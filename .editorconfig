@@ -1,0 +1,39 @@
+# top-most .editorconfig file
+# See Also: https://EditorConfig.org
+root = true
+
+# By default indent with 4 spaces
+[*]
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+charset = utf-8
+
+# Makefiles need tab indentation
+[{Makefile,*.mk}]
+indent_style = tab
+tab_width = 8
+end_of_line = lf
+
+# Set some end_of_line rules.
+# See Also: .gitattributes
+
+[*.cs]
+end_of_line = crlf
+
+[{*.cpp,*.h,*.inl}]
+end_of_line = crlf
+
+[{*.*proj,*.props,*.targets}]
+end_of_line = crlf
+indent_size = 2
+
+[{*.ps1,*.cmd,*.bat}]
+end_of_line = crlf
+
+[*.sh]
+end_of_line = lf
+
+[{CMakeLists.txt,*.cmake}]
+end_of_line = lf

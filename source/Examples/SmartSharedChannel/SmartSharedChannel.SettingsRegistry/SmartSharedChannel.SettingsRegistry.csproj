@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{97B2C71D-A882-4C06-A920-BA088D9CD9EC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SmartSharedChannel</RootNamespace>
+    <AssemblyName>SmartSharedChannel.SettingsRegistry</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <SettingsSystemCodeGenOutputPath>SmartSharedChannel</SettingsSystemCodeGenOutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <SettingsRegistryDef Include="Codegen\AssemblyInfo.cs" />
+    <SettingsRegistryDef Include="Codegen\SharedChannelConfig.cs" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />
+</Project>

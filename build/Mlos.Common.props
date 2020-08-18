@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Main Mlos props. -->
+  <!-- Include EnvironmentConfig for CoreXT. -->
+  <Import Project="$(EnvironmentConfig)" Condition="Exists('$(CoreXTConfigFile)')"/>
+  <!-- Msbuild runs as an x86 process. If its running on a 64-bit machine, correctly set the PROCESS_ARCHITECTURE. -->
+  <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
+    <PROCESSOR_ARCHITECTURE Condition="'$(PROCESSOR_ARCHITECTURE)' == 'x86' and '$(PROCESSOR_ARCHITEW6432)' == 'AMD64'">AMD64</PROCESSOR_ARCHITECTURE>
+  </PropertyGroup>
+  <PropertyGroup>
+    <IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</IsWindows>
+    <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+    <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+  </PropertyGroup>
+  <!-- Configure folder paths. -->
+  <PropertyGroup>
+    <BaseDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</BaseDir>
+    <SourceDir>$(BaseDir)\source</SourceDir>
+  </PropertyGroup>
+  <!-- For Non CoreXT builds, change output folder. -->
+  <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <BuildType>$(Configuration)</BuildType>
+    <BuildArchitecture>$(Platform)</BuildArchitecture>
+    <BUILD_ALT_DIR Condition="'$(BUILD_ALT_DIR)'=='' AND '$(BuildType)'=='debug'">d</BUILD_ALT_DIR>
+    <ObjectDirectory Condition="'$(ObjectDirectory)' == ''">obj$(BUILD_ALT_DIR)</ObjectDirectory>
+    <!-- In this case "dotnet" is simply to distinguish it from the default CoreXT build location. -->
+    <ObjectRoot>$(BaseDir)\out\dotnet\</ObjectRoot>
+    <!-- Place the object output outside of the source directory. -->
+    <BaseIntermediateOutputPath>$(ObjectRoot)\source\$([MSBuild]::MakeRelative($(SourceDir), $(MSBuildProjectDirectory)))\obj</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <BinplaceDir>$(BaseDir)\target\bin\$(BuildType)\$(BuildArchitecture)</BinplaceDir>
+    <MlosCodeGenOutputPathRoot Condition="'$(MlosCodeGenOutputPathRoot)' == ''">$(BaseDir)\out\Mlos.CodeGen.out\$(BuildType)</MlosCodeGenOutputPathRoot>
+  </PropertyGroup>
+  <!-- Configure warning levels and errors. -->
+  <PropertyGroup>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
+  </PropertyGroup>
+  <!-- Ignore build log files from projects in VisualStudio -->
+  <ItemGroup>
+    <None Remove="build.err" />
+    <None Remove="build.log" />
+    <None Remove="build.wrn" />
+    <None Remove="msbuild.log" />
+  </ItemGroup>
+  <PropertyGroup>
+    <!-- Used to prevent duplicate includes. -->
+    <MlosCommonPropsImported>true</MlosCommonPropsImported>
+  </PropertyGroup>
+</Project>

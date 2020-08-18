@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{02D39538-502B-4536-955D-DE341CD6A9EC}</ProjectGuid>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mlos.Model.Services</RootNamespace>
+    <AssemblyName>Mlos.Model.Services</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ModelsDb\ModelsDatabase.cs" />
+    <Compile Include="ModelsDb\ModelsDatabaseCommandWrapper.cs" />
+    <Compile Include="ModelsDb\ModelsDatabaseConnectionDetails.cs" />
+    <Compile Include="ModelsDb\ObjectRelationalMappings\Optimizer.cs" />
+    <Compile Include="ModelsDb\ObjectRelationalMappings\RemoteProcedureCall.cs" />
+    <Compile Include="Spaces\Dimensions.cs" />
+    <Compile Include="Spaces\Hypergrids.cs" />
+    <Compile Include="Spaces\JsonConverters\DimensionJsonConverter.cs" />
+    <Compile Include="Spaces\JsonConverters\JsonConverterWithExpectations.cs" />
+    <Compile Include="Spaces\JsonConverters\SimpleHypergridJsonConverter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="ModelsDb\SampleModelsDatabaseConnectionDetails.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+</Project>

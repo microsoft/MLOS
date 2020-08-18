@@ -1,0 +1,414 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <!-- Define UncrustifyEnabled property. -->
+    <PropertyGroup Condition="'$(UncrustifyEnabled)' == ''">
+        <UncrustifyEnabled>true</UncrustifyEnabled>
+    </PropertyGroup>
+
+    <!-- Define UncrustifyAssemblyListingEnabled property. -->
+    <PropertyGroup Condition="'$(UncrustifyAssemblyListingEnabled)' == ''">
+        <UncrustifyAssemblyListingEnabled>false</UncrustifyAssemblyListingEnabled>
+    </PropertyGroup>
+
+    <!-- Define UncrustifyFull property. -->
+    <PropertyGroup Condition="'$(UncrustifyFull)' == ''">
+        <UncrustifyFull>false</UncrustifyFull>
+    </PropertyGroup>
+
+    <!-- Define UncrustifyAutoFix property. -->
+    <PropertyGroup Condition="'$(UncrustifyAutoFix)' == ''">
+        <UncrustifyAutoFix>false</UncrustifyAutoFix>
+    </PropertyGroup>
+
+    <!-- Define UncrustifyBaseConfig property. -->
+    <PropertyGroup Condition="'$(UncrustifyBaseConfig)' == ''">
+        <UncrustifyBaseConfig>$(MSBuildThisFileDirectory)\cfg\defaults</UncrustifyBaseConfig>
+    </PropertyGroup>
+
+    <!-- Define UncrustifyVersion property. -->
+    <PropertyGroup Condition="'$(UncrustifyVersion)' == ''">
+        <UncrustifyVersion>undefined</UncrustifyVersion>
+    </PropertyGroup>
+
+    <!-- Define UncrustifyAssemblyListingPath property. -->
+    <PropertyGroup Condition="'$(UncrustifyAssemblyListingEnabled)'=='true' and '$(UncrustifyEnabled)'=='true'"> 
+        <UncrustifyAssemblyListingPath>$(OutputPath)after\</UncrustifyAssemblyListingPath>
+    </PropertyGroup> 
+    <PropertyGroup Condition="'$(UncrustifyAssemblyListingEnabled)'=='true' and '$(UncrustifyEnabled)'!='true'"> 
+        <UncrustifyAssemblyListingPath>$(OutputPath)before\</UncrustifyAssemblyListingPath>
+    </PropertyGroup> 
+
+    <ItemDefinitionGroup Condition="'$(UncrustifyAssemblyListingEnabled)'=='true'"> 
+        <ClCompile>
+            <AdditionalOptions>%(AdditionalOptions) /DUSE_DETERMINISTIC_MACROS /Fa$(OutputPath)</AdditionalOptions>
+        </ClCompile>
+    </ItemDefinitionGroup> 
+
+    <!-- Define UncrustifyAssemblyListingDiffTool property. -->
+    <PropertyGroup Condition="'$(UncrustifyAssemblyListingDiffTool)' == ''">
+        <UncrustifyAssemblyListingDiffTool>windiff.exe</UncrustifyAssemblyListingDiffTool>
+    </PropertyGroup>
+
+    <UsingTask
+        TaskName="ReportUncrustifyErrors"
+        TaskFactory="CodeTaskFactory"
+        AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
+        <ParameterGroup>
+            <UncrustifyOutputPath ParameterType="System.String" Required="true" />
+            <UncrustifyRanCheckOnly ParameterType="System.Boolean" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System"/>
+            <Using Namespace="System.IO"/>
+            <Using Namespace="System.Text.RegularExpressions"/>
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+            var files = File.ReadLines(UncrustifyOutputPath);
+            // Here we put all messages we have (key is filename, value is message containing "{0}")
+            Dictionary<String, String> fileErrorMessageMap = new Dictionary<string, string>();
+            List<String> unstableFiles = new List<String>();
+            List<String> unmatchedFiles = new List<string>();
+
+            string configFileError = "Uncrustify had issues loading the config file: {0}";
+            string fileReadError = "Failed to read file: {0}";
+
+            // If Uncrustify ran AutoFix first, then a FAIL indicates an unstable file. However, if Uncrustify only ran Check mode, the file is not unstable and just needs to be formatted with AutoFix.
+            // This happens on official builds since we only check what was submitted by the developer instead of running AutoFix. The check prevents us from checking in badly formatted code.
+            string fileFailError = UncrustifyRanCheckOnly ? "{0} failed the Uncrustify check and contains invalid formatting. Try building the project locally (which should auto-format the file) and submitting the changes with the new format."
+                                            : "{0} is not stable to be formatted with Uncrustify C++ code formatter. You can run build again to see if second pass will make formatting stable.";
+            // Holds all "checks". Checks include regex that can extract filename from a Uncrustify output line, and associated message.
+            // Message should contain "{0}".
+                        Dictionary<Regex, String> checks = new Dictionary<Regex, string>
+            {
+                { new Regex(@"(file could not be opened)|(No such file or directory)", RegexOptions.IgnoreCase), fileReadError },
+                { new Regex(@"Unable to load the config file", RegexOptions.IgnoreCase), configFileError },
+                { new Regex(@"FAIL:\s(.*)\s\(.*", RegexOptions.IgnoreCase), fileFailError },
+                { new Regex(@"(.*)\sUnmatched\s.*"), "{0} has syntax error (unmatched token). Double check code around this line, as Uncrustify C++ code formatter cannot even parse this file.\n" +
+                  "If it helps, disable Uncrustify by setting \"false\" in <UncrustifyEnabled> in assosiated .vcxproj which will give you compiler error instead." }
+            };
+            foreach (string line in files)
+            {
+                if (!line.StartsWith("Parsing") && !line.StartsWith("PASS:"))
+                {
+                    foreach (var check in checks)
+                    {
+                        Match m = check.Key.Match(line);
+                        if (m.Success)
+                        {
+                            string filename = m.Groups[1].Value;
+                            if (!fileErrorMessageMap.ContainsKey(filename))
+                            {
+                                fileErrorMessageMap.Add(filename, check.Value);
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            foreach (var fileErrorMessage in fileErrorMessageMap)
+            {
+                Log.LogError(String.Format(fileErrorMessage.Value, fileErrorMessage.Key));
+            }
+
+            if (fileErrorMessageMap.Count > 0)
+            {
+                Log.LogError("If suggestions above do not help, please refer to CodingStandard.md for details on how to fix Uncrustify errors.");
+            }
+
+            return (fileErrorMessageMap.Count == 0);
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <UsingTask
+        TaskName="RemoveEqualFilesFromLists"
+        TaskFactory="CodeTaskFactory"
+        AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" >
+        <ParameterGroup>
+            <SourceFilenames ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+            <DestinationFilenames ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+            <ChangedSourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+            <ChangedDestinationFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Collections.Generic" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+            // RemoveEqualFilesFromLists task fragment
+            // Given two lists of files (source and destination), remove pairs of files that contain exactly the same contents.
+
+            // Helper function to determine if two files contain equal text contents.
+            Func<FileInfo, FileInfo, bool> filesHaveSameText = (FileInfo file1, FileInfo file2) =>
+            {
+                // If they differ in size, they cannot have the same text.
+                if (file1.Length != file2.Length)
+                {
+                    return false;
+                }
+
+                using (StreamReader fileOneReader = new StreamReader(file1.OpenRead()))
+                using (StreamReader fileTwoReader = new StreamReader(file2.OpenRead()))
+                {
+                    while (!fileOneReader.EndOfStream && !fileTwoReader.EndOfStream)
+                    {
+                        string liTxt = fileOneReader.ReadLine();
+                        string li2Txt = fileTwoReader.ReadLine();
+                        if (!liTxt.Equals(li2Txt))
+                        {
+                            return false;
+                        }
+                    }
+
+                    // All lines equal up til now.
+                    // If the two end in different places, they are not the same.
+                    return fileOneReader.EndOfStream == fileTwoReader.EndOfStream;
+                }
+            };
+
+            if (SourceFilenames.Length != DestinationFilenames.Length)
+            {
+                Log.LogError(String.Format("Error: source and destination file name lists must have the same length. {0} and {1}", SourceFilenames.Length, DestinationFilenames.Length));
+                return false;
+            }
+
+            List<ITaskItem> changedSourceFiles = new List<ITaskItem>();
+            List<ITaskItem> changedDestinationFiles = new List<ITaskItem>();
+
+            for (int i = 0; i < SourceFilenames.Length; ++i)
+            {
+                FileInfo sourceFile = new FileInfo(SourceFilenames[i].ItemSpec);
+                FileInfo destinationFile = new FileInfo(DestinationFilenames[i].ItemSpec);
+
+                // Destination filename ("myfile.cpp") should be contained within source filename ("myfile.cpp.uncrustify").
+                if (!sourceFile.Name.Contains(destinationFile.Name))
+                {
+                    Log.LogError(String.Format("Error: source file name \"{0}\"does not contain destination file name \"{1}\".", sourceFile.Name, destinationFile.Name));
+                    return false;
+                }
+
+                if (filesHaveSameText(sourceFile, destinationFile))
+                {
+                    Log.LogMessage(String.Format("Skipping copy of file {0}, which is the same as its counterpart {1}.", SourceFilenames[i].ItemSpec, DestinationFilenames[i].ItemSpec));
+                }
+                else
+                {
+                    changedSourceFiles.Add(SourceFilenames[i]);
+                    changedDestinationFiles.Add(DestinationFilenames[i]);
+                }
+            }
+
+            ChangedSourceFiles = changedSourceFiles.ToArray();
+            ChangedDestinationFiles = changedDestinationFiles.ToArray();
+
+            return true;
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <!-- Define target: CleanUncrustify -->
+    <Target Name="CleanUncrustify" BeforeTargets="Clean">
+        <Delete Files="$(OutputPath)\uncrustifydone.txt" />
+    </Target>
+
+    <!-- Define target: Uncrustify -->
+    <Target Name="Uncrustify" 
+        Inputs="@(ClCompile);@(ClInclude);@(UncrustifyFiles)" 
+        Outputs="$(OutputPath)\uncrustifydone.txt" 
+        BeforeTargets="Build"
+        Condition="'$(UncrustifyEnabled)' == 'true'">
+
+        <!-- Include compiled files -->
+        <ItemGroup>
+            <UncrustifyFiles Include="@(ClCompile)"/>
+            <UncrustifyFiles Include="@(ClInclude)"/>
+        </ItemGroup>
+        <Message Text="Initial UncrustifyFiles: @(UncrustifyFiles)" Importance="low" />
+
+        <!-- Compute a set of files asked to be explicitly excluded -->
+        <ItemGroup>
+            <ExcludeUncrustifyFiles Include="@(UncrustifyFiles)" Condition="'%(UncrustifyFiles.ExcludeFromUncrustify)' == 'true'"/>
+        </ItemGroup>
+        <Message Text="ExcludeUncrustifyFiles: @(ExcludeUncrustifyFiles)" Importance="low" />
+
+        <!-- Compute a set of files asked to be excluded because they are in object dirs -->
+        <ItemGroup>
+            <ExcludeUncrustifyGeneratedFiles Include="@(UncrustifyFiles)" Condition="$([System.String]::new('%(UncrustifyFiles.RootDir)%(UncrustifyFiles.Directory)').StartsWith($(ObjectRoot), System.StringComparison.InvariantCultureIgnoreCase))"/>
+            <ExcludeUncrustifyGeneratedFiles Include="@(UncrustifyFiles)" Condition="$([System.String]::new('%(UncrustifyFiles.RootDir)%(UncrustifyFiles.Directory)').StartsWith($(MlosCodeGenOutputPathRoot), System.StringComparison.InvariantCultureIgnoreCase))"/>
+        </ItemGroup>
+        <Message Text="ExcludeUncrustifyGeneratedFiles: @(ExcludeUncrustifyGeneratedFiles)" Importance="low" />
+
+        <!-- Compute a set of read-only files asked to be excluded -->
+        <ItemGroup>
+            <ExcludeUncrustifyReadOnlyFiles Include="@(UncrustifyFiles)" Condition="$([MSBuild]::BitwiseAnd(1, $([System.IO.File]::GetAttributes (%(UncrustifyFiles.FullPath))))) == 1"/>
+        </ItemGroup>
+        <Message Text="ExcludeUncrustifyReadOnlyFiles: @(ExcludeUncrustifyReadOnlyFiles)" Importance="low" />
+
+        <!-- Exclude requested files -->
+        <ItemGroup>
+            <UncrustifyFiles Remove="@(ExcludeUncrustifyFiles)"/>
+        </ItemGroup>
+
+        <!-- Exclude generated files -->
+        <ItemGroup>
+            <UncrustifyFiles Remove="@(ExcludeUncrustifyGeneratedFiles)"/>
+        </ItemGroup>
+
+        <!-- Exclude read-only file unless asked to run over everything -->
+        <ItemGroup>
+            <UncrustifyFiles Remove="@(ExcludeUncrustifyReadOnlyFiles)" Condition="'$(UncrustifyFull)' == 'false'"/>
+        </ItemGroup>
+
+        <!-- The temporary formatted files will have the same names as the originals with
+         ".uncrustify" appended to the end of the filename. -->
+        <ItemGroup>
+            <TempFormattedUncrustifyFiles Include="@(UncrustifyFiles->'%(Identity).uncrustify')" />
+        </ItemGroup>
+
+        <Message Text="Running Uncrustify on @(UncrustifyFiles)"/>
+
+        <!-- Construct list of source files to process -->
+        <WriteLinesToFile
+              File="$(OutputPath)\files_to_uncrustify_autofix_and_check.txt"  
+              Lines="@(UncrustifyFiles)"
+              Overwrite="true"
+        />
+
+        <Error Condition="'$(UncrustifyVersion)' == 'undefined' and '$(UncrustifyAutoFix)' == 'true' and '$(UncrustifyFull)' == 'false' and '@(UncrustifyFiles)' != ''"
+            Text = "You must specify UncrustifyVersion in your .vcxproj" />
+
+            <!-- Run the tool in fix mode. Don't replace the original source files unless there are no
+             errors - errors during this step are typically syntax errors that the Uncrustify C++
+             formatter can't parse. If run with the "replace" option we'll be formatting around
+             some invalid syntax that will need to be changed, potentially causing more unintended
+             changes to the code. Instead output to temporary files, and replace the source only if
+             there are no errors. -->
+
+        <Exec Condition="'$(UncrustifyAutoFix)' == 'true' and '$(UncrustifyFull)' == 'false' and '@(UncrustifyFiles)' != ''"
+            Command="$(UncrustifyRootDir)uncrustify.exe -c $(UncrustifyBaseConfig)-v$(UncrustifyVersion).cfg -F $(OutputPath)\files_to_uncrustify_autofix_and_check.txt -l CPP --suffix .uncrustify > $(OutputPath)\uncrustifyoutput.txt 2&gt;&amp;1"
+            ContinueOnError='true'
+            IgnoreExitCode='true'
+        />
+
+        <ReportUncrustifyErrors
+            Condition="'$(UncrustifyAutoFix)' == 'true' and '$(UncrustifyFull)' == 'false' and '@(UncrustifyFiles)' != ''"
+            UncrustifyOutputPath="$(OutputPath)uncrustifyoutput.txt" UncrustifyRanCheckOnly="false" />
+
+        <!-- Remove any files that are equivalent from the list of files to copy over. This prevents us from
+        overwriting any files that Uncrustify didn't change. When files are overwritten it changes the file
+        modification time, making msbuild think the file has changed even though the contents are the same. -->
+        <RemoveEqualFilesFromLists
+            Condition="'$(UncrustifyAutoFix)' == 'true' and '$(UncrustifyFull)' == 'false' and '@(UncrustifyFiles)' != ''"
+            SourceFilenames="@(TempFormattedUncrustifyFiles)"
+            DestinationFilenames="@(UncrustifyFiles)">
+            <Output ItemName="ChangedSourceFiles" TaskParameter="ChangedSourceFiles" />
+            <Output ItemName="ChangedDestinationFiles" TaskParameter="ChangedDestinationFiles" />
+        </RemoveEqualFilesFromLists>
+
+        <!-- If we reach here (after the first "ReportUncrustifyErrors" has run) Uncrustify was
+             error-free and it's time to replace the source files with the Uncrustify-formatted
+             ones and delete the extra copy with '.uncrustify' on the end. Only run the copy and
+             delete if the UncrustifyAutoFix ran. -->
+        <!-- The copy and delete commands are set to continue on errors. If a file is
+             (incorrectly) uncrustified from multiple projects, the two projects may step over each
+             other as they both uncrustify the same files and one may delete the other's .uncrustify
+             files. The uncrustified files will be the same so that's not the issue, the issue is
+             the Copy command unexpectedly finding files where they should be. For now I'm adding
+             WarnAndContinue to deal with this issue so that the tasks don't fail if the files don't
+             exist. The problem will only exist on dev machines since official builds run Check
+             only and not AutoFix. -->
+        <Copy
+            Condition="'$(UncrustifyAutoFix)' == 'true' and '$(UncrustifyFull)' == 'false' and '@(UncrustifyFiles)' != ''"
+            SourceFiles="@(ChangedSourceFiles)"
+            DestinationFiles="@(ChangedDestinationFiles)"
+            ContinueOnError="WarnAndContinue" />
+            
+        <Warning
+            Condition="'$(MSBuildLastTaskResult)' == 'False'"
+            Text="If you get a .uncrustify file not found warning, you probably have included one or more files in multiple projects' ClCompile/ClInclude lists, resulting in the file(s) being Uncrustified twice in the same build. Refer to CodingStandard.md for more details." />
+
+        <Delete
+            Condition="'$(UncrustifyAutoFix)' == 'true' and '$(UncrustifyFull)' == 'false' and '@(UncrustifyFiles)' != ''"
+            Files="@(TempFormattedUncrustifyFiles)"
+            ContinueOnError="WarnAndContinue" />
+
+        <Warning
+            Condition="'$(MSBuildLastTaskResult)' == 'False'"
+            Text="If you get a .uncrustify file not found warning, you probably have included one or more files in multiple projects' ClCompile/ClInclude lists, resulting in the file(s) being Uncrustified twice in the same build. Refer to CodingStandard.md for more details." />
+
+
+        <!-- Run the tool in check mode. This happens regardless of whether AutoFix was run in the
+             previous step. The check runs on the original file names (not the .uncrustify temporary
+             files since they've already been copied over). On GCI and official builds, this is all that
+             runs to make sure we aren't checking in any bad formatted code. If Uncrustify detects bad
+             formatting the build will fail and the developer must fix the formatting and start a new build. -->
+        <Exec Condition="'@(UncrustifyFiles)' != ''"
+            Command="$(UncrustifyRootDir)uncrustify.exe -c $(UncrustifyBaseConfig)-v$(UncrustifyVersion).cfg -F $(OutputPath)\files_to_uncrustify_autofix_and_check.txt -l CPP --check > $(OutputPath)\uncrustifyoutput.txt 2&gt;&amp;1"
+            ContinueOnError='true' IgnoreExitCode='true' />
+
+        <ReportUncrustifyErrors
+            Condition="'@(UncrustifyFiles)' != ''"
+            UncrustifyOutputPath="$(OutputPath)uncrustifyoutput.txt"
+            UncrustifyRanCheckOnly="!$(UncrustifyAutoFix)" />
+
+        <Delete Files="$(OutputPath)\uncrustifyoutput.txt" Condition="'$(KeepUncrustifyOutput)' != 'true'" />
+
+        <!-- Save list of files processed -->
+        <WriteLinesToFile
+              File="$(OutputPath)\uncrustifydone.txt"  
+              Lines="@(UncrustifyFiles)"
+              Overwrite="true" />
+    </Target>
+
+    <!-- Define target: UncrustifyBeforeCompile -->
+    <Target Name="UncrustifyBeforeCompile" 
+        BeforeTargets="ClCompile"
+        DependsOnTargets="Uncrustify">
+
+        <MakeDir Directories="$(UncrustifyAssemblyListingPath)" Condition="'$(UncrustifyAssemblyListingPath)' != ''" />
+    </Target>
+
+    <Target Name="UncrustifyAssemblyListing" 
+        Inputs="@(ClCompile)" 
+        Outputs="$(UncrustifyAssemblyListingPath)\%(ClCompile.filename).asm"
+        AfterTargets="ClCompile"
+        Condition="'$(UncrustifyAssemblyListingEnabled)' == 'true'">
+
+        <!-- Compute a set of files to be compiled -->
+        <ItemGroup>
+            <UncrustifyCompileFiles Include="@(ClCompile)"/>
+        </ItemGroup>
+
+        <!-- Compute a set of files asked to be excluded because they are in object dirs -->
+        <ItemGroup>
+            <ExcludeUncrustifyCompileGeneratedFiles Include="@(UncrustifyCompileFiles)" Condition="$([System.String]::new('%(UncrustifyCompileFiles.RootDir)%(UncrustifyCompileFiles.Directory)').StartsWith($(ObjectRoot), System.StringComparison.InvariantCultureIgnoreCase))"/>
+        </ItemGroup>
+
+        <!-- Exclude compile generated files -->
+        <ItemGroup>
+            <UncrustifyCompileFiles Remove="@(ExcludeUncrustifyCompileGeneratedFiles)"/>
+        </ItemGroup>
+
+        <ItemGroup>
+            <UncrustifyAssemblyListingInputFiles Include="$(OutputPath)%(UncrustifyCompileFiles.filename).asm"/>
+            <UncrustifyAssemblyListingOutputFiles Include="$(UncrustifyAssemblyListingPath)%(UncrustifyCompileFiles.filename).asm"/>
+        </ItemGroup>
+
+        <Exec Command="findstr /V /C:&quot; Line&quot; @(UncrustifyAssemblyListingInputFiles) >@(UncrustifyAssemblyListingOutputFiles)" Condition="'%(UncrustifyCompileFiles.filename)'!=''"/>
+
+    </Target>
+
+    <Target Name="UncrustifyAssemblyListingDiff" 
+        Inputs="" 
+        Outputs=""
+        AfterTargets="Build"
+        Condition="'$(UncrustifyAssemblyListingEnabled)' == 'true' and '$(UncrustifyEnabled)' == 'true'">
+
+        <Exec Command="$(UncrustifyAssemblyListingDiffTool) $(OutputPath)before\* $(OutputPath)after\*"/>
+
+    </Target>
+</Project>

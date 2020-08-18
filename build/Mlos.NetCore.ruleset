@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="Mlos.CSharp.ruleset" Description="Default rules and overrides for C# in Mlos" ToolsVersion="Current">
+  <!-- Import some defaults -->
+  <!--Include Path="$(PkgFxCopAnalyzers)\rulesets\AllRulesEnabled.ruleset" Action="Default" /-->
+  <Include Path="$(PkgFxCopAnalyzers)\rulesets\legacy\MinimumRecommendedRules.ruleset" Action="Default" />
+  <!--
+    Apply some local overrides
+    See Also: stylecop.json for other control options.
+  -->
+  <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
+    <!-- Prefix local calls with this -->
+    <Rule Id="SA1101" Action="Hidden" />
+    <!-- Comments should contain text -->
+    <Rule Id="SA1120" Action="Hidden" />
+    <!-- Do not use regions -->
+    <Rule Id="SA1124" Action="Hidden" />
+    <!-- Readonly fields should appear before non-readonly fields -->
+    <Rule Id="SA1214" Action="Hidden" />
+    <!-- Element should begin with should begin with an uppercase letter -->
+    <Rule Id="SA1300" Action="Hidden" />
+    <!-- Non-private readonly fields should begin with upper-case letter -->
+    <Rule Id="SA1304" Action="Hidden" />
+    <!-- Fields should be private -->
+    <Rule Id="SA1401" Action="Hidden" />
+    <!-- File may only contain a single type -->
+    <Rule Id="SA1402" Action="Hidden" />
+    <!-- Element should not be on a single line -->
+    <Rule Id="SA1502" Action="Info" />
+    <!-- Partial elements should be documented -->
+    <Rule Id="SA1601" Action="Hidden" />
+    <!-- Enumeration items should be documented -->
+    <Rule Id="SA1602" Action="Hidden" />
+    <!-- Element parameter documentation should have text -->
+    <Rule Id="SA1614" Action="Hidden" />
+    <!-- Element return value documentation should have text -->
+    <Rule Id="SA1616" Action="Info" />
+    <!-- The property's documentation should begin with: Gets (or Sets) -->
+    <Rule Id="SA1623" Action="Info" />
+    <!-- The file header is missing or not located at the top of the file -->
+    <Rule Id="SA1633" Action="Error" />
+    <!-- Elements should be separated by blank line -->
+    <Rule Id="SA1516" Action="Info" />
+    <!-- Elements should be documented. #TODO remove-->
+    <Rule Id="SA1600" Action="Hidden" />
+    <!-- Constructor documentation summary should include standard text -->
+    <Rule Id="SA1642" Action="Info" />
+    <!-- File name should match first type name. #TODO remove-->
+    <Rule Id="SA1649" Action="Hidden" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <!-- Mark assemblies with assembly version. -->
+    <Rule Id="CA1016" Action="Hidden" />
+    <!-- If possible, make the underlying type of enum System.Int32 instead of ulong. -->
+    <Rule Id="CA1028" Action="Hidden" />
+    <!-- Modify to catch a more specific allowed exception type, or rethrow the exception. -->
+    <Rule Id="CA1031" Action="Info" />
+    <!-- Avoid empty interfaces. -->
+    <Rule Id="CA1040" Action="Info" />
+    <!-- Microsoft.Globalization : Do not declare visible instance fields. -->
+    <Rule Id="CA1051" Action="Info" />
+    <!-- In externally visible method, validate parameter is non-null before using it. Performance. -->
+    <Rule Id="CA1062" Action="Info" />
+    <!-- Passes string liternal.  Retrieve strings from resource table. -->
+    <Rule Id="CA1303" Action="Hidden" />
+    <!-- Microsoft.Globalization : Specify CultureInfo on char.ToLower. -->
+    <Rule Id="CA1304" Action="Info" />
+    <!-- Microsoft.Globalization : Specify CultureInfo on string.Format. -->
+    <Rule Id="CA1305" Action="Info" />
+    <!-- Microsoft.Globalization : Specify CultureInfo on string.Equals. -->
+    <Rule Id="CA1307" Action="Info" />
+    <!-- Parameter of method is never used. -->
+    <Rule Id="CA1801" Action="Hidden" />
+    <!-- Initialize all static fields and remove the explicit static constructor. -->
+    <Rule Id="CA1810" Action="Hidden" />
+    <!-- Line is an internal class that is apparently never instantiated. -->
+    <Rule Id="CA1812" Action="Hidden" />
+    <!-- Member does not access instance data and can be marked as static. -->
+    <Rule Id="CA1822" Action="Hidden" />
+    <!-- Do not create tasks without passing a TaskScheduler. #TODO revisit -->
+    <Rule Id="CA2008" Action="Info" />
+    <!-- Non-constant fields should not be visible. -->
+    <Rule Id="CA2211" Action="Hidden" />
+    <!-- Passes string liternal.  Retrieve strings from resource table. -->
+    <Rule Id="CS0169" Action="Hidden" />
+    <!-- Field is never assigned to, and will always have its default value `null'. -->
+    <Rule Id="CS0649" Action="Hidden" />
+    <!-- Missing XML comment for publicly visible type or member. #TODO remove -->
+    <Rule Id="CS1591" Action="Hidden" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeQuality.Analyzers" RuleNamespace="Microsoft.CodeQuality.Analyzers">
+    <Rule Id="CA1815" Action="Hidden" />
+  </Rules>
+</RuleSet>
+
+

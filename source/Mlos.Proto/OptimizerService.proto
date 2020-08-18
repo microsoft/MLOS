@@ -1,0 +1,181 @@
+syntax = "proto3";
+
+
+// Exposes Bayesian Optimizer's functionality over gRPC.
+//
+service OptimizerService
+{
+    // Returns a list of existing optimizer instances.
+    //
+    rpc ListExistingOptimizers(Empty) returns (OptimizerList);
+
+    // Returns information about optimizers configuration and optimization problem.
+    //
+    rpc GetOptimizerInfo(OptimizerHandle) returns (OptimizerInfo);
+
+    // Creates an optimizer with the specified configuration.
+    //
+    rpc CreateOptimizer(CreateOptimizerRequest) returns (OptimizerHandle);
+
+    // Request a suggestion.
+    //
+    rpc Suggest(SuggestRequest) returns (ConfigurationParameters);
+
+    // Produces a prediction for specified features.
+    //
+    rpc Predict(PredictRequest) returns (PredictResponse);
+
+    // Adds an observation to the optimizer's data set.
+    //
+    rpc RegisterObservation(RegisterObservationRequest) returns (Empty);
+};
+
+// A request to create an optimizer.
+//
+message CreateOptimizerRequest
+{
+    OptimizationProblem OptimizationProblem = 1;
+    string OptimizerConfigName = 2;
+    string OptimizerConfig = 3; 
+};
+
+
+// A request to create a suggestion given specified context.
+//
+message SuggestRequest
+{
+    OptimizerHandle OptimizerHandle = 1;
+    bool Random = 2;
+    Context Context = 3;
+};
+
+
+// A request to add an observation to the optimizer's data set.
+//
+message RegisterObservationRequest
+{
+    OptimizerHandle OptimizerHandle = 1;
+    Observation Observation = 2;
+};
+
+// A representation of an optimization problem. 
+//
+message OptimizationProblem
+{
+    Hypergrid ParameterSpace = 1;
+    Hypergrid ContextSpace = 2;
+    Hypergrid ObjectiveSpace = 3;
+    repeated Objective Objectives = 4;
+};
+
+// An opaque handle to the optimizer that the client passes along with each request.
+//
+message OptimizerHandle
+{
+    string Id = 1;
+};
+
+// Represents information about an optimizer instance, including its configuration, optimization problem, and handle
+//
+message OptimizerInfo
+{
+    OptimizerHandle OptimizerHandle = 1;
+    string OptimizerConfigJsonString = 2;
+    OptimizationProblem OptimizationProblem = 3; 
+};
+
+// A list of OptimizerInfo messages.
+//
+message OptimizerList
+{
+    repeated OptimizerInfo Optimizers = 1;
+}
+
+// A representation of a single observation to be added to the optimizer's data set.
+//
+message Observation
+{
+    Features Features = 1;
+    ObjectiveValues ObjectiveValues = 2;
+};
+
+// A representation of features for the optimizer's surrogate models to operate on.
+//
+message Features
+{
+    string FeaturesJsonString = 1;
+};
+
+// Serialized configuration parameters.
+//
+message ConfigurationParameters
+{
+    string ParametersJsonString = 1;
+};
+
+// Serialized context values.
+//
+message Context
+{
+    string ContextJsonString = 1;
+};
+
+// A request to predict objective values given specified features (parameters and context).
+//
+message PredictRequest
+{
+    OptimizerHandle OptimizerHandle = 1;
+    Features Features = 2;    
+};
+
+// Serialized response to the PredictRequest
+// 
+message PredictResponse
+{
+    ObjectivePredictions ObjectivePredictions = 1;
+}
+
+// Serialized objective value predictions for given features.
+//
+message ObjectivePredictions
+{
+    Features Features = 1;
+    repeated ObjectiveValuePrediction Predictions = 2;
+};
+
+// Representation of the ObjectiveValues.
+//
+message ObjectiveValues
+{
+    string ObjectiveValuesJsonString = 1;
+};
+
+// Serialized representation of a Hypergrid.
+//
+message Hypergrid{
+    string HypergridJsonString = 1;
+};
+
+// Representation of a single objective. 
+//
+message Objective {
+    string Name = 1;
+    bool Minimize = 2;
+};
+
+// Representation of a single objective value prediction.
+//
+message ObjectiveValuePrediction{
+    string ObjectiveName = 1;
+    double Mean = 2;
+    double Variance = 3;
+    double StandardDeviation = 4;
+    int32 ObservationCount = 5;
+};
+
+// A convenience message for optimizer functions that return nothing.
+//
+message Empty
+{
+};
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)\Mlos.Common.props" Condition="'$(MlosCommonPropsImported)' != 'true'" />
+  <!--
+    Work around a bug with Microsoft.Build.Traversal and the Clean target:
+    https://github.com/microsoft/MSBuildSdks/issues/34#issuecomment-393192238
+  -->
+  <PropertyGroup Condition=" '$(BUILD_COREXT)' != '1' ">
+    <OutputPath Condition=" '$(Configuration)' != '' and '$(IsTraversal)' == 'true' ">bin\$(Configuration)\</OutputPath>
+    <OutputPath Condition=" '$(Configuration)' == '' and '$(IsTraversal)' == 'true' ">bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <!-- Don't stash the project assets for dirs.proj in the source dir on Restore target -->
+  <PropertyGroup Condition=" '$(BUILD_COREXT)' != '1' ">
+    <RestoreOutputPath Condition=" '$(IsTraversal)' == 'true' ">$(BaseIntermediateOutputPath)</RestoreOutputPath>
+  </PropertyGroup>
+</Project>

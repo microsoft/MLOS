@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{E4407270-6E64-4E87-A4B7-3B932121BC81}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SmartCache</RootNamespace>
+    <AssemblyName>SmartCache.SettingsRegistry</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" />
+    <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <SettingsSystemCodeGenOutputPath>SmartCache</SettingsSystemCodeGenOutputPath>
+  </PropertyGroup>
+  <ItemGroup Label="SettingsRegistryDefs">
+    <SettingsRegistryDef Include="Codegen\AssemblyInfo.cs" />
+    <SettingsRegistryDef Include="Codegen\SmartCache.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInitializer.cs" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />
+</Project>

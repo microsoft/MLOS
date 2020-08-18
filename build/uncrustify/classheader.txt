@@ -1,0 +1,11 @@
+//--------------------------------------------------------------------
+// Class: $(class)
+//
+// Description:
+//      <enter useful description here>
+//
+// Dev notes:
+//      <any important properties of the class and how it is used>
+//
+// Hungarian: (for components using that)
+//

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" ReferenceOutputAssembly="true" />
+    <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.CodeGen\Mlos.SettingsSystem.CodeGen.csproj" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <!-- Figure out folder path to the Codegen executable. -->
+  <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
+    <SettingsSystemCodeGenPath>$(ObjectRoot)\source\Mlos.SettingsSystem.CodeGen\$(ObjectDirectory)\$(Platform)\</SettingsSystemCodeGenPath>
+  </PropertyGroup>
+  <!-- Set path to Codegen executable. -->
+  <PropertyGroup>
+    <SettingsSystemCodeGenExe>dotnet $(SettingsSystemCodeGenPath)\Mlos.SettingsSystem.CodeGen.dll</SettingsSystemCodeGenExe>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+      With multiple SettingsProviders generated for a large project, we may need to name them differently for disambiguation.
+      To do this we currently default to placing them in a special directory structure based on their path relative to the $(SourceDir), but in the OBJECT_ROOT.
+    -->
+    <SettingsSystemCodeGenOutputPath Condition="'$(SettingsSystemCodeGenOutputPath)' == ''">$([MSBuild]::MakeRelative($(SourceDir), $(MSBuildProjectDirectory)))</SettingsSystemCodeGenOutputPath>
+    <!-- Turn that into an absolute path -->
+    <SettingsSystemCodeGenAbsoluteOutputPath Condition="'$(SettingsSystemCodeGenAbsoluteOutputPath)' == ''">$(MlosCodeGenOutputPathRoot)\$(SettingsSystemCodeGenOutputPath)</SettingsSystemCodeGenAbsoluteOutputPath>
+
+    <!-- Base file name for generated code files -->
+    <SettingsSystemCodeGenOutputBasename Condition="'$(SettingsSystemCodeGenOutputBasename)' == ''">SettingsProvider_gen</SettingsSystemCodeGenOutputBasename>
+  </PropertyGroup>
+
+  <!-- Track the set of code gen outputs *from this project* (reference projects handled next) for incremental build purposes. -->
+  <ItemGroup Label="Mlos CodeGen Outputs" Condition="'@(SettingsRegistryDef->Count())' != 0">
+    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_callbacks.h" />
+    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.h" />
+    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.h" />
+    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_python.h" />
+    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.cs" />
+    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_deserialize.cs" />
+    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="@(SettingsRegistryDef -> '%(FullPath)')" />
+    <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.cs" />
+    <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_deserialize.cs" />
+    <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.cs" />
+  </ItemGroup>
+
+  <!--
+    Note: To simplify/consolidate the logic, Input properties for these codegen Targets is now removed
+    so that they always run and the CodeGen process itself avoids overwriting files if their output hasn't changed.
+  -->
+
+  <!-- Codegen using internal compiler -->
+  <Target Name="SettingsSystemRegistryDefCodeGen" AfterTargets="AfterResolveReferences" Outputs="@(MlosCodeGenOutput)" Condition="'@(SettingsRegistryDef->Count())' != 0">
+    <PropertyGroup>
+      <SettingsSystemCodeGenInputArgs>@(SettingsRegistryDef -> '--input-cs=&quot;%(FullPath)&quot;', ' ')</SettingsSystemCodeGenInputArgs>
+    </PropertyGroup>
+    <Message Text="Running Mlos SettingsSystem code gen on '@(SettingsRegistryDef)'" Importance="high" />
+    <Exec ConsoleToMsBuild="true" Condition="'$(SkipSettingsSystemCodeGen)' != 'true'" Command="$(SettingsSystemCodeGenExe) $(SettingsSystemCodeGenInputArgs) --output-path=&quot;$(SettingsSystemCodeGenAbsoluteOutputPath)&quot; --output-basename=$(SettingsSystemCodeGenOutputBasename)">
+      <Output TaskParameter="ConsoleOutput" ItemName="OutputOfExec" />
+    </Exec>
+  </Target>
+
+  <!-- Provide a meta-target for easier dependency/cli specification -->
+  <Target Name="SettingsSystemCodeGen" DependsOnTargets="SettingsSystemRegistryDefCodeGen" />
+
+  <!-- Binplace settings registry to the target folder -->
+  <Target Name="BinplaceSettingsRegistry" AfterTargets="Build">
+    <Copy SourceFiles="$(OutputPath)\$(TargetFileName)" DestinationFolder="$(BinplaceDir)" />
+  </Target>
+
+  <Target Name="CleanSettingsSystemCodeGen" BeforeTargets="BeforeClean">
+    <RemoveDir Directories="$(SettingsSystemCodeGenAbsoluteOutputPath)" />
+  </Target>
+</Project>

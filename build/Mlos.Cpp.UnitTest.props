@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Global GoogleTest Settings">
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+    <PkgGoogleTest Condition="'$(PkgGoogleTest)' == ''">$(NuGetPackageRoot)\googletest\1.8.3</PkgGoogleTest>
+    <PkgGoogleTestRedist Condition="'$(PkgGoogleTestRedist)' == ''">$(NuGetPackageRoot)\googletest.redist\1.8.3</PkgGoogleTestRedist>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="googletest" Version="1.8.3" SkipGetTargetFrameworkProperties="true" />
+    <PackageReference Include="googletest.redist" Version="1.8.3" SkipGetTargetFrameworkProperties="true" />
+  </ItemGroup>
+</Project>

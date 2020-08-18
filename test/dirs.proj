@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.Build.Traversal/2.0.50">
+  <Import Project="..\build\Mlos.Dirs.props" />
+  <ItemGroup>
+    <ProjectReference Include="Mlos.TestRun\Mlos.TestRun.proj" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.Dirs.targets" />
+</Project>

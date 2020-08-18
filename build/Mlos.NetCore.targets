@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Add a target that building from dirs.proj seems to require. -->
+  <Target Name="VerifyAlteredTargetsUsed" />
+  <Target Name="DisableCodeAnalysis"
+    BeforeTargets="CoreCompile"
+    Condition="'$(SkipCodeAnalysis)' == 'true' Or ('$(BuildingInsideVisualStudio)' == 'true' And '$(BuildingProject)' == 'true' And '$(SkipCodeAnalysis)' != 'false')">
+    <!--
+      Disable automatically running analyzers when either
+      a) building a project inside Visual Studio and SkipCodeAnalysis is not set to false, or
+      b) when SkipCodeAnalysis is explicitly set to true on the command line.
+      Note that analyzer behavior for IntelliSense purposes is not altered by this.
+      See Also: https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/1711
+    -->
+    <ItemGroup>
+      <Analyzer Remove="@(Analyzer)" />
+    </ItemGroup>
+  </Target>
+  <Import Project="$(MSBuildThisFileDirectory)\Mlos.Common.targets" />
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+</Project>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\build\Mlos.Common.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{FAF9BFBE-41E3-453C-B975-B1EB26C17A33}</ProjectGuid>
+    <ConfigurationType>Application</ConfigurationType>
+    <RootNamespace>Mlos.Microbenchmark</RootNamespace>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.props" />
+  <ItemGroup Label="References">
+    <ProjectReference Include="$(SourceDir)\Mlos.Core\Mlos.Core.vcxproj" />
+  </ItemGroup>
+  <ItemGroup Label="SettingsRegistry">
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\SmartSharedChannel.SettingsRegistry\SmartSharedChannel.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_base.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_callbacks.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_dispatch.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_base.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_callbacks.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_dispatch.h" />
+  </ItemGroup>
+  <ItemDefinitionGroup Label="Compilation Settings">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+        $(SourceDir)\Mlos.Core\;
+        $(MlosCodeGenOutputPathRoot);
+        %(AdditionalIncludeDirectories);
+      </AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="SharedChannelMicrobenchmark.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GlobalDispatchTable.h" />
+    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.Binplace.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.targets" />
+</Project>

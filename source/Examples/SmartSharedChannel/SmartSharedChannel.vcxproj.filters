@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="SharedChannelMicrobenchmark.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GlobalDispatchTable.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_base.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\MLOS.UnitTest\SettingsProvider_gen_base.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_callbacks.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\MLOS.UnitTest\SettingsProvider_gen_callbacks.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_dispatch.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\MLOS.UnitTest\SettingsProvider_gen_dispatch.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Codegen">
+      <UniqueIdentifier>{6e46a6aa-7773-4921-ab34-b4eaa86522a3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

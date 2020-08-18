@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{7747149E-BB3B-4F9A-8F1B-D94A062B492F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mlos.UnitTest.SettingsRegistry</RootNamespace>
+    <AssemblyName>Mlos.UnitTest.SettingsRegistry</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" />
+    <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <SettingsSystemCodeGenOutputPath>Mlos.UnitTest</SettingsSystemCodeGenOutputPath>
+  </PropertyGroup>
+  <ItemGroup Label="SettingsRegistryDefs">
+    <SettingsRegistryDef Include="Codegen\AssemblyInfo.cs" />
+    <SettingsRegistryDef Include="Codegen\DemoComponentConfig.cs" />
+    <SettingsRegistryDef Include="Codegen\UpdateConfigTestMessage.cs" />
+    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry1.cs" />
+    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry2.cs" />
+    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry3.cs" />
+    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry4.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInitializer.cs" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />
+</Project>

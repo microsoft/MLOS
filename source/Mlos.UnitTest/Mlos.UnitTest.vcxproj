@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CC97843D-E8D3-4162-BDCC-6955ECF0F565}</ProjectGuid>
+    <ConfigurationType>Application</ConfigurationType>
+    <Keyword>Win32Proj</Keyword>
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.props" />
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.UnitTest.props" />
+  <ItemDefinitionGroup Label="Compilation Settings">
+    <ClCompile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>
+        GTEST_HAS_STD_WSTRING;
+        GTEST_ENV_HAS_STD_TUPLE_=1;
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+        $(SourceDir)\Mlos.Core;
+        $(MlosCodeGenOutputPathRoot);
+        %(AdditionalIncludeDirectories);
+      </AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>
+        Pathcch.lib;
+        %(AdditionalDependencies)
+      </AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="BufferTests.cpp" />
+    <ClCompile Include="Main.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="MessageVerificationTests.cpp" />
+    <ClCompile Include="MetadataTests.cpp" />
+    <ClCompile Include="SharedChannelTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GlobalDispatchTable.h" />
+    <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup Label="Components">
+    <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_base.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_callbacks.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_dispatch.h" />
+  </ItemGroup>
+  <ItemGroup Label="References">
+    <ProjectReference Include="$(SourceDir)\Mlos.Core\Mlos.Core.vcxproj" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_callbacks.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_dispatch.h" />
+  </ItemGroup>
+  <Target Name="CopyGtestDeps" DependsOnTargets="BinplaceGTestRetail;BinplaceGTestDebug" BeforeTargets="Binplace" />
+  <Import Project="$(BaseDir)\build\Mlos.Binplace.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.UnitTest.targets" />
+</Project>

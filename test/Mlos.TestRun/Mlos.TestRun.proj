@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <Import Project="$(BaseDir)\build\Mlos.TestRun.targets" />
+  <ItemGroup Label="References">
+    <ProjectReference Include="$(BaseDir)\source\Mlos.Agent.Server\Mlos.Agent.Server.csproj" />
+    <ProjectReference Include="$(BaseDir)\source\Mlos.UnitTest\Mlos.UnitTest.vcxproj" />
+    <ProjectReference Include="$(BaseDir)\source\Mlos.NetCore.UnitTest\Mlos.NetCore.UnitTest.csproj" />
+  </ItemGroup>
+  <!-- Determine the correct path to each of the output of ProjectReferences. -->
+  <Target Name="ComputeProjectReferenceOutputs" BeforeTargets="Test">
+    <MSBuild Projects="$(BaseDir)\source\Mlos.Agent.Server\Mlos.Agent.Server.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="MlosAgentServerOutput" />
+    </MSBuild>
+    <Error Text="Missing or invalid MlosAgentServerOutput: @(MlosAgentServerOutput->'%(fullpath)'" Condition="'@(MlosAgentServerOutput->Count())' != '1'" />
+
+    <MSBuild Projects="$(BaseDir)\source\Mlos.NetCore.UnitTest\Mlos.NetCore.UnitTest.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
+      <Output TaskParameter="TargetOutputs" ItemName="MlosNetCoreUnitTestOutput" />
+    </MSBuild>
+    <Error Text="Missing or invalid MlosNetCoreUnitTestOutput: @(MlosNetCoreUnitTestOutput->'%(fullpath)'" Condition="'@(MlosNetCoreUnitTestOutput->Count())' != '1'" />
+  </Target>
+  <!-- FIXME: Disabling running tests via QuickBuild for now.  Convert them to QTests (#122). -->
+  <Target Name="Test" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(RunUnitTest)' != 'false'">
+    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; &quot;$(BinplaceDir)\Mlos.UnitTest.exe&quot;" />
+    <Exec Command="dotnet test &quot;@(MlosNetCoreUnitTestOutput->'%(fullpath)')&quot;" />
+  </Target>
+</Project>

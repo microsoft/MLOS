@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(ExtendedTargetsPath)\Microsoft.Cpp.targets" />
+  <!-- Uncrustify is used for style encforcement of C++ code -->
+  <PropertyGroup>
+    <UncrustifyBaseConfig Condition="'$(UncrustifyBaseConfig)' == ''">$(MSBuildThisFileDirectory)\uncrustify\mlos</UncrustifyBaseConfig>
+    <UncrustifyVersion>1</UncrustifyVersion>
+    <UncrustifyAutoFix Condition="'$(UncrustifyAutoFix)' == ''">true</UncrustifyAutoFix>
+    <UncrustifyEnabled Condition="'$(UncrustifyEnabled)' == ''">true</UncrustifyEnabled>
+    <KeepUncrustifyOutput Condition="'$(KeepUncrustifyOutput)' == ''">false</KeepUncrustifyOutput>
+    <UncrustifyRootDir Condition="'$(UncrustifyRootDir)' == '' And '$(IsWindows)' == 'true'">$(MSBuildThisFileDirectory)\uncrustify\uncrustify-0.71.0_f-win64\</UncrustifyRootDir>
+  </PropertyGroup>
+  <Import Project="Uncrustify.targets" Condition="'$(UncrustifyEnabled)' != 'false' And '$(QBUILD)' != '1'" />
+  <Import Project="$(BaseDir)\build\Mlos.Common.targets" />
+</Project>

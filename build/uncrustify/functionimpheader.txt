@@ -1,0 +1,16 @@
+//---------------------------------------------------------------------
+// Function: $(fclass)::$(function)
+//
+// Description:
+//      <description here, please>
+//
+// Returns:
+//      <description of the return value>
+//
+// Exception Thrown:
+//  This is an optional section usually dedicated to declaring that a
+//  function is guaranteed not to thow or that it only throws certain
+//  specific functions.
+//  
+// Notes:
+//

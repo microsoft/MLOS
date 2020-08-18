@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="GlobalDispatchTable.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\MLOS.Core\SettingsProvider_gen_callbacks.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\MLOS.Core\SettingsProvider_gen_dispatch.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartCache\SettingsProvider_gen_base.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartCache\SettingsProvider_gen_callbacks.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartCache\SettingsProvider_gen_dispatch.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="SmartCacheImpl.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Codegen">
+      <UniqueIdentifier>{8b87ecd9-0951-454f-9f46-bcd5085f8426}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

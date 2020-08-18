@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option csharp_namespace = "GrpcGreeter";
+
+package greet;
+
+// The greeting service definition.
+//
+service Greeter
+{
+    // Sends a greeting
+    //
+    rpc Echo (EchoRequest) returns (EchoReply);
+}
+
+// The request message containing the user's name.
+//
+message EchoRequest
+{
+  string name = 1;
+}
+
+// The response message containing the greetings.
+//
+message EchoReply
+{
+  string message = 1;
+}

@@ -1,0 +1,42 @@
+// -----------------------------------------------------------------------
+// <copyright file="GlobalMemoryRegion.cs" company="Microsoft Corporation">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root
+// for license information.
+// </copyright>
+// -----------------------------------------------------------------------
+
+using Mlos.SettingsSystem.Attributes;
+using Mlos.SettingsSystem.StdTypes;
+
+namespace Mlos.Core.Internal
+{
+    [CodegenType]
+    internal partial struct GlobalMemoryRegion
+    {
+        /// <summary>
+        /// Memory region header.
+        /// </summary>
+        internal MemoryRegion MemoryHeader;
+
+        /// <summary>
+        /// Control channel synchronization object.
+        /// </summary>
+        internal ChannelSynchronization ControlChannelSynchronization;
+
+        /// <summary>
+        /// Control channel synchronization object.
+        /// </summary>
+        internal ChannelSynchronization FeedbackChannelSynchronization;
+
+        /// <summary>
+        /// Total number of regions.
+        /// </summary>
+        internal uint TotalMemoryRegionCount;
+
+        /// <summary>
+        /// Number of registered settings assembly.
+        /// </summary>
+        internal AtomicUInt32 RegisteredSettingsAssemblyCount;
+    }
+}

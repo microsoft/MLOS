@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{61D51941-49BB-40E5-B56A-5F2430B2A95B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mlos.Streaming</RootNamespace>
+    <AssemblyName>Mlos.Streaming</AssemblyName>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <ItemGroup>
+    <Compile Include="Estimators\HyperLogLog.cs" />
+    <Compile Include="Operators\Aggregates.cs" />
+    <Compile Include="Operators\Buffers.cs" />
+    <Compile Include="Operators\Consume.cs" />
+    <Compile Include="Operators\CardinatilityEstimate.cs" />
+    <Compile Include="Operators\Join.cs" />
+    <Compile Include="Operators\Merge.cs" />
+    <Compile Include="Operators\Select.cs" />
+    <Compile Include="IStreamObserver.cs" />
+    <Compile Include="Streamable.cs" />
+    <Compile Include="StreamableSource.cs" />
+    <Compile Include="ValueHolder.cs" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+</Project>

@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Mlos.Core.cpp" />
+    <ClCompile Include="MlosContext.cpp" />
+    <ClCompile Include="SharedConfigMemoryRegion.cpp">
+      <Filter>MemoryRegions</Filter>
+    </ClCompile>
+    <ClCompile Include="SharedChannel.cpp" />
+    <ClCompile Include="SharedMemoryMapView.Windows.cpp" />
+    <ClCompile Include="SharedConfigManager.cpp" />
+    <ClCompile Include="NamedEvent.Window.cpp" />
+    <ClCompile Include="GlobalMemoryRegion.cpp">
+      <Filter>MemoryRegions</Filter>
+    </ClCompile>
+    <ClCompile Include="Security.Windows.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_base.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="FNVHashFunction.h">
+      <Filter>Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="Hash.h">
+      <Filter>Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="BytePtr.h" />
+    <ClInclude Include="ComponentConfig.h" />
+    <ClInclude Include="Mlos.Core.h" />
+    <ClInclude Include="MlosContext.h" />
+    <ClInclude Include="ObjectDeserializationCallback.h" />
+    <ClInclude Include="PropertyProxy.h" />
+    <ClInclude Include="PropertyProxyStringView.h" />
+    <ClInclude Include="SharedMemoryMapView.Windows.h" />
+    <ClInclude Include="StaticSingleton.h" />
+    <ClInclude Include="StringTypes.h" />
+    <ClInclude Include="StaticVector.h" />
+    <ClInclude Include="Utils.h" />
+    <ClInclude Include="SharedConfigMemoryRegion.h">
+      <Filter>MemoryRegions</Filter>
+    </ClInclude>
+    <ClInclude Include="SharedChannel.h" />
+    <ClInclude Include="SharedMemoryRegionView.h" />
+    <ClInclude Include="SharedConfigManager.h" />
+    <ClInclude Include="SharedConfig.h" />
+    <ClInclude Include="SharedChannelPolicies.h" />
+    <ClInclude Include="NamedEvent.Window.h" />
+    <ClInclude Include="PropertyProxyStringPtr.h" />
+    <ClInclude Include="GlobalMemoryRegion.h">
+      <Filter>MemoryRegions</Filter>
+    </ClInclude>
+    <ClInclude Include="ProbingPolicy.h">
+      <Filter>Collections</Filter>
+    </ClInclude>
+    <ClInclude Include="MlosPlatform.Std.inl" />
+    <ClInclude Include="MlosPlatform.h" />
+    <ClInclude Include="ObjectSerialization.h" />
+    <ClInclude Include="ObjectSerializationStringView.h" />
+    <ClInclude Include="Security.Windows.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Codegen">
+      <UniqueIdentifier>{0a16e050-e760-4bd8-84ad-e139a271b3c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Collections">
+      <UniqueIdentifier>{c0cbe7f6-565f-4992-bbea-b44f4eff9871}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MemoryRegions">
+      <UniqueIdentifier>{9fc7c27a-be53-48f3-b356-d240db1e1cc8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MlosContext.inl" />
+    <None Include="SharedConfigManager.inl" />
+    <None Include="ComponentConfig.inl" />
+    <None Include="SharedChannel.inl" />
+  </ItemGroup>
+</Project>

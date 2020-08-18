@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="NoCoreXT path properties">
+    <ExtendedTargetsPath Condition="'$(ExtendedTargetsPath)' == ''">$(VCTargetsPath)</ExtendedTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Label="Global Debug Settings">
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <!-- Non CoreXT builds use compiler included with Visual Studio. -->
+  <PropertyGroup Label="MSVS compiler properties" Condition="'$(BUILD_COREXT)' != '1'">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="NetCoreReferences properties">
+    <NoStdLib>true</NoStdLib>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+  <!-- If not specified, be sure to default to 64-bit builds -->
+  <PropertyGroup>
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <!-- Place output files outside of the source dir -->
+  <PropertyGroup>
+    <IntermediateOutputPath Condition="'$(BUILD_COREXT)' != '1'">$(BaseIntermediateOutputPath)$(BUILD_ALT_DIR)\$(Platform)\</IntermediateOutputPath>
+    <OutDir>$(IntermediateOutputPath)</OutDir>
+  </PropertyGroup>
+  <Import Project="$(ExtendedTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(ExtendedTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup Label="Compilation Settings">
+    <ClCompile>
+      <PreprocessorDefinitions>
+        _WIN32;
+        _WINDOWS;
+        _AMD64_;
+        %(PreprocessorDefinitions);
+      </PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>
+        $(MSBuildThisFileDirectory);
+        %(AdditionalIncludeDirectories);
+      </AdditionalIncludeDirectories>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <ExceptionHandling>Async</ExceptionHandling>
+      <TreatWarningAsError>$(TreatWarningsAsErrors)</TreatWarningAsError>
+      <WarningLevel>Level$(WarningLevel)</WarningLevel>
+    </ClCompile>
+    <Link>
+      <RandomizedBaseAddress>true</RandomizedBaseAddress>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <PreprocessorDefinitions>
+        NDEBUG;
+        %(PreprocessorDefinitions);
+      </PreprocessorDefinitions>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <PreprocessorDefinitions>
+        DEBUG;
+        %(PreprocessorDefinitions);
+      </PreprocessorDefinitions>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <Target Name="GenerateDllDef" Condition="'@(DllDef)'!=''"
+   Inputs="@(DllDef)" Outputs="@(DllDef->'$(IntermediateOutputPath)%(FileName).def')"
+      BeforeTargets="Lib;ImpLib;Link"
+     DependsOnTargets="BuildGenerateSources">
+     <Message Text="Converting @(DllDef->'%(filename).def') " Importance="High"/>
+     <PropertyGroup>
+       <DllDefDefinitions>
+         $(PreprocessorDefinitions)
+       </DllDefDefinitions>
+       <DllDefDefinitions Condition="'$(Configuration)'=='Debug'">
+         DEBUG;
+         $(DllDefDefinitions)
+       </DllDefDefinitions>
+       <DllDefDefinitions Condition="'$(REGEN_IMPORT_LIBS)'!=''">
+         REGEN_IMPORT_LIBS;
+         $(DllDefDefinitions)
+       </DllDefDefinitions>
+       <DllDefDefinitions Condition="'$(MERGE_IMPORT_LIBS)'!=''">
+         MERGE_IMPORT_LIBS;
+         $(DllDefDefinitions)
+       </DllDefDefinitions>
+     </PropertyGroup>
+     <CL CompileAs="CompileAsC" Sources="@(DllDef)"
+         PreprocessOutputPath="@(DllDef->'$(IntermediateOutputPath)%(FileName).def')"
+         PreprocessorDefinitions="$(DllDefDefinitions)"
+         AdditionalIncludeDirectories="$(AdditionalIncludeDirectories)"
+         PreprocessSuppressLineNumbers="true"
+         PreprocessToFile="true">
+     </CL>
+   </Target>
+</Project>

@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{283A0331-2EAD-4DD2-A3FE-20D229E2D277}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mlos.SettingsSystem.CodeGen</RootNamespace>
+    <AssemblyName>Mlos.SettingsSystem.CodeGen</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Mlos.SettingsSystem.CodeGen.MainCodeGen</StartupObject>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.SingleFile.props" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.6.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectDeserializeEntryCountCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectDeserializeFunctionCallbackCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectDeserializeHandlerCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectDeserializeRuntimeCallbackCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectGetVariableDataSizeCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectSerializationVariableDataCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppProxyVerifyVariableDataCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppTypeMetadataInfoHashCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppTypeMetadataInfoIndexCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppTypeReflectionTableCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppTypeMetadataCompareKeyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppTypeMetadataGetKeyHashCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppEnumCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppProxyDeclarationCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppObjectOffsetStaticAssertCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpObjectExchangeCodeWriters\CSharpObjectGetVariableDataSizeCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpObjectExchangeCodeWriters\CSharpObjectSerializationFixedPartCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpObjectExchangeCodeWriters\CSharpProxyVerifyVariableDataCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpObjectExchangeCodeWriters\CSharpObjectSerializationVariableDataCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpObjectExchangeCodeWriters\CSharpObjectDeserializeHandlerCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpObjectExchangeCodeWriters\CSharpObjectDispatchHandlerCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpCodegenKeyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpCodegenKeyCompareKeyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpCodegenKeyMethodsCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpProxyCompareKeyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpProxyGetKeyHashValueCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpObjectCodegenTypeCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpObjectCompareKeyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpObjectUpdateCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpObjectCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpProxyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CodeWriter.cs" />
+    <Compile Include="CodeWriters\Constants.cs" />
+    <Compile Include="CodeWriters\CSharpTypeTableCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypeTableCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppProxyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppObjectCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppCodeWriter.cs" />
+    <Compile Include="CodeWriters\MultiCodeWriter.cs" />
+    <Compile Include="CodeCommentsReader.cs" />
+    <Compile Include="CommandLineParser.cs" />
+    <Compile Include="CompilationExtensions.cs" />
+    <Compile Include="CodeGenCSharpCompiler.cs" />
+    <Compile Include="CppTypeMapper.cs" />
+    <Compile Include="MainCodeGen.cs" />
+    <Compile Include="TypeMetadataMapper.cs" />
+    <Compile Include="TypeCodeGenerator.cs" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+</Project>

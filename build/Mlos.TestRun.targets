@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- A basic .proj file to include for test proj files to run properly. -->
+  <Target Name="Build" BeforeTargets="Test">
+    <MSBuild Projects="@(ProjectReference)" Targets="Build" RunEachTargetSeparately="true" Condition="'$(QBUILD)' != '1' And '$(BuildProjectReferences)' != 'false'" />
+  </Target>
+  <Target Name="Clean">
+    <MSBuild Projects="@(ProjectReference)" Targets="Clean" RunEachTargetSeparately="true" Condition="'$(QBUILD)' != '1' And '$(BuildProjectReferences)' != 'false'" />
+  </Target>
+  <Target Name="Restore">
+    <MSBuild Projects="@(ProjectReference)" Targets="Restore" RunEachTargetSeparately="true" Condition="'$(QBUILD)' != '1' And '$(BuildProjectReferences)' != 'false'" />
+  </Target>
+  <Target Name="VerifyAlteredTargetsUsed">
+    <MSBuild Projects="@(ProjectReference)" Targets="VerifyAlteredTargetsUsed" RunEachTargetSeparately="true" Condition="'$(QBUILD)' != '1' And '$(BuildProjectReferences)' != 'false'" />
+  </Target>
+  <Import Project="$(BaseDir)\build\Mlos.Common.targets" />
+</Project>

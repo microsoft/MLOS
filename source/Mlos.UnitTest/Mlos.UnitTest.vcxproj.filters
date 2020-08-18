@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="BufferTests.cpp" />
+    <ClCompile Include="Main.cpp" />
+    <ClCompile Include="MessageVerificationTests.cpp" />
+    <ClCompile Include="MetadataTests.cpp" />
+    <ClCompile Include="SharedChannelTests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(SettingsSystemCodeGenOutput)" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="GlobalDispatchTable.h" />
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_dispatch.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_callbacks.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_base.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_callbacks.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_dispatch.h">
+      <Filter>Codegen</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Codegen">
+      <UniqueIdentifier>{79d98b05-f9b6-463f-a4ed-4c48df71975d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{88BE308A-67C2-4091-B98A-9C30C829F90C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mlos.NetCore.Benchmark</RootNamespace>
+    <AssemblyName>Mlos.NetCore.Benchmark</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Benchmark.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
+    <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" />
+    <ProjectReference Include="$(SourceDir)\Mlos.Streaming\Mlos.Streaming.csproj" />
+    <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="HashFunctionBenchmarks.cs" />
+    <Compile Include="main.cs" />
+    <Compile Include="SharedChannelBenchmarks.cs" />
+    <Compile Include="StreamingBenchmarks.cs" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+</Project>

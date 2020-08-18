@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{E4A7ACC8-8211-48BF-AE6C-2588B4D4D3DB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mlos.Core</RootNamespace>
+    <AssemblyName>Mlos.NetCore</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <PropertyGroup Label="SettingsRegistryOutput">
+    <SettingsSystemCodeGenOutputPath>Mlos.Core</SettingsSystemCodeGenOutputPath>
+  </PropertyGroup>
+  <ItemGroup Label="SettingsRegistryDefs">
+    <SettingsRegistryDef Include="Codegen\ArenaAllocator.cs" />
+    <SettingsRegistryDef Include="Codegen\AssemblyInfo.cs" />
+    <SettingsRegistryDef Include="Codegen\ComponentAssembly.cs" />
+    <SettingsRegistryDef Include="Codegen\GlobalMemoryRegion.cs" />
+    <SettingsRegistryDef Include="Codegen\MemoryRegion.cs" />
+    <SettingsRegistryDef Include="Codegen\SharedChannel.cs" />
+    <SettingsRegistryDef Include="Codegen\SharedConfig.cs" />
+    <SettingsRegistryDef Include="Codegen\SharedConfigMemoryRegion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Collections\IHashValueOperators.cs" />
+    <Compile Include="Collections\IProbingPolicy.cs" />
+    <Compile Include="Collections\FNVHashFunction.cs" />
+    <Compile Include="Collections\MurMur2HashFunction.cs" />
+    <Compile Include="Collections\MurMur3HashFunction.cs" />
+    <Compile Include="IOptimizationProblem.cs" />
+    <Compile Include="ISimpleBayesianOptimizerFactory.cs" />
+    <Compile Include="ISimpleBayesianOptimizerProxy.cs" />
+    <Compile Include="MemoryRegions\MemoryRegionViewExtensions.cs" />
+    <Compile Include="MemoryRegions\SharedConfigMemoryRegionExtensions.cs" />
+    <Compile Include="StdTypes\AtomicTypes.cs" />
+    <Compile Include="StdTypes\StringTypes.cs" />
+    <Compile Include="ArrayExtensions.cs" />
+    <Compile Include="CodegenProxyExtensions.cs" />
+    <Compile Include="CodegenTypeExtensions.cs" />
+    <Compile Include="ComponentConfig.cs" />
+    <Compile Include="DeserializeEntry.cs" />
+    <Compile Include="DispatchEntry.cs" />
+    <Compile Include="IntPtrExtensions.cs" />
+    <Compile Include="ISharedConfigAccessor.cs" />
+    <Compile Include="MlosContext.cs" />
+    <Compile Include="NamedEvent.cs" />
+    <Compile Include="NamedSemaphore.Linux.cs" />
+    <Compile Include="NamedEvent.Windows.cs" />
+    <Compile Include="Native.Linux.cs" />
+    <Compile Include="Native.Windows.cs" />
+    <Compile Include="PropertyProxyArray.cs" />
+    <Compile Include="ProxyArray.cs" />
+    <Compile Include="Security.Windows.cs" />
+    <Compile Include="SettingsAssemblyManager.cs" />
+    <Compile Include="SharedChannel.cs" />
+    <Compile Include="SharedChannelPolicies.cs" />
+    <Compile Include="SharedConfig.cs" />
+    <Compile Include="SharedConfigManager.cs" />
+    <Compile Include="SharedMemoryMapView.cs" />
+    <Compile Include="SharedMemoryMapView.Linux.cs" />
+    <Compile Include="SharedMemoryMapView.Windows.cs" />
+    <Compile Include="SharedMemoryRegionView.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />
+</Project>

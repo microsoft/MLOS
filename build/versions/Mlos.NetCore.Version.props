@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <UsePipelineVersion Condition="exists('$(BaseDir)\.version\PipelineAssemblyInfo.cs')">true</UsePipelineVersion>
+    <GenerateAssemblyCopyrightAttribute>true</GenerateAssemblyCopyrightAttribute>
+    <Copyright>Copyright (c) Microsoft Corporation.  All rights reserved.</Copyright>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(UsePipelineVersion)' == 'true'">
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(BaseDir)\.version\PipelineAssemblyInfo.cs" Condition="'$(UsePipelineVersion)' == 'true'">
+      <Link>Properties\PipelineAssemblyInfo.cs</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

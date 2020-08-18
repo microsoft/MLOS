@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+  <Import Project="$(BaseDir)\build\versions\Mlos.NetCore.Version.props" />
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyClsCompliant>false</AssemblyClsCompliant>
+    <NoStdLib>true</NoStdLib>
+    <Prefer32Bit>false</Prefer32Bit>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <Platform>AnyCPU</Platform>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
+    <!-- For dotnet builds change BaseOutputPath. -->
+    <BaseOutputPath>$(ObjectRoot)\source\$([MSBuild]::MakeRelative($(SourceDir), $(MSBuildProjectDirectory)))\</BaseOutputPath>
+    <OutputPath>$(BaseOutputPath)$(ObjectDirectory)\$(Platform)\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|AnyCPU">
+      <Configuration>Debug</Configuration>
+      <DebugSymbols>true</DebugSymbols>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|AnyCPU">
+      <Configuration>Release</Configuration>
+      <DebugSymbols>true</DebugSymbols>
+      <Optimize>true</Optimize>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup>
+    <DocumentationFile>$(BaseOutputPath)\doc\$(AssemblyName).xml</DocumentationFile>
+    <!-- Enable documentation file for StyleCop rule SA0001 -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\Mlos.NetCore.ruleset</CodeAnalysisRuleSet>
+    <StyleCopConfigPath Condition="'$(StyleCopConfigPath)' == ''">$(MSBuildThisFileDirectory)</StyleCopConfigPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Private.Uri" Version="4.3.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <AdditionalFiles Include="$(StyleCopConfigPath)\stylecop.json" Visible="false">
+      <Link>stylecop.json</Link>
+    </AdditionalFiles>
+  </ItemGroup>
+</Project>

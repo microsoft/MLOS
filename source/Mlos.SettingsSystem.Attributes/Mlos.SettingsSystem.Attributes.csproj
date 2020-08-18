@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <PropertyGroup>
+    <ProjectGuid>{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Mlos.SettingsSystem.Attributes</RootNamespace>
+    <AssemblyName>Mlos.SettingsSystem.Attributes</AssemblyName>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <ItemGroup>
+    <PackageReference Include="System.Collections.Immutable" Version="1.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Attributes\AlignAttribute.cs" />
+    <Compile Include="Attributes\BaseCodegenAttribute.cs" />
+    <Compile Include="Attributes\BaseCodegenFieldAttribute.cs" />
+    <Compile Include="Attributes\DispatchTableNamespaceAttribute.cs" />
+    <Compile Include="Attributes\FixedSizeArrayAttribute.cs" />
+    <Compile Include="Attributes\ScalarSettingAttribute.cs" />
+    <Compile Include="Attributes\CodegenTypeAttribute.cs" />
+    <Compile Include="Components\ComponentConfiguration.cs" />
+    <Compile Include="Core\Collections\IHash.cs" />
+    <Compile Include="Core\ICodegenType.cs" />
+    <Compile Include="Core\ICodegenKey.cs" />
+    <Compile Include="Core\ICodegenProxy.cs" />
+    <Compile Include="StdTypes\AtomicTypes.cs" />
+    <Compile Include="StdTypes\StringTypes.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="AssemblyExtensionMethods.cs" />
+    <Compile Include="FieldInfoExtensionMethods.cs" />
+    <Compile Include="TypeExtensionMethods.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+</Project>

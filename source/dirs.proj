@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.Build.Traversal/2.0.50">
+  <Import Project="..\build\Mlos.Dirs.props" />
+  <ItemGroup>
+    <!-- Mlos projects -->
+    <ProjectReference Include="Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" />
+    <ProjectReference Include="Mlos.SettingsSystem.CodeGen\Mlos.SettingsSystem.CodeGen.csproj" />
+    <ProjectReference Include="Mlos.Core\Mlos.Core.vcxproj" />
+    <ProjectReference Include="Mlos.NetCore\Mlos.NetCore.csproj" />
+    <ProjectReference Include="Mlos.UnitTest\Mlos.UnitTest.vcxproj" />
+    <ProjectReference Include="Mlos.NetCore.Benchmark\Mlos.NetCore.Benchmark.csproj" />
+    <ProjectReference Include="Mlos.NetCore.UnitTest\Mlos.NetCore.UnitTest.csproj" />
+    <ProjectReference Include="Mlos.Model.Services\Mlos.Model.Services.csproj" />
+    <ProjectReference Include="Mlos.Model.Services.UnitTests\Mlos.Model.Services.UnitTests.csproj" />
+    <ProjectReference Include="Mlos.Agent\Mlos.Agent.csproj" />
+    <ProjectReference Include="Mlos.Agent.GrpcClient\Mlos.Agent.GrpcClient.csproj" />
+    <ProjectReference Include="Mlos.Agent.GrpcServer\Mlos.Agent.GrpcServer.csproj" />
+    <ProjectReference Include="Mlos.Agent.Server\Mlos.Agent.Server.csproj" />
+    <ProjectReference Include="Examples\dirs.proj" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.Dirs.targets" />
+</Project>
