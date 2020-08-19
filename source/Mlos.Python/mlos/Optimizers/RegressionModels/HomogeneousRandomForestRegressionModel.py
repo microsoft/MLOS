@@ -8,7 +8,7 @@ import random
 import numpy as np
 
 from mlos.Spaces import Dimension, Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
-from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter, CompositeToSimpleHypergridAdapter
+from mlos.Spaces.HypergridAdapters import CompositeToSimpleHypergridAdapter
 from mlos.Tracer import trace
 from mlos.Logger import create_logger
 from .DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeRegressionModelConfig
@@ -95,17 +95,9 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         self.input_space = input_space
         self.output_space = output_space
 
-        self._input_space_adapter = CategoricalToDiscreteHypergridAdapter(
-            adaptee=CompositeToSimpleHypergridAdapter(
-                adaptee=self.input_space
-            )
-        )
+        self._input_space_adapter = CompositeToSimpleHypergridAdapter(adaptee=self.input_space)
+        self._output_space_adapter = CompositeToSimpleHypergridAdapter(adaptee=self.output_space)
 
-        self._output_space_adapter = CategoricalToDiscreteHypergridAdapter(
-            adaptee=CompositeToSimpleHypergridAdapter(
-                adaptee=self.output_space
-            )
-        )
 
         self.target_dimension_names = [dimension.name for dimension in self._output_space_adapter.dimensions]
         assert len(self.target_dimension_names) == 1, "Single target predictions for now."
@@ -119,8 +111,8 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
         Each estimator is meant to have a different subset of features and a different subset of samples.
 
-        In the long run, we can solve it by creating an ObservationSet or ObservationStream class, then each
-        estimator would have its own ObservationStream object that would know which data points to fetch and
+        In the long run, we can solve it by creating an DataSet or DataSetView class, then each
+        estimator would have its own DataSetView object that would know which data points to fetch and
         how to do it.
 
         For now however, I'll do it here in-line to get it working.
@@ -154,16 +146,10 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 max_num_dimensions=features_per_estimator
             )
 
-            estimator_output_space = self._create_random_flat_subspace(
-                original_space=self.output_space,
-                subspace_name=f"estimator_{i}_output_space",
-                max_num_dimensions=1
-            )
-
             estimator = DecisionTreeRegressionModel(
                 model_config=self.model_config.decision_tree_regression_model_config,
                 input_space=estimator_input_space,
-                output_space=estimator_output_space,
+                output_space=self.output_space,
                 logger=self.logger
             )
 
@@ -180,13 +166,12 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         :return:
         """
         random_point = original_space.random()
-        original_dimension_names = [dimension_name for dimension_name, _ in random_point]
-        selected_dimension_names = random.sample(original_dimension_names, min(len(original_dimension_names), max_num_dimensions))
+        dimensions_for_point = original_space.get_dimensions_for_point(random_point)
+        selected_dimensions = random.sample(dimensions_for_point, min(len(dimensions_for_point), max_num_dimensions))
         flat_dimensions = []
-        for original_dimension_name in selected_dimension_names:
-            original_dimension = original_space[original_dimension_name]
-            flat_dimension = original_dimension.copy()
-            flat_dimension.name = Dimension.flatten_dimension_name(original_dimension_name)
+        for dimension in selected_dimensions:
+            flat_dimension = dimension.copy()
+            flat_dimension.name = Dimension.flatten_dimension_name(flat_dimension.name)
             flat_dimensions.append(flat_dimension)
         flat_hypergrid = SimpleHypergrid(
             name=subspace_name,
@@ -223,16 +208,20 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         for i, tree in enumerate(self._decision_trees):
             # Let's filter out the useless samples (samples with missing values)
             # TODO: DRY - this code is repeated for predict()
-            estimators_df = feature_values_pandas_frame[[dimension.name for dimension in tree.input_space.dimensions]]
+            estimators_df = feature_values_pandas_frame[tree.input_dimension_names]
             filtered_observations = estimators_df[estimators_df.notnull().all(axis=1)]
+            filtered_targets = target_values_pandas_frame.iloc[filtered_observations.index]
             num_filtered_observations = len(filtered_observations.index)
             # We seed so that each time they are fitted on the same subset
             np.random.seed(i)
-            # TODO: GOOD COMMENT HERE
-            selected_observation_ids = np.random.randint(0, num_filtered_observations, min(num_filtered_observations, num_observations_per_estimator))
+            # We are selecting a subset of observations to decorellate the models.
+            # TODO: the excluded samples can be used as a test set.
+            #
+            selected_observation_ids = random.sample(range(num_filtered_observations), min(num_filtered_observations, num_observations_per_estimator))
             num_selected_observations = len(selected_observation_ids)
             if tree.should_fit(num_selected_observations):
-                tree.fit(filtered_observations.iloc[selected_observation_ids], target_values_pandas_frame.iloc[selected_observation_ids])
+                assert len(filtered_observations.index) == len(filtered_targets.index)
+                tree.fit(filtered_observations.iloc[selected_observation_ids], filtered_targets.iloc[selected_observation_ids])
 
     @trace()
     def predict(self, feature_values_pandas_frame):

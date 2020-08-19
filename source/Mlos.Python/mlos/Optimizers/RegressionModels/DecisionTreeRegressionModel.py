@@ -10,6 +10,7 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
 from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
+from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
 from mlos.Tracer import trace
 
 
@@ -187,11 +188,12 @@ class DecisionTreeRegressionModel(RegressionModel):
         assert DecisionTreeRegressionModelConfig.contains(model_config)
         super(DecisionTreeRegressionModel, self).__init__(model_type=type(self), model_config=model_config)
 
-        # TODO: move to RegressionModel?
         self.input_space = input_space
         self.output_space = output_space
 
-        self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
+        self._input_space_adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.input_space)
+
+        self.input_dimension_names = [dimension.name for dimension in self._input_space_adapter.dimensions]
         self.target_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
         self.logger.debug(f"Input dimensions: {str(self.input_dimension_names)}; Target dimensions: {str(self.target_dimension_names)}.")
 
@@ -239,6 +241,8 @@ class DecisionTreeRegressionModel(RegressionModel):
 
         # Let's get the numpy arrays out of the panda frames
         #
+        feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
+
         feature_values = feature_values_pandas_frame[self.input_dimension_names].to_numpy()
         target_values = target_values_pandas_frame[self.target_dimension_names].to_numpy()
 
@@ -277,32 +281,21 @@ class DecisionTreeRegressionModel(RegressionModel):
     @trace()
     def predict(self, feature_values_pandas_frame):
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
-        predictions = []
 
-        if not self.fitted:
-            # We haven't been fitted so we return a lot of empty predictions
-            self.logger.debug("Decision tree has not been fitted. Returning None predictions.")
-            for row in range(len(feature_values_pandas_frame.index)):
-                predictions.append(Prediction(target_name=self.target_dimension_names[0], valid=False))
-        else:
-            # Instead of calling self._regressor.predict() we consult the _observations_per_leaf()
-            # to get the variance as well
+        invalid_prediction = Prediction(target_name=self.target_dimension_names[0], valid=False)
+        predictions = [invalid_prediction for _ in range(len(feature_values_pandas_frame.index))]
 
-            # Let's get the numpy arrays out of the panda frames
-            # TODO: move to common function
-            #
-            input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
-            feature_values = feature_values_pandas_frame[input_dimension_names].to_numpy()
+        if self.fitted:
+            feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
+            features_df = feature_values_pandas_frame[self.input_dimension_names]
+            features_df = features_df[features_df.notnull().all(axis=1)]
 
-            # TODO: this is wasteful and slow. we should make sure that only rows with adequate data are passed into this function
-            predictions = []
-            for row in feature_values:
-                # TODO: row_point = Point(**{name: value for name, value in zip(self.input_dimension_names, row)})
-                if np.isnan(row).any(): # TODO: or row_point not in self.input_space:
-                    # This row has missing data - no prediction possible
-                    predictions.append(Prediction(target_name=self.target_dimension_names[0], valid=False))
-                else:
+            for index, row in features_df.iterrows():
+                row_point = Point(**{dim_name: row[dim_name] for dim_name in self.input_dimension_names})
+                if row_point in self._input_space_adapter:
                     leaf_node_index = self._regressor.apply([row])[0]
                     prediction = self._predictions_per_leaf[leaf_node_index]
-                    predictions.append(prediction)
+                    predictions[index] = prediction
+        else:
+            self.logger.debug("Decision tree has not been fitted. Returning invalid predictions.")
         return predictions
