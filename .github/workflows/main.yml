@@ -70,20 +70,24 @@ jobs:
     strategy:
       matrix:
         os: [windows-2019, ubuntu-20.04]
-        # FIXME: Currently doesn't work for python 3.8
-        python-version: [3.7]
+        python-version: [3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install apt dependencies
+      if: startsWith(matrix.os, 'ubuntu')
+      # pip needs some additional libraries on linux:
+      run: apt -y install build-essential libfreetype-dev unixodbc-dev
+    - name: Install pip dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pylint
         pip install -r source/Mlos.Python/requirements.txt
     - name: Run pylint checks
-      run: pylint --rcfile source/.pylintrc source/Mlos.Python/mlos
+      run: scripts/run-python-checks
     - name: Run Python unit tests
-      run: python -m unittest discover --verbose --locals --failfast -s source/Mlos.Python
+      # Workaround some path case sensitivity issues:
+      run: scripts/run-python-tests
