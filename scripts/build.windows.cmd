@@ -1,5 +1,6 @@
 @echo off
 rem Build script for Windows.  Used in Github Actions for continuous integration checks.
+rem Note: "set Configuration={Release or Debug}" to switch the build type.
 
 rem Move to the root of the repo.
 pushd "%~dp0\.."
