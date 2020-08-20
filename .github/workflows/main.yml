@@ -46,7 +46,7 @@ jobs:
       shell: bash
       run: |
         sudo apt -y install python3-pip
-        pip3 install licenseheader
+        pip3 install licenseheaders
         scripts/update-python-license-headers
         # Note: licenseheader currently rewrites the line-endings from crlf to lf,
         # so we instruct git-diff to ignore those when considering changes.
