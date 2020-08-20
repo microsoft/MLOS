@@ -15,13 +15,11 @@ jobs:
   windows-msbuild-debug:
     name: Run debug msbuild on Windows
     runs-on: windows-2019
-
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-
-    # Runs a single command using the runners shell
+    # Runs a multiple commands using the runners shell
     - name: Run debug msbuild
       shell: cmd
       run: |
@@ -31,13 +29,8 @@ jobs:
   windows-msbuild-release:
     name: Run release msbuild on Windows
     runs-on: windows-2019
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-
-    # Runs a single command using the runners shell
     - name: Run release msbuild
       shell: cmd
       run: |
