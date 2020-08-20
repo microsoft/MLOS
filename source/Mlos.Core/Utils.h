@@ -26,7 +26,8 @@ namespace Core
 //
 // NOTES:
 //
-inline constexpr uint32_t lower_uint32(const uint64_t value) {
+inline constexpr uint32_t lower_uint32(const uint64_t value)
+{
     return static_cast<uint32_t>(value);
 }
 
