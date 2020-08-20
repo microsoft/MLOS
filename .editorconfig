@@ -37,3 +37,6 @@ end_of_line = lf
 
 [{CMakeLists.txt,*.cmake}]
 end_of_line = lf
+
+[*.yml]
+indent_size = 2
