@@ -36,3 +36,40 @@ jobs:
       run: |
         set Configuration=Release
         scripts\build.windows.cmd
+
+  python-licenseheader-checks:
+    name: Check for license header comments on python files
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run licenseheaders tool and check to see if it caused any changes
+      shell: bash
+      run: |
+        sudo apt -y install pip3
+        pip3 install licenseheader
+        scripts/update-python-license-headers
+        # Note: licenseheader currently rewrites the line-endings from crlf to lf,
+        # so we instruct git-diff to ignore those when considering changes.
+        git --no-pager diff --ignore-cr-at-eol --exit-code
+
+  python-lint-checks:
+    name: Run python lint checks
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run python checks
+      shell: bash
+      run: |
+        sudo apt -y install pylint
+        scripts/run-python-checks
+
+  python-unit-tests:
+    name:
+    runs-on: ubuntu-20.04
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run python unit tests
+      shell: bash
+      run: |
+        sudo apt -y install pylint
+        scripts/run-python-checks
