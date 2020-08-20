@@ -68,9 +68,9 @@ jobs:
     name: Run Python checks
     runs-on: ${{ matrix.os }}
     strategy:
-    matrix:
-      os: [windows-2019, ubuntu-20.04]
-      python-version: [3.7, 3.8]
+      matrix:
+        os: [windows-2019, ubuntu-20.04]
+        python-version: [3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
