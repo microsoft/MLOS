@@ -38,8 +38,8 @@ main(
     __in int argc,
     __in char* argv[])
 {
-    argc;
-    argv;
+    UNUSED(argc);
+    UNUSED(argv);
 
     // Create MlosContext.
     //

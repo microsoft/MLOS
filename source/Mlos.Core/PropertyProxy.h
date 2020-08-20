@@ -15,6 +15,7 @@
 
 #pragma once
 #include "BytePtr.h"
+#include "ObjectSerialization.h"
 
 namespace Mlos
 {

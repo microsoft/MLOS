@@ -6,10 +6,16 @@
 // @File: MlosPlatform.Std.inl
 //
 // Purpose:
-//      <description>
+//      Provides a platform specific implementation for functions declared in
+//      MlosPlatform.h
+//
+//      This file is expected to be included by the target application, not
+//      Mlos.Core.  It is simply provided there as a typical/common reference
+//      implementation.
 //
 // Notes:
-//      <special-instructions>
+//      Since these functions need to be externally visible for Mlos.Core to
+//      link against, they should not be marked "inline".
 //
 //*********************************************************************
 

@@ -16,6 +16,7 @@
 #pragma once
 
 #include "BytePtr.h"
+#include "StringTypes.h"
 
 // Serialization methods classes.
 // CodeGen will create specialized function templates.
@@ -43,10 +44,10 @@ constexpr inline bool VerifyVariableData(
 {
     // Verify fixed size structure is no-op. Ignore the arguments.
     //
-    (void)object;
-    (void)objectOffset;
-    (void)totalDataSize;
-    (void)expectedDataOffset;
+    UNUSED(object);
+    UNUSED(objectOffset);
+    UNUSED(totalDataSize);
+    UNUSED(expectedDataOffset);
 
     return true;
 }

@@ -49,16 +49,24 @@
 typedef unsigned int HRESULT;
 typedef unsigned char byte;
 
+// Ignore some SAL annotations in Linux
+
 #define _Check_return_
+#define _Out_
+#define __in
+#define _In_
+#define _In_z_
+
 #define SUCCEEDED(x) (x >= 0)
 #define FAILED(x) (x < 0)
 #define S_OK 0
 #define S_FALSE 1
-#define _Out_
 #define E_OUTOFMEMORY (-ENOMEM)
 #define E_NOT_SET (-ENOENT)
 
 #endif
+
+#define UNUSED(x) (void)x
 
 #include "MlosPlatform.h"
 
