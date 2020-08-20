@@ -20,9 +20,9 @@
 
 // Include Mlos.UnitTest codegen files.
 //
-#include "Mlos.UnitTest\SettingsProvider_gen_base.h"
-#include "Mlos.UnitTest\SettingsProvider_gen_callbacks.h"
-#include "Mlos.UnitTest\SettingsProvider_gen_dispatch.h"
+#include "Mlos.UnitTest/SettingsProvider_gen_base.h"
+#include "Mlos.UnitTest/SettingsProvider_gen_callbacks.h"
+#include "Mlos.UnitTest/SettingsProvider_gen_dispatch.h"
 
 // Base indexes for all included dispatch tables.
 //

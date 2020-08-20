@@ -15,6 +15,11 @@
 
 #include "stdafx.h"
 
+// Since they are not inlined, include the MlosPlatform.Std definitions only
+// once in the project to prevent duplicate definition warnings.
+//
+#include "MlosPlatform.Std.inl"
+
 #pragma warning(push)
 #pragma warning(disable: 4996 4251 4275 4244)
 #include "gtest/gtest.h"

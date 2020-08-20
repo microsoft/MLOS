@@ -30,7 +30,6 @@
 // Mlos.Core.
 //
 #include "Mlos.Core.h"
-#include "MlosPlatform.Std.inl"
 
 // Global dispatch table.
 //

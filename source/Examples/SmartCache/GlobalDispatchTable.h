@@ -17,9 +17,9 @@
 
 // Include SmartCache codegen files.
 //
-#include "SmartCache\SettingsProvider_gen_base.h"
-#include "SmartCache\SettingsProvider_gen_callbacks.h"
-#include "SmartCache\SettingsProvider_gen_dispatch.h"
+#include "SmartCache/SettingsProvider_gen_base.h"
+#include "SmartCache/SettingsProvider_gen_callbacks.h"
+#include "SmartCache/SettingsProvider_gen_dispatch.h"
 
 // Base indexes for all included dispatch tables.
 //
