@@ -1,3 +1,6 @@
+:: Copyright (c) Microsoft Corporation.
+:: Licensed under the MIT License.
+
 @echo off
 rem Build script for Windows.  Used in Github Actions for continuous integration checks.
 rem Note: "set Configuration={Release or Debug}" to switch the build type.
@@ -15,4 +18,6 @@ rem Build all .vcxproj and .csproj files listed in the various dirs.proj files.
 rem Note: This also includes running unit tests.
 msbuild /m /r dirs.proj
 
+popd
+@echo on
 exit /B %ERRORLEVEL%

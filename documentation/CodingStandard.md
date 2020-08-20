@@ -1,6 +1,6 @@
 # MLOS Coding Standards
 
-MLOS uses and supports multiple languages.  Here we document the coding styles and standards we attempt to adhere to.
+MLOS uses and supports multiple languages.  Here we document the coding styles and standards we attempt to adhere to and the tools we use to achieve that.
 
 ## C++
 
@@ -28,26 +28,50 @@ We use [`pylint`](https://pypi.org/project/pylint/) for Python code to mostly fo
 
 To run it locally, issues the following commands:
 
-```shell
-# One time install of pylint tool
-pip install pylint
-```
+1. One time instal of the `pylint` tool:
 
-```shell
-scripts/run-python-checks
-```
+    ```shell
+    pip install pylint
+    ```
+
+2. Followed by:
+
+    - Linux:
+
+        ```sh
+        scripts/run-python-checks.sh
+        ```
+
+    - Windows:
+
+        ```cmd
+        scripts\run-python-checks.cmd
+        ```
 
 We also use [`licenseheaders`](https://pypi.org/project/licenseheaders/) to add ensure license headers are added to `.py` files.
 
 To run it locally, issues the following commands:
 
-```shell
-# One time install of licenseheaders tool
-pip install licenseheaders
-```
+1. One time install of the `licenseheaders` tool:
 
-```shell
-scripts/update-python-license-headers
-```
+    ```shell
+    pip install licenseheaders
+    ```
+
+2. Followed by:
+
+    - Linux:
+
+        ```sh
+        scripts/update-python-license-headers.sh
+        ```
+
+    - Windows:
+
+        ```cmd
+        scripts\update-python-license-headers.cmd
+        ```
 
 > Note: Currently this has issues with conflicting cross-platform line-ending styles.
+>
+> Use `git diff --ignore-cr-at-eol` to identify the differences.
