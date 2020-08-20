@@ -12,6 +12,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # Run the debug/retail msbuild jobs separately so they can be executed in parallel.
+
   windows-msbuild-debug:
     name: Run debug msbuild on Windows
     runs-on: windows-2019
@@ -37,38 +39,51 @@ jobs:
         set Configuration=Release
         scripts\build.windows.cmd
 
-  python-licenseheader-checks:
+  # The licenseheaders check depends on comparing the source tree, so we keep it in a
+  # separate pipeline to ensure it starts from a clean state.
+  # For simplicity, we only run this one on ubuntu.
+
+  python-licenseheaders-checks:
     name: Check for license header comments on python files
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install licenseheaders
     - name: Run licenseheaders tool and check to see if it caused any changes
       shell: bash
       run: |
-        sudo apt -y install python3-pip
-        pip3 install licenseheaders
         scripts/update-python-license-headers
-        # Note: licenseheader currently rewrites the line-endings from crlf to lf,
+        # Note: licenseheaders currently rewrites the line-endings from crlf to lf,
         # so we instruct git-diff to ignore those when considering changes.
         git --no-pager diff --ignore-cr-at-eol --exit-code
 
-  python-lint-checks:
-    name: Run python lint checks
-    runs-on: ubuntu-20.04
+  python-checks:
+    name: Run Python checks
+    runs-on: ${{ matrix.os }}
+    strategy:
+    matrix:
+      os: [windows-2019, ubuntu-20.04]
+      python-version: [3.7, 3.8]
     steps:
     - uses: actions/checkout@v2
-    - name: Run python checks
-      shell: bash
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
       run: |
-        sudo apt -y install pylint
-        scripts/run-python-checks
-
-#  python-unit-tests:
-#    name:
-#    runs-on: ubuntu-20.04
-#    steps:
-#    - uses: actions/checkout@v2
-#    - name: Run python unit tests
-#      shell: bash
-#      run: |
-#        # TODO:
+        python -m pip install --upgrade pip
+        pip install pylint
+        pip install -r source/Mlos.Python/requirements.txt
+    - name: Run pylint checks
+      run: pylint --rcfile source/.pylintrc source/Mlos.Python/mlos
+    - name: Run Python unit tests
+      working-directory: source/Mlos.Python
+      run: python -m unittest discover --verbose --locals --failfast
