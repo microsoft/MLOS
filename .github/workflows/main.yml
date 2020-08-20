@@ -59,7 +59,7 @@ jobs:
     - name: Run licenseheaders tool and check to see if it caused any changes
       shell: bash
       run: |
-        scripts/update-python-license-headers.cmd
+        scripts/update-python-license-headers.sh
         # Note: licenseheaders currently rewrites the line-endings from crlf to lf,
         # so we instruct git-diff to ignore those when considering changes.
         git --no-pager diff --ignore-cr-at-eol --exit-code
