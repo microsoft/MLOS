@@ -8,8 +8,11 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import \
+    HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import \
+    ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
 
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 import mlos.global_values as global_values
@@ -66,39 +69,34 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
             minimize=False
         )
 
-        expected_utility_function_values = [
-            prediction.mean - 3 * math.sqrt(prediction.variance)
-            for prediction in self.sample_predictions
-        ]
+        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
+        sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
 
+        prediction_df = self.sample_predictions.get_dataframe()
+        expected_utility_function_values = prediction_df[sample_mean_col] - 3 * prediction_df[sample_var_col].apply('sqrt')
         utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
         for expected, actual in zip(expected_utility_function_values, utility_function_values):
-            self.assertTrue(expected == actual)
+            self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))
 
     def test_random_function_configs(self):
         for _ in range(100):
             utility_function_config_point = ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE.random()
-            utility_function_config = ConfidenceBoundUtilityFunctionConfig.create_from_config_point(utility_function_config_point)
+            utility_function_config = ConfidenceBoundUtilityFunctionConfig.create_from_config_point(
+                utility_function_config_point)
             utility_function = ConfidenceBoundUtilityFunction(
                 function_config=utility_function_config,
                 surrogate_model=self.model,
                 minimize=False
             )
 
+            sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
+            sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
+
             sign = -1 if utility_function_config.utility_function_name == 'lower_confidence_bound' else 1
-            expected_utility_function_values = [
-                prediction.mean + sign * utility_function_config.num_standard_deviations * math.sqrt(prediction.variance)
-                for prediction in self.sample_predictions
-            ]
-
+            prediction_df = self.sample_predictions.get_dataframe()
+            expected_utility_function_values = prediction_df[sample_mean_col] + \
+                                               sign * utility_function_config.num_standard_deviations * prediction_df[sample_var_col].apply('sqrt')
             utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
+
             for expected, actual in zip(expected_utility_function_values, utility_function_values):
-                self.assertTrue(expected == actual)
-
-
-
-
-
-
-
-
+                self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))

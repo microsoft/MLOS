@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import math
 
 from mlos.Logger import create_logger
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
 from mlos.Tracer import trace
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
 
 class ConfidenceBoundUtilityFunctionConfig:
     CONFIG_SPACE = SimpleHypergrid(
@@ -44,11 +44,7 @@ class ConfidenceBoundUtilityFunction:
         self.config = function_config
         self.minimize = minimize
         self._sign = 1 if not minimize else -1
-        if self.config.utility_function_name == "lower_confidence_bound":
-            self._utility_function_implementation = self.lower_confidence_bound
-        elif self.config.utility_function_name == "upper_confidence_bound":
-            self._utility_function_implementation = self.upper_confidence_bound
-        else:
+        if self.config.utility_function_name not in ("lower_confidence_bound", "upper_confidence_bound"):
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
         self.surrogate_model = surrogate_model
@@ -56,19 +52,20 @@ class ConfidenceBoundUtilityFunction:
     @trace()
     def __call__(self, feature_values_pandas_frame):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
+
+        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
+        sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
+
         predictions = self.surrogate_model.predict(feature_values_pandas_frame)
+        predictions_df = predictions.get_dataframe()
 
-        # If no prediction was possible, we return the value of utility function to be -infinity
-        # TODO: this might not be desirable - consider alternative approaches.
-        utility_function_values = [
-            self._sign * self._utility_function_implementation(prediction)
-            if prediction is not None else -math.inf
-            for prediction in predictions
-        ]
+        if self.config.utility_function_name == "lower_confidence_bound":
+            utility_function_values = self._sign * (
+                predictions_df[sample_mean_col] - self.config.num_standard_deviations * predictions_df[sample_var_col] ** 0.5)
+        elif self.config.utility_function_name == "upper_confidence_bound":
+            utility_function_values = self._sign * (
+                predictions_df[sample_mean_col] + self.config.num_standard_deviations * predictions_df[sample_var_col] ** 0.5)
+        else:
+            raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
+
         return utility_function_values
-
-    def lower_confidence_bound(self, prediction):
-        return prediction.mean - prediction.standard_deviation * self.config.num_standard_deviations
-
-    def upper_confidence_bound(self, prediction):
-        return prediction.mean + prediction.standard_deviation * self.config.num_standard_deviations

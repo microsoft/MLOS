@@ -122,7 +122,6 @@ class TestBayesianOptimizer(unittest.TestCase):
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
         global_values.tracer.clear_events()
 
-    @unittest.skip(reason="Takes a while and it just ran. TODO: unskip.")
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
@@ -172,7 +171,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         self.logger.info(f"Optimum: {bayesian_optimizer.optimum()}")
 
-
+    @unittest.skip(reason="Takes a while and it just ran. TODO: unskip.")
     def test_hierarchical_quadratic_cold_start(self):
 
         output_space = SimpleHypergrid(
@@ -211,7 +210,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             self.logger.info(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
 
-
+    @unittest.skip(reason="Takes a while and it just ran. TODO: unskip.")
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
         output_space = SimpleHypergrid(
