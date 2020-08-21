@@ -15,6 +15,7 @@ from mlos.Tracer import Tracer
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
 from mlos.SynthethicFunctions.sample_functions import quadratic
@@ -101,7 +102,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         bayesian_optimizer.register(input_values_dataframe, output_values_dataframe)
 
         num_guided_samples = 2
-        for i in range(num_guided_samples):
+        for _ in range(num_guided_samples):
             # Suggest the parameters
             suggested_params = bayesian_optimizer.suggest()
             suggested_params_dict = suggested_params.to_dict()

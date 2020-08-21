@@ -92,7 +92,8 @@ class RandomSearchOptimizer:
         feature_values_dataframe = pd.DataFrame(data_dict)
 
         utility_function_values = self.utility_function(feature_values_dataframe)
-        index_of_max_value = utility_function_values.index(max(utility_function_values))
+        num_utility_function_values = len(utility_function_values)
+        index_of_max_value = utility_function_values.argmax() if num_utility_function_values > 0 else 0
         config_to_suggest = candidate_configs[index_of_max_value]
         self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
         return config_to_suggest

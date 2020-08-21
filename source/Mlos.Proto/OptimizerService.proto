@@ -36,7 +36,7 @@ message CreateOptimizerRequest
 {
     OptimizationProblem OptimizationProblem = 1;
     string OptimizerConfigName = 2;
-    string OptimizerConfig = 3; 
+    string OptimizerConfig = 3;
 };
 
 
@@ -58,7 +58,7 @@ message RegisterObservationRequest
     Observation Observation = 2;
 };
 
-// A representation of an optimization problem. 
+// A representation of an optimization problem.
 //
 message OptimizationProblem
 {
@@ -81,7 +81,7 @@ message OptimizerInfo
 {
     OptimizerHandle OptimizerHandle = 1;
     string OptimizerConfigJsonString = 2;
-    OptimizationProblem OptimizationProblem = 3; 
+    OptimizationProblem OptimizationProblem = 3;
 };
 
 // A list of OptimizerInfo messages.
@@ -125,22 +125,7 @@ message Context
 message PredictRequest
 {
     OptimizerHandle OptimizerHandle = 1;
-    Features Features = 2;    
-};
-
-// Serialized response to the PredictRequest
-// 
-message PredictResponse
-{
-    ObjectivePredictions ObjectivePredictions = 1;
-}
-
-// Serialized objective value predictions for given features.
-//
-message ObjectivePredictions
-{
-    Features Features = 1;
-    repeated ObjectiveValuePrediction Predictions = 2;
+    Features Features = 2;
 };
 
 // Representation of the ObjectiveValues.
@@ -156,21 +141,26 @@ message Hypergrid{
     string HypergridJsonString = 1;
 };
 
-// Representation of a single objective. 
+// Representation of a single objective.
 //
 message Objective {
     string Name = 1;
     bool Minimize = 2;
 };
 
-// Representation of a single objective value prediction.
+// Representation of an objective value prediction
 //
-message ObjectiveValuePrediction{
+message SingleObjectivePrediction
+{
     string ObjectiveName = 1;
-    double Mean = 2;
-    double Variance = 3;
-    double StandardDeviation = 4;
-    int32 ObservationCount = 5;
+    string PredictionDataframeJsonString = 2;
+};
+
+message PredictResponse
+{
+    // repeated for every objective (in a multi-objective case)
+    //
+    repeated SingleObjectivePrediction ObjectivePredictions = 1;
 };
 
 // A convenience message for optimizer functions that return nothing.

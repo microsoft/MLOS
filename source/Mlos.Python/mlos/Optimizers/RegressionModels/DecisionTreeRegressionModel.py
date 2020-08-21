@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 from enum import Enum
+from typing import List
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 
@@ -12,6 +13,19 @@ from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, Re
 from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
 from mlos.Tracer import trace
+
+
+class DecisionTreeRegressionModelPrediction(Prediction):
+    all_prediction_fields = Prediction.LegalColumnNames
+    OUTPUT_FIELDS: List[Prediction.LegalColumnNames] = [
+        all_prediction_fields.IS_VALID_INPUT,
+        all_prediction_fields.SAMPLE_MEAN,
+        all_prediction_fields.SAMPLE_VARIANCE,
+        all_prediction_fields.SAMPLE_SIZE]
+
+    @trace()
+    def __init__(self, objective_name: str):
+        super().__init__(objective_name=objective_name, predictor_outputs=DecisionTreeRegressionModelPrediction.OUTPUT_FIELDS)
 
 
 class DecisionTreeRegressionModelConfig(RegressionModelConfig):
@@ -78,7 +92,7 @@ class DecisionTreeRegressionModelConfig(RegressionModelConfig):
         max_leaf_nodes=0,
         min_impurity_decrease=0.0,
         ccp_alpha=0.0,
-        min_samples_to_fit=50,
+        min_samples_to_fit=10,
         n_new_samples_before_refit=10
     )
 
@@ -215,7 +229,9 @@ class DecisionTreeRegressionModel(RegressionModel):
 
         # These are used to compute the variance in predictions
         self._observations_per_leaf = dict()
-        self._predictions_per_leaf = dict()
+        self._mean_per_leaf = dict()
+        self._variance_per_leaf = dict()
+        self._count_per_leaf = dict()
 
         self.fitted = False
         self.num_observations_used_to_fit = 0
@@ -248,7 +264,6 @@ class DecisionTreeRegressionModel(RegressionModel):
 
         # Clean up state before fitting again
         self._observations_per_leaf = dict()
-        self._predictions_per_leaf = dict()
 
         self._regressor.fit(feature_values, target_values)
 
@@ -273,29 +288,61 @@ class DecisionTreeRegressionModel(RegressionModel):
 
             # TODO: note that if we change the tree to fit a linear regression at each leaf, these predictions would have
             # to be computed in the .predict() function, though the slope and y-intersect could be computed here.
-            prediction = Prediction(target_name=self.target_dimension_names[0], mean=leaf_mean, variance=leaf_variance, count=len(observations_at_leaf))
-            self._predictions_per_leaf[node_index] = prediction
-
+            self._mean_per_leaf[node_index] = leaf_mean
+            self._variance_per_leaf[node_index] = leaf_variance
+            self._count_per_leaf[node_index] = len(observations_at_leaf)
         self.fitted = True
 
     @trace()
     def predict(self, feature_values_pandas_frame):
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
-        invalid_prediction = Prediction(target_name=self.target_dimension_names[0], valid=False)
-        predictions = [invalid_prediction for _ in range(len(feature_values_pandas_frame.index))]
+        # dataframe column shortcuts
+        is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
+        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
+        sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
+        sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
+
+        # init prediction object
+        predictions = DecisionTreeRegressionModelPrediction(objective_name=self.target_dimension_names[0])
+        prediction_dataframe = predictions.get_dataframe()
+
+        # default to all invalid inputs / modified below as appropriate
+        prediction_dataframe[is_valid_input_col] = False
 
         if self.fitted:
+            input_dimension_names = self.input_dimension_names
             feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
             features_df = feature_values_pandas_frame[self.input_dimension_names]
-            features_df = features_df[features_df.notnull().all(axis=1)]
 
-            for index, row in features_df.iterrows():
-                row_point = Point(**{dim_name: row[dim_name] for dim_name in self.input_dimension_names})
-                if row_point in self._input_space_adapter:
-                    leaf_node_index = self._regressor.apply([row])[0]
-                    prediction = self._predictions_per_leaf[leaf_node_index]
-                    predictions[index] = prediction
+            # find any feature row with missing values; no prediction will be possible for such rows
+            is_valid_input = features_df.notnull().all(axis=1)
+            # find any feature row not in the CONFIG_SPACE; no prediction is possible for such rows
+            is_row_in_config_space = features_df.apply(
+                lambda row: Point(**{dim_name: row[i] for i, dim_name in enumerate(input_dimension_names)}) in self._input_space_adapter,
+                axis=1
+            )
+            # create boolean series indicating if prediction is possible for each feature row; save this to output prediction_dataframe
+            is_prediction_possible = np.logical_and(is_valid_input, is_row_in_config_space)
+            prediction_dataframe[is_valid_input_col] = is_prediction_possible
+
+            if is_prediction_possible.any():
+                valid_features = features_df.loc[is_prediction_possible]
+                # use decision tree regressor to know what leaf each valid feature row belongs
+                valid_features['leaf_node_index'] = self._regressor.apply(valid_features.to_numpy())
+
+                # set prediction data for all rows assigned to leaf_node_index
+                valid_features[sample_mean_col] = valid_features['leaf_node_index'].map(self._mean_per_leaf)
+                valid_features[sample_var_col] = valid_features['leaf_node_index'].map(self._variance_per_leaf)
+                valid_features[sample_size_col] = valid_features['leaf_node_index'].map(self._count_per_leaf)
+
+                # use valid_features to set all prediction values
+                for prediction_field in [sample_mean_col, sample_var_col, sample_size_col]:
+                    prediction_dataframe.loc[is_prediction_possible, prediction_field] = valid_features[prediction_field]
+
+            # validate prediction_dataframe contains this model's expected columns
+            predictions.set_dataframe(prediction_dataframe)
         else:
-            self.logger.debug("Decision tree has not been fitted. Returning invalid predictions.")
+            # We haven't been fitted so we return a lot of empty predictions
+            self.logger.debug("Decision tree has not been fitted. Returning prediction dataframe with NaN predictions.")
         return predictions

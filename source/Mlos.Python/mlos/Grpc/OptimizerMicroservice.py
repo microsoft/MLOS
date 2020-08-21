@@ -90,21 +90,21 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         optimizer = self._get_optimizer(request)
         features_dict = json.loads(request.Features.FeaturesJsonString)
         features_df = pd.DataFrame(features_dict)
+
         predictions = optimizer.predict(features_df)
 
+        if not isinstance(predictions, list):
+            # a single objective optimization problem is executing, so create list of one prediction
+            predictions = [predictions]
+
         response = OptimizerService_pb2.PredictResponse(
-            ObjectivePredictions=OptimizerService_pb2.ObjectivePredictions(
-                Features=OptimizerService_pb2.Features(FeaturesJsonString=request.Features.FeaturesJsonString),
-                Predictions=[
-                    OptimizerService_pb2.ObjectiveValuePrediction(
-                        ObjectiveName=prediction.target_name,
-                        Mean=prediction.mean,
-                        Variance=prediction.variance,
-                        StandardDeviation=prediction.standard_deviation,
-                        ObservationCount=prediction.count
-                    ) for prediction in predictions
-                ]
-            )
+            ObjectivePredictions=[
+                OptimizerService_pb2.SingleObjectivePrediction(
+                    ObjectiveName=prediction.objective_name,
+                    PredictionDataframeJsonString=prediction.dataframe_to_json()
+                )
+                for prediction in predictions
+            ]
         )
 
         return response
