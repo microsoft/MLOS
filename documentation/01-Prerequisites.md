@@ -152,14 +152,14 @@ Be sure to include support for .Net Core, C++, CMake
 1. Install Python 3.x
 
     ```sh
-    apt -y install python3 python3-pip
+    sudo apt -y install python3 python3-pip
     ```
 
 2. Install MLOS Python dependencies:
 
     ```sh
     # Also add some dependencies needed by some of the pip modules
-    apt -y install build-essential libfreetype-dev unixodbc-dev
+    sudo apt -y install build-essential libfreetype-dev unixodbc-dev
     ```
 
     ```sh
