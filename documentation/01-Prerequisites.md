@@ -9,6 +9,9 @@ These are one-time setup instructions that should be executed prior to following
 - [Install build tools](#install-build-tools)
   - [Linux](#linux-build-tools)
   - [Windows](#windows-build-tools)
+- [Install Python Dependencies](#install-python-dependencies)
+  - [Linux](#linux-python-install)
+  - [Windows](#windows-python-install)
 - [Install Docker](#install-docker)
   - [Linux](#linux-docker-install)
   - [Windows](#windows-docker-install)
@@ -118,7 +121,6 @@ There are several build tools install paths to choose from on Windows.
     choco install -y dotnetcore-runtime.install --params="Skip32Bit"
     choco install -y dotnetcore dotnetcore-sdk
     choco install -y visualstudio2019buildtools visualstudio2019-workload-netcorebuildtools visualstudio2019-workload-vctools
-    choco install -y python --version=3.7.8
     ```
 
 2. Install an editor
@@ -142,6 +144,45 @@ Download and install Visual Studio 2019 (free) Community Edition:
 <https://visualstudio.microsoft.com/vs/community/>
 
 Be sure to include support for .Net Core, C++, CMake
+
+## Install Python Dependencies
+
+### Linux Python Install
+
+1. Install Python 3.x
+
+    ```sh
+    sudo apt -y install python3 python3-pip
+    ```
+
+2. Install MLOS Python dependencies:
+
+    ```sh
+    # Also add some dependencies needed by some of the pip modules
+    sudo apt -y install build-essential libfreetype-dev unixodbc-dev
+    ```
+
+    ```sh
+    pip3 install -r source/Mlos.Python/requirements.txt
+    ```
+
+### Windows Python Install
+
+#### Using Chocolatey
+
+0. See above for instructions on installing Chocolatey.
+
+1. Install Python
+
+    ```shell
+    choco install -y python --version=3.7.8
+    ```
+
+2. Install MLOS Python dependencies:
+
+    ```shell
+    pip install -r source\Mlos.Python\requirements.txt
+    ```
 
 ## Install Docker
 
