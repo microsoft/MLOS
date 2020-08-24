@@ -4,7 +4,6 @@
 #
 import math
 import random
-from typing import List
 
 import numpy as np
 import pandas as pd
@@ -16,18 +15,6 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeRegressionModelConfig
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
-
-
-class HomogeneousRandomForestRegressionModelPrediction(Prediction):
-    all_prediction_fields = Prediction.LegalColumnNames
-    OUTPUT_FIELDS: List[Prediction.LegalColumnNames] = [
-        all_prediction_fields.IS_VALID_INPUT,
-        all_prediction_fields.SAMPLE_MEAN,
-        all_prediction_fields.SAMPLE_VARIANCE,
-        all_prediction_fields.SAMPLE_SIZE]
-
-    def __init__(self, objective_name: str):
-        super().__init__(objective_name=objective_name, predictor_outputs=HomogeneousRandomForestRegressionModelPrediction.OUTPUT_FIELDS)
 
 
 class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
@@ -85,6 +72,13 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
     2. Each decision tree receives a subset of features and a subset of rows.
 
     """
+
+    _PREDICTOR_OUTPUT_COLUMNS = [
+        Prediction.LegalColumnNames.IS_VALID_INPUT,
+        Prediction.LegalColumnNames.SAMPLE_MEAN,
+        Prediction.LegalColumnNames.SAMPLE_VARIANCE,
+        Prediction.LegalColumnNames.SAMPLE_SIZE
+    ]
 
     @trace()
     def __init__(
@@ -259,7 +253,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
 
         # initialize return predictions
-        aggregate_predictions = HomogeneousRandomForestRegressionModelPrediction(objective_name=self.target_dimension_names[0])
+        aggregate_predictions = Prediction(objective_name=self.target_dimension_names[0], predictor_outputs=self._PREDICTOR_OUTPUT_COLUMNS)
         aggregate_prediction_df = aggregate_predictions.get_dataframe()
 
         # default to all valid inputs / modified below as appropriate
@@ -294,7 +288,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         #   section: section: 4.3.2 for details
         all_predictions_df[sample_var_col] = all_predictions_df[sample_var_col_names_per_tree].mean(axis=1) \
                                              + (all_predictions_df[sample_mean_col_names_per_tree] ** 2).mean(axis=1) \
-                                             - all_predictions_df[sample_mean_col]
+                                             - all_predictions_df[sample_mean_col] ** 2
         all_predictions_df[sample_size_col] = num_prediction_dataframes
         aggregate_prediction_df = all_predictions_df[[is_valid_input_col, sample_mean_col, sample_var_col, sample_size_col]]
 

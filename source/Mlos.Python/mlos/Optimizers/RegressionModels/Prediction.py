@@ -6,7 +6,6 @@ from enum import Enum
 from typing import List
 import json
 import pandas as pd
-from mlos.Tracer import trace
 
 class Prediction:
     """ General Prediction class used to capture output from surrogate model .predict() methods
@@ -44,11 +43,25 @@ class Prediction:
         SAMPLE_VARIANCE = 'sample_variance'
         SAMPLE_SIZE = 'sample_size'
 
-    @trace()
+    @classmethod
+    def create_prediction_from_dataframe(cls, objective_name: str, dataframe: pd.DataFrame):
+        assert objective_name is not None
+        predictor_outputs = [
+            Prediction.LegalColumnNames(column_name)
+            for column_name
+            in dataframe.columns.values
+        ]
+        return Prediction(
+            objective_name=objective_name,
+            predictor_outputs=predictor_outputs,
+            dataframe=dataframe
+        )
+
     def __init__(
             self,
             objective_name: str,
             predictor_outputs: List[LegalColumnNames],
+            dataframe: pd.DataFrame = None,
             num_head_rows_to_print: int = 1
     ):
         self.objective_name = objective_name
@@ -62,7 +75,12 @@ class Prediction:
 
         # expect dataframe column names to be values from Enum above
         self.expected_column_names = [output_enum.value for output_enum in self.predictor_outputs]
-        self._dataframe = pd.DataFrame(columns=self.expected_column_names)
+
+        self._dataframe = None
+        if dataframe is None:
+            self._dataframe = pd.DataFrame(columns=self.expected_column_names)
+        else:
+            self.set_dataframe(dataframe)
 
     def set_dataframe(self, dataframe: pd.DataFrame):
         # validate passed columns exist in LegalColumnNames enum
@@ -84,7 +102,10 @@ class Prediction:
     def get_dataframe(self):
         return self._dataframe
 
-    @trace()
+    @classmethod
+    def dataframe_from_json(cls, json_string):
+        return pd.DataFrame.from_dict(json.loads(json_string))
+
     def dataframe_to_json(self):
         return json.dumps(self.get_dataframe().to_dict(orient='list'))
 

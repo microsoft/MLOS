@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import numpy as np
 from mlos.Logger import create_logger
-from mlos.Spaces import CategoricalDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
@@ -18,7 +19,8 @@ class ExperimentDesignerConfig:
         name='experiment_designer_config',
         dimensions=[
             CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__]),
-            CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
+            CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__]),
+            ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
         subgrid=ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE,
@@ -32,7 +34,8 @@ class ExperimentDesignerConfig:
         utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
         confidence_bound_utility_function_config=ConfidenceBoundUtilityFunctionConfig.DEFAULT,
-        random_search_optimizer_config=RandomSearchOptimizerConfig.DEFAULT
+        random_search_optimizer_config=RandomSearchOptimizerConfig.DEFAULT,
+        fraction_random_suggestions=0.5
     )
 
 
@@ -68,6 +71,7 @@ class ExperimentDesigner:
         self.config = designer_config
         self.optimization_problem = optimization_problem
         self.surrogate_model = surrogate_model
+        self.rng = np.random.Generator(np.random.PCG64())
 
         assert self.config.utility_function_implementation == ConfidenceBoundUtilityFunction.__name__
         self.utility_function = ConfidenceBoundUtilityFunction(
@@ -87,6 +91,9 @@ class ExperimentDesigner:
 
     def suggest(self, context_values_dataframe=None, random=False):
         self.logger.debug(f"Suggest(random={random})")
+        random_number = self.rng.random()
+        override_random = random_number < self.config.fraction_random_suggestions
+        random = random or override_random
         if random:
             return self.optimization_problem.parameter_space.random()
         return self.numeric_optimizer.suggest(context_values_dataframe)

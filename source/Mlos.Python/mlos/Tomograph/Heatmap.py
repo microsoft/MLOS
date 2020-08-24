@@ -51,6 +51,7 @@ class Heatmap:
         :param new_values:
         :return:
         """
+        new_values = np.nan_to_num(x=new_values, copy=False, nan=0)
         num_new_rows = new_values.shape[0]
         num_new_cols = new_values.shape[1]
 

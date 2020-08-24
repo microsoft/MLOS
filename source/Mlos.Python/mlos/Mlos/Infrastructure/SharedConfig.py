@@ -47,17 +47,22 @@ class SharedConfig:
         :return:
         """
 
+        current_config = None
         # Note: this will throw if the component is not allowed - no need to throw explicitly for now
-        with self._configuration_locks[component_type]:
-            current_config = self._current_configurations.get(component_type, None)
+        if component_type in self._configuration_locks:
+            with self._configuration_locks[component_type]:
+                current_config = self._current_configurations.get(component_type, None)
 
         if current_config is not None:
             return current_config
-        return self._default_configurations[component_type]
+        return self._default_configurations.get(component_type, None)
 
     def get_enabled_message_types(self, component_type):
-        with self._message_type_locks[component_type]:
-            return self._enabled_message_types.get(component_type, set())
+        if component_type in self._message_type_locks:
+            with self._message_type_locks[component_type]:
+                return self._enabled_message_types.get(component_type, set())
+        else:
+            return set()
 
     def is_message_type_enabled(self, component_type, message_type):
         if component_type in self._enabled_message_types:

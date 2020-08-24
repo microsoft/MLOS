@@ -181,17 +181,19 @@ class ModelTomograph:
 
                 features_df = self._create_features_dataframe(x_dim, y_dim, point)
                 predictions = self.optimizer.predict(feature_values_pandas_frame=features_df, t=time)
-                predicted_mean = np.array([prediction.mean for prediction in predictions])
+                predictions_df = predictions.get_dataframe()
+                if not predictions_df.empty:
+                    predicted_mean = predictions_df['sample_mean'].to_numpy()
 
-                # To plot the values we need to reshape them back to the resolution.
-                #
-                reshaped_mean = predicted_mean.reshape((current_y_resolution, current_x_resolution))
+                    # To plot the values we need to reshape them back to the resolution.
+                    #
+                    reshaped_mean = predicted_mean.reshape((current_y_resolution, current_x_resolution))
 
-                self._heatmaps_grid[row][col].update_values(new_values=reshaped_mean)
+                    self._heatmaps_grid[row][col].update_values(new_values=reshaped_mean)
 
-                # Lastly: remember min and max for plotting
-                #
-                self._update_known_extremes(current_min=np.min(predicted_mean), current_max=np.max(predicted_mean))
+                    # Lastly: remember min and max for plotting
+                    #
+                    self._update_known_extremes(current_min=np.min(predicted_mean), current_max=np.max(predicted_mean))
 
     def _create_figure_and_axes(self):
         if self._figure is not None:

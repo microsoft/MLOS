@@ -9,12 +9,12 @@ class LruCacheConfig:
     CONFIG_SPACE = SimpleHypergrid(
         name='lru_cache_config',
         dimensions=[
-            DiscreteDimension('cache_size', min=1, max=2 ** 10)
+            DiscreteDimension('cache_size', min=1, max=2 ** 12)
         ]
     )
 
     DEFAULT = Point(
-        cache_size=10
+        cache_size=100
     )
 
 class LruCache(XruCache):
@@ -28,12 +28,14 @@ class LruCache(XruCache):
 
     """
 
-    def __init__(self, max_size):
-        XruCache.__init__(self, max_size=max_size)
+    def __init__(self, max_size, logger):
+        XruCache.__init__(self, max_size=max_size, logger=logger)
 
     def evict(self):
         removed_node = self._list.remove_at_tail()
         evicted_entry = removed_node.cache_entry
         del self._dict[removed_node.cache_entry.key]
         self._count -= 1
+        if not all(node.cache_entry.key in self._dict for node in self._list):
+            assert False
         return evicted_entry
