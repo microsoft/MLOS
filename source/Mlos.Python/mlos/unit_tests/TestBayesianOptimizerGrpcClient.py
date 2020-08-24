@@ -116,11 +116,11 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
             params_dict = params.to_dict()
             features_df = pd.DataFrame(params_dict, index=[0])
 
-            predictions = optimizer.predict(features_df)
-            only_prediction = predictions[0].get_dataframe()
+            prediction = optimizer.predict(features_df)
+            prediction_df = prediction.get_dataframe()
 
             y = quadratic(**params_dict)
-            print(f"Params: {params}, Actual: {y}, Prediction: {str(only_prediction)}")
+            print(f"Params: {params}, Actual: {y}, Prediction: {str(prediction_df)}")
 
             objectives_df = pd.DataFrame({'y': [y]})
             optimizer.register(features_df, objectives_df)

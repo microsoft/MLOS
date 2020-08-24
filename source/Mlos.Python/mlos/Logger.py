@@ -51,20 +51,20 @@ def create_logger(logger_name, create_console_handler=True, create_file_handler=
 
     if create_console_handler:
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO)
+        console_handler.setLevel(logging_level)
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
 
     if create_file_handler:
         file_handler = logging.FileHandler(logger_name + ".log")
-        file_handler.setLevel(logging.INFO)
+        file_handler.setLevel(logging_level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
 
     buffering_handler = None
     if create_buffering_handler:
         buffering_handler = BufferingHandler()
-        buffering_handler.setLevel(logging.INFO)
+        buffering_handler.setLevel(logging_level)
         buffering_handler.setFormatter(formatter)
         logger.addHandler(buffering_handler)
 

@@ -3,14 +3,17 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+from contextlib import contextmanager
 import json
 import logging
+import multiprocessing
 import pandas as pd
 
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerInfo, OptimizerHandle, OptimizerList
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
 
 
 class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
@@ -24,9 +27,29 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         self._next_optimizer_id = 0
         self._optimizers_by_id = dict()
 
+        self._lock_manager = multiprocessing.Manager()
+        self._optimizer_locks_by_optimizer_id = dict()
+
     def get_next_optimizer_id(self):
         self._next_optimizer_id += 1
         return str(self._next_optimizer_id - 1)
+
+    @contextmanager
+    def exclusive_optimizer(self, request):
+        """ Context manager to acquire the optimizer lock and yield the corresponding optimizer.
+
+        This makes sure that:
+            1. The lock is acquired before any operation on the optimizer commences.
+            2. The lock is released even if exceptions are flying.
+
+
+        :param optimizer_id:
+        :return:
+        :raises: KeyError if the optimizer_id was not found.
+        """
+        optimizer_id = request.OptimizerHandle.Id
+        with self._optimizer_locks_by_optimizer_id[optimizer_id]:
+            yield self._optimizers_by_id[optimizer_id]
 
     def ListExistingOptimizers(self, request: Empty, context):
         optimizers_info = []
@@ -58,15 +81,23 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         )
 
         optimizer_id = self.get_next_optimizer_id()
-        self._optimizers_by_id[optimizer_id] = optimizer
+
+        # To avoid a race condition we acquire the lock before inserting the lock and the optimizer into their respective
+        # dictionaries. Otherwise we could end up with a situation where a lock is in the dictionary, but the optimizer
+        # is not.
+        optimizer_lock = self._lock_manager.RLock()
+        with optimizer_lock:
+            self._optimizer_locks_by_optimizer_id[optimizer_id] = optimizer_lock
+            self._optimizers_by_id[optimizer_id] = optimizer
         logging.info(f"Created optimizer {optimizer_id}.")
         return OptimizerService_pb2.OptimizerHandle(Id=optimizer_id)
 
     def Suggest(self, request, context): # pylint: disable=unused-argument
         # TODO: return an error if optimizer not found
         #
-        optimizer = self._get_optimizer(request)
-        suggested_params = optimizer.suggest(random=request.Random, context=request.Context)
+        with self.exclusive_optimizer(request) as optimizer:
+            suggested_params = optimizer.suggest(random=request.Random, context=request.Context)
+
         return OptimizerService_pb2.ConfigurationParameters(
             ParametersJsonString=json.dumps(suggested_params.to_dict())
         )
@@ -75,40 +106,32 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         # TODO: add an API to register observations in bulk.
         # TODO: stop ignoring context
         #
-        optimizer = self._get_optimizer(request)
         feature_values = json.loads(request.Observation.Features.FeaturesJsonString)
         feature_values_dataframe = pd.DataFrame(feature_values, index=[0])
 
         objective_values = json.loads(request.Observation.ObjectiveValues.ObjectiveValuesJsonString)
         objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
 
-        optimizer.register(feature_values_dataframe, objective_values_dataframe)
+        with self.exclusive_optimizer(request) as optimizer:
+            optimizer.register(feature_values_dataframe, objective_values_dataframe)
 
         return Empty()
 
     def Predict(self, request, context): # pylint: disable=unused-argument
-        optimizer = self._get_optimizer(request)
+
         features_dict = json.loads(request.Features.FeaturesJsonString)
         features_df = pd.DataFrame(features_dict)
-
-        predictions = optimizer.predict(features_df)
-
-        if not isinstance(predictions, list):
-            # a single objective optimization problem is executing, so create list of one prediction
-            predictions = [predictions]
+        with self.exclusive_optimizer(request) as optimizer:
+            prediction = optimizer.predict(features_df)
+        assert isinstance(prediction, Prediction)
 
         response = OptimizerService_pb2.PredictResponse(
             ObjectivePredictions=[
                 OptimizerService_pb2.SingleObjectivePrediction(
                     ObjectiveName=prediction.objective_name,
-                    PredictionDataframeJsonString=prediction.dataframe_to_json()
+                    PredictionDataFrameJsonString=prediction.dataframe_to_json()
                 )
-                for prediction in predictions
             ]
         )
 
         return response
-
-    def _get_optimizer(self, request):
-        # TODO: throw exceptions if invalid Id, or invalid Request
-        return self._optimizers_by_id[request.OptimizerHandle.Id]

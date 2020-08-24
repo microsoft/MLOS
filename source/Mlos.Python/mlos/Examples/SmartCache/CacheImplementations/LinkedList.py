@@ -13,6 +13,9 @@ class LinkedList:
     def __str__(self):
         return f"[{', '.join(str(node.cache_entry.key) for node in self)}]"
 
+    def __len__(self):
+        return len([element for element in self])
+
     def enumerate(self, reverse=False):
         current_node = self.head if not reverse else self.tail
 
@@ -29,20 +32,24 @@ class LinkedList:
 
         if self.head == node:
             self.head = node.next
-        else:
+        elif node.previous is not None:
             node.previous.next = node.next
+        else:
+            assert False
 
         if self.tail == node:
             self.tail = node.previous
-        else:
+        elif node.next is not None:
             node.next.previous = node.previous
+        else:
+            assert False
 
         node.next = None
         node.previous = None
         return node
 
     def insert_at_head(self, node):
-        node.previous = None
+        assert node.previous is None
         node.next = self.head
 
         if node.next is None:

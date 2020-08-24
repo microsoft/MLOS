@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 from enum import Enum
-from typing import List
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 
@@ -13,19 +12,6 @@ from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, Re
 from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
 from mlos.Tracer import trace
-
-
-class DecisionTreeRegressionModelPrediction(Prediction):
-    all_prediction_fields = Prediction.LegalColumnNames
-    OUTPUT_FIELDS: List[Prediction.LegalColumnNames] = [
-        all_prediction_fields.IS_VALID_INPUT,
-        all_prediction_fields.SAMPLE_MEAN,
-        all_prediction_fields.SAMPLE_VARIANCE,
-        all_prediction_fields.SAMPLE_SIZE]
-
-    @trace()
-    def __init__(self, objective_name: str):
-        super().__init__(objective_name=objective_name, predictor_outputs=DecisionTreeRegressionModelPrediction.OUTPUT_FIELDS)
 
 
 class DecisionTreeRegressionModelConfig(RegressionModelConfig):
@@ -188,6 +174,13 @@ class DecisionTreeRegressionModel(RegressionModel):
     * have a tree fit a linear model at each leaf.
     """
 
+    _PREDICTOR_OUTPUT_COLUMNS = [
+        Prediction.LegalColumnNames.IS_VALID_INPUT,
+        Prediction.LegalColumnNames.SAMPLE_MEAN,
+        Prediction.LegalColumnNames.SAMPLE_VARIANCE,
+        Prediction.LegalColumnNames.SAMPLE_SIZE
+    ]
+
     def __init__(
             self,
             model_config: DecisionTreeRegressionModelConfig,
@@ -304,7 +297,7 @@ class DecisionTreeRegressionModel(RegressionModel):
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
 
         # init prediction object
-        predictions = DecisionTreeRegressionModelPrediction(objective_name=self.target_dimension_names[0])
+        predictions = Prediction(objective_name=self.target_dimension_names[0], predictor_outputs=self._PREDICTOR_OUTPUT_COLUMNS)
         prediction_dataframe = predictions.get_dataframe()
 
         # default to all invalid inputs / modified below as appropriate

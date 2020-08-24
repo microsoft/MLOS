@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 import json
-import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Spaces import Point
@@ -85,34 +84,15 @@ class BayesianOptimizerProxy(OptimizerInterface):
         )
         prediction_response = self._optimizer_stub.Predict(prediction_request)
 
-        # create Prediction object(s) (one for each objective if multi-objective optimization) from the response
-        multi_objective_predictions = []
-        for single_objective_prediction in prediction_response.ObjectivePredictions:
-            objective_name = single_objective_prediction.ObjectiveName
-            predictions_dict = json.loads(single_objective_prediction.PredictionDataframeJsonString)
-            prediction_df = pd.DataFrame(predictions_dict)
+        # To be compliant with the OptimizerInterface, we need to recover a single Prediction object and return it.
+        #
+        objective_predictions_pb2 = prediction_response.ObjectivePredictions
+        assert len(objective_predictions_pb2) == 1
+        only_prediction_pb2 = objective_predictions_pb2[0]
+        objective_name = only_prediction_pb2.ObjectiveName
+        prediction_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
+        return Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=prediction_df)
 
-            # reverse lookup Prediction.PredictionSchema enums from discovered df column names
-            regressor_model_output_enums = []
-            for column_name in prediction_df.columns.values:
-                found_enum = Prediction.get_enum_by_column_name(column_name)
-                if found_enum is not None:
-                    regressor_model_output_enums.append(found_enum)
-
-            # confirm enum was found whose value is the column_name
-            num_output_enum = len(regressor_model_output_enums)
-            num_dataframe_columns = len(prediction_df.columns.values)
-            prediction_df_head = prediction_df.head(10)
-            assert num_output_enum == num_dataframe_columns, \
-                f'Failed to find >= 1 Prediction.PredictionSchema enum for dataframe.head(10) "{prediction_df_head}"'
-
-            # hydrate Prediction for this objective and add to multi_objective list
-            predictions = Prediction(objective_name=objective_name,
-                                     predictor_outputs=regressor_model_output_enums)
-            predictions.set_dataframe(prediction_df)
-
-            multi_objective_predictions.append(predictions)
-        return multi_objective_predictions
 
     def optimum(self, stay_focused=False):  # pylint: disable=unused-argument,no-self-use
         ...
