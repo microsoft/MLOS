@@ -12,12 +12,12 @@ class ConfidenceBoundUtilityFunctionConfig:
     CONFIG_SPACE = SimpleHypergrid(
         name="confidence_bound_utility_function_config",
         dimensions=[
-            CategoricalDimension(name="utility_function_name", values=["lower_confidence_bound", "upper_confidence_bound"]),
+            CategoricalDimension(name="utility_function_name", values=["lower_confidence_bound_on_improvement", "upper_confidence_bound_on_improvement"]),
             ContinuousDimension(name="num_standard_deviations", min=0, include_min=False, max=5)
         ]
     )
     DEFAULT = Point(
-        utility_function_name="lower_confidence_bound",
+        utility_function_name="upper_confidence_bound_on_improvement",
         num_standard_deviations=3
     )
 
@@ -44,7 +44,7 @@ class ConfidenceBoundUtilityFunction:
         self.config = function_config
         self.minimize = minimize
         self._sign = 1 if not minimize else -1
-        if self.config.utility_function_name not in ("lower_confidence_bound", "upper_confidence_bound"):
+        if self.config.utility_function_name not in ("lower_confidence_bound_on_improvement", "upper_confidence_bound_on_improvement"):
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
         self.surrogate_model = surrogate_model
@@ -59,12 +59,12 @@ class ConfidenceBoundUtilityFunction:
         predictions = self.surrogate_model.predict(feature_values_pandas_frame)
         predictions_df = predictions.get_dataframe()
 
-        if self.config.utility_function_name == "lower_confidence_bound":
-            utility_function_values = self._sign * (
-                predictions_df[sample_mean_col] - self.config.num_standard_deviations * predictions_df[sample_var_col] ** 0.5)
-        elif self.config.utility_function_name == "upper_confidence_bound":
-            utility_function_values = self._sign * (
-                predictions_df[sample_mean_col] + self.config.num_standard_deviations * predictions_df[sample_var_col] ** 0.5)
+        if self.config.utility_function_name == "lower_confidence_bound_on_improvement":
+            utility_function_values = predictions_df[sample_mean_col] * self._sign - \
+                                      (predictions_df[sample_var_col] ** 0.5) * self.config.num_standard_deviations
+        elif self.config.utility_function_name == "upper_confidence_bound_on_improvement":
+            utility_function_values = predictions_df[sample_mean_col] * self._sign + \
+                                      (predictions_df[sample_var_col] ** 0.5) * self.config.num_standard_deviations
         else:
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
