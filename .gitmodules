@@ -1,0 +1,9 @@
+[submodule "source/website/theme/ace-documentation"]
+	path = source/website/theme/ace-documentation
+	url = https://github.com/vantagedesign/ace-documentation.git
+[submodule "website/themes/dot"]
+	path = website/themes/dot
+	url = https://github.com/themefisher/dot.git
+[submodule "website/themes/book"]
+	path = website/themes/book
+	url = https://github.com/alex-shpak/hugo-book
