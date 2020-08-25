@@ -410,3 +410,4 @@ tools/
 source/Mlos.Proto/mlos/Grpc/OptimizerService.proto
 
 website/sphinx/_build/
+website/sphinx/api

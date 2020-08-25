@@ -16,7 +16,7 @@
 {%- if is_namespace %}
 {{- [pkgname, "namespace"] | join(" ") | e | heading }}
 {% else %}
-{{- pkgname | e | heading }}
+{{- [pkgname, "package"] | join(" ") | e | heading }}
 {% endif %}
 
 {%- if modulefirst and not is_namespace %}
@@ -31,7 +31,7 @@ Submodules
 {% else %}
 {%- for submodule in submodules %}
 {% if show_headings %}
-{{- submodule | e | heading(2) }}
+{{- [submodule, "module"] | join(" ") | e | heading(2) }}
 {% endif %}
 {{ automodule(submodule, automodule_options) }}
 {% endfor %}
