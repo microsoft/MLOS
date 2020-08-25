@@ -5,4 +5,4 @@ baseURL = "https://microsoft.github.io/MLOS/"
 
 [params]
   BookRepo = 'https://github.com/microsoft/MLOS'
-
+  BookSection = '*'
