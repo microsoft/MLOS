@@ -156,8 +156,8 @@ intersphinx_mapping = {
 
 def setup(app):
     # a copy button to copy snippet of code from the documentation
-    app.add_javascript('js/copybutton.js')
-    app.add_stylesheet("basic.css")
+    app.add_js_file('js/copybutton.js')
+    app.add_css_file("basic.css")
 
 
 # The following is used by sphinx.ext.linkcode to provide links to github

@@ -5,6 +5,6 @@ Welcome to MLOS
 
 .. toctree::
    :maxdepth: 2
-   :caption: Getting Started
+   :caption: API
 
-   quick_start
+   api/modules
