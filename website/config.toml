@@ -1,8 +1,7 @@
+title = 'MLOS'
+
 theme = "book"
 
-disableReadmoreNav = true
+[params]
+  BookRepo = 'https://github.com/microsoft/MLOS'
 
-[[menu.shortcuts]]
-name = "<i class='fab fa-github'></i>"
-url = "https://github.com/microsoft/MLOS"
-weight = 10
