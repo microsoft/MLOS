@@ -1,4 +1,4 @@
 #!/bin/sh
 
-cp -r ../documenation content/
-jupyter nbconvert ../source/Mlos.Notebooks --to markdown --output-dir content/notebooks
+cp -r ../documentation content/
+jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks
