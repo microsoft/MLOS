@@ -408,3 +408,5 @@ tools/
 
 # duplicated/copied proto file for python code generation
 source/Mlos.Proto/mlos/Grpc/OptimizerService.proto
+
+website/sphinx/_build/
