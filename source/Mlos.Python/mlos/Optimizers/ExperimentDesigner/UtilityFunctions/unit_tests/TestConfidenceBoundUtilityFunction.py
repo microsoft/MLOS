@@ -59,7 +59,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
     def test_lower_confidence_bound(self):
         """Tests if the lower confidence bound utility function is behaving properly."""
         utility_function_config = ConfidenceBoundUtilityFunctionConfig(
-            utility_function_name="lower_confidence_bound",
+            utility_function_name="lower_confidence_bound_on_improvement",
             num_standard_deviations=3
         )
 
@@ -79,23 +79,30 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
             self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))
 
     def test_random_function_configs(self):
-        for _ in range(100):
+        for i in range(100):
+            minimize = [True, False][i % 2]
             utility_function_config_point = ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE.random()
             utility_function_config = ConfidenceBoundUtilityFunctionConfig.create_from_config_point(
                 utility_function_config_point)
             utility_function = ConfidenceBoundUtilityFunction(
                 function_config=utility_function_config,
                 surrogate_model=self.model,
-                minimize=False
+                minimize=minimize
             )
 
             sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
             sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
 
-            sign = -1 if utility_function_config.utility_function_name == 'lower_confidence_bound' else 1
+            sign = -1 if minimize else 1
             prediction_df = self.sample_predictions.get_dataframe()
-            expected_utility_function_values = prediction_df[sample_mean_col] + \
-                                               sign * utility_function_config.num_standard_deviations * prediction_df[sample_var_col].apply('sqrt')
+            if utility_function_config.utility_function_name == 'lower_confidence_bound_on_improvement':
+                expected_utility_function_values = sign * prediction_df[sample_mean_col] - \
+                                                   utility_function_config.num_standard_deviations * prediction_df[
+                                                       sample_var_col].apply('sqrt')
+            else:
+                expected_utility_function_values = sign * prediction_df[sample_mean_col] + \
+                                                   utility_function_config.num_standard_deviations * prediction_df[
+                                                       sample_var_col].apply('sqrt')
             utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
 
             for expected, actual in zip(expected_utility_function_values, utility_function_values):

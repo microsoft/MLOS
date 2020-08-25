@@ -74,7 +74,7 @@ class TestRandomSearchOptimizer(unittest.TestCase):
         cls.model.fit(cls.input_values_dataframe, cls.output_values_dataframe)
 
         cls.utility_function_config = ConfidenceBoundUtilityFunctionConfig(
-            utility_function_name="lower_confidence_bound",
+            utility_function_name="upper_confidence_bound_on_improvement",
             num_standard_deviations=0.2
         )
 
