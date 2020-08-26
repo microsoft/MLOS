@@ -163,5 +163,5 @@ def setup(app):
 # The following is used by sphinx.ext.linkcode to provide links to github
 linkcode_resolve = make_linkcode_resolve('mlos',
                                          'https://github.com/Microsoft/'
-                                         'MLOS/blob/{revision}/'
+                                         'MLOS/blob/{revision}/source/Mlos.Python/'
                                          '{package}/{path}#L{lineno}')
