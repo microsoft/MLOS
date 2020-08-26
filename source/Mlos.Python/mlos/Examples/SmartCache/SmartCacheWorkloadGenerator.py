@@ -61,7 +61,7 @@ class SmartCacheWorkloadGenerator:
         self.current_config = new_config
         return True
 
-    def run(self, timeout_s=5):
+    def run(self, timeout_s=1):
         self.logger.info(f"Started the SmartCacheWorkloadGenerator. Duration={timeout_s}")
         self.reconfigure()
         smart_cache = SmartCache(logger=self.logger)
