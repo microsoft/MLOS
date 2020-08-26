@@ -1,1 +1,1 @@
-sphinx-apidoc -e -o api ../../source/Mlos.Python/mlos -t _templates/ -d 1 -f
+sphinx-apidoc -o api -t _templates ../../source/Mlos.Python/mlos ../../source/Mlos.Python/mlos/unit_tests/* -d 1 -f -e

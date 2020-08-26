@@ -19,9 +19,7 @@
 {{- pkgname | e | heading }}
 {% endif %}
 
-{%- if modulefirst and not is_namespace %}
 {{ automodule(pkgname, automodule_options) }}
-{% endif %}
 
 {%- if submodules %}
 
@@ -36,18 +34,6 @@
 {% endfor %}
 {%- endif %}
 {%- endif %}
-
 {%- if subpackages %}
-
-
 {{ toctree(subpackages) }}
-{% endif %}
-
-
-
-{%- if not modulefirst and not is_namespace %}
-Module contents
----------------
-
-{{ automodule(pkgname, automodule_options) }}
 {% endif %}
