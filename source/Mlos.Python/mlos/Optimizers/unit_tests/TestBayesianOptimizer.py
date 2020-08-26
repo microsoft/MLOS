@@ -6,6 +6,7 @@ import math
 import os
 import random
 import unittest
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -44,7 +45,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         :return:
         """
-
+        warnings.simplefilter("error")
         cls.temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(cls.temp_dir):
             os.mkdir(cls.temp_dir)
@@ -56,6 +57,7 @@ class TestBayesianOptimizer(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         trace_output_path = os.path.join(cls.temp_dir, "OptimizerTestTrace.json")
+        print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_pre_heated(self):

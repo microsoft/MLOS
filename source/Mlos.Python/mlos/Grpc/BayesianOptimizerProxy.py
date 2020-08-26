@@ -90,9 +90,10 @@ class BayesianOptimizerProxy(OptimizerInterface):
         assert len(objective_predictions_pb2) == 1
         only_prediction_pb2 = objective_predictions_pb2[0]
         objective_name = only_prediction_pb2.ObjectiveName
-        prediction_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
-        return Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=prediction_df)
-
+        valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
+        prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
+        prediction.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
+        return prediction
 
     def optimum(self, stay_focused=False):  # pylint: disable=unused-argument,no-self-use
         ...

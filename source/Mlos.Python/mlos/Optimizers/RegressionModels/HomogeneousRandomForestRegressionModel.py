@@ -230,7 +230,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 tree.fit(filtered_observations.iloc[selected_observation_ids], filtered_targets.iloc[selected_observation_ids])
 
     @trace()
-    def predict(self, feature_values_pandas_frame):
+    def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
         """ Aggregate predictions from all estimators
 
         see: https://arxiv.org/pdf/1211.0906.pdf
@@ -243,44 +243,33 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
         feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame)
 
-        # Since each estimator actually spits out an array - this is an array of arrays where each "row" is a sequence
-        # of predictions. This is in case feature_values_pandas_frame had multiple rows... - one prediciton per row per estimator
-        #
         # dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
         sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
         sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
 
-        # initialize return predictions
-        aggregate_predictions = Prediction(objective_name=self.target_dimension_names[0], predictor_outputs=self._PREDICTOR_OUTPUT_COLUMNS)
-        aggregate_prediction_df = aggregate_predictions.get_dataframe()
-
-        # default to all valid inputs / modified below as appropriate
-        aggregate_prediction_df[is_valid_input_col] = True
-
         # collect predictions from ensemble constituent models
-        predictions_per_tree = [estimator.predict(feature_values_pandas_frame) for estimator in self._decision_trees]
+        predictions_per_tree = [estimator.predict(feature_values_pandas_frame, include_only_valid_rows=True) for estimator in self._decision_trees]
         prediction_dataframes_per_tree = [prediction.get_dataframe() for prediction in predictions_per_tree]
         num_prediction_dataframes = len(prediction_dataframes_per_tree)
 
         # We will be concatenating all these prediction dataframes together, but to to avoid duplicate columns, we first rename them.
         #
-        old_names = [is_valid_input_col, sample_mean_col, sample_var_col, sample_size_col]
-        valid_input_col_names_per_tree = [f"{is_valid_input_col}_{i}" for i in range(num_prediction_dataframes)]
+        old_names = [sample_mean_col, sample_var_col, sample_size_col]
         sample_mean_col_names_per_tree = [f"{sample_mean_col}_{i}" for i in range(num_prediction_dataframes)]
         sample_var_col_names_per_tree = [f"{sample_var_col}_{i}" for i in range(num_prediction_dataframes)]
 
         for i in range(num_prediction_dataframes):
             new_names = [f"{old_name}_{i}" for old_name in old_names]
             old_names_to_new_names_mapping = {old_name: new_name for old_name, new_name in zip(old_names, new_names)}
+            prediction_dataframes_per_tree[i].drop(columns=[is_valid_input_col], inplace=True)
             # We can safely overwrite them in place since we are their sole owner by now.
             prediction_dataframes_per_tree[i].rename(columns=old_names_to_new_names_mapping, inplace=True)
 
-        # This creates a 'wide' dataframe with repeated column names. Normally that's not desired, but it will work well for us.
+        # This creates a 'wide' dataframe with unique column names.
         #
         all_predictions_df = pd.concat(prediction_dataframes_per_tree, axis=1)
-        all_predictions_df[is_valid_input_col] = all_predictions_df[valid_input_col_names_per_tree].any(axis=1)
         all_predictions_df[sample_mean_col] = all_predictions_df[sample_mean_col_names_per_tree].apply('mean', axis=1)
 
         # To compute the pooled variance we will use the second to last form of the equation from the paper:
@@ -290,8 +279,15 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                                              + (all_predictions_df[sample_mean_col_names_per_tree] ** 2).mean(axis=1) \
                                              - all_predictions_df[sample_mean_col] ** 2
         all_predictions_df[sample_size_col] = num_prediction_dataframes
-        aggregate_prediction_df = all_predictions_df[[is_valid_input_col, sample_mean_col, sample_var_col, sample_size_col]]
+        all_predictions_df[is_valid_input_col] = True
 
-        aggregate_predictions.set_dataframe(aggregate_prediction_df)
+        aggregate_predictions = Prediction(
+            objective_name=self.target_dimension_names[0],
+            predictor_outputs=self._PREDICTOR_OUTPUT_COLUMNS,
+        )
 
+        aggregate_predictions_df = all_predictions_df[[is_valid_input_col, sample_mean_col, sample_var_col, sample_size_col]]
+        aggregate_predictions.set_dataframe(aggregate_predictions_df)
+        if not include_only_valid_rows:
+            aggregate_predictions.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
         return aggregate_predictions

@@ -4,7 +4,6 @@
 #
 from enum import Enum
 from typing import List
-import json
 import pandas as pd
 
 class Prediction:
@@ -61,6 +60,7 @@ class Prediction:
             self,
             objective_name: str,
             predictor_outputs: List[LegalColumnNames],
+            dataframe_index: pd.Index = None,
             dataframe: pd.DataFrame = None,
             num_head_rows_to_print: int = 1
     ):
@@ -76,13 +76,18 @@ class Prediction:
         # expect dataframe column names to be values from Enum above
         self.expected_column_names = [output_enum.value for output_enum in self.predictor_outputs]
 
-        self._dataframe = None
-        if dataframe is None:
-            self._dataframe = pd.DataFrame(columns=self.expected_column_names)
-        else:
+        self._dataframe = pd.DataFrame(columns=self.expected_column_names, index=dataframe_index)
+        if dataframe is not None:
             self.set_dataframe(dataframe)
 
     def set_dataframe(self, dataframe: pd.DataFrame):
+        self.validate_dataframe(dataframe)
+        if self._dataframe.index.empty or (len(self._dataframe.index) == len(dataframe.index) and self._dataframe.index.equals(dataframe.index)):
+            self._dataframe = dataframe
+        else:
+            self._dataframe.loc[dataframe.index, self.expected_column_names] = dataframe[self.expected_column_names]
+
+    def validate_dataframe(self, dataframe: pd.DataFrame):
         # validate passed columns exist in LegalColumnNames enum
         for column_name in dataframe.columns.values:
             assert column_name in self.expected_column_names, \
@@ -93,8 +98,6 @@ class Prediction:
             assert expected_column_name in dataframe.columns.values, \
                 f'PredictionSchema Error: Failed to find expected column name "{expected_column_name}" in passed dataframe'
 
-        self._dataframe = dataframe
-
     @classmethod
     def get_enum_by_column_name(cls, column_name):
         return Prediction.LegalColumnNames(column_name)
@@ -104,10 +107,10 @@ class Prediction:
 
     @classmethod
     def dataframe_from_json(cls, json_string):
-        return pd.DataFrame.from_dict(json.loads(json_string))
+        return pd.read_json(json_string, orient='index')
 
     def dataframe_to_json(self):
-        return json.dumps(self.get_dataframe().to_dict(orient='list'))
+        return self.get_dataframe().to_json(orient='index')
 
     def __str__(self):
         rows_as_dict = self._dataframe.head(self.num_head_rows_to_print).to_dict(orient='records')
@@ -116,3 +119,28 @@ class Prediction:
             num_rows=self.num_head_rows_to_print,
             rows_as_dict=rows_as_dict
         )
+
+    def add_invalid_rows_at_missing_indices(self, desired_index):
+        assert self._dataframe.index.intersection(desired_index).equals(self._dataframe.index),\
+            "Desired index must be a superset of the existing index."
+        invalid_predictions_index = desired_index.difference(self._dataframe.index)
+        self.add_invalid_prediction_rows(invalid_predictions_index)
+
+    def add_invalid_prediction_rows(self, invalid_predictions_index):
+        """ Inserts rows with LegalColumnNames.IS_VALID_INPUT column set to False, and all other columns set to NaN at specified index.
+
+        This is useful if a model can only produce valid predictions for a subset of rows, but the caller expects a dataframe
+        with index matching the index of the features dataframe.
+
+        :param invalid_predictions_index:
+        :return:
+        """
+        assert invalid_predictions_index.intersection(self._dataframe.index).empty, "Valid and invalid indices cannot overlap."
+        if self.LegalColumnNames.IS_VALID_INPUT.value not in self.expected_column_names:
+            self.expected_column_names.append(self.LegalColumnNames.IS_VALID_INPUT.value)
+        invalid_predictions_df = pd.DataFrame(columns=self.expected_column_names, index=invalid_predictions_index)
+        invalid_predictions_df[self.LegalColumnNames.IS_VALID_INPUT.value] = False
+        all_predictions_df = pd.concat([self._dataframe, invalid_predictions_df])
+        all_predictions_df.sort_index(inplace=True)
+        self.validate_dataframe(all_predictions_df)
+        self._dataframe = all_predictions_df

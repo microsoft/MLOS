@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
 from mlos.Tomograph.Heatmap import Heatmap
 
@@ -182,7 +183,7 @@ class ModelTomograph:
                 features_df = self._create_features_dataframe(x_dim, y_dim, point)
                 predictions = self.optimizer.predict(feature_values_pandas_frame=features_df, t=time)
                 predictions_df = predictions.get_dataframe()
-                if not predictions_df.empty:
+                if not predictions_df.empty and predictions_df[Prediction.LegalColumnNames.IS_VALID_INPUT.value].any():
                     predicted_mean = predictions_df['sample_mean'].to_numpy()
 
                     # To plot the values we need to reshape them back to the resolution.
