@@ -75,7 +75,7 @@ class TestRandomSearchOptimizer(unittest.TestCase):
 
         cls.utility_function_config = ConfidenceBoundUtilityFunctionConfig(
             utility_function_name="upper_confidence_bound_on_improvement",
-            num_standard_deviations=0.2
+            alpha=0.05
         )
 
         cls.optimization_problem = OptimizationProblem(

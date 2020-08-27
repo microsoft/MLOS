@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import math
+from scipy.stats import t
 import unittest
 
 import numpy as np
@@ -60,7 +61,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
         """Tests if the lower confidence bound utility function is behaving properly."""
         utility_function_config = ConfidenceBoundUtilityFunctionConfig(
             utility_function_name="lower_confidence_bound_on_improvement",
-            num_standard_deviations=3
+            alpha=0.01
         )
 
         utility_function = ConfidenceBoundUtilityFunction(
@@ -70,10 +71,15 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
         )
 
         sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-        sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
+        mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
         prediction_df = self.sample_predictions.get_dataframe()
-        expected_utility_function_values = prediction_df[sample_mean_col] - 3 * prediction_df[sample_var_col].apply('sqrt')
+
+        t_values = t.ppf(1 - utility_function_config.alpha / 2.0, prediction_df[dof_col])
+        confidence_interval_radii = t_values * prediction_df[mean_var_col].apply('sqrt')
+
+        expected_utility_function_values = prediction_df[sample_mean_col] - confidence_interval_radii
         utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
         for expected, actual in zip(expected_utility_function_values, utility_function_values):
             self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))
@@ -91,18 +97,17 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
             )
 
             sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-            sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
+            mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+            dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
             sign = -1 if minimize else 1
             prediction_df = self.sample_predictions.get_dataframe()
+            t_values = t.ppf(1 - utility_function_config.alpha / 2.0, prediction_df[dof_col])
+            confidence_interval_radii = t_values * prediction_df[mean_var_col].apply('sqrt')
             if utility_function_config.utility_function_name == 'lower_confidence_bound_on_improvement':
-                expected_utility_function_values = sign * prediction_df[sample_mean_col] - \
-                                                   utility_function_config.num_standard_deviations * prediction_df[
-                                                       sample_var_col].apply('sqrt')
+                expected_utility_function_values = sign * prediction_df[sample_mean_col] - confidence_interval_radii
             else:
-                expected_utility_function_values = sign * prediction_df[sample_mean_col] + \
-                                                   utility_function_config.num_standard_deviations * prediction_df[
-                                                       sample_var_col].apply('sqrt')
+                expected_utility_function_values = sign * prediction_df[sample_mean_col] + confidence_interval_radii
             utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
 
             for expected, actual in zip(expected_utility_function_values, utility_function_values):

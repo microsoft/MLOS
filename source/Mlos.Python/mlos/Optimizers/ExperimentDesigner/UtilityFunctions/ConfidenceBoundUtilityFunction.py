@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-
+from scipy.stats import t
 from mlos.Logger import create_logger
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
 from mlos.Tracer import trace
@@ -13,12 +13,12 @@ class ConfidenceBoundUtilityFunctionConfig:
         name="confidence_bound_utility_function_config",
         dimensions=[
             CategoricalDimension(name="utility_function_name", values=["lower_confidence_bound_on_improvement", "upper_confidence_bound_on_improvement"]),
-            ContinuousDimension(name="num_standard_deviations", min=0, include_min=False, max=5)
+            ContinuousDimension(name="alpha", min=0.01, max=0.2)
         ]
     )
     DEFAULT = Point(
         utility_function_name="upper_confidence_bound_on_improvement",
-        num_standard_deviations=3
+        alpha=0.01
     )
 
     @classmethod
@@ -29,10 +29,10 @@ class ConfidenceBoundUtilityFunctionConfig:
     def __init__(
             self,
             utility_function_name=DEFAULT.utility_function_name,
-            num_standard_deviations=DEFAULT.num_standard_deviations
+            alpha=DEFAULT.alpha
     ):
         self.utility_function_name = utility_function_name
-        self.num_standard_deviations = num_standard_deviations
+        self.alpha = alpha
 
 
 class ConfidenceBoundUtilityFunction:
@@ -54,17 +54,19 @@ class ConfidenceBoundUtilityFunction:
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
         sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-        sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
+        mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
         predictions = self.surrogate_model.predict(feature_values_pandas_frame)
         predictions_df = predictions.get_dataframe()
 
+        t_values = t.ppf(1 - self.config.alpha / 2.0, predictions_df[dof_col])
+        confidence_interval_radii = t_values * predictions_df[mean_var_col].apply('sqrt')
+
         if self.config.utility_function_name == "lower_confidence_bound_on_improvement":
-            utility_function_values = predictions_df[sample_mean_col] * self._sign - \
-                                      (predictions_df[sample_var_col] ** 0.5) * self.config.num_standard_deviations
+            utility_function_values = predictions_df[sample_mean_col] * self._sign - confidence_interval_radii
         elif self.config.utility_function_name == "upper_confidence_bound_on_improvement":
-            utility_function_values = predictions_df[sample_mean_col] * self._sign + \
-                                      (predictions_df[sample_var_col] ** 0.5) * self.config.num_standard_deviations
+            utility_function_values = predictions_df[sample_mean_col] * self._sign + confidence_interval_radii
         else:
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
