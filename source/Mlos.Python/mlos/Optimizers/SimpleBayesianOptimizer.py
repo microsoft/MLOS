@@ -9,12 +9,12 @@ import pickle
 import numpy as np
 from bayes_opt import BayesianOptimization, UtilityFunction
 
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point, DefaultConfigMeta
 from .OptimizationProblem import OptimizationProblem
 from .OptimizerInterface import OptimizerInterface
 
 
-class SimpleBayesianOptimizerConfig:
+class SimpleBayesianOptimizerConfig(metaclass=DefaultConfigMeta):
 
     CONFIG_SPACE = SimpleHypergrid(
         name="SimpleBayesianOptimizerConfig",
@@ -25,7 +25,7 @@ class SimpleBayesianOptimizerConfig:
         ]
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         utility_function='ucb',
         kappa=3,
         xi=1
@@ -58,11 +58,11 @@ class SimpleBayesianOptimizerConfig:
             xi=None
     ):
         if utility_function is None:
-            utility_function = self.DEFAULT.utility_function
+            utility_function = self._DEFAULT.utility_function
         if kappa is None:
-            kappa = self.DEFAULT.kappa
+            kappa = self._DEFAULT.kappa
         if xi is None:
-            xi = self.DEFAULT.xi
+            xi = self._DEFAULT.xi
 
         self.utility_function = utility_function
         self.kappa = kappa

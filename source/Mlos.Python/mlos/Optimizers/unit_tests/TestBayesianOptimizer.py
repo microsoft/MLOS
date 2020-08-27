@@ -122,6 +122,16 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         print(bayesian_optimizer.optimum())
 
+    def test_bayesian_optimizer_default_copies_parameters(self):
+        config = BayesianOptimizerConfig.DEFAULT
+        config.min_samples_required_for_guided_design_of_experiments = 1
+        config.experiment_designer_config.fraction_random_suggestions = .1
+
+        original_config = BayesianOptimizerConfig.DEFAULT
+        assert original_config.min_samples_required_for_guided_design_of_experiments == 10
+        print(original_config.experiment_designer_config.fraction_random_suggestions)
+        assert original_config.experiment_designer_config.fraction_random_suggestions == .5
+
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 

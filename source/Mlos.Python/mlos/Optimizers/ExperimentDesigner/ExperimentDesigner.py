@@ -4,7 +4,7 @@
 #
 import numpy as np
 from mlos.Logger import create_logger
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid, DefaultConfigMeta
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
@@ -13,7 +13,7 @@ from .NumericOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, Rand
 
 
 
-class ExperimentDesignerConfig:
+class ExperimentDesignerConfig(metaclass=DefaultConfigMeta):
 
     CONFIG_SPACE = SimpleHypergrid(
         name='experiment_designer_config',
@@ -30,7 +30,7 @@ class ExperimentDesignerConfig:
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
         confidence_bound_utility_function_config=ConfidenceBoundUtilityFunctionConfig.DEFAULT,

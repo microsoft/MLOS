@@ -4,11 +4,11 @@
 #
 from scipy.stats import t
 from mlos.Logger import create_logger
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
+from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point, DefaultConfigMeta
 from mlos.Tracer import trace
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 
-class ConfidenceBoundUtilityFunctionConfig:
+class ConfidenceBoundUtilityFunctionConfig(metaclass=DefaultConfigMeta):
     CONFIG_SPACE = SimpleHypergrid(
         name="confidence_bound_utility_function_config",
         dimensions=[
@@ -16,7 +16,7 @@ class ConfidenceBoundUtilityFunctionConfig:
             ContinuousDimension(name="alpha", min=0.01, max=0.2)
         ]
     )
-    DEFAULT = Point(
+    _DEFAULT = Point(
         utility_function_name="upper_confidence_bound_on_improvement",
         alpha=0.01
     )
@@ -28,8 +28,8 @@ class ConfidenceBoundUtilityFunctionConfig:
 
     def __init__(
             self,
-            utility_function_name=DEFAULT.utility_function_name,
-            alpha=DEFAULT.alpha
+            utility_function_name=_DEFAULT.utility_function_name,
+            alpha=_DEFAULT.alpha
     ):
         self.utility_function_name = utility_function_name
         self.alpha = alpha

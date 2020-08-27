@@ -67,7 +67,7 @@ class DecisionTreeRegressionModelConfig(RegressionModelConfig):
         ]
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         criterion=Criterion.MSE.value,
         splitter=Splitter.RANDOM.value,
         max_depth=0,
@@ -118,8 +118,8 @@ class DecisionTreeRegressionModelConfig(RegressionModelConfig):
             max_leaf_nodes=0,
             min_impurity_decrease=0.0,
             ccp_alpha=0.0,
-            min_samples_to_fit=DEFAULT.min_samples_to_fit,
-            n_new_samples_before_refit=DEFAULT.n_new_samples_before_refit
+            min_samples_to_fit=_DEFAULT.min_samples_to_fit,
+            n_new_samples_before_refit=_DEFAULT.n_new_samples_before_refit
     ):
         """
         :param criterion: The function to measure the quality of a split.

@@ -32,7 +32,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
         on_external_dimension=CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__])
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         n_estimators=5,
         features_fraction_per_estimator=1,
         samples_fraction_per_estimator=1,
@@ -42,11 +42,11 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
 
     def __init__(
             self,
-            n_estimators=DEFAULT.n_estimators,
-            features_fraction_per_estimator=DEFAULT.features_fraction_per_estimator,
-            samples_fraction_per_estimator=DEFAULT.samples_fraction_per_estimator,
-            regressor_implementation=DEFAULT.regressor_implementation,
-            decision_tree_regression_model_config: Point()=DEFAULT.decision_tree_regression_model_config
+            n_estimators=_DEFAULT.n_estimators,
+            features_fraction_per_estimator=_DEFAULT.features_fraction_per_estimator,
+            samples_fraction_per_estimator=_DEFAULT.samples_fraction_per_estimator,
+            regressor_implementation=_DEFAULT.regressor_implementation,
+            decision_tree_regression_model_config: Point()=_DEFAULT.decision_tree_regression_model_config
     ):
         self.n_estimators = n_estimators
         self.features_fraction_per_estimator = features_fraction_per_estimator
@@ -57,7 +57,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
         self.decision_tree_regression_model_config = DecisionTreeRegressionModelConfig.create_from_config_point(decision_tree_regression_model_config)
 
     @classmethod
-    def contains(cls, config):
+    def contains(cls, config): # pylint: disable=unused-argument
         return True  # TODO: see if you can remove this class entirely.
 
 

@@ -83,7 +83,7 @@ class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig)
                                                    values=[SklearnRandomForestRegressionModelConfig.__name__])
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         max_basis_function_degree=2,
         residual_model_name=SklearnRandomForestRegressionModelConfig.__name__,
         boosting_root_model_name=SklearnLassoRegressionModelConfig.__name__,
@@ -108,14 +108,14 @@ class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig)
 
     def __init__(
             self,
-            max_basis_function_degree=DEFAULT.max_basis_function_degree,
-            boosting_root_model_name=DEFAULT.boosting_root_model_name,
-            min_abs_root_model_coef=DEFAULT.min_abs_root_model_coef,
-            boosting_root_model_config: Point()=DEFAULT.sklearn_lasso_regression_model_config,
-            random_forest_model_config: Point()=DEFAULT.sklearn_random_forest_regression_model_config,
-            residual_model_name=DEFAULT.residual_model_name,
-            perform_initial_root_model_hyper_parameter_search=DEFAULT.perform_initial_root_model_hyper_parameter_search,
-            perform_initial_random_forest_hyper_parameter_search=DEFAULT.perform_initial_random_forest_hyper_parameter_search
+            max_basis_function_degree=_DEFAULT.max_basis_function_degree,
+            boosting_root_model_name=_DEFAULT.boosting_root_model_name,
+            min_abs_root_model_coef=_DEFAULT.min_abs_root_model_coef,
+            boosting_root_model_config: Point()=_DEFAULT.sklearn_lasso_regression_model_config,
+            random_forest_model_config: Point()=_DEFAULT.sklearn_random_forest_regression_model_config,
+            residual_model_name=_DEFAULT.residual_model_name,
+            perform_initial_root_model_hyper_parameter_search=_DEFAULT.perform_initial_root_model_hyper_parameter_search,
+            perform_initial_random_forest_hyper_parameter_search=_DEFAULT.perform_initial_random_forest_hyper_parameter_search
     ):
         self.max_basis_function_degree = max_basis_function_degree
         self.residual_model_name = residual_model_name
