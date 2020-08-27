@@ -42,6 +42,8 @@ class Prediction:
         SAMPLE_VARIANCE = 'sample_variance'
         SAMPLE_SIZE = 'sample_size'
 
+        DEGREES_OF_FREEDOM = 'degrees_of_freedom'
+
     @classmethod
     def create_prediction_from_dataframe(cls, objective_name: str, dataframe: pd.DataFrame):
         assert objective_name is not None
@@ -62,7 +64,8 @@ class Prediction:
             predictor_outputs: List[LegalColumnNames],
             dataframe_index: pd.Index = None,
             dataframe: pd.DataFrame = None,
-            num_head_rows_to_print: int = 1
+            num_head_rows_to_print: int = 1,
+            allow_extra_columns: bool = False
     ):
         self.objective_name = objective_name
         self.num_head_rows_to_print = num_head_rows_to_print
@@ -75,6 +78,7 @@ class Prediction:
 
         # expect dataframe column names to be values from Enum above
         self.expected_column_names = [output_enum.value for output_enum in self.predictor_outputs]
+        self.allow_extra_columns = allow_extra_columns
 
         self._dataframe = pd.DataFrame(columns=self.expected_column_names, index=dataframe_index)
         if dataframe is not None:
@@ -88,15 +92,30 @@ class Prediction:
             self._dataframe.loc[dataframe.index, self.expected_column_names] = dataframe[self.expected_column_names]
 
     def validate_dataframe(self, dataframe: pd.DataFrame):
-        # validate passed columns exist in LegalColumnNames enum
-        for column_name in dataframe.columns.values:
-            assert column_name in self.expected_column_names, \
-                f'PredictionSchema Error: Failed to find "{column_name}" in Prediction.PredictionSchema class'
+
+        if not self.allow_extra_columns:
+            # validate passed columns exist in LegalColumnNames enum
+            for column_name in dataframe.columns.values:
+                assert column_name in self.expected_column_names, \
+                    f'PredictionSchema Error: Failed to find "{column_name}" in Prediction.PredictionSchema class'
 
         # validate all declared columns (in model's SCHEMA) are present in the dataframe
         for expected_column_name in self.expected_column_names:
             assert expected_column_name in dataframe.columns.values, \
                 f'PredictionSchema Error: Failed to find expected column name "{expected_column_name}" in passed dataframe'
+
+        mean_variance_col = self.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        sample_variance_col = self.LegalColumnNames.SAMPLE_VARIANCE.value
+
+        if mean_variance_col in self.expected_column_names:
+            if dataframe[mean_variance_col].notnull().any():
+                assert (dataframe[mean_variance_col].notnull() >= 0).all()
+
+        if sample_variance_col in self.expected_column_names:
+            if dataframe[sample_variance_col].notnull().any():
+                assert (dataframe[sample_variance_col].notnull() >= 0).all()
+
+
 
     @classmethod
     def get_enum_by_column_name(cls, column_name):

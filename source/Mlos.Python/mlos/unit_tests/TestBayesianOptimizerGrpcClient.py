@@ -4,6 +4,7 @@
 #
 import math
 import unittest
+import warnings
 
 import grpc
 import pandas as pd
@@ -26,6 +27,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        warnings.simplefilter("error")
         global_values.declare_singletons()
 
     def setUp(self):

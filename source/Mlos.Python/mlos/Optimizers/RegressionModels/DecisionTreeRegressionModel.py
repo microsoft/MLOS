@@ -177,6 +177,7 @@ class DecisionTreeRegressionModel(RegressionModel):
     _PREDICTOR_OUTPUT_COLUMNS = [
         Prediction.LegalColumnNames.IS_VALID_INPUT,
         Prediction.LegalColumnNames.SAMPLE_MEAN,
+        Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_SIZE
     ]
@@ -223,7 +224,8 @@ class DecisionTreeRegressionModel(RegressionModel):
         # These are used to compute the variance in predictions
         self._observations_per_leaf = dict()
         self._mean_per_leaf = dict()
-        self._variance_per_leaf = dict()
+        self._mean_variance_per_leaf = dict()
+        self._sample_variance_per_leaf = dict()
         self._count_per_leaf = dict()
 
         self.fitted = False
@@ -277,12 +279,14 @@ class DecisionTreeRegressionModel(RegressionModel):
             self._observations_per_leaf[node_index] = observations_at_leaf
 
             leaf_mean = np.mean(observations_at_leaf)
-            leaf_variance = np.var(observations_at_leaf, ddof=1) # ddof = delta degrees of freedom. We want sample variance.
+            leaf_sample_variance = np.var(observations_at_leaf, ddof=1) # ddof = delta degrees of freedom. We want sample variance.
+            leaf_mean_variance = leaf_sample_variance / len(observations_at_leaf)
 
             # TODO: note that if we change the tree to fit a linear regression at each leaf, these predictions would have
             # to be computed in the .predict() function, though the slope and y-intersect could be computed here.
             self._mean_per_leaf[node_index] = leaf_mean
-            self._variance_per_leaf[node_index] = leaf_variance
+            self._mean_variance_per_leaf[node_index] = leaf_mean_variance
+            self._sample_variance_per_leaf[node_index] = leaf_sample_variance
             self._count_per_leaf[node_index] = len(observations_at_leaf)
         self.fitted = True
 
@@ -293,6 +297,7 @@ class DecisionTreeRegressionModel(RegressionModel):
         # dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
         sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
+        mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
 
@@ -319,7 +324,8 @@ class DecisionTreeRegressionModel(RegressionModel):
         if valid_rows_index is not None and not valid_rows_index.empty:
             prediction_dataframe['leaf_node_index'] = self._regressor.apply(features_df.iloc[valid_rows_index].to_numpy())
             prediction_dataframe[sample_mean_col] = prediction_dataframe['leaf_node_index'].map(self._mean_per_leaf)
-            prediction_dataframe[sample_var_col] = prediction_dataframe['leaf_node_index'].map(self._variance_per_leaf)
+            prediction_dataframe[mean_var_col] = prediction_dataframe['leaf_node_index'].map(self._mean_variance_per_leaf)
+            prediction_dataframe[sample_var_col] = prediction_dataframe['leaf_node_index'].map(self._sample_variance_per_leaf)
             prediction_dataframe[sample_size_col] = prediction_dataframe['leaf_node_index'].map(self._count_per_leaf)
             prediction_dataframe[is_valid_input_col] = True
             prediction_dataframe.drop(columns=['leaf_node_index'], inplace=True)
