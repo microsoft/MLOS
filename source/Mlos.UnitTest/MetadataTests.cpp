@@ -57,9 +57,9 @@ TEST(MetadataTests, VerifyProxyAccess)
 
     Proxy::Mlos::UnitTest::CompositeStructure2 proxy(buffer, 0);
 
-    std::wstring_view a1 = proxy.Title();
-    std::wstring_view a2 = proxy.BaseComp().Name();
-    std::string_view a3 = proxy.BaseComp().Version();
+    WideStringPtr a1 = proxy.Title();
+    WideStringPtr a2 = proxy.BaseComp().Name();
+    StringPtr a3 = proxy.BaseComp().Version();
 }
 
 TEST(MetadataTests, VerifyProxyAccessEnumArray)

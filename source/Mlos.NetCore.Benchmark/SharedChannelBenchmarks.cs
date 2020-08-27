@@ -138,7 +138,7 @@ public class BaseSharedChannelBenchmark : IDisposable
         UnitTestProxy.WideStringMultiMessage.Callback =
             msg =>
             {
-                if (!"Test_Name45659876".AsSpan().Equals(msg.StringMessages[0].Strings[3].ValueAsSpan(), StringComparison.InvariantCulture))
+                if (string.Compare("Test_Name45659876", msg.StringMessages[0].Strings[3].Value, StringComparison.InvariantCulture) != 0)
                 {
                     Environment.FailFast("Message failed");
                 }
