@@ -15,6 +15,8 @@
 
 #include "stdafx.h"
 
+#include "MlosPlatform.Std.inl"
+
 //----------------------------------------------------------------------------
 // NAME: CheckHR
 //
@@ -86,7 +88,7 @@ main(
     hr = RegisterSmartConfigs(mlosContext);
     CheckHR(hr);
 
-    // Run the bechmark.
+    // Run the benchmark.
     //
     uint64_t messageCount = RunSharedChannelBenchmark(
         g_SharedChannelConfig,

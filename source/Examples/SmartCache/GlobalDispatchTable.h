@@ -27,3 +27,12 @@ constexpr uint32_t SmartCache::ObjectDeserializationHandler::DispatchTableBaseIn
 {
     return static_cast<uint32_t>(Mlos::Core::ObjectDeserializationHandler::DispatchTableElementCount());
 }
+
+constexpr auto GlobalDispatchTable()
+{
+    auto globalDispatchTable = Mlos::Core::DispatchTable<0>()
+        .concatenate(Mlos::Core::ObjectDeserializationHandler::DispatchTable)
+        .concatenate(SmartCache::ObjectDeserializationHandler::DispatchTable);
+
+    return globalDispatchTable;
+}

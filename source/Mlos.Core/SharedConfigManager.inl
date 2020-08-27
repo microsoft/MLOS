@@ -44,7 +44,7 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(ComponentConfig<T>& componentCon
 
     while (true)
     {
-        slotIndex = TProbingPolicy::CalculateIndex(componentConfig, probingCount, elementCount);
+        slotIndex = TProbingPolicy::CalculateIndex(static_cast<T>(componentConfig), probingCount, elementCount);
 
         uint32_t offset = configsArray.Elements()[slotIndex];
         if (offset == 0)
@@ -145,7 +145,7 @@ HRESULT SharedConfigManager::Lookup(ComponentConfig<T>& componentConfig)
 
     while (true)
     {
-        slotIndex = TProbingPolicy::CalculateIndex(componentConfig, probingCount, elementCount);
+        slotIndex = TProbingPolicy::CalculateIndex(static_cast<T>(componentConfig), probingCount, elementCount);
 
         uint32_t offset = configsArray.Elements()[slotIndex];
         if (offset == 0)
