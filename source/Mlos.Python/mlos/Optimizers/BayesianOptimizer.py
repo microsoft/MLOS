@@ -6,7 +6,7 @@ import pandas as pd
 
 from mlos.Logger import create_logger
 from mlos.Tracer import trace
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
 
 
 from .OptimizerInterface import OptimizerInterface
@@ -16,7 +16,7 @@ from .RegressionModels.HomogeneousRandomForestRegressionModel import Homogeneous
     HomogeneousRandomForestRegressionModelConfig
 
 
-class BayesianOptimizerConfig:
+class BayesianOptimizerConfig(metaclass=DefaultConfigMeta):
 
     CONFIG_SPACE = SimpleHypergrid(
         name="bayesian_optimizer_config",
@@ -33,7 +33,7 @@ class BayesianOptimizerConfig:
         on_external_dimension=CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__])
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         surrogate_model_implementation=HomogeneousRandomForestRegressionModel.__name__,
         experiment_designer_implementation=ExperimentDesigner.__name__,
         min_samples_required_for_guided_design_of_experiments=10,

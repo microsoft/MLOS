@@ -53,7 +53,7 @@ class SklearnRidgeRegressionModelConfig(RegressionModelConfig):
             CategoricalDimension(name="solver", values=[solver.value for solver in Solver]),
         ]
     )
-    DEFAULT = Point(
+    _DEFAULT = Point(
         alpha=1.0,
         fit_intercept=True,
         normalize=False,
@@ -84,14 +84,14 @@ class SklearnRidgeRegressionModelConfig(RegressionModelConfig):
 
     def __init__(
             self,
-            alpha=DEFAULT.alpha,
-            fit_intercept=DEFAULT.fit_intercept,
-            normalize=DEFAULT.normalize,
-            copy_x=DEFAULT.copy_x,
-            max_iter=DEFAULT.max_iter,
-            tol=DEFAULT.tol,
-            random_state=DEFAULT.random_state,
-            solver=DEFAULT.solver
+            alpha=_DEFAULT.alpha,
+            fit_intercept=_DEFAULT.fit_intercept,
+            normalize=_DEFAULT.normalize,
+            copy_x=_DEFAULT.copy_x,
+            max_iter=_DEFAULT.max_iter,
+            tol=_DEFAULT.tol,
+            random_state=_DEFAULT.random_state,
+            solver=_DEFAULT.solver
     ):
         """
         Ridge parameters:

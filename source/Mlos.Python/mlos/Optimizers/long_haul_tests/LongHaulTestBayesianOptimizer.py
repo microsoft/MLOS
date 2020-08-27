@@ -268,3 +268,61 @@ class TestBayesianOptimizer(unittest.TestCase):
                     out_file.write(f"{restart_num} failed.\n")
                     out_file.write(f"Exception: {e}")
         self.assertFalse(has_failed)
+
+    # pylint: disable=no-self-use
+    def test_bayesian_optimizer_1d_nonconvex(self):
+        # print seed for reproducible tests
+        seed = np.random.randint(1e6)
+        print(seed)
+        random.seed(seed)
+        np.random.seed(seed)
+        sign = 1
+        for minimize in [True, False]:
+            # define function
+            sign = 1 if minimize else -1
+            def f(x):
+                return (6*x-2)**2*np.sin(12*x-4)
+
+            # setup hypergrid
+            # single continuous input dimension between 0 and 1
+            input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name="x", min=0, max=1)])
+            # define output space, we might not know the exact ranges
+            output_space = SimpleHypergrid(name="objective",
+                                           dimensions=[ContinuousDimension(name="function_value", min=-10, max=10)])
+
+            optimization_problem = OptimizationProblem(
+                parameter_space=input_space,
+                objective_space=output_space,
+                # we want to minimize the function
+                objectives=[Objective(name="function_value", minimize=minimize)]
+            )
+
+            optimizer_config = BayesianOptimizerConfig.DEFAULT.copy()
+            random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
+
+            random_forest_config.decision_tree_regression_model_config.n_new_samples_before_refit = 1
+
+            random_forest_config.n_estimators = 20
+
+            optimizer_config.experiment_designer_config.confidence_bound_utility_function_config.alpha = 0.1
+
+
+            optimizer = BayesianOptimizer(optimization_problem, optimizer_config)
+
+            def run_optimization(optimizer):
+                # suggest new value from optimizer
+                suggested_value = optimizer.suggest()
+                input_values_df = suggested_value.to_pandas()
+                # suggested value are dictionary-like, keys are input space parameter names
+                # evaluate target function
+                target_value = sign * f(suggested_value['x'])
+
+                # build dataframes to
+                target_values_df = pd.DataFrame({'function_value': [target_value]})
+
+                optimizer.register(input_values_df, target_values_df)
+
+            for _ in range(40):
+                run_optimization(optimizer)
+            print(optimizer.optimum()['function_value'])
+            self.assertLessEqual(sign * optimizer.optimum()['function_value'], -5.5)
