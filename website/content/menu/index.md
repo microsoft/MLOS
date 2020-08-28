@@ -16,7 +16,7 @@ headless = true
   - [Optimizer Monitor]({{< relref "/notebooks/OptimizerMonitor" >}})
 
 - API Documentation
-  - [Python](python_api/)
+  - [Python](/MLOS/python_api/)
 
 - [Code of Conduct]({{< relref "/CODE_OF_CONDUCT" >}})
 - [Contributing]({{< relref "/CONTRIBUTING" >}})
