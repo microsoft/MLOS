@@ -13,7 +13,7 @@ class ConfidenceBoundUtilityFunctionConfig(metaclass=DefaultConfigMeta):
         name="confidence_bound_utility_function_config",
         dimensions=[
             CategoricalDimension(name="utility_function_name", values=["lower_confidence_bound_on_improvement", "upper_confidence_bound_on_improvement"]),
-            ContinuousDimension(name="alpha", min=0.01, max=0.2)
+            ContinuousDimension(name="alpha", min=0.01, max=0.5)
         ]
     )
     _DEFAULT = Point(

@@ -43,7 +43,19 @@ class BayesianOptimizerConfig(metaclass=DefaultConfigMeta):
 
 
 class BayesianOptimizer(OptimizerInterface):
+    """Generic Bayesian Optimizer based on regresson model
 
+    Uses extra trees as surrogate model and confidence bound acquisition function by default.
+
+    Attributes
+    ----------
+    logger : Logger
+    optimization_problem : OptimizationProblem
+    surrogate_model : HomogeneousRandomForestRegressionModel
+    optimizer_config : Point
+    experiment_designer: ExperimentDesigner
+
+    """
     def __init__(
             self,
             optimization_problem: OptimizationProblem,
@@ -85,6 +97,9 @@ class BayesianOptimizer(OptimizerInterface):
         # TODO: this will need a better home - either a DataSet class or the surrogate model itself.
         self._feature_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.parameter_space.dimensions])
         self._target_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.objective_space.dimensions])
+
+    def get_experiment_data(self):
+        return self._feature_values_df.copy(), self._target_values_df.copy()
 
     @property
     def num_observed_samples(self):
