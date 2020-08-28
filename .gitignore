@@ -411,3 +411,7 @@ source/Mlos.Proto/mlos/Grpc/OptimizerService.proto
 
 # generated website
 website/public
+website/content/documentation/
+website/content/notebooks/
+website/sphinx/_build
+website/sphinx/api
