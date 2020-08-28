@@ -112,7 +112,8 @@ For detailed instructions, please refer to:
 
 ## Examples
 
-Code and documentation for examples of using MLOS to optimize a system are described in [documentation/03-ExampleUsage.md](./documentation/04-ExampleUsage.md) and in the [source/Examples](https://github.com/microsoft/MLOS/tree/main/source/Examples) tree.
+Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](./notebooks/) section. Additional code is in the  [source/Examples](https://github.com/microsoft/MLOS/tree/main/source/Examples) source directory.
+You can find the source of the notebooks [on github as well](https://github.com/microsoft/MLOS/tree/main/source/Mlos.Notebooks).
 
 ## Documentation
 
@@ -122,9 +123,9 @@ Code and documentation for examples of using MLOS to optimize a system are descr
 
 ## Contributing
 
-We welcome contributions!  Please see [CONTRIBUTING.md](./CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for details.
+We welcome contributions!  Please see [Contributing](./contributing) and [Code of Conduct](./code_of_conduct) for details.
 
-Also, please see the [Roadmap](TODOFIXME) of planned features.
+Also, please see the [Roadmap](#) of planned features.
 
 ## Contact
 
@@ -132,4 +133,4 @@ For more formal enquiries, you can [contact us](mailto:mlos-maintainers@service.
 
 ## License
 
-- [MIT License](./LICENSE)
+- [MIT License](./license)
