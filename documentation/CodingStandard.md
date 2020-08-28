@@ -28,7 +28,7 @@ We use [`pylint`](https://pypi.org/project/pylint/) for Python code to mostly fo
 
 To run it locally, issues the following commands:
 
-1. One time instal of the `pylint` tool:
+1. One time install of the `pylint` tool:
 
     ```shell
     pip install pylint

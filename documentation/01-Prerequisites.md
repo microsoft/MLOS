@@ -149,21 +149,29 @@ Be sure to include support for .Net Core, C++, CMake
 
 ### Linux Python Install
 
-1. Install Python 3.x
+1. Install Python 3.7
 
     ```sh
-    sudo apt -y install python3 python3-pip
+    # We need to add a special apt repository for Python 3.7 support:
+    sudo apt-get -y install software-properties-common apt-transport-https
+	sudo add-apt-repository -y ppa:deadsnakes/ppa
+	sudo apt-get update
+	sudo apt-get -y install python3.7
     ```
 
 2. Install MLOS Python dependencies:
 
     ```sh
     # Also add some dependencies needed by some of the pip modules
-    sudo apt -y install build-essential libfreetype-dev unixodbc-dev
+    sudo apt-get -y install python3-pip python3.7-dev \
+        build-essential libfreetype-dev unixodbc-dev
     ```
 
     ```sh
-    pip3 install -r source/Mlos.Python/requirements.txt
+    python3.7 -m pip install --upgrade pip
+    python3.7 -m pip install setuptools
+
+    python3.7 -m pip install -r source/Mlos.Python/requirements.txt
     ```
 
 ### Windows Python Install
