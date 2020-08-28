@@ -10,12 +10,13 @@ headless = true
   - [Architecture]({{< relref "/documentation/MlosArchitecture" >}})
   - [Repo Organization]({{< relref "/documentation/RepoOrganization" >}})
 
-
-
 - Notebooks
   - [Start Here]({{< relref "/notebooks/StartHere" >}})
   - [Smart Cache]({{< relref "/notebooks/SmartCache" >}})
   - [Optimizer Monitor]({{< relref "/notebooks/OptimizerMonitor" >}})
+
+- API Documentation
+  - [Python](python_api/)
 
 - [Code of Conduct]({{< relref "/CODE_OF_CONDUCT" >}})
 - [Contributing]({{< relref "/CONTRIBUTING" >}})
