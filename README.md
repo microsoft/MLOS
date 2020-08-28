@@ -107,8 +107,8 @@ MLOS supports Windows and Linux build environments.
 
 For detailed instructions, please refer to:
 
-  1. [Prerequisites](./documentation/01-prerequisites/)
-  2. [Build](./documentation/02-build/)
+  1. [Prerequisites](./documentation/01-Prerequisites.md)
+  2. [Build](./documentation/02-Build.md)
 
 ## Examples
 
@@ -123,7 +123,7 @@ You can find the source of the notebooks [on github as well](https://github.com/
 
 ## Contributing
 
-We welcome contributions!  Please see [Contributing](./contributing) and [Code of Conduct](./code_of_conduct) for details.
+We welcome contributions!  Please see [Contributing](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md) for details.
 
 Also, please see the [Roadmap](#) of planned features.
 
@@ -133,4 +133,4 @@ For more formal enquiries, you can [contact us](mailto:mlos-maintainers@service.
 
 ## License
 
-- [MIT License](./license)
+- [MIT License](./LICENSE)
