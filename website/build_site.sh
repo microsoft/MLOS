@@ -7,6 +7,8 @@ cp ../*.md content/
 cp ../LICENSE content/
 cp ../README.md content/_index.md
 mv content/documentation/README.md content/documentation/_index.md
+sed -i 's/.md/\//g' *.md
+sed -i 's/.md/\//g' documentation/*.md
 
 
 if [ ! -d "themes/book" ]; then
