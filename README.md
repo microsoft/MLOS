@@ -73,27 +73,27 @@ Some of the examples require only the installation of the mlos Python library. T
 To use this simplified installation, it's recommended to use the Anaconda python distribution and create a new conda environment:
 
 ```
-    conda create -n mlos_environment
-    conda activate mlos_environment
+$ conda create -n mlos_environment
+$ conda activate mlos_environment
 ```
 
 You can download the mlos code using git:
 
 ```
-    git clone git@github.com:microsoft/MLOS.git
+$ git clone git@github.com:microsoft/MLOS.git
 ```
 
 To install the Python library, change to the Python directory and install with ``pip``:
 
 ```
-    cd MLOS/source/Mlos.Python
-    pip install -e .
+$ cd MLOS/source/Mlos.Python
+$ pip install -e .
 ```
 
 You can also install the package directly without checking out the code:
 
 ```
-    pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
+$ pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
 ```
 
 However, this does not include the examples.
@@ -107,12 +107,12 @@ MLOS supports Windows and Linux build environments.
 
 For detailed instructions, please refer to:
 
-  1. [documentation/01-Prerequisites.md](./documentation/01-Prerequisites.md)
-  2. [documentation/02-Build.md](./documentation/02-Build.md)
+  1. [Prerequisites](./documentation/01-prerequisites/)
+  2. [Build](./documentation/02-build/)
 
 ## Examples
 
-Code and documentation for examples of using MLOS to optimize a system are described in [documentation/03-ExampleUsage.md](./documentation/04-ExampleUsage.md) and in the [source/Examples](./source/Examples/) tree.
+Code and documentation for examples of using MLOS to optimize a system are described in [documentation/03-ExampleUsage.md](./documentation/04-ExampleUsage.md) and in the [source/Examples](https://github.com/microsoft/MLOS/tree/main/source/Examples) tree.
 
 ## Documentation
 
