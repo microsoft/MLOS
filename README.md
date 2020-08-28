@@ -66,7 +66,42 @@ To achieve this MLOS provides:
 
     Once hooks are created in the target system, iteration on the external agent can be more rapidly developed and deployed.
 
-## Build
+
+## Python only installation
+
+Some of the examples require only the installation of the mlos Python library. These examples do not use the shared memory infrastructure.
+To use this simplified installation, it's recommended to use the Anaconda python distribution and create a new conda environment:
+
+```
+    conda create -n mlos_environment
+    conda activate mlos_environment
+```
+
+You can download the mlos code using git:
+
+```
+    git clone git@github.com:microsoft/MLOS.git
+```
+
+To install the Python library, change to the Python directory and install with ``pip``:
+
+```
+    cd MLOS/source/Mlos.Python
+    pip install -e .
+```
+
+You can also install the package directly without checking out the code:
+
+```
+    pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
+```
+
+However, this does not include the examples.
+
+After this installation, you can run any of the Python-only example notebooks.
+A good place to start is the [introduction to Bayesian Optimization](#).
+
+## Full Build (C# and C++ components)
 
 MLOS supports Windows and Linux build environments.
 
