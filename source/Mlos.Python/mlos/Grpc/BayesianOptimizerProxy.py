@@ -3,12 +3,12 @@
 # Licensed under the MIT License.
 #
 import json
-from mlos.Logger import create_logger
+from mlos.global_values import deserialize_from_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
-from mlos.Spaces import Point
-
-from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Spaces import Point
 
 
 class BayesianOptimizerProxy(OptimizerInterface):
@@ -44,6 +44,10 @@ class BayesianOptimizerProxy(OptimizerInterface):
     @property
     def optimizer_handle(self):
         return OptimizerService_pb2.OptimizerHandle(Id=self.id)
+
+    def get_optimizer_convergence_state(self):
+        optimizer_convergence_state_response = self._optimizer_stub.GetOptimizerConvergenceState(self.optimizer_handle)
+        return deserialize_from_bytes_string(optimizer_convergence_state_response.SerializedOptimizerConvergenceState)
 
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
         suggestion_request = OptimizerService_pb2.SuggestRequest(

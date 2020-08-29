@@ -176,10 +176,11 @@ class DecisionTreeRegressionModel(RegressionModel):
 
     _PREDICTOR_OUTPUT_COLUMNS = [
         Prediction.LegalColumnNames.IS_VALID_INPUT,
-        Prediction.LegalColumnNames.SAMPLE_MEAN,
+        Prediction.LegalColumnNames.PREDICTED_VALUE,
         Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_VARIANCE,
-        Prediction.LegalColumnNames.SAMPLE_SIZE
+        Prediction.LegalColumnNames.SAMPLE_SIZE,
+        Prediction.LegalColumnNames.DEGREES_OF_FREEDOM
     ]
 
     def __init__(
@@ -194,10 +195,13 @@ class DecisionTreeRegressionModel(RegressionModel):
         self.logger = logger
 
         assert DecisionTreeRegressionModelConfig.contains(model_config)
-        super(DecisionTreeRegressionModel, self).__init__(model_type=type(self), model_config=model_config)
-
-        self.input_space = input_space
-        self.output_space = output_space
+        RegressionModel.__init__(
+            self,
+            model_type=type(self),
+            model_config=model_config,
+            input_space=input_space,
+            output_space=output_space
+        )
 
         self._input_space_adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.input_space)
 
@@ -228,8 +232,9 @@ class DecisionTreeRegressionModel(RegressionModel):
         self._sample_variance_per_leaf = dict()
         self._count_per_leaf = dict()
 
-        self.fitted = False
-        self.num_observations_used_to_fit = 0
+    @property
+    def num_observations_used_to_fit(self):
+        return self.fit_state.train_set_size
 
     def should_fit(self, num_samples):
         """ Returns true if the model should be fitted.
@@ -244,10 +249,10 @@ class DecisionTreeRegressionModel(RegressionModel):
         if not self.fitted:
             return num_samples > self.model_config.min_samples_to_fit
         num_new_samples = num_samples - self.num_observations_used_to_fit
-        return num_new_samples > self.model_config.n_new_samples_before_refit
+        return num_new_samples >= self.model_config.n_new_samples_before_refit
 
     @trace()
-    def fit(self, feature_values_pandas_frame, target_values_pandas_frame):
+    def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number):
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 
         # Let's get the numpy arrays out of the panda frames
@@ -288,7 +293,9 @@ class DecisionTreeRegressionModel(RegressionModel):
             self._mean_variance_per_leaf[node_index] = leaf_mean_variance
             self._sample_variance_per_leaf[node_index] = leaf_sample_variance
             self._count_per_leaf[node_index] = len(observations_at_leaf)
+
         self.fitted = True
+        self.last_refit_iteration_number = iteration_number
 
     @trace()
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
@@ -296,10 +303,11 @@ class DecisionTreeRegressionModel(RegressionModel):
 
         # dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
-        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-        mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
+        predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
+        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
         valid_rows_index = None
         features_df = None
@@ -322,11 +330,12 @@ class DecisionTreeRegressionModel(RegressionModel):
         prediction_dataframe = predictions.get_dataframe()
 
         if valid_rows_index is not None and not valid_rows_index.empty:
-            prediction_dataframe['leaf_node_index'] = self._regressor.apply(features_df.iloc[valid_rows_index].to_numpy())
-            prediction_dataframe[sample_mean_col] = prediction_dataframe['leaf_node_index'].map(self._mean_per_leaf)
-            prediction_dataframe[mean_var_col] = prediction_dataframe['leaf_node_index'].map(self._mean_variance_per_leaf)
+            prediction_dataframe['leaf_node_index'] = self._regressor.apply(features_df.loc[valid_rows_index].to_numpy())
+            prediction_dataframe[predicted_value_col] = prediction_dataframe['leaf_node_index'].map(self._mean_per_leaf)
+            prediction_dataframe[predicted_value_var_col] = prediction_dataframe['leaf_node_index'].map(self._mean_variance_per_leaf)
             prediction_dataframe[sample_var_col] = prediction_dataframe['leaf_node_index'].map(self._sample_variance_per_leaf)
             prediction_dataframe[sample_size_col] = prediction_dataframe['leaf_node_index'].map(self._count_per_leaf)
+            prediction_dataframe[dof_col] = prediction_dataframe[sample_size_col] - 1
             prediction_dataframe[is_valid_input_col] = True
             prediction_dataframe.drop(columns=['leaf_node_index'], inplace=True)
 

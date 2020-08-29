@@ -50,7 +50,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
             input_space=cls.input_space,
             output_space=cls.output_space
         )
-        cls.model.fit(cls.input_pandas_dataframe, cls.output_pandas_dataframe)
+        cls.model.fit(cls.input_pandas_dataframe, cls.output_pandas_dataframe, iteration_number=len(cls.input_pandas_dataframe.index))
 
         cls.sample_inputs = {'x': np.linspace(start=-10, stop=110, num=13, endpoint=True)}
         cls.sample_inputs_pandas_dataframe = pd.DataFrame(cls.sample_inputs)
@@ -70,16 +70,16 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
             minimize=False
         )
 
-        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-        mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
+        predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
         prediction_df = self.sample_predictions.get_dataframe()
 
         t_values = t.ppf(1 - utility_function_config.alpha / 2.0, prediction_df[dof_col])
-        confidence_interval_radii = t_values * prediction_df[mean_var_col].apply('sqrt')
+        confidence_interval_radii = t_values * prediction_df[predicted_value_var_col].apply('sqrt')
 
-        expected_utility_function_values = prediction_df[sample_mean_col] - confidence_interval_radii
+        expected_utility_function_values = prediction_df[predicted_value_col] - confidence_interval_radii
         utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
         for expected, actual in zip(expected_utility_function_values, utility_function_values):
             self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))
@@ -96,18 +96,18 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
                 minimize=minimize
             )
 
-            sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-            mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+            predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
+            predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
             dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
             sign = -1 if minimize else 1
             prediction_df = self.sample_predictions.get_dataframe()
             t_values = t.ppf(1 - utility_function_config.alpha / 2.0, prediction_df[dof_col])
-            confidence_interval_radii = t_values * prediction_df[mean_var_col].apply('sqrt')
+            confidence_interval_radii = t_values * prediction_df[predicted_value_var_col].apply('sqrt')
             if utility_function_config.utility_function_name == 'lower_confidence_bound_on_improvement':
-                expected_utility_function_values = sign * prediction_df[sample_mean_col] - confidence_interval_radii
+                expected_utility_function_values = sign * prediction_df[predicted_value_col] - confidence_interval_radii
             else:
-                expected_utility_function_values = sign * prediction_df[sample_mean_col] + confidence_interval_radii
+                expected_utility_function_values = sign * prediction_df[predicted_value_col] + confidence_interval_radii
             utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
 
             for expected, actual in zip(expected_utility_function_values, utility_function_values):

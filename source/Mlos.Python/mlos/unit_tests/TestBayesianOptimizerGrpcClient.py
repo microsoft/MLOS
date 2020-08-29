@@ -95,12 +95,44 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         self.assertTrue(new_optimizer_id == bayesian_optimizer.id)
         self.assertTrue(new_optimizer.optimizer_config == bayesian_optimizer.optimizer_config)
 
-        self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=100)
+        num_iterations = 100
+        self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=num_iterations)
+        convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
+
+        # Now let's make sure we the convergence state is looks reasonable.
+        #
+        random_forest_fit_state = convergence_state.surrogate_model_fit_state
+
+        # Let's look at the goodness of fit.
+        #
+        random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+
+        # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
+        # and should make this test not very flaky.
+        self.assertTrue(random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations)
+
+        # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
+        models_gof_metrics = [random_forest_gof_metrics]
+        for decision_tree_fit_state in random_forest_fit_state.decision_trees_fit_states:
+            models_gof_metrics.append(decision_tree_fit_state.current_train_gof_metrics)
+
+        for model_gof_metrics in models_gof_metrics:
+            self.assertTrue(0 <= model_gof_metrics.relative_absolute_error <= 1) # This could fail if the models are really wrong. Not expected in this unit test though.
+            self.assertTrue(0 <= model_gof_metrics.relative_squared_error <= 1)
+
+            # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
+            n = model_gof_metrics.last_refit_iteration_number
+            self.assertTrue(model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error)
+
+            # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
+            self.assertTrue(model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate)
+
 
     def test_optimizer_with_random_config(self):
-        for _ in range(10):
+        num_random_restarts = 10
+        for i in range(num_random_restarts):
             optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
-            print(f"Creating a bayesian optimizer with config: {optimizer_config.to_dict()}")
+            print(f"[{i+1}/{num_random_restarts}] Creating a bayesian optimizer with config: {optimizer_config.to_dict()}")
             bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
                 optimization_problem=self.optimization_problem,
                 optimizer_config=optimizer_config

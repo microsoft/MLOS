@@ -174,17 +174,16 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.logger = logger
 
         assert RegressionEnhancedRandomForestRegressionModelConfig.contains(model_config)
-        super(RegressionEnhancedRandomForestRegressionModel, self).__init__(
+        RegressionModel.__init__(
+            self,
             model_type=type(self),
-            model_config=model_config
+            model_config=model_config,
+            input_space=input_space,
+            output_space=output_space
         )
-        self.model_config = model_config
 
-        self.input_space = input_space
         self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
-        self.output_space = output_space
         self.output_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
-
         self._input_space_dimension_name_mappings = {
             dimension.name: Dimension.flatten_dimension_name(dimension.name)
             for dimension in self.input_space.dimensions
@@ -264,7 +263,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.root_model_gradient_coef_ = None
 
     @trace()
-    def fit(self, feature_values_pandas_frame, target_values_pandas_frame):
+    def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number=0):
         """ Fits the RegressionEnhancedRandomForest
 
             The issue here is that the feature_values will come in as a numpy array where each column corresponds to one
@@ -407,7 +406,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         return self
 
     @trace()
-    def predict(self, feature_values_pandas_frame):
+    def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
         self.logger.info(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
         check_is_fitted(self)

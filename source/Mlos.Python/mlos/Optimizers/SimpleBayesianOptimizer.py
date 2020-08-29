@@ -146,6 +146,9 @@ class SimpleBayesianOptimizer(OptimizerInterface):
     def observations(self):
         return self._observations
 
+    def get_optimizer_convergence_state(self):
+        return None
+
     def suggest(self, random=False, context=None):  # pylint: disable=redefined-outer-name,unused-argument
 
         suggested_params = None

@@ -19,6 +19,10 @@ class OptimizerInterface(ABC):
         self.optimization_problem = optimization_problem
 
     @abstractmethod
+    def get_optimizer_convergence_state(self):
+        raise NotImplementedError("All subclasses must implement this method.")
+
+    @abstractmethod
     def suggest(self, random=False, context=None) -> Point:
         """ Suggest the next set of parameters to try.
 
