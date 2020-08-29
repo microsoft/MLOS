@@ -9,8 +9,9 @@ import logging
 import multiprocessing
 import pandas as pd
 
+from mlos.global_values import serialize_to_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
-from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerInfo, OptimizerHandle, OptimizerList
+from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
@@ -35,7 +36,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         return str(self._next_optimizer_id - 1)
 
     @contextmanager
-    def exclusive_optimizer(self, request):
+    def exclusive_optimizer(self, optimizer_id):
         """ Context manager to acquire the optimizer lock and yield the corresponding optimizer.
 
         This makes sure that:
@@ -47,7 +48,6 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         :return:
         :raises: KeyError if the optimizer_id was not found.
         """
-        optimizer_id = request.OptimizerHandle.Id
         with self._optimizer_locks_by_optimizer_id[optimizer_id]:
             yield self._optimizers_by_id[optimizer_id]
 
@@ -69,6 +69,15 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             OptimizerHandle=OptimizerHandle(Id=request.Id),
             OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
             OptimizationProblem=optimizer.optimization_problem.to_protobuf()
+        )
+
+    def GetOptimizerConvergenceState(self, request, context):
+        with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
+            serialized_convergence_state = serialize_to_bytes_string(optimizer.get_optimizer_convergence_state())
+
+        return OptimizerConvergenceState(
+            OptimizerHandle=OptimizerHandle(Id=request.Id),
+            SerializedOptimizerConvergenceState=serialized_convergence_state
         )
 
     def CreateOptimizer(self, request: OptimizerService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
@@ -95,7 +104,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
     def Suggest(self, request, context): # pylint: disable=unused-argument
         # TODO: return an error if optimizer not found
         #
-        with self.exclusive_optimizer(request) as optimizer:
+        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             suggested_params = optimizer.suggest(random=request.Random, context=request.Context)
 
         return OptimizerService_pb2.ConfigurationParameters(
@@ -112,7 +121,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objective_values = json.loads(request.Observation.ObjectiveValues.ObjectiveValuesJsonString)
         objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
 
-        with self.exclusive_optimizer(request) as optimizer:
+        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             optimizer.register(feature_values_dataframe, objective_values_dataframe)
 
         return Empty()
@@ -121,7 +130,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
         features_dict = json.loads(request.Features.FeaturesJsonString)
         features_df = pd.DataFrame(features_dict)
-        with self.exclusive_optimizer(request) as optimizer:
+        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             prediction = optimizer.predict(features_df)
         assert isinstance(prediction, Prediction)
 

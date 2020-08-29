@@ -5,15 +5,16 @@
 import math
 import random
 
-import numpy as np
 import pandas as pd
 
 from mlos.Spaces import Dimension, Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.HypergridAdapters import CompositeToSimpleHypergridAdapter
 from mlos.Tracer import trace
 from mlos.Logger import create_logger
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeRegressionModelConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestFitState import HomogeneousRandomForestFitState
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
 
 
@@ -35,7 +36,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
     _DEFAULT = Point(
         n_estimators=5,
         features_fraction_per_estimator=1,
-        samples_fraction_per_estimator=1,
+        samples_fraction_per_estimator=0.7,
         regressor_implementation=DecisionTreeRegressionModel.__name__,
         decision_tree_regression_model_config=DecisionTreeRegressionModelConfig.DEFAULT
     )
@@ -75,7 +76,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
     _PREDICTOR_OUTPUT_COLUMNS = [
         Prediction.LegalColumnNames.IS_VALID_INPUT,
-        Prediction.LegalColumnNames.SAMPLE_MEAN,
+        Prediction.LegalColumnNames.PREDICTED_VALUE,
         Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_SIZE,
@@ -95,13 +96,15 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         self.logger = logger
 
         assert HomogeneousRandomForestRegressionModelConfig.contains(model_config)
-        super(HomogeneousRandomForestRegressionModel, self).__init__(
-            model_type=type(self),
-            model_config=model_config
-        )
 
-        self.input_space = input_space
-        self.output_space = output_space
+        RegressionModel.__init__(
+            self,
+            model_type=type(self),
+            model_config=model_config,
+            input_space=input_space,
+            output_space=output_space,
+            fit_state=HomogeneousRandomForestFitState(input_space=input_space, output_space=output_space)
+        )
 
         self._input_space_adapter = CompositeToSimpleHypergridAdapter(adaptee=self.input_space)
         self._output_space_adapter = CompositeToSimpleHypergridAdapter(adaptee=self.output_space)
@@ -163,6 +166,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
             # TODO: each one of them also needs a sample filter.
             self._decision_trees.append(estimator)
+            self.fit_state.decision_trees_fit_states.append(estimator.fit_state)
 
     @staticmethod
     def _create_random_flat_subspace(original_space, subspace_name, max_num_dimensions):
@@ -188,7 +192,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         return flat_hypergrid
 
     @trace()
-    def fit(self, feature_values_pandas_frame, target_values_pandas_frame):
+    def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number):
         """ Fits the random forest.
 
             The issue here is that the feature_values will come in as a numpy array where each column corresponds to one
@@ -206,30 +210,31 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
         target_values_pandas_frame = self._output_space_adapter.translate_dataframe(target_values_pandas_frame)
 
-        # Let's select samples for each tree
-        total_num_observations = len(feature_values_pandas_frame.index)
-        num_observations_per_estimator = math.ceil(self.model_config.samples_fraction_per_estimator * total_num_observations)
-
-        # TODO: for now feed each _estimator all of the data - they will pick their own.
-        # Later give them a dataset/datastream which would be a wrapper around either SQL or arrow endpoints.
-
         for i, tree in enumerate(self._decision_trees):
-            # Let's filter out the useless samples (samples with missing values)
-            # TODO: DRY - this code is repeated for predict()
+            # Let's filter out samples with missing values
             estimators_df = feature_values_pandas_frame[tree.input_dimension_names]
-            filtered_observations = estimators_df[estimators_df.notnull().all(axis=1)]
-            filtered_targets = target_values_pandas_frame.iloc[filtered_observations.index]
-            num_filtered_observations = len(filtered_observations.index)
-            # We seed so that each time they are fitted on the same subset
-            np.random.seed(i)
-            # We are selecting a subset of observations to decorellate the models.
-            # TODO: the excluded samples can be used as a test set.
-            #
-            selected_observation_ids = random.sample(range(num_filtered_observations), min(num_filtered_observations, num_observations_per_estimator))
-            num_selected_observations = len(selected_observation_ids)
+            non_null_observations = estimators_df[estimators_df.notnull().all(axis=1)]
+            targets_for_non_null_observations = target_values_pandas_frame.loc[non_null_observations.index]
+
+            observations_for_tree_training = non_null_observations.sample(
+                frac=self.model_config.samples_fraction_per_estimator,
+                replace=False, # TODO: add options to control bootstrapping vs. subsampling,
+                random_state=i,
+                axis='index'
+            )
+            observations_for_tree_validation = non_null_observations.loc[non_null_observations.index.difference(observations_for_tree_training.index)]
+            num_selected_observations = len(observations_for_tree_training.index)
             if tree.should_fit(num_selected_observations):
-                assert len(filtered_observations.index) == len(filtered_targets.index)
-                tree.fit(filtered_observations.iloc[selected_observation_ids], filtered_targets.iloc[selected_observation_ids])
+                assert len(non_null_observations.index) == len(targets_for_non_null_observations.index)
+                targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
+                tree.fit(observations_for_tree_training, targets_for_tree_training, iteration_number)
+                tree.compute_goodness_of_fit(observations_for_tree_training, targets_for_tree_training, data_set_type=DataSetType.TRAIN)
+                if not observations_for_tree_validation.empty:
+                    targets_for_tree_validation = targets_for_non_null_observations.loc[observations_for_tree_validation.index]
+                    tree.compute_goodness_of_fit(observations_for_tree_validation, targets_for_tree_validation, data_set_type=DataSetType.VALIDATION)
+
+        self.last_refit_iteration_number = max(tree.last_refit_iteration_number for tree in self._decision_trees)
+        self.fitted = any(tree.fitted for tree in self._decision_trees)
 
     @trace()
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
@@ -239,7 +244,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         section: 4.3.2 for details
 
         :param feature_values_pandas_frame:
-        :return: TODO: https://msdata.visualstudio.com/Database%20Systems/_backlogs/backlog/MLOS/Epics/?showParents=true&workitem=743670
+        :return: Prediction
         """
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
@@ -247,8 +252,8 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
         # dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
-        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-        mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
+        predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
         dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
@@ -260,9 +265,9 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
         # We will be concatenating all these prediction dataframes together, but to to avoid duplicate columns, we first rename them.
         #
-        old_names = [sample_mean_col, mean_var_col, sample_var_col, sample_size_col]
-        sample_mean_col_names_per_tree = [f"{sample_mean_col}_{i}" for i in range(num_prediction_dataframes)]
-        mean_var_col_names_per_tree = [f"{mean_var_col}_{i}" for i in range(num_prediction_dataframes)]
+        old_names = [predicted_value_col, predicted_value_var_col, sample_var_col, sample_size_col, dof_col]
+        predicted_value_col_names_per_tree = [f"{predicted_value_col}_{i}" for i in range(num_prediction_dataframes)]
+        mean_var_col_names_per_tree = [f"{predicted_value_var_col}_{i}" for i in range(num_prediction_dataframes)]
         sample_var_col_names_per_tree = [f"{sample_var_col}_{i}" for i in range(num_prediction_dataframes)]
         sample_size_col_names_per_tree = [f"{sample_size_col}_{i}" for i in range(num_prediction_dataframes)]
 
@@ -276,18 +281,18 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         # This creates a 'wide' dataframe with unique column names.
         #
         all_predictions_df = pd.concat(prediction_dataframes_per_tree, axis=1)
-        all_predictions_df[sample_mean_col] = all_predictions_df[sample_mean_col_names_per_tree].apply('mean', axis=1)
+        all_predictions_df[predicted_value_col] = all_predictions_df[predicted_value_col_names_per_tree].apply('mean', axis=1)
 
         # To compute the pooled variance we will use the second to last form of the equation from the paper:
         #   paper: https://arxiv.org/pdf/1211.0906.pdf
         #   section: section: 4.3.2 for details
-        all_predictions_df[mean_var_col] = all_predictions_df[mean_var_col_names_per_tree].mean(axis=1) \
-                                             + (all_predictions_df[sample_mean_col_names_per_tree] ** 2).mean(axis=1) \
-                                             - all_predictions_df[sample_mean_col] ** 2
+        all_predictions_df[predicted_value_var_col] = all_predictions_df[mean_var_col_names_per_tree].mean(axis=1) \
+                                             + (all_predictions_df[predicted_value_col_names_per_tree] ** 2).mean(axis=1) \
+                                             - all_predictions_df[predicted_value_col] ** 2
         all_predictions_df[sample_var_col] = all_predictions_df[sample_var_col_names_per_tree].mean(axis=1) \
-                                             + (all_predictions_df[sample_mean_col_names_per_tree] ** 2).mean(axis=1) \
-                                             - all_predictions_df[sample_mean_col] ** 2
-        all_predictions_df[sample_size_col] = all_predictions_df[sample_mean_col_names_per_tree].count(axis=1)
+                                             + (all_predictions_df[predicted_value_col_names_per_tree] ** 2).mean(axis=1) \
+                                             - all_predictions_df[predicted_value_col] ** 2
+        all_predictions_df[sample_size_col] = all_predictions_df[predicted_value_col_names_per_tree].count(axis=1)
         all_predictions_df[dof_col] = all_predictions_df[sample_size_col_names_per_tree].sum(axis=1) - all_predictions_df[sample_size_col]
         all_predictions_df[is_valid_input_col] = True
 

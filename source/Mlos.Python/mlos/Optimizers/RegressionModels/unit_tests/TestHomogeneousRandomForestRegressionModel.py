@@ -53,8 +53,8 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
             output_space=self.output_space
         )
 
-        for _ in range(2):
-            model.fit(self.input_pandas_dataframe, self.output_pandas_dataframe)
+        for i in range(2):
+            model.fit(self.input_pandas_dataframe, self.output_pandas_dataframe, iteration_number=i)
             print("Random forest predictions")
 
             sample_inputs = {'x': np.linspace(start=-10, stop=110, num=13, endpoint=True)}
@@ -85,7 +85,7 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
                 input_space=self.input_space,
                 output_space=self.output_space
             )
-            model.fit(self.input_pandas_dataframe, self.output_pandas_dataframe)
+            model.fit(self.input_pandas_dataframe, self.output_pandas_dataframe, iteration_number=i)
             predictions = model.predict(sample_inputs_pandas_dataframe)
             for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'],
                                                 predictions.get_dataframe().iterrows()):

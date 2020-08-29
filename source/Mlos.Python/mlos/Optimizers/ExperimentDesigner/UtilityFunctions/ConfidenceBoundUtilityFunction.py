@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import numpy as np
 from scipy.stats import t
 from mlos.Logger import create_logger
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point, DefaultConfigMeta
@@ -53,20 +54,20 @@ class ConfidenceBoundUtilityFunction:
     def __call__(self, feature_values_pandas_frame):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
-        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
-        mean_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
+        predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
         predictions = self.surrogate_model.predict(feature_values_pandas_frame)
         predictions_df = predictions.get_dataframe()
 
         t_values = t.ppf(1 - self.config.alpha / 2.0, predictions_df[dof_col])
-        confidence_interval_radii = t_values * predictions_df[mean_var_col].apply('sqrt')
+        confidence_interval_radii = t_values * np.sqrt(predictions_df[predicted_value_var_col])
 
         if self.config.utility_function_name == "lower_confidence_bound_on_improvement":
-            utility_function_values = predictions_df[sample_mean_col] * self._sign - confidence_interval_radii
+            utility_function_values = predictions_df[predicted_value_col] * self._sign - confidence_interval_radii
         elif self.config.utility_function_name == "upper_confidence_bound_on_improvement":
-            utility_function_values = predictions_df[sample_mean_col] * self._sign + confidence_interval_radii
+            utility_function_values = predictions_df[predicted_value_col] * self._sign + confidence_interval_radii
         else:
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 

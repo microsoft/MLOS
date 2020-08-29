@@ -8,11 +8,12 @@ from mlos.Logger import create_logger
 from mlos.Tracer import trace
 from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
 
-
-from .OptimizerInterface import OptimizerInterface
-from .OptimizationProblem import OptimizationProblem
-from .ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, ExperimentDesignerConfig
-from .RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel,\
+from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
+from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, ExperimentDesignerConfig
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel,\
     HomogeneousRandomForestRegressionModelConfig
 
 
@@ -93,18 +94,24 @@ class BayesianOptimizer(OptimizerInterface):
             logger=self.logger
         )
 
+        self._optimizer_convergence_state = BayesianOptimizerConvergenceState(
+            surrogate_model_fit_state=self.surrogate_model.fit_state
+        )
+
         # Also let's make sure we have the dataframes we need for the surrogate model.
         # TODO: this will need a better home - either a DataSet class or the surrogate model itself.
         self._feature_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.parameter_space.dimensions])
         self._target_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.objective_space.dimensions])
 
-    def get_experiment_data(self):
-        return self._feature_values_df.copy(), self._target_values_df.copy()
-
     @property
     def num_observed_samples(self):
         return len(self._feature_values_df.index)
 
+    def get_optimizer_convergence_state(self):
+        return self._optimizer_convergence_state
+
+    def get_experiment_data(self):
+        return self._feature_values_df.copy(), self._target_values_df.copy()
 
     @trace()
     def suggest(self, random=False, context=None):
@@ -115,23 +122,15 @@ class BayesianOptimizer(OptimizerInterface):
     @trace()
     def register(self, feature_values_pandas_frame, target_values_pandas_frame):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
-        # and should be able to refit automatically.
+        # TODO: and should be able to refit automatically.
 
         self._feature_values_df = self._feature_values_df.append(feature_values_pandas_frame, ignore_index=True)
         self._target_values_df = self._target_values_df.append(target_values_pandas_frame, ignore_index=True)
 
-        # This was so freakin slow! It might be worthwhile for when the incoming observations are tiny, but not for bulk
-        # for incoming_df_row_id in range(num_new_observations):
-        #    # we are adding to the existing observations using .loc[] because it appends to an existing dataframe
-        #    # in place. paradoxically .append() returns a new dataframe. This really needs to be in a DataSet class
-        #    # so that all this logic is in one place.
-        #    existing_df_row_id = num_existing_observations + incoming_df_row_id
-        #    self._feature_values_df.loc[existing_df_row_id] = feature_values_pandas_frame.loc[incoming_df_row_id]
-        #    self._target_values_df.loc[existing_df_row_id] = target_values_pandas_frame.loc[incoming_df_row_id]
-
         # TODO: ascertain that min_samples_required ... is more than min_samples to fit the model
         if self.num_observed_samples >= self.optimizer_config.min_samples_required_for_guided_design_of_experiments:
-            self.surrogate_model.fit(self._feature_values_df, self._target_values_df)
+            self.surrogate_model.fit(self._feature_values_df, self._target_values_df, iteration_number=len(self._feature_values_df.index))
+            self.surrogate_model.compute_goodness_of_fit(self._feature_values_df, self._target_values_df, DataSetType.TRAIN)
 
     @trace()
     def predict(self, feature_values_pandas_frame, t=None):
