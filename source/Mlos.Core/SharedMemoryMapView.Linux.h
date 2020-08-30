@@ -1,24 +1,47 @@
+//*********************************************************************
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root
+// for license information.
+//
+// @File: SharedMemoryMapView.Linux.h
+//
+// Purpose:
+//      <description>
+//
+// Notes:
+//      <special-instructions>
+//
+//*********************************************************************
+
 #pragma once
 
 namespace Mlos
 {
 namespace Core
 {
-
 class SharedMemoryMapView
 {
 public:
     SharedMemoryMapView() noexcept;
 
-    SharedMemoryMapView(SharedMemoryMapView&& SharedMemoryMapView) noexcept;
+    SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept;
 
+    ~SharedMemoryMapView();
+
+    // Creates a shared memory view.
+    //
     _Check_return_
-    HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+    HRESULT Create(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
+    // Opens already created shared memory view.
+    //
     _Check_return_
     HRESULT Open(const char* const sharedMemoryMapName) noexcept;
 
-    ~SharedMemoryMapView();
+    // Creates or opens a shared memory view.
+    //
+    _Check_return_
+    HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
 private:
     _Check_return_
@@ -29,7 +52,7 @@ public:
     BytePtr Buffer;
 
 private:
-    // HANDLE m_hMapFile;
+    int m_fdSharedMemory;
 };
 
 }

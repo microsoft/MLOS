@@ -30,55 +30,20 @@ public:
       : SharedMemoryMapView(std::move(sharedMemoryRegionView))
     {}
 
+    // Opens already created shared memory view.
+    //
     _Check_return_
-    HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
-    {
-        HRESULT hr;
-        hr = SharedMemoryMapView::CreateOrOpen(sharedMemoryMapName, memSize);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+    HRESULT Create(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
-        if (hr == S_FALSE)
-        {
-            // We opened a existing shared memory view. Do not initialize it.
-            //
-            return hr;
-        }
-
-        // Initialize the memory region header.
-        //
-        {
-            T& memoryRegion = MemoryRegion();
-
-            memoryRegion.MemoryHeader.Signature = 0x67676767;
-            memoryRegion.MemoryHeader.MemoryRegionSize = MemSize;
-            memoryRegion.MemoryHeader.MemoryRegionCodeTypeIndex = TypeMetadataInfo::CodegenTypeIndex<T>();
-        }
-
-        // Initialize the memory region.
-        //
-        {
-            T& memoryRegion = InitializeMemoryRegion();
-            (void)memoryRegion;
-        }
-
-        return hr;
-    }
-
+    // Creates or opens a shared memory view.
+    //
     _Check_return_
-    HRESULT Open(const char* const sharedMemoryMapName) noexcept
-    {
-        HRESULT hr;
-        hr = SharedMemoryMapView::Open(sharedMemoryMapName);
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+    HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
-        return hr;
-    }
+    // Opens already created shared memory view.
+    //
+    _Check_return_
+    HRESULT Open(const char* const sharedMemoryMapName) noexcept;
 
     T& MemoryRegion()
     {
@@ -90,6 +55,9 @@ public:
     {
         return *reinterpret_cast<TCodegenType*>(Buffer.Pointer + offset);
     }
+
+private:
+    void InitializeMemoryRegionView();
 
     T& InitializeMemoryRegion();
 };

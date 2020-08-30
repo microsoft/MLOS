@@ -14,6 +14,7 @@
       <Filter>MemoryRegions</Filter>
     </ClCompile>
     <ClCompile Include="Security.Windows.cpp" />
+    <ClCompile Include="SharedMemoryRegionView.inl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_base.h">

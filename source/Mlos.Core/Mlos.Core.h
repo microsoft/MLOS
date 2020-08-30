@@ -46,8 +46,10 @@
 // Linux.
 //
 #include <errno.h>
-typedef unsigned int HRESULT;
+typedef int32_t HRESULT;
 typedef unsigned char byte;
+
+constexpr int32_t INVALID_FD_VALUE = -1;
 
 // Ignore some SAL annotations in Linux
 
@@ -63,6 +65,7 @@ typedef unsigned char byte;
 #define S_FALSE 1
 #define E_OUTOFMEMORY (-ENOMEM)
 #define E_NOT_SET (-ENOENT)
+#define HRESULT_FROM_ERRNO(errno) (-errno)
 
 #endif
 
@@ -103,6 +106,7 @@ typedef unsigned char byte;
 #include "Mlos.Core/SettingsProvider_gen_dispatch.h"
 
 #include "SharedMemoryRegionView.h"
+#include "SharedMemoryRegionView.inl"
 
 // Include shared channel implementation.
 //

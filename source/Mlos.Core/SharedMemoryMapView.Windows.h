@@ -37,6 +37,11 @@ public:
 
     ~SharedMemoryMapView();
 
+    // Creates a shared memory view.
+    //
+    _Check_return_
+    HRESULT Create(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+
     // Opens already created shared memory view.
     //
     _Check_return_
@@ -50,10 +55,6 @@ public:
     // Closes a shared memory handle.
     //
     void Close();
-
-protected:
-    _Check_return_
-    HRESULT Create(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
 private:
     _Check_return_
