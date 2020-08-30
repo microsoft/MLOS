@@ -63,6 +63,7 @@
     <ClInclude Include="SharedConfigManager.h" />
     <ClInclude Include="SharedConfigMemoryRegion.h" />
     <ClInclude Include="SharedMemoryMapView.Windows.h" />
+    <ClInclude Include="SharedMemoryRegionView.inl" />
     <ClInclude Include="SharedMemoryRegionView.h" />
     <ClInclude Include="StaticSingleton.h" />
     <ClInclude Include="StaticVector.h" />

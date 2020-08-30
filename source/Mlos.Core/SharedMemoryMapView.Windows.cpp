@@ -57,7 +57,7 @@ SharedMemoryMapView::~SharedMemoryMapView()
 // NAME: SharedMemoryMapView::Create
 //
 // PURPOSE:
-//  Creates a shared memory map view and initialize memory view.
+//  Creates a shared memory map view.
 //
 // RETURNS:
 //  HRESULT.

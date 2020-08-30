@@ -28,6 +28,7 @@
 #include "Mlos.Core.inl"
 
 #include <future>
+#include <vector>
 
 using namespace Mlos::Core;
 using namespace SmartSharedChannel;

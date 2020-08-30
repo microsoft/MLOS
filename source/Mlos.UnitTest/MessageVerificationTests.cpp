@@ -3,7 +3,7 @@
 // Licensed under the MIT License. See License.txt in the project root
 // for license information.
 //
-// @File: BufferTests.cpp
+// @File: MessageVerificationTests.cpp
 //
 // Purpose:
 //      <description>
@@ -74,7 +74,7 @@ TEST(MessageVerification, VerifyVariableDataMessages)
     }
 
     // First terminate feedback channel.
-    // Wait untill there are no active readers on the channel.
+    // Wait until there are no active readers on the channel.
     //
     mlosContext.TerminateControlChannel();
 
@@ -131,7 +131,7 @@ TEST(MessageVerification, DetectInvalidDataMessages)
         });
 
     // First terminate feedback channel.
-    // Wait untill there are no active readers on the channel.
+    // Wait until there are no active readers on the channel.
     //
     // mlosContext.TerminateControlChannel();
 

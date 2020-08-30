@@ -1,3 +1,18 @@
+//*********************************************************************
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root
+// for license information.
+//
+// @File: SharedConfigManager.inl
+//
+// Purpose:
+//      <description>
+//
+// Notes:
+//      <special-instructions>
+//
+//*********************************************************************
+
 #pragma once
 
 namespace Mlos
@@ -174,7 +189,6 @@ HRESULT SharedConfigManager::Lookup(ComponentConfig<T>& componentConfig)
 
     return E_NOT_SET;
 }
-
 
 }
 }

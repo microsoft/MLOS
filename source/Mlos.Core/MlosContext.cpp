@@ -109,7 +109,7 @@ HRESULT MlosContext::RegisterSettingsAssembly(
         //
         ++m_globalMemoryRegion.RegisteredSettingsAssemblyCount;
 
-        // Send message to Mlos.Agent to load the settings asembly.
+        // Send message to Mlos.Agent to load the settings assembly.
         //
         Internal::RegisterAssemblyRequestMessage registerAssemblyRequestMsg = { 0 };
         registerAssemblyRequestMsg.AssemblyIndex = assemblyIndex;
@@ -250,19 +250,19 @@ HRESULT InternalMlosContextInitializer::Initialize()
 {
     const size_t SharedMemorySize = 65536;
 
-    HRESULT hr = m_globalMemoryRegionView.CreateOrOpen("Test_Mlos.GlobalMemory", SharedMemorySize);
+    HRESULT hr = m_globalMemoryRegionView.Create("Test_Mlos.GlobalMemory", SharedMemorySize);
     if (FAILED(hr))
     {
         return hr;
     }
 
-    hr = m_controlChannelMemoryMapView.CreateOrOpen("Test_SharedChannelMemory", SharedMemorySize);
+    hr = m_controlChannelMemoryMapView.Create("Test_SharedChannelMemory", SharedMemorySize);
     if (FAILED(hr))
     {
         return hr;
     }
 
-    hr = m_feedbackChannelMemoryMapView.CreateOrOpen("Test_FeedbackChannelMemory", SharedMemorySize);
+    hr = m_feedbackChannelMemoryMapView.Create("Test_FeedbackChannelMemory", SharedMemorySize);
     if (FAILED(hr))
     {
         return hr;
