@@ -89,12 +89,12 @@ class RegressionModel(ABC):
             absolute_target_variation = (target_value - target_mean).abs()
             squared_target_variation = absolute_target_variation ** 2
             sum_absolute_target_variation = absolute_target_variation.sum()
-            sum_squared_target_variation = squared_target_variation.sum()
+            sum_squared_target_variation = squared_target_variation.sum()  # a.k.a.: total sum of squares
             error = target_value - predictions_df[predicted_value_col]
             absolute_error = error.abs()
             squared_error = error ** 2
             sum_absolute_error = absolute_error.sum()
-            sum_squared_error = squared_error.sum()
+            sum_squared_error = squared_error.sum()  # a.k.a.: residal sum of squares
 
             mean_absolute_error = sum_absolute_error / num_predictions
             root_mean_squared_error = np.sqrt(sum_squared_error / num_predictions)
@@ -102,13 +102,18 @@ class RegressionModel(ABC):
                 relative_absolute_error = sum_absolute_error / sum_absolute_target_variation
                 relative_squared_error = np.sqrt(sum_squared_error / sum_squared_target_variation)
 
+            coefficient_of_determination = 1 - (sum_squared_error/sum_squared_target_variation)
+
+            # TODO: Ask Ed about which degrees of freedom to use here...
+            # adjusted_coefficient_of_determination = ...
+
             t_values_90_percent = t.ppf(0.95, predictions_df[dof_col])
+            # t_values_95_percent = t.ppf(0.975, predictions_df[dof_col])
+            # t_values_99_percent = t.ppf(0.995, predictions_df[dof_col])
             prediction_90_ci_radius = t_values_90_percent * np.sqrt(predictions_df[predicted_value_var_col])
             sample_90_ci_radius = t_values_90_percent * np.sqrt(predictions_df[sample_var_col])
             prediction_90_ci_hit_rate = (absolute_error < prediction_90_ci_radius).mean()
             sample_90_ci_hit_rate = (absolute_error < sample_90_ci_radius).mean()
-            # t_values_95_percent = t.ppf(0.975, predictions_df[dof_col])
-            # t_values_99_percent = t.ppf(0.995, predictions_df[dof_col])
 
         gof_metrics = GoodnessOfFitMetrics(
             last_refit_iteration_number=self.last_refit_iteration_number,
@@ -119,7 +124,7 @@ class RegressionModel(ABC):
             root_mean_squared_error=root_mean_squared_error,
             relative_absolute_error=relative_absolute_error,
             relative_squared_error=relative_squared_error,
-            coefficient_of_determination=None,
+            coefficient_of_determination=coefficient_of_determination,
             adjusted_coefficient_of_determination=None,
             prediction_90_ci_hit_rate=prediction_90_ci_hit_rate,
             prediction_95_ci_hit_rate=None,
