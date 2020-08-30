@@ -126,6 +126,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
             self.assertTrue(model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate)
+            self.assertTrue(0 <= model_gof_metrics.coefficient_of_determination <= 1)
 
 
     def test_optimizer_with_random_config(self):
