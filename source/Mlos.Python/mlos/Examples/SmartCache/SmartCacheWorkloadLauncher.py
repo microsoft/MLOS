@@ -28,8 +28,8 @@ class SmartCacheWorkloadLauncher:
         self._smart_cache_workload = SmartCacheWorkloadGenerator(logger=logger)
         self._smart_cache_workload_thread = None
 
-    def start_workload(self, block=True):
-        self._smart_cache_workload_thread = Thread(target=self._smart_cache_workload.run)
+    def start_workload(self, duration_s=1, block=True):
+        self._smart_cache_workload_thread = Thread(target=self._smart_cache_workload.run, args=(duration_s,))
         self._smart_cache_workload_thread.start()
         if block:
             self._smart_cache_workload_thread.join()

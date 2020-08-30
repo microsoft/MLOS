@@ -8,6 +8,8 @@ import time
 from functools import wraps
 from typing import Dict
 
+import pandas as pd
+
 from . import global_values
 
 
@@ -30,15 +32,13 @@ def trace():
                     arguments = None
                     if result is not None and isinstance(result, (str, int, float, bool)):
                         arguments = {'result': result}
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns,
-                                           arguments=arguments)
+                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, arguments=arguments)
                 except Exception as e:
                     arguments = {'exception': str(e)}
                     end_timestamp_ns = int(time.time() * 1000000)
                     if end_timestamp_ns <= start_timestamp_ns:
                         end_timestamp_ns += 100
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns,
-                                           arguments=arguments)
+                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, arguments=arguments)
                     raise e
 
             else:
@@ -148,6 +148,11 @@ class Tracer:
 
                 if isinstance(value, (str, int, bool, float)):
                     args_json[key] = value
+                elif isinstance(value, pd.DataFrame):
+                    args_json[key] = {
+                        "columns": [name for name in value.columns.values],
+                        "num_rows": len(value.index)
+                    }
                 else:
                     try:
                         value = str(value)

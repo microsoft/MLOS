@@ -2,12 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-
 import json
-
 import pandas as pd
-
-from .Dimensions.Dimension import Dimension
+from mlos.Spaces.Dimensions.Dimension import Dimension
 
 
 class Point:
@@ -54,6 +51,19 @@ class Point:
 
     def __getattr__(self, dimension_name):
         return self[dimension_name]
+
+    def __setattr__(self, name, value):
+        if name == "dimension_value_dict":
+            self.__dict__[name] = value
+        else:
+            dimension_name = name
+            subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(dimension_name)
+            if subgrid_name is None:
+                self.dimension_value_dict[dimension_name] = value
+            else:
+                point_in_subgrid = self.dimension_value_dict.get(subgrid_name, Point())
+                point_in_subgrid[dimension_name_without_subgrid_name] = value
+                self.dimension_value_dict[subgrid_name] = point_in_subgrid
 
     def __getitem__(self, dimension_name):
         if dimension_name not in self:
@@ -103,5 +113,13 @@ class Point:
     def to_dict(self):
         return {param_name: value for param_name, value in self}
 
-    def to_pandas(self):
+    def to_dataframe(self):
         return pd.DataFrame({param_name: [value] for param_name, value in self})
+
+    @classmethod
+    def from_dataframe(cls, dataframe: pd.DataFrame):
+        assert len(dataframe.index) == 1
+        dataframe = dataframe.dropna(axis=1)
+        dataframe_dict = dataframe.to_dict(orient='list')
+        point_dict = {key: values[0] for key, values in dataframe_dict.items()}
+        return Point(**point_dict)

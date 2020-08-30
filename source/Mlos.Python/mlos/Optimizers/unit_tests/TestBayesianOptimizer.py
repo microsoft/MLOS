@@ -16,6 +16,7 @@ from mlos.Tracer import Tracer
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
@@ -56,7 +57,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        trace_output_path = os.path.join(cls.temp_dir, "OptimizerTestTrace.json")
+        trace_output_path = os.path.join(cls.temp_dir, "TestBayesianOptimizerTrace.json")
         print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
@@ -122,16 +123,6 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         print(bayesian_optimizer.optimum())
 
-    def test_bayesian_optimizer_default_copies_parameters(self):
-        config = BayesianOptimizerConfig.DEFAULT
-        config.min_samples_required_for_guided_design_of_experiments = 1
-        config.experiment_designer_config.fraction_random_suggestions = .1
-
-        original_config = BayesianOptimizerConfig.DEFAULT
-        assert original_config.min_samples_required_for_guided_design_of_experiments == 10
-        print(original_config.experiment_designer_config.fraction_random_suggestions)
-        assert original_config.experiment_designer_config.fraction_random_suggestions == .5
-
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
@@ -140,8 +131,8 @@ class TestBayesianOptimizer(unittest.TestCase):
         input_space = SimpleHypergrid(
             name="input",
             dimensions=[
-                ContinuousDimension(name='x_1', min=-100, max=100),
-                ContinuousDimension(name='x_2', min=-100, max=100)
+                ContinuousDimension(name='x_1', min=-10, max=10),
+                ContinuousDimension(name='x_2', min=-10, max=10)
             ]
         )
 
@@ -158,29 +149,65 @@ class TestBayesianOptimizer(unittest.TestCase):
             objectives=[Objective(name='y', minimize=True)]
         )
 
+        optimizer_config = BayesianOptimizerConfig.DEFAULT
+        optimizer_config.min_samples_required_for_guided_design_of_experiments = 50
+        optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
+        optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
+        optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 2
+
+        print(optimizer_config.to_json(indent=2))
+
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT,
+            optimizer_config=optimizer_config,
             logger=self.logger
         )
 
-        num_guided_samples = 20
-        for i in range(num_guided_samples):
+        num_iterations = 62
+        for i in range(num_iterations):
             suggested_params = bayesian_optimizer.suggest()
             suggested_params_dict = suggested_params.to_dict()
-
             target_value = quadratic(**suggested_params_dict)
-            print(suggested_params, target_value)
+            print(f"[{i+1}/{num_iterations}] Suggested params: {suggested_params_dict}, target_value: {target_value}")
 
             input_values_df = pd.DataFrame({param_name: [param_value] for param_name, param_value in suggested_params_dict.items()})
             target_values_df = pd.DataFrame({'y': [target_value]})
 
             bayesian_optimizer.register(input_values_df, target_values_df)
-            if i > 20 and i % 20 == 0:
-                print(f"[{i}/{num_guided_samples}] Optimum: {bayesian_optimizer.optimum()}")
+            if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
+                print(f"[{i}/{num_iterations}] Optimum: {bayesian_optimizer.optimum()}")
+                convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
+                random_forest_fit_state = convergence_state.surrogate_model_fit_state
+                random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+                print(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}, Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
 
-        print(bayesian_optimizer.optimum())
+        convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
+        random_forest_fit_state = convergence_state.surrogate_model_fit_state
+        random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+        self.assertTrue(random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations)
+        models_gof_metrics = [random_forest_gof_metrics]
+        for decision_tree_fit_state in random_forest_fit_state.decision_trees_fit_states:
+            models_gof_metrics.append(decision_tree_fit_state.current_train_gof_metrics)
 
+        for model_gof_metrics in models_gof_metrics:
+            self.assertTrue(0 <= model_gof_metrics.relative_absolute_error <= 1)  # This could fail if the models are really wrong. Not expected in this unit test though.
+            self.assertTrue(0 <= model_gof_metrics.relative_squared_error <= 1)
+
+            # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
+            n = model_gof_metrics.last_refit_iteration_number
+            self.assertTrue(model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error)
+
+            # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
+            self.assertTrue(model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate)
+
+        goodness_of_fit_df = random_forest_fit_state.get_goodness_of_fit_dataframe(data_set_type=DataSetType.TRAIN)
+        print(goodness_of_fit_df.head())
+
+        goodness_of_fit_df = random_forest_fit_state.get_goodness_of_fit_dataframe(
+            data_set_type=DataSetType.TRAIN,
+            deep=True
+        )
+        print(goodness_of_fit_df.head())
 
     def test_hierarchical_quadratic_cold_start(self):
 
@@ -279,3 +306,14 @@ class TestBayesianOptimizer(unittest.TestCase):
                     out_file.write(f"{restart_num} failed.\n")
                     out_file.write(f"Exception: {e}")
         self.assertFalse(has_failed)
+
+
+    def test_bayesian_optimizer_default_copies_parameters(self):
+        config = BayesianOptimizerConfig.DEFAULT
+        config.min_samples_required_for_guided_design_of_experiments = 1
+        config.experiment_designer_config.fraction_random_suggestions = .1
+
+        original_config = BayesianOptimizerConfig.DEFAULT
+        assert original_config.min_samples_required_for_guided_design_of_experiments == 10
+        print(original_config.experiment_designer_config.fraction_random_suggestions)
+        assert original_config.experiment_designer_config.fraction_random_suggestions == .5

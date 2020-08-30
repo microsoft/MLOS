@@ -21,22 +21,26 @@ class TestE2EScenarios(unittest.TestCase):
 
     """
 
-    def setUp(self) -> None:
+    @classmethod
+    def setUpClass(cls) -> None:
         mlos_globals.init_mlos_global_context()
-        self.logger = create_logger('TestE2EScenarios')
-        self.logger.level = logging.INFO
-        self.mlos_agent = MlosAgent(
-            logger=self.logger,
+        cls.logger = create_logger('TestE2EScenarios')
+        cls.logger.level = logging.INFO
+        cls.mlos_agent = MlosAgent(
+            logger=cls.logger,
             communication_channel=mlos_globals.mlos_global_context.communication_channel,
             shared_config=mlos_globals.mlos_global_context.shared_config
         )
-        self.mlos_agent_thread = Thread(target=self.mlos_agent.run)
-        self.mlos_agent_thread.start()
+        cls.mlos_agent_thread = Thread(target=cls.mlos_agent.run)
+        cls.mlos_agent_thread.start()
         mlos_globals.mlos_global_context.start_clock()
+        cls.mlos_agent.add_allowed_component_type(SmartCache)
+        cls.mlos_agent.add_allowed_component_type(SmartCacheWorkloadGenerator)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls) -> None:
+        cls.mlos_agent.stop_all()
         mlos_globals.mlos_global_context.stop_clock()
-        self.mlos_agent.stop_all()
 
     def test_timer(self):
         """ Tests if the timer works with required precision.
@@ -67,11 +71,6 @@ class TestE2EScenarios(unittest.TestCase):
     def test_setting_random_configs_for_smart_cache_workload(self):
 
         workload_duration_s = 1
-
-        # Let's add the allowed component types
-        self.mlos_agent.add_allowed_component_type(SmartCache)
-        self.mlos_agent.add_allowed_component_type(SmartCacheWorkloadGenerator)
-
         # Let's launch the smart_cache_workload
         smart_cache_workload = SmartCacheWorkloadGenerator(logger=self.logger)
         self.current_workload_config_values = smart_cache_workload.current_config.values
@@ -79,11 +78,6 @@ class TestE2EScenarios(unittest.TestCase):
         smart_cache_workload_thread.start()
 
         def _set_random_workload_configuration(elapsed_time_ms):
-            # First check that the config has been consumed
-            #if smart_cache_workload.current_config.values != self.current_workload_config_values:
-            #    print("Put breakpoint here.")
-            #self.assertTrue(smart_cache_workload.current_config.values == self.current_workload_config_values)
-
             new_config_values = SmartCacheWorkloadGenerator.parameter_search_space.random()
             self.mlos_agent.set_configuration(
                 component_type=SmartCacheWorkloadGenerator,
@@ -107,10 +101,6 @@ class TestE2EScenarios(unittest.TestCase):
 
     def test_setting_random_configs_for_smart_cache(self):
         workload_duration_s = 5
-
-        # Let's add the allowed component types
-        self.mlos_agent.add_allowed_component_type(SmartCache)
-        self.mlos_agent.add_allowed_component_type(SmartCacheWorkloadGenerator)
 
         # Let's create the workload
         smart_cache_workload = SmartCacheWorkloadGenerator(logger=self.logger)
@@ -157,10 +147,6 @@ class TestE2EScenarios(unittest.TestCase):
         :return:
         """
         workload_duration_s = 2
-
-        # Let's add the allowed component types
-        self.mlos_agent.add_allowed_component_type(SmartCache)
-        self.mlos_agent.add_allowed_component_type(SmartCacheWorkloadGenerator)
 
 
         # Let's create the workload

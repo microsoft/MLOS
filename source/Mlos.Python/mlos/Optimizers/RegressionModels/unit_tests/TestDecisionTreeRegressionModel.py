@@ -72,7 +72,7 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
             model_config_values = DecisionTreeRegressionModelConfig.CONFIG_SPACE.random()
             print(str(model_config_values))
-            model_config = DecisionTreeRegressionModelConfig(**model_config_values.dimension_value_dict)
+            model_config = DecisionTreeRegressionModelConfig(**model_config_values.to_dict())
             model = DecisionTreeRegressionModel(
                 model_config=model_config,
                 input_space=self.input_space,

@@ -80,6 +80,7 @@ class RegressionModel(ABC):
         root_mean_squared_error = None
         relative_absolute_error = None
         relative_squared_error = None
+        coefficient_of_determination = None
         prediction_90_ci_hit_rate = None
         sample_90_ci_hit_rate = None
 
@@ -101,8 +102,7 @@ class RegressionModel(ABC):
             if sum_absolute_target_variation > 0:
                 relative_absolute_error = sum_absolute_error / sum_absolute_target_variation
                 relative_squared_error = np.sqrt(sum_squared_error / sum_squared_target_variation)
-
-            coefficient_of_determination = 1 - (sum_squared_error/sum_squared_target_variation)
+                coefficient_of_determination = 1 - (sum_squared_error/sum_squared_target_variation)
 
             # TODO: Ask Ed about which degrees of freedom to use here...
             # adjusted_coefficient_of_determination = ...
