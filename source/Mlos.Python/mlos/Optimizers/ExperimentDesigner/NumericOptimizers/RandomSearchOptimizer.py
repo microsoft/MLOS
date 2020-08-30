@@ -2,9 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import numpy as np
-import pandas as pd
-
 from mlos.Logger import create_logger
 from mlos.Tracer import trace
 from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point, DefaultConfigMeta
@@ -66,34 +63,11 @@ class RandomSearchOptimizer:
         TODO: make it capable of consuming the context values
         :return:
         """
-        parameter_names = [
-            dimension.name
-            for dimension
-            in self.optimization_problem.parameter_space.dimensions
-        ]
 
-        candidate_configs = []
-
-        for _ in range(self.config.num_samples_per_iteration):
-            candidate_config = self.optimization_problem.parameter_space.random()
-            candidate_configs.append(candidate_config)
-
-        # Let's build a dictionary to create a dataframe
-        data_dict = {}
-        for parameter_name in parameter_names:
-            parameter_values_per_candidate = []
-            for candidate_config in candidate_configs:
-                if parameter_name in candidate_config:
-                    parameter_values_per_candidate.append(candidate_config[parameter_name])
-                else:
-                    parameter_values_per_candidate.append(np.NaN)
-            data_dict[parameter_name] = parameter_values_per_candidate
-
-        feature_values_dataframe = pd.DataFrame(data_dict)
-
-        utility_function_values = self.utility_function(feature_values_dataframe)
+        feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.config.num_samples_per_iteration)
+        utility_function_values = self.utility_function(feature_values_dataframe.copy(deep=False))
         num_utility_function_values = len(utility_function_values)
         index_of_max_value = utility_function_values.argmax() if num_utility_function_values > 0 else 0
-        config_to_suggest = candidate_configs[index_of_max_value]
+        config_to_suggest = Point.from_dataframe(feature_values_dataframe.iloc[[index_of_max_value]])
         self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
         return config_to_suggest

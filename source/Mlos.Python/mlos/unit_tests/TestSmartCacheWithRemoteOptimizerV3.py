@@ -117,7 +117,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
             smart_cache_workload_thread.join()
 
             current_cache_config = self.mlos_agent.get_configuration(component_type=SmartCache)
-            features_df = current_cache_config.to_pandas()
+            features_df = current_cache_config.to_dataframe()
             hit_rate = self.hit_rate_monitor.get_hit_rate()
             num_requests = self.hit_rate_monitor.num_requests
             working_set_size_estimate = self.working_set_size_estimator.estimate_working_set_size()

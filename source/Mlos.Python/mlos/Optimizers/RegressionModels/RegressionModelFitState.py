@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 from typing import Dict, List
+import pandas as pd
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitMetrics, DataSetType
 from mlos.Spaces import Hypergrid
 
@@ -45,6 +46,28 @@ class RegressionModelFitState:
 
     @property
     def train_set_size(self):
-        if not self.historical_gof_metrics[DataSetType.TRAIN]:
+        if not self.has_any_train_gof_metrics:
             raise RuntimeError("Trying to retrieve training size of an untrained model.")
         return self.current_train_gof_metrics.observation_count
+
+    # pylint: disable=unused-argument
+    def get_goodness_of_fit_dataframe(self, data_set_type: DataSetType, deep=False):
+        """ Converts the historical goodness of fit metrics into a data frame.
+
+        :param data_set_type:
+        :return:
+        """
+        gof_metrics_list = self.historical_gof_metrics[data_set_type]
+        column_names = GoodnessOfFitMetrics._fields
+
+        values = {col_name: [] for col_name in column_names}
+
+        for gof_record in gof_metrics_list:
+            for i, col_name in enumerate(column_names):
+                values[col_name].append(gof_record[i])
+
+        index = pd.Index(values['last_refit_iteration_number'])
+        del values['last_refit_iteration_number']
+        del values['data_set_type']
+        df = pd.DataFrame(values, index=index)
+        return df

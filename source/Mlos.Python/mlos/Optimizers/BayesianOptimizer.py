@@ -24,7 +24,7 @@ class BayesianOptimizerConfig(metaclass=DefaultConfigMeta):
         dimensions=[
             CategoricalDimension(name="surrogate_model_implementation", values=[HomogeneousRandomForestRegressionModel.__name__]),
             CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__]),
-            DiscreteDimension(name="min_samples_required_for_guided_design_of_experiments", min=2, max=100)
+            DiscreteDimension(name="min_samples_required_for_guided_design_of_experiments", min=2, max=10000)
         ]
     ).join(
         subgrid=HomogeneousRandomForestRegressionModelConfig.CONFIG_SPACE,
@@ -117,7 +117,9 @@ class BayesianOptimizer(OptimizerInterface):
     def suggest(self, random=False, context=None):
         # TODO: pass context to the suggest method
         random = random or self.num_observed_samples < self.optimizer_config.min_samples_required_for_guided_design_of_experiments
-        return self.experiment_designer.suggest(random=random)
+        suggested_config = self.experiment_designer.suggest(random=random)
+        assert suggested_config in self.optimization_problem.parameter_space
+        return suggested_config
 
     @trace()
     def register(self, feature_values_pandas_frame, target_values_pandas_frame):
@@ -129,8 +131,12 @@ class BayesianOptimizer(OptimizerInterface):
 
         # TODO: ascertain that min_samples_required ... is more than min_samples to fit the model
         if self.num_observed_samples >= self.optimizer_config.min_samples_required_for_guided_design_of_experiments:
-            self.surrogate_model.fit(self._feature_values_df, self._target_values_df, iteration_number=len(self._feature_values_df.index))
-            self.surrogate_model.compute_goodness_of_fit(self._feature_values_df, self._target_values_df, DataSetType.TRAIN)
+            self.surrogate_model.fit(
+                feature_values_pandas_frame=self._feature_values_df,
+                target_values_pandas_frame=self._target_values_df,
+                iteration_number=len(self._feature_values_df.index)
+            )
+            self.surrogate_model.compute_goodness_of_fit(features_df=self._feature_values_df, target_df=self._target_values_df, data_set_type=DataSetType.TRAIN)
 
     @trace()
     def predict(self, feature_values_pandas_frame, t=None):

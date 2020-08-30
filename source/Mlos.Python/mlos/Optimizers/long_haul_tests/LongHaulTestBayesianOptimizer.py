@@ -171,7 +171,6 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         self.logger.info(f"Optimum: {bayesian_optimizer.optimum()}")
 
-    @unittest.skip(reason="Takes a while and it just ran. TODO: unskip.")
     def test_hierarchical_quadratic_cold_start(self):
 
         output_space = SimpleHypergrid(
@@ -210,7 +209,6 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             self.logger.info(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
 
-    @unittest.skip(reason="Takes a while and it just ran. TODO: unskip.")
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
         output_space = SimpleHypergrid(
@@ -312,7 +310,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             def run_optimization(optimizer):
                 # suggest new value from optimizer
                 suggested_value = optimizer.suggest()
-                input_values_df = suggested_value.to_pandas()
+                input_values_df = suggested_value.to_dataframe()
                 # suggested value are dictionary-like, keys are input space parameter names
                 # evaluate target function
                 target_value = sign * f(suggested_value['x'])

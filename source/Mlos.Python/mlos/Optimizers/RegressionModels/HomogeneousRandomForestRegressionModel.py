@@ -227,11 +227,19 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
             if tree.should_fit(num_selected_observations):
                 assert len(non_null_observations.index) == len(targets_for_non_null_observations.index)
                 targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
-                tree.fit(observations_for_tree_training, targets_for_tree_training, iteration_number)
-                tree.compute_goodness_of_fit(observations_for_tree_training, targets_for_tree_training, data_set_type=DataSetType.TRAIN)
+                tree.fit(
+                    feature_values_pandas_frame=observations_for_tree_training,
+                    target_values_pandas_frame=targets_for_tree_training,
+                    iteration_number=iteration_number
+                )
+                tree.compute_goodness_of_fit(features_df=observations_for_tree_training, target_df=targets_for_tree_training, data_set_type=DataSetType.TRAIN)
                 if not observations_for_tree_validation.empty:
                     targets_for_tree_validation = targets_for_non_null_observations.loc[observations_for_tree_validation.index]
-                    tree.compute_goodness_of_fit(observations_for_tree_validation, targets_for_tree_validation, data_set_type=DataSetType.VALIDATION)
+                    tree.compute_goodness_of_fit(
+                        features_df=observations_for_tree_validation,
+                        target_df=targets_for_tree_validation,
+                        data_set_type=DataSetType.VALIDATION
+                    )
 
         self.last_refit_iteration_number = max(tree.last_refit_iteration_number for tree in self._decision_trees)
         self.fitted = any(tree.fitted for tree in self._decision_trees)
@@ -259,7 +267,10 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
         # collect predictions from ensemble constituent models
-        predictions_per_tree = [estimator.predict(feature_values_pandas_frame, include_only_valid_rows=True) for estimator in self._decision_trees]
+        predictions_per_tree = [
+            estimator.predict(feature_values_pandas_frame=feature_values_pandas_frame, include_only_valid_rows=True)
+            for estimator in self._decision_trees
+        ]
         prediction_dataframes_per_tree = [prediction.get_dataframe() for prediction in predictions_per_tree]
         num_prediction_dataframes = len(prediction_dataframes_per_tree)
 

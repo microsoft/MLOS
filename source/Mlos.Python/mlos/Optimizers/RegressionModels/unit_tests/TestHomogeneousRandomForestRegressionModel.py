@@ -78,7 +78,7 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
             if i % 10 == 0:
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
             model_config_values = HomogeneousRandomForestRegressionModelConfig.CONFIG_SPACE.random()
-            print(str(model_config_values))
+            print(str(model_config_values.to_json(indent=2)))
             model_config = HomogeneousRandomForestRegressionModelConfig(**model_config_values.dimension_value_dict)
             model = HomogeneousRandomForestRegressionModel(
                 model_config=model_config,
@@ -87,6 +87,5 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
             )
             model.fit(self.input_pandas_dataframe, self.output_pandas_dataframe, iteration_number=i)
             predictions = model.predict(sample_inputs_pandas_dataframe)
-            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'],
-                                                predictions.get_dataframe().iterrows()):
+            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'], predictions.get_dataframe().iterrows()):
                 print(sample_input, prediction)
