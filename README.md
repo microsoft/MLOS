@@ -99,7 +99,7 @@ $ pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=s
 However, this does not include the examples.
 
 After this installation, you can run any of the Python-only example notebooks.
-A good place to start is the [introduction to Bayesian Optimization](#).
+A good place to start is the [Introduction to Bayesian Optimization](#) notebook.
 
 ## Full Build (C# and C++ components)
 
