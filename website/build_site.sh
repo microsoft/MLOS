@@ -3,6 +3,9 @@
 cp -r ../documentation content/
 jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks
 
+# nbconvert and hugo disagree about paths
+sed -i 's/BayesianOptimization_files/\.\.\/BayesianOptimization_files/g' content/notebooks/BayesianOptimization.md
+
 cp ../*.md content/
 cp ../LICENSE content/
 cp ../README.md content/_index.md
