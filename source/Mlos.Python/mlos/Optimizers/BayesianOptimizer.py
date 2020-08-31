@@ -6,7 +6,7 @@ import pandas as pd
 
 from mlos.Logger import create_logger
 from mlos.Tracer import trace
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
 
 
 from .OptimizerInterface import OptimizerInterface
@@ -16,7 +16,7 @@ from .RegressionModels.HomogeneousRandomForestRegressionModel import Homogeneous
     HomogeneousRandomForestRegressionModelConfig
 
 
-class BayesianOptimizerConfig:
+class BayesianOptimizerConfig(metaclass=DefaultConfigMeta):
 
     CONFIG_SPACE = SimpleHypergrid(
         name="bayesian_optimizer_config",
@@ -33,7 +33,7 @@ class BayesianOptimizerConfig:
         on_external_dimension=CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__])
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         surrogate_model_implementation=HomogeneousRandomForestRegressionModel.__name__,
         experiment_designer_implementation=ExperimentDesigner.__name__,
         min_samples_required_for_guided_design_of_experiments=10,
@@ -43,7 +43,19 @@ class BayesianOptimizerConfig:
 
 
 class BayesianOptimizer(OptimizerInterface):
+    """Generic Bayesian Optimizer based on regresson model
 
+    Uses extra trees as surrogate model and confidence bound acquisition function by default.
+
+    Attributes
+    ----------
+    logger : Logger
+    optimization_problem : OptimizationProblem
+    surrogate_model : HomogeneousRandomForestRegressionModel
+    optimizer_config : Point
+    experiment_designer: ExperimentDesigner
+
+    """
     def __init__(
             self,
             optimization_problem: OptimizationProblem,
@@ -85,6 +97,9 @@ class BayesianOptimizer(OptimizerInterface):
         # TODO: this will need a better home - either a DataSet class or the surrogate model itself.
         self._feature_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.parameter_space.dimensions])
         self._target_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.objective_space.dimensions])
+
+    def get_experiment_data(self):
+        return self._feature_values_df.copy(), self._target_values_df.copy()
 
     @property
     def num_observed_samples(self):

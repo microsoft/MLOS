@@ -53,7 +53,7 @@ class SklearnRandomForestRegressionModelConfig(RegressionModelConfig):
         ]
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         n_estimators=100,
         criterion=Criterion.MSE.value,
         max_depth=0,  # overloading 0 as None to deal with sklearn param type interpretation
@@ -99,21 +99,21 @@ class SklearnRandomForestRegressionModelConfig(RegressionModelConfig):
 
     def __init__(
             self,
-            n_estimators=DEFAULT.n_estimators,
-            criterion=DEFAULT.criterion,
-            max_depth=DEFAULT.max_depth,
-            min_samples_split=DEFAULT.min_samples_split,
-            min_samples_leaf=DEFAULT.min_samples_leaf,
-            min_weight_fraction_leaf=DEFAULT.min_weight_fraction_leaf,
-            max_features=DEFAULT.max_features,
-            max_leaf_nodes=DEFAULT.max_leaf_nodes,
-            min_impurity_decrease=DEFAULT.min_impurity_decrease,
-            bootstrap=DEFAULT.bootstrap,
-            oob_score=DEFAULT.oob_score,
-            n_jobs=DEFAULT.n_jobs,
-            warm_start=DEFAULT.warm_start,
-            ccp_alpha=DEFAULT.ccp_alpha,
-            max_samples=DEFAULT.max_samples
+            n_estimators=_DEFAULT.n_estimators,
+            criterion=_DEFAULT.criterion,
+            max_depth=_DEFAULT.max_depth,
+            min_samples_split=_DEFAULT.min_samples_split,
+            min_samples_leaf=_DEFAULT.min_samples_leaf,
+            min_weight_fraction_leaf=_DEFAULT.min_weight_fraction_leaf,
+            max_features=_DEFAULT.max_features,
+            max_leaf_nodes=_DEFAULT.max_leaf_nodes,
+            min_impurity_decrease=_DEFAULT.min_impurity_decrease,
+            bootstrap=_DEFAULT.bootstrap,
+            oob_score=_DEFAULT.oob_score,
+            n_jobs=_DEFAULT.n_jobs,
+            warm_start=_DEFAULT.warm_start,
+            ccp_alpha=_DEFAULT.ccp_alpha,
+            max_samples=_DEFAULT.max_samples
     ):
         """
         Random Forest parameters:

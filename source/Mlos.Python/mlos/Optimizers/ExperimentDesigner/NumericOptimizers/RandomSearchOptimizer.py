@@ -7,12 +7,12 @@ import pandas as pd
 
 from mlos.Logger import create_logger
 from mlos.Tracer import trace
-from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point
+from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point, DefaultConfigMeta
 
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
 
-class RandomSearchOptimizerConfig:
+class RandomSearchOptimizerConfig(metaclass=DefaultConfigMeta):
     CONFIG_SPACE = SimpleHypergrid(
         name="random_search_optimizer_config",
         dimensions=[
@@ -20,7 +20,7 @@ class RandomSearchOptimizerConfig:
         ]
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         num_samples_per_iteration=1000
     )
 
@@ -29,7 +29,7 @@ class RandomSearchOptimizerConfig:
         config_key_value_pairs = {param_name: value for param_name, value in config_point}
         return cls(**config_key_value_pairs)
 
-    def __init__(self, num_samples_per_iteration=DEFAULT.num_samples_per_iteration):
+    def __init__(self, num_samples_per_iteration=_DEFAULT.num_samples_per_iteration):
         self.num_samples_per_iteration = num_samples_per_iteration
 
 
@@ -92,7 +92,8 @@ class RandomSearchOptimizer:
         feature_values_dataframe = pd.DataFrame(data_dict)
 
         utility_function_values = self.utility_function(feature_values_dataframe)
-        index_of_max_value = utility_function_values.index(max(utility_function_values))
+        num_utility_function_values = len(utility_function_values)
+        index_of_max_value = utility_function_values.argmax() if num_utility_function_values > 0 else 0
         config_to_suggest = candidate_configs[index_of_max_value]
         self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
         return config_to_suggest

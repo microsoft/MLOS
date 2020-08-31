@@ -20,13 +20,13 @@ namespace Mlos.UnitTest
     [CodegenMessage]
     internal partial class CompositeStructure
     {
-        internal WideStringView Name;
+        internal WideStringPtr Name;
         internal Point Point2d;
         internal Point3D Point3d;
         internal Line Line;
         internal Index2D Index2D;
         internal Index3D Index3D;
-        internal StringView Version;
+        internal StringPtr Version;
     }
 
     // Fixed struct holding a variable length struct.
@@ -37,7 +37,7 @@ namespace Mlos.UnitTest
         internal char Letter;
         internal short ShortInteger;
         internal CompositeStructure BaseComp;
-        internal WideStringView Title;
+        internal WideStringPtr Title;
         internal Point PointNext;
     }
 
@@ -83,7 +83,7 @@ namespace Mlos.UnitTest
     {
         internal int Id;
 
-        internal StringView String;
+        internal StringPtr String;
     }
 
     [CodegenMessage]
@@ -104,7 +104,7 @@ namespace Mlos.UnitTest
         internal int Id;
 
         [FixedSizeArray(length: 5)]
-        internal readonly StringView[] Strings;
+        internal readonly StringPtr[] Strings;
     }
 
     [CodegenMessage]
@@ -113,7 +113,7 @@ namespace Mlos.UnitTest
         internal int Id;
 
         [FixedSizeArray(length: 5)]
-        internal readonly WideStringView[] Strings;
+        internal readonly WideStringPtr[] Strings;
     }
 
     [CodegenMessage]

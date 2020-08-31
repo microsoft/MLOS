@@ -16,6 +16,7 @@
 #pragma once
 
 #include "BytePtr.h"
+#include "StringTypes.h"
 
 // Serialization methods classes.
 // CodeGen will create specialized function templates.
@@ -43,10 +44,10 @@ constexpr inline bool VerifyVariableData(
 {
     // Verify fixed size structure is no-op. Ignore the arguments.
     //
-    (void)object;
-    (void)objectOffset;
-    (void)totalDataSize;
-    (void)expectedDataOffset;
+    UNUSED(object);
+    UNUSED(objectOffset);
+    UNUSED(totalDataSize);
+    UNUSED(expectedDataOffset);
 
     return true;
 }
@@ -126,7 +127,7 @@ constexpr inline size_t GetVariableDataSize(const std::array<Mlos::Core::WideStr
 
     for (const auto& element : object)
     {
-        length += VariableLength(element);
+        length += GetVariableDataSize(element);
     }
 
     return length;
@@ -174,7 +175,7 @@ inline size_t SerializeVariableData(
     for (const auto& element : object)
     {
         size_t elementDataSize = element.Length;
-        memcpy(buffer.Pointer + dataOffset, element.data(), elementDataSize);
+        memcpy(buffer.Pointer + dataOffset, element.Data, elementDataSize);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementDataSize;
 
@@ -198,8 +199,8 @@ inline size_t SerializeVariableData(
 
     for (const auto& element : object)
     {
-        size_t elementDataSize = element.Length() * sizeof(wchar_t);
-        memcpy(buffer.Pointer + dataOffset, element.data(), elementDataSize);
+        size_t elementDataSize = element.Length * sizeof(wchar_t);
+        memcpy(buffer.Pointer + dataOffset, element.Data, elementDataSize);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementDataSize;
 

@@ -25,15 +25,17 @@
 #include <array>
 #include <functional>
 #include <future>
-#include <string_view>
 
 // Mlos.Core.
 //
 #include "Mlos.Core.h"
-#include "MlosPlatform.Std.inl"
 
 // Global dispatch table.
 //
 #include "GlobalDispatchTable.h"
+
+// Mlos.Core.
+//
+#include "Mlos.Core.inl"
 
 using namespace Mlos::Core;

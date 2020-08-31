@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
+from mlos.Spaces import DefaultConfigMeta
 
 
 class RegressionModel(ABC):
@@ -18,7 +19,7 @@ class RegressionModel(ABC):
         self.model_config = model_config
         super().__init__()
 
-class RegressionModelConfig(ABC):
+class RegressionModelConfig(ABC, metaclass=DefaultConfigMeta):
     """ An abstract class for all regression models config to implement.
 
     """

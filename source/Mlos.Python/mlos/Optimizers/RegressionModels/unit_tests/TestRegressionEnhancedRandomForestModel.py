@@ -7,7 +7,7 @@ import unittest
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
-
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import \
     RegressionEnhancedRandomForestRegressionModel, \
     RegressionEnhancedRandomForestRegressionModelConfig
@@ -19,10 +19,13 @@ from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig i
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
 import mlos.global_values as global_values
-global_values.declare_singletons()
 
 
 class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        global_values.declare_singletons()
 
     def setUp(self):
         # Let's create a simple quadratic response function
@@ -52,7 +55,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
                 perform_initial_root_model_hyper_parameter_search=True,
                 perform_initial_random_forest_hyper_parameter_search=True)
 
-    @unittest.expectedFailure  # The configs don't belong to their respective config spaces
+    # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
     def test_lasso_feature_discovery(self):
         rerf = RegressionEnhancedRandomForestRegressionModel(model_config=self.model_config,
                                                              input_space=self.input_space,
@@ -79,7 +82,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         num_diffs = len(list(expected_symm_diff_found))
         assert num_diffs == 0
 
-    @unittest.expectedFailure # The configs don't belong to their respective config spaces
+    # @unittest.expectedFailure # The configs don't belong to their respective config spaces
     def test_lasso_coefficients(self):
         rerf = RegressionEnhancedRandomForestRegressionModel(
             model_config=self.model_config,
@@ -110,8 +113,9 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         num_incorrect_terms = len(incorrect_terms)
         assert num_incorrect_terms == 0
 
-    @unittest.expectedFailure  # The configs don't belong to their respective config spaces
+    # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
     def test_polynomial_gradient(self):
+        print(self.model_config)
         rerf = RegressionEnhancedRandomForestRegressionModel(model_config=self.model_config,
                                                              input_space=self.input_space,
                                                              output_space=self.output_space)
@@ -136,3 +140,34 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         incorrect_terms = np.where(np.abs(true_gradient_coef - rerf.root_model_gradient_coef_) > epsilon)[0]
         num_incorrect_terms = len(incorrect_terms)
         assert num_incorrect_terms == 0
+
+    # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
+    def test_predictions(self):
+        rerf = RegressionEnhancedRandomForestRegressionModel(
+            model_config=self.model_config,
+            input_space=self.input_space,
+            output_space=self.output_space
+        )
+        num_x = 100
+        np.random.seed(13)
+        x = np.random.uniform(0, 5, [num_x, len(self.input_space.dimensions)])
+        x_df = pd.DataFrame(x, columns=['x1', 'x2'])
+
+        # y = 1 -3*X_1 -4*X_2 -0.5*X_1**2 -2*X_2**2
+        y_coef_true = np.array([1, -3, -4, -0.5, 0.0, -2.0])
+        poly_reg = PolynomialFeatures(degree=2)
+        poly_terms_x = poly_reg.fit_transform(x)
+        y = np.matmul(poly_terms_x, y_coef_true)
+        y_df = pd.DataFrame(y, columns=['degree2_polynomial_y'])
+
+        # fit model with same degree as true y
+        rerf.fit(x_df, y_df)
+
+        predictions = rerf.predict(x_df)
+        pred_df = predictions.get_dataframe()
+
+        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
+        pred_df['residual'] = y - pred_df[sample_mean_col]
+        r2 = np.sum(pred_df['residual']**2, axis=0)
+
+        assert r2 < 10**-4

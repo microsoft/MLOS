@@ -17,7 +17,6 @@
 
 #include <string_view>
 #include "BytePtr.h"
-#include "ObjectSerializationStringView.h"
 
 // Serialization methods for std::string_view, std::wstring_view.
 //

@@ -6,6 +6,7 @@ import math
 import os
 import random
 import unittest
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -15,6 +16,7 @@ from mlos.Tracer import Tracer
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
 from mlos.SynthethicFunctions.sample_functions import quadratic
@@ -43,7 +45,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         :return:
         """
-
+        warnings.simplefilter("error")
         cls.temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(cls.temp_dir):
             os.mkdir(cls.temp_dir)
@@ -55,6 +57,7 @@ class TestBayesianOptimizer(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         trace_output_path = os.path.join(cls.temp_dir, "OptimizerTestTrace.json")
+        print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_pre_heated(self):
@@ -101,7 +104,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         bayesian_optimizer.register(input_values_dataframe, output_values_dataframe)
 
         num_guided_samples = 2
-        for i in range(num_guided_samples):
+        for _ in range(num_guided_samples):
             # Suggest the parameters
             suggested_params = bayesian_optimizer.suggest()
             suggested_params_dict = suggested_params.to_dict()
@@ -118,6 +121,16 @@ class TestBayesianOptimizer(unittest.TestCase):
             bayesian_optimizer.register(input_values_df, target_values_df)
 
         print(bayesian_optimizer.optimum())
+
+    def test_bayesian_optimizer_default_copies_parameters(self):
+        config = BayesianOptimizerConfig.DEFAULT
+        config.min_samples_required_for_guided_design_of_experiments = 1
+        config.experiment_designer_config.fraction_random_suggestions = .1
+
+        original_config = BayesianOptimizerConfig.DEFAULT
+        assert original_config.min_samples_required_for_guided_design_of_experiments == 10
+        print(original_config.experiment_designer_config.fraction_random_suggestions)
+        assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.

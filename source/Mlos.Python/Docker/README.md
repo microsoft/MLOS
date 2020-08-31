@@ -71,7 +71,7 @@ docker build -f Docker/Dockerfile -t mssql-server-linux-with-mlos-python --build
 - Remove that container:
 
   ```shell
-  docker container rm MlosOptimizerService:
+  docker container rm MlosOptimizerService
   ```
 
 ## Notes and considerations

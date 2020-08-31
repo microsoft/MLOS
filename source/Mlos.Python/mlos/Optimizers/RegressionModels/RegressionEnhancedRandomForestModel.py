@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-
+from typing import List
 import numpy as np
+
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
 from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
@@ -16,14 +17,11 @@ from mlos.Spaces import Dimension, Hypergrid, SimpleHypergrid, \
 from mlos.Tracer import trace
 from mlos.Logger import create_logger
 
-from .RegressionModel import RegressionModel, RegressionModelConfig
-from .Prediction import Prediction
-from .SklearnLassoRegressionModelConfig import SklearnLassoRegressionModelConfig
-from .SklearnRidgeRegressionModelConfig import SklearnRidgeRegressionModelConfig
-from .SklearnRandomForestRegressionModelConfig import\
-    SklearnRandomForestRegressionModelConfig
-
-
+from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.RegressionModels.SklearnLassoRegressionModelConfig import SklearnLassoRegressionModelConfig
+from mlos.Optimizers.RegressionModels.SklearnRidgeRegressionModelConfig import SklearnRidgeRegressionModelConfig
+from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
 
 # sklearn injects many warnings, so from
 #   https://stackoverflow.com/questions/32612180/eliminating-warnings-from-scikit-learn
@@ -34,6 +32,17 @@ from .SklearnRandomForestRegressionModelConfig import\
 # def warn(*args, **kwargs):
 #    pass
 # warnings.warn = warn
+
+
+class RegressionEnhancedRandomForestRegressionModelPrediction(Prediction):
+    all_prediction_fields = Prediction.LegalColumnNames
+    OUTPUT_FIELDS: List[Prediction.LegalColumnNames] = [
+        all_prediction_fields.SAMPLE_MEAN,
+        all_prediction_fields.SAMPLE_VARIANCE,
+        all_prediction_fields.SAMPLE_SIZE]
+
+    def __init__(self, objective_name: str):
+        super().__init__(objective_name=objective_name, predictor_outputs=RegressionEnhancedRandomForestRegressionModelPrediction.OUTPUT_FIELDS)
 
 
 class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig):
@@ -74,7 +83,7 @@ class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig)
                                                    values=[SklearnRandomForestRegressionModelConfig.__name__])
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         max_basis_function_degree=2,
         residual_model_name=SklearnRandomForestRegressionModelConfig.__name__,
         boosting_root_model_name=SklearnLassoRegressionModelConfig.__name__,
@@ -88,14 +97,8 @@ class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig)
 
     @classmethod
     def contains(cls, config):
-        return Point(
-            max_basis_function_degree=config.max_basis_function_degree,
-            residual_model_name=config.residual_model_name,
-            boosting_root_model_name=config.boosting_root_model_name,
-            min_abs_root_model_coef=config.min_abs_root_model_coef,
-            perform_initial_root_model_hyper_parameter_search=config.perform_initial_root_model_hyper_parameter_search,
-            perform_initial_random_forest_hyper_parameter_search=config.perform_initial_random_forest_hyper_parameter_search,
-        ) in cls.CONFIG_SPACE
+        # following example set in HomogeneousRandomForestRegressionModelConfig.contains()
+        return True
 
     @classmethod
     def create_from_config_point(cls, config_point):
@@ -105,14 +108,14 @@ class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig)
 
     def __init__(
             self,
-            max_basis_function_degree=DEFAULT.max_basis_function_degree,
-            boosting_root_model_name=DEFAULT.boosting_root_model_name,
-            min_abs_root_model_coef=DEFAULT.min_abs_root_model_coef,
-            boosting_root_model_config: Point()=DEFAULT.sklearn_lasso_regression_model_config,
-            random_forest_model_config: Point()=DEFAULT.sklearn_random_forest_regression_model_config,
-            residual_model_name=DEFAULT.residual_model_name,
-            perform_initial_root_model_hyper_parameter_search=DEFAULT.perform_initial_root_model_hyper_parameter_search,
-            perform_initial_random_forest_hyper_parameter_search=DEFAULT.perform_initial_random_forest_hyper_parameter_search
+            max_basis_function_degree=_DEFAULT.max_basis_function_degree,
+            boosting_root_model_name=_DEFAULT.boosting_root_model_name,
+            min_abs_root_model_coef=_DEFAULT.min_abs_root_model_coef,
+            boosting_root_model_config: Point()=_DEFAULT.sklearn_lasso_regression_model_config,
+            random_forest_model_config: Point()=_DEFAULT.sklearn_random_forest_regression_model_config,
+            residual_model_name=_DEFAULT.residual_model_name,
+            perform_initial_root_model_hyper_parameter_search=_DEFAULT.perform_initial_root_model_hyper_parameter_search,
+            perform_initial_random_forest_hyper_parameter_search=_DEFAULT.perform_initial_random_forest_hyper_parameter_search
     ):
         self.max_basis_function_degree = max_basis_function_degree
         self.residual_model_name = residual_model_name
@@ -208,7 +211,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
                 positive=self.base_regressor_config.positive,
                 random_state=self.base_regressor_config.random_state,
                 selection=self.base_regressor_config.selection
-
             )
         elif self.model_config.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
             self.base_regressor_ = linear_model.Ridge(
@@ -276,7 +278,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         :return:
         """
         self.logger.info(
-            f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
+            f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations."
+        )
 
         # pull X and y values from data frames passed
         x = feature_values_pandas_frame[self.input_dimension_names].to_numpy()
@@ -364,8 +367,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         # ET TODO: capping minimum coef seems to go against the spirit of Lasso/Ridge identifying features
         #  So need to understand if this is needed
-        self.detected_feature_indices_ = \
-            np.where(np.abs(self.screening_root_model_coef_) >= self.model_config.min_abs_root_model_coef)[0]
+        self.detected_feature_indices_ = np.where(np.abs(self.screening_root_model_coef_) >= self.model_config.min_abs_root_model_coef)[0]
         self.base_regressor_.coef_ = self.base_regressor_.coef_[self.detected_feature_indices_]
 
         # define coef for gradient to polynomial fit
@@ -391,7 +393,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             rf_gscv.fit(x_star, y_residuals)
 
             # retrieve best random forest model and hyper parameters
-            self.model_config.random_forest_regressor_ = rf_gscv.best_estimator_
+            self.random_forest_regressor_ = rf_gscv.best_estimator_
 
             # only perform hyper-parameter search on first fit
             self.model_config.perform_initial_random_forest_hyper_parameter_search = False
@@ -421,10 +423,21 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         x_star = self._filter_to_detected_features(fit_x)
         y_predicted = self.base_regressor_.predict(x_star) + self.random_forest_regressor_.predict(x_star)
 
+        # dataframe column shortcuts
+        sample_mean_col = Prediction.LegalColumnNames.SAMPLE_MEAN.value
+        sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
+        sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
+
+        # initialize return predictions
+        predictions = RegressionEnhancedRandomForestRegressionModelPrediction(objective_name=self.output_dimension_names[0])
+        prediction_df = predictions.get_dataframe()
+
+        prediction_df[sample_mean_col] = y_predicted
+        prediction_df[sample_size_col] = self.dof_
+
         # compute confidence interval error while preparing return list of Prediction objects
-        predictions = []
-        target_name = self.output_dimension_names[0]
-        for i, xi in enumerate(x):
+        var_list = []
+        for xi in fit_x:
             leverage_x = np.matmul(np.matmul(xi.T, self.partial_hat_matrix_), xi)
 
             # split on whether x was in the model fit data
@@ -435,14 +448,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             else:
                 # return standard error of extrapolated x
                 prediction_var = self.variance_estimate_ * (1.0 + leverage_x)
-            predictions.append(
-                Prediction(
-                    target_name=target_name,
-                    mean=y_predicted[i],
-                    variance=prediction_var,
-                    count=self.dof_)
-            )
+            var_list.append(prediction_var)
 
+        prediction_df[sample_var_col] = var_list
+        predictions.set_dataframe(prediction_df)
         return predictions
 
     def score(self, feature_values_pandas_frame, target_values_pandas_frame):
@@ -481,7 +490,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             j = 0
             for i, ip in enumerate(powers_wrt_xj):
                 if i in restricted_features:
-                    p = ip # powers_wrt_xj[i]
+                    p = ip  # powers_wrt_xj[i]
                     c = fit_coef[j]
                     if p > 0:  # if p > 0, X_j contributes X_j**p to F polynomial
                         grad_coef_row.append(p * c)

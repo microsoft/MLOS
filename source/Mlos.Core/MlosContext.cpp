@@ -14,6 +14,7 @@
 //*********************************************************************
 
 #include "Mlos.Core.h"
+#include "Mlos.Core.inl"
 
 namespace Mlos
 {
@@ -27,9 +28,8 @@ namespace Core
 // PURPOSE:
 //  Creates MlosContext.
 //
-//
 // NOTES:
-//  From shared memory view creates communication channels.
+//  The constructor creates communication channels from shared memory views.
 //
 MlosContext::MlosContext(
     Internal::GlobalMemoryRegion& globalMemoryRegion,

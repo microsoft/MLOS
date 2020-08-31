@@ -31,11 +31,10 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
     """
 
     def setUp(self):
+        mlos_globals.init_mlos_global_context()
+        mlos_globals.mlos_global_context.start_clock()
         self.logger = create_logger('TestSmartCacheWithRemoteOptimizer')
-        self.logger.level = logging.INFO
-
-        self.communication_channel = CommunicationChannel()
-        self.shared_config = SharedConfig()
+        self.logger.level = logging.DEBUG
 
         # Start up the gRPC service.
         #
@@ -47,22 +46,13 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
 
         self.mlos_agent = MlosAgent(
             logger=self.logger,
-            communication_channel=self.communication_channel,
-            shared_config=self.shared_config,
-            mlos_service_endpoint=None,
+            communication_channel=mlos_globals.mlos_global_context.communication_channel,
+            shared_config=mlos_globals.mlos_global_context.shared_config,
             bayesian_optimizer_grpc_channel=self.optimizer_service_grpc_channel
-        )
-
-        self.mlos_global_context = MlosGlobalContext(
-            communication_channel=self.communication_channel,
-            shared_config=self.shared_config
         )
 
         self.mlos_agent_thread = Thread(target=self.mlos_agent.run)
         self.mlos_agent_thread.start()
-
-        mlos_globals.init_mlos_global_context()
-        mlos_globals.mlos_global_context = self.mlos_global_context
 
         global_values.declare_singletons()  # TODO: having both globals and global_values is a problem
 
@@ -98,7 +88,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
         )
 
     def tearDown(self):
-        self.mlos_global_context.stop_clock()
+        mlos_globals.mlos_global_context.stop_clock()
         self.mlos_agent.stop_all()
         self.server.stop(grace=None)
 

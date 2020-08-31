@@ -50,6 +50,19 @@ public:
 };
 
 //----------------------------------------------------------------------------
+// NAME: StringPtr::operator==
+//
+// PURPOSE:
+//  Compares two instances of StringPtr.
+//
+// NOTES:
+//
+inline bool operator==(const StringPtr& lhs, const StringPtr& rhs)
+{
+    return lhs.Length == rhs.Length && (lhs.Length == 0 || (strncmp(lhs.Data, rhs.Data, lhs.Length) == 0));
+}
+
+//----------------------------------------------------------------------------
 // NAME: WideStringPtr
 //
 // PURPOSE:
@@ -78,5 +91,18 @@ public:
         return *this;
     }
 };
+
+//----------------------------------------------------------------------------
+// NAME: WideStringPtr::operator==
+//
+// PURPOSE:
+//  Compares two instances of WideStringPtr.
+//
+// NOTES:
+//
+inline bool operator==(const WideStringPtr& lhs, const WideStringPtr& rhs)
+{
+    return lhs.Length == rhs.Length && (lhs.Length == 0 || (wcsncmp(lhs.Data, rhs.Data, lhs.Length) == 0));
+}
 }
 }

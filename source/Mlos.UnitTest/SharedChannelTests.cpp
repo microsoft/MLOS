@@ -20,13 +20,13 @@ class TestFlatBuffer : public BytePtr
 {
 public:
     TestFlatBuffer()
-      : BytePtr(&(*array.begin()))
+      : BytePtr(nullptr)
     {
-        array = { 0 };
+        Pointer = &(*array.begin());
     }
 
 private:
-    std::array<byte, T> array;
+    std::array<byte, T> array = { 0 };
 };
 
 namespace
@@ -34,12 +34,12 @@ namespace
 #ifndef DEBUG
 // Verify buffer size.
 // SharedChannel asserts if the provided size is not optimal.
-// In retail it shriks the to largest usable size.
-// Retail only to avoid assert.
+// In the retail build, channel size shrinks the to largest usable size.
+// Test for retail build only to avoid assert.
 //
 TEST(SharedChannel, VerifyBufferSize)
 {
-    // To correctly handling positiong overflow, buffer size must fulfill following condition:
+    // To correctly handle position counter overflow, the buffer size must fulfill the following condition:
     // (uint32_t::max + 1 ).% Buffer.Size = 0
     //
     {

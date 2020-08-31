@@ -17,7 +17,7 @@ def trace():
     def tracing_decorator(wrapped_function):
         @wraps(wrapped_function)
         def wrapper(*args, **kwargs):
-            tracer = global_values.tracer
+            tracer = getattr(global_values, 'tracer', None)
             if tracer is not None:
                 start_timestamp_ns = int(time.time() * 1000000)
                 tracer.add_trace_event(name=wrapped_function.__qualname__, phase='B', timestamp_ns=start_timestamp_ns,

@@ -4,6 +4,7 @@
 #
 import math
 import unittest
+import warnings
 
 import grpc
 import pandas as pd
@@ -26,6 +27,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        warnings.simplefilter("error")
         global_values.declare_singletons()
 
     def setUp(self):
@@ -96,7 +98,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=100)
 
     def test_optimizer_with_random_config(self):
-        for i in range(10):
+        for _ in range(10):
             optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
             print(f"Creating a bayesian optimizer with config: {optimizer_config.to_dict()}")
             bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
@@ -111,17 +113,16 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         ...
 
     def optimize_quadratic(self, optimizer, num_iterations):
-        for i in range(num_iterations):
+        for _ in range(num_iterations):
             params = optimizer.suggest()
             params_dict = params.to_dict()
             features_df = pd.DataFrame(params_dict, index=[0])
 
-            # TODO: update once predict returns a df
-            predictions = optimizer.predict(features_df)
-            only_prediction = predictions[0]
+            prediction = optimizer.predict(features_df)
+            prediction_df = prediction.get_dataframe()
 
             y = quadratic(**params_dict)
-            print(f"Params: {params}, Actual: {y}, Prediction: {str(only_prediction)}")
+            print(f"Params: {params}, Actual: {y}, Prediction: {str(prediction_df)}")
 
-            objectives_df = pd.DataFrame({'y':[y]})
+            objectives_df = pd.DataFrame({'y': [y]})
             optimizer.register(features_df, objectives_df)

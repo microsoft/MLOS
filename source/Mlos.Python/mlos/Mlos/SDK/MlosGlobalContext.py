@@ -53,6 +53,16 @@ class MlosGlobalContext:
         self._shared_config.enable_message_types(Clock, [ClockTick])
 
         self._clock = Clock(communication_channel=communication_channel, tick_frequency_ms=10)
+
+    @property
+    def communication_channel(self):
+        return self._communication_channel
+
+    @property
+    def shared_config(self):
+        return self._shared_config
+
+    def start_clock(self):
         self._clock.start()
 
     def stop_clock(self):

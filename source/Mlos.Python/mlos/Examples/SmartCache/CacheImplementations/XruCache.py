@@ -16,9 +16,10 @@ class XruCache(CacheInterface):
 
     """
 
-    def __init__(self, max_size):
+    def __init__(self, max_size, logger):
         CacheInterface.__init__(self)
         assert max_size > 0
+        self.logger = logger
 
         self._max_size = max_size
         self._dict = dict()
@@ -43,18 +44,22 @@ class XruCache(CacheInterface):
         return node.cache_entry.value
 
     def push(self, cache_entry):
-
         evicted_entry = None
-        new_entry_node = LinkedListNode(cache_entry)
 
-        if self._count >= self._max_size:
-            evicted_entry = self.evict()
+        if cache_entry.key in self:
+            # Let's replace the key's value and bump it to the head of the list.
+            node = self._dict[cache_entry.key]
+            node.cache_entry = cache_entry
+            self._list.move_to_head(node)
+        else:
+            if self._count >= self._max_size:
+                evicted_entry = self.evict()
 
-        if self._count < self._max_size:
-            # we still have room in the cache
-            self._dict[cache_entry.key] = new_entry_node
-            self._list.insert_at_head(new_entry_node)
-            self._count += 1
+            if self._count < self._max_size:
+                new_entry_node = LinkedListNode(cache_entry)
+                self._dict[cache_entry.key] = new_entry_node
+                self._list.insert_at_head(new_entry_node)
+                self._count += 1
 
         return evicted_entry
 

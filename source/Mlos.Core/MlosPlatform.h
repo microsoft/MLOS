@@ -6,10 +6,15 @@
 // @File: MlosPlatform.h
 //
 // Purpose:
-//      <description>
+//      Declares some functions to allow platform specific implementation of
+//      various OS related functions.
 //
 // Notes:
-//      <special-instructions>
+//      This is included by Mlos.Core, whereas their implementation is expected
+//      to be provided by the target application linking with Mlos.Core.
+//
+// See Also:
+//      MlosPlatform.Std.inl
 //
 //*********************************************************************
 
