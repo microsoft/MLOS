@@ -7,6 +7,10 @@ cp ../*.md content/
 cp ../LICENSE content/
 cp ../README.md content/_index.md
 mv content/documentation/README.md content/documentation/_index.md
+
+# replace markdown links
+# this allows the original files to link on github directly
+# while also rendering properly in hugo (which requires no .md in the links)
 sed -i 's/\.md/\//g' content/*.md
 sed -i 's/\.md/\//g' content/documentation/*.md
 
