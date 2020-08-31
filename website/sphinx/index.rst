@@ -14,6 +14,5 @@ You can find the main documentation website at https://microsoft.github.io/MLOS/
    :maxdepth: 3
    :hidden:
 
-   Main Documentation <https://microsoft.github.io/MLOS/>
-
+   Main website <https://microsoft.github.io/MLOS/>
    api/mlos
