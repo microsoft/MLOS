@@ -3,17 +3,17 @@
 # Licensed under the MIT License.
 #
 from mlos.Examples.SmartCache.CacheImplementations.XruCache import XruCache
-from mlos.Spaces import DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces import DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
 
-class MruCacheConfig:
+class MruCacheConfig(metaclass=DefaultConfigMeta):
     CONFIG_SPACE = SimpleHypergrid(
         name='mru_cache_config',
         dimensions=[
-            DiscreteDimension('cache_size', min=1, max=2 ** 10)
+            DiscreteDimension('cache_size', min=1, max=2 ** 12)
         ]
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         cache_size=10
     )
 
@@ -29,8 +29,8 @@ class MruCache(XruCache):
 
     """
 
-    def __init__(self, max_size):
-        XruCache.__init__(self, max_size=max_size)
+    def __init__(self, max_size, logger):
+        XruCache.__init__(self, max_size=max_size, logger=logger)
 
     def evict(self):
         removed_node = self._list.remove_at_head()

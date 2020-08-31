@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 import json
-
 from mlos.Logger import create_logger
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Spaces import Point
@@ -85,15 +84,16 @@ class BayesianOptimizerProxy(OptimizerInterface):
         )
         prediction_response = self._optimizer_stub.Predict(prediction_request)
 
-        return [
-            Prediction(
-                target_name=prediction.ObjectiveName,
-                mean=prediction.Mean,
-                variance=prediction.Variance,
-                count=prediction.ObservationCount,
-                standard_deviation=prediction.StandardDeviation
-            ) for prediction in prediction_response.ObjectivePredictions.Predictions
-        ]
+        # To be compliant with the OptimizerInterface, we need to recover a single Prediction object and return it.
+        #
+        objective_predictions_pb2 = prediction_response.ObjectivePredictions
+        assert len(objective_predictions_pb2) == 1
+        only_prediction_pb2 = objective_predictions_pb2[0]
+        objective_name = only_prediction_pb2.ObjectiveName
+        valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
+        prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
+        prediction.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
+        return prediction
 
     def optimum(self, stay_focused=False):  # pylint: disable=unused-argument,no-self-use
         ...

@@ -3,8 +3,11 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
+from typing import Dict
 
-from .OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Spaces import Point
 
 class OptimizerInterface(ABC):
     """ Defines the interface to all our optimizers.
@@ -16,7 +19,7 @@ class OptimizerInterface(ABC):
         self.optimization_problem = optimization_problem
 
     @abstractmethod
-    def suggest(self, random=False, context=None):
+    def suggest(self, random=False, context=None) -> Point:
         """ Suggest the next set of parameters to try.
 
         :return:
@@ -24,7 +27,7 @@ class OptimizerInterface(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def register(self, feature_values_pandas_frame, target_values_pandas_frame):
+    def register(self, feature_values_pandas_frame, target_values_pandas_frame) -> None:
         """ Registers a new result with the optimizer.
 
         :param params:
@@ -34,7 +37,7 @@ class OptimizerInterface(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def predict(self, feature_values_pandas_frame, t=None):
+    def predict(self, feature_values_pandas_frame, t=None) -> Prediction:
         """ Predict target value based on the parameters supplied.
 
         :param params:
@@ -43,7 +46,7 @@ class OptimizerInterface(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def optimum(self, stay_focused=False):
+    def optimum(self, stay_focused=False) -> Dict: # TODO: make it return an object
         """ Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.

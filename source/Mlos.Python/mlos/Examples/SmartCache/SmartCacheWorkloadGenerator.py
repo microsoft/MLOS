@@ -61,26 +61,21 @@ class SmartCacheWorkloadGenerator:
         self.current_config = new_config
         return True
 
-    def run(self, timeout_s=5):
+    def run(self, timeout_s=1):
         self.logger.info(f"Started the SmartCacheWorkloadGenerator. Duration={timeout_s}")
+        self.reconfigure()
+        smart_cache = SmartCache(logger=self.logger)
 
         start_time = datetime.datetime.utcnow()
         end_time = start_time + datetime.timedelta(seconds=timeout_s)
-        did_reconfigure = True
-        smart_cache = None
 
         while datetime.datetime.utcnow() < end_time:
-
-            if did_reconfigure is True:
-                self.logger.info(f"Reconfigured. New config: {str(self.current_config)}")
-                smart_cache = SmartCache(logger=self.logger)
 
             if self.current_config.values.workload_type == 'fibonacci':
                 range_min = self.current_config.values.fibonacci_config.min
                 range_max = range_min + self.current_config.values.fibonacci_config.range_width
-                for i in range(self.current_config.values.reconfiguration_interval):
-                    if datetime.datetime.utcnow() > end_time:
-                        break
+
+                while datetime.datetime.utcnow() < end_time:
                     sequence_number = random.randint(range_min, range_max)
                     self.logger.debug(f"\tfib({sequence_number}) = ?")
                     result = self.fibonacci(sequence_number, smart_cache)
@@ -89,34 +84,26 @@ class SmartCacheWorkloadGenerator:
             elif self.current_config.values.workload_type == 'random_key_from_range':
                 range_min = self.current_config.values.random_key_from_range_config.min
                 range_max = range_min + self.current_config.values.random_key_from_range_config.range_width
-                if did_reconfigure:
-                    old_i = 0
-                for i in range(old_i, old_i + self.current_config.values.reconfiguration_interval):
+                while datetime.datetime.utcnow() < end_time:
                     key = random.randint(range_min, range_max)
                     value = smart_cache.get(key)
                     if value is None:
                         value = str(key)
                         smart_cache.push(key, value)
-                    #print(key, value)
-                old_i = i
 
             elif self.current_config.values.workload_type == 'sequential_key_from_range':
                 range_min = self.current_config.values.sequential_key_from_range_config.min
                 range_width = self.current_config.values.sequential_key_from_range_config.range_width
-                range_max = range_min + range_width
-                if did_reconfigure:
-                    old_i = 0
-                for i in range(old_i, old_i + self.current_config.values.reconfiguration_interval):
+                i = 0
+                while datetime.datetime.utcnow() < end_time:
                     key = range_min + (i % range_width)
                     value = smart_cache.get(key)
                     if value is None:
                         value = str(key)
                         smart_cache.push(key, value)
-                    #print(key, value)
-                old_i = i
+                    i += 1
             else:
                 raise RuntimeError(f"Unknown workload type: {self.current_config.values.workload_type}")
-            did_reconfigure = self.reconfigure()
 
         self.logger.info("Exiting the SmartCacheWorkloadGenerator.")
 

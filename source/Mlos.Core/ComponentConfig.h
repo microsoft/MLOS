@@ -34,6 +34,7 @@ class ComponentConfig : public T
 {
 public:
     using SharedConfigType = SharedConfig<T>;
+    using TProxyObjectType = typename T::ProxyObjectType;
 
     ComponentConfig(MlosContext& mlosContext) noexcept
       : m_mlosContext(mlosContext),
@@ -54,9 +55,9 @@ public:
 
     // Gets the proxy object to the config located in the shared memory.
     //
-    typename T::ProxyObjectType Proxy()
+    TProxyObjectType Proxy()
     {
-        return T::ProxyObjectType(&m_sharedConfig->m_config);
+        return TProxyObjectType(&m_sharedConfig->m_config);
     }
 
     // Sends the telemetry message.

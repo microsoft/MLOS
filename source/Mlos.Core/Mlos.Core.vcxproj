@@ -74,7 +74,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ComponentConfig.inl" />
+    <None Include="Mlos.Core.inl" />
     <None Include="MlosContext.inl" />
+    <None Include="ProbingPolicy.inl" />
     <None Include="SharedChannel.inl" />
     <None Include="SharedConfigManager.inl" />
   </ItemGroup>

@@ -3,32 +3,17 @@
 // Licensed under the MIT License. See License.txt in the project root
 // for license information.
 //
-// @File: stdafx.h
+// @File: Mlos.Core.inl
 //
 // Purpose:
-//      <description>
+//  Includes Mlos.Core inline implementation.
 //
 // Notes:
-//      <special-instructions>
+//  This file must be included after the code generated files, to provide
+//  types definition prior defining template specializations.
 //
 //*********************************************************************
 
 #pragma once
 
-#include <array>
-#include <functional>
-#include <memory>
-
-// Mlos.Core.
-//
-#include "Mlos.Core.h"
-
-// Global dispatch table.
-//
-#include "GlobalDispatchTable.h"
-
-// Mlos.Core.
-//
-#include "Mlos.Core.inl"
-
-using namespace Mlos::Core;
+#include "ProbingPolicy.inl"

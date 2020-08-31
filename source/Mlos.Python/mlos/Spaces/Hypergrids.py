@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 import random
 import pandas as pd
 
+from mlos.Exceptions import PointOutOfDomainException
 from mlos.Spaces.Dimensions.Dimension import Dimension
 from mlos.Spaces.Point import Point
 
@@ -39,6 +40,10 @@ class Hypergrid(ABC):
     @property
     @abstractmethod
     def dimensions(self):
+        raise NotImplementedError("All subclasses must implement this.")
+
+    @abstractmethod
+    def get_dimensions_for_point(self, point):
         raise NotImplementedError("All subclasses must implement this.")
 
     @abstractmethod
@@ -93,6 +98,20 @@ class SimpleHypergrid(Hypergrid):
     @property
     def num_dimensions(self):
         return len(self._dimensions)
+
+    def get_dimensions_for_point(self, point):
+        """ Returns a list of dimensions for a given point.
+
+        It's trivial for SimpleHypergrid, but more interesting for the
+
+        :param point:
+        :return:
+        """
+        if point not in self:
+            raise PointOutOfDomainException(f"Point {point} does not belong to {self}.")
+
+        return self.dimensions
+
 
     def add_dimension(self, dimension):
         assert isinstance(dimension, Dimension)
@@ -337,3 +356,38 @@ class CompositeHypergrid(Hypergrid):
                 returned_dimension = dimension.copy()
                 returned_dimension.name = subgrid_name + "." + returned_dimension.name
                 yield returned_dimension
+
+    def get_dimensions_for_point(self, point):
+        """ Returns dimensions that the given point and belongs to. For pivot dimensions, it returns the guest_subgrid.external_pivot_dimension
+
+        In a hierarchical hypergrid, coordiantes of a point in the root hypergrid determine which of the subgrids will be 'activated' (meaningful). For example
+        if point.base_boosting_regression_model_name == "LassoRegression" then the subgrid describing the configuration for Lasso Regression becomes 'activated'
+        that is to say, specifying parameters for Lasso Regression becomes meaningful. If point.base_boosting_regression_model_name == "RidgeRegression", we can
+        still specify the Lasso Regression parameters, but they would never be consumed (by the smart component) so are meaningless and effectively noise.
+
+        :param point:
+        :return:
+        """
+        if point not in self:
+            raise PointOutOfDomainException(f"Point {point} does not belong to {self}.")
+
+        dimensions_by_name = {dimension.name: dimension for dimension in self.root_hypergrid.dimensions}
+        ordered_dimension_names = [dimension.name for dimension in self.root_hypergrid.dimensions]
+
+        for external_dimension_name, guest_subgrids_joined_on_dimension in self.guest_subgrids_by_pivot_dimension.items():
+            for guest_subgrid in guest_subgrids_joined_on_dimension:
+                if point[external_dimension_name] in guest_subgrid.external_pivot_dimension:
+                    # We return this narrower pivot dimension, since point[external_dimension_name] has
+                    # to belong to the external_pivot_dimension for all of the subgrid dimensions to make sense.
+                    #
+                    dimensions_by_name[external_dimension_name] = guest_subgrid.external_pivot_dimension
+                    subgrid = guest_subgrid.subgrid
+                    for dimension in subgrid.get_dimensions_for_point(point[subgrid.name]):
+                        dimension = dimension.copy()
+                        dimension.name = f"{subgrid.name}.{dimension.name}"
+                        dimensions_by_name[dimension.name] = dimension
+                        ordered_dimension_names.append(dimension.name)
+
+        # Returning dimensions in order they were visited (mostly to make sure that root dimension names come first.
+        #
+        return [dimensions_by_name[name] for name in ordered_dimension_names]

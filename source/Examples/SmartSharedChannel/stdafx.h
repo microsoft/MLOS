@@ -17,12 +17,15 @@
 
 // Mlos.Core.
 //
-#include "MlosPlatform.Std.inl"
 #include "Mlos.Core.h"
 
 // Global dispatch table.
 //
 #include "GlobalDispatchTable.h"
+
+// Mlos.Core.
+//
+#include "Mlos.Core.inl"
 
 #include <future>
 

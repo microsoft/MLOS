@@ -37,7 +37,7 @@ class SklearnLassoRegressionModelConfig(RegressionModelConfig):
             CategoricalDimension(name="selection", values=[selection.value for selection in Selection]),
         ]
     )
-    DEFAULT = Point(
+    _DEFAULT = Point(
         selection=Selection.CYCLIC.value,
         alpha=1.0,
         fit_intercept=True,
@@ -74,17 +74,17 @@ class SklearnLassoRegressionModelConfig(RegressionModelConfig):
 
     def __init__(
             self,
-            alpha=DEFAULT.alpha,
-            fit_intercept=DEFAULT.fit_intercept,
-            normalize=DEFAULT.normalize,
-            precompute=DEFAULT.precompute,
-            copy_x=DEFAULT.copy_x,
-            max_iter=DEFAULT.max_iter,
-            tol=DEFAULT.tol,
-            warm_start=DEFAULT.warm_start,
-            positive=DEFAULT.positive,
-            random_state=DEFAULT.random_state,
-            selection=DEFAULT.selection
+            alpha=_DEFAULT.alpha,
+            fit_intercept=_DEFAULT.fit_intercept,
+            normalize=_DEFAULT.normalize,
+            precompute=_DEFAULT.precompute,
+            copy_x=_DEFAULT.copy_x,
+            max_iter=_DEFAULT.max_iter,
+            tol=_DEFAULT.tol,
+            warm_start=_DEFAULT.warm_start,
+            positive=_DEFAULT.positive,
+            random_state=_DEFAULT.random_state,
+            selection=_DEFAULT.selection
     ):
         """
         Lasso parameters:

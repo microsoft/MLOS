@@ -2,11 +2,13 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+
 import json
 
 import pandas as pd
 
 from .Dimensions.Dimension import Dimension
+
 
 class Point:
     """ Models a point in a Hypergrid.
@@ -18,7 +20,7 @@ class Point:
             self[dimension_name] = value
 
     def copy(self):
-        return Point(**self.dimension_value_dict)
+        return Point(**{key: value for key, value in self})
 
     def flat_copy(self):
         """ Creates a copy of the point but all dimension names are flattened.
@@ -77,6 +79,9 @@ class Point:
         if subgrid_name not in self.dimension_value_dict:
             return False
         return dimension_name_without_subgrid_name in self[subgrid_name]
+
+    def __repr__(self):
+        return self.__str__()
 
     def __str__(self):
         return str(self.to_dict())

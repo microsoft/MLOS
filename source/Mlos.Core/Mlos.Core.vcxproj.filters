@@ -75,5 +75,9 @@
     <None Include="SharedConfigManager.inl" />
     <None Include="ComponentConfig.inl" />
     <None Include="SharedChannel.inl" />
+    <None Include="Mlos.Core.inl" />
+    <None Include="ProbingPolicy.inl">
+      <Filter>Collections</Filter>
+    </None>
   </ItemGroup>
 </Project>

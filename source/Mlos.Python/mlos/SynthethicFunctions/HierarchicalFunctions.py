@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid, DefaultConfigMeta
 from mlos.SynthethicFunctions.sample_functions import quadratic
 
 
-class MultilevelQuadratic:
+class MultilevelQuadratic(metaclass=DefaultConfigMeta):
     """ A test function to check if the optimizer can handle multilevel functions.
 
     Functionally, the CONFIG_SPACE is no different from:
@@ -58,7 +58,7 @@ class MultilevelQuadratic:
         on_external_dimension=CategoricalDimension(name="vertex_height", values=[15])
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         vertex_height="high",
         high_quadratic_params=Point(
             x_1=42,

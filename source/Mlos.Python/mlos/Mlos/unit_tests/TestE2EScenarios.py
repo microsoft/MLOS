@@ -22,31 +22,21 @@ class TestE2EScenarios(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        mlos_globals.init_mlos_global_context()
         self.logger = create_logger('TestE2EScenarios')
         self.logger.level = logging.INFO
-        self.communication_channel = CommunicationChannel()
-        self.shared_config = SharedConfig()
         self.mlos_agent = MlosAgent(
             logger=self.logger,
-            communication_channel=self.communication_channel,
-            shared_config=self.shared_config,
-            mlos_service_endpoint=None
-        )
-
-        self.mlos_global_context = MlosGlobalContext(
-            communication_channel=self.communication_channel,
-            shared_config=self.shared_config
+            communication_channel=mlos_globals.mlos_global_context.communication_channel,
+            shared_config=mlos_globals.mlos_global_context.shared_config
         )
         self.mlos_agent_thread = Thread(target=self.mlos_agent.run)
         self.mlos_agent_thread.start()
-
-        mlos_globals.init_mlos_global_context()
-        mlos_globals.mlos_global_context = self.mlos_global_context
+        mlos_globals.mlos_global_context.start_clock()
 
     def tearDown(self):
-        self.mlos_global_context.stop_clock()
+        mlos_globals.mlos_global_context.stop_clock()
         self.mlos_agent.stop_all()
-
 
     def test_timer(self):
         """ Tests if the timer works with required precision.
@@ -114,9 +104,6 @@ class TestE2EScenarios(unittest.TestCase):
         self.mlos_agent.start_experiment(random_workload_config_experiment)
         time.sleep(workload_duration_s)
         self.mlos_agent.stop_experiment(random_workload_config_experiment)
-
-
-
 
     def test_setting_random_configs_for_smart_cache(self):
         workload_duration_s = 5
@@ -262,10 +249,3 @@ class TestE2EScenarios(unittest.TestCase):
         if len(all_registered_mlos_objects) != 0:
             print("Put breakpoint here")
         self.assertTrue(len(all_registered_mlos_objects) == 0)
-
-
-
-
-
-
-

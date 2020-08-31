@@ -35,7 +35,6 @@ class MlosAgent:
             logger,
             communication_channel,
             shared_config,
-            mlos_service_endpoint,
             bayesian_optimizer_grpc_channel=None
     ):
 
@@ -44,6 +43,7 @@ class MlosAgent:
         # the global mlos context is via the shared memory. Here we take a shortcut.
         self._communication_channel = communication_channel
         self._shared_config = shared_config
+        self._bayesian_optimizer_grpc_channel = bayesian_optimizer_grpc_channel
 
         self._configuration_manager = ConfigurationManager(shared_config=self._shared_config)
         self._runtime_decision_manager = RuntimeDecisionsManager()
@@ -59,10 +59,7 @@ class MlosAgent:
             RegisterSmartComponentMessage: [self._register_smart_component],
             UnregisterSmartComponentMessage: [self._unregister_smart_component]
         }
-        self._callback_processor_thread = None
-
-        self._mlos_service_endpoint = mlos_service_endpoint
-        self._bayesian_optimizer_grpc_channel = bayesian_optimizer_grpc_channel
+        self._callback_processor_thread = Thread(target=self._process_callbacks)
 
         self._experiment_manager = ExperimentManager(
             mlos_agent=self,
@@ -86,7 +83,6 @@ class MlosAgent:
           8) forward runtime decisions from mlos service to target
         """
 
-        self._callback_processor_thread = Thread(target=self._process_callbacks)
         self._callback_processor_thread.start()
 
     def stop_all(self):

@@ -15,6 +15,8 @@
 
 #include "stdafx.h"
 
+#include "MlosPlatform.Std.inl"
+
 using namespace Mlos::Core;
 using namespace SmartCache;
 
@@ -38,8 +40,8 @@ main(
     __in int argc,
     __in char* argv[])
 {
-    argc;
-    argv;
+    UNUSED(argc);
+    UNUSED(argv);
 
     // Create MlosContext.
     //
@@ -64,6 +66,9 @@ main(
     //
     config.CacheSize = 31;
     config.TelemetryBitMask = 0xffffffff;
+
+    hr = mlosContext.RegisterComponentConfig(config);
+    CheckHR(hr);
 
     // Create an intelligent component.
     //

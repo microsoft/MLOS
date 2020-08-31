@@ -33,7 +33,7 @@ class PolynomialObjective:
     )
     # needs constraint coefficient_domain_min < coefficient_domain_max
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         seed=17,
         input_domain_dimension=2,
         max_degree=2,
@@ -53,14 +53,14 @@ class PolynomialObjective:
 
     def __init__(self,
                  seed: int = 17,
-                 input_domain_dimension: int = DEFAULT.input_domain_dimension,
-                 max_degree: int = DEFAULT.max_degree,
-                 include_mixed_coefficients: bool = DEFAULT.include_mixed_coefficients,
-                 percent_coefficients_zeroed: float = DEFAULT.percent_coefficients_zeroed,
-                 coefficient_domain_min: float = DEFAULT.coefficient_domain_min,
-                 coefficient_domain_max: float = DEFAULT.coefficient_domain_max,
-                 include_noise: bool = DEFAULT.include_noise,
-                 noise_coefficient_of_variation: float = DEFAULT.noise_coefficient_of_variation,
+                 input_domain_dimension: int = _DEFAULT.input_domain_dimension,
+                 max_degree: int = _DEFAULT.max_degree,
+                 include_mixed_coefficients: bool = _DEFAULT.include_mixed_coefficients,
+                 percent_coefficients_zeroed: float = _DEFAULT.percent_coefficients_zeroed,
+                 coefficient_domain_min: float = _DEFAULT.coefficient_domain_min,
+                 coefficient_domain_max: float = _DEFAULT.coefficient_domain_max,
+                 include_noise: bool = _DEFAULT.include_noise,
+                 noise_coefficient_of_variation: float = _DEFAULT.noise_coefficient_of_variation,
                  coefficients=None,
                  logger=None):
         if logger is None:

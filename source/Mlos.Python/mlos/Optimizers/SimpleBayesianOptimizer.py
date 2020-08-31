@@ -9,12 +9,12 @@ import pickle
 import numpy as np
 from bayes_opt import BayesianOptimization, UtilityFunction
 
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point, DefaultConfigMeta
 from .OptimizationProblem import OptimizationProblem
 from .OptimizerInterface import OptimizerInterface
 
 
-class SimpleBayesianOptimizerConfig:
+class SimpleBayesianOptimizerConfig(metaclass=DefaultConfigMeta):
 
     CONFIG_SPACE = SimpleHypergrid(
         name="SimpleBayesianOptimizerConfig",
@@ -25,7 +25,7 @@ class SimpleBayesianOptimizerConfig:
         ]
     )
 
-    DEFAULT = Point(
+    _DEFAULT = Point(
         utility_function='ucb',
         kappa=3,
         xi=1
@@ -58,11 +58,11 @@ class SimpleBayesianOptimizerConfig:
             xi=None
     ):
         if utility_function is None:
-            utility_function = self.DEFAULT.utility_function
+            utility_function = self._DEFAULT.utility_function
         if kappa is None:
-            kappa = self.DEFAULT.kappa
+            kappa = self._DEFAULT.kappa
         if xi is None:
-            xi = self.DEFAULT.xi
+            xi = self._DEFAULT.xi
 
         self.utility_function = utility_function
         self.kappa = kappa
@@ -151,35 +151,37 @@ class SimpleBayesianOptimizer(OptimizerInterface):
         suggested_params = None
 
         if random:
-            return self.current_search_space.random().to_dict()
-
-        if not self.focused:
-            self._optimizer._space._bounds = self._format_parameter_bounds(self._full_parameter_space_bounds)
-        else:
-            self._optimizer._space._bounds = self._format_parameter_bounds(self._focused_parameter_space_bounds)
-        suggested_params = self._optimizer.suggest(utility_function=self._utility_function)
-
-        for param_name, param_value in suggested_params.items():
-            param_dimension = self.feature_space[param_name]
-            if isinstance(param_dimension, DiscreteDimension):
-                # we need to round the parameter
-                suggested_params[param_name] = int(round(param_value))
-            elif isinstance(param_dimension, CategoricalDimension):
-                # we need to round and index into the dimension
-                suggested_params[param_name] = param_dimension[int(round(param_value))]
-
-        # we also have to remove the parameter root grid name
-        param_names = [param_name for param_name in suggested_params.keys()]
-        for param_name in param_names:
-            _, param_name_without_subgrid_name = Dimension.split_dimension_name(param_name)
-            suggested_params[param_name_without_subgrid_name] = suggested_params[param_name]
-            del suggested_params[param_name]
-
-        retries_remaining = 100
-        while retries_remaining > 0 and (suggested_params in self._registered_param_combos):
             suggested_params = self.current_search_space.random().to_dict()
-            retries_remaining -= 1
 
+        else:
+            if not self.focused:
+                self._optimizer._space._bounds = self._format_parameter_bounds(self._full_parameter_space_bounds)
+            else:
+                self._optimizer._space._bounds = self._format_parameter_bounds(self._focused_parameter_space_bounds)
+            suggested_params = self._optimizer.suggest(utility_function=self._utility_function)
+
+            for param_name, param_value in suggested_params.items():
+                param_dimension = self.feature_space[param_name]
+                if isinstance(param_dimension, DiscreteDimension):
+                    # we need to round the parameter
+                    suggested_params[param_name] = int(round(param_value))
+                elif isinstance(param_dimension, CategoricalDimension):
+                    # we need to round and index into the dimension
+                    suggested_params[param_name] = param_dimension[int(round(param_value))]
+
+            # we also have to remove the parameter root grid name
+            param_names = [param_name for param_name in suggested_params.keys()]
+            for param_name in param_names:
+                _, param_name_without_subgrid_name = Dimension.split_dimension_name(param_name)
+                suggested_params[param_name_without_subgrid_name] = suggested_params[param_name]
+                del suggested_params[param_name]
+
+            retries_remaining = 100
+            while retries_remaining > 0 and (suggested_params in self._registered_param_combos):
+                suggested_params = self.current_search_space.random().to_dict()
+                retries_remaining -= 1
+
+        assert Point(**suggested_params) in self.parameter_space
         return suggested_params
 
     def register(self, params, target_value): # pylint: disable=arguments-differ
@@ -339,14 +341,14 @@ class SimpleBayesianOptimizer(OptimizerInterface):
         """ Formats parameter bounds for consumption by GaussianProcessRegressor.
 
         The regressor expects a numpy array where each row (along the 0th dimension) contains two columns:
-        min and max. The key is to return an array that contains para
+        min and max. The array is meant to be sorted alphabetically.
 
         :param parameter_bounds:
         :return:
         """
         bounds_array_ordered_by_feature_name = []
 
-        for feature_name in self._ordered_feature_names:
+        for feature_name in sorted(self._ordered_feature_names):
             if feature_name in parameter_bounds.keys():
                 bounds_array_ordered_by_feature_name.append(parameter_bounds[feature_name])
             else:

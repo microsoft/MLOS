@@ -8,6 +8,8 @@ from mlos.Examples.SmartCache.CacheImplementations.MruCache import MruCache, Mru
 from mlos.Examples.SmartCache.MlosInterface import PushRuntimeDecisionContext, ReconfigurationRuntimeDecisionContext
 from mlos.Examples.SmartCache.MlosInterface.MlosTelemetryMessages import SmartCacheGet, SmartCachePush, SmartCacheEvict
 
+from mlos.Mlos.Infrastructure.ConfigurationManager import Configuration
+
 from mlos.Spaces import CategoricalDimension, Point, SimpleHypergrid
 from mlos.Mlos.SDK import MlosObject, MlosSmartComponentRuntimeAttributes
 
@@ -60,8 +62,8 @@ class SmartCache:
             smart_component_type=type(self),
             smart_component_runtime_attributes=self.RuntimeAttributes(component_id=id(self))
         )
-        self.current_config = None
-        self.cache_implementation = None
+        self.current_config = Configuration(component_type=SmartCache, values=self.default_config, id=-1)
+        self.cache_implementation = LruCache(max_size=self.current_config.values.lru_cache_config.cache_size, logger=self.logger)
         self.mlos_object.register()
 
         self.reconfigure()
@@ -75,8 +77,14 @@ class SmartCache:
     def __len__(self):
         return len(self.cache_implementation)
 
+    def __contains__(self, item):
+        return item in self.cache_implementation
+
     def push(self, key, value):
         self.reconfigure() # TODO: make this less frequent
+
+        if key in self:
+            return
 
         should_push = self.mlos_object.make_runtime_decision(PushRuntimeDecisionContext(
             mlos_object=self.mlos_object,
@@ -115,15 +123,15 @@ class SmartCache:
         """
         smart_cache_reconfiguration_decision_runtime_context = ReconfigurationRuntimeDecisionContext(self.mlos_object)
         should_reconfigure = self.mlos_object.make_runtime_decision(smart_cache_reconfiguration_decision_runtime_context)
-        if not should_reconfigure or self.current_config == self.mlos_object.config:
+        if not should_reconfigure or self.current_config == self.mlos_object.config or self.mlos_object.config is None:
             return
 
         self.current_config = self.mlos_object.config
         self.logger.info(f"Reconfiguring. New config values: {self.current_config.values.to_json()}")
 
         if self.current_config.values.implementation == 'LRU':
-            self.cache_implementation = LruCache(max_size=self.current_config.values.lru_cache_config.cache_size)
+            self.cache_implementation = LruCache(max_size=self.current_config.values.lru_cache_config.cache_size, logger=self.logger)
         elif self.current_config.values.implementation == 'MRU':
-            self.cache_implementation = MruCache(max_size=self.current_config.values.mru_cache_config.cache_size)
+            self.cache_implementation = MruCache(max_size=self.current_config.values.mru_cache_config.cache_size, logger=self.logger)
         else:
             raise RuntimeError("Invalid config")

@@ -4,19 +4,20 @@
 #
 import datetime
 import math
+import unittest
 import numpy as np
 import pandas as pd
-import unittest
 
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import \
+    HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 import mlos.global_values as global_values
 
 
-
 class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
 
-    def classSetUp(self):
+    @classmethod
+    def setUpClass(cls) -> None:
         global_values.declare_singletons()
 
     def setUp(self):
@@ -59,7 +60,8 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
             sample_inputs = {'x': np.linspace(start=-10, stop=110, num=13, endpoint=True)}
             sample_inputs_pandas_dataframe = pd.DataFrame(sample_inputs)
             predictions = model.predict(sample_inputs_pandas_dataframe)
-            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'], predictions):
+            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'],
+                                                predictions.get_dataframe().iterrows()):
                 print(sample_input, prediction)
 
 
@@ -85,5 +87,6 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
             )
             model.fit(self.input_pandas_dataframe, self.output_pandas_dataframe)
             predictions = model.predict(sample_inputs_pandas_dataframe)
-            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'], predictions):
+            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'],
+                                                predictions.get_dataframe().iterrows()):
                 print(sample_input, prediction)
