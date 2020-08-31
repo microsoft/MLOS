@@ -13,7 +13,10 @@ headless = true
 - Notebooks
   - [Start Here]({{< relref "/notebooks/StartHere" >}})
   - [Smart Cache]({{< relref "/notebooks/SmartCache" >}})
+  - [Smart Cache Active Learning]({{< relref "/notebooks/SmartCacheActiveLearning" >}})
   - [Optimizer Monitor]({{< relref "/notebooks/OptimizerMonitor" >}})
+  - [Bayesian Optimization]({{< relref "/notebooks/BayesianOptimization" >}})
+
 
 - API Documentation
   - [Python](/MLOS/python_api/)
