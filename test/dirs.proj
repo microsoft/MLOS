@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.Build.Traversal/2.0.50">
   <Import Project="..\build\Mlos.Dirs.props" />
   <ItemGroup>
-    <ProjectReference Include="Mlos.TestRun\Mlos.TestRun.proj" />
+    <ProjectReference Include="Mlos.TestRun\Mlos.TestRun.proj" Condition="'$(IsWindows)' == 'true'" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.Dirs.targets" />
 </Project>

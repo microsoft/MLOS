@@ -19,10 +19,6 @@
 
 using namespace Mlos::Core;
 
-// Include codegen files.
-//
-#include "GlobalDispatchTable.h"
-
 namespace
 {
 // Verify shared memory.

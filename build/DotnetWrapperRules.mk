@@ -1,0 +1,71 @@
+# Provides targets that are a wrapper around "dotnet build" for our .csproj so
+# we can easily run "make" in a given source directory.
+# Expects the variable RelativePathToProjectRoot (e.g. ..) to be set prior to include.
+# To allow combining with other rules, this one doesn't define the all/clean targets.
+# They should be defined to depend on the dotnet-build/dotnet-clean targets
+# *before* including this file.
+
+ifeq ($(RelativePathToProjectRoot),)
+    $(error Makefile authoring error: RelativePathToProjectRoot is not set)
+endif
+
+ifneq ($(MlosCommonMkImported),true)
+    include $(RelativePathToProjectRoot)/build/Common.mk
+endif
+
+# Determine (roughly) where the outputs should be (per the msbuild files).
+# Needed for "clean" target.
+# See Also: Mlos.Common.props
+DotnetBaseOutDir := $(MLOS_ROOT)/out/dotnet
+DotnetOutputPath := $(DotnetBaseOutDir)/$(RelativeSourceDir)
+
+# Makes sure that our local dotnet install/wrapper is available.
+# Check the timestamps on both the wrapper and the symlink.
+DOTNET_REAL := $(MLOS_ROOT)/tools/dotnet/dotnet
+.NOTPARALLEL: $(DOTNET) $(DOTNET_REAL)
+$(DOTNET) $(DOTNET_REAL): $(MLOS_ROOT)/scripts/fetch-dotnet.sh
+	@ $(MLOS_ROOT)/scripts/fetch-dotnet.sh
+
+# Find all the *.csproj, dirs.proj files in this directory and make some
+# corresponding fake targets for the "all" target to depend on.
+Csprojs := $(wildcard *.csproj)
+CsprojBuildTargets := $(Csprojs:.csproj=.csproj.fake-build-target)
+CsprojTestTargets := $(Csprojs:.csproj=.csproj.fake-test-target)
+DirsProj := $(wildcard dirs.proj)
+DirsProjBuildTarget := $(DirsProj:.proj=.proj.fake-build-target)
+DirsProjTestTarget := $(DirsProj:.proj=.proj.fake-test-target)
+
+# To be added to the including Makefile's all target.
+.PHONY: dotnet-build
+dotnet-build: $(DOTNET) $(CsprojBuildTargets) $(DirsProjBuildTarget)
+	@ echo "make dotnet-build target finished."
+
+.PHONY: dotnet-test
+dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
+	@ echo "make dotnet-test target finished."
+
+# For each of the fake build targets, just call "dotnet build" on its
+# corresponding *.csproj file
+# We won't track any inputs/outputs/dependencies - we just let "dotnet build" handle that.
+# Additionally, we let it handle the output directory via the .csproj file (see above).
+%.fake-build-target: $(DOTNET)
+	@ # Note: This command currently also does a "dotnet restore" first,
+	@ # which can be slow, however is difficult to check when it is unnecessary.
+	@ # Note: -m tells it to build in parallel.
+	@ $(DOTNET) build -m --configuration $(CONFIGURATION) $(@:.fake-build-target=)
+
+# For each of the fake test targets, just call "dotnet test" on its
+# corresponding *.csproj file
+# For now, don't force a rebuild first.
+%.fake-test-target: #%.fake-build-target
+	$(DOTNET) test -m --configuration $(CONFIGURATION) $(@:.fake-test-target=)
+
+# Note: this clean method somewhat lazily removes both Debug and Release build outputs.
+# To be added to the including Makefile's clean target.
+.PHONY: dotnet-clean
+dotnet-clean:
+	@ $(RM) $(DotnetOutputPath)
+
+handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
+    $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
+    dotnet-build dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
