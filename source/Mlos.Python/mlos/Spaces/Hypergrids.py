@@ -136,8 +136,11 @@ class SimpleHypergrid(Hypergrid):
         return subgrid[dimension_name_without_subgrid_name]
 
 
-    def __str__(self):
-        return f"{self.name}"
+    def __repr__(self):
+        ret = [f"{self.name}"]
+        for dimension in self.dimensions:
+            ret.append(str(dimension))
+        return "\n".join(ret)
 
     def add_subgrid_on_external_dimension(self, other_hypergrid: Hypergrid, external_dimension: Dimension):
         assert external_dimension.name in self.dimensions_dict, f"{self.name} does not contain dimension {external_dimension.name}"
