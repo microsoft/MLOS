@@ -23,6 +23,7 @@ setup(
     license="MIT",
     keywords="",
     url="https://github.com/microsoft/mlos",
-    entry_points={'console_scripts': ['start_mlos_optimization_runtime=mlos.start_mlos_optimization_runtime:main']},
+    entry_points={'console_scripts': ['start_mlos_optimization_runtime=mlos.start_mlos_optimization_runtime:main',
+                                      'start_optimizer_microservice=mlos.start_optimizer_microservice:main']},
 
 )

@@ -33,18 +33,21 @@ def parse_command_line_arguments():
     return arguments
 
 
-def ctrl_c_handler(_, __):
-    print("Received CTRL-C: shutting down.")
-    if server.started:
-        print("Shutting down server.")
-        server.stop(grace=None)
-        print("Server stopped.")
-
-
-if __name__ == "__main__":
-    global_values.declare_singletons()
-    signal.signal(signal.SIGINT, ctrl_c_handler)
+def main():
     args = parse_command_line_arguments()
     server = OptimizerMicroserviceServer(port=args.port, num_threads=args.num_threads)
+
+    def ctrl_c_handler(_, __):
+        print("Received CTRL-C: shutting down.")
+        if server.started:
+            print("Shutting down server.")
+            server.stop(grace=None)
+            print("Server stopped.")
+
+    global_values.declare_singletons()
+    signal.signal(signal.SIGINT, ctrl_c_handler)
     server.start()
     server.wait_for_termination()
+
+if __name__ == "__main__":
+    main()
