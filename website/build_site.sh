@@ -9,7 +9,7 @@ sed -i 's/BayesianOptimization_files/\.\.\/BayesianOptimization_files/g' content
 
 # place links to github in notebook files
 for f in content/notebooks/*.md; do
-    base=$(basename "$f" '.md') # gives '25' from '25.conf'
+    base=$(basename "$f" '.md') # removes .md from file name
     sed -i "s/FILENAME/$base/g" "$f"
 done
 sed -i 's/FILENAME\.ipynb/BayesianOptimization\.ipynb/g' content/notebooks/*.md
