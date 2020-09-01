@@ -1,10 +1,18 @@
 #!/bin/sh
 
 cp -r ../documentation content/
-jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks
+jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks --template nbconvert_template.md.j2
 
 # nbconvert and hugo disagree about paths
+# this should probably be done via the template
 sed -i 's/BayesianOptimization_files/\.\.\/BayesianOptimization_files/g' content/notebooks/BayesianOptimization.md
+
+# place links to github in notebook files
+for f in content/notebooks/*.md; do
+    base=$(basename "$f" '.md') # gives '25' from '25.conf'
+    sed -i.before "s/FILENAME/$base/g" "$f"
+done
+sed -i 's/FILENAME\.ipynb/BayesianOptimization\.ipynb/g' content/notebooks/*.md
 
 cp ../*.md content/
 cp ../LICENSE content/
