@@ -7,7 +7,7 @@ import unittest
 
 from mlos.Spaces import CategoricalDimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
-class TestCompositeSpaces(unittest.TestCase):
+class TestHierarchicalSpaces(unittest.TestCase):
 
     def setUp(self):
         self.emergency_buffer_settings = SimpleHypergrid(

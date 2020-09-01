@@ -8,7 +8,7 @@ import random
 import pandas as pd
 
 from mlos.Spaces import Dimension, Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
-from mlos.Spaces.HypergridAdapters import CompositeToSimpleHypergridAdapter
+from mlos.Spaces.HypergridAdapters import HierarchicalToFlatHypergridAdapter
 from mlos.Tracer import trace
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
@@ -106,8 +106,8 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
             fit_state=HomogeneousRandomForestFitState(input_space=input_space, output_space=output_space)
         )
 
-        self._input_space_adapter = CompositeToSimpleHypergridAdapter(adaptee=self.input_space)
-        self._output_space_adapter = CompositeToSimpleHypergridAdapter(adaptee=self.output_space)
+        self._input_space_adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.input_space)
+        self._output_space_adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.output_space)
 
 
         self.target_dimension_names = [dimension.name for dimension in self._output_space_adapter.dimensions]

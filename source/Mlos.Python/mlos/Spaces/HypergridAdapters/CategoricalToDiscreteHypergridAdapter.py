@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 from pandas import DataFrame
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Hypergrid, Point, SimpleHypergrid, CompositeHypergrid
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Hypergrid, Point, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters.HypergridAdapter import HypergridAdapter
 
 class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
@@ -29,10 +29,10 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
 
 
         # Now we need to build the target hypergrid and the mappings between adaptee and target.
-        if isinstance(adaptee, SimpleHypergrid) or (isinstance(adaptee, HypergridAdapter) and isinstance(adaptee.target, SimpleHypergrid)):
+        if HypergridAdapter.is_like_simple_hypergrid(adaptee) and not adaptee.is_hierarchical():
             self._build_simple_hypergrid_target()
-        elif isinstance(adaptee, CompositeHypergrid) or (isinstance(adaptee, HypergridAdapter) and isinstance(adaptee.target, CompositeHypergrid)):
-            self._build_composite_hypergrid_target()
+        else:
+            raise NotImplementedError("First apply the HierarchicalToFlatHypergridAdapter and chain it with this one.")
 
     @property
     def adaptee(self) -> Hypergrid:
@@ -121,64 +121,3 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
             max=len(adaptee_dimension) - 1
         )
         return target_dimension
-
-
-    def _build_composite_hypergrid_target(self) -> None:
-        """ Not implemented.
-
-        I gave implementing this several tries and I want to capture my learning here for posterity (and my future self).
-
-        So the two approaches I have taken were:
-
-        ####################################################################################################################
-        Approach 1:
-        Keep all the logic here - this means look at the Composite Hypergrid, and by inspecting it public state,
-        reconstruct a slightly altered copy with all CategoricalDimensions and OrdinalDimensions replaced with
-        DiscreteDimensions.
-
-        This has several weaknesses:
-            1. We really depend on that CompositeHypergrid API to remain very stable and we essentially add inertia
-                to the CompositeHypergrid class.
-            2. It's complex. Each CompositeHypergrid can have Hypergrids joined on dimension and on external dimension,
-                and it's quite tricky (though obviously possible) to do it.
-
-        ####################################################################################################################
-        Approach 2:
-        Add two methods to the Hypergrid API: copy(), and replace_dimension(...).
-
-        This has even more weaknesses:
-            1. The CompositeHypergrid class becomes bloated. While the .copy() API might be generally useful, the
-                replace_dimension(...) API is super specific to this adapter.
-            2. Again, any changes to the CompositeHypergrid class now require changing 2 more, recursive methods.
-            3. The replace_dimension(...) method is so specific to this adapter and requires keeping so much
-                state that it actually hurts to see it in the CompositeHypergrid class.
-        ####################################################################################################################
-
-        Having explored the two options above I turned to the "Zen of Python" and Greg.
-
-        Greg recommended a visitor pattern with many advantages:
-            1. It decouples the innards of CompositeHypergrdis from anything operating on it.
-            2. There is already a bunch of recursive algorithms applied over CompositeHypergrids and if we expect many
-                more than the Adapter Patter is probably the way to go.
-
-        But... This functionality is not urgent so we can spend some time designing it properly and we can come back to
-        it when we need to.
-
-        Three or four lines from the "Zen of Python" pertain:
-
-            Simple is better than complex.
-            Complex is better than complicated.
-            Flat is better than nested.
-            ...
-            There should be one-- and preferably only one --obvious way to do it.
-
-            So in the name of simply-flat I believe that the only HypergridAdapter for Composite Hypergrids we need
-        right now is a CompositeHypergridToSimpleHypergrid flattening adapter that flattens the hierarchy. All of the
-        other adapters can be stacked on top of it. It solves our immediate problem without compromise, because we
-        have to apply the flattening adapter anyway before sending the data to the models.
-
-        :return:
-        """
-        assert isinstance(self.adaptee, CompositeHypergrid) or \
-               (isinstance(self.adaptee, HypergridAdapter) and isinstance(self.adaptee.target, CompositeHypergrid))
-        raise NotImplementedError

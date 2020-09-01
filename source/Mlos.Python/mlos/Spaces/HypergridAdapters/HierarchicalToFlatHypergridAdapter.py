@@ -8,8 +8,8 @@ from mlos.Spaces import Dimension, Hypergrid, Point, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters.HypergridAdapter import HypergridAdapter
 
 
-class CompositeToSimpleHypergridAdapter(HypergridAdapter):
-    """ Flattens a CompositeHypergrid object to a SimpleHypergrid object.
+class HierarchicalToFlatHypergridAdapter(HypergridAdapter):
+    """ Flattens a hierarchical Hypergrid object to a flat Hypergrid.
 
     """
     def __init__(self, adaptee: Hypergrid):
@@ -20,12 +20,6 @@ class CompositeToSimpleHypergridAdapter(HypergridAdapter):
         self._backward_name_mapping = dict()
 
         if HypergridAdapter.is_like_simple_hypergrid(self._adaptee):
-            # Not a ton to do...
-            self._target = self._adaptee
-            self._forward_name_mapping = {dim.name: dim.name for dim in self._adaptee.dimensions}
-            self._backward_name_mapping = self._forward_name_mapping
-
-        elif HypergridAdapter.is_like_composite_hypergrid(self._adaptee):
             # Need to flatten all the names
             target_dimensions = []
             for adaptee_dimension in self._adaptee.dimensions:
