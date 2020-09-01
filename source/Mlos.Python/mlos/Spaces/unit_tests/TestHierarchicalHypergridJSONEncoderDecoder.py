@@ -6,7 +6,7 @@ import json
 import random
 import unittest
 
-from mlos.Spaces.Hypergrids import SimpleHypergrid, CompositeHypergrid
+from mlos.Spaces.Hypergrids import SimpleHypergrid
 import mlos.Spaces.Dimensions.DimensionCalculator
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
@@ -18,7 +18,7 @@ from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonEncoder
 
 
-class TestCompositeSpaces(unittest.TestCase):
+class TestHierarchicalSpaces(unittest.TestCase):
 
     def setUp(self):
         self.original_root_communication_channel_parameter_space = SimpleHypergrid(
@@ -62,7 +62,7 @@ class TestCompositeSpaces(unittest.TestCase):
         self.hierarchical_settings = json.loads(json.dumps(self.original_hierarchical_settings, cls=HypergridJsonEncoder), cls=HypergridJsonDecoder)
 
 
-    def test_composite_spaces(self):
+    def test_hierachical_spaces(self):
 
         valid_config_no_emergency_buffer = Point(
             num_readers=1,

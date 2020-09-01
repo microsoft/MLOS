@@ -61,150 +61,15 @@ class Hypergrid(ABC):
     def join(self, subgrid, on_external_dimension: Dimension):
         raise NotImplementedError("All subclasses must implement this.")
 
+    @abstractmethod
+    def is_hierarchical(self):
+        raise NotImplementedError("All subclasses must implement this.")
+
 
 class SimpleHypergrid(Hypergrid):
-    """ Models a space comprized of Continuous, Discrete, Ordinal and Categorical Dimensions
+    """ Models a space comprized of Continuous, Discrete, Ordinal and Categorical Dimensions.
 
-    """
-
-    def __init__(self, name, dimensions=None, random_state=None):
-        super(SimpleHypergrid, self).__init__(name=name, random_state=random_state)
-        if dimensions is None:
-            dimensions = []
-        self._dimensions = []
-        self.dimensions_dict = dict()
-
-        for dimension in dimensions:
-            dimension.random_state = self.random_state
-            self.add_dimension(dimension)
-
-    def __str__(self):
-        return f"{self.name} = {' x '.join('{' + str(dimension) + '}' for dimension in self._dimensions)}"
-
-    @property
-    def random_state(self):
-        return self._random_state
-
-    @random_state.setter
-    def random_state(self, value):
-        self._random_state = value
-        for dimension in self._dimensions:
-            dimension.random_state = self.random_state
-
-    @property
-    def dimensions(self):
-        return self._dimensions
-
-    @property
-    def num_dimensions(self):
-        return len(self._dimensions)
-
-    def get_dimensions_for_point(self, point):
-        """ Returns a list of dimensions for a given point.
-
-        It's trivial for SimpleHypergrid, but more interesting for the
-
-        :param point:
-        :return:
-        """
-        if point not in self:
-            raise PointOutOfDomainException(f"Point {point} does not belong to {self}.")
-
-        return self.dimensions
-
-
-    def add_dimension(self, dimension):
-        assert isinstance(dimension, Dimension)
-        assert dimension.name not in self.dimensions_dict
-
-        dimension.random_state = self.random_state
-        self.dimensions_dict[dimension.name] = dimension
-        self._dimensions.append(dimension)
-
-    def __contains__(self, item):
-        if isinstance(item, Hypergrid):
-            return self.contains_space(item)
-        if isinstance(item, Point):
-            return self.contains_point(item)
-        raise NotImplementedError(f"SimpleHypergrid only supports containment operator for SimpleHypergrids and Points, not {type(item)}")
-
-    def intersects(self, other_space):
-        """ Determines if self intersects with the other_space.
-
-        The only way they don't intersect is if there is at least one dimension common to both spaces that
-        such that self[dimension.name].intersects(other[dimension.name) == False.
-
-        :param other_space:
-        :return:
-        """
-        assert isinstance(other_space, SimpleHypergrid)
-        for other_dimension in other_space.dimensions:
-            our_dimension = self[other_dimension.name]
-            if our_dimension is None:
-                continue
-            if not our_dimension.intersects(other_dimension):
-                return False
-        return True
-
-    def join(self, subgrid: Hypergrid, on_external_dimension: Dimension):
-        """ Creates a CompositeHypergrid with itself as a root.
-        """
-        assert on_external_dimension is not None
-        external_dimension = on_external_dimension
-
-        assert self[external_dimension.name] is not None, f"The {self.name} hypergrid does not contain dimension named {external_dimension.name}."
-        if not self[external_dimension.name].intersects(external_dimension):
-            # No intersection - nothing to do
-            return self
-        hierarchical_space = CompositeHypergrid(name=self.name, root_hypergrid=self)
-        hierarchical_space.add_subgrid_on_external_dimension(other_hypergrid=subgrid, external_dimension=external_dimension)
-        return hierarchical_space
-
-    def __getitem__(self, dimension_name):
-        return self.dimensions_dict.get(dimension_name, None)
-
-    def contains_space(self, other_space):
-        """ Checks if other_space is a subspace of this one.
-
-        For another space to be a subspace of this one:
-            1. all of the other_space.dimensions must be in self.dimensions
-            2. every dimension in other_space.dimensions must be contained by the corresponding dimension in this space.
-
-        :param other_space:
-        :return:
-        """
-
-        for other_dimension in other_space.dimensions:
-            our_dimension = self.dimensions_dict.get(other_dimension.name, None)
-            if our_dimension is None:
-                return False
-            if other_dimension not in our_dimension:
-                return False
-        return True
-
-    def contains_point(self, point):
-        """ Checks if point belongs to this space.
-
-        For a point to belong to a space:
-            1. the point has to specify a coordinate for all dimensions in self.dimensions
-            2. each coordinate must be contained in our dimension
-
-        :param point:
-        :return:
-        """
-        return all(point[dimension.name] is not None and point[dimension.name] in dimension for dimension in self._dimensions)
-
-    def random(self, point=None):
-        if point is None:
-            point = Point()
-        for dimension in self._dimensions:
-            if dimension.name not in point:
-                point[dimension.name] = dimension.random()
-        return point
-
-
-class CompositeHypergrid(Hypergrid):
-    """ Models a hypergrid that results from joins of SimpleHypergrids and other CompositeHypergrids.
+    Can be flat or hierarchical, depending if any join operations were performed.
 
     """
     class GuestSubgrid:
@@ -221,11 +86,16 @@ class CompositeHypergrid(Hypergrid):
             self.subgrid = subgrid
             self.external_pivot_dimension = external_pivot_dimension
 
-    def __init__(self, name, root_hypergrid, random_state=None):
-        if random_state is None:
-            random_state = root_hypergrid.random_state
-        super(CompositeHypergrid, self).__init__(name=name, random_state=random_state)
-        self.root_hypergrid = root_hypergrid
+    def __init__(self, name, dimensions=None, random_state=None):
+        Hypergrid.__init__(self, name=name, random_state=random_state)
+        self._dimensions = []
+        self.dimensions_dict = dict()
+
+        if dimensions is None:
+            dimensions = []
+
+        for dimension in dimensions:
+            self.add_dimension(dimension)
 
         # maps a pivot dimension name to a set of guest subgrids that are joined on that external dimension
         #
@@ -235,6 +105,17 @@ class CompositeHypergrid(Hypergrid):
         #
         self.subgrids_by_name = dict()
 
+    def is_hierarchical(self):
+        return len(self.subgrids_by_name) > 0
+
+    def add_dimension(self, dimension):
+        assert isinstance(dimension, Dimension)
+        assert dimension.name not in self.dimensions_dict
+
+        dimension.random_state = self.random_state
+        self.dimensions_dict[dimension.name] = dimension
+        self._dimensions.append(dimension)
+
     @property
     def random_state(self):
         return self._random_state
@@ -242,14 +123,15 @@ class CompositeHypergrid(Hypergrid):
     @random_state.setter
     def random_state(self, value):
         self._random_state = value
-        self.root_hypergrid.random_state = self.random_state
+        for dimension in self._dimensions:
+            dimension.random_state = self._random_state
         for _, subgrid in self.subgrids_by_name.items():
             subgrid.random_state = self.random_state
 
     def __getitem__(self, dimension_name):
         subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(dimension_name)
         if subgrid_name is None:
-            return self.root_hypergrid[dimension_name]
+            return self.dimensions_dict.get(dimension_name, None)
         subgrid = self.subgrids_by_name[subgrid_name]
         return subgrid[dimension_name_without_subgrid_name]
 
@@ -258,7 +140,7 @@ class CompositeHypergrid(Hypergrid):
         return f"{self.name}"
 
     def add_subgrid_on_external_dimension(self, other_hypergrid: Hypergrid, external_dimension: Dimension):
-        assert self.root_hypergrid[external_dimension.name] is not None, f"{self.name} does not contain dimension {external_dimension.name}"
+        assert external_dimension.name in self.dimensions_dict, f"{self.name} does not contain dimension {external_dimension.name}"
         if not self[external_dimension.name].intersects(external_dimension):
             # They don't intersect so nothing to do
             return
@@ -268,7 +150,7 @@ class CompositeHypergrid(Hypergrid):
             raise RuntimeError(f"Subgrid {other_hypergrid.name} already joined to hypergrid {self.name} along the dimension {external_dimension.name}.")
 
         other_hypergrid.random_state = self.random_state
-        guest_subgrids_joined_on_dimension.add(CompositeHypergrid.GuestSubgrid(subgrid=other_hypergrid, external_pivot_dimension=external_dimension))
+        guest_subgrids_joined_on_dimension.add(SimpleHypergrid.GuestSubgrid(subgrid=other_hypergrid, external_pivot_dimension=external_dimension))
         self.guest_subgrids_by_pivot_dimension[external_dimension.name] = guest_subgrids_joined_on_dimension
         self.subgrids_by_name[other_hypergrid.name] = other_hypergrid
 
@@ -303,7 +185,7 @@ class CompositeHypergrid(Hypergrid):
         return self
 
     def contains_point(self, point: Point):
-        """ Checks if point belongs to the composite hypergrid.
+        """ Checks if point belongs to the  hypergrid.
 
         We must first see if for every dimension of the root hypergrid, the Point:
         a) specifies the dimension
@@ -315,13 +197,13 @@ class CompositeHypergrid(Hypergrid):
         c) if b) is true, then for every dimension in the subgrid, check if the points dimension
             values are within bounds.
 
-        This has to be recursive, because any of the subgrids can be composite already.
+        This has to be recursive, because any of the subgrids can be hierarchical already.
 
         :param point:
         :return:
         """
 
-        if point not in self.root_hypergrid:
+        if not all(point[dimension.name] is not None and point[dimension.name] in dimension for dimension in self._dimensions):
             return False
 
         for external_dimension_name, guest_subgrids_joined_on_dimension in self.guest_subgrids_by_pivot_dimension.items():
@@ -334,10 +216,37 @@ class CompositeHypergrid(Hypergrid):
                         return False
         return True
 
+
+    def contains_space(self, other_space):
+        """ Checks if other_space is a subspace of this one.
+
+        For another space to be a subspace of this one:
+            1. all of the other_space.dimensions must be in self.dimensions
+            2. every dimension in other_space.dimensions must be contained by the corresponding dimension in this space.
+
+        However the complication arises for hierarchical hypergrids so we'll tackle this more complex problem down the road.
+
+        :param other_space:
+        :return:
+        """
+        if self.is_hierarchical() or other_space.is_hierarchical():
+            raise NotImplementedError
+
+        for other_dimension in other_space.dimensions:
+            our_dimension = self.dimensions_dict.get(other_dimension.name, None)
+            if our_dimension is None:
+                return False
+            if other_dimension not in our_dimension:
+                return False
+        return True
+
     def random(self, point=None):
         if point is None:
             point = Point()
-        point = self.root_hypergrid.random(point)
+
+        for dimension in self._dimensions:
+            if dimension.name not in point:
+                point[dimension.name] = dimension.random()
 
         for external_dimension_name, guest_subgrids_joined_on_dimension in self.guest_subgrids_by_pivot_dimension.items():
             for guest_subgrid in guest_subgrids_joined_on_dimension:
@@ -349,13 +258,19 @@ class CompositeHypergrid(Hypergrid):
 
     @property
     def dimensions(self):
-        for dimension in self.root_hypergrid.dimensions:
-            yield dimension
+        dimensions = []
+        for dimension in self._dimensions:
+            dimensions.append(dimension)
         for subgrid_name, subgrid in self.subgrids_by_name.items():
             for dimension in subgrid.dimensions:
                 returned_dimension = dimension.copy()
                 returned_dimension.name = subgrid_name + "." + returned_dimension.name
-                yield returned_dimension
+                dimensions.append(returned_dimension)
+        return dimensions
+
+    @property
+    def root_dimensions(self):
+        return self._dimensions
 
     def get_dimensions_for_point(self, point):
         """ Returns dimensions that the given point and belongs to. For pivot dimensions, it returns the guest_subgrid.external_pivot_dimension
@@ -371,8 +286,8 @@ class CompositeHypergrid(Hypergrid):
         if point not in self:
             raise PointOutOfDomainException(f"Point {point} does not belong to {self}.")
 
-        dimensions_by_name = {dimension.name: dimension for dimension in self.root_hypergrid.dimensions}
-        ordered_dimension_names = [dimension.name for dimension in self.root_hypergrid.dimensions]
+        dimensions_by_name = {dimension.name: dimension for dimension in self._dimensions}
+        ordered_dimension_names = [dimension.name for dimension in self._dimensions]
 
         for external_dimension_name, guest_subgrids_joined_on_dimension in self.guest_subgrids_by_pivot_dimension.items():
             for guest_subgrid in guest_subgrids_joined_on_dimension:

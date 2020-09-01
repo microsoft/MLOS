@@ -6,7 +6,7 @@ from json import JSONEncoder, JSONDecoder
 import json
 
 from . import Dimension, EmptyDimension, CategoricalDimension, ContinuousDimension, Point, \
-    DiscreteDimension, OrdinalDimension, CompositeDimension, Hypergrid, SimpleHypergrid, CompositeHypergrid
+    DiscreteDimension, OrdinalDimension, CompositeDimension, Hypergrid, SimpleHypergrid
 
 class HypergridJsonEncoder(JSONEncoder):
 
@@ -59,15 +59,12 @@ class HypergridJsonEncoder(JSONEncoder):
             if isinstance(o, SimpleHypergrid):
                 return_dict['ObjectType'] = "SimpleHypergrid"
                 return_dict['Name'] = o.name
-                return_dict['Dimensions'] = o.dimensions
-            elif isinstance(o, CompositeHypergrid):
-                return_dict['ObjectType'] = "CompositeHypergrid"
-                return_dict['Name'] = o.name
-                return_dict['RootHypergrid'] = o.root_hypergrid
-                return_dict['GuestSubgrids'] = o.guest_subgrids_by_pivot_dimension
+                return_dict['Dimensions'] = o.root_dimensions
+                if o.is_hierarchical():
+                    return_dict['GuestSubgrids'] = o.guest_subgrids_by_pivot_dimension
             return return_dict
 
-        if isinstance(o, CompositeHypergrid.GuestSubgrid):
+        if isinstance(o, SimpleHypergrid.GuestSubgrid):
             return {
                 'ObjectType': 'GuestSubgrid',
                 'Subgrid': o.subgrid,
@@ -143,26 +140,21 @@ class HypergridJsonDecoder(JSONDecoder):
                 chunks=obj['Chunks']
             )
         if object_type == "SimpleHypergrid":
-            return SimpleHypergrid(
+            simple_hypergrid = SimpleHypergrid(
                 name=obj['Name'],
                 dimensions=obj.get('Dimensions', [])
             )
-        if object_type == "CompositeHypergrid":
-            composite_hypergrid = CompositeHypergrid(
-                name=obj['Name'],
-                root_hypergrid=obj['RootHypergrid']
-            )
 
-            for _, subgrids_joined_on_dimension in obj['GuestSubgrids'].items():
+            for _, subgrids_joined_on_dimension in obj.get('GuestSubgrids', dict()).items():
                 for guest_subgrid in subgrids_joined_on_dimension:
-                    composite_hypergrid.add_subgrid_on_external_dimension(
+                    simple_hypergrid.add_subgrid_on_external_dimension(
                         other_hypergrid=guest_subgrid.subgrid,
                         external_dimension=guest_subgrid.external_pivot_dimension
                     )
-            return composite_hypergrid
+            return simple_hypergrid
 
         if object_type == "GuestSubgrid":
-            return CompositeHypergrid.GuestSubgrid(
+            return SimpleHypergrid.GuestSubgrid(
                 subgrid=obj['Subgrid'],
                 external_pivot_dimension=obj['ExternalPivotDimension']
             )

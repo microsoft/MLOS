@@ -7,12 +7,12 @@ import unittest
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
-class TestCompositeHypergrid2(unittest.TestCase):
+class TestHierarchicalHypergrid2(unittest.TestCase):
     """ Tests the improved implementation of the Hypergrids.
 
     In particular:
-    * CompositeHypergrid.join() should attach to the root_hypergrid if possible
-    * CompositeHypergrid implement a hierarchical namespace, where a coordinate within
+    * SimpleHypergrid.join() should attach to the root hypergrid if possible
+    * SimpleHypergrids that are hierarchical implement a hierarchical namespace, where a coordinate within
         each subgrid is prefixed with the name of that subgrid:
 
     """
@@ -93,7 +93,7 @@ class TestCompositeHypergrid2(unittest.TestCase):
 
         :return:
         """
-        self.assertTrue(self.cache_param_space.root_hypergrid.name == 'cache_param_space')
+        self.assertTrue(self.cache_param_space.name == 'cache_param_space')
 
         subgrids_joined_on_cache_implementation_name_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.cache_param_space.guest_subgrids_by_pivot_dimension['cache_implementation_name'])
         self.assertTrue(self.lru_cache_param_space in subgrids_joined_on_cache_implementation_name_dimension)

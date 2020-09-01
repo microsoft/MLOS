@@ -4,7 +4,7 @@
 #
 from abc import abstractmethod
 from pandas import DataFrame
-from mlos.Spaces import CompositeHypergrid, Hypergrid, Point, SimpleHypergrid
+from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
 
 
 class HypergridAdapter(Hypergrid):
@@ -15,11 +15,6 @@ class HypergridAdapter(Hypergrid):
     @staticmethod
     def is_like_simple_hypergrid(hypergrid):
         return isinstance(hypergrid, SimpleHypergrid) or (isinstance(hypergrid, HypergridAdapter) and isinstance(hypergrid.target, SimpleHypergrid))
-
-    @staticmethod
-    def is_like_composite_hypergrid(hypergrid):
-        return isinstance(hypergrid, CompositeHypergrid) or (isinstance(hypergrid, HypergridAdapter) and isinstance(hypergrid.target, CompositeHypergrid))
-
 
     @abstractmethod
     def __init__(self, name=None, random_state=None):
@@ -62,6 +57,9 @@ class HypergridAdapter(Hypergrid):
 
     def random(self, point=None):
         return self.target.random(point=point)
+
+    def is_hierarchical(self):
+        return self.target.is_hierarchical()
 
     def join(self, subgrid, on_external_dimension):
         raise RuntimeError("Join operation is non-sensical for a HypergridAdapter.")

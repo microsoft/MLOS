@@ -7,7 +7,7 @@ import unittest
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
-class TestCompositeHypergrid2(unittest.TestCase):
+class TestHierarchicalHypergrid3(unittest.TestCase):
     """ Tests the join on external dimension in hypergrids.
 
     In particular:
