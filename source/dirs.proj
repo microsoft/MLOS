@@ -5,9 +5,9 @@
     <!-- Mlos projects -->
     <ProjectReference Include="Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" />
     <ProjectReference Include="Mlos.SettingsSystem.CodeGen\Mlos.SettingsSystem.CodeGen.csproj" />
-    <ProjectReference Include="Mlos.Core\Mlos.Core.vcxproj" />
+    <ProjectReference Include="Mlos.Core\Mlos.Core.vcxproj" Condition="'$(IsWindows)' == 'true'" />
     <ProjectReference Include="Mlos.NetCore\Mlos.NetCore.csproj" />
-    <ProjectReference Include="Mlos.UnitTest\Mlos.UnitTest.vcxproj" />
+    <ProjectReference Include="Mlos.UnitTest\Mlos.UnitTest.vcxproj" Condition="'$(IsWindows)' == 'true'" />
     <ProjectReference Include="Mlos.NetCore.Benchmark\Mlos.NetCore.Benchmark.csproj" />
     <ProjectReference Include="Mlos.NetCore.UnitTest\Mlos.NetCore.UnitTest.csproj" />
     <ProjectReference Include="Mlos.Model.Services\Mlos.Model.Services.csproj" />

@@ -2,8 +2,8 @@
 <Project Sdk="Microsoft.Build.Traversal/2.0.50">
   <Import Project="..\..\build\Mlos.Dirs.props" />
   <ItemGroup>
-    <ProjectReference Include="SmartCache\SmartCache.vcxproj" />
-    <ProjectReference Include="SmartSharedChannel\SmartSharedChannel.vcxproj" />
+    <ProjectReference Include="SmartCache\SmartCache.vcxproj" Condition="'$(IsWindows)' == 'true'" />
+    <ProjectReference Include="SmartSharedChannel\SmartSharedChannel.vcxproj" Condition="'$(IsWindows)' == 'true'" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.Dirs.targets" />
 </Project>

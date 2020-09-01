@@ -20,7 +20,7 @@ string ObjectDirectory
     {
         string objectDirectory =  Configuration switch
         {
-                "Release" => objectDirectory ="obj",
+                "Release" => objectDirectory = "obj",
                 "Debug" => objectDirectory = "objd",
                 _ => throw new InvalidOperationException("Unsupported configuration")
         };
@@ -44,6 +44,12 @@ var SqlPassword = GenerateRandomPassword(length: 10);
 // Output directory contains build results.
 //
 var OutputDir = Directory("./out/");
+
+// Output directory for cmake.
+// See Also: Makefile, build/Common.mk
+//
+var CMakeConfiguration = "Release";
+var CMakeBuildDir = Directory($"./out/cmake/{CMakeConfiguration}");
 
 // Docker Test Directory contains the generated dockerfiles and connection string files
 // required for E2E Docker tests
@@ -238,8 +244,9 @@ Task("Generate-CMake")
     {
         var cmakeSettings = new CMakeSettings
         {
-            OutputPath = $"{OutputDir}/cmake",
-            SourcePath = "./source/Mlos.Core/"
+            Generator = "Unix Makefiles",
+            OutputPath = $"{CMakeBuildDir}",
+            SourcePath = ".",
         };
 
         CMake(cmakeSettings);
@@ -250,9 +257,26 @@ Task("Build-CMake")
     .IsDependentOn("Generate-CMake")
     .Does(() =>
     {
+        var cmakeBuildTargets = new[]
+        {
+            // TODO: Add additional C++ build/test targets for Linux
+            "Mlos.Core",
+            "Mlos.UnitTest",
+            "SmartCache",
+            "SmartSharedChannel",
+        };
+
         var settings = new CMakeBuildSettings
         {
-            BinaryPath = $"{OutputDir}/cmake"
+            BinaryPath = $"{CMakeBuildDir}",
+            Configuration = CMakeConfiguration,
+            Targets = new[]
+            {
+                // Workaround a bug in how CMakeBuildSettings joins the targets
+                // to be build with commas instead of spaces before passing it
+                // to the "cmake --build" command.
+                String.Join(" ", cmakeBuildTargets)
+            },
         };
 
         CMakeBuild(settings);
@@ -320,12 +344,14 @@ Task("Create-Nuget-Package")
         // Create nuget package in Taget directory.
         //
         NuGetPack("./nuspec/Mlos.nuspec",
-            new NuGetPackSettings {
+            new NuGetPackSettings
+            {
                 Version = asmVersion.FileVersion,
                 OutputDirectory = TargetDir,
                 Symbols = false,
                 NoPackageAnalysis = true,
-                Files = sourceFiles});
+                Files = sourceFiles
+            });
     });
 
 

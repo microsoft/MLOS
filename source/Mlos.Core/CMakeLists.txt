@@ -1,46 +1,25 @@
-cmake_minimum_required(VERSION 3.15)
-project(MlosCore)
+project(Mlos.Core)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+get_filename_component(MLOS_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
+include("${MLOS_ROOT}/build/Mlos.Common.cmake")
+include("${MLOS_ROOT}/build/Mlos.Cpp.cmake")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
+add_library(${PROJECT_NAME} STATIC
+    GlobalMemoryRegion.cpp
+    Mlos.Core.cpp
+    MlosContext.cpp
+    NamedEvent.Linux.cpp
+    SharedChannel.cpp
+    SharedConfigManager.cpp
+    SharedConfigMemoryRegion.cpp
+    SharedMemoryMapView.Linux.cpp)
 
-include_directories(.)
-include_directories(../../out/Mlos.CodeGen.out/Release/)
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} pthread)
 
-include(../../build/clang_tools.cmake)
+target_link_libraries(${PROJECT_NAME} rt)
 
-add_library(
-        MlosCore
-        BytePtr.h
-        ComponentConfig.h
-        FNVHashFunction.h
-        GlobalMemoryRegion.cpp
-        GlobalMemoryRegion.h
-        Hash.h
-        Mlos.Core.cpp
-        Mlos.Core.h
-        MlosContext.cpp
-        MlosContext.h
-        NamedEvent.Linux.cpp
-        NamedEvent.Linux.h
-        ObjectDeserializationCallback.h
-        ObjectSerialization.h
-        ObjectSerializationStringView.h
-        PropertyProxy.h
-        PropertyProxyStringView.h
-        SharedChannel.cpp
-        SharedChannel.h
-        SharedChannelPolicies.h
-        SharedConfigMemoryRegion.cpp
-        SharedConfigMemoryRegion.h
-        SharedMemoryMapView.Linux.cpp
-        SharedMemoryMapView.Linux.h
-        SharedMemoryRegionView.h
-        StaticSingleton.h
-        StaticVector.h
-        StringTypes.h
-        Utils.h)
+# Add dependencies on SettingsRegistry project(s).
 
-set_property(TARGET MlosCore PROPERTY CXX_STANDARD 17)
+# Mlos.NetCore currently also does the Mlos.Core SettingsProvider code generation.
+add_dependencies(${PROJECT_NAME} Mlos.NetCore)

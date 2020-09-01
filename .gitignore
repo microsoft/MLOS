@@ -406,6 +406,14 @@ tools/
 # launch settings
 *launchSettings.json
 
+# CMake output
+build.cmake/
+CMakeCache.txt
+CMakeFiles/
+
+# ctags output
+tags
+
 # duplicated/copied proto file for python code generation
 source/Mlos.Proto/mlos/Grpc/OptimizerService.proto
 

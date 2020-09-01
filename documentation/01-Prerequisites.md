@@ -4,17 +4,23 @@ These are one-time setup instructions that should be executed prior to following
 
 ## Contents
 
-- [Requirements](#requirements)
-- [Clone the repository](#clone-the-repository)
-- [Install build tools](#install-build-tools)
-  - [Linux](#linux-build-tools)
-  - [Windows](#windows-build-tools)
-- [Install Python Dependencies](#install-python-dependencies)
-  - [Linux](#linux-python-install)
-  - [Windows](#windows-python-install)
-- [Install Docker](#install-docker)
-  - [Linux](#linux-docker-install)
-  - [Windows](#windows-docker-install)
+- [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
+  - [Contents](#contents)
+  - [Requirements](#requirements)
+  - [Clone the repository](#clone-the-repository)
+  - [Install build tools](#install-build-tools)
+    - [Docker](#docker)
+    - [Linux build tools](#linux-build-tools)
+    - [Windows build tools](#windows-build-tools)
+      - [Using a local script](#using-a-local-script)
+      - [Using Chocolatey](#using-chocolatey)
+      - [Manually](#manually)
+  - [Install Python Dependencies](#install-python-dependencies)
+    - [Linux](#linux-python-install)
+    - [Windows](#windows-python-install)
+  - [Install Docker](#install-docker)
+    - [Linux Docker Install](#linux-docker-install)
+    - [Windows Docker Install](#windows-docker-install)
 
 > Note: Most Windows shell commands here expect `powershell` (or [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows)).
 
@@ -26,15 +32,18 @@ It supports Windows and Linux environments.
 
 - Windows
 
-  > Portions of MLOS require Docker, which requires a Linux VM.  So support for *one* of the following is required:
+  > Portions of MLOS use Docker, which requires a Linux VM.  So support for *one* of the following is required:
   - [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) (e.g. Windows 10 build >= 2004, including Pro, Enterprise, *and* Home), *or*
   - [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) (only Windows 10 Pro/Enterprise, *not* ~~Home~~)
 
   > Note: WSL2 is advised for ease of setup, integrations with Docker, and more flexible resource utilizations benefits.
 
+  See the [Install Docker](#install-docker) section for more details.
+
 - Linux
-  - Ubuntu 18.04 (bionic), 20.04 (focal)
-  - Debian 9 (stretch), 10 (buster)
+  - Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
+
+  > Other distros/versions may work, but are untested.
 
 ## Clone the repository
 
@@ -48,9 +57,59 @@ git clone https://github.com/microsoft/MLOS.git
 
 ## Install build tools
 
+### Docker
+
+To automatically setup a Linux build environment using `docker`, run the following:
+
+```sh
+# Select your target Ubuntu version:
+UbuntuVersion=20.04
+# Build the docker image:
+docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
+```
+
+> Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
+
+> Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
+
+See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
+
 ### Linux build tools
 
- TODO
+To manually setup your own Linux build environment:
+
+```sh
+# Make sure some basic build tools are available:
+sudo apt-get install git make build-essential
+```
+
+```sh
+# Make sure some apt related tools are available:
+sudo apt-get install \
+  apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
+# Make sure an appropriate version of clang is available:
+./script/install.llvm-clang.sh
+```
+
+```sh
+# Make sure some dotnet dependencies are available:
+sudo apt-get install liblttng-ctl0 liblttng-ust0 zlib1g libxml2
+```
+
+> Note: older distros such as Ubuntu 16.04 may also need the `libcurl3` package installed for `dotnet restore` to work, but is unavailable on (or will break) more recent versions of Ubuntu.
+
+> Note: `libxml2` pulls an appropriate version of `libicu`.
+
+> Note: most other dependencies like `dotnet` and `cmake` are automatically fetched to the `tools/` directory using helpers in `scripts/` and invoked by the `Makefile` and `cmake` tools.
+
+Optional tools:
+
+```sh
+sudo apt-get install exuberant-ctags
+```
+
+> When available `make ctags` can be invoked to help generate a `tags` database at the root of the source tree to allow easier code navigation in editors that support it.
 
 ### Windows build tools
 
@@ -196,7 +255,30 @@ Be sure to include support for .Net Core, C++, CMake
 
 ### Linux Docker Install
 
-TODO
+Please see the official Docker install documenation for distribution specific documentation:
+
+- Ubuntu: <https://docs.docker.com/engine/install/ubuntu/>
+
+  As a short guide (copied from the link above):
+
+  ```sh
+  sudo apt-get remove docker docker-engine docker.io containerd runc
+  sudo apt-get update
+
+  sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+  sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+
+  sudo apt-get update
+  sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+  apt-get install docker-ce
+  ```
 
 ### Windows Docker Install
 
