@@ -66,18 +66,54 @@ To achieve this MLOS provides:
 
     Once hooks are created in the target system, iteration on the external agent can be more rapidly developed and deployed.
 
-## Build
+
+## Python only installation
+
+Some of the examples require only the installation of the mlos Python library. These examples do not use the shared memory infrastructure.
+To use this simplified installation, it's recommended to use the Anaconda python distribution and create a new conda environment:
+
+```
+$ conda create -n mlos_environment
+$ conda activate mlos_environment
+```
+
+You can download the mlos code using git:
+
+```
+$ git clone git@github.com:microsoft/MLOS.git
+```
+
+To install the Python library, change to the Python directory and install with ``pip``:
+
+```
+$ cd MLOS/source/Mlos.Python
+$ pip install -e .
+```
+
+You can also install the package directly without checking out the code:
+
+```
+$ pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
+```
+
+However, this does not include the examples.
+
+After this installation, you can run any of the Python-only example notebooks.
+A good place to start is the [Introduction to Bayesian Optimization](./notebooks/BayesianOptimization/) notebook.
+
+## Full Build (C# and C++ components)
 
 MLOS supports Windows and Linux build environments.
 
 For detailed instructions, please refer to:
 
-  1. [documentation/01-Prerequisites.md](./documentation/01-Prerequisites.md)
-  2. [documentation/02-Build.md](./documentation/02-Build.md)
+  1. [Prerequisites](./documentation/01-Prerequisites.md)
+  2. [Build](./documentation/02-Build.md)
 
 ## Examples
 
-Code and documentation for examples of using MLOS to optimize a system are described in [documentation/03-ExampleUsage.md](./documentation/04-ExampleUsage.md) and in the [source/Examples](./source/Examples/) tree.
+Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](./notebooks/) section. Additional code is in the  [source/Examples](https://github.com/microsoft/MLOS/tree/main/source/Examples) source directory.
+You can find the source of the notebooks [on github as well](https://github.com/microsoft/MLOS/tree/main/source/Mlos.Notebooks).
 
 ## Documentation
 
@@ -87,9 +123,9 @@ Code and documentation for examples of using MLOS to optimize a system are descr
 
 ## Contributing
 
-We welcome contributions!  Please see [CONTRIBUTING.md](./CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for details.
+We welcome contributions!  Please see [Contributing](./CONTRIBUTING.md) and [Code of Conduct](./CODE_OF_CONDUCT.md) for details.
 
-Also, please see the [Roadmap](TODOFIXME) of planned features.
+Also, please see the [Roadmap](#) of planned features.
 
 ## Contact
 

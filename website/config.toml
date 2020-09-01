@@ -1,0 +1,9 @@
+title = 'MLOS'
+
+theme = "book"
+baseURL = "https://microsoft.github.io/MLOS/"
+DisablePathToLower = "True"
+
+[params]
+  BookRepo = 'https://github.com/microsoft/MLOS'
+  BookMenuBundle = '/menu'
