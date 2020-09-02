@@ -6,6 +6,7 @@ jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir co
 # nbconvert and hugo disagree about paths
 # this should probably be done via the template
 sed -i 's/BayesianOptimization_files/\.\.\/BayesianOptimization_files/g' content/notebooks/BayesianOptimization.md
+sed -i 's/SmartCacheOptimization_files/\.\.\/SmartCacheOptimization_files/g' content/notebooks/SmartCacheOptimization.md
 
 # place links to github in notebook files
 for f in content/notebooks/*.md; do
