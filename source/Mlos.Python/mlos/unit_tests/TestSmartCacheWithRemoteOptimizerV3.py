@@ -66,8 +66,8 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
         self.mlos_agent.set_configuration(
             component_type=SmartCacheWorkloadGenerator,
             new_config_values=Point(
-                workload_type='sequential_key_from_range',
-                sequential_key_from_range_config=Point(
+                workload_type='cyclical_key_from_range',
+                cyclical_key_from_range_config=Point(
                     min=0,
                     range_width=2048
                 )

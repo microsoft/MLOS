@@ -3,6 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import uuid
 from contextlib import contextmanager
 import json
 import logging
@@ -25,15 +26,15 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
     """
 
     def __init__(self):
-        self._next_optimizer_id = 0
         self._optimizers_by_id = dict()
+        self._ordered_ids = []
 
         self._lock_manager = multiprocessing.Manager()
         self._optimizer_locks_by_optimizer_id = dict()
 
-    def get_next_optimizer_id(self):
-        self._next_optimizer_id += 1
-        return str(self._next_optimizer_id - 1)
+    @staticmethod
+    def get_next_optimizer_id():
+        return str(uuid.uuid4())
 
     @contextmanager
     def exclusive_optimizer(self, optimizer_id):
@@ -53,7 +54,8 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
     def ListExistingOptimizers(self, request: Empty, context):
         optimizers_info = []
-        for optimizer_id, optimizer in self._optimizers_by_id.items():
+        for optimizer_id in self._ordered_ids:
+            optimizer = self._optimizers_by_id[optimizer_id]
             optimizers_info.append(OptimizerInfo(
                 OptimizerHandle=OptimizerHandle(Id=optimizer_id),
                 OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
@@ -98,6 +100,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         with optimizer_lock:
             self._optimizer_locks_by_optimizer_id[optimizer_id] = optimizer_lock
             self._optimizers_by_id[optimizer_id] = optimizer
+            self._ordered_ids.append(optimizer_id)
         logging.info(f"Created optimizer {optimizer_id}.")
         return OptimizerService_pb2.OptimizerHandle(Id=optimizer_id)
 

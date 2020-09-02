@@ -69,7 +69,7 @@ class DecisionTreeRegressionModelConfig(RegressionModelConfig):
 
     _DEFAULT = Point(
         criterion=Criterion.MSE.value,
-        splitter=Splitter.RANDOM.value,
+        splitter=Splitter.BEST.value,
         max_depth=0,
         min_samples_split=2,
         min_samples_leaf=3,

@@ -27,6 +27,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
             ContinuousDimension(name="features_fraction_per_estimator", min=0, max=1, include_min=False, include_max=True),
             ContinuousDimension(name="samples_fraction_per_estimator", min=0, max=1, include_min=False, include_max=True),
             CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__]),
+            CategoricalDimension(name="bootstrap", values=[True, False])
         ]
     ).join(
         subgrid=DecisionTreeRegressionModelConfig.CONFIG_SPACE,
@@ -34,25 +35,28 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
     )
 
     _DEFAULT = Point(
-        n_estimators=5,
+        n_estimators=10,
         features_fraction_per_estimator=1,
         samples_fraction_per_estimator=0.7,
         regressor_implementation=DecisionTreeRegressionModel.__name__,
-        decision_tree_regression_model_config=DecisionTreeRegressionModelConfig.DEFAULT
+        decision_tree_regression_model_config=DecisionTreeRegressionModelConfig.DEFAULT,
+        bootstrap=True
     )
 
     def __init__(
             self,
-            n_estimators=_DEFAULT.n_estimators,
-            features_fraction_per_estimator=_DEFAULT.features_fraction_per_estimator,
-            samples_fraction_per_estimator=_DEFAULT.samples_fraction_per_estimator,
-            regressor_implementation=_DEFAULT.regressor_implementation,
-            decision_tree_regression_model_config: Point()=_DEFAULT.decision_tree_regression_model_config
+            n_estimators: int = _DEFAULT.n_estimators,
+            features_fraction_per_estimator: float = _DEFAULT.features_fraction_per_estimator,
+            samples_fraction_per_estimator: float = _DEFAULT.samples_fraction_per_estimator,
+            regressor_implementation: str = _DEFAULT.regressor_implementation,
+            decision_tree_regression_model_config: Point = _DEFAULT.decision_tree_regression_model_config,
+            bootstrap: bool = _DEFAULT.bootstrap
     ):
         self.n_estimators = n_estimators
         self.features_fraction_per_estimator = features_fraction_per_estimator
         self.samples_fraction_per_estimator = samples_fraction_per_estimator
         self.regressor_implementation = regressor_implementation
+        self.bootstrap = bootstrap
 
         assert regressor_implementation == DecisionTreeRegressionModel.__name__
         self.decision_tree_regression_model_config = DecisionTreeRegressionModelConfig.create_from_config_point(decision_tree_regression_model_config)
@@ -222,16 +226,26 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 random_state=i,
                 axis='index'
             )
+            if self.model_config.bootstrap:
+                bootstrapped_observations_for_tree_training = observations_for_tree_training.sample(
+                    frac=1.0/self.model_config.samples_fraction_per_estimator,
+                    replace=True,
+                    random_state=i,
+                    axis='index'
+                )
+            else:
+                bootstrapped_observations_for_tree_training = observations_for_tree_training.copy()
             observations_for_tree_validation = non_null_observations.loc[non_null_observations.index.difference(observations_for_tree_training.index)]
             num_selected_observations = len(observations_for_tree_training.index)
             if tree.should_fit(num_selected_observations):
-                assert len(non_null_observations.index) == len(targets_for_non_null_observations.index)
-                targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
+                bootstrapped_targets_for_tree_training = targets_for_non_null_observations.loc[bootstrapped_observations_for_tree_training.index]
+                assert len(bootstrapped_observations_for_tree_training.index) == len(bootstrapped_targets_for_tree_training.index)
                 tree.fit(
-                    feature_values_pandas_frame=observations_for_tree_training,
-                    target_values_pandas_frame=targets_for_tree_training,
+                    feature_values_pandas_frame=bootstrapped_observations_for_tree_training,
+                    target_values_pandas_frame=bootstrapped_targets_for_tree_training,
                     iteration_number=iteration_number
                 )
+                targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
                 tree.compute_goodness_of_fit(features_df=observations_for_tree_training, target_df=targets_for_tree_training, data_set_type=DataSetType.TRAIN)
                 if not observations_for_tree_validation.empty:
                     targets_for_tree_validation = targets_for_non_null_observations.loc[observations_for_tree_validation.index]

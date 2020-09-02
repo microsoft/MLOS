@@ -9,7 +9,7 @@ import pandas as pd
 from mlos.Optimizers.OptimizerInterface import OptimizerInterface
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
-from mlos.Tomograph.Heatmap import Heatmap
+from mlos.OptimizerMonitoring.Tomograph.Heatmap import Heatmap
 
 class ModelTomograph:
     """ The role of this class is to present to the user the grid-of-heatmaps view of the internal state of
@@ -197,8 +197,6 @@ class ModelTomograph:
                     self._update_known_extremes(current_min=np.min(predicted_mean), current_max=np.max(predicted_mean))
 
     def _create_figure_and_axes(self):
-        if self._figure is not None:
-            return
         self._figure, self._axes = plt.subplots(
             nrows=self.num_plottable_dimensions,
             ncols=self.num_plottable_dimensions,
