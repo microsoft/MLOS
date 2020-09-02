@@ -146,6 +146,9 @@ class SimpleBayesianOptimizer(OptimizerInterface):
     def observations(self):
         return self._observations
 
+    def get_all_observations(self):
+        return None
+
     def get_optimizer_convergence_state(self):
         return None
 

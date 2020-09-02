@@ -3,7 +3,9 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, Tuple
+
+import pandas as pd
 
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
@@ -39,6 +41,10 @@ class OptimizerInterface(ABC):
         :param target_value:
         :return:
         """
+        raise NotImplementedError("All subclasses must implement this method.")
+
+    @abstractmethod
+    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod

@@ -32,6 +32,10 @@ service OptimizerService
     // Adds an observation to the optimizer's data set.
     //
     rpc RegisterObservation(RegisterObservationRequest) returns (Empty);
+
+    // Returns all observations registered for a given optimizer.
+    //
+    rpc GetAllObservations(OptimizerHandle) returns (Observations);
 };
 
 // A request to create an optimizer.
@@ -106,6 +110,16 @@ message OptimizerList
 // A representation of a single observation to be added to the optimizer's data set.
 //
 message Observation
+{
+    Features Features = 1;
+    ObjectiveValues ObjectiveValues = 2;
+};
+
+// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
+// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
+// break Greg's PR. 
+// 
+message Observations
 {
     Features Features = 1;
     ObjectiveValues ObjectiveValues = 2;

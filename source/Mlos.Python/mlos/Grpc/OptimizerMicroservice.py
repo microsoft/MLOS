@@ -12,7 +12,8 @@ import pandas as pd
 
 from mlos.global_values import serialize_to_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
-from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList
+from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList, Observations, Features,\
+    ObjectiveValues
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
@@ -135,6 +136,16 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             optimizer.register(feature_values_dataframe, objective_values_dataframe)
 
         return Empty()
+
+    def GetAllObservations(self, request, context): # pylint: disable=unused-argument
+        with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
+            features_df, objectives_df = optimizer.get_all_observations()
+
+        return Observations(
+            Features=Features(FeaturesJsonString=features_df.to_json(orient='index', double_precision=15)),
+            ObjectiveValues=ObjectiveValues(ObjectiveValuesJsonString=objectives_df.to_json(orient='index', double_precision=15))
+        )
+
 
     def Predict(self, request, context): # pylint: disable=unused-argument
 

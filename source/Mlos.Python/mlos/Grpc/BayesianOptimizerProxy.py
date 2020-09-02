@@ -3,6 +3,10 @@
 # Licensed under the MIT License.
 #
 import json
+from typing import Tuple
+
+import pandas as pd
+
 from mlos.global_values import deserialize_from_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Logger import create_logger
@@ -75,6 +79,12 @@ class BayesianOptimizerProxy(OptimizerInterface):
                 )
             )
             self._optimizer_stub.RegisterObservation(register_request)
+
+    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        response = self._optimizer_stub.GetAllObservations(self.optimizer_handle)
+        features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
+        objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
+        return features_df, objectives_df
 
     def predict(self, feature_values_pandas_frame, t=None):  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
