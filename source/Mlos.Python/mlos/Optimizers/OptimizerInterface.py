@@ -17,6 +17,7 @@ class OptimizerInterface(ABC):
     @abstractmethod
     def __init__(self, optimization_problem: OptimizationProblem):
         self.optimization_problem = optimization_problem
+        self.optimizer_config = None # TODO: pass from subclasses.
 
     @abstractmethod
     def get_optimizer_convergence_state(self):

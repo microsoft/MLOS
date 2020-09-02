@@ -7,3 +7,4 @@ pandas==1.0.3
 pylint==2.3.1
 pyodbc==4.0.30
 grpcio-tools==1.30.0
+tensorboardX==2.1
