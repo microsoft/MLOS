@@ -6,76 +6,46 @@ These are one-time setup instructions that should be executed prior to following
 
 - [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
   - [Contents](#contents)
-  - [Requirements](#requirements)
-  - [Clone the repository](#clone-the-repository)
-  - [Install build tools](#install-build-tools)
-    - [Docker](#docker)
+  
+  - [Linux](#linux)
+    - [Requirements](#linux-requirements)
+    - [Clone the repository](#clone-the-repository)
     - [Linux build tools](#linux-build-tools)
+      - [Linux Build Manually](#linux-build-manually)
+      - [Docker](#docker)
+    - [Linux Python Install](#linux-python-install)
+    - [Linux Docker Install](#linux-docker-install)
+  
+  - [Windows](#Windows)
+    - [Windows Requirements](#windows-requirements)
+    - [Clone the repository](#clone-the-repository)
     - [Windows build tools](#windows-build-tools)
       - [Using a local script](#using-a-local-script)
       - [Using Chocolatey](#using-chocolatey)
-      - [Manually](#manually)
-  - [Install Python Dependencies](#install-python-dependencies)
-    - [Linux](#linux-python-install)
-    - [Windows](#windows-python-install)
-  - [Install Docker](#install-docker)
-    - [Linux Docker Install](#linux-docker-install)
+      - [Windows Build Manually](#win-build-manually)
+    - [Windows Pythoon Install](#windows-python-install)
     - [Windows Docker Install](#windows-docker-install)
+      
 
 > Note: Most Windows shell commands here expect `powershell` (or [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows)).
 
-## Requirements
 
-MLOS currently only supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
+MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
+It supports Windows and Linux environments. Below we provide instructions for each OS.
 
-It supports Windows and Linux environments.
 
-- Windows
+## Linux
 
-  > Portions of MLOS use Docker, which requires a Linux VM.  So support for *one* of the following is required:
-  - [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) (e.g. Windows 10 build >= 2004, including Pro, Enterprise, *and* Home), *or*
-  - [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) (only Windows 10 Pro/Enterprise, *not* ~~Home~~)
+### Linux Requirements
 
-  > Note: WSL2 is advised for ease of setup, integrations with Docker, and more flexible resource utilizations benefits.
-
-  See the [Install Docker](#install-docker) section for more details.
-
-- Linux
   - Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
 
   > Other distros/versions may work, but are untested.
 
-## Clone the repository
-
-Cross platform
-
-```shell
-git clone https://github.com/microsoft/MLOS.git
-```
-
-> See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`.
-
-## Install build tools
-
-### Docker
-
-To automatically setup a Linux build environment using `docker`, run the following:
-
-```sh
-# Select your target Ubuntu version:
-UbuntuVersion=20.04
-# Build the docker image:
-docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
-```
-
-> Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
-
-> Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
-
-See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
 
 ### Linux build tools
 
+#### Linux Build Manually
 To manually setup your own Linux build environment:
 
 ```sh
@@ -110,6 +80,113 @@ sudo apt-get install exuberant-ctags
 ```
 
 > When available `make ctags` can be invoked to help generate a `tags` database at the root of the source tree to allow easier code navigation in editors that support it.
+
+#### Docker
+
+To automatically setup a Linux build environment using `docker`, run the following:
+
+```sh
+# Select your target Ubuntu version:
+UbuntuVersion=20.04
+# Build the docker image:
+docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
+```
+
+> Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
+
+> Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
+
+See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
+
+
+### Clone the repository
+
+Cross platform
+
+```shell
+git clone https://github.com/microsoft/MLOS.git
+```
+
+> See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`.
+
+
+### Linux Python Install
+
+1. Install Python 3.7
+
+    ```sh
+    # We need to add a special apt repository for Python 3.7 support:
+    sudo apt-get -y install software-properties-common apt-transport-https
+	sudo add-apt-repository -y ppa:deadsnakes/ppa
+	sudo apt-get update
+	sudo apt-get -y install python3.7
+    ```
+
+2. Install MLOS Python dependencies:
+
+    ```sh
+    # Also add some dependencies needed by some of the pip modules
+    sudo apt-get -y install python3-pip python3.7-dev \
+        build-essential libfreetype-dev unixodbc-dev
+    ```
+
+    ```sh
+    python3.7 -m pip install --upgrade pip
+    python3.7 -m pip install setuptools
+
+    python3.7 -m pip install -r source/Mlos.Python/requirements.txt
+    ```
+
+
+### Linux Docker Install
+
+Please see the official Docker install documenation for distribution specific documentation:
+
+- Ubuntu: <https://docs.docker.com/engine/install/ubuntu/>
+
+  As a short guide (copied from the link above):
+
+  ```sh
+  sudo apt-get remove docker docker-engine docker.io containerd runc
+  sudo apt-get update
+
+  sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+  sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) \
+    stable"
+
+  sudo apt-get update
+  sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+  apt-get install docker-ce
+  ```
+
+
+
+
+
+## Windows
+
+
+### Windows Requirements
+
+  > Portions of MLOS use Docker, which requires a Linux VM.  So support for *one* of the following is required:
+  - [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) (e.g. Windows 10 build >= 2004, including Pro, Enterprise, *and* Home), *or*
+  - [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) (only Windows 10 Pro/Enterprise, *not* ~~Home~~)
+
+  > Note: WSL2 is advised for ease of setup, integrations with Docker, and more flexible resource utilizations benefits.
+
+  See the [Install Docker](#install-docker) section for more details.
+
+- Linux
+  - Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
+
+  > Other distros/versions may work, but are untested.
+
 
 ### Windows build tools
 
@@ -196,7 +273,7 @@ There are several build tools install paths to choose from on Windows.
     choco install -y visualstudio2019community
     ```
 
-#### Manually
+#### Windows Build Manually
 
 Download and install Visual Studio 2019 (free) Community Edition:
 
@@ -204,34 +281,21 @@ Download and install Visual Studio 2019 (free) Community Edition:
 
 Be sure to include support for .Net Core, C++, CMake
 
-## Install Python Dependencies
 
-### Linux Python Install
 
-1. Install Python 3.7
+### Clone the repository
 
-    ```sh
-    # We need to add a special apt repository for Python 3.7 support:
-    sudo apt-get -y install software-properties-common apt-transport-https
-	sudo add-apt-repository -y ppa:deadsnakes/ppa
-	sudo apt-get update
-	sudo apt-get -y install python3.7
-    ```
+Cross platform
 
-2. Install MLOS Python dependencies:
+```shell
+git clone https://github.com/microsoft/MLOS.git
+```
 
-    ```sh
-    # Also add some dependencies needed by some of the pip modules
-    sudo apt-get -y install python3-pip python3.7-dev \
-        build-essential libfreetype-dev unixodbc-dev
-    ```
+> See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`.
 
-    ```sh
-    python3.7 -m pip install --upgrade pip
-    python3.7 -m pip install setuptools
 
-    python3.7 -m pip install -r source/Mlos.Python/requirements.txt
-    ```
+
+
 
 ### Windows Python Install
 
@@ -251,34 +315,6 @@ Be sure to include support for .Net Core, C++, CMake
     pip install -r source\Mlos.Python\requirements.txt
     ```
 
-## Install Docker
-
-### Linux Docker Install
-
-Please see the official Docker install documenation for distribution specific documentation:
-
-- Ubuntu: <https://docs.docker.com/engine/install/ubuntu/>
-
-  As a short guide (copied from the link above):
-
-  ```sh
-  sudo apt-get remove docker docker-engine docker.io containerd runc
-  sudo apt-get update
-
-  sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-  sudo add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) \
-    stable"
-
-  sudo apt-get update
-  sudo apt-get install docker-ce docker-ce-cli containerd.io
-
-  apt-get install docker-ce
-  ```
 
 ### Windows Docker Install
 
@@ -369,3 +405,13 @@ As mentioned above, Docker on Windows first requires a Linux VM.
       ```
 
       From within this shell environment, `docker` cli commands should be proxied through to your `docker-dev-vm` prepared by `docker-machine`.
+
+
+
+--------------
+
+
+
+## Install build tools
+
+
