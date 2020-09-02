@@ -16,6 +16,7 @@ from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, Opt
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Spaces import Point
 
 
 class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
@@ -85,10 +86,16 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
     def CreateOptimizer(self, request: OptimizerService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
 
         optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
+        optimizer_config_json = request.OptimizerConfig
+        if optimizer_config_json is not None:
+            optimizer_config = Point.from_json(optimizer_config_json)
+        else:
+            optimizer_config = BayesianOptimizerConfig.DEFAULT
+
 
         optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT
+            optimizer_config=optimizer_config
         )
 
         optimizer_id = self.get_next_optimizer_id()
