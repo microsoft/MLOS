@@ -37,11 +37,13 @@ def main():
     mlos_model_runtime = MlosOptimizationRuntime(models_database_connection_string=connection_string)
 
     if args.command == "launch":
+        print("Launching MLOS model runtime ...")
         mlos_model_runtime.add_distributable_class(DistributableSimpleBayesianOptimizer)
         mlos_model_runtime.register_global_rpc_handlers()
         mlos_model_runtime.run()
 
     elif args.command == "init-db":
+        print("Initializing MLOS database")
         mlos_model_runtime.initialize_database()
 
 
