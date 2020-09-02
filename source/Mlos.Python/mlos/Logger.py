@@ -42,6 +42,22 @@ class BufferingHandler(logging.StreamHandler):
 
 
 def create_logger(logger_name, create_console_handler=True, create_file_handler=False, create_buffering_handler=False, logging_level=logging.INFO):
+    """Create a new logger.
+
+    Parameters
+    ==========
+    logger_name : str
+        Name for the new logger.
+    create_console_handler : boolean, default=True
+        Whether to create a stream handler and add to the logger.
+    create_file_handler : boolean, default=False
+        Whether to add a file handler. If True, logs are stored in ``<logger_name>.log``.
+    create_buffering_handler : boolean, default=False
+        Whether to add a buffering handler. If True, return value will be
+        logger, buffering_handler instead of just the logger.
+    logging_level : int, default=logging.INFO
+        Log level.
+    """
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging_level)
     logger.propagate = False
