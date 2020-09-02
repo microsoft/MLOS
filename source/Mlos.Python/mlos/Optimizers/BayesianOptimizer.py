@@ -110,7 +110,7 @@ class BayesianOptimizer(OptimizerInterface):
     def get_optimizer_convergence_state(self):
         return self._optimizer_convergence_state
 
-    def get_experiment_data(self):
+    def get_all_observations(self):
         return self._feature_values_df.copy(), self._target_values_df.copy()
 
     @trace()
