@@ -11,21 +11,24 @@ Individual components may also include their own more detailed documentation wit
 
 Here's a brief summary of some documentation suggestions to help get started:
 
-1. See [01-Prerequisites.md](01-Prerequisites.md) for initial environment setup instructions.
-2. See [02-Build.md](02-Build.md) for basic build instructions.
-3. See [03-ExampleUsage.md](03-ExampleUsage.md) for some usage examples for applying MLOS to some code/system.
-4. See [04-Contributing.md](04-Contributing.md) for notes on making changes to MLOS itself.
-5. See [05-Test.md](05-Test.md) for notes on testing those changes.
-6. See [06-Debug.md](06-Debug.md) for notes on debugging those changes.
+1. See [01-Prerequisites.md](./01-Prerequisites.md) for initial environment setup instructions.
+2. See [02-Build.md](./02-Build.md) for basic build instructions.
+3. See [03-ExampleUsage.md](./03-ExampleUsage.md) for some usage examples for applying MLOS to some code/system.
+4. See [04-Test.md](./04-Test.md) for notes on testing those changes.
+5. See [05-Debug.md](./05-Debug.md) for notes on debugging those changes.
 
 ## Overview
 
 Here's some documentation references describing the MLOS architecture:
 
-1. [MlosArchitecture.md](MlosArchitecture.md)
-2. [Glossary.md](Glossary.md)
+1. [MlosArchitecture.md](./MlosArchitecture.md)
+2. [Glossary.md](./Glossary.md)
 3. [DEEM 2020 Paper](https://arxiv.org/abs/2006.02155)
 
 Here's a document describing the layout of the repository:
 
-- [RepoOrganization.md](RepoOrganization.md)
+- [RepoOrganization.md](./RepoOrganization.md)
+
+## Contributing
+
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for notes on making changes to MLOS itself.
