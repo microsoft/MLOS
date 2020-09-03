@@ -2,12 +2,11 @@
 
 # ensure we're in the right folder
 scriptdir=$(readlink -f "$(dirname "$0")")
-cd "$scriptdir/.."
-cd website
+cd "$scriptdir"
 
 cp -r ../documentation content/
 # downgrade html output because hugo doesn't like raw html
-jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks --template nbconvert_template.md.j2 --config jupyter_nbconvert_config.py
+nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks --template nbconvert_template.md.j2 --config jupyter_nbconvert_config.py
 
 # nbconvert and hugo disagree about paths
 # this should probably be done via the template
