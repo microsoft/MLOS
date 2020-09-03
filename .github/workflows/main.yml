@@ -88,7 +88,13 @@ jobs:
       run: |
         cd website
         hugo
-    - name:
+    - name: generate API rst files
+      run: website\sphinx\apidoc.sh
+    - name: run sphinx
+      run: |
+        cd sphinx
+        make
+        cp -a _build/html ../python_api
 
   python-checks:
     name: Run Python checks
