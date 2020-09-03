@@ -10,5 +10,8 @@ set -eu
 scriptdir=$(readlink -f "$(dirname "$0")")
 cd "$scriptdir/.."
 
+. "$scriptdir/util.sh"
+pythoncmd=`getPythonCmd`
+
 cd source/Mlos.Python
-pylint --rcfile ../.pylintrc mlos
+$pythoncmd -m pylint --rcfile ../.pylintrc mlos
