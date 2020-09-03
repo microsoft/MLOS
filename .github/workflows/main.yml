@@ -83,7 +83,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade wheel
         pip install source/Mlos.Python/
-        pip install matplotlib sphinx nbconvert sphinx_rtd_theme
+        pip install matplotlib sphinx nbconvert sphinx_rtd_theme numpydoc
     - name: Generate markdown for hugo
       run: website/build_site.sh
     - name: Run hugo
