@@ -94,7 +94,7 @@ jobs:
       run: website/sphinx/apidoc.sh
     - name: Run sphinx
       run: |
-        cd sphinx
+        cd website/sphinx
         make
         cp -a _build/html ../python_api
 
