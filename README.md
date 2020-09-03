@@ -96,7 +96,7 @@ Use `pip` to install the Python library:
 $ pip install MLOS/source/Mlos.Python/
 ```
 
-Alternatively you can also install the package directly without checking out the code:
+Alternatively, you can also install the package directly without checking out the code:
 
 ```
 $ pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
