@@ -31,4 +31,4 @@ Here's a document describing the layout of the repository:
 
 ## Contributing
 
-See [Contributing.md](./Contributing.md) for notes on making changes to MLOS itself.
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for notes on making changes to MLOS itself.
