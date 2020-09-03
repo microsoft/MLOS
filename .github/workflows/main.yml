@@ -96,6 +96,9 @@ jobs:
         make
         cp -a _build/html ../python_api
 
+    - name: check ref name
+      run: echo ${{github.ref}}
+
     - name: Deploy to GitHub pages
       if: ${{ github.ref == 'ref/head/main' }}
       uses: JamesIves/github-pages-deploy-action@3.5.9
