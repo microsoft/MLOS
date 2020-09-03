@@ -83,16 +83,16 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade wheel
         pip install source/Mlos.Python/
-        pip install matplotlib sphinx jupyter-nbconvert
+        pip install matplotlib sphinx nbconvert
     - name: Generate markdown for hugo
       run: website/build_site.sh
     - name: Run hugo
       run: |
         cd website
         hugo
-    - name: generate API rst files
+    - name: Generate API rst files
       run: website/sphinx/apidoc.sh
-    - name: run sphinx
+    - name: Run sphinx
       run: |
         cd sphinx
         make
