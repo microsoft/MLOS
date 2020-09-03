@@ -70,8 +70,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2.3.1
-      with:
-        persist-credentials: false
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -97,6 +95,12 @@ jobs:
         cd website/sphinx
         make
         cp -a _build/html ../python_api
+
+    - name: Deploy to GitHub pages
+      uses: JamesIves/github-pages-deploy-action@3.5.9
+      with:
+        BRANCH: gh-pages
+        FOLDER: website/public
 
   python-checks:
     name: Run Python checks
