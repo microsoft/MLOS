@@ -17,6 +17,7 @@ jobs:
   windows-msbuild-debug:
     name: Run debug msbuild on Windows
     runs-on: windows-2019
+    timeout-minutes: 10
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -31,6 +32,7 @@ jobs:
   windows-msbuild-release:
     name: Run release msbuild on Windows
     runs-on: windows-2019
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v2
     - name: Run release msbuild
@@ -46,6 +48,7 @@ jobs:
   python-licenseheaders-checks:
     name: Check for license header comments on python files
     runs-on: ubuntu-20.04
+    timeout-minutes: 3
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python
@@ -67,6 +70,7 @@ jobs:
   python-checks:
     name: Run Python checks
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [windows-2019, ubuntu-20.04]
@@ -89,13 +93,17 @@ jobs:
         pip install -r source/Mlos.Python/requirements.txt
     - name: Run pylint checks (Windows)
       if: startsWith(matrix.os, 'windows')
+      timeout-minutes: 2
       run: scripts\run-python-checks.cmd
     - name: Run pylint checks (Linux)
       if: startsWith(matrix.os, 'ubuntu')
+      timeout-minutes: 2
       run: scripts/run-python-checks.sh
     - name: Run Python unit tests (Windows)
       if: startsWith(matrix.os, 'windows')
+      timeout-minutes: 5
       run: scripts\run-python-tests.cmd
     - name: Run Python unit tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
+      timeout-minutes: 5
       run: scripts/run-python-tests.sh
