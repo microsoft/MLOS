@@ -21,8 +21,8 @@ class PolynomialObjective:
         name="polynomial_objective_config",
         dimensions=[
             ContinuousDimension(name='seed', min=1, max=2 ** 32),
-            DiscreteDimension(name='input_domain_dimension', min=1, max=16),
-            DiscreteDimension(name='max_degree', min=1, max=16),
+            DiscreteDimension(name='input_domain_dimension', min=1, max=5),
+            DiscreteDimension(name='max_degree', min=1, max=5),
             CategoricalDimension(name='include_mixed_coefficients', values=[False, True]),
             ContinuousDimension(name='percent_coefficients_zeroed', min=0.0, max=1.0),
             ContinuousDimension(name='coefficient_domain_min', min=-math.inf, max=math.inf),
