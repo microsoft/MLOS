@@ -70,14 +70,20 @@ To achieve this MLOS provides:
 ## Python only installation
 
 Some of the examples require only the installation of the mlos Python library. These examples do not use the shared memory infrastructure.
-To use this simplified installation, it's recommended to use the Anaconda python distribution and create a new conda environment:
+
+For this simplified installation, it's recommended to use the [Anaconda python distribution](https://www.anaconda.com/products/individual).
+For a slimer installation experience, you can also use the [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
+After installing either anaconda or miniconda, you can create a new environment with all requirements for the examples using
 
 ```
-$ conda create -n mlos_environment
-$ conda activate mlos_environment
+$ conda env create -f source/Mlos.Notebooks/environment.yml
+```
+The environment will be called ``mlos_python_environment`` and you can activate it as follows:
+```
+$ conda activate mlos_python_environment
 ```
 
-You can download the mlos code using git:
+Now download the mlos code using git:
 
 ```
 $ git clone git@github.com:microsoft/MLOS.git
