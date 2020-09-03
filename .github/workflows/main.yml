@@ -17,7 +17,7 @@ jobs:
   windows-msbuild-debug:
     name: Run debug msbuild on Windows
     runs-on: windows-2019
-    timeout-minutes: 10
+    timeout-minutes: 12
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -70,7 +70,7 @@ jobs:
   python-checks:
     name: Run Python checks
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 12
     strategy:
       matrix:
         os: [windows-2019, ubuntu-20.04]
@@ -101,9 +101,9 @@ jobs:
       run: scripts/run-python-checks.sh
     - name: Run Python unit tests (Windows)
       if: startsWith(matrix.os, 'windows')
-      timeout-minutes: 5
+      timeout-minutes: 8
       run: scripts\run-python-tests.cmd
     - name: Run Python unit tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      timeout-minutes: 5
+      timeout-minutes: 8
       run: scripts/run-python-tests.sh
