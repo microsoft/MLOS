@@ -2,6 +2,8 @@
 
 # ensure we're in the right folder
 scriptdir=$(readlink -f "$(dirname "$0")")
+echo $scriptdir
+echo `pwd`
 cd "$scriptdir/.."
 cd website/sphinx
 
