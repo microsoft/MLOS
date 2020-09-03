@@ -8,10 +8,10 @@ These are one-time setup instructions that should be executed prior to following
   - [Contents](#contents)
   - [Linux](#linux)
     - [Linux Requirements](#linux-requirements)
-    - [Linux Build Tools](#linux-build-tools)
-      - [Manual Setup](#manual-setup)
-      - [Docker](#docker)
     - [Clone the repository](#clone-the-repository)
+    - [Linux Build Tools](#linux-build-tools)
+      - [Manual Linux Build Environment Setup](#manual-linux-build-environment-setup)
+      - [Linux Build Environment using Docker](#linux-build-environment-using-docker)
     - [Linux Python Install](#linux-python-install)
     - [Linux Docker Install](#linux-docker-install)
   - [Windows](#windows)
@@ -37,9 +37,27 @@ It supports Windows and Linux environments. Below we provide instructions for ea
 
 > Other distros/versions may work, but are untested.
 
+### Clone the repository
+
+Make sure you have `git` available:
+
+```sh
+apt-get -y install git
+```
+
+Clone the repository:
+
+```sh
+git clone https://github.com/microsoft/MLOS.git
+```
+
 ### Linux Build Tools
 
-#### Manual Setup
+MLOS uses and supports several different languages, so needs their respective build tools installed.
+
+> The easiest path is probably using the `docker` image instructions we provide [below](#linux-build-environment-using-docker) however, if you want to setup the build environment manually use following set of instructions.
+
+#### Manual Linux Build Environment Setup
 
 To manually setup your own Linux build environment:
 
@@ -76,7 +94,7 @@ sudo apt-get install exuberant-ctags
 
 > When available `make ctags` can be invoked to help generate a `tags` database at the root of the source tree to allow easier code navigation in editors that support it.
 
-#### Docker
+#### Linux Build Environment using Docker
 
 To automatically setup a Linux build environment using `docker`, run the following:
 
@@ -92,17 +110,6 @@ docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$Ubun
 > Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
 
 See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
-
-
-### Clone the repository
-
-Cross platform
-
-```shell
-git clone https://github.com/microsoft/MLOS.git
-```
-
-> See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`.
 
 
 ### Linux Python Install
