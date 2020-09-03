@@ -85,7 +85,7 @@ jobs:
     - name: Install apt dependencies
       if: startsWith(matrix.os, 'ubuntu')
       # pip needs some additional libraries on linux:
-      run: sudo apt -y install build-essential libfreetype-dev unixodbc-dev
+      run: sudo apt-get -y install build-essential libfreetype-dev unixodbc-dev
     - name: Install pip dependencies
       run: |
         python -m pip install --upgrade pip
