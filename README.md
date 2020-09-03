@@ -71,38 +71,38 @@ To achieve this MLOS provides:
 
 Some of the examples require only the installation of the mlos Python library. These examples do not use the shared memory infrastructure.
 
+
+First, download the mlos code using git:
+
+```
+$ git clone git@github.com:microsoft/MLOS.git
+```
+
 For this simplified installation, it's recommended to use the [Anaconda python distribution](https://www.anaconda.com/products/individual).
 For a slimer installation experience, you can also use the [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
 After installing either anaconda or miniconda, you can create a new environment with all requirements for the examples using
 
 ```
-$ conda env create -f source/Mlos.Notebooks/environment.yml
+$ conda env create -f MLOS/source/Mlos.Notebooks/environment.yml
 ```
 The environment will be called ``mlos_python_environment`` and you can activate it as follows:
 ```
 $ conda activate mlos_python_environment
 ```
 
-Now download the mlos code using git:
+Use ``pip`` to install the Python library:
 
 ```
-$ git clone git@github.com:microsoft/MLOS.git
+$ pip install MLOS/source/Mlos.Python/
 ```
 
-To install the Python library, change to the Python directory and install with ``pip``:
-
-```
-$ cd MLOS/source/Mlos.Python
-$ pip install -e .
-```
-
-You can also install the package directly without checking out the code:
+Alternatively you can also install the package directly without checking out the code:
 
 ```
 $ pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
 ```
 
-However, this does not include the examples.
+However, this does not include the examples and requires you to set up your environment manually.
 
 After this installation, you can run any of the Python-only example notebooks.
 A good place to start is the [Introduction to Bayesian Optimization](./notebooks/BayesianOptimization/) notebook.
