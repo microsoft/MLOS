@@ -18,6 +18,19 @@ class SmartCache:
     """ A tunable and observable cache that takes advantage of Mlos.
 
     The goal here is to provide a bunch of cache implementations that are parameterizable.
+
+    Parameters
+    ----------
+    logger : Logger
+        Logger to use.
+
+    Attributes
+    ----------
+    RuntimeAttributes : MlosSmartComponentRuntimeAttributes
+    parameter_search_space : SimpleHypergrid
+    default_config : Point
+    telemetry_message_types : list
+    runtime_decision_contexts : list
     """
 
     # Used during registration

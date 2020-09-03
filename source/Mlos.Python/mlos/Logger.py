@@ -45,7 +45,7 @@ def create_logger(logger_name, create_console_handler=True, create_file_handler=
     """Create a new logger.
 
     Parameters
-    ==========
+    ----------
     logger_name : str
         Name for the new logger.
     create_console_handler : boolean, default=True

@@ -8,7 +8,7 @@ from mlos.Examples.SmartCache import SmartCache
 
 
 class HitRateMonitor(MlosTelemetryAggregator):
-    """ Gathers statistics about the miss/hit rates.
+    """ Gathers statistics about the miss/hit rates of the SmartCache.
 
     """
     def __init__(self):

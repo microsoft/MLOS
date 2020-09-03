@@ -16,7 +16,7 @@ class BayesianOptimizerFactory:
     """Produces BayesianOptimizerProxies either by connecting them to either a new or an existing remote bayesian optimizer.
 
     Parameters
-    ==========
+    ----------
     grpc_channel : int
         Port for the grpc communication channel.
 
@@ -33,7 +33,7 @@ class BayesianOptimizerFactory:
         """Creates a remote optimizer over a given problem with a given config.
 
         Parameters
-        ==========
+        ----------
         optimization_problem : OptimizationProblem
             Optimization problem for the new remote optimizer.
 
@@ -69,7 +69,7 @@ class BayesianOptimizerFactory:
         """Connects to an existing optimizer.
 
         Parameters
-        ==========
+        ----------
         optimizer_info : OptimizerInfo
 
         Return
