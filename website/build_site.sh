@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# ensure we're in the right folder
+scriptdir=$(readlink -f "$(dirname "$0")")
+cd "$scriptdir/.."
+cd website
+
 cp -r ../documentation content/
 # downgrade html output because hugo doesn't like raw html
 jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks --template nbconvert_template.md.j2 --config jupyter_nbconvert_config.py
