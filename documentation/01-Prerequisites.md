@@ -6,7 +6,6 @@ These are one-time setup instructions that should be executed prior to following
 
 - [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
   - [Contents](#contents)
-  
   - [Linux](#linux)
     - [Requirements](#linux-requirements)
     - [Clone the repository](#clone-the-repository)
@@ -15,7 +14,6 @@ These are one-time setup instructions that should be executed prior to following
       - [Docker](#docker)
     - [Linux Python Install](#linux-python-install)
     - [Linux Docker Install](#linux-docker-install)
-  
   - [Windows](#Windows)
     - [Windows Requirements](#windows-requirements)
     - [Clone the repository](#clone-the-repository)
@@ -25,14 +23,9 @@ These are one-time setup instructions that should be executed prior to following
       - [Windows Build Manually](#win-build-manually)
     - [Windows Pythoon Install](#windows-python-install)
     - [Windows Docker Install](#windows-docker-install)
-      
-
-> Note: Most Windows shell commands here expect `powershell` (or [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows)).
-
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
-
 
 ## Linux
 
@@ -165,12 +158,9 @@ Please see the official Docker install documenation for distribution specific do
   apt-get install docker-ce
   ```
 
-
-
-
-
 ## Windows
 
+> Note: Most Windows shell commands here expect `powershell` (or [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows)).
 
 ### Windows Requirements
 
