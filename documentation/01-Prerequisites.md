@@ -7,22 +7,24 @@ These are one-time setup instructions that should be executed prior to following
 - [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
   - [Contents](#contents)
   - [Linux](#linux)
-    - [Requirements](#linux-requirements)
-    - [Clone the repository](#clone-the-repository)
-    - [Linux build tools](#linux-build-tools)
-      - [Linux Build Manually](#linux-build-manually)
+    - [Linux Requirements](#linux-requirements)
+    - [Linux Build Tools](#linux-build-tools)
+      - [Manual Setup](#manual-setup)
       - [Docker](#docker)
+    - [Clone the repository](#clone-the-repository)
     - [Linux Python Install](#linux-python-install)
     - [Linux Docker Install](#linux-docker-install)
-  - [Windows](#Windows)
+  - [Windows](#windows)
     - [Windows Requirements](#windows-requirements)
-    - [Clone the repository](#clone-the-repository)
     - [Windows build tools](#windows-build-tools)
       - [Using a local script](#using-a-local-script)
       - [Using Chocolatey](#using-chocolatey)
-      - [Windows Build Manually](#win-build-manually)
-    - [Windows Pythoon Install](#windows-python-install)
+      - [Windows Build Manually](#windows-build-manually)
+    - [Clone the repository](#clone-the-repository-1)
+    - [Windows Python Install](#windows-python-install)
+      - [Using Chocolatey](#using-chocolatey-1)
     - [Windows Docker Install](#windows-docker-install)
+  - [Install build tools](#install-build-tools)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
@@ -31,14 +33,14 @@ It supports Windows and Linux environments. Below we provide instructions for ea
 
 ### Linux Requirements
 
-  - Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
+- Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
 
-  > Other distros/versions may work, but are untested.
+> Other distros/versions may work, but are untested.
 
+### Linux Build Tools
 
-### Linux build tools
+#### Manual Setup
 
-#### Linux Build Manually
 To manually setup your own Linux build environment:
 
 ```sh
