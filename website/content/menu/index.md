@@ -11,10 +11,8 @@ headless = true
   - [Repo Organization]({{< relref "/documentation/RepoOrganization" >}})
 
 - Notebooks
-  - [Start Here]({{< relref "/notebooks/StartHere" >}})
-  - [Smart Cache Optimization]({{< relref "/notebooks/SmartCacheOptimization" >}})
-  - [Optimizer Monitor]({{< relref "/notebooks/OptimizerMonitor" >}})
   - [Bayesian Optimization]({{< relref "/notebooks/BayesianOptimization" >}})
+  - [Smart Cache Optimization]({{< relref "/notebooks/SmartCacheOptimization" >}})
 
 
 - API Documentation
