@@ -20,9 +20,21 @@ SmartCacheWorkloadGeneratorReconfigure = namedtuple(
 
 
 class SmartCacheWorkloadGenerator:
-    """ Instantiates one (or many) SmartCaches and subjects them to various workloads.
+    """Instantiates one (or many) SmartCaches and subjects them to various workloads.
 
     The main idea here is to exercise all use-cases demanded of Mlos.
+
+    Parameters
+    ----------
+    logger : Logger
+        Logger.
+
+    Attributes
+    ----------
+    RuntimeAttributes : MlosSmartComponentRuntimeAttributes
+    default_config : Point
+    telemetry_message_types : list
+    mlos_object : MlosObject
 
     """
     RuntimeAttributes = MlosSmartComponentRuntimeAttributes(

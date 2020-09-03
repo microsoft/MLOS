@@ -46,6 +46,7 @@ def main():
 
     global_values.declare_singletons()
     signal.signal(signal.SIGINT, ctrl_c_handler)
+    print("Starting Optimizer Microservice ...")
     server.start()
     server.wait_for_termination()
 
