@@ -6,7 +6,7 @@ cd "$scriptdir"
 
 cp -r ../documentation content/
 # downgrade html output because hugo doesn't like raw html
-nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks --template nbconvert_template.md.j2 --config jupyter_nbconvert_config.py
+jupyter nbconvert ../source/Mlos.Notebooks/*.ipynb --to markdown --output-dir content/notebooks --template nbconvert_template.md.j2 --config jupyter_nbconvert_config.py
 
 # nbconvert and hugo disagree about paths
 # this should probably be done via the template
