@@ -129,7 +129,7 @@ sudo apt-get install \
   apt-transport-https ca-certificates curl gnupg-agent software-properties-common
 
 # Make sure an appropriate version of clang is available:
-./script/install.llvm-clang.sh
+./scripts/install.llvm-clang.sh
 ```
 
 ```sh
