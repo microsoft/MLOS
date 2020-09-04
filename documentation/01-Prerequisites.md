@@ -7,16 +7,16 @@ These are one-time setup instructions that should be executed prior to following
 - [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
   - [Contents](#contents)
   - [Linux](#linux)
-    - [Linux Requirements](#linux-requirements)
+    - [Linux Distribution Requirements](#linux-distribution-requirements)
     - [Clone the repository](#clone-the-repository)
-    - [Linux Docker Install](#linux-docker-install)
-    - [Install Linux Build Tools](#install-linux-build-tools)
-      - [Docker Build Image](#docker-build-image)
-      - [Manual Build Tools Install](#manual-build-tools-install)
-    - [Linux Python Install](#linux-python-install)
-      - [Docker Python Install](#docker-python-install)
-      - [Using Conda](#using-conda)
-      - [Manual Python Install](#manual-python-install)
+    - [Option 1: Linux Docker Install](#option-1-linux-docker-install)
+      - [Install Docker](#install-docker)
+      - [Build the Docker Image](#build-the-docker-image)
+    - [Option 2: Manual Build Tools Install](#option-2-manual-build-tools-install)
+      - [Linux Python Install](#linux-python-install)
+        - [Option 1: Docker Python Install](#option-1-docker-python-install)
+        - [Option 2: Using Conda](#option-2-using-conda)
+        - [Option 3: Manual Python Install](#option-3-manual-python-install)
   - [Windows](#windows)
     - [Windows Requirements](#windows-requirements)
     - [Clone the repository](#clone-the-repository-1)
@@ -25,16 +25,18 @@ These are one-time setup instructions that should be executed prior to following
       - [Build Tools Using Chocolatey](#build-tools-using-chocolatey)
       - [Windows Build Manually](#windows-build-manually)
     - [Windows Python Install](#windows-python-install)
-      - [Conda Based Install for Windows](#conda-based-install-for-windows)
-      - [Python Using Chocolatey](#python-using-chocolatey)
-    - [Windows Docker Install](#windows-docker-install)
+      - [Option 1: Conda Based Install for Windows](#option-1-conda-based-install-for-windows)
+      - [Option 2: Python Using Chocolatey](#option-2-python-using-chocolatey)
+    - [Option 3: Windows Docker Install](#option-3-windows-docker-install)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
 
 ## Linux
 
-### Linux Requirements
+On Linux, there are a couple of options to install the build tools and the needed Python environment. The preferred way is via the Docker images. All of them require `git` and of course a linux installation:
+
+### Linux Distribution Requirements
 
 - Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
 
@@ -54,7 +56,9 @@ Clone the repository:
 git clone https://github.com/microsoft/MLOS.git
 ```
 
-### Linux Docker Install
+### Option 1: Linux Docker Install
+
+#### Install Docker
 
 Docker is used for certain portions of the end-to-end examples and as a convient way to setup the build/dev/test environments.
 
@@ -87,15 +91,7 @@ Please see the official Docker install documenation for distribution specific do
   apt-get install docker-ce
   ```
 
-### Install Linux Build Tools
-
-MLOS uses and supports several different languages, so needs their respective build tools installed.
-
-> To focus only on Python to start, skip ahead to the [Python Install](#linux-python-install) instructions.
-
-> The easiest path is probably using the `docker` image instructions we [provide](#docker-build-image) however, if you want to setup the build environment manually use set of instructions [below](#manual-build-tools-install).
-
-#### Docker Build Image
+#### Build the Docker Image
 
 To automatically setup a Linux build environment using `docker`, run the following to build the image locally:
 
@@ -109,12 +105,11 @@ docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$Ubun
 ```
 
 > Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
-
 > Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
 
 See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
 
-#### Manual Build Tools Install
+### Option 2: Manual Build Tools Install
 
 To manually setup your own Linux build environment:
 
@@ -138,9 +133,7 @@ sudo apt-get install liblttng-ctl0 liblttng-ust0 zlib1g libxml2
 ```
 
 > Note: older distros such as Ubuntu 16.04 may also need the `libcurl3` package installed for `dotnet restore` to work, but is unavailable on (or will break) more recent versions of Ubuntu.
-
 > Note: `libxml2` pulls an appropriate version of `libicu`.
-
 > Note: most other dependencies like `dotnet` and `cmake` are automatically fetched to the `tools/` directory using helpers in `scripts/` and invoked by the `Makefile` and `cmake` tools.
 
 Optional tools:
@@ -151,17 +144,17 @@ sudo apt-get install exuberant-ctags
 
 > When available `make ctags` can be invoked to help generate a `tags` database at the root of the source tree to allow easier code navigation in editors that support it.
 
-### Linux Python Install
+#### Linux Python Install
 
-#### Docker Python Install
+##### Option 1: Docker Python Install
 
 If you used the [Docker build image](#docker-build-image) instructions you're done!  All of the required packages should already be installed in the image.
 
-#### Using Conda
+##### Option 2: Using Conda
 
 TODO
 
-#### Manual Python Install
+##### Option 3: Manual Python Install
 
 1. Install Python 3.7
 
@@ -197,6 +190,7 @@ TODO
 ### Windows Requirements
 
 > Portions of MLOS use Docker, which requires a Linux VM.  So support for *one* of the following is required:
+
 - [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2), *or*
 - [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/)
 
@@ -309,11 +303,11 @@ Be sure to include support for .Net Core and C++.
 
 ### Windows Python Install
 
-#### Conda Based Install for Windows
+#### Option 1: Conda Based Install for Windows
 
 TODO
 
-#### Python Using Chocolatey
+#### Option 2: Python Using Chocolatey
 
 0. See above for instructions on installing Chocolatey.
 
@@ -329,7 +323,7 @@ TODO
     pip install -r source\Mlos.Python\requirements.txt
     ```
 
-### Windows Docker Install
+### Option 3: Windows Docker Install
 
 As mentioned above, Docker on Windows first requires a Linux VM.
 
