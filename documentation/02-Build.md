@@ -4,6 +4,8 @@
 
 See [01-Prerequisites.md](./01-Prerequisites.md) for initial build tools setup instructions.
 
+There are different instructions according to the environment setup you chose.
+
 ## Contents
 
 - [Build Instructions for MLOS](#build-instructions-for-mlos)
@@ -19,7 +21,7 @@ See [01-Prerequisites.md](./01-Prerequisites.md) for initial build tools setup i
 
 ## Docker
 
-Assuming you've built a container image using the instructions in [01-Prerequisites.md](./01-Prerequisites.md#docker) you can start an interactive session using the container image as follows:
+If you chose to use the Docker build environment and have already built or pulled a container image using the instructions in [01-Prerequisites.md](./01-Prerequisites.md#docker) you can start an interactive session using the container image as follows:
 
 ```sh
 # Using the UbuntuVersion local shell variable set earlier to "docker build" the image:
@@ -100,7 +102,7 @@ make check
 
 ### VSCode
 
-TODO: Provide some notes about how cmake integration works with vscode.
+TODO: Provide some notes about how cmake and dotnet integration works with vscode.
 
 ## Windows
 
