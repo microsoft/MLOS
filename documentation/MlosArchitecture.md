@@ -2,27 +2,22 @@
 
 This document provides a brief overview of the MLOS architecture for supporting **M**achine **L**earning **O**ptimized **S**ystems.
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
-<!-- code_chunk_output -->
-
 - [MLOS Architecture](#mlos-architecture)
   - [High Level Description](#high-level-description)
     - [Principles](#principles)
     - [Workflows](#workflows)
   - [Architecture Diagram](#architecture-diagram)
-    - [Main Components](#main-components)
+    - [Main components](#main-components)
     - [Shared Memory Regions](#shared-memory-regions)
-    - [Target process](#target-process)
+    - [Target Process](#target-process)
       - [Mlos.Core](#mloscore)
       - [Shared Channel](#shared-channel)
     - [Mlos.Agent](#mlosagent)
       - [Mlos.NetCore](#mlosnetcore)
-      - [Settings Registry Assemblies](#settings-registry-assemblies)
+      - [Settings registry assemblies](#settings-registry-assemblies)
       - [Grpc Server](#grpc-server)
-      - [Experiment Management](#experiment-management)
-  - [Implementation Details](#implementation-Details)
-
-<!-- /code_chunk_output -->
+      - [Experiment management](#experiment-management)
+  - [Implementation details](#implementation-details)
 
 ## High Level Description
 
@@ -73,7 +68,7 @@ MLOS workflows take roughly two basic forms:
 
 ## Architecture Diagram
 
-<img src="./images/MlosArchitecture.svg" />
+![Mlos Component Architecture Diagram](./images/MlosArchitecture.svg)
 
 ### Main components
 

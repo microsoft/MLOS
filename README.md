@@ -66,52 +66,57 @@ To achieve this MLOS provides:
 
     Once hooks are created in the target system, iteration on the external agent can be more rapidly developed and deployed.
 
-
 ## Python only installation
 
-Some of the examples require only the installation of the mlos Python library. These examples do not use the shared memory infrastructure.
+Some of the examples require only the installation of the `mlos` Python library.
+These are simplified examples for getting started and do not use the shared memory infrastructure for cross language/process interactions.
 
+First, download the MLOS code using git:
 
-First, download the `mlos` code using git:
-
-```
-$ git clone https://github.com/microsoft/MLOS.git
+```shell
+git clone https://github.com/microsoft/MLOS.git
 ```
 
 For this simplified installation, it's recommended to use the [Anaconda python distribution](https://www.anaconda.com/products/individual).
-For a slimer installation experience, you can also use the [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
+For a slimmer installation experience, you can also use the [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
 After installing either anaconda or miniconda, you can create a new environment with all requirements for the examples using
 
+> Note currently MLOS needs Python 3.7, but by default conda packages Python 3.8.
+> For the moment, you may need to search the [installer archives](https://repo.anaconda.com/miniconda/) for a python 3.7 version.
+> e.g. [Miniconda3-py37_4.8.3-Windows-x86_64.exe](https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Windows-x86_64.exe)
+
+```shell
+conda env create -f MLOS/source/Mlos.Notebooks/environment.yml
 ```
-$ conda env create -f MLOS/source/Mlos.Notebooks/environment.yml
-```
+
 The environment will be called `mlos_python_environment` and you can activate it as follows:
-```
-$ conda activate mlos_python_environment
+
+```shell
+conda activate mlos_python_environment
 ```
 
 Use `pip` to install the Python library:
 
-```
-$ pip install MLOS/source/Mlos.Python/
+```shell
+pip install MLOS/source/Mlos.Python/
 ```
 
 Alternatively, you can also install the package directly without checking out the code:
 
-```
-$ pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
+```shell
+pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
 ```
 
 However, this does not include the examples and requires you to set up your environment manually.
 
 After this installation, you can run any of the Python-only example notebooks. To do so you can:
 
-```
-$ python -m ipykernel install --user --name=mlos_environment
-$ jupyter-notebook --notebook-dir=MLOS/source/Mlos.Notebooks
+```shell
+python -m ipykernel install --user --name=mlos_environment
+jupyter-notebook --notebook-dir=MLOS/source/Mlos.Notebooks
 ```
 
-Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](./notebooks/BayesianOptimization/).
+Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](./source/Mlos.Notebooks/BayesianOptimization.ipynb).
 
 ## Full Build (C# and C++ components)
 
@@ -124,8 +129,9 @@ For detailed instructions, please refer to:
 
 ## Examples
 
-Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](./notebooks/) section. Additional code is in the  [source/Examples](https://github.com/microsoft/MLOS/tree/main/source/Examples) source directory.
-You can find the source of the notebooks [on github as well](https://github.com/microsoft/MLOS/tree/main/source/Mlos.Notebooks).
+Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](./source/Mlos.Notebooks/#github-pages-view) section.
+Additional code is in the  [source/Examples](./source/Examples/#github-tree-view) source directory.
+You can find the source of the notebooks [on github as well](./source/Mlos.Notebooks/#github-tree-view).
 
 ## Documentation
 
