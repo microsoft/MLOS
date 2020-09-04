@@ -34,7 +34,9 @@ It supports Windows and Linux environments. Below we provide instructions for ea
 
 ## Linux
 
-On Linux, there are a couple of options to install the build tools and the needed Python environment. The preferred way is via the Docker images. All of them require `git` and of course a linux installation:
+On Linux, there are a couple of options to install the build tools and the needed Python environment.
+The preferred way is via the [Docker images](#option-1-linux-docker-build).
+All of them require `git` and, of course, a Linux installation:
 
 ### Linux Distribution Requirements
 
