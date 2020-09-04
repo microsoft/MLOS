@@ -9,22 +9,25 @@ These are one-time setup instructions that should be executed prior to following
   - [Linux](#linux)
     - [Linux Requirements](#linux-requirements)
     - [Clone the repository](#clone-the-repository)
-    - [Linux Build Tools](#linux-build-tools)
-      - [Manual Linux Build Environment Setup](#manual-linux-build-environment-setup)
-      - [Linux Build Environment using Docker](#linux-build-environment-using-docker)
-    - [Linux Python Install](#linux-python-install)
     - [Linux Docker Install](#linux-docker-install)
+    - [Install Linux Build Tools](#install-linux-build-tools)
+      - [Docker Build Image](#docker-build-image)
+      - [Manual Build Tools Install](#manual-build-tools-install)
+    - [Linux Python Install](#linux-python-install)
+      - [Docker Python Install](#docker-python-install)
+      - [Using Conda](#using-conda)
+      - [Manual Python Install](#manual-python-install)
   - [Windows](#windows)
     - [Windows Requirements](#windows-requirements)
+    - [Clone the repository](#clone-the-repository-1)
     - [Windows build tools](#windows-build-tools)
       - [Using a local script](#using-a-local-script)
-      - [Using Chocolatey](#using-chocolatey)
+      - [Build Tools Using Chocolatey](#build-tools-using-chocolatey)
       - [Windows Build Manually](#windows-build-manually)
-    - [Clone the repository](#clone-the-repository-1)
     - [Windows Python Install](#windows-python-install)
-      - [Using Chocolatey](#using-chocolatey-1)
+      - [Conda Based Install for Windows](#conda-based-install-for-windows)
+      - [Python Using Chocolatey](#python-using-chocolatey)
     - [Windows Docker Install](#windows-docker-install)
-  - [Install build tools](#install-build-tools)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
@@ -51,19 +54,73 @@ Clone the repository:
 git clone https://github.com/microsoft/MLOS.git
 ```
 
-### Linux Build Tools
+### Linux Docker Install
+
+Docker is used for certain portions of the end-to-end examples and as a convient way to setup the build/dev/test environments.
+
+> If you are starting with the Python only setup, you can skip this step for now if you wish.
+
+Please see the official Docker install documenation for distribution specific documentation:
+
+- Ubuntu: <https://docs.docker.com/engine/install/ubuntu/>
+
+  As a short guide (copied from the link above):
+
+  ```sh
+  sudo apt-get remove \
+    docker docker-engine docker.io containerd runc
+
+  sudo apt-get update
+
+  sudo apt-get install \
+    apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+    | sudo apt-key add -
+
+  sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+  sudo apt-get update
+  sudo apt-get install docker-ce docker-ce-cli containerd.io
+
+  apt-get install docker-ce
+  ```
+
+### Install Linux Build Tools
 
 MLOS uses and supports several different languages, so needs their respective build tools installed.
 
-> The easiest path is probably using the `docker` image instructions we provide [below](#linux-build-environment-using-docker) however, if you want to setup the build environment manually use following set of instructions.
+> To focus only on Python to start, skip ahead to the [Python Install](#linux-python-install) instructions.
 
-#### Manual Linux Build Environment Setup
+> The easiest path is probably using the `docker` image instructions we [provide](#docker-build-image) however, if you want to setup the build environment manually use set of instructions [below](#manual-build-tools-install).
+
+#### Docker Build Image
+
+To automatically setup a Linux build environment using `docker`, run the following to build the image locally:
+
+> Note: we will eventually publish for use with `docker pull` instead.
+
+```sh
+# Select your target Ubuntu version:
+UbuntuVersion=20.04
+# Build the docker image:
+docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
+```
+
+> Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
+
+> Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
+
+See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
+
+#### Manual Build Tools Install
 
 To manually setup your own Linux build environment:
 
 ```sh
 # Make sure some basic build tools are available:
-sudo apt-get install git make build-essential
+sudo apt-get install build-essential
 ```
 
 ```sh
@@ -94,34 +151,27 @@ sudo apt-get install exuberant-ctags
 
 > When available `make ctags` can be invoked to help generate a `tags` database at the root of the source tree to allow easier code navigation in editors that support it.
 
-#### Linux Build Environment using Docker
-
-To automatically setup a Linux build environment using `docker`, run the following:
-
-```sh
-# Select your target Ubuntu version:
-UbuntuVersion=20.04
-# Build the docker image:
-docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
-```
-
-> Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
-
-> Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
-
-See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
-
-
 ### Linux Python Install
+
+#### Docker Python Install
+
+If you used the [Docker build image](#docker-build-image) instructions you're done!  All of the required packages should already be installed in the image.
+
+#### Using Conda
+
+TODO
+
+#### Manual Python Install
 
 1. Install Python 3.7
 
     ```sh
     # We need to add a special apt repository for Python 3.7 support:
-    sudo apt-get -y install software-properties-common apt-transport-https
-	sudo add-apt-repository -y ppa:deadsnakes/ppa
-	sudo apt-get update
-	sudo apt-get -y install python3.7
+    sudo apt-get -y install \
+        software-properties-common apt-transport-https
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt-get update
+    sudo apt-get -y install python3.7
     ```
 
 2. Install MLOS Python dependencies:
@@ -136,36 +186,9 @@ See [02-Build.md](./02-Build.md#docker) for instructions on how to run this imag
     python3.7 -m pip install --upgrade pip
     python3.7 -m pip install setuptools
 
-    python3.7 -m pip install -r source/Mlos.Python/requirements.txt
+    python3.7 -m pip install \
+        -r source/Mlos.Python/requirements.txt
     ```
-
-
-### Linux Docker Install
-
-Please see the official Docker install documenation for distribution specific documentation:
-
-- Ubuntu: <https://docs.docker.com/engine/install/ubuntu/>
-
-  As a short guide (copied from the link above):
-
-  ```sh
-  sudo apt-get remove docker docker-engine docker.io containerd runc
-  sudo apt-get update
-
-  sudo apt-get install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-  sudo add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
-    $(lsb_release -cs) \
-    stable"
-
-  sudo apt-get update
-  sudo apt-get install docker-ce docker-ce-cli containerd.io
-
-  apt-get install docker-ce
-  ```
 
 ## Windows
 
@@ -173,19 +196,23 @@ Please see the official Docker install documenation for distribution specific do
 
 ### Windows Requirements
 
-  > Portions of MLOS use Docker, which requires a Linux VM.  So support for *one* of the following is required:
-  - [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) (e.g. Windows 10 build >= 2004, including Pro, Enterprise, *and* Home), *or*
-  - [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) (only Windows 10 Pro/Enterprise, *not* ~~Home~~)
+> Portions of MLOS use Docker, which requires a Linux VM.  So support for *one* of the following is required:
+- [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2), *or*
+- [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/)
 
-  > Note: WSL2 is advised for ease of setup, integrations with Docker, and more flexible resource utilizations benefits.
+> Note: WSL2 is advised for ease of setup, integrations with Docker, and more flexible resource utilizations benefits.
 
-  See the [Install Docker](#install-docker) section for more details.
+See the [Install Docker](#install-docker) section for more details.
 
-- Linux
-  - Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
+### Clone the repository
 
-  > Other distros/versions may work, but are untested.
+Cross platform
 
+```shell
+git clone https://github.com/microsoft/MLOS.git
+```
+
+> See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`, or use `choco install git` (see [below](#using-chocolatey) for more details about chocolatey).
 
 ### Windows build tools
 
@@ -207,11 +234,11 @@ There are several build tools install paths to choose from on Windows.
     Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
     ```
 
-    > This is necessary for our build environment initialization script `scripts/init.windows.ps1` as well.
+    > This is necessary for our build environment initialization script `scripts\init.windows.ps1` as well.
 
 #### Using a local script
 
-1. Launch the script we provide in the MLOS repo to install/update Visual Studio 2019 Community Edition with the necessary components:
+1. Launch the script we provide in the MLOS repo to install/update the free Visual Studio 2019 Community Edition with the necessary components:
 
     ```powershell
     .\scripts\install-vs2019.ps1
@@ -226,7 +253,7 @@ There are several build tools install paths to choose from on Windows.
 
     > Note: This will install the free Community edition by default. Use the `-Sku` option if you prefer to install the `Enterprise` version instead.
 
-#### Using Chocolatey
+#### Build Tools Using Chocolatey
 
 [Chocolatey](https://chocolatey.org) is a package manager for Windows to help support scripted and reproducable installation of tools.
 
@@ -278,27 +305,15 @@ Download and install Visual Studio 2019 (free) Community Edition:
 
 <https://visualstudio.microsoft.com/vs/community/>
 
-Be sure to include support for .Net Core, C++, CMake
-
-
-
-### Clone the repository
-
-Cross platform
-
-```shell
-git clone https://github.com/microsoft/MLOS.git
-```
-
-> See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`.
-
-
-
-
+Be sure to include support for .Net Core and C++.
 
 ### Windows Python Install
 
-#### Using Chocolatey
+#### Conda Based Install for Windows
+
+TODO
+
+#### Python Using Chocolatey
 
 0. See above for instructions on installing Chocolatey.
 
@@ -313,7 +328,6 @@ git clone https://github.com/microsoft/MLOS.git
     ```shell
     pip install -r source\Mlos.Python\requirements.txt
     ```
-
 
 ### Windows Docker Install
 
@@ -404,13 +418,3 @@ As mentioned above, Docker on Windows first requires a Linux VM.
       ```
 
       From within this shell environment, `docker` cli commands should be proxied through to your `docker-dev-vm` prepared by `docker-machine`.
-
-
-
---------------
-
-
-
-## Install build tools
-
-
