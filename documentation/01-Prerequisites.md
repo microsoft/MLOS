@@ -58,7 +58,7 @@ Clone the repository:
 git clone https://github.com/microsoft/MLOS.git
 ```
 
-### Option 1: Linux Docker Install
+### Option 1: Linux Docker Build Env
 
 #### Install Docker
 
