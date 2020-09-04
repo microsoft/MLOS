@@ -146,7 +146,7 @@ sudo apt-get install exuberant-ctags
 
 > When available `make ctags` can be invoked to help generate a `tags` database at the root of the source tree to allow easier code navigation in editors that support it.
 
-#### Linux Python Install
+### Linux Python Install
 
 ##### Option 1: Docker Python Install
 
