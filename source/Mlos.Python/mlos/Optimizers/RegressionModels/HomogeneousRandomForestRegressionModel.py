@@ -313,10 +313,10 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         #   section: section: 4.3.2 for details
         all_predictions_df[predicted_value_var_col] = all_predictions_df[mean_var_col_names_per_tree].mean(axis=1) \
                                              + (all_predictions_df[predicted_value_col_names_per_tree] ** 2).mean(axis=1) \
-                                             - all_predictions_df[predicted_value_col] ** 2
+                                             - all_predictions_df[predicted_value_col] ** 2 + 0.0000001 # A little numerical instability correction
         all_predictions_df[sample_var_col] = all_predictions_df[sample_var_col_names_per_tree].mean(axis=1) \
                                              + (all_predictions_df[predicted_value_col_names_per_tree] ** 2).mean(axis=1) \
-                                             - all_predictions_df[predicted_value_col] ** 2
+                                             - all_predictions_df[predicted_value_col] ** 2 + 0.0000001 # A little numerical instability correction
         all_predictions_df[sample_size_col] = all_predictions_df[predicted_value_col_names_per_tree].count(axis=1)
         all_predictions_df[dof_col] = all_predictions_df[sample_size_col_names_per_tree].sum(axis=1) - all_predictions_df[sample_size_col]
         all_predictions_df[is_valid_input_col] = True
