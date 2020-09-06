@@ -151,4 +151,4 @@ For more formal enquiries, you can [contact us](mailto:mlos-maintainers@service.
 
 ## License
 
-- [MIT License](./LICENSE)
+- [MIT License](./LICENSE.txt)

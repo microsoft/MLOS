@@ -58,6 +58,7 @@ done
 sed -i 's/FILENAME\.ipynb/BayesianOptimization\.ipynb/g' content/notebooks/*.md
 
 # Make top level md files available in the site.
+cp ../LICENSE.txt content/
 cp ../*.md content/
 # But make a few of them the directory level index.
 mv content/README.md content/_index.md
