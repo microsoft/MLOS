@@ -88,7 +88,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
         optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
         optimizer_config_json = request.OptimizerConfig
-        if optimizer_config_json is not None:
+        if optimizer_config_json is not None and len(optimizer_config_json) > 0:
             optimizer_config = Point.from_json(optimizer_config_json)
         else:
             optimizer_config = BayesianOptimizerConfig.DEFAULT

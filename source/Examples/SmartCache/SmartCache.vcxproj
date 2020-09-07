@@ -31,11 +31,13 @@
     <ClCompile Include="Main.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Workloads.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GlobalDispatchTable.h" />
     <ClInclude Include="SmartCacheImpl.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Workloads.h" />
   </ItemGroup>
   <ItemGroup Label="SettingsRegistry">
     <ProjectReference Include="$(MSBuildThisFileDirectory)\SmartCache.SettingsRegistry\SmartCache.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />

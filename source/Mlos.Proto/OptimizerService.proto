@@ -1,5 +1,6 @@
 syntax = "proto3";
 
+option csharp_namespace = "Mlos.OptimizerService";
 
 // Exposes Bayesian Optimizer's functionality over gRPC.
 //
@@ -163,13 +164,15 @@ message ObjectiveValues
 
 // Serialized representation of a Hypergrid.
 //
-message Hypergrid{
+message Hypergrid
+{
     string HypergridJsonString = 1;
 };
 
 // Representation of a single objective.
 //
-message Objective {
+message Objective
+{
     string Name = 1;
     bool Minimize = 2;
 };

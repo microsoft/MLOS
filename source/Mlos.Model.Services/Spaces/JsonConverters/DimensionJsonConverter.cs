@@ -8,15 +8,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Mlos.Model.Services.Spaces.JsonConverters
 {
     public class DimensionJsonConverter : JsonConverterWithExpectations<IDimension>
     {
+        /// <inheritdoc/>
         public override IDimension Read(
             ref Utf8JsonReader reader,
             Type typeToConvert,
@@ -32,21 +30,19 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
             Expect(ref reader, expectedTokenType: JsonTokenType.String);
             dimensionName = reader.GetString();
 
-            switch (dimensionType)
+            IDimension dimension = dimensionType switch
             {
-                case "ContinuousDimension":
-                    return DeserializeContinuousDimension(ref reader, dimensionName);
-                case "DiscreteDimension":
-                    return DeserializeDiscreteDimension(ref reader, dimensionName);
-                case "OrdinalDimension":
-                    return DeserializeOrdinalDimension(ref reader, dimensionName);
-                case "CategoricalDimension":
-                    return DeserializeCategoricalDimension(ref reader, dimensionName);
-                default:
-                    throw new JsonException();
-            }
+                "ContinuousDimension" => DeserializeContinuousDimension(ref reader, dimensionName),
+                "DiscreteDimension" => DeserializeDiscreteDimension(ref reader, dimensionName),
+                "OrdinalDimension" => DeserializeOrdinalDimension(ref reader, dimensionName),
+                "CategoricalDimension" => DeserializeCategoricalDimension(ref reader, dimensionName),
+                _ => throw new JsonException($"Unsupported dimensionType:{dimensionType} name:{dimensionName}"),
+            };
+
+            return dimension;
         }
 
+        /// <inheritdoc/>
         public override void Write(
             Utf8JsonWriter writer,
             IDimension value,
@@ -67,9 +63,6 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
                     JsonSerializer.Serialize(writer, dimension, options);
                     break;
                 case CategoricalDimension dimension:
-                    JsonSerializer.Serialize(writer, dimension, options);
-                    break;
-                case EmptyDimension dimension:
                     JsonSerializer.Serialize(writer, dimension, options);
                     break;
                 default:
@@ -177,7 +170,7 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
             Expect(ref reader, JsonTokenType.PropertyName, "OrderedValues");
             Expect(ref reader, JsonTokenType.StartArray);
 
-            JsonTokenType nextTokenType = PeakNextTokenType(reader);
+            JsonTokenType nextTokenType = PeekNextTokenType(reader);
             while ((nextTokenType == JsonTokenType.Number) || (nextTokenType == JsonTokenType.String))
             {
                 if (nextTokenType == JsonTokenType.Number)
@@ -191,7 +184,7 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
                     orderedValues.Add(reader.GetString());
                 }
 
-                nextTokenType = PeakNextTokenType(reader);
+                nextTokenType = PeekNextTokenType(reader);
             }
 
             Expect(ref reader, JsonTokenType.EndArray);
@@ -219,11 +212,11 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
         /// <returns></returns>
         private CategoricalDimension DeserializeCategoricalDimension(ref Utf8JsonReader reader, string dimensionName)
         {
-            List<object> values = new List<object>();
+            var values = new List<object>();
             Expect(ref reader, JsonTokenType.PropertyName, "Values");
             Expect(ref reader, JsonTokenType.StartArray);
 
-            JsonTokenType nextTokenType = PeakNextTokenType(reader);
+            JsonTokenType nextTokenType = PeekNextTokenType(reader);
             while ((nextTokenType == JsonTokenType.Number) || (nextTokenType == JsonTokenType.String))
             {
                 if (nextTokenType == JsonTokenType.Number)
@@ -237,7 +230,7 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
                     values.Add(reader.GetString());
                 }
 
-                nextTokenType = PeakNextTokenType(reader);
+                nextTokenType = PeekNextTokenType(reader);
             }
 
             Expect(ref reader, JsonTokenType.EndArray);

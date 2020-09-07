@@ -15,20 +15,15 @@
 
 #pragma once
 
-template<class K, class V>
+template<typename TKey, typename TValue>
 class SmartCacheImpl
 {
-public:
-    class CacheEntry
-    {
-    public:
-        K Key;
-        V* Value;
-    };
-
 private:
-    int m_size = 16;
-    std::unique_ptr<CacheEntry*[]> m_cacheBuffer;
+    int m_cacheSize;
+
+    std::list<TValue> m_elementSequence;
+
+    std::unordered_map<TKey, typename std::list<TValue>::iterator> m_lookupTable;
 
     // Mlos Tunable Component Config.
     //
@@ -38,19 +33,18 @@ public:
     SmartCacheImpl(Mlos::Core::ComponentConfig<SmartCache::SmartCacheConfig>& config);
     ~SmartCacheImpl();
 
-    bool Contains(K key);
-    V* Get(K key);
-    void Push(K key, V* value);
-    K FindLargestKeyUpTo(K upperBound, K defaultKey);
+    bool Contains(TKey key);
+    TValue* Get(TKey key);
+    void Push(TKey key, const TValue value);
+
     void Reconfigure();
 };
 
-template<class K, class V>
-SmartCacheImpl<K, V>::SmartCacheImpl(Mlos::Core::ComponentConfig<SmartCache::SmartCacheConfig>& config)
+template<typename TKey, typename TValue>
+inline SmartCacheImpl<TKey, TValue>::SmartCacheImpl(Mlos::Core::ComponentConfig<SmartCache::SmartCacheConfig>& config)
   : m_config(config)
 {
-    m_size = 0;
-    m_cacheBuffer = nullptr;
+    m_cacheSize = 0;
 
     // Apply initial configuration.
     //
@@ -60,157 +54,110 @@ SmartCacheImpl<K, V>::SmartCacheImpl(Mlos::Core::ComponentConfig<SmartCache::Sma
 template<class K, class V>
 SmartCacheImpl<K, V>::~SmartCacheImpl()
 {
-    for (int i = 0; i < m_size; i++)
-    {
-        if (m_cacheBuffer[i] != nullptr)
-        {
-            delete m_cacheBuffer[i];
-        }
-    }
-
-    m_cacheBuffer.reset();
 }
 
-template<class K, class V>
-bool SmartCacheImpl<K, V>::Contains(K key)
+template<typename TKey, typename TValue>
+inline bool SmartCacheImpl<TKey, TValue>::Contains(TKey key)
 {
-    if (m_config.TelemetryBitMask & 1) // 1 is KeyAccessEvent flag
-    {
-        SmartCache::CacheRequestEventMessage message;
-        message.CacheAddress = reinterpret_cast<uint64_t>(this);
-        message.KeyValue = key;
-        m_config.SendTelemetryMessage(message);
-    }
+    bool isInCache = m_lookupTable.find(key) != m_lookupTable.end();
 
-    CacheEntry* temp = m_cacheBuffer[key % m_size];
-    if (temp == nullptr || temp->Key != key)
-    {
-        return false;
-    }
+    SmartCache::CacheRequestEventMessage msg;
+    msg.ConfigId = m_config.ConfigId;
+    msg.Key = key;
+    msg.IsInCache = isInCache;
 
-    return true;
+    m_config.SendTelemetryMessage(msg);
+
+    return isInCache;
 }
 
-template<class K, class V>
-V* SmartCacheImpl<K, V>::Get(K key)
+template<typename TKey, typename TValue>
+inline TValue* SmartCacheImpl<TKey, TValue>::Get(TKey key)
 {
     if (!Contains(key))
     {
         return nullptr;
     }
 
-    return m_cacheBuffer[key % m_size]->Value;
+    // Find the element ref in the lookup table.
+    //
+    auto lookupItr = m_lookupTable.find(key);
+
+    // Move the element to the beginning of the queue.
+    //
+    m_elementSequence.emplace_front(*lookupItr->second);
+    m_elementSequence.erase(lookupItr->second);
+
+    // As we moved the element, we need to update the element ref.
+    //
+    lookupItr->second = m_elementSequence.begin();
+
+    return &m_elementSequence.front();
 }
 
-template<class K, class V>
-void SmartCacheImpl<K, V>::Push(K key, V* value)
+template<typename TKey, typename TValue>
+inline void SmartCacheImpl<TKey, TValue>::Push(TKey key, const TValue value)
 {
-    if (m_config.TelemetryBitMask & 1) // 1 is KeyAccessEvent flag
+    if (m_elementSequence.size() == m_cacheSize)
     {
-        SmartCache::CacheRequestEventMessage message;
-        message.CacheAddress = reinterpret_cast<uint64_t>(this);
-        message.KeyValue = key;
-        m_config.SendTelemetryMessage(message);
+        // We reached the maximum cache size, based on the current policy evict the element.
+        //
+        if (m_config.EvictionPolicy == SmartCache::CacheEvictionPolicy::LeastRecentlyUsed)
+        {
+            auto evictedLookupItr = m_elementSequence.back();
+            m_elementSequence.pop_back();
+            m_lookupTable.erase(evictedLookupItr);
+        }
+        else if (m_config.EvictionPolicy == SmartCache::CacheEvictionPolicy::MostRecentlyUsed)
+        {
+            auto evictedLookupItr = m_elementSequence.front();
+            m_elementSequence.pop_front();
+            m_lookupTable.erase(evictedLookupItr);
+        }
+        else
+        {
+            // Unknown configuration.
+            //
+            throw std::exception();
+        }
     }
 
-    CacheEntry* existingEntry = m_cacheBuffer[key % m_size];
-    if (existingEntry == nullptr)
-    {
-        existingEntry = new CacheEntry();
-        m_cacheBuffer[key % m_size] = existingEntry;
-    }
+    // Find the element ref in the lookup table.
+    //
+    auto lookupItr = m_lookupTable.find(key);
 
-    existingEntry->Key = key;
-    delete existingEntry->Value;
-    existingEntry->Value = value;
+    if (lookupItr == m_lookupTable.end())
+    {
+        m_elementSequence.emplace_front(value);
+        auto elementItr = m_elementSequence.begin();
+
+        m_lookupTable.emplace(key, elementItr);
+    }
+    else
+    {
+        // Enqueue new element to the beginning of the queue.
+        //
+        m_elementSequence.emplace_front(value);
+        m_elementSequence.erase(lookupItr->second);
+
+        // Update existing lookup.
+        //
+        lookupItr->second = m_elementSequence.begin();
+    }
 
     return;
 }
 
-template<class K, class V>
-K SmartCacheImpl<K, V>::FindLargestKeyUpTo(K upperBound, K defaultKey)
+template<typename TKey, typename TValue>
+inline void SmartCacheImpl<TKey, TValue>::Reconfigure()
 {
-    K largestSoFar = defaultKey;
-
-    for (int i = 0; i < m_size; i++)
-    {
-        if (m_cacheBuffer[i] == nullptr)
-        {
-            continue;
-        }
-
-        if (m_cacheBuffer[i]->Key > largestSoFar&& m_cacheBuffer[i]->Key <= upperBound)
-        {
-            largestSoFar = m_cacheBuffer[i]->Key;
-        }
-    }
-
-    return largestSoFar;
-}
-
-template<class K, class V>
-void SmartCacheImpl<K, V>::Reconfigure()
-{
-    for (int i = 0; i < m_size; i++)
-    {
-        if (m_cacheBuffer[i] != nullptr)
-        {
-            delete m_cacheBuffer[i];
-        }
-    }
-
-    m_cacheBuffer.reset();
-
-    // Copy configuration.
+    // Update the cache size from the latest configuration.
     //
-    m_size = m_config.CacheSize;
+    m_cacheSize = m_config.CacheSize;
 
-    // Reconfigure cache with the new settings.
+    // Clear the cache.
     //
-    m_cacheBuffer = std::make_unique<CacheEntry*[]>(m_size);
-
-    for (int i = 0; i < m_size; i++)
-    {
-        m_cacheBuffer[i] = nullptr;
-    }
-}
-
-class FibonacciValue
-{
-public:
-    uint64_t previous;
-    uint64_t current;
-};
-
-uint64_t fibonacci(uint64_t sequenceNumber, SmartCacheImpl<uint64_t, FibonacciValue>& existingCache)
-{
-    uint64_t temp;
-    uint64_t previous = 1;
-    uint64_t current = 1;
-
-    uint64_t maxCachedSequenceNumber = existingCache.FindLargestKeyUpTo(sequenceNumber, 2);
-    FibonacciValue* newCacheEntry = nullptr;
-
-    if (maxCachedSequenceNumber > 2)
-    {
-        // std::cout << "Cache hit at: " << maxCachedSequenceNumber << "for target: " << sequenceNumber << std::endl;
-        FibonacciValue* existingEntry = existingCache.Get(maxCachedSequenceNumber);
-        previous = existingEntry->previous;
-        current = existingEntry->current;
-    }
-
-    for (uint64_t i = maxCachedSequenceNumber; i < sequenceNumber; i++)
-    {
-        temp = previous;
-        previous = current;
-        current = previous + temp;
-
-        newCacheEntry = new FibonacciValue();
-        newCacheEntry->previous = previous;
-        newCacheEntry->current = current;
-
-        existingCache.Push(i, newCacheEntry);
-    }
-
-    return current;
+    m_elementSequence.clear();
+    m_lookupTable.clear();
+    m_lookupTable.reserve(m_cacheSize);
 }

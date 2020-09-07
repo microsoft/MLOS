@@ -3,7 +3,7 @@
 // Licensed under the MIT License. See License.txt in the project root
 // for license information.
 //
-// @File: stdafx.h
+// @File: Workloads.h
 //
 // Purpose:
 //      <description>
@@ -15,25 +15,4 @@
 
 #pragma once
 
-#include <array>
-#include <condition_variable>
-#include <functional>
-#include <future>
-#include <memory>
-#include <mutex>
-#include <list>
-#include <unordered_map>
-
-// Mlos.Core.
-//
-#include "Mlos.Core.h"
-
-// Global dispatch table.
-//
-#include "GlobalDispatchTable.h"
-
-// Mlos.Core.
-//
-#include "Mlos.Core.inl"
-
-using namespace Mlos::Core;
+uint64_t CyclicalWorkload(uint64_t sequenceNumber, SmartCacheImpl<int32_t, int32_t>& smartCache);

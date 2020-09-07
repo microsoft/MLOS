@@ -12,7 +12,7 @@ using System.Text.Json.Serialization;
 using Mlos.Core;
 using Mlos.Model.Services.Spaces;
 
-namespace Mlos.Model.Services.Client
+namespace Mlos.Model.Services
 {
     /// <summary>
     /// Models and Optimization Problem which is generally comprized of Decision Variables (Parameter Space), Context Values (Context Space) and Objectives.
@@ -21,13 +21,13 @@ namespace Mlos.Model.Services.Client
     public class OptimizationProblem : IOptimizationProblem
     {
         [JsonPropertyName("parameter_space")]
-        public SimpleHypergrid ParameterSpace { get; set; }
+        public Hypergrid ParameterSpace { get; set; }
 
         [JsonPropertyName("context_space")]
-        public SimpleHypergrid ContextSpace { get; set; }
+        public Hypergrid ContextSpace { get; set; }
 
         [JsonPropertyName("objective_space")]
-        public SimpleHypergrid ObjectiveSpace { get; set; }
+        public Hypergrid ObjectiveSpace { get; set; }
 
         [JsonPropertyName("objectives")]
         public List<OptimizationObjective> Objectives { get; }
