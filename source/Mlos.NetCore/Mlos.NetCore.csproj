@@ -30,8 +30,8 @@
     <Compile Include="Collections\MurMur2HashFunction.cs" />
     <Compile Include="Collections\MurMur3HashFunction.cs" />
     <Compile Include="IOptimizationProblem.cs" />
-    <Compile Include="ISimpleBayesianOptimizerFactory.cs" />
-    <Compile Include="ISimpleBayesianOptimizerProxy.cs" />
+    <Compile Include="IOptimizerFactory.cs" />
+    <Compile Include="IOptimizerProxy.cs" />
     <Compile Include="MemoryRegions\MemoryRegionViewExtensions.cs" />
     <Compile Include="MemoryRegions\SharedConfigMemoryRegionExtensions.cs" />
     <Compile Include="StdTypes\AtomicTypes.cs" />

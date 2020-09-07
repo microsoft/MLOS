@@ -5,7 +5,8 @@ include("${MLOS_ROOT}/build/Mlos.Common.cmake")
 include("${MLOS_ROOT}/build/Mlos.Cpp.cmake")
 
 add_executable(${PROJECT_NAME}
-    Main.cpp)
+    Main.cpp
+    Workloads.cpp)
 
 target_link_libraries(${PROJECT_NAME} Mlos.Core)
 

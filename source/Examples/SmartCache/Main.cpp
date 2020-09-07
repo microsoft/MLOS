@@ -25,6 +25,7 @@ using namespace SmartCache;
 #include "GlobalDispatchTable.h"
 
 #include "SmartCacheImpl.h"
+#include "Workloads.h"
 
 void CheckHR(HRESULT hr)
 {
@@ -51,6 +52,20 @@ main(
 
     Mlos::Core::InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
 
+    // Create a feedback channel receiver thread.
+    //
+    ISharedChannel& feedbackChannel = mlosContext.FeedbackChannel();
+
+    std::future<bool> feedbackChannelReader = std::async(
+        std::launch::async,
+        [&feedbackChannel]
+    {
+        auto globalDispatchTable = GlobalDispatchTable();
+        feedbackChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+
+        return true;
+    });
+
     // Register Mlos.SmartCache Settings assembly.
     //
     hr = mlosContext.RegisterSettingsAssembly(
@@ -64,23 +79,66 @@ main(
 
     // Initialize config with default values.
     //
-    config.CacheSize = 31;
-    config.TelemetryBitMask = 0xffffffff;
+    config.ConfigId = 1;
+    config.EvictionPolicy = SmartCache::CacheEvictionPolicy::LeastRecentlyUsed;
+    config.CacheSize = 100;
 
     hr = mlosContext.RegisterComponentConfig(config);
     CheckHR(hr);
 
     // Create an intelligent component.
     //
-    SmartCacheImpl<uint64_t, FibonacciValue> cache(config);
+    SmartCacheImpl<int32_t, int32_t> smartCache(config);
 
-    uint64_t result;
-    for (int i = 0; i < 10; i++)
+    for (int observations = 0; observations < 500; observations++)
     {
-        result = fibonacci(i, cache);
+        for (int i = 0; i < 20; i++)
+        {
+            CyclicalWorkload(2048, smartCache);
+        }
+
+        bool isConfigReady = false;
+        std::mutex waitForConfigMutex;
+        std::condition_variable waitForConfigCondVar;
+
+        // Setup a callback.
+        //
+        ObjectDeserializationCallback::Mlos::Core::SharedConfigUpdatedFeedbackMessage_Callback =
+            [&waitForConfigMutex, &waitForConfigCondVar,
+             &isConfigReady](Proxy::Mlos::Core::SharedConfigUpdatedFeedbackMessage&& msg)
+            {
+                // Ignore the message.
+                //
+                UNUSED(msg);
+
+                std::unique_lock<std::mutex> lck(waitForConfigMutex);
+                isConfigReady = true;
+                waitForConfigCondVar.notify_all();
+            };
+
+        // Send a request to obtain a new configuration.
+        //
+        SmartCache::RequestNewConfigurationMesage msg = { 0 };
+        mlosContext.SendTelemetryMessage(msg);
+
+        std::unique_lock<std::mutex> lock(waitForConfigMutex);
+        while (!isConfigReady)
+        {
+            waitForConfigCondVar.wait(lock);
+        }
+
+        config.Update();
+        smartCache.Reconfigure();
     }
 
-    // Terminate the agent.
+    // Terminate the feedback channel.
+    //
+    mlosContext.TerminateFeedbackChannel();
+
+    // At this point there are no active feedback channel reader threads.
+    // Now, terminate the control channel.
     //
     mlosContext.TerminateControlChannel();
+
+    feedbackChannelReader.wait();
 }

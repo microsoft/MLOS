@@ -6,13 +6,9 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Mlos.Model.Services.Client
+namespace Mlos.Model.Services
 {
     /// <summary>
     /// Each of the objectives in the ObjectiveSpace can be either maximized or minimized.

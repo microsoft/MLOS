@@ -6,9 +6,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,18 +16,51 @@ using Mlos.Model.Services.Spaces.JsonConverters;
 namespace Mlos.Model.Services.Spaces
 {
     /// <summary>
-    /// Base class for SimpleHypergrid and CompositeHypergrid.
-    ///
-    /// This is just the first step in the implementation. As the need arises we will bring
-    /// the C# implementation of Hypergrids to par with the Python implementation.
+    /// Hypergrid interace.
     /// </summary>
-    public abstract class Hypergrid
+    public abstract class IHypergrid
     {
         public abstract string ToJson();
     }
 
-    public class SimpleHypergrid : Hypergrid
+    public class Hypergrid : IHypergrid
     {
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Converters =
+            {
+                new JsonStringEnumConverter(),
+                new HypergridJsonConverter(),
+                new DimensionJsonConverter(),
+                new SubgridJoinJsonConverter(),
+                new HashSetJsonConverter<SubgridJoin>(),
+                new JsonDictionaryConverter<string, HashSet<SubgridJoin>>(),
+            },
+        };
+
+        /// <summary>
+        /// Create Hypergrid from json string.
+        /// </summary>
+        /// <param name="jsonString"></param>
+        /// <returns></returns>
+        public static Hypergrid FromJson(string jsonString)
+        {
+            Hypergrid hypergrid = (jsonString != null) ? JsonSerializer.Deserialize<Hypergrid>(jsonString, JsonSerializerOptions) : null;
+
+            return hypergrid;
+        }
+
+        /// <summary>
+        /// Internal structure describing subgrid joins.
+        /// </summary>
+        internal struct SubgridJoin
+        {
+            internal IDimension OnExternalJoin { get; set; }
+
+            internal Hypergrid Subgrid;
+        }
+
         // This is for the benefit of the JsonSerializer.
         public enum HypergridType
         {
@@ -36,35 +68,69 @@ namespace Mlos.Model.Services.Spaces
             CompositeHypergrid,
         }
 
-        public HypergridType ObjectType { get; set; }
         public string Name { get; set; }
-        public List<IDimension> Dimensions { get; }
 
-        public SimpleHypergrid(string name, List<IDimension> dimensions)
+        public HypergridType ObjectType { get; set; }
+
+        public ReadOnlyCollection<IDimension> Dimensions { get; }
+
+        public Hypergrid RootGrid { get; private set; }
+
+        internal Dictionary<string, HashSet<SubgridJoin>> Subgrids { get; }
+
+        public Hypergrid(string name, IDimension dimension)
         {
             ObjectType = HypergridType.SimpleHypergrid;
             Name = name;
-            Dimensions = dimensions;
+            Dimensions = new ReadOnlyCollection<IDimension>(new[] { dimension });
+            Subgrids = new Dictionary<string, HashSet<SubgridJoin>>();
         }
 
+        public Hypergrid(string name, params IDimension[] dimensions)
+        {
+            ObjectType = HypergridType.SimpleHypergrid;
+            Name = name;
+            Dimensions = new ReadOnlyCollection<IDimension>(dimensions);
+            Subgrids = new Dictionary<string, HashSet<SubgridJoin>>();
+        }
+
+        internal Hypergrid(string name, IDimension[] dimensions, Dictionary<string, HashSet<SubgridJoin>> subgrids)
+        {
+            ObjectType = HypergridType.SimpleHypergrid;
+            Name = name;
+            Dimensions = new ReadOnlyCollection<IDimension>(dimensions);
+            Subgrids = subgrids;
+        }
+
+        /// <summary>
+        /// Joins the subgrid on the specified dimension.
+        /// </summary>
+        /// <param name="subgrid"></param>
+        /// <param name="onExternalDimension"></param>
+        /// <returns></returns>
+        public Hypergrid Join(Hypergrid subgrid, IDimension onExternalDimension)
+        {
+            if (!Subgrids.ContainsKey(onExternalDimension.Name))
+            {
+                Subgrids.Add(onExternalDimension.Name, new HashSet<SubgridJoin>());
+            }
+
+            Subgrids[onExternalDimension.Name].Add(
+                new SubgridJoin
+                {
+                    Subgrid = subgrid,
+                    OnExternalJoin = onExternalDimension,
+                });
+
+            subgrid.RootGrid = this;
+
+            return this;
+        }
+
+        /// <inheritdoc/>
         public override string ToJson()
         {
-            JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Converters =
-                {
-                    new SimpleHypergridJsonConverter(),
-                    new DimensionJsonConverter(),
-                    new JsonStringEnumConverter(),
-                },
-            };
-
-            return JsonSerializer.Serialize(this, jsonSerializerOptions);
+            return JsonSerializer.Serialize(this, JsonSerializerOptions);
         }
-    }
-
-    public abstract class CompositeHypergrid : Hypergrid
-    {
     }
 }

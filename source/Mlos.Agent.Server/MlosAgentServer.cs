@@ -15,10 +15,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 
-using Mlos.Agent;
 using Mlos.Core;
-using Mlos.Model.Services.Client.Proxies;
-using Mlos.Model.Services.ModelsDb;
+
+using MlosOptimizer = Mlos.Model.Services.Client.BayesianOptimizer;
 
 namespace Mlos.Agent.Server
 {
@@ -37,7 +36,7 @@ namespace Mlos.Agent.Server
                         //
                         options.ListenLocalhost(5000, o => o.Protocols = HttpProtocols.Http2);
                     });
-                    webBuilder.UseStartup<Mlos.Agent.GrpcServer.Startup>();
+                    webBuilder.UseStartup<GrpcServer.Startup>();
                 });
 
         public static void Main(string[] args)
@@ -62,15 +61,20 @@ namespace Mlos.Agent.Server
             Console.WriteLine("Mlos.Agent.Server");
             TargetProcessManager targetProcessManager = null;
 
-            // Since the models database and optimizer factory are part of the "intelligence" it belongs to the Mlos.Agent.Server.
+            // #TODO connect to gRpc optimizer only if user provided json file in the command line argument.
+            // #TODO, make address configurable.
             //
-            ModelsDatabase modelsDatabase = new ModelsDatabase(modelsDatabaseConnectionDetailsFile);
+            if (modelsDatabaseConnectionDetailsFile != null)
+            {
+                Console.WriteLine("Connected to Mlos.Optimizer");
 
-            SimpleBayesianOptimizerFactory optimizerFactory = new SimpleBayesianOptimizerFactory(modelsDatabase);
+                // This switch must be set before creating the GrpcChannel/HttpClient.
+                //
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-            // Since component assemblies need to use the optimizerFactory (at least for now) we put it in the GlobalProperties.
-            //
-            MlosContext.OptimizerFactory = optimizerFactory;
+                Uri optimizerAddressUri = new Uri("http://localhost:50051");
+                MlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
+            }
 
             // Create circular buffer shared memory before running the target process.
             //

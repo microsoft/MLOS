@@ -1,22 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
   <PropertyGroup>
     <ProjectGuid>{516E3859-CB93-49AF-BF4B-81CE7387B9F7}</ProjectGuid>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mlos.Model.Services.UnitTests</RootNamespace>
     <AssemblyName>Mlos.ModelServies.UnitTests</AssemblyName>
-    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+    <GrpcServices>Client</GrpcServices>
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Grpc.props" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.UnitTest.props" />
   <ItemGroup>
     <PackageReference Include="Python.Runtime.NetStandard" Version="3.7.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Examples\SmartCache\SmartCache.SettingsRegistry\SmartCache.SettingsRegistry.csproj" />
+    <ProjectReference Include="..\Mlos.Model.Services.Client\Mlos.Model.Services.Client.csproj" />
     <ProjectReference Include="..\Mlos.Model.Services\Mlos.Model.Services.csproj" />
+    <ProjectReference Include="..\Mlos.NetCore\Mlos.NetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
       <Compile Include="UnitTests.cs" />

@@ -20,6 +20,6 @@ namespace Mlos.Core
 
         public static ISharedConfigAccessor SharedConfigManager { get; set; }
 
-        public static ISimpleBayesianOptimizerFactory OptimizerFactory { get; set; }
+        public static IOptimizerFactory OptimizerFactory { get; set; }
     }
 }

@@ -6,55 +6,35 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
+using System.Collections.ObjectModel;
 
 namespace Mlos.Model.Services.Spaces
 {
     public enum DimensionTypeName
     {
-        EmptyDimension,
         ContinuousDimension,
         DiscreteDimension,
         OrdinalDimension,
         CategoricalDimension,
-        CompositeDimension,
     }
 
     public interface IDimension
     {
-    }
-
-    public class EmptyDimension : IDimension
-    {
-        public enum ContainedType
-        {
-            ContinuousDimension,
-            DiscreteDimension,
-            OrdinalDimension,
-            CategoricalDimension,
-        }
-
-        public DimensionTypeName ObjectType { get; set; }
         public string Name { get; set; }
-        public ContainedType Type { get; set; }
-        public EmptyDimension(string name, ContainedType containedType)
-        {
-            ObjectType = DimensionTypeName.EmptyDimension;
-            Name = name;
-            Type = containedType;
-        }
     }
 
     public sealed class ContinuousDimension : IDimension
     {
         public DimensionTypeName ObjectType { get; set; }
+
         public string Name { get; set; }
+
         public double Min { get; set; }
+
         public double Max { get; set; }
+
         public bool IncludeMin { get; set; }
+
         public bool IncludeMax { get; set; }
 
         public ContinuousDimension(string name, double min, double max, bool includeMin = true, bool includeMax = true)
@@ -71,8 +51,11 @@ namespace Mlos.Model.Services.Spaces
     public class DiscreteDimension : IDimension
     {
         public DimensionTypeName ObjectType { get; set; } // TODO: private setter, read only, make sure works with serializer, move to base class
+
         public string Name { get; set; }
+
         public long Min { get; set; }
+
         public long Max { get; set; }
 
         public DiscreteDimension(string name, long min, long max)
@@ -87,18 +70,18 @@ namespace Mlos.Model.Services.Spaces
     public class OrdinalDimension : IDimension
     {
         public DimensionTypeName ObjectType { get; set; }
+
         public string Name { get; set; }
-        public List<object> OrderedValues { get; }
+
+        public ReadOnlyCollection<object> OrderedValues { get; }
+
         public bool Ascending { get; set; }
 
-        public OrdinalDimension(string name, List<object> orderedValues, bool ascending)
+        public OrdinalDimension(string name, bool ascending, params object[] orderedValues)
         {
             ObjectType = DimensionTypeName.OrdinalDimension;
-
             Name = name;
-
-            OrderedValues = orderedValues;
-
+            OrderedValues = new ReadOnlyCollection<object>(orderedValues);
             Ascending = ascending;
         }
     }
@@ -106,14 +89,16 @@ namespace Mlos.Model.Services.Spaces
     public class CategoricalDimension : IDimension
     {
         public DimensionTypeName ObjectType { get; set; }
-        public string Name { get; set; }
-        public List<object> Values { get; }
 
-        public CategoricalDimension(string name, List<object> values)
+        public string Name { get; set; }
+
+        public ReadOnlyCollection<object> Values { get; }
+
+        public CategoricalDimension(string name, params object[] values)
         {
             ObjectType = DimensionTypeName.CategoricalDimension;
             Name = name;
-            Values = values;
+            Values = new ReadOnlyCollection<object>(values);
         }
     }
 }
