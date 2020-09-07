@@ -80,9 +80,8 @@ namespace SmartCache
                 });
 
             IOptimizerFactory optimizerFactory = MlosContext.OptimizerFactory;
-            optimizerProxy = optimizerFactory.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
 
-            var optimizationProblem2 = optimizerProxy.GetOptimizationProblem();
+            optimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
         }
 
         /// <summary>
@@ -109,48 +108,51 @@ namespace SmartCache
         {
             SmartCacheProxy.SmartCacheConfig smartCacheConfig = MlosContext.SharedConfigManager.Lookup<SmartCacheProxy.SmartCacheConfig>().Config;
 
-            if (totalRequestCount != 0)
+            if (optimizerProxy != null)
             {
-                double hitRate = (double)isInCacheCount / (double)totalRequestCount;
-
-                isInCacheCount = 0;
-                totalRequestCount = 0;
-
-                // Let's assemble an observation that consists of the config and the resulting performance.
-                //
-                var currentConfigDictionary = new Dictionary<string, object>();
-                currentConfigDictionary["cache_implementation"] = smartCacheConfig.EvictionPolicy;
-
-                _ = smartCacheConfig.EvictionPolicy switch
+                if (totalRequestCount != 0)
                 {
-                    CacheEvictionPolicy.LeastRecentlyUsed => currentConfigDictionary["lru_cache_config.cache_size"] = smartCacheConfig.CacheSize,
-                    CacheEvictionPolicy.MostRecentlyUsed => currentConfigDictionary["mru_cache_config.cache_size"] = smartCacheConfig.CacheSize,
-                    _ => throw new NotImplementedException(),
-                };
+                    double hitRate = (double)isInCacheCount / (double)totalRequestCount;
 
-                string currentConfigJsonString = JsonSerializer.Serialize(currentConfigDictionary, JsonOptions);
+                    isInCacheCount = 0;
+                    totalRequestCount = 0;
 
-                // Register an observation.
+                    // Let's assemble an observation that consists of the config and the resulting performance.
+                    //
+                    var currentConfigDictionary = new Dictionary<string, object>();
+                    currentConfigDictionary["cache_implementation"] = smartCacheConfig.EvictionPolicy;
+
+                    _ = smartCacheConfig.EvictionPolicy switch
+                    {
+                        CacheEvictionPolicy.LeastRecentlyUsed => currentConfigDictionary["lru_cache_config.cache_size"] = smartCacheConfig.CacheSize,
+                        CacheEvictionPolicy.MostRecentlyUsed => currentConfigDictionary["mru_cache_config.cache_size"] = smartCacheConfig.CacheSize,
+                        _ => throw new NotImplementedException(),
+                    };
+
+                    string currentConfigJsonString = JsonSerializer.Serialize(currentConfigDictionary, JsonOptions);
+
+                    // Register an observation.
+                    //
+                    optimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
+                }
+
+                // Get new configuration.
                 //
-                optimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
+                string newConfigJsonString = optimizerProxy.Suggest();
+
+                var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
+
+                // Update cache config.
+                //
+                smartCacheConfig.EvictionPolicy = Enum.Parse<CacheEvictionPolicy>(newConfigDictionary["cache_implementation"].GetString());
+
+                smartCacheConfig.CacheSize = smartCacheConfig.EvictionPolicy switch
+                {
+                    CacheEvictionPolicy.LeastRecentlyUsed => (int)newConfigDictionary["lru_cache_config.cache_size"].GetDouble(),
+                    CacheEvictionPolicy.MostRecentlyUsed => (int)newConfigDictionary["mru_cache_config.cache_size"].GetDouble(),
+                    _ => throw new NotSupportedException(),
+                };
             }
-
-            // Get new configuration.
-            //
-            string newConfigJsonString = optimizerProxy.Suggest();
-
-            var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
-
-            // Update cache config.
-            //
-            smartCacheConfig.EvictionPolicy = Enum.Parse<CacheEvictionPolicy>(newConfigDictionary["cache_implementation"].GetString());
-
-            smartCacheConfig.CacheSize = smartCacheConfig.EvictionPolicy switch
-            {
-                CacheEvictionPolicy.LeastRecentlyUsed => (int)newConfigDictionary["lru_cache_config.cache_size"].GetDouble(),
-                CacheEvictionPolicy.MostRecentlyUsed => (int)newConfigDictionary["mru_cache_config.cache_size"].GetDouble(),
-                _ => throw new NotSupportedException(),
-            };
 
             // Send feedback message.
             //

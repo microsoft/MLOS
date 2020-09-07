@@ -22,6 +22,7 @@
   <!-- FIXME: Disabling running tests via QuickBuild for now.  Convert them to QTests (#122). -->
   <Target Name="Test" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(RunUnitTest)' != 'false'">
     <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; &quot;$(BinplaceDir)\Mlos.UnitTest.exe&quot;" />
+    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; &quot;$(BinplaceDir)\SmartCache.exe&quot;" />
     <Exec Command="dotnet test &quot;@(MlosNetCoreUnitTestOutput->'%(fullpath)')&quot;" />
   </Target>
 </Project>

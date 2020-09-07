@@ -90,8 +90,10 @@ main(
     //
     SmartCacheImpl<int32_t, int32_t> smartCache(config);
 
-    for (int observations = 0; observations < 500; observations++)
+    for (int observations = 0; observations < 100; observations++)
     {
+        std::cout << "observations: " << observations << std::endl;
+
         for (int i = 0; i < 20; i++)
         {
             CyclicalWorkload(2048, smartCache);

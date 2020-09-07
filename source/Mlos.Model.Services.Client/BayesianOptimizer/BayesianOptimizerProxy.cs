@@ -7,7 +7,8 @@
 // -----------------------------------------------------------------------
 
 using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using Mlos.Core;
 using Mlos.Model.Services.Spaces;
 
@@ -37,14 +38,24 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
             Hypergrid objectiveSpace = Hypergrid.FromJson(optimizerInfo.OptimizationProblem.ObjectiveSpace?.HypergridJsonString);
             Hypergrid parameterSpace = Hypergrid.FromJson(optimizerInfo.OptimizationProblem.ParameterSpace?.HypergridJsonString);
 
-            // #TODO deserialize objectives
-            //
-            return new OptimizationProblem
+            var optimizationProblem = new OptimizationProblem
             {
                 ContextSpace = contextSpace,
                 ObjectiveSpace = objectiveSpace,
                 ParameterSpace = parameterSpace,
             };
+
+            // Add optimization objectives.
+            //
+            optimizationProblem.Objectives.AddRange(
+                optimizerInfo.OptimizationProblem.Objectives.Select(r =>
+                    new OptimizationObjective
+                    {
+                        Minimize = r.Minimize,
+                        Name = r.Name,
+                    }));
+
+            return optimizationProblem;
         }
 
         /// <inheritdoc/>
@@ -73,7 +84,7 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
         /// <inheritdoc/>
         public string Suggest(bool random = false)
         {
-            OptimizerService.ConfigurationParameters configurationParameter = client.Suggest(
+            OptimizerService.ConfigurationParameters configurationParameters = client.Suggest(
                 new OptimizerService.SuggestRequest
                 {
                     OptimizerHandle = optimizerHandle,
@@ -84,7 +95,7 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
                     Random = random,
                 });
 
-            string suggestedParameter = configurationParameter.ParametersJsonString;
+            string suggestedParameter = configurationParameters.ParametersJsonString;
             Console.WriteLine($"Suggest {random} {suggestedParameter}");
             return suggestedParameter;
         }

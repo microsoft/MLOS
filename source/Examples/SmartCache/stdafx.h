@@ -17,6 +17,7 @@
 
 #include <array>
 #include <condition_variable>
+#include <iostream>
 #include <functional>
 #include <future>
 #include <memory>

@@ -98,36 +98,36 @@ inline TValue* SmartCacheImpl<TKey, TValue>::Get(TKey key)
 template<typename TKey, typename TValue>
 inline void SmartCacheImpl<TKey, TValue>::Push(TKey key, const TValue value)
 {
-    if (m_elementSequence.size() == m_cacheSize)
-    {
-        // We reached the maximum cache size, based on the current policy evict the element.
-        //
-        if (m_config.EvictionPolicy == SmartCache::CacheEvictionPolicy::LeastRecentlyUsed)
-        {
-            auto evictedLookupItr = m_elementSequence.back();
-            m_elementSequence.pop_back();
-            m_lookupTable.erase(evictedLookupItr);
-        }
-        else if (m_config.EvictionPolicy == SmartCache::CacheEvictionPolicy::MostRecentlyUsed)
-        {
-            auto evictedLookupItr = m_elementSequence.front();
-            m_elementSequence.pop_front();
-            m_lookupTable.erase(evictedLookupItr);
-        }
-        else
-        {
-            // Unknown configuration.
-            //
-            throw std::exception();
-        }
-    }
-
     // Find the element ref in the lookup table.
     //
     auto lookupItr = m_lookupTable.find(key);
 
     if (lookupItr == m_lookupTable.end())
     {
+        if (m_elementSequence.size() == m_cacheSize)
+        {
+            // We reached the maximum cache size, evict the element based on the current policy.
+            //
+            if (m_config.EvictionPolicy == SmartCache::CacheEvictionPolicy::LeastRecentlyUsed)
+            {
+                auto evictedLookupItr = m_elementSequence.back();
+                m_elementSequence.pop_back();
+                m_lookupTable.erase(evictedLookupItr);
+            }
+            else if (m_config.EvictionPolicy == SmartCache::CacheEvictionPolicy::MostRecentlyUsed)
+            {
+                auto evictedLookupItr = m_elementSequence.front();
+                m_elementSequence.pop_front();
+                m_lookupTable.erase(evictedLookupItr);
+            }
+            else
+            {
+                // Unknown policy.
+                //
+                throw std::exception();
+            }
+        }
+
         m_elementSequence.emplace_front(value);
         auto elementItr = m_elementSequence.begin();
 
