@@ -13,20 +13,15 @@ These are one-time setup instructions that should be executed prior to following
       - [Install Docker](#install-docker)
       - [Build the Docker Image](#build-the-docker-image)
     - [Option 2: Manual Build Tools Install](#option-2-manual-build-tools-install)
-    - [Linux Python Install](#linux-python-install)
+    - [Install Python on Linux](#install-python-on-linux)
       - [Option 1: Docker Python Install](#option-1-docker-python-install)
       - [Option 2: Using Conda](#option-2-using-conda)
       - [Option 3: Manual Python Install](#option-3-manual-python-install)
   - [Windows](#windows)
-    - [Install Docker on Windows](#install-docker-on-windows)
-    - [Clone the repository](#clone-the-repository-1)
-    - [Windows build tools](#windows-build-tools)
-      - [Option 1: Using a local script](#option-1-using-a-local-script)
-      - [Option 2: Install Build Tools Using Chocolatey](#option-2-install-build-tools-using-chocolatey)
-      - [Option 3: Install Windows Build Manually](#option-3-install-windows-build-manually)
-    - [Windows Python Install](#windows-python-install)
-      - [Option 1: Conda Based Install for Windows](#option-1-conda-based-install-for-windows)
-      - [Option 2: Python Using Chocolatey](#option-2-python-using-chocolatey)
+    - [Step 1: Clone the repository](#step-1-clone-the-repository)
+    - [Step 2: Install Python](#step-2-install-python)
+    - [Step 3: Install Docker on Windows](#step-3-install-docker-on-windows)
+    - [Step 4: Install Windows Build Tools](#step-4-install-windows-build-tools)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
@@ -117,7 +112,7 @@ sudo apt-get install exuberant-ctags
 
 > When available `make ctags` can be invoked to help generate a `tags` database at the root of the source tree to allow easier code navigation in editors that support it.
 
-### Linux Python Install
+### Install Python on Linux
 
 #### Option 1: Docker Python Install
 
@@ -158,118 +153,30 @@ TODO
 
 ## Windows
 
-> Note: Most Windows shell commands here expect `powershell` (or [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows)).
+MLOS is easiest to use on Windows 10, Version 1903 (March 2019) or newer.
 
-### Install Docker on Windows
+### Step 1: Clone the repository
 
-Portions of MLOS use Docker. Please follow the instructions on the [Docker Website](https://www.docker.com/products/docker-desktop) to install it. Note that on Windows Home, you need a fairly recent Windows version to install Docker (Windows 10 1903 or newer).
+[Install git](https://git-scm.com/) and clone the repo:
 
-On any Windows 10 v1903 or newer, we recommend you use the [Windows Subsytem for Linux v2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) to run the containers. On older Windows 10, you can resort to the [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) of Docker.
-
-### Clone the repository
-
-Cross platform
-
-```shell
+```ps1
 git clone https://github.com/microsoft/MLOS.git
 ```
 
-> See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`, or use `choco install git` (see [below](#using-chocolatey) for more details about chocolatey).
+### Step 2: Install Python
 
-### Windows build tools
+TODO
 
-There are several build tools install paths to choose from on Windows.
+### Step 3: Install Docker on Windows
 
-> Note: For most of these commands we first need a `powershell` with Administrator privileges:
+Portions of MLOS use Docker. Please follow the instructions on the [Docker Website](https://www.docker.com/products/docker-desktop) to install it. Note that on Windows *Home*, you need a fairly recent Windows version to install Docker (Windows 10 1903 or newer).
 
-1. Start a powershell environment with Administrator privileges:
+On Windows 10 v1903 or newer, we recommend you use the [Windows Subsytem for Linux v2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) to run the containers. On older Windows 10, you can resort to the [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) of Docker.
 
-    ```shell
-    powershell -NoProfile -Command "Start-Process powershell -Verb RunAs"
-    ```
-
-    > If you find that when you start a new shell environment it can't find some of the tools installed later on, the new `PATH` environment variable might not be updated.  Try to restart your shell.
-
-2. Allow local powershell scripts to be executed:
-
-    ```powershell
-    Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
-    ```
-
-    > This is necessary for our build environment initialization script `scripts\init.windows.ps1` as well.
-
-#### Option 1: Using a local script
-
-1. Launch the script we provide in the MLOS repo to install/update the free Visual Studio 2019 Community Edition with the necessary components:
-
-    ```powershell
-    .\scripts\install-vs2019.ps1
-    ```
-
-    ```text
-    Waiting for installer process vs_community to end ...
-    Waiting for installer process vs_community to end ...
-    ...
-    Done
-    ```
-
-    > Note: This will install the free Community edition by default. Use the `-Sku` option if you prefer to install the `Enterprise` version instead.
-
-#### Option 2: Install Build Tools Using Chocolatey
-
-[Chocolatey](https://chocolatey.org) is a package manager for Windows to help support scripted and reproducable installation of tools.
-
-0. Install [chocolatey](https://chocolatey.org/install)
-
-1. Install build tools:
-
-    ```shell
-    choco install -y git
-    choco install -y dotnetcore-runtime.install --params="Skip32Bit"
-    choco install -y dotnetcore dotnetcore-sdk
-    choco install -y visualstudio2019buildtools visualstudio2019-workload-netcorebuildtools visualstudio2019-workload-vctools
-    ```
-
-2. Install an editor
-  (*optional*)
-
-    ```shell
-    choco install -y vscode
-    choco install -y vscode-cpptools vscode-csharp vscode-cake
-    ```
-
-    or
-
-    ```shell
-    choco install -y visualstudio2019community
-    ```
-
-#### Option 3: Install Windows Build Manually
+### Step 4: Install Windows Build Tools
 
 Download and install Visual Studio 2019 (free) Community Edition:
 
 <https://visualstudio.microsoft.com/vs/community/>
 
 Be sure to include support for .Net Core and C++.
-
-### Windows Python Install
-
-#### Option 1: Conda Based Install for Windows
-
-TODO
-
-#### Option 2: Python Using Chocolatey
-
-0. See above for instructions on installing Chocolatey.
-
-1. Install Python
-
-    ```shell
-    choco install -y python --version=3.7.8
-    ```
-
-2. Install MLOS Python dependencies:
-
-    ```shell
-    pip install -r source\Mlos.Python\requirements.txt
-    ```
