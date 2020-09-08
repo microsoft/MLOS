@@ -5,6 +5,8 @@
 from pandas import DataFrame
 from mlos.Spaces import CategoricalDimension, DiscreteDimension, Hypergrid, Point, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters.HypergridAdapter import HypergridAdapter
+from mlos.Spaces.HypergridAdapters.HierarchicalToFlatHypergridAdapter import HierarchicalToFlatHypergridAdapter
+
 
 class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
     """ Maps values in categorical dimensions into values in discrete dimensions.
@@ -12,6 +14,9 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
     """
 
     def __init__(self, adaptee: Hypergrid):
+        if not HypergridAdapter.is_like_simple_hypergrid(adaptee):
+            raise ValueError("Adaptee must implement a Hypergrid Interface.")
+
         HypergridAdapter.__init__(self, name=adaptee.name, random_state=adaptee.random_state)
         self._adaptee: Hypergrid = adaptee
         self._target: Hypergrid = None
@@ -27,12 +32,11 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
         #   Value: a dictionary mapping target values to adaptee values
         self._target_to_adaptee_dimension_mappings = dict()
 
+        if self._adaptee.is_hierarchical():
+            self._adaptee = HierarchicalToFlatHypergridAdapter(adaptee=self._adaptee)
 
         # Now we need to build the target hypergrid and the mappings between adaptee and target.
-        if HypergridAdapter.is_like_simple_hypergrid(adaptee) and not adaptee.is_hierarchical():
-            self._build_simple_hypergrid_target()
-        else:
-            raise NotImplementedError("First apply the HierarchicalToFlatHypergridAdapter and chain it with this one.")
+        self._build_simple_hypergrid_target()
 
     @property
     def adaptee(self) -> Hypergrid:
@@ -83,8 +87,6 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
 
         :return:
         """
-        assert isinstance(self.adaptee, SimpleHypergrid) or \
-               (isinstance(self.adaptee, HypergridAdapter) and isinstance(self.adaptee.target, SimpleHypergrid))
 
         self._target = SimpleHypergrid(
             name=self._adaptee.name,

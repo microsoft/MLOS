@@ -8,7 +8,8 @@ import unittest
 import pandas as pd
 
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimension, DiscreteDimension, OrdinalDimension
-from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter, HierarchicalToFlatHypergridAdapter
+from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter, DiscreteToUnitContinuousHypergridAdapter,\
+    HierarchicalToFlatHypergridAdapter
 
 class TestCategoricalToDiscreteHypergridAdapter(unittest.TestCase):
 
@@ -18,7 +19,7 @@ class TestCategoricalToDiscreteHypergridAdapter(unittest.TestCase):
         cls.simple_hypergrid = SimpleHypergrid(
             name='simple_adaptee',
             dimensions=[
-                CategoricalDimension(name='categorical_mixed_types', values=['red', True, False, 1]),
+                CategoricalDimension(name='categorical_mixed_types', values=['red', True, False, 5]),
                 DiscreteDimension(name='one_to_ten', min=1, max=10),
                 ContinuousDimension(name='zero_to_one', min=0, max=1),
                 OrdinalDimension(name='ordinal_mixed_types', ordered_values=[1, False, 'two'])
@@ -53,6 +54,58 @@ class TestCategoricalToDiscreteHypergridAdapter(unittest.TestCase):
         """
         adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.simple_hypergrid)
         self._test_translating_categorical_to_discrete_point_from_adaptee(adaptee=self.simple_hypergrid, adapter=adapter)
+
+    def test_translating_point_to_unit_continuous_hypergrid(self):
+        hypergrdis_and_adapters = [
+            (self.simple_hypergrid, DiscreteToUnitContinuousHypergridAdapter(adaptee=self.simple_hypergrid)),
+            (self.hierarchical_hypergrid, DiscreteToUnitContinuousHypergridAdapter(adaptee=self.hierarchical_hypergrid))
+        ]
+        for hypergrid, adapter in hypergrdis_and_adapters:
+            for _ in range(1000):
+                original_point = hypergrid.random()
+                translated_point = adapter.translate_point(original_point)
+                self.assertTrue(all(isinstance(dim_value, float) and 0 <= dim_value <= 1 for _, dim_value in translated_point))
+                self.assertTrue(translated_point in adapter)
+                untranslated_point = adapter.untranslate_point(translated_point)
+                self.assertTrue(original_point == untranslated_point)
+                self.assertTrue(untranslated_point in hypergrid)
+
+    def test_translating_dataframe_from_flat_to_unit_continuous_hypergrid(self):
+        adapter = DiscreteToUnitContinuousHypergridAdapter(adaptee=self.simple_hypergrid)
+        original_df = self.simple_hypergrid.random_dataframe(num_samples=1000)
+        translated_df = adapter.translate_dataframe(df=original_df, in_place=False)
+        self.assertTrue(id(original_df) != id(translated_df))
+        for column in translated_df.columns:
+            self.assertTrue(translated_df[column].between(0, 1).all())
+        untranslated_df = adapter.untranslate_dataframe(df=translated_df, in_place=False)
+        self.assertTrue(original_df.equals(untranslated_df))
+
+        # Let's make sure that translating in place works as expected.
+        translated_in_place_df = adapter.translate_dataframe(original_df)
+        self.assertTrue(id(original_df) == id(translated_in_place_df))
+        self.assertTrue(translated_in_place_df.equals(translated_df))
+        untranslated_in_place_df = adapter.untranslate_dataframe(translated_in_place_df)
+        self.assertTrue(id(original_df) == id(untranslated_in_place_df))
+        self.assertTrue(untranslated_in_place_df.equals(untranslated_df))
+
+    def test_translating_dataframe_from_hierarchical_to_unit_continuous_hypergrid(self):
+        adapter = DiscreteToUnitContinuousHypergridAdapter(adaptee=self.hierarchical_hypergrid)
+        original_df = self.hierarchical_hypergrid.random_dataframe(num_samples=1000)
+        translated_df = adapter.translate_dataframe(df=original_df, in_place=False)
+        self.assertTrue(id(original_df) != id(translated_df))
+        for column in translated_df.columns:
+            self.assertTrue(translated_df[column].dropna().between(0, 1).all())
+        untranslated_df = adapter.untranslate_dataframe(df=translated_df, in_place=False)
+        self.assertTrue(original_df.equals(untranslated_df))
+
+        # Let's make sure that translating in place works as expected.
+        translated_in_place_df = adapter.translate_dataframe(original_df)
+        self.assertTrue(id(original_df) == id(translated_in_place_df))
+        self.assertTrue(translated_in_place_df.equals(translated_df))
+        untranslated_in_place_df = adapter.untranslate_dataframe(translated_in_place_df)
+        self.assertTrue(id(original_df) == id(untranslated_in_place_df))
+        self.assertTrue(untranslated_in_place_df.equals(untranslated_df))
+
 
     def test_translating_dataframe_from_categorical_to_discrete_simple_hypergrid(self):
         adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.simple_hypergrid)
@@ -90,10 +143,10 @@ class TestCategoricalToDiscreteHypergridAdapter(unittest.TestCase):
         self.assertTrue(id(original_df) == id(untranslated_in_place_df))
         self.assertTrue(untranslated_in_place_df.equals(untranslated_df))
 
-    def test_translating_point_from_categorical_to_discrete_composite_hypergrid(self):
-        with self.assertRaises(NotImplementedError):
-            hierarchical_adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.hierarchical_hypergrid)
-            self._test_translating_categorical_to_discrete_point_from_adaptee(adaptee=self.hierarchical_hypergrid, adapter=hierarchical_adapter)
+    def test_translating_point_from_hierarchical_categorical_to_discrete_hypergrid(self):
+        # This used to raise, but now it's handled internally so let's make sure it doesn't raise anymore.
+        hierarchical_adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.hierarchical_hypergrid)
+        self._test_translating_categorical_to_discrete_point_from_adaptee(adaptee=self.hierarchical_hypergrid, adapter=hierarchical_adapter)
 
     def _test_translating_categorical_to_discrete_point_from_adaptee(self, adaptee, adapter):
         # First make sure that none of the resulting dimensions are categorical.
@@ -127,7 +180,7 @@ class TestCategoricalToDiscreteHypergridAdapter(unittest.TestCase):
             self.assertTrue(untranslated_point in self.simple_hypergrid)
             self.assertTrue(original_point == untranslated_point)
 
-    def test_translating_point_from_composite_to_simple_hypergrid(self):
+    def test_translating_point_from_hierarchical_to_flat_hypergrid(self):
         adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.hierarchical_hypergrid)
         self.assertTrue(isinstance(adapter.target, SimpleHypergrid))
         for _ in range(1000):

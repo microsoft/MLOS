@@ -15,7 +15,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import \
     ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
 
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension
+from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 import mlos.global_values as global_values
 
 
@@ -59,7 +59,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
 
     def test_lower_confidence_bound(self):
         """Tests if the lower confidence bound utility function is behaving properly."""
-        utility_function_config = ConfidenceBoundUtilityFunctionConfig(
+        utility_function_config = Point(
             utility_function_name="lower_confidence_bound_on_improvement",
             alpha=0.01
         )
@@ -80,16 +80,14 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
         confidence_interval_radii = t_values * prediction_df[predicted_value_var_col].apply('sqrt')
 
         expected_utility_function_values = prediction_df[predicted_value_col] - confidence_interval_radii
-        utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
+        utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)['utility']
         for expected, actual in zip(expected_utility_function_values, utility_function_values):
             self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))
 
     def test_random_function_configs(self):
         for i in range(100):
             minimize = [True, False][i % 2]
-            utility_function_config_point = ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE.random()
-            utility_function_config = ConfidenceBoundUtilityFunctionConfig.create_from_config_point(
-                utility_function_config_point)
+            utility_function_config = ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE.random()
             utility_function = ConfidenceBoundUtilityFunction(
                 function_config=utility_function_config,
                 surrogate_model=self.model,
@@ -108,7 +106,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
                 expected_utility_function_values = sign * prediction_df[predicted_value_col] - confidence_interval_radii
             else:
                 expected_utility_function_values = sign * prediction_df[predicted_value_col] + confidence_interval_radii
-            utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)
+            utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)['utility']
 
             for expected, actual in zip(expected_utility_function_values, utility_function_values):
                 self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))

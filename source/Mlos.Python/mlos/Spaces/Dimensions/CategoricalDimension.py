@@ -22,7 +22,7 @@ class CategoricalDimension(Dimension):
         self.is_numeric = self._am_i_numeric()
 
     def __repr__(self):
-        return f"{self.name}: [{', '.join(str(value) for value in self.values[:min(3, len(self))])}]"
+        return f"{self.name}: [{', '.join(str(value) for value in self.values[:min(3, len(self))])}{', ...' if len(self) > 3 else ''}]"
 
     def copy(self):
         return CategoricalDimension(

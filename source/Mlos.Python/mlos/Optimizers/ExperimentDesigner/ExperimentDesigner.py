@@ -8,8 +8,9 @@ from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, Simple
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
+from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfig
+from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfig
 from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
-from .NumericOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfig
 
 
 
@@ -19,7 +20,7 @@ class ExperimentDesignerConfig(metaclass=DefaultConfigMeta):
         name='experiment_designer_config',
         dimensions=[
             CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__]),
-            CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__]),
+            CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__, GlowWormSwarmOptimizer.__name__]),
             ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
@@ -28,6 +29,9 @@ class ExperimentDesignerConfig(metaclass=DefaultConfigMeta):
     ).join(
         subgrid=RandomSearchOptimizerConfig.CONFIG_SPACE,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
+    ).join(
+        subgrid=GlowWormSwarmOptimizerConfig.CONFIG_SPACE,
+        on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
     )
 
     _DEFAULT = Point(
@@ -64,6 +68,8 @@ class ExperimentDesigner:
             surrogate_model: RegressionModel,
             logger=None
     ):
+        assert designer_config in ExperimentDesignerConfig.CONFIG_SPACE
+
         if logger is None:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
@@ -73,21 +79,27 @@ class ExperimentDesigner:
         self.surrogate_model = surrogate_model
         self.rng = np.random.Generator(np.random.PCG64())
 
-        assert self.config.utility_function_implementation == ConfidenceBoundUtilityFunction.__name__
         self.utility_function = ConfidenceBoundUtilityFunction(
-            function_config=ConfidenceBoundUtilityFunctionConfig.create_from_config_point(self.config.confidence_bound_utility_function_config),
+            function_config=self.config.confidence_bound_utility_function_config,
             surrogate_model=self.surrogate_model,
             minimize=self.optimization_problem.objectives[0].minimize,
             logger=self.logger
         )
 
-        assert self.config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__
-        self.numeric_optimizer = RandomSearchOptimizer(
-            optimizer_config=RandomSearchOptimizerConfig.create_from_config_point(self.config.random_search_optimizer_config),
-            optimization_problem=self.optimization_problem,
-            utility_function=self.utility_function,
-            logger=self.logger
-        )
+        if self.config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
+            self.numeric_optimizer = RandomSearchOptimizer(
+                optimizer_config=self.config.random_search_optimizer_config,
+                optimization_problem=self.optimization_problem,
+                utility_function=self.utility_function,
+                logger=self.logger
+            )
+        elif self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+            self.numeric_optimizer = GlowWormSwarmOptimizer(
+                optimizer_config=self.config.glow_worm_swarm_optimizer_config,
+                optimization_problem=self.optimization_problem,
+                utility_function=self.utility_function,
+                logger=self.logger
+            )
 
     def suggest(self, context_values_dataframe=None, random=False):
         self.logger.debug(f"Suggest(random={random})")
