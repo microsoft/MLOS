@@ -12,9 +12,6 @@ class EmptyDimension(Dimension):
         super(EmptyDimension, self).__init__(name=name)
         self.type = type
 
-    def __repr__(self):
-        return self.to_string(include_name=True)
-
     def __str__(self):
         return self.to_string(include_name=False)
 
@@ -22,6 +19,9 @@ class EmptyDimension(Dimension):
         if include_name:
             return self.name + ": {}"
         return "{}"
+
+    def __repr__(self):
+        return self.to_string(include_name=True)
 
     @property
     def is_innumerably_large(self):

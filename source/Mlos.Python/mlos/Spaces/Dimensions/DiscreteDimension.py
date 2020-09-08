@@ -63,7 +63,7 @@ class DiscreteDimension(Dimension):
             return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.max}}}"
         if len(self) == 3:
             return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, {self.max}}}"
-        return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, ... , {self.max}}}"
+        return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, {self.min + 2 * self.stride}, ... , {self.max}}}"
 
     def __len__(self):
         return self.max - self.min + 1
