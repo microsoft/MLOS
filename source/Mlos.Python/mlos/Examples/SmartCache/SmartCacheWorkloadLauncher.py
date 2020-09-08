@@ -10,8 +10,15 @@ from mlos.Mlos.SDK import mlos_globals, MlosAgent
 
 
 class SmartCacheWorkloadLauncher:
-    """ Prepares the mlos infrastructure and launches SmartCacheWorkload.
+    """Prepares the mlos infrastructure and launches SmartCacheWorkload.
 
+    Parameters
+    ----------
+    logger : Logger
+
+    Attributes
+    ----------
+    mlos_agent : MlosAgent
     """
     def __init__(self, logger):
         mlos_globals.init_mlos_global_context()
