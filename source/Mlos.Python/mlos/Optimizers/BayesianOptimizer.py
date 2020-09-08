@@ -74,12 +74,14 @@ class BayesianOptimizer(OptimizerInterface):
         assert optimizer_config in BayesianOptimizerConfig.CONFIG_SPACE, "Invalid config."
         self.optimizer_config = optimizer_config
 
+        joint_feature_space = SimpleHypergrid('joint_feature_space', [*self.optimization_problem.parameter_space.dimensions, *self.optimization_problem.context_space.dimensions])
+
         # Now let's put together the surrogate model.
         #
         assert self.optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__, "TODO: implement more"
         self.surrogate_model = HomogeneousRandomForestRegressionModel(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
-            input_space=self.optimization_problem.parameter_space, # TODO: change to feature space
+            input_space=joint_feature_space,
             output_space=self.optimization_problem.objective_space,
             logger=self.logger
         )
@@ -116,8 +118,12 @@ class BayesianOptimizer(OptimizerInterface):
     @trace()
     def suggest(self, random=False, context=None):
         # TODO: pass context to the suggest method
+        if self.optimization_problem.context_space is not None:
+            if context is None:
+                raise ValueError("Non-empty context space but no context given.")
+            assert context in self.optimization_problem.context_space
         random = random or self.num_observed_samples < self.optimizer_config.min_samples_required_for_guided_design_of_experiments
-        suggested_config = self.experiment_designer.suggest(random=random)
+        suggested_config = self.experiment_designer.suggest(random=random, context_values_dataframe=context.to_dataframe())
         assert suggested_config in self.optimization_problem.parameter_space
         return suggested_config
 

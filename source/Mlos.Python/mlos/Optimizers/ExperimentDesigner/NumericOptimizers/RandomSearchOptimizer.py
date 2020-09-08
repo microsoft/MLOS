@@ -64,10 +64,19 @@ class RandomSearchOptimizer:
         :return:
         """
 
-        feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.config.num_samples_per_iteration)
+        config_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.config.num_samples_per_iteration)
+        if context_values_dataframe is not None:
+            assert len(context_values_dataframe) == 1
+            config_values_dataframe['_join_key'] = 0
+            copied_context = context_values_dataframe.copy()
+            copied_context['_join_key'] = 0
+            feature_values_dataframe = config_values_dataframe.merge(copied_context, how='outer').drop(columns='_join_key')
+            config_values_dataframe = config_values_dataframe.drop(columns='_join_key')
+        else:
+            feature_values_dataframe = config_values_dataframe
         utility_function_values = self.utility_function(feature_values_dataframe.copy(deep=False))
         num_utility_function_values = len(utility_function_values)
         index_of_max_value = utility_function_values.argmax() if num_utility_function_values > 0 else 0
-        config_to_suggest = Point.from_dataframe(feature_values_dataframe.iloc[[index_of_max_value]])
+        config_to_suggest = Point.from_dataframe(config_values_dataframe.iloc[[index_of_max_value]])
         self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
         return config_to_suggest

@@ -71,6 +71,14 @@ class SimpleHypergrid(Hypergrid):
 
     Can be flat or hierarchical, depending if any join operations were performed.
 
+    Parameters
+    ----------
+    name : str
+        Identifier
+
+    dimensions : list of Dimension
+        List of dimension objects. The space is the cartesian product of these.
+
     """
     class GuestSubgrid:
         """ Allows a subgrid to be joined on a dimension that's not in that subgrid.
