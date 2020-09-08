@@ -43,7 +43,7 @@ class Hypergrid(ABC):
         raise NotImplementedError("All subclasses must implement this.")
 
     @abstractmethod
-    def get_dimensions_for_point(self, point):
+    def get_dimensions_for_point(self, point, external_dimensions=True):
         raise NotImplementedError("All subclasses must implement this.")
 
     @abstractmethod
@@ -275,8 +275,10 @@ class SimpleHypergrid(Hypergrid):
     def root_dimensions(self):
         return self._dimensions
 
-    def get_dimensions_for_point(self, point):
-        """ Returns dimensions that the given point and belongs to. For pivot dimensions, it returns the guest_subgrid.external_pivot_dimension
+    def get_dimensions_for_point(self, point, external_dimensions=True):
+        """ Returns dimensions that the given point belongs to.
+        For pivot dimensions, it returns the guest_subgrid.external_pivot_dimension if external_dimensions == True,
+        else it returns the original dimension.
 
         In a hierarchical hypergrid, coordiantes of a point in the root hypergrid determine which of the subgrids will be 'activated' (meaningful). For example
         if point.base_boosting_regression_model_name == "LassoRegression" then the subgrid describing the configuration for Lasso Regression becomes 'activated'
@@ -298,9 +300,10 @@ class SimpleHypergrid(Hypergrid):
                     # We return this narrower pivot dimension, since point[external_dimension_name] has
                     # to belong to the external_pivot_dimension for all of the subgrid dimensions to make sense.
                     #
-                    dimensions_by_name[external_dimension_name] = guest_subgrid.external_pivot_dimension
+                    if external_dimensions:
+                        dimensions_by_name[external_dimension_name] = guest_subgrid.external_pivot_dimension
                     subgrid = guest_subgrid.subgrid
-                    for dimension in subgrid.get_dimensions_for_point(point[subgrid.name]):
+                    for dimension in subgrid.get_dimensions_for_point(point[subgrid.name], external_dimensions=external_dimensions):
                         dimension = dimension.copy()
                         dimension.name = f"{subgrid.name}.{dimension.name}"
                         dimensions_by_name[dimension.name] = dimension

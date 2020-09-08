@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 from abc import abstractmethod
+import numpy as np
 from pandas import DataFrame
 from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
 
@@ -35,7 +36,10 @@ class HypergridAdapter(Hypergrid):
     # Forward all Hypergrid APIs to self.target
     #
     def __contains__(self, item):
-        return self.target.__contains__(item)
+        if isinstance(item, Point):
+            untranslated_point = self._untranslate_point(item)
+            return self.adaptee.__contains__(untranslated_point)
+        raise NotImplementedError
 
     def __getitem__(self, item):
         return self.target.__getitem__(item)
@@ -52,11 +56,12 @@ class HypergridAdapter(Hypergrid):
     def dimensions(self):
         return self.target.dimensions
 
-    def get_dimensions_for_point(self, point):
-        return self.target.get_dimensions_for_point(point)
+    def get_dimensions_for_point(self, point, external_dimensions=True):
+        return self.target.get_dimensions_for_point(point, external_dimensions)
 
     def random(self, point=None):
-        return self.target.random(point=point)
+        adaptee_random = self.adaptee.random(point=point)
+        return self._translate_point(adaptee_random)
 
     def is_hierarchical(self):
         return self.target.is_hierarchical()
@@ -81,6 +86,13 @@ class HypergridAdapter(Hypergrid):
             # If the adaptee made a copy, we can do our translation in place (on that copy)
             #
             in_place = True
+
+        # Before translating let's make sure we have all the dimensions we need
+        #
+        column_names = set(df.columns.values)
+        for dimension in self.adaptee.dimensions:
+            if dimension.name not in column_names:
+                df[dimension.name] = np.nan
         return self._translate_dataframe(df, in_place)
 
     def untranslate_dataframe(self, df: DataFrame, in_place: bool = True) -> DataFrame:

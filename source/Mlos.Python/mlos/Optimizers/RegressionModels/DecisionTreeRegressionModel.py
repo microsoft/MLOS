@@ -314,7 +314,6 @@ class DecisionTreeRegressionModel(RegressionModel):
         if self.fitted:
             features_df = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
             features_df = features_df[self.input_dimension_names]
-
             rows_with_no_nulls_index = features_df.index[features_df.notnull().all(axis=1)]
             if not rows_with_no_nulls_index.empty:
                 valid_rows_index = features_df.loc[rows_with_no_nulls_index].index[features_df.loc[rows_with_no_nulls_index].apply(

@@ -6,6 +6,7 @@ import json
 import random
 import unittest
 
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
 from mlos.Spaces.Hypergrids import SimpleHypergrid
 import mlos.Spaces.Dimensions.DimensionCalculator
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
@@ -187,4 +188,5 @@ class TestHierarchicalSpaces(unittest.TestCase):
         print("-------------------------------------------------------------------------------------------------------")
         print(json.dumps(self.original_hierarchical_settings, cls=HypergridJsonEncoder, indent=2))
         print("-------------------------------------------------------------------------------------------------------")
+        print(json.dumps(BayesianOptimizerConfig.CONFIG_SPACE, cls=HypergridJsonEncoder, indent=2))
 

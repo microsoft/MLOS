@@ -182,7 +182,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         :return:
         """
         random_point = original_space.random()
-        dimensions_for_point = original_space.get_dimensions_for_point(random_point)
+        dimensions_for_point = original_space.get_dimensions_for_point(random_point, external_dimensions=False)
         selected_dimensions = random.sample(dimensions_for_point, min(len(dimensions_for_point), max_num_dimensions))
         flat_dimensions = []
         for dimension in selected_dimensions:
