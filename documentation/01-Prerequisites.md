@@ -14,20 +14,19 @@ These are one-time setup instructions that should be executed prior to following
       - [Build the Docker Image](#build-the-docker-image)
     - [Option 2: Manual Build Tools Install](#option-2-manual-build-tools-install)
     - [Linux Python Install](#linux-python-install)
-        - [Option 1: Docker Python Install](#option-1-docker-python-install)
-        - [Option 2: Using Conda](#option-2-using-conda)
-        - [Option 3: Manual Python Install](#option-3-manual-python-install)
+      - [Option 1: Docker Python Install](#option-1-docker-python-install)
+      - [Option 2: Using Conda](#option-2-using-conda)
+      - [Option 3: Manual Python Install](#option-3-manual-python-install)
   - [Windows](#windows)
-    - [Windows Requirements](#windows-requirements)
+    - [Install Docker on Windows](#install-docker-on-windows)
     - [Clone the repository](#clone-the-repository-1)
     - [Windows build tools](#windows-build-tools)
-      - [Using a local script](#using-a-local-script)
-      - [Build Tools Using Chocolatey](#build-tools-using-chocolatey)
-      - [Windows Build Manually](#windows-build-manually)
+      - [Option 1: Using a local script](#option-1-using-a-local-script)
+      - [Option 2: Install Build Tools Using Chocolatey](#option-2-install-build-tools-using-chocolatey)
+      - [Option 3: Install Windows Build Manually](#option-3-install-windows-build-manually)
     - [Windows Python Install](#windows-python-install)
       - [Option 1: Conda Based Install for Windows](#option-1-conda-based-install-for-windows)
       - [Option 2: Python Using Chocolatey](#option-2-python-using-chocolatey)
-    - [Option 3: Windows Docker Install](#option-3-windows-docker-install)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
@@ -66,38 +65,11 @@ Docker is used for certain portions of the end-to-end examples and as a convient
 
 > If you are starting with the Python only setup, you can skip this step for now if you wish.
 
-Please see the official Docker install documenation for distribution specific documentation:
-
-- Ubuntu: <https://docs.docker.com/engine/install/ubuntu/>
-
-  As a short guide (copied from the link above):
-
-  ```sh
-  sudo apt-get remove \
-    docker docker-engine docker.io containerd runc
-
-  sudo apt-get update
-
-  sudo apt-get install \
-    apt-transport-https ca-certificates curl gnupg-agent software-properties-common
-
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
-    | sudo apt-key add -
-
-  sudo add-apt-repository \
-    "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-  sudo apt-get update
-  sudo apt-get install docker-ce docker-ce-cli containerd.io
-
-  apt-get install docker-ce
-  ```
+Please see the official Docker install documenation for distribution specific documentation. The Ubuntu docs are [here](https://docs.docker.com/engine/install/ubuntu/).
 
 #### Build the Docker Image
 
 To automatically setup a Linux build environment using `docker`, run the following to build the image locally:
-
-> Note: we will eventually publish for use with `docker pull` instead.
 
 ```sh
 # Select your target Ubuntu version:
@@ -107,7 +79,6 @@ docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$Ubun
 ```
 
 > Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
-> Tip: you can also pass `--build-arg=http_proxy=http:/some-proxy-caching-host:3128` to help direct `apt` and `pip` to fetch the necessary packages via local caches.
 
 See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
 
@@ -148,15 +119,15 @@ sudo apt-get install exuberant-ctags
 
 ### Linux Python Install
 
-##### Option 1: Docker Python Install
+#### Option 1: Docker Python Install
 
 If you used the [Docker build image](#docker-build-image) instructions you're done!  All of the required packages should already be installed in the image.
 
-##### Option 2: Using Conda
+#### Option 2: Using Conda
 
 TODO
 
-##### Option 3: Manual Python Install
+#### Option 3: Manual Python Install
 
 1. Install Python 3.7
 
@@ -189,16 +160,11 @@ TODO
 
 > Note: Most Windows shell commands here expect `powershell` (or [`pwsh`](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows)).
 
-### Windows Requirements
+### Install Docker on Windows
 
-> Portions of MLOS use Docker, which requires a Linux VM.  So support for *one* of the following is required:
+Portions of MLOS use Docker. Please follow the instructions on the [Docker Website](https://www.docker.com/products/docker-desktop) to install it. Note that on Windows Home, you need a fairly recent Windows version to install Docker (Windows 10 1903 or newer).
 
-- [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2), *or*
-- [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/)
-
-> Note: WSL2 is advised for ease of setup, integrations with Docker, and more flexible resource utilizations benefits.
-
-See the [Install Docker](#install-docker) section for more details.
+On any Windows 10 v1903 or newer, we recommend you use the [Windows Subsytem for Linux v2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) to run the containers. On older Windows 10, you can resort to the [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) of Docker.
 
 ### Clone the repository
 
@@ -222,7 +188,7 @@ There are several build tools install paths to choose from on Windows.
     powershell -NoProfile -Command "Start-Process powershell -Verb RunAs"
     ```
 
-    > If you find that when you start a new shell environment it can't find some of the tools installed later on, the new `PATH` environment variable might not be updated.  Try to restart your machine.
+    > If you find that when you start a new shell environment it can't find some of the tools installed later on, the new `PATH` environment variable might not be updated.  Try to restart your shell.
 
 2. Allow local powershell scripts to be executed:
 
@@ -232,7 +198,7 @@ There are several build tools install paths to choose from on Windows.
 
     > This is necessary for our build environment initialization script `scripts\init.windows.ps1` as well.
 
-#### Using a local script
+#### Option 1: Using a local script
 
 1. Launch the script we provide in the MLOS repo to install/update the free Visual Studio 2019 Community Edition with the necessary components:
 
@@ -249,28 +215,11 @@ There are several build tools install paths to choose from on Windows.
 
     > Note: This will install the free Community edition by default. Use the `-Sku` option if you prefer to install the `Enterprise` version instead.
 
-#### Build Tools Using Chocolatey
+#### Option 2: Install Build Tools Using Chocolatey
 
 [Chocolatey](https://chocolatey.org) is a package manager for Windows to help support scripted and reproducable installation of tools.
 
-0. Install chocolatey:
-
-    ```powershell
-    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-    ```
-
-    ```text
-    Getting latest version of the Chocolatey package for download.
-    ...
-    Chocolatey (choco.exe) is now ready.
-    You can call choco from anywhere, command line or powershell by typing choco.
-    Run choco /? for a list of functions.
-    You may need to shut down and restart powershell and/or consoles
-    first prior to using choco.
-    ...
-    ```
-
-    See Also: <https://chocolatey.org/install>
+0. Install [chocolatey](https://chocolatey.org/install)
 
 1. Install build tools:
 
@@ -295,7 +244,7 @@ There are several build tools install paths to choose from on Windows.
     choco install -y visualstudio2019community
     ```
 
-#### Windows Build Manually
+#### Option 3: Install Windows Build Manually
 
 Download and install Visual Studio 2019 (free) Community Edition:
 
@@ -324,93 +273,3 @@ TODO
     ```shell
     pip install -r source\Mlos.Python\requirements.txt
     ```
-
-### Option 3: Windows Docker Install
-
-As mentioned above, Docker on Windows first requires a Linux VM.
-
-> As such, if your Windows development environment is itself a VM, you'll need one that supports *nested virtualization*.\
-> <https://docs.microsoft.com/en-us/azure/virtual-machines/acu>
-
-- The easiest route is through [WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-win10):
-
-  1. Enable WSL2 on Windows 10 build 2004 or later:
-
-      ```shell
-      dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-
-      dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-      ```
-
-      ```powershell
-      Invoke-WebRequest -Uri https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi -OutFile wsl_update_x64.msi -UseBasicParsing
-      Invoke-Item wsl_update_x64.msi
-      ```
-
-      > Note: You may need to restart at this point.
-
-      ```shell
-      wsl --set-default-version 2
-      ```
-
-  2. [Install a Linux distro for WSL2](https://docs.microsoft.com/en-us/windows/wsl/install-manual) (e.g. [Ubuntu 20.04](https://www.microsoft.com/en-us/p/ubuntu-2004-lts/9n6svws3rx71?rtc=1&activetab=pivot:overviewtab)):
-
-      ```powershell
-      Invoke-WebRequest -Uri https://aka.ms/wslubuntu2004 -OutFile Ubuntu-20.04.appx -UseBasicParsing
-
-      Add-AppxPackage ./Ubuntu-20.04.appx
-      ```
-
-      > Finish the installation by launching the "*Ubuntu 20.04*" distribution from the Start menu to setup your Linux account in the WSL distribution.
-
-  3. Install Docker
-
-      - Chocolatey
-
-        ```shell
-        choco install docker-desktop docker-cli
-        ```
-
-      - Manually
-
-        <https://docs.docker.com/docker-for-windows/install/>
-
-     Configure Docker Desktop to use WSL2
-
-  At this point `docker` commands should work naturally from any shell environment and proxied through to the WSL2 Linux distribution configured in Docker Desktop.
-
-- Alternatively, you can enable Hyper-V and use [`docker-machine`](https://docs.docker.com/machine/reference/create/) to create a VM suitable for running Docker containers:
-
-  > Note: This isn't supported on Windows Home edition.
-
-  1. Enable Hyper-V
-
-      ```powershell
-      Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V -All
-      ```
-
-  2. Install `docker-machine`:
-
-      - Manually:
-
-        <https://docs.docker.com/machine/install-machine/>
-
-      - Or, via Chocolatey:
-
-        ```shell
-        choco install docker-machine
-        ```
-
-  3. Build a VM for running Docker containers:
-
-      ```shell
-      docker-machine create --driver hyperv --hyperv-virtual-switch "NameOfYourDockerVSwitch" docker-dev-vm
-      ```
-
-  4. Invoke a shell environment to use it:
-
-      ```shell
-      docker-machine env --shell powershell docker-dev-vm | Invoke-Expression
-      ```
-
-      From within this shell environment, `docker` cli commands should be proxied through to your `docker-dev-vm` prepared by `docker-machine`.
