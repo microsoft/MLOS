@@ -2,7 +2,7 @@
 # source code and repo markdown docs.
 
 .PHONY:
-all: hugo-site sphinx-site
+all: hugo-site sphinx-site test
 
 .PHONY:
 .NOTPARALLEL:
@@ -31,10 +31,9 @@ clean-sphinx-site:
 sphinx-site: clean-sphinx-site
 	sphinx/apidoc.sh
 	$(MAKE) -C sphinx
-	cp -a sphinx/_build/html python_api
+	cp -a sphinx/_build/html public/python_api
 
 .PHONY:
 .NOTPARALLEL:
 link-check:
-	# TODO
-	false
+	./test_site_links.sh
