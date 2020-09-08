@@ -21,7 +21,7 @@ class CategoricalDimension(Dimension):
         self.values_set = set(self.values)
         self.is_numeric = self._am_i_numeric()
 
-    def __str__(self):
+    def __repr__(self):
         return f"{self.name}: [{', '.join(str(value) for value in self.values[:min(3, len(self))])}]"
 
     def copy(self):

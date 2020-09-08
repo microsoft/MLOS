@@ -59,7 +59,7 @@ class ConnectionString:
         assert (self.username is not None and self.password is not None) or (self.trusted_connection is True)
 
 
-    def __str__(self):
+    def __repr__(self):
         self.validate()
 
         return_string = f"Driver={{{self.driver}}}; Server={self.host}; Database={self.database_name};"

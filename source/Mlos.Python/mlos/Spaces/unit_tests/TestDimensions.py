@@ -205,7 +205,7 @@ class TestDiscreteDimension(unittest.TestCase):
         self.assertTrue(str(self.just_one) == "x: {1}")
         self.assertTrue(str(self.one_two) == "x: {1, 2}")
         self.assertTrue(str(self.one_two_three) == "x: {1, 2, 3}")
-        self.assertTrue(str(self.one_to_hundred) == "x: {1, 1 + 1, ... , 100}")
+        self.assertTrue(str(self.one_to_hundred) == "x: {1, 2, 3, ... , 100}")
         #self.assertTrue(str(self.even_one_to_hundred) == "x: {2, 2 + 2, ... , 100}")
         #self.assertTrue(str(self.odd_one_to_hundred) == "x: {1, 1 + 2, ... , 99}")
         #self.assertTrue(str(self.divisible_by_three_one_to_hundred) == "x: {3, 3 + 3, ... , 99}")
