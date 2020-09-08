@@ -6,7 +6,7 @@
 set -eu
 
 # be verbose
-set -x
+#set -x
 
 # ensure we're in the right folder
 scriptdir=$(readlink -f "$(dirname "$0")")
@@ -67,8 +67,18 @@ mv content/documentation/README.md content/documentation/_index.md
 # replace markdown links
 # this allows the original files to link on github directly
 # while also rendering properly in hugo (which requires no .md in the links)
-sed -i 's/\.md/\//g' content/*.md
-sed -i 's/\.md/\//g' content/documentation/*.md
+# TODO: FIXME:
+for content_filepath in $(find content/ -type f -name '*.md'); do
+    base_filepath=$(echo "$content_filepath" | sed 's|^content/||')
+    parent_path=$(dirname "$base_filepath")
+    sed -i -r \
+        -e "s|\]\(./([^)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}\1)|g" \
+        -e "s|\]\(./([^)]+)|](/MLOS/${parent_path}/\1)|" \
+        "$content_filepath"
+done
+# FIXME:
+#sed -i 's/\.md/\//g' content/*.md
+#sed -i 's/\.md/\//g' content/documentation/*.md
 
 # Get a theme for hugo
 if [ ! -d "themes/book" ]; then

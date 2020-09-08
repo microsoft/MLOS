@@ -129,9 +129,9 @@ For detailed instructions, please refer to:
 
 ## Examples
 
-Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](./source/Mlos.Notebooks/#github-pages-view) section.
-Additional code is in the  [source/Examples](./source/Examples/#github-tree-view) source directory.
-You can find the source of the notebooks [on github as well](./source/Mlos.Notebooks/#github-tree-view).
+Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](https://microsoft.github.io/MLOS/notebooks/) section.
+Additional code is in the  [source/Examples](./source/Examples/#mlos-github-tree-view) source directory.
+You can find the source of the notebooks [on github as well](./source/Mlos.Notebooks/#mlos-github-tree-view).
 
 ## Documentation
 
