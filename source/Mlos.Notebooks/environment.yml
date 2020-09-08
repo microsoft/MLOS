@@ -18,3 +18,4 @@ dependencies:
   - pip:
     - grpcio-tools==1.30.0
     - bayesian-optimization==1.0.1
+    - tensorboardX==2.1
