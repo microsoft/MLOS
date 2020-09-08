@@ -17,6 +17,8 @@ scriptdir=$(readlink -f "$(dirname "$0")")
 MLOS_ROOT=$(readlink -f "$scriptdir/..")
 cd "$MLOS_ROOT/website"
 
+. "$MLOS_ROOT/scripts/util.sh"
+
 # Make sure we have the
 if ! [ -x /usr/bin/linklint ]; then
     echo "Missing linklint dependency" >&2
@@ -26,15 +28,31 @@ if ! [ -x /usr/bin/linklint ]; then
     set +x
 fi
 
-# Use docker to create a temporary web server for the site.
 container_name='mlos-website-link-checker'
+if ! areInDockerContainer; then
+    echo "INFO: Starting $container_name container to serve website content for link checking." >&2
 
-echo "INFO: Starting $container_name container to server website content for link checking." >&2
+    # Make sure there's no container from a previous run hanging around first.
+    docker rm -f $container_name 2>/dev/null || true
+    # Start a new one.
+    docker run -d --name $container_name -v $PWD:/src/MLOS/website -v $PWD/nginx.conf:/etc/nginx/conf.d/mlos.conf -p 8080:8080 nginx:latest
+else
+    echo "INFO: already inside docker.  Starting nginx for website content link checking." >&2
 
-# Make sure there's no container from a previous run hanging around first.
-docker rm -f $container_name 2>/dev/null || true
-# Start a new one.
-docker run -d --name $container_name -v $PWD:/src/MLOS/website -v $PWD/nginx.conf:/etc/nginx/conf.d/mlos.conf -p 8080:8080 nginx:latest
+    # Already in a docker container - install nginx for local testing.
+    if ! [ -x /usr/sbin/nginx ]; then
+        set -x
+        sudo apt-get update > /dev/null
+        sudo apt-get -y install nginx
+        set +x
+    fi
+    if ! [ -L /etc/nginx/conf.d/mlos.conf ]; then
+        sudo rm -f /etc/nginx/conf.d/mlos.conf
+        sudo ln -s $PWD/nginx.conf /etc/nginx/conf.d/mlos.conf
+    fi
+    service nginx start >/dev/null
+    service nginx reload >/dev/null
+fi
 
 echo "INFO: Performing link checking." >&2
 
@@ -43,8 +61,12 @@ echo "INFO: Performing link checking." >&2
 linklint_output=$(linklint -quiet -silent -error -no_anchors -host localhost:8080 -http /MLOS/@)
 
 # Finally, cleanup the container.
-if ! docker rm -f $container_name >/dev/null; then
-    echo "WARNING: Failed to cleanup $container_name container." >&2
+if ! areInDockerContainer; then
+    if ! docker rm -f $container_name >/dev/null; then
+        echo "WARNING: Failed to cleanup $container_name container." >&2
+    fi
+else
+    service nginx stop >/dev/null &
 fi
 
 if [ -n "$linklint_output" ]; then
