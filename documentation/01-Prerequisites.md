@@ -159,7 +159,7 @@ MLOS is easiest to use on Windows 10, Version 1903 (March 2019) or newer.
 
 [Install git](https://git-scm.com/) and clone the repo:
 
-```ps1
+```shell
 git clone https://github.com/microsoft/MLOS.git
 ```
 
