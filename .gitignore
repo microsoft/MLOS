@@ -427,3 +427,4 @@ website/resources
 website/themes
 website/sphinx/_build
 website/sphinx/api
+website/python_api
