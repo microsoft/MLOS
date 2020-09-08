@@ -26,9 +26,6 @@ class CompositeDimension(Dimension):
             for chunk in chunks:
                 self._interval_tree.add(chunk)
 
-    def __repr__(self):
-        return self.to_string(include_name=True)
-
     def __str__(self):
         return self.to_string(include_name=True)
 
@@ -37,6 +34,9 @@ class CompositeDimension(Dimension):
         if include_name:
             return f"{self.name}: {chunks_string}"
         return chunks_string
+
+    def __repr__(self):
+        return self.to_string(include_name=True)
 
     def copy(self):
         copy = CompositeDimension(
