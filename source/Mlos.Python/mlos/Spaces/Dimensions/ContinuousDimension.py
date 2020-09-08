@@ -56,7 +56,7 @@ class ContinuousDimension(Dimension):
                and self.include_max == other.include_max
 
 
-    def __str__(self):
+    def __repr__(self):
         """ Returns a string representation of this continuous dimension.
 
         In some circles the usage of '[' and ']' convey that the boundary points of a set are included,

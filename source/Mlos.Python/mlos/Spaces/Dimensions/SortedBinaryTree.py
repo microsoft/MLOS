@@ -63,7 +63,7 @@ class Node:
         self.key = key
         self.payload = payload
 
-    def __str__(self):
+    def __repr__(self):
         return f"Key: {self.key} Payload: {self.payload}"
 
     def has_left_child(self):
@@ -146,7 +146,7 @@ class SortedBinaryTree:
     def __init__(self, root=None):
         self.root = root
 
-    def __str__(self):
+    def __repr__(self):
         all_keys = [node.key for node in self.enumerate()]
         return str(all_keys)
 

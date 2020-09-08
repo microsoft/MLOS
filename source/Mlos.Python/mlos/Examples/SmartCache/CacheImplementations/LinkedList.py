@@ -10,7 +10,7 @@ class LinkedList:
     def __iter__(self):
         return self.enumerate()
 
-    def __str__(self):
+    def __repr__(self):
         return f"[{', '.join(str(node.cache_entry.key) for node in self)}]"
 
     def __len__(self):

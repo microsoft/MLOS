@@ -26,7 +26,7 @@ class CompositeDimension(Dimension):
             for chunk in chunks:
                 self._interval_tree.add(chunk)
 
-    def __str__(self):
+    def __repr__(self):
         return f"{self.name}: " + " UNION ".join(chunk.to_string(include_name=False) for chunk in self.enumerate_chunks())
 
     def copy(self):
