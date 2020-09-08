@@ -58,7 +58,7 @@ git clone https://github.com/microsoft/MLOS.git
 
 Docker is used for certain portions of the end-to-end examples and as a convient way to setup the build/dev/test environments.
 
-> If you are starting with the Python only setup, you can skip this step for now if you wish.
+> If you are starting with the [Python only setup](#install-python-on-linux), you can skip this step for now if you wish.
 
 Please see the official Docker install documenation for distribution specific documentation. The Ubuntu docs are [here](https://docs.docker.com/engine/install/ubuntu/).
 
