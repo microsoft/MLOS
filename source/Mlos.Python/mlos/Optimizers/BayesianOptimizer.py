@@ -74,7 +74,9 @@ class BayesianOptimizer(OptimizerInterface):
         assert optimizer_config in BayesianOptimizerConfig.CONFIG_SPACE, "Invalid config."
         self.optimizer_config = optimizer_config
 
-        joint_feature_space = SimpleHypergrid('joint_feature_space', [*self.optimization_problem.parameter_space.dimensions, *self.optimization_problem.context_space.dimensions])
+        joint_feature_space = SimpleHypergrid('joint_feature_space',
+                                              [*self.optimization_problem.parameter_space.dimensions,
+                                               *self.optimization_problem.context_space.dimensions])
 
         # Now let's put together the surrogate model.
         #
