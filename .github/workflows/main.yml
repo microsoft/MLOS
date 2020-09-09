@@ -94,10 +94,10 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install --upgrade wheel
         python -m pip install --upgrade pyyaml
-    - name: Generate main site from markdown using hugo
-      run: make -C website hugo-site
     - name: Generate Python API docs using sphinx
       run: make -C website sphinx-site
+    - name: Generate main site from markdown using hugo
+      run: make -C website hugo-site
     - name: Test the links in the output site
       run: make -C website link-check
     - name: Deploy to GitHub pages
