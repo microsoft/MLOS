@@ -2,68 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from abc import ABC, abstractmethod
-import random
-import pandas as pd
-
 from mlos.Exceptions import PointOutOfDomainException
 from mlos.Spaces.Dimensions.Dimension import Dimension
+from mlos.Spaces.Hypergrid import Hypergrid
 from mlos.Spaces.Point import Point
-
-
-class Hypergrid(ABC):
-
-    def __init__(self, name=None, random_state=None):
-        self.name = name
-        if random_state is None:
-            random_state = random.Random()
-        self._random_state = random_state
-
-    @abstractmethod
-    def __contains__(self, item):
-        raise NotImplementedError("All subclasses must implement this.")
-
-    @abstractmethod
-    def __getitem__(self, item):
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def random_state(self):
-        return self._random_state
-
-    @random_state.setter
-    @abstractmethod
-    def random_state(self, value):
-        raise NotImplementedError("This has to be implemented in all derived classes to set random_state on individual dimensions.")
-
-    @property
-    @abstractmethod
-    def dimensions(self):
-        raise NotImplementedError("All subclasses must implement this.")
-
-    @abstractmethod
-    def get_dimensions_for_point(self, point, external_dimensions=True):
-        raise NotImplementedError("All subclasses must implement this.")
-
-    @abstractmethod
-    def random(self, point=None):
-        raise NotImplementedError("All subclasses must implement this.")
-
-    def random_dataframe(self, num_samples):
-        config_dicts = [
-            {dim_name: value for dim_name, value in self.random()}
-            for _ in range(num_samples)
-        ]
-        return pd.DataFrame(config_dicts)
-
-    @abstractmethod
-    def join(self, subgrid, on_external_dimension: Dimension):
-        raise NotImplementedError("All subclasses must implement this.")
-
-    @abstractmethod
-    def is_hierarchical(self):
-        raise NotImplementedError("All subclasses must implement this.")
 
 
 class SimpleHypergrid(Hypergrid):
@@ -72,7 +14,7 @@ class SimpleHypergrid(Hypergrid):
     Can be flat or hierarchical, depending if any join operations were performed.
 
     """
-    class GuestSubgrid:
+    class JoinedSubgrid:
         """ Allows a subgrid to be joined on a dimension that's not in that subgrid.
 
         Think how in SQL you can do:
@@ -80,11 +22,22 @@ class SimpleHypergrid(Hypergrid):
         The JOIN predicate does not reference any column in Employer so we end up with a cross product of all John's with
         all employers.
 
-        That's kinda the idea here. We want to join a subgrid on an arbitrary predicate expressed by that external_pivot_dimension.
+        That's kinda the idea here. We want to join a subgrid on an arbitrary predicate expressed by that join_dimension.
         """
-        def __init__(self, subgrid, external_pivot_dimension):
+        def __init__(self, subgrid, join_dimension):
             self.subgrid = subgrid
-            self.external_pivot_dimension = external_pivot_dimension
+            self.join_dimension = join_dimension
+
+        def to_string(self, indent=0):
+            """ Returns it's own string representation.
+
+            :param indent:
+            :return:
+            """
+            indent_str = ' ' * indent
+            return f"\n{indent_str}IF {self.join_dimension.name} IN {self.join_dimension.to_string(include_name=False)} THEN (" \
+                   f"\n{self.subgrid.to_string(indent=indent+2)}" \
+                   f"\n{indent_str})"
 
     def __init__(self, name, dimensions=None, random_state=None):
         Hypergrid.__init__(self, name=name, random_state=random_state)
@@ -99,7 +52,7 @@ class SimpleHypergrid(Hypergrid):
 
         # maps a pivot dimension name to a set of guest subgrids that are joined on that external dimension
         #
-        self.guest_subgrids_by_pivot_dimension = dict()
+        self.joined_subgrids_by_pivot_dimension = dict()
 
         # maps a subgrid name to the subgrid
         #
@@ -128,33 +81,60 @@ class SimpleHypergrid(Hypergrid):
         for _, subgrid in self.subgrids_by_name.items():
             subgrid.random_state = self.random_state
 
-    def __getitem__(self, dimension_name):
-        subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(dimension_name)
+    def __getitem__(self, dimension_or_subgrid_name):
+        subgrid_name, name_without_subgrid_name = Dimension.split_dimension_name(dimension_or_subgrid_name)
         if subgrid_name is None:
-            return self.dimensions_dict.get(dimension_name, None)
+            if name_without_subgrid_name in self.dimensions_dict.keys():
+                return self.dimensions_dict[dimension_or_subgrid_name]
+            if name_without_subgrid_name in self.subgrids_by_name.keys():
+                return self.subgrids_by_name[name_without_subgrid_name]
+            raise KeyError(f"{dimension_or_subgrid_name} does not match any dimension names nor any subgrid names.")
         subgrid = self.subgrids_by_name[subgrid_name]
-        return subgrid[dimension_name_without_subgrid_name]
+        return subgrid[name_without_subgrid_name]
 
+    def get(self, dimension_or_subgrid_name, default=None):
+        try:
+            return self[dimension_or_subgrid_name]
+        except KeyError:
+            return default
 
     def __repr__(self):
-        ret = [f"{self.name}"]
-        for dimension in self.dimensions:
-            ret.append(str(dimension))
-        return "\n".join(ret)
+        return f"{self.to_string(indent=2)}"
+
+    def to_string(self, indent=0):
+        indent_str = ' ' * indent
+        dimensions_indent_str = ' ' * (indent+2)
+        root_grid_header = f"{indent_str}Name: {self.name}\n" \
+                           f"{indent_str}Dimensions:\n"
+        root_dimension_strings = []
+        for dimension in self._dimensions:
+            root_dimension_strings.append(f"{dimensions_indent_str}{dimension}")
+        root_grid_string = root_grid_header + "\n".join(root_dimension_strings)
+
+        if self.is_hierarchical():
+            root_grid_string += "\n"
+
+        subgrid_strings = []
+        for _, joined_subgrids in self.joined_subgrids_by_pivot_dimension.items():
+            for joined_subgrid in joined_subgrids:
+                subgrid_strings.append(joined_subgrid.to_string(indent=indent))
+        subgrid_string = "\n".join(subgrid_strings)
+        return root_grid_string + subgrid_string
 
     def add_subgrid_on_external_dimension(self, other_hypergrid: Hypergrid, external_dimension: Dimension):
         assert external_dimension.name in self.dimensions_dict, f"{self.name} does not contain dimension {external_dimension.name}"
+        assert other_hypergrid.name not in self.dimensions_dict.keys(), f"{other_hypergrid.name} collides with a dimension name."
         if not self[external_dimension.name].intersects(external_dimension):
             # They don't intersect so nothing to do
             return
 
-        guest_subgrids_joined_on_dimension = self.guest_subgrids_by_pivot_dimension.get(external_dimension.name, set())
+        guest_subgrids_joined_on_dimension = self.joined_subgrids_by_pivot_dimension.get(external_dimension.name, set())
         if any(guest_subgrid.subgrid.name == other_hypergrid.name for guest_subgrid in guest_subgrids_joined_on_dimension):
             raise RuntimeError(f"Subgrid {other_hypergrid.name} already joined to hypergrid {self.name} along the dimension {external_dimension.name}.")
 
         other_hypergrid.random_state = self.random_state
-        guest_subgrids_joined_on_dimension.add(SimpleHypergrid.GuestSubgrid(subgrid=other_hypergrid, external_pivot_dimension=external_dimension))
-        self.guest_subgrids_by_pivot_dimension[external_dimension.name] = guest_subgrids_joined_on_dimension
+        guest_subgrids_joined_on_dimension.add(SimpleHypergrid.JoinedSubgrid(subgrid=other_hypergrid, join_dimension=external_dimension))
+        self.joined_subgrids_by_pivot_dimension[external_dimension.name] = guest_subgrids_joined_on_dimension
         self.subgrids_by_name[other_hypergrid.name] = other_hypergrid
 
     def __contains__(self, item):
@@ -169,11 +149,16 @@ class SimpleHypergrid(Hypergrid):
         :param on_external_dimension:
         :return:
         """
+        if subgrid is None:
+            return self
         assert on_external_dimension is not None
 
+        if subgrid.name in self.dimensions_dict.keys():
+            raise ValueError(f"{subgrid.name} collides with a dimension name.")
+
         external_dimension = on_external_dimension
-        pivot_dimension_name = external_dimension.name
-        subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(pivot_dimension_name)
+        join_dimension_name = external_dimension.name
+        subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(join_dimension_name)
         if subgrid_name is None:
             self.add_subgrid_on_external_dimension(other_hypergrid=subgrid, external_dimension=external_dimension)
         else:
@@ -206,12 +191,12 @@ class SimpleHypergrid(Hypergrid):
         :return:
         """
 
-        if not all(point[dimension.name] is not None and point[dimension.name] in dimension for dimension in self._dimensions):
+        if not all(point.get(dimension.name) is not None and point.get(dimension.name) in dimension for dimension in self._dimensions):
             return False
 
-        for external_dimension_name, guest_subgrids_joined_on_dimension in self.guest_subgrids_by_pivot_dimension.items():
+        for external_dimension_name, guest_subgrids_joined_on_dimension in self.joined_subgrids_by_pivot_dimension.items():
             for guest_subgrid in guest_subgrids_joined_on_dimension:
-                if point[external_dimension_name] in guest_subgrid.external_pivot_dimension:
+                if point[external_dimension_name] in guest_subgrid.join_dimension:
                     # We need to check if the sub_point belongs to the sub_grid
                     #
                     subgrid = guest_subgrid.subgrid
@@ -251,11 +236,11 @@ class SimpleHypergrid(Hypergrid):
             if dimension.name not in point:
                 point[dimension.name] = dimension.random()
 
-        for external_dimension_name, guest_subgrids_joined_on_dimension in self.guest_subgrids_by_pivot_dimension.items():
-            for guest_subgrid in guest_subgrids_joined_on_dimension:
-                if point[external_dimension_name] in guest_subgrid.external_pivot_dimension:
-                    sub_point = guest_subgrid.subgrid.random()
-                    point[guest_subgrid.subgrid.name] = sub_point
+        for external_dimension_name, guest_subgrids_joined_on_dimension in self.joined_subgrids_by_pivot_dimension.items():
+            for joined_subgrid in guest_subgrids_joined_on_dimension:
+                if point[external_dimension_name] in joined_subgrid.join_dimension:
+                    sub_point = joined_subgrid.subgrid.random()
+                    point[joined_subgrid.subgrid.name] = sub_point
 
         return point
 
@@ -275,9 +260,10 @@ class SimpleHypergrid(Hypergrid):
     def root_dimensions(self):
         return self._dimensions
 
-    def get_dimensions_for_point(self, point, external_dimensions=True):
+    def get_dimensions_for_point(self, point, return_join_dimensions=True):
         """ Returns dimensions that the given point belongs to.
-        For pivot dimensions, it returns the guest_subgrid.external_pivot_dimension if external_dimensions == True,
+
+        For join dimensions, it can return the joined_subgrid.join_dimension if return_join_dimensions == True,
         else it returns the original dimension.
 
         In a hierarchical hypergrid, coordiantes of a point in the root hypergrid determine which of the subgrids will be 'activated' (meaningful). For example
@@ -294,16 +280,16 @@ class SimpleHypergrid(Hypergrid):
         dimensions_by_name = {dimension.name: dimension for dimension in self._dimensions}
         ordered_dimension_names = [dimension.name for dimension in self._dimensions]
 
-        for external_dimension_name, guest_subgrids_joined_on_dimension in self.guest_subgrids_by_pivot_dimension.items():
-            for guest_subgrid in guest_subgrids_joined_on_dimension:
-                if point[external_dimension_name] in guest_subgrid.external_pivot_dimension:
-                    # We return this narrower pivot dimension, since point[external_dimension_name] has
-                    # to belong to the external_pivot_dimension for all of the subgrid dimensions to make sense.
+        for external_dimension_name, guest_subgrids_joined_on_dimension in self.joined_subgrids_by_pivot_dimension.items():
+            for joined_subgrid in guest_subgrids_joined_on_dimension:
+                if point[external_dimension_name] in joined_subgrid.join_dimension:
+                    # We return this narrower join dimension, since point[join_dimension_name] has
+                    # to belong to the join_dimension for all of the subgrid dimensions to make sense.
                     #
-                    if external_dimensions:
-                        dimensions_by_name[external_dimension_name] = guest_subgrid.external_pivot_dimension
-                    subgrid = guest_subgrid.subgrid
-                    for dimension in subgrid.get_dimensions_for_point(point[subgrid.name], external_dimensions=external_dimensions):
+                    if return_join_dimensions:
+                        dimensions_by_name[external_dimension_name] = joined_subgrid.join_dimension
+                    subgrid = joined_subgrid.subgrid
+                    for dimension in subgrid.get_dimensions_for_point(point[subgrid.name], return_join_dimensions=return_join_dimensions):
                         dimension = dimension.copy()
                         dimension.name = f"{subgrid.name}.{dimension.name}"
                         dimensions_by_name[dimension.name] = dimension

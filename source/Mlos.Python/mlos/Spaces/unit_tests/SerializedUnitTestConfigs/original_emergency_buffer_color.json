@@ -1,0 +1,15 @@
+{
+  "ObjectType": "SimpleHypergrid",
+  "Name": "emergency_buffer_color",
+  "Dimensions": [
+    {
+      "ObjectType": "CategoricalDimension",
+      "Name": "color",
+      "Values": [
+        "Maroon",
+        "Crimson",
+        "Tanager"
+      ]
+    }
+  ]
+}

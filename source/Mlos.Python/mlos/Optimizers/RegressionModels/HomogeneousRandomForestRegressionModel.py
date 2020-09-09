@@ -59,7 +59,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
         self.bootstrap = bootstrap
 
         assert regressor_implementation == DecisionTreeRegressionModel.__name__
-        self.decision_tree_regression_model_config = DecisionTreeRegressionModelConfig.create_from_config_point(decision_tree_regression_model_config)
+        self.decision_tree_regression_model_config = decision_tree_regression_model_config
 
     @classmethod
     def contains(cls, config): # pylint: disable=unused-argument
@@ -182,7 +182,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         :return:
         """
         random_point = original_space.random()
-        dimensions_for_point = original_space.get_dimensions_for_point(random_point, external_dimensions=False)
+        dimensions_for_point = original_space.get_dimensions_for_point(random_point, return_join_dimensions=False)
         selected_dimensions = random.sample(dimensions_for_point, min(len(dimensions_for_point), max_num_dimensions))
         flat_dimensions = []
         for dimension in selected_dimensions:

@@ -16,7 +16,7 @@ class TestHierarchicalHypergrid3(unittest.TestCase):
             * if yes - drop the prefix and call dimension_subgrid.join(subgrid, on_external_dimension)
             * otherwise we are joining here so:
                 * if not dimension.intersects(self[dimension.name]): return self
-                * self.guest_subgrids_by_pivot_dimension[dimension.name] = GuestHypergrid(dimension, subgrid)
+                * self.joined_subgrids_by_pivot_dimension[dimension.name] = JoinedHypergrid(dimension, subgrid)
 
     * Randomly generating points from the supergrid should generate points from the newly joined subgrid
     * Point containment should work
