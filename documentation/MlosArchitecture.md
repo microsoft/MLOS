@@ -10,17 +10,17 @@ This document provides a brief overview of the MLOS architecture for supporting 
     - [Principles](#principles)
     - [Workflows](#workflows)
   - [Architecture Diagram](#architecture-diagram)
-    - [Main Components](#main-components)
+    - [Main components](#main-components)
     - [Shared Memory Regions](#shared-memory-regions)
-    - [Target process](#target-process)
+    - [Target Process](#target-process)
       - [Mlos.Core](#mloscore)
       - [Shared Channel](#shared-channel)
     - [Mlos.Agent](#mlosagent)
       - [Mlos.NetCore](#mlosnetcore)
-      - [Settings Registry Assemblies](#settings-registry-assemblies)
+      - [Settings registry assemblies](#settings-registry-assemblies)
       - [Grpc Server](#grpc-server)
-      - [Experiment Management](#experiment-management)
-  - [Implementation Details](#implementation-Details)
+      - [Experiment management](#experiment-management)
+  - [Implementation details](#implementation-details)
 
 <!-- /code_chunk_output -->
 
@@ -73,7 +73,7 @@ MLOS workflows take roughly two basic forms:
 
 ## Architecture Diagram
 
-<img src="./images/MlosArchitecture.svg" />
+<img src="./images/MLOS_architecture.svg" />
 
 ### Main components
 
