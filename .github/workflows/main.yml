@@ -67,6 +67,13 @@ jobs:
         # so we instruct git-diff to ignore those when considering changes.
         git --no-pager diff --ignore-cr-at-eol --exit-code
 
+  # Check in-repo markdown links
+  markdown-link-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: gaurav-nelson/github-action-markdown-link-check@v1
+
   build-publish-website:
     name: Build and publish website
     runs-on: ubuntu-20.04
