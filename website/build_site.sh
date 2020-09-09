@@ -47,7 +47,6 @@ for f in content/notebooks/*.md; do
     base=$(basename "$f" '.md') # removes .md from file name
     sed -i "s/FILENAME/$base/g" "$f"
 done
-#sed -i 's/FILENAME\.ipynb/BayesianOptimization\.ipynb/g' content/notebooks/*.md
 
 # Make some top level files available in the site.
 cp ../LICENSE.txt content/
