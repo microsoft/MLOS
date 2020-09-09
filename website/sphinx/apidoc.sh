@@ -18,7 +18,8 @@ pythonCmd=$(getPythonCmd)
 
 echo "Installing dependencies for generating Python API docs"
 
-$pythonCmd -m pip install sphinx sphinx_rtd_theme numpydoc
+$pythonCmd -m pip install -e $MLOS_ROOT/source/Mlos.Python/
+$pythonCmd -m pip install sphinx sphinx_rtd_theme numpydoc matplotlib
 
 echo "Generating Python API rst files"
 
