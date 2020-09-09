@@ -73,6 +73,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        - folder-path: 'documentation, build, source, test, scripts'
+        - file-path: './*.md'
 
   build-publish-website:
     name: Build and publish website
