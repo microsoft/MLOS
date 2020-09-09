@@ -2,7 +2,7 @@
 # source code and repo markdown docs.
 
 .PHONY:
-all: sphinx-site hugo-site test
+all: public/python_api public/index.html test
 
 .PHONY:
 .NOTPARALLEL:
