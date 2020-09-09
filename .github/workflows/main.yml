@@ -75,7 +75,7 @@ jobs:
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         folder-path: './documentation, ./build, ./source, ./test, ./scripts'
-        file-path: './*.md, ./LICENSE'
+        file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md, ./LICENSE'
 
   build-publish-website:
     name: Build and publish website
