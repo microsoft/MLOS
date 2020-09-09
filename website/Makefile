@@ -9,16 +9,25 @@ all: hugo-site sphinx-site test
 test: link-check
 
 .PHONY:
+clean: clean-hugo-site clean-sphinx-site
+
+.PHONY:
 clean-hugo-site:
 	rm -rf content/*.md || true
+	rm -rf content/*.md.bak || true
 	rm -rf content/*.txt || true
+	rm -rf content/build
 	rm -rf content/documentation
+	rm -rf content/scripts
+	rm -rf content/source
+	rm -rf content/test
 	rm -rf content/notebooks
 	rm -rf public
 
 .PHONY:
 hugo-site: clean-hugo-site
 	./build_site.sh
+	#find content/ -name '*.md.bak' -delete
 	hugo
 
 .PHONY:

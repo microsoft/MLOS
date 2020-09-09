@@ -22,10 +22,6 @@ $pythonCmd -m pip install \
     $("$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
 $pythonCmd -m pip install jupyter nbconvert
 
-# Make all of the top-level documentation available in the site content.
-mkdir -p content
-cp -r "$MLOS_ROOT/documentation" content/
-
 # execute and render the notebooks to html
 # downgrade html output because hugo doesn't like raw html
 mkdir -p content/notebooks
@@ -50,19 +46,39 @@ for f in content/notebooks/*.md; do
     base=$(basename "$f" '.md') # removes .md from file name
     sed -i "s/FILENAME/$base/g" "$f"
 done
-sed -i 's/FILENAME\.ipynb/BayesianOptimization\.ipynb/g' content/notebooks/*.md
+#sed -i 's/FILENAME\.ipynb/BayesianOptimization\.ipynb/g' content/notebooks/*.md
 
-# Make top level md files available in the site.
+# Make some top level files available in the site.
 cp ../LICENSE.txt content/
-cp ../*.md content/
-# But make a few of them the directory level index.
-mv content/README.md content/_index.md
-mv content/documentation/README.md content/documentation/_index.md
+# Make all *.md files from the repo available in the content tree using the same layout.
+(cd $MLOS_ROOT; \
+    find \
+        *.md \
+        build/ \
+        documentation/ \
+        scripts/ \
+        source/ \
+        test/ \
+        -name '*.md' \
+) | while read md_path; do
+    md_dir=$(dirname "$md_path")
+    md_file=$(basename "$md_path")
+    mkdir -p "content/$md_dir"
+    if [ "$md_file" == 'README.md' ]; then
+        # Except for README files - they should be created like directory indexes.
+        # NOTE: Each directory that includes an .md should have one of these.
+        cp "$MLOS_ROOT/$md_dir/README.md" "content/$md_dir/_index.md"
+    else
+        cp "$MLOS_ROOT/$md_path" "content/$md_dir/"
+    fi
+done
+
+# Make all of the top-level documentation available in the site content.
+cp -r "$MLOS_ROOT/documentation/images" content/documentation/
 
 # replace markdown links
 # this allows the original files to link on github directly
 # while also rendering properly in hugo (which requires no .md in the links)
-# TODO: FIXME:
 for content_filepath in $(find content/ -type f -name '*.md'); do
     # Skip some file that are handled manually and are revision controlled.
     if [ "$content_filepath" == 'content/menu/index.md' ]; then
@@ -71,15 +87,21 @@ for content_filepath in $(find content/ -type f -name '*.md'); do
 
     base_filepath=$(echo "$content_filepath" | sed 's|^content/||')
     parent_path=$(dirname "$base_filepath")
+
+    # 1. replace a special fake anchor with a link to the main github repo site
+    # (this allows browsing back to the main published source from the website)
+    # 2. convert relative paths to be relative to the website root instead
+    # 3. strip the .md file ending to replace it with a trailing slash
+    # (to be consistent with the hugo md -> html conversion)
+
+    # Also keep a backup for comparison/debugging purposes.
+
     sed -i.bak -r \
         -e "s|\]\(([./]*[^:#)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}/\1)|g" \
         -e "s|\]\(([./]*[^:)]+)\)|](/MLOS/${parent_path}/\1)|g" \
         -e "s|\]\(([./]*[^:#)]+)\.md(#[^)]+)?\)|](\1/\2)|g" \
         "$content_filepath"
 done
-# FIXME:
-#sed -i 's/\.md/\//g' content/*.md
-#sed -i 's/\.md/\//g' content/documentation/*.md
 
 # Get a theme for hugo
 if [ ! -d "themes/book" ]; then
