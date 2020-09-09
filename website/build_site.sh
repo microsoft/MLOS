@@ -108,3 +108,10 @@ done
 if [ ! -d "themes/book" ]; then
     git clone --depth 1 --branch v8 https://github.com/alex-shpak/hugo-book.git themes/book/
 fi
+
+if ! [ -x /usr/bin/hugo ]; then
+    set -x
+    sudo apt-get update >/dev/null
+    sudo apt-get -y install hugo
+    set +x
+fi
