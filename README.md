@@ -116,7 +116,7 @@ python -m ipykernel install --user --name=mlos_environment
 jupyter-notebook --notebook-dir=MLOS/source/Mlos.Notebooks
 ```
 
-Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](./source/Mlos.Notebooks/BayesianOptimization.ipynb).
+Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](./source/Mlos.Notebooks/BayesianOptimization.ipynb#mlos-github-tree-view).
 
 ## Full Build (C# and C++ components)
 
