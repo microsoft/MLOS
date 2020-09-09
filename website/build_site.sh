@@ -18,6 +18,7 @@ pythonCmd=$(getPythonCmd)
 
 # Make sure we have all the requirements for generating notebooks.
 $pythonCmd -m pip install -e "$MLOS_ROOT/source/Mlos.Python/"
+$pythonCmd -m pip install pyyaml
 $pythonCmd -m pip install \
     $("$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
 $pythonCmd -m pip install jupyter nbconvert
