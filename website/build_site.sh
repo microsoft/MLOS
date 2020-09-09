@@ -44,13 +44,8 @@ for nb in $notebooks; do
 #        --ExecutePreprocessor.timeout=600 \
 done
 
-# nbconvert and hugo disagree about paths
-# this should probably be done via the template
-for nb in $notebooks; do
-    sed -i "s/${nb}_files/\.\.\/${nb}_files/g" "content/notebooks/${nb}.md"
-done
-
 # place links to github in notebook files
+# (builds off the nbconvert template)
 for f in content/notebooks/*.md; do
     base=$(basename "$f" '.md') # removes .md from file name
     sed -i "s/FILENAME/$base/g" "$f"
@@ -69,11 +64,17 @@ mv content/documentation/README.md content/documentation/_index.md
 # while also rendering properly in hugo (which requires no .md in the links)
 # TODO: FIXME:
 for content_filepath in $(find content/ -type f -name '*.md'); do
+    # Skip some file that are handled manually and are revision controlled.
+    if [ "$content_filepath" == 'content/menu/index.md' ]; then
+        continue
+    fi
+
     base_filepath=$(echo "$content_filepath" | sed 's|^content/||')
     parent_path=$(dirname "$base_filepath")
-    sed -i -r \
-        -e "s|\]\(./([^)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}\1)|g" \
-        -e "s|\]\(./([^)]+)|](/MLOS/${parent_path}/\1)|" \
+    sed -i.bak -r \
+        -e "s|\]\(([./]*[^:#)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}/\1)|g" \
+        -e "s|\]\(([./]*[^:)]+)\)|](/MLOS/${parent_path}/\1)|g" \
+        -e "s|\]\(([./]*[^:#)]+)\.md(#[^)]+)?\)|](\1/\2)|g" \
         "$content_filepath"
 done
 # FIXME:
