@@ -200,12 +200,12 @@ Opening a `*.sln` file in the `source/` directory with Visual Studio 2019 should
 2) Launch Visual Studio for a given solution:
 
     ```shell
-    devenv MLOS.NetCore.sln
+    devenv Mlos.NetCore.sln
     ```
 
     Alternatively, you can launch `devenv` for a project and manually add its dependencies to the solution that Visual Studio creates.
     For instance:
 
     ```shell
-    devenv MLOS.Core.vcxproj
+    devenv Mlos.Core.vcxproj
     ```

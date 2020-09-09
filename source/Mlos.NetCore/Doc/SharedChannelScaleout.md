@@ -6,10 +6,10 @@ writers operating on the same channel instance.
 
 ## Benchmark
 
-The benchmark is implemented in *MLOS.NetCore.Benchmark* project
+The benchmark is implemented in *Mlos.NetCore.Benchmark* project
 
 Benchmark:
-> $(MLOSROOT)\MLOS\out\obj\Source\MLOS.NetCore.Benchmark\obj\amd64\MLOS.NetCore.Benchmark.exe -i --filter SharedChannelReaderScaleOutBenchmarks
+> $(MLOSROOT)\MLOS\out\obj\Source\Mlos.NetCore.Benchmark\obj\amd64\Mlos.NetCore.Benchmark.exe -i --filter SharedChannelReaderScaleOutBenchmarks
 
 ## Results
 

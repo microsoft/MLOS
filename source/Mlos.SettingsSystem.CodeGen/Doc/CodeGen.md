@@ -4,7 +4,7 @@
 
 Document describes internal _CodeGen_ implementation.
 
-# Mlos goals
+# MLOS goals
 
 Provide an ability to expose internal application settings, telemetry, and events to an external agent.
 Codegen responsibility is to generate a set of classes and helper methods to exchange the messages and share (read and update) config structures residing in the shared memory.
@@ -73,15 +73,15 @@ _CodeWriters_ results are combined into single or multiple file; each _CodeWrite
 
 ### Namespaces
 
-- MLOS.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
+- `Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters`
 
     - CodeGens in this namespace write Cpp struct and proxy view defintions.
 
-- MLOS.SettingsSystem.CodeGen.CodeWriters.PythonCodeWriters
+- `Mlos.SettingsSystem.CodeGen.CodeWriters.PythonCodeWriters`
 
     - Creates python bindings.
 
-- MLOS.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
+- `Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters`
 
     - Creates set of classes and functions that enables exchange generated objects.
     This includes helper classes returning type index, serialization and deserialization handlers.
@@ -89,12 +89,13 @@ _CodeWriters_ results are combined into single or multiple file; each _CodeWrite
 ## Basic structure generation
 
 ### CppObjectCodeWriter
+
 Creates a regular Cpp structure based on CSharp type.
 
 From the following CSharp code:
 
 ```CSharp
-namespace MLOS.Core.Channel
+namespace Mlos.Core.Channel
 {
     /// <summary>
     /// Shared circular buffer channel settings.
@@ -145,6 +146,7 @@ Codegen is using CSharp namespaces.
 
 
 ### CppProxyCodeWriter
+
 Creates a view to a Cpp structure. To be more precise, creates a view to serialized form of the structure.
 Allows to read structure fields after they are serialized in the exchange buffer.
 
