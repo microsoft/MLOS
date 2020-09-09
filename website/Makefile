@@ -54,6 +54,7 @@ sphinx/_build/html:
 
 .PHONY:
 copy-python-apis: sphinx/_build/html
+	mkdir -p public
 	rm -rf public/python_api
 	cp -a sphinx/_build/html public/python_api
 
