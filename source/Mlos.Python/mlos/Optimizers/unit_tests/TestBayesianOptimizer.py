@@ -218,13 +218,21 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         num_restarts = 2
         for restart_num in range(num_restarts):
+
+            optimizer_config = BayesianOptimizerConfig.DEFAULT
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
+            optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.min_samples_to_fit = 10
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 2
+
             bayesian_optimizer = BayesianOptimizer(
                 optimization_problem=optimization_problem,
-                optimizer_config=BayesianOptimizerConfig.DEFAULT,
+                optimizer_config=optimizer_config,
                 logger=self.logger
             )
 
-            num_guided_samples = 200
+            num_guided_samples = 50
             for i in range(num_guided_samples):
                 suggested_params = bayesian_optimizer.suggest()
                 y = MultilevelQuadratic.evaluate(suggested_params)

@@ -27,7 +27,16 @@ class CompositeDimension(Dimension):
                 self._interval_tree.add(chunk)
 
     def __repr__(self):
-        return f"{self.name}: " + " UNION ".join(chunk.to_string(include_name=False) for chunk in self.enumerate_chunks())
+        return self.to_string(include_name=True)
+
+    def __str__(self):
+        return self.to_string(include_name=True)
+
+    def to_string(self, include_name=True):
+        chunks_string = " UNION ".join(chunk.to_string(include_name=False) for chunk in self.enumerate_chunks())
+        if include_name:
+            return f"{self.name}: {chunks_string}"
+        return chunks_string
 
     def copy(self):
         copy = CompositeDimension(
@@ -116,6 +125,9 @@ class CompositeDimension(Dimension):
 
     def equals(self, other):
         raise NotImplementedError("Did you remember to import DimensionCalulator?")
+
+    def random(self):
+        raise NotImplementedError("TODO")
 
 
 def get_next_chunk(chunk_enumerator):

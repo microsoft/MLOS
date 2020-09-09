@@ -56,8 +56,8 @@ class HypergridAdapter(Hypergrid):
     def dimensions(self):
         return self.target.dimensions
 
-    def get_dimensions_for_point(self, point, external_dimensions=True):
-        return self.target.get_dimensions_for_point(point, external_dimensions)
+    def get_dimensions_for_point(self, point, return_join_dimensions=True):
+        return self.target.get_dimensions_for_point(point, return_join_dimensions)
 
     def random(self, point=None):
         adaptee_random = self.adaptee.random(point=point)

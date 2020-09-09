@@ -4,8 +4,8 @@
 #
 from numbers import Number
 
-from .Dimension import Dimension
-from .EmptyDimension import EmptyDimension
+from mlos.Spaces.Dimensions.Dimension import Dimension
+from mlos.Spaces.Dimensions.EmptyDimension import EmptyDimension
 
 
 class CategoricalDimension(Dimension):
@@ -22,7 +22,16 @@ class CategoricalDimension(Dimension):
         self.is_numeric = self._am_i_numeric()
 
     def __repr__(self):
-        return f"{self.name}: [{', '.join(str(value) for value in self.values[:min(3, len(self))])}{', ...' if len(self) > 3 else ''}]"
+        return self.to_string(include_name=True)
+
+    def __str__(self):
+        return self.to_string()
+
+    def to_string(self, include_name=True):
+        values_str = f"{{{', '.join(str(value) for value in self.values[:min(3, len(self))])}{', ...' if len(self) > 3 else ''}}}"
+        if include_name:
+            return f"{self.name}: {values_str}"
+        return values_str
 
     def copy(self):
         return CategoricalDimension(

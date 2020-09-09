@@ -90,7 +90,7 @@ class SklearnRidgeRegressionModelConfig(RegressionModelConfig):
             copy_x=_DEFAULT.copy_x,
             max_iter=_DEFAULT.max_iter,
             tol=_DEFAULT.tol,
-            random_state=_DEFAULT.random_state,
+            random_state=None,
             solver=_DEFAULT.solver
     ):
         """
