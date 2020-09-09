@@ -27,22 +27,40 @@ clean-hugo-site:
 .PHONY:
 hugo-site: clean-hugo-site
 	./build_site.sh
-	#find content/ -name '*.md.bak' -delete
+	find content/ -name '*.md.bak' -delete
 	hugo
+	# If the sphinx site was already built, just copy it over.
+	# This let's us run "make hugo-site link-check" a bit more quickly.
+	$(MAKE) public/python_api
+
+public/index.html:
+	$(MAKE) hugo-site
 
 .PHONY:
 clean-sphinx-site:
-	rm -rf python_api
 	rm -rf sphinx/_build
 	rm -rf sphinx/api
+	rm -rf public/python_api
 
+# Note: this is an expensive target.
 .PHONY:
 sphinx-site: clean-sphinx-site
 	sphinx/apidoc.sh
 	$(MAKE) -C sphinx
+	$(MAKE) copy-python-apis
+
+sphinx/_build/html:
+	$(MAKE) sphinx-site
+
+.PHONY:
+copy-python-apis: sphinx/_build/html
+	rm -rf public/python_api
 	cp -a sphinx/_build/html public/python_api
+
+public/python_api:
+	$(MAKE) copy-python-apis
 
 .PHONY:
 .NOTPARALLEL:
-link-check:
+link-check: public/index.html public/python_api
 	./test_site_links.sh

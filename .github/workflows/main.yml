@@ -87,6 +87,8 @@ jobs:
       run: make -C website hugo-site
     - name: Generate Python API docs using sphinx
       run: make -C website sphinx-site
+    - name: Test the links in the output site
+      run: make -C website link-check
     - name: Deploy to GitHub pages
       if: ${{ github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@3.5.9
