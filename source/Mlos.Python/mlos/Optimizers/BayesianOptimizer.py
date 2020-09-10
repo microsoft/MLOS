@@ -147,15 +147,15 @@ class BayesianOptimizer(OptimizerInterface):
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
     @trace()
-    def optimum(self, empirical, context=None, stay_focused=False):
+    def optimum(self, empirical=True, context=None, stay_focused=False):
         """Return current optimum of optimization problem.
 
         Parameters
         ----------
-        empirical : boolean
+        empirical : boolean, default=True
             Whether to return the best observed value so far (True) or optimize the current surrogate (False).
 
-        contest : DataFrame (default=None)
+        contest : DataFrame, default=None
             Context features to condition on when finding the default.
 
         stay_focused : boolean
@@ -183,7 +183,7 @@ class BayesianOptimizer(OptimizerInterface):
                 optimal_config_and_target[param_name] = params_for_best_objective[param_name]
 
         else:
-            params_for_best_objective = self.experiment_designer.numeric_optimizer.optimize(
+            params_for_best_objective = self.experiment_designer.numeric_optimizer.maximize(
                 target_function=self.experiment_designer.surrogate_model.predict, context=context)
             # FIXME we're lying here as we don't actually return the target because we're not evaluatings
             optimal_config_and_target = params_for_best_objective.to_dict()
