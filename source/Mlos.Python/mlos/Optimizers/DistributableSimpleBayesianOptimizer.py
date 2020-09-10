@@ -171,7 +171,7 @@ class DistributableSimpleBayesianOptimizer(SimpleBayesianOptimizer, Distributabl
         return super().predict(feature_values_pandas_frame=feature_values_pandas_frame, t=t)
 
     @remotely_executable()
-    def optimum(self, stay_focused=False):
+    def optimum(self, empirical=True, context=None, stay_focused=False): # pylint: disable=unused-argument
         return super().optimum(stay_focused=stay_focused)
 
     @remotely_executable()
