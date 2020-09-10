@@ -104,7 +104,9 @@ class OptimizationProblem:
 
         # Fit functions / surrogate models will be fed features consisting of both context and parameters.
         # Thus, the feature space is comprised of both context and parameters.
-        if set(parameter_space.root_dimensions).intersection(context.root_dimensions):
+        parameter_names = {parameter.name for parameter in parameter_space.root_dimensions}
+        context_names = [context.name for context in context_space.root_dimensions]
+        if parameter_names.intersection(context_names):
             raise ValueError("Parameter space and context space can't share dimensions.")
         self.feature_space = SimpleHypergrid(name='features',
                                              dimensions=[*parameter_space.dimensions, *context_space.dimensions])
