@@ -53,15 +53,19 @@ class RandomSearchOptimizer:
         self.config = optimizer_config
 
     @trace()
-    def suggest(self, context_values_dataframe=None):  # pylint: disable=unused-argument
-        """ Returns the next best configuration to try.
+    def maximize(self, target_function, context_values_dataframe=None):
+        """Maximize callable target function.
 
-        It does so by generating num_samples_per_iteration random configurations,
-        passing them through the utility function and selecting the configuration with
-        the highest utility value.
+        Parameters
+        ----------
+        target_function : callable
+            Function to maximize.
+        context_values_dataframe : DataFrame (default=None)
+            Context for optimization.
 
-        TODO: make it capable of consuming the context values
-        :return:
+        Returns
+        -------
+        position_of_optimum : Point
         """
         config_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.config.num_samples_per_iteration)
         if context_values_dataframe is not None:
@@ -73,9 +77,19 @@ class RandomSearchOptimizer:
             config_values_dataframe = config_values_dataframe.drop(columns='_join_key')
         else:
             feature_values_dataframe = config_values_dataframe
-        utility_function_values = self.utility_function(feature_values_dataframe.copy(deep=False))
-        num_utility_function_values = len(utility_function_values)
-        index_of_max_value = utility_function_values.argmax() if num_utility_function_values > 0 else 0
-        config_to_suggest = Point.from_dataframe(config_values_dataframe.iloc[[index_of_max_value]])
+        target_values = target_function(feature_values_dataframe.copy(deep=False))
+        num_target_values = len(target_values)
+        index_of_max_value = target_values.argmax() if num_target_values > 0 else 0
+        return Point.from_dataframe(config_values_dataframe.iloc[[index_of_max_value]])
+
+    @trace()
+    def suggest(self, context_values_dataframe=None):
+        """ Returns the next best configuration to try.
+
+        It does so by generating num_samples_per_iteration random configurations,
+        passing them through the utility function and selecting the configuration with
+        the highest utility value.
+        """
+        config_to_suggest = self.maximize(self.utility_function, context_values_dataframe=context_values_dataframe)
         self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
         return config_to_suggest

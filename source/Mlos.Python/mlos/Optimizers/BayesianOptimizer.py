@@ -147,23 +147,46 @@ class BayesianOptimizer(OptimizerInterface):
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
     @trace()
-    def optimum(self, stay_focused=False):
-        if self.optimization_problem.objectives[0].minimize:
-            index_of_best_target = self._target_values_df.idxmin()[0]
-        else:
-            index_of_best_target = self._target_values_df.idxmax()[0]
+    def optimum(self, empirical, context=None, stay_focused=False):
+        """Return current optimum of optimization problem.
+
+        Parameters
+        ----------
+        empirical : boolean
+            Whether to return the best observed value so far (True) or optimize the current surrogate (False).
+
+        contest : DataFrame (default=None)
+            Context features to condition on when finding the default.
+
+        stay_focused : boolean
+            Ignored.
+        """
         objective_name = self.optimization_problem.objectives[0].name
-        best_objective_value = self._target_values_df.loc[index_of_best_target][objective_name]
 
-        param_names = [dimension.name for dimension in self.optimization_problem.parameter_space.dimensions]
-        params_for_best_objective = self._feature_values_df.loc[index_of_best_target]
+        if empirical:
+            if context is not None:
+                raise ValueError("Empirical optimum with context not supported.")
 
-        optimal_config_and_target = {
-            objective_name: best_objective_value,
-        }
+            if self.optimization_problem.objectives[0].minimize:
+                index_of_best_target = self._target_values_df.idxmin()[0]
+            else:
+                index_of_best_target = self._target_values_df.idxmax()[0]
+            best_objective_value = self._target_values_df.loc[index_of_best_target][objective_name]
 
-        for param_name in param_names:
-            optimal_config_and_target[param_name] = params_for_best_objective[param_name]
+            param_names = [dimension.name for dimension in self.optimization_problem.parameter_space.dimensions]
+            params_for_best_objective = self._feature_values_df.loc[index_of_best_target]
+            optimal_config_and_target = {
+                objective_name: best_objective_value,
+            }
+
+            for param_name in param_names:
+                optimal_config_and_target[param_name] = params_for_best_objective[param_name]
+
+        else:
+            params_for_best_objective = self.experiment_designer.numeric_optimizer.optimize(
+                target_function=self.experiment_designer.surrogate_model.predict, context=context)
+            # FIXME we're lying here as we don't actually return the target because we're not evaluatings
+            optimal_config_and_target = params_for_best_objective.to_dict()
 
         return optimal_config_and_target
 
