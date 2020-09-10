@@ -108,10 +108,12 @@ jobs:
         BRANCH: gh-pages
         FOLDER: website/public
 
+  # FIXME: These timeouts are egregiously long right now.
+  # See Also: https://github.com/microsoft/MLOS/pull/66#issuecomment-690760863
   python-checks:
     name: Run Python checks
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 12
+    timeout-minutes: 90
     strategy:
       matrix:
         os: [windows-2019, ubuntu-20.04]
@@ -142,9 +144,9 @@ jobs:
       run: scripts/run-python-checks.sh
     - name: Run Python unit tests (Windows)
       if: startsWith(matrix.os, 'windows')
-      timeout-minutes: 8
+      timeout-minutes: 75
       run: scripts\run-python-tests.cmd
     - name: Run Python unit tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      timeout-minutes: 8
+      timeout-minutes: 75
       run: scripts/run-python-tests.sh
