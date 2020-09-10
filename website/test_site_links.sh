@@ -19,6 +19,16 @@ cd "$MLOS_ROOT/website"
 
 . "$MLOS_ROOT/scripts/util.sh"
 
+if ! [ -e public/python_api/index.html ]; then
+    echo "ERROR: The sphinx API docs have not yet been generated.  Please run 'make sphinx-site' first." >&2
+    exit 1
+fi
+
+if ! [ -e public/index.html ]; then
+    echo "ERROR: The public site has not yet been generated.  Please run 'make hugo-site' first." >&2
+    exit 1
+fi
+
 # Make sure we have the
 if ! [ -x /usr/bin/linklint ]; then
     echo "Missing linklint dependency" >&2
