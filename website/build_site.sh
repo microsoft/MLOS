@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-# A simple script to build the github IO pages out of
+# A simple script to build the flat html github IO pages out of our
+# in-repo markdown pages as well as the notebook examples.
 
 # be strict
 set -eu
