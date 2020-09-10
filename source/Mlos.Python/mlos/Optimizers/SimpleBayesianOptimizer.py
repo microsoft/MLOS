@@ -297,7 +297,7 @@ class SimpleBayesianOptimizer(OptimizerInterface):
 
         return local_parameter_importance
 
-    def optimum(self, stay_focused=False):
+    def optimum(self, empirical=True, context=None, stay_focused=False): # pylint: disable=unused-argument
         # TODO: add arguments to set context
         self._optimizer._space._bounds = self._full_feature_space_bounds
 

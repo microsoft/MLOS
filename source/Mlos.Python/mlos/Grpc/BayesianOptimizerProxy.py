@@ -99,7 +99,7 @@ class BayesianOptimizerProxy(OptimizerInterface):
         prediction.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
         return prediction
 
-    def optimum(self, stay_focused=False):  # pylint: disable=unused-argument,no-self-use
+    def optimum(self, empirical=True, context=None, stay_focused=False): # pylint: disable=unused-argument,no-self-use
         ...
 
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
