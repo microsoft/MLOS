@@ -22,7 +22,8 @@ $pythonCmd -m pip install -e "$MLOS_ROOT/source/Mlos.Python/"
 $pythonCmd -m pip install pyyaml
 $pythonCmd -m pip install \
     $("$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
-$pythonCmd -m pip install jupyter nbconvert
+# FIXME: nbconvert 6.0.1 had an error.
+$pythonCmd -m pip install jupyter nbconvert==5.6.1
 
 # execute and render the notebooks to html
 # downgrade html output because hugo doesn't like raw html
