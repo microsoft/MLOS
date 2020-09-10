@@ -5,6 +5,7 @@
 #
 import os
 import sys
+import warnings
 
 # This is the directory where the grpc outputs generated code.
 #
@@ -22,6 +23,6 @@ __all__ = [
 # Make sure there are no http_proxy environment variables set.
 # See Also: https://stackoverflow.com/a/57868784/10772564
 if os.environ.get('https_proxy'):
-    raise Warning("Use of https_proxy environment variable may cause issues with Grpc.")
+    warnings.warn("Use of https_proxy environment variable may cause issues with Grpc.")
 if os.environ.get('http_proxy'):
-    raise Warning("Use of http_proxy environment variable may cause issues with Grpc.")
+    warnings.warn("Use of http_proxy environment variable may cause issues with Grpc.")
