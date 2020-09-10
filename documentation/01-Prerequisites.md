@@ -52,6 +52,7 @@ Clone the repository:
 
 ```sh
 git clone https://github.com/microsoft/MLOS.git
+cd MLOS
 ```
 
 ### Linux Docker Install
@@ -210,6 +211,7 @@ Cross platform
 
 ```shell
 git clone https://github.com/microsoft/MLOS.git
+cd MLOS
 ```
 
 > See <https://git-scm.com/book/en/v2/Getting-Started-Installing> for help installing `git`, or use `choco install git` (see [below](#using-chocolatey) for more details about chocolatey).

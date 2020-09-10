@@ -75,6 +75,7 @@ First, download the MLOS code using git:
 
 ```shell
 git clone https://github.com/microsoft/MLOS.git
+cd MLOS
 ```
 
 For this simplified installation, it's recommended to use the [Anaconda python distribution](https://www.anaconda.com/products/individual).
