@@ -184,7 +184,8 @@ class BayesianOptimizer(OptimizerInterface):
 
         else:
             def target_function(config_values):
-                return self.experiment_designer.surrogate_model.predict(config_values).get_dataframe().predicted_value
+                sign = -1 if self.experiment_designer.optimization_problem.objective_functions[0].minimize else 1
+                return sign * self.experiment_designer.surrogate_model.predict(config_values).get_dataframe().predicted_value
             params_for_best_objective = self.experiment_designer.numeric_optimizer.maximize(
                 target_function=target_function, context_values_dataframe=context)
             # FIXME we're lying here as we don't actually return the target because we're not evaluatings
