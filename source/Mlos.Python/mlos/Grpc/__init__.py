@@ -18,3 +18,10 @@ __all__ = [
     "OptimizerService_pb2",
     "OptimizerService_pb2_grpc"
 ]
+
+# Make sure there are no http_proxy environment variables set.
+# See Also: https://stackoverflow.com/a/57868784/10772564
+if os.environ.get('https_proxy'):
+    del os.environ['https_proxy']
+if os.environ.get('http_proxy'):
+    del os.environ['http_proxy']
