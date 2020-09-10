@@ -111,7 +111,7 @@ jobs:
   python-checks:
     name: Run Python checks
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 12
+    timeout-minutes: 15
     strategy:
       matrix:
         os: [windows-2019, ubuntu-20.04]
@@ -142,9 +142,9 @@ jobs:
       run: scripts/run-python-checks.sh
     - name: Run Python unit tests (Windows)
       if: startsWith(matrix.os, 'windows')
-      timeout-minutes: 8
+      timeout-minutes: 12
       run: scripts\run-python-tests.cmd
     - name: Run Python unit tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      timeout-minutes: 8
+      timeout-minutes: 12
       run: scripts/run-python-tests.sh
