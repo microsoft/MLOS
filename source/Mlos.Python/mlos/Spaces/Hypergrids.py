@@ -67,7 +67,7 @@ class Hypergrid(ABC):
 
 
 class SimpleHypergrid(Hypergrid):
-    """ Models a space comprized of Continuous, Discrete, Ordinal and Categorical Dimensions.
+    """ Models a space comprised of Continuous, Discrete, Ordinal and Categorical Dimensions.
 
     Can be flat or hierarchical, depending if any join operations were performed.
 

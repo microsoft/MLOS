@@ -22,7 +22,7 @@ def objective_from_dict(objective_dict):
     return Objective(**objective_dict)
 
 class OptimizationProblem:
-    """ Models an instance of an optimization problem.
+    """Models an instance of an optimization problem.
 
     An instance of OptimizationProblem can be used to create a variety of optimizers and instantly enlighten them to
     what they are working with.
@@ -62,6 +62,22 @@ class OptimizationProblem:
                 * ram utilization
                 * etc
 
+    Parameters
+    ----------
+    parameter_space : Hypergrid
+        Space of input parameters to tune.
+    objective_space : Hypergrid
+        Output space of objective.
+    objectives : List[Objective]
+        List of objectives to optimize.
+    context_space : Hypergrid (default=None)
+        Additional context features that vary between instances but are not optimized over.
+
+    Attributes
+    ----------
+    feature_space : Hypergrid
+        Joint space of parameters and context.
+
     """
 
     # The dimensions that we inject to keep track of individual subspaces, but which are worthless
@@ -88,19 +104,9 @@ class OptimizationProblem:
 
         # Fit functions / surrogate models will be fed features consisting of both context and parameters.
         # Thus, the feature space is comprised of both context and parameters.
-        self.feature_space = SimpleHypergrid(
-            name="features",
-            dimensions=[
-                CategoricalDimension(name="contains_parameters", values=[True]),
-                CategoricalDimension(name="contains_context", values=[self.context_space is not None])
-            ]
-        ).join(
-            subgrid=self.parameter_space,
-            on_external_dimension=CategoricalDimension(name="contains_parameters", values=[True])
-        ).join(
-            subgrid=self.context_space,
-            on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
-        )
+        # FIXME this suffers from name collisions and needs mangling
+        self.feature_space = SimpleHypergrid(name='features',
+                                             dimensions=[*parameter_space.dimensions, *context_space.dimensions])
 
     def to_dict(self):
         return {

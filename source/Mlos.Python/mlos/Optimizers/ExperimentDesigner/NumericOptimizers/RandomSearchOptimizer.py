@@ -63,7 +63,6 @@ class RandomSearchOptimizer:
         TODO: make it capable of consuming the context values
         :return:
         """
-
         config_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.config.num_samples_per_iteration)
         if context_values_dataframe is not None:
             assert len(context_values_dataframe) == 1
