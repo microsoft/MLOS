@@ -183,8 +183,10 @@ class BayesianOptimizer(OptimizerInterface):
                 optimal_config_and_target[param_name] = params_for_best_objective[param_name]
 
         else:
+            def target_function(config_values):
+                return self.experiment_designer.surrogate_model.predict(config_values).get_dataframe().predicted_value
             params_for_best_objective = self.experiment_designer.numeric_optimizer.maximize(
-                target_function=self.experiment_designer.surrogate_model.predict, context=context)
+                target_function=target_function, context_values_dataframe=context)
             # FIXME we're lying here as we don't actually return the target because we're not evaluatings
             optimal_config_and_target = params_for_best_objective.to_dict()
 
