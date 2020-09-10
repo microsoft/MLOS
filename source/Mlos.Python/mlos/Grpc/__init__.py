@@ -22,6 +22,6 @@ __all__ = [
 # Make sure there are no http_proxy environment variables set.
 # See Also: https://stackoverflow.com/a/57868784/10772564
 if os.environ.get('https_proxy'):
-    del os.environ['https_proxy']
+    raise Warning("Use of https_proxy environment variable may cause issues with Grpc.")
 if os.environ.get('http_proxy'):
-    del os.environ['http_proxy']
+    raise Warning("Use of http_proxy environment variable may cause issues with Grpc.")
