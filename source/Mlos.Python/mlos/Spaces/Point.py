@@ -91,9 +91,6 @@ class Point:
         return dimension_name_without_subgrid_name in self[subgrid_name]
 
     def __repr__(self):
-        return self.__str__()
-
-    def __str__(self):
         return str(self.to_dict())
 
     def get(self, dimension_name, default):

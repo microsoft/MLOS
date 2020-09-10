@@ -12,7 +12,7 @@ class EmptyDimension(Dimension):
         super(EmptyDimension, self).__init__(name=name)
         self.type = type
 
-    def __str__(self):
+    def __repr__(self):
         return self.name + ": {}"
 
     @property

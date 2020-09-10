@@ -53,7 +53,7 @@ class DiscreteDimension(Dimension):
                and other.max == self.max \
                and other.stride == self.stride
 
-    def __str__(self):
+    def __repr__(self):
         return self.to_string(include_name=True)
 
     def to_string(self, include_name=True):
@@ -63,7 +63,7 @@ class DiscreteDimension(Dimension):
             return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.max}}}"
         if len(self) == 3:
             return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, {self.max}}}"
-        return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min} + {self.stride}, ... , {self.max}}}"
+        return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, {self.min + 2 * self.stride}, ... , {self.max}}}"
 
     def __len__(self):
         num_strides = int((self.max - self.min) / self.stride)
