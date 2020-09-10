@@ -52,36 +52,36 @@ class DiscreteToUnitContinuousHypergridAdapter(HypergridAdapter):
     def target(self) -> Hypergrid:
         return self._target
 
-    def _translate_point(self, point: Point) -> Point:
-        translated_point = Point()
+    def _project_point(self, point: Point) -> Point:
+        projected_point = Point()
         for dim_name, original_dim_value in point:
             adaptee_dimension = self._adaptee[dim_name]
             if isinstance(adaptee_dimension, DiscreteDimension):
                 # simply scale the value
-                translated_point[dim_name] = (original_dim_value - adaptee_dimension.min * 1.0) / len(adaptee_dimension)
+                projected_point[dim_name] = (original_dim_value - adaptee_dimension.min * 1.0) / len(adaptee_dimension)
             elif isinstance(adaptee_dimension, ContinuousDimension):
                 if adaptee_dimension.min == adaptee_dimension.max:
-                    translated_point[dim_name] = 0
+                    projected_point[dim_name] = 0
                 else:
-                    translated_point[dim_name] = (original_dim_value - adaptee_dimension.min * 1.0) / (adaptee_dimension.max - adaptee_dimension.min)
+                    projected_point[dim_name] = (original_dim_value - adaptee_dimension.min * 1.0) / (adaptee_dimension.max - adaptee_dimension.min)
             else:
                 raise ValueError(f"Dimension {adaptee_dimension.name} is neither Discrete nor Continuous.")
-        return translated_point
+        return projected_point
 
-    def _untranslate_point(self, point: Point) -> Point:
-        untranslated_point = Point()
-        for dim_name, translated_dim_value in point:
+    def _unproject_point(self, point: Point) -> Point:
+        unprojected_point = Point()
+        for dim_name, projected_dim_value in point:
             adaptee_dimension = self._adaptee[dim_name]
             if isinstance(adaptee_dimension, DiscreteDimension):
                 # simply scale the value the other way
-                untranslated_point[dim_name] = math.floor(translated_dim_value * len(adaptee_dimension) + adaptee_dimension.min)
+                unprojected_point[dim_name] = math.floor(projected_dim_value * len(adaptee_dimension) + adaptee_dimension.min)
             elif isinstance(adaptee_dimension, ContinuousDimension):
-                untranslated_point[dim_name] = translated_dim_value * (adaptee_dimension.max - adaptee_dimension.min) + adaptee_dimension.min
+                unprojected_point[dim_name] = projected_dim_value * (adaptee_dimension.max - adaptee_dimension.min) + adaptee_dimension.min
             else:
                 raise ValueError(f"Dimension {adaptee_dimension.name} is neither Discrete nor Continuous.")
-        return untranslated_point
+        return unprojected_point
 
-    def _translate_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
+    def _project_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         # Basically apply the scaling for each column.
         #
         if not in_place:
@@ -100,7 +100,7 @@ class DiscreteToUnitContinuousHypergridAdapter(HypergridAdapter):
                 raise ValueError(f"Dimension {adaptee_dimension.name} is neither Discrete nor Continuous.")
         return df
 
-    def _untranslate_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
+    def _unproject_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
 

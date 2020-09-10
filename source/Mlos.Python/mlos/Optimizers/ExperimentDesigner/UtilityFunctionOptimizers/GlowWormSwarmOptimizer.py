@@ -108,7 +108,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         top_utility_values = utility_function_values.nlargest(n=self.optimizer_config.num_worms, columns=['utility'])
 
         # TODO: could it be in place?
-        features_for_top_utility = self.parameter_adapter.translate_dataframe(feature_values_dataframe.loc[top_utility_values.index], in_place=False)
+        features_for_top_utility = self.parameter_adapter.project_dataframe(feature_values_dataframe.loc[top_utility_values.index], in_place=False)
         worms = pd.concat([features_for_top_utility, top_utility_values], axis=1)
         # Let's reset the index to make keeping track down the road easier.
         #
@@ -131,9 +131,9 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         best_config = worms.loc[[idx_of_max], self.dimension_names]
         config_to_suggest = Point.from_dataframe(best_config)
         self.logger.debug(f"Suggesting: {str(config_to_suggest)} at random.")
-        # TODO: we might have to go for second or nth best if the translation won't work out. But then again if we were
-        # TODO: able to compute the utility function then the translation has worked out once before...
-        return self.parameter_adapter.untranslate_point(config_to_suggest)
+        # TODO: we might have to go for second or nth best if the projection won't work out. But then again if we were
+        # TODO: able to compute the utility function then the projection has worked out once before...
+        return self.parameter_adapter.unproject_point(config_to_suggest)
 
     @trace()
     def compute_utility(self, worms):
@@ -144,8 +144,8 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         :param worms:
         :return:
         """
-        untranslated_features = self.parameter_adapter.untranslate_dataframe(worms[self.dimension_names], in_place=False)
-        utility_function_values = self.utility_function(untranslated_features.copy(deep=False))
+        unprojected_features = self.parameter_adapter.unproject_dataframe(worms[self.dimension_names], in_place=False)
+        utility_function_values = self.utility_function(unprojected_features.copy(deep=False))
         worms['utility'] = utility_function_values
         index_of_nans = worms.index.difference(utility_function_values.index)
         # TODO: A better solution would be to give them random valid configs, and let them live.
