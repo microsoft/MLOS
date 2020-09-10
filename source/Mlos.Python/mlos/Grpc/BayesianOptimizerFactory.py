@@ -42,7 +42,7 @@ class BayesianOptimizerFactory:
 
 
         Returns
-        =======
+        -------
         BayesianOptimizerProxy
 
         """
@@ -72,8 +72,8 @@ class BayesianOptimizerFactory:
         ----------
         optimizer_info : OptimizerInfo
 
-        Return
-        ======
+        Returns
+        -------
         BayesianOptimizerProxy
         """
         return BayesianOptimizerProxy(

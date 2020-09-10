@@ -22,7 +22,7 @@ def objective_from_dict(objective_dict):
     return Objective(**objective_dict)
 
 class OptimizationProblem:
-    """ Models an instance of an optimization problem.
+    """Models an instance of an optimization problem.
 
     An instance of OptimizationProblem can be used to create a variety of optimizers and instantly enlighten them to
     what they are working with.
@@ -61,6 +61,17 @@ class OptimizationProblem:
                 * cpu utilization
                 * ram utilization
                 * etc
+
+    Parameters
+    ----------
+    parameter_space : Hypergrid
+        Input parameter space for objective, i.e. the search space.
+    objective_space : Hypergrid(
+        Output space for the objective, can be (-inf, +inf)
+    objectives : list[Objective]
+        Objective function(s) to optimize, with input from parameter_space and output in objective_space.
+    context_space : Hypergrid
+        Additional run-time context features.
 
     """
 

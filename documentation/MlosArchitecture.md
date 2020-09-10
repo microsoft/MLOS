@@ -68,7 +68,7 @@ MLOS workflows take roughly two basic forms:
 
 ## Architecture Diagram
 
-![Mlos Component Architecture Diagram](./images/MlosArchitecture.svg)
+![Mlos Component Architecture Diagram](./images/MLOS_architecture.svg)
 
 ### Main components
 

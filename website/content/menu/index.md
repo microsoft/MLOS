@@ -3,7 +3,7 @@ headless = true
 +++
 
 - [Documentation]({{< relref "/documentation" >}})
-  - [Prerequisits]({{< relref "/documentation/01-Prerequisites" >}})
+  - [Prerequisites]({{< relref "/documentation/01-Prerequisites" >}})
   - [Build]({{< relref "/documentation/02-Build" >}})
   - [Test]({{< relref "/documentation/04-Test" >}})
   - [Coding Standard]({{< relref "/documentation/CodingStandard" >}})
