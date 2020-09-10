@@ -50,6 +50,7 @@ Clone the repository:
 
 ```sh
 git clone https://github.com/microsoft/MLOS.git
+cd MLOS
 ```
 
 ### Option 1: Linux Docker Build Env
@@ -67,13 +68,11 @@ Please see the official Docker install documenation for distribution specific do
 To automatically setup a Linux build environment using `docker`, run the following to build the image locally:
 
 ```sh
-# Select your target Ubuntu version:
-UbuntuVersion=20.04
 # Build the docker image:
-docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
+docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
 ```
 
-> Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
+> Where `20.04` can also be replaced with another [supported `UbuntuVersion`](#linux-distribution-requirements).
 
 See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
 
@@ -163,6 +162,7 @@ MLOS is easiest to use on Windows 10, Version 1903 (March 2019) or newer.
 
 ```shell
 git clone https://github.com/microsoft/MLOS.git
+cd MLOS
 ```
 
 ### Step 2: Install Python

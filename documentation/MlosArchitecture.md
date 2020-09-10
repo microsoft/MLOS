@@ -2,9 +2,6 @@
 
 This document provides a brief overview of the MLOS architecture for supporting **M**achine **L**earning **O**ptimized **S**ystems.
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
-<!-- code_chunk_output -->
-
 - [MLOS Architecture](#mlos-architecture)
   - [High Level Description](#high-level-description)
     - [Principles](#principles)
@@ -21,8 +18,6 @@ This document provides a brief overview of the MLOS architecture for supporting 
       - [Grpc Server](#grpc-server)
       - [Experiment management](#experiment-management)
   - [Implementation details](#implementation-details)
-
-<!-- /code_chunk_output -->
 
 ## High Level Description
 
@@ -73,7 +68,7 @@ MLOS workflows take roughly two basic forms:
 
 ## Architecture Diagram
 
-<img src="./images/MLOS_architecture.svg" />
+![Mlos Component Architecture Diagram](./images/MLOS_architecture.svg)
 
 ### Main components
 

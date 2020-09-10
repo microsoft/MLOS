@@ -37,4 +37,8 @@ getPythonCmd() {
     echo "$pythoncmd"
 }
 
+areInDockerContainer() {
+    grep -q docker /proc/1/cgroup
+}
+
 # vim: set ft=bash:
