@@ -13,6 +13,7 @@ handledtargets += cmake-build cmake-test cmake-clean \
 		  cmake-buildfiles clean-cmake-buildfiles \
 		  cmake-distclean $(CMAKE) \
 		  python-checks python-test \
+		  website website-clean \
 		  grpc-clean mlos-codegen-clean
 
 # Build using dotnet and the Makefile produced by cmake.
@@ -28,7 +29,7 @@ test: dotnet-test cmake-test python-test
 check: all test
 
 .PHONY: clean
-clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean
+clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean
 
 .PHONY: distclean
 distclean: clean cmake-distclean
@@ -46,6 +47,13 @@ mlos-codegen-clean: dotnet-clean
 grpc-clean:
 	@ $(RM) $(MLOS_ROOT)/Grpc.out
 
+.PHONY: website
+website:
+	$(MAKE) -C website
+
+.PHONY: website-clean
+website-clean:
+	$(MAKE) -C website clean
 
 # Build the dirs.proj file in this directory with "dotnet build"
 include $(MLOS_ROOT)/build/DotnetWrapperRules.mk
