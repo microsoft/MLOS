@@ -197,7 +197,7 @@ class DecisionTreeRegressionModel(RegressionModel):
 
         # Let's get the numpy arrays out of the panda frames
         #
-        feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
+        feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
 
         feature_values = feature_values_pandas_frame[self.input_dimension_names].to_numpy()
         target_values = target_values_pandas_frame[self.target_dimension_names].to_numpy()
@@ -252,7 +252,7 @@ class DecisionTreeRegressionModel(RegressionModel):
         valid_rows_index = None
         features_df = None
         if self.fitted:
-            features_df = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
+            features_df = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
             features_df = features_df[self.input_dimension_names]
             rows_with_no_nulls_index = features_df.index[features_df.notnull().all(axis=1)]
             if not rows_with_no_nulls_index.empty:

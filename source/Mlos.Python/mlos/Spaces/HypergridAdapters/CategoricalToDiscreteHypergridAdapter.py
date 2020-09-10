@@ -46,27 +46,27 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
     def target(self) -> Hypergrid:
         return self._target
 
-    def _translate_point(self, point: Point) -> Point:
-        translated_point = Point()
+    def _project_point(self, point: Point) -> Point:
+        projected_point = Point()
         for dim_name, original_dim_value in point:
             forward_mapping = self._adaptee_to_target_dimension_mappings.get(dim_name, None)
             if forward_mapping is None:
-                translated_point[dim_name] = original_dim_value
+                projected_point[dim_name] = original_dim_value
             else:
-                translated_point[dim_name] = forward_mapping[original_dim_value]
-        return translated_point
+                projected_point[dim_name] = forward_mapping[original_dim_value]
+        return projected_point
 
-    def _untranslate_point(self, point: Point) -> Point:
-        untranslated_point = Point()
-        for dim_name, translated_dim_value in point:
+    def _unproject_point(self, point: Point) -> Point:
+        unprojected_point = Point()
+        for dim_name, projected_dim_value in point:
             backward_mapping = self._target_to_adaptee_dimension_mappings.get(dim_name, None)
             if backward_mapping is None:
-                untranslated_point[dim_name] = translated_dim_value
+                unprojected_point[dim_name] = projected_dim_value
             else:
-                untranslated_point[dim_name] = backward_mapping[translated_dim_value]
-        return untranslated_point
+                unprojected_point[dim_name] = backward_mapping[projected_dim_value]
+        return unprojected_point
 
-    def _translate_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
+    def _project_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         # For each dimension that has a forward mapping, apply the mapping to the corresponding column.
         #
         if not in_place:
@@ -75,7 +75,7 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
             df[dim_name] = df[dim_name].apply(lambda original_value: forward_mapping.get(original_value, original_value))  # pylint: disable=cell-var-from-loop
         return df
 
-    def _untranslate_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
+    def _unproject_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
         for dim_name, backward_mapping in self._target_to_adaptee_dimension_mappings.items():
@@ -104,7 +104,7 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
                 self._target.add_dimension(target_dimension)
 
     def _map_categorical_dimension(self, adaptee_dimension: CategoricalDimension) -> DiscreteDimension:
-        """ Translates a categorical dimension into a discrete dimension and persists the mappings.
+        """ Projects a categorical dimension into a discrete dimension and persists the mappings.
 
         :param adaptee_dimension:
         :return:
