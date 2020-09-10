@@ -29,8 +29,8 @@ hugo-site: clean-hugo-site
 	./build_site.sh
 	find content/ -name '*.md.bak' -delete
 	hugo
-	# If the sphinx site was already built, just copy it over.
-	# This let's us run "make hugo-site link-check" a bit more quickly.
+	@ # If the sphinx site was already built, just copy it over.
+	@ # This let's us run "make hugo-site link-check" a bit more quickly.
 	$(MAKE) public/python_api
 
 public/index.html:
