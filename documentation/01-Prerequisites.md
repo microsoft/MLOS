@@ -68,13 +68,11 @@ Please see the official Docker install documenation for distribution specific do
 To automatically setup a Linux build environment using `docker`, run the following to build the image locally:
 
 ```sh
-# Select your target Ubuntu version:
-UbuntuVersion=20.04
 # Build the docker image:
-docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
+docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
 ```
 
-> Where `UbuntuVersion` can also be set to another supported version of Ubuntu.
+> Where `20.04` can also be replaced with another [supported `UbuntuVersion`](#linux-distribution-requirements).
 
 See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
 

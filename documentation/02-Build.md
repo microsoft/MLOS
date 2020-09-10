@@ -27,26 +27,23 @@ There are different instructions according to the environment setup you chose.
 
 If you chose to use the Docker build environment and have already built or pulled a container image using the instructions in [01-Prerequisites.md](./01-Prerequisites.md#docker), then you can start an interactive session using the container image as follows:
 
-```sh
-# Using the UbuntuVersion local shell variable set earlier to "docker build" the image:
-UbuntuVersion='20.04'
-```
-
 ### Create a new container instance
 
 ```sh
 # Run the image:
 docker run -it -v $PWD:/src/MLOS \
-  --name mlos-build-$UbuntuVersion \
-  mlos/build:ubuntu-$UbuntuVersion
+  --name mlos-build \
+  mlos/build:ubuntu-20.04
 ```
 
-> If you receive an error that the container name already exists, then you can use either the `docker rm` or `docker start` commands below to retry.
+> Where `20.04` can also be replaced with another [supported `UbuntuVersion`](./01-Prerequisites.md#linux-distribution-requirements).
+>
+> Note: If you receive an error that the container name already exists, then you can use either the `docker rm` or `docker start` commands [below](#other-useful-docker-commands) to retry.
 >
 > The `-v $PWD:/src/MLOS` option makes the current directory (assumed to be the root of the MLOS repository) available inside the container so that you can edit the code from your host machine, but build it inside the container.
 >
-> Note that the build artifacts located at `out/` in the container are kept separate by default, so you can test with multiple containers at a time.
-> You can use additional `-v /path/to/out-$UbuntuVersion:/src/MLOS/out` style arguments to direct that output to a host accessible locations if desired.
+> Note that the build artifacts located at `out/` in the container are kept separate by default, so you can test with multiple containers at a time (e.g. each using different Ubuntu versions).
+> You can use additional `-v /path/to/out-20.04:/src/MLOS/out` style arguments to direct that output to a host accessible locations if desired.
 
 ### Other useful docker commands
 
@@ -59,30 +56,30 @@ docker ps -a | grep -i mlos
 
 ```sh
 # Gracefully stop the container instance
-docker stop mlos-build-$UbuntuVersion
+docker stop mlos-build
 ```
 
 ```sh
 # Forcefully stop the container instance.
-docker kill mlos-build-$UbuntuVersion
+docker kill mlos-build
 ```
 
 ```sh
 # Remove the container instance.
-docker rm mlos-build-$UbuntuVersion
+docker rm mlos-build
 ```
 
 ### Start an existing container instance
 
 ```sh
 # Start the image if it already exists and was stopped:
-docker start -i mlos-build-$UbuntuVersion
+docker start -i mlos-build
 ```
 
 ### Get a new shell in a running container instance
 
 ```sh
-docker exec -it mlos-build-$UbuntuVersion /bin/bash
+docker exec -it mlos-build /bin/bash
 ```
 
 Once you have an interactive session in the container, the MLOS source code is available at `/src/MLOS` and can be built using the same instructions in the [Linux: CLI `make`](#cli-make) section below.
