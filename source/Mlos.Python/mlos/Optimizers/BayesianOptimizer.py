@@ -114,7 +114,7 @@ class BayesianOptimizer(OptimizerInterface):
         return self._feature_values_df.copy(), self._target_values_df.copy()
 
     @trace()
-    def suggest(self, random=False, context: Point=None):
+    def suggest(self, random=False, context: Point = None):
         # TODO: pass context to the suggest method
         if self.optimization_problem.context_space is not None:
             if context is None:
@@ -184,7 +184,7 @@ class BayesianOptimizer(OptimizerInterface):
 
         else:
             def target_function(config_values):
-                sign = -1 if self.experiment_designer.optimization_problem.objective_functions[0].minimize else 1
+                sign = -1 if self.experiment_designer.optimization_problem.objectives[0].minimize else 1
                 return sign * self.experiment_designer.surrogate_model.predict(config_values).get_dataframe().predicted_value
             params_for_best_objective = self.experiment_designer.numeric_optimizer.maximize(
                 target_function=target_function, context_values_dataframe=context)

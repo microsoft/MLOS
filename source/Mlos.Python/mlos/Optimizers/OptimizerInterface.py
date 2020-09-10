@@ -50,7 +50,7 @@ class OptimizerInterface(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def optimum(self, stay_focused=False) -> Dict: # TODO: make it return an object
+    def optimum(self, empirical=True, context=None, stay_focused=False) -> Dict: # TODO: make it return an object
         """ Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
