@@ -20,3 +20,4 @@ headless = true
 
 - [Code of Conduct]({{< relref "/CODE_OF_CONDUCT" >}})
 - [Contributing]({{< relref "/CONTRIBUTING" >}})
+- [MLOS Github Repository](https://github.com/Microsoft/MLOS)
