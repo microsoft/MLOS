@@ -1,5 +1,12 @@
-# A Dockerfile for creating a suitable build environment for MLOS for testing
-# the various versions of Ubuntu we need to support.
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
+# See Also:
+# - LICENSE.txt in this repository's root directory
+# - https://aka.ms/mcr/osslegalnotice
+
+# A Dockerfile for creating a suitable build environment for MLOS for
+# development and testing on the various versions of Ubuntu we need to support.
 
 # Supported UbuntuVersions: 16.04, 18.04, 20.04
 #
@@ -19,10 +26,11 @@
 # The latter allows live editing in a native editor (e.g. VSCode or
 # VisualStudio) and building using the container's environment.
 #
-# Once inside the container the `make` command will handle typical build needs.
-#
 # To restart an existing container:
 #   docker start -i mlos-build
+#
+# Once inside the container the `make` command will handle typical build needs.
+# See the markdown files in the documentation/ directory for additional information.
 
 # The default version of Ubuntu to use.
 # This is currently set to 16.04 since that is the version that SqlServer
