@@ -61,7 +61,7 @@ class TestHierarchicalSpaces(unittest.TestCase):
         self.emergency_buffer_settings_with_color = json.loads(json.dumps(self.original_emergency_buffer_settings_with_color, cls=HypergridJsonEncoder), cls=HypergridJsonDecoder)
         self.hierarchical_settings = json.loads(json.dumps(self.original_hierarchical_settings, cls=HypergridJsonEncoder), cls=HypergridJsonDecoder)
 
-        self.serialized_configs_dir = os.path.join(os.getcwd(), "mlos", "Spaces", "unit_tests", "SerializedUnitTestConfigs")
+        self.serialized_configs_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SerializedUnitTestConfigs")
         self.serialized_configs_filenames = [
             (self.original_root_communication_channel_parameter_space, "original_root_communication_channel_parameter_space.json"),
             (self.original_emergency_buffer_settings, "original_emergency_buffer_settings.json"),
@@ -76,7 +76,7 @@ class TestHierarchicalSpaces(unittest.TestCase):
             in self.serialized_configs_filenames
         ]
 
-        self.expected_print_outputs_dir = os.path.join(os.getcwd(), "mlos", "Spaces", "unit_tests", "ExpectedPrintOutputs")
+        self.expected_print_outputs_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ExpectedPrintOutputs")
         self.expected_print_outputs_filenames = [
             (self.original_root_communication_channel_parameter_space, "original_root_communication_channel_parameter_space.txt"),
             (self.original_emergency_buffer_settings, "original_emergency_buffer_settings.txt"),
