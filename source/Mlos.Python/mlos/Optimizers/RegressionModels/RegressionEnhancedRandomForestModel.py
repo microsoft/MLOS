@@ -39,7 +39,7 @@ class RegressionEnhancedRandomForestRegressionModelPrediction(Prediction):
     OUTPUT_FIELDS: List[Prediction.LegalColumnNames] = [
         all_prediction_fields.PREDICTED_VALUE,
         all_prediction_fields.PREDICTED_VALUE_VARIANCE,
-        all_prediction_fields.PREDICTED_VALUE_DEGREES_OF_FREEDOM]
+        all_prediction_fields.DEGREES_OF_FREEDOM]
 
     def __init__(self, objective_name: str):
         super().__init__(objective_name=objective_name, predictor_outputs=RegressionEnhancedRandomForestRegressionModelPrediction.OUTPUT_FIELDS)
@@ -92,50 +92,49 @@ class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig)
         sklearn_ridge_regression_model_config=SklearnRidgeRegressionModelConfig.DEFAULT,
         sklearn_random_forest_regression_model_config=SklearnRandomForestRegressionModelConfig.DEFAULT,
         perform_initial_root_model_hyper_parameter_search=True,
-        perform_initial_random_forest_hyper_parameter_search=False
+        perform_initial_random_forest_hyper_parameter_search=True
     )
 
     @classmethod
     def contains(cls, config):
-        # following example set in HomogeneousRandomForestRegressionModelConfig.contains()
-        return True
+        return config in cls.CONFIG_SPACE
 
-    @classmethod
-    def create_from_config_point(cls, config_point):
-        assert cls.contains(config_point)
-        config_key_value_pairs = {param_name: value for param_name, value in config_point}
-        return cls(**config_key_value_pairs)
-
-    def __init__(
-            self,
-            max_basis_function_degree=_DEFAULT.max_basis_function_degree,
-            boosting_root_model_name=_DEFAULT.boosting_root_model_name,
-            min_abs_root_model_coef=_DEFAULT.min_abs_root_model_coef,
-            boosting_root_model_config: Point()=_DEFAULT.sklearn_lasso_regression_model_config,
-            random_forest_model_config: Point()=_DEFAULT.sklearn_random_forest_regression_model_config,
-            residual_model_name=_DEFAULT.residual_model_name,
-            perform_initial_root_model_hyper_parameter_search=_DEFAULT.perform_initial_root_model_hyper_parameter_search,
-            perform_initial_random_forest_hyper_parameter_search=_DEFAULT.perform_initial_random_forest_hyper_parameter_search
-    ):
-        self.max_basis_function_degree = max_basis_function_degree
-        self.residual_model_name = residual_model_name
-        self.min_abs_root_model_coef = min_abs_root_model_coef
-        self.perform_initial_root_model_hyper_parameter_search = perform_initial_root_model_hyper_parameter_search
-        self.perform_initial_random_forest_hyper_parameter_search = perform_initial_random_forest_hyper_parameter_search
-
-        self.boosting_root_model_name = boosting_root_model_name
-        self.boosting_root_model_config = None
-        if self.boosting_root_model_name == SklearnLassoRegressionModelConfig.__name__:
-            self.boosting_root_model_config = SklearnLassoRegressionModelConfig \
-                .create_from_config_point(boosting_root_model_config)
-        elif self.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
-            self.boosting_root_model_config = SklearnRidgeRegressionModelConfig \
-                .create_from_config_point(boosting_root_model_config)
-        else:
-            print('Unrecognized boosting_root_model_name "{}"'.format(self.boosting_root_model_name))
-
-        self.random_forest_model_config = SklearnRandomForestRegressionModelConfig \
-            .create_from_config_point(random_forest_model_config)
+    # @classmethod
+    # def create_from_config_point(cls, config_point):
+    #     assert cls.contains(config_point)
+    #     config_key_value_pairs = {param_name: value for param_name, value in config_point}
+    #     return cls(**config_key_value_pairs)
+    #
+    # def __init__(
+    #         self,
+    #         max_basis_function_degree=_DEFAULT.max_basis_function_degree,
+    #         boosting_root_model_name=_DEFAULT.boosting_root_model_name,
+    #         min_abs_root_model_coef=_DEFAULT.min_abs_root_model_coef,
+    #         boosting_root_model_config: Point() = _DEFAULT.sklearn_lasso_regression_model_config,
+    #         random_forest_model_config: Point() = _DEFAULT.sklearn_random_forest_regression_model_config,
+    #         residual_model_name=_DEFAULT.residual_model_name,
+    #         perform_initial_root_model_hyper_parameter_search=_DEFAULT.perform_initial_root_model_hyper_parameter_search,
+    #         perform_initial_random_forest_hyper_parameter_search=_DEFAULT.perform_initial_random_forest_hyper_parameter_search
+    # ):
+    #     self.max_basis_function_degree = max_basis_function_degree
+    #     self.residual_model_name = residual_model_name
+    #     self.min_abs_root_model_coef = min_abs_root_model_coef
+    #     self.perform_initial_root_model_hyper_parameter_search = perform_initial_root_model_hyper_parameter_search
+    #     self.perform_initial_random_forest_hyper_parameter_search = perform_initial_random_forest_hyper_parameter_search
+    #
+    #     self.boosting_root_model_name = boosting_root_model_name
+    #     self.boosting_root_model_config = None
+    #     if self.boosting_root_model_name == SklearnLassoRegressionModelConfig.__name__:
+    #         self.boosting_root_model_config = SklearnLassoRegressionModelConfig \
+    #             .create_from_config_point(boosting_root_model_config)
+    #     elif self.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
+    #         self.boosting_root_model_config = SklearnRidgeRegressionModelConfig \
+    #             .create_from_config_point(boosting_root_model_config)
+    #     else:
+    #         print('Unrecognized boosting_root_model_name "{}"'.format(self.boosting_root_model_name))
+    #
+    #     self.random_forest_model_config = SklearnRandomForestRegressionModelConfig \
+    #         .create_from_config_point(random_forest_model_config)
 
 
 class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
@@ -165,7 +164,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     @trace()
     def __init__(
             self,
-            model_config: RegressionEnhancedRandomForestRegressionModelConfig,
+            model_config: Point,
             input_space: Hypergrid,
             output_space: Hypergrid,
             logger=None
@@ -174,7 +173,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             logger = create_logger("RegressionEnhancedRandomForestRegressionModel")
         self.logger = logger
 
-        assert RegressionEnhancedRandomForestRegressionModelConfig.contains(model_config)
+        assert model_config in RegressionEnhancedRandomForestRegressionModelConfig.CONFIG_SPACE
+
         RegressionModel.__init__(
             self,
             model_type=type(self),
@@ -182,60 +182,12 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             input_space=input_space,
             output_space=output_space
         )
-
+        self.model_config = model_config
         self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
         self.output_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
 
         self.base_regressor_ = None
-        self.base_regressor_config = dict()
-        self.base_regressor_config = self.model_config.boosting_root_model_config
-        if self.model_config.boosting_root_model_name == SklearnLassoRegressionModelConfig.__name__:
-            self.base_regressor_ = linear_model.Lasso(
-                alpha=self.base_regressor_config.alpha,
-                fit_intercept=self.base_regressor_config.fit_intercept,
-                normalize=self.base_regressor_config.normalize,
-                precompute=self.base_regressor_config.precompute,
-                copy_X=self.base_regressor_config.copy_x,
-                max_iter=self.base_regressor_config.max_iter,
-                tol=self.base_regressor_config.tol,
-                warm_start=self.base_regressor_config.warm_start,
-                positive=self.base_regressor_config.positive,
-                random_state=self.base_regressor_config.random_state,
-                selection=self.base_regressor_config.selection
-            )
-        elif self.model_config.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
-            self.base_regressor_ = linear_model.Ridge(
-                alpha=self.base_regressor_config.alpha,
-                fit_intercept=self.base_regressor_config.fit_intercept,
-                normalize=self.base_regressor_config.normalize,
-                copy_X=self.base_regressor_config.copy_x,
-                max_iter=self.base_regressor_config.max_iter,
-                tol=self.base_regressor_config.tol,
-                random_state=self.base_regressor_config.random_state,
-                solver=self.base_regressor_config.solver
-            )
-        else:
-            self.logger('Boosting base model name "{0}" not supported currently.' \
-                        .format(self.model_config.boosting_root_model_name))
-
-        rf_config = self.model_config.random_forest_model_config
-        self.random_forest_regressor_ = RandomForestRegressor(
-            n_estimators=rf_config.n_estimators,
-            criterion=rf_config.criterion,
-            max_depth=rf_config.max_depth_value,
-            min_samples_split=rf_config.min_samples_split,
-            min_samples_leaf=rf_config.min_samples_leaf,
-            min_weight_fraction_leaf=rf_config.min_weight_fraction_leaf,
-            max_features=rf_config.max_features,
-            max_leaf_nodes=rf_config.max_leaf_nodes_value,
-            min_impurity_decrease=rf_config.min_impurity_decrease,
-            bootstrap=rf_config.bootstrap,
-            oob_score=rf_config.oob_score,
-            n_jobs=rf_config.n_jobs,
-            warm_start=rf_config.warm_start,
-            ccp_alpha=rf_config.ccp_alpha,
-            max_samples=rf_config.max_sample_value
-        )
+        self.random_forest_regressor_ = None
 
         # set up basis feature transform
         self.polynomial_features_transform_ = \
@@ -267,16 +219,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         :param target_values_pandas_frame:
         :return:
         """
-        self.logger.info(
-            f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations."
-        )
-
         # pull X and y values from data frames passed
         y = target_values_pandas_frame[self.output_dimension_names].to_numpy().reshape(-1)
         x_df = feature_values_pandas_frame[self.input_dimension_names]
-        x_df.fillna(value=0, inplace=True)
-        fit_x = self._explode_x(x_df)
-        self.fit_X_ = fit_x
+        fit_x = self.transform_x(x_df, what_to_return='fit_x')
 
         # run root regression
         self._fit_root_regression(fit_x, y)
@@ -292,26 +238,26 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self._fit_random_forest_regression(x_star, y_residuals)
 
         # retain inverse(fit_X.T * fit_X) to use for confidence intervals on predicted values
-        condition_number = np.linalg.cond(fit_x)
+        condition_number = np.linalg.cond(x_star)
         if condition_number > 10.0 ** 10:
             # add small noise to fit_x to remove singularity,
             #  expect prediction confidence to be reduced (wider intervals) by doing this
             self.logger.info(
                 f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^10."
             )
-            fit_x += np.random.normal(0, 10.0**-2, size=fit_x.shape)
-            condition_number = np.linalg.cond(fit_x)
+            x_star += np.random.normal(0, 10.0**-4, size=x_star.shape)
+            condition_number = np.linalg.cond(x_star)
             self.logger.info(
                 f"Resulting condition number {condition_number}."
             )
-        x_transpose_times_x = np.matmul(fit_x.T, fit_x)
+        x_transpose_times_x = np.matmul(x_star.T, x_star)
         self.partial_hat_matrix_ = np.linalg.inv(x_transpose_times_x)
 
         # retain standard error from base model (used for prediction confidence intervals)
         base_predicted_y = self.base_regressor_.predict(x_star)
         base_residual_y = y - base_predicted_y
         residual_sum_of_squares = np.sum(base_residual_y ** 2)
-        dof = fit_x.shape[0] - len(self.base_regressor_.coef_)
+        dof = fit_x.shape[0] - (len(self.base_regressor_.coef_) + 1)  # +1 for intercept
         self.base_regressor_standard_error_ = residual_sum_of_squares / float(dof)
 
         # values needed to compute total model prediction intervals
@@ -323,43 +269,19 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         return self
 
     def _fit_root_regression(self, x, y):
+        # Assumes x has already been transformed
         self.detected_feature_indices_ = []
-
-        # hard wiring which model hyper parameters are used for model optimization
-        tunable_hyper_params = {
-            SklearnLassoRegressionModelConfig.__name__: {
-                'alpha': np.exp([np.log(0.001) + h * (np.log(100) - np.log(0.001)) / 100 for h in range(100)])
-            },
-            SklearnRidgeRegressionModelConfig.__name__: {
-                'alpha': np.exp([np.log(0.001) + h * (np.log(100) - np.log(0.001)) / 100 for h in range(100)])
-            }
-        }
 
         if self.model_config.perform_initial_root_model_hyper_parameter_search:
             # tune hyper parameters via k-fold cross validation
-            root_model_gscv = GridSearchCV(
-                self.base_regressor_,
-                tunable_hyper_params[self.model_config.boosting_root_model_name])
-            root_model_gscv.fit(x, y)
-
-            # retain best lasso/Ridge model
-            self.base_regressor_ = root_model_gscv.best_estimator_
-
-            # retain hyper-params search results in case we want to re-use these w/o search
-            self.root_model_kwargs = self.base_regressor_.get_params()
-
-            # restrict X to features detected with Lasso regression
-            #  this is X* in the original paper and will be used for the random forest fit
-            #  since X* is the input for both models, the index list will be needed for predict method
-            self.screening_root_model_coef_ = self.base_regressor_.coef_
-
-            # only perform hyper-parameter search on first fit
-            self.model_config.perform_initial_root_model_hyper_parameter_search = False
+            self._execute_grid_search_for_base_regressor_model(x, y)
 
         else:
-            # run lasso with specified params from __init__  or hyper-parameter search
-            # fit/refit with original/discovered alpha and X*
-            self.base_regressor_ = self.base_regressor_(**self.root_model_kwargs)
+            # fit lasso/ridge model using either specified params from __init__  or hyper-parameter search
+            if self.model_config.boosting_root_model_name == SklearnLassoRegressionModelConfig.__name__:
+                self.base_regressor_ = linear_model.Lasso(**self.root_model_kwargs)
+            elif self.model_config.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
+                self.base_regressor_ = linear_model.Ridge(**self.root_model_kwargs)
             self.base_regressor_.fit(x, y)
 
             self.screening_root_model_coef_ = self.base_regressor_.coef_
@@ -374,50 +296,126 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         return self
 
-    def _fit_random_forest_regression(self, x_star, y_residuals):
-        if self.model_config.perform_initial_random_forest_hyper_parameter_search:
-            num_features = len(x_star[0])
-            max_feature_param = [1]
-            p_floor_3 = round(num_features / 3)
-            if p_floor_3 > 0:
-                max_feature_param = np.array([int(0.5 * p_floor_3), int(p_floor_3), int(2 * p_floor_3)])
-                max_feature_param = list(np.unique(np.where(max_feature_param == 0, 1, max_feature_param)))
-            rf_params = {
-                'min_samples_leaf': [5, 10],
-                'n_estimators': [10, 50, 100],
-                'max_features': max_feature_param
+    def _execute_grid_search_for_base_regressor_model(self, x, y):
+        model_config = self.model_config
+        if self.model_config.boosting_root_model_name == SklearnLassoRegressionModelConfig.__name__:
+            self.base_regressor_ = linear_model.Lasso(
+                alpha=model_config.sklearn_lasso_regression_model_config.alpha,
+                fit_intercept=model_config.sklearn_lasso_regression_model_config.fit_intercept,
+                normalize=model_config.sklearn_lasso_regression_model_config.normalize,
+                precompute=model_config.sklearn_lasso_regression_model_config.precompute,
+                copy_X=model_config.sklearn_lasso_regression_model_config.copy_x,
+                max_iter=model_config.sklearn_lasso_regression_model_config.max_iter,
+                tol=model_config.sklearn_lasso_regression_model_config.tol,
+                warm_start=model_config.sklearn_lasso_regression_model_config.warm_start,
+                positive=model_config.sklearn_lasso_regression_model_config.positive,
+                random_state=None,
+                selection=model_config.sklearn_lasso_regression_model_config.selection
+            )
+        elif self.model_config.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
+            self.base_regressor_ = linear_model.Ridge(
+                alpha=model_config.sklearn_ridge_regression_model_config.alpha,
+                fit_intercept=model_config.sklearn_ridge_regression_model_config.fit_intercept,
+                normalize=model_config.sklearn_ridge_regression_model_config.normalize,
+                copy_X=model_config.sklearn_ridge_regression_model_config.copy_x,
+                max_iter=model_config.sklearn_ridge_regression_model_config.max_iter,
+                tol=model_config.sklearn_ridge_regression_model_config.tol,
+                random_state=None,
+                solver=model_config.sklearn_ridge_regression_model_config.solver
+            )
+        else:
+            self.logger('Boosting base model name "{0}" not supported currently.' \
+                        .format(self.model_config.boosting_root_model_name))
+
+        # hard wiring which model hyper parameters are used for model optimization
+        tunable_hyper_params = {
+            SklearnLassoRegressionModelConfig.__name__: {
+                'alpha': np.exp([np.log(0.001) + h * (np.log(100) - np.log(0.001)) / 100 for h in range(100)])
+            },
+            SklearnRidgeRegressionModelConfig.__name__: {
+                'alpha': np.exp([np.log(0.001) + h * (np.log(100) - np.log(0.001)) / 100 for h in range(100)])
             }
+        }
 
-            rf_gscv = GridSearchCV(self.random_forest_regressor_, rf_params)
-            rf_gscv.fit(x_star, y_residuals)
+        root_model_gscv = GridSearchCV(
+            self.base_regressor_,
+            tunable_hyper_params[self.model_config.boosting_root_model_name])
+        root_model_gscv.fit(x, y)
 
-            # retrieve best random forest model and hyper parameters
-            self.random_forest_regressor_ = rf_gscv.best_estimator_
+        # retain best lasso/Ridge model
+        self.base_regressor_ = root_model_gscv.best_estimator_
 
-            # only perform hyper-parameter search on first fit
-            self.model_config.perform_initial_random_forest_hyper_parameter_search = False
+        # retain hyper-params search results in case we want to re-use these w/o search
+        self.root_model_kwargs = self.base_regressor_.get_params()
+
+        # restrict X to features detected with Lasso regression
+        #  this is X* in the original paper and will be used for the random forest fit
+        #  since X* is the input for both models, the index list will be needed for predict method
+        self.screening_root_model_coef_ = self.base_regressor_.coef_
+
+        # only perform hyper-parameter search on first fit
+        self.model_config.perform_initial_root_model_hyper_parameter_search = False
+
+    def _fit_random_forest_regression(self, x_star, y_residuals):
+        # Assumes x has already been transformed and the reduced feature space and residuals relative to base model
+        #  are passed to the random forest regression
+        if self.model_config.perform_initial_random_forest_hyper_parameter_search:
+            self._execute_grid_search_for_random_forest_regressor_model(x_star, y_residuals)
 
         else:
-            self.random_forest_regressor_ = self.random_forest_regressor_(**self.random_forest_kwargs)
+            self.random_forest_regressor_ = RandomForestRegressor(**self.random_forest_kwargs)
             self.random_forest_regressor_.fit(x_star, y_residuals)
 
         self.random_forest_kwargs = self.random_forest_regressor_.get_params()
 
         return self
 
+    def _execute_grid_search_for_random_forest_regressor_model(self, x_star, y_residuals):
+        model_config = self.model_config.sklearn_random_forest_regression_model_config
+        self.random_forest_regressor_ = RandomForestRegressor(
+            n_estimators=model_config.n_estimators,
+            criterion=model_config.criterion,
+            max_depth=model_config.max_depth if model_config.max_depth > 0 else None,
+            min_samples_split=model_config.min_samples_split,
+            min_samples_leaf=model_config.min_samples_leaf,
+            min_weight_fraction_leaf=model_config.min_weight_fraction_leaf,
+            max_features=model_config.max_features,
+            max_leaf_nodes=model_config.max_leaf_nodes if model_config.max_leaf_nodes > 0 else None,
+            min_impurity_decrease=model_config.min_impurity_decrease,
+            bootstrap=model_config.bootstrap,
+            oob_score=model_config.oob_score,
+            n_jobs=model_config.n_jobs,
+            warm_start=model_config.warm_start,
+            ccp_alpha=model_config.ccp_alpha,
+            max_samples=model_config.max_samples if model_config.max_samples > 0 else None
+        )
+        num_features = len(x_star[0])
+        max_feature_param = [1]
+        p_floor_3 = round(num_features / 3)
+        if p_floor_3 > 0:
+            max_feature_param = np.array([int(0.5 * p_floor_3), int(p_floor_3), int(2 * p_floor_3)])
+            max_feature_param = list(np.unique(np.where(max_feature_param == 0, 1, max_feature_param)))
+        rf_params = {
+            'min_samples_leaf': [5, 10],
+            'n_estimators': [10, 50, 100],
+            'max_features': max_feature_param
+        }
+
+        rf_gscv = GridSearchCV(self.random_forest_regressor_, rf_params)
+        rf_gscv.fit(x_star, y_residuals)
+
+        # retrieve best random forest model and hyper parameters
+        self.random_forest_regressor_ = rf_gscv.best_estimator_
+
+        # only perform hyper-parameter search on first fit
+        self.model_config.perform_initial_random_forest_hyper_parameter_search = False
+
     @trace()
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
-        self.logger.info(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
-
         check_is_fitted(self)
 
         x_df = feature_values_pandas_frame[self.input_dimension_names]
-        x_df.fillna(value=0, inplace=True)
-        fit_x = self._explode_x(x_df)
-
-        # restrict to features selected by previous lasso fit
-        #   serve as inputs to both regression and random forest on the residuals
-        x_star = self._filter_to_detected_features(fit_x)
+        x_star = self.transform_x(x_df)
 
         base_predicted = self.base_regressor_.predict(x_star)
         residual_predicted = self.random_forest_regressor_.predict(x_star)
@@ -426,7 +424,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # dataframe column shortcuts
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
-        predicted_value_dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
+        predicted_value_dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
 
         # initialize return predictions
         predictions = RegressionEnhancedRandomForestRegressionModelPrediction(objective_name=self.output_dimension_names[0])
@@ -435,19 +433,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         prediction_df[predicted_value_col] = y_predicted
         prediction_df[predicted_value_dof_col] = self.dof_
 
-        # compute confidence interval error while preparing return list of Prediction objects
+        # compute variance needed for prediction interval
         var_list = []
-        for xi in fit_x:
+        for xi in x_star:
             leverage_x = np.matmul(np.matmul(xi.T, self.partial_hat_matrix_), xi)
-
-            # split on whether x was in the model fit data
-            x_in_fit_x = np.any(np.all(np.isin(x_df, xi, assume_unique=True), axis=1))
-            if x_in_fit_x:
-                # return standard error of estimated mean y (from model)
-                prediction_var = self.variance_estimate_ * leverage_x
-            else:
-                # return standard error of extrapolated x
-                prediction_var = self.variance_estimate_ * (1.0 + leverage_x)
+            prediction_var = self.base_regressor_standard_error_ * (1.0 + leverage_x)
             var_list.append(prediction_var)
 
         prediction_df[predicted_value_var_col] = var_list
@@ -455,11 +445,12 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         return predictions
 
     def score(self, feature_values_pandas_frame, target_values_pandas_frame):
-        x = feature_values_pandas_frame[self.input_dimension_names].to_numpy()
+        x_df = feature_values_pandas_frame[self.input_dimension_names]
         y = target_values_pandas_frame[self.output_dimension_names].to_numpy()
 
-        y_pred = self.predict(x)
-        r2 = r2_score(y, y_pred)
+        predictions = self.predict(x_df)
+        predictions_df = predictions.get_dataframe()
+        r2 = r2_score(y, predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE.value])
         return r2
 
     @staticmethod
@@ -515,6 +506,28 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # deal with Hierarchical HyperGrid hat matrix singularities
         if zero_cols_idx is not None:
             self.polynomial_features_powers_ = np.delete(self.polynomial_features_powers_, zero_cols_idx, axis=0)
+
+    def transform_x(self, x, what_to_return='x_star'):
+        """
+        transform_x performs 3 operations as part of preparing the input feature dataframe for RERF fit()/predict():
+          1. Impute 0s for NaNs.  This case arises in hierarchical hypergrids where dimensions are not shared
+             across categorical levels.  Since the presence of zero columns in the design matrix makes the p-hat matrix
+             singular, fit() method eliminates those columns.
+          2. "Explodes" the initial feature space using the specified polynomial basis functions.
+          3. Once Lasso/Ridge regression identifies feature dimensions of little predictive value, those dimensions
+             are "filtered" from the expanded feature space.
+        """
+        x.fillna(value=0, inplace=True)
+        fit_x = self._explode_x(x)
+        self.fit_X_ = fit_x
+        if what_to_return.upper() == 'fit_x'.upper():
+            return fit_x
+
+        # restrict to features selected by previous lasso fit
+        #   serve as inputs to both regression and random forest on the residuals
+        x_star = self._filter_to_detected_features(fit_x)
+
+        return x_star
 
     def _explode_x(self, x):
         """
