@@ -1,2 +1,6 @@
-This product currently bundles Uncrustify, which is available under a
-"GPL-2" license.  For details, see build/uncrustify/.
+NOTICES
+
+This repository incorporates material as listed below or described in the code.
+
+- This product currently bundles Uncrustify, which is available under a "GPL-2"
+  license.  For more details, please see build/uncrustify/.
