@@ -48,7 +48,10 @@ namespace Mlos.Agent.Server
 
             foreach (string arg in args)
             {
-                if (Path.GetExtension(arg) == ".exe")
+                // Linux executables don't have a suffix by default.
+                // So, for now just assume that anything else is an executable.
+                //
+                if (Path.GetExtension(arg) == ".exe" || string.IsNullOrEmpty(Path.GetExtension(arg)))
                 {
                     executableFilePath = arg;
                 }
