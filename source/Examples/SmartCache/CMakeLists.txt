@@ -21,6 +21,6 @@ add_dependencies(${PROJECT_NAME} SmartCache.SettingsRegistry)
 # FIXME:
 # - This doesn't finish, it just hangs.
 # - When you pkill dotnet to end it, the test reports success.
-#add_test(NAME MlosTestRun_MlosAgentServer_SmartCache
-#    COMMAND ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> $<TARGET_FILE:SmartCache>)
-#add_dependencies(check ${PROJECT_NAME} Mlos.Agent.Server)
+add_test(NAME MlosTestRun_MlosAgentServer_SmartCache
+    COMMAND ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> $<TARGET_FILE:SmartCache>)
+add_dependencies(check ${PROJECT_NAME} Mlos.Agent.Server)
