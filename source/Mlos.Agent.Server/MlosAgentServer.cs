@@ -48,16 +48,16 @@ namespace Mlos.Agent.Server
 
             foreach (string arg in args)
             {
-                // Linux executables don't have a suffix by default.
-                // So, for now just assume that anything else is an executable.
-                //
-                if (Path.GetExtension(arg) == ".exe" || string.IsNullOrEmpty(Path.GetExtension(arg)))
-                {
-                    executableFilePath = arg;
-                }
-                else if (Path.GetExtension(arg) == ".json")
+                if (Path.GetExtension(arg) == ".json")
                 {
                     modelsDatabaseConnectionDetailsFile = arg;
+                }
+                else
+                {
+                    // Linux executables don't have a suffix by default.
+                    // So, for now just assume that anything else is an executable.
+                    //
+                    executableFilePath = arg;
                 }
             }
 
