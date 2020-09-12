@@ -59,16 +59,22 @@ namespace Mlos.Agent.Server
                 {
                     FileName = executableFilePath,
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     UseShellExecute = false,
                 },
             };
 
-            targetProcess.OutputDataReceived += (sendingProcess, outLine) => Console.WriteLine(outLine.Data);
-            targetProcess.ErrorDataReceived += (sendingProcess, outLine) => Console.WriteLine(outLine.Data);
+            targetProcess.OutputDataReceived += (sendingProcess, outLine) =>
+            {
+                Console.Out.WriteLine(outLine.Data);
+                Console.Out.Flush();
+            };
+            targetProcess.ErrorDataReceived += (sendingProcess, outLine) => Console.Error.WriteLine(outLine.Data);
 
             targetProcess.Start();
 
             targetProcess.BeginOutputReadLine();
+            targetProcess.BeginErrorReadLine();
         }
 
         public void WaitForTargetProcessToExit()
