@@ -40,6 +40,7 @@ public/index.html:
 clean-sphinx-site:
 	rm -rf sphinx/_build
 	rm -rf sphinx/api
+	git restore sphinx/api/mlos.rst
 	rm -rf public/python_api
 
 # Note: this is an expensive target.
