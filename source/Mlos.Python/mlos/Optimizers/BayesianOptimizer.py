@@ -142,27 +142,6 @@ class BayesianOptimizer(OptimizerInterface):
     def predict(self, feature_values_pandas_frame, t=None):
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
-    @trace()
-    def optimum(self, stay_focused=False):
-        if self.optimization_problem.objectives[0].minimize:
-            index_of_best_target = self._target_values_df.idxmin()[0]
-        else:
-            index_of_best_target = self._target_values_df.idxmax()[0]
-        objective_name = self.optimization_problem.objectives[0].name
-        best_objective_value = self._target_values_df.loc[index_of_best_target][objective_name]
-
-        param_names = [dimension.name for dimension in self.optimization_problem.parameter_space.dimensions]
-        params_for_best_objective = self._feature_values_df.loc[index_of_best_target]
-
-        optimal_config_and_target = {
-            objective_name: best_objective_value,
-        }
-
-        for param_name in param_names:
-            optimal_config_and_target[param_name] = params_for_best_objective[param_name]
-
-        return optimal_config_and_target
-
     def focus(self, subspace):
         ...
 
