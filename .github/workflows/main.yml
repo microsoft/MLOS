@@ -118,6 +118,7 @@ jobs:
       matrix:
         os: [windows-2019, ubuntu-20.04]
         # FIXME: MLOS currently fails pylint checks for 3.8
+        # See Also: https://github.com/microsoft/MLOS/issues/54
         python-version: [3.7] #, 3.8]
     steps:
     - uses: actions/checkout@v2

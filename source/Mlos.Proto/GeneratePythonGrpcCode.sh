@@ -10,9 +10,13 @@ set -eu
 
 # Start in the script directory.
 scriptdir=$(readlink -f "$(dirname "$0")")
-cd "$scriptdir"
+MLOS_ROOT=$(readlink -f "$scriptdir/../..")
 
+. "$MLOS_ROOT/scripts/util.sh"
+pythonCmd=$(getPythonCmd)
+
+cd "$scriptdir"
 mkdir -p mlos/Grpc
 cp OptimizerService.proto mlos/Grpc/
-python3 -m grpc_tools.protoc -I . --python_out=../Mlos.Python --grpc_python_out=../Mlos.Python  mlos/Grpc/OptimizerService.proto
+$pythonCmd -m grpc_tools.protoc -I . --python_out=../Mlos.Python --grpc_python_out=../Mlos.Python  mlos/Grpc/OptimizerService.proto
 rm -rf mlos
