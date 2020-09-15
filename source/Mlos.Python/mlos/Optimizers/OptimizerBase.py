@@ -27,7 +27,7 @@ class OptimizerBase(ABC):
 
     @abstractmethod
     def suggest(self, random=False, context=None) -> Point:
-        """ Suggest the next set of parameters to try.
+        """Suggest the next set of parameters to try.
 
         :return:
         """
@@ -35,7 +35,7 @@ class OptimizerBase(ABC):
 
     @abstractmethod
     def register(self, feature_values_pandas_frame, target_values_pandas_frame) -> None:
-        """ Registers a new result with the optimizer.
+        """Registers a new result with the optimizer.
 
         :param params:
         :param target_value:
@@ -49,7 +49,7 @@ class OptimizerBase(ABC):
 
     @abstractmethod
     def predict(self, feature_values_pandas_frame, t=None) -> Prediction:
-        """ Predict target value based on the parameters supplied.
+        """Predict target value based on the parameters supplied.
 
         :param params:
         :return:
@@ -57,7 +57,7 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     def optimum(self, stay_focused=False) -> Dict: # pylint: disable=unused-argument  # TODO take context
-        """ Return the optimal value found so far along with the related parameter values.
+        """Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
 
@@ -71,6 +71,8 @@ class OptimizerBase(ABC):
 
         """
         features_df, objectives_df = self.get_all_observations()
+        if not len(features_df):
+            raise ValueError("Can't compute optimum before registering any results.")
 
         if self.optimization_problem.objectives[0].minimize:
             index_of_best_target = objectives_df.idxmin()[0]
@@ -84,7 +86,7 @@ class OptimizerBase(ABC):
 
     @abstractmethod
     def focus(self, subspace):
-        """ Force the optimizer to focus on a specific subspace.
+        """Force the optimizer to focus on a specific subspace.
 
         This could be a great way to pass priors to the optimizer, as well as play with the component for the developers.
 
@@ -95,7 +97,7 @@ class OptimizerBase(ABC):
 
     @abstractmethod
     def reset_focus(self):
-        """ Changes focus back to the full search space.
+        """Changes focus back to the full search space.
 
         :return:
         """

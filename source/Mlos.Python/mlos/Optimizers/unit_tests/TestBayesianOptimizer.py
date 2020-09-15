@@ -123,6 +123,30 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         print(bayesian_optimizer.optimum()[1])
 
+    def test_optimum_before_register_error(self):
+        input_space = SimpleHypergrid(
+            name="input",
+            dimensions=[ContinuousDimension(name='x', min=-10, max=10)])
+
+        output_space = SimpleHypergrid(
+            name="output",
+            dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)])
+        optimization_problem = OptimizationProblem(
+            parameter_space=input_space,
+            objective_space=output_space,
+            objectives=[Objective(name='y', minimize=True)]
+        )
+        bayesian_optimizer = BayesianOptimizer(
+            optimization_problem=optimization_problem,
+            logger=self.logger,
+            optimizer_config=BayesianOptimizerConfig.DEFAULT
+        )
+        with self.assertRaises(ValueError):
+            bayesian_optimizer.optimum()
+
+        bayesian_optimizer.register(pd.DataFrame({'x': [0.]}), pd.DataFrame({'y': [1.]}))
+        bayesian_optimizer.optimum()
+
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
