@@ -41,6 +41,8 @@ jobs:
       matrix:
         configuration: [Debug, Release]
     steps:
+      - name: Install apt dependencies
+        run: sudo apt-get -y install build-essential clang-10 curl liblttng-ctl0 liblttng-ust0 libxml2 zlib1g
       - uses: actions/checkout@v2
       - name: Run ${{ matrix.configuration }} dotnet build
         timeout-minutes: 5
