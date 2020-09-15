@@ -15,8 +15,10 @@ from mlos.Logger import create_logger
 from mlos.Tracer import Tracer
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
@@ -33,18 +35,8 @@ class TestBayesianOptimizer(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """ Set's up all the objects needed to test the RandomSearchOptimizer
+        """ Sets up all the singletons needed to test the BayesianOptimizer.
 
-        To test the RandomSearchOptimizer we need to first construct:
-        * an optimization problem
-        * a utility function
-
-        To construct a utility function we need the same set up as in the TestConfidenceBoundUtilityFunction
-        test.
-
-
-
-        :return:
         """
         warnings.simplefilter("error")
         cls.temp_dir = os.path.join(os.getcwd(), "temp")
@@ -259,13 +251,21 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         num_restarts = 2
         for restart_num in range(num_restarts):
+
+            optimizer_config = BayesianOptimizerConfig.DEFAULT
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
+            optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.min_samples_to_fit = 10
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 2
+
             bayesian_optimizer = BayesianOptimizer(
                 optimization_problem=optimization_problem,
-                optimizer_config=BayesianOptimizerConfig.DEFAULT,
+                optimizer_config=optimizer_config,
                 logger=self.logger
             )
 
-            num_guided_samples = 200
+            num_guided_samples = 50
             for i in range(num_guided_samples):
                 suggested_params = bayesian_optimizer.suggest()
                 y = MultilevelQuadratic.evaluate(suggested_params)
@@ -296,10 +296,9 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         random_state = random.Random()
-        num_restarts = 1
-        has_failed = False
+        num_restarts = 10
         for restart_num in range(num_restarts):
-            try:
+
                 # Let's set up random seeds so that we can easily repeat failed experiments
                 #
                 random_state.seed(restart_num)
@@ -330,16 +329,6 @@ class TestBayesianOptimizer(unittest.TestCase):
 
                 best_config_point, best_objective = bayesian_optimizer.optimum()
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
-            except Exception as e:
-                has_failed = True
-                error_file_path = os.path.join(os.getcwd(), "temp", "test_errors.txt")
-                with open(error_file_path, 'a') as out_file:
-                    out_file.write(
-                        "##################################################################################\n")
-                    out_file.write(f"{restart_num} failed.\n")
-                    out_file.write(f"Exception: {e}")
-        self.assertFalse(has_failed)
-
 
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = BayesianOptimizerConfig.DEFAULT

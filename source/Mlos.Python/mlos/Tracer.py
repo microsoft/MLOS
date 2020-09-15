@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+from contextlib import contextmanager
 import json
 import time
 
@@ -50,10 +51,16 @@ def trace():
     return tracing_decorator
 
 
+
 def add_trace_event(name, phase, category='', actor_id=None, thread_id=None, arguments=None):
     if global_values.tracer is not None:
         global_values.tracer.add_trace_event(name, phase, category=category, actor_id=actor_id, thread_id=thread_id, arguments=arguments)
 
+@contextmanager
+def traced(scope_name):
+    add_trace_event(name=scope_name, phase="B")
+    yield
+    add_trace_event(name=scope_name, phase="E")
 
 class Tracer:
     """ Collects a trace of events to be displayed by chrome://tracing.

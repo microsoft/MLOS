@@ -13,8 +13,6 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import \
     RegressionEnhancedRandomForestRegressionModel, \
     RegressionEnhancedRandomForestRegressionModelConfig
-from mlos.Optimizers.RegressionModels.SklearnLassoRegressionModelConfig import SklearnLassoRegressionModelConfig
-from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension
 from mlos.SynthethicFunctions.HierarchicalFunctions import MultilevelQuadratic
 import mlos.global_values as global_values
@@ -27,17 +25,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         global_values.declare_singletons()
 
     def setUp(self):
-        lasso_model_config = SklearnLassoRegressionModelConfig.DEFAULT
-        rf_model_config = SklearnRandomForestRegressionModelConfig.DEFAULT
-        self.model_config = \
-            RegressionEnhancedRandomForestRegressionModelConfig(
-                max_basis_function_degree=2,
-                min_abs_root_model_coef=0.02,
-                boosting_root_model_name=SklearnLassoRegressionModelConfig.__name__,
-                boosting_root_model_config=lasso_model_config,
-                random_forest_model_config=rf_model_config,
-                perform_initial_root_model_hyper_parameter_search=True,
-                perform_initial_random_forest_hyper_parameter_search=True)
+        self.model_config = RegressionEnhancedRandomForestRegressionModelConfig.DEFAULT
 
         self.test_case_globals = {
             '2d_X_input_space': SimpleHypergrid(
@@ -138,11 +126,12 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = 2
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
+        num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == (num_terms_in_polynomial, final_num_features), 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_terms_in_polynomial, num_terms_in_polynomial), 'Hat matrix shape is incorrect')
         self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
 
         # test if expected non-zero terms were found
         expected_fit_model_terms = {1, 2, 3, 5}
@@ -166,11 +155,12 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = 2
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
+        num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == (num_terms_in_polynomial, final_num_features), 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_terms_in_polynomial, num_terms_in_polynomial), 'Hat matrix shape is incorrect')
         self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
 
         # test fit coef match known coef
         y_coef_true = self.get_simple_quadratic_coefficients()
@@ -198,11 +188,12 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = 2
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
+        num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == (num_terms_in_polynomial, final_num_features), 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_terms_in_polynomial, num_terms_in_polynomial), 'Hat matrix shape is incorrect')
         self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
 
         # test gradient at X
         epsilon = 10 ** -2
@@ -227,11 +218,12 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = 2
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
+        num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == (num_terms_in_polynomial, final_num_features), 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_train_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_terms_in_polynomial, num_terms_in_polynomial), 'Hat matrix shape is incorrect')
         self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.fit_X_.shape == (num_train_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
 
         # generate new random sample to test predictions
         num_test_points = 50
@@ -265,10 +257,11 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
         num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * num_categorical_levels_expected
+        num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == (num_terms_in_polynomial, final_num_features), 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
         self.assertTrue(rerf.fit_X_.shape == (num_train_x, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_terms_in_polynomial, num_terms_in_polynomial), 'Hat matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
         self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
 
         # generate new random to test predictions
@@ -304,10 +297,11 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
         num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * num_categorical_levels_expected
+        num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == (num_terms_in_polynomial, final_num_features), 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
         self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_terms_in_polynomial, num_terms_in_polynomial), 'Hat matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
         self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
 
         # test gradient coefficients
@@ -360,10 +354,11 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         num_train_x = 100
         x_train_df, y_train_df = generate_points(num_train_x)
         rerf.fit(x_train_df, y_train_df)
+        num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == (28, 8), 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_train_x, 28), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (28, 28), 'Hat matrix shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.fit_X_.shape == (num_train_x, rerf.polynomial_features_powers_.shape[0]), 'Design matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
         self.assertTrue(rerf.polynomial_features_powers_.shape == (28, 8), 'PolynomalFeature.power_ shape is incorrect')
 
         # test predictions

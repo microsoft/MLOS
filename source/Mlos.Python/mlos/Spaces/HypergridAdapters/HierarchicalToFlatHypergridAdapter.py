@@ -45,22 +45,22 @@ class HierarchicalToFlatHypergridAdapter(HypergridAdapter):
     def target(self) -> Hypergrid:
         return self._target
 
-    def _translate_point(self, point: Point) -> Point:
+    def _project_point(self, point: Point) -> Point:
         return point.flat_copy()
 
-    def _untranslate_point(self, point: Point) -> Point:
+    def _unproject_point(self, point: Point) -> Point:
         unflattened_dict = {
             self._backward_name_mapping[dim_name]: value for dim_name, value in point
         }
         return Point(**unflattened_dict)
 
-    def _translate_dataframe(self, df: DataFrame, in_place: bool) -> DataFrame:
+    def _project_dataframe(self, df: DataFrame, in_place: bool) -> DataFrame:
         if in_place:
             df.rename(columns=self._forward_name_mapping, inplace=True, copy=False)
             return df
         return df.rename(columns=self._forward_name_mapping, inplace=in_place, copy=not in_place)
 
-    def _untranslate_dataframe(self, df: DataFrame, in_place: bool) -> DataFrame:
+    def _unproject_dataframe(self, df: DataFrame, in_place: bool) -> DataFrame:
         if in_place:
             # Apparently if we pass inplace=True, the rename returns None, otherwise it returns a new dataframe.
             #

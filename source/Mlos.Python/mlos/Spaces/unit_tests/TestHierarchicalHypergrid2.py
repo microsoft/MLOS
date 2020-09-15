@@ -95,15 +95,15 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
         """
         self.assertTrue(self.cache_param_space.name == 'cache_param_space')
 
-        subgrids_joined_on_cache_implementation_name_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.cache_param_space.guest_subgrids_by_pivot_dimension['cache_implementation_name'])
+        subgrids_joined_on_cache_implementation_name_dimension = set(joined_subgrid.subgrid for joined_subgrid in self.cache_param_space.joined_subgrids_by_pivot_dimension['cache_implementation_name'])
         self.assertTrue(self.lru_cache_param_space in subgrids_joined_on_cache_implementation_name_dimension)
         self.assertTrue(self.associative_cache_implementation_param_space in subgrids_joined_on_cache_implementation_name_dimension)
 
-        subgrids_joined_on_hash_function_name_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.associative_cache_implementation_param_space.guest_subgrids_by_pivot_dimension['hash_function_name'])
+        subgrids_joined_on_hash_function_name_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.associative_cache_implementation_param_space.joined_subgrids_by_pivot_dimension['hash_function_name'])
         self.assertTrue(self.mod_prime_hash_function_param_space in subgrids_joined_on_hash_function_name_dimension)
         self.assertTrue(self.lowest_bits_param_space in subgrids_joined_on_hash_function_name_dimension)
 
-        subgrids_joined_on_bucket_implementation_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.associative_cache_implementation_param_space.guest_subgrids_by_pivot_dimension['bucket_implementation'])
+        subgrids_joined_on_bucket_implementation_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.associative_cache_implementation_param_space.joined_subgrids_by_pivot_dimension['bucket_implementation'])
         self.assertTrue(self.binary_search_tree_param_space in subgrids_joined_on_bucket_implementation_dimension)
         self.assertTrue(self.linked_list_param_space in subgrids_joined_on_bucket_implementation_dimension)
 
@@ -139,6 +139,48 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
             except:
                 self.assertTrue(False)
 
+    def test_that_getitem_returns_subgrid(self):
+        """ Tests if we can use the __getitem__ operator to retrieve a subgrid.
+
+        :return:
+        """
+        lru_cache_param_space = self.cache_param_space['lru_cache_config']
+        for _ in range(1000):
+            self.assertTrue(lru_cache_param_space.random() in self.lru_cache_param_space)
+            self.assertTrue(self.lru_cache_param_space.random() in lru_cache_param_space)
+
+    def test_that_getitem_returns_dimensions(self):
+        """ Tests if we can use the __getitem__ operator to retrieve a dimension.
+
+        :return:
+        """
+        cache_implementation_dimension = self.cache_param_space["cache_implementation_name"]
+        self.assertTrue(cache_implementation_dimension ==CategoricalDimension(name='cache_implementation_name', values=['lru_cache', 'associative_cache']))
+        num_bits_dimension = self.cache_param_space["associative_cache_config"]["lowest_bits"]["num_bits"]
+        self.assertTrue(num_bits_dimension == self.lowest_bits_param_space["num_bits"])
+
+    def test_getitem_throws(self):
+        with self.assertRaises(KeyError):
+            self.cache_param_space["non_existent_dimension"]
+
+    def test_that_collision_throws(self):
+        """ Test that if we try to join on a subgrid that has the same name as an existing dimension, we throw.
+
+        This is because the __getitem__ can return either a dimension or a subgrid, so their names cannot collide.
+
+        :return:
+        """
+        with self.assertRaises(ValueError):
+            SimpleHypergrid(
+                name="collisions",
+                dimensions=[
+                    CategoricalDimension(name="associative_cache_config", values=[True, False]),
+                    CategoricalDimension(name='cache_implementation_name', values=['lru_cache', 'associative_cache'])
+                ]
+            ).join(
+                subgrid=self.associative_cache_implementation_param_space,
+                on_external_dimension=CategoricalDimension(name='cache_implementation_name', values=['associative_cache'])
+            )
 
 
 

@@ -59,7 +59,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
         self.bootstrap = bootstrap
 
         assert regressor_implementation == DecisionTreeRegressionModel.__name__
-        self.decision_tree_regression_model_config = DecisionTreeRegressionModelConfig.create_from_config_point(decision_tree_regression_model_config)
+        self.decision_tree_regression_model_config = decision_tree_regression_model_config
 
     @classmethod
     def contains(cls, config): # pylint: disable=unused-argument
@@ -182,7 +182,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         :return:
         """
         random_point = original_space.random()
-        dimensions_for_point = original_space.get_dimensions_for_point(random_point)
+        dimensions_for_point = original_space.get_dimensions_for_point(random_point, return_join_dimensions=False)
         selected_dimensions = random.sample(dimensions_for_point, min(len(dimensions_for_point), max_num_dimensions))
         flat_dimensions = []
         for dimension in selected_dimensions:
@@ -211,8 +211,8 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         """
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 
-        feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
-        target_values_pandas_frame = self._output_space_adapter.translate_dataframe(target_values_pandas_frame)
+        feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
+        target_values_pandas_frame = self._output_space_adapter.project_dataframe(target_values_pandas_frame)
 
         for i, tree in enumerate(self._decision_trees):
             # Let's filter out samples with missing values
@@ -270,7 +270,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         """
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
-        feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame)
+        feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame)
 
         # dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
