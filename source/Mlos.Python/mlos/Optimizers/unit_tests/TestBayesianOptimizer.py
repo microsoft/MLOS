@@ -121,7 +121,8 @@ class TestBayesianOptimizer(unittest.TestCase):
             # Register the observation with the optimizer
             bayesian_optimizer.register(input_values_df, target_values_df)
 
-        print(bayesian_optimizer.optimum()[1])
+        best_config_point, best_objective = bayesian_optimizer.optimum()
+        print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_optimum_before_register_error(self):
         input_space = SimpleHypergrid(

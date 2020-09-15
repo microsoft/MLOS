@@ -330,5 +330,5 @@ class TestBayesianOptimizer(unittest.TestCase):
             for _ in range(40):
                 run_optimization(optimizer)
             best_config_point, best_objective = bayesian_optimizer.optimum()
-            print(Optimum config: {best_config_point}, optimum objective: {best_objective})
+            print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
             self.assertLessEqual(sign * best_objective['function_value'], -5.5)
