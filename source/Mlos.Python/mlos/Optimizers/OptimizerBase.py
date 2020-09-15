@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
-from typing import Dict, Tuple
+from typing import Tuple
 
 import pandas as pd
 
