@@ -115,7 +115,8 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             # Register the observation with the optimizer
             bayesian_optimizer.register(input_values_df, target_values_df)
-        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()[1]}")
+        best_config_point, best_objective = bayesian_optimizer.optimum()
+        self.logger.info(f"Optimum: {best_objective} Best Configuration: {best_config_point}")
         trace_output_path = os.path.join(self.temp_dir, "PreHeatedTrace.json")
         self.logger.info(f"Writing trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
@@ -165,7 +166,8 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             bayesian_optimizer.register(input_values_df, target_values_df)
             if i > 20 and i % 20 == 0:
-                self.logger.info(f"[{i}/{num_guided_samples}] Optimum: {bayesian_optimizer.optimum()[1]}")
+                best_config_point, best_objective = bayesian_optimizer.optimum()
+                self.logger.info(f"[{i}/{num_guided_samples}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
 
         best_config, optimum = bayesian_optimizer.optimum()
         assert input_space.contains_point(best_config)
@@ -209,8 +211,8 @@ class TestBayesianOptimizer(unittest.TestCase):
                 })
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
-
-            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()[1]}")
+            best_config_point, best_objective = bayesian_optimizer.optimum()
+            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -260,7 +262,9 @@ class TestBayesianOptimizer(unittest.TestCase):
                     target_values_df = pd.DataFrame({'y': [y]})
                     bayesian_optimizer.register(input_values_df, target_values_df)
 
-                self.logger.info(f"[Restart: {restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()[1]}")
+                best_config_point, best_objective = bayesian_optimizer.optimum()
+                self.logger.info(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
+
             except Exception as e:
                 has_failed = True
                 error_file_path = os.path.join(os.getcwd(), "temp", "test_errors.txt")

@@ -276,9 +276,8 @@ class TestBayesianOptimizer(unittest.TestCase):
                 })
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
-
-            print(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()[1]}")
-
+            best_config_point, best_objective = bayesian_optimizer.optimum()
+            print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -328,7 +327,8 @@ class TestBayesianOptimizer(unittest.TestCase):
                     target_values_df = pd.DataFrame({'y': [y]})
                     bayesian_optimizer.register(input_values_df, target_values_df)
 
-                print(f"[Restart: {restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()[1]}")
+                best_config_point, best_objective = bayesian_optimizer.optimum()
+                print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
             except Exception as e:
                 has_failed = True
                 error_file_path = os.path.join(os.getcwd(), "temp", "test_errors.txt")
