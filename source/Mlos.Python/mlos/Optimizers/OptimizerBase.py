@@ -12,7 +12,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
 
 class OptimizerBase(ABC):
-    """ Defines the interface to all our optimizers.
+    """Defines the base class to all our optimizers.
 
     """
 
