@@ -61,7 +61,12 @@ class OptimizerBase(ABC):
 
         This could be either min or max, depending on the settings.
 
-        :return:
+        Returns
+        -------
+        best_config_point : Point
+            Configuration that corresponds to the optimum objective value.
+        best_objective : Point
+            Best objective value observed so far.
         """
         features_df, objectives_df = self.get_all_observations()
 
@@ -69,20 +74,11 @@ class OptimizerBase(ABC):
             index_of_best_target = objectives_df.idxmin()[0]
         else:
             index_of_best_target = objectives_df.idxmax()[0]
-        objective_name = self.optimization_problem.objectives[0].name
-        best_objective_value = objectives_df.loc[index_of_best_target][objective_name]
+        best_objective = Point.from_dataframe(objectives_df.loc[index_of_best_target])
+        best_config_point = Point.from_dataframe(features_df.loc[index_of_best_target])
 
-        param_names = [dimension.name for dimension in self.optimization_problem.parameter_space.dimensions]
-        params_for_best_objective = features_df.loc[index_of_best_target]
 
-        optimal_config_and_target = {
-            objective_name: best_objective_value,
-        }
-
-        for param_name in param_names:
-            optimal_config_and_target[param_name] = params_for_best_objective[param_name]
-
-        return optimal_config_and_target
+        return best_config_point, best_objective
 
     @abstractmethod
     def focus(self, subspace):

@@ -300,18 +300,6 @@ class SimpleBayesianOptimizer(OptimizerBase):
 
         return local_parameter_importance
 
-    def optimum(self, stay_focused=False):
-        # TODO: add arguments to set context
-        self._optimizer._space._bounds = self._full_feature_space_bounds
-
-        if stay_focused and self.focused:
-            self._optimizer._space._bounds = self._format_parameter_bounds(self._focused_parameter_space_bounds)
-
-        optimal_config_and_target = self._optimizer.max
-        if self.minimize:
-            optimal_config_and_target['target'] = -optimal_config_and_target['target']
-        return optimal_config_and_target
-
     def focus(self, subspace):
         assert subspace in self.parameter_space
         parameter_bounds = self._format_search_space(subspace)
