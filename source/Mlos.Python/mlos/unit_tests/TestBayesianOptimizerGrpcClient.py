@@ -169,6 +169,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
     def optimize_quadratic(self, optimizer, num_iterations):
         registered_features_df = None
         registered_objectives_df = None
+        old_optimum = np.inf
         for _ in range(num_iterations):
             params = optimizer.suggest()
             params_dict = params.to_dict()
@@ -176,6 +177,12 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             prediction = optimizer.predict(features_df)
             prediction_df = prediction.get_dataframe()
+
+            best_params, optimum = optimizer.optimum()
+            # ensure current optimum doesn't go up
+            assert optimum <= old_optimum
+            old_optimum = optimum
+            print(f"Best Params: {best_params}, Best Value: {optimum[y]}")
 
             y = quadratic(**params_dict)
             print(f"Params: {params}, Actual: {y}, Prediction: {str(prediction_df)}")
