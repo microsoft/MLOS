@@ -278,7 +278,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
             best_config_point, best_objective = bayesian_optimizer.optimum()
-            print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
+            print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -328,7 +328,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                     bayesian_optimizer.register(input_values_df, target_values_df)
 
                 best_config_point, best_objective = bayesian_optimizer.optimum()
-                print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
+                print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = BayesianOptimizerConfig.DEFAULT
