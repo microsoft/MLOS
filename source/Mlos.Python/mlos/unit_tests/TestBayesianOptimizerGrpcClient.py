@@ -179,8 +179,6 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
             prediction = optimizer.predict(features_df)
             prediction_df = prediction.get_dataframe()
 
-
-
             y = quadratic(**params_dict)
             print(f"Params: {params}, Actual: {y}, Prediction: {str(prediction_df)}")
 
