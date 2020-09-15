@@ -167,7 +167,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             bayesian_optimizer.register(input_values_df, target_values_df)
             if i > 20 and i % 20 == 0:
                 best_config_point, best_objective = bayesian_optimizer.optimum()
-                self.logger.info(f"[{i}/{num_guided_samples}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
+                self.logger.info(f"[{i}/{num_guided_samples}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
         best_config, optimum = bayesian_optimizer.optimum()
         assert input_space.contains_point(best_config)
@@ -212,7 +212,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
             best_config_point, best_objective = bayesian_optimizer.optimum()
-            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
+            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -263,7 +263,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                     bayesian_optimizer.register(input_values_df, target_values_df)
 
                 best_config_point, best_objective = bayesian_optimizer.optimum()
-                self.logger.info(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objevtive: {best_objective}")
+                self.logger.info(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
             except Exception as e:
                 has_failed = True
@@ -329,5 +329,6 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             for _ in range(40):
                 run_optimization(optimizer)
-            print(optimizer.optimum()[1]['function_value'])
-            self.assertLessEqual(sign * optimizer.optimum()[1]['function_value'], -5.5)
+            best_config_point, best_objective = bayesian_optimizer.optimum()
+            print(Optimum config: {best_config_point}, optimum objective: {best_objective})
+            self.assertLessEqual(sign * best_objective['function_value'], -5.5)
