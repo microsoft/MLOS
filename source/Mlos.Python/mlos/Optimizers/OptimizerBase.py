@@ -74,8 +74,8 @@ class OptimizerBase(ABC):
             index_of_best_target = objectives_df.idxmin()[0]
         else:
             index_of_best_target = objectives_df.idxmax()[0]
-        best_objective = Point.from_dataframe(objectives_df.loc[index_of_best_target])
-        best_config_point = Point.from_dataframe(features_df.loc[index_of_best_target])
+        best_objective = Point.from_dataframe(objectives_df.loc[[index_of_best_target]])
+        best_config_point = Point.from_dataframe(features_df.loc[[index_of_best_target]])
 
 
         return best_config_point, best_objective

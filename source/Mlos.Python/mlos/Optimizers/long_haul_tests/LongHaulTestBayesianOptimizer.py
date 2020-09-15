@@ -115,8 +115,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             # Register the observation with the optimizer
             bayesian_optimizer.register(input_values_df, target_values_df)
-
-        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()}")
+        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()[1]}")
         trace_output_path = os.path.join(self.temp_dir, "PreHeatedTrace.json")
         self.logger.info(f"Writing trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
@@ -167,9 +166,9 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             bayesian_optimizer.register(input_values_df, target_values_df)
             if i > 20 and i % 20 == 0:
-                self.logger.info(f"[{i}/{num_guided_samples}] Optimum: {bayesian_optimizer.optimum()}")
+                self.logger.info(f"[{i}/{num_guided_samples}] Optimum: {bayesian_optimizer.optimum()[1]}")
 
-        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()}")
+        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()[1]}")
 
     def test_hierarchical_quadratic_cold_start(self):
 
@@ -207,7 +206,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
 
-            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
+            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()[1]}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -257,7 +256,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                     target_values_df = pd.DataFrame({'y': [y]})
                     bayesian_optimizer.register(input_values_df, target_values_df)
 
-                self.logger.info(f"[Restart: {restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
+                self.logger.info(f"[Restart: {restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()[1]}")
             except Exception as e:
                 has_failed = True
                 error_file_path = os.path.join(os.getcwd(), "temp", "test_errors.txt")
@@ -322,5 +321,5 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             for _ in range(40):
                 run_optimization(optimizer)
-            print(optimizer.optimum()['function_value'])
-            self.assertLessEqual(sign * optimizer.optimum()['function_value'], -5.5)
+            print(optimizer.optimum()[1]['function_value'])
+            self.assertLessEqual(sign * optimizer.optimum()[1]['function_value'], -5.5)
