@@ -298,37 +298,36 @@ class TestBayesianOptimizer(unittest.TestCase):
         random_state = random.Random()
         num_restarts = 10
         for restart_num in range(num_restarts):
+            # Let's set up random seeds so that we can easily repeat failed experiments
+            #
+            random_state.seed(restart_num)
+            BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
+            MultilevelQuadratic.CONFIG_SPACE.random_state = random_state
 
-                # Let's set up random seeds so that we can easily repeat failed experiments
-                #
-                random_state.seed(restart_num)
-                BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
-                MultilevelQuadratic.CONFIG_SPACE.random_state = random_state
+            optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
+            print(f"[Restart: {restart_num}/{num_restarts}] Creating a BayesianOptimimizer with the following config: ")
+            print(optimizer_config.to_json(indent=2))
+            bayesian_optimizer = BayesianOptimizer(
+                optimization_problem=optimization_problem,
+                optimizer_config=optimizer_config,
+                logger=self.logger
+            )
 
-                optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
-                print(f"[Restart: {restart_num}/{num_restarts}] Creating a BayesianOptimimizer with the following config: ")
-                print(optimizer_config.to_json(indent=2))
-                bayesian_optimizer = BayesianOptimizer(
-                    optimization_problem=optimization_problem,
-                    optimizer_config=optimizer_config,
-                    logger=self.logger
-                )
+            num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 50
+            for i in range(num_guided_samples):
+                suggested_params = bayesian_optimizer.suggest()
+                y = MultilevelQuadratic.evaluate(suggested_params)
+                print(f"[Restart: {restart_num}/{num_restarts}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
 
-                num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 50
-                for i in range(num_guided_samples):
-                    suggested_params = bayesian_optimizer.suggest()
-                    y = MultilevelQuadratic.evaluate(suggested_params)
-                    print(f"[Restart: {restart_num}/{num_restarts}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
+                input_values_df = pd.DataFrame({
+                    param_name: [param_value]
+                    for param_name, param_value in suggested_params
+                })
+                target_values_df = pd.DataFrame({'y': [y]})
+                bayesian_optimizer.register(input_values_df, target_values_df)
 
-                    input_values_df = pd.DataFrame({
-                        param_name: [param_value]
-                        for param_name, param_value in suggested_params
-                    })
-                    target_values_df = pd.DataFrame({'y': [y]})
-                    bayesian_optimizer.register(input_values_df, target_values_df)
-
-                best_config_point, best_objective = bayesian_optimizer.optimum()
-                print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
+            best_config_point, best_objective = bayesian_optimizer.optimum()
+            print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = BayesianOptimizerConfig.DEFAULT
