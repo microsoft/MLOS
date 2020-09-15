@@ -56,7 +56,7 @@ class OptimizerBase(ABC):
         """
         raise NotImplementedError("All subclasses must implement this method.")
 
-    def optimum(self, stay_focused=False) -> Dict: # TODO: make it return an object
+    def optimum(self, stay_focused=False) -> Dict: # pylint: disable=unused-argument  # TODO take context
         """ Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
