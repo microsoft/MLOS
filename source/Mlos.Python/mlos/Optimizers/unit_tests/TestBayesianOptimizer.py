@@ -305,6 +305,21 @@ class TestBayesianOptimizer(unittest.TestCase):
             MultilevelQuadratic.CONFIG_SPACE.random_state = random_state
 
             optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
+
+            # We can make this test more useful as a Unit Test by restricting its duration.
+            #
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 50
+            if optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__:
+                random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
+                random_forest_config.n_estimators = min(random_forest_config.n_estimators, 5)
+                decision_tree_config = random_forest_config.decision_tree_regression_model_config
+                decision_tree_config.min_samples_to_fit = 10
+                decision_tree_config.n_new_samples_before_refit = 10
+
+            if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+                optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
+
+
             print(f"[Restart: {restart_num}/{num_restarts}] Creating a BayesianOptimimizer with the following config: ")
             print(optimizer_config.to_json(indent=2))
             bayesian_optimizer = BayesianOptimizer(
@@ -313,7 +328,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 logger=self.logger
             )
 
-            num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 50
+            num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 10
             for i in range(num_guided_samples):
                 suggested_params = bayesian_optimizer.suggest()
                 y = MultilevelQuadratic.evaluate(suggested_params)
