@@ -9,7 +9,7 @@ from mlos.Tracer import trace
 from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
 
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
-from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, ExperimentDesignerConfig
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
@@ -43,7 +43,7 @@ class BayesianOptimizerConfig(metaclass=DefaultConfigMeta):
     )
 
 
-class BayesianOptimizer(OptimizerInterface):
+class BayesianOptimizer(OptimizerBase):
     """Generic Bayesian Optimizer based on regresson model
 
     Uses extra trees as surrogate model and confidence bound acquisition function by default.
@@ -69,7 +69,7 @@ class BayesianOptimizer(OptimizerInterface):
         # Let's initialize the optimizer.
         #
         assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
-        OptimizerInterface.__init__(self, optimization_problem)
+        OptimizerBase.__init__(self, optimization_problem)
 
         assert optimizer_config in BayesianOptimizerConfig.CONFIG_SPACE, "Invalid config."
         self.optimizer_config = optimizer_config
