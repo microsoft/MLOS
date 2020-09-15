@@ -148,7 +148,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         bayesian_optimizer.optimum()
 
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
-        """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
+        """Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
         :return:
         """
@@ -188,6 +188,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         num_iterations = 62
+        old_optimum = np.inf
         for i in range(num_iterations):
             suggested_params = bayesian_optimizer.suggest()
             suggested_params_dict = suggested_params.to_dict()
@@ -199,7 +200,14 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             bayesian_optimizer.register(input_values_df, target_values_df)
             if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
-                print(f"[{i}/{num_iterations}] Optimum: {bayesian_optimizer.optimum()[1]}")
+                _, all_targets = bayesian_optimizer.get_all_observations()
+                best_config, optimum = bayesian_optimizer.optimum()
+                print(f"[{i}/{num_iterations}] Optimum: {optimum}")
+                assert optimum.y == all_targets.min()[0]
+                assert input_space.contains_point(best_config)
+                assert output_space.contains_point(optimum)
+                assert optimum.y <= old_optimum
+                old_optimum = optimum.y
                 convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
                 random_forest_fit_state = convergence_state.surrogate_model_fit_state
                 random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics

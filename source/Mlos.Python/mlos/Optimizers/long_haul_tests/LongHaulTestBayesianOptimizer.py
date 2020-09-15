@@ -124,7 +124,6 @@ class TestBayesianOptimizer(unittest.TestCase):
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
-        :return:
         """
         input_space = SimpleHypergrid(
             name="input",
@@ -168,7 +167,12 @@ class TestBayesianOptimizer(unittest.TestCase):
             if i > 20 and i % 20 == 0:
                 self.logger.info(f"[{i}/{num_guided_samples}] Optimum: {bayesian_optimizer.optimum()[1]}")
 
-        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()[1]}")
+        best_config, optimum = bayesian_optimizer.optimum()
+        assert input_space.contains_point(best_config)
+        assert output_space.contains_point(optimum)
+        _, all_targets = bayesian_optimizer.get_all_observations()
+        assert optimum.y == all_targets.min()[0]
+        self.logger.info(f"Optimum: {optimum} best configuration: {best_config}")
 
     def test_hierarchical_quadratic_cold_start(self):
 
