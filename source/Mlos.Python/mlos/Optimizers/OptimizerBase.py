@@ -65,8 +65,10 @@ class OptimizerBase(ABC):
         -------
         best_config_point : Point
             Configuration that corresponds to the optimum objective value.
-        best_objective : Point
-            Best objective value observed so far.
+        best_objective_point : Point
+
+            Best objective value observed so far (corresponding to the best_config_point).
+
         """
         features_df, objectives_df = self.get_all_observations()
 
