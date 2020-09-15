@@ -41,6 +41,32 @@ jobs:
         set Configuration=Release
         scripts\build.windows.cmd
 
+  linux-dotnet-debug:
+    name: dotnet build/test in debug mode on Linux
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run dotnet build
+        shell: bash
+        run: make CONFIGURATION=Debug dotnet-build
+      - name: Run dotnet test
+        shell: bash
+        run: make CONFIGURATION=Debug dotnet-test
+
+  linux-dotnet-release:
+    name: dotnet build/test in release mode on Linux
+    runs-on: ubuntu-20.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run dotnet build
+        shell: bash
+        run: make CONFIGURATION=Release dotnet-build
+      - name: Run dotnet test
+        shell: bash
+        run: make CONFIGURATION=Release dotnet-test
+
   # The licenseheaders check depends on comparing the source tree, so we keep it in a
   # separate pipeline to ensure it starts from a clean state.
   # For simplicity, we only run this one on ubuntu.
