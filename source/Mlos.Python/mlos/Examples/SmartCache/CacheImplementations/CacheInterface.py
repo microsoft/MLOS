@@ -9,7 +9,7 @@ class CacheInterface(ABC):
 
     @abstractmethod
     def __init__(self):
-        ...  # pylint: disable=pointless-statement
+        pass
 
     @abstractmethod
     def __iter__(self):
