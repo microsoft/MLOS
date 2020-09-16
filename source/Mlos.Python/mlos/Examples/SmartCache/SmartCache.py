@@ -140,7 +140,7 @@ class SmartCache:
             return
 
         self.current_config = self.mlos_object.config
-        self.logger.info(f"Reconfiguring. New config values: {self.current_config.values.to_json()}")
+        self.logger.debug(f"Reconfiguring. New config values: {self.current_config.values.to_json()}")
 
         if self.current_config.values.implementation == 'LRU':
             self.cache_implementation = LruCache(max_size=self.current_config.values.lru_cache_config.cache_size, logger=self.logger)

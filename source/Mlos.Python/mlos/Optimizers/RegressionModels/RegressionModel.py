@@ -125,13 +125,13 @@ class RegressionModel(ABC):
             relative_absolute_error=relative_absolute_error,
             relative_squared_error=relative_squared_error,
             coefficient_of_determination=coefficient_of_determination,
-            adjusted_coefficient_of_determination=None,
+            # adjusted_coefficient_of_determination=None,
             prediction_90_ci_hit_rate=prediction_90_ci_hit_rate,
-            prediction_95_ci_hit_rate=None,
-            prediction_99_ci_hit_rate=None,
+            # prediction_95_ci_hit_rate=None,
+            # prediction_99_ci_hit_rate=None,
             sample_90_ci_hit_rate=sample_90_ci_hit_rate,
-            sample_95_ci_hit_rate=None,
-            sample_99_ci_hit_rate=None,
+            # sample_95_ci_hit_rate=None,
+            # sample_99_ci_hit_rate=None,
         )
         self.fit_state.set_gof_metrics(data_set_type, gof_metrics)
 

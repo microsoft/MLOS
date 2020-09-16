@@ -38,7 +38,7 @@ def build_docker_image(sa_password):
     popd()
 
 def run_docker_container():
-    command = "docker run --detach -p1433:1433 --name MlosOptimizerService mssql-server-linux-with-mlos-python"
+    command = "docker run --detach -p50051:50051 --name MlosOptimizerService mssql-server-linux-with-mlos-python"
     print(command)
     run_command_and_stream_output(command=command)
 

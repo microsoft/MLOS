@@ -2,9 +2,10 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+from abc import ABC, abstractmethod
 import random
 
-class Dimension:
+class Dimension(ABC):
     """ An abstract class representing a set of values a given parameter can take.
 
     This is a base class for: EmptyDimension, ContinuousDimension, DiscreteDimension, OrdinalDimension,
@@ -59,18 +60,33 @@ class Dimension:
     def random_state(self, value):
         self._random_state = value
 
+    @abstractmethod
     def copy(self):
         raise NotImplementedError
 
+    def __str__(self):
+        return self.to_string(include_name=True)
+
+    def __repr__(self):
+        return self.to_string(include_name=True)
+
+    @abstractmethod
+    def to_string(self, include_name=True):
+        raise NotImplementedError
+
+    @abstractmethod
     def __contains__(self, item):
         raise NotImplementedError
 
+    @abstractmethod
     def __len__(self):
         raise NotImplementedError
 
+    @abstractmethod
     def __iter__(self):
         raise NotImplementedError
 
+    @abstractmethod
     def __eq__(self, other):
         raise NotImplementedError
 
@@ -91,18 +107,23 @@ class Dimension:
         # innumerably large dimensions are so large that an attempt to iterate over them is impractical
         return len(self) > self.INNUMERABLY_LARGE
 
+    @abstractmethod
     def intersects(self, other):
         raise NotImplementedError
 
+    @abstractmethod
     def intersection(self, other):
         raise NotImplementedError
 
+    @abstractmethod
     def union(self, other):
         raise NotImplementedError
 
+    @abstractmethod
     def difference(self, other):
         raise NotImplementedError
 
+    @abstractmethod
     def linspace(self, num=100):
         """ Similar to numpy's linspace. Returns an iterable of num elements linearly distributed along the dimension.
 
@@ -111,5 +132,6 @@ class Dimension:
         """
         raise NotImplementedError
 
+    @abstractmethod
     def random(self):
         raise NotImplementedError

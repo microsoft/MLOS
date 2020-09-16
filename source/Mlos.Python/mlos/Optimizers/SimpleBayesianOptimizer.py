@@ -11,7 +11,7 @@ from bayes_opt import BayesianOptimization, UtilityFunction
 
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point, DefaultConfigMeta
 from .OptimizationProblem import OptimizationProblem
-from .OptimizerInterface import OptimizerInterface
+from .OptimizerBase import OptimizerBase
 
 
 class SimpleBayesianOptimizerConfig(metaclass=DefaultConfigMeta):
@@ -76,14 +76,14 @@ class SimpleBayesianOptimizerConfig(metaclass=DefaultConfigMeta):
         }
 
 
-class SimpleBayesianOptimizer(OptimizerInterface):
+class SimpleBayesianOptimizer(OptimizerBase):
     """ A toy bayesian optimizer based on Gaussian processes.
 
     """
 
     def __init__(self, optimization_problem: OptimizationProblem, optimizer_config: SimpleBayesianOptimizerConfig):
         assert len(optimization_problem.objectives) == 1, "This is a single-objective optimizer."
-        OptimizerInterface.__init__(self, optimization_problem)
+        OptimizerBase.__init__(self, optimization_problem)
         self.minimize = self.optimization_problem.objectives[0].minimize
 
         self._ordered_parameter_names = [
@@ -146,6 +146,9 @@ class SimpleBayesianOptimizer(OptimizerInterface):
     def observations(self):
         return self._observations
 
+    def get_all_observations(self):
+        return None
+
     def get_optimizer_convergence_state(self):
         return None
 
@@ -188,7 +191,7 @@ class SimpleBayesianOptimizer(OptimizerInterface):
         return suggested_params
 
     def register(self, params, target_value): # pylint: disable=arguments-differ
-        # TODO: make this conform to the OptimizerInterface
+        # TODO: make this conform to the OptimizerBase
 
         if params in self._registered_param_combos:
             return

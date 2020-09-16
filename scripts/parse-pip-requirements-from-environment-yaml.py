@@ -29,7 +29,6 @@ for item in data["dependencies"]:
             pattern=r'([^=])=([^=])',
             repl='\\1==\\2',
             string=item)
-        new_dependencies.append(new_item)
     elif item_type == dict:
         for item_key in item:
             if item_key != "pip":
@@ -40,9 +39,9 @@ for item in data["dependencies"]:
     else:
         raise Exception("Unhandled type: '{item_type}'".format(item_type = item_type))
 
-excluded_dependencies = ['python']
+excluded_dependencies = ['python', 'nb_conda_kernels']
 for item in new_dependencies:
-    if item in excluded_dependencies:
+    dep_name = re.split('[><=]+', item)[0]
+    if dep_name in excluded_dependencies:
         continue
-    else:
-        print(item)
+    print(item)

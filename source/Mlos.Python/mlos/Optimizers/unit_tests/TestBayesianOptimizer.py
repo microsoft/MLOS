@@ -15,8 +15,10 @@ from mlos.Logger import create_logger
 from mlos.Tracer import Tracer
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
@@ -33,18 +35,8 @@ class TestBayesianOptimizer(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """ Set's up all the objects needed to test the RandomSearchOptimizer
+        """ Sets up all the singletons needed to test the BayesianOptimizer.
 
-        To test the RandomSearchOptimizer we need to first construct:
-        * an optimization problem
-        * a utility function
-
-        To construct a utility function we need the same set up as in the TestConfidenceBoundUtilityFunction
-        test.
-
-
-
-        :return:
         """
         warnings.simplefilter("error")
         cls.temp_dir = os.path.join(os.getcwd(), "temp")
@@ -121,10 +113,35 @@ class TestBayesianOptimizer(unittest.TestCase):
             # Register the observation with the optimizer
             bayesian_optimizer.register(input_values_df, target_values_df)
 
-        print(bayesian_optimizer.optimum())
+        best_config_point, best_objective = bayesian_optimizer.optimum()
+        print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
+
+    def test_optimum_before_register_error(self):
+        input_space = SimpleHypergrid(
+            name="input",
+            dimensions=[ContinuousDimension(name='x', min=-10, max=10)])
+
+        output_space = SimpleHypergrid(
+            name="output",
+            dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)])
+        optimization_problem = OptimizationProblem(
+            parameter_space=input_space,
+            objective_space=output_space,
+            objectives=[Objective(name='y', minimize=True)]
+        )
+        bayesian_optimizer = BayesianOptimizer(
+            optimization_problem=optimization_problem,
+            logger=self.logger,
+            optimizer_config=BayesianOptimizerConfig.DEFAULT
+        )
+        with self.assertRaises(ValueError):
+            bayesian_optimizer.optimum()
+
+        bayesian_optimizer.register(pd.DataFrame({'x': [0.]}), pd.DataFrame({'y': [1.]}))
+        bayesian_optimizer.optimum()
 
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
-        """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
+        """Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
         :return:
         """
@@ -164,6 +181,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         num_iterations = 62
+        old_optimum = np.inf
         for i in range(num_iterations):
             suggested_params = bayesian_optimizer.suggest()
             suggested_params_dict = suggested_params.to_dict()
@@ -175,7 +193,14 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             bayesian_optimizer.register(input_values_df, target_values_df)
             if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
-                print(f"[{i}/{num_iterations}] Optimum: {bayesian_optimizer.optimum()}")
+                _, all_targets = bayesian_optimizer.get_all_observations()
+                best_config, optimum = bayesian_optimizer.optimum()
+                print(f"[{i}/{num_iterations}] Optimum: {optimum}")
+                assert optimum.y == all_targets.min()[0]
+                assert input_space.contains_point(best_config)
+                assert output_space.contains_point(optimum)
+                assert optimum.y <= old_optimum
+                old_optimum = optimum.y
                 convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
                 random_forest_fit_state = convergence_state.surrogate_model_fit_state
                 random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
@@ -226,13 +251,21 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         num_restarts = 2
         for restart_num in range(num_restarts):
+
+            optimizer_config = BayesianOptimizerConfig.DEFAULT
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
+            optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.min_samples_to_fit = 10
+            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 2
+
             bayesian_optimizer = BayesianOptimizer(
                 optimization_problem=optimization_problem,
-                optimizer_config=BayesianOptimizerConfig.DEFAULT,
+                optimizer_config=optimizer_config,
                 logger=self.logger
             )
 
-            num_guided_samples = 200
+            num_guided_samples = 50
             for i in range(num_guided_samples):
                 suggested_params = bayesian_optimizer.suggest()
                 y = MultilevelQuadratic.evaluate(suggested_params)
@@ -244,9 +277,8 @@ class TestBayesianOptimizer(unittest.TestCase):
                 })
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
-
-            print(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
-
+            best_config_point, best_objective = bayesian_optimizer.optimum()
+            print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -264,49 +296,53 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         random_state = random.Random()
-        num_restarts = 1
-        has_failed = False
+        num_restarts = 10
         for restart_num in range(num_restarts):
-            try:
-                # Let's set up random seeds so that we can easily repeat failed experiments
-                #
-                random_state.seed(restart_num)
-                BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
-                MultilevelQuadratic.CONFIG_SPACE.random_state = random_state
+            # Let's set up random seeds so that we can easily repeat failed experiments
+            #
+            random_state.seed(restart_num)
+            BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
+            MultilevelQuadratic.CONFIG_SPACE.random_state = random_state
 
-                optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
-                print(f"[Restart: {restart_num}/{num_restarts}] Creating a BayesianOptimimizer with the following config: ")
-                print(optimizer_config.to_json(indent=2))
-                bayesian_optimizer = BayesianOptimizer(
-                    optimization_problem=optimization_problem,
-                    optimizer_config=optimizer_config,
-                    logger=self.logger
-                )
+            optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
 
-                num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 50
-                for i in range(num_guided_samples):
-                    suggested_params = bayesian_optimizer.suggest()
-                    y = MultilevelQuadratic.evaluate(suggested_params)
-                    print(f"[Restart: {restart_num}/{num_restarts}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
+            # We can make this test more useful as a Unit Test by restricting its duration.
+            #
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 50
+            if optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__:
+                random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
+                random_forest_config.n_estimators = min(random_forest_config.n_estimators, 5)
+                decision_tree_config = random_forest_config.decision_tree_regression_model_config
+                decision_tree_config.min_samples_to_fit = 10
+                decision_tree_config.n_new_samples_before_refit = 10
 
-                    input_values_df = pd.DataFrame({
-                        param_name: [param_value]
-                        for param_name, param_value in suggested_params
-                    })
-                    target_values_df = pd.DataFrame({'y': [y]})
-                    bayesian_optimizer.register(input_values_df, target_values_df)
+            if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+                optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
 
-                print(f"[Restart: {restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
-            except Exception as e:
-                has_failed = True
-                error_file_path = os.path.join(os.getcwd(), "temp", "test_errors.txt")
-                with open(error_file_path, 'a') as out_file:
-                    out_file.write(
-                        "##################################################################################\n")
-                    out_file.write(f"{restart_num} failed.\n")
-                    out_file.write(f"Exception: {e}")
-        self.assertFalse(has_failed)
 
+            print(f"[Restart: {restart_num}/{num_restarts}] Creating a BayesianOptimimizer with the following config: ")
+            print(optimizer_config.to_json(indent=2))
+            bayesian_optimizer = BayesianOptimizer(
+                optimization_problem=optimization_problem,
+                optimizer_config=optimizer_config,
+                logger=self.logger
+            )
+
+            num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 10
+            for i in range(num_guided_samples):
+                suggested_params = bayesian_optimizer.suggest()
+                y = MultilevelQuadratic.evaluate(suggested_params)
+                print(f"[Restart: {restart_num}/{num_restarts}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
+
+                input_values_df = pd.DataFrame({
+                    param_name: [param_value]
+                    for param_name, param_value in suggested_params
+                })
+                target_values_df = pd.DataFrame({'y': [y]})
+                bayesian_optimizer.register(input_values_df, target_values_df)
+
+            best_config_point, best_objective = bayesian_optimizer.optimum()
+            print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = BayesianOptimizerConfig.DEFAULT

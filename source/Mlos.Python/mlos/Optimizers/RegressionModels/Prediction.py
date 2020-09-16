@@ -129,7 +129,7 @@ class Prediction:
         return pd.read_json(json_string, orient='index')
 
     def dataframe_to_json(self):
-        return self.get_dataframe().to_json(orient='index')
+        return self.get_dataframe().to_json(orient='index', double_precision=15)
 
     def __repr__(self):
         rows_as_dict = self._dataframe.head(self.num_head_rows_to_print).to_dict(orient='records')

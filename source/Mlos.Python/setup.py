@@ -16,7 +16,9 @@ setup(
         'pandas>=1.0.3',
         'pylint>=2.3.1',
         'pyodbc',
-        'grpcio-tools>=1.30.0'],
+        'grpcio-tools>=1.30.0',
+        'tensorboardX>=2.1'
+    ],
     author="Microsoft",
     author_email="mlos-maintainers@service.microsoft.com",
     description=("MLOS Python service and client for optimizing code constants"),

@@ -3,11 +3,14 @@
 # Licensed under the MIT License.
 #
 import numpy as np
+import pandas as pd
 from scipy.stats import t
 from mlos.Logger import create_logger
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point, DefaultConfigMeta
 from mlos.Tracer import trace
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
+
 
 class ConfidenceBoundUtilityFunctionConfig(metaclass=DefaultConfigMeta):
     CONFIG_SPACE = SimpleHypergrid(
@@ -22,22 +25,9 @@ class ConfidenceBoundUtilityFunctionConfig(metaclass=DefaultConfigMeta):
         alpha=0.01
     )
 
-    @classmethod
-    def create_from_config_point(cls, config_point):
-        config_key_value_pairs = {param_name: value for param_name, value in config_point}
-        return cls(**config_key_value_pairs)
 
-    def __init__(
-            self,
-            utility_function_name=_DEFAULT.utility_function_name,
-            alpha=_DEFAULT.alpha
-    ):
-        self.utility_function_name = utility_function_name
-        self.alpha = alpha
-
-
-class ConfidenceBoundUtilityFunction:
-    def __init__(self, function_config: ConfidenceBoundUtilityFunctionConfig, surrogate_model, minimize, logger=None):
+class ConfidenceBoundUtilityFunction(UtilityFunction):
+    def __init__(self, function_config: Point, surrogate_model, minimize, logger=None):
         if logger is None:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
@@ -71,4 +61,4 @@ class ConfidenceBoundUtilityFunction:
         else:
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
-        return utility_function_values
+        return pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'])

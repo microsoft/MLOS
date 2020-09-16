@@ -14,7 +14,9 @@ from mlos.Logger import create_logger
 from mlos.Tracer import Tracer
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
 from mlos.SynthethicFunctions.sample_functions import quadratic
@@ -115,8 +117,8 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             # Register the observation with the optimizer
             bayesian_optimizer.register(input_values_df, target_values_df)
-
-        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()}")
+        best_config_point, best_objective = bayesian_optimizer.optimum()
+        self.logger.info(f"Optimum: {best_objective} Best Configuration: {best_config_point}")
         trace_output_path = os.path.join(self.temp_dir, "PreHeatedTrace.json")
         self.logger.info(f"Writing trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
@@ -125,7 +127,6 @@ class TestBayesianOptimizer(unittest.TestCase):
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
-        :return:
         """
         input_space = SimpleHypergrid(
             name="input",
@@ -167,9 +168,15 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             bayesian_optimizer.register(input_values_df, target_values_df)
             if i > 20 and i % 20 == 0:
-                self.logger.info(f"[{i}/{num_guided_samples}] Optimum: {bayesian_optimizer.optimum()}")
+                best_config_point, best_objective = bayesian_optimizer.optimum()
+                self.logger.info(f"[{i}/{num_guided_samples}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
-        self.logger.info(f"Optimum: {bayesian_optimizer.optimum()}")
+        best_config, optimum = bayesian_optimizer.optimum()
+        assert input_space.contains_point(best_config)
+        assert output_space.contains_point(optimum)
+        _, all_targets = bayesian_optimizer.get_all_observations()
+        assert optimum.y == all_targets.min()[0]
+        self.logger.info(f"Optimum: {optimum} best configuration: {best_config}")
 
     def test_hierarchical_quadratic_cold_start(self):
 
@@ -206,8 +213,8 @@ class TestBayesianOptimizer(unittest.TestCase):
                 })
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
-
-            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
+            best_config_point, best_objective = bayesian_optimizer.optimum()
+            self.logger.info(f"[{restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -225,7 +232,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         random_state = random.Random()
-        num_restarts = 100
+        num_restarts = 200
         has_failed = False
         for restart_num in range(num_restarts):
             try:
@@ -236,6 +243,22 @@ class TestBayesianOptimizer(unittest.TestCase):
                 MultilevelQuadratic.CONFIG_SPACE.random_state = random_state
 
                 optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
+
+                # The goal here is to make sure the optimizer works with a lot of different configurations.
+                # So let's make sure each run is not too long.
+                #
+                optimizer_config.min_samples_required_for_guided_design_of_experiments = 50
+                if optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__:
+                    random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
+                    random_forest_config.n_estimators = min(random_forest_config.n_estimators, 5)
+                    decision_tree_config = random_forest_config.decision_tree_regression_model_config
+                    decision_tree_config.min_samples_to_fit = 10
+                    decision_tree_config.n_new_samples_before_refit = 10
+
+                if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+                    optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
+
+
                 self.logger.info(f"[Restart: {restart_num}/{num_restarts}] Creating a BayesianOptimimizer with the following config: ")
                 self.logger.info(f"Optimizer config: {optimizer_config.to_json(indent=2)}")
                 bayesian_optimizer = BayesianOptimizer(
@@ -257,7 +280,9 @@ class TestBayesianOptimizer(unittest.TestCase):
                     target_values_df = pd.DataFrame({'y': [y]})
                     bayesian_optimizer.register(input_values_df, target_values_df)
 
-                self.logger.info(f"[Restart: {restart_num}/{num_restarts}] Optimum: {bayesian_optimizer.optimum()}")
+                best_config_point, best_objective = bayesian_optimizer.optimum()
+                self.logger.info(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
+
             except Exception as e:
                 has_failed = True
                 error_file_path = os.path.join(os.getcwd(), "temp", "test_errors.txt")
@@ -322,5 +347,6 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             for _ in range(40):
                 run_optimization(optimizer)
-            print(optimizer.optimum()['function_value'])
-            self.assertLessEqual(sign * optimizer.optimum()['function_value'], -5.5)
+            best_config_point, best_objective = optimizer.optimum()
+            print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
+            self.assertLessEqual(sign * best_objective['function_value'], -5.5)

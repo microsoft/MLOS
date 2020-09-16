@@ -1,0 +1,52 @@
+{
+  "ObjectType": "SimpleHypergrid",
+  "Name": "emergency_buffer_config",
+  "Dimensions": [
+    {
+      "ObjectType": "DiscreteDimension",
+      "Name": "log2_emergency_buffer_size",
+      "Min": 0,
+      "Max": 16
+    },
+    {
+      "ObjectType": "CategoricalDimension",
+      "Name": "use_colors",
+      "Values": [
+        true,
+        false
+      ]
+    }
+  ],
+  "GuestSubgrids": {
+    "use_colors": {
+      "ObjectType": "set",
+      "Values": [
+        {
+          "ObjectType": "GuestSubgrid",
+          "Subgrid": {
+            "ObjectType": "SimpleHypergrid",
+            "Name": "emergency_buffer_color",
+            "Dimensions": [
+              {
+                "ObjectType": "CategoricalDimension",
+                "Name": "color",
+                "Values": [
+                  "Maroon",
+                  "Crimson",
+                  "Tanager"
+                ]
+              }
+            ]
+          },
+          "ExternalPivotDimension": {
+            "ObjectType": "CategoricalDimension",
+            "Name": "use_colors",
+            "Values": [
+              true
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

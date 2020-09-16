@@ -6,9 +6,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -80,14 +78,14 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
         }
 
         /// <summary>
-        /// Peaks at the next JsonTokenType without affecting the state of the reader.
+        /// Peeks at the next JsonTokenType without affecting the state of the reader.
         ///
         /// Note: the reader is a struct and is not passed by reference. Thus we get a copy
         /// here and are not affecting the state of the reader in the caller.
         /// </summary>
         /// <param name="reader"></param>
         /// <returns></returns>
-        protected JsonTokenType PeakNextTokenType(Utf8JsonReader reader)
+        protected JsonTokenType PeekNextTokenType(Utf8JsonReader reader)
         {
             if (!reader.Read())
             {

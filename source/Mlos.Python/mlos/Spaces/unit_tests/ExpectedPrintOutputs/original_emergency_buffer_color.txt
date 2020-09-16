@@ -1,0 +1,3 @@
+  Name: emergency_buffer_color
+  Dimensions:
+    color: {Maroon, Crimson, Tanager}

@@ -45,12 +45,9 @@ ARG SA_PASSWORD=DEFAULT_SA_PASSWORD
 RUN (/opt/mssql/bin/sqlservr --accept-eula & ) | grep -q "Service Broker manager has started" && \
     /opt/mssql-tools/bin/sqlcmd -S127.0.0.1 -Usa -P${SA_PASSWORD} -i ./Mlos.Python/mlos/MlosOptimizationServices/ModelsDatabase/SQLScripts/Schema.sql
 
-# Let's expose the SQL Server's port
+# Expose the optimizer's port
 #
-EXPOSE 1433
-
-# TODO: this has to be removed eventually, but it's better than what we have so far
-ENV SA_PASSWORD=$SA_PASSWORD
+EXPOSE 50051
 
 CMD /opt/mssql/bin/sqlservr & \
-    cd Mlos.Python; start_mlos_optimization_runtime launch --database-connection-string-file ./Secrets/local_docker_connection_string.json
+    cd Mlos.Python; start_optimizer_microservice launch

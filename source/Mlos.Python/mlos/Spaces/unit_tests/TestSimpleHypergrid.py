@@ -8,7 +8,7 @@ import unittest
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
 
-from mlos.Spaces.Hypergrids import SimpleHypergrid
+from mlos.Spaces.SimpleHypergrid import SimpleHypergrid
 
 
 class TestSimpleSpaces(unittest.TestCase):

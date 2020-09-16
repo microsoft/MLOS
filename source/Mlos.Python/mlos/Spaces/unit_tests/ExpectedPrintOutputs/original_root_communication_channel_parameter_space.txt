@@ -1,0 +1,18 @@
+  Name: communication_channel_parameter_space
+  Dimensions:
+    num_readers: {1, 2, ... , 64}
+    log2_buffer_size: {10, 11, ... , 24}
+    use_emergency_buffer: {True, False}
+
+  IF use_emergency_buffer IN {True} THEN (
+    Name: emergency_buffer_config
+    Dimensions:
+      log2_emergency_buffer_size: {0, 1, ... , 16}
+      use_colors: {True, False}
+
+    IF use_colors IN {True} THEN (
+      Name: emergency_buffer_color
+      Dimensions:
+        color: {Maroon, Crimson, Tanager}
+    )
+  )

@@ -1,0 +1,95 @@
+{
+  "ObjectType": "SimpleHypergrid",
+  "Name": "communication_channel_parameter_space",
+  "Dimensions": [
+    {
+      "ObjectType": "DiscreteDimension",
+      "Name": "num_readers",
+      "Min": 1,
+      "Max": 64
+    },
+    {
+      "ObjectType": "DiscreteDimension",
+      "Name": "log2_buffer_size",
+      "Min": 10,
+      "Max": 24
+    },
+    {
+      "ObjectType": "CategoricalDimension",
+      "Name": "use_emergency_buffer",
+      "Values": [
+        true,
+        false
+      ]
+    }
+  ],
+  "GuestSubgrids": {
+    "use_emergency_buffer": {
+      "ObjectType": "set",
+      "Values": [
+        {
+          "ObjectType": "GuestSubgrid",
+          "Subgrid": {
+            "ObjectType": "SimpleHypergrid",
+            "Name": "emergency_buffer_config",
+            "Dimensions": [
+              {
+                "ObjectType": "DiscreteDimension",
+                "Name": "log2_emergency_buffer_size",
+                "Min": 0,
+                "Max": 16
+              },
+              {
+                "ObjectType": "CategoricalDimension",
+                "Name": "use_colors",
+                "Values": [
+                  true,
+                  false
+                ]
+              }
+            ],
+            "GuestSubgrids": {
+              "use_colors": {
+                "ObjectType": "set",
+                "Values": [
+                  {
+                    "ObjectType": "GuestSubgrid",
+                    "Subgrid": {
+                      "ObjectType": "SimpleHypergrid",
+                      "Name": "emergency_buffer_color",
+                      "Dimensions": [
+                        {
+                          "ObjectType": "CategoricalDimension",
+                          "Name": "color",
+                          "Values": [
+                            "Maroon",
+                            "Crimson",
+                            "Tanager"
+                          ]
+                        }
+                      ]
+                    },
+                    "ExternalPivotDimension": {
+                      "ObjectType": "CategoricalDimension",
+                      "Name": "use_colors",
+                      "Values": [
+                        true
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "ExternalPivotDimension": {
+            "ObjectType": "CategoricalDimension",
+            "Name": "use_emergency_buffer",
+            "Values": [
+              true
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

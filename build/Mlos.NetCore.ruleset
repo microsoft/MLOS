@@ -10,6 +10,8 @@
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <!-- Prefix local calls with this -->
     <Rule Id="SA1101" Action="Hidden" />
+    <!-- Parameter must not span multiple lines. -->
+    <Rule Id="SA1118" Action="Hidden" />
     <!-- Comments should contain text -->
     <Rule Id="SA1120" Action="Hidden" />
     <!-- Do not use regions -->

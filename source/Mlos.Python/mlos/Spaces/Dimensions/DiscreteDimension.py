@@ -63,11 +63,10 @@ class DiscreteDimension(Dimension):
             return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.max}}}"
         if len(self) == 3:
             return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, {self.max}}}"
-        return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, {self.min + 2 * self.stride}, ... , {self.max}}}"
+        return f"{self.name + ': ' if include_name else ''}{{{self.min}, {self.min + self.stride}, ... , {self.max}}}"
 
     def __len__(self):
-        num_strides = int((self.max - self.min) / self.stride)
-        return num_strides + 1
+        return self.max - self.min + 1
 
     def __iter__(self):
         if self.is_innumerably_large:

@@ -32,10 +32,10 @@ class GoodnessOfFitMetrics(NamedTuple):
     relative_absolute_error: float = None
     relative_squared_error: float = None
     coefficient_of_determination: float = None
-    adjusted_coefficient_of_determination: float = None
+    # adjusted_coefficient_of_determination: float = None
     prediction_90_ci_hit_rate: float = None
-    prediction_95_ci_hit_rate: float = None
-    prediction_99_ci_hit_rate: float = None
+    # prediction_95_ci_hit_rate: float = None
+    # prediction_99_ci_hit_rate: float = None
     sample_90_ci_hit_rate: float = None
-    sample_95_ci_hit_rate: float = None
-    sample_99_ci_hit_rate: float = None
+    # sample_95_ci_hit_rate: float = None
+    # sample_99_ci_hit_rate: float = None

@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import pandas as pd
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid, DefaultConfigMeta
 from mlos.SynthethicFunctions.sample_functions import quadratic
 
@@ -27,7 +28,7 @@ class MultilevelQuadratic(metaclass=DefaultConfigMeta):
     CONFIG_SPACE = SimpleHypergrid(
         name="multilevel_quadratic_config",
         dimensions=[
-            CategoricalDimension(name="vertex_height", values=['low', 5, 15])
+            CategoricalDimension(name="vertex_height", values=["low", 5, 15])
         ]
     ).join(
         subgrid=SimpleHypergrid(
@@ -37,7 +38,7 @@ class MultilevelQuadratic(metaclass=DefaultConfigMeta):
                 ContinuousDimension(name="x_2", min=-100, max=100),
             ]
         ),
-        on_external_dimension=CategoricalDimension(name="vertex_height", values=['low'])
+        on_external_dimension=CategoricalDimension(name="vertex_height", values=["low"])
     ).join(
         subgrid=SimpleHypergrid(
             name="medium_quadratic_params",
@@ -74,7 +75,7 @@ class MultilevelQuadratic(metaclass=DefaultConfigMeta):
     @classmethod
     def evaluate(cls, config_params):
         assert config_params in cls.CONFIG_SPACE
-        if config_params.vertex_height == 'low':
+        if config_params.vertex_height == "low":
             return quadratic(
                 x_1=config_params.low_quadratic_params.x_1,
                 x_2=config_params.low_quadratic_params.x_2
@@ -88,3 +89,18 @@ class MultilevelQuadratic(metaclass=DefaultConfigMeta):
             x_1=config_params.high_quadratic_params.x_1,
             x_2=config_params.high_quadratic_params.x_2
         ) + config_params.vertex_height
+
+    @classmethod
+    def evaluate_df(cls, configs_df: pd.DataFrame):
+        lows = configs_df[configs_df['vertex_height'] == "low"]
+        y_for_lows = lows["low_quadratic_params.x_1"] ** 2 + lows["low_quadratic_params.x_1"] ** 2
+
+        mids = configs_df[configs_df['vertex_height'] == 5]
+        y_for_mids = mids["medium_quadratic_params.x_1"] ** 2 + mids["medium_quadratic_params.x_1"] ** 2
+
+        highs = configs_df[configs_df['vertex_height'] == 15]
+        y_for_highs = highs["high_quadratic_params.x_1"] ** 2 + highs["high_quadratic_params.x_1"] ** 2
+
+        all_ys = pd.concat([y_for_lows, y_for_mids, y_for_highs])
+        ys_df = pd.DataFrame(all_ys, columns=['y']).sort_index()
+        return ys_df

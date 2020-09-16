@@ -6,16 +6,16 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-
 using Mlos.SettingsSystem.Attributes;
-using Mlos.SettingsSystem.StdTypes;
 
 namespace SmartCache
 {
-    /// <summary>
-    /// TODO: learn to use and extend this.
-    /// </summary>
+    public enum CacheEvictionPolicy
+    {
+        LeastRecentlyUsed,
+        MostRecentlyUsed,
+    }
+
     [CodegenConfig]
     internal partial struct SmartCacheConfig
     {
@@ -23,28 +23,32 @@ namespace SmartCache
         internal long ConfigId;
 
         [ScalarSetting]
-        internal ulong TelemetryBitMask;
+        internal CacheEvictionPolicy EvictionPolicy;
 
         [ScalarSetting]
         internal int CacheSize;
     }
 
-    [Flags]
-    public enum TelemetryMasks : ulong
-    {
-        KeyAccessEvent = 1,
-        ThroughputMetrics = 2,
-    }
-
     [CodegenMessage]
     internal partial struct CacheRequestEventMessage
     {
-        // This is to uniquely identify which cache is being pounded.
-        //
-        internal ulong CacheAddress;
+        [ScalarSetting]
+        internal long ConfigId;
 
         // This is for the aggregator to build workload signature.
         //
-        internal ulong KeyValue;
+        [ScalarSetting]
+        internal ulong Key;
+
+        [ScalarSetting]
+        internal bool IsInCache;
+    }
+
+    /// <summary>
+    /// Ask optimizer for the new configuration.
+    /// </summary>
+    [CodegenMessage]
+    internal partial struct RequestNewConfigurationMesage
+    {
     }
 }

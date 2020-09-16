@@ -7,6 +7,7 @@ import unittest
 import warnings
 
 import grpc
+import numpy as np
 import pandas as pd
 
 import mlos.global_values as global_values
@@ -96,7 +97,18 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         self.assertTrue(new_optimizer.optimizer_config == bayesian_optimizer.optimizer_config)
 
         num_iterations = 100
-        self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=num_iterations)
+        registered_features_df, registered_objectives_df = self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=num_iterations)
+
+        # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
+        #
+        registered_features_df = pd.read_json(registered_features_df.to_json(orient='index', double_precision=15), orient='index')
+        registered_objectives_df = pd.read_json(registered_objectives_df.to_json(orient='index', double_precision=15), orient='index')
+
+        observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
+
+        self.assertTrue(registered_features_df.equals(observed_features_df))
+        self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
+
         convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
 
         # Now let's make sure we the convergence state is looks reasonable.
@@ -138,7 +150,17 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
                 optimization_problem=self.optimization_problem,
                 optimizer_config=optimizer_config
             )
-            self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=12)
+            registered_features_df, registered_objectives_df = self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=12)
+
+            # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
+            #
+            registered_features_df = pd.read_json(registered_features_df.to_json(orient='index', double_precision=15), orient='index')
+            registered_objectives_df = pd.read_json(registered_objectives_df.to_json(orient='index', double_precision=15), orient='index')
+
+            observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
+
+            self.assertTrue(registered_features_df.equals(observed_features_df))
+            self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
 
 
     @unittest.skip(reason="Not implemented yet.")
@@ -146,6 +168,9 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         ...
 
     def optimize_quadratic(self, optimizer, num_iterations):
+        registered_features_df = None
+        registered_objectives_df = None
+        old_optimum = np.inf
         for _ in range(num_iterations):
             params = optimizer.suggest()
             params_dict = params.to_dict()
@@ -159,3 +184,20 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             objectives_df = pd.DataFrame({'y': [y]})
             optimizer.register(features_df, objectives_df)
+
+            if registered_features_df is None:
+                registered_features_df = features_df
+            else:
+                registered_features_df = registered_features_df.append(features_df, ignore_index=True)
+
+            if registered_objectives_df is None:
+                registered_objectives_df = objectives_df
+            else:
+                registered_objectives_df = registered_objectives_df.append(objectives_df, ignore_index=True)
+
+            best_params, optimum = optimizer.optimum()
+            # ensure current optimum doesn't go up
+            assert optimum.y <= old_optimum
+            old_optimum = optimum.y
+            print(f"Best Params: {best_params}, Best Value: {optimum.y}")
+        return registered_features_df, registered_objectives_df

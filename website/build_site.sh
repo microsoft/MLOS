@@ -28,6 +28,7 @@ $pythonCmd -m pip install jupyter nbconvert==5.6.1
 # execute and render the notebooks to html
 # downgrade html output because hugo doesn't like raw html
 mkdir -p content/notebooks
+# Restricted set of notebooks that are rendered for inclusion on the webpage:
 notebooks='BayesianOptimization SmartCacheOptimization'
 for nb in $notebooks; do
     nb_path="$MLOS_ROOT/source/Mlos.Notebooks/$nb.ipynb"
@@ -48,6 +49,17 @@ done
 for f in content/notebooks/*.md; do
     base=$(basename "$f" '.md') # removes .md from file name
     sed -i "s/FILENAME/$base/g" "$f"
+done
+
+# Provide
+cat > content/notebooks/_index.md <<HERE
+# MLOS Sample Notebooks
+
+HERE
+for nb in $notebooks; do
+    cat >> content/notebooks/_index.md <<HERE
+- [${nb}](./${nb}.md)
+HERE
 done
 
 # Make some top level files available in the site.
@@ -88,20 +100,28 @@ for content_filepath in $(find content/ -type f -name '*.md'); do
     fi
 
     base_filepath=$(echo "$content_filepath" | sed 's|^content/||')
+
     parent_path=$(dirname "$base_filepath")
+    if [ "$parent_path" == '.' ]; then
+        parent_path=''
+    elif [ -n "$parent_path" ]; then
+        parent_path="${parent_path}/"
+    fi
 
     # 1. replace a special fake anchor with a link to the main github repo site
     # (this allows browsing back to the main published source from the website)
     # 2. convert relative paths to be relative to the website root instead
     # 3. strip the .md file ending to replace it with a trailing slash
     # (to be consistent with the hugo md -> html conversion)
+    # 4. Strip any unnecessary '/./' path components we introduce by doing that.
 
     # Also keep a backup for comparison/debugging purposes.
 
     sed -i.bak -r \
-        -e "s|\]\(([./]*[^:#)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}/\1)|g" \
-        -e "s|\]\(([./]*[^:)]+)\)|](/MLOS/${parent_path}/\1)|g" \
-        -e "s|\]\(([./]*[^:#)]+)\.md(#[^)]+)?\)|](\1/\2)|g" \
+        -e "s|\]\(([./]*[^:#)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}\1)|g" \
+        -e "s|\]\(([./]*[^:#)]+)(#[^)]*)?\)|](/MLOS/${parent_path}\1\2)|g" \
+        -e "s|\]\(([./]*[^:#)]+)\.md(#[^)]*)?\)|](\1/\2)|g" \
+        -e "s|\]\(([^)]*)/\./([^)]*)\)|](\1/\2)|g" \
         "$content_filepath"
 done
 
