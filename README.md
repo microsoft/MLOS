@@ -67,7 +67,7 @@ To achieve this MLOS provides:
     Once hooks are created in the target system, iteration on the external agent can be more rapidly developed and deployed.
 
 ## Python quickstart
-The easiest way to get started with MLOS is to just just the Python package.
+The easiest way to get started with MLOS is to just the Python package.
 You can find installation instructions in the [Prerequisites: Python Quickstart](./documentation/01-Prerequisites.md#python-quickstart).
 
 
