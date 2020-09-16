@@ -5,7 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console) - Mlos.Agent.Server",
+            "name": "(gdb) Attach - Mlos.UnitTest",
+            "type": "cppdbg",
+            "request": "attach",
+            "program":  "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": ".NET Core Launch (console) - Mlos.Agent.Server - Mlos.UnitTest",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "", //"build",
