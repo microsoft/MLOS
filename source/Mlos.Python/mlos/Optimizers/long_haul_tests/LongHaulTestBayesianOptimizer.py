@@ -171,11 +171,8 @@ class TestBayesianOptimizer(unittest.TestCase):
                 y = objective_function.evaluate_point(suggested_params)
                 self.logger.info(f"[{i}/{num_guided_samples}] {suggested_params}, y: {y}")
 
-                input_values_df = pd.DataFrame({
-                    param_name: [param_value]
-                    for param_name, param_value in suggested_params
-                })
-                target_values_df = pd.DataFrame({'y': [y]})
+                input_values_df = suggested_params.to_dataframe()
+                target_values_df = y.to_dataframe()
                 bayesian_optimizer.register(input_values_df, target_values_df)
             best_config_point, best_objective = bayesian_optimizer.optimum()
             self.logger.info(f"[{restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
@@ -239,11 +236,8 @@ class TestBayesianOptimizer(unittest.TestCase):
                 y = objective_function.evaluate_point(suggested_params)
                 self.logger.info(f"[Restart: {restart_num}/{num_restarts}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
 
-                input_values_df = pd.DataFrame({
-                    param_name: [param_value]
-                    for param_name, param_value in suggested_params
-                })
-                target_values_df = pd.DataFrame({'y': [y]})
+                input_values_df = suggested_params.to_dataframe()
+                target_values_df = y.to_dataframe()
                 bayesian_optimizer.register(input_values_df, target_values_df)
 
             best_config_point, best_objective = bayesian_optimizer.optimum()
