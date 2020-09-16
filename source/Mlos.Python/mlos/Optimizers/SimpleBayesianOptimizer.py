@@ -9,7 +9,8 @@ import pickle
 import numpy as np
 from bayes_opt import BayesianOptimization, UtilityFunction
 
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point, DefaultConfigMeta
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 from .OptimizationProblem import OptimizationProblem
 from .OptimizerBase import OptimizerBase
 

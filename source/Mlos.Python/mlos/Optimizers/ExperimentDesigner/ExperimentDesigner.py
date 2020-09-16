@@ -4,7 +4,8 @@
 #
 import numpy as np
 from mlos.Logger import create_logger
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid, DefaultConfigMeta
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 

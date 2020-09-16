@@ -14,7 +14,7 @@ from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import
     RegressionEnhancedRandomForestRegressionModel, \
     RegressionEnhancedRandomForestRegressionModelConfig
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension
-from mlos.SynthethicFunctions.HierarchicalFunctions import MultilevelQuadratic
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
 import mlos.global_values as global_values
 
 
@@ -326,33 +326,20 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(num_incorrect_terms == 0, 'Estimated gradient coefficients deviated further than expected from known coefficients')
 
     def test_lasso_hierarchical_categorical_predictions(self):
-        this_tests_input_space = MultilevelQuadratic.CONFIG_SPACE
+        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
+
+
         rerf = RegressionEnhancedRandomForestRegressionModel(
             model_config=self.model_config,
-            input_space=this_tests_input_space,
-            output_space=self.test_case_globals['output_space']
+            input_space=objective_function.parameter_space,
+            output_space=objective_function.output_space
         )
-
-        def generate_points(num_points):
-            x_list = []
-            output_dim_name = self.test_case_globals['output_space'].dimensions[0].name
-            y_dict = {output_dim_name: []}
-            for _ in range(num_points):
-                xi = this_tests_input_space.random()
-                yi = MultilevelQuadratic.evaluate(xi)
-                xi_df = pd.DataFrame({
-                    param_name: [param_value]
-                    for param_name, param_value in xi
-                })
-                x_list.append(xi_df)
-                y_dict[output_dim_name].append(yi)
-            x_df = pd.concat(x_list).reset_index(drop=True)
-            y_df = pd.DataFrame(y_dict)
-            return x_df, y_df
 
         # fit model with same degree as true y
         num_train_x = 100
-        x_train_df, y_train_df = generate_points(num_train_x)
+        x_train_df = objective_function.parameter_space.random_dataframe(num_samples=num_train_x)
+        y_train_df = objective_function.evaluate_dataframe(x_train_df)
         rerf.fit(x_train_df, y_train_df)
         num_detected_features = len(rerf.detected_feature_indices_)
 
@@ -363,7 +350,8 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
 
         # test predictions
         num_test_x = 10
-        x_test_df, y_test_df = generate_points(num_test_x)
+        x_test_df = objective_function.parameter_space.random_dataframe(num_samples=num_test_x)
+        y_test_df = objective_function.evaluate_dataframe(x_test_df)
 
         predictions = rerf.predict(x_test_df)
         pred_df = predictions.get_dataframe()

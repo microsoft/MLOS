@@ -13,7 +13,6 @@ from .Dimensions import DimensionCalculator
 from .Hypergrid import Hypergrid
 from .SimpleHypergrid import SimpleHypergrid
 from .Point import Point
-from .DefaultConfigMeta import DefaultConfigMeta
 
 __all__ = [
     "Point",
@@ -27,5 +26,4 @@ __all__ = [
     "CompositeDimension",
     "Hypergrid",
     "SimpleHypergrid",
-    "DefaultConfigMeta",
 ]

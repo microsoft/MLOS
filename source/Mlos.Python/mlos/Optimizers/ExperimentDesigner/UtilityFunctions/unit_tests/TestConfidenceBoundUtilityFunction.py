@@ -72,7 +72,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
-        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         prediction_df = self.sample_predictions.get_dataframe()
 
@@ -96,7 +96,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
 
             predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
             predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
-            dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
+            dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
             sign = -1 if minimize else 1
             prediction_df = self.sample_predictions.get_dataframe()
