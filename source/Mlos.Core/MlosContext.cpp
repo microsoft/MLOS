@@ -76,6 +76,10 @@ HRESULT MlosContext::RegisterSettingsAssembly(
         return HRESULT_FROM_WIN32(GetLastError());
     }
 #else
+    // For Linux we don't have system methods for discovering the location of dll files.
+    // Instead, we return null here and provide environment variable hooks in Mlos.Agent
+    // to aid searching for the settings registry assembly (akin to LD_LIBRARY_PATH).
+    //
     char* szApplicationFullPath = nullptr;
 #endif
 
@@ -321,6 +325,10 @@ HRESULT InterProcessMlosContextInitializer::Initialize()
     // #TODO const as codegen, pass a config struct ?
     //
     const size_t SharedMemorySize = 65536;
+
+    // TODO: Make these config regions configurable to support multiple processes.
+
+    // Note: Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
 
     HRESULT hr = m_globalMemoryRegionView.CreateOrOpen("Host_Mlos.GlobalMemory", SharedMemorySize);
     if (FAILED(hr))
