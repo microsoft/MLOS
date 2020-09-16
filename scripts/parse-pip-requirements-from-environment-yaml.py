@@ -29,7 +29,9 @@ for item in data["dependencies"]:
             pattern=r'([^=])=([^=])',
             repl='\\1==\\2',
             string=item)
-        new_dependencies.append(new_item)
+        if "conda" not in new_item:
+            # skip any conda related packages in pip
+            new_dependencies.append(new_item)
     elif item_type == dict:
         for item_key in item:
             if item_key != "pip":
