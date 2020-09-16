@@ -110,7 +110,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         return prediction
 
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
-        ...
+        ...  # pylint: disable=pointless-statement
 
     def reset_focus(self):# pylint: disable=no-self-use
-        ...
+        ...  # pylint: disable=pointless-statement

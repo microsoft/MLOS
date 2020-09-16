@@ -143,7 +143,7 @@ class BayesianOptimizer(OptimizerBase):
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
     def focus(self, subspace):
-        ...
+        ...  # pylint: disable=pointless-statement
 
     def reset_focus(self):
-        ...
+        ...  # pylint: disable=pointless-statement
