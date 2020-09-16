@@ -102,6 +102,9 @@ class CompositeDimension(Dimension):
     def pop_overlapping_chunks(self, chunk):
         return self._interval_tree.pop_overlapping_chunks(chunk)
 
+    def pop_adjacent_chunks(self, chunk):
+        return self._interval_tree.pop_adjacent_chunks(chunk)
+
     def push(self, chunk, skip_checks=False):
         if not skip_checks:
             overlapping_chunks = self._interval_tree.pop_overlapping_chunks(chunk)
