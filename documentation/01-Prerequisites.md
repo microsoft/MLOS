@@ -43,10 +43,6 @@ It's recommended to use the [Anaconda python distribution](https://www.anaconda.
 or the smaller [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
 After installing either anaconda or miniconda, you can create a new environment with all requirements for the examples using
 
-> Note currently MLOS needs Python 3.7, but by default conda packages Python 3.8.
-> For the moment, you may need to search the [installer archives](https://repo.anaconda.com/miniconda/) for a python 3.7 version.
-> e.g. [Miniconda3-py37_4.8.3-Windows-x86_64.exe](https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Windows-x86_64.exe)
-
 ```shell
 conda env create -f MLOS/source/Mlos.Notebooks/environment.yml
 ```

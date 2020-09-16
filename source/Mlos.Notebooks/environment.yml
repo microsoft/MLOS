@@ -15,7 +15,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  - python
+  - python=3.7
   - pip:
     - grpcio-tools==1.30.0
     - bayesian-optimization==1.0.1
