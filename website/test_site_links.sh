@@ -84,7 +84,39 @@ if [ -n "$linklint_output" ]; then
     echo "$linklint_output"
     exit 1
 else
-    echo "OK: Link lint checks passed."
+    echo "OK: Basic link lint checks passed."
+fi
+
+# Now do anchor link checking.
+
+# To do this we need to tweak the site slightly for linklint's benefit.
+
+# Some special treatment for the base level index file, mostly to keep linklint
+# happy about checking anchors.
+# Without this it seems to get confused about /#foo anchors.
+sed -i.bak -r 's|<a href="#|<a href="/MLOS/#|g' public/index.html
+
+# Make / and /MLOS synonmous for the local checks.
+if [ -L public/MLOS ]; then
+    rm -f public/MLOS
+elif [ -e public/MLOS ]; then
+    echo "ERROR: public/MLOS already exists and si not a symlink." >&2
+    exit 1
+fi
+ln -s . public/MLOS
+
+linklint_output=$(linklint -quiet -silent -error -root public -local /@)
+
+# Cleanup after ourselves.
+rm -f public/index.html.bak
+rm -f public/MLOS
+
+if [ -n "$linklint_output" ]; then
+    echo "ERROR: local anchor link issues found:" >&2
+    echo "$linklint_output"
+    exit 1
+else
+    echo "OK: Local anchor link lint checks passed."
 fi
 
 exit 0
