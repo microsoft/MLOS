@@ -6,9 +6,10 @@ These are one-time setup instructions that should be executed prior to following
 
 - [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
   - [Contents](#contents)
+  - [Cloning the repository](#clone-the-repository)
+  - [Python quickstart](#python-quickstart)
   - [Linux](#linux)
     - [Linux Distribution Requirements](#linux-distribution-requirements)
-    - [Clone the repository](#clone-the-repository)
     - [Option 1: Linux Docker Build Env](#option-1-linux-docker-build-env)
       - [Install Docker](#install-docker)
       - [Build the Docker Image](#build-the-docker-image)
@@ -16,15 +17,59 @@ These are one-time setup instructions that should be executed prior to following
     - [Install Python on Linux](#install-python-on-linux)
       - [Option 1: Docker Python Install](#option-1-docker-python-install)
       - [Option 2: Using Conda](#option-2-using-conda)
-      - [Option 3: Manual Python Install](#option-3-manual-python-install)
   - [Windows](#windows)
-    - [Step 1: Clone the repository](#step-1-clone-the-repository)
-    - [Step 2: Install Python](#step-2-install-python)
-    - [Step 3: Install Docker on Windows](#step-3-install-docker-on-windows)
-    - [Step 4: Install Windows Build Tools](#step-4-install-windows-build-tools)
+    - [Step 1: Install Python](#step-1-install-python)
+    - [Step 2: Install Docker on Windows](#step-2-install-docker-on-windows)
+    - [Step 3: Install Windows Build Tools](#step-3-install-windows-build-tools)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
+
+
+## Clone the repository
+
+Make sure you have [git](https://git-scm.com/) installed and clone the repo:
+
+```shell
+git clone https://github.com/microsoft/MLOS.git
+cd MLOS
+```
+
+## Python quickstart
+
+Some of the examples require only the installation of the `mlos` Python library, which is easy to install on any operating system.
+
+It's recommended to use the [Anaconda python distribution](https://www.anaconda.com/products/individual).
+or the smaller [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
+After installing either anaconda or miniconda, you can create a new environment with all requirements for the examples using
+
+> Note currently MLOS needs Python 3.7, but by default conda packages Python 3.8.
+> For the moment, you may need to search the [installer archives](https://repo.anaconda.com/miniconda/) for a python 3.7 version.
+> e.g. [Miniconda3-py37_4.8.3-Windows-x86_64.exe](https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Windows-x86_64.exe)
+
+```shell
+conda env create -f MLOS/source/Mlos.Notebooks/environment.yml
+```
+
+The environment will be called `mlos_python_environment` and you can activate it as follows:
+
+```shell
+conda activate mlos_python_environment
+```
+
+Use `pip` to install the Python library:
+
+```shell
+pip install MLOS/source/Mlos.Python/
+```
+
+After this installation, you can run any of the Python-only example notebooks. To do so you can:
+
+```shell
+jupyter-notebook --notebook-dir=MLOS/source/Mlos.Notebooks
+```
+
+Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](./source/Mlos.Notebooks/BayesianOptimization.ipynb#mlos-github-tree-view).
 
 ## Linux
 
@@ -38,20 +83,6 @@ All of them require `git` and, of course, a Linux installation:
 
 > Other distros/versions may work, but are untested.
 
-### Clone the repository
-
-Make sure you have `git` available:
-
-```sh
-apt-get -y install git
-```
-
-Clone the repository:
-
-```sh
-git clone https://github.com/microsoft/MLOS.git
-cd MLOS
-```
 
 ### Option 1: Linux Docker Build Env
 
@@ -121,61 +152,25 @@ If you used the [Docker build image](#docker-build-image) instructions you're do
 
 #### Option 2: Using Conda
 
-TODO
-
-#### Option 3: Manual Python Install
-
-1. Install Python 3.7
-
-    ```sh
-    # We need to add a special apt repository for Python 3.7 support:
-    sudo apt-get -y install \
-        software-properties-common apt-transport-https
-    sudo add-apt-repository -y ppa:deadsnakes/ppa
-    sudo apt-get update
-    sudo apt-get -y install python3.7
-    ```
-
-2. Install MLOS Python dependencies:
-
-    ```sh
-    # Also add some dependencies needed by some of the pip modules
-    sudo apt-get -y install python3-pip python3.7-dev \
-        build-essential libfreetype-dev unixodbc-dev
-    ```
-
-    ```sh
-    python3.7 -m pip install --upgrade pip
-    python3.7 -m pip install setuptools
-
-    python3.7 -m pip install \
-        -r source/Mlos.Python/requirements.txt
-    ```
+Follow the [Python Quickstart](#python-quickstart) above.
 
 ## Windows
 
 MLOS is easiest to use on Windows 10, Version 1903 (March 2019) or newer.
 
-### Step 1: Clone the repository
 
-[Install git](https://git-scm.com/) and clone the repo:
 
-```shell
-git clone https://github.com/microsoft/MLOS.git
-cd MLOS
-```
+### Step 1: Install Python
 
-### Step 2: Install Python
+Follow the [Python Quickstart](#python-quickstart) above.
 
-TODO
-
-### Step 3: Install Docker on Windows
+### Step 2: Install Docker on Windows
 
 Portions of MLOS use Docker. Please follow the instructions on the [Docker Website](https://www.docker.com/products/docker-desktop) to install it. Note that on Windows *Home*, you need a fairly recent Windows version to install Docker (Windows 10 1903 or newer).
 
 On Windows 10 v1903 or newer, we recommend you use the [Windows Subsytem for Linux v2](https://docs.microsoft.com/en-us/windows/wsl/install-win10#update-to-wsl-2) to run the containers. On older Windows 10, you can resort to the [Hyper-V support](https://docs.microsoft.com/en-us/virtualization/hyper-v-on-windows/) of Docker.
 
-### Step 4: Install Windows Build Tools
+### Step 3: Install Windows Build Tools
 
 Download and install Visual Studio 2019 (free) Community Edition:
 
