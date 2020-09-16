@@ -66,58 +66,10 @@ To achieve this MLOS provides:
 
     Once hooks are created in the target system, iteration on the external agent can be more rapidly developed and deployed.
 
-## Python only installation
+## Python quickstart
+The easiest way to get started with MLOS is to just the Python package.
+You can find installation instructions in the [Prerequisites: Python Quickstart](./documentation/01-Prerequisites.md#python-quickstart).
 
-Some of the examples require only the installation of the `mlos` Python library.
-These are simplified examples for getting started and do not use the shared memory infrastructure for cross language/process interactions.
-
-First, download the MLOS code using git:
-
-```shell
-git clone https://github.com/microsoft/MLOS.git
-cd MLOS
-```
-
-For this simplified installation, it's recommended to use the [Anaconda python distribution](https://www.anaconda.com/products/individual).
-For a slimmer installation experience, you can also use the [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
-After installing either anaconda or miniconda, you can create a new environment with all requirements for the examples using
-
-> Note currently MLOS needs Python 3.7, but by default conda packages Python 3.8.
-> For the moment, you may need to search the [installer archives](https://repo.anaconda.com/miniconda/) for a python 3.7 version.
-> e.g. [Miniconda3-py37_4.8.3-Windows-x86_64.exe](https://repo.anaconda.com/miniconda/Miniconda3-py37_4.8.3-Windows-x86_64.exe)
-
-```shell
-conda env create -f MLOS/source/Mlos.Notebooks/environment.yml
-```
-
-The environment will be called `mlos_python_environment` and you can activate it as follows:
-
-```shell
-conda activate mlos_python_environment
-```
-
-Use `pip` to install the Python library:
-
-```shell
-pip install MLOS/source/Mlos.Python/
-```
-
-Alternatively, you can also install the package directly without checking out the code:
-
-```shell
-pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
-```
-
-However, this does not include the examples and requires you to set up your environment manually.
-
-After this installation, you can run any of the Python-only example notebooks. To do so you can:
-
-```shell
-python -m ipykernel install --user --name=mlos_environment
-jupyter-notebook --notebook-dir=MLOS/source/Mlos.Notebooks
-```
-
-Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](./source/Mlos.Notebooks/BayesianOptimization.ipynb#mlos-github-tree-view).
 
 ## Full Build (C# and C++ components)
 
