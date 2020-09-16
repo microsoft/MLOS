@@ -42,6 +42,6 @@ for item in data["dependencies"]:
 excluded_dependencies = ['python', 'nb_conda_kernels']
 for item in new_dependencies:
     dep_name = re.split('[><=]+', item)[0]
-+   if dep_name in excluded_dependencies:
+    if dep_name in excluded_dependencies:
         continue
     print(item)
