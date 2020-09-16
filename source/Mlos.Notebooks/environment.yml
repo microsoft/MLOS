@@ -12,7 +12,6 @@ dependencies:
   - jupyterlab
   - jupyter
   - ipykernel
-  - nb_conda_kernels
   - matplotlib
   - seaborn
   - python=3.7
