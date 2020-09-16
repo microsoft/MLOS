@@ -15,10 +15,10 @@ from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
 from mlos.Logger import create_logger
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid
-from mlos.SynthethicFunctions.sample_functions import quadratic
 
 
 class TestBayesianOptimizerGrpcClient(unittest.TestCase):
@@ -42,30 +42,14 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
         self.optimizer_monitor = OptimizerMonitor(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 
-        # Define the optimization problem.
-        #
-        input_space = SimpleHypergrid(
-            name="input",
-            dimensions=[
-                ContinuousDimension(name='x_1', min=-100, max=100),
-                ContinuousDimension(name='x_2', min=-100, max=100)
-            ]
-        )
-
-        output_space = SimpleHypergrid(
-            name="output",
-            dimensions=[
-                ContinuousDimension(name='y', min=-math.inf, max=math.inf)
-            ]
-        )
+        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        self.objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
 
         self.optimization_problem = OptimizationProblem(
-            parameter_space=input_space,
-            objective_space=output_space,
+            parameter_space=self.objective_function.parameter_space,
+            objective_space=self.objective_function.output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
-
-
 
     def tearDown(self):
         """ We need to tear down the gRPC server here.
@@ -172,28 +156,25 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         registered_objectives_df = None
         old_optimum = np.inf
         for _ in range(num_iterations):
-            params = optimizer.suggest()
-            params_dict = params.to_dict()
-            features_df = pd.DataFrame(params_dict, index=[0])
-
-            prediction = optimizer.predict(features_df)
+            suggested_params = optimizer.suggest()
+            suggested_params_df = suggested_params.to_dataframe()
+            prediction = optimizer.predict(suggested_params_df)
             prediction_df = prediction.get_dataframe()
 
-            y = quadratic(**params_dict)
-            print(f"Params: {params}, Actual: {y}, Prediction: {str(prediction_df)}")
+            y = self.objective_function.evaluate_point(suggested_params)
 
-            objectives_df = pd.DataFrame({'y': [y]})
-            optimizer.register(features_df, objectives_df)
+            print(f"Params: {suggested_params}, Actual: {y}, Prediction: {str(prediction_df)}")
+            optimizer.register(suggested_params_df, y.to_dataframe())
 
             if registered_features_df is None:
-                registered_features_df = features_df
+                registered_features_df = suggested_params_df
             else:
-                registered_features_df = registered_features_df.append(features_df, ignore_index=True)
+                registered_features_df = registered_features_df.append(suggested_params_df, ignore_index=True)
 
             if registered_objectives_df is None:
-                registered_objectives_df = objectives_df
+                registered_objectives_df = y.to_dataframe()
             else:
-                registered_objectives_df = registered_objectives_df.append(objectives_df, ignore_index=True)
+                registered_objectives_df = registered_objectives_df.append(y.to_dataframe(), ignore_index=True)
 
             best_params, optimum = optimizer.optimum()
             # ensure current optimum doesn't go up

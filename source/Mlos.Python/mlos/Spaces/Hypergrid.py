@@ -52,7 +52,7 @@ class Hypergrid(ABC):
 
     def random_dataframe(self, num_samples):
         config_dicts = [
-            {dim_name: value for dim_name, value in self.random()}
+            self.random().to_dict()
             for _ in range(num_samples)
         ]
         return pd.DataFrame(config_dicts)

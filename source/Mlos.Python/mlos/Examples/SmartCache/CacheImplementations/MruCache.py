@@ -3,7 +3,8 @@
 # Licensed under the MIT License.
 #
 from mlos.Examples.SmartCache.CacheImplementations.XruCache import XruCache
-from mlos.Spaces import DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
+from mlos.Spaces import DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 
 class MruCacheConfig(metaclass=DefaultConfigMeta):
     CONFIG_SPACE = SimpleHypergrid(

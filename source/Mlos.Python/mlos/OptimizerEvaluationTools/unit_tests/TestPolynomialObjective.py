@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 from scipy import stats
 
-from mlos.SynthethicFunctions.PolynomialObjective import PolynomialObjective
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 
 import mlos.global_values as global_values
 
@@ -60,7 +60,7 @@ class TestPolynomialObjective(unittest.TestCase):
             seed=shortcut['seed'],
             max_degree=shortcut['rand_max_degree'],
             coefficient_domain_min=shortcut['coefficient_focus'],
-            coefficient_domain_max=shortcut['coefficient_focus'] + shortcut['epsilon'],
+            coefficient_domain_width=shortcut['epsilon'],
             input_domain_dimension=shortcut['rand_input_domain_dim']
         )
 
@@ -70,7 +70,7 @@ class TestPolynomialObjective(unittest.TestCase):
             seed=shortcut['seed'],
             max_degree=shortcut['rand_max_degree'],
             coefficient_domain_min=shortcut['coefficient_focus'],
-            coefficient_domain_max=shortcut['coefficient_focus'] + shortcut['epsilon'],
+            coefficient_domain_width=shortcut['epsilon'],
             input_domain_dimension=shortcut['rand_input_domain_dim'],
             include_mixed_coefficients=False
         )
@@ -81,7 +81,7 @@ class TestPolynomialObjective(unittest.TestCase):
             seed=shortcut['seed'],
             max_degree=shortcut['rand_max_degree'],
             coefficient_domain_min=shortcut['coefficient_focus'],
-            coefficient_domain_max=shortcut['coefficient_focus'] + shortcut['epsilon'],
+            coefficient_domain_width=shortcut['epsilon'],
             input_domain_dimension=shortcut['rand_input_domain_dim'],
             include_noise=True,
             noise_coefficient_of_variation=shortcut['noise']

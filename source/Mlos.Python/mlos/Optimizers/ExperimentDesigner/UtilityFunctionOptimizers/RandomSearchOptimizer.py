@@ -8,7 +8,8 @@ from mlos.Tracer import trace
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
-from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point, DefaultConfigMeta
+from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 
 
 class RandomSearchOptimizerConfig(metaclass=DefaultConfigMeta):
