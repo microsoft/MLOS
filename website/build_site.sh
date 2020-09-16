@@ -28,6 +28,7 @@ $pythonCmd -m pip install jupyter nbconvert==5.6.1
 # execute and render the notebooks to html
 # downgrade html output because hugo doesn't like raw html
 mkdir -p content/notebooks
+# Restricted set of notebooks that are rendered for inclusion on the webpage:
 notebooks='BayesianOptimization SmartCacheOptimization'
 for nb in $notebooks; do
     nb_path="$MLOS_ROOT/source/Mlos.Notebooks/$nb.ipynb"
@@ -48,6 +49,17 @@ done
 for f in content/notebooks/*.md; do
     base=$(basename "$f" '.md') # removes .md from file name
     sed -i "s/FILENAME/$base/g" "$f"
+done
+
+# Provide
+cat > content/notebooks/_index.md <<HERE
+# MLOS Sample Notebooks
+
+HERE
+for nb in $notebooks; do
+    cat >> content/notebooks/_index.md <<HERE
+- [${nb}](./${nb}.md)
+HERE
 done
 
 # Make some top level files available in the site.
@@ -95,10 +107,6 @@ for content_filepath in $(find content/ -type f -name '*.md'); do
     elif [ -n "$parent_path" ]; then
         parent_path="${parent_path}/"
     fi
-
-    echo "content_filepath: $content_filepath"
-    echo "base_filepath: $base_filepath"
-    echo "parent_path: $parent_path"
 
     # 1. replace a special fake anchor with a link to the main github repo site
     # (this allows browsing back to the main published source from the website)
