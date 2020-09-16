@@ -9,7 +9,7 @@ from mlos.Tracer import trace
 from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
 
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
-from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, ExperimentDesignerConfig
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
@@ -43,7 +43,7 @@ class BayesianOptimizerConfig(metaclass=DefaultConfigMeta):
     )
 
 
-class BayesianOptimizer(OptimizerInterface):
+class BayesianOptimizer(OptimizerBase):
     """Generic Bayesian Optimizer based on regresson model
 
     Uses extra trees as surrogate model and confidence bound acquisition function by default.
@@ -69,7 +69,7 @@ class BayesianOptimizer(OptimizerInterface):
         # Let's initialize the optimizer.
         #
         assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
-        OptimizerInterface.__init__(self, optimization_problem)
+        OptimizerBase.__init__(self, optimization_problem)
 
         assert optimizer_config in BayesianOptimizerConfig.CONFIG_SPACE, "Invalid config."
         self.optimizer_config = optimizer_config
@@ -141,27 +141,6 @@ class BayesianOptimizer(OptimizerInterface):
     @trace()
     def predict(self, feature_values_pandas_frame, t=None):
         return self.surrogate_model.predict(feature_values_pandas_frame)
-
-    @trace()
-    def optimum(self, stay_focused=False):
-        if self.optimization_problem.objectives[0].minimize:
-            index_of_best_target = self._target_values_df.idxmin()[0]
-        else:
-            index_of_best_target = self._target_values_df.idxmax()[0]
-        objective_name = self.optimization_problem.objectives[0].name
-        best_objective_value = self._target_values_df.loc[index_of_best_target][objective_name]
-
-        param_names = [dimension.name for dimension in self.optimization_problem.parameter_space.dimensions]
-        params_for_best_objective = self._feature_values_df.loc[index_of_best_target]
-
-        optimal_config_and_target = {
-            objective_name: best_objective_value,
-        }
-
-        for param_name in param_names:
-            optimal_config_and_target[param_name] = params_for_best_objective[param_name]
-
-        return optimal_config_and_target
 
     def focus(self, subspace):
         ...

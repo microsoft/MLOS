@@ -7,6 +7,7 @@ import unittest
 import warnings
 
 import grpc
+import numpy as np
 import pandas as pd
 
 import mlos.global_values as global_values
@@ -169,6 +170,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
     def optimize_quadratic(self, optimizer, num_iterations):
         registered_features_df = None
         registered_objectives_df = None
+        old_optimum = np.inf
         for _ in range(num_iterations):
             params = optimizer.suggest()
             params_dict = params.to_dict()
@@ -192,4 +194,10 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
                 registered_objectives_df = objectives_df
             else:
                 registered_objectives_df = registered_objectives_df.append(objectives_df, ignore_index=True)
+
+            best_params, optimum = optimizer.optimum()
+            # ensure current optimum doesn't go up
+            assert optimum.y <= old_optimum
+            old_optimum = optimum.y
+            print(f"Best Params: {best_params}, Best Value: {optimum.y}")
         return registered_features_df, registered_objectives_df

@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
-from typing import Dict, Tuple
+from typing import Tuple
 
 import pandas as pd
 
@@ -11,8 +11,8 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
 
-class OptimizerInterface(ABC):
-    """ Defines the interface to all our optimizers.
+class OptimizerBase(ABC):
+    """Defines the base class to all our optimizers.
 
     """
 
@@ -27,7 +27,7 @@ class OptimizerInterface(ABC):
 
     @abstractmethod
     def suggest(self, random=False, context=None) -> Point:
-        """ Suggest the next set of parameters to try.
+        """Suggest the next set of parameters to try.
 
         :return:
         """
@@ -35,7 +35,7 @@ class OptimizerInterface(ABC):
 
     @abstractmethod
     def register(self, feature_values_pandas_frame, target_values_pandas_frame) -> None:
-        """ Registers a new result with the optimizer.
+        """Registers a new result with the optimizer.
 
         :param params:
         :param target_value:
@@ -49,26 +49,44 @@ class OptimizerInterface(ABC):
 
     @abstractmethod
     def predict(self, feature_values_pandas_frame, t=None) -> Prediction:
-        """ Predict target value based on the parameters supplied.
+        """Predict target value based on the parameters supplied.
 
         :param params:
         :return:
         """
         raise NotImplementedError("All subclasses must implement this method.")
 
-    @abstractmethod
-    def optimum(self, stay_focused=False) -> Dict: # TODO: make it return an object
-        """ Return the optimal value found so far along with the related parameter values.
+    def optimum(self, stay_focused=False) -> Tuple[Point, Point]: # pylint: disable=unused-argument  # TODO take context
+        """Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
 
-        :return:
+        Returns
+        -------
+        best_config_point : Point
+            Configuration that corresponds to the optimum objective value.
+        best_objective_point : Point
+
+            Best objective value observed so far (corresponding to the best_config_point).
+
         """
-        raise NotImplementedError("All subclasses must implement this method.")
+        features_df, objectives_df = self.get_all_observations()
+        if not len(features_df):
+            raise ValueError("Can't compute optimum before registering any results.")
+
+        if self.optimization_problem.objectives[0].minimize:
+            index_of_best_target = objectives_df.idxmin()[0]
+        else:
+            index_of_best_target = objectives_df.idxmax()[0]
+        best_objective = Point.from_dataframe(objectives_df.loc[[index_of_best_target]])
+        best_config_point = Point.from_dataframe(features_df.loc[[index_of_best_target]])
+
+
+        return best_config_point, best_objective
 
     @abstractmethod
     def focus(self, subspace):
-        """ Force the optimizer to focus on a specific subspace.
+        """Force the optimizer to focus on a specific subspace.
 
         This could be a great way to pass priors to the optimizer, as well as play with the component for the developers.
 
@@ -79,7 +97,7 @@ class OptimizerInterface(ABC):
 
     @abstractmethod
     def reset_focus(self):
-        """ Changes focus back to the full search space.
+        """Changes focus back to the full search space.
 
         :return:
         """

@@ -11,7 +11,7 @@ from bayes_opt import BayesianOptimization, UtilityFunction
 
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Dimension, DiscreteDimension, SimpleHypergrid, Point, DefaultConfigMeta
 from .OptimizationProblem import OptimizationProblem
-from .OptimizerInterface import OptimizerInterface
+from .OptimizerBase import OptimizerBase
 
 
 class SimpleBayesianOptimizerConfig(metaclass=DefaultConfigMeta):
@@ -76,14 +76,14 @@ class SimpleBayesianOptimizerConfig(metaclass=DefaultConfigMeta):
         }
 
 
-class SimpleBayesianOptimizer(OptimizerInterface):
+class SimpleBayesianOptimizer(OptimizerBase):
     """ A toy bayesian optimizer based on Gaussian processes.
 
     """
 
     def __init__(self, optimization_problem: OptimizationProblem, optimizer_config: SimpleBayesianOptimizerConfig):
         assert len(optimization_problem.objectives) == 1, "This is a single-objective optimizer."
-        OptimizerInterface.__init__(self, optimization_problem)
+        OptimizerBase.__init__(self, optimization_problem)
         self.minimize = self.optimization_problem.objectives[0].minimize
 
         self._ordered_parameter_names = [
@@ -191,7 +191,7 @@ class SimpleBayesianOptimizer(OptimizerInterface):
         return suggested_params
 
     def register(self, params, target_value): # pylint: disable=arguments-differ
-        # TODO: make this conform to the OptimizerInterface
+        # TODO: make this conform to the OptimizerBase
 
         if params in self._registered_param_combos:
             return
@@ -299,18 +299,6 @@ class SimpleBayesianOptimizer(OptimizerInterface):
             local_parameter_importance[param_dimension.name] = predictions_in_neighborhood
 
         return local_parameter_importance
-
-    def optimum(self, stay_focused=False):
-        # TODO: add arguments to set context
-        self._optimizer._space._bounds = self._full_feature_space_bounds
-
-        if stay_focused and self.focused:
-            self._optimizer._space._bounds = self._format_parameter_bounds(self._focused_parameter_space_bounds)
-
-        optimal_config_and_target = self._optimizer.max
-        if self.minimize:
-            optimal_config_and_target['target'] = -optimal_config_and_target['target']
-        return optimal_config_and_target
 
     def focus(self, subspace):
         assert subspace in self.parameter_space

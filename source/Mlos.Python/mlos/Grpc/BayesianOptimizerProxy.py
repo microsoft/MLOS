@@ -10,12 +10,12 @@ import pandas as pd
 from mlos.global_values import deserialize_from_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Logger import create_logger
-from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
 
 
-class BayesianOptimizerProxy(OptimizerInterface):
+class BayesianOptimizerProxy(OptimizerBase):
     """ Client to remote BayesianOptimizer.
 
     Wraps all implementation details around communicating with the remote BayesianOptimizer.
@@ -37,7 +37,7 @@ class BayesianOptimizerProxy(OptimizerInterface):
             logger = create_logger("BayesianOptimizerClient")
         self.logger = logger
 
-        OptimizerInterface.__init__(self, optimization_problem)
+        OptimizerBase.__init__(self, optimization_problem)
         assert optimizer_config is not None
 
         self._grpc_channel = grpc_channel
@@ -98,7 +98,7 @@ class BayesianOptimizerProxy(OptimizerInterface):
         )
         prediction_response = self._optimizer_stub.Predict(prediction_request)
 
-        # To be compliant with the OptimizerInterface, we need to recover a single Prediction object and return it.
+        # To be compliant with the OptimizerBase, we need to recover a single Prediction object and return it.
         #
         objective_predictions_pb2 = prediction_response.ObjectivePredictions
         assert len(objective_predictions_pb2) == 1
@@ -108,9 +108,6 @@ class BayesianOptimizerProxy(OptimizerInterface):
         prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
         prediction.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
         return prediction
-
-    def optimum(self, stay_focused=False):  # pylint: disable=unused-argument,no-self-use
-        ...
 
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
         ...

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
 from mlos.OptimizerMonitoring.Tomograph.Heatmap import Heatmap
@@ -23,7 +23,7 @@ class ModelTomograph:
 
     def __init__(
             self,
-            optimizer: OptimizerInterface,
+            optimizer: OptimizerBase,
             resolution: int = DEFAULT_RESOLUTION,
             dimension_names_to_skip=None, # TODO: remove - add an adapter that always removes useless dimension names.
             figure_size=(10, 10)
@@ -50,7 +50,7 @@ class ModelTomograph:
                 is missing some important sectors of the search space.
 
 
-        :param optimizer: a reference to an object implementing the OptimizerInterface.
+        :param optimizer: a reference to an object implementing the OptimizerBase.
         :param resolution: maximum number of pixels along a dimension of each heatmap.
         :param dimension_names_to_skip: dimensions not to be plotted. Remove this. Consider a solution, where mutually exclusive subgrids are plotted on
                 separate figures.
