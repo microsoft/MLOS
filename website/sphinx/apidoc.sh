@@ -19,10 +19,10 @@ pythonCmd=$(getPythonCmd)
 echo "Installing dependencies for generating Python API docs"
 
 $pythonCmd -m pip install -e $MLOS_ROOT/source/Mlos.Python/
-$pythonCmd -m pip install sphinx sphinx_rtd_theme numpydoc matplotlib
 
-# Work around some issues with python not picking up the system installed package sometimes.
-$pythonCmd -m pip install 'kiwisolver>=1.0.2'
+# Make sure we have up to date versions of the necessary packages (and their
+# dependencies) rather than falling back to any system provided ones.
+$pythonCmd -m pip install --upgrade sphinx sphinx_rtd_theme numpydoc matplotlib kiwisolver pillow
 
 echo "Generating Python API rst files"
 
