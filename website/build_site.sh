@@ -88,7 +88,17 @@ for content_filepath in $(find content/ -type f -name '*.md'); do
     fi
 
     base_filepath=$(echo "$content_filepath" | sed 's|^content/||')
+
     parent_path=$(dirname "$base_filepath")
+    if [ "$parent_path" == '.' ]; then
+        parent_path=''
+    elif [ -n "$parent_path" ]; then
+        parent_path="${parent_path}/"
+    fi
+
+    echo "content_filepath: $content_filepath"
+    echo "base_filepath: $base_filepath"
+    echo "parent_path: $parent_path"
 
     # 1. replace a special fake anchor with a link to the main github repo site
     # (this allows browsing back to the main published source from the website)
@@ -100,11 +110,9 @@ for content_filepath in $(find content/ -type f -name '*.md'); do
     # Also keep a backup for comparison/debugging purposes.
 
     sed -i.bak -r \
-        -e "s|\]\(([./]*[^:#)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}/\1)|g" \
-        -e "s|\]\(([./]*[^:#)]+)(#[^)]*)?\)|](/MLOS/${parent_path}/\1\2)|g" \
+        -e "s|\]\(([./]*[^:#)]+)#mlos-github-tree-view\)|](https://github.com/microsoft/MLOS/tree/main/${parent_path}\1)|g" \
+        -e "s|\]\(([./]*[^:#)]+)(#[^)]*)?\)|](/MLOS/${parent_path}\1\2)|g" \
         -e "s|\]\(([./]*[^:#)]+)\.md(#[^)]*)?\)|](\1/\2)|g" \
-        -e "s|\]\(([^)]*)/\./([^)]*)\)|](\1/\2)|g" \
-        -e "s|\]\(([^)]*)/\./([^)]*)\)|](\1/\2)|g" \
         -e "s|\]\(([^)]*)/\./([^)]*)\)|](\1/\2)|g" \
         "$content_filepath"
 done
