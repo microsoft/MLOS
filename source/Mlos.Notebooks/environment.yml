@@ -1,4 +1,4 @@
-name: mlos_python_environment
+name: mlos_python_environment_38
 channels:
   - defaults
 dependencies:
@@ -15,7 +15,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  - python=3.7
+  - python=3.8
   - pip:
     - grpcio-tools==1.30.0
     - bayesian-optimization==1.0.1
