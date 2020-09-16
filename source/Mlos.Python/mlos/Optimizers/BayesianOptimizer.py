@@ -146,7 +146,6 @@ class BayesianOptimizer(OptimizerBase):
     def predict(self, feature_values_pandas_frame, t=None):
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
-<<<<<<< HEAD
     @trace()
     def optimum(self, empirical=True, context=None, stay_focused=False):
         """Return current optimum of optimization problem.
@@ -194,8 +193,6 @@ class BayesianOptimizer(OptimizerBase):
 
         return optimal_config_and_target
 
-=======
->>>>>>> main
     def focus(self, subspace):
         ...
 
