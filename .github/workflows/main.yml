@@ -56,6 +56,10 @@ jobs:
         timeout-minutes: 5
         shell: bash
         run: CONFIGURATION=${{ matrix.configuration }} make cmake-build
+      - name: Run cake build
+        timeout-minutes: 10
+        shell: bash
+        run: ./build.linux.sh
 
   # The licenseheaders check depends on comparing the source tree, so we keep it in a
   # separate pipeline to ensure it starts from a clean state.
