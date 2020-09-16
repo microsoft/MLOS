@@ -96,10 +96,6 @@ for content_filepath in $(find content/ -type f -name '*.md'); do
         parent_path="${parent_path}/"
     fi
 
-    echo "content_filepath: $content_filepath"
-    echo "base_filepath: $base_filepath"
-    echo "parent_path: $parent_path"
-
     # 1. replace a special fake anchor with a link to the main github repo site
     # (this allows browsing back to the main published source from the website)
     # 2. convert relative paths to be relative to the website root instead
