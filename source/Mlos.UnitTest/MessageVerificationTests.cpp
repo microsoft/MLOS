@@ -47,7 +47,7 @@ TEST(MessageVerification, VerifyVariableDataMessages)
         std::launch::async,
         [&controlChannel, &globalDispatchTable]
         {
-            controlChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+            controlChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         });
@@ -125,7 +125,7 @@ TEST(MessageVerification, DetectInvalidDataMessages)
         std::launch::async,
         [&controlChannel, &globalDispatchTable]
         {
-            controlChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+            controlChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         });

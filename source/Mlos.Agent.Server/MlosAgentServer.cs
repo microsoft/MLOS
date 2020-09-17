@@ -96,13 +96,13 @@ namespace Mlos.Agent.Server
                 Console.WriteLine("No executable given to launch.  Will wait for agent to connect independently.");
             }
 
-            var cancelationTokenSource = new CancellationTokenSource();
+            var cancellationTokenSource = new CancellationTokenSource();
 
-            Task grpcServerTask = CreateHostBuilder(Array.Empty<string>()).Build().RunAsync(cancelationTokenSource.Token);
+            Task grpcServerTask = CreateHostBuilder(Array.Empty<string>()).Build().RunAsync(cancellationTokenSource.Token);
 
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(
-                () => MainAgent.RunAgent(),
+                MainAgent.RunAgent,
                 TaskCreationOptions.LongRunning);
 
             if (targetProcessManager != null)
@@ -117,11 +117,11 @@ namespace Mlos.Agent.Server
             mlosAgentTask.Wait();
             mlosAgentTask.Dispose();
 
-            cancelationTokenSource.Cancel();
+            cancellationTokenSource.Cancel();
             grpcServerTask.Wait();
 
             grpcServerTask.Dispose();
-            cancelationTokenSource.Dispose();
+            cancellationTokenSource.Dispose();
 
             Console.WriteLine("Mlos.Agent exited.");
         }

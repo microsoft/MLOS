@@ -59,6 +59,91 @@ TEST(SharedChannel, VerifyBufferSize)
 }
 #endif // !DEBUG
 
+// Verify channel restart.
+//
+TEST(SharedChannel, VerifyChannelRestart)
+{
+    auto globalDispatchTable = GlobalDispatchTable();
+
+    // Define objects (used as a messages).
+    //
+    Mlos::UnitTest::Point point = { 13, 17 };
+
+    // Create the test channel.
+    //
+    TestFlatBuffer<128> buffer;
+    ChannelSynchronization sync = { 0 };
+    TestSharedChannel sharedChannel(sync, buffer, 128);
+
+    // Write the first message.
+    //
+    sharedChannel.SendMessage(point);
+
+    // Read the first message, do not advance the free region.
+    //
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+
+    // Write second message.
+    //
+    sharedChannel.SendMessage(point);
+
+    // Write the third message as partially written.
+    //
+    uint32_t writePosition = sync.WritePosition;
+    sharedChannel.SendMessage(point);
+    *reinterpret_cast<uint32_t*>(buffer.Pointer + writePosition) |= 1;
+
+    // Write the fourth message.
+    //
+    sharedChannel.SendMessage(point);
+
+    // Simulate start processing of the written frames.
+    //
+    sync.ReadPosition.store(sync.WritePosition.load());
+
+    // Simulate channel restart.
+    //
+    sharedChannel.InitializeChannel();
+
+    // First frame is fully processed.
+    // Read position points to first unprocessed frame.
+    //
+    EXPECT_EQ(sharedChannel.Sync.FreePosition, 24);
+    EXPECT_EQ(sharedChannel.Sync.ReadPosition, 24);
+
+    // Next message was fully written, expect it to be processed.
+    //
+    bool isProcessed = false;
+    ObjectDeserializationCallback::Mlos::UnitTest::Point_Callback = [&isProcessed](Proxy::Mlos::UnitTest::Point&& recvPoint)
+        {
+            UNUSED(recvPoint);
+            isProcessed = true;
+        };
+
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+    EXPECT_EQ(isProcessed, true);
+
+    // Next message was partially written, so it will not be processed.
+    //
+    isProcessed = false;
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+    EXPECT_EQ(isProcessed, false);
+
+    // Last message was fully written, expect it to be processed.
+    //
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+    EXPECT_EQ(isProcessed, true);
+
+    // We should process all the written frames.
+    //
+    EXPECT_EQ(sync.ReadPosition.load(), sync.WritePosition.load());
+
+    // Cleanup process frames.
+    //
+    sharedChannel.AdvanceFreePosition();
+    EXPECT_EQ(sync.FreePosition.load(), sync.WritePosition.load());
+}
+
 // Verify synchronization positions.
 // Send and receive objects and each step will verify if shared channel sync positions are correct.
 //
@@ -221,7 +306,7 @@ TEST(SharedChannel, StressSendReceive)
         std::launch::async,
         [&sharedChannel, &globalDispatchTable]
         {
-            sharedChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+            sharedChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         });
@@ -230,7 +315,7 @@ TEST(SharedChannel, StressSendReceive)
         std::launch::async,
         [&sharedChannel, &globalDispatchTable]
         {
-            sharedChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+            sharedChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         });
