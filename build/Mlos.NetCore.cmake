@@ -81,6 +81,8 @@ function(add_mlos_dotnet_project)
 
     # Save the path to the output dll so we can reference it some tests later on.
     set_target_properties(${NAME}
+        PROPERTIES DOTNET_OUTPUT_DIR ${OUTPUT_PATH})
+    set_target_properties(${NAME}
         PROPERTIES DOTNET_OUTPUT_DLL ${OUTPUT})
 
     if(${MLOS_SETTINGS_REGISTRY})
