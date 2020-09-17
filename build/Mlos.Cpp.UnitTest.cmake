@@ -52,7 +52,11 @@ set_tests_properties(
 # Provide a function for handling some of the boilerplate to setup a test run
 # of an executable using the Mlos.Agent.Server
 #
-#
+#   add_mlos_agent_server_exe_test_run(
+#       NAME MlosTestRun_Mlos.Agent.Server_${PROJECT_NAME}
+#       EXECUTABLE_TARGET ${PROJECT_NAME}
+#       TIMEOUT 240
+#       MLOS_SETTINGS_REGISTRY_TARGETS Mlos.UnitTest.SettingsRegistry)
 #
 function(add_mlos_agent_server_exe_test_run)
     set(oneValueArgs NAME EXECUTABLE_TARGET TIMEOUT)

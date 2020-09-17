@@ -26,8 +26,6 @@ namespace Mlos.Agent.Server
     /// </summary>
     public static class MlosAgentServer
     {
-        private static StreamWriter unbufferedStdOut;
-
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -43,14 +41,6 @@ namespace Mlos.Agent.Server
 
         public static void Main(string[] args)
         {
-            // So that we can get all of the output from the
-            // TargetProcessManager redirected in a timely manner, make sure to
-            // mark stdout as unbuffered.
-            //
-            unbufferedStdOut = new StreamWriter(Console.OpenStandardOutput());
-            unbufferedStdOut.AutoFlush = true;
-            Console.SetOut(unbufferedStdOut);
-
             // TODO: use some proper arg parser. For now let's keep it simple.
             //
             string executableFilePath = null;
