@@ -22,25 +22,29 @@ endif()
 
 # Add some test fixtures to use for setup/tear down of other Mlos unit tests.
 
-# TODO: Add a RESOURCE_LOCK for the shared memories.
+# Note: Fixtures only run once per ctest invokation.
+# That's fine for the pre-check, but the cleanup step, so we moved that into
+# the test command itself for now.
 
 # These "tests" are really just to help define fixtures to be depended on by
 # other tests for setup/tear down checks.
 add_test(NAME CheckForMlosSharedMemories
     COMMAND ${MLOS_ROOT}/build/CMakeHelpers/CheckForMlosSharedMemories.sh)
-add_test(NAME RemoveMlosSharedMemories
-    COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RemoveMlosSharedMemories.sh)
+#add_test(NAME RemoveMlosSharedMemories
+#    COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RemoveMlosSharedMemories.sh)
 # These properties add the pre/post actions for the "MlosSharedMemoriesChecks" fixture.
 set_tests_properties(CheckForMlosSharedMemories PROPERTIES
     FIXTURES_SETUP MlosSharedMemoriesChecks)
-set_tests_properties(RemoveMlosSharedMemories PROPERTIES
-    FIXTURES_CLEANUP MlosSharedMemoriesChecks)
+#set_tests_properties(RemoveMlosSharedMemories PROPERTIES
+#    FIXTURES_CLEANUP MlosSharedMemoriesChecks)
 # Now other test can add "MlosSharedMemoriesChecks" to their
 # "FIXTURES_REQUIRED" property to invoke these scripts before/after themselves.
 
 # Mark all setup/tear down activities involving the shared memory regions as
 # mutually exclusive (no parallel runs).
-set_tests_properties(CheckForMlosSharedMemories RemoveMlosSharedMemories
+set_tests_properties(
+    CheckForMlosSharedMemories
+    #RemoveMlosSharedMemories
     PROPERTIES RESOURCE_LOCK MlosSharedMemories)
 
 # add_mlos_agent_server_exe_test_run()
@@ -83,11 +87,11 @@ function(add_mlos_agent_server_exe_test_run)
     # - Make sure there aren't other things using the shared mem regions in
     #   /dev/shm/ that we're about to create (e.g. from a previous failed test
     #   or something else that's running).
-    #   (and probably also cleanup after we're done)
+    #   (and also clean them up after we're done)
     # - Make sure that the Agent can find the SettingsRegistry DLLs that the
     #   /some/test/exe needs to use.
     add_test(NAME ${TEST_NAME}
-        COMMAND ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>)
+        COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RunTestsAndSharedMemChecks.sh ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>)
     set_tests_properties(${TEST_NAME} PROPERTIES
         TIMEOUT ${TEST_TIMEOUT}
         # Let the Mlos.Agent.Server know where to find the registry assembly.
