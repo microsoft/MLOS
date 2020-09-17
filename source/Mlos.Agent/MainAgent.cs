@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 using Mlos.Core;
 using Proxy.Mlos.Core;
@@ -26,11 +27,12 @@ namespace Mlos.Agent
     {
         /// <remarks>
         /// Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
+        /// TODO: Make these config regions configurable to support multiple processes.
         /// </remarks>
         private const string GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
         private const string ControlChannelMemoryMapName = "Host_Mlos.ControlChannel";
         private const string FeedbackChannelMemoryMapName = "Host_Mlos.FeedbackChannel";
-        private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event";
+        private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event"; //// FIXME: Use non-backslashes for Linux environments.
         private const string FeedbackChannelSemaphoreName = @"Global\FeedbackChannel_Event";
         private const string SharedConfigMemoryMapName = "Host_Mlos.Config.SharedMemory";
         private const int SharedMemorySize = 65536;
@@ -171,17 +173,67 @@ namespace Mlos.Agent
             {
                 MlosProxyInternal.RegisteredSettingsAssemblyConfig assemblyConfig = assemblySharedConfig.Config;
 
-                // Try to load assembly from the agent folder.
+                // Start looking for places to find the assembly.
                 //
-                string applicationFolderPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                string assemblyFilePath = Path.Combine(applicationFolderPath, assemblyConfig.AssemblyFileName.Value);
+                List<string> assemblyDirs = new List<string>();
 
-                if (!File.Exists(assemblyFilePath))
+                // 1. Try to load assembly from the agent folder.
+                //
+                assemblyDirs.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+
+                // 2. Try to load assembly from the full path listed in the config.
+                // Note: This doesn't currently work for Linux.
+                // See Also: Mlos.Core/MlosContext.cpp
+                //
+                if (assemblyConfig.ApplicationFilePath.Value != null)
                 {
-                    // Try to load assembly from the target folder.
-                    //
-                    applicationFolderPath = Path.GetDirectoryName(assemblyConfig.ApplicationFilePath.Value);
-                    assemblyFilePath = Path.Combine(applicationFolderPath, assemblyConfig.AssemblyFileName.Value);
+                    assemblyDirs.Add(Path.GetDirectoryName(assemblyConfig.ApplicationFilePath.Value));
+                }
+
+                // 3. The current working directory.
+                //
+                assemblyDirs.Add(".");
+
+                // 4. The search path specified in an environment variable.
+                // This is akin to an LD_LIBRARY_PATH but specifically for MLOS Settings Registry DLLs.
+                //
+                string settingsRegistryLibraryPath = System.Environment.GetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH");
+                if (!string.IsNullOrEmpty(settingsRegistryLibraryPath))
+                {
+                    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        assemblyDirs.AddRange(settingsRegistryLibraryPath.Split(';'));
+                    }
+                    else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        assemblyDirs.AddRange(settingsRegistryLibraryPath.Split(':'));
+                    }
+                    else
+                    {
+                        throw new NotImplementedException(
+                            string.Format("Unhandled OS: '{0}'", System.Runtime.InteropServices.RuntimeInformation.OSDescription ?? "Unknown"));
+                    }
+                }
+
+                // Now, return the first full path to the assembly that we find.
+                //
+                string assemblyFilePath = null;
+                string assemblyFileName = assemblyConfig.AssemblyFileName.Value;
+                foreach (string assemblyDir in assemblyDirs)
+                {
+                    ////Console.WriteLine(string.Format("Checking for settings registry assembly {0} in {1}", assemblyFileName, assemblyDir));
+                    string tmpAssemblyFilePath = Path.Combine(assemblyDir, assemblyFileName);
+                    if (File.Exists(tmpAssemblyFilePath))
+                    {
+                        assemblyFilePath = tmpAssemblyFilePath;
+                        Console.WriteLine(string.Format("Found settings registry assembly at {0}", assemblyFilePath));
+                        break;
+                    }
+                }
+
+                if (assemblyFilePath == null)
+                {
+                    throw new FileNotFoundException(string.Format("Failed to find settings registry assembly '{0}'", assemblyFileName));
                 }
 
                 Assembly assembly = Assembly.LoadFrom(assemblyFilePath);

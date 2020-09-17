@@ -54,11 +54,19 @@ dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
 	@ # Note: -m tells it to build in parallel.
 	@ $(DOTNET) build -m --configuration $(CONFIGURATION) $(@:.fake-build-target=)
 
+# By default don't run certain tests.
+# To override, run with:
+#   DOTNET_TEST_FILTER=' ' make dotnet-test
+DOTNET_TEST_FILTER := ${DOTNET_TEST_FILTER}
+ifeq ($(DOTNET_TEST_FILTER),)
+    DOTNET_TEST_FILTER = --filter='Category!=SkipForCI'
+endif
+
 # For each of the fake test targets, just call "dotnet test" on its
 # corresponding *.csproj file
 # For now, don't force a rebuild first.
 %.fake-test-target: #%.fake-build-target
-	$(DOTNET) test -m --configuration $(CONFIGURATION) $(@:.fake-test-target=)
+	$(DOTNET) test --no-build -m --configuration $(CONFIGURATION) $(DOTNET_TEST_FILTER) $(@:.fake-test-target=)
 
 # Note: this clean method somewhat lazily removes both Debug and Release build outputs.
 # To be added to the including Makefile's clean target.

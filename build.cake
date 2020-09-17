@@ -282,6 +282,31 @@ Task("Build-CMake")
         CMakeBuild(settings);
     });
 
+Task("Test-CMake")
+    .WithCriteria(() => IsRunningOnUnix())
+    .IsDependentOn("Build-CMake")
+    .Does(() =>
+    {
+        var cmakeTestTargets = new[]
+        {
+            // test is a virtual target that cmake generates for automatically
+            // calling ctest for all the registered tests in the CMakeLists.txt
+            "test",
+        };
+
+        var settings = new CMakeBuildSettings
+        {
+            BinaryPath = $"{CMakeBuildDir}",
+            Configuration = CMakeConfiguration,
+            Targets = new[]
+            {
+                String.Join(" ", cmakeTestTargets)
+            },
+        };
+
+        CMakeBuild(settings);
+    });
+
 // Return list of files as nuget spec content from given input folder.
 //
 private IEnumerable<NuSpecContent> CollectFilesAsNugetContent(string inputDirPath, string nugetOutputDir, params string[] includeFilePatterns)
@@ -458,7 +483,7 @@ Task("Test-Docker-E2E")
 Task("Default")
     .IsDependentOn("Run-NetCore-Unit-Tests")
     .IsDependentOn("Run-Unit-Tests")
-    .IsDependentOn("Build-CMake")
+    .IsDependentOn("Test-CMake")
     .IsDependentOn("Generate-MlosModelServices-Dockerfile");
 
 //    .IsDependentOn("Create-Nuget-Package")

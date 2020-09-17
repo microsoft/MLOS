@@ -47,6 +47,7 @@ SharedConfigManager::SharedConfigManager(MlosContext& mlosContext) noexcept
 HRESULT SharedConfigManager::RegisterSharedConfigMemoryRegion()
 {
     // Create (allocate and register) shared config memory region.
+    // See Also: Mlos.Agent/MainAgent.cs
     //
     const char* const appConfigSharedMemoryName = "Host_Mlos.Config.SharedMemory";
 

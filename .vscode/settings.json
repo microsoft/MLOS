@@ -1,3 +1,7 @@
 {
-    "cmake.buildDirectory": "${workspaceFolder}/out/cmake"
+    "cmake.buildDirectory": "${workspaceFolder}/out/cmake/Debug",
+    "launch": {
+        "configurations": [],
+        "compounds": []
+    }
 }
