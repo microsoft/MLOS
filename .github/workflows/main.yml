@@ -56,6 +56,10 @@ jobs:
         timeout-minutes: 5
         shell: bash
         run: CONFIGURATION=${{ matrix.configuration }} make cmake-build
+      - name: Run ${{ matrix.configuration }} cmake test
+        timeout-minutes: 5
+        shell: bash
+        run: CONFIGURATION=${{ matrix.configuration }} make cmake-test
       - name: Run cake build
         timeout-minutes: 10
         shell: bash
