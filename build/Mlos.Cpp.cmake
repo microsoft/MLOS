@@ -25,6 +25,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # NOTE: This option is only available with clang, not gcc.
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
 
+# When compiling for Debug build, make sure that DEBUG is defined for the compiler.
+# This is to mimic MSVC behavior so that our #ifdefs can remain the same rather
+# than having to switch to using NDEBUG.
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
+
 # TODO: Search for clang compiler and set the appropriate C/CXX compiler variables.
 #if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 #    # TODO: Add local version of clang to use?

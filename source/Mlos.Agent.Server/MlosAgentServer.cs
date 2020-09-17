@@ -48,13 +48,16 @@ namespace Mlos.Agent.Server
 
             foreach (string arg in args)
             {
-                if (Path.GetExtension(arg) == ".exe")
-                {
-                    executableFilePath = arg;
-                }
-                else if (Path.GetExtension(arg) == ".json")
+                if (Path.GetExtension(arg) == ".json")
                 {
                     modelsDatabaseConnectionDetailsFile = arg;
+                }
+                else
+                {
+                    // Linux executables don't have a suffix by default.
+                    // So, for now just assume that anything else is an executable.
+                    //
+                    executableFilePath = arg;
                 }
             }
 
@@ -84,8 +87,13 @@ namespace Mlos.Agent.Server
             //
             if (executableFilePath != null)
             {
+                Console.WriteLine($"Starting {executableFilePath}");
                 targetProcessManager = new TargetProcessManager(executableFilePath: executableFilePath);
                 targetProcessManager.StartTargetProcess();
+            }
+            else
+            {
+                Console.WriteLine("No executable given to launch.  Will wait for agent to connect independently.");
             }
 
             var cancelationTokenSource = new CancellationTokenSource();
