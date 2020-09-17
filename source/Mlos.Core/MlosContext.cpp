@@ -348,6 +348,8 @@ HRESULT InterProcessMlosContextInitializer::Initialize()
         return hr;
     }
 
+    // FIXME: Use non-backslashes for Linux environments.
+
     hr = m_controlChannelPolicy.m_notificationEvent.CreateOrOpen("Global\\ControlChannel_Event");
     if (FAILED(hr))
     {

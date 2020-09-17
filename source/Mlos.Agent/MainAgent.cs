@@ -32,7 +32,7 @@ namespace Mlos.Agent
         private const string GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
         private const string ControlChannelMemoryMapName = "Host_Mlos.ControlChannel";
         private const string FeedbackChannelMemoryMapName = "Host_Mlos.FeedbackChannel";
-        private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event";
+        private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event"; //// FIXME: Use non-backslashes for Linux environments.
         private const string FeedbackChannelSemaphoreName = @"Global\FeedbackChannel_Event";
         private const string SharedConfigMemoryMapName = "Host_Mlos.Config.SharedMemory";
         private const int SharedMemorySize = 65536;
