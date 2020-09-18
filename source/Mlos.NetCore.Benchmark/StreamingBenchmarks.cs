@@ -11,7 +11,6 @@ using System.Linq;
 
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using BenchmarkDotNet.Running;
 
 using Mlos.Streaming;
 
@@ -31,12 +30,12 @@ public class StreamingBenchmarks
     {
     }
 
-    private IEnumerable<int> intStream => Enumerable.Range(1, N);
+    private IEnumerable<int> IntStream => Enumerable.Range(1, N);
 
     [Benchmark]
     public void LinqOnEnumerable()
     {
-        _ = intStream.Min();
+        _ = IntStream.Min();
     }
 
     [Benchmark]
@@ -44,6 +43,6 @@ public class StreamingBenchmarks
     {
         var collectionStream = new StreamableSource<int>();
         collectionStream.Min();
-        collectionStream.Publish(intStream);
+        collectionStream.Publish(IntStream);
     }
 }
