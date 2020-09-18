@@ -9,4 +9,7 @@
     <MSBuild Projects="@(ProjectReference)" Targets="Restore" RunEachTargetSeparately="true" Condition="'$(QBUILD)' != '1' And '$(BuildProjectReferences)' != 'false'" />
   </Target>
   -->
+  <Target Name="PublishProjectBinary">
+    <MSBuild Projects="@(ProjectReference)" Targets="PublishProjectBinary" RunEachTargetSeparately="true" Condition="'$(QBUILD)' != '1' And '$(BuildProjectReferences)' != 'false'" />
+  </Target>
 </Project>

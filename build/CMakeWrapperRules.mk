@@ -21,7 +21,8 @@ RelativeSourceDir := $(shell realpath --relative-to $(RelativePathToProjectRoot)
 ConfigurationBuildDir := $(CmakeBuildDir)/$(CONFIGURATION)/$(RelativeSourceDir)
 ConfigurationMakefile := $(ConfigurationBuildDir)/Makefile
 
-handledtargets += cmake-build cmake-test cmake-clean cmake-buildfiles clean-cmake-buildfiles \
+handledtargets += cmake-build cmake-install cmake-test cmake-clean \
+		  cmake-buildfiles clean-cmake-buildfiles \
 		  local-cmake-distclean $(ConfigurationMakefile)
 
 # To be added the to the including Makefile's all target.
@@ -29,6 +30,12 @@ handledtargets += cmake-build cmake-test cmake-clean cmake-buildfiles clean-cmak
 cmake-build: $(ConfigurationMakefile)
 	$(MAKE) -C $(ConfigurationBuildDir)
 	@ echo "make cmake-build target finished."
+
+# To be added the to the including Makefile's install target.
+.PHONY: cmake-install
+cmake-install: $(ConfigurationMakefile)
+	$(MAKE) -C $(ConfigurationBuildDir) install
+	@ echo "make cmake-install target finished."
 
 # To be added the to the including Makefile's test target.
 .PHONY: cmake-test

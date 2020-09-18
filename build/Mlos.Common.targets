@@ -4,4 +4,7 @@
     <MSBuild Projects="@(ProjectReference)" Targets="Restore" RunEachTargetSeparately="true" />
     <MSBuild Projects="@(ProjectFile)" Targets="Restore" RunEachTargetSeparately="true" />
   </Target>
+  <!-- An empty placeholder for other targets to reference with an AfterTargets property -->
+  <!-- We can then invoke this one via "dotnet build /t:PublishProjectBinary" -->
+  <Target Name="PublishProjectBinary" />
 </Project>

@@ -6,6 +6,10 @@
 all: dotnet-build # ctags
 	@ echo "make all target finished."
 
+.PHONY: install
+install: dotnet-install
+	@ echo "make install target finished."
+
 .PHONY: clean
 clean: dotnet-clean
 

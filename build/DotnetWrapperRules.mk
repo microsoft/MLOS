@@ -30,9 +30,11 @@ $(DOTNET) $(DOTNET_REAL): $(MLOS_ROOT)/scripts/fetch-dotnet.sh
 # corresponding fake targets for the "all" target to depend on.
 Csprojs := $(wildcard *.csproj)
 CsprojBuildTargets := $(Csprojs:.csproj=.csproj.fake-build-target)
+CsprojInstallTargets := $(Csprojs:.csproj=.csproj.fake-install-target)
 CsprojTestTargets := $(Csprojs:.csproj=.csproj.fake-test-target)
 DirsProj := $(wildcard dirs.proj)
 DirsProjBuildTarget := $(DirsProj:.proj=.proj.fake-build-target)
+DirsProjInstallTarget := $(DirsProj:.proj=.proj.fake-install-target)
 DirsProjTestTarget := $(DirsProj:.proj=.proj.fake-test-target)
 
 # To be added to the including Makefile's all target.
@@ -43,6 +45,12 @@ dotnet-build: $(DOTNET) $(CsprojBuildTargets) $(DirsProjBuildTarget)
 .PHONY: dotnet-test
 dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
 	@ echo "make dotnet-test target finished."
+
+# To be added to the including Makefile's all target.
+.PHONY: dotnet-install
+.NOTPARALLEL: dotnet-install
+dotnet-install: $(DOTNET) $(CsprojInstallTargets) $(DirsProjInstallTarget)
+	@ echo "make dotnet-install target finished."
 
 # For each of the fake build targets, just call "dotnet build" on its
 # corresponding *.csproj file
@@ -68,6 +76,15 @@ endif
 %.fake-test-target: #%.fake-build-target
 	$(DOTNET) test --no-build -m --configuration $(CONFIGURATION) $(DOTNET_TEST_FILTER) $(@:.fake-test-target=)
 
+# For each of the fake install targets, just call "dotnet publish"
+# on its corresponding *.csproj file (via a special .csproj target)
+# We won't track any inputs/outputs/dependencies - we just let "dotnet build" handle that.
+.NOTPARALLEL: %.fake-install-target
+%.fake-install-target: $(DOTNET)
+	@ # Note: This command doesn't need to do the restore, since the internal one will do it for us.
+	@ # Note: Additionally, we omit -m to avoid overlapping child "dotnet" processes.
+	@ $(DOTNET) build --no-restore --configuration $(CONFIGURATION) /t:PublishProjectBinary $(@:.fake-install-target=)
+
 # Note: this clean method somewhat lazily removes both Debug and Release build outputs.
 # To be added to the including Makefile's clean target.
 .PHONY: dotnet-clean
@@ -76,4 +93,4 @@ dotnet-clean:
 
 handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
     $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
+    dotnet-build dotnet-install dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
