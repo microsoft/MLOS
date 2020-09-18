@@ -149,10 +149,9 @@ void ISharedChannel::AdvanceFreePosition()
     //
     uint32_t distance = readPosition - freePosition;
 
-    // Follow the free links up to a current read position.
-    // Cleanup is completed when free position is equal to read position.
-    // However by the time this cleanup is completed,
-    // the reader threads might process more frames and advance read position.
+    // Follow the free links up to the current read position.
+    // The cleanup is completed when the free position is equal to the read position.
+    // However, by the time this cleanup is completed, the reader threads might process more frames and advance the read position.
     //
     while (freePosition != readPosition)
     {

@@ -101,7 +101,8 @@ namespace Mlos.Agent.Server
 
             // Create (or open) the circular buffer shared memory before running the target process.
             //
-            MainAgent.InitializeSharedChannel();
+            using var mainAgent = new MainAgent();
+            mainAgent.InitializeSharedChannel();
 
             // Active learning mode.
             //
@@ -146,14 +147,14 @@ namespace Mlos.Agent.Server
             //
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(
-                MainAgent.RunAgent,
+                () => mainAgent.RunAgent(),
                 TaskCreationOptions.LongRunning);
 
             if (targetProcessManager != null)
             {
                 targetProcessManager.WaitForTargetProcessToExit();
                 targetProcessManager.Dispose();
-                MainAgent.UninitializeSharedChannel();
+                mainAgent.UninitializeSharedChannel();
             }
 
             Console.WriteLine("Waiting for Mlos.Agent to exit");
