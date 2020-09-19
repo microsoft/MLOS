@@ -100,38 +100,13 @@ class TestBayesianOptimizer(unittest.TestCase):
         #
         with self.assertRaises(ValueError):
             bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
-
-        with self.assertRaises(ValueError):
-            bayesian_optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
-
-        with self.assertRaises(ValueError):
-            bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
-
-        with self.assertRaises(ValueError):
-            bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
+        self.validate_optima(optimizer=bayesian_optimizer)
 
         bayesian_optimizer.register(input_values_dataframe, output_values_dataframe)
-
-        # Now the optima should exist
-        #
         observed_best_config, observed_best_optimum = bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
         assert observed_best_optimum.y == output_values_dataframe['y'].min()
 
-        predicted_best_config, predicted_optimum = bayesian_optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
-
-        ucb_90_ci_config, ucb_90_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
-        ucb_95_ci_config, ucb_95_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
-        ucb_99_ci_config, ucb_99_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
-
-        lcb_90_ci_config, lcb_90_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
-        lcb_95_ci_config, lcb_95_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
-        lcb_99_ci_config, lcb_99_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
-
-        # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
-        # change width non-linearily both with degrees of freedom, and with prediction variance.
-        #
-        assert lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value
-        assert predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
+        self.validate_optima(optimizer=bayesian_optimizer)
 
         num_guided_samples = 2
         for _ in range(num_guided_samples):
@@ -231,13 +206,14 @@ class TestBayesianOptimizer(unittest.TestCase):
             bayesian_optimizer.register(input_values_df, target_values_df)
             if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
                 _, all_targets = bayesian_optimizer.get_all_observations()
-                best_config, optimum = bayesian_optimizer.optimum()
+                best_config, optimum = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                 print(f"[{i}/{num_iterations}] Optimum: {optimum}")
                 assert optimum.y == all_targets.min()[0]
                 assert input_space.contains_point(best_config)
                 assert output_space.contains_point(optimum)
                 assert optimum.y <= old_optimum
                 old_optimum = optimum.y
+                self.validate_optima(optimizer=bayesian_optimizer)
                 convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
                 random_forest_fit_state = convergence_state.surrogate_model_fit_state
                 random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
@@ -270,6 +246,8 @@ class TestBayesianOptimizer(unittest.TestCase):
             deep=True
         )
         print(goodness_of_fit_df.head())
+
+        self.validate_optima(optimizer=bayesian_optimizer)
 
     def test_hierarchical_quadratic_cold_start(self):
 
@@ -314,8 +292,9 @@ class TestBayesianOptimizer(unittest.TestCase):
                 })
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
-            best_config_point, best_objective = bayesian_optimizer.optimum()
+            best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
             print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
+            self.validate_optima(optimizer=bayesian_optimizer)
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
@@ -378,8 +357,9 @@ class TestBayesianOptimizer(unittest.TestCase):
                 target_values_df = pd.DataFrame({'y': [y]})
                 bayesian_optimizer.register(input_values_df, target_values_df)
 
-            best_config_point, best_objective = bayesian_optimizer.optimum()
+            best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
             print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
+            self.validate_optima(optimizer=bayesian_optimizer)
 
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = BayesianOptimizerConfig.DEFAULT
@@ -390,3 +370,32 @@ class TestBayesianOptimizer(unittest.TestCase):
         assert original_config.min_samples_required_for_guided_design_of_experiments == 10
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
+
+    def validate_optima(self, optimizer):
+        if not optimizer.get_optimizer_convergence_state().surrogate_model_fit_state.fitted:
+            # Computing prediction based optima should fail if the surrogate model is not fitted.
+            #
+            with self.assertRaises(ValueError):
+                optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
+
+            with self.assertRaises(ValueError):
+                optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
+
+            with self.assertRaises(ValueError):
+                optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
+        else:
+            predicted_best_config, predicted_optimum = optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
+
+            ucb_90_ci_config, ucb_90_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+            ucb_95_ci_config, ucb_95_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+            ucb_99_ci_config, ucb_99_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+
+            lcb_90_ci_config, lcb_90_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+            lcb_95_ci_config, lcb_95_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+            lcb_99_ci_config, lcb_99_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+
+            # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
+            # change width non-linearily both with degrees of freedom, and with prediction variance.
+            #
+            assert lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value
+            assert predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound

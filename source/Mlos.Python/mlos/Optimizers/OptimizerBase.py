@@ -7,7 +7,7 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
-from scipy.stats import t
+import scipy.stats
 
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
@@ -64,11 +64,7 @@ class OptimizerBase(ABC):
         """
         raise NotImplementedError("All subclasses must implement this method.")
 
-    def optimum(
-        self,
-        optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION,
-        alpha: float = 0.05  # probability of type 1 error for confidence-bound based definitions of optimum.
-    ) -> Tuple[Point, Point]:
+    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05) -> Tuple[Point, Point]:
         """Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
@@ -90,16 +86,11 @@ class OptimizerBase(ABC):
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
             return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        else:
-            return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha)
+        return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha)
 
 
     @trace()
-    def _best_observation_optimum(
-        self,
-        features_df: pd.DataFrame,
-        objectives_df: pd.DataFrame
-    ) -> Tuple[Point, Point]:
+    def _best_observation_optimum(self, features_df: pd.DataFrame, objectives_df: pd.DataFrame) -> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
         if objective.minimize:
             index_of_best = objectives_df[objective.name].idxmin()
@@ -110,12 +101,7 @@ class OptimizerBase(ABC):
         return config_at_optimum, optimum_value
 
     @trace()
-    def _prediction_based_optimum(
-        self,
-        features_df: pd.DataFrame,
-        optimum_definition: OptimumDefinition,
-        alpha: float
-    )-> Tuple[Point, Point]:
+    def _prediction_based_optimum(self, features_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
 
         # Let's see if we have them cached before recomputing
@@ -123,6 +109,9 @@ class OptimizerBase(ABC):
         if self._cached_predictions_for_observations is None:
             self._cached_predictions_for_observations = self.predict(feature_values_pandas_frame=features_df)
         predictions_df = self._cached_predictions_for_observations.get_dataframe()
+
+        if len(predictions_df.index) == 0:
+            raise ValueError("Insufficient data to compute confidence-bound based optimum.")
 
         # Predictions index must be a subset of features index.
         #
@@ -152,7 +141,7 @@ class OptimizerBase(ABC):
             if len(predictions_df.index) == 0:
                 raise ValueError("Insufficient data to compute confidence-bound based optimum.")
 
-            t_values = t.ppf(1 - alpha / 2, predictions_df[dof_column_name])
+            t_values = scipy.stats.t.ppf(1 - alpha / 2, predictions_df[dof_column_name])
             prediction_interval_radii = t_values * np.sqrt(predictions_df[variance_column_name])
 
             if optimum_definition == OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG:
