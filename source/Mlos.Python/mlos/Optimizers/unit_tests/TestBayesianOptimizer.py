@@ -75,8 +75,8 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         x_1, x_2 = np.meshgrid(
-            input_space['x_1'].linspace(num=21),
-            input_space['x_2'].linspace(num=21)
+            input_space['x_1'].linspace(num=101),
+            input_space['x_2'].linspace(num=101)
         )
 
         y = quadratic(x_1=x_1, x_2=x_2)
