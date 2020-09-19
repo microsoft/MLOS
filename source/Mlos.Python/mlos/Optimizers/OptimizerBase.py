@@ -25,6 +25,10 @@ class OptimizerBase(ABC):
         self.optimization_problem = optimization_problem
         self.optimizer_config = None # TODO: pass from subclasses.
 
+        # To avoid repeated calls to .predict() if no change is expected. Must be cleared on every call to .register()
+        #
+        self._cached_predictions_for_observations = None
+
     @abstractmethod
     def get_optimizer_convergence_state(self):
         raise NotImplementedError("All subclasses must implement this method.")
@@ -81,7 +85,7 @@ class OptimizerBase(ABC):
         assert optimum_definition in OptimumDefinition
 
         features_df, objectives_df = self.get_all_observations()
-        if not len(features_df):
+        if not len(features_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
@@ -91,7 +95,11 @@ class OptimizerBase(ABC):
 
 
     @trace()
-    def _best_observation_optimum(self, features_df: pd.DataFrame, objectives_df: pd.DataFrame):
+    def _best_observation_optimum(
+        self,
+        features_df: pd.DataFrame,
+        objectives_df: pd.DataFrame
+    ) -> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
         if objective.minimize:
             index_of_best = objectives_df[objective.name].idxmin()
@@ -107,48 +115,60 @@ class OptimizerBase(ABC):
         features_df: pd.DataFrame,
         optimum_definition: OptimumDefinition,
         alpha: float
-    ):
+    )-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
-        predictions = self.predict(feature_values_pandas_frame=features_df)
-        predictions_df = predictions.get_dataframe()
+
+        # Let's see if we have them cached before recomputing
+        #
+        if self._cached_predictions_for_observations is None:
+            self._cached_predictions_for_observations = self.predict(feature_values_pandas_frame=features_df)
+        predictions_df = self._cached_predictions_for_observations.get_dataframe()
+
+        # Predictions index must be a subset of features index.
+        #
+        assert features_df.index.intersection(predictions_df.index).equals(predictions_df.index)
 
         predicted_value_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE.value
-        dof_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
+        dof_column_name = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
         variance_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
-
-        predicted_values = predictions_df[predicted_value_column_name]
 
         if optimum_definition == OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG:
             if objective.minimize:
-                index_of_best = predicted_values.idxmin()
+                index_of_best = predictions_df[predicted_value_column_name].idxmin()
             else:
-                index_of_best = predicted_values.idxmax()
+                index_of_best = predictions_df[predicted_value_column_name].idxmax()
 
-            optimum_value = Point.from_dataframe(predictions_df.loc[[index_of_best]])
+            optimum_value = Point.from_dataframe(predictions_df.loc[[index_of_best], [predicted_value_column_name]])
 
         else:
+            # We will be manipulating this data so let's make a copy for now, and later optimize this away.
+            #
+            predictions_df = predictions_df.copy(deep=True)
+
             # Drop nulls and zeroes.
             #
-            degrees_of_freedom = predictions_df[dof_column_name].dropna()
-            degrees_of_freedom = degrees_of_freedom[degrees_of_freedom != 0]
+            predictions_df = predictions_df[predictions_df[dof_column_name].notna() & predictions_df[dof_column_name] != 0]
 
-            t_values = t.ppf(1 - alpha / 2, degrees_of_freedom)
+            if len(predictions_df.index) == 0:
+                raise ValueError("Insufficient data to compute confidence-bound based optimum.")
+
+            t_values = t.ppf(1 - alpha / 2, predictions_df[dof_column_name])
             prediction_interval_radii = t_values * np.sqrt(predictions_df[variance_column_name])
 
             if optimum_definition == OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG:
-                upper_confidence_bounds = predicted_values + prediction_interval_radii
+                upper_confidence_bounds = predictions_df[predicted_value_column_name] + prediction_interval_radii
                 if objective.minimize:
                     index_of_best = upper_confidence_bounds.idxmin()
                 else:
                     index_of_best = upper_confidence_bounds.idxmax()
-                optimum_value = Point.from_dataframe(upper_confidence_bounds.loc[[index_of_best]])
+                optimum_value = Point(upper_confidence_bound=upper_confidence_bounds.loc[index_of_best])
             else:
-                lower_confidence_bounds = predicted_values - prediction_interval_radii
+                lower_confidence_bounds = predictions_df[predicted_value_column_name] - prediction_interval_radii
                 if objective.minimize:
                     index_of_best = lower_confidence_bounds.idxmin()
                 else:
                     index_of_best = lower_confidence_bounds.idx_max()
-                optimum_value = Point.from_dataframe(lower_confidence_bounds.loc[[index_of_best]])
+                optimum_value = Point(lower_confidence_bound=lower_confidence_bounds.loc[index_of_best])
 
         config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value

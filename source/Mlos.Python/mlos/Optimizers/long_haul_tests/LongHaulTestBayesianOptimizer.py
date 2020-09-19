@@ -15,6 +15,7 @@ from mlos.Tracer import Tracer
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
+from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
@@ -117,6 +118,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             # Register the observation with the optimizer
             bayesian_optimizer.register(input_values_df, target_values_df)
+
         best_config_point, best_objective = bayesian_optimizer.optimum()
         self.logger.info(f"Optimum: {best_objective} Best Configuration: {best_config_point}")
         trace_output_path = os.path.join(self.temp_dir, "PreHeatedTrace.json")

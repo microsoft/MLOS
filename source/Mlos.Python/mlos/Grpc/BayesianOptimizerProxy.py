@@ -80,6 +80,8 @@ class BayesianOptimizerProxy(OptimizerBase):
             )
             self._optimizer_stub.RegisterObservation(register_request)
 
+        self._cached_predictions_for_observations = None
+
     def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         response = self._optimizer_stub.GetAllObservations(self.optimizer_handle)
         features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')

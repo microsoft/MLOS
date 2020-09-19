@@ -17,6 +17,7 @@ from mlos.Tracer import Tracer
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 
@@ -74,8 +75,8 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         x_1, x_2 = np.meshgrid(
-            input_space['x_1'].linspace(num=101),
-            input_space['x_2'].linspace(num=101)
+            input_space['x_1'].linspace(num=21),
+            input_space['x_2'].linspace(num=21)
         )
 
         y = quadratic(x_1=x_1, x_2=x_2)
@@ -94,7 +95,45 @@ class TestBayesianOptimizer(unittest.TestCase):
             optimizer_config=BayesianOptimizerConfig.DEFAULT,
             logger=self.logger
         )
+
+        # A call to .optimum() should throw before we feed any data to the optimizer.
+        #
+        with self.assertRaises(ValueError):
+            bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
+
+        with self.assertRaises(ValueError):
+            bayesian_optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
+
+        with self.assertRaises(ValueError):
+            bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
+
+        with self.assertRaises(ValueError):
+            bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
+
         bayesian_optimizer.register(input_values_dataframe, output_values_dataframe)
+
+        # Now the optima should exist
+        #
+        observed_best_config, observed_best_optimum = bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
+        assert observed_best_optimum.y == output_values_dataframe['y'].min()
+
+        predicted_best_config, predicted_optimum = bayesian_optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
+
+        ucb_90_ci_config, ucb_90_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+        ucb_95_ci_config, ucb_95_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+        ucb_99_ci_config, ucb_99_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+
+        lcb_90_ci_config, lcb_90_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+        lcb_95_ci_config, lcb_95_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+        lcb_99_ci_config, lcb_99_ci_optimum = bayesian_optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+
+        # At the very least we can assert the ordering.
+        #
+        assert lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound
+        assert ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
+
+
+
 
         num_guided_samples = 2
         for _ in range(num_guided_samples):
