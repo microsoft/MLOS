@@ -9,7 +9,7 @@ Some notes on the directory layout organization in this repo.
   > Note: For this reason, `cmake` output is redirected to `out/cmake/{Release,Debug}/` instead.
 - [`source/`](../source/#mlos-github-tree-view) contains a directory for each component of MLOS, including unit test source code.
   - i.e. running `msbuild` or `make` in the `source/` directory will build (and generally analyze) all of the projects, but not execute their tests.
-  - [`source/Examples/`](../source/Examples/#mlos-github-tree-view) contains sample target codes to optimize with the other MLOS components and help describe the integration methods
+  - [`source/Examples/`](../source/Examples/) contains sample target codes to optimize with the other MLOS components and help describe the integration methods
 - [`test/`](../test/#mlos-github-tree-view) contains a directory and project to invoke each of the unit tests.
   - i.e. running `msbuild` or `make` in the `test/` directory will also run all of the tests.
 - [`scripts/`](../scripts/#mlos-github-tree-view) contains some helper scripts to initialize development environments, install tools, invoke build pipelines, run tests, etc.

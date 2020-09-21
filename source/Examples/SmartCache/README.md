@@ -1,8 +1,8 @@
-# SmartCache Example
+# [SmartCache Example](./#mlos-github-tree-view)
 
 TODO: Some description of the example contained in this directory.
 
-This `SmartCache` can be used to demonstrate a full end-to-end MLOS integrated microbenchmark for a "smart" component (in this case a cache).
+This [`SmartCache`](./#mlos-github-tree-view) can be used to demonstrate a full end-to-end MLOS integrated microbenchmark for a "smart" component (in this case a cache).
 
 ## Overview
 
