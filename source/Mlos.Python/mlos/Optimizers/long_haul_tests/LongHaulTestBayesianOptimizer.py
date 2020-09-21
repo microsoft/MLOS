@@ -368,15 +368,23 @@ class TestBayesianOptimizer(unittest.TestCase):
             with self.assertRaises(ValueError):
                 optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
         else:
+            self.assertTrue(optimizer.cached_predictions_for_observations is None)
             predicted_best_config, predicted_optimum = optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
-
+            self.assertTrue(optimizer.cached_predictions_for_observations is not None)
+            cached_predictions_id = id(optimizer.cached_predictions_for_observations)
             ucb_90_ci_config, ucb_90_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             ucb_95_ci_config, ucb_95_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             ucb_99_ci_config, ucb_99_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
 
             lcb_90_ci_config, lcb_90_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             lcb_95_ci_config, lcb_95_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             lcb_99_ci_config, lcb_99_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
 
             # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
             # change width non-linearily both with degrees of freedom, and with prediction variance.

@@ -27,11 +27,16 @@ class OptimizerBase(ABC):
 
         # To avoid repeated calls to .predict() if no change is expected. Must be cleared on every call to .register()
         #
-        self._cached_predictions_for_observations = None
+        self.cached_predictions_for_observations = None
+
+
 
     @abstractmethod
     def get_optimizer_convergence_state(self):
         raise NotImplementedError("All subclasses must implement this method.")
+
+    def get_surrogate_model_fit_state(self):
+        return self.get_optimizer_convergence_state().surrogate_model_fit_state
 
     @abstractmethod
     def suggest(self, random=False, context=None) -> Point:
@@ -106,9 +111,9 @@ class OptimizerBase(ABC):
 
         # Let's see if we have them cached before recomputing
         #
-        if self._cached_predictions_for_observations is None:
-            self._cached_predictions_for_observations = self.predict(feature_values_pandas_frame=features_df)
-        predictions_df = self._cached_predictions_for_observations.get_dataframe()
+        if self.cached_predictions_for_observations is None:
+            self.cached_predictions_for_observations = self.predict(feature_values_pandas_frame=features_df)
+        predictions_df = self.cached_predictions_for_observations.get_dataframe()
 
         if len(predictions_df.index) == 0:
             raise ValueError("Insufficient data to compute confidence-bound based optimum.")
@@ -130,7 +135,8 @@ class OptimizerBase(ABC):
             optimum_value = Point.from_dataframe(predictions_df.loc[[index_of_best], [predicted_value_column_name]])
 
         else:
-            # We will be manipulating this data so let's make a copy for now, and later optimize this away.
+            # We will be manipulating this data so let's make a copy for now.
+            # TODO: Profile this and if necessary optimize this copy away.
             #
             predictions_df = predictions_df.copy(deep=True)
 
