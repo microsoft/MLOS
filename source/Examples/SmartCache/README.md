@@ -22,11 +22,25 @@ TODO: Diagrams
 
 ## Building
 
+> Note: these commands are given relative to the root of the MLOS repo.
+>
+> To move there, you can execute the following within the repository:
+>
+> `cd $(git rev-parse --show-toplevel)`
+
 To build and run the necessary components for this example
 
 1. [Build the Docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image) using the [`Dockerfile`](../../../Dockerfile) at the root of the repository.
 
+    ```shell
+    docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
+    ```
+
 2. [Run the Docker image](../../../documentation/02-Build.md#create-a-new-container-instance) you just built.
+
+    ```shell
+    docker run -it -v $PWD:/src/MLOS --name mlos-build mlos/build:ubuntu-20.0
+    ```
 
 3. Inside the container, [build the compiled software](../../../documentation/02-Build.md#cli-make) with `make`:
 
@@ -54,12 +68,6 @@ To build and run the necessary components for this example
         `out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU/SmartCache.SettingsRegistry.dll`
 
 ## Executing
-
-> Note: these commands are given relative to the root of the MLOS repo.
->
-> To move there, you can execute the following within the repository:
->
-> `cd $(git rev-parse --show-toplevel)`
 
 `SmartCache` can be invoked separate, or by the `Mlos.Agent.Server` itself.
 
