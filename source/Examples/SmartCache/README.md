@@ -69,44 +69,57 @@ To build and run the necessary components for this example
 
 ## Executing
 
-`SmartCache` can be invoked separate, or by the `Mlos.Agent.Server` itself.
-
-Once started, `SmartCache` will attempt to register its component specific set of shared memory messages with the `Mlos.Agent` in the `Mlos.Agent.Server` using some `Mlos.Core` component registration messages.  That message includes the name of the `SettingsRegistry` assembly (`.dll`) corresponding to that component's settings/messages.
-
-The `Mlos.Agent.Server` needs to be told where it can find those assemblies.  To do that we provide an `MLOS_SETTINGS_REGISTRY_PATH` environment variable.
-
-In this case we populate it with the path to the `SmartCache.SettingsRegistry.dll`:
+The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark:
 
 ```sh
-export MLOS_SETTINGS_REGISTRY_PATH="out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU:$MLOS_SETTINGS_REGISTRY_PATH"
+export MLOS_SETTINGS_REGISTRY_PATH="out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU"
+
+tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll \
+    out/cmake/Release/source/Examples/SmartCache/SmartCache
 ```
 
-Next, we can start the `Mlos.Server.Agent` using the `dotnet` command:
+> Note: This is currently missing the `.json` file argument to connect to the optimizer service.
 
-```sh
-tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll
-# Note: This is missing the .json file to connect to the optimizer service.
+```txt
+Mlos.Agent.Server
+Starting out/cmake/Release/source/Examples/SmartCache/SmartCache
+observations: 0
+warn: Microsoft.AspNetCore.Server.Kestrel[0]
+      Unable to bind to http://localhost:5000 on the IPv6 loopback interface: 'Cannot assign requested address'.
+info: Microsoft.Hosting.Lifetime[0]
+      Now listening on: http://localhost:5000
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Production
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /src/MLOS
+Starting Mlos.Agent
+Found settings registry assembly at out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU/SmartCache.SettingsRegistry.dll
+observations: 1
+observations: 2
+observations: 3
+...
 ```
 
-The `Mlos.Agent` that gets started will then wait for a signal that the component (`SmartCache`) has connected to the shared memory region before starting to poll the component for messages to process.
+### Explanation
 
-To start the `SmartCache` process we first need another shell instance in the docker container:
+The `Mlos.Agent` that gets started by the `Mlos.Agent.Server` waits for a signal that the component (`SmartCache`) has connected to the shared memory region before starting to poll the component for messages to process.
+This is important in case the component is started independently.
 
-```sh
-docker exec -it mlos-build /bin/bash
-```
+In this case, `Mlos.Agent.Server` itself starts the component.
 
-Now, we can start `SmartCache` as follows:
+Once started, `SmartCache` will attempt to register its component specific set of shared memory messages with the `Mlos.Agent` in the `Mlos.Agent.Server` using `RegisterComponentConfig` and `RegisterAssemblyRequestMessage` from `Mlos.Core` and `Mlos.NetCore`.
+That includes the name of the `SettingsRegistry` assembly (`.dll`) corresponding to that component's settings/messages.
 
-```sh
-out/cmake/Release/source/Examples/SmartCache/SmartCache
-```
-
-> To have `Mlos.Agent.Server` start `SmartCache` without having to start another shell in the docker container instance, add the path to the `SmartCache` binary as an argument to the `dotnet ... Mlos.Agent.Server` invocation.
+The `Mlos.Agent.Server` needs to be told where it can find those assemblies in order to load them so that it can process the messages sent by the component.
+To do that, before we started the `Mlos.Agent.Server`, we first populated the `MLOS_SETTINGS_REGISTRY_PATH` environment variable with the directory path to the `SmartCache.SettingsRegistry.dll`.
 
 ## Caveats
 
 - The system currently only supports one shared memory region and doesn't cleanup the shared memory after itself.
+
+    As such, you may see hung processes when restarting after a failed experiment.
 
     To help with this, we currently provide a helper script to remove previous incarnations of the shared memory regions:
 
@@ -121,3 +134,5 @@ out/cmake/Release/source/Examples/SmartCache/SmartCache
     pkill SmartCache
     pkill -f dotnet.*Mlos.Agent.Server.dll
     ```
+
+    > Note: each of these commands should be executed inside the `Mlos.Agent.Server` execution environment (e.g. inside the docker container).
