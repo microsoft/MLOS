@@ -9,6 +9,7 @@ from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
 from mlos.Spaces.Dimensions.Dimension import Dimension
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
+from mlos.Tracer import trace, traced
 
 
 class Hypergrid(ABC):
@@ -57,6 +58,7 @@ class Hypergrid(ABC):
     def random(self, point=None):
         raise NotImplementedError("All subclasses must implement this.")
 
+    @trace()
     def random_dataframe(self, num_samples):
         config_dicts = [
             {dim_name: value for dim_name, value in self.random()}
@@ -64,6 +66,7 @@ class Hypergrid(ABC):
         ]
         return pd.DataFrame(config_dicts)
 
+    @trace()
     def filter_out_invalid_rows(self, original_dataframe: pd.DataFrame) -> pd.DataFrame:
         """ Returns a dataframe containing only valid rows from the dataframe.
 

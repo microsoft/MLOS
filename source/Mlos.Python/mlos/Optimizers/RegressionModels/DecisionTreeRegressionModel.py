@@ -11,7 +11,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
 from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
-from mlos.Tracer import trace
+from mlos.Tracer import trace, traced
 
 
 class DecisionTreeRegressionModelConfig(RegressionModelConfig):
@@ -254,16 +254,19 @@ class DecisionTreeRegressionModel(RegressionModel):
         if self.fitted:
             features_df = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
 
-            filtered = self._input_space_adapter.filter_out_invalid_rows(features_df)
 
             features_df = features_df[self.input_dimension_names]
-            rows_with_no_nulls_index = features_df.index[features_df.notnull().all(axis=1)]
-            if not rows_with_no_nulls_index.empty:
-                valid_rows_index = features_df.loc[rows_with_no_nulls_index].index[features_df.loc[rows_with_no_nulls_index].apply(
-                    lambda row: Point(**{dim_name: row[i] for i, dim_name in enumerate(self.input_dimension_names)}) in self._input_space_adapter,
-                    axis=1
-                )]
-            assert filtered.equals(features_df.loc[valid_rows_index])
+            filtered = self._input_space_adapter.filter_out_invalid_rows(original_dataframe=features_df)
+            with traced("filtering_out_invalid_rows"):
+                rows_with_no_nulls_index = features_df.index[features_df.notnull().all(axis=1)]
+                if not rows_with_no_nulls_index.empty:
+                    valid_rows_index = features_df.loc[rows_with_no_nulls_index].index[features_df.loc[rows_with_no_nulls_index].apply(
+                        lambda row: Point(**{dim_name: row[i] for i, dim_name in enumerate(self.input_dimension_names)}) in self._input_space_adapter,
+                        axis=1
+                    )]
+                    assert filtered.equals(features_df.loc[valid_rows_index])
+                else:
+                    assert filtered.empty
 
         predictions = Prediction(
             objective_name=self.target_dimension_names[0],
