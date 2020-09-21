@@ -5,7 +5,10 @@
 from abc import ABC, abstractmethod
 import random
 import pandas as pd
+from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
+from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
 from mlos.Spaces.Dimensions.Dimension import Dimension
+from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
 
 
 class Hypergrid(ABC):
@@ -18,6 +21,10 @@ class Hypergrid(ABC):
         if random_state is None:
             random_state = random.Random()
         self._random_state = random_state
+
+    @property
+    def dimension_names(self):
+        return [dimension.name for dimension in self.dimensions]
 
     @abstractmethod
     def __contains__(self, item):
@@ -56,6 +63,53 @@ class Hypergrid(ABC):
             for _ in range(num_samples)
         ]
         return pd.DataFrame(config_dicts)
+
+    def filter_out_invalid_rows(self, original_dataframe: pd.DataFrame) -> pd.DataFrame:
+        """ Returns a dataframe containing only valid rows from the dataframe.
+
+        Valid rows are rows with no NaNs and with values for all dimensions in the required ranges.
+
+        If there are additional columns, they will be preserved.
+
+        :param original_dataframe:
+        :return:
+        """
+        assert set(original_dataframe.columns.values).issuperset(set(self.dimension_names))
+
+        # Let's ignore any extra columns
+        #
+        dataframe = original_dataframe[self.dimension_names]
+        rows_with_no_nulls_index = dataframe.index[dataframe.notnull().all(axis=1)]
+
+        # Now for each column let's filter out the row whose values are outside the allowed ranges.
+        #
+        valid_rows_index = rows_with_no_nulls_index
+        for dimension in self.dimensions:
+            valid_rows = original_dataframe.loc[valid_rows_index]
+
+            if isinstance(dimension, ContinuousDimension):
+                if dimension.include_min:
+                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] >= dimension.min].index)
+                else:
+                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] > dimension.min].index)
+
+                if dimension.include_max:
+                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] <= dimension.max].index)
+                else:
+                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] < dimension.max].index)
+
+            elif isinstance(dimension, DiscreteDimension):
+                valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] >= dimension.min].index)
+                valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] <= dimension.max].index)
+
+            elif isinstance(dimension, CategoricalDimension):
+                valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] in dimension.values_set].index)
+
+            else:
+                raise ValueError(f"Unsupported dimension type: {type(dimension)}")
+
+        return original_dataframe.loc[valid_rows_index]
+
 
     @abstractmethod
     def join(self, subgrid, on_external_dimension: Dimension):

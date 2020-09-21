@@ -253,6 +253,9 @@ class DecisionTreeRegressionModel(RegressionModel):
         features_df = None
         if self.fitted:
             features_df = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
+
+            filtered = self._input_space_adapter.filter_out_invalid_rows(features_df)
+
             features_df = features_df[self.input_dimension_names]
             rows_with_no_nulls_index = features_df.index[features_df.notnull().all(axis=1)]
             if not rows_with_no_nulls_index.empty:
@@ -260,6 +263,7 @@ class DecisionTreeRegressionModel(RegressionModel):
                     lambda row: Point(**{dim_name: row[i] for i, dim_name in enumerate(self.input_dimension_names)}) in self._input_space_adapter,
                     axis=1
                 )]
+            assert filtered.equals(features_df.loc[valid_rows_index])
 
         predictions = Prediction(
             objective_name=self.target_dimension_names[0],
