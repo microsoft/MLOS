@@ -9,6 +9,7 @@ from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
 from mlos.Spaces.Dimensions.Dimension import Dimension
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
+from mlos.Spaces.Point import Point
 from mlos.Tracer import trace, traced
 
 
@@ -80,34 +81,45 @@ class Hypergrid(ABC):
         """
         assert set(original_dataframe.columns.values).issuperset(set(self.dimension_names))
 
-        # Let's exclude any extra columns
-        #
+        valid_rows_index = None
         dataframe = original_dataframe[self.dimension_names]
-        valid_rows_index = dataframe.index[dataframe.notnull().all(axis=1)]
 
-        # Now for each column let's filter out the rows whose values are outside the allowed ranges.
-        #
-        for dimension in self.dimensions:
-            if isinstance(dimension, ContinuousDimension):
-                if dimension.include_min:
+        if not self.is_hierarchical():
+            # Let's exclude any extra columns
+            #
+            valid_rows_index = dataframe.index[dataframe.notnull().all(axis=1)]
+
+            # Now for each column let's filter out the rows whose values are outside the allowed ranges.
+            #
+            for dimension in self.dimensions:
+                if isinstance(dimension, ContinuousDimension):
+                    if dimension.include_min:
+                        valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] >= dimension.min].index)
+                    else:
+                        valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] > dimension.min].index)
+
+                    if dimension.include_max:
+                        valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] <= dimension.max].index)
+                    else:
+                        valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] < dimension.max].index)
+
+                elif isinstance(dimension, DiscreteDimension):
                     valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] >= dimension.min].index)
-                else:
-                    valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] > dimension.min].index)
-
-                if dimension.include_max:
                     valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] <= dimension.max].index)
+
+                elif isinstance(dimension, CategoricalDimension):
+                    valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name].isin(dimension.values_set)].index)
+
                 else:
-                    valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] < dimension.max].index)
+                    raise ValueError(f"Unsupported dimension type: {type(dimension)}")
 
-            elif isinstance(dimension, DiscreteDimension):
-                valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] >= dimension.min].index)
-                valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] <= dimension.max].index)
-
-            elif isinstance(dimension, CategoricalDimension):
-                valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] in dimension.values_set].index)
-
-            else:
-                raise ValueError(f"Unsupported dimension type: {type(dimension)}")
+        else:
+            # TODO: this can be optimized. Do everything we did for non-hierarchical hypergrids, but also evaluate constraints imposed by join dimensions.
+            #
+            valid_rows_index = dataframe[dataframe.apply(
+                lambda row: Point(**{dim_name: row[i] for i, dim_name in enumerate(self.dimension_names)}) in self,
+                axis=1
+            )].index
 
         if exclude_extra_columns:
             return dataframe.loc[valid_rows_index]
