@@ -6,17 +6,17 @@ This `SmartCache` can be used to demonstrate a full end-to-end MLOS integrated m
 
 ## Overview
 
-To do that, we run the (C++) `SmartCache` executable to communicate with the (C#) [`Mlos.Agent.Server`](../../Mlos.Agent.Server/) over a shared memory channel provided by the [`Mlos.Core`](../../Mlos.Core/) library.
+To do that, we run the (C++) `SmartCache` executable to communicate with the (C#) [`Mlos.Agent.Server`](../../Mlos.Agent.Server/#mlos-github-tree-view) over a shared memory channel provided by the [`Mlos.Core`](../../Mlos.Core/#mlos-github-tree-view) library.
 
 The `Mlos.Agent.Server` is essentially a small wrapper around several other communication channels to allow different components to connect for component experimentation convenience.
 
 It provides
 
-1. Shared memory communication channels via the [`Mlos.Agent`](../../Mlos.Agent) and [`Mlos.NetCore`](../../Mlos.NetCore) libraries.
+1. Shared memory communication channels via the [`Mlos.Agent`](../../Mlos.Agent/#mlos-github-tree-view) and [`Mlos.NetCore`](../../Mlos.NetCore/#mlos-github-tree-view) libraries.
 
-2. A [`Mlos.Agent.GrpcServer`](../../Mlos.Agent.GrpcClient/) GRPC channel to allow driving the experimentation process from a Jupyter notebook.
+2. A [`Mlos.Agent.GrpcServer`](../../Mlos.Agent.GrpcClient/#mlos-github-tree-view) GRPC channel to allow driving the experimentation process from a Jupyter notebook.
 
-3. A GRPC client to connect to the (Python) [`mlos.Grpc.OptimizerMicroserviceServer`](../../Mlos.Python/mlos/Grpc/OptimizerMicroserviceServer.py) to store and track those experiments.
+3. A GRPC client to connect to the (Python) [`mlos.Grpc.OptimizerMicroserviceServer`](../../Mlos.Python/mlos/Grpc/OptimizerMicroserviceServer.py#mlos-github-tree-view) to store and track those experiments.
 
 TODO: Diagrams
 
@@ -30,7 +30,7 @@ TODO: Diagrams
 
 To build and run the necessary components for this example
 
-1. [Build the Docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image) using the [`Dockerfile`](../../../Dockerfile) at the root of the repository.
+1. [Build the Docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image) using the [`Dockerfile`](../../../Dockerfile#mlos-github-tree-view) at the root of the repository.
 
     ```shell
     docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
@@ -55,15 +55,15 @@ To build and run the necessary components for this example
 
 4. For a `Release` build (the default), the relevant output will be at:
 
-    - `Mlos.Agent.Server`:
+    - Mlos.Agent.Server:
 
         `out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll`
 
-    - `SmartCache`:
+    - SmartCache:
 
         `out/cmake/Release/source/Examples/SmartCache/SmartCache`
 
-    - `SmartCache.SettingsRegistry`
+    - SmartCache.SettingsRegistry:
 
         `out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU/SmartCache.SettingsRegistry.dll`
 
@@ -85,7 +85,7 @@ Next, we can start the `Mlos.Server.Agent` using the `dotnet` command:
 
 ```sh
 tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll
-# FIXME: This is missing the .json file to connect to the optimizer service.
+# Note: This is missing the .json file to connect to the optimizer service.
 ```
 
 The `Mlos.Agent` that gets started will then wait for a signal that the component (`SmartCache`) has connected to the shared memory region before starting to poll the component for messages to process.
