@@ -11,7 +11,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
 from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
-from mlos.Tracer import trace, traced
+from mlos.Tracer import trace
 
 
 class DecisionTreeRegressionModelConfig(RegressionModelConfig):

@@ -10,7 +10,7 @@ from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
 from mlos.Spaces.Dimensions.Dimension import Dimension
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
 from mlos.Spaces.Point import Point
-from mlos.Tracer import trace, traced
+from mlos.Tracer import trace
 
 
 class Hypergrid(ABC):
