@@ -81,7 +81,7 @@ In this case we populate it with the path to the `SmartCache.SettingsRegistry.dl
 export MLOS_SETTINGS_REGISTRY_PATH="out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU:$MLOS_SETTINGS_REGISTRY_PATH"
 ```
 
-Next, we can the `Mlos.Server.Agent` using the `dotnet` command:
+Next, we can start the `Mlos.Server.Agent` using the `dotnet` command:
 
 ```sh
 tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll
