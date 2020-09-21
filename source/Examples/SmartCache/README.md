@@ -39,7 +39,7 @@ To build and run the necessary components for this example
 2. [Run the Docker image](../../../documentation/02-Build.md#create-a-new-container-instance) you just built.
 
     ```shell
-    docker run -it -v $PWD:/src/MLOS --name mlos-build mlos/build:ubuntu-20.0
+    docker run -it -v $PWD:/src/MLOS --name mlos-build mlos/build:ubuntu-20.04
     ```
 
 3. Inside the container, [build the compiled software](../../../documentation/02-Build.md#cli-make) with `make`:
