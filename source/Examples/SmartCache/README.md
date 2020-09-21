@@ -53,7 +53,7 @@ To build and run the necessary components for this example
     > To just build `SmartCache` and `Mlos.Agent.Server`, execute the following: \
     > `make -C source/Examples/SmartCache && make -C source/Mlos.Agent.Server`
 
-4. For a `Release` build, the relevant output will be at:
+4. For a `Release` build (the default), the relevant output will be at:
 
     - `Mlos.Agent.Server`:
 
