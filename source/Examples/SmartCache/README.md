@@ -88,7 +88,7 @@ tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Serve
 # FIXME: This is missing the .json file to connect to the optimizer service.
 ```
 
-The `Mlos.Agent` that gets started will then wait for a signal that the other side (`SmartCache`) has connected to the shared memory region before started to poll it for messages to process.
+The `Mlos.Agent` that gets started will then wait for a signal that the component (`SmartCache`) has connected to the shared memory region before starting to poll the component for messages to process.
 
 To start the `SmartCache` process we first need another shell instance in the docker container:
 
