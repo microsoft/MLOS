@@ -67,7 +67,7 @@ class Hypergrid(ABC):
         return pd.DataFrame(config_dicts)
 
     @trace()
-    def filter_out_invalid_rows(self, original_dataframe: pd.DataFrame) -> pd.DataFrame:
+    def filter_out_invalid_rows(self, original_dataframe: pd.DataFrame, exclude_extra_columns=True) -> pd.DataFrame:
         """ Returns a dataframe containing only valid rows from the dataframe.
 
         Valid rows are rows with no NaNs and with values for all dimensions in the required ranges.
@@ -75,42 +75,42 @@ class Hypergrid(ABC):
         If there are additional columns, they will be preserved.
 
         :param original_dataframe:
+        :param exclude_extra_columns:
         :return:
         """
         assert set(original_dataframe.columns.values).issuperset(set(self.dimension_names))
 
-        # Let's ignore any extra columns
+        # Let's exclude any extra columns
         #
         dataframe = original_dataframe[self.dimension_names]
-        rows_with_no_nulls_index = dataframe.index[dataframe.notnull().all(axis=1)]
+        valid_rows_index = dataframe.index[dataframe.notnull().all(axis=1)]
 
-        # Now for each column let's filter out the row whose values are outside the allowed ranges.
+        # Now for each column let's filter out the rows whose values are outside the allowed ranges.
         #
-        valid_rows_index = rows_with_no_nulls_index
         for dimension in self.dimensions:
-            valid_rows = original_dataframe.loc[valid_rows_index]
-
             if isinstance(dimension, ContinuousDimension):
                 if dimension.include_min:
-                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] >= dimension.min].index)
+                    valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] >= dimension.min].index)
                 else:
-                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] > dimension.min].index)
+                    valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] > dimension.min].index)
 
                 if dimension.include_max:
-                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] <= dimension.max].index)
+                    valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] <= dimension.max].index)
                 else:
-                    valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] < dimension.max].index)
+                    valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] < dimension.max].index)
 
             elif isinstance(dimension, DiscreteDimension):
-                valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] >= dimension.min].index)
-                valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] <= dimension.max].index)
+                valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] >= dimension.min].index)
+                valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] <= dimension.max].index)
 
             elif isinstance(dimension, CategoricalDimension):
-                valid_rows_index = valid_rows_index.intersection(valid_rows[valid_rows[dimension.name] in dimension.values_set].index)
+                valid_rows_index = valid_rows_index.intersection(dataframe[dataframe[dimension.name] in dimension.values_set].index)
 
             else:
                 raise ValueError(f"Unsupported dimension type: {type(dimension)}")
 
+        if exclude_extra_columns:
+            return dataframe.loc[valid_rows_index]
         return original_dataframe.loc[valid_rows_index]
 
 
