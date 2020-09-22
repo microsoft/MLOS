@@ -17,7 +17,7 @@ from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import 
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid, Point
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Tracer import Tracer
+from mlos.Tracer import Tracer, trace
 import mlos.global_values as global_values
 
 class TestUtilityFunctionOptimizers(unittest.TestCase):
@@ -53,6 +53,9 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         cls.output_values_dataframe = objective_function.evaluate_dataframe(cls.input_values_dataframe)
 
         cls.model_config = HomogeneousRandomForestConfigStore.default
+
+        print(cls.model_config)
+
         cls.model = HomogeneousRandomForestRegressionModel(
             model_config=cls.model_config,
             input_space=cls.input_space,
@@ -86,6 +89,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
+    @trace()
     def test_random_search_optimizer(self):
         print("##############################################")
         random_search_optimizer = RandomSearchOptimizer(
@@ -98,6 +102,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
             print(suggested_params)
             self.assertTrue(suggested_params in self.input_space)
 
+    @trace()
     def test_glow_worm_swarm_optimizer(self):
         print("##############################################")
         glow_worm_swarm_optimizer = GlowWormSwarmOptimizer(
@@ -110,6 +115,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
             print(suggested_params)
             self.assertTrue(suggested_params in self.input_space)
 
+    @trace()
     def test_glow_worm_on_three_level_quadratic(self):
         output_space = SimpleHypergrid(
             name="output",
@@ -154,7 +160,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         num_iterations = 5
         for i in range(num_iterations):
             suggested_params = glow_worm_swarm_optimizer.suggest()
-            print(f"[{i+1}/{num_iterations}] {suggested_params}")
+            print(f"[{i+1}/{num_iterations}] {suggested_params.to_json()}")
             self.assertTrue(suggested_params in objective_function.parameter_space)
 
 

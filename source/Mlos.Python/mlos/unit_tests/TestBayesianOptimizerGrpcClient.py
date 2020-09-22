@@ -16,7 +16,7 @@ from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
 from mlos.Logger import create_logger
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid
 
@@ -60,9 +60,10 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
     def test_optimizer_with_default_config(self):
         pre_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
+        print(BayesianOptimizerConfigStore.default)
         bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT
+            optimizer_config=BayesianOptimizerConfigStore.default
         )
         post_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
 
@@ -128,8 +129,16 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
     def test_optimizer_with_random_config(self):
         num_random_restarts = 10
         for i in range(num_random_restarts):
-            optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
-            print(f"[{i+1}/{num_random_restarts}] Creating a bayesian optimizer with config: {optimizer_config.to_dict()}")
+            optimizer_config = BayesianOptimizerConfigStore.parameter_space.random()
+
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
+            if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
+                optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = min(
+                    optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators,
+                    20
+                )
+
+            print(f"[{i+1}/{num_random_restarts}] Creating a bayesian optimizer with config: {optimizer_config}")
             bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
                 optimization_problem=self.optimization_problem,
                 optimizer_config=optimizer_config
@@ -155,17 +164,11 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         registered_features_df = None
         registered_objectives_df = None
         old_optimum = np.inf
-        for _ in range(num_iterations):
+        for i in range(num_iterations):
             suggested_params = optimizer.suggest()
             suggested_params_df = suggested_params.to_dataframe()
-            prediction = optimizer.predict(suggested_params_df)
-            prediction_df = prediction.get_dataframe()
-
             y = self.objective_function.evaluate_point(suggested_params)
-
-            print(f"Params: {suggested_params}, Actual: {y}, Prediction: {str(prediction_df)}")
             optimizer.register(suggested_params_df, y.to_dataframe())
-
             if registered_features_df is None:
                 registered_features_df = suggested_params_df
             else:
@@ -180,5 +183,5 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
             # ensure current optimum doesn't go up
             assert optimum.y <= old_optimum
             old_optimum = optimum.y
-            print(f"Best Params: {best_params}, Best Value: {optimum.y}")
+            print(f"[{i+1}/{num_iterations}]Best Params: {best_params.to_json()}, Best Value: {optimum.y}")
         return registered_features_df, registered_objectives_df

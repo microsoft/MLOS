@@ -334,7 +334,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             # We can make this test more useful as a Unit Test by restricting its duration.
             #
-            optimizer_config.min_samples_required_for_guided_design_of_experiments = 50
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
             if optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__:
                 random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
                 random_forest_config.n_estimators = min(random_forest_config.n_estimators, 5)

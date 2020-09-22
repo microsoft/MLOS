@@ -76,7 +76,9 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
         for i in range(num_iterations):
             if i % 10 == 0:
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
+
             model_config = HomogeneousRandomForestConfigStore.parameter_space.random()
+            model_config.n_estimators = min(model_config.n_estimators, 20)
             print(model_config)
             model = HomogeneousRandomForestRegressionModel(
                 model_config=model_config,

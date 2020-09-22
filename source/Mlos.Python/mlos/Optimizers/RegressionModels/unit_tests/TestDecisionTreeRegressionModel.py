@@ -79,9 +79,9 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
         sample_inputs = {'x': np.linspace(start=-10, stop=110, num=13, endpoint=True)}
         sample_inputs_pandas_dataframe = pd.DataFrame(sample_inputs)
 
-        num_iterations = 500
+        num_iterations = 50
         for i in range(num_iterations):
-            if i % 100 == 0:
+            if i % 10 == 0:
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
             model_config = DecisionTreeConfigStore.parameter_space.random()
             print(str(model_config))

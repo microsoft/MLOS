@@ -21,7 +21,7 @@ HomogeneousRandomForestConfigStore = ComponentConfigStore(
         on_external_dimension=CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__])
     ),
     default=Point(
-        n_estimators=50,
+        n_estimators=10,
         features_fraction_per_estimator=1,
         samples_fraction_per_estimator=1,
         regressor_implementation=DecisionTreeRegressionModel.__name__,
