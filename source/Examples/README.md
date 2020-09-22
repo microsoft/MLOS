@@ -1,4 +1,4 @@
 # Examples
 
-- [SmartCache](./SmartCache/)
-- [SmartSharedChannel](./SmartSharedChannel/)
+- [Smart Cache](./SmartCache/)
+- [Smart Shared Channel](./SmartSharedChannel/)
