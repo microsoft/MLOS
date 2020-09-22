@@ -51,7 +51,8 @@ for f in content/notebooks/*.md; do
     sed -i "s/FILENAME/$base/g" "$f"
 done
 
-# Provide
+# Provide an index file for viewing the set of notebooks that we render at
+# http://microsoft.github.io/MLOS/notebooks/
 cat > content/notebooks/_index.md <<HERE
 # MLOS Sample Notebooks
 
