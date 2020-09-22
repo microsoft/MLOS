@@ -10,7 +10,7 @@ import pandas as pd
 
 import mlos.global_values as global_values
 from mlos.Logger import create_logger
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizerConfig
 from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point
 from mlos.Tracer import Tracer, trace, traced
@@ -38,7 +38,7 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
 
     def test_filtering_out_invalid_rows(self):
         spaces = [
-            BayesianOptimizerConfig.CONFIG_SPACE,
+            BayesianOptimizerConfigStore.parameter_space,
             GlowWormSwarmOptimizerConfig.CONFIG_SPACE
         ]
 

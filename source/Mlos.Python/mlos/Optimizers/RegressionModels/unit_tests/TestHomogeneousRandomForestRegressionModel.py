@@ -8,8 +8,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import \
-    HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel, HomogeneousRandomForestConfigStore
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 import mlos.global_values as global_values
 
@@ -46,7 +45,7 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
 
     def test_default_homogeneous_random_forest_model(self):
 
-        model_config = HomogeneousRandomForestRegressionModelConfig()
+        model_config = HomogeneousRandomForestConfigStore.default
         model = HomogeneousRandomForestRegressionModel(
             model_config=model_config,
             input_space=self.input_space,
@@ -77,9 +76,8 @@ class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
         for i in range(num_iterations):
             if i % 10 == 0:
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
-            model_config_values = HomogeneousRandomForestRegressionModelConfig.CONFIG_SPACE.random()
-            print(str(model_config_values.to_json(indent=2)))
-            model_config = HomogeneousRandomForestRegressionModelConfig(**model_config_values.dimension_value_dict)
+            model_config = HomogeneousRandomForestConfigStore.parameter_space.random()
+            print(model_config)
             model = HomogeneousRandomForestRegressionModel(
                 model_config=model_config,
                 input_space=self.input_space,

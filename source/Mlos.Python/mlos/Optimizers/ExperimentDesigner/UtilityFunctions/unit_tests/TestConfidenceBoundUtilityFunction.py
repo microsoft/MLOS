@@ -9,8 +9,8 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import \
-    HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import HomogeneousRandomForestConfigStore
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import \
     ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
@@ -44,7 +44,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
         cls.input_pandas_dataframe = pd.DataFrame({"x": cls.input_values})
         cls.output_pandas_dataframe = pd.DataFrame({"y": cls.output_values})
 
-        cls.model_config = HomogeneousRandomForestRegressionModelConfig()
+        cls.model_config = HomogeneousRandomForestConfigStore.default
         cls.model = HomogeneousRandomForestRegressionModel(
             model_config=cls.model_config,
             input_space=cls.input_space,

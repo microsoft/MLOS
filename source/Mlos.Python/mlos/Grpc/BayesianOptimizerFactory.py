@@ -7,7 +7,7 @@ from mlos.Logger import create_logger
 from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, OptimizerInfo
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Grpc.BayesianOptimizerProxy import BayesianOptimizerProxy
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Spaces import Point
 
@@ -47,7 +47,7 @@ class BayesianOptimizerFactory:
 
         """
         if optimizer_config is None:
-            optimizer_config = BayesianOptimizerConfig.DEFAULT
+            optimizer_config = BayesianOptimizerConfigStore.default
 
         create_optimizer_request = CreateOptimizerRequest(
             OptimizationProblem=optimization_problem.to_protobuf(),

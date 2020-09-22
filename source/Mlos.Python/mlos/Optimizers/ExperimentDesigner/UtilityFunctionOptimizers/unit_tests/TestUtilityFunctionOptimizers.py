@@ -13,7 +13,8 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOp
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfig
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import HomogeneousRandomForestConfigStore
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid, Point
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
 from mlos.Tracer import Tracer
@@ -51,7 +52,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         cls.input_values_dataframe = objective_function.parameter_space.random_dataframe(num_samples=2500)
         cls.output_values_dataframe = objective_function.evaluate_dataframe(cls.input_values_dataframe)
 
-        cls.model_config = HomogeneousRandomForestRegressionModelConfig()
+        cls.model_config = HomogeneousRandomForestConfigStore.default
         cls.model = HomogeneousRandomForestRegressionModel(
             model_config=cls.model_config,
             input_space=cls.input_space,
