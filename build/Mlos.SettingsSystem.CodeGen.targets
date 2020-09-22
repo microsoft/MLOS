@@ -64,11 +64,6 @@
   <!-- Provide a meta-target for easier dependency/cli specification -->
   <Target Name="SettingsSystemCodeGen" DependsOnTargets="SettingsSystemRegistryDefCodeGen" />
 
-  <!-- Binplace settings registry to the target folder -->
-  <Target Name="BinplaceSettingsRegistry" AfterTargets="Build">
-    <Copy SourceFiles="$(OutputPath)\$(TargetFileName)" DestinationFolder="$(BinplaceDir)" />
-  </Target>
-
   <Target Name="CleanSettingsSystemCodeGen" BeforeTargets="BeforeClean">
     <RemoveDir Directories="$(SettingsSystemCodeGenAbsoluteOutputPath)" />
   </Target>
