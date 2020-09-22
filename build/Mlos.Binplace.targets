@@ -5,6 +5,10 @@
     <BinplaceFile Include="$(OutputPath)\$(TargetFileName)" Condition="'$(TargetFileName)' != ''" />
     <BinplaceFile Include="$(OutputPath)\$(TargetName).pdb" Condition="'$(TargetName)' != ''" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- Provide the config file to allow using the "dotnet" command to run the dll output by this project. -->
+    <BinplaceFile Include="$(OutputPath)\$(TargetName).runtimeconfig.json" Condition="'$(BinplaceDotnetRuntimeConfig)' == 'true'" />
+  </ItemGroup>
   <ItemGroup Label="BinplaceInputs">
     <BinplaceInputs Include="@(BinplaceFile -> '%(FullPath)')" />
   </ItemGroup>
