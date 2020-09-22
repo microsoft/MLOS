@@ -17,7 +17,7 @@
 #       DIRECTORY ${PROJECT_SOURCE_DIR})
 #
 function(add_mlos_dotnet_project)
-    set(options MLOS_SETTINGS_REGISTRY PUBLISH_BINARY)
+    set(options MLOS_SETTINGS_REGISTRY)
     set(oneValueArgs NAME DIRECTORY)
     cmake_parse_arguments(add_mlos_dotnet_project "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -26,7 +26,6 @@ function(add_mlos_dotnet_project)
     endif()
 
     set(MLOS_SETTINGS_REGISTRY ${add_mlos_dotnet_project_MLOS_SETTINGS_REGISTRY})
-    set(PUBLISH_BINARY ${add_mlos_dotnet_project_PUBLISH_BINARY})
     set(NAME ${add_mlos_dotnet_project_NAME})
     set(DIRECTORY ${add_mlos_dotnet_project_DIRECTORY})
 
@@ -55,6 +54,7 @@ function(add_mlos_dotnet_project)
     # By convention .csproj files, their output, and their library name
     # all share the same basename.
     set(OUTPUT_DLL ${OUTPUT_PATH}/${NAME}.dll)
+    set(OUTPUT_EXE ${BINPLACE_DIR}/${NAME}.dll)
     set(CSPROJ ${NAME}.csproj)
 
     # Parse the csproj files in the directory to determine the *.cs file dependencies.
@@ -71,25 +71,11 @@ function(add_mlos_dotnet_project)
         ${CS_SOURCES}
         ${DIRECTORY}/${CSPROJ})
 
-    if(${PUBLISH_BINARY})
-        set(OUTPUT_EXE "${BINPLACE_DIR}/${NAME}")
-        # Invokes "dotnet publish" to output an executable (along with it's
-        # dependencies) to the BINPLACE_DIR according to a special
-        # PublishProjectBinary target defined in the
-        # Mlos.NetCore.Publishing.targets msbuild file.
-        add_custom_command(OUTPUT ${OUTPUT_DLL}
-            COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} /t:'Build$<SEMICOLON>PublishProjectBinary' ${CSPROJ}
-            DEPENDS ${DEPENDENCIES}
-            BYPRODUCTS ${OUTPUT_EXE}
-            WORKING_DIRECTORY ${DIRECTORY}
-            COMMENT "Building dotnet assembly and publishing executable for ${NAME}")
-    else()
-        add_custom_command(OUTPUT ${OUTPUT_DLL}
-            COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} ${CSPROJ}
-            DEPENDS ${DEPENDENCIES}
-            WORKING_DIRECTORY ${DIRECTORY}
-            COMMENT "Building dotnet assembly ${NAME}.dll")
-    endif()
+    add_custom_command(OUTPUT ${OUTPUT_DLL}
+        COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} ${CSPROJ}
+        DEPENDS ${DEPENDENCIES}
+        WORKING_DIRECTORY ${DIRECTORY}
+        COMMENT "Building dotnet assembly ${NAME}.dll")
 
     add_custom_target(${NAME} ALL
         DEPENDS ${OUTPUT_DLL})
@@ -99,11 +85,9 @@ function(add_mlos_dotnet_project)
         PROPERTIES DOTNET_OUTPUT_DIR ${OUTPUT_PATH})
     set_target_properties(${NAME}
         PROPERTIES DOTNET_OUTPUT_DLL ${OUTPUT_DLL})
-
-    if(${PUBLISH_BINARY})
-        set_target_properties(${NAME}
-            PROPERTIES DOTNET_OUTPUT_EXE ${OUTPUT_EXE})
-    endif()
+    # If the .csproj specifies a binplace rule, this is the path it should be placed in.
+    set_target_properties(${NAME}
+        PROPERTIES DOTNET_OUTPUT_EXE ${OUTPUT_EXE})
 
     if(${MLOS_SETTINGS_REGISTRY})
         add_dependencies(${NAME} Mlos.SettingsSystem.Attributes)
@@ -123,5 +107,4 @@ function(add_mlos_dotnet_project)
     if(CS_PROJS)
         add_dependencies(${NAME} ${CS_PROJS})
     endif()
-
 endfunction()
