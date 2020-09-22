@@ -19,7 +19,6 @@ headless = true
 
 - [E2E Examples]({{< relref "/source/Examples" >}})
   - [Smart Cache]({{< relref "/source/Examples/SmartCache" >}})
-  - [Smart Shared Channel]({{< relref "/source/Examples/SmartSharedChannel" >}})
 
 - [Code of Conduct]({{< relref "/CODE_OF_CONDUCT" >}})
 - [Contributing]({{< relref "/CONTRIBUTING" >}})
