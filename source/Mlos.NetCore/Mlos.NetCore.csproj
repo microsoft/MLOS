@@ -66,5 +66,4 @@
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
   <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />
-  <Import Project="$(BaseDir)\build\Mlos.Binplace.targets" />
 </Project>

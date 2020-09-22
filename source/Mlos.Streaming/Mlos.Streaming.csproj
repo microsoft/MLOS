@@ -24,5 +24,4 @@
     <Compile Include="ValueHolder.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
-  <Import Project="$(BaseDir)\build\Mlos.Binplace.targets" />
 </Project>

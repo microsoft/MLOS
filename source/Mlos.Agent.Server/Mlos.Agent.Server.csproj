@@ -25,8 +25,4 @@
     <Compile Include="TargetProcessManager.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
-  <PropertyGroup>
-    <BinplaceDotnetRuntimeConfig>true</BinplaceDotnetRuntimeConfig>
-  </PropertyGroup>
-  <Import Project="$(BaseDir)\build\Mlos.Binplace.targets" />
 </Project>
