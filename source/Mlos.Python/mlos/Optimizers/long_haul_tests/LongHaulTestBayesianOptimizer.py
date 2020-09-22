@@ -14,7 +14,7 @@ from mlos.Logger import create_logger
 from mlos.Tracer import Tracer
 
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfigStore
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
@@ -78,7 +78,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT,
+            optimizer_config=BayesianOptimizerConfigStore.default,
             logger=self.logger
         )
         bayesian_optimizer.register(random_params_df, y_df)
@@ -117,7 +117,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT,
+            optimizer_config=BayesianOptimizerConfigStore.default,
             logger=self.logger
         )
 
@@ -164,7 +164,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         for restart_num in range(num_restarts):
             bayesian_optimizer = BayesianOptimizer(
                 optimization_problem=optimization_problem,
-                optimizer_config=BayesianOptimizerConfig.DEFAULT,
+                optimizer_config=BayesianOptimizerConfigStore.default,
                 logger=self.logger
             )
 
@@ -206,10 +206,10 @@ class TestBayesianOptimizer(unittest.TestCase):
             # Let's set up random seeds so that we can easily repeat failed experiments
             #
             random_state.seed(restart_num)
-            BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
+            BayesianOptimizerConfigStore.parameter_space.random_state = random_state
             objective_function.parameter_space.random_state = random_state
 
-            optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
+            optimizer_config = BayesianOptimizerConfigStore.parameter_space.random()
 
             # The goal here is to make sure the optimizer works with a lot of different configurations.
             # So let's make sure each run is not too long.
@@ -275,7 +275,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 objectives=[Objective(name="function_value", minimize=minimize)]
             )
 
-            optimizer_config = BayesianOptimizerConfig.DEFAULT.copy()
+            optimizer_config = BayesianOptimizerConfigStore.default
             random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
 
             random_forest_config.decision_tree_regression_model_config.n_new_samples_before_refit = 1

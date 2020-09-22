@@ -71,8 +71,7 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
             sample_inputs = {'x': np.linspace(start=-10, stop=110, num=13, endpoint=True)}
             sample_inputs_pandas_dataframe = pd.DataFrame(sample_inputs)
             predictions = model.predict(sample_inputs_pandas_dataframe)
-            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'],
-                                                predictions.get_dataframe().iterrows()):
+            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'], predictions.get_dataframe().iterrows()):
                 print(sample_input, self.input_output_mapping(sample_input), prediction)
 
     def test_random_decision_tree_models(self):

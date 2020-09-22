@@ -13,7 +13,7 @@ from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel imp
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import HomogeneousRandomForestConfigStore
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import \
-    ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
+    ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfigStore
 
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 import mlos.global_values as global_values
@@ -87,7 +87,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
     def test_random_function_configs(self):
         for i in range(100):
             minimize = [True, False][i % 2]
-            utility_function_config = ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE.random()
+            utility_function_config = ConfidenceBoundUtilityFunctionConfigStore.parameter_space.random()
             utility_function = ConfidenceBoundUtilityFunction(
                 function_config=utility_function_config,
                 surrogate_model=self.model,

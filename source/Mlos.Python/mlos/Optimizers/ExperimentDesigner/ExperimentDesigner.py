@@ -5,19 +5,17 @@
 import numpy as np
 from mlos.Logger import create_logger
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
-from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
-from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfig
-from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfig
-from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
+from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfigStore
+from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfigStore
+from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfigStore
 
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
-
-class ExperimentDesignerConfig(metaclass=DefaultConfigMeta):
-
-    CONFIG_SPACE = SimpleHypergrid(
+ExperimentDesignerConfigStore=ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
         name='experiment_designer_config',
         dimensions=[
             CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__]),
@@ -25,24 +23,23 @@ class ExperimentDesignerConfig(metaclass=DefaultConfigMeta):
             ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
-        subgrid=ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE,
+        subgrid=ConfidenceBoundUtilityFunctionConfigStore.parameter_space,
         on_external_dimension=CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__])
     ).join(
-        subgrid=RandomSearchOptimizerConfig.CONFIG_SPACE,
+        subgrid=RandomSearchOptimizerConfigStore.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
     ).join(
-        subgrid=GlowWormSwarmOptimizerConfig.CONFIG_SPACE,
+        subgrid=GlowWormSwarmOptimizerConfigStore.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
-    )
-
-    _DEFAULT = Point(
+    ),
+    default=Point(
         utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
-        confidence_bound_utility_function_config=ConfidenceBoundUtilityFunctionConfig.DEFAULT,
-        random_search_optimizer_config=RandomSearchOptimizerConfig.DEFAULT,
+        confidence_bound_utility_function_config=ConfidenceBoundUtilityFunctionConfigStore.default,
+        random_search_optimizer_config=RandomSearchOptimizerConfigStore.default,
         fraction_random_suggestions=0.5
     )
-
+)
 
 class ExperimentDesigner:
     """ Portion of a BayesianOptimizer concerned with Design of Experiments.
@@ -64,12 +61,12 @@ class ExperimentDesigner:
 
     def __init__(
             self,
-            designer_config: ExperimentDesignerConfig,
+            designer_config: Point,
             optimization_problem: OptimizationProblem,
             surrogate_model: RegressionModel,
             logger=None
     ):
-        assert designer_config in ExperimentDesignerConfig.CONFIG_SPACE
+        assert designer_config in ExperimentDesignerConfigStore.parameter_space
 
         if logger is None:
             logger = create_logger(self.__class__.__name__)

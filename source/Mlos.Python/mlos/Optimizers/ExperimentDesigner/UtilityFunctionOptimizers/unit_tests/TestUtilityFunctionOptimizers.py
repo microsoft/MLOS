@@ -9,8 +9,8 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfig
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfig
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfigStore
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfigStore
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import HomogeneousRandomForestConfigStore
@@ -95,11 +95,11 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         random_search_optimizer = RandomSearchOptimizer(
             optimization_problem=self.optimization_problem,
             utility_function=self.utility_function,
-            optimizer_config=RandomSearchOptimizerConfig.DEFAULT
+            optimizer_config=RandomSearchOptimizerConfigStore.default
         )
         for _ in range(5):
             suggested_params = random_search_optimizer.suggest()
-            print(suggested_params)
+            print(suggested_params.to_json())
             self.assertTrue(suggested_params in self.input_space)
 
     @trace()
@@ -108,11 +108,11 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         glow_worm_swarm_optimizer = GlowWormSwarmOptimizer(
             optimization_problem=self.optimization_problem,
             utility_function=self.utility_function,
-            optimizer_config=GlowWormSwarmOptimizerConfig.DEFAULT
+            optimizer_config=GlowWormSwarmOptimizerConfigStore.default
         )
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
-            print(suggested_params)
+            print(suggested_params.to_json())
             self.assertTrue(suggested_params in self.input_space)
 
     @trace()
@@ -154,7 +154,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         glow_worm_swarm_optimizer = GlowWormSwarmOptimizer(
             optimization_problem=optimization_problem,
             utility_function=utility_function,
-            optimizer_config=GlowWormSwarmOptimizerConfig.DEFAULT
+            optimizer_config=GlowWormSwarmOptimizerConfigStore.default
         )
 
         num_iterations = 5

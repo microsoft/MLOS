@@ -11,7 +11,7 @@ import pandas as pd
 import mlos.global_values as global_values
 from mlos.Logger import create_logger
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizerConfig
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizerConfigStore
 from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point
 from mlos.Tracer import Tracer, trace, traced
 
@@ -39,7 +39,7 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
     def test_filtering_out_invalid_rows(self):
         spaces = [
             BayesianOptimizerConfigStore.parameter_space,
-            GlowWormSwarmOptimizerConfig.CONFIG_SPACE
+            GlowWormSwarmOptimizerConfigStore.parameter_space
         ]
 
         # Just to make sure we are testing both hierarchical and flat code paths.

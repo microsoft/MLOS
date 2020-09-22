@@ -5,7 +5,7 @@
 from mlos.Spaces import SimpleHypergrid, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
-from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, ExperimentDesignerConfig
+from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, ExperimentDesignerConfigStore
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import HomogeneousRandomForestConfigStore
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 
@@ -24,7 +24,7 @@ BayesianOptimizerConfigStore = ComponentConfigStore(
         subgrid=HomogeneousRandomForestConfigStore.parameter_space,
         on_external_dimension=CategoricalDimension(name="surrogate_model_implementation", values=[HomogeneousRandomForestRegressionModel.__name__])
     ).join(
-        subgrid=ExperimentDesignerConfig.CONFIG_SPACE,
+        subgrid=ExperimentDesignerConfigStore.parameter_space,
         on_external_dimension=CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__])
     ),
     default=Point(
@@ -32,7 +32,7 @@ BayesianOptimizerConfigStore = ComponentConfigStore(
         experiment_designer_implementation=ExperimentDesigner.__name__,
         min_samples_required_for_guided_design_of_experiments=10,
         homogeneous_random_forest_regression_model_config=HomogeneousRandomForestConfigStore.default,
-        experiment_designer_config=ExperimentDesignerConfig.DEFAULT
+        experiment_designer_config=ExperimentDesignerConfigStore.default
     ),
     description="TODO"
 )
