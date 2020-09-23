@@ -11,7 +11,7 @@ from typing import Dict
 
 import pandas as pd
 
-from . import global_values
+from mlos import global_values
 
 
 # This is defined outside of the class, because the first parameter has to be
@@ -28,7 +28,7 @@ def trace():
                 try:
                     result = wrapped_function(*args, **kwargs)
                     end_timestamp_ns = int(time.time() * 1000000)
-                    if end_timestamp_ns <= start_timestamp_ns:
+                    while end_timestamp_ns <= start_timestamp_ns:
                         end_timestamp_ns += 100
                     arguments = None
                     if result is not None and isinstance(result, (str, int, float, bool)):
@@ -37,7 +37,7 @@ def trace():
                 except Exception as e:
                     arguments = {'exception': str(e)}
                     end_timestamp_ns = int(time.time() * 1000000)
-                    if end_timestamp_ns <= start_timestamp_ns:
+                    while end_timestamp_ns <= start_timestamp_ns:
                         end_timestamp_ns += 100
                     tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, arguments=arguments)
                     raise e
@@ -51,16 +51,31 @@ def trace():
     return tracing_decorator
 
 
-
-def add_trace_event(name, phase, category='', actor_id=None, thread_id=None, arguments=None):
+def add_trace_event(name, phase, category='', timestamp_ns=None, actor_id=None, thread_id=None, arguments=None):
     if global_values.tracer is not None:
-        global_values.tracer.add_trace_event(name, phase, category=category, actor_id=actor_id, thread_id=thread_id, arguments=arguments)
+        global_values.tracer.add_trace_event(
+            name,
+            phase,
+            timestamp_ns=timestamp_ns,
+            category=category,
+            actor_id=actor_id,
+            thread_id=thread_id,
+            arguments=arguments
+        )
+
 
 @contextmanager
 def traced(scope_name):
-    add_trace_event(name=scope_name, phase="B")
+    start_timestamp_ns = int(time.time() * 1000000)
+    add_trace_event(name=scope_name, phase="B", timestamp_ns=start_timestamp_ns)
+
     yield
-    add_trace_event(name=scope_name, phase="E")
+
+    end_timestamp_ns = int(time.time() * 1000000)
+    while end_timestamp_ns <= start_timestamp_ns:
+        end_timestamp_ns += 100
+    add_trace_event(name=scope_name, phase="E", timestamp_ns=end_timestamp_ns)
+
 
 class Tracer:
     """ Collects a trace of events to be displayed by chrome://tracing.

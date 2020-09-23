@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from mlos.Logger import create_logger
-from mlos.Tracer import Tracer
+from mlos.Tracer import Tracer, trace
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
@@ -53,6 +53,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
+    @trace()
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_pre_heated(self):
         """ Tests the bayesian optimizer on a simple quadratic function first feeding the optimizer a lot of data.
 
@@ -116,6 +117,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         best_config_point, best_objective = bayesian_optimizer.optimum()
         print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
+    @trace()
     def test_optimum_before_register_error(self):
         input_space = SimpleHypergrid(
             name="input",
@@ -140,6 +142,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         bayesian_optimizer.register(pd.DataFrame({'x': [0.]}), pd.DataFrame({'y': [1.]}))
         bayesian_optimizer.optimum()
 
+    @trace()
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
         """Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
@@ -234,6 +237,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
         print(goodness_of_fit_df.head())
 
+    @trace()
     def test_hierarchical_quadratic_cold_start(self):
 
         objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
@@ -283,6 +287,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             best_config_point, best_objective = bayesian_optimizer.optimum()
             print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
+    @trace()
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
         objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
@@ -350,6 +355,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             best_config_point, best_objective = bayesian_optimizer.optimum()
             print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
+    @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = BayesianOptimizerConfig.DEFAULT
         config.min_samples_required_for_guided_design_of_experiments = 1

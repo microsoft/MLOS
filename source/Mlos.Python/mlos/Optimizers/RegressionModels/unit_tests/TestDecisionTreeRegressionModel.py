@@ -4,19 +4,32 @@
 #
 import datetime
 import math
+import os
 import unittest
+
 import numpy as np
 import pandas as pd
 
+import mlos.global_values as global_values
 from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeConfigStore
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
-import mlos.global_values as global_values
+from mlos.Tracer import Tracer
 
 class TestDecisionTreeRegressionModel(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
         global_values.declare_singletons()
+        global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        temp_dir = os.path.join(os.getcwd(), "temp")
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+        trace_output_path = os.path.join(temp_dir, "TestDecisionTreeRegressionModel.json")
+        print(f"Dumping trace to {trace_output_path}")
+        global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
     def setUp(self):
         # Let's create a simple linear mapping
