@@ -5,7 +5,7 @@
 // for license information.
 // </copyright>
 // -----------------------------------------------------------------------
-
+//
 // This file contains the data structures that represent both the component
 // settings as well as the component specific messages it can send to and
 // receive from the agent.
@@ -23,10 +23,11 @@ namespace SmartCache
         MostRecentlyUsed,
     }
 
-    /// <remarks>
-    /// This contains the actual "settings" data structure(s) to be placed in
-    /// shared memory for this component.
-    /// </remarks>
+    /// <summary>
+    /// This is the collection of settings for the SmartCache component.
+    /// To be made available in shared memory for both the agent and the
+    /// component to use.
+    /// </summary>
     [CodegenConfig]
     internal partial struct SmartCacheConfig
     {

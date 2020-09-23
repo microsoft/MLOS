@@ -151,7 +151,7 @@ inline void SmartCacheImpl<TKey, TValue>::Push(TKey key, const TValue value)
 template<typename TKey, typename TValue>
 inline void SmartCacheImpl<TKey, TValue>::Reconfigure()
 {
-    // Update the cache size from the latest configuration.
+    // Update the cache size from the latest configuration available in shared memory.
     //
     m_cacheSize = m_config.CacheSize;
 
@@ -159,5 +159,9 @@ inline void SmartCacheImpl<TKey, TValue>::Reconfigure()
     //
     m_elementSequence.clear();
     m_lookupTable.clear();
+
+    // Adjust the number of buckets reserved for the cache (relative to the
+    // max_load_factor) to match the new size.
+    //
     m_lookupTable.reserve(m_cacheSize);
 }
