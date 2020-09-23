@@ -123,7 +123,7 @@ class OptimizerBase(ABC):
         assert features_df.index.intersection(predictions_df.index).equals(predictions_df.index)
 
         predicted_value_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE.value
-        dof_column_name = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
+        dof_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
         variance_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
 
         if optimum_definition == OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG:
