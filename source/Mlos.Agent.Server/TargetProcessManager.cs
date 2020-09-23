@@ -24,15 +24,12 @@ namespace Mlos.Agent.Server
         private readonly string executableFilePath;
         private Process targetProcess;
 
+        private bool disposed = false;
+
         public TargetProcessManager(string executableFilePath)
         {
             this.executableFilePath = executableFilePath;
             targetProcess = null;
-        }
-
-        ~TargetProcessManager()
-        {
-            Dispose(false);
         }
 
         public void Dispose()
@@ -41,14 +38,20 @@ namespace Mlos.Agent.Server
             GC.SuppressFinalize(this);
         }
 
-        private void Dispose(bool isManualDisposing)
+        private void Dispose(bool disposing)
         {
-            if (targetProcess != null)
+            if (disposed)
             {
-                // TODO: what happens if the process is still running when we call Dispose? Should we WaitForExit first? Should we kill?
-                //
-                targetProcess.Dispose();
+                return;
             }
+
+            if (disposing)
+            {
+                targetProcess?.Dispose();
+                targetProcess = null;
+            }
+
+            disposed = true;
         }
 
         public void StartTargetProcess()
@@ -90,9 +93,32 @@ namespace Mlos.Agent.Server
                 {
                     throw new ApplicationException($"Target application exited with error code:{targetProcess.ExitCode}");
                 }
+            }
+        }
 
-                targetProcess.Dispose();
-                targetProcess = null;
+        /// <summary>
+        /// Terminate target process.
+        /// </summary>
+        /// <remarks>
+        /// Mlos.Agent.Service calls this method on shutdown if the target process is still active.
+        /// </remarks>
+        public void TerminateTargetProcess()
+        {
+            if (targetProcess != null)
+            {
+                try
+                {
+                    targetProcess.Kill();
+                }
+                catch
+                {
+                    if (!targetProcess.HasExited)
+                    {
+                        // If the process is still active, rethrow the exception.
+                        //
+                        throw;
+                    }
+                }
             }
         }
     }
