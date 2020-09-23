@@ -29,10 +29,6 @@
 using namespace Mlos::Core;
 using namespace SmartCache;
 
-// Include codegen files.
-//
-#include "GlobalDispatchTable.h"
-
 #include "SmartCacheImpl.h"
 #include "Workloads.h"
 
