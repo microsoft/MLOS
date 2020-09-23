@@ -22,8 +22,8 @@ from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel imp
 
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
-from mlos.SynthethicFunctions.sample_functions import quadratic
-from mlos.SynthethicFunctions.HierarchicalFunctions import MultilevelQuadratic
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
 
 import mlos.global_values as global_values
 
@@ -240,6 +240,9 @@ class TestBayesianOptimizer(unittest.TestCase):
     @trace()
     def test_hierarchical_quadratic_cold_start(self):
 
+        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
+
         output_space = SimpleHypergrid(
             name="output",
             dimensions=[
@@ -248,7 +251,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         optimization_problem = OptimizationProblem(
-            parameter_space=MultilevelQuadratic.CONFIG_SPACE,
+            parameter_space=objective_function.parameter_space,
             objective_space=output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
@@ -272,20 +275,23 @@ class TestBayesianOptimizer(unittest.TestCase):
             num_guided_samples = 50
             for i in range(num_guided_samples):
                 suggested_params = bayesian_optimizer.suggest()
-                y = MultilevelQuadratic.evaluate(suggested_params)
+                y = objective_function.evaluate_point(suggested_params)
                 print(f"[{i}/{num_guided_samples}] {suggested_params}, y: {y}")
 
                 input_values_df = pd.DataFrame({
                     param_name: [param_value]
                     for param_name, param_value in suggested_params
                 })
-                target_values_df = pd.DataFrame({'y': [y]})
+                target_values_df = y.to_dataframe()
                 bayesian_optimizer.register(input_values_df, target_values_df)
             best_config_point, best_objective = bayesian_optimizer.optimum()
             print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     @trace()
     def test_hierarchical_quadratic_cold_start_random_configs(self):
+
+        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
         output_space = SimpleHypergrid(
             name="output",
@@ -295,7 +301,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         )
 
         optimization_problem = OptimizationProblem(
-            parameter_space=MultilevelQuadratic.CONFIG_SPACE,
+            parameter_space=objective_function.parameter_space,
             objective_space=output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
@@ -307,7 +313,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             #
             random_state.seed(restart_num)
             BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
-            MultilevelQuadratic.CONFIG_SPACE.random_state = random_state
+            objective_function.parameter_space.random_state = random_state
 
             optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
 
@@ -336,14 +342,14 @@ class TestBayesianOptimizer(unittest.TestCase):
             num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 10
             for i in range(num_guided_samples):
                 suggested_params = bayesian_optimizer.suggest()
-                y = MultilevelQuadratic.evaluate(suggested_params)
+                y = objective_function.evaluate_point(suggested_params)
                 print(f"[Restart: {restart_num}/{num_restarts}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
 
                 input_values_df = pd.DataFrame({
                     param_name: [param_value]
                     for param_name, param_value in suggested_params
                 })
-                target_values_df = pd.DataFrame({'y': [y]})
+                target_values_df = y.to_dataframe()
                 bayesian_optimizer.register(input_values_df, target_values_df)
 
             best_config_point, best_objective = bayesian_optimizer.optimum()

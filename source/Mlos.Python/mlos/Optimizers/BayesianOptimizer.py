@@ -6,7 +6,9 @@ import pandas as pd
 
 from mlos.Logger import create_logger
 from mlos.Tracer import trace
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
+
 
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
 from mlos.Optimizers.OptimizerBase import OptimizerBase

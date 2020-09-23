@@ -15,10 +15,8 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityF
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid, Point
-from mlos.SynthethicFunctions.HierarchicalFunctions import MultilevelQuadratic
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
 from mlos.Tracer import Tracer
-
-from mlos.SynthethicFunctions.sample_functions import quadratic
 import mlos.global_values as global_values
 
 class TestUtilityFunctionOptimizers(unittest.TestCase):
@@ -44,31 +42,14 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
 
-        cls.input_space = SimpleHypergrid(
-            name="input",
-            dimensions=[
-                ContinuousDimension(name='x_1', min=-0.5, max=0.5),
-                ContinuousDimension(name='x_2', min=-0.5, max=0.5)
-            ]
-        )
+        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
-        cls.output_space = SimpleHypergrid(
-            name="output",
-            dimensions=[
-                ContinuousDimension(name='y', min=-math.inf, max=math.inf)
-            ]
-        )
+        cls.input_space = objective_function.parameter_space
+        cls.output_space = objective_function.output_space
 
-        x_1, x_2 = np.meshgrid(
-            cls.input_space['x_1'].linspace(num=51),
-            cls.input_space['x_2'].linspace(num=51)
-        )
-
-        y = quadratic(x_1=x_1, x_2=x_2)
-
-
-        cls.input_values_dataframe = pd.DataFrame({'x_1': x_1.reshape(-1), 'x_2': x_2.reshape(-1)})
-        cls.output_values_dataframe = pd.DataFrame({'y': y.reshape(-1)})
+        cls.input_values_dataframe = objective_function.parameter_space.random_dataframe(num_samples=2500)
+        cls.output_values_dataframe = objective_function.evaluate_dataframe(cls.input_values_dataframe)
 
         cls.model_config = HomogeneousRandomForestRegressionModelConfig()
         cls.model = HomogeneousRandomForestRegressionModel(
@@ -128,7 +109,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
             print(suggested_params)
             self.assertTrue(suggested_params in self.input_space)
 
-    def test_glow_worm_on_multilevel_quadratic(self):
+    def test_glow_worm_on_three_level_quadratic(self):
         output_space = SimpleHypergrid(
             name="output",
             dimensions=[
@@ -136,21 +117,23 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
             ]
         )
 
+        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
         # Let's warm up the model a bit
         #
         num_warmup_samples = 1000
-        random_params_df = MultilevelQuadratic.CONFIG_SPACE.random_dataframe(num_samples=num_warmup_samples)
-        y = MultilevelQuadratic.evaluate_df(random_params_df)
+        random_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_warmup_samples)
+        y = objective_function.evaluate_dataframe(random_params_df)
 
         model = HomogeneousRandomForestRegressionModel(
             model_config=self.model_config,
-            input_space=MultilevelQuadratic.CONFIG_SPACE,
+            input_space=objective_function.parameter_space,
             output_space=output_space
         )
         model.fit(feature_values_pandas_frame=random_params_df, target_values_pandas_frame=y, iteration_number=num_warmup_samples)
 
         optimization_problem = OptimizationProblem(
-            parameter_space=MultilevelQuadratic.CONFIG_SPACE,
+            parameter_space=objective_function.parameter_space,
             objective_space=output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
@@ -171,6 +154,6 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         for i in range(num_iterations):
             suggested_params = glow_worm_swarm_optimizer.suggest()
             print(f"[{i+1}/{num_iterations}] {suggested_params}")
-            self.assertTrue(suggested_params in MultilevelQuadratic.CONFIG_SPACE)
+            self.assertTrue(suggested_params in objective_function.parameter_space)
 
 

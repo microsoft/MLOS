@@ -82,21 +82,17 @@ namespace Mlos.Agent
             //
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
 
-            // Enable channels.
-            //
-            globalMemoryRegion.ControlChannelSynchronization.TerminateChannel.Store(false);
-            globalMemoryRegion.FeedbackChannelSynchronization.TerminateChannel.Store(false);
-
             var feedbackChannel = new SharedChannel<InterProcessSharedChannelPolicy, SharedChannelSpinPolicy>(
                 buffer: feedbackChannelMemoryMapView.Buffer,
                 size: (uint)feedbackChannelMemoryMapView.MemSize,
-                sync: globalMemoryRegion.FeedbackChannelSynchronization);
-
-            feedbackChannel.ChannelPolicy.NotificationEvent = feedbackChannelNamedEvent;
+                sync: globalMemoryRegion.FeedbackChannelSynchronization)
+            {
+                ChannelPolicy = { NotificationEvent = feedbackChannelNamedEvent },
+            };
 
             // Set SharedConfig memory region.
             //
-            SharedConfigManager.SetMemoryRegion(new MlosProxyInternal.SharedConfigMemoryRegion() { Buffer = sharedConfigMemoryMapView.MemoryRegion().Buffer });
+            SharedConfigManager.SetMemoryRegion(new MlosProxyInternal.SharedConfigMemoryRegion { Buffer = sharedConfigMemoryMapView.MemoryRegion().Buffer });
 
             // Setup MlosContext.
             //
@@ -324,13 +320,9 @@ namespace Mlos.Agent
 
             controlChannel.ChannelPolicy.NotificationEvent = controlChannelNamedEvent;
 
-            // Create a thread that will monitor the reconfiguration request queue
+            // Process the messages from the control channel.
             //
-            bool result = true;
-            while (result)
-            {
-                result = controlChannel.WaitAndDispatchFrame(globalDispatchTable);
-            }
+            controlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
         }
     }
 }
