@@ -53,8 +53,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
                     continue;
                 }
 
-                foreach (string lineComment in comment.Split(
-                    new[] { Environment.NewLine }, StringSplitOptions.None))
+                foreach (string lineComment in comment.Split(new[] { Environment.NewLine }, StringSplitOptions.None))
                 {
                     WriteLine($"// {lineComment.Trim()}");
                 }
