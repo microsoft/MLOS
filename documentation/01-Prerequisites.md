@@ -6,7 +6,7 @@ These are one-time setup instructions that should be executed prior to following
 
 - [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
   - [Contents](#contents)
-  - [Cloning the repository](#clone-the-repository)
+  - [Clone the repository](#clone-the-repository)
   - [Python quickstart](#python-quickstart)
   - [Linux](#linux)
     - [Linux Distribution Requirements](#linux-distribution-requirements)
@@ -21,10 +21,10 @@ These are one-time setup instructions that should be executed prior to following
     - [Step 1: Install Python](#step-1-install-python)
     - [Step 2: Install Docker on Windows](#step-2-install-docker-on-windows)
     - [Step 3: Install Windows Build Tools](#step-3-install-windows-build-tools)
+    - [Step 4: Build the Docker image](#step-4-build-the-docker-image)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
-
 
 ## Clone the repository
 
@@ -78,7 +78,6 @@ All of them require `git` and, of course, a Linux installation:
 - Ubuntu 16.04 (xenial), 18.04 (bionic), 20.04 (focal)
 
 > Other distros/versions may work, but are untested.
-
 
 ### Option 1: Linux Docker Build Env
 
@@ -154,8 +153,6 @@ Follow the [Python Quickstart](#python-quickstart) above.
 
 MLOS is easiest to use on Windows 10, Version 1903 (March 2019) or newer.
 
-
-
 ### Step 1: Install Python
 
 Follow the [Python Quickstart](#python-quickstart) above.
@@ -173,3 +170,7 @@ Download and install Visual Studio 2019 (free) Community Edition:
 <https://visualstudio.microsoft.com/vs/community/>
 
 Be sure to include support for .Net Core and C++.
+
+### Step 4: Build the Docker image
+
+The instructions for [building the docker image](#build-the-docker-image) are the same as for Linux.

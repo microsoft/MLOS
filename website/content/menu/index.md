@@ -10,13 +10,15 @@ headless = true
   - [Architecture]({{< relref "/documentation/MlosArchitecture" >}})
   - [Repo Organization]({{< relref "/documentation/RepoOrganization" >}})
 
-- Notebooks
+- [Notebooks]({{< relref "/notebooks" >}})
   - [Bayesian Optimization]({{< relref "/notebooks/BayesianOptimization" >}})
   - [Smart Cache Optimization]({{< relref "/notebooks/SmartCacheOptimization" >}})
 
-
 - API Documentation
   - [Python](/MLOS/python_api/)
+
+- [E2E Examples]({{< relref "/source/Examples" >}})
+  - [Smart Cache]({{< relref "/source/Examples/SmartCache" >}})
 
 - [Code of Conduct]({{< relref "/CODE_OF_CONDUCT" >}})
 - [Contributing]({{< relref "/CONTRIBUTING" >}})

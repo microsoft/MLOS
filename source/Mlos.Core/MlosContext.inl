@@ -1,3 +1,18 @@
+//*********************************************************************
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root
+// for license information.
+//
+// @File: MlosContext.inl
+//
+// Purpose:
+//      <description>
+//
+// Notes:
+//      <special-instructions>
+//
+//*********************************************************************
+
 #pragma once
 
 namespace Mlos
@@ -68,12 +83,7 @@ HRESULT MlosContext::RegisterComponentConfig(ComponentConfig<T>& componentConfig
     // Create or find existing shared configuration.
     //
     HRESULT hr = m_sharedConfigManager.CreateOrUpdateFrom(componentConfig);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    return S_OK;
+    return hr;
 }
 
 //----------------------------------------------------------------------------

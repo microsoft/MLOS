@@ -48,7 +48,7 @@ namespace SmartCache
     /// Ask optimizer for the new configuration.
     /// </summary>
     [CodegenMessage]
-    internal partial struct RequestNewConfigurationMesage
+    internal partial struct RequestNewConfigurationMessage
     {
     }
 }

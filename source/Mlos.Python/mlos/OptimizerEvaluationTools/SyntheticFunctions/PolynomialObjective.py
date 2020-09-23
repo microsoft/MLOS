@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import math
 import numpy as np
 from sklearn.preprocessing import PolynomialFeatures
 from mlos.Logger import create_logger
@@ -20,13 +19,13 @@ class PolynomialObjective:
     CONFIG_SPACE = SimpleHypergrid(
         name="polynomial_objective_config",
         dimensions=[
-            ContinuousDimension(name='seed', min=1, max=2 ** 32),
+            DiscreteDimension(name='seed', min=1, max=2 ** 32),
             DiscreteDimension(name='input_domain_dimension', min=1, max=5),
             DiscreteDimension(name='max_degree', min=1, max=5),
             CategoricalDimension(name='include_mixed_coefficients', values=[False, True]),
             ContinuousDimension(name='percent_coefficients_zeroed', min=0.0, max=1.0),
-            ContinuousDimension(name='coefficient_domain_min', min=-math.inf, max=math.inf),
-            ContinuousDimension(name='coefficient_domain_max', min=-math.inf, max=math.inf),
+            ContinuousDimension(name='coefficient_domain_min', min=-2**32, max=2**32),
+            ContinuousDimension(name='coefficient_domain_width', min=1, max=2**32),
             CategoricalDimension(name='include_noise', values=[False, True]),
             ContinuousDimension(name='noise_coefficient_of_variation', min=0.0, max=1.0)
         ]
@@ -40,7 +39,7 @@ class PolynomialObjective:
         include_mixed_coefficients=True,
         percent_coefficients_zeroed=0.0,
         coefficient_domain_min=-10.0,
-        coefficient_domain_max=-1.0,
+        coefficient_domain_width=9.0,
         include_noise=False,
         noise_coefficient_of_variation=0.0
     )
@@ -58,7 +57,7 @@ class PolynomialObjective:
                  include_mixed_coefficients: bool = _DEFAULT.include_mixed_coefficients,
                  percent_coefficients_zeroed: float = _DEFAULT.percent_coefficients_zeroed,
                  coefficient_domain_min: float = _DEFAULT.coefficient_domain_min,
-                 coefficient_domain_max: float = _DEFAULT.coefficient_domain_max,
+                 coefficient_domain_width: float = _DEFAULT.coefficient_domain_width,
                  include_noise: bool = _DEFAULT.include_noise,
                  noise_coefficient_of_variation: float = _DEFAULT.noise_coefficient_of_variation,
                  coefficients=None,
@@ -73,7 +72,7 @@ class PolynomialObjective:
         self.include_mixed_coefficients = include_mixed_coefficients
         self.percent_coefficients_zeroed = percent_coefficients_zeroed
         self.coefficient_domain_min = coefficient_domain_min
-        self.coefficient_domain_max = coefficient_domain_max
+        self.coefficient_domain_max = coefficient_domain_min + coefficient_domain_width
         self.coefficients = coefficients
         self.include_noise = include_noise
         self.noise_coefficient_of_variation = noise_coefficient_of_variation
@@ -81,7 +80,7 @@ class PolynomialObjective:
         self.coef_ = []
 
         # confirm min < max constraint
-        assert coefficient_domain_min < coefficient_domain_max, 'Minimum coefficient range must be less than maximum'
+        assert coefficient_domain_min < self.coefficient_domain_max, 'Minimum coefficient range must be less than maximum'
 
         self.polynomial_features_ = PolynomialFeatures(degree=self.max_degree)
         discarded_x = np.array([1] * self.input_domain_dimension).reshape(1, -1)

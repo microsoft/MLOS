@@ -19,9 +19,12 @@ using SmartCacheProxy = Proxy.SmartCache;
 
 namespace SmartCache
 {
+    /// <summary>
+    /// Assembly initializer.
+    /// </summary>
     public static class AssemblyInitializer
     {
-        private static IOptimizerProxy optimizerProxy;
+        private static readonly IOptimizerProxy OptimizerProxy;
 
         private static int isInCacheCount = 0;
         private static int totalRequestCount = 0;
@@ -41,7 +44,7 @@ namespace SmartCache
             // Setup message callbacks.
             //
             SmartCacheProxy.CacheRequestEventMessage.Callback = CacheRequestEventMessageHandler;
-            SmartCacheProxy.RequestNewConfigurationMesage.Callback = RequestNewConfigurationMesageHandler;
+            SmartCacheProxy.RequestNewConfigurationMessage.Callback = RequestNewConfigurationMessageHandler;
 
             // Create smart cache parameter search space.
             //
@@ -81,7 +84,7 @@ namespace SmartCache
 
             IOptimizerFactory optimizerFactory = MlosContext.OptimizerFactory;
 
-            optimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
+            OptimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
         }
 
         /// <summary>
@@ -104,11 +107,11 @@ namespace SmartCache
         /// Request a new configuration from the optimizer.
         /// </summary>
         /// <param name="msg"></param>
-        private static void RequestNewConfigurationMesageHandler(SmartCacheProxy.RequestNewConfigurationMesage msg)
+        private static void RequestNewConfigurationMessageHandler(SmartCacheProxy.RequestNewConfigurationMessage msg)
         {
             SmartCacheProxy.SmartCacheConfig smartCacheConfig = MlosContext.SharedConfigManager.Lookup<SmartCacheProxy.SmartCacheConfig>().Config;
 
-            if (optimizerProxy != null)
+            if (OptimizerProxy != null)
             {
                 if (totalRequestCount != 0)
                 {
@@ -133,12 +136,12 @@ namespace SmartCache
 
                     // Register an observation.
                     //
-                    optimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
+                    OptimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
                 }
 
                 // Get new configuration.
                 //
-                string newConfigJsonString = optimizerProxy.Suggest();
+                string newConfigJsonString = OptimizerProxy.Suggest();
 
                 var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
 

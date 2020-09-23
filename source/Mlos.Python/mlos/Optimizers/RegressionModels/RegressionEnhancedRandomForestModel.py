@@ -266,6 +266,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.dof_ = fit_x.shape[0] - len(self.base_regressor_.coef_)
         self.variance_estimate_ = residual_sum_of_squares / float(self.dof_)
 
+        self.fitted = True
         return self
 
     def _fit_root_regression(self, x, y):

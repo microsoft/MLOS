@@ -130,9 +130,15 @@ namespace Mlos.Core
             NotificationEvent.Wait();
         }
 
+        /// <summary>
+        /// Inter process synchronization object.
+        /// </summary>
         public NamedEvent NotificationEvent;
     }
 
+    /// <summary>
+    /// Spin policy for the shared channel.
+    /// </summary>
     public struct SharedChannelSpinPolicy : ISharedChannelSpinPolicy
     {
         /// <inheritdoc/>
