@@ -14,7 +14,7 @@ from mlos.Tracer import trace
 
 
 class Hypergrid(ABC):
-    """ A base class for all search-space-like classes.
+    """A base class for all search-space-like classes.
 
     """
 
@@ -69,15 +69,10 @@ class Hypergrid(ABC):
 
     @trace()
     def filter_out_invalid_rows(self, original_dataframe: pd.DataFrame, exclude_extra_columns=True) -> pd.DataFrame:
-        """ Returns a dataframe containing only valid rows from the dataframe.
+        """Returns a dataframe containing only valid rows from the original_dataframe.
 
         Valid rows are rows with no NaNs and with values for all dimensions in the required ranges.
-
-        If there are additional columns, they will be preserved.
-
-        :param original_dataframe:
-        :param exclude_extra_columns:
-        :return:
+        If there are additional columns, they will be dropped unless exclude_extra_columns == False.
         """
         assert set(original_dataframe.columns.values).issuperset(set(self.dimension_names))
 

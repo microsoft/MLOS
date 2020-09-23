@@ -19,7 +19,7 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """ Sets up all the singletons needed to test the BayesianOptimizer.
+        """Sets up all the singletons needed to test the BayesianOptimizer.
 
         """
         warnings.simplefilter("error")
@@ -66,27 +66,27 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
                     row_as_point = Point.from_dataframe(row_as_df)
                     if row_as_point in space:
                         valid_indices.append(idx)
-                slow_valid_rows_index = pd.Index(valid_indices)
+                expected_valid_rows_index = pd.Index(valid_indices)
 
-            print(f"{len(slow_valid_rows_index)}/{len(random_dataframe_with_invalid_rows.index)} rows are valid.")
-            self.assertTrue(0 < len(slow_valid_rows_index))
-            self.assertTrue(len(slow_valid_rows_index) < num_samples)
+            print(f"{len(expected_valid_rows_index)}/{len(random_dataframe_with_invalid_rows.index)} rows are valid.")
+            self.assertTrue(0 < len(expected_valid_rows_index))
+            self.assertTrue(len(expected_valid_rows_index) < num_samples)
 
             # Let's filter out invalid rows the fast way.
             #
-            fast_valid_rows_index = space.filter_out_invalid_rows(original_dataframe=random_dataframe_with_invalid_rows, exclude_extra_columns=True).index
-            self.assertTrue(slow_valid_rows_index.equals(fast_valid_rows_index))
+            actual_valid_rows_index = space.filter_out_invalid_rows(original_dataframe=random_dataframe_with_invalid_rows, exclude_extra_columns=True).index
+            self.assertTrue(expected_valid_rows_index.equals(actual_valid_rows_index))
 
             if not space.is_hierarchical():
                 # For flat spaces we can choose between the column-wise operators and the row-wise validation. This is to get the tracing data to see the
                 # perf difference, but also to validate correctness by computing the desired index in yet another way.
                 #
                 with traced(scope_name="faster_filtering"):
-                    faster_valid_rows_index = random_dataframe_with_invalid_rows[random_dataframe_with_invalid_rows.apply(
+                    expected_valid_rows_index_2 = random_dataframe_with_invalid_rows[random_dataframe_with_invalid_rows.apply(
                         lambda row: Point(**{dim_name: row[i] for i, dim_name in enumerate(space.dimension_names)}) in space,
                         axis=1
                     )].index
-                self.assertTrue(faster_valid_rows_index.equals(fast_valid_rows_index))
+                self.assertTrue(expected_valid_rows_index_2.equals(actual_valid_rows_index))
 
 
 
