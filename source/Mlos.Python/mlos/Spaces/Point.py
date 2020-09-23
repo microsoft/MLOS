@@ -3,6 +3,8 @@
 # Licensed under the MIT License.
 #
 import json
+from numbers import Number
+
 import pandas as pd
 from mlos.Spaces.Dimensions.Dimension import Dimension
 
@@ -116,7 +118,12 @@ class Point:
         return Point(**coordinates)
 
     def to_dict(self):
-        return {param_name: value for param_name, value in self}
+        return_dict = {}
+        for param_name, value in self:
+            if isinstance(value, Number) and int(value) == value:
+                value = int(value)
+            return_dict[param_name] = value
+        return return_dict
 
     def to_dataframe(self):
         return pd.DataFrame({param_name: [value] for param_name, value in self})
