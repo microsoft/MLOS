@@ -30,6 +30,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
 # than having to switch to using NDEBUG.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
+# Also include debug symbols for optimized builds.
+# TODO: Strip them and keep the symbols separately.
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_RELEASE} -g")
+
 # TODO: Search for clang compiler and set the appropriate C/CXX compiler variables.
 #if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 #    # TODO: Add local version of clang to use?

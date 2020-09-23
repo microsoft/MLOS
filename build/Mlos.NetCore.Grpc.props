@@ -3,12 +3,35 @@
   <PropertyGroup>
     <!-- Protobuf gen output path. -->
     <GrpcOutputDir>$(BaseDir)\out\Grpc.out\$(GrpcServices)\$(BuildType)</GrpcOutputDir>
+    <GrpcVersion>2.29.0</GrpcVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.12.0" />
-    <PackageReference Include="Grpc.AspNetCore" Version="2.29.0" Condition="'$(GrpcServices)' == 'Server'" />
-    <PackageReference Include="Grpc.Core" Version="2.29.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.29.0" Condition="'$(GrpcServices)' == 'Client'" />
-    <PackageReference Include="Grpc.Tools" Version="2.29.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.12.0" GeneratePathProperty="true" />
+    <BinplaceFile Include="$(PkgGoogle_Protobuf)/lib/netstandard2.0/Google.Protobuf.dll" />
+
+    <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="Grpc.Core.Api" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <BinplaceFile Include="$(PkgGrpc_Core)/lib/netstandard2.0/Grpc.Core.dll" />
+    <BinplaceFile Include="$(PkgGrpc_Core_Api)/lib/netstandard2.0/Grpc.Core.Api.dll" />
+
+    <PackageReference Include="Grpc.Net.Common" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <BinplaceFile Include="$(PkgGrpc_Net_Common)/lib/netstandard2.1/Grpc.Net.Common.dll" />
+
+    <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(GrpcServices)' == 'Server'">
+    <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="Grpc.AspNetCore.Server" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <BinplaceFile Include="$(PkgGrpc_AspNetCore_Server)/lib/netcoreapp3.0/Grpc.AspNetCore.Server.dll" />
+    <BinplaceFile Include="$(PkgGrpc_AspNetCore_Server_ClientFactory)/lib/netcoreapp3.0/Grpc.AspNetCore.Server.ClientFactory.dll" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(GrpcServices)' == 'Client'">
+    <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="$(GrpcVersion)" GeneratePathProperty="true" />
+    <BinplaceFile Include="$(PkgGrpc_Net_Client)/lib/netstandard2.1/Grpc.Net.Client.dll" />
+    <BinplaceFile Include="$(PkgGrpc_Net_ClientFactory)/lib/netstandard2.1/Grpc.Net.ClientFactory.dll" />
   </ItemGroup>
 </Project>

@@ -31,3 +31,8 @@ add_mlos_agent_server_exe_test_run(
     EXECUTABLE_TARGET ${PROJECT_NAME}
     TIMEOUT 240
     MLOS_SETTINGS_REGISTRY_TARGETS Mlos.UnitTest.SettingsRegistry)
+
+# Binplace the outputs for more convenient testing.
+install(TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS ${CMAKE_BUILD_TYPE}
+    RUNTIME DESTINATION ${BINPLACE_DIR})

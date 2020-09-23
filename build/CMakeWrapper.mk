@@ -6,6 +6,9 @@
 all: cmake-build # ctags
 	@ echo "make all target finished."
 
+.PHONY: install
+install: cmake-install
+
 .PHONY: clean
 clean: cmake-clean
 
