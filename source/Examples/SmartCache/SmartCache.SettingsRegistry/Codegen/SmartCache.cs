@@ -6,6 +6,13 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+// This file contains the data structures that represent both the component
+// settings as well as the component specific messages it can send to and
+// receive from the agent.
+//
+// Note: they are annotated with C# attributes that allow the MLOS code
+// generation process to walk the structures using reflection.
+
 using Mlos.SettingsSystem.Attributes;
 
 namespace SmartCache
@@ -16,6 +23,10 @@ namespace SmartCache
         MostRecentlyUsed,
     }
 
+    /// <remarks>
+    /// This contains the actual "settings" data structure(s) to be placed in
+    /// shared memory for this component.
+    /// </remarks>
     [CodegenConfig]
     internal partial struct SmartCacheConfig
     {
@@ -29,6 +40,9 @@ namespace SmartCache
         internal int CacheSize;
     }
 
+    /// <summary>
+    /// A telemetry message for the component to inform the agent of its progress.
+    /// </summary>
     [CodegenMessage]
     internal partial struct CacheRequestEventMessage
     {
@@ -45,8 +59,12 @@ namespace SmartCache
     }
 
     /// <summary>
-    /// Ask optimizer for the new configuration.
+    /// A message to ask optimizer for the new configuration.
     /// </summary>
+    /// <remarks>
+    /// Note: This message contains no members to detail the request.
+    /// It's very existence on the channel is signal enough of its intent.
+    /// </remarks>
     [CodegenMessage]
     internal partial struct RequestNewConfigurationMessage
     {
