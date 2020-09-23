@@ -7,18 +7,27 @@
 # Note: this is not required, but then the other tools should be available on
 # the system PATH.
 
-if [ -z "$BASH" ]; then
-    echo "ERROR: This script currently only works using a bash shell." >&2
+sourced=''
+if [ -n "$BASH_VERSION" ]; then
+    if [[ $0 != $BASH_SOURCE ]]; then
+        sourced="$BASH_SOURCE"
+    fi
+elif [ -n "$ZSH_VERSION" ]; then
+    if [[ $ZSH_EVAL_CONTEXT =~ :file$ ]]; then
+        sourced="$0"
+    fi
+else
+    echo "ERROR This script needs to be sourced and currently only works using bash or zsh shells." >&2
     return 1
 fi
 
-if [[ $0 == $BASH_SOURCE ]]; then
+if [ -z "$sourced" ]; then
     echo "Please 'source' this file instead of running it:" >&2
     echo "# . $0" >&2
     exit 1
 fi
 
-scriptdir=$(dirname "$(readlink -f "$BASH_SOURCE")")
+scriptdir=$(dirname "$(readlink -f "$sourced")")
 MLOS_ROOT=$(readlink -f "$scriptdir/..")
 
 # Make sure cmake is available.
