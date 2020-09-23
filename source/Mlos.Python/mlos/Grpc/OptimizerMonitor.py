@@ -4,7 +4,7 @@
 #
 from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerHandle
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 
 
@@ -28,7 +28,7 @@ class OptimizerMonitor:
         optimizer_list = self._optimizer_service_stub.ListExistingOptimizers(request)
 
         optimizer_proxies = [
-            self._optimizer_factory.connect_to_existing_optimizer(optimizer_info)
+            self._optimizer_factory.connect_to_existing_remote_optimizer(optimizer_info)
             for optimizer_info
             in optimizer_list.Optimizers
         ]
@@ -42,5 +42,5 @@ class OptimizerMonitor:
         """
         optimizer_handle = OptimizerHandle(Id=optimizer_id)
         optimizer_info = self._optimizer_service_stub.GetOptimizerInfo(optimizer_handle)
-        optimizer_proxy = self._optimizer_factory.connect_to_existing_optimizer(optimizer_info)
+        optimizer_proxy = self._optimizer_factory.connect_to_existing_remote_optimizer(optimizer_info)
         return optimizer_proxy

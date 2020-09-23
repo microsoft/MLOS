@@ -11,14 +11,13 @@ import numpy as np
 import pandas as pd
 
 import mlos.global_values as global_values
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
 from mlos.Logger import create_logger
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
-from mlos.Spaces import ContinuousDimension, SimpleHypergrid
 
 
 class TestBayesianOptimizerGrpcClient(unittest.TestCase):

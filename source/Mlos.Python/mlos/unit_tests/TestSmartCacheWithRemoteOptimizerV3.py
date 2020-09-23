@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import datetime
 import logging
 import math
 from threading import Thread
-import time
 import unittest
 
 import grpc
@@ -14,12 +12,11 @@ import pandas as pd
 
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 from mlos.Examples.SmartCache import SmartCacheWorkloadGenerator, SmartCache, HitRateMonitor
 from mlos.Examples.SmartCache.TelemetryAggregators.WorkingSetSizeEstimator import WorkingSetSizeEstimator
 from mlos.Mlos.SDK import mlos_globals, MlosExperiment, MlosAgent
-from mlos.Mlos.SDK.CommonAggregators.Timer import Timer
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
