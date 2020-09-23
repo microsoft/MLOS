@@ -57,7 +57,7 @@ TEST(BufferChannel, CreateMemory)
         std::launch::async,
         [&feedbackChannel, &globalDispatchTable]
         {
-            feedbackChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+            feedbackChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         });

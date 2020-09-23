@@ -4,19 +4,32 @@
 #
 import datetime
 import math
+import os
 import unittest
+
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModelConfig, DecisionTreeRegressionModel
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 import mlos.global_values as global_values
+from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeConfigStore
+from mlos.Spaces import SimpleHypergrid, ContinuousDimension
+from mlos.Tracer import Tracer
 
 class TestDecisionTreeRegressionModel(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
         global_values.declare_singletons()
+        global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        temp_dir = os.path.join(os.getcwd(), "temp")
+        if not os.path.exists(temp_dir):
+            os.mkdir(temp_dir)
+        trace_output_path = os.path.join(temp_dir, "TestDecisionTreeRegressionModel.json")
+        print(f"Dumping trace to {trace_output_path}")
+        global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
     def setUp(self):
         # Let's create a simple linear mapping
@@ -44,7 +57,7 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
         self.output_pandas_dataframe = pd.DataFrame({"y": self.output_values})
 
     def test_default_decision_tree_model(self):
-        model_config = DecisionTreeRegressionModelConfig.DEFAULT
+        model_config = DecisionTreeConfigStore.default
         model = DecisionTreeRegressionModel(
             model_config=model_config,
             input_space=self.input_space,
@@ -70,7 +83,7 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
         for i in range(num_iterations):
             if i % 100 == 0:
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
-            model_config = DecisionTreeRegressionModelConfig.CONFIG_SPACE.random()
+            model_config = DecisionTreeConfigStore.parameter_space.random()
             print(str(model_config))
             model = DecisionTreeRegressionModel(
                 model_config=model_config,
@@ -80,6 +93,5 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
             model.fit(self.input_pandas_dataframe, self.output_pandas_dataframe, iteration_number=i)
             predictions = model.predict(sample_inputs_pandas_dataframe)
 
-            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'],
-                                                predictions.get_dataframe().iterrows()):
+            for sample_input, prediction in zip(sample_inputs_pandas_dataframe['x'], predictions.get_dataframe().iterrows()):
                 print(sample_input, self.input_output_mapping(sample_input), prediction)

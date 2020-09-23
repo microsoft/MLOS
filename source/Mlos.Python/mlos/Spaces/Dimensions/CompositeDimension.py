@@ -26,9 +26,6 @@ class CompositeDimension(Dimension):
             for chunk in chunks:
                 self._interval_tree.add(chunk)
 
-    def __repr__(self):
-        return self.to_string(include_name=True)
-
     def __str__(self):
         return self.to_string(include_name=True)
 
@@ -37,6 +34,9 @@ class CompositeDimension(Dimension):
         if include_name:
             return f"{self.name}: {chunks_string}"
         return chunks_string
+
+    def __repr__(self):
+        return self.to_string(include_name=True)
 
     def copy(self):
         copy = CompositeDimension(
@@ -101,6 +101,9 @@ class CompositeDimension(Dimension):
 
     def pop_overlapping_chunks(self, chunk):
         return self._interval_tree.pop_overlapping_chunks(chunk)
+
+    def pop_adjacent_chunks(self, chunk):
+        return self._interval_tree.pop_adjacent_chunks(chunk)
 
     def push(self, chunk, skip_checks=False):
         if not skip_checks:

@@ -2,8 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import unittest
+import math
 import random
+import unittest
 
 import mlos.Spaces.Dimensions.DimensionCalculator
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
@@ -22,6 +23,8 @@ class TestContinuousDimension(unittest.TestCase):
 
     def setUp(self):
         self.empty = ContinuousDimension(name='x', min=0, max=0, include_min=False, include_max=False)
+        self.unbounded_continuous = ContinuousDimension(name='x', min=0, max=math.inf)
+        self.unbounded_discrete = DiscreteDimension(name='x', min=0, max=math.inf)
         self.should_be_empty = ContinuousDimension(name='x', min=0, max=0, include_min=False, include_max=True)
         self.should_be_empty_too = ContinuousDimension(name='x', min=0, max=0, include_min=True, include_max=False)
         self.should_contain_zero = ContinuousDimension(name='x', min=0, max=0, include_min=True, include_max=True)
@@ -134,7 +137,13 @@ class TestContinuousDimension(unittest.TestCase):
         self.assertTrue(self.left_open.intersection(self.right_open) in self.open)
 
     def test_random(self):
-        self.assertTrue(self.empty.random() is None)
+        with self.assertRaises(ValueError):
+            self.empty.random()
+        with self.assertRaises(ValueError):
+            self.unbounded_continuous.random()
+        with self.assertRaises(OverflowError):
+            self.unbounded_discrete.random()
+
         self.assertTrue(self.outer.random() in self.outer)
         for _ in range(1000):
             self.assertTrue(self.one_to_five.random() not in self.six_to_ten)
@@ -184,12 +193,14 @@ class TestDiscreteDimension(unittest.TestCase):
         self.just_one = DiscreteDimension(name='x', min=1, max=1)
         self.one_two = DiscreteDimension(name='x', min=1, max=2)
         self.one_two_three = DiscreteDimension(name='x', min=1, max=3)
+        self.one_two_three_four = DiscreteDimension(name='x', min=1, max=4)
         self.one_to_hundred = DiscreteDimension(name='x', min=1, max=100)
 
         self.all_dims = [
             self.just_one,
             self.one_two,
             self.one_two_three,
+            self.one_two_three_four,
             self.one_to_hundred,
         ]
 
@@ -197,6 +208,7 @@ class TestDiscreteDimension(unittest.TestCase):
         self.assertTrue(str(self.just_one) == "x: {1}")
         self.assertTrue(str(self.one_two) == "x: {1, 2}")
         self.assertTrue(str(self.one_two_three) == "x: {1, 2, 3}")
+        self.assertTrue(str(self.one_two_three_four) == "x: {1, 2, ... , 4}")
         self.assertTrue(str(self.one_to_hundred) == "x: {1, 2, ... , 100}")
 
     def test_point_containment(self):

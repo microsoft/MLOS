@@ -61,7 +61,7 @@ main(
         [&feedbackChannel]
     {
         auto globalDispatchTable = GlobalDispatchTable();
-        feedbackChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+        feedbackChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
         return true;
     });
@@ -113,14 +113,14 @@ main(
                 //
                 UNUSED(msg);
 
-                std::unique_lock<std::mutex> lck(waitForConfigMutex);
+                std::unique_lock<std::mutex> lock(waitForConfigMutex);
                 isConfigReady = true;
                 waitForConfigCondVar.notify_all();
             };
 
         // Send a request to obtain a new configuration.
         //
-        SmartCache::RequestNewConfigurationMesage msg = { 0 };
+        SmartCache::RequestNewConfigurationMessage msg = { 0 };
         mlosContext.SendTelemetryMessage(msg);
 
         std::unique_lock<std::mutex> lock(waitForConfigMutex);

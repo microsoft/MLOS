@@ -21,9 +21,6 @@ class CategoricalDimension(Dimension):
         self.values_set = set(self.values)
         self.is_numeric = self._am_i_numeric()
 
-    def __repr__(self):
-        return self.to_string(include_name=True)
-
     def __str__(self):
         return self.to_string()
 
@@ -32,6 +29,9 @@ class CategoricalDimension(Dimension):
         if include_name:
             return f"{self.name}: {values_str}"
         return values_str
+
+    def __repr__(self):
+        return self.to_string(include_name=True)
 
     def copy(self):
         return CategoricalDimension(

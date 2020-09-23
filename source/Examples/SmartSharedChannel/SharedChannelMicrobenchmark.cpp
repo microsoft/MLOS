@@ -164,9 +164,7 @@ uint64_t RunSharedChannelBenchmark(
         {
             auto globalDispatchTable = GlobalDispatchTable();
 
-            sharedChannel.ReaderThreadLoop(
-                globalDispatchTable.data(),
-                globalDispatchTable.size());
+            sharedChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         }));

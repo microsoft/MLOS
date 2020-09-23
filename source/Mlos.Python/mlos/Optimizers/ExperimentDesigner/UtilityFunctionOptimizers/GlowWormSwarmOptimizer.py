@@ -10,7 +10,8 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctio
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Tracer import trace, traced
-from mlos.Spaces import ContinuousDimension, DiscreteDimension, DefaultConfigMeta, Point, SimpleHypergrid
+from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 from mlos.Spaces.HypergridAdapters import DiscreteToUnitContinuousHypergridAdapter
 
 

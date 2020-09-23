@@ -13,7 +13,7 @@ from mlos.Tracer import trace
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeRegressionModelConfig
+from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeConfigStore
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestFitState import HomogeneousRandomForestFitState
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
 
@@ -30,7 +30,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
             CategoricalDimension(name="bootstrap", values=[True, False])
         ]
     ).join(
-        subgrid=DecisionTreeRegressionModelConfig.CONFIG_SPACE,
+        subgrid=DecisionTreeConfigStore.parameter_space,
         on_external_dimension=CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__])
     )
 
@@ -39,7 +39,7 @@ class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
         features_fraction_per_estimator=1,
         samples_fraction_per_estimator=0.7,
         regressor_implementation=DecisionTreeRegressionModel.__name__,
-        decision_tree_regression_model_config=DecisionTreeRegressionModelConfig.DEFAULT,
+        decision_tree_regression_model_config=DecisionTreeConfigStore.default,
         bootstrap=True
     )
 
@@ -84,7 +84,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_SIZE,
-        Prediction.LegalColumnNames.DEGREES_OF_FREEDOM
+        Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM
     ]
 
     @trace()
@@ -278,7 +278,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
-        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         # collect predictions from ensemble constituent models
         predictions_per_tree = [
