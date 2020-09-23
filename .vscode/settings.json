@@ -3,5 +3,10 @@
     "launch": {
         "configurations": [],
         "compounds": []
-    }
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "cmake.generator": "Unix Makefiles",
+    "cmake.preferredGenerators": [
+        "Unix Makefiles"
+    ]
 }
