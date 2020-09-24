@@ -206,7 +206,7 @@ namespace SmartCache
 
                     string currentConfigJsonString = JsonSerializer.Serialize(currentConfigDictionary, JsonOptions);
 
-                    // Send (register) the observation with the optimizer.
+                    // Register the observation with the optimizer by sending it a grpc request.
                     //
                     OptimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
                 }
