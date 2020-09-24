@@ -24,7 +24,7 @@
 //
 #include "stdafx.h"
 
-// Include platform specific implementations of some Mlos functions.
+// Include platform specific implementations of some MLOS functions.
 // Only needed in one compilation unit for a given target.
 //
 #include "MlosPlatform.Std.inl"
