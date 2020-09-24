@@ -68,6 +68,7 @@ namespace Mlos.Agent
         {
             // Create or open the memory mapped files.
             //
+            Console.WriteLine("Create or open memory mapped files");
             globalMemoryRegionView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
             controlChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(ControlChannelMemoryMapName, SharedMemorySize);
             feedbackChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(FeedbackChannelMemoryMapName, SharedMemorySize);
@@ -75,12 +76,17 @@ namespace Mlos.Agent
 
             // Create channel synchronization primitives.
             //
+            Console.WriteLine("Create channel synchronization primitives");
             controlChannelNamedEvent = NamedEvent.CreateOrOpen(ControlChannelSemaphoreName);
             feedbackChannelNamedEvent = NamedEvent.CreateOrOpen(FeedbackChannelSemaphoreName);
 
             // Setup feedback channel.
             //
+            Console.WriteLine("Setup feedback channel");
+
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
+
+            Console.WriteLine("Setup feedback channel1");
 
             var feedbackChannel = new SharedChannel<InterProcessSharedChannelPolicy, SharedChannelSpinPolicy>(
                 buffer: feedbackChannelMemoryMapView.Buffer,
@@ -92,6 +98,8 @@ namespace Mlos.Agent
 
             // Set SharedConfig memory region.
             //
+            Console.WriteLine("Set SharedConfig memory region.");
+
             SharedConfigManager.SetMemoryRegion(new MlosProxyInternal.SharedConfigMemoryRegion { Buffer = sharedConfigMemoryMapView.MemoryRegion().Buffer });
 
             // Setup MlosContext.
@@ -108,6 +116,8 @@ namespace Mlos.Agent
 
             // Register Mlos.Core assembly.
             //
+            Console.WriteLine("Register Mlos.Core assembly.");
+
             RegisterAssembly(typeof(MlosContext).Assembly, dispatchTableBaseIndex: 0);
 
             // Register assemblies from the shared config.

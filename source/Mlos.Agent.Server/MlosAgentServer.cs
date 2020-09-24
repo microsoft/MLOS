@@ -72,7 +72,7 @@ namespace Mlos.Agent.Server
                 Console.WriteLine("Connected to Mlos.Optimizer");
 
                 // This switch must be set before creating the GrpcChannel/HttpClient.
-                //
+                AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
                 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
                 Uri optimizerAddressUri = new Uri("http://localhost:50051");

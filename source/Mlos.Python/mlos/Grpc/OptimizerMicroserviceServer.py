@@ -39,7 +39,8 @@ class OptimizerMicroserviceServer:
         self._server.add_insecure_port(f'[::]:{self.port}')
         self._server.start()
         self.started = True
-        self.logger.info("OptimizerMicroserviceServer started")
+        print("AAAAAA")
+        self.logger.info("OptimizerMicroserviceServer started for real")
 
     def stop(self, grace=None):
         self._server.stop(grace=grace)
