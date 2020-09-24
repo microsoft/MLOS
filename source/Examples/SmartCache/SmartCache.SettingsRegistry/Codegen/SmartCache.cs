@@ -28,7 +28,7 @@
 // etc.)
 //
 // For C++ the codegen is expected to be used with #include statements.
-
+//
 // For C# the codegen is combined with the code in this file to create a
 // loadable dll that the (C#) Mlos.Agent can directly use to process messages
 // and access settings in shared memory.
