@@ -31,6 +31,10 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import trace, traced
 
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
+
+import mlos.global_values as global_values
 
 
 class TestBayesianOptimizer(unittest.TestCase):
@@ -123,7 +127,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             optimizer_config=BayesianOptimizerConfigStore.default
         )
 
-        optimizers = [local_optimizer, remote_optimizer]
+        optimizers = [local_optimizer]#, remote_optimizer]
         for bayesian_optimizer in optimizers:
             # A call to .optimum() should throw before we feed any data to the optimizer.
             #
@@ -227,7 +231,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             optimizer_config=optimizer_config
         )
 
-        for bayesian_optimizer in [local_optimizer, remote_optimizer]:
+        for bayesian_optimizer in [local_optimizer]: #], remote_optimizer]:
             num_iterations = 62
             old_optimum = np.inf
             for i in range(num_iterations):
@@ -322,7 +326,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 optimizer_config=optimizer_config
             )
 
-            for bayesian_optimizer in [local_optimizer, remote_optimizer]:
+            for bayesian_optimizer in [local_optimizer]: #, remote_optimizer]:
                 num_guided_samples = 50
                 for i in range(num_guided_samples):
                     suggested_params = bayesian_optimizer.suggest()
@@ -395,7 +399,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 optimizer_config=optimizer_config
             )
 
-            for bayesian_optimizer in [local_optimizer, remote_optimizer]:
+            for bayesian_optimizer in [local_optimizer]: #, remote_optimizer]:
                 num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 10
                 for i in range(num_guided_samples):
                     suggested_params = bayesian_optimizer.suggest()
@@ -447,23 +451,15 @@ class TestBayesianOptimizer(unittest.TestCase):
             with self.assertRaises(ValueError):
                 optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
         else:
-            self.assertTrue(optimizer.cached_predictions_for_observations is None)
             predicted_best_config, predicted_optimum = optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
-            self.assertTrue(optimizer.cached_predictions_for_observations is not None)
-            cached_predictions_id = id(optimizer.cached_predictions_for_observations)
             ucb_90_ci_config, ucb_90_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
-            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             ucb_95_ci_config, ucb_95_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
-            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             ucb_99_ci_config, ucb_99_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
-            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
 
             lcb_90_ci_config, lcb_90_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
-            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             lcb_95_ci_config, lcb_95_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
-            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
             lcb_99_ci_config, lcb_99_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
-            self.assertTrue(id(optimizer.cached_predictions_for_observations) == cached_predictions_id)
+
 
             # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
             # change width non-linearily both with degrees of freedom, and with prediction variance.

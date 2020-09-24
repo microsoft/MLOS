@@ -53,7 +53,8 @@ function(add_mlos_dotnet_project)
 
     # By convention .csproj files, their output, and their library name
     # all share the same basename.
-    set(OUTPUT ${OUTPUT_PATH}/${NAME}.dll)
+    set(OUTPUT_DLL ${OUTPUT_PATH}/${NAME}.dll)
+    set(OUTPUT_EXE ${BINPLACE_DIR}/${NAME}.dll)
     set(CSPROJ ${NAME}.csproj)
 
     # Parse the csproj files in the directory to determine the *.cs file dependencies.
@@ -70,20 +71,23 @@ function(add_mlos_dotnet_project)
         ${CS_SOURCES}
         ${DIRECTORY}/${CSPROJ})
 
-    add_custom_command(OUTPUT ${OUTPUT}
+    add_custom_command(OUTPUT ${OUTPUT_DLL}
         COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} ${CSPROJ}
         DEPENDS ${DEPENDENCIES}
         WORKING_DIRECTORY ${DIRECTORY}
-        COMMENT "Building DOTNET assembly ${NAME}.dll")
+        COMMENT "Building dotnet assembly ${NAME}.dll")
 
     add_custom_target(${NAME} ALL
-        DEPENDS ${OUTPUT})
+        DEPENDS ${OUTPUT_DLL})
 
     # Save the path to the output dll so we can reference it some tests later on.
     set_target_properties(${NAME}
         PROPERTIES DOTNET_OUTPUT_DIR ${OUTPUT_PATH})
     set_target_properties(${NAME}
-        PROPERTIES DOTNET_OUTPUT_DLL ${OUTPUT})
+        PROPERTIES DOTNET_OUTPUT_DLL ${OUTPUT_DLL})
+    # If the .csproj specifies a binplace rule, this is the path it should be placed in.
+    set_target_properties(${NAME}
+        PROPERTIES DOTNET_OUTPUT_EXE ${OUTPUT_EXE})
 
     if(${MLOS_SETTINGS_REGISTRY})
         add_dependencies(${NAME} Mlos.SettingsSystem.Attributes)

@@ -7,6 +7,10 @@
 all: dotnet-build cmake-build # ctags
 	@ echo "make all target finished."
 
+.PHONY: install
+install: dotnet-install cmake-install
+	@ echo "make install target finished."
+
 .PHONY: clean
 clean: dotnet-clean cmake-clean
 

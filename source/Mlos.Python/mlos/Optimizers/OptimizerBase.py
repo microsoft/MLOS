@@ -111,9 +111,8 @@ class OptimizerBase(ABC):
 
         # Let's see if we have them cached before recomputing
         #
-        if self.cached_predictions_for_observations is None:
-            self.cached_predictions_for_observations = self.predict(feature_values_pandas_frame=features_df)
-        predictions_df = self.cached_predictions_for_observations.get_dataframe()
+        predictions = self.predict(feature_values_pandas_frame=features_df)
+        predictions_df = predictions.get_dataframe()
 
         if len(predictions_df.index) == 0:
             raise ValueError("Insufficient data to compute confidence-bound based optimum.")
@@ -157,18 +156,18 @@ class OptimizerBase(ABC):
                 else:
                     index_of_best = upper_confidence_bounds.idxmax()
                 optimum_value = Point(upper_confidence_bound=upper_confidence_bounds.loc[index_of_best])
-            else:
+            elif optimum_definition == OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG:
                 lower_confidence_bounds = predictions_df[predicted_value_column_name] - prediction_interval_radii
                 if objective.minimize:
                     index_of_best = lower_confidence_bounds.idxmin()
                 else:
                     index_of_best = lower_confidence_bounds.idx_max()
                 optimum_value = Point(lower_confidence_bound=lower_confidence_bounds.loc[index_of_best])
+            else:
+                raise RuntimeError(f"Unknown optimum definition.")
 
         config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value
-
-
 
     @abstractmethod
     def focus(self, subspace):
