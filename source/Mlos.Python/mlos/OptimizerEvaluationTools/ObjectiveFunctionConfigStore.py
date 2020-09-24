@@ -25,7 +25,7 @@ ObjectiveFunctionConfigStore = ComponentConfigStore(
     default=Point(
         implementation=PolynomialObjective.__name__,
         # TODO: move polynomial objective to config store
-        polynomial_objective_config=PolynomialObjective._DEFAULT, # pylint: disable=protected-access
+        polynomial_objective_config=PolynomialObjective.DEFAULT,
     )
 )
 
