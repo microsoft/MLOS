@@ -139,7 +139,6 @@ class BayesianOptimizer(OptimizerBase):
                 iteration_number=len(self._feature_values_df.index)
             )
             self.surrogate_model.compute_goodness_of_fit(features_df=self._feature_values_df, target_df=self._target_values_df, data_set_type=DataSetType.TRAIN)
-        self.cached_predictions_for_observations = None
 
     @trace()
     def predict(self, feature_values_pandas_frame, t=None):

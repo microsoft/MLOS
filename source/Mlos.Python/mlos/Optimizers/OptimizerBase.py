@@ -25,12 +25,6 @@ class OptimizerBase(ABC):
         self.optimization_problem = optimization_problem
         self.optimizer_config = None # TODO: pass from subclasses.
 
-        # To avoid repeated calls to .predict() if no change is expected. Must be cleared on every call to .register()
-        #
-        self.cached_predictions_for_observations = None
-
-
-
     @abstractmethod
     def get_optimizer_convergence_state(self):
         raise NotImplementedError("All subclasses must implement this method.")
@@ -111,9 +105,8 @@ class OptimizerBase(ABC):
 
         # Let's see if we have them cached before recomputing
         #
-        if self.cached_predictions_for_observations is None:
-            self.cached_predictions_for_observations = self.predict(feature_values_pandas_frame=features_df)
-        predictions_df = self.cached_predictions_for_observations.get_dataframe()
+        predictions = self.predict(feature_values_pandas_frame=features_df)
+        predictions_df = predictions.get_dataframe()
 
         if len(predictions_df.index) == 0:
             raise ValueError("Insufficient data to compute confidence-bound based optimum.")
@@ -167,8 +160,6 @@ class OptimizerBase(ABC):
 
         config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value
-
-
 
     @abstractmethod
     def focus(self, subspace):
