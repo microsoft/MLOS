@@ -124,7 +124,8 @@ namespace Mlos.Agent.Server
             // Start the MainAgent message processing loop as a background thread.
             //
             // In MainAgent.RunAgent we loop on the shared memory control and
-            // telemetry channels looking for messages and dispatching they to
+            // telemetry channels looking for messages and dispatching them to
+
             // their registered callback handlers.
             //
             // The set of recognized messages are dynamically registered using
