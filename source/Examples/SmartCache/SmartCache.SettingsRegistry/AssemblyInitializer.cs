@@ -113,6 +113,7 @@ namespace SmartCache
 
             if (OptimizerProxy != null)
             {
+                Console.WriteLine("Optimizer is not null");
                 if (totalRequestCount != 0)
                 {
                     double hitRate = (double)isInCacheCount / (double)totalRequestCount;
@@ -135,12 +136,14 @@ namespace SmartCache
                     string currentConfigJsonString = JsonSerializer.Serialize(currentConfigDictionary, JsonOptions);
 
                     // Register an observation.
-                    //
+                    Console.WriteLine("Register an observation");
+
                     OptimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
                 }
 
                 // Get new configuration.
-                //
+                Console.WriteLine("Suggesting");
+
                 string newConfigJsonString = OptimizerProxy.Suggest();
 
                 var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);

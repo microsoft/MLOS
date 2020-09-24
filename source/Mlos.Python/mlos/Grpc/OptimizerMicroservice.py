@@ -18,6 +18,8 @@ from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimiz
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
+from mlos.Logger import create_logger
+
 
 
 class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
@@ -33,6 +35,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
         self._lock_manager = multiprocessing.Manager()
         self._optimizer_locks_by_optimizer_id = dict()
+        self.logger = create_logger("OptimizerMicroservice")
 
     @staticmethod
     def get_next_optimizer_id():
@@ -85,7 +88,8 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         )
 
     def CreateOptimizer(self, request: OptimizerService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
-
+        self.logger.info("Creating Optimizer")
+        print("CREATING OPTIMIZER")
         optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
         optimizer_config_json = request.OptimizerConfig
         if optimizer_config_json is not None and len(optimizer_config_json) > 0:
@@ -109,10 +113,12 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             self._optimizer_locks_by_optimizer_id[optimizer_id] = optimizer_lock
             self._optimizers_by_id[optimizer_id] = optimizer
             self._ordered_ids.append(optimizer_id)
-        logging.info(f"Created optimizer {optimizer_id}.")
+        self.logger.info(f"Created optimizer {optimizer_id}.")
         return OptimizerService_pb2.OptimizerHandle(Id=optimizer_id)
 
     def Suggest(self, request, context): # pylint: disable=unused-argument
+        self.logger.info("Suggesting")
+
         # TODO: return an error if optimizer not found
         #
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
