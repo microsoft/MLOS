@@ -73,7 +73,6 @@ class SmartCache:
     default_config = SmartCacheConfigStore.default
     parameter_search_space = SmartCacheConfigStore.parameter_space
 
-
     def __init__(self, logger):
         self.logger = logger
         self.mlos_object = MlosObject(
