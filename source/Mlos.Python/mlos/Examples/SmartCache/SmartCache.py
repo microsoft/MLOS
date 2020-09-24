@@ -9,9 +9,27 @@ from mlos.Examples.SmartCache.MlosInterface import PushRuntimeDecisionContext, R
 from mlos.Examples.SmartCache.MlosInterface.MlosTelemetryMessages import SmartCacheGet, SmartCachePush, SmartCacheEvict
 
 from mlos.Mlos.Infrastructure.ConfigurationManager import Configuration
+from mlos.Mlos.SDK import MlosObject, MlosSmartComponentRuntimeAttributes
 
 from mlos.Spaces import CategoricalDimension, Point, SimpleHypergrid
-from mlos.Mlos.SDK import MlosObject, MlosSmartComponentRuntimeAttributes
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
+
+
+SmartCacheConfigStore = ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
+        name='smart_cache_config',
+        dimensions=[
+            CategoricalDimension(name='implementation', values=['LRU', 'MRU'])
+        ]
+    ).join(
+        subgrid=LruCacheConfigStore.parameter_space,
+        on_external_dimension=CategoricalDimension(name='implementation', values=['LRU'])
+    ).join(
+        subgrid=MruCacheConfigStore.parameter_space,
+        on_external_dimension=CategoricalDimension(name='implementation', values=['MRU'])
+    ),
+    default=Point(implementation='LRU', lru_cache_config=LruCacheConfigStore.default)
+)
 
 
 class SmartCache:
@@ -39,22 +57,6 @@ class SmartCache:
         attribute_names=[]
     )
 
-    parameter_search_space = SimpleHypergrid(
-        name='smart_cache_config',
-        dimensions=[
-            CategoricalDimension(name='implementation', values=['LRU', 'MRU'])
-        ]
-    ).join(
-        subgrid=LruCacheConfigStore.parameter_space,
-        on_external_dimension=CategoricalDimension(name='implementation', values=['LRU'])
-    ).join(
-        subgrid=MruCacheConfigStore.parameter_space,
-        on_external_dimension=CategoricalDimension(name='implementation', values=['MRU'])
-    )
-
-    # Used if no intelligence is hooked up
-    default_config = Point(implementation='LRU', lru_cache_config=LruCacheConfigStore.default)
-
     # Used to inform the Mlos Global Context about all types of telemetry messages that this component can emit
     telemetry_message_types = [
         (SmartCachePush, 0b1),
@@ -68,6 +70,9 @@ class SmartCache:
         ReconfigurationRuntimeDecisionContext,
     ]
 
+    default_config = SmartCacheConfigStore.default
+    parameter_search_space = SmartCacheConfigStore.parameter_space
+
 
     def __init__(self, logger):
         self.logger = logger
@@ -75,7 +80,7 @@ class SmartCache:
             smart_component_type=type(self),
             smart_component_runtime_attributes=self.RuntimeAttributes(component_id=id(self))
         )
-        self.current_config = Configuration(component_type=SmartCache, values=self.default_config, id=-1)
+        self.current_config = Configuration(component_type=SmartCache, values=SmartCacheConfigStore.default, id=-1)
         self.cache_implementation = LruCache(max_size=self.current_config.values.lru_cache_config.cache_size, logger=self.logger)
         self.mlos_object.register()
 
