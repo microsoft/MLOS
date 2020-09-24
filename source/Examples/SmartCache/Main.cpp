@@ -35,7 +35,13 @@ using namespace SmartCache;
 #include "SmartCacheImpl.h"
 #include "Workloads.h"
 
-// A basic Windows result code handler.
+// A basic result code handler.
+//
+// MLOS is cross-platform, but started in Windows, so many of the return values
+// reflect that.
+//
+// HRESULTs are an error code encoding mechanism typically used in Windows environments.
+// See Also: https://en.wikipedia.org/wiki/HRESULT
 //
 void CheckHR(HRESULT hr)
 {
