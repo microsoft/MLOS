@@ -12,7 +12,7 @@ import pandas as pd
 
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
-from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 from mlos.Examples.SmartCache import SmartCacheWorkloadGenerator, SmartCache, HitRateMonitor
 from mlos.Examples.SmartCache.TelemetryAggregators.WorkingSetSizeEstimator import WorkingSetSizeEstimator

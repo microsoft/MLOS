@@ -103,7 +103,7 @@ class Point:
         return self.__str__()
 
     def __str__(self):
-        return str(self.to_json(indent=2))
+        return str(self.to_json())
 
     def to_json(self, indent=None):
         if indent is not None:

@@ -4,7 +4,7 @@
 #
 from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerHandle
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
-from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 
 

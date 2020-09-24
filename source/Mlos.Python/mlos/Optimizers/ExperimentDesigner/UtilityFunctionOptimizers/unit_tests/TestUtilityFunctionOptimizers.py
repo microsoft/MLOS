@@ -99,7 +99,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         )
         for _ in range(5):
             suggested_params = random_search_optimizer.suggest()
-            print(suggested_params.to_json())
+            print(suggested_params)
             self.assertTrue(suggested_params in self.input_space)
 
     @trace()
@@ -112,7 +112,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         )
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
-            print(suggested_params.to_json())
+            print(suggested_params)
             self.assertTrue(suggested_params in self.input_space)
 
     @trace()
@@ -160,7 +160,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         num_iterations = 5
         for i in range(num_iterations):
             suggested_params = glow_worm_swarm_optimizer.suggest()
-            print(f"[{i+1}/{num_iterations}] {suggested_params.to_json()}")
+            print(f"[{i+1}/{num_iterations}] {suggested_params}")
             self.assertTrue(suggested_params in objective_function.parameter_space)
 
 

@@ -25,12 +25,6 @@ class OptimizerBase(ABC):
         self.optimization_problem = optimization_problem
         self.optimizer_config = None # TODO: pass from subclasses.
 
-        # To avoid repeated calls to .predict() if no change is expected. Must be cleared on every call to .register()
-        #
-        self.cached_predictions_for_observations = None
-
-
-
     @abstractmethod
     def get_optimizer_convergence_state(self):
         raise NotImplementedError("All subclasses must implement this method.")
@@ -109,8 +103,6 @@ class OptimizerBase(ABC):
     def _prediction_based_optimum(self, features_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
 
-        # Let's see if we have them cached before recomputing
-        #
         predictions = self.predict(feature_values_pandas_frame=features_df)
         predictions_df = predictions.get_dataframe()
 
