@@ -144,7 +144,7 @@ main(
     // Create an instance of our SmartCache component to tune.
     //
     // Note that we pass it a ComponentConfig instance, which also includes our
-    // MlosContext instance, so that the component can internally send telemtry
+    // MlosContext instance, so that the component can internally send telemetry
     // messages and update its config from the component specific shared memory
     // region.
     //
