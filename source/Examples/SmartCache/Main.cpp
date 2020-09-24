@@ -218,6 +218,10 @@ main(
         // When it does, the message will be handled by the callback lambda we
         // setup above which will signal the lock and conditional variables.
         //
+        // To see how the external agent will process the request, see the
+        // RequestNewConfigurationMessage handler in
+        // SmartCache.SettingsRegistry/AssemblyInitializer.cs.
+        //
         std::unique_lock<std::mutex> lock(waitForConfigMutex);
         while (!isConfigReady)
         {
