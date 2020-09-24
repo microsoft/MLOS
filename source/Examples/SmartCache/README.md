@@ -119,18 +119,8 @@ For additional details please see the comments in the following code files:
 
 - [Mlos.Agent.Server/MlosAgentServer.cs](../../Mlos.AgentServer/MlosAgentServer.cs#mlos-github-tree-view)
 - [SmartCache/Main.cpp](./Main.cpp#mlos-github-tree-view)
-
-    Initially registers its smart component's messages and settings with the `Mlos.Agent.Server` so that the `Mlos.Agent` knows how to process the messages the smart component will send it.
-
 - [SmartCache.SettingsRegistry/AssemblyInitializer.cs](./SmartCache.SettingsRegistry/AssemblyInitializer.cs#mlos-github-tree-view)
-
-    Contains code invoked by the `Mlos.Agent` started by the `Mlos.Agent.Server` to setup the message handler callbacks that get invoked by the `Mlos.Agent` when messages code generated from the component's SettingsRegistry (below) are received on the telemetry/control channel.
-
 - [SmartCache.SettingsRegistry/Codegen/SmartCache.cs](./SmartCache.SettingsRegistry/Codegen/SmartCache.cs#mlos-github-tree-view)
-
-    Contains the actual settings and the message structures.
-
-    This is used to generate code for the `SmartCache` C++ binary to use and the `Mlos.Agent.Server` to load dynamically to interpret those messages.
 
 ## Caveats
 
