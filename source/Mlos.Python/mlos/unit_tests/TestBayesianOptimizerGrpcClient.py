@@ -132,12 +132,11 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
             if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
-                optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = min(
-                    optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators,
-                    20
-                )
+                rf_config = optimizer_config.homogeneous_random_forest_regression_model_config
+                rf_config.n_estimators = min(rf_config.n_estimators, 20)
 
             print(f"[{i+1}/{num_random_restarts}] Creating a bayesian optimizer with config: {optimizer_config}")
+
             bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
                 optimization_problem=self.optimization_problem,
                 optimizer_config=optimizer_config
@@ -182,5 +181,5 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
             # ensure current optimum doesn't go up
             assert optimum.y <= old_optimum
             old_optimum = optimum.y
-            print(f"[{i+1}/{num_iterations}]Best Params: {best_params.to_json()}, Best Value: {optimum.y}")
+            print(f"[{i+1}/{num_iterations}]Best Params: {best_params}, Best Value: {optimum.y}")
         return registered_features_df, registered_objectives_df
