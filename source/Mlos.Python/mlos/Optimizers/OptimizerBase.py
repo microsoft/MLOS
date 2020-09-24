@@ -150,13 +150,15 @@ class OptimizerBase(ABC):
                 else:
                     index_of_best = upper_confidence_bounds.idxmax()
                 optimum_value = Point(upper_confidence_bound=upper_confidence_bounds.loc[index_of_best])
-            else:
+            elif optimum_definition == OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG:
                 lower_confidence_bounds = predictions_df[predicted_value_column_name] - prediction_interval_radii
                 if objective.minimize:
                     index_of_best = lower_confidence_bounds.idxmin()
                 else:
                     index_of_best = lower_confidence_bounds.idx_max()
                 optimum_value = Point(lower_confidence_bound=lower_confidence_bounds.loc[index_of_best])
+            else:
+                raise RuntimeError(f"Unknown optimum definition.")
 
         config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value
