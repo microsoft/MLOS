@@ -133,7 +133,7 @@ public:
 
     InternalMlosContextInitializer& operator=(const InternalMlosContextInitializer&) = delete;
 
-public:
+private:
     // Global shared memory region.
     //
     SharedMemoryRegionView<Internal::GlobalMemoryRegion> m_globalMemoryRegionView;
@@ -145,6 +145,8 @@ public:
     // Named shared memory for Feedback Channel.
     //
     SharedMemoryMapView m_feedbackChannelMemoryMapView;
+
+    friend class InternalMlosContext;
 };
 
 //----------------------------------------------------------------------------
@@ -192,7 +194,7 @@ public:
 
     InterProcessMlosContextInitializer& operator=(const InterProcessMlosContextInitializer&) = delete;
 
-public:
+private:
     // Global shared memory region.
     //
     SharedMemoryRegionView<Internal::GlobalMemoryRegion> m_globalMemoryRegionView;
@@ -212,6 +214,8 @@ public:
     // Channel policy for feedback channel.
     //
     InterProcessSharedChannelPolicy m_feedbackChannelPolicy;
+
+    friend class InterProcessMlosContext;
 };
 
 //----------------------------------------------------------------------------
