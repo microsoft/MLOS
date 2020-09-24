@@ -104,7 +104,9 @@ namespace Mlos.Agent.Server
             MainAgent.InitializeSharedChannel();
 
             // Active learning mode.
-            // In active learning the MlosAgentServer controls the workload against the target component.
+            //
+            // TODO: In active learning mode the MlosAgentServer can control the
+            // workload against the target component.
             //
             if (executableFilePath != null)
             {
