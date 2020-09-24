@@ -415,6 +415,14 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
         check_is_fitted(self)
 
+        # confirm feature_values_pandas_frame contains all expected columns
+        #  if any are missing, impute NaN values
+        missing_column_names = set.difference(set(self.input_dimension_names),
+                                              set(feature_values_pandas_frame.columns.values))
+        if missing_column_names:
+            num_x = len(feature_values_pandas_frame.index)
+            for missing_column_name in missing_column_names:
+                feature_values_pandas_frame[missing_column_name] = np.NaN * num_x
         x_df = feature_values_pandas_frame[self.input_dimension_names]
         x_star = self.transform_x(x_df)
 
