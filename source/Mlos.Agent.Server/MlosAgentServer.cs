@@ -127,11 +127,14 @@ namespace Mlos.Agent.Server
             // telemetry channels looking for messages and dispatching they to
             // their registered callback handlers.
             //
-            // The recognized messages are dynamically registered using the
-            // RegisterSettingsAssembly message/methods.
-            // Once registered, the AssemblyInitializer constructor is searched
-            // for with reflection inside those assemblies and executed in order
-            // to setup the message handler callbacks within the agent.
+            // The set of recognized messages are dynamically registered using
+            // the RegisterSettingsAssembly method which is called through the
+            // handler for the RegisterAssemblyRequestMessage.
+            //
+            // Once registered, the SettingsAssemblyManager uses reflect to
+            // search for an AssemblyInitializer inside those assemblies and
+            // executes it in order to setup the message handler callbacks
+            // within the agent.
             //
             // See Also: AssemblyInitializer.cs within the SettingsRegistry
             // assembly project in question.
