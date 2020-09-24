@@ -15,7 +15,7 @@ Some notes on the directory layout organization in this repo.
     For instance:
 
     - [Mlos Settings System Code Generation System](../source/Mlos.SettingsSystem.CodeGen/)
-    - [Mlos.Core Shared Memory Communication Channel](../source/Mlos.Core/)
+    - [Mlos.Core Shared Memory Communication Channel](../source/Mlos.Core/doc/)
 
   - [`source/Examples/`](../source/Examples/) contains sample target codes to optimize with the other MLOS components and help describe the integration methods
 

@@ -4,6 +4,8 @@ This document describes the implementation details of the mechanism (a shared me
 
 For additional context, please see the [MlosArchitecture.md](../../../documentation/MlosArchitecture.md) documentation.
 
+See [source/Mlos.Core](../#mlos-github-tree-view) to browse the code.
+
 ## Contents
 
 - [MLOS Shared Channel](#mlos-shared-channel)
