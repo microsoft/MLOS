@@ -133,7 +133,8 @@ namespace Mlos.Agent.Server
             // the RegisterSettingsAssembly method which is called through the
             // handler for the RegisterAssemblyRequestMessage.
             //
-            // Once registered, the SettingsAssemblyManager uses reflect to
+            // Once registered, the SettingsAssemblyManager uses reflection to
+
             // search for an AssemblyInitializer inside those assemblies and
             // executes it in order to setup the message handler callbacks
             // within the agent.
