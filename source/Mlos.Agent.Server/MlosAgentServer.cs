@@ -128,7 +128,8 @@ namespace Mlos.Agent.Server
 
             // their registered callback handlers.
             //
-            // The set of recognized messages are dynamically registered using
+            // The set of recognized messages is dynamically registered using
+
             // the RegisterSettingsAssembly method which is called through the
             // handler for the RegisterAssemblyRequestMessage.
             //
