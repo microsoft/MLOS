@@ -6,10 +6,15 @@
 // @File: GlobalDispatchTable.h
 //
 // Purpose:
-//      <description>
+//  This file adds the code generated files for this smart component's settings
+//  and messages.  Once the messages structures are defined, the message
+//  processing loop needs to be made aware of them by concatenating them into
+//  the GlobalDispatchTable.  Note that this is a compile time constant
+//  operation for effeciency.
 //
 // Notes:
-//      <special-instructions>
+//  This is expected to be included *after* Mlos.Core.h and *before*
+//  Mlos.Core.inl.  See stdafx.h for an example.
 //
 //*********************************************************************
 
@@ -36,12 +41,12 @@ constexpr uint32_t SmartCache::ObjectDeserializationHandler::DispatchTableBaseIn
 // corresponding to the DispatchTables that are concatenated below.
 // See SmartSharedChannel/GlobalDispatchTable.h for an example.
 
-// Registers each of the code generated messages for the channel message handler
-// reader loops.
+// Registers each of the code generated messages for the channel message reader
+// loops.
 //
 // Note: messages still need to have a Callback setup for it so that application
 // specific code is executed when its messages are received.
-// See Also: SmartCache/Main.cpp
+// See SmartCache/Main.cpp for an example.
 //
 constexpr auto GlobalDispatchTable()
 {
