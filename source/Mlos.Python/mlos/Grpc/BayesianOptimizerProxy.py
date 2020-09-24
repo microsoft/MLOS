@@ -13,7 +13,6 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
-from mlos.Tracer import trace
 
 
 class BayesianOptimizerProxy(OptimizerBase):
@@ -50,12 +49,10 @@ class BayesianOptimizerProxy(OptimizerBase):
     def optimizer_handle(self):
         return OptimizerService_pb2.OptimizerHandle(Id=self.id)
 
-    @trace()
     def get_optimizer_convergence_state(self):
         optimizer_convergence_state_response = self._optimizer_stub.GetOptimizerConvergenceState(self.optimizer_handle)
         return deserialize_from_bytes_string(optimizer_convergence_state_response.SerializedOptimizerConvergenceState)
 
-    @trace()
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
         suggestion_request = OptimizerService_pb2.SuggestRequest(
             OptimizerHandle=self.optimizer_handle,
@@ -65,7 +62,6 @@ class BayesianOptimizerProxy(OptimizerBase):
         suggested_params_dict = json.loads(suggestion_response.ParametersJsonString)
         return Point(**suggested_params_dict)
 
-    @trace()
     def register(self, feature_values_pandas_frame, target_values_pandas_frame):  # pylint: disable=unused-argument
         # TODO: implement RegisterObservations <- plural
         #
@@ -84,16 +80,12 @@ class BayesianOptimizerProxy(OptimizerBase):
             )
             self._optimizer_stub.RegisterObservation(register_request)
 
-        self.cached_predictions_for_observations = None
-
-    @trace()
     def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         response = self._optimizer_stub.GetAllObservations(self.optimizer_handle)
         features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
         objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
         return features_df, objectives_df
 
-    @trace()
     def predict(self, feature_values_pandas_frame, t=None):  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
@@ -114,6 +106,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         objective_name = only_prediction_pb2.ObjectiveName
         valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
         prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
+        prediction.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
         return prediction
 
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use

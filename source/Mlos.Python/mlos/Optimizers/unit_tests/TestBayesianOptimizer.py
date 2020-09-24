@@ -14,7 +14,7 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Tracer import Tracer, trace
 
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfigStore
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
@@ -94,7 +94,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT,
+            optimizer_config=BayesianOptimizerConfigStore.default,
             logger=self.logger
         )
 
@@ -147,7 +147,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
             logger=self.logger,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT
+            optimizer_config=BayesianOptimizerConfigStore.default
         )
         with self.assertRaises(ValueError):
             bayesian_optimizer.optimum()
@@ -182,7 +182,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             objectives=[Objective(name='y', minimize=True)]
         )
 
-        optimizer_config = BayesianOptimizerConfig.DEFAULT
+        optimizer_config = BayesianOptimizerConfigStore.default
         optimizer_config.min_samples_required_for_guided_design_of_experiments = 50
         optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
         optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
@@ -273,7 +273,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         num_restarts = 2
         for restart_num in range(num_restarts):
 
-            optimizer_config = BayesianOptimizerConfig.DEFAULT
+            optimizer_config = BayesianOptimizerConfigStore.default
             optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
             optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
             optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
@@ -327,10 +327,10 @@ class TestBayesianOptimizer(unittest.TestCase):
             # Let's set up random seeds so that we can easily repeat failed experiments
             #
             random_state.seed(restart_num)
-            BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
+            BayesianOptimizerConfigStore.parameter_space.random_state = random_state
             objective_function.parameter_space.random_state = random_state
 
-            optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
+            optimizer_config = BayesianOptimizerConfigStore.parameter_space.random()
 
             # We can make this test more useful as a Unit Test by restricting its duration.
             #
@@ -372,11 +372,11 @@ class TestBayesianOptimizer(unittest.TestCase):
 
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
-        config = BayesianOptimizerConfig.DEFAULT
+        config = BayesianOptimizerConfigStore.default
         config.min_samples_required_for_guided_design_of_experiments = 1
         config.experiment_designer_config.fraction_random_suggestions = .1
 
-        original_config = BayesianOptimizerConfig.DEFAULT
+        original_config = BayesianOptimizerConfigStore.default
         assert original_config.min_samples_required_for_guided_design_of_experiments == 10
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
