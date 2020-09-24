@@ -6,15 +6,19 @@
 // @File: stdafx.h
 //
 // Purpose:
-//      <description>
+//  This is the standard include header, expected to be in every compilation unit
+//  in this project.
 //
 // Notes:
-//      <special-instructions>
+//  It is generally not expected to change much, so precompiled headers can be
+//  made use of to help optimize builds if desired.
 //
 //*********************************************************************
 
 #pragma once
 
+// Include standard libraries necessary for all compilation units.
+//
 #include <array>
 #include <condition_variable>
 #include <iostream>
@@ -25,15 +29,22 @@
 #include <list>
 #include <unordered_map>
 
-// Mlos.Core.
+// Include Mlos.Core shared memory channel APIs.
+//
+// This also includes the the core message headers code generated from the
+// Mlos.NetCore project for registering new assemblies for application specific
+// smart components.
 //
 #include "Mlos.Core.h"
 
-// Global dispatch table.
+// Include application specific codegen files and sets up the global dispatch table.
 //
 #include "GlobalDispatchTable.h"
 
-// Mlos.Core.
+// Include Mlos.Core inline implementations.
+//
+// Note: This should be included after the application specific code gen
+// included in GlobalDispatchTable.h
 //
 #include "Mlos.Core.inl"
 

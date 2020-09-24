@@ -1,8 +1,10 @@
 # [SmartCache Example](./#mlos-github-tree-view)
 
-TODO: Some description of the example contained in this directory.
+This [`SmartCache`](./#mlos-github-tree-view) example is a C++ implementation of the [Python SmartCache](../../Mlos.Python/mlos/Examples/SmartCache/#mlos-github-tree-view).
 
-This [`SmartCache`](./#mlos-github-tree-view) can be used to demonstrate a full end-to-end MLOS integrated microbenchmark for a "smart" component (in this case a cache).
+It implements a simple cache with different replacement policies and cache size as built-in tunables and some simple workloads.
+
+It can be used to demonstrate a full end-to-end MLOS integrated microbenchmark for a "smart" component (in this case a cache).
 
 ## Overview
 
@@ -45,44 +47,48 @@ To build and run the necessary components for this example
 3. Inside the container, [build the compiled software](../../../documentation/02-Build.md#cli-make) with `make`:
 
     ```sh
-    make dotnet-build cmake-build
+    make all install
     ```
 
     > This will build everything using a default `CONFIGURATION=Release`.
     >
-    > To just build `SmartCache` and `Mlos.Agent.Server`, execute the following: \
-    > `make -C source/Examples/SmartCache && make -C source/Mlos.Agent.Server`
+    > To just build `SmartCache` and `Mlos.Agent.Server`, execute the following:
 
-4. For a `Release` build (the default), the relevant output will be at:
+      ```sh
+      # Alternatively:
+      make -C source/Examples/SmartCache all install && make -C source/Mlos.Agent.Server
+      ```
+
+4. For a `Release` build (the default), the relevant output will be installed at:
 
     - Mlos.Agent.Server:
 
-        `out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll`
+        `target/bin/Release/Mlos.Agent.Server.dll`
 
     - SmartCache:
 
-        `out/cmake/Release/source/Examples/SmartCache/SmartCache`
+        `target/bin/Release/SmartCache`
 
     - SmartCache.SettingsRegistry:
 
-        `out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU/SmartCache.SettingsRegistry.dll`
+        `target/bin/Release/SmartCache.SettingsRegistry.dll`
 
 ## Executing
 
 The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark:
 
 ```sh
-export MLOS_SETTINGS_REGISTRY_PATH="out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU"
+export MLOS_SETTINGS_REGISTRY_PATH="$PWD/target/bin/Release"
 
-tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll \
-    out/cmake/Release/source/Examples/SmartCache/SmartCache
+tools/bin/dotnet target/bin/Release/Mlos.Agent.Server.dll \
+    target/bin/Release/SmartCache
 ```
 
 > Note: This is currently missing the `.json` file argument to connect to the optimizer service.
 
 ```txt
 Mlos.Agent.Server
-Starting out/cmake/Release/source/Examples/SmartCache/SmartCache
+Starting target/bin/Release/SmartCache
 observations: 0
 warn: Microsoft.AspNetCore.Server.Kestrel[0]
       Unable to bind to http://localhost:5000 on the IPv6 loopback interface: 'Cannot assign requested address'.
@@ -95,7 +101,7 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: /src/MLOS
 Starting Mlos.Agent
-Found settings registry assembly at out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/obj/AnyCPU/SmartCache.SettingsRegistry.dll
+Found settings registry assembly at target/bin/Release/SmartCache.SettingsRegistry.dll
 observations: 1
 observations: 2
 observations: 3
@@ -114,6 +120,13 @@ That includes the name of the `SettingsRegistry` assembly (`.dll`) corresponding
 
 The `Mlos.Agent.Server` needs to be told where it can find those assemblies in order to load them so that it can process the messages sent by the component.
 To do that, before we started the `Mlos.Agent.Server`, we first populated the `MLOS_SETTINGS_REGISTRY_PATH` environment variable with the directory path to the `SmartCache.SettingsRegistry.dll`.
+
+For additional details please see the comments in the following code files:
+
+- [Mlos.Agent.Server/MlosAgentServer.cs](../../Mlos.Agent.Server/MlosAgentServer.cs#mlos-github-tree-view)
+- [SmartCache/Main.cpp](./Main.cpp#mlos-github-tree-view)
+- [SmartCache.SettingsRegistry/AssemblyInitializer.cs](./SmartCache.SettingsRegistry/AssemblyInitializer.cs#mlos-github-tree-view)
+- [SmartCache.SettingsRegistry/Codegen/SmartCache.cs](./SmartCache.SettingsRegistry/Codegen/SmartCache.cs#mlos-github-tree-view)
 
 ## Caveats
 
