@@ -230,29 +230,14 @@ main(
         smartCache.Reconfigure();
     }
 
-
-    // Optionally tell the external agent we aren't coming back so that when we
-    // finish it will as well.
+    // Terminate the feedback channel.
     //
-    if (false)
-    {
-        // Terminate the feedback channel.
-        //
-        mlosContext.TerminateFeedbackChannel();
+    mlosContext.TerminateFeedbackChannel();
 
-        // At this point there are no active feedback channel reader threads.
-        // Now, terminate the control channel.
-        //
-        mlosContext.TerminateControlChannel();
+    // At this point there are no active feedback channel reader threads.
+    // Now, terminate the control channel.
+    //
+    mlosContext.TerminateControlChannel();
 
-        feedbackChannelReader.wait();
-    }
-    else
-    {
-        // Alternatively, we can let the agent remain running so that we can
-        // invoke another instance of this microbenchmark to continue exploring
-        // the parameter space.
-    }
-
-    return 0;
+    feedbackChannelReader.wait();
 }
