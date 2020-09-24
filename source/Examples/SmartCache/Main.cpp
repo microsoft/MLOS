@@ -19,6 +19,9 @@
 //
 //*********************************************************************
 
+// Include all the common headers for the application
+// (including Mlos.Core and component settings registry code generation output)
+//
 #include "stdafx.h"
 
 // Include platform specific implementations of some Mlos functions.
@@ -81,7 +84,16 @@ main(
         std::launch::async,
         [&feedbackChannel]
     {
+        // GlobalDispatchTable defines the set of recognized messages by this
+        // application.
+        // See GlobalDispatchTable.h for details.
+        //
         auto globalDispatchTable = GlobalDispatchTable();
+
+        // This starts a loop to handle reading messages from the feedback
+        // channel, looking them up in the dispatch table, and calling the
+        // callbacks associated with them.
+        //
         feedbackChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
         return true;
@@ -189,9 +201,9 @@ main(
         //
         // Note: the message (as defined in
         // SmartCache.SettingsRegistry/CodeGen/SmartCache.cs) has no members, so
-        // there's no details to fill in here. It's simply a signal to send to
-        // the external agent to request a new config be populated in the shared
-        // memory region.
+        // there's no details to fill in here (and it is just zero-initialized).
+        // It's simply a signal to send to the external agent to request a new
+        // config be populated in the shared memory region.
         //
         SmartCache::RequestNewConfigurationMessage msg = { 0 };
         mlosContext.SendTelemetryMessage(msg);
