@@ -47,15 +47,19 @@ To build and run the necessary components for this example
 3. Inside the container, [build the compiled software](../../../documentation/02-Build.md#cli-make) with `make`:
 
     ```sh
-    make dotnet-build cmake-build cmake-install
+    make all install
     ```
 
     > This will build everything using a default `CONFIGURATION=Release`.
     >
-    > To just build `SmartCache` and `Mlos.Agent.Server`, execute the following: \
-    > `make -C source/Examples/SmartCache all install && make -C source/Mlos.Agent.Server`
+    > To just build `SmartCache` and `Mlos.Agent.Server`, execute the following:
 
-4. For a `Release` build (the default), the relevant output will be at:
+      ```sh
+      # Alternatively:
+      make -C source/Examples/SmartCache all install && make -C source/Mlos.Agent.Server
+      ```
+
+4. For a `Release` build (the default), the relevant output will be installed at:
 
     - Mlos.Agent.Server:
 
@@ -119,7 +123,7 @@ To do that, before we started the `Mlos.Agent.Server`, we first populated the `M
 
 For additional details please see the comments in the following code files:
 
-- [Mlos.Agent.Server/MlosAgentServer.cs](../../Mlos.AgentServer/MlosAgentServer.cs#mlos-github-tree-view)
+- [Mlos.Agent.Server/MlosAgentServer.cs](../../Mlos.Agent.Server/MlosAgentServer.cs#mlos-github-tree-view)
 - [SmartCache/Main.cpp](./Main.cpp#mlos-github-tree-view)
 - [SmartCache.SettingsRegistry/AssemblyInitializer.cs](./SmartCache.SettingsRegistry/AssemblyInitializer.cs#mlos-github-tree-view)
 - [SmartCache.SettingsRegistry/Codegen/SmartCache.cs](./SmartCache.SettingsRegistry/Codegen/SmartCache.cs#mlos-github-tree-view)

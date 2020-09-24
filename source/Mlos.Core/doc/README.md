@@ -8,5 +8,4 @@ actions for tuning them.
 
 ## See Also:
 
-- [SharedChannel.md](./SharedChannel.md)
-- [SharedMemoryManagement.md](./SharedMemoryManagement.md)
+- [Mlos Shared Memory Communication Channel](./SharedChannel.md)
