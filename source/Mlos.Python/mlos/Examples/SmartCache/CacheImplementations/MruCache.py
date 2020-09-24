@@ -6,7 +6,7 @@ from mlos.Examples.SmartCache.CacheImplementations.XruCache import XruCache
 from mlos.Spaces import DiscreteDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
-MruCacheConfigStore=ComponentConfigStore(
+MruCacheConfigStore = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name='mru_cache_config',
         dimensions=[DiscreteDimension('cache_size', min=1, max=2 ** 12)]

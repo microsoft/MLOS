@@ -9,13 +9,13 @@ from sklearn.metrics.pairwise import euclidean_distances
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
-from mlos.Tracer import trace, traced
 from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Spaces.HypergridAdapters import DiscreteToUnitContinuousHypergridAdapter
+from mlos.Tracer import trace, traced
 
 
-GlowWormSwarmOptimizerConfigStore=ComponentConfigStore(
+GlowWormSwarmOptimizerConfigStore = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="glow_worm_swarm_optimizer_config",
         dimensions=[

@@ -6,14 +6,14 @@ import numpy as np
 import pandas as pd
 from scipy.stats import t
 from mlos.Logger import create_logger
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Tracer import trace
-from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 
 
-ConfidenceBoundUtilityFunctionConfigStore=ComponentConfigStore(
+ConfidenceBoundUtilityFunctionConfigStore = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="confidence_bound_utility_function_config",
         dimensions=[

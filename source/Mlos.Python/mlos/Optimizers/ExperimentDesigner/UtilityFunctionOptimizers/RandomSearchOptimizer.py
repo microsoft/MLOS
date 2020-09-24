@@ -4,15 +4,15 @@
 #
 import pandas as pd
 
-from mlos.Tracer import trace
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
+from mlos.Tracer import trace
 
 
-RandomSearchOptimizerConfigStore=ComponentConfigStore(
+RandomSearchOptimizerConfigStore = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="random_search_optimizer_config",
         dimensions=[
