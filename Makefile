@@ -9,9 +9,9 @@
 RelativePathToProjectRoot := .
 include ./build/Common.mk
 
-handledtargets += cmake-build cmake-test cmake-clean \
+handledtargets += cmake-build cmake-install cmake-test cmake-check \
 		  cmake-buildfiles clean-cmake-buildfiles \
-		  cmake-distclean $(CMAKE) \
+		  cmake-clean cmake-distclean $(CMAKE) \
 		  python-checks python-test python-clean \
 		  website website-clean \
 		  grpc-clean mlos-codegen-clean
@@ -27,6 +27,10 @@ test: dotnet-test cmake-test python-test
 
 .PHONY: check
 check: all test
+
+.PHONY: install
+install: dotnet-install cmake-install
+	@ echo "make install target finished."
 
 .PHONY: clean
 clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean
@@ -78,13 +82,20 @@ cmake-build: $(ConfigurationMakefile)
 	@  $(MAKE) -C $(ConfigurationCmakeDir)
 	@ echo "make cmake-build target finished."
 
+.PHONY: cmake-install
+cmake-install: $(ConfigurationMakefile)
+	@  $(MAKE) -C $(ConfigurationCmakeDir) install
+	@ echo "make cmake-install target finished."
+
 .PHONY: cmake-test
 cmake-test: $(ConfigurationMakefile)
 	@  $(MAKE) -C $(ConfigurationCmakeDir) test
+	@ echo "make cmake-test target finished."
 
 .PHONY: cmake-check
 cmake-check:
 	@  $(MAKE) -C $(ConfigurationCmakeDir) check
+	@ echo "make cmake-check target finished."
 
 .NOTPARALLEL: cmake-clean
 .PHONY: cmake-clean

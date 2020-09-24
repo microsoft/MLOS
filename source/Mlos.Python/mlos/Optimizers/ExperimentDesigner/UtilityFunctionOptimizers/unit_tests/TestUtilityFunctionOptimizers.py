@@ -81,7 +81,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
-        trace_output_path = os.path.join(temp_dir, "TestRandomSearchOptimizerTrace.json")
+        trace_output_path = os.path.join(temp_dir, "TestUtilityFunctionOptimizers.json")
         print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 

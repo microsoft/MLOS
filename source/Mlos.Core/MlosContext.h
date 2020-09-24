@@ -23,6 +23,13 @@ namespace Core
 // NAME: MlosContext
 //
 // PURPOSE:
+//  Provides the main entrypoint for an application component to interact with an
+//  (external) agent over shared memory channels.
+//
+//  Application components use this class to
+//  1. Register their settings assembly so the external agent can process the
+//  application component messages.
+//  2. Send different types of messages (e.g. control, telemetry, etc.)
 //
 // NOTES:
 //

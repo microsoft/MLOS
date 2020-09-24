@@ -46,12 +46,20 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         {
             WriteLine();
 
-            foreach (string lineComment in codeComment.Summary.Split(new[] { Environment.NewLine }, StringSplitOptions.None))
+            foreach (string comment in new[] { codeComment.Summary, codeComment.Remarks })
             {
-                WriteLine($"// {lineComment.Trim()}");
-            }
+                if (comment == null)
+                {
+                    continue;
+                }
 
-            WriteLine("//");
+                foreach (string lineComment in comment.Split(new[] { Environment.NewLine }, StringSplitOptions.None))
+                {
+                    WriteLine($"// {lineComment.Trim()}");
+                }
+
+                WriteLine("//");
+            }
         }
 
         /// <inheritdoc />

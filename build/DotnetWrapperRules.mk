@@ -44,6 +44,10 @@ dotnet-build: $(DOTNET) $(CsprojBuildTargets) $(DirsProjBuildTarget)
 dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
 	@ echo "make dotnet-test target finished."
 
+.PHONY: dotnet-install
+dotnet-install:
+	@ echo "make dotnet-install is currently a no-op."
+
 # For each of the fake build targets, just call "dotnet build" on its
 # corresponding *.csproj file
 # We won't track any inputs/outputs/dependencies - we just let "dotnet build" handle that.
@@ -76,4 +80,4 @@ dotnet-clean:
 
 handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
     $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
+    dotnet-build dotnet-install dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
