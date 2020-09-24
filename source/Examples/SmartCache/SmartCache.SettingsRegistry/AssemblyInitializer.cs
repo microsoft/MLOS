@@ -20,15 +20,43 @@ using SmartCacheProxy = Proxy.SmartCache;
 namespace SmartCache
 {
     /// <summary>
-    /// Assembly initializer.
+    /// Initializer for this component Settings Registry assembly dll.
     /// </summary>
+    /// <remarks>
+    /// This class is instantiated by the C# Mlos.Agent (MainAgent.cs -
+    /// RegisterSettingsAssembly) which calls
+    /// <seealso cref="SettingsAssemblyManager.RegisterAssembly" /> to invoke
+    /// this one time initialization code for the settings and message handlers
+    /// for this component's Settings Registry. This allows the Mlos.Agent (which
+    /// is generic) to invoke the appropriate handlers for the component specific
+    /// message handlers.
+    /// The handlers can then communicate with an optimizer, adjust the
+    /// component's shared memory config settings, and pass messages back to the
+    /// component on the feedback channel.
+    /// </remarks>
     public static class AssemblyInitializer
     {
-        private static readonly IOptimizerProxy OptimizerProxy;
+        // Some variables for the tracking the telemetry received from the smart component.
 
+        /// <summary>
+        /// A running count of the number of hits in the cache.
+        /// </summary>
         private static int isInCacheCount = 0;
+
+        /// <summary>
+        /// A running count of the total number of requests for the cache.
+        /// </summary>
         private static int totalRequestCount = 0;
 
+        /// <summary>
+        /// A local reference to the connection to the optimizer service.
+        /// </summary>
+        private static readonly IOptimizerProxy OptimizerProxy;
+
+        /// <remarks>
+        /// Messages to the optimizer are handled using JSON, so this provides a
+        /// standard serialization mechanism from C# Dictionary objects.
+        /// </remarks>
         private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -39,14 +67,36 @@ namespace SmartCache
             },
         };
 
+        /// <summary>
+        /// This is the entry point for setting up the message handlers for the
+        /// messages code generated from the (partial) structs defined for this
+        /// smart component in the CodeGen/SmartCache.cs.
+        /// </summary>
+        /// <remarks>
+        /// See class comments for further details.
+        /// </remarks>
         static AssemblyInitializer()
         {
             // Setup message callbacks.
+            //
+            // Note: these message properties are code generated from the
+            // (partial) structs in CodeGen/SmartCache.cs
+            //
+            // See out/Mlos.CodeGen.out/SmartCache/*.cs for the C# code
+            // generation output from those partial definitions.
             //
             SmartCacheProxy.CacheRequestEventMessage.Callback = CacheRequestEventMessageHandler;
             SmartCacheProxy.RequestNewConfigurationMessage.Callback = RequestNewConfigurationMessageHandler;
 
             // Create smart cache parameter search space.
+            //
+            // These hypergrids define the combination of valid ranges
+            // of values for the different tunables.
+            // Note that some of these are interdependent.
+            //
+            // TODO: Eventually this will also be code generated from additional
+            // "domain range" attributes on the "ScalarSettings" defined for the
+            // component (see also CodeGen/SmartCache.cs)
             //
             Hypergrid cacheSearchSpace = new Hypergrid(
                 name: "smart_cache_config",
@@ -64,6 +114,12 @@ namespace SmartCache
 
             // Create optimization problem.
             //
+            // Here we declare to the optimizer what our desired output from the
+            // component to optimize is.
+            //
+            // In this case we declare "hit rate", which will be calculated as a
+            // percentage, is the thing we want the optimizer to improve.
+            //
             var optimizationProblem = new OptimizationProblem
             {
                 ParameterSpace = cacheSearchSpace,
@@ -78,19 +134,25 @@ namespace SmartCache
             optimizationProblem.Objectives.Add(
                 new OptimizationObjective
                 {
+                    // Tell the optimizer that we want to maximize hit rate.
+                    //
                     Name = "HitRate",
-                    Minimize = true,
+                    Minimize = false,
                 });
 
+            // Get a local reference to the optimizer to reuse when processing messages later on.
+            //
+            // Note: we read this from a global variable that should have been
+            // setup for the Mlos.Agent (e.g. in the Mlos.Agent.Server).
+            //
             IOptimizerFactory optimizerFactory = MlosContext.OptimizerFactory;
-
             OptimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
         }
 
         /// <summary>
-        /// CacheRequestEventMessageHandler.
+        /// Handler to be called when receiving a CacheRequestEventMessage.
         /// </summary>
-        /// <param name="msg"></param>
+        /// <param name="msg">A reference to the message buffer.</param>
         private static void CacheRequestEventMessageHandler(SmartCacheProxy.CacheRequestEventMessage msg)
         {
             // Update hit rate
@@ -104,13 +166,22 @@ namespace SmartCache
         }
 
         /// <summary>
-        /// Request a new configuration from the optimizer.
+        /// Handler for a RequestNewConfigurationMessage from the smart componet.
+        /// Receipt of such a message is used as a signal to request a new
+        /// configuration from the optimizer and update the config in the shared
+        /// memory region for the component.
         /// </summary>
-        /// <param name="msg"></param>
+        /// <param name="msg">A reference to the message buffer (unused).</param>
         private static void RequestNewConfigurationMessageHandler(SmartCacheProxy.RequestNewConfigurationMessage msg)
         {
+            // Get a reference to the smart cache's config stored in shared memory.
+            //
             SmartCacheProxy.SmartCacheConfig smartCacheConfig = MlosContext.SharedConfigManager.Lookup<SmartCacheProxy.SmartCacheConfig>().Config;
 
+            // If we have a connection to the optimizer, then ask it for a new
+            // configuration based on the stats from CacheRequestEvent telemetry
+            // messages we've already received.
+            //
             if (OptimizerProxy != null)
             {
                 if (totalRequestCount != 0)
@@ -120,7 +191,8 @@ namespace SmartCache
                     isInCacheCount = 0;
                     totalRequestCount = 0;
 
-                    // Let's assemble an observation that consists of the config and the resulting performance.
+                    // Let's assemble an observation message that consists of
+                    // the config and the resulting performance.
                     //
                     var currentConfigDictionary = new Dictionary<string, object>();
                     currentConfigDictionary["cache_implementation"] = smartCacheConfig.EvictionPolicy;
@@ -134,18 +206,19 @@ namespace SmartCache
 
                     string currentConfigJsonString = JsonSerializer.Serialize(currentConfigDictionary, JsonOptions);
 
-                    // Register an observation.
+                    // Register the observation with the optimizer by sending it a grpc request.
                     //
                     OptimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
                 }
 
-                // Get new configuration.
+                // Now, ask the optimizer for a new configuration suggestion.
                 //
                 string newConfigJsonString = OptimizerProxy.Suggest();
 
                 var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
 
-                // Update cache config.
+                // Update smart cache's config in shared memory with the
+                // optimizer's new settings recommendation.
                 //
                 smartCacheConfig.EvictionPolicy = Enum.Parse<CacheEvictionPolicy>(newConfigDictionary["cache_implementation"].GetString());
 
@@ -156,8 +229,16 @@ namespace SmartCache
                     _ => throw new NotSupportedException(),
                 };
             }
+            else
+            {
+                // No optimizer connection was found, so we will simply ignore
+                // the request for a new configuration message for now and leave
+                // the config as is.
+            }
 
-            // Send feedback message.
+            // Send an (empty) "SharedConfigUpdated" message on the feedback
+            // channel to let the SmartCache know that it can update it's
+            // version of the config from shared memory.
             //
             SharedConfigUpdatedFeedbackMessage feedbackMsg;
             MlosContext.FeedbackChannel.SendMessage(ref feedbackMsg);

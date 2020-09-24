@@ -8,8 +8,21 @@ Some notes on the directory layout organization in this repo.
   - For instance, `.props` and `.targets` files for definining and controlling common `msbuild` and `dotnet build` properties and targets are contained there, as are various style check configurations.
   > Note: For this reason, `cmake` output is redirected to `out/cmake/{Release,Debug}/` instead.
 - [`source/`](../source/#mlos-github-tree-view) contains a directory for each component of MLOS, including unit test source code.
-  - i.e. running `msbuild` or `make` in the `source/` directory will build (and generally analyze) all of the projects, but not execute their tests.
+  - i.e. running `msbuild` or `make` in the `source/` directory will build (and generally analyze) all of the projects, but not necessarily execute their tests.
+
+  - Many components include more detailed documentation about their implementation internals.
+
+    For instance:
+
+    - [Mlos Settings System Code Generation System](../source/Mlos.SettingsSystem.CodeGen/)
+    - [Mlos.Core Shared Memory Communication Channel](../source/Mlos.Core/doc/)
+
   - [`source/Examples/`](../source/Examples/) contains sample target codes to optimize with the other MLOS components and help describe the integration methods
+
+    For instance:
+
+    - [Smart Cache C++](../source/Examples/SmartCache/)
+
 - [`test/`](../test/#mlos-github-tree-view) contains a directory and project to invoke each of the unit tests.
   - i.e. running `msbuild` or `make` in the `test/` directory will also run all of the tests.
 - [`scripts/`](../scripts/#mlos-github-tree-view) contains some helper scripts to initialize development environments, install tools, invoke build pipelines, run tests, etc.
