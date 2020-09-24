@@ -12,6 +12,25 @@
 //
 // Note: they are annotated with C# attributes that allow the MLOS code
 // generation process to walk the structures using reflection.
+//
+// The .csproj file for this SettingsRegistry assembly specially declares this
+// file as relevant (SettingsRegistryDef) to for Mlos.SettingsSystem.CodeGen to
+// invoke that process.
+//
+// Then according to those rules the code generation output by default is
+// sent to out/Mlos.CodeGen.out/SmartCache/SettingsProvider_gen_*.*
+//
+// Different settings registries are separated to different folders (and
+// optionally namespaces - see SmartCache/CodeGen/AssemblyInfo.cs) to allow
+// multiple settings registries to be included in the same project.
+//
+// Mlos.SettingsSystem.CodeGen outputs for multiple languages (e.g. C++, C#,
+// etc.)
+//
+// For C++ the codegen are expected to be used with #include statements.
+// For C# the codegen is combined with the code in this file to create a
+// loadable dll that the (C#) Mlos.Agent can directly use to process messages
+// and access settings in shared memory.
 
 using Mlos.SettingsSystem.Attributes;
 
