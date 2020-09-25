@@ -4,9 +4,10 @@
     <!-- Protobuf gen output path. -->
     <GrpcOutputDir>$(BaseDir)\out\Grpc.out\$(GrpcServices)\$(BuildType)</GrpcOutputDir>
     <GrpcVersion>2.29.0</GrpcVersion>
+    <ProtobufVersion>3.12.0</ProtobufVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.12.0" GeneratePathProperty="true" />
+    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" GeneratePathProperty="true" />
 
     <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Grpc.Core.Api" Version="$(GrpcVersion)" GeneratePathProperty="true" />
