@@ -17,7 +17,7 @@ from mlos.Logger import create_logger
 from mlos.Examples.SmartCache import SmartCacheWorkloadGenerator, SmartCache, HitRateMonitor
 from mlos.Examples.SmartCache.TelemetryAggregators.WorkingSetSizeEstimator import WorkingSetSizeEstimator
 from mlos.Mlos.SDK import mlos_globals, MlosExperiment, MlosAgent
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
+from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 
@@ -101,7 +101,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
         """
         self.optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
-            optimizer_config=BayesianOptimizerConfigStore.default
+            optimizer_config=bayesian_optimizer_config_store.default
         )
         self.mlos_agent.start_experiment(self.smart_cache_experiment)
 

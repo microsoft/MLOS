@@ -14,7 +14,7 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import HomogeneousRandomForestConfigStore
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestFitState import HomogeneousRandomForestFitState
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 
@@ -52,7 +52,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
             logger = create_logger("HomogeneousRandomForestRegressionModel")
         self.logger = logger
 
-        assert model_config in HomogeneousRandomForestConfigStore.parameter_space
+        assert model_config in homogeneous_random_forest_config_store.parameter_space
 
         RegressionModel.__init__(
             self,

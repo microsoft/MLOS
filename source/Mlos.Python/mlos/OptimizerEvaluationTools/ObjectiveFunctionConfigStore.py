@@ -8,7 +8,7 @@ from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Flower import Flower
 
-ObjectiveFunctionConfigStore = ComponentConfigStore(
+objective_function_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="objective_function",
         dimensions=[
@@ -29,17 +29,17 @@ ObjectiveFunctionConfigStore = ComponentConfigStore(
     )
 )
 
-ObjectiveFunctionConfigStore.add_config_by_name(
+objective_function_config_store.add_config_by_name(
     config_name="three_level_quadratic",
     config_point=Point(implementation=ThreeLevelQuadratic.__name__)
 )
 
-ObjectiveFunctionConfigStore.add_config_by_name(
+objective_function_config_store.add_config_by_name(
     config_name="flower",
     config_point=Point(implementation=Flower.__name__)
 )
 
-ObjectiveFunctionConfigStore.add_config_by_name(
+objective_function_config_store.add_config_by_name(
     config_name="noisy_polynomial_objective",
     config_point=Point(
         implementation=PolynomialObjective.__name__,
@@ -57,7 +57,7 @@ ObjectiveFunctionConfigStore.add_config_by_name(
     )
 )
 
-ObjectiveFunctionConfigStore.add_config_by_name(
+objective_function_config_store.add_config_by_name(
     config_name="2d_quadratic_concave_down",
     config_point=Point(
         implementation=PolynomialObjective.__name__,
@@ -75,7 +75,7 @@ ObjectiveFunctionConfigStore.add_config_by_name(
     )
 )
 
-ObjectiveFunctionConfigStore.add_config_by_name(
+objective_function_config_store.add_config_by_name(
     config_name="2d_quadratic_concave_up",
     config_point=Point(
         implementation=PolynomialObjective.__name__,

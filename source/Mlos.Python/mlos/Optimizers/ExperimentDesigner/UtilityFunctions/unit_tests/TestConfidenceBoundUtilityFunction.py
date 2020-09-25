@@ -10,10 +10,10 @@ import numpy as np
 import pandas as pd
 
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import HomogeneousRandomForestConfigStore
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import \
-    ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfigStore
+    ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
 
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 import mlos.global_values as global_values
@@ -44,7 +44,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
         cls.input_pandas_dataframe = pd.DataFrame({"x": cls.input_values})
         cls.output_pandas_dataframe = pd.DataFrame({"y": cls.output_values})
 
-        cls.model_config = HomogeneousRandomForestConfigStore.default
+        cls.model_config = homogeneous_random_forest_config_store.default
         cls.model = HomogeneousRandomForestRegressionModel(
             model_config=cls.model_config,
             input_space=cls.input_space,
@@ -87,7 +87,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
     def test_random_function_configs(self):
         for i in range(100):
             minimize = [True, False][i % 2]
-            utility_function_config = ConfidenceBoundUtilityFunctionConfigStore.parameter_space.random()
+            utility_function_config = confidence_bound_utility_function_config_store.parameter_space.random()
             utility_function = ConfidenceBoundUtilityFunction(
                 function_config=utility_function_config,
                 surrogate_model=self.model,

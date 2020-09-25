@@ -13,7 +13,7 @@ from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Tracer import trace
 
 
-ConfidenceBoundUtilityFunctionConfigStore = ComponentConfigStore(
+confidence_bound_utility_function_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="confidence_bound_utility_function_config",
         dimensions=[

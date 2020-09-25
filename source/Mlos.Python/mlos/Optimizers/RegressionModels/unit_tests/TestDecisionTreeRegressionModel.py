@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 import mlos.global_values as global_values
-from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeConfigStore
+from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, decision_tree_config_store
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer
@@ -57,7 +57,7 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
         self.output_pandas_dataframe = pd.DataFrame({"y": self.output_values})
 
     def test_default_decision_tree_model(self):
-        model_config = DecisionTreeConfigStore.default
+        model_config = decision_tree_config_store.default
         model = DecisionTreeRegressionModel(
             model_config=model_config,
             input_space=self.input_space,
@@ -75,7 +75,7 @@ class TestDecisionTreeRegressionModel(unittest.TestCase):
         for i in range(num_iterations):
             if i % 10 == 0:
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
-            model_config = DecisionTreeConfigStore.parameter_space.random()
+            model_config = decision_tree_config_store.parameter_space.random()
             print(str(model_config))
             model = DecisionTreeRegressionModel(
                 model_config=model_config,

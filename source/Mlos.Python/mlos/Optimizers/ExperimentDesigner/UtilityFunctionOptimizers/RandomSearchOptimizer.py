@@ -12,7 +12,7 @@ from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Tracer import trace
 
 
-RandomSearchOptimizerConfigStore = ComponentConfigStore(
+random_search_optimizer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="random_search_optimizer_config",
         dimensions=[

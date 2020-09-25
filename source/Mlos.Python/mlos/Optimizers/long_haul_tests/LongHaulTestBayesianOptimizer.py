@@ -13,8 +13,8 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Tracer import Tracer
 
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfigStore
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
@@ -63,7 +63,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         """
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
         random_params_df = objective_function.parameter_space.random_dataframe(num_samples=10000)
 
@@ -78,7 +78,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfigStore.default,
+            optimizer_config=bayesian_optimizer_config_store.default,
             logger=self.logger
         )
         bayesian_optimizer.register(random_params_df, y_df)
@@ -93,7 +93,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
             # Register the observation with the optimizer
             bayesian_optimizer.register(suggested_params.to_dataframe(), target_value.to_dataframe())
-        
+
         self.validate_optima(bayesian_optimizer)
         best_config_point, best_objective = bayesian_optimizer.optimum()
         self.logger.info(f"Optimum: {best_objective} Best Configuration: {best_config_point}")
@@ -106,7 +106,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
         """
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
 
         optimization_problem = OptimizationProblem(
@@ -117,7 +117,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfigStore.default,
+            optimizer_config=bayesian_optimizer_config_store.default,
             logger=self.logger
         )
 
@@ -144,7 +144,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
     def test_hierarchical_quadratic_cold_start(self):
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
         output_space = SimpleHypergrid(
@@ -164,7 +164,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         for restart_num in range(num_restarts):
             bayesian_optimizer = BayesianOptimizer(
                 optimization_problem=optimization_problem,
-                optimizer_config=BayesianOptimizerConfigStore.default,
+                optimizer_config=bayesian_optimizer_config_store.default,
                 logger=self.logger
             )
 
@@ -183,7 +183,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
         output_space = SimpleHypergrid(
@@ -206,10 +206,10 @@ class TestBayesianOptimizer(unittest.TestCase):
             # Let's set up random seeds so that we can easily repeat failed experiments
             #
             random_state.seed(restart_num)
-            BayesianOptimizerConfigStore.parameter_space.random_state = random_state
+            bayesian_optimizer_config_store.parameter_space.random_state = random_state
             objective_function.parameter_space.random_state = random_state
 
-            optimizer_config = BayesianOptimizerConfigStore.parameter_space.random()
+            optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
             # The goal here is to make sure the optimizer works with a lot of different configurations.
             # So let's make sure each run is not too long.
@@ -275,7 +275,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 objectives=[Objective(name="function_value", minimize=minimize)]
             )
 
-            optimizer_config = BayesianOptimizerConfigStore.default
+            optimizer_config = bayesian_optimizer_config_store.default
             random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
 
             random_forest_config.decision_tree_regression_model_config.n_new_samples_before_refit = 1

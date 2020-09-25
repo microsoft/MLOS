@@ -9,12 +9,12 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
-from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfigStore
-from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfigStore
-from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfigStore
+from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
+from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
+from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
 
 
-ExperimentDesignerConfigStore = ComponentConfigStore(
+experiment_designer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name='experiment_designer_config',
         dimensions=[
@@ -23,20 +23,20 @@ ExperimentDesignerConfigStore = ComponentConfigStore(
             ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
-        subgrid=ConfidenceBoundUtilityFunctionConfigStore.parameter_space,
+        subgrid=confidence_bound_utility_function_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__])
     ).join(
-        subgrid=RandomSearchOptimizerConfigStore.parameter_space,
+        subgrid=random_search_optimizer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
     ).join(
-        subgrid=GlowWormSwarmOptimizerConfigStore.parameter_space,
+        subgrid=glow_worm_swarm_optimizer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
     ),
     default=Point(
         utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
-        confidence_bound_utility_function_config=ConfidenceBoundUtilityFunctionConfigStore.default,
-        random_search_optimizer_config=RandomSearchOptimizerConfigStore.default,
+        confidence_bound_utility_function_config=confidence_bound_utility_function_config_store.default,
+        random_search_optimizer_config=random_search_optimizer_config_store.default,
         fraction_random_suggestions=0.5
     )
 )
@@ -66,7 +66,7 @@ class ExperimentDesigner:
             surrogate_model: RegressionModel,
             logger=None
     ):
-        assert designer_config in ExperimentDesignerConfigStore.parameter_space
+        assert designer_config in experiment_designer_config_store.parameter_space
 
         if logger is None:
             logger = create_logger(self.__class__.__name__)

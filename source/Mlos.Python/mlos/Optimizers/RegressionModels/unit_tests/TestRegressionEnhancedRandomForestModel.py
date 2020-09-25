@@ -14,7 +14,7 @@ from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import
     RegressionEnhancedRandomForestRegressionModel, \
     RegressionEnhancedRandomForestRegressionModelConfig
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 import mlos.global_values as global_values
 
 
@@ -326,7 +326,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(num_incorrect_terms == 0, 'Estimated gradient coefficients deviated further than expected from known coefficients')
 
     def test_lasso_hierarchical_categorical_predictions(self):
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
 

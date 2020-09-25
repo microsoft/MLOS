@@ -7,7 +7,7 @@ import os
 import random
 import unittest
 
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
+from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Spaces.SimpleHypergrid import SimpleHypergrid
 import mlos.Spaces.Dimensions.DimensionCalculator
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
@@ -217,7 +217,7 @@ class TestHierarchicalSpaces(unittest.TestCase):
         print("-------------------------------------------------------------------------------------------------------")
         print(json.dumps(self.original_hierarchical_settings, cls=HypergridJsonEncoder, indent=2))
         print("-------------------------------------------------------------------------------------------------------")
-        print(json.dumps(BayesianOptimizerConfigStore.parameter_space, cls=HypergridJsonEncoder, indent=2))
+        print(json.dumps(bayesian_optimizer_config_store.parameter_space, cls=HypergridJsonEncoder, indent=2))
 
     def test_serializing_configs(self):
         for hypergrid, expected_output_file_path in self.serialized_configs_file_paths:

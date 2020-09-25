@@ -14,7 +14,7 @@ from mlos.global_values import serialize_to_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList, Observations, Features,\
     ObjectiveValues
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfigStore
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
@@ -91,7 +91,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         if optimizer_config_json is not None and len(optimizer_config_json) > 0:
             optimizer_config = Point.from_json(optimizer_config_json)
         else:
-            optimizer_config = BayesianOptimizerConfigStore.default
+            optimizer_config = bayesian_optimizer_config_store.default
 
 
         optimizer = BayesianOptimizer(

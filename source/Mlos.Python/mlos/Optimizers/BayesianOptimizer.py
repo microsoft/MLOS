@@ -6,7 +6,7 @@ import pandas as pd
 
 from mlos.Logger import create_logger
 
-from mlos.Optimizers.BayesianOptimizerConfigStore import BayesianOptimizerConfigStore
+from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
@@ -46,7 +46,7 @@ class BayesianOptimizer(OptimizerBase):
         assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
         OptimizerBase.__init__(self, optimization_problem)
 
-        assert optimizer_config in BayesianOptimizerConfigStore.parameter_space, "Invalid config."
+        assert optimizer_config in bayesian_optimizer_config_store.parameter_space, "Invalid config."
         self.optimizer_config = optimizer_config
 
         # Now let's put together the surrogate model.

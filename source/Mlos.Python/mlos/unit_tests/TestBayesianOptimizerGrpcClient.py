@@ -15,8 +15,8 @@ from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
 from mlos.Logger import create_logger
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfigStore
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 
 
@@ -41,7 +41,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
         self.optimizer_monitor = OptimizerMonitor(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         self.objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
 
         self.optimization_problem = OptimizationProblem(
@@ -59,10 +59,10 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
     def test_optimizer_with_default_config(self):
         pre_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
-        print(BayesianOptimizerConfigStore.default)
+        print(bayesian_optimizer_config_store.default)
         bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
-            optimizer_config=BayesianOptimizerConfigStore.default
+            optimizer_config=bayesian_optimizer_config_store.default
         )
         post_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
 
@@ -128,7 +128,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
     def test_optimizer_with_random_config(self):
         num_random_restarts = 10
         for i in range(num_random_restarts):
-            optimizer_config = BayesianOptimizerConfigStore.parameter_space.random()
+            optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
             optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
             if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
