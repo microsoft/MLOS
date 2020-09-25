@@ -7,63 +7,16 @@ import random
 
 import pandas as pd
 
-from mlos.Spaces import Dimension, Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
+from mlos.Spaces import Dimension, Hypergrid, Point, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters import HierarchicalToFlatHypergridAdapter
 from mlos.Tracer import trace
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeConfigStore
+from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestFitState import HomogeneousRandomForestFitState
-from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
-
-
-class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
-
-    CONFIG_SPACE = SimpleHypergrid(
-        name="homogeneous_random_forest_regression_model_config",
-        dimensions=[
-            DiscreteDimension(name="n_estimators", min=1, max=100),
-            ContinuousDimension(name="features_fraction_per_estimator", min=0, max=1, include_min=False, include_max=True),
-            ContinuousDimension(name="samples_fraction_per_estimator", min=0, max=1, include_min=False, include_max=True),
-            CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__]),
-            CategoricalDimension(name="bootstrap", values=[True, False])
-        ]
-    ).join(
-        subgrid=DecisionTreeConfigStore.parameter_space,
-        on_external_dimension=CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__])
-    )
-
-    _DEFAULT = Point(
-        n_estimators=10,
-        features_fraction_per_estimator=1,
-        samples_fraction_per_estimator=0.7,
-        regressor_implementation=DecisionTreeRegressionModel.__name__,
-        decision_tree_regression_model_config=DecisionTreeConfigStore.default,
-        bootstrap=True
-    )
-
-    def __init__(
-            self,
-            n_estimators: int = _DEFAULT.n_estimators,
-            features_fraction_per_estimator: float = _DEFAULT.features_fraction_per_estimator,
-            samples_fraction_per_estimator: float = _DEFAULT.samples_fraction_per_estimator,
-            regressor_implementation: str = _DEFAULT.regressor_implementation,
-            decision_tree_regression_model_config: Point = _DEFAULT.decision_tree_regression_model_config,
-            bootstrap: bool = _DEFAULT.bootstrap
-    ):
-        self.n_estimators = n_estimators
-        self.features_fraction_per_estimator = features_fraction_per_estimator
-        self.samples_fraction_per_estimator = samples_fraction_per_estimator
-        self.regressor_implementation = regressor_implementation
-        self.bootstrap = bootstrap
-
-        assert regressor_implementation == DecisionTreeRegressionModel.__name__
-        self.decision_tree_regression_model_config = decision_tree_regression_model_config
-
-    @classmethod
-    def contains(cls, config): # pylint: disable=unused-argument
-        return True  # TODO: see if you can remove this class entirely.
+from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 
 
 class HomogeneousRandomForestRegressionModel(RegressionModel):
@@ -90,7 +43,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
     @trace()
     def __init__(
             self,
-            model_config: HomogeneousRandomForestRegressionModelConfig,
+            model_config: Point,
             input_space: Hypergrid,
             output_space: Hypergrid,
             logger=None
@@ -99,7 +52,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
             logger = create_logger("HomogeneousRandomForestRegressionModel")
         self.logger = logger
 
-        assert HomogeneousRandomForestRegressionModelConfig.contains(model_config)
+        assert model_config in homogeneous_random_forest_config_store.parameter_space
 
         RegressionModel.__init__(
             self,

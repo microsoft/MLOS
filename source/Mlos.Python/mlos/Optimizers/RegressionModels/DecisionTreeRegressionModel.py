@@ -8,7 +8,7 @@ from sklearn.tree import DecisionTreeRegressor
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
-from mlos.Optimizers.RegressionModels.DecisionTreeConfigStore import DecisionTreeConfigStore
+from mlos.Optimizers.RegressionModels.DecisionTreeConfigStore import decision_tree_config_store
 from mlos.Spaces import Hypergrid, Point
 from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
 from mlos.Tracer import trace
@@ -42,7 +42,7 @@ class DecisionTreeRegressionModel(RegressionModel):
             logger = create_logger("DecisionTreeRegressionModel")
         self.logger = logger
 
-        assert model_config in DecisionTreeConfigStore.parameter_space
+        assert model_config in decision_tree_config_store.parameter_space
         RegressionModel.__init__(
             self,
             model_type=type(self),

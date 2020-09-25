@@ -4,19 +4,15 @@
 #
 from mlos.Examples.SmartCache.CacheImplementations.XruCache import XruCache
 from mlos.Spaces import DiscreteDimension, Point, SimpleHypergrid
-from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
-class LruCacheConfig(metaclass=DefaultConfigMeta):
-    CONFIG_SPACE = SimpleHypergrid(
+lru_cache_config_store = ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
         name='lru_cache_config',
-        dimensions=[
-            DiscreteDimension('cache_size', min=1, max=2 ** 12)
-        ]
-    )
-
-    _DEFAULT = Point(
-        cache_size=100
-    )
+        dimensions=[DiscreteDimension('cache_size', min=1, max=2 ** 12)]
+    ),
+    default=Point(cache_size=100)
+)
 
 class LruCache(XruCache):
     """ An implementation of a Least Recently Used cache.

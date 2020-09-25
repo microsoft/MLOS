@@ -101,7 +101,8 @@ namespace Mlos.Agent.Server
 
             // Create (or open) the circular buffer shared memory before running the target process.
             //
-            MainAgent.InitializeSharedChannel();
+            using var mainAgent = new MainAgent();
+            mainAgent.InitializeSharedChannel();
 
             // Active learning mode.
             //
@@ -146,22 +147,64 @@ namespace Mlos.Agent.Server
             //
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(
-                MainAgent.RunAgent,
+                () => mainAgent.RunAgent(),
                 TaskCreationOptions.LongRunning);
 
-            if (targetProcessManager != null)
-            {
-                targetProcessManager.WaitForTargetProcessToExit();
-                targetProcessManager.Dispose();
-                MainAgent.UninitializeSharedChannel();
-            }
+            Task waitForTargetProcessTask = Task.Factory.StartNew(
+                () =>
+                {
+                    if (targetProcessManager != null)
+                    {
+                        targetProcessManager.WaitForTargetProcessToExit();
+                        targetProcessManager.Dispose();
+                        mainAgent.UninitializeSharedChannel();
+                    }
+                },
+                TaskCreationOptions.LongRunning);
 
             Console.WriteLine("Waiting for Mlos.Agent to exit");
 
+            while (true)
+            {
+                Task.WaitAny(new[] { mlosAgentTask, waitForTargetProcessTask });
+
+                if (mlosAgentTask.IsFaulted && targetProcessManager != null && !waitForTargetProcessTask.IsCompleted)
+                {
+                    // MlosAgentTask has failed, however the target process is still active.
+                    // Terminate the target process and continue shutdown.
+                    //
+                    targetProcessManager.TerminateTargetProcess();
+                    continue;
+                }
+
+                if (mlosAgentTask.IsCompleted && waitForTargetProcessTask.IsCompleted)
+                {
+                    // MlosAgentTask is no longer processing messages, and target process does no longer exist.
+                    // Shutdown the agent.
+                    //
+                    break;
+                }
+            }
+
+            // Print any exceptions if occured.
+            //
+            if (mlosAgentTask.Exception != null)
+            {
+                Console.WriteLine($"Exception: {mlosAgentTask.Exception}");
+            }
+
+            if (waitForTargetProcessTask.Exception != null)
+            {
+                Console.WriteLine($"Exception: {waitForTargetProcessTask.Exception}");
+            }
+
             // Perform some cleanup.
             //
-            mlosAgentTask.Wait();
+            waitForTargetProcessTask.Dispose();
+
             mlosAgentTask.Dispose();
+
+            targetProcessManager?.Dispose();
 
             cancellationTokenSource.Cancel();
             grpcServerTask.Wait();

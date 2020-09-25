@@ -18,8 +18,6 @@
     <Rule Id="SA1124" Action="Hidden" />
     <!-- Readonly fields should appear before non-readonly fields -->
     <Rule Id="SA1214" Action="Hidden" />
-    <!-- Element should begin with should begin with an uppercase letter -->
-    <Rule Id="SA1300" Action="Hidden" />
     <!-- Non-private readonly fields should begin with upper-case letter -->
     <Rule Id="SA1304" Action="Hidden" />
     <!-- Fields should be private -->
