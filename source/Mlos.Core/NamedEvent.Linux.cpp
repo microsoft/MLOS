@@ -15,8 +15,9 @@
 
 #include "Mlos.Core.h"
 
-#include <fcntl.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
 
 using namespace Mlos::Core;
 
@@ -28,7 +29,9 @@ namespace Core
 // NAME: NamedEvent::Constructor.
 //
 NamedEvent::NamedEvent() noexcept
-  : m_semaphore(SEM_FAILED)
+  : m_semaphore(SEM_FAILED),
+    m_namedEventName(nullptr),
+    CleanupOnClose(false)
 {
 }
 
@@ -39,7 +42,9 @@ NamedEvent::NamedEvent() noexcept
 //  Move constructor.
 //
 NamedEvent::NamedEvent(NamedEvent&& namedEvent) noexcept
-  : m_semaphore(std::exchange(namedEvent.m_semaphore, SEM_FAILED))
+  : m_semaphore(std::exchange(namedEvent.m_semaphore, SEM_FAILED)),
+    m_namedEventName(std::exchange(namedEvent.m_namedEventName, nullptr)),
+    CleanupOnClose(std::exchange(namedEvent.CleanupOnClose, false))
 {
 }
 
@@ -56,6 +61,12 @@ _Check_return_
 HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
 {
     HRESULT hr = S_OK;
+
+    m_namedEventName = strdup(namedEventName);
+    if (m_namedEventName == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
 
     m_semaphore = sem_open(namedEventName, O_CREAT, S_IRUSR | S_IWUSR, 0);
     if (m_semaphore == SEM_FAILED)
@@ -86,9 +97,37 @@ HRESULT NamedEvent::Open(const char* const namedEventName) noexcept
 //
 NamedEvent::~NamedEvent()
 {
+    Close();
+}
+
+//----------------------------------------------------------------------------
+// NAME: NamedEvent::Close
+//
+// PURPOSE:
+//  Closes a named event object.
+//
+void NamedEvent::Close()
+{
     if (m_semaphore != SEM_FAILED)
     {
         sem_close(m_semaphore);
+        m_semaphore = SEM_FAILED;
+
+        if (CleanupOnClose)
+        {
+            if (m_namedEventName != nullptr)
+            {
+                sem_unlink(m_namedEventName);
+            }
+
+            CleanupOnClose = false;
+        }
+    }
+
+    if (m_namedEventName != nullptr)
+    {
+        free(m_namedEventName);
+        m_namedEventName = nullptr;
     }
 }
 

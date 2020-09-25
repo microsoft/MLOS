@@ -92,6 +92,9 @@ namespace Mlos.Core
             };
         }
 
+        /// <summary>
+        /// Size of the shared memory map.
+        /// </summary>
         public ulong MemSize => sharedMemoryMap.MemSize;
 
         /// <summary>
@@ -108,18 +111,15 @@ namespace Mlos.Core
 
         private void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                sharedMemoryMap?.Dispose();
-                sharedMemoryMap = null;
-            }
+            sharedMemoryMap?.Dispose();
+            sharedMemoryMap = null;
 
-            disposed = true;
+            isDisposed = true;
         }
 
         /// <inheritdoc/>
@@ -131,6 +131,15 @@ namespace Mlos.Core
 
         private SharedMemoryMapView sharedMemoryMap;
 
-        private bool disposed = false;
+        private bool isDisposed = false;
+
+        /// <summary>
+        /// Indicates if we should cleanup OS resources when closing the shared memory map view.
+        /// </summary>
+        public bool CleanupOnClose
+        {
+            get { return sharedMemoryMap.CleanupOnClose; }
+            set { sharedMemoryMap.CleanupOnClose = value; }
+        }
     }
 }

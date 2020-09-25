@@ -104,10 +104,15 @@ namespace Mlos.Agent.Server
                 MlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
             }
 
-            // Create (or open) the circular buffer shared memory before running the target process.
+            // In the active learning mode, create a new shared memory map before running the target process.
+            // On Linux, we unlink existing shared memory map, if they exist.
+            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
             //
+            using MlosContext mlosContext = (executableFilePath != null)
+                ? InterProcessMlosContext.Create()
+                : InterProcessMlosContext.CreateOrOpen();
             using var mainAgent = new MainAgent();
-            mainAgent.InitializeSharedChannel();
+            mainAgent.InitializeSharedChannel(mlosContext);
 
             // Active learning mode.
             //
@@ -153,7 +158,9 @@ namespace Mlos.Agent.Server
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(
                 () => mainAgent.RunAgent(),
-                TaskCreationOptions.LongRunning);
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Current);
 
             Task waitForTargetProcessTask = Task.Factory.StartNew(
                 () =>
@@ -165,13 +172,15 @@ namespace Mlos.Agent.Server
                         mainAgent.UninitializeSharedChannel();
                     }
                 },
-                TaskCreationOptions.LongRunning);
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Current);
 
             Console.WriteLine("Waiting for Mlos.Agent to exit");
 
             while (true)
             {
-                Task.WaitAny(new[] { mlosAgentTask, waitForTargetProcessTask });
+                Task.WaitAny(mlosAgentTask, waitForTargetProcessTask);
 
                 if (mlosAgentTask.IsFaulted && targetProcessManager != null && !waitForTargetProcessTask.IsCompleted)
                 {

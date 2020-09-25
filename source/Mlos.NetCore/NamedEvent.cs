@@ -38,11 +38,15 @@ namespace Mlos.Core
             }
         }
 
+        /// <summary>
+        /// Finalizes an instance of the <see cref="NamedEvent"/> class.
+        /// </summary>
         ~NamedEvent()
         {
             Dispose(false);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             // Dispose of unmanaged resources.
@@ -75,6 +79,12 @@ namespace Mlos.Core
         /// <summary>
         /// True if object has been disposed.
         /// </summary>
-        protected bool disposed = false;
+        protected bool isDisposed = false;
+
+        /// <summary>
+        /// Indicates if we should cleanup OS resources when closing the shared memory map view.
+        /// </summary>
+        /// <returns></returns>
+        public bool CleanupOnClose;
     }
 }

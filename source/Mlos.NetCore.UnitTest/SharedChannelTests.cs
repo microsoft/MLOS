@@ -19,7 +19,7 @@ using UnitTestProxy = Proxy.Mlos.UnitTest;
 
 namespace Mlos.NetCore.UnitTest
 {
-    public class SharedChannelTests : IDisposable
+    public sealed class SharedChannelTests : IDisposable
     {
         private const string GlobalMemoryMapName = "Mlos.NetCore.Global.UnitTest";
         private const string SharedChannelMemoryMapName = "Mlos.NetCore.SharedChannelTests.UnitTest";
@@ -40,7 +40,9 @@ namespace Mlos.NetCore.UnitTest
             // Initialize shared channel.
             //
             globalChannelMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+            globalChannelMemoryRegionView.CleanupOnClose = true;
             sharedChannelMemoryMapView = SharedMemoryMapView.Create(SharedChannelMemoryMapName, SharedMemorySize);
+            sharedChannelMemoryMapView.CleanupOnClose = true;
 
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalChannelMemoryRegionView.MemoryRegion();
 
@@ -53,7 +55,7 @@ namespace Mlos.NetCore.UnitTest
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
             {

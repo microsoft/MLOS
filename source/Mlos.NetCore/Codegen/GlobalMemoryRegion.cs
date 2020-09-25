@@ -30,6 +30,11 @@ namespace Mlos.Core.Internal
         internal ChannelSynchronization FeedbackChannelSynchronization;
 
         /// <summary>
+        /// Gets or sets information how many processes are using the global memory region.
+        /// </summary>
+        internal AtomicUInt32 AttachedProcessesCount;
+
+        /// <summary>
         /// Total number of regions.
         /// </summary>
         internal uint TotalMemoryRegionCount;

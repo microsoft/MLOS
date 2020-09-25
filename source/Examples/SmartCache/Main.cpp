@@ -43,7 +43,7 @@ using namespace SmartCache;
 // HRESULTs are an error code encoding mechanism typically used in Windows environments.
 // See Also: https://en.wikipedia.org/wiki/HRESULT
 //
-void CheckHR(HRESULT hr)
+void ThrowIfFail(HRESULT hr)
 {
     if (FAILED(hr))
     {
@@ -74,7 +74,7 @@ main(
     //
     Mlos::Core::InterProcessMlosContextInitializer mlosContextInitializer;
     HRESULT hr = mlosContextInitializer.Initialize();
-    CheckHR(hr);
+    ThrowIfFail(hr);
 
     Mlos::Core::InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
 
@@ -124,7 +124,7 @@ main(
     hr = mlosContext.RegisterSettingsAssembly(
         "SmartCache.SettingsRegistry.dll",
         SmartCache::ObjectDeserializationHandler::DispatchTableBaseIndex());
-    CheckHR(hr);
+    ThrowIfFail(hr);
 
     // Create a component configuration object.
     // This will be stored in a shared memory region below for use by both the
@@ -145,7 +145,7 @@ main(
     // config for this component and if not creates it.
     //
     hr = mlosContext.RegisterComponentConfig(config);
-    CheckHR(hr);
+    ThrowIfFail(hr);
 
     // Create an instance of our SmartCache component to tune.
     //

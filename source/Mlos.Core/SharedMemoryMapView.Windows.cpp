@@ -28,7 +28,8 @@ namespace Core
 SharedMemoryMapView::SharedMemoryMapView() noexcept
   : MemSize(0),
     m_hMapFile(nullptr),
-    Buffer(nullptr)
+    Buffer(nullptr),
+    CleanupOnClose(false)
 {
 }
 
@@ -41,7 +42,8 @@ SharedMemoryMapView::SharedMemoryMapView() noexcept
 SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept
   : MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
     m_hMapFile(std::exchange(sharedMemoryMapView.m_hMapFile, nullptr)),
-    Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr))
+    Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
+    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0))
 {
 }
 
@@ -57,7 +59,7 @@ SharedMemoryMapView::~SharedMemoryMapView()
 // NAME: SharedMemoryMapView::Create
 //
 // PURPOSE:
-//  Creates a shared memory map view.
+//  Creates a new shared memory map view.
 //
 // RETURNS:
 //  HRESULT.
@@ -245,6 +247,10 @@ HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
 //
 void SharedMemoryMapView::Close()
 {
+    // Windows OS will remove the shared memory map once the last process detaches from it, just reset the flag.
+    //
+    CleanupOnClose = false;
+
     UnmapViewOfFile(Buffer.Pointer);
     Buffer.Pointer = nullptr;
 

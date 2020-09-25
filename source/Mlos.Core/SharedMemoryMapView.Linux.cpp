@@ -16,19 +16,33 @@
 #include "Mlos.Core.h"
 
 #include <sys/mman.h>
-#include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <fcntl.h>
+#include <unistd.h>
 
-using namespace Mlos::Core;
-
+namespace Mlos
+{
+namespace Core
+{
 //----------------------------------------------------------------------------
 // NAME: SharedMemoryMapView::Constructor.
 //
 SharedMemoryMapView::SharedMemoryMapView() noexcept
  :  MemSize(0),
     m_fdSharedMemory(INVALID_FD_VALUE),
-    Buffer(nullptr)
+    m_sharedMemoryMapName(nullptr),
+    Buffer(nullptr),
+    CleanupOnClose(false)
 {
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::Destructor
+//
+SharedMemoryMapView::~SharedMemoryMapView()
+{
+    Close();
 }
 
 //----------------------------------------------------------------------------
@@ -40,7 +54,9 @@ SharedMemoryMapView::SharedMemoryMapView() noexcept
 SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept :
     MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
     m_fdSharedMemory(std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE)),
-    Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr))
+    m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr)),
+    Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
+    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0))
 {
 }
 
@@ -58,6 +74,12 @@ SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapVi
 HRESULT SharedMemoryMapView::Create(const char* const sharedMemoryMapName, size_t memSize) noexcept
 {
     shm_unlink(sharedMemoryMapName);
+
+    m_sharedMemoryMapName = strdup(sharedMemoryMapName);
+    if (m_sharedMemoryMapName == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
 
     m_fdSharedMemory = shm_open(sharedMemoryMapName, O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
@@ -77,6 +99,12 @@ HRESULT SharedMemoryMapView::Create(const char* const sharedMemoryMapName, size_
 //
 HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
 {
+    m_sharedMemoryMapName = strdup(sharedMemoryMapName);
+    if (m_sharedMemoryMapName == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
+
     m_fdSharedMemory = shm_open(sharedMemoryMapName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
     return MapMemoryView(memSize);
@@ -95,38 +123,112 @@ HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName,
 //
 HRESULT SharedMemoryMapView::Open(const char* const sharedMemoryMapName) noexcept
 {
+    m_sharedMemoryMapName = strdup(sharedMemoryMapName);
+    if (m_sharedMemoryMapName == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
+
     m_fdSharedMemory = shm_open(sharedMemoryMapName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+    if (m_fdSharedMemory == INVALID_FD_VALUE)
+    {
+        return HRESULT_FROM_ERRNO(errno);
+    }
 
     return MapMemoryView(0 /* memSize */);
 }
 
 HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
 {
-    if (m_fdSharedMemory == -1)
+    if (m_fdSharedMemory == INVALID_FD_VALUE)
     {
         return HRESULT_FROM_ERRNO(errno);
     }
 
-    if (ftruncate(m_fdSharedMemory, memSize) == -1)
+    HRESULT hr = S_OK;
+
+    if (memSize == 0)
     {
-        return HRESULT_FROM_ERRNO(errno);
+        // Obtain the size of the shared map.
+        //
+        struct stat statBuffer = { 0 };
+        if (fstat(m_fdSharedMemory, &statBuffer) != -1)
+        {
+            memSize = statBuffer.st_size;
+        }
+        else
+        {
+            hr = HRESULT_FROM_ERRNO(errno);
+        }
     }
 
-    Buffer = mmap(0, memSize, PROT_READ | PROT_WRITE, MAP_SHARED, m_fdSharedMemory, 0);
+    if (SUCCEEDED(hr))
+    {
+        if (ftruncate(m_fdSharedMemory, memSize) == -1)
+        {
+            hr = HRESULT_FROM_ERRNO(errno);
+        }
+    }
 
-    //#handle failure
-    MemSize = memSize;
+    if (SUCCEEDED(hr))
+    {
+        void* pointer = mmap(0, memSize, PROT_READ | PROT_WRITE, MAP_SHARED, m_fdSharedMemory, 0);
+        if (pointer != MAP_FAILED)
+        {
+            Buffer.Pointer = reinterpret_cast<byte*>(pointer);
+            MemSize = memSize;
+        }
+        else
+        {
+            hr = HRESULT_FROM_ERRNO(errno);
+        }
+    }
 
-    return S_OK;
+    if (FAILED(hr))
+    {
+        Close();
+    }
+
+    return hr;
 }
 
 //----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::Destructor
+// NAME: SharedMemoryMapView::Close
 //
-SharedMemoryMapView::~SharedMemoryMapView()
+// PURPOSE:
+//  Closes a shared memory view.
+//
+void SharedMemoryMapView::Close()
 {
+    if (Buffer.Pointer != nullptr)
+    {
+        munmap(Buffer.Pointer, MemSize);
+        Buffer = nullptr;
+
+        MemSize = 0;
+    }
+
     if (m_fdSharedMemory != INVALID_FD_VALUE)
     {
         close(m_fdSharedMemory);
+        m_fdSharedMemory = INVALID_FD_VALUE;
+
+        if (CleanupOnClose)
+        {
+            if (m_sharedMemoryMapName != nullptr)
+            {
+                shm_unlink(m_sharedMemoryMapName);
+            }
+
+            CleanupOnClose = false;
+        }
     }
+
+    if (m_sharedMemoryMapName != nullptr)
+    {
+        free(m_sharedMemoryMapName);
+        m_sharedMemoryMapName = nullptr;
+    }
+}
+}
 }
