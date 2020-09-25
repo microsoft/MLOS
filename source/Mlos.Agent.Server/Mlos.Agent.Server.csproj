@@ -13,6 +13,10 @@
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.SingleFile.props" />
   <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.8.0" GeneratePathProperty="true" />
+    <BinplaceFile Include="$(PkgCommandLineParser)/lib/netstandard2.0/CommandLine.dll" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="$(SourceDir)\Mlos.Agent\Mlos.Agent.csproj" />
     <ProjectReference Include="$(SourceDir)\Mlos.Agent.GrpcServer\Mlos.Agent.GrpcServer.csproj" />
     <ProjectReference Include="$(SourceDir)\Mlos.Streaming\Mlos.Streaming.csproj" />

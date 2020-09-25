@@ -81,10 +81,9 @@ The following commands will start the `Mlos.Server.Agent` and cause it to start 
 export MLOS_SETTINGS_REGISTRY_PATH="$PWD/target/bin/Release"
 
 tools/bin/dotnet target/bin/Release/Mlos.Agent.Server.dll \
-    target/bin/Release/SmartCache
+    --executable target/bin/Release/SmartCache \
+    --optimizer-uri http://localhost:50051
 ```
-
-> Note: This is currently missing the `.json` file argument to connect to the optimizer service.
 
 ```txt
 Mlos.Agent.Server
@@ -120,6 +119,8 @@ That includes the name of the `SettingsRegistry` assembly (`.dll`) corresponding
 
 The `Mlos.Agent.Server` needs to be told where it can find those assemblies in order to load them so that it can process the messages sent by the component.
 To do that, before we started the `Mlos.Agent.Server`, we first populated the `MLOS_SETTINGS_REGISTRY_PATH` environment variable with the directory path to the `SmartCache.SettingsRegistry.dll`.
+
+We also tell the `Mlos.Agent.Server` how to connect to the (Python) MLOS Optimizer Service over GRPC so that the application message handlers setup by the `SmartCache.SettingsRegistry` for the agent can request new configuration recommendations on behave of the application.
 
 For additional details please see the comments in the following code files:
 
