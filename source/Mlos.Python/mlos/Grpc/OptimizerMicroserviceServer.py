@@ -26,7 +26,7 @@ class OptimizerMicroserviceServer:
         self.num_threads = num_threads
         self.started = False
         self._server = None
-        self.logger = create_logger("OptimizerMicroserviceServer")
+        self.logger = create_logger("OptimizerMicroserviceServer init")
 
 
     def start(self):
@@ -39,7 +39,7 @@ class OptimizerMicroserviceServer:
         self._server.add_insecure_port(f'[::]:{self.port}')
         self._server.start()
         self.started = True
-        self.logger.info("OptimizerMicroserviceServer started for real")
+        self.logger.info("OptimizerMicroserviceServer started")
 
     def stop(self, grace=None):
         self._server.stop(grace=grace)

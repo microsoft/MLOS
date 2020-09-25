@@ -6,7 +6,6 @@
 import uuid
 from contextlib import contextmanager
 import json
-import logging
 import multiprocessing
 import pandas as pd
 
