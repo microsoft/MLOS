@@ -30,6 +30,7 @@ $(DOTNET) $(DOTNET_REAL): $(MLOS_ROOT)/scripts/fetch-dotnet.sh
 # corresponding fake targets for the "all" target to depend on.
 Csprojs := $(wildcard *.csproj)
 CsprojBuildTargets := $(Csprojs:.csproj=.csproj.fake-build-target)
+CsprojBuildQuickTargets := $(Csprojs:.csproj=.csproj.fake-build-quick-target)
 CsprojTestTargets := $(Csprojs:.csproj=.csproj.fake-test-target)
 DirsProj := $(wildcard dirs.proj)
 DirsProjBuildTarget := $(DirsProj:.proj=.proj.fake-build-target)
@@ -39,6 +40,12 @@ DirsProjTestTarget := $(DirsProj:.proj=.proj.fake-test-target)
 .PHONY: dotnet-build
 dotnet-build: $(DOTNET) $(CsprojBuildTargets) $(DirsProjBuildTarget)
 	@ echo "make dotnet-build target finished."
+
+# A target for quickly rebuilding just a given project and none of its dependencies.
+# Note: this doesn't make sense to use with dirs.proj, so we skip it here.
+.PHONY: dotnet-build-quick
+dotnet-build-quick: $(DOTNET) $(CsprojBuildQuickTargets)
+	@ echo "make dotnet-build-quick target finished."
 
 .PHONY: dotnet-test
 dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
@@ -57,6 +64,10 @@ dotnet-install:
 	@ # which can be slow, however is difficult to check when it is unnecessary.
 	@ # Note: -m tells it to build in parallel.
 	@ $(DOTNET) build -m --configuration $(CONFIGURATION) $(@:.fake-build-target=)
+
+%.fake-build-quick-target: $(DOTNET)
+	@ # A target to allow quickly rebuilding just a given project and none of its dependencies.
+	@ $(DOTNET) build -m --configuration $(CONFIGURATION) --no-restore /p:BuildProjectReferences=false $(@:.fake-build-quick-target=)
 
 # By default don't run certain tests.
 # To override, run with:
@@ -80,4 +91,4 @@ dotnet-clean:
 
 handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
     $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-install dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
+    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
