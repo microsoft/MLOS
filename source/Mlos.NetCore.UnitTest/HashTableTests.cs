@@ -40,6 +40,7 @@ namespace Mlos.NetCore.UnitTest
         public void Insert()
         {
             using var sharedMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.SharedConfigMemoryRegion>(SharedMemoryMapName, SharedMemorySize);
+            sharedMemoryRegionView.CleanupOnClose = true;
 
             MlosProxyInternal.SharedConfigMemoryRegion sharedConfigMemoryRegion = sharedMemoryRegionView.MemoryRegion();
 

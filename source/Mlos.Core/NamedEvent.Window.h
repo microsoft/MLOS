@@ -33,7 +33,7 @@ public:
     _Check_return_
     HRESULT CreateOrOpen(const char* const namedEventName) noexcept;
 
-    // Opens a named event object.
+    // Opens an existing named event object.
     //
     _Check_return_
     HRESULT Open(const char* const namedEventName) noexcept;
@@ -55,6 +55,11 @@ public:
     // Gets a value that indicates whether the handle is invalid.
     //
     bool IsInvalid();
+
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    // No-op on Windows.
+    //
+    bool CleanupOnClose;
 
 private:
     HANDLE m_hEvent;

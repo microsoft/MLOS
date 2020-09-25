@@ -6,6 +6,10 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
+
+using MlosProxyInternal = Proxy.Mlos.Core.Internal;
+
 namespace Mlos.Core
 {
     /// <summary>
@@ -18,12 +22,21 @@ namespace Mlos.Core
     /// See Also: Mlos.Core/MlosContext.h for the corresponding C++ smart
     /// component side.
     /// </remarks>
-    public static class MlosContext
+    public abstract class MlosContext : IDisposable
     {
+        #region Shared public objects
+
+        /// <summary>
+        /// Gets or sets the control channel instance.
+        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
+        /// </summary>
+        public static ISharedChannel ControlChannel { get; protected set; }
+
         /// <summary>
         /// Gets or sets the feedback channel instance.
+        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
         /// </summary>
-        public static ISharedChannel FeedbackChannel { get; set; }
+        public static ISharedChannel FeedbackChannel { get; protected set; }
 
         public static ISharedConfigAccessor SharedConfigManager { get; set; }
 
@@ -38,5 +51,95 @@ namespace Mlos.Core
         /// example).
         /// </remarks>
         public static IOptimizerFactory OptimizerFactory { get; set; }
+
+        #endregion
+
+        protected SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView;
+        protected SharedMemoryMapView controlChannelMemoryMapView;
+        protected SharedMemoryMapView feedbackChannelMemoryMapView;
+        protected SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView;
+
+        protected NamedEvent controlChannelNamedEvent;
+        protected NamedEvent feedbackChannelNamedEvent;
+
+        protected bool isDisposed;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (isDisposed || !disposing)
+            {
+                return;
+            }
+
+            // Close shared memory.
+            //
+            globalMemoryRegionView?.Dispose();
+            globalMemoryRegionView = null;
+
+            controlChannelMemoryMapView?.Dispose();
+            controlChannelMemoryMapView = null;
+
+            feedbackChannelMemoryMapView?.Dispose();
+            feedbackChannelMemoryMapView = null;
+
+            sharedConfigMemoryMapView?.Dispose();
+            sharedConfigMemoryMapView = null;
+
+            controlChannelNamedEvent?.Dispose();
+            controlChannelNamedEvent = null;
+
+            feedbackChannelNamedEvent?.Dispose();
+            feedbackChannelNamedEvent = null;
+
+            isDisposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public MlosProxyInternal.GlobalMemoryRegion GlobalMemoryRegion => globalMemoryRegionView.MemoryRegion();
+
+        public MlosProxyInternal.SharedConfigMemoryRegion SharedConfigMemoryRegion => sharedConfigMemoryMapView.MemoryRegion();
+
+        /// <summary>
+        /// Terminate the control channel.
+        /// </summary>
+        public void TerminateControlChannel()
+        {
+            // Terminate the channel to avoid deadlocks if the buffer is full, and there is no active reader thread.
+            //
+            ControlChannel.SyncObject.TerminateChannel.Store(true);
+            controlChannelNamedEvent.Signal();
+        }
+
+        /// <summary>
+        /// Terminates the feedback channel.
+        /// </summary>
+        public void TerminateFeedbackChannel()
+        {
+            FeedbackChannel.SyncObject.TerminateChannel.Store(true);
+            feedbackChannelNamedEvent.Signal();
+        }
+
+        /// <summary>
+        /// Checks if the control channel is still active.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsControlChannelActive()
+        {
+            return !ControlChannel.SyncObject.TerminateChannel.Load();
+        }
+
+        /// <summary>
+        /// Checks if the feedback channel is still active.
+        /// </summary>
+        /// <returns></returns>
+        public bool IsFeedbackChannelActive()
+        {
+            return !FeedbackChannel.SyncObject.TerminateChannel.Load();
+        }
     }
 }

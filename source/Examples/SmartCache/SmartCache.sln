@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SmartCache", "SmartCache.vcxproj", "{0CE12F0A-E7B5-4E52-B6DF-E9BA1F525030}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E4407270-6E64-4E87-A4B7-3B932121BC81} = {E4407270-6E64-4E87-A4B7-3B932121BC81}
+		{5DB4C179-4A97-40F9-8155-8C44B2BE416D} = {5DB4C179-4A97-40F9-8155-8C44B2BE416D}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartCache.SettingsRegistry", "SmartCache.SettingsRegistry\SmartCache.SettingsRegistry.csproj", "{E4407270-6E64-4E87-A4B7-3B932121BC81}"

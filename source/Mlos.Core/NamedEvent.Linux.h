@@ -41,6 +41,10 @@ public:
     _Check_return_
     HRESULT Open(const char* const namedEventName) noexcept;
 
+    // Closes a named event object.
+    //
+    void Close();
+
     // Sets the named event object to the signaled state.
     //
     _Check_return_
@@ -51,8 +55,14 @@ public:
     _Check_return_
     HRESULT Wait();
 
+public:
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    //
+    bool CleanupOnClose;
+
 private:
     sem_t* m_semaphore;
+    char* m_namedEventName;
 };
 
 }
