@@ -103,8 +103,6 @@ class OptimizerBase(ABC):
     def _prediction_based_optimum(self, features_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
 
-        # Let's see if we have them cached before recomputing
-        #
         predictions = self.predict(feature_values_pandas_frame=features_df)
         predictions_df = predictions.get_dataframe()
 

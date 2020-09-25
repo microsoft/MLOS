@@ -5,7 +5,7 @@
 import unittest
 import warnings
 
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 import mlos.global_values
 
 
@@ -22,7 +22,7 @@ class TestObjectiveFunctionFactory(unittest.TestCase):
 
     def test_default(self):
 
-        named_configs = ObjectiveFunctionConfigStore.list_named_configs()
+        named_configs = objective_function_config_store.list_named_configs()
 
         objective_function_configs_to_test = [
             named_config.config_point for named_config in named_configs

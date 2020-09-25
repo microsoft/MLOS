@@ -4,7 +4,7 @@
 #
 from mlos.Spaces import Point
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctionBase
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionConfigStore import ObjectiveFunctionConfigStore
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionConfigStore import objective_function_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjectiveWrapper import PolynomialObjectiveWrapper
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
@@ -18,7 +18,7 @@ class ObjectiveFunctionFactory:
 
     @classmethod
     def create_objective_function(cls, objective_function_config: Point) -> ObjectiveFunctionBase:
-        assert objective_function_config in ObjectiveFunctionConfigStore.parameter_space
+        assert objective_function_config in objective_function_config_store.parameter_space
 
         if objective_function_config.implementation == PolynomialObjective.__name__:
             polynomial_objective_config = objective_function_config.polynomial_objective_config

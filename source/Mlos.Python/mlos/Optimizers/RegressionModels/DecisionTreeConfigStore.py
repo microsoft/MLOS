@@ -32,7 +32,7 @@ class MaxFeaturesFunc(Enum):
     SQRT = "sqrt"
     LOG2 = "log2"
 
-DecisionTreeConfigStore = ComponentConfigStore(
+decision_tree_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="decision_tree_regression_model_config",
         dimensions=[

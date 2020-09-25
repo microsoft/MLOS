@@ -6,25 +6,26 @@ import numpy as np
 import pandas as pd
 from scipy.stats import t
 from mlos.Logger import create_logger
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
-from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
-from mlos.Tracer import trace
-from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
+from mlos.Tracer import trace
 
 
-class ConfidenceBoundUtilityFunctionConfig(metaclass=DefaultConfigMeta):
-    CONFIG_SPACE = SimpleHypergrid(
+confidence_bound_utility_function_config_store = ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
         name="confidence_bound_utility_function_config",
         dimensions=[
             CategoricalDimension(name="utility_function_name", values=["lower_confidence_bound_on_improvement", "upper_confidence_bound_on_improvement"]),
             ContinuousDimension(name="alpha", min=0.01, max=0.5)
         ]
-    )
-    _DEFAULT = Point(
+    ),
+    default=Point(
         utility_function_name="upper_confidence_bound_on_improvement",
         alpha=0.01
     )
+)
 
 
 class ConfidenceBoundUtilityFunction(UtilityFunction):

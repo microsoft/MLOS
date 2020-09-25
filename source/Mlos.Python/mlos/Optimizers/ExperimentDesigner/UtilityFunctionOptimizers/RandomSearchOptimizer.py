@@ -4,25 +4,25 @@
 #
 import pandas as pd
 
-from mlos.Tracer import trace
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point
-from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
+from mlos.Tracer import trace
 
 
-class RandomSearchOptimizerConfig(metaclass=DefaultConfigMeta):
-    CONFIG_SPACE = SimpleHypergrid(
+random_search_optimizer_config_store = ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
         name="random_search_optimizer_config",
         dimensions=[
             DiscreteDimension(name="num_samples_per_iteration", min=1, max=1000)
         ]
-    )
-
-    _DEFAULT = Point(
+    ),
+    default=Point(
         num_samples_per_iteration=1000
     )
+)
 
 
 class RandomSearchOptimizer(UtilityFunctionOptimizer):
