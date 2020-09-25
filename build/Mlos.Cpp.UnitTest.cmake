@@ -86,7 +86,7 @@ function(add_mlos_agent_server_exe_test_run)
     endforeach()
 
     # Basically we want to run:
-    # $ dotnet Mlos.Agent.Server.dll /some/test/exe
+    # $ dotnet Mlos.Agent.Server.dll --executable /some/test/exe
     # However, we need to
     # - Make sure there aren't other things using the shared mem regions in
     #   /dev/shm/ that we're about to create (e.g. from a previous failed test
@@ -95,7 +95,7 @@ function(add_mlos_agent_server_exe_test_run)
     # - Make sure that the Agent can find the SettingsRegistry DLLs that the
     #   /some/test/exe needs to use.
     add_test(NAME ${TEST_NAME}
-        COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RunTestsAndSharedMemChecks.sh ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>)
+        COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RunTestsAndSharedMemChecks.sh ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> --executable $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>)
     set_tests_properties(${TEST_NAME} PROPERTIES
         TIMEOUT ${TEST_TIMEOUT}
         # Let the Mlos.Agent.Server know where to find the registry assembly.
