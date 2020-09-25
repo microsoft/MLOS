@@ -66,8 +66,18 @@ namespace Mlos.Agent.Server
                 });
             if (cliOptsParseResult.Tag == ParserResultType.NotParsed)
             {
+                // CommandLine already prints the help text for us in this case.
+                //
                 Console.Error.WriteLine("Failed to parse command line options.");
                 Environment.Exit(1);
+            }
+
+            // Check for the executable before setting up any shared memory to
+            // reduce cleanup issues.
+            //
+            if (executableFilePath != null && !File.Exists(executableFilePath))
+            {
+                throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
             }
 
             Console.WriteLine("Mlos.Agent.Server");
