@@ -11,7 +11,8 @@ set -eu
 
 DOTNET_VERSION='3.1.201'
 
-scriptdir=$(dirname "$(readlink -f "$0")")
+script=$(readlink -f "$0")
+scriptdir=$(dirname "$script")
 cd "$scriptdir/.."
 mkdir -p ./tools
 TOOLS_DIR=$(readlink -f ./tools)
@@ -42,13 +43,13 @@ if [ -x "$SYS_DOTNET" ]; then
         # the system dotnet file (including this script).
         touch -r "$SYS_DOTNET" -h "$DOTNET_DIR/dotnet"
         touch -r "$SYS_DOTNET" -h "$TOOLS_DIR/bin/dotnet"
-        touch -r "$SYS_DOTNET" -h "$0"
+        touch -r "$SYS_DOTNET" -h "$script"
 
         exit 0
     else
         cat >&2 <<-WARNMSG
         WARNING: system dotnet version is too old.
-        Please update your system and rerun $0.
+        Please update your system (e.g. with apt-get) and rerun $0.
 WARNMSG
         exit 1
         # Alternatively, we could also skip the exit here and let it fall
