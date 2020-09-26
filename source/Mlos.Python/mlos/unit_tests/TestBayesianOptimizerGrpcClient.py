@@ -98,8 +98,8 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
         observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-        self.assertTrue(registered_features_df.equals(observed_features_df))
-        self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
+        self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
+        self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
 
         convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
 
@@ -166,8 +166,8 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-            self.assertTrue(registered_features_df.equals(observed_features_df))
-            self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
+            self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
+            self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
 
 
     @unittest.skip(reason="Not implemented yet.")
