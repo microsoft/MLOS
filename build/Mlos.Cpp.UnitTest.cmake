@@ -133,4 +133,5 @@ function(add_mlos_agent_server_exe_test_run)
     endif()
     # Include these targets in cmake's "check" target so we can build/test in one shot.
     add_dependencies(check ${TEST_EXECUTABLE_TARGET} Mlos.Agent.Server)
+    add_dependencies(${TEST_EXECUTABLE_TARGET} Mlos.Agent.Server)
 endfunction()
