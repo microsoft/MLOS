@@ -9,7 +9,6 @@ import time
 from threading import current_thread
 from typing import Dict
 
-
 import pandas as pd
 
 from mlos import global_values
@@ -34,13 +33,25 @@ def trace():
                     arguments = None
                     if result is not None and isinstance(result, (str, int, float, bool)):
                         arguments = {'result': result}
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, thread_id=thread_id, arguments=arguments)
+                    tracer.add_trace_event(
+                        name=wrapped_function.__qualname__,
+                        phase='E',
+                        timestamp_ns=end_timestamp_ns,
+                        thread_id=thread_id,
+                        arguments=arguments
+                    )
                 except Exception as e:
                     arguments = {'exception': str(e)}
                     end_timestamp_ns = int(time.time() * 1000000)
                     while end_timestamp_ns <= start_timestamp_ns:
                         end_timestamp_ns += 100
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, thread_id=thread_id, arguments=arguments)
+                    tracer.add_trace_event(
+                        name=wrapped_function.__qualname__,
+                        phase='E',
+                        timestamp_ns=end_timestamp_ns,
+                        thread_id=thread_id,
+                        arguments=arguments
+                    )
                     raise e
 
             else:

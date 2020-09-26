@@ -69,9 +69,11 @@ class BayesianOptimizerProxy(OptimizerBase):
     def register(self, feature_values_pandas_frame, target_values_pandas_frame):
         register_request = OptimizerService_pb2.RegisterObservationsRequest(
             OptimizerHandle=self.optimizer_handle,
-            Observations= OptimizerService_pb2.Observations(
+            Observations=OptimizerService_pb2.Observations(
                 Features=OptimizerService_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
-                ObjectiveValues=OptimizerService_pb2.ObjectiveValues(ObjectiveValuesJsonString=target_values_pandas_frame.to_json(orient='index', double_precision=15))
+                ObjectiveValues=OptimizerService_pb2.ObjectiveValues(
+                    ObjectiveValuesJsonString=target_values_pandas_frame.to_json(orient='index', double_precision=15)
+                )
             )
         )
         self._optimizer_stub.RegisterObservations(register_request)
@@ -107,7 +109,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         return prediction
 
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
-        ...
+        pass
 
     def reset_focus(self):# pylint: disable=no-self-use
-        ...
+        pass
