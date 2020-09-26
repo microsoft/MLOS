@@ -87,6 +87,13 @@ RUN if [ v`lsb_release -s -r` = 'v16.04' ]; then \
 # Note: libxml2 automatically pulls in an appropriate version of the ^libicu[0-9]+$ package.
 RUN apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g
 
+# Install dotnet in the system.
+RUN wget -q -O /tmp/packages-microsoft-prod.deb "https://packages.microsoft.com/config/ubuntu/`lsb_release -r -s`/packages-microsoft-prod.deb" && \
+    dpkg -i /tmp/packages-microsoft-prod.deb && \
+    apt-get update && \
+    apt-get --no-install-recommends -y install \
+        dotnet-sdk-3.1 dotnet-runtime-3.1 aspnetcore-runtime-3.1
+
 # Cleanup the apt caches from the image.
 RUN apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
