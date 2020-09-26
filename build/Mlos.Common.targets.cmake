@@ -28,15 +28,15 @@ else()
         COMMENT "Skipping ctags - command not found.")
 endif()
 
-# Make sure that if this doesn't exist we invoke the fetch-dotnet.sh script.
+# Make sure that if this doesn't exist we invoke the setup-dotnet.sh script.
 # See Also: Mlos.NetCore.cmake
 
 # FIXME: Prevent "clean" from removing this output file.
 
 add_custom_command(OUTPUT "${DOTNET}"
-    COMMAND "${MLOS_ROOT}/scripts/fetch-dotnet.sh"
+    COMMAND "${MLOS_ROOT}/scripts/setup-dotnet.sh"
     WORKING_DIRECTORY "${MLOS_ROOT}"
-    COMMENT "Fetching local dotnet")
+    COMMENT "Setting up local dotnet")
 
 add_custom_target(DOTNET_TOOL
     DEPENDS "${DOTNET_REAL}"

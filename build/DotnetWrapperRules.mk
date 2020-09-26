@@ -23,8 +23,8 @@ DotnetOutputPath := $(DotnetBaseOutDir)/$(RelativeSourceDir)
 # Check the timestamps on both the wrapper and the symlink.
 DOTNET_REAL := $(MLOS_ROOT)/tools/dotnet/dotnet
 .NOTPARALLEL: $(DOTNET) $(DOTNET_REAL)
-$(DOTNET) $(DOTNET_REAL): $(MLOS_ROOT)/scripts/fetch-dotnet.sh
-	@ $(MLOS_ROOT)/scripts/fetch-dotnet.sh
+$(DOTNET) $(DOTNET_REAL): $(MLOS_ROOT)/scripts/setup-dotnet.sh
+	@ $(MLOS_ROOT)/scripts/setup-dotnet.sh
 
 # Find all the *.csproj, dirs.proj files in this directory and make some
 # corresponding fake targets for the "all" target to depend on.

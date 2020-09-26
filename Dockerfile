@@ -91,13 +91,13 @@ RUN apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxm
 RUN apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Prefetch the necessary local build tools/dependencies.
-COPY ./scripts/fetch-cmake.sh \
-    ./scripts/fetch-dotnet.sh ./scripts/dotnet.env ./scripts/util.sh ./scripts/dotnet \
+COPY ./scripts/setup-cmake.sh \
+    ./scripts/setup-dotnet.sh ./scripts/dotnet.env ./scripts/util.sh ./scripts/dotnet \
     /src/MLOS/scripts/
 RUN cd /src/MLOS && \
-    ./scripts/fetch-cmake.sh && \
+    ./scripts/setup-cmake.sh && \
     ./tools/bin/cmake --help >/dev/null && \
-    ./scripts/fetch-dotnet.sh && \
+    ./scripts/setup-dotnet.sh && \
     ./tools/bin/dotnet help >/dev/null
 
 # Whether or not to include extras to make interactive editing inside the
