@@ -49,11 +49,14 @@ if [ -x "$SYS_DOTNET" ]; then
         cat >&2 <<-WARNMSG
         WARNING: system dotnet version is too old.
         Please update your system and rerun $0.
-        Installing a local version for now.
 WARNMSG
+        exit 1
+        # Alternatively, we could also skip the exit here and let it fall
+        # through to automatically installing a more up to date version in
+        # tools/.
     fi
 else
-    echo "No system dotnet installed.  Fetching a local verison for this repo." >&2
+    echo "INFO: No system dotnet installed.  Fetching a local verison for this repo." >&2
 fi
 
 ###########################################################################
