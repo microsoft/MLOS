@@ -121,8 +121,8 @@ clean-cmake-buildfiles:
 
 # Fetch a specific version of cmake.
 .NOTPARALLEL: $(CMAKE)
-$(CMAKE): ./scripts/fetch-cmake.sh
-	@  ./scripts/fetch-cmake.sh
+$(CMAKE): ./scripts/setup-cmake.sh
+	@  ./scripts/setup-cmake.sh
 
 .PHONY: python-checks
 python-checks:

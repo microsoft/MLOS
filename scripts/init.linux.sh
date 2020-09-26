@@ -32,16 +32,16 @@ MLOS_ROOT=$(readlink -f "$scriptdir/..")
 
 # Make sure cmake is available.
 if ! [ -x "$MLOS_ROOT/tools/cmake/bin/cmake" ] || ! [ -x "$MLOS_ROOT/tools/bin/cmake" ]; then
-    if ! "$MLOS_ROOT/scripts/fetch-cmake.sh"; then
-        echo "ERROR: Faled to fetch cmake." >&2
+    if ! "$MLOS_ROOT/scripts/setup-cmake.sh"; then
+        echo "ERROR: Faled to setup cmake." >&2
         return -1
     fi
 fi
 
 # Make sure dotnet is available.
 if ! [ -x "$MLOS_ROOT/tools/dotnet/dotnet" ] || ! [ -x "$MLOS_ROOT/tools/bin/dotnet" ]; then
-    if ! "$MLOS_ROOT/scripts/fetch-dotnet.sh"; then
-        echo "ERROR: Faled to fetch dotnet." >&2
+    if ! "$MLOS_ROOT/scripts/setup-dotnet.sh"; then
+        echo "ERROR: Faled to setup dotnet." >&2
         return -1
     fi
 fi
