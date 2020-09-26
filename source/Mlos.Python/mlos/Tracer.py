@@ -3,11 +3,12 @@
 # Licensed under the MIT License.
 #
 from contextlib import contextmanager
+from functools import wraps
 import json
 import time
-
-from functools import wraps
+from threading import current_thread
 from typing import Dict
+
 
 import pandas as pd
 
@@ -23,8 +24,8 @@ def trace():
             tracer = getattr(global_values, 'tracer', None)
             if tracer is not None:
                 start_timestamp_ns = int(time.time() * 1000000)
-                tracer.add_trace_event(name=wrapped_function.__qualname__, phase='B', timestamp_ns=start_timestamp_ns,
-                                       arguments=kwargs)
+                thread_id = current_thread().ident
+                tracer.add_trace_event(name=wrapped_function.__qualname__, phase='B', timestamp_ns=start_timestamp_ns, thread_id=thread_id, arguments=kwargs)
                 try:
                     result = wrapped_function(*args, **kwargs)
                     end_timestamp_ns = int(time.time() * 1000000)
@@ -33,13 +34,13 @@ def trace():
                     arguments = None
                     if result is not None and isinstance(result, (str, int, float, bool)):
                         arguments = {'result': result}
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, arguments=arguments)
+                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, thread_id=thread_id, arguments=arguments)
                 except Exception as e:
                     arguments = {'exception': str(e)}
                     end_timestamp_ns = int(time.time() * 1000000)
                     while end_timestamp_ns <= start_timestamp_ns:
                         end_timestamp_ns += 100
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, arguments=arguments)
+                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, thread_id=thread_id, arguments=arguments)
                     raise e
 
             else:

@@ -34,6 +34,10 @@ service OptimizerService
     //
     rpc RegisterObservation(RegisterObservationRequest) returns (Empty);
 
+    // Adds observations to the optimizer's data set.
+    //
+    rpc RegisterObservations(RegisterObservationsRequest) returns (Empty);
+
     // Returns all observations registered for a given optimizer.
     //
     rpc GetAllObservations(OptimizerHandle) returns (Observations);
@@ -65,6 +69,14 @@ message RegisterObservationRequest
 {
     OptimizerHandle OptimizerHandle = 1;
     Observation Observation = 2;
+};
+
+// A request to add a observations to the optimizer's data set.
+//
+message RegisterObservationsRequest
+{
+    OptimizerHandle OptimizerHandle = 1;
+    Observations Observations = 2;
 };
 
 // A representation of an optimization problem.

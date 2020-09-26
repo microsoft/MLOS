@@ -13,6 +13,7 @@ from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimiz
 from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
 
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
 experiment_designer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(

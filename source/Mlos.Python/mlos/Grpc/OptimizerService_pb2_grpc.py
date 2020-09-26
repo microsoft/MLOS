@@ -51,6 +51,11 @@ class OptimizerServiceStub(object):
                 request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationRequest.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
                 )
+        self.RegisterObservations = channel.unary_unary(
+                '/OptimizerService/RegisterObservations',
+                request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationsRequest.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
+                )
         self.GetAllObservations = channel.unary_unary(
                 '/OptimizerService/GetAllObservations',
                 request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
@@ -119,6 +124,14 @@ class OptimizerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RegisterObservations(self, request, context):
+        """Adds observations to the optimizer's data set.
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetAllObservations(self, request, context):
         """Returns all observations registered for a given optimizer.
 
@@ -163,6 +176,11 @@ def add_OptimizerServiceServicer_to_server(servicer, server):
             'RegisterObservation': grpc.unary_unary_rpc_method_handler(
                     servicer.RegisterObservation,
                     request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationRequest.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
+            ),
+            'RegisterObservations': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterObservations,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationsRequest.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
             ),
             'GetAllObservations': grpc.unary_unary_rpc_method_handler(
@@ -290,6 +308,22 @@ class OptimizerService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/OptimizerService/RegisterObservation',
             mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationRequest.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RegisterObservations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/OptimizerService/RegisterObservations',
+            mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationsRequest.SerializeToString,
             mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)

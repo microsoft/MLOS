@@ -12,7 +12,7 @@ import pandas as pd
 
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 from mlos.Examples.SmartCache import SmartCacheWorkloadGenerator, SmartCache, HitRateMonitor
 from mlos.Examples.SmartCache.TelemetryAggregators.WorkingSetSizeEstimator import WorkingSetSizeEstimator
@@ -122,7 +122,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
             new_config_values = self.optimizer.suggest()
             self.mlos_agent.set_configuration(component_type=SmartCache, new_config_values=new_config_values)
             self.hit_rate_monitor.reset()
-            self.logger.info(f"Previous config: {current_cache_config}")
+            self.logger.info(f"Previous config: {current_cache_config.to_json()}")
             self.logger.info(f"Estimated working set size: {working_set_size_estimate.chapman_estimator}. Hit rate: {hit_rate:.2f}. Num requests: {num_requests} ")
 
 

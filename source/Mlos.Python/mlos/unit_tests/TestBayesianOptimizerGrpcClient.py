@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 
 import mlos.global_values as global_values
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
 from mlos.Logger import create_logger
