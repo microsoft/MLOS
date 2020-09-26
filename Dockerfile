@@ -50,6 +50,7 @@ RUN apt-get update && \
     apt-get --no-install-recommends -y install \
         git make build-essential sudo curl wget lsb-release \
         software-properties-common apt-transport-https apt-utils \
+        ca-certificates gnupg \
         exuberant-ctags vim-nox bash-completion less
 
 # A few quality of life improvements:
@@ -91,6 +92,11 @@ RUN apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxm
 RUN mkdir -p /tmp/MLOS/scripts
 COPY ./scripts/install.dotnet.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.dotnet.sh
+
+# Install cmake in the system using our script.
+RUN mkdir -p /tmp/MLOS/scripts
+COPY ./scripts/install.cmake.sh /tmp/MLOS/scripts/
+RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh
 
 # Cleanup the apt caches from the image.
 RUN apt-get -y clean && rm -rf /var/lib/apt/lists/*
