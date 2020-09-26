@@ -25,7 +25,7 @@ class BayesianOptimizerFactory:
         Logger object
     """
 
-    def __init__(self, grpc_channel, logger=None):
+    def __init__(self, grpc_channel=None, logger=None):
         self.logger = logger if logger is not None else create_logger("BayesianOptimizerFactory")
         self._grpc_channel = grpc_channel
         self._optimizer_service_stub = None
