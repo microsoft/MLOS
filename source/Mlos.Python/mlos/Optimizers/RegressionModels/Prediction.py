@@ -115,8 +115,6 @@ class Prediction:
             if dataframe[sample_variance_col].notnull().any():
                 assert (dataframe[sample_variance_col].notnull() >= 0).all()
 
-
-
     @classmethod
     def get_enum_by_column_name(cls, column_name):
         return Prediction.LegalColumnNames(column_name)
