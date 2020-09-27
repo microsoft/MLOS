@@ -33,7 +33,7 @@ class BayesianOptimizerFactory:
             self._optimizer_service_stub = OptimizerServiceStub(channel=self._grpc_channel)
 
 
-    def create_local_optimizer(self, optimization_problem: OptimizationProblem, optimizer_config: Point = None) -> OptimizerBase:
+    def create_local_optimizer(self, optimization_problem: OptimizationProblem, optimizer_config: Point = None) -> BayesianOptimizer:
         if optimizer_config is None:
             self.logger.info(f"Optimizer config not specified. Using default.")
             optimizer_config = bayesian_optimizer_config_store.default
@@ -46,7 +46,7 @@ class BayesianOptimizerFactory:
         )
 
 
-    def create_remote_optimizer(self, optimization_problem: OptimizationProblem, optimizer_config: Point = None) -> OptimizerBase:
+    def create_remote_optimizer(self, optimization_problem: OptimizationProblem, optimizer_config: Point = None) -> BayesianOptimizerProxy:
         """Creates a remote optimizer over a given problem with a given config.
 
         Parameters
@@ -84,7 +84,7 @@ class BayesianOptimizerFactory:
             logger=self.logger
         )
 
-    def connect_to_existing_remote_optimizer(self, optimizer_info: OptimizerInfo):
+    def connect_to_existing_remote_optimizer(self, optimizer_info: OptimizerInfo) -> BayesianOptimizerProxy:
         """Connects to an existing optimizer.
 
         Parameters

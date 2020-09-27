@@ -61,6 +61,11 @@ class OptimizerServiceStub(object):
                 request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Observations.FromString,
                 )
+        self.Echo = channel.unary_unary(
+                '/OptimizerService/Echo',
+                request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
+                )
 
 
 class OptimizerServiceServicer(object):
@@ -140,6 +145,14 @@ class OptimizerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def Echo(self, request, context):
+        """Like ping.
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_OptimizerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -187,6 +200,11 @@ def add_OptimizerServiceServicer_to_server(servicer, server):
                     servicer.GetAllObservations,
                     request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Observations.SerializeToString,
+            ),
+            'Echo': grpc.unary_unary_rpc_method_handler(
+                    servicer.Echo,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -341,5 +359,21 @@ class OptimizerService(object):
         return grpc.experimental.unary_unary(request, target, '/OptimizerService/GetAllObservations',
             mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
             mlos_dot_Grpc_dot_OptimizerService__pb2.Observations.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Echo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/OptimizerService/Echo',
+            mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)

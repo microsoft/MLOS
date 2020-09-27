@@ -41,6 +41,10 @@ service OptimizerService
     // Returns all observations registered for a given optimizer.
     //
     rpc GetAllObservations(OptimizerHandle) returns (Observations);
+
+    // Like ping.
+    //
+    rpc Echo(Empty) returns (Empty);
 };
 
 // A request to create an optimizer.

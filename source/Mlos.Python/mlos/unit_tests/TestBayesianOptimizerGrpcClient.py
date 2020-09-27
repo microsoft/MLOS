@@ -10,13 +10,16 @@ import grpc
 import numpy as np
 import pandas as pd
 
+
 import mlos.global_values as global_values
-from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
+from mlos.Grpc.OptimizerService_pb2 import Empty
+from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Logger import create_logger
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 
 
@@ -56,6 +59,12 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         :return:
         """
         self.server.stop(grace=None)
+
+    def test_echo(self):
+        optimizer_service_stub = OptimizerServiceStub(channel=self.optimizer_service_channel)
+        response = optimizer_service_stub.Echo(Empty())
+        self.assertTrue(isinstance(response, Empty))
+
 
     def test_optimizer_with_default_config(self):
         pre_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}

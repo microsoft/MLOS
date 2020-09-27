@@ -179,3 +179,6 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         )
 
         return response
+
+    def Echo(self, request: Empty, context): # pylint: disable=unused-argument
+        return Empty()
