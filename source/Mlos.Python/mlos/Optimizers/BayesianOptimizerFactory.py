@@ -9,7 +9,6 @@ from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Grpc.BayesianOptimizerProxy import BayesianOptimizerProxy
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
-from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Spaces import Point
 
 
