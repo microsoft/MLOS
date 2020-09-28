@@ -219,7 +219,6 @@ namespace SmartCache
                 string newConfigJsonString = OptimizerProxy.Suggest();
                 Console.WriteLine("Suggesting: " + newConfigJsonString);
 
-
                 var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
 
                 // Update smart cache's config in shared memory with the
