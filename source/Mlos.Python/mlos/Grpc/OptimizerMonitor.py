@@ -20,7 +20,7 @@ class OptimizerMonitor:
         self._optimizer_factory = BayesianOptimizerFactory(grpc_channel=self._grpc_channel, logger=self.logger)
 
     def __repr__(self):
-        return f"OptimizerMonitor(grpc_channel='{self._grpc_channel._channel.target().decode()}')"
+        return f"OptimizerMonitor(grpc_channel='{self._grpc_channel._channel.target().decode()}')"  # pylint: disable=protected-access
 
     def get_existing_optimizers(self):
         """Returns proxies to all existing optimizers.
