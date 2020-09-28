@@ -54,11 +54,8 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
 
         private BayesianOptimizerProxy CreateRemoteOptimizer(OptimizationProblem optimizationProblem)
         {
-            Console.WriteLine("CreateRemoteOptimizer run");
-
             GrpcChannel channel = GrpcChannel.ForAddress(optimizerAddressUri);
             var client = new MlosOptimizerService.OptimizerServiceClient(channel);
-            Console.WriteLine("CreateRemoteOptimizer client created");
 
             OptimizerHandle optimizerHandle = client.CreateOptimizer(
                 new CreateOptimizerRequest
@@ -66,7 +63,7 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
                     OptimizationProblem = optimizationProblem.ToOptimizerServiceOptimizationProblem(),
                     OptimizerConfig = string.Empty,
                 });
-            Console.WriteLine("CreateRemoteOptimizer client return");
+
             return new BayesianOptimizerProxy(client, optimizerHandle);
         }
     }

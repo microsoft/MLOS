@@ -72,8 +72,6 @@ namespace Mlos.Agent
 
             // Register Mlos.Core assembly.
             //
-            Console.WriteLine("Register Mlos.Core assembly.");
-
             RegisterAssembly(typeof(MlosContext).Assembly, dispatchTableBaseIndex: 0);
 
             // Register assemblies from the shared config.
