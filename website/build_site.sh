@@ -29,7 +29,7 @@ $pythonCmd -m pip install jupyter nbconvert==5.6.1
 # downgrade html output because hugo doesn't like raw html
 mkdir -p content/notebooks
 # Restricted set of notebooks that are rendered for inclusion on the webpage:
-notebooks='BayesianOptimization SmartCacheOptimization'
+notebooks='BayesianOptimization SmartCacheOptimization SmartCacheCPP'
 for nb in $notebooks; do
     nb_path="$MLOS_ROOT/source/Mlos.Notebooks/$nb.ipynb"
     echo "Executing and rendering $nb_path"
