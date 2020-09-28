@@ -75,7 +75,8 @@ To build and run the necessary components for this example
 
 ## Executing
 
-The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark:
+The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark. We're also passing
+an `optimizer-uri`, which requires us to start an optimizer microservice (``start_optimizer_microservice launch``).
 
 ```sh
 export MLOS_SETTINGS_REGISTRY_PATH="$PWD/target/bin/Release"
