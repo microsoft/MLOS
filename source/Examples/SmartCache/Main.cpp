@@ -179,7 +179,7 @@ main(
         std::condition_variable waitForConfigCondVar;
 
         // Also, setup a callback lambda function for handling the
-        // SharedConfigUpdatedFeedbackeMessage we expect to receive from the
+        // SharedConfigUpdatedFeedbackMessage we expect to receive from the
         // agent after we request a config update with a RequestNewConfigurationMessage.
         //
         // Note: this lambda will be invoked by the background task setup above
