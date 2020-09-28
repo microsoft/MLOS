@@ -65,7 +65,7 @@ After this installation, you can run any of the Python-only example notebooks. T
 jupyter-notebook --notebook-dir=MLOS/source/Mlos.Notebooks
 ```
 
-Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](../source/Mlos.Notebooks/BayesianOptimization.ipynb#mlos-github-tree-view).
+Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](https://microsoft.github.io/MLOS/notebooks/BayesianOptimization).
 
 ## Linux
 
