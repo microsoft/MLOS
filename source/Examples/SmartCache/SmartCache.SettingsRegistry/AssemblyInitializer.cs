@@ -215,9 +215,10 @@ namespace SmartCache
 
                 // Now, ask the optimizer for a new configuration suggestion.
                 //
-                Console.WriteLine("Suggesting");
 
                 string newConfigJsonString = OptimizerProxy.Suggest();
+                Console.WriteLine("Suggesting: " + newConfigJsonString);
+
 
                 var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
 
