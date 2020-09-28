@@ -256,28 +256,41 @@ namespace Mlos.Agent.Server
                     parserResult,
                     onError: ht =>
                     {
-                        ht.AddNewLineBetweenHelpSections = true;
-                        ht.AddPreOptionsLines(new[]
-                        {
-                            "The Mlos.Agent.Server acts as an external agent for MLOS integrated components, allowing them to send it messages over shared memory, which it can process and use to interface with an optimizer service to tune the components over their shared memory communication channels.",
-                            string.Empty,
-                            "usage mode 1:  Wait for an application to register over global shared memory, without an optimizer.",
-                            "    dotnet Mlos.Agent.Server.dll",
-                            string.Empty,
-                            "usage mode 2:  Wait for an application to register over global shared memory, and prepare to communicate with an MLOS optimizer listening at the given Grpc URI.",
-                            "    dotnet Mlos.Agent.Server.dll --optimizer-uri http://localhost:50051",
-                            string.Empty,
-                            "usage mode 3:  Start an executable to communicate over freshly prepared global shared memory.",
-                            "    dotnet Mlos.Agent.Server.dll --executable path/to/executable",
-                            string.Empty,
-                            "usage mode 4:  Start an executable to communicate over freshly prepared global shared memory and prepare to communicate with an MLOS optimizer listening at the given Grpc URI.",
-                            "    dotnet Mlos.Agent.Server.dll --executable path/to/executable --optimizer-uri http://localhost:50051",
-                            string.Empty,
-                            "Note: the optimizer service used in these examples can be started using the 'start_optimizer_microservice launch --port 50051' command from the mlos Python module.",
-                        });
                         return HelpText.DefaultParsingErrorsHandler(parserResult, ht);
                     },
                     e => e);
+                helpText.AddNewLineBetweenHelpSections = true;
+                helpText.AddPreOptionsLines(new[]
+                    {
+                        // Use a single long line of text to let the help output get wrapped automatically for us.
+                        "The Mlos.Agent.Server acts as an external agent for MLOS integrated components, allowing them to "
+                        + "send it messages over shared memory, which it can process and use to interface with an optimizer "
+                        + "service to tune the components over their shared memory communication channels.",
+                        string.Empty,
+
+                        // Indent the actual commands to make them stand out a bit more.
+                        // Note: The help out preserves the indent across wrapping.
+                        "usage mode 1:  Wait for an application to register over global shared memory, without an optimizer.",
+                        "    dotnet Mlos.Agent.Server.dll",
+                        string.Empty,
+
+                        "usage mode 2:  Wait for an application to register over global shared memory, and prepare to "
+                        + "communicate with an MLOS optimizer listening at the given Grpc URI.",
+                        "    dotnet Mlos.Agent.Server.dll --optimizer-uri http://localhost:50051",
+                        string.Empty,
+
+                        "usage mode 3:  Start an executable to communicate over freshly prepared global shared memory.",
+                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable",
+                        string.Empty,
+
+                        "usage mode 4:  Start an executable to communicate over freshly prepared global shared memory and "
+                        + "prepare to communicate with an MLOS optimizer listening at the given Grpc URI.",
+                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable --optimizer-uri http://localhost:50051",
+                        string.Empty,
+
+                        "Note: the optimizer service used in these examples can be started using the 'start_optimizer_microservice "
+                        + "launch --port 50051' command from the mlos Python module.",
+                    });
             }
 
             Console.WriteLine(helpText);
