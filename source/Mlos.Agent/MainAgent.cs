@@ -91,7 +91,8 @@ namespace Mlos.Agent
 
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
 
-            Console.WriteLine("Setup feedback channel1");
+            Console.WriteLine("Setup feedback channel");
+
 
             var feedbackChannel = new SharedChannel<InterProcessSharedChannelPolicy, SharedChannelSpinPolicy>(
                 buffer: feedbackChannelMemoryMapView.Buffer,
