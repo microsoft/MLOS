@@ -11,6 +11,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
+using CommandLine;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
@@ -42,7 +44,7 @@ namespace Mlos.Agent.Server
                     {
                         // Setup a HTTP/2 endpoint without TLS.
                         //
-                        options.ListenLocalhost(5000, o => o.Protocols = HttpProtocols.Http2);
+                        options.ListenAnyIP(5000, o => o.Protocols = HttpProtocols.Http2);
                     });
                     webBuilder.UseStartup<GrpcServer.Startup>();
                 });
@@ -53,35 +55,39 @@ namespace Mlos.Agent.Server
         /// <param name="args">command line arguments.</param>
         public static void Main(string[] args)
         {
-            // TODO: use some proper arg parser. For now let's keep it simple.
-            //
             string executableFilePath = null;
-            string modelsDatabaseConnectionDetailsFile = null;
+            Uri optimizerAddressUri = null;
 
-            foreach (string arg in args)
+            var cliOptsParseResult = CommandLine.Parser.Default.ParseArguments<CliOptions>(args)
+                .WithParsed(parsedOptions =>
+                {
+                    executableFilePath = parsedOptions.Executable;
+                    optimizerAddressUri = parsedOptions.OptimizerUri;
+                });
+            if (cliOptsParseResult.Tag == ParserResultType.NotParsed)
             {
-                if (Path.GetExtension(arg) == ".json")
-                {
-                    modelsDatabaseConnectionDetailsFile = arg;
-                }
-                else
-                {
-                    // Linux executables don't have a suffix by default.
-                    // So, for now just assume that anything else is an executable.
-                    //
-                    executableFilePath = arg;
-                }
+                // CommandLine already prints the help text for us in this case.
+                //
+                Console.Error.WriteLine("Failed to parse command line options.");
+                Environment.Exit(1);
+            }
+
+            // Check for the executable before setting up any shared memory to
+            // reduce cleanup issues.
+            //
+            if (executableFilePath != null && !File.Exists(executableFilePath))
+            {
+                throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
             }
 
             Console.WriteLine("Mlos.Agent.Server");
             TargetProcessManager targetProcessManager = null;
 
-            // #TODO connect to gRpc optimizer only if user provided json file in the command line argument.
-            // #TODO, make address configurable.
+            // Connect to gRpc optimizer only if user provided an address in the command line.
             //
-            if (modelsDatabaseConnectionDetailsFile != null)
+            if (optimizerAddressUri != null)
             {
-                Console.WriteLine("Connected to Mlos.Optimizer");
+                Console.WriteLine("Connecting to the Mlos.Optimizer");
 
                 // This switch must be set before creating the GrpcChannel/HttpClient.
                 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2Support", true);
@@ -95,7 +101,6 @@ namespace Mlos.Agent.Server
                 // See Also: AssemblyInitializer.cs within the SettingsRegistry
                 // assembly project in question.
                 //
-                Uri optimizerAddressUri = new Uri("http://localhost:50051");
                 MlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
             }
 
@@ -186,7 +191,7 @@ namespace Mlos.Agent.Server
                 }
             }
 
-            // Print any exceptions if occured.
+            // Print any exceptions if occurred.
             //
             if (mlosAgentTask.Exception != null)
             {
@@ -213,6 +218,18 @@ namespace Mlos.Agent.Server
             cancellationTokenSource.Dispose();
 
             Console.WriteLine("Mlos.Agent exited.");
+        }
+
+        /// <summary>
+        /// The command line options for this application.
+        /// </summary>
+        private class CliOptions
+        {
+            [Option("executable", Required = false, Default = null, HelpText = "A path to an executable to start (e.g. 'target/bin/Release/SmartCache').")]
+            public string Executable { get; set; }
+
+            [Option("optimizer-uri", Required = false, Default = null, HelpText = "A URI to connect to the MLOS Optimizer service over GRPC (e.g. 'http://localhost:50051').")]
+            public Uri OptimizerUri { get; set; }
         }
     }
 }

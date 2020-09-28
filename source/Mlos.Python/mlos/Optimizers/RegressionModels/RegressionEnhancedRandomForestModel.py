@@ -204,6 +204,13 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.variance_estimate_ = None
         self.root_model_gradient_coef_ = None
         self.polynomial_features_powers_ = None
+        self.num_dummy_vars_ = None
+        self.num_categorical_dims_ = None
+        self.continuous_dim_col_names_ = None
+        self.categorical_dim_col_names_ = None
+        self.dummy_var_map_ = None
+        self.dummy_var_cols_ = None
+        self.categorical_zero_cols_idx_to_delete_ = None
 
     @trace()
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number=0):
@@ -415,6 +422,12 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
         check_is_fitted(self)
 
+        # confirm feature_values_pandas_frame contains all expected columns
+        #  if any are missing, impute NaN values
+        missing_column_names = set.difference(set(self.input_dimension_names),
+                                              set(feature_values_pandas_frame.columns.values))
+        for missing_column_name in missing_column_names:
+            feature_values_pandas_frame[missing_column_name] = np.NaN
         x_df = feature_values_pandas_frame[self.input_dimension_names]
         x_star = self.transform_x(x_df)
 
@@ -454,8 +467,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         r2 = r2_score(y, predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE.value])
         return r2
 
-    @staticmethod
-    def _create_one_hot_encoding_map(categorical_values):
+    def _create_one_hot_encoding_map(self, categorical_values):
+        if self.dummy_var_map_ is not None and self.dummy_var_cols_ is not None:
+            return self.dummy_var_cols_, self.dummy_var_map_
+
         sorted_unique_categorical_levels = np.sort(categorical_values.unique()).tolist()
         num_dummy_vars = len(sorted_unique_categorical_levels) - 1  # dropping first
         dummy_var_cols = []
@@ -465,7 +480,9 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             dummy_var_map[level][i] = 1
             dummy_var_cols.append(f'ohe_{i}')
 
-        # ET TODO: Retain these two values when called from fit and reuse them when called from predict
+        self.dummy_var_map_ = dummy_var_map
+        self.dummy_var_cols_ = dummy_var_cols
+
         return dummy_var_cols, dummy_var_map
 
     def _set_categorical_powers_table(self,
@@ -545,9 +562,15 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         fit_x = x
 
         # find categorical features
-        categorical_dim_col_names = [x.columns.values[i] for i in range(len(x.columns.values)) if x.dtypes[i] == object]
-        continuous_dim_col_names = [x.columns.values[i] for i in range(len(x.columns.values)) if x.dtypes[i] != object]
-        num_categorical_dims_ = len(categorical_dim_col_names)
+        if self.categorical_dim_col_names_ is None:
+            self.categorical_dim_col_names_ = [x.columns.values[i] for i in range(len(x.columns.values)) if x.dtypes[i] == object]
+        categorical_dim_col_names = self.categorical_dim_col_names_
+        if self.continuous_dim_col_names_ is None:
+            self.continuous_dim_col_names_ = [x.columns.values[i] for i in range(len(x.columns.values)) if x.dtypes[i] != object]
+        continuous_dim_col_names = self.continuous_dim_col_names_
+        if self.num_categorical_dims_ is None:
+            self.num_categorical_dims_ = len(categorical_dim_col_names)
+        num_categorical_dims_ = self.num_categorical_dims_
 
         if num_categorical_dims_ > 0:
             # use the following to create one hot encoding columns prior to constructing fit_x and powers_ table
@@ -557,7 +580,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             x['flattened_categoricals'] = x[categorical_dim_col_names].apply(
                 lambda cat_row: '-'.join(cat_row.map(str)),
                 axis=1)
-
             dummy_var_cols, dummy_var_map = self._create_one_hot_encoding_map(x['flattened_categoricals'])
             working_x[dummy_var_cols] = x.apply(lambda row: dummy_var_map[row['flattened_categoricals']],
                                                 axis=1,
@@ -565,7 +587,9 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
             # create transformed x for linear fit with dummy variable (one hot encoding)
             # add continuous dimension columns corresponding to each categorical level
-            num_dummy_vars = len(dummy_var_cols)
+            if self.num_dummy_vars_ is None:
+                self.num_dummy_vars_ = len(dummy_var_cols)
+            num_dummy_vars = self.num_dummy_vars_
             for i in range(num_dummy_vars):
                 for cont_dim_name in continuous_dim_col_names:
                     dummy_times_x_col_name = f'{cont_dim_name}*ohe_{i}'
@@ -590,18 +614,21 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
             # check for zero columns (expected with hierarchical feature hypergrids containing NaNs for some features
             #  this should eliminate singular design matrix errors from lasso/ridge regressions
-            zero_cols_idx = np.argwhere(np.all(fit_x[..., :] == 0, axis=0))
+            if self.categorical_zero_cols_idx_to_delete_ is None:
+                self.categorical_zero_cols_idx_to_delete_ = np.argwhere(np.all(fit_x[..., :] == 0, axis=0))
+            zero_cols_idx = self.categorical_zero_cols_idx_to_delete_
             if zero_cols_idx.any():
                 fit_x = np.delete(fit_x, zero_cols_idx, axis=1)
 
             # construct the regressor_model.powers_ table to enable construction of algebraic gradients
-            self._set_categorical_powers_table(
-                num_continuous_dims=len(continuous_dim_col_names),
-                num_categorical_levels=len(x['flattened_categoricals'].unique()),
-                num_terms_in_poly=num_terms_in_poly,
-                num_dummy_vars=num_dummy_vars,
-                zero_cols_idx=zero_cols_idx
-            )
+            if self.polynomial_features_powers_ is None:
+                self._set_categorical_powers_table(
+                    num_continuous_dims=len(continuous_dim_col_names),
+                    num_categorical_levels=len(x['flattened_categoricals'].unique()),
+                    num_terms_in_poly=num_terms_in_poly,
+                    num_dummy_vars=num_dummy_vars,
+                    zero_cols_idx=zero_cols_idx
+                )
 
             # remove temporary fields
             x.drop(columns=['flattened_categoricals'], inplace=True)
