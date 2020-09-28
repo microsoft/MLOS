@@ -38,7 +38,6 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         self._optimizer_locks_by_optimizer_id = dict()
         self.logger = create_logger("OptimizerMicroservice")
         self.logger.info("OptimizerMicroservice init")
-        print("OptimizerMicroservice init")
 
     @staticmethod
     def get_next_optimizer_id():

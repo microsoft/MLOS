@@ -184,7 +184,6 @@ namespace SmartCache
             //
             if (OptimizerProxy != null)
             {
-                Console.WriteLine("Optimizer is not null");
                 if (totalRequestCount != 0)
                 {
                     double hitRate = (double)isInCacheCount / (double)totalRequestCount;
