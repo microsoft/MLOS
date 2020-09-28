@@ -24,6 +24,19 @@ class BayesianOptimizerProxy(OptimizerBase):
         * Simpler to use than making gRPC requests
         * We can change the gRPC definition without affecting the user's code.
         * All logic related to gRPC is in one place
+
+    Parameters
+    ----------
+    grpc_channel : grpc_channel
+        GRPC channel to connect to existing remote optimizer.
+    optimization_problem : OptimizationProblem
+        Problem to optimizer.
+    optimizer_config : Point
+        Optimizer Configuation.
+    id : str
+        Unique identifying string.
+    logger : logger, default=None
+        Logger to use. By default, a new logger is created internally.
     """
 
     def __init__(

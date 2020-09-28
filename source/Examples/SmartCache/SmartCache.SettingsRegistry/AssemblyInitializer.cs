@@ -208,12 +208,15 @@ namespace SmartCache
 
                     // Register the observation with the optimizer by sending it a grpc request.
                     //
+                    Console.WriteLine("Register an observation");
+
                     OptimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
                 }
 
                 // Now, ask the optimizer for a new configuration suggestion.
                 //
                 string newConfigJsonString = OptimizerProxy.Suggest();
+                Console.WriteLine("Suggesting: " + newConfigJsonString);
 
                 var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
 

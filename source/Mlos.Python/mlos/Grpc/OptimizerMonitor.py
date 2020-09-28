@@ -9,7 +9,7 @@ from mlos.Logger import create_logger
 
 
 class OptimizerMonitor:
-    """ Enables monitoring optimizers existing within the OptimizerMicroservice.
+    """Enables monitoring optimizers existing within the OptimizerMicroservice.
 
     """
 
@@ -19,8 +19,11 @@ class OptimizerMonitor:
         self._optimizer_service_stub = OptimizerServiceStub(channel=self._grpc_channel)
         self._optimizer_factory = BayesianOptimizerFactory(grpc_channel=self._grpc_channel, logger=self.logger)
 
+    def __repr__(self):
+        return f"OptimizerMonitor(grpc_channel='{self._grpc_channel._channel.target().decode()}')"  # pylint: disable=protected-access
+
     def get_existing_optimizers(self):
-        """ Returns proxies to all existing optimizers.
+        """Returns proxies to all existing optimizers.
 
         :return:
         """
@@ -35,7 +38,7 @@ class OptimizerMonitor:
         return optimizer_proxies
 
     def get_optimizer_by_id(self, optimizer_id):
-        """ Returns a proxy to an optimizer with a specified Id.
+        """Returns a proxy to an optimizer with a specified Id.
 
         :param optimizer_id:
         :return:
