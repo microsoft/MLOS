@@ -75,15 +75,14 @@ To build and run the necessary components for this example
 
 ## Executing
 
-The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark. We're also passing
-an `optimizer-uri`, which requires us to start an optimizer microservice (``start_optimizer_microservice launch``).
+The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark.
+For a more detailed walk-through please look at [the SmartCache C++ notebook](https://microsoft.github.io/MLOS/source/Examples/SmartCacheCPP/).
 
 ```sh
 export MLOS_SETTINGS_REGISTRY_PATH="$PWD/target/bin/Release"
 
 tools/bin/dotnet target/bin/Release/Mlos.Agent.Server.dll \
-    --executable target/bin/Release/SmartCache \
-    --optimizer-uri http://localhost:50051
+    --executable target/bin/Release/SmartCache
 ```
 
 ```txt
@@ -107,6 +106,7 @@ observations: 2
 observations: 3
 ...
 ```
+
 
 ### Explanation
 
