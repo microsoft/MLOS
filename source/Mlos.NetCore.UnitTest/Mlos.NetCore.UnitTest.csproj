@@ -28,6 +28,7 @@
     <Compile Include="HashFunctionTests.cs" />
     <Compile Include="SemaphoreTests.Linux.cs" Condition="'$(IsLinux)' == 'true'" />
     <Compile Include="SettingsAssemblyInitializer.cs" />
+    <Compile Include="SharedMemoryMapViewTests.cs" />
     <Compile Include="SharedChannelTests.cs" />
     <Compile Include="StreamingTests.cs" />
   </ItemGroup>

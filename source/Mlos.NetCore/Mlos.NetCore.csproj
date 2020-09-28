@@ -29,9 +29,6 @@
     <Compile Include="Collections\FNVHashFunction.cs" />
     <Compile Include="Collections\MurMur2HashFunction.cs" />
     <Compile Include="Collections\MurMur3HashFunction.cs" />
-    <Compile Include="IOptimizationProblem.cs" />
-    <Compile Include="IOptimizerFactory.cs" />
-    <Compile Include="IOptimizerProxy.cs" />
     <Compile Include="MemoryRegions\MemoryRegionViewExtensions.cs" />
     <Compile Include="MemoryRegions\SharedConfigMemoryRegionExtensions.cs" />
     <Compile Include="StdTypes\AtomicTypes.cs" />
@@ -42,7 +39,11 @@
     <Compile Include="ComponentConfig.cs" />
     <Compile Include="DeserializeEntry.cs" />
     <Compile Include="DispatchEntry.cs" />
+    <Compile Include="InterProcessMlosContext.cs" />
     <Compile Include="IntPtrExtensions.cs" />
+    <Compile Include="IOptimizationProblem.cs" />
+    <Compile Include="IOptimizerFactory.cs" />
+    <Compile Include="IOptimizerProxy.cs" />
     <Compile Include="ISharedConfigAccessor.cs" />
     <Compile Include="MlosContext.cs" />
     <Compile Include="NamedEvent.cs" />

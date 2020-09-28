@@ -4,34 +4,41 @@
     <!-- Protobuf gen output path. -->
     <GrpcOutputDir>$(BaseDir)\out\Grpc.out\$(GrpcServices)\$(BuildType)</GrpcOutputDir>
     <GrpcVersion>2.29.0</GrpcVersion>
+    <ProtobufVersion>3.12.0</ProtobufVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.12.0" GeneratePathProperty="true" />
-    <BinplaceFile Include="$(PkgGoogle_Protobuf)/lib/netstandard2.0/Google.Protobuf.dll" />
+    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" GeneratePathProperty="true" />
 
     <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Grpc.Core.Api" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <BinplaceFile Include="$(PkgGrpc_Core)/lib/netstandard2.0/Grpc.Core.dll" />
-    <BinplaceFile Include="$(PkgGrpc_Core_Api)/lib/netstandard2.0/Grpc.Core.Api.dll" />
 
     <PackageReference Include="Grpc.Net.Common" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <BinplaceFile Include="$(PkgGrpc_Net_Common)/lib/netstandard2.1/Grpc.Net.Common.dll" />
 
     <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" GeneratePathProperty="true" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(GrpcServices)' == 'Server'">
+  <ItemGroup Condition="'$(GrpcServices)' == 'Server' Or '$(GrpcServices)' == 'Both'">
     <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Grpc.AspNetCore.Server" Version="$(GrpcVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <BinplaceFile Include="$(PkgGrpc_AspNetCore_Server)/lib/netcoreapp3.0/Grpc.AspNetCore.Server.dll" />
-    <BinplaceFile Include="$(PkgGrpc_AspNetCore_Server_ClientFactory)/lib/netcoreapp3.0/Grpc.AspNetCore.Server.ClientFactory.dll" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(GrpcServices)' == 'Client'">
+  <ItemGroup Condition="'$(GrpcServices)' == 'Client' Or '$(GrpcServices)' == 'Both'">
     <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Grpc.Net.ClientFactory" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <BinplaceFile Include="$(PkgGrpc_Net_Client)/lib/netstandard2.1/Grpc.Net.Client.dll" />
-    <BinplaceFile Include="$(PkgGrpc_Net_ClientFactory)/lib/netstandard2.1/Grpc.Net.ClientFactory.dll" />
+  </ItemGroup>
+
+  <!--
+    Add a reference to a separate project that consolidates the binplace rules
+    for those packages in order to avoid duplicate copy operations which upsets
+    some build systems.
+  -->
+  <PropertyGroup>
+    <MlosGrpcBinplaceProj>$([System.IO.Path]::GetFullPath('$(BaseDir)\source\Mlos.Grpc.Binplace\Mlos.Grpc.Binplace.csproj'))</MlosGrpcBinplaceProj>
+    <NormalizedProjectPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectFullPath)'))</NormalizedProjectPath>
+  </PropertyGroup>
+  <!-- Prevent circular dependencies -->
+  <ItemGroup Condition="'$(NormalizedProjectPath)' != '$(MlosGrpcBinplaceProj)'">
+    <ProjectReference Include="$(MlosGrpcBinplaceProj)" />
   </ItemGroup>
 </Project>

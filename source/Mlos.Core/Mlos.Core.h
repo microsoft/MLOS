@@ -70,6 +70,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #endif
 
 #define UNUSED(x) (void)x
+#define ReturnIfFail(hr) if (FAILED(hr)) return hr;
 
 #include "MlosPlatform.h"
 
@@ -125,6 +126,8 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 // Include Mlos Client API.
 //
 #include "MlosContext.h"
+#include "InternalMlosContext.h"
+#include "InterProcessMlosContext.h"
 #include "StaticSingleton.h"
 #include "StaticVector.h"
 

@@ -14,7 +14,8 @@
       <Filter>MemoryRegions</Filter>
     </ClCompile>
     <ClCompile Include="Security.Windows.cpp" />
-    <ClCompile Include="SharedMemoryRegionView.inl" />
+    <ClCompile Include="InterProcessMlosContext.cpp" />
+    <ClCompile Include="InternalMlosContext.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_base.h">
@@ -59,6 +60,9 @@
     <ClInclude Include="ObjectSerialization.h" />
     <ClInclude Include="ObjectSerializationStringView.h" />
     <ClInclude Include="Security.Windows.h" />
+    <ClInclude Include="SharedMemoryRegionView.inl" />
+    <ClInclude Include="InterProcessMlosContext.h" />
+    <ClInclude Include="InternalMlosContext.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Codegen">

@@ -70,18 +70,15 @@ namespace Mlos.Core.Windows
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                eventHandle?.Dispose();
-                eventHandle = null;
-            }
+            eventHandle?.Dispose();
+            eventHandle = null;
 
-            disposed = true;
+            isDisposed = true;
         }
 
         private EventSafeHandle eventHandle;

@@ -13,7 +13,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Mlos.Core;
-using Proxy.Mlos.Core;
 
 using MlosProxy = Proxy.Mlos.Core;
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
@@ -28,18 +27,6 @@ namespace Mlos.Agent
     /// </remarks>
     public class MainAgent : IDisposable
     {
-        /// <remarks>
-        /// Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
-        /// TODO: Make these config regions configurable to support multiple processes.
-        /// </remarks>
-        private const string GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
-        private const string ControlChannelMemoryMapName = "Host_Mlos.ControlChannel";
-        private const string FeedbackChannelMemoryMapName = "Host_Mlos.FeedbackChannel";
-        private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event"; //// FIXME: Use non-backslashes for Linux environments.
-        private const string FeedbackChannelSemaphoreName = @"Global\FeedbackChannel_Event";
-        private const string SharedConfigMemoryMapName = "Host_Mlos.Config.SharedMemory";
-        private const int SharedMemorySize = 65536;
-
         private readonly SettingsAssemblyManager settingsAssemblyManager = new SettingsAssemblyManager();
 
         private readonly Dictionary<uint, SharedMemoryMapView> memoryRegions = new Dictionary<uint, SharedMemoryMapView>();
@@ -53,15 +40,9 @@ namespace Mlos.Agent
         private bool isDisposed;
 
         #region Shared objects
-        private SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView;
 
-        private SharedMemoryMapView controlChannelMemoryMapView;
-        private SharedMemoryMapView feedbackChannelMemoryMapView;
+        private MlosContext mlosContext;
 
-        private NamedEvent controlChannelNamedEvent;
-        private NamedEvent feedbackChannelNamedEvent;
-
-        private SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView;
         #endregion
 
         #region Mlos.Agent setup
@@ -69,48 +50,17 @@ namespace Mlos.Agent
         /// <summary>
         /// Initialize shared channel.
         /// </summary>
-        public void InitializeSharedChannel()
+        /// <param name="mlosContext">Mlos context instance.</param>
+        public void InitializeSharedChannel(MlosContext mlosContext)
         {
-            // Create or open the memory mapped files.
-            //
-            Console.WriteLine("Create or open memory mapped files");
-            globalMemoryRegionView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
-            controlChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(ControlChannelMemoryMapName, SharedMemorySize);
-            feedbackChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(FeedbackChannelMemoryMapName, SharedMemorySize);
-            sharedConfigMemoryMapView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.SharedConfigMemoryRegion>(SharedConfigMemoryMapName, SharedMemorySize);
-
-            // Create channel synchronization primitives.
-            //
-            Console.WriteLine("Create channel synchronization primitives");
-            controlChannelNamedEvent = NamedEvent.CreateOrOpen(ControlChannelSemaphoreName);
-            feedbackChannelNamedEvent = NamedEvent.CreateOrOpen(FeedbackChannelSemaphoreName);
-
-            // Setup feedback channel.
-            //
-            Console.WriteLine("Setup feedback channel");
-
-            MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-
-            Console.WriteLine("Setup feedback channel");
-
-
-            var feedbackChannel = new SharedChannel<InterProcessSharedChannelPolicy, SharedChannelSpinPolicy>(
-                buffer: feedbackChannelMemoryMapView.Buffer,
-                size: (uint)feedbackChannelMemoryMapView.MemSize,
-                sync: globalMemoryRegion.FeedbackChannelSynchronization)
-            {
-                ChannelPolicy = { NotificationEvent = feedbackChannelNamedEvent },
-            };
+            this.mlosContext = mlosContext;
 
             // Set SharedConfig memory region.
             //
-            Console.WriteLine("Set SharedConfig memory region.");
-
-            sharedConfigManager.SetMemoryRegion(new MlosProxyInternal.SharedConfigMemoryRegion { Buffer = sharedConfigMemoryMapView.MemoryRegion().Buffer });
+            sharedConfigManager.SetMemoryRegion(new MlosProxyInternal.SharedConfigMemoryRegion { Buffer = mlosContext.SharedConfigMemoryRegion.Buffer });
 
             // Setup MlosContext.
             //
-            MlosContext.FeedbackChannel = feedbackChannel;
             MlosContext.SharedConfigManager = sharedConfigManager;
 
             // Initialize callbacks.
@@ -129,7 +79,7 @@ namespace Mlos.Agent
             // Register assemblies from the shared config.
             // Assembly Mlos.NetCore does not have a config, as it is always registered first.
             //
-            for (uint index = 1; index < globalMemoryRegion.RegisteredSettingsAssemblyCount.Load(); index++)
+            for (uint index = 1; index < mlosContext.GlobalMemoryRegion.RegisteredSettingsAssemblyCount.Load(); index++)
             {
                 RegisterSettingsAssembly(assemblyIndex: index);
             }
@@ -144,8 +94,8 @@ namespace Mlos.Agent
 
             // Signal named event to close any waiter threads.
             //
-            controlChannelNamedEvent.Signal();
-            feedbackChannelNamedEvent.Signal();
+            mlosContext.TerminateControlChannel();
+            mlosContext.TerminateFeedbackChannel();
         }
 
         /// <summary>
@@ -301,15 +251,13 @@ namespace Mlos.Agent
 
         /// <summary>
         /// #TODO remove, this is not required.
-        /// set the terminate channel in sync object and signal.
         /// </summary>
         /// <param name="msg"></param>
-        private void TerminateReaderThreadRequestMessageCallback(TerminateReaderThreadRequestMessage msg)
+        private void TerminateReaderThreadRequestMessageCallback(MlosProxy.TerminateReaderThreadRequestMessage msg)
         {
             // Terminate the channel.
             //
-            MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-            ChannelSynchronization controlChannelSync = globalMemoryRegion.ControlChannelSynchronization;
+            MlosProxy.ChannelSynchronization controlChannelSync = mlosContext.GlobalMemoryRegion.ControlChannelSynchronization;
             controlChannelSync.TerminateChannel.Store(true);
         }
 
@@ -320,20 +268,9 @@ namespace Mlos.Agent
         /// </summary>
         public void RunAgent()
         {
-            // Create the shared memory control channel.
-            //
-            var globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-            var controlChannel = new SharedChannel<InterProcessSharedChannelPolicy, SharedChannelSpinPolicy>(
-                buffer: controlChannelMemoryMapView.Buffer,
-                size: (uint)controlChannelMemoryMapView.MemSize,
-                sync: globalMemoryRegion.ControlChannelSynchronization)
-            {
-                ChannelPolicy = { NotificationEvent = controlChannelNamedEvent },
-            };
-
             // Process the messages from the control channel.
             //
-            controlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
+            MlosContext.ControlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -343,32 +280,16 @@ namespace Mlos.Agent
                 return;
             }
 
-            // Close shared memory.
+            // Dispose MlosContext.
             //
-            globalMemoryRegionView?.Dispose();
-            globalMemoryRegionView = null;
-
-            controlChannelMemoryMapView?.Dispose();
-            controlChannelMemoryMapView = null;
-
-            feedbackChannelMemoryMapView?.Dispose();
-            feedbackChannelMemoryMapView = null;
-
-            sharedConfigMemoryMapView?.Dispose();
-            sharedConfigMemoryMapView = null;
-
-            controlChannelNamedEvent?.Dispose();
-            controlChannelNamedEvent = null;
-
-            feedbackChannelNamedEvent?.Dispose();
-            feedbackChannelNamedEvent = null;
+            mlosContext?.Dispose();
+            mlosContext = null;
 
             isDisposed = true;
         }
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

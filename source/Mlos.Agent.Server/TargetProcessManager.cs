@@ -7,9 +7,7 @@
 // -----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 
 namespace Mlos.Agent.Server
 {
@@ -22,9 +20,10 @@ namespace Mlos.Agent.Server
     internal class TargetProcessManager : IDisposable
     {
         private readonly string executableFilePath;
+
         private Process targetProcess;
 
-        private bool disposed = false;
+        private bool isDisposed;
 
         public TargetProcessManager(string executableFilePath)
         {
@@ -40,18 +39,15 @@ namespace Mlos.Agent.Server
 
         private void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                targetProcess?.Dispose();
-                targetProcess = null;
-            }
+            targetProcess?.Dispose();
+            targetProcess = null;
 
-            disposed = true;
+            isDisposed = true;
         }
 
         public void StartTargetProcess()
