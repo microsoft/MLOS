@@ -76,7 +76,7 @@ To build and run the necessary components for this example
 ## Executing
 
 The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark.
-For a more detailed walk-through please look at [the SmartCache C++ notebook](https://microsoft.github.io/MLOS/source/Examples/SmartCacheCPP/).
+For a more detailed walk-through please look at [the SmartCache C++ notebook](https://microsoft.github.io/MLOS/notebooks/SmartCacheCPP/).
 
 ```sh
 export MLOS_SETTINGS_REGISTRY_PATH="$PWD/target/bin/Release"
