@@ -27,6 +27,12 @@
     <SettingsSystemCodeGenOutputBasename Condition="'$(SettingsSystemCodeGenOutputBasename)' == ''">SettingsProvider_gen</SettingsSystemCodeGenOutputBasename>
   </PropertyGroup>
 
+  <!-- Binplace settings registry to the target folder -->
+  <PropertyGroup>
+    <!-- Provide a property for external projects to override where the output of the settings registry dlls should be placed -->
+    <SettingsRegistryBinplaceDir Condition="'$(SettingsRegistryBinplaceDir)' == ''">$(BinplaceDir)</SettingsRegistryBinplaceDir>
+  </PropertyGroup>
+
   <!-- Track the set of code gen outputs *from this project* (reference projects handled next) for incremental build purposes. -->
   <ItemGroup Label="Mlos CodeGen Outputs" Condition="'@(SettingsRegistryDef->Count())' != 0">
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_callbacks.h" />
@@ -63,14 +69,9 @@
 
   <!-- Provide a meta-target for easier dependency/cli specification -->
   <Target Name="SettingsSystemCodeGen" DependsOnTargets="SettingsSystemRegistryDefCodeGen" />
-
+ 
   <!-- Binplace settings registry to the target folder -->
-  <PropertyGroup>
-    <!-- Provide a property for external projects to override where the output of the settings registry dlls should be placed -->
-    <SettingsRegistryBinplaceDir Condition="'$(SettingsRegistryBinplaceDir)' == ''">$(BinplaceDir)</SettingsRegistryBinplaceDir>
-  </PropertyGroup>
-  <!-- By default we don't need to binplace to BinplaceDir since Mlos.NetCore.targets already do that for us. -->
-  <Target Name="BinplaceSettingsRegistry" AfterTargets="Build" Condition="'$(SettingsRegistryBinplaceDir)' != '$(BinplaceDir)'">
+  <Target Name="BinplaceSettingsRegistry" AfterTargets="Build">
     <Copy SourceFiles="$(OutputPath)\$(TargetFileName)" DestinationFolder="$(SettingsRegistryBinplaceDir)" />
   </Target>
 
