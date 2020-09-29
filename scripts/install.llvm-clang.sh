@@ -20,7 +20,7 @@ if [ "$(type $CLANG_BIN 2>/dev/null)" == "" ]; then
     set -x
     sudo apt-get update >/dev/null
     set +x
-    if apt-cache $CLANG_PKG | grep -q "^Package: $CLANG_PKG"; then
+    if apt-cache show $CLANG_PKG | grep -q "^Package: $CLANG_PKG"; then
         echo "Installing $CLANG_PKG via apt ..."
         # Try to install it via the existing package manager:
         set -x
@@ -28,6 +28,9 @@ if [ "$(type $CLANG_BIN 2>/dev/null)" == "" ]; then
         set +x
     else
         # Else, we need to add repositories for the current distro we're on.
+
+        sudo apt-get -y --no-install-recommends install \
+            curl lsb-release wget software-properties-common
 
         TOOLS_DIR="$MLOS_ROOT/tools"
         mkdir -p "$TOOLS_DIR"
