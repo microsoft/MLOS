@@ -7,14 +7,9 @@
 // -----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
-using CommandLine;
-using CommandLine.Text;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -60,29 +55,7 @@ namespace Mlos.Agent.Server
         {
             string executableFilePath = null;
             Uri optimizerAddressUri = null;
-            IEnumerable<string> extraArgs = null;
-
-            var cliOptsParser = new Parser(with => with.HelpWriter = null);
-            var cliOptsParseResult = cliOptsParser.ParseArguments<CliOptions>(args)
-                .WithParsed(parsedOptions =>
-                {
-                    executableFilePath = parsedOptions.Executable;
-                    optimizerAddressUri = parsedOptions.OptimizerUri;
-                    extraArgs = parsedOptions.ExtraArgs;
-                });
-            if (cliOptsParseResult.Tag == ParserResultType.NotParsed)
-            {
-                cliOptsParseResult.WithNotParsed(errs => ShowUsageHelp(
-                    cliOptsParseResult,
-                    errors: errs,
-                    msg: "Failed to parse command line options."));
-            }
-            else if (extraArgs != null && extraArgs.Any())
-            {
-                ShowUsageHelp(cliOptsParseResult, msg: "Extra arguments found.");
-            }
-
-            cliOptsParser.Dispose();
+            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri);
 
             // Check for the executable before setting up any shared memory to
             // reduce cleanup issues.
@@ -230,90 +203,6 @@ namespace Mlos.Agent.Server
             cancellationTokenSource.Dispose();
 
             Console.WriteLine("Mlos.Agent exited.");
-        }
-
-        private static void ShowUsageHelp<T>(ParserResult<T> parserResult, IEnumerable<Error> errors = null, string msg = null)
-        {
-            if (msg != null)
-            {
-                Console.Error.WriteLine(msg);
-                Console.Error.WriteLine(string.Empty);
-            }
-
-            if (errors == null)
-            {
-                errors = new List<Error>();
-            }
-
-            HelpText helpText = null;
-            if (errors.IsVersion())
-            {
-                helpText = HelpText.AutoBuild(parserResult);
-            }
-            else
-            {
-                helpText = HelpText.AutoBuild(
-                    parserResult,
-                    onError: ht =>
-                    {
-                        return HelpText.DefaultParsingErrorsHandler(parserResult, ht);
-                    },
-                    e => e);
-                helpText.AddNewLineBetweenHelpSections = true;
-                helpText.AddPreOptionsLines(new[]
-                    {
-                        // Use a single long line of text to let the help output get wrapped automatically for us.
-                        "The Mlos.Agent.Server acts as an external agent for MLOS integrated components, allowing them to "
-                        + "send it messages over shared memory, which it can process and use to interface with an optimizer "
-                        + "service to tune the components over their shared memory communication channels.",
-                        string.Empty,
-
-                        // Indent the actual commands to make them stand out a bit more.
-                        // Note: The help out preserves the indent across wrapping.
-                        "usage mode 1:  Wait for an application to register over global shared memory, without an optimizer.",
-                        "    dotnet Mlos.Agent.Server.dll",
-                        string.Empty,
-
-                        "usage mode 2:  Wait for an application to register over global shared memory, and prepare to "
-                        + "communicate with an MLOS optimizer listening at the given Grpc URI.",
-                        "    dotnet Mlos.Agent.Server.dll --optimizer-uri http://localhost:50051",
-                        string.Empty,
-
-                        "usage mode 3:  Start an executable to communicate over freshly prepared global shared memory.",
-                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable",
-                        string.Empty,
-
-                        "usage mode 4:  Start an executable to communicate over freshly prepared global shared memory and "
-                        + "prepare to communicate with an MLOS optimizer listening at the given Grpc URI.",
-                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable --optimizer-uri http://localhost:50051",
-                        string.Empty,
-
-                        "Note: the optimizer service used in these examples can be started using the 'start_optimizer_microservice "
-                        + "launch --port 50051' command from the mlos Python module.",
-                    });
-            }
-
-            Console.WriteLine(helpText);
-            Environment.Exit(1);
-        }
-
-        /// <summary>
-        /// The command line options for this application.
-        /// </summary>
-        private class CliOptions
-        {
-            [Option("executable", Required = false, Default = null, HelpText = "A path to an executable to start (e.g. 'target/bin/Release/SmartCache').")]
-            public string Executable { get; set; }
-
-            [Option("optimizer-uri", Required = false, Default = null, HelpText = "A URI to connect to the MLOS Optimizer service over GRPC (e.g. 'http://localhost:50051').")]
-            public Uri OptimizerUri { get; set; }
-
-            /// <remarks>
-            /// Just used to detect any extra arguments so we can throw a warning.
-            /// See Also: https://github.com/microsoft/MLOS/issues/112.
-            /// </remarks>
-            [CommandLine.Value(0)]
-            public IEnumerable<string> ExtraArgs { get; set; }
         }
     }
 }

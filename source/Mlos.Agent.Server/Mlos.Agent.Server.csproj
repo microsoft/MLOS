@@ -25,6 +25,7 @@
     <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CliOptionsParser.cs" />
     <Compile Include="MlosAgentServer.cs" />
     <Compile Include="TargetProcessManager.cs" />
   </ItemGroup>
