@@ -158,22 +158,14 @@ Task("Clean")
     CleanDirectory(TargetDir);
 });
 
-Task("Restore")
-    .IsDependentOn("Clean")
-    .Does(() =>
-    {
-        DotNetCoreRestore(SolutionFilePath);
-    });
-
 Task("Build-NetCore")
-    .IsDependentOn("Restore")
     .Does(() =>
     {
         var path = MakeAbsolute(new DirectoryPath(SolutionFilePath));
         DotNetCoreBuild(path.FullPath, new DotNetCoreBuildSettings
         {
             Configuration = Configuration,
-            NoRestore = true,
+            NoRestore = false,
             DiagnosticOutput = true,
             MSBuildSettings = MsBuildSettings,
             Verbosity = DotNetCoreVerbosity.Minimal
