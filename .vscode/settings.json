@@ -14,6 +14,6 @@
         132
     ],
     // Control how the vim reflow key combo wraps text for comments.
-    // Set it just below the line length limit to account for an off-by-one error in the vscodevim plugin.
-    "vim.textwidth": 131
+    // Set it to something less than the code length but not too short.
+    "vim.textwidth": 100
 }
