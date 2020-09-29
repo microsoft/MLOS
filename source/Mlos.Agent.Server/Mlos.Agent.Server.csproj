@@ -30,14 +30,4 @@
     <Compile Include="TargetProcessManager.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
-  <Target Name="TestBadCliArgs" AfterTargets="Build" Condition="'$(RunUnitTest)' != 'false'">
-    <Exec Command="dotnet &quot;$(OutputPath)/$(TargetName).dll&quot; unhandled-arg" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low" StandardErrorImportance="low">
-      <Output TaskParameter="ExitCode" PropertyName="UnhandledArgExitCode" />
-    </Exec>
-    <Error Text="CLI parser failed to error on unhandled arguments." Condition="'$(UnhandledArgExitCode)' != '1'" />
-    <Exec Command="dotnet &quot;$(OutputPath)/$(TargetName).dll&quot; --unhandled-opt" IgnoreExitCode="true" IgnoreStandardErrorWarningFormat="true" StandardOutputImportance="low" StandardErrorImportance="low">
-      <Output TaskParameter="ExitCode" PropertyName="UnhandledOptExitCode" />
-    </Exec>
-    <Error Text="CLI parser failed to error on unhandled options." Condition="'$(UnhandledOptExitCode)' != '1'" />
-  </Target>
 </Project>
