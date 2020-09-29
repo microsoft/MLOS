@@ -26,6 +26,9 @@
             "preLaunchTask": "", //"build",
             "program": "${workspaceFolder}/out/dotnet/source/Mlos.Agent.Server/objd/AnyCPU/Mlos.Agent.Server.dll",
             "args": [
+                //"--optimizer-uri",
+                //"http://localhost:50051",
+                "--executable",
                 "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest"
             ],
             "env": {
@@ -42,10 +45,10 @@
             "preLaunchTask": "", //"build",
             "program": "${workspaceFolder}/out/dotnet/source/Mlos.Agent.Server/objd/AnyCPU/Mlos.Agent.Server.dll",
             "args": [
+                //"--optimizer-uri",
+                //"http://localhost:50051",
                 "--executable",
-                "${workspaceFolder}/out/cmake/Debug/source/Examples/SmartCache/SmartCache",
-                "--optimizer-uri",
-                "http://localhost:50051"
+                "${workspaceFolder}/out/cmake/Debug/source/Examples/SmartCache/SmartCache"
             ],
             "env": {
                 "MLOS_SETTINGS_REGISTRY_PATH": "${workspaceFolder}/out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/objd/AnyCPU"

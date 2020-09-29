@@ -11,8 +11,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-using CommandLine;
-
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
@@ -57,20 +55,7 @@ namespace Mlos.Agent.Server
         {
             string executableFilePath = null;
             Uri optimizerAddressUri = null;
-
-            var cliOptsParseResult = CommandLine.Parser.Default.ParseArguments<CliOptions>(args)
-                .WithParsed(parsedOptions =>
-                {
-                    executableFilePath = parsedOptions.Executable;
-                    optimizerAddressUri = parsedOptions.OptimizerUri;
-                });
-            if (cliOptsParseResult.Tag == ParserResultType.NotParsed)
-            {
-                // CommandLine already prints the help text for us in this case.
-                //
-                Console.Error.WriteLine("Failed to parse command line options.");
-                Environment.Exit(1);
-            }
+            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri);
 
             // Check for the executable before setting up any shared memory to
             // reduce cleanup issues.
@@ -227,18 +212,6 @@ namespace Mlos.Agent.Server
             cancellationTokenSource.Dispose();
 
             Console.WriteLine("Mlos.Agent exited.");
-        }
-
-        /// <summary>
-        /// The command line options for this application.
-        /// </summary>
-        private class CliOptions
-        {
-            [Option("executable", Required = false, Default = null, HelpText = "A path to an executable to start (e.g. 'target/bin/Release/SmartCache').")]
-            public string Executable { get; set; }
-
-            [Option("optimizer-uri", Required = false, Default = null, HelpText = "A URI to connect to the MLOS Optimizer service over GRPC (e.g. 'http://localhost:50051').")]
-            public Uri OptimizerUri { get; set; }
         }
     }
 }
