@@ -35,13 +35,13 @@ To build and run the necessary components for this example
 1. [Build the Docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image) using the [`Dockerfile`](../../../Dockerfile#mlos-github-tree-view) at the root of the repository.
 
     ```shell
-    docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
+    docker build --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 .
     ```
 
 2. [Run the Docker image](../../../documentation/02-Build.md#create-a-new-container-instance) you just built.
 
     ```shell
-    docker run -it -v $PWD:/src/MLOS --name mlos-build mlos/build:ubuntu-20.04
+    docker run -it -v $PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-20.04
     ```
 
 3. Inside the container, [build the compiled software](../../../documentation/02-Build.md#cli-make) with `make`:

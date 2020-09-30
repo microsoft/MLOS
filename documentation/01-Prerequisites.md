@@ -95,7 +95,7 @@ To automatically setup a Linux build environment using `docker`, run the followi
 
 ```sh
 # Build the docker image:
-docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
+docker build --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 .
 ```
 
 > Where `20.04` can also be replaced with another [supported `UbuntuVersion`](#linux-distribution-requirements).

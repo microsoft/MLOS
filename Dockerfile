@@ -4,17 +4,17 @@
 # Supported UbuntuVersions: 16.04, 18.04, 20.04
 #
 # Build with:
-#   UbuntuVersion=20.04; docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
+#   UbuntuVersion=20.04; docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos-build-ubuntu-$UbuntuVersion .
 #
 # Optionally, build with a proxy server:
-#   UbuntuVersion=20.04; docker build --build-arg=http_proxy=http://some-proxy-caching-host:3128 --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
+#   UbuntuVersion=20.04; docker build --build-arg=http_proxy=http://some-proxy-caching-host:3128 --build-arg=UbuntuVersion=$UbuntuVersion -t mlos-build-ubuntu-$UbuntuVersion .
 #
 # Run with:
-#   docker run -it --name mlos-build-$UbuntuVersion mlos/build:ubuntu-$UbuntuVersion
+#   docker run -it -P --name mlos-build mlos-build-ubuntu-$UbuntuVersion
 #
 # Alternatively, if you want to map the current source tree into the container
 # instead of using a separate copy from the build step:
-#   docker run -v `pwd`:/src/MLOS -it --name mlos-build-$UbuntuVersion mlos/build:ubuntu-$UbuntuVersion
+#   docker run -v $PWD:/src/MLOS -it -P --name mlos-build mlos-build-ubuntu-$UbuntuVersion
 #
 # The latter allows live editing in a native editor (e.g. VSCode or
 # VisualStudio) and building using the container's environment.
@@ -22,7 +22,7 @@
 # Once inside the container the `make` command will handle typical build needs.
 #
 # To restart an existing container:
-#   docker start -i mlos-build-$UbuntuVersion
+#   docker start -i mlos-build
 
 # The default version of Ubuntu to use.
 # This is currently set to 16.04 since that is the version that SqlServer

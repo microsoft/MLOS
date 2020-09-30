@@ -33,7 +33,7 @@ If you chose to use the Docker build environment and have already built or pulle
 # Run the image:
 docker run -it -v $PWD:/src/MLOS \
   --name mlos-build \
-  mlos/build:ubuntu-20.04
+  mlos-build-ubuntu-20.04
 ```
 
 > Where `20.04` can also be replaced with another [supported `UbuntuVersion`](./01-Prerequisites.md#linux-distribution-requirements).
