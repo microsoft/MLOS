@@ -5,7 +5,7 @@
 # - LICENSE.txt in this repository's root directory
 # - https://aka.ms/mcr/osslegalnotice
 
-# A Dockerfile for creating a suitable build environment for MLOS for
+# A Dockerfile for creating a suitable (Linux) build environment for MLOS for
 # development and testing on the various versions of Ubuntu we need to support.
 
 # Supported UbuntuVersions: 16.04, 18.04, 20.04
