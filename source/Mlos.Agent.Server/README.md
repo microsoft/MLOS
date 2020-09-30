@@ -27,7 +27,7 @@ Since it is meant as a reusable agent for different components, it contains no s
 
 Rather, it starts an [`Mlos.Agent`](../Mlos.Agent/#mlos-github-tree-view) message processing loop which loads each component's SettingsRegistry assembly dlls upon registration request (via the `RegisterComponentConfig` and `RegisterAssemblyRequestMessage` from [`Mlos.Core`](../Mlos.Core/#mlos-github-tree-view) and [`Mlos.NetCore`](../Mlos.NetCore/#mlos-github-tree-view)) and runs their `AssemblyInitializer` constructor to setup the component specific message handler callbacks.
 
-See the [`SmartCache`](../Examples/SmartCache/#mlos-github-tree-view) code, especially it's SettingsRegistry's [`AssemblyInitializer.cs`](../../Example/SmartCache/SmartCache.SettingsRegistry/AssemblyInitializer.cs#mlos-github-tree-view) for a more detailed example.
+See the [`SmartCache`](../Examples/SmartCache/#mlos-github-tree-view) code, especially it's SettingsRegistry's [`AssemblyInitializer.cs`](../Examples/SmartCache/SmartCache.SettingsRegistry/AssemblyInitializer.cs#mlos-github-tree-view) for a more detailed example.
 
 ## Building
 
