@@ -31,6 +31,15 @@ ARG UbuntuVersion=16.04
 
 FROM --platform=linux/amd64 ubuntu:${UbuntuVersion}
 
+LABEL org.label-schema.schema-version = "1.0"
+LABEL org.label-schema.name = "mlos-build-ubuntu-${UbuntuVersion}"
+LABEL org.label-schema.description = "MLOS build environment for Ubuntu ${UbuntuVersion}"
+LABEL org.label-schema.vendor = "Microsoft"
+LABEL org.label-schema.vcs-url = "https://github.com/Microsoft/MLOS"
+LABEL org.label-schema.usage = "https://github.com/Microsoft/MLOS/tree/main/documentation"
+LABEL org.label-schema.docker.cmd = "docker run -it -P -v $PWD:/src/MLOS"
+LABEL org.label-schema.docker.cmd.test = "docker run -P -v $PWD:/src/MLOS make all install test"
+
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=UTC
 ARG LANG=en_US.UTF-8
