@@ -33,6 +33,47 @@ jobs:
         set Configuration=${{ matrix.configuration }}
         scripts\build.windows.cmd
 
+  # TODO: change this to only push if the build/test of the MLOS software succeeds using the docker image.
+  docker-build:
+    name: Build docker ${{ matrix.UbuntuVersion }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        UbuntuVersion: [16.04, 18.04, 20.04]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Docker Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: mloscontainerregistry.azurecr.io
+          username: ${{ secrets.MLOS_ACR_USERNAME }}
+          password: ${{ secrets.MLOS_ACR_PASSWORD }}
+      # TODO: Schedule a daily fresh build (without caches)
+      - name: Docker build image for Ubuntu ${{ matrix.UbuntuVersion }}
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          # Try to reuse the cache from the current build image (if it exists).
+          docker pull mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest || true
+          docker build . --build-arg=UbuntuVersion=${{ matrix.UbuntuVersion }} \
+            --cache-from mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest \
+            --tag mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+      # TODO: Run the build/tests
+      # ...
+      # Assuming those succeeded ...
+      - name: Push the docker image
+        # Only do this if this was a successful merge to the main branch.
+        if: ${{ github.ref == 'refs/heads/main' }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          docker tag mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
+            mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker push mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion  }}:${{ github.sha }}
+          docker push mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion  }}:latest
+
   linux-build-test:
     name: ${{ matrix.configuration }} build/test C++/C# on Linux
     runs-on: ubuntu-20.04

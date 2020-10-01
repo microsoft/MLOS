@@ -17,7 +17,7 @@ scriptdir=$(dirname "$script")
 cd "$scriptdir/.."
 . ./scripts/util.sh
 
-mkdir -p ./tools
+mkdir -p ./tools/bin
 cd ./tools
 
 bins='cmake cpack ctest'
