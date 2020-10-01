@@ -59,12 +59,13 @@ jobs:
           docker build . --build-arg=UbuntuVersion=${{ matrix.UbuntuVersion }} \
             --cache-from mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest \
             --tag mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-          #docker push mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion  }}:${{ github.sha }}
+          # Need to push the SHA versioned image for use by dependent jobs.
+          docker push mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion  }}:${{ github.sha }}
 
   linux-build-test:
-    name: ${{ matrix.configuration }} build/test C++/C# on Linux
+    name: ${{ matrix.configuration }} build/test C++/C# on Ubuntu ${{ matrix.UbuntuVersion }}
     runs-on: ubuntu-latest
-    needs: [docker-image-build]
+    needs: docker-image-build
     timeout-minutes: 30
     strategy:
       matrix:
@@ -82,7 +83,7 @@ jobs:
       - name: Start ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
         shell: bash
         run: |
-          docker run -d -v $PWD:/src/MLOS --env CONFIGURATION=${{ matrix.configuration }} \
+          docker run -it -d -v $PWD:/src/MLOS --env CONFIGURATION=${{ matrix.configuration }} \
             --name mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
             mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
       # TODO: Add Python checks to this set
@@ -106,12 +107,16 @@ jobs:
         timeout-minutes: 10
         shell: bash
         run: docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} ./build.linux.sh
-      - name: Stop ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      - name: Cleanup ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
         shell: bash
-        run: docker stop mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
+        run: |
+          docker stop mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
+          docker rm mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
 
-  docker-image-push:
-    name: Build docker image for Ubuntu ${{ matrix.UbuntuVersion }}
+  docker-image-publish:
+    name: Publish docker image for Ubuntu ${{ matrix.UbuntuVersion }}
+    # Only do this if this was a successful merge to the main branch.
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs: [linux-build-test, docker-image-build]
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -119,16 +124,19 @@ jobs:
       matrix:
         UbuntuVersion: [16.04, 18.04, 20.04]
     steps:
+      - name: Docker Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: mloscontainerregistry.azurecr.io
+          username: ${{ secrets.MLOS_ACR_USERNAME }}
+          password: ${{ secrets.MLOS_ACR_PASSWORD }}
       - name: Push the docker image
-        # Only do this if this was a successful merge to the main branch.
-        if: ${{ github.ref == 'refs/heads/main' }}
         timeout-minutes: 15
         shell: bash
         run: |
           docker pull mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
           docker tag mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
             mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker push mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion  }}:${{ github.sha }}
           docker push mloscontainerregistry.azurecr.io/mlos-build-ubuntu-${{ matrix.UbuntuVersion  }}:latest
 
   # The licenseheaders check depends on comparing the source tree, so we keep it in a
@@ -161,7 +169,7 @@ jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         use-quiet-mode: yes
@@ -173,7 +181,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Checkout
-      uses: actions/checkout@v2.3.1
+      uses: actions/checkout@v2
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
