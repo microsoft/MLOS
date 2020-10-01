@@ -83,7 +83,7 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa && \
 
 RUN python3.7 -m pip install pip && \
     python3.7 -m pip install --upgrade pip && \
-    python3.7 -m pip install setuptools
+    python3.7 -m pip install setuptools wheel
 
 COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
