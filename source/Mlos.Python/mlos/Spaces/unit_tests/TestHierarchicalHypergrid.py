@@ -5,7 +5,7 @@
 import random
 import unittest
 
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
 
 class TestHierarchicalSpaces(unittest.TestCase):
 

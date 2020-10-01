@@ -25,9 +25,14 @@ add_dependencies(${PROJECT_NAME} Mlos.NetCore)
 add_subdirectory(Mlos.UnitTest.SettingsRegistry)
 add_dependencies(${PROJECT_NAME} Mlos.UnitTest.SettingsRegistry)
 
-# FIXME:
-# - This doesn't finish, it just hangs.
-# - When you pkill dotnet to end it, the test reports success.
-#add_test(NAME MlosTestRun_MlosAgentServer_MlosUnitTest
-#    COMMAND ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> $<TARGET_FILE:Mlos.UnitTest>)
-#add_dependencies(check ${PROJECT_NAME} Mlos.Agent.Server)
+# Use a custom function to help setup a test run.
+add_mlos_agent_server_exe_test_run(
+    NAME MlosTestRun_Mlos.Agent.Server_${PROJECT_NAME}
+    EXECUTABLE_TARGET ${PROJECT_NAME}
+    TIMEOUT 240
+    MLOS_SETTINGS_REGISTRY_TARGETS Mlos.UnitTest.SettingsRegistry)
+
+# Binplace the outputs for more convenient testing.
+install(TARGETS ${PROJECT_NAME}
+    CONFIGURATIONS ${CMAKE_BUILD_TYPE}
+    RUNTIME DESTINATION ${BINPLACE_DIR})

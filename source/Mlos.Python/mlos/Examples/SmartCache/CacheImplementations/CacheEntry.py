@@ -7,5 +7,5 @@ class CacheEntry:
         self.key = key
         self.value = value
 
-    def __str__(self):
+    def __repr__(self):
         return str(vars(self))

@@ -30,6 +30,7 @@ $(DOTNET) $(DOTNET_REAL): $(MLOS_ROOT)/scripts/fetch-dotnet.sh
 # corresponding fake targets for the "all" target to depend on.
 Csprojs := $(wildcard *.csproj)
 CsprojBuildTargets := $(Csprojs:.csproj=.csproj.fake-build-target)
+CsprojBuildQuickTargets := $(Csprojs:.csproj=.csproj.fake-build-quick-target)
 CsprojTestTargets := $(Csprojs:.csproj=.csproj.fake-test-target)
 DirsProj := $(wildcard dirs.proj)
 DirsProjBuildTarget := $(DirsProj:.proj=.proj.fake-build-target)
@@ -40,9 +41,19 @@ DirsProjTestTarget := $(DirsProj:.proj=.proj.fake-test-target)
 dotnet-build: $(DOTNET) $(CsprojBuildTargets) $(DirsProjBuildTarget)
 	@ echo "make dotnet-build target finished."
 
+# A target for quickly rebuilding just a given project and none of its dependencies.
+# Note: this doesn't make sense to use with dirs.proj, so we skip it here.
+.PHONY: dotnet-build-quick
+dotnet-build-quick: $(DOTNET) $(CsprojBuildQuickTargets)
+	@ echo "make dotnet-build-quick target finished."
+
 .PHONY: dotnet-test
 dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
 	@ echo "make dotnet-test target finished."
+
+.PHONY: dotnet-install
+dotnet-install:
+	@ echo "make dotnet-install is currently a no-op."
 
 # For each of the fake build targets, just call "dotnet build" on its
 # corresponding *.csproj file
@@ -54,11 +65,23 @@ dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
 	@ # Note: -m tells it to build in parallel.
 	@ $(DOTNET) build -m --configuration $(CONFIGURATION) $(@:.fake-build-target=)
 
+%.fake-build-quick-target: $(DOTNET)
+	@ # A target to allow quickly rebuilding just a given project and none of its dependencies.
+	@ $(DOTNET) build -m --configuration $(CONFIGURATION) --no-restore /p:BuildProjectReferences=false $(@:.fake-build-quick-target=)
+
+# By default don't run certain tests.
+# To override, run with:
+#   DOTNET_TEST_FILTER=' ' make dotnet-test
+DOTNET_TEST_FILTER := ${DOTNET_TEST_FILTER}
+ifeq ($(DOTNET_TEST_FILTER),)
+    DOTNET_TEST_FILTER = --filter='Category!=SkipForCI'
+endif
+
 # For each of the fake test targets, just call "dotnet test" on its
 # corresponding *.csproj file
 # For now, don't force a rebuild first.
 %.fake-test-target: #%.fake-build-target
-	$(DOTNET) test -m --configuration $(CONFIGURATION) $(@:.fake-test-target=)
+	$(DOTNET) test --no-build -m --configuration $(CONFIGURATION) $(DOTNET_TEST_FILTER) $(@:.fake-test-target=)
 
 # Note: this clean method somewhat lazily removes both Debug and Release build outputs.
 # To be added to the including Makefile's clean target.
@@ -68,4 +91,4 @@ dotnet-clean:
 
 handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
     $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
+    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)

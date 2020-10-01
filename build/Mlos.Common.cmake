@@ -47,5 +47,16 @@ if((${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR}) OR (${CMAKE_BINARY_DIR} ST
 endif()
 set(CMAKE_BINARY_DIR "${MLOS_ROOT}/out/cmake/${CMAKE_BUILD_TYPE}")
 
+# Set a binplace dir to match the msbuild rules.
+# We will use this in our install() definition rules.
+set(BINPLACE_DIR "${MLOS_ROOT}/target/bin/${CMAKE_BUILD_TYPE}")
+
+# By default only let any ctest processes last for limited number of seconds.
+# To override on a per test basis, use add_test_properties()
+set(DEFAULT_CTEST_TIMEOUT 120)
+
 # See Also: Mlos.NetCore.cmake, Mlos.Common.targets.cmake
 set(DOTNET "${MLOS_ROOT}/tools/bin/dotnet")
+
+find_program(PYTHON3
+    NAMES python3.7 python3)

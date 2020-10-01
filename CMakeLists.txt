@@ -8,6 +8,10 @@ include("${MLOS_ROOT}/build/Mlos.Common.cmake")
 # Top level project:
 project(MLOS)
 
+# Force the test target that gets generated to run ctest in verbose mode.
+set(CMAKE_CTEST_ARGUMENTS "--verbose;${CMAKE_CTEST_ARGUMENTS}")
+set(CMAKE_CTEST_ARGUMENTS "--timeout ${DEFAULT_CTEST_TIMEOUT};${CMAKE_CTEST_ARGUMENTS}")
+
 enable_testing()
 # Add a custom "check" target that will run all of the tests registered in the
 # various other CMakeLists.txt via "ctest", but making sure that the targets

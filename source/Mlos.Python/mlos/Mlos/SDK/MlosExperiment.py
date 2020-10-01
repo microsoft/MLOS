@@ -6,25 +6,35 @@ from enum import Enum
 
 
 class MlosExperiment:
-    """ A container for all resources associated with a given experiment.
+    """A container for all resources associated with a given experiment.
 
-            TelemetryAggregators's resources include:
-            * SmartComponent types governed by the experiment
-            * SmartComponent runtime attributes set governed by the experiment
-            * Telemetry enabled by the experiment
-            * Decision Makers associated with each runtime decision
+    TelemetryAggregators's resources include:
+    * SmartComponent types governed by the experiment
+    * SmartComponent runtime attributes set governed by the experiment
+    * Telemetry enabled by the experiment
+    * Decision Makers associated with each runtime decision
 
-            The idea is that upon authoring an experiment, we pass it as an argument to the MlosAgent,
-            who in turn enables all required telemetry, associates callbacks with each telemetry event
-            binds decision makers to runtime decisions etc.
+    The idea is that upon authoring an experiment, we pass it as an argument to the MlosAgent,
+    who in turn enables all required telemetry, associates callbacks with each telemetry event
+    binds decision makers to runtime decisions etc.
 
-            Whenever an experiment completes, the MlosAgent unbinds decision makers, disables the telemetry,
-            and releases the SmartComponents.
+    Whenever an experiment completes, the MlosAgent unbinds decision makers, disables the telemetry,
+    and releases the SmartComponents.
 
-            For now we will only enable a single experiment at a time.
+    For now we will only enable a single experiment at a time.
 
-            Further, for now we will coarsely group SmartComponents by type, and ignore runtime attribute filters.
-        """
+    Further, for now we will coarsely group SmartComponents by type, and ignore runtime attribute filters.
+
+    Parameters
+    ----------
+    smart_component_types : list or None
+        List of smart components to configure during experiment.
+
+    telemetry_aggregators : list or None
+        Telemetry aggregators to monitor.
+
+    runtime_decision_makers : list or None
+    """
 
     class Status(Enum):
         REQUESTED = 1

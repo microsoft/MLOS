@@ -3,14 +3,14 @@
 # Licensed under the MIT License.
 #
 import json
+import os
 import random
 import unittest
 
-from mlos.Spaces.Hypergrids import SimpleHypergrid
+from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
+from mlos.Spaces.SimpleHypergrid import SimpleHypergrid
 import mlos.Spaces.Dimensions.DimensionCalculator
-from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
-from mlos.Spaces.Dimensions.OrdinalDimension import OrdinalDimension
 from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
 from mlos.Spaces.Point import Point
 
@@ -60,6 +60,36 @@ class TestHierarchicalSpaces(unittest.TestCase):
         self.emergency_buffer_color = json.loads(json.dumps(self.original_emergency_buffer_color, cls=HypergridJsonEncoder), cls=HypergridJsonDecoder)
         self.emergency_buffer_settings_with_color = json.loads(json.dumps(self.original_emergency_buffer_settings_with_color, cls=HypergridJsonEncoder), cls=HypergridJsonDecoder)
         self.hierarchical_settings = json.loads(json.dumps(self.original_hierarchical_settings, cls=HypergridJsonEncoder), cls=HypergridJsonDecoder)
+
+        self.serialized_configs_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "SerializedUnitTestConfigs")
+        self.serialized_configs_filenames = [
+            (self.original_root_communication_channel_parameter_space, "original_root_communication_channel_parameter_space.json"),
+            (self.original_emergency_buffer_settings, "original_emergency_buffer_settings.json"),
+            (self.original_emergency_buffer_color, "original_emergency_buffer_color.json"),
+            (self.original_emergency_buffer_settings_with_color, "original_emergency_buffer_settings_with_color.json"),
+            (self.original_hierarchical_settings, "original_hierarchical_settings.json")
+        ]
+
+        self.serialized_configs_file_paths = [
+            (hypergrid, os.path.join(self.serialized_configs_dir, serialized_config_filename))
+            for hypergrid, serialized_config_filename
+            in self.serialized_configs_filenames
+        ]
+
+        self.expected_print_outputs_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "ExpectedPrintOutputs")
+        self.expected_print_outputs_filenames = [
+            (self.original_root_communication_channel_parameter_space, "original_root_communication_channel_parameter_space.txt"),
+            (self.original_emergency_buffer_settings, "original_emergency_buffer_settings.txt"),
+            (self.original_emergency_buffer_color, "original_emergency_buffer_color.txt"),
+            (self.original_emergency_buffer_settings_with_color, "original_emergency_buffer_settings_with_color.txt"),
+            (self.original_hierarchical_settings, "original_hierarchical_settings.txt")
+        ]
+
+        self.expected_print_outputs_file_paths = [
+            (hypergrid, os.path.join(self.expected_print_outputs_dir, expected_print_output_filename))
+            for hypergrid, expected_print_output_filename
+            in self.expected_print_outputs_filenames
+        ]
 
 
     def test_hierachical_spaces(self):
@@ -187,4 +217,32 @@ class TestHierarchicalSpaces(unittest.TestCase):
         print("-------------------------------------------------------------------------------------------------------")
         print(json.dumps(self.original_hierarchical_settings, cls=HypergridJsonEncoder, indent=2))
         print("-------------------------------------------------------------------------------------------------------")
+        print(json.dumps(bayesian_optimizer_config_store.parameter_space, cls=HypergridJsonEncoder, indent=2))
 
+    def test_serializing_configs(self):
+        for hypergrid, expected_output_file_path in self.serialized_configs_file_paths:
+            with open(expected_output_file_path, 'r') as in_file:
+                expected_output = in_file.read()
+            actual_output = json.dumps(hypergrid, cls=HypergridJsonEncoder, indent=2)
+            assert(actual_output.strip() == expected_output.strip())
+
+    def test_deserializing_configs(self):
+        for hypergrid, serialized_config_file_path in self.serialized_configs_file_paths:
+            with open(serialized_config_file_path, 'r') as in_file:
+                deserialized_hypergrid = json.load(in_file, cls=HypergridJsonDecoder)
+            # Since the __eq__ is not yet implemented, let's assert that all points in one, are in the other.
+            for _ in range(1000):
+                self.assertTrue(hypergrid.random() in deserialized_hypergrid)
+                self.assertTrue(deserialized_hypergrid.random() in hypergrid)
+
+    def test_print_output(self):
+        for hypergrid, expected_print_output_file_path in self.expected_print_outputs_file_paths:
+            #with open(expected_print_output_file_path, 'w') as out_file:
+            #    out_file.write(str(hypergrid))
+            print(hypergrid)
+            print("--------------------------------------------------------------------------------------------------")
+
+            with open(expected_print_output_file_path, 'r') as in_file:
+                expected_output = in_file.read()
+
+            self.assertTrue(expected_output.strip() == str(hypergrid).strip())

@@ -3,18 +3,24 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import uuid
 from contextlib import contextmanager
 import json
-import logging
 import multiprocessing
+from typing import Iterator
+
 import pandas as pd
 
 from mlos.global_values import serialize_to_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
-from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
+from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList, Observations, Features,\
+    ObjectiveValues
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Spaces import Point
+from mlos.Logger import create_logger
+
 
 
 class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
@@ -25,18 +31,20 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
     """
 
     def __init__(self):
-        self._next_optimizer_id = 0
         self._optimizers_by_id = dict()
+        self._ordered_ids = []
 
         self._lock_manager = multiprocessing.Manager()
         self._optimizer_locks_by_optimizer_id = dict()
+        self.logger = create_logger("OptimizerMicroservice")
+        self.logger.info("OptimizerMicroservice init")
 
-    def get_next_optimizer_id(self):
-        self._next_optimizer_id += 1
-        return str(self._next_optimizer_id - 1)
+    @staticmethod
+    def get_next_optimizer_id():
+        return str(uuid.uuid4())
 
     @contextmanager
-    def exclusive_optimizer(self, optimizer_id):
+    def exclusive_optimizer(self, optimizer_id) -> Iterator[BayesianOptimizer]:
         """ Context manager to acquire the optimizer lock and yield the corresponding optimizer.
 
         This makes sure that:
@@ -53,7 +61,8 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
     def ListExistingOptimizers(self, request: Empty, context):
         optimizers_info = []
-        for optimizer_id, optimizer in self._optimizers_by_id.items():
+        for optimizer_id in self._ordered_ids:
+            optimizer = self._optimizers_by_id[optimizer_id]
             optimizers_info.append(OptimizerInfo(
                 OptimizerHandle=OptimizerHandle(Id=optimizer_id),
                 OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
@@ -81,12 +90,19 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         )
 
     def CreateOptimizer(self, request: OptimizerService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
-
+        self.logger.info("Creating Optimizer")
+        print("CREATING OPTIMIZER")
         optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
+        optimizer_config_json = request.OptimizerConfig
+        if optimizer_config_json is not None and len(optimizer_config_json) > 0:
+            optimizer_config = Point.from_json(optimizer_config_json)
+        else:
+            optimizer_config = bayesian_optimizer_config_store.default
+
 
         optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT
+            optimizer_config=optimizer_config
         )
 
         optimizer_id = self.get_next_optimizer_id()
@@ -98,10 +114,13 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         with optimizer_lock:
             self._optimizer_locks_by_optimizer_id[optimizer_id] = optimizer_lock
             self._optimizers_by_id[optimizer_id] = optimizer
-        logging.info(f"Created optimizer {optimizer_id}.")
+            self._ordered_ids.append(optimizer_id)
+        self.logger.info(f"Created optimizer {optimizer_id}.")
         return OptimizerService_pb2.OptimizerHandle(Id=optimizer_id)
 
     def Suggest(self, request, context): # pylint: disable=unused-argument
+        self.logger.info("Suggesting")
+
         # TODO: return an error if optimizer not found
         #
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
@@ -122,9 +141,31 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
 
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(feature_values_dataframe, objective_values_dataframe)
+            optimizer.register(feature_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
 
         return Empty()
+
+    def RegisterObservations(self, request, context): # pylint: disable=unused-argument
+        # TODO: stop ignoring context
+        #
+        observations = request.Observations
+        features_df = pd.read_json(observations.Features.FeaturesJsonString, orient='index')
+        objectives_df = pd.read_json(observations.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
+
+        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
+            optimizer.register(feature_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
+
+        return Empty()
+
+    def GetAllObservations(self, request, context): # pylint: disable=unused-argument
+        with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
+            features_df, objectives_df = optimizer.get_all_observations()
+
+        return Observations(
+            Features=Features(FeaturesJsonString=features_df.to_json(orient='index', double_precision=15)),
+            ObjectiveValues=ObjectiveValues(ObjectiveValuesJsonString=objectives_df.to_json(orient='index', double_precision=15))
+        )
+
 
     def Predict(self, request, context): # pylint: disable=unused-argument
 
@@ -144,3 +185,6 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         )
 
         return response
+
+    def Echo(self, request: Empty, context): # pylint: disable=unused-argument
+        return Empty()

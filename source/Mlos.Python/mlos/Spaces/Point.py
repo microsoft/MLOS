@@ -3,6 +3,8 @@
 # Licensed under the MIT License.
 #
 import json
+from numbers import Number
+
 import pandas as pd
 from mlos.Spaces.Dimensions.Dimension import Dimension
 
@@ -34,9 +36,9 @@ class Point:
         if not isinstance(other, Point):
             return False
         return \
-            all(other[dimension_name] == value for dimension_name, value in self) \
+            all(other.get(dimension_name, None) == value for dimension_name, value in self) \
             and \
-            all(self[dimension_name] == value for dimension_name, value in other)
+            all(self.get(dimension_name, None) == value for dimension_name, value in other)
 
     def __ne__(self, other):
         return not self == other
@@ -50,6 +52,9 @@ class Point:
                     yield dimension_name + "." + sub_dimension_name, sub_dimension_value
 
     def __getattr__(self, dimension_name):
+        if dimension_name == "__isabstractmethod__":
+            # A sad but necessary way to deal with ABC.
+            return False
         return self[dimension_name]
 
     def __setattr__(self, name, value):
@@ -67,11 +72,17 @@ class Point:
 
     def __getitem__(self, dimension_name):
         if dimension_name not in self:
-            return None
+            raise KeyError(f"This Point does not have a value along dimension: {dimension_name}")
         subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(dimension_name)
         if subgrid_name is None:
-            return self.dimension_value_dict.get(dimension_name, None)
+            return self.dimension_value_dict[dimension_name]
         return self[subgrid_name][dimension_name_without_subgrid_name]
+
+    def get(self, dimension_name, default=None):
+        try:
+            return self[dimension_name]
+        except KeyError:
+            return default
 
     def __setitem__(self, dimension_name, value):
         subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(dimension_name)
@@ -94,11 +105,7 @@ class Point:
         return self.__str__()
 
     def __str__(self):
-        return str(self.to_dict())
-
-    def get(self, dimension_name, default):
-        value = self[dimension_name]
-        return value if value is not None else default
+        return str(self.to_json(indent=2))
 
     def to_json(self, indent=None):
         if indent is not None:
@@ -111,7 +118,12 @@ class Point:
         return Point(**coordinates)
 
     def to_dict(self):
-        return {param_name: value for param_name, value in self}
+        return_dict = {}
+        for param_name, value in self:
+            if isinstance(value, Number) and int(value) == value:
+                value = int(value)
+            return_dict[param_name] = value
+        return return_dict
 
     def to_dataframe(self):
         return pd.DataFrame({param_name: [value] for param_name, value in self})

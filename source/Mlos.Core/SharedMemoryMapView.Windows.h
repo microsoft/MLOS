@@ -64,6 +64,11 @@ public:
     size_t MemSize;
     BytePtr Buffer;
 
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    // No-op on Windows.
+    //
+    bool CleanupOnClose;
+
 private:
     HANDLE m_hMapFile;
 };

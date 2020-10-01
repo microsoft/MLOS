@@ -7,59 +7,16 @@ import random
 
 import pandas as pd
 
-from mlos.Spaces import Dimension, Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
+from mlos.Spaces import Dimension, Hypergrid, Point, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters import HierarchicalToFlatHypergridAdapter
 from mlos.Tracer import trace
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel, DecisionTreeRegressionModelConfig
+from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestFitState import HomogeneousRandomForestFitState
-from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
-
-
-class HomogeneousRandomForestRegressionModelConfig(RegressionModelConfig):
-
-    CONFIG_SPACE = SimpleHypergrid(
-        name="homogeneous_random_forest_regression_model_config",
-        dimensions=[
-            DiscreteDimension(name="n_estimators", min=1, max=100),
-            ContinuousDimension(name="features_fraction_per_estimator", min=0, max=1, include_min=False, include_max=True),
-            ContinuousDimension(name="samples_fraction_per_estimator", min=0, max=1, include_min=False, include_max=True),
-            CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__]),
-        ]
-    ).join(
-        subgrid=DecisionTreeRegressionModelConfig.CONFIG_SPACE,
-        on_external_dimension=CategoricalDimension(name="regressor_implementation", values=[DecisionTreeRegressionModel.__name__])
-    )
-
-    _DEFAULT = Point(
-        n_estimators=5,
-        features_fraction_per_estimator=1,
-        samples_fraction_per_estimator=0.7,
-        regressor_implementation=DecisionTreeRegressionModel.__name__,
-        decision_tree_regression_model_config=DecisionTreeRegressionModelConfig.DEFAULT
-    )
-
-    def __init__(
-            self,
-            n_estimators=_DEFAULT.n_estimators,
-            features_fraction_per_estimator=_DEFAULT.features_fraction_per_estimator,
-            samples_fraction_per_estimator=_DEFAULT.samples_fraction_per_estimator,
-            regressor_implementation=_DEFAULT.regressor_implementation,
-            decision_tree_regression_model_config: Point()=_DEFAULT.decision_tree_regression_model_config
-    ):
-        self.n_estimators = n_estimators
-        self.features_fraction_per_estimator = features_fraction_per_estimator
-        self.samples_fraction_per_estimator = samples_fraction_per_estimator
-        self.regressor_implementation = regressor_implementation
-
-        assert regressor_implementation == DecisionTreeRegressionModel.__name__
-        self.decision_tree_regression_model_config = DecisionTreeRegressionModelConfig.create_from_config_point(decision_tree_regression_model_config)
-
-    @classmethod
-    def contains(cls, config): # pylint: disable=unused-argument
-        return True  # TODO: see if you can remove this class entirely.
+from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 
 
 class HomogeneousRandomForestRegressionModel(RegressionModel):
@@ -80,13 +37,13 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_VARIANCE,
         Prediction.LegalColumnNames.SAMPLE_SIZE,
-        Prediction.LegalColumnNames.DEGREES_OF_FREEDOM
+        Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM
     ]
 
     @trace()
     def __init__(
             self,
-            model_config: HomogeneousRandomForestRegressionModelConfig,
+            model_config: Point,
             input_space: Hypergrid,
             output_space: Hypergrid,
             logger=None
@@ -95,7 +52,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
             logger = create_logger("HomogeneousRandomForestRegressionModel")
         self.logger = logger
 
-        assert HomogeneousRandomForestRegressionModelConfig.contains(model_config)
+        assert model_config in homogeneous_random_forest_config_store.parameter_space
 
         RegressionModel.__init__(
             self,
@@ -178,7 +135,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         :return:
         """
         random_point = original_space.random()
-        dimensions_for_point = original_space.get_dimensions_for_point(random_point)
+        dimensions_for_point = original_space.get_dimensions_for_point(random_point, return_join_dimensions=False)
         selected_dimensions = random.sample(dimensions_for_point, min(len(dimensions_for_point), max_num_dimensions))
         flat_dimensions = []
         for dimension in selected_dimensions:
@@ -207,8 +164,8 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         """
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 
-        feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame, in_place=False)
-        target_values_pandas_frame = self._output_space_adapter.translate_dataframe(target_values_pandas_frame)
+        feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
+        target_values_pandas_frame = self._output_space_adapter.project_dataframe(target_values_pandas_frame)
 
         for i, tree in enumerate(self._decision_trees):
             # Let's filter out samples with missing values
@@ -222,16 +179,26 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 random_state=i,
                 axis='index'
             )
+            if self.model_config.bootstrap:
+                bootstrapped_observations_for_tree_training = observations_for_tree_training.sample(
+                    frac=1.0/self.model_config.samples_fraction_per_estimator,
+                    replace=True,
+                    random_state=i,
+                    axis='index'
+                )
+            else:
+                bootstrapped_observations_for_tree_training = observations_for_tree_training.copy()
             observations_for_tree_validation = non_null_observations.loc[non_null_observations.index.difference(observations_for_tree_training.index)]
             num_selected_observations = len(observations_for_tree_training.index)
             if tree.should_fit(num_selected_observations):
-                assert len(non_null_observations.index) == len(targets_for_non_null_observations.index)
-                targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
+                bootstrapped_targets_for_tree_training = targets_for_non_null_observations.loc[bootstrapped_observations_for_tree_training.index]
+                assert len(bootstrapped_observations_for_tree_training.index) == len(bootstrapped_targets_for_tree_training.index)
                 tree.fit(
-                    feature_values_pandas_frame=observations_for_tree_training,
-                    target_values_pandas_frame=targets_for_tree_training,
+                    feature_values_pandas_frame=bootstrapped_observations_for_tree_training,
+                    target_values_pandas_frame=bootstrapped_targets_for_tree_training,
                     iteration_number=iteration_number
                 )
+                targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
                 tree.compute_goodness_of_fit(features_df=observations_for_tree_training, target_df=targets_for_tree_training, data_set_type=DataSetType.TRAIN)
                 if not observations_for_tree_validation.empty:
                     targets_for_tree_validation = targets_for_non_null_observations.loc[observations_for_tree_validation.index]
@@ -256,7 +223,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         """
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
-        feature_values_pandas_frame = self._input_space_adapter.translate_dataframe(feature_values_pandas_frame)
+        feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame)
 
         # dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
@@ -264,7 +231,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
         sample_size_col = Prediction.LegalColumnNames.SAMPLE_SIZE.value
-        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         # collect predictions from ensemble constituent models
         predictions_per_tree = [
@@ -299,10 +266,10 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         #   section: section: 4.3.2 for details
         all_predictions_df[predicted_value_var_col] = all_predictions_df[mean_var_col_names_per_tree].mean(axis=1) \
                                              + (all_predictions_df[predicted_value_col_names_per_tree] ** 2).mean(axis=1) \
-                                             - all_predictions_df[predicted_value_col] ** 2
+                                             - all_predictions_df[predicted_value_col] ** 2 + 0.0000001 # A little numerical instability correction
         all_predictions_df[sample_var_col] = all_predictions_df[sample_var_col_names_per_tree].mean(axis=1) \
                                              + (all_predictions_df[predicted_value_col_names_per_tree] ** 2).mean(axis=1) \
-                                             - all_predictions_df[predicted_value_col] ** 2
+                                             - all_predictions_df[predicted_value_col] ** 2 + 0.0000001 # A little numerical instability correction
         all_predictions_df[sample_size_col] = all_predictions_df[predicted_value_col_names_per_tree].count(axis=1)
         all_predictions_df[dof_col] = all_predictions_df[sample_size_col_names_per_tree].sum(axis=1) - all_predictions_df[sample_size_col]
         all_predictions_df[is_valid_input_col] = True

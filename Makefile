@@ -9,10 +9,11 @@
 RelativePathToProjectRoot := .
 include ./build/Common.mk
 
-handledtargets += cmake-build cmake-test cmake-clean \
+handledtargets += cmake-build cmake-install cmake-test cmake-check \
 		  cmake-buildfiles clean-cmake-buildfiles \
-		  cmake-distclean $(CMAKE) \
-		  python-checks python-test \
+		  cmake-clean cmake-distclean $(CMAKE) \
+		  python-checks python-test python-clean \
+		  website website-clean \
 		  grpc-clean mlos-codegen-clean
 
 # Build using dotnet and the Makefile produced by cmake.
@@ -27,8 +28,12 @@ test: dotnet-test cmake-test python-test
 .PHONY: check
 check: all test
 
+.PHONY: install
+install: dotnet-install cmake-install
+	@ echo "make install target finished."
+
 .PHONY: clean
-clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean
+clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean
 
 .PHONY: distclean
 distclean: clean cmake-distclean
@@ -46,6 +51,19 @@ mlos-codegen-clean: dotnet-clean
 grpc-clean:
 	@ $(RM) $(MLOS_ROOT)/Grpc.out
 
+.PHONY: website
+website:
+	$(MAKE) -C website
+
+.PHONY: website-clean
+website-clean:
+	$(MAKE) -C website clean
+
+.PHONY: python-clean
+python-clean:
+	@ find $(MLOS_ROOT)/source/Mlos.Python/ -type d -name '__pycache__' -print0 | xargs -0 -r rm -rf
+	@ find $(MLOS_ROOT)/source/Mlos.Python/ -type f -name '*.pyc' -print0 | xargs -0 -r rm -f
+	@ $(RM) $(MLOS_ROOT)/source/Mlos.Python/mlos.egg-info
 
 # Build the dirs.proj file in this directory with "dotnet build"
 include $(MLOS_ROOT)/build/DotnetWrapperRules.mk
@@ -64,13 +82,20 @@ cmake-build: $(ConfigurationMakefile)
 	@  $(MAKE) -C $(ConfigurationCmakeDir)
 	@ echo "make cmake-build target finished."
 
+.PHONY: cmake-install
+cmake-install: $(ConfigurationMakefile)
+	@  $(MAKE) -C $(ConfigurationCmakeDir) install
+	@ echo "make cmake-install target finished."
+
 .PHONY: cmake-test
 cmake-test: $(ConfigurationMakefile)
 	@  $(MAKE) -C $(ConfigurationCmakeDir) test
+	@ echo "make cmake-test target finished."
 
 .PHONY: cmake-check
 cmake-check:
 	@  $(MAKE) -C $(ConfigurationCmakeDir) check
+	@ echo "make cmake-check target finished."
 
 .NOTPARALLEL: cmake-clean
 .PHONY: cmake-clean

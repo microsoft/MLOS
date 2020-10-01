@@ -66,52 +66,10 @@ To achieve this MLOS provides:
 
     Once hooks are created in the target system, iteration on the external agent can be more rapidly developed and deployed.
 
+## Python quickstart
+The easiest way to get started with MLOS is to just the Python package.
+You can find installation instructions in the [Prerequisites: Python Quickstart](./documentation/01-Prerequisites.md#python-quickstart).
 
-## Python only installation
-
-Some of the examples require only the installation of the mlos Python library. These examples do not use the shared memory infrastructure.
-
-
-First, download the `mlos` code using git:
-
-```
-$ git clone https://github.com/microsoft/MLOS.git
-```
-
-For this simplified installation, it's recommended to use the [Anaconda python distribution](https://www.anaconda.com/products/individual).
-For a slimer installation experience, you can also use the [miniconda installer](https://docs.conda.io/en/latest/miniconda.html).
-After installing either anaconda or miniconda, you can create a new environment with all requirements for the examples using
-
-```
-$ conda env create -f MLOS/source/Mlos.Notebooks/environment.yml
-```
-The environment will be called `mlos_python_environment` and you can activate it as follows:
-```
-$ conda activate mlos_python_environment
-```
-
-Use `pip` to install the Python library:
-
-```
-$ pip install MLOS/source/Mlos.Python/
-```
-
-Alternatively, you can also install the package directly without checking out the code:
-
-```
-$ pip install "git+https://github.com/microsoft/MLOS.git#egg=mlos&subdirectory=source/Mlos.Python"
-```
-
-However, this does not include the examples and requires you to set up your environment manually.
-
-After this installation, you can run any of the Python-only example notebooks. To do so you can:
-
-```
-$ python -m ipykernel install --user --name=mlos_environment
-$ jupyter-notebook --notebook-dir=MLOS/source/Mlos.Notebooks
-```
-
-Jupyter will list a few notebooks. A good place to start is the *BayesianOptimization.ipynb*, which provides an [Introduction to Bayesian Optimization](./notebooks/BayesianOptimization/).
 
 ## Full Build (C# and C++ components)
 
@@ -124,8 +82,9 @@ For detailed instructions, please refer to:
 
 ## Examples
 
-Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](./notebooks/) section. Additional code is in the  [source/Examples](https://github.com/microsoft/MLOS/tree/main/source/Examples) source directory.
-You can find the source of the notebooks [on github as well](https://github.com/microsoft/MLOS/tree/main/source/Mlos.Notebooks).
+Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](https://microsoft.github.io/MLOS/notebooks/) section.
+Additional code is in the  [source/Examples](./source/Examples/#mlos-github-tree-view) source directory.
+You can find the source of the notebooks [on github as well](./source/Mlos.Notebooks/#mlos-github-tree-view).
 
 ## Documentation
 
@@ -145,4 +104,4 @@ For more formal enquiries, you can [contact us](mailto:mlos-maintainers@service.
 
 ## License
 
-- [MIT License](./LICENSE)
+- [MIT License](./LICENSE.txt)

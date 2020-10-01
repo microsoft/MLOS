@@ -74,7 +74,7 @@ class SmartCacheWorkloadGenerator:
         return True
 
     def run(self, timeout_s=1):
-        self.logger.info(f"Started the SmartCacheWorkloadGenerator. Duration={timeout_s}")
+        self.logger.debug(f"Started the SmartCacheWorkloadGenerator. Duration={timeout_s}")
         self.reconfigure()
         smart_cache = SmartCache(logger=self.logger)
 
@@ -82,42 +82,47 @@ class SmartCacheWorkloadGenerator:
         end_time = start_time + datetime.timedelta(seconds=timeout_s)
 
         while datetime.datetime.utcnow() < end_time:
-
             if self.current_config.values.workload_type == 'fibonacci':
-                range_min = self.current_config.values.fibonacci_config.min
-                range_max = range_min + self.current_config.values.fibonacci_config.range_width
-
-                while datetime.datetime.utcnow() < end_time:
-                    sequence_number = random.randint(range_min, range_max)
-                    self.logger.debug(f"\tfib({sequence_number}) = ?")
-                    result = self.fibonacci(sequence_number, smart_cache)
-                    self.logger.debug(f"\tfib({sequence_number}) = {result}")
-
+                self.fibonacci_workload(end_time, smart_cache)
             elif self.current_config.values.workload_type == 'random_key_from_range':
-                range_min = self.current_config.values.random_key_from_range_config.min
-                range_max = range_min + self.current_config.values.random_key_from_range_config.range_width
-                while datetime.datetime.utcnow() < end_time:
-                    key = random.randint(range_min, range_max)
-                    value = smart_cache.get(key)
-                    if value is None:
-                        value = str(key)
-                        smart_cache.push(key, value)
-
-            elif self.current_config.values.workload_type == 'sequential_key_from_range':
-                range_min = self.current_config.values.sequential_key_from_range_config.min
-                range_width = self.current_config.values.sequential_key_from_range_config.range_width
-                i = 0
-                while datetime.datetime.utcnow() < end_time:
-                    key = range_min + (i % range_width)
-                    value = smart_cache.get(key)
-                    if value is None:
-                        value = str(key)
-                        smart_cache.push(key, value)
-                    i += 1
+                self.random_key_from_range(end_time, smart_cache)
+            elif self.current_config.values.workload_type == 'cyclical_key_from_range':
+                self.cyclical_key_from_range(end_time, smart_cache)
             else:
                 raise RuntimeError(f"Unknown workload type: {self.current_config.values.workload_type}")
+        self.logger.debug("Exiting the SmartCacheWorkloadGenerator.")
 
-        self.logger.info("Exiting the SmartCacheWorkloadGenerator.")
+    def fibonacci_workload(self, end_time, smart_cache):
+        range_min = self.current_config.values.fibonacci_config.min
+        range_max = range_min + self.current_config.values.fibonacci_config.range_width
+
+        while datetime.datetime.utcnow() < end_time:
+            sequence_number = random.randint(range_min, range_max)
+            self.logger.debug(f"\tfib({sequence_number}) = ?")
+            result = self.fibonacci(sequence_number, smart_cache)
+            self.logger.debug(f"\tfib({sequence_number}) = {result}")
+
+    def random_key_from_range(self, end_time, smart_cache):
+        range_min = self.current_config.values.random_key_from_range_config.min
+        range_max = range_min + self.current_config.values.random_key_from_range_config.range_width
+        while datetime.datetime.utcnow() < end_time:
+            key = random.randint(range_min, range_max)
+            value = smart_cache.get(key)
+            if value is None:
+                value = str(key)
+                smart_cache.push(key, value)
+
+    def cyclical_key_from_range(self, end_time, smart_cache):
+        range_min = self.current_config.values.cyclical_key_from_range_config.min
+        range_width = self.current_config.values.cyclical_key_from_range_config.range_width
+        i = 0
+        while datetime.datetime.utcnow() < end_time:
+            key = range_min + (i % range_width)
+            value = smart_cache.get(key)
+            if value is None:
+                value = str(key)
+                smart_cache.push(key, value)
+            i += 1
 
     class _FibonacciValue:
         def __init__(self, sequence_number, value, previous):

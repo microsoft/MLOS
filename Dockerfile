@@ -7,7 +7,7 @@
 #   UbuntuVersion=20.04; docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
 #
 # Optionally, build with a proxy server:
-#   UbuntuVersion=20.04; docker build --build-arg=http_proxy=http://some-proxy-caching-host:3128 -t mlos/build:ubuntu-$UbuntuVersion
+#   UbuntuVersion=20.04; docker build --build-arg=http_proxy=http://some-proxy-caching-host:3128 --build-arg=UbuntuVersion=$UbuntuVersion -t mlos/build:ubuntu-$UbuntuVersion .
 #
 # Run with:
 #   docker run -it --name mlos-build-$UbuntuVersion mlos/build:ubuntu-$UbuntuVersion

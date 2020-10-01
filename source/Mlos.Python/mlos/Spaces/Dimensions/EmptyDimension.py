@@ -13,7 +13,15 @@ class EmptyDimension(Dimension):
         self.type = type
 
     def __str__(self):
-        return self.name + ": {}"
+        return self.to_string(include_name=False)
+
+    def to_string(self, include_name=True):
+        if include_name:
+            return self.name + ": {}"
+        return "{}"
+
+    def __repr__(self):
+        return self.to_string(include_name=True)
 
     @property
     def is_innumerably_large(self):
@@ -27,6 +35,10 @@ class EmptyDimension(Dimension):
 
     def __len__(self):
         return 0
+
+    def __iter__(self):
+        for item in []:
+            yield item
 
     def __eq__(self, other):
         return isinstance(other, EmptyDimension) and (self.name == other.name) and (self.type == other.type)
@@ -49,5 +61,8 @@ class EmptyDimension(Dimension):
     def equals(self, other):
         raise NotImplementedError("Did you remember to import DimensionCalulator?")
 
-    def random(self):
+    def random(self): # pylint: disable=no-self-use
         return None
+
+    def linspace(self, num=100): # pylint: disable=unused-argument,no-self-use
+        return []

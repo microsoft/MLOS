@@ -4,40 +4,42 @@
 #
 import numpy as np
 from mlos.Logger import create_logger
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid, DefaultConfigMeta
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
-from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, ConfidenceBoundUtilityFunctionConfig
-from .NumericOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfig
+from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
+from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
+from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
 
 
-
-class ExperimentDesignerConfig(metaclass=DefaultConfigMeta):
-
-    CONFIG_SPACE = SimpleHypergrid(
+experiment_designer_config_store = ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
         name='experiment_designer_config',
         dimensions=[
             CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__]),
-            CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__]),
+            CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__, GlowWormSwarmOptimizer.__name__]),
             ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
-        subgrid=ConfidenceBoundUtilityFunctionConfig.CONFIG_SPACE,
+        subgrid=confidence_bound_utility_function_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__])
     ).join(
-        subgrid=RandomSearchOptimizerConfig.CONFIG_SPACE,
+        subgrid=random_search_optimizer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
-    )
-
-    _DEFAULT = Point(
+    ).join(
+        subgrid=glow_worm_swarm_optimizer_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
+    ),
+    default=Point(
         utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
-        confidence_bound_utility_function_config=ConfidenceBoundUtilityFunctionConfig.DEFAULT,
-        random_search_optimizer_config=RandomSearchOptimizerConfig.DEFAULT,
+        confidence_bound_utility_function_config=confidence_bound_utility_function_config_store.default,
+        random_search_optimizer_config=random_search_optimizer_config_store.default,
         fraction_random_suggestions=0.5
     )
-
+)
 
 class ExperimentDesigner:
     """ Portion of a BayesianOptimizer concerned with Design of Experiments.
@@ -59,11 +61,13 @@ class ExperimentDesigner:
 
     def __init__(
             self,
-            designer_config: ExperimentDesignerConfig,
+            designer_config: Point,
             optimization_problem: OptimizationProblem,
             surrogate_model: RegressionModel,
             logger=None
     ):
+        assert designer_config in experiment_designer_config_store.parameter_space
+
         if logger is None:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
@@ -73,21 +77,27 @@ class ExperimentDesigner:
         self.surrogate_model = surrogate_model
         self.rng = np.random.Generator(np.random.PCG64())
 
-        assert self.config.utility_function_implementation == ConfidenceBoundUtilityFunction.__name__
         self.utility_function = ConfidenceBoundUtilityFunction(
-            function_config=ConfidenceBoundUtilityFunctionConfig.create_from_config_point(self.config.confidence_bound_utility_function_config),
+            function_config=self.config.confidence_bound_utility_function_config,
             surrogate_model=self.surrogate_model,
             minimize=self.optimization_problem.objectives[0].minimize,
             logger=self.logger
         )
 
-        assert self.config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__
-        self.numeric_optimizer = RandomSearchOptimizer(
-            optimizer_config=RandomSearchOptimizerConfig.create_from_config_point(self.config.random_search_optimizer_config),
-            optimization_problem=self.optimization_problem,
-            utility_function=self.utility_function,
-            logger=self.logger
-        )
+        if self.config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
+            self.numeric_optimizer = RandomSearchOptimizer(
+                optimizer_config=self.config.random_search_optimizer_config,
+                optimization_problem=self.optimization_problem,
+                utility_function=self.utility_function,
+                logger=self.logger
+            )
+        elif self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+            self.numeric_optimizer = GlowWormSwarmOptimizer(
+                optimizer_config=self.config.glow_worm_swarm_optimizer_config,
+                optimization_problem=self.optimization_problem,
+                utility_function=self.utility_function,
+                logger=self.logger
+            )
 
     def suggest(self, context_values_dataframe=None, random=False):
         self.logger.debug(f"Suggest(random={random})")

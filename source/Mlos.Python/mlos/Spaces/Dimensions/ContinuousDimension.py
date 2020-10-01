@@ -56,7 +56,7 @@ class ContinuousDimension(Dimension):
                and self.include_max == other.include_max
 
 
-    def __str__(self):
+    def __repr__(self):
         """ Returns a string representation of this continuous dimension.
 
         In some circles the usage of '[' and ']' convey that the boundary points of a set are included,
@@ -222,7 +222,9 @@ class ContinuousDimension(Dimension):
 
     def random(self):
         if self.width == 0 and not (self.include_min or self.include_min):
-            return None
+            raise ValueError("Cannot generate a random value from an empty dimension.")
+        if self.width == math.inf:
+            raise ValueError("Cannot generate a random value from an unbounded dimension.")
         ret_val = None
         while ret_val is None or (ret_val == self.min and not self.include_min):
             ret_val = self._random_state.random() * self.width + self.min

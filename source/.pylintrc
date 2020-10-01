@@ -7,7 +7,7 @@ extension-pkg-whitelist=
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=Secrets,unit_tests,OptimizerService_pb2.py,OptimizerService_pb2_grpc.py
+ignore=Secrets,unit_tests,OptimizerService_pb2.py,OptimizerService_pb2_grpc.py,long_haul_tests
 
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.
@@ -143,7 +143,8 @@ disable=print-statement,
         logging-fstring-interpolation,
         logging-not-lazy,
         invalid-name,  # Eventually want to turn this on, just have a lot of errors currently, so didn't want to clutter things up.
-        bare-except
+        bare-except,
+        len-as-condition,
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

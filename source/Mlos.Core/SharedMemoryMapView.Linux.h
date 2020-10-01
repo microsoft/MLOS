@@ -43,6 +43,10 @@ public:
     _Check_return_
     HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
+    // Closes a shared memory view.
+    //
+    void Close();
+
 private:
     _Check_return_
     HRESULT MapMemoryView(size_t memSize) noexcept;
@@ -51,8 +55,13 @@ public:
     size_t MemSize;
     BytePtr Buffer;
 
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    //
+    bool CleanupOnClose;
+
 private:
     int m_fdSharedMemory;
+    char* m_sharedMemoryMapName;
 };
 
 }

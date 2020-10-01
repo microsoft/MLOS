@@ -3,41 +3,33 @@
 # Licensed under the MIT License.
 #
 import numpy as np
+import pandas as pd
 from scipy.stats import t
 from mlos.Logger import create_logger
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point, DefaultConfigMeta
-from mlos.Tracer import trace
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
+from mlos.Tracer import trace
 
-class ConfidenceBoundUtilityFunctionConfig(metaclass=DefaultConfigMeta):
-    CONFIG_SPACE = SimpleHypergrid(
+
+confidence_bound_utility_function_config_store = ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
         name="confidence_bound_utility_function_config",
         dimensions=[
             CategoricalDimension(name="utility_function_name", values=["lower_confidence_bound_on_improvement", "upper_confidence_bound_on_improvement"]),
             ContinuousDimension(name="alpha", min=0.01, max=0.5)
         ]
-    )
-    _DEFAULT = Point(
+    ),
+    default=Point(
         utility_function_name="upper_confidence_bound_on_improvement",
         alpha=0.01
     )
-
-    @classmethod
-    def create_from_config_point(cls, config_point):
-        config_key_value_pairs = {param_name: value for param_name, value in config_point}
-        return cls(**config_key_value_pairs)
-
-    def __init__(
-            self,
-            utility_function_name=_DEFAULT.utility_function_name,
-            alpha=_DEFAULT.alpha
-    ):
-        self.utility_function_name = utility_function_name
-        self.alpha = alpha
+)
 
 
-class ConfidenceBoundUtilityFunction:
-    def __init__(self, function_config: ConfidenceBoundUtilityFunctionConfig, surrogate_model, minimize, logger=None):
+class ConfidenceBoundUtilityFunction(UtilityFunction):
+    def __init__(self, function_config: Point, surrogate_model, minimize, logger=None):
         if logger is None:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
@@ -56,7 +48,7 @@ class ConfidenceBoundUtilityFunction:
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
-        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         predictions = self.surrogate_model.predict(feature_values_pandas_frame=feature_values_pandas_frame)
         predictions_df = predictions.get_dataframe()
@@ -71,4 +63,4 @@ class ConfidenceBoundUtilityFunction:
         else:
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
-        return utility_function_values
+        return pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'])

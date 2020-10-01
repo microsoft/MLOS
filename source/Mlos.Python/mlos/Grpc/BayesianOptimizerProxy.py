@@ -3,15 +3,20 @@
 # Licensed under the MIT License.
 #
 import json
+from typing import Tuple
+
+import pandas as pd
+
 from mlos.global_values import deserialize_from_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Logger import create_logger
-from mlos.Optimizers.OptimizerInterface import OptimizerInterface
+from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
+from mlos.Tracer import trace
 
 
-class BayesianOptimizerProxy(OptimizerInterface):
+class BayesianOptimizerProxy(OptimizerBase):
     """ Client to remote BayesianOptimizer.
 
     Wraps all implementation details around communicating with the remote BayesianOptimizer.
@@ -19,6 +24,19 @@ class BayesianOptimizerProxy(OptimizerInterface):
         * Simpler to use than making gRPC requests
         * We can change the gRPC definition without affecting the user's code.
         * All logic related to gRPC is in one place
+
+    Parameters
+    ----------
+    grpc_channel : grpc_channel
+        GRPC channel to connect to existing remote optimizer.
+    optimization_problem : OptimizationProblem
+        Problem to optimizer.
+    optimizer_config : Point
+        Optimizer Configuation.
+    id : str
+        Unique identifying string.
+    logger : logger, default=None
+        Logger to use. By default, a new logger is created internally.
     """
 
     def __init__(
@@ -33,7 +51,7 @@ class BayesianOptimizerProxy(OptimizerInterface):
             logger = create_logger("BayesianOptimizerClient")
         self.logger = logger
 
-        OptimizerInterface.__init__(self, optimization_problem)
+        OptimizerBase.__init__(self, optimization_problem)
         assert optimizer_config is not None
 
         self._grpc_channel = grpc_channel
@@ -45,10 +63,12 @@ class BayesianOptimizerProxy(OptimizerInterface):
     def optimizer_handle(self):
         return OptimizerService_pb2.OptimizerHandle(Id=self.id)
 
+    @trace()
     def get_optimizer_convergence_state(self):
         optimizer_convergence_state_response = self._optimizer_stub.GetOptimizerConvergenceState(self.optimizer_handle)
         return deserialize_from_bytes_string(optimizer_convergence_state_response.SerializedOptimizerConvergenceState)
 
+    @trace()
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
         suggestion_request = OptimizerService_pb2.SuggestRequest(
             OptimizerHandle=self.optimizer_handle,
@@ -58,24 +78,27 @@ class BayesianOptimizerProxy(OptimizerInterface):
         suggested_params_dict = json.loads(suggestion_response.ParametersJsonString)
         return Point(**suggested_params_dict)
 
-    def register(self, feature_values_pandas_frame, target_values_pandas_frame):  # pylint: disable=unused-argument
-        # TODO: implement RegisterObservations <- plural
-        #
-        features_dicts_per_record = feature_values_pandas_frame.to_dict(orient='records')
-        objectives_dicts_per_record = target_values_pandas_frame.to_dict(orient='records')
-
-        # TODO: Either implement streaming or arrow flight or batch.
-        #
-        for feature_dict, objective_dict in zip(features_dicts_per_record, objectives_dicts_per_record):
-            register_request = OptimizerService_pb2.RegisterObservationRequest(
-                OptimizerHandle=self.optimizer_handle,
-                Observation=OptimizerService_pb2.Observation(
-                    Features=OptimizerService_pb2.Features(FeaturesJsonString=json.dumps(feature_dict)),
-                    ObjectiveValues=OptimizerService_pb2.ObjectiveValues(ObjectiveValuesJsonString=json.dumps(objective_dict))
+    @trace()
+    def register(self, feature_values_pandas_frame, target_values_pandas_frame):
+        register_request = OptimizerService_pb2.RegisterObservationsRequest(
+            OptimizerHandle=self.optimizer_handle,
+            Observations=OptimizerService_pb2.Observations(
+                Features=OptimizerService_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
+                ObjectiveValues=OptimizerService_pb2.ObjectiveValues(
+                    ObjectiveValuesJsonString=target_values_pandas_frame.to_json(orient='index', double_precision=15)
                 )
             )
-            self._optimizer_stub.RegisterObservation(register_request)
+        )
+        self._optimizer_stub.RegisterObservations(register_request)
 
+    @trace()
+    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        response = self._optimizer_stub.GetAllObservations(self.optimizer_handle)
+        features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
+        objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
+        return features_df, objectives_df
+
+    @trace()
     def predict(self, feature_values_pandas_frame, t=None):  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
@@ -88,7 +111,7 @@ class BayesianOptimizerProxy(OptimizerInterface):
         )
         prediction_response = self._optimizer_stub.Predict(prediction_request)
 
-        # To be compliant with the OptimizerInterface, we need to recover a single Prediction object and return it.
+        # To be compliant with the OptimizerBase, we need to recover a single Prediction object and return it.
         #
         objective_predictions_pb2 = prediction_response.ObjectivePredictions
         assert len(objective_predictions_pb2) == 1
@@ -96,14 +119,10 @@ class BayesianOptimizerProxy(OptimizerInterface):
         objective_name = only_prediction_pb2.ObjectiveName
         valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
         prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
-        prediction.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
         return prediction
 
-    def optimum(self, stay_focused=False):  # pylint: disable=unused-argument,no-self-use
-        ...
-
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
-        ...
+        pass
 
     def reset_focus(self):# pylint: disable=no-self-use
-        ...
+        pass

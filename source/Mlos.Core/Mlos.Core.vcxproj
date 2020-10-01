@@ -26,6 +26,8 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup Label="Sources">
+    <ClCompile Include="InternalMlosContext.cpp" />
+    <ClCompile Include="InterProcessMlosContext.cpp" />
     <ClCompile Include="Mlos.Core.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -43,6 +45,8 @@
     <ClInclude Include="ComponentConfig.h" />
     <ClInclude Include="FNVHashFunction.h" />
     <ClInclude Include="Hash.h" />
+    <ClInclude Include="InternalMlosContext.h" />
+    <ClInclude Include="InterProcessMlosContext.h" />
     <ClInclude Include="Mlos.Core.h" />
     <ClInclude Include="MlosContext.h" />
     <ClInclude Include="NamedEvent.Window.h" />

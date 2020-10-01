@@ -12,6 +12,9 @@ using System.Runtime.InteropServices;
 
 namespace Mlos.Core.Windows
 {
+    /// <summary>
+    /// Windows implementation of shared memory map view.
+    /// </summary>
     public class SharedMemoryMapView : Mlos.Core.SharedMemoryMapView
     {
         /// <summary>
@@ -115,23 +118,20 @@ namespace Mlos.Core.Windows
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                // Close the memory mapping.
-                //
-                memoryMappingHandle?.Dispose();
+            // Close the memory mapping.
+            //
+            memoryMappingHandle?.Dispose();
 
-                // Close the shared memory.
-                //
-                sharedMemoryHandle?.Dispose();
-            }
+            // Close the shared memory.
+            //
+            sharedMemoryHandle?.Dispose();
 
-            disposed = true;
+            isDisposed = true;
         }
 
         private readonly MemoryMappingSafeHandle memoryMappingHandle;

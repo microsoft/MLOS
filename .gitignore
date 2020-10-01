@@ -382,6 +382,8 @@ healthchecksdb
 obj/
 objd/
 
+temp/
+
 # Build errors
 *.wrn
 *.err
@@ -419,7 +421,13 @@ source/Mlos.Proto/mlos/Grpc/OptimizerService.proto
 
 # generated website
 website/public
-website/content/documentation/
-website/content/notebooks/
+website/content
+!website/content/menu/index.md
+website/resources
+website/themes
 website/sphinx/_build
 website/sphinx/api
+website/python_api
+
+# python code coverage
+coverage

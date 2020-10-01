@@ -3,9 +3,8 @@
 # Licensed under the MIT License.
 #
 from json import JSONEncoder, JSONDecoder
-import json
 
-from . import Dimension, EmptyDimension, CategoricalDimension, ContinuousDimension, Point, \
+from mlos.Spaces import Dimension, EmptyDimension, CategoricalDimension, ContinuousDimension, Point, \
     DiscreteDimension, OrdinalDimension, CompositeDimension, Hypergrid, SimpleHypergrid
 
 class HypergridJsonEncoder(JSONEncoder):
@@ -61,18 +60,18 @@ class HypergridJsonEncoder(JSONEncoder):
                 return_dict['Name'] = o.name
                 return_dict['Dimensions'] = o.root_dimensions
                 if o.is_hierarchical():
-                    return_dict['GuestSubgrids'] = o.guest_subgrids_by_pivot_dimension
+                    return_dict['GuestSubgrids'] = o.joined_subgrids_by_pivot_dimension
             return return_dict
 
-        if isinstance(o, SimpleHypergrid.GuestSubgrid):
+        if isinstance(o, SimpleHypergrid.JoinedSubgrid):
             return {
                 'ObjectType': 'GuestSubgrid',
                 'Subgrid': o.subgrid,
-                'ExternalPivotDimension': o.external_pivot_dimension
+                'ExternalPivotDimension': o.join_dimension
             }
 
         if isinstance(o, Point):
-            return o.dimension_value_dict
+            return o.to_json()
 
         if isinstance(o, set):
             return {
@@ -146,34 +145,20 @@ class HypergridJsonDecoder(JSONDecoder):
             )
 
             for _, subgrids_joined_on_dimension in obj.get('GuestSubgrids', dict()).items():
-                for guest_subgrid in subgrids_joined_on_dimension:
+                for joined_subgrid in subgrids_joined_on_dimension:
                     simple_hypergrid.add_subgrid_on_external_dimension(
-                        other_hypergrid=guest_subgrid.subgrid,
-                        external_dimension=guest_subgrid.external_pivot_dimension
+                        other_hypergrid=joined_subgrid.subgrid,
+                        external_dimension=joined_subgrid.join_dimension
                     )
             return simple_hypergrid
 
         if object_type == "GuestSubgrid":
-            return SimpleHypergrid.GuestSubgrid(
+            return SimpleHypergrid.JoinedSubgrid(
                 subgrid=obj['Subgrid'],
-                external_pivot_dimension=obj['ExternalPivotDimension']
+                join_dimension=obj['ExternalPivotDimension']
             )
 
         if object_type == "set":
             return set(obj['Values'])
 
         return obj
-
-if __name__ == "__main__":
-    empty_dimension = EmptyDimension(name="empty", type=ContinuousDimension)
-    some_dict = {
-        'dim': empty_dimension,
-        'greeting': "Hello World!"
-    }
-    json_string = json.dumps(some_dict, cls=HypergridJsonEncoder)
-    print(json_string)
-
-    deserialized_dict = json.loads(json_string, cls=HypergridJsonDecoder)
-    dim = deserialized_dict['dim']
-    print(dim)
-    print(dim.type)

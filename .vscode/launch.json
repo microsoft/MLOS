@@ -1,23 +1,67 @@
 {
-    // Use IntelliSense to learn about possible attributes. 
+    // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "Cake: Debug Script (CoreCLR)",
+            "name": "(gdb) Attach - Mlos.UnitTest",
+            "type": "cppdbg",
+            "request": "attach",
+            "program":  "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest",
+            "processId": "${command:pickProcess}",
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": ".NET Core Launch (console) - Mlos.Agent.Server - Mlos.UnitTest",
             "type": "coreclr",
             "request": "launch",
-            "program": "${workspaceRoot}/tools/Cake.CoreCLR/Cake.dll",
+            "preLaunchTask": "", //"build",
+            "program": "${workspaceFolder}/out/dotnet/source/Mlos.Agent.Server/objd/AnyCPU/Mlos.Agent.Server.dll",
             "args": [
-                "${workspaceRoot}/build.cake",
-                "--debug",
-                "--verbosity=diagnostic"
+                //"--optimizer-uri",
+                //"http://localhost:50051",
+                "--executable",
+                "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest"
             ],
-            "cwd": "${workspaceRoot}",
-            "stopAtEntry": true,
-            "externalConsole": false
+            "env": {
+                "MLOS_SETTINGS_REGISTRY_PATH": "${workspaceFolder}/out/dotnet/source/Mlos.UnitTest/Mlos.UnitTest.SettingsRegistry/objd/AnyCPU"
+            },
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Launch (console) - Mlos.Agent.Server - SmartCache",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "", //"build",
+            "program": "${workspaceFolder}/out/dotnet/source/Mlos.Agent.Server/objd/AnyCPU/Mlos.Agent.Server.dll",
+            "args": [
+                //"--optimizer-uri",
+                //"http://localhost:50051",
+                "--executable",
+                "${workspaceFolder}/out/cmake/Debug/source/Examples/SmartCache/SmartCache"
+            ],
+            "env": {
+                "MLOS_SETTINGS_REGISTRY_PATH": "${workspaceFolder}/out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/objd/AnyCPU"
+            },
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
         }
     ]
 }

@@ -49,4 +49,8 @@
       <Link>stylecop.json</Link>
     </AdditionalFiles>
   </ItemGroup>
+  <ItemGroup>
+    <!-- Provide the config file to allow using the "dotnet" command to run the dll output by this project. -->
+    <BinplaceFile Include="$(OutputPath)\$(TargetName).runtimeconfig.json" Condition="'$(OutputType)' == 'Exe'" />
+  </ItemGroup>
 </Project>

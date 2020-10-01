@@ -83,7 +83,7 @@ class SklearnLassoRegressionModelConfig(RegressionModelConfig):
             tol=_DEFAULT.tol,
             warm_start=_DEFAULT.warm_start,
             positive=_DEFAULT.positive,
-            random_state=_DEFAULT.random_state,
+            random_state=None,
             selection=_DEFAULT.selection
     ):
         """

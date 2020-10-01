@@ -14,32 +14,56 @@ on:
 jobs:
   # Run the debug/retail msbuild jobs separately so they can be executed in parallel.
 
-  windows-msbuild-debug:
-    name: Run debug msbuild on Windows
+  windows-msbuild:
+    name: Run ${{ matrix.configuration }} msbuild on Windows
     runs-on: windows-2019
-    timeout-minutes: 12
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
     # Runs multiple commands using the runners shell
-    - name: Run debug msbuild
+    - name: Run ${{ matrix.configuration }} msbuild
+      timeout-minutes: 15
       shell: cmd
       run: |
-        set Configuration=Debug
+        set Configuration=${{ matrix.configuration }}
         scripts\build.windows.cmd
 
-  windows-msbuild-release:
-    name: Run release msbuild on Windows
-    runs-on: windows-2019
-    timeout-minutes: 10
+  linux-build-test:
+    name: ${{ matrix.configuration }} build/test C++/C# on Linux
+    runs-on: ubuntu-20.04
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
     steps:
-    - uses: actions/checkout@v2
-    - name: Run release msbuild
-      shell: cmd
-      run: |
-        set Configuration=Release
-        scripts\build.windows.cmd
+      - name: Install apt dependencies
+        run: sudo apt-get -y install build-essential clang-10 curl liblttng-ctl0 liblttng-ust0 libxml2 zlib1g
+      - uses: actions/checkout@v2
+      - name: Run ${{ matrix.configuration }} dotnet build
+        timeout-minutes: 5
+        shell: bash
+        run: CONFIGURATION=${{ matrix.configuration }} make dotnet-build
+      - name: Run ${{ matrix.configuration }} dotnet test
+        timeout-minutes: 5
+        shell: bash
+        run: CONFIGURATION=${{ matrix.configuration }} make dotnet-test
+      - name: Run ${{ matrix.configuration }} cmake build
+        timeout-minutes: 5
+        shell: bash
+        run: CONFIGURATION=${{ matrix.configuration }} make cmake-build
+      - name: Run ${{ matrix.configuration }} cmake test
+        timeout-minutes: 5
+        shell: bash
+        run: CONFIGURATION=${{ matrix.configuration }} make cmake-test
+      - name: Run cake build
+        timeout-minutes: 10
+        shell: bash
+        run: ./build.linux.sh
 
   # The licenseheaders check depends on comparing the source tree, so we keep it in a
   # separate pipeline to ensure it starts from a clean state.
@@ -67,6 +91,17 @@ jobs:
         # so we instruct git-diff to ignore those when considering changes.
         git --no-pager diff --ignore-cr-at-eol --exit-code
 
+  # Check in-repo markdown links
+  markdown-link-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: gaurav-nelson/github-action-markdown-link-check@v1
+      with:
+        use-quiet-mode: yes
+        folder-path: './documentation, ./build, ./source, ./test, ./scripts'
+        file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md'
+
   build-publish-website:
     name: Build and publish website
     runs-on: ubuntu-20.04
@@ -76,29 +111,20 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.7'
     - name: Install apt dependencies
       run: sudo apt-get -y install build-essential libfreetype-dev unixodbc-dev hugo
-    - name: Install MLOS and dependencies
+    - name: Update pip
       run: |
         python -m pip install --upgrade pip
         python -m pip install --upgrade wheel
-        pip install source/Mlos.Python/
-        pip install matplotlib sphinx nbconvert sphinx_rtd_theme numpydoc
-    - name: Generate markdown for hugo
-      run: website/build_site.sh
-    - name: Run hugo
-      run: |
-        cd website
-        hugo
-    - name: Generate API rst files
-      run: website/sphinx/apidoc.sh
-    - name: Run sphinx
-      run: |
-        cd website/sphinx
-        make
-        cp -a _build/html ../python_api
-
+        python -m pip install --upgrade pyyaml
+    - name: Generate Python API docs using sphinx
+      run: make -C website sphinx-site
+    - name: Generate main site from markdown using hugo
+      run: make -C website hugo-site
+    - name: Test the links in the output site
+      run: make -C website link-check
     - name: Deploy to GitHub pages
       if: ${{ github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@3.5.9
@@ -106,14 +132,17 @@ jobs:
         BRANCH: gh-pages
         FOLDER: website/public
 
+  # FIXME: These timeouts are egregiously long right now.
+  # See Also: https://github.com/microsoft/MLOS/pull/66#issuecomment-690760863
   python-checks:
     name: Run Python checks
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 12
+    timeout-minutes: 90
     strategy:
       matrix:
         os: [windows-2019, ubuntu-20.04]
         # FIXME: MLOS currently fails pylint checks for 3.8
+        # See Also: https://github.com/microsoft/MLOS/issues/54
         python-version: [3.7] #, 3.8]
     steps:
     - uses: actions/checkout@v2
@@ -140,9 +169,9 @@ jobs:
       run: scripts/run-python-checks.sh
     - name: Run Python unit tests (Windows)
       if: startsWith(matrix.os, 'windows')
-      timeout-minutes: 8
+      timeout-minutes: 75
       run: scripts\run-python-tests.cmd
     - name: Run Python unit tests (Linux)
       if: startsWith(matrix.os, 'ubuntu')
-      timeout-minutes: 8
+      timeout-minutes: 75
       run: scripts/run-python-tests.sh
