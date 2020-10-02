@@ -135,6 +135,8 @@ jobs:
     strategy:
       matrix:
         UbuntuVersion: [16.04, 18.04, 20.04]
+    env:
+      MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -149,12 +151,19 @@ jobs:
         # We probably don't already have a cache for this sha (e.g. during PR checks).
         # So, fallback to using the most recently published image cache.
         restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-latest
-    - name: Docker Login
+    - name: Github Docker Package Registry Login
       uses: docker/login-action@v1
       with:
         registry: docker.pkg.github.com
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Github Docker Container Registry Login
+      if: ${{ env.MLOS_GCR_USR != '' }}
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.MLOS_GCR_USR }}
+        password: ${{ secrets.MLOS_GCR_PAT }}
     - name: Build image
       uses: docker/build-push-action@v2
       with:
