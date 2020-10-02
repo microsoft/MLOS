@@ -98,9 +98,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-
+        # Save the buildx cache output keyed by the git commit sha and UbuntuVersion.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        #restore-keys: (no fallback)
     - name: Build image
       if: github.event_name == 'schedule'
       uses: docker/build-push-action@v2
@@ -117,6 +117,8 @@ jobs:
   docker-image-cached-build:
     name: Build Ubuntu ${{ matrix.UbuntuVersion }} image (cache)
     runs-on: ubuntu-latest
+    # Reuse the cache from the fresh build if it ran.
+    # This let's us keep the rest of the workflow for publishing fresh images the same.
     needs: [docker-image-fresh-build, docker-registry-name]
     timeout-minutes: 20
     strategy:
@@ -131,9 +133,11 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-
+        # Try to load the image cache for this sha (e.g. in case a fresh build job just did it).
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        # We probably don't already have a cache for this sha (e.g. during PR checks).
+        # So, fallback to using the most recently published image cache.
+        restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-latest
     - name: Docker Login
       uses: docker/login-action@v1
       with:
@@ -145,6 +149,7 @@ jobs:
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        # Even if the local cache doesn't have anything, allow using the latest published version.
         cache-from: |
           type=local,src=/tmp/.buildx-cache
           ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
@@ -165,31 +170,31 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
-    # we depend on by re-executing its same steps.
+    # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Cache Docker layers
+      id: load-docker-cache
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-
-    - name: Docker Login
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build image (cached)
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         #cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
     # Now start an instance of that container image.
@@ -250,31 +255,31 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
-    # we depend on by re-executing its same steps.
+    # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Cache Docker layers
+      id: load-docker-cache
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-
-    - name: Docker Login
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build image (cached)
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         #cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
     # Now start an instance of that container image.
@@ -373,31 +378,31 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
-    # we depend on by re-executing its same steps.
+    # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Cache Docker layers
+      id: load-docker-cache
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-
-    - name: Docker Login
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build image (cached)
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         #cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
     # Now, start the image as a new container instance.
@@ -435,34 +440,42 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
-    # we depend on by re-executing its same steps.
+    # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
     - name: Cache Docker layers
+      id: load-docker-cache
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
-        restore-keys: |
-          ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-
-    - name: Docker Login
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Retrieve the image from the prebuilt cache and push it to the target repo.
-      timeout-minutes: 2
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
         tags:
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
     # Now we can push the image to the local docker package repository.
+    - name: Docker Login
+      uses: docker/login-action@v1
+      with:
+        registry: docker.pkg.github.com
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Push the docker image
       timeout-minutes: 15
       shell: bash
