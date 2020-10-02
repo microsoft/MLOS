@@ -32,16 +32,17 @@ TODO: Diagrams
 
 To build and run the necessary components for this example
 
-1. [Build the Docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image) using the [`Dockerfile`](../../../Dockerfile#mlos-github-tree-view) at the root of the repository.
+1. [Pull or build the Docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image) using the [`Dockerfile`](../../../Dockerfile#mlos-github-tree-view) at the root of the repository.
 
     ```shell
-    docker build --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 .
+    docker build . --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 \
+        --cache-from docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-20.04
     ```
 
 2. [Run the Docker image](../../../documentation/02-Build.md#create-a-new-container-instance) you just built.
 
     ```shell
-    docker run -it -v $PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-20.04
+    docker run -it -v $PWD:/src/MLOS -P --name mlos-build mlos-build-ubuntu-20.04
     ```
 
 3. Inside the container, [build the compiled software](../../../documentation/02-Build.md#cli-make) with `make`:
@@ -56,7 +57,8 @@ To build and run the necessary components for this example
 
       ```sh
       # Alternatively:
-      make -C source/Examples/SmartCache all install && make -C source/Mlos.Agent.Server
+      make -C source/Mlos.Agent.Server
+      make -C source/Examples/SmartCache all install
       ```
 
 4. For a `Release` build (the default), the relevant output will be installed at:
