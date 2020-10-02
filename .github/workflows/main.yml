@@ -47,7 +47,7 @@ jobs:
   # - For authentication we use the built-in GITHUB_TOKEN secret to avoid the
   # need to setup special secrets (see forked repo considerations below).
   # Once it adds GITHUB_TOKEN supported, we will switch the pipelines to use
-  # the recently announced ghcr.io registry.
+  # the recently announced ghcr.io registry completely.
   # - To support forked repos also executing the actions workflows (e.g. for
   # local testing), we use variables and target the local fork's package registry.
   # - For each PR, we rebuild the images using a combination of local action
@@ -73,7 +73,7 @@ jobs:
     - id: registry-name-tolower
       name: Compute the lowercase github docker package registry name
       shell: bash
-      run: echo "::set-output name=registry-name-tolower::docker.pkg.github.com/${{ github.repository }}" | tr A-Z a-z
+      run: echo "::set-output name=registry-name-tolower::${{ github.repository }}" | tr A-Z a-z
     - id: utc-date
       # Used as an additional cache-busting aid to make sure we do a fresh image build every day.
       shell: bash
@@ -164,8 +164,10 @@ jobs:
         # Even if the local cache doesn't have anything, allow using the latest published version.
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          ${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
           docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         cache-to: type=local,dest=/tmp/.buildx-cache
         #load: true
 
@@ -451,6 +453,8 @@ jobs:
     strategy:
       matrix:
         UbuntuVersion: [16.04, 18.04, 20.04]
+    env:
+      MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -463,17 +467,11 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        # Load the output cache from the docker-image-cached-build job.
+        # Store the output to the -latest cache key, for reuse by the docker-image-cached-build
         key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-latest
+        # Load the output cache from the docker-image-cached-build job.
         restore-keys:
           mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
-    # To prevent race issues, abort if that fails.
-    - name: Check for docker cache hit
-      if: steps.load-docker-cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
-        exit 1
     - name: Import cached image
       uses: docker/build-push-action@v2
       with:
@@ -497,16 +495,40 @@ jobs:
         cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
     # Now we can push the image to the local docker package repository.
-    - name: Docker Login
+    # Note: Although this works well with the built in GITHUB_TOKEN secret,
+    # it requires a "docker login" to be able to pull (no anonymous pulls).
+    - name: Github Docker Package Registry Login
       uses: docker/login-action@v1
       with:
         registry: docker.pkg.github.com
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Push the docker image
+    - name: Push the docker image to this repo's github docker package registry
       timeout-minutes: 15
       shell: bash
+      # We only push to the :latest tag, to avoid needing to cleanup the
+      # registry manually (there's currently no API for that).
       run: |
         docker tag mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
-          ${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-        docker push ${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+        docker push docker.pkg.github.com/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+    # Optionally push to the new Github Container Registry service, if the
+    # current repo has the appropriate personal access token secrets setup.
+    # This service allows anonymous pulls.
+    - name: Github Docker Container Registry Login
+      if: ${{ env.MLOS_GCR_USR != '' }}
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.MLOS_GCR_USR }}
+        password: ${{ secrets.MLOS_GCR_PAT }}
+    - name: Push the docker image to this repo's github docker container registry service
+      if: ${{ env.MLOS_GCR_USR != '' }}
+      timeout-minutes: 15
+      shell: bash
+      # We only push to the :latest tag, to avoid needing to cleanup the
+      # registry manually (there's currently no API for that).
+      run: |
+        docker tag mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
+          ghcr.io/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+        docker push ghcr.io/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
