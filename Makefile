@@ -173,7 +173,7 @@ docker-image:
 	    --build-arg=MlosBuildBaseArg=$(MlosBuildBaseArg) \
 	    --build-arg=UbuntuVersion=$(UbuntuVersion) \
 	    --build-arg=http_proxy=${http_proxy} \
-	    --cache-from docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-$(UbuntuVersion) \
+	    --cache-from ghcr.io/microsoft/mlos/mlos-build-ubuntu-$(UbuntuVersion) \
 	    -t mlos-build-ubuntu-$(UbuntuVersion)
 	@ echo Finished building mlos-build-ubuntu-$(UbuntuVersion) image.
 	@ echo Run "docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)" to start an instance.

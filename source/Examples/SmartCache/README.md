@@ -36,7 +36,7 @@ To build and run the necessary components for this example
 
     ```shell
     docker build . --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 \
-        --cache-from docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-20.04
+        --cache-from ghcr.io/microsoft/mlos/mlos-build-ubuntu-20.04
     ```
 
 2. [Run the Docker image](../../../documentation/02-Build.md#create-a-new-container-instance) you just built.

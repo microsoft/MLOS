@@ -36,7 +36,7 @@ If you chose to use the Docker build environment and have already built or pulle
 ```sh
 docker run -it -v $PWD:/src/MLOS \
   --name mlos-build \
-  docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-20.04
+  ghcr.io/microsoft/mlos/mlos-build-ubuntu-20.04
 ```
 
 #### Using the locally built image
