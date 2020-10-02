@@ -52,17 +52,17 @@ HRESULT InternalMlosContextInitializer::Initialize()
 
     if (SUCCEEDED(hr))
     {
-        hr = m_globalMemoryRegionView.Create("Test_Mlos.GlobalMemory", SharedMemorySize);
+        hr = m_globalMemoryRegionView.CreateNew("Test_Mlos.GlobalMemory", SharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = m_controlChannelMemoryMapView.Create("Test_SharedChannelMemory", SharedMemorySize);
+        hr = m_controlChannelMemoryMapView.CreateNew("Test_SharedChannelMemory", SharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = m_feedbackChannelMemoryMapView.Create("Test_FeedbackChannelMemory", SharedMemorySize);
+        hr = m_feedbackChannelMemoryMapView.CreateNew("Test_FeedbackChannelMemory", SharedMemorySize);
     }
 
     if (FAILED(hr))

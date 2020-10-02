@@ -33,7 +33,7 @@ public:
     // Opens already created shared memory view.
     //
     _Check_return_
-    HRESULT Create(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+    HRESULT CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
     // Creates or opens a shared memory view.
     //
@@ -43,7 +43,7 @@ public:
     // Opens already created shared memory view.
     //
     _Check_return_
-    HRESULT Open(const char* const sharedMemoryMapName) noexcept;
+    HRESULT OpenExisting(const char* const sharedMemoryMapName) noexcept;
 
     T& MemoryRegion()
     {

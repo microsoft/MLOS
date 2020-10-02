@@ -23,7 +23,7 @@ namespace Mlos.Core.Windows
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Create(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView CreateNew(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             return CreateOrOpen(sharedMemoryMapName, sharedMemorySize);
         }
@@ -77,7 +77,7 @@ namespace Mlos.Core.Windows
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Open(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView OpenExisting(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             SharedMemorySafeHandle sharedMemoryHandle = Native.OpenFileMapping(
                 Native.MemoryMappedFileAccess.FileMapRead | Native.MemoryMappedFileAccess.FileMapWrite,

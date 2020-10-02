@@ -61,7 +61,7 @@ SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapVi
 }
 
 //----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::Create
+// NAME: SharedMemoryMapView::CreateNew
 //
 // PURPOSE:
 //  Creates a new shared memory map view.
@@ -71,8 +71,10 @@ SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapVi
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::Create(const char* const sharedMemoryMapName, size_t memSize) noexcept
+HRESULT SharedMemoryMapView::CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept
 {
+    Close();
+
     shm_unlink(sharedMemoryMapName);
 
     m_sharedMemoryMapName = strdup(sharedMemoryMapName);
@@ -99,6 +101,8 @@ HRESULT SharedMemoryMapView::Create(const char* const sharedMemoryMapName, size_
 //
 HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
 {
+    Close();
+
     m_sharedMemoryMapName = strdup(sharedMemoryMapName);
     if (m_sharedMemoryMapName == nullptr)
     {
@@ -111,7 +115,7 @@ HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName,
 }
 
 //----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::Open
+// NAME: SharedMemoryMapView::OpenExisting
 //
 // PURPOSE:
 //  Opens already created shared memory region.
@@ -121,8 +125,10 @@ HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName,
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::Open(const char* const sharedMemoryMapName) noexcept
+HRESULT SharedMemoryMapView::OpenExisting(const char* const sharedMemoryMapName) noexcept
 {
+    Close();
+
     m_sharedMemoryMapName = strdup(sharedMemoryMapName);
     if (m_sharedMemoryMapName == nullptr)
     {
@@ -140,25 +146,28 @@ HRESULT SharedMemoryMapView::Open(const char* const sharedMemoryMapName) noexcep
 
 HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
 {
-    if (m_fdSharedMemory == INVALID_FD_VALUE)
-    {
-        return HRESULT_FROM_ERRNO(errno);
-    }
-
     HRESULT hr = S_OK;
 
-    if (memSize == 0)
+    if (m_fdSharedMemory == INVALID_FD_VALUE)
     {
-        // Obtain the size of the shared map.
-        //
-        struct stat statBuffer = { 0 };
-        if (fstat(m_fdSharedMemory, &statBuffer) != -1)
+        hr = HRESULT_FROM_ERRNO(errno);
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        if (memSize == 0)
         {
-            memSize = statBuffer.st_size;
-        }
-        else
-        {
-            hr = HRESULT_FROM_ERRNO(errno);
+            // Obtain the size of the shared map.
+            //
+            struct stat statBuffer = { 0 };
+            if (fstat(m_fdSharedMemory, &statBuffer) != -1)
+            {
+                memSize = statBuffer.st_size;
+            }
+            else
+            {
+                hr = HRESULT_FROM_ERRNO(errno);
+            }
         }
     }
 

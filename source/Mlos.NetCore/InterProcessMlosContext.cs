@@ -38,10 +38,10 @@ namespace Mlos.Core
         {
             // Create or open the memory mapped files.
             //
-            SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.Create(ControlChannelMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.Create(FeedbackChannelMemoryMapName, SharedMemorySize);
-            SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView = SharedMemoryRegionView.Create<MlosProxyInternal.SharedConfigMemoryRegion>(SharedConfigMemoryMapName, SharedMemorySize);
+            SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.CreateNew(ControlChannelMemoryMapName, SharedMemorySize);
+            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.CreateNew(FeedbackChannelMemoryMapName, SharedMemorySize);
+            SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.SharedConfigMemoryRegion>(SharedConfigMemoryMapName, SharedMemorySize);
 
             // Create channel synchronization primitives.
             //
