@@ -156,6 +156,9 @@ VOLUME /src/MLOS/target
 
 WORKDIR /src/MLOS
 
+# Expose the typical port that we start mlos microservice optimizer on by default.
+EXPOSE 50051/tcp
+
 # By default execute a bash shell for interactive usage.
 # This can also be overridden on the "docker run" command line with
 # "make" to execute a build and exit for pipeline usage instead.
