@@ -14,7 +14,8 @@ handledtargets += cmake-build cmake-install cmake-test cmake-check \
 		  cmake-clean cmake-distclean $(CMAKE) \
 		  python-checks python-test python-clean \
 		  website website-clean \
-		  grpc-clean mlos-codegen-clean
+		  grpc-clean mlos-codegen-clean \
+		  docker-image
 
 # Build using dotnet and the Makefile produced by cmake.
 .PHONY: all
@@ -139,6 +140,43 @@ python-test:
 ctags:
 	@  test -e $(ConfigurationMakefile) || $(MAKE) -C . $(ConfigurationMakefile)
 	@  $(MAKE) -C $(ConfigurationCmakeDir) ctags
+
+# Provide a target to help build a local docker image.
+#
+UbuntuVersion := ${UbuntuVersion}
+ifeq ($(UbuntuVersion),)
+    UbuntuVersion = 20.04
+endif
+ValidUbuntuVersions := 16.04 18.04 20.04
+ifneq ($(filter-out $(ValidUbuntuVersions),$(UbuntuVersion)),)
+    $(error Unhandled UbuntuVersion: $(UbuntuVersion))
+endif
+MlosBuildBaseArg := ${MlosBuildBaseArg}
+ifeq ($(MlosBuildBaseArg),)
+    MlosBuildBaseArg = without-extras
+endif
+ValidMlosBuildBaseArgs := without-extras with-extras
+ifneq ($(filter-out $(ValidMlosBuildBaseArgs),$(MlosBuildBaseArg)),)
+    $(error Unhandled MlosBuildBaseArg: $(MlosBuildBaseArg))
+endif
+MlosBuildImageTarget := ${MlosBuildImageTarget}
+ifeq ($(MlosImageTarget),)
+    MlosBuildImageTarget = mlos-build-base-$(MlosBuildBaseArg)
+endif
+ValidMlosBuildImageTargets := mlos-build-base-with-source mlos-build-base-with-extras mlos-build-base-without-extras
+ifneq ($(filter-out $(ValidMlosBuildImageTargets),$(MlosBuildImageTarget)),)
+    $(error Unhandled MlosBuildImageTarget: $(MlosBuildImageTarget))
+endif
+.PHONY: docker-image
+docker-image:
+	docker build . --target $(MlosBuildImageTarget) \
+	    --build-arg=MlosBuildBaseArg=$(MlosBuildBaseArg) \
+	    --build-arg=UbuntuVersion=$(UbuntuVersion) \
+	    --build-arg=http_proxy=${http_proxy} \
+	    --cache-from docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-$(UbuntuVersion) \
+	    -t mlos-build-ubuntu-$(UbuntuVersion)
+	@ echo Finished building mlos-build-ubuntu-$(UbuntuVersion) image.
+	@ echo Run "docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)" to start an instance.
 
 # Cleanup the outputs produced by cmake.
 .PHONY: cmake-distclean

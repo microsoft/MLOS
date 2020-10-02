@@ -6,9 +6,17 @@ Here are some brief instructions on how to try it out:
 
 ## Building
 
-1. Build the docker image
-2. Create a docker image instance
-3. Build the code:
+> Note: these command examples expect to be run from the top-level of the repository.
+>
+> To move there, execute the following:
+>
+> `cd $(git rev-parse --show-toplevel)`
+
+1. [Build or pull the docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image)
+2. [Create a docker image instance](../../../documentation/02-Build.md#create-a-new-container-instance)
+3. [Build the code](../../../documentation/02-Build.md#cli-make)
+
+   (inside the docker container)
 
     ```sh
     make -C source/Mlos.Agent.Server

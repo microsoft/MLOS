@@ -10,21 +10,25 @@
 
 # Supported UbuntuVersions: 16.04, 18.04, 20.04
 #
-# Build with:
-#   UbuntuVersion=20.04; docker build --build-arg=UbuntuVersion=$UbuntuVersion -t mlos-build-ubuntu-$UbuntuVersion .
+# Do a minimal build with:
+#   UbuntuVersion=20.04;
+#   docker build . --target mlos-build-base-without-extras \
+#       --build-arg=UbuntuVersion=$UbuntuVersion \
+#       -t mlos-build-ubuntu-$UbuntuVersion \
+#       --cache-from docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-$UbuntuVersion
 #
-# Optionally, build with a proxy server:
-#   UbuntuVersion=20.04; docker build --build-arg=http_proxy=http://some-proxy-caching-host:3128 --build-arg=UbuntuVersion=$UbuntuVersion -t mlos-build-ubuntu-$UbuntuVersion .
+# Note: to optionally reference a local proxy cache, also add the following argument:
+#       --build-arg=http_proxy=http://some-proxy-host:3128
 #
 # Run with:
-#   docker run -it -P --name mlos-build mlos-build-ubuntu-$UbuntuVersion
+#   docker run -it -v $PWD:/src/MLOS -P --name mlos-build mlos-build-ubuntu-$UbuntuVersion
 #
-# Alternatively, if you want to map the current source tree into the container
-# instead of using a separate copy from the build step:
-#   docker run -v $PWD:/src/MLOS -it -P --name mlos-build mlos-build-ubuntu-$UbuntuVersion
-#
-# The latter allows live editing in a native editor (e.g. VSCode or
+# This allows live editing in a native editor (e.g. VSCode or
 # VisualStudio) and building using the container's environment.
+#
+# Alternatively, change the --target option in the command above to
+# "mlos-build-base-with-source" to include the current source tree in the image
+# and then omit the "-v" option arguments in the "docker run" command.
 #
 # To restart an existing container:
 #   docker start -i mlos-build
@@ -173,7 +177,7 @@ RUN apt-get update && \
 
 # End MlosBuildBaseWithExtras
 
-FROM mlos-build-base-${MlosBuildBaseArg} AS mlos-build-with-source
+FROM mlos-build-base-${MlosBuildBaseArg} AS mlos-build-base-with-source
 
 # Copy the current MLOS source tree into /src/MLOS so that it can also be
 # executed standalone without a bind mount.

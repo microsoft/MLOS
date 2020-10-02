@@ -13,6 +13,8 @@ There are different instructions according to the environment setup you chose.
   - [Contents](#contents)
   - [Docker](#docker)
     - [Create a new container instance](#create-a-new-container-instance)
+      - [Using the upstream container image](#using-the-upstream-container-image)
+      - [Using the locally built image](#using-the-locally-built-image)
     - [Other useful docker commands](#other-useful-docker-commands)
     - [Start an existing container instance](#start-an-existing-container-instance)
     - [Get a new shell in a running container instance](#get-a-new-shell-in-a-running-container-instance)
@@ -28,6 +30,16 @@ There are different instructions according to the environment setup you chose.
 If you chose to use the Docker build environment and have already built or pulled a container image using the instructions in [01-Prerequisites.md](./01-Prerequisites.md#docker), then you can start an interactive session using the container image as follows:
 
 ### Create a new container instance
+
+#### Using the upstream container image
+
+```sh
+docker run -it -v $PWD:/src/MLOS \
+  --name mlos-build \
+  docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-20.04
+```
+
+#### Using the locally built image
 
 ```sh
 # Run the image:
