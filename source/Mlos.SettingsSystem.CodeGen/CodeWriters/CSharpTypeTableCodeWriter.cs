@@ -27,7 +27,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         protected string DispatchTableCSharpNamespace { get; private set; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CSharpTypeTableCodeWriter"/> class.
         /// </summary>
         /// <remarks>
         /// Get DispatchTable namespace from the custom assembly attribute.

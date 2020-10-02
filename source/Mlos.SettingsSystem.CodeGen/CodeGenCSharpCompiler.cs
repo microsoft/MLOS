@@ -10,7 +10,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 
 using Microsoft.CodeAnalysis;
@@ -138,7 +137,7 @@ namespace Mlos.SettingsSystem.CodeGen
         public CSharpCompilation Compilation { get; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CompilerOutput"/> struct.
         /// </summary>
         /// <param name="assembly"></param>
         /// <param name="emitResult"></param>
