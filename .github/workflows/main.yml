@@ -15,6 +15,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: "0 6 * * *"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -59,9 +61,60 @@ jobs:
   # - By only pushing the "latest" we reduce the burden of having the garbage
   # collect any old images that were published using the git-sha.
 
-  docker-image-build:
+  # docker only recognizes lower case registry names and doesn't provide a native function,
+  # so we need to perform a small shell transformation
+  docker-registry-name:
+    name: Compute the lowercase github docker package registry name
+    runs-on: ubuntu-latest
+    outputs:
+      tolower: ${{ steps.tolower.outputs.registry_name }}
+    steps:
+    - id: tolower
+      shell: bash
+      run: echo "::set-output name=registry_name::docker.pkg.github.com/${{ github.repository }}" | tr A-Z a-z
+
+  docker-image-fresh-build:
+    name: Build docker image (fresh) for Ubuntu ${{ matrix.UbuntuVersion }}
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        UbuntuVersion: [16.04, 18.04, 20.04]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+    - name: Docker Login
+      uses: docker/login-action@v1
+      with:
+        registry: docker.pkg.github.com
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build image
+      uses: docker/build-push-action@v2
+      with:
+        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
+        tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        # Force a fresh build
+        no-cache: true
+        pull: true
+        #cache-from: (none)
+        cache-to: type=local,dest=/tmp/.buildx-cache
+        #load: true
+
+  docker-image-cached-build:
     name: Build docker image (cache) for Ubuntu ${{ matrix.UbuntuVersion }}
     runs-on: ubuntu-latest
+    needs: docker-registry-name
     timeout-minutes: 20
     strategy:
       matrix:
@@ -91,14 +144,15 @@ jobs:
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ github.repository }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/Microsoft/MLOS/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
 
   linux-build-test:
     name: ${{ matrix.configuration }} build/test C++/C# on Ubuntu ${{ matrix.UbuntuVersion }}
     runs-on: ubuntu-latest
-    needs: docker-image-build
+    needs: [docker-registry-name, docker-image-cached-build]
     timeout-minutes: 30
     strategy:
       matrix:
@@ -107,7 +161,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    # "Fetch" the docker image precached by the "docker-image-build" job that
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -131,9 +185,10 @@ jobs:
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ github.repository }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/Microsoft/MLOS/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         #cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
     # Now start an instance of that container image.
     - name: Start ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
@@ -180,7 +235,7 @@ jobs:
 
   build-publish-website:
     name: Build and publish website
-    needs: docker-image-build
+    needs: [docker-registry-name, docker-image-cached-build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -191,7 +246,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    # "Fetch" the docker image precached by the "docker-image-build" job that
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -215,9 +270,10 @@ jobs:
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ github.repository }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/Microsoft/MLOS/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         #cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
     # Now start an instance of that container image.
     - name: Start docker instance
       shell: bash
@@ -302,7 +358,7 @@ jobs:
   linux-python-checks:
     name: Run Python checks on Ubuntu ${{ matrix.UbuntuVersion }}
     runs-on: ubuntu-latest
-    needs: docker-image-build
+    needs: [docker-registry-name, docker-image-cached-build]
     timeout-minutes: 30
     strategy:
       matrix:
@@ -313,7 +369,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    # "Fetch" the docker image precached by the "docker-image-build" job that
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -337,9 +393,10 @@ jobs:
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ github.repository }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/Microsoft/MLOS/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         #cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
     # Now, start the image as a new container instance.
     - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       # These images are expected to have installed all the pip dependencies already.
@@ -365,7 +422,7 @@ jobs:
     # Only do this if this was a successful merge to the main branch.
     if: ${{ github.ref == 'refs/heads/main' }}
     # And make sure that all of the other tests have passed first.
-    needs: [docker-image-build, linux-build-test, linux-python-checks, build-publish-website]
+    needs: [docker-registry-name, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -374,7 +431,7 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    # "Fetch" the docker image precached by the "docker-image-build" job that
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing its same steps.
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -391,21 +448,22 @@ jobs:
         registry: docker.pkg.github.com
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Build image (cached)
+    - name: Retrieve the image from the prebuilt cache and push it to the target repo.
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ github.repository }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/Microsoft/MLOS/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
     # Now we can push the image to the local docker package repository.
     - name: Push the docker image
       timeout-minutes: 15
       shell: bash
       run: |
         docker tag mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
-          docker.pkg.github.com/${{ github.repository }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-        docker push docker.pkg.github.com/${{ github.repository }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion  }}:latest
+          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+        docker push ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
