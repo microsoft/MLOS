@@ -37,7 +37,11 @@
 # supports.  See above for ways to override this.
 ARG UbuntuVersion=16.04
 
-FROM --platform=linux/amd64 ubuntu:${UbuntuVersion}
+# Allow requesting an image with additional content useful for interactive
+# development by passing --build-arg=MlosBuildBaseArg=with-extras
+ARG MlosBuildBaseArg=without-extras
+
+FROM --platform=linux/amd64 ubuntu:${UbuntuVersion} AS mlos-build-base-without-extras
 
 LABEL org.label-schema.schema-version = "1.0"
 LABEL org.label-schema.name = "mlos-build-ubuntu-${UbuntuVersion}"
@@ -60,7 +64,8 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=${DEBIAN_FRONTEND} TZ=${TZ} \
         apt-get --no-install-recommends -y install tzdata && \
     DEBIAN_FRONTEND=${DEBIAN_FRONTEND} TZ=${TZ} \
-        dpkg-reconfigure tzdata
+        dpkg-reconfigure tzdata && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Start setting up the container image to include the necessary build tools.
 RUN apt-get update && \
@@ -68,7 +73,8 @@ RUN apt-get update && \
         git make build-essential sudo curl wget lsb-release \
         software-properties-common apt-transport-https apt-utils \
         ca-certificates gnupg \
-        exuberant-ctags vim-nox bash-completion less
+        exuberant-ctags vim-nox bash-completion less && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # A few quality of life improvements:
 # Don't beep/bell on tab completion failure.
@@ -79,11 +85,13 @@ RUN add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
     apt-get --no-install-recommends -y install \
         python3.7 python3-pip \
-        python3.7-dev libfreetype6-dev unixodbc-dev
+        python3.7-dev libfreetype6-dev unixodbc-dev && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 RUN python3.7 -m pip install pip && \
     python3.7 -m pip install --upgrade pip && \
-    python3.7 -m pip install setuptools wheel
+    python3.7 -m pip install setuptools wheel && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
@@ -94,29 +102,33 @@ COPY ./scripts/install.llvm-clang.sh /tmp/MLOS/scripts/
 RUN apt-get update && \
     apt-get --no-install-recommends -y install \
         gnupg-agent && \
-    /bin/bash /tmp/MLOS/scripts/install.llvm-clang.sh
+    /bin/bash /tmp/MLOS/scripts/install.llvm-clang.sh && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install some dependencies necessary for dotnet.
 # Older versions of Ubuntu need additional libcurl libraries not already pulled
 # in by the curl binary.
 RUN if [ v`lsb_release -s -r` = 'v16.04' ]; then \
-        apt-get --no-install-recommends -y install libcurl3; \
+        apt-get update && \
+        apt-get --no-install-recommends -y install libcurl3 && \
+        apt-get -y clean && rm -rf /var/lib/apt/lists/*; \
     fi
 # Note: libxml2 automatically pulls in an appropriate version of the ^libicu[0-9]+$ package.
-RUN apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g
+RUN apt-get update && \
+    apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install dotnet in the system using our script.
 RUN mkdir -p /tmp/MLOS/scripts
 COPY ./scripts/install.dotnet.sh /tmp/MLOS/scripts/
-RUN /bin/bash /tmp/MLOS/scripts/install.dotnet.sh
+RUN /bin/bash /tmp/MLOS/scripts/install.dotnet.sh && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install cmake in the system using our script.
 RUN mkdir -p /tmp/MLOS/scripts
 COPY ./scripts/install.cmake.sh /tmp/MLOS/scripts/
-RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh
-
-# Cleanup the apt caches from the image.
-RUN apt-get -y clean && rm -rf /var/lib/apt/lists/*
+RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Prefetch the necessary local build tools/dependencies.
 COPY ./scripts/setup-cmake.sh \
@@ -127,23 +139,6 @@ RUN cd /src/MLOS && \
     ./tools/bin/cmake --help >/dev/null && \
     ./scripts/setup-dotnet.sh && \
     ./tools/bin/dotnet help >/dev/null
-
-# Whether or not to include extras to make interactive editing inside the
-# container using "docker exec" somewhat more reasonable.
-# Run the docker build command with an additional "--build-arg=WithExtras=true"
-# to install them as well.
-ARG WithExtras=false
-RUN if [ "x$WithExtras" = "xtrue" ]; then \
-        apt-get update && \
-        apt-get -y install \
-            man man-db manpages manpages-dev && \
-        /etc/cron.weekly/man-db; \
-    fi
-
-# Copy the current MLOS source tree into /src/MLOS so that it can also be
-# executed standalone without a bind mount.
-# Note: due to the recursive copy, this step is not very cacheable.
-COPY ./ /src/MLOS/
 
 # Declare a volume that we can bind mount the current MLOS repo into in-place
 # instead of the default copy.
@@ -161,3 +156,28 @@ WORKDIR /src/MLOS
 # This can also be overridden on the "docker run" command line with
 # "make" to execute a build and exit for pipeline usage instead.
 CMD ["/bin/bash", "-l"]
+
+# End mlos-build-base-without-extras
+
+FROM mlos-build-base-without-extras AS mlos-build-base-with-extras
+
+# Whether or not to include extras to make interactive editing inside the
+# container using "docker exec" somewhat more reasonable.
+# Run the docker build command with an additional "--build-arg=WithExtras=true"
+# to install them as well.
+RUN apt-get update && \
+    apt-get -y install \
+    man man-db manpages manpages-dev && \
+    /etc/cron.weekly/man-db && \
+    apt-get -y clean
+
+# End MlosBuildBaseWithExtras
+
+FROM mlos-build-base-${MlosBuildBaseArg} AS mlos-build-with-source
+
+# Copy the current MLOS source tree into /src/MLOS so that it can also be
+# executed standalone without a bind mount.
+# Note: due to the recursive copy, this step is not very cacheable.
+COPY ./ /src/MLOS/
+
+# End MlosBuildWithSource
