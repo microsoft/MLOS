@@ -56,25 +56,35 @@ jobs:
   # - Images are not pushed to the package registry until all of the tests pass.
   # - To support parallel testing, we need to "rebuild" the image in several
   # steps (hence the caches).
-  # - TODO: In a separate workflow, we nightly do a clean rebuild without any caches
+  # - In this same workflow, we nightly do a clean rebuild without any caches
   # (again running tests before pushing it).
   # - By only pushing the "latest" we reduce the burden of having the garbage
   # collect any old images that were published using the git-sha.
 
-  # docker only recognizes lower case registry names and doesn't provide a native function,
-  # so we need to perform a small shell transformation
-  docker-registry-name:
-    name: Compute the lowercase github docker package registry name
+  prep-vars:
     runs-on: ubuntu-latest
     outputs:
-      tolower: ${{ steps.tolower.outputs.registry_name }}
+      # docker only recognizes lower case registry names and doesn't provide a native function,
+      # so we need to perform a small shell transformation
+      registry-name-tolower: ${{ steps.registry-name-tolower.outputs.registry-name-tolower }}
+      utc-date: ${{ steps.utc-date.outputs.utc-date }}
+      utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
     steps:
-    - id: tolower
+    - id: registry-name-tolower
+      name: Compute the lowercase github docker package registry name
       shell: bash
-      run: echo "::set-output name=registry_name::docker.pkg.github.com/${{ github.repository }}" | tr A-Z a-z
+      run: echo "::set-output name=registry-name-tolower::docker.pkg.github.com/${{ github.repository }}" | tr A-Z a-z
+    - id: utc-date
+      # Used as an additional cache-busting aid to make sure we do a fresh image build every day.
+      shell: bash
+      run: echo ::set-output name=utc-date::$(date -u +%Y-%m-%d)
+    - id: utc-ts
+      shell: bash
+      run: echo ::set-output name=utc-ts::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
 
   docker-image-fresh-build:
     name: Build fresh Ubuntu ${{ matrix.UbuntuVersion }} image
+    needs: prep-vars
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -99,7 +109,7 @@ jobs:
       with:
         path: /tmp/.buildx-cache
         # Save the buildx cache output keyed by the git commit sha and UbuntuVersion.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
         #restore-keys: (no fallback)
     - name: Build image
       if: github.event_name == 'schedule'
@@ -120,7 +130,7 @@ jobs:
     runs-on: ubuntu-latest
     # Reuse the cache from the fresh build if it ran.
     # This let's us keep the rest of the workflow for publishing fresh images the same.
-    needs: [docker-image-fresh-build, docker-registry-name]
+    needs: [prep-vars, docker-image-fresh-build]
     timeout-minutes: 20
     strategy:
       matrix:
@@ -135,10 +145,10 @@ jobs:
       with:
         path: /tmp/.buildx-cache
         # Try to load the image cache for this sha (e.g. in case a fresh build job just did it).
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
         # We probably don't already have a cache for this sha (e.g. during PR checks).
         # So, fallback to using the most recently published image cache.
-        restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-latest
+        restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-latest
     - name: Docker Login
       uses: docker/login-action@v1
       with:
@@ -154,7 +164,7 @@ jobs:
         # Even if the local cache doesn't have anything, allow using the latest published version.
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
           docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         cache-to: type=local,dest=/tmp/.buildx-cache
         #load: true
@@ -162,7 +172,7 @@ jobs:
   linux-build-test:
     name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} build/test C++/C#
     runs-on: ubuntu-latest
-    needs: [docker-registry-name, docker-image-cached-build]
+    needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 30
     strategy:
       matrix:
@@ -181,7 +191,7 @@ jobs:
       with:
         path: /tmp/.buildx-cache
         # Load the output cache from the docker-image-cached-build job.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
         #restore-keys: (no fallback)
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
@@ -246,7 +256,7 @@ jobs:
 
   build-publish-website:
     name: Build and publish website
-    needs: [docker-registry-name, docker-image-cached-build]
+    needs: [prep-vars, docker-image-cached-build]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -267,7 +277,7 @@ jobs:
       with:
         path: /tmp/.buildx-cache
         # Load the output cache from the docker-image-cached-build job.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
         #restore-keys: (no fallback)
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
@@ -370,7 +380,7 @@ jobs:
   linux-python-checks:
     name: Run Python checks on Ubuntu ${{ matrix.UbuntuVersion }}
     runs-on: ubuntu-latest
-    needs: [docker-registry-name, docker-image-cached-build]
+    needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 30
     strategy:
       matrix:
@@ -391,7 +401,7 @@ jobs:
       with:
         path: /tmp/.buildx-cache
         # Load the output cache from the docker-image-cached-build job.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
         #restore-keys: (no fallback)
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
@@ -435,7 +445,7 @@ jobs:
     # Only do this if this was a successful merge to the main branch.
     # FIXME: if: ${{ github.ref == 'refs/heads/main' }}
     # And make sure that all of the other tests have passed first.
-    needs: [docker-registry-name, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]
+    needs: [prep-vars, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -444,10 +454,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - id: prep
-      shell: bash
-      run: |
-        echo ::set-output name=created::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
@@ -458,8 +464,9 @@ jobs:
       with:
         path: /tmp/.buildx-cache
         # Load the output cache from the docker-image-cached-build job.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
-        #restore-keys: (no fallback)
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-latest
+        restore-keys:
+          mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
       if: steps.load-docker-cache.outputs.cache-hit != 'true'
@@ -484,7 +491,7 @@ jobs:
           org.opencontainers.image.source=${{ github.event.repository.clone_url }}
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
           org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.created=${{ steps.prep.outputs.created }}
+          org.opencontainers.image.created=${{ needs.prep.outputs.utc-ts }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
@@ -501,5 +508,5 @@ jobs:
       shell: bash
       run: |
         docker tag mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
-          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-        docker push ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+        docker push ${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
