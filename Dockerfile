@@ -47,14 +47,9 @@ ARG MlosBuildBaseArg=without-extras
 
 FROM --platform=linux/amd64 ubuntu:${UbuntuVersion} AS mlos-build-base-without-extras
 
-LABEL org.label-schema.schema-version = "1.0"
-LABEL org.label-schema.name = "mlos-build-ubuntu-${UbuntuVersion}"
-LABEL org.label-schema.description = "MLOS build environment for Ubuntu ${UbuntuVersion}"
-LABEL org.label-schema.vendor = "Microsoft"
-LABEL org.label-schema.vcs-url = "https://github.com/Microsoft/MLOS"
-LABEL org.label-schema.usage = "https://github.com/Microsoft/MLOS/tree/main/documentation"
-LABEL org.label-schema.docker.cmd = "docker run -it -P -v $PWD:/src/MLOS"
-LABEL org.label-schema.docker.cmd.test = "docker run -P -v $PWD:/src/MLOS make all install test"
+LABEL org.opencontainers.image.vendor = "Microsoft"
+LABEL org.opencontainers.image.source = "https://github.com/Microsoft/MLOS"
+LABEL org.opencontainers.image.usage = "https://github.com/Microsoft/MLOS/tree/main/documentation"
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=UTC
