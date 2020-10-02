@@ -497,9 +497,9 @@ jobs:
         # Add some labels for publishing.
         labels: |
           org.opencontainers.image.title=mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
-          org.opencontainers.image.description="MLOS Build environment for Ubuntu ${UbuntuVersion}"
+          org.opencontainers.image.description="MLOS Build environment for Ubuntu ${{ matrix.UbuntuVersion }}"
           org.opencontainers.image.url=${{ github.event.repository.html_url }}
-          org.opencontainers.image.source=${{ github.event.repository.clone_url }}
+          org.opencontainers.image.source=${{ github.event.repository.html_url }}
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
           org.opencontainers.image.revision=${{ github.sha }}
           org.opencontainers.image.created=${{ needs.prep.outputs.utc-ts }}
