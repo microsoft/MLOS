@@ -93,12 +93,6 @@ jobs:
         key: ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-${{ github.sha }}
         restore-keys: |
           ${{ runner.os }}-buildx-${{ matrix.UbuntuVersion }}-
-    - name: Docker Login
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build image
       uses: docker/build-push-action@v2
       with:
@@ -114,7 +108,7 @@ jobs:
   docker-image-cached-build:
     name: Build Ubuntu ${{ matrix.UbuntuVersion }} image (cache)
     runs-on: ubuntu-latest
-    needs: docker-registry-name
+    needs: [docker-image-fresh-build, docker-registry-name]
     timeout-minutes: 20
     strategy:
       matrix:
