@@ -68,6 +68,7 @@ namespace SmartCache
         };
 
         /// <summary>
+        /// Initializes static members of the <see cref="AssemblyInitializer"/> class.
         /// This is the entry point for setting up the message handlers for the
         /// messages code generated from the (partial) structs defined for this
         /// smart component in the CodeGen/SmartCache.cs.
