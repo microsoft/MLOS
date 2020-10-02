@@ -443,14 +443,13 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Retrieve the image from the prebuilt cache and push it to the target repo.
+      timeout-minutes: 2
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          ${{ needs.docker-registry-name.outputs.tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
     # Now we can push the image to the local docker package repository.
