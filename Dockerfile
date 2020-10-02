@@ -84,6 +84,9 @@ RUN apt-get update && \
 # Don't beep/bell on tab completion failure.
 RUN echo "set bell-style none" >> /etc/inputrc
 
+# Create directory for our scripts to go.
+RUN mkdir -p /tmp/MLOS/scripts
+
 # Install python3.7 and its pip dependencies
 RUN add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
@@ -101,7 +104,6 @@ COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
 
 # Install LLVM using our script.
-RUN mkdir -p /tmp/MLOS/scripts
 COPY ./scripts/install.llvm-clang.sh /tmp/MLOS/scripts/
 RUN apt-get update && \
     apt-get --no-install-recommends -y install \
@@ -123,13 +125,11 @@ RUN apt-get update && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install dotnet in the system using our script.
-RUN mkdir -p /tmp/MLOS/scripts
 COPY ./scripts/install.dotnet.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.dotnet.sh && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install cmake in the system using our script.
-RUN mkdir -p /tmp/MLOS/scripts
 COPY ./scripts/install.cmake.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
