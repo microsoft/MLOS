@@ -11,7 +11,6 @@ using Mlos.UnitTest;
 
 using Xunit;
 
-using MlosProxy = Proxy.Mlos.Core;
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 using UnitTestProxy = Proxy.Mlos.UnitTest;
 
@@ -39,7 +38,7 @@ namespace Mlos.NetCore.UnitTest
         [Fact]
         public void Insert()
         {
-            using var sharedMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.SharedConfigMemoryRegion>(SharedMemoryMapName, SharedMemorySize);
+            using var sharedMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.SharedConfigMemoryRegion>(SharedMemoryMapName, SharedMemorySize);
             sharedMemoryRegionView.CleanupOnClose = true;
 
             MlosProxyInternal.SharedConfigMemoryRegion sharedConfigMemoryRegion = sharedMemoryRegionView.MemoryRegion();

@@ -19,6 +19,9 @@ using UnitTestProxy = Proxy.Mlos.UnitTest;
 
 namespace Mlos.NetCore.UnitTest
 {
+    /// <summary>
+    /// #TODO use InternalContext, configure shared memory view map.
+    /// </summary>
     public sealed class SharedChannelTests : IDisposable
     {
         private const string GlobalMemoryMapName = "Mlos.NetCore.Global.UnitTest";
@@ -39,9 +42,9 @@ namespace Mlos.NetCore.UnitTest
 
             // Initialize shared channel.
             //
-            globalChannelMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+            globalChannelMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
             globalChannelMemoryRegionView.CleanupOnClose = true;
-            sharedChannelMemoryMapView = SharedMemoryMapView.Create(SharedChannelMemoryMapName, SharedMemorySize);
+            sharedChannelMemoryMapView = SharedMemoryMapView.CreateNew(SharedChannelMemoryMapName, SharedMemorySize);
             sharedChannelMemoryMapView.CleanupOnClose = true;
 
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalChannelMemoryRegionView.MemoryRegion();

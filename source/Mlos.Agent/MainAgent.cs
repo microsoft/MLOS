@@ -226,7 +226,7 @@ namespace Mlos.Agent
         {
             if (!memoryRegions.ContainsKey(msg.MemoryRegionId))
             {
-                SharedMemoryMapView sharedMemoryMapView = SharedMemoryMapView.Open(
+                SharedMemoryMapView sharedMemoryMapView = SharedMemoryMapView.OpenExisting(
                     msg.Name.Value,
                     msg.MemoryRegionSize);
 
