@@ -39,7 +39,7 @@ if ! [ -x /usr/bin/linklint ]; then
 fi
 
 container_name='mlos-website-link-checker'
-if ! areInDockerContainer; then
+if ! areInDockerContainer && [ -x /usr/bin/docker ]; then
     echo "INFO: Starting $container_name container to serve website content for link checking." >&2
 
     # Make sure there's no container from a previous run hanging around first.
