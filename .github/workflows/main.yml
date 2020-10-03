@@ -314,8 +314,10 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
-        target: mlos-build-base-without-extras
-        tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        # For this target we can shave a small amount of time and only rebuild
+        # up to the python stage - no need for dotnet, cmake, clang, etc. yet.
+        target: mlos-build-base-with-python
+        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
         #cache-to: type=local,dest=/tmp/.buildx-cache
@@ -325,14 +327,14 @@ jobs:
       shell: bash
       run: |
         docker run -it -d -v $PWD:/src/MLOS \
-          --name mlos-build \
-          mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+          --name mlos-python-build \
+          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Generate Python API docs using sphinx
-      run: docker exec mlos-build make -C website sphinx-site
+      run: docker exec mlos-python-build make -C website sphinx-site
     - name: Generate main site from markdown using hugo
-      run: docker exec mlos-build make -C website hugo-site
+      run: docker exec mlos-python-build make -C website hugo-site
     - name: Test the links in the output site
-      run: docker exec mlos-build make -C website link-check
+      run: docker exec mlos-python-build make -C website link-check
     - name: Deploy to GitHub pages
       if: ${{ github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@3.5.9
@@ -342,8 +344,8 @@ jobs:
     - name: Cleanup docker instance
       shell: bash
       run: |
-        docker stop mlos-build
-        docker rm mlos-build
+        docker stop mlos-python-build
+        docker rm mlos-python-build
 
   # The licenseheaders check depends on comparing the source tree, so we keep it in a
   # separate pipeline to ensure it starts from a clean state.
