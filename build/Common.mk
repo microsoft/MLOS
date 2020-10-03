@@ -34,8 +34,8 @@ endif
 # keep msbuild props/targets files in build/
 CmakeBuildDir := $(MLOS_ROOT)/out/cmake
 
-CMAKE := $(MLOS_ROOT)/tools/cmake/bin/cmake
-DOTNET := $(MLOS_ROOT)/tools/bin/dotnet
+CMAKE := cmake
+DOTNET := dotnet
 
 PATH := $(MLOS_ROOT)/tools/bin:$(PATH)
 export PATH

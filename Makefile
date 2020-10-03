@@ -11,7 +11,7 @@ include ./build/Common.mk
 
 handledtargets += cmake-build cmake-install cmake-test cmake-check \
 		  cmake-buildfiles clean-cmake-buildfiles \
-		  cmake-clean cmake-distclean $(CMAKE) \
+		  cmake-clean cmake-distclean \
 		  python-checks python-test python-clean \
 		  website website-clean \
 		  grpc-clean mlos-codegen-clean \
@@ -110,7 +110,7 @@ cmake-buildfiles: $(ConfigurationMakefile)
 # Create the build Makefile using cmake.
 .NOTPARALLEL: $(ConfigurationMakefile)
 .PHONY: $(ConfigurationMakefile)
-$(ConfigurationMakefile): $(CMAKE) CMakeLists.txt
+$(ConfigurationMakefile): CMakeLists.txt
 	@  $(MKDIR) $(ConfigurationCmakeDir) > /dev/null
 	@  $(CMAKE) -D CMAKE_BUILD_TYPE=$(CONFIGURATION) -S $(MLOS_ROOT) -B $(ConfigurationCmakeDir) -G $(CmakeGenerator)
 
@@ -119,11 +119,6 @@ clean-cmake-buildfiles:
 	@ $(RM) $(ConfigurationCmakeDir)/CMakeCache.txt
 	@ $(RM) $(ConfigurationCmakeDir)/_deps
 	@ $(RM) $(ConfigurationMakefile)
-
-# Fetch a specific version of cmake.
-.NOTPARALLEL: $(CMAKE)
-$(CMAKE): ./scripts/setup-cmake.sh
-	@  ./scripts/setup-cmake.sh
 
 .PHONY: python-checks
 python-checks:
