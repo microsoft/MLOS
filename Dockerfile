@@ -75,6 +75,13 @@ RUN apt-get update && \
         exuberant-ctags vim-nox bash-completion less && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
+# Setup a regular user that we can use for running the container.
+# Use 1000:1000 as the ids (they're the typical default in most cases so should
+# work well with bind mounts).
+RUN addgroup --gid 1000 mlos-docker && \
+    adduser --shell /bin/bash --gecos 'MLOS Docker User' --disabled-password --uid 1000 --gid 1000 mlos-docker && \
+    echo 'mlos-docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
 # A few quality of life improvements:
 # Don't beep/bell on tab completion failure.
 RUN echo "set bell-style none" >> /etc/inputrc
@@ -119,15 +126,17 @@ RUN apt-get update && \
     apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
+USER mlos-docker:mlos-docker
+
 # Install dotnet in the system using our script.
 COPY ./scripts/install.dotnet.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.dotnet.sh && \
-    apt-get -y clean && rm -rf /var/lib/apt/lists/*
+    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Install cmake in the system using our script.
 COPY ./scripts/install.cmake.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh && \
-    apt-get -y clean && rm -rf /var/lib/apt/lists/*
+    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Prefetch the necessary local build tools/dependencies.
 COPY ./scripts/setup-cmake.sh \
@@ -163,19 +172,23 @@ CMD ["/bin/bash", "-l"]
 
 FROM mlos-build-base-without-extras AS mlos-build-base-with-extras
 
+USER root:root
+
 # Whether or not to include extras to make interactive editing inside the
 # container using "docker exec" somewhat more reasonable.
 # Run the docker build command with an additional "--build-arg=WithExtras=true"
 # to install them as well.
-RUN apt-get update && \
-    apt-get -y install \
-    man man-db manpages manpages-dev && \
-    /etc/cron.weekly/man-db && \
-    apt-get -y clean
+RUN sudo apt-get update && \
+    sudo apt-get -y install \
+        man man-db manpages manpages-dev && \
+    sudo /etc/cron.weekly/man-db && \
+    sudo apt-get -y clean
 
 # End MlosBuildBaseWithExtras
 
 FROM mlos-build-base-${MlosBuildBaseArg} AS mlos-build-base-with-source
+
+USER mlos-docker:mlos-docker
 
 # Copy the current MLOS source tree into /src/MLOS so that it can also be
 # executed standalone without a bind mount.
