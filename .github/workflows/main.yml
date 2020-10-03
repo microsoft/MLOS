@@ -518,9 +518,8 @@ jobs:
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
           org.opencontainers.image.revision=${{ github.sha }}
           org.opencontainers.image.created=${{ needs.prep.outputs.utc-ts }}
-        cache-from: |
-          type=local,src=/tmp/.buildx-cache
-        cache-to: type=local,dest=/tmp/.buildx-cache
+        cache-from: type=local,src=/tmp/.buildx-cache
+        #cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
     # Now we can push the image to the local docker package repository.
     # Note: Although this works well with the built in GITHUB_TOKEN secret,
