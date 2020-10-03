@@ -23,6 +23,7 @@ jobs:
       registry-name-tolower: ${{ steps.registry-name-tolower.outputs.registry-name-tolower }}
       utc-date: ${{ steps.utc-date.outputs.utc-date }}
       utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
+      main-sha: ${{ steps.main-sha.outputs.main-sha }}
     steps:
     - id: registry-name-tolower
       name: Compute the lowercase github docker package registry name
@@ -32,6 +33,14 @@ jobs:
       # Used as an additional cache-busting aid to make sure we do a fresh image build every day.
       shell: bash
       run: echo ::set-output name=utc-date::$(date -u +%Y-%m-%d)
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    - id: main-sha
+      name: Lookup the current git sha for the main branch
+      shell: bash
+      run: echo ::set-output name=main-sha::$(git rev-parse refs/heads/main)
 
   linux-python-long-haul-checks:
     name: Run Python checks on Ubuntu ${{ matrix.UbuntuVersion }}
@@ -62,7 +71,7 @@ jobs:
         path: /tmp/.buildx-cache
         # Load the output cache from the docker-image-cached-build job.
         key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
-        restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-latest
+        restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ needs.prep-vars.outputs.main-sha }}
     - name: Github Docker Package Registry Login
       uses: docker/login-action@v1
       with:
