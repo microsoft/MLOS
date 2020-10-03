@@ -71,8 +71,6 @@ jobs:
       utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
       main-sha: ${{ steps.main-sha.outputs.main-sha }}
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
     - id: registry-name-tolower
       name: Compute the lowercase github docker package registry name
       shell: bash
@@ -84,6 +82,10 @@ jobs:
     - id: utc-ts
       shell: bash
       run: echo ::set-output name=utc-ts::$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: main
     - id: main-sha
       name: Lookup the current git sha for the main branch
       shell: bash
