@@ -238,7 +238,7 @@ jobs:
     - name: Start ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS --env CONFIGURATION=${{ matrix.configuration }} \
+        docker run -it -d -v $PWD:/src/MLOS -u $UID --env CONFIGURATION=${{ matrix.configuration }} \
           --name mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Run ${{ matrix.configuration }} dotnet build
@@ -326,7 +326,7 @@ jobs:
     - name: Start docker instance
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS \
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
           --name mlos-python-build \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Generate Python API docs using sphinx
@@ -454,7 +454,7 @@ jobs:
       # These images are expected to have installed all the pip dependencies already.
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS \
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
           --name mlos-build-python-${{ matrix.UbuntuVersion }} \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion}})
