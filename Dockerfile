@@ -192,6 +192,10 @@ RUN apt-get update && \
     apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
+# Disable some noisy dotnet messages
+ENV DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+
 # Install dotnet in the system using our script.
 COPY ./scripts/install.dotnet.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.dotnet.sh && \
