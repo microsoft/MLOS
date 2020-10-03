@@ -45,7 +45,7 @@ ARG UbuntuVersion=16.04
 # development by passing --build-arg=MlosBuildBaseArg=with-extras
 ARG MlosBuildBaseArg=without-extras
 
-FROM --platform=linux/amd64 ubuntu:${UbuntuVersion} AS mlos-build-base-without-extras
+FROM --platform=linux/amd64 ubuntu:${UbuntuVersion} AS mlos-build-base
 
 LABEL org.opencontainers.image.vendor="Microsoft"
 LABEL org.opencontainers.image.url="https://github.com/Microsoft/MLOS"
@@ -89,6 +89,8 @@ RUN echo "set bell-style none" >> /etc/inputrc
 # Create directory for our scripts to go.
 RUN mkdir -p /tmp/MLOS/scripts
 
+FROM mlos-build-base AS mlos-build-base-with-python
+
 # Install python3.7 and its pip dependencies
 RUN add-apt-repository -y ppa:deadsnakes/ppa && \
     apt-get update && \
@@ -105,28 +107,62 @@ RUN python3.7 -m pip install pip && \
 COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
 
+# Setup some directories with the right permissions.
+RUN sudo mkdir -p \
+    /src/MLOS/out \
+    /src/MLOS/target \
+    /src/MLOS/scripts \
+    /src/MLOS/tools \
+    && sudo chown -R mlos-docker:mlos-docker /src/MLOS
+
+# Declare a volume that we can bind mount the current MLOS repo into in-place
+# instead of the default copy.
+VOLUME /src/MLOS
+
+# Mark the output directories as separate volumes so that we can reuse the live
+# source tree across different container build targets without conflicting
+# cmake or build outputs.
+VOLUME /src/MLOS/out
+VOLUME /src/MLOS/target
+VOLUME /src/MLOS/tools
+
+WORKDIR /src/MLOS
+
+# Expose the typical port that we start mlos microservice optimizer on by default.
+EXPOSE 50051/tcp
+# Also expose the nginx port for website build testing.
+EXPOSE 8080/tcp
+
+# Run as a non-root-user from here on out.
+USER mlos-docker:mlos-docker
+
+# By default execute a bash shell for interactive usage.
+# This can also be overridden on the "docker run" command line with
+# "make" to execute a build and exit for pipeline usage instead.
+CMD ["/bin/bash", "-l"]
+
+FROM mlos-build-base-with-python AS mlos-build-base-without-extras
+
 # Install LLVM using our script.
 COPY ./scripts/install.llvm-clang.sh /tmp/MLOS/scripts/
-RUN apt-get update && \
-    apt-get --no-install-recommends -y install \
+RUN sudo apt-get update && \
+    sudo apt-get --no-install-recommends -y install \
         gnupg-agent && \
     /bin/bash /tmp/MLOS/scripts/install.llvm-clang.sh && \
-    apt-get -y clean && rm -rf /var/lib/apt/lists/*
+    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Install some dependencies necessary for dotnet.
 # Older versions of Ubuntu need additional libcurl libraries not already pulled
 # in by the curl binary.
 RUN if [ v`lsb_release -s -r` = 'v16.04' ]; then \
-        apt-get update && \
-        apt-get --no-install-recommends -y install libcurl3 && \
-        apt-get -y clean && rm -rf /var/lib/apt/lists/*; \
+        sudo apt-get update && \
+        sudo apt-get --no-install-recommends -y install libcurl3 && \
+        sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*; \
     fi
 # Note: libxml2 automatically pulls in an appropriate version of the ^libicu[0-9]+$ package.
-RUN apt-get update && \
-    apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
-    apt-get -y clean && rm -rf /var/lib/apt/lists/*
-
-USER mlos-docker:mlos-docker
+RUN sudo apt-get update && \
+    sudo apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
+    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Install dotnet in the system using our script.
 COPY ./scripts/install.dotnet.sh /tmp/MLOS/scripts/
@@ -139,12 +175,6 @@ RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh && \
     sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Prefetch the necessary local build tools/dependencies.
-RUN sudo mkdir -p \
-    /src/MLOS/out \
-    /src/MLOS/target \
-    /src/MLOS/scripts \
-    /src/MLOS/tools \
-    && sudo chown -R mlos-docker:mlos-docker /src/MLOS
 COPY --chown=mlos-docker:mlos-docker \
     ./scripts/setup-cmake.sh \
     ./scripts/setup-dotnet.sh ./scripts/dotnet.env ./scripts/util.sh ./scripts/dotnet \
@@ -155,33 +185,11 @@ RUN cd /src/MLOS && \
     ./scripts/setup-dotnet.sh && \
     ./tools/bin/dotnet help >/dev/null
 
-# Declare a volume that we can bind mount the current MLOS repo into in-place
-# instead of the default copy.
-VOLUME /src/MLOS
-
-# Mark the output directories as separate volumes so that we can reuse the live
-# source tree across different container build targets without conflicting
-# cmake or build outputs.
-VOLUME /src/MLOS/out
-VOLUME /src/MLOS/target
-
-WORKDIR /src/MLOS
-
-# Expose the typical port that we start mlos microservice optimizer on by default.
-EXPOSE 50051/tcp
-# Also expose the nginx port for website build testing.
-EXPOSE 8080/tcp
-
-# By default execute a bash shell for interactive usage.
-# This can also be overridden on the "docker run" command line with
-# "make" to execute a build and exit for pipeline usage instead.
-CMD ["/bin/bash", "-l"]
-
 # End mlos-build-base-without-extras
 
 FROM mlos-build-base-without-extras AS mlos-build-base-with-extras
 
-USER root:root
+USER mlos-docker:mlos-docker
 
 # Whether or not to include extras to make interactive editing inside the
 # container using "docker exec" somewhat more reasonable.
@@ -202,6 +210,6 @@ USER mlos-docker:mlos-docker
 # Copy the current MLOS source tree into /src/MLOS so that it can also be
 # executed standalone without a bind mount.
 # Note: due to the recursive copy, this step is not very cacheable.
-COPY ./ /src/MLOS/
+COPY --chown=mlos-docker:mlos-docker ./ /src/MLOS/
 
 # End MlosBuildWithSource
