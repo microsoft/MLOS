@@ -239,29 +239,48 @@ jobs:
       shell: bash
       run: |
         echo $UID
-        docker run -it -d -v $PWD:/src/MLOS -u $UID --env CONFIGURATION=${{ matrix.configuration }} \
+        docker run -it -d -v $PWD:/src/MLOS -u root --env CONFIGURATION=${{ matrix.configuration }} \
           --name mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          addgroup --gid $UID github-action-runner
+        docker exec -u root mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          adduser --uid $UID --gid $UID --gecos '' --disabled-password github-action-runner
+        docker exec -u root mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          adduser github-action-runner sudo
     - name: Run ${{ matrix.configuration }} dotnet build
       timeout-minutes: 5
       shell: bash
-      run: docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} make dotnet-build
+      run: |
+        docker exec -u $UID mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make dotnet-build
     - name: Run ${{ matrix.configuration }} dotnet test
       timeout-minutes: 5
       shell: bash
-      run: docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} make dotnet-test
+      run: |
+        docker exec -u $UID mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make dotnet-test
     - name: Run ${{ matrix.configuration }} cmake build
       timeout-minutes: 5
       shell: bash
-      run: docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} make cmake-build
+      run: |
+        docker exec -u $UID mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make cmake-build
     - name: Run ${{ matrix.configuration }} cmake test
       timeout-minutes: 5
       shell: bash
-      run: docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} make cmake-test
+      run: |
+        docker exec -u $UID mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make cmake-test
     - name: Run cake build
       timeout-minutes: 10
       shell: bash
-      run: docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} ./build.linux.sh
+      run: |
+        docker exec -u $UID mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          ./build.linux.sh
     - name: Cleanup ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
@@ -327,15 +346,24 @@ jobs:
     - name: Start docker instance
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $UID \
-          --name mlos-python-build \
+        docker run -it -d -v $PWD:/src/MLOS -u root \
+          --name mlos-build-python \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-python \
+          addgroup --gid $UID github-action-runner
+        docker exec -u root mlos-build-python \
+          adduser --uid $UID --gid $UID --gecos '' --disabled-password github-action-runner
+        docker exec -u root mlos-build-python \
+          adduser github-action-runner sudo
     - name: Generate Python API docs using sphinx
-      run: docker exec mlos-python-build make -C website sphinx-site
+      run: docker exec -u $UID mlos-build-python make -C website sphinx-site
     - name: Generate main site from markdown using hugo
-      run: docker exec mlos-python-build make -C website hugo-site
+      run: docker exec -u $UID mlos-build-python make -C website hugo-site
     - name: Test the links in the output site
-      run: docker exec mlos-python-build make -C website link-check
+      run: docker exec -u $UID mlos-build-python make -C website link-check
     - name: Deploy to GitHub pages
       if: ${{ github.ref == 'refs/heads/main' }}
       uses: JamesIves/github-pages-deploy-action@3.5.9
@@ -345,8 +373,8 @@ jobs:
     - name: Cleanup docker instance
       shell: bash
       run: |
-        docker stop mlos-python-build
-        docker rm mlos-python-build
+        docker stop mlos-build-python
+        docker rm mlos-build-python
 
   # The licenseheaders check depends on comparing the source tree, so we keep it in a
   # separate pipeline to ensure it starts from a clean state.
@@ -455,15 +483,24 @@ jobs:
       # These images are expected to have installed all the pip dependencies already.
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $UID \
+        docker run -it -d -v $PWD:/src/MLOS -u root \
           --name mlos-build-python-${{ matrix.UbuntuVersion }} \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-    - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion}})
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
+          addgroup --gid $UID github-action-runner
+        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
+          adduser --uid $UID --gid $UID --gecos '' --disabled-password github-action-runner
+        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
+          adduser github-action-runner sudo
+    - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion }})
       timeout-minutes: 2
-      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-checks
-    - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion}})
+      run: docker exec -u $UID mlos-build-python-${{ matrix.UbuntuVersion }} make python-checks
+    - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion }})
       timeout-minutes: 30
-      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
+      run: docker exec -u $UID mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |

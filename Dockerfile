@@ -82,9 +82,11 @@ RUN echo "set bell-style none" >> /etc/inputrc
 # Setup a regular user that we can use for running the container.
 # Use 1000:1000 as the ids (they're the typical default in most cases so should
 # work well with bind mounts).
+# TODO: make this configurable with some build-args?
 RUN addgroup --gid 1000 mlos-docker && \
     adduser --shell /bin/bash --gecos 'MLOS Docker User' --disabled-password --uid 1000 --gid 1000 mlos-docker && \
-    echo 'mlos-docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+    adduser mlos-docker sudo && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Create directory for our scripts to go.
 RUN sudo mkdir -p /tmp/MLOS/scripts /tmp/MLOS/tools && \
