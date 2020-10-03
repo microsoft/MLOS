@@ -239,7 +239,7 @@ jobs:
       shell: bash
       run: |
         echo $UID
-        docker run -it -d -v $PWD:/src/MLOS -u $(id -u):$(id -g) --env CONFIGURATION=${{ matrix.configuration }} \
+        docker run -it -d -v $PWD:/src/MLOS -u $UID --env CONFIGURATION=${{ matrix.configuration }} \
           --name mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container
@@ -342,14 +342,14 @@ jobs:
     - name: Start docker instance
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $(id -u):$(id -g) \
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
           --name mlos-build-python \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container
       shell: bash
       run: |
         docker exec -u root mlos-build-python \
-          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u):$(id -g)
+          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
     - name: Generate Python API docs using sphinx
       run: docker exec mlos-build-python make -C website sphinx-site
     - name: Generate main site from markdown using hugo
@@ -475,7 +475,7 @@ jobs:
       # These images are expected to have installed all the pip dependencies already.
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $(id -u):$(id -g) \
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
           --name mlos-build-python-${{ matrix.UbuntuVersion }} \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container

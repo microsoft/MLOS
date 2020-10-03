@@ -105,7 +105,7 @@ jobs:
       # These images are expected to have installed all the pip dependencies already.
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $(id -u):$(id -g) \
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
           --name mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container

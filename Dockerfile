@@ -56,7 +56,7 @@ ARG TZ=UTC
 ARG LANG=en_US.UTF-8
 
 # Use root for the setup tasks.
-USER root:root
+USER root
 
 # Setup the tzdata and locale early on so it doesn't prompt or spit warnings at us.
 RUN apt-get update && \
@@ -127,7 +127,7 @@ COPY ./scripts/setup-container-user.sh /tmp/MLOS/scripts/
 RUN /tmp/MLOS/scripts/setup-container-user.sh mlos-docker 1000 1000
 
 # Run as a non-root-user from here on out.
-USER mlos-docker:mlos-docker
+USER mlos-docker
 
 # By default execute a bash shell for interactive usage.
 # This can also be overridden on the "docker run" command line with
@@ -139,7 +139,7 @@ CMD ["/bin/bash", "-l"]
 FROM mlos-build-base AS mlos-build-base-with-python
 
 # Use root for the setup tasks.
-USER root:root
+USER root
 
 # Install python3.7 and its pip dependencies
 RUN add-apt-repository -y ppa:deadsnakes/ppa && \
@@ -163,14 +163,14 @@ EXPOSE 50051/tcp
 EXPOSE 8080/tcp
 
 # Restore the non-root user for default CMD execution.
-USER mlos-docker:mlos-docker
+USER mlos-docker
 
 # End mlos-build-base-with-python stage.
 
 FROM mlos-build-base-with-python AS mlos-build-base-without-extras
 
 # Use root for the setup tasks.
-USER root:root
+USER root
 
 # Install LLVM using our script.
 COPY ./scripts/install.llvm-clang.sh /tmp/MLOS/scripts/
@@ -204,14 +204,14 @@ RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Restore the non-root user for default CMD execution.
-USER mlos-docker:mlos-docker
+USER mlos-docker
 
 # End mlos-build-base-without-extras stage
 
 FROM mlos-build-base-without-extras AS mlos-build-base-with-extras
 
 # Use root for the setup tasks.
-USER root:root
+USER root
 
 # Whether or not to include extras to make interactive editing inside the
 # container using "docker exec" somewhat more reasonable.
@@ -224,13 +224,13 @@ RUN apt-get update && \
     apt-get -y clean
 
 # Restore the non-root user for default CMD execution.
-USER mlos-docker:mlos-docker
+USER mlos-docker
 
 # End mlos-build-base-with-extras stage
 
 FROM mlos-build-base-${MlosBuildBaseArg} AS mlos-build-base-with-source
 
-USER mlos-docker:mlos-docker
+USER mlos-docker
 
 # Copy the current MLOS source tree into /src/MLOS so that it can also be
 # executed standalone without a bind mount.
