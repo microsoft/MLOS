@@ -159,10 +159,15 @@ jobs:
         key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
         # We probably don't already have a cache for this sha (e.g. during PR checks).
         # So, fallback to using the most recently published image cache.
+        # Note: Including additional keys may seem like it improves the rebuild
+        # time since we know we'll get a cache hit from a previously built
+        # image, but it can lead to growing cache sizes that get propogated
+        # forward, which can actually increase build times.
+        # Really only "published" versions should be allowed to be reused.
+        #  mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-
+        #  mlos-buildx-${{ matrix.UbuntuVersion }}-
         restore-keys: |
           mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ needs.prep-vars.outputs.main-sha }}
-          mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-
-          mlos-buildx-${{ matrix.UbuntuVersion }}-
     - name: Github Docker Package Registry Login
       uses: docker/login-action@v1
       with:
