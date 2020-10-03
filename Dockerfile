@@ -85,18 +85,6 @@ RUN echo "set bell-style none" >> /etc/inputrc
 # Allow members of the sudo group to execute commands without prompting for a password.
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Declare a volume that we can bind mount the current MLOS repo into in-place
-# instead of the default copy.
-VOLUME /src/MLOS
-
-# Mark the output directories as separate volumes so that we can reuse the live
-# source tree across different container build targets without conflicting
-# cmake or build outputs.
-VOLUME /src/MLOS/out
-VOLUME /src/MLOS/target
-VOLUME /src/MLOS/tools
-VOLUME /src/MLOS/temp
-
 # Add a group to use for controlling access to the local container build output target.
 RUN addgroup --system mlos-build
 
@@ -113,6 +101,18 @@ RUN mkdir -p \
         /src/MLOS/target \
         /src/MLOS/temp \
         /src/MLOS/tools
+
+# Declare a volume that we can bind mount the current MLOS repo into in-place
+# instead of the default copy.
+VOLUME /src/MLOS
+
+# Mark the output directories as separate volumes so that we can reuse the live
+# source tree across different container build targets without conflicting
+# cmake or build outputs.
+VOLUME /src/MLOS/out
+VOLUME /src/MLOS/target
+VOLUME /src/MLOS/tools
+VOLUME /src/MLOS/temp
 
 WORKDIR /src/MLOS
 
