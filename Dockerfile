@@ -55,6 +55,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=UTC
 ARG LANG=en_US.UTF-8
 
+# Use root for the setup tasks.
+USER root:root
+
 # Setup the tzdata and locale early on so it doesn't prompt or spit warnings at us.
 RUN apt-get update && \
     LANG=C apt-get --no-install-recommends -y install apt-utils && \
@@ -79,20 +82,64 @@ RUN apt-get update && \
 # Don't beep/bell on tab completion failure.
 RUN echo "set bell-style none" >> /etc/inputrc
 
+# Allow members of the sudo group to execute commands without prompting for a password.
+RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+# Declare a volume that we can bind mount the current MLOS repo into in-place
+# instead of the default copy.
+VOLUME /src/MLOS
+
+# Mark the output directories as separate volumes so that we can reuse the live
+# source tree across different container build targets without conflicting
+# cmake or build outputs.
+VOLUME /src/MLOS/out
+VOLUME /src/MLOS/target
+VOLUME /src/MLOS/tools
+VOLUME /src/MLOS/temp
+
+# Add a group to use for controlling access to the local container build output target.
+RUN addgroup --system mlos-build
+
+# Setup some build output directories with appropriate permissions for non-root
+# users to use.
+RUN mkdir -p \
+    /src/MLOS/out \
+    /src/MLOS/target \
+    /src/MLOS/temp \
+    /src/MLOS/tools && \
+    chgrp -R mlos-build /src/MLOS && \
+    chmod 2775 \
+        /src/MLOS/out \
+        /src/MLOS/target \
+        /src/MLOS/temp \
+        /src/MLOS/tools
+
+WORKDIR /src/MLOS
+
+# Create directory for our scripts to go.
+RUN mkdir -p /tmp/MLOS/scripts /tmp/MLOS/tools
+
 # Setup a regular user that we can use for running the container.
 # Use 1000:1000 as the ids (they're the typical default in most cases so should
 # work well with bind mounts).
 # TODO: make this configurable with some build-args?
-RUN addgroup --gid 1000 mlos-docker && \
-    adduser --shell /bin/bash --gecos 'MLOS Docker User' --disabled-password --uid 1000 --gid 1000 mlos-docker && \
-    adduser mlos-docker sudo && \
-    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+COPY ./scripts/setup-container-user.sh /tmp/MLOS/scripts/
+RUN /tmp/MLOS/scripts/setup-container-user.sh mlos-docker 1000 1000
 
-# Create directory for our scripts to go.
-RUN sudo mkdir -p /tmp/MLOS/scripts /tmp/MLOS/tools && \
-    sudo chown -R mlos-docker:mlos-docker /tmp/MLOS
+# Run as a non-root-user from here on out.
+USER mlos-docker:mlos-docker
+
+# By default execute a bash shell for interactive usage.
+# This can also be overridden on the "docker run" command line with
+# "make" to execute a build and exit for pipeline usage instead.
+CMD ["/bin/bash", "-l"]
+
+# End mlos-build-base stage.
 
 FROM mlos-build-base AS mlos-build-base-with-python
+
+# Use root for the setup tasks.
+USER root:root
 
 # Install python3.7 and its pip dependencies
 RUN add-apt-repository -y ppa:deadsnakes/ppa && \
@@ -110,101 +157,76 @@ RUN python3.7 -m pip install pip && \
 COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
 
-# Setup some directories with the right permissions.
-RUN sudo mkdir -p \
-    /src/MLOS/out \
-    /src/MLOS/target \
-    /src/MLOS/scripts \
-    /src/MLOS/tools \
-    && sudo chown -R mlos-docker:mlos-docker /src/MLOS
-
-# Declare a volume that we can bind mount the current MLOS repo into in-place
-# instead of the default copy.
-VOLUME /src/MLOS
-
-# Mark the output directories as separate volumes so that we can reuse the live
-# source tree across different container build targets without conflicting
-# cmake or build outputs.
-VOLUME /src/MLOS/out
-VOLUME /src/MLOS/target
-VOLUME /src/MLOS/tools
-
-WORKDIR /src/MLOS
-
 # Expose the typical port that we start mlos microservice optimizer on by default.
 EXPOSE 50051/tcp
 # Also expose the nginx port for website build testing.
 EXPOSE 8080/tcp
 
-# Run as a non-root-user from here on out.
+# Restore the non-root user for default CMD execution.
 USER mlos-docker:mlos-docker
 
-# By default execute a bash shell for interactive usage.
-# This can also be overridden on the "docker run" command line with
-# "make" to execute a build and exit for pipeline usage instead.
-CMD ["/bin/bash", "-l"]
+# End mlos-build-base-with-python stage.
 
 FROM mlos-build-base-with-python AS mlos-build-base-without-extras
 
+# Use root for the setup tasks.
+USER root:root
+
 # Install LLVM using our script.
 COPY ./scripts/install.llvm-clang.sh /tmp/MLOS/scripts/
-RUN sudo apt-get update && \
-    sudo apt-get --no-install-recommends -y install \
+RUN apt-get update && \
+    apt-get --no-install-recommends -y install \
         gnupg-agent && \
     /bin/bash /tmp/MLOS/scripts/install.llvm-clang.sh && \
-    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install some dependencies necessary for dotnet.
 # Older versions of Ubuntu need additional libcurl libraries not already pulled
 # in by the curl binary.
 RUN if [ v`lsb_release -s -r` = 'v16.04' ]; then \
-        sudo apt-get update && \
-        sudo apt-get --no-install-recommends -y install libcurl3 && \
-        sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*; \
+        apt-get update && \
+        apt-get --no-install-recommends -y install libcurl3 && \
+        apt-get -y clean && rm -rf /var/lib/apt/lists/*; \
     fi
 # Note: libxml2 automatically pulls in an appropriate version of the ^libicu[0-9]+$ package.
-RUN sudo apt-get update && \
-    sudo apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
-    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install dotnet in the system using our script.
 COPY ./scripts/install.dotnet.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.dotnet.sh && \
-    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install cmake in the system using our script.
 COPY ./scripts/install.cmake.sh /tmp/MLOS/scripts/
 RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh && \
-    sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
+    apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
-# Prefetch the necessary local build tools/dependencies.
-COPY --chown=mlos-docker:mlos-docker \
-    ./scripts/setup-cmake.sh \
-    ./scripts/setup-dotnet.sh ./scripts/dotnet.env ./scripts/util.sh ./scripts/dotnet \
-    /src/MLOS/scripts/
-RUN cd /src/MLOS && \
-    ./scripts/setup-cmake.sh && \
-    ./tools/bin/cmake --help >/dev/null && \
-    ./scripts/setup-dotnet.sh && \
-    ./tools/bin/dotnet help >/dev/null
+# Restore the non-root user for default CMD execution.
+USER mlos-docker:mlos-docker
 
-# End mlos-build-base-without-extras
+# End mlos-build-base-without-extras stage
 
 FROM mlos-build-base-without-extras AS mlos-build-base-with-extras
 
-USER mlos-docker:mlos-docker
+# Use root for the setup tasks.
+USER root:root
 
 # Whether or not to include extras to make interactive editing inside the
 # container using "docker exec" somewhat more reasonable.
 # Run the docker build command with an additional "--build-arg=WithExtras=true"
 # to install them as well.
-RUN sudo apt-get update && \
-    sudo apt-get -y install \
+RUN apt-get update && \
+    apt-get -y install \
         man man-db manpages manpages-dev && \
-    sudo /etc/cron.weekly/man-db && \
-    sudo apt-get -y clean
+    /etc/cron.weekly/man-db && \
+    apt-get -y clean
 
-# End MlosBuildBaseWithExtras
+# Restore the non-root user for default CMD execution.
+USER mlos-docker:mlos-docker
+
+# End mlos-build-base-with-extras stage
 
 FROM mlos-build-base-${MlosBuildBaseArg} AS mlos-build-base-with-source
 
@@ -215,4 +237,4 @@ USER mlos-docker:mlos-docker
 # Note: due to the recursive copy, this step is not very cacheable.
 COPY --chown=mlos-docker:mlos-docker ./ /src/MLOS/
 
-# End MlosBuildWithSource
+# End mlos-build-base-with-source stage

@@ -105,9 +105,14 @@ jobs:
       # These images are expected to have installed all the pip dependencies already.
       shell: bash
       run: |
-        docker run -it -d -v $PWD:/src/MLOS \
+        docker run -it -d -v $PWD:/src/MLOS -u $(id -u):$(id -g) \
           --name mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
     - name: Run pylint long haul tests (Ubuntu ${{ matrix.UbuntuVersion}})
       run: docker exec --workdir /src/MLOS/source/Mlos.Python mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
         python3.7 -m unittest discover -p LongHaulTest*.py --verbose
