@@ -513,11 +513,13 @@ jobs:
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         # Add some labels for publishing.
         labels: |
+          org.opencontainers.image.title=mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
+          org.opencontainers.image.description="MLOS build environment for Ubuntu ${{ matrix.UbuntuVersion }}"
           org.opencontainers.image.url=https://github.com/${{ github.repository }}
           org.opencontainers.image.source=https://github.com/${{ github.repository }}
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
           org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.created=${{ needs.prep.outputs.utc-ts }}
+          org.opencontainers.image.created=${{ needs.prep-vars.outputs.utc-ts }}
         cache-from: type=local,src=/tmp/.buildx-cache
         #cache-to: type=local,dest=/tmp/.buildx-cache
         load: true

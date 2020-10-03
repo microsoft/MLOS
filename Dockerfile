@@ -48,10 +48,7 @@ ARG MlosBuildBaseArg=without-extras
 FROM --platform=linux/amd64 ubuntu:${UbuntuVersion} AS mlos-build-base-without-extras
 
 LABEL org.opencontainers.image.vendor="Microsoft"
-LABEL org.opencontainers.image.title="mlos-build-ubuntu-${UbuntuVersion}"
-LABEL org.opencontainers.image.description="MLOS Build environment for Ubuntu ${UbuntuVersion}"
 LABEL org.opencontainers.image.url="https://github.com/Microsoft/MLOS"
-LABEL org.opencontainers.image.source="https://github.com/Microsoft/MLOS"
 LABEL org.opencontainers.image.usage="https://github.com/Microsoft/MLOS/tree/main/documentation"
 
 ARG DEBIAN_FRONTEND=noninteractive
