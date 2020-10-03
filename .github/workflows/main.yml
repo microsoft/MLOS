@@ -441,8 +441,10 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
-        target: mlos-build-base-without-extras
-        tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        # For this task we can get a slight speed up by skipping the dotnet,
+        # clang, cmake layers.
+        target: mlos-build-base-with-python
+        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
         #cache-to: type=local,dest=/tmp/.buildx-cache
@@ -453,19 +455,19 @@ jobs:
       shell: bash
       run: |
         docker run -it -d -v $PWD:/src/MLOS \
-          --name mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
-          mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+          --name mlos-build-python-${{ matrix.UbuntuVersion }} \
+          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion}})
       timeout-minutes: 2
-      run: docker exec mlos-build-ubuntu-${{ matrix.UbuntuVersion }} make python-checks
+      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-checks
     - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion}})
       timeout-minutes: 30
-      run: docker exec mlos-build-ubuntu-${{ matrix.UbuntuVersion }} make python-test
+      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
-        docker stop mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
-        docker rm mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
+        docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
+        docker rm mlos-build-python-${{ matrix.UbuntuVersion }}
 
   docker-image-publish:
     name: Publish Ubuntu ${{ matrix.UbuntuVersion }} image
