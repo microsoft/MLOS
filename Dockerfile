@@ -79,8 +79,10 @@ RUN apt-get update && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # A few quality of life improvements:
-# Don't beep/bell on tab completion failure.
-RUN echo "set bell-style none" >> /etc/inputrc
+# - Don't beep/bell on tab completion failure.
+# - Add the default pip command install location to the search PATH
+RUN echo 'set bell-style none' >> /etc/inputrc && \
+    echo 'export PATH="$PATH:$HOME/.local/bin"' >> /etc/profile.d/pip-cmds.sh
 
 # Allow members of the sudo group to execute commands without prompting for a password.
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
