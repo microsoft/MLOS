@@ -64,10 +64,7 @@ fi
 current_uid_username=$(getent passwd $uid | cut -d: -f1)
 
 # Add a group to use for the local container outputs.
-if ! getent group mlos-build; then
-    addgroup --system mlos-group
-fi
-adduser $current_uid_username mlos-build
+adduser $current_uid_username src
 
 # Add the user to the sudo group.
 # (by the name associated with the uid in case the uid already existed)

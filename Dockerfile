@@ -85,9 +85,6 @@ RUN echo "set bell-style none" >> /etc/inputrc
 # Allow members of the sudo group to execute commands without prompting for a password.
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Add a group to use for controlling access to the local container build output target.
-RUN addgroup --system mlos-build
-
 # Setup some build output directories with appropriate permissions for non-root
 # users to use.
 RUN mkdir -p \
@@ -95,8 +92,8 @@ RUN mkdir -p \
     /src/MLOS/target \
     /src/MLOS/temp \
     /src/MLOS/tools && \
-    chgrp -R mlos-build /src/MLOS && \
-    chmod 2775 \
+    chgrp -R src /src/MLOS && \
+    chmod 0775 \
         /src/MLOS/out \
         /src/MLOS/target \
         /src/MLOS/temp \
