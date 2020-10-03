@@ -128,6 +128,15 @@ RUN /tmp/MLOS/scripts/setup-container-user.sh mlos-docker 1000 1000
 # Run as a non-root-user from here on out.
 USER mlos-docker
 
+# Add some directories for vscode to bind to avoid having to rebuild extensions every launch.
+# https://code.visualstudio.com/docs/remote/containers-advanced#_avoiding-extension-reinstalls-on-container-rebuild
+RUN mkdir -p \
+    /home/mlos-docker/.vscode-server/extensions \
+    /home/mlos-docker/.vscode-server-insiders/extensions && \
+    chown -R mlos-docker \
+        /home/mlos-docker/.vscode-server \
+        /home/mlos-docker/.vscode-server-insiders
+
 # By default execute a bash shell for interactive usage.
 # This can also be overridden on the "docker run" command line with
 # "make" to execute a build and exit for pipeline usage instead.
