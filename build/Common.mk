@@ -37,7 +37,8 @@ CmakeBuildDir := $(MLOS_ROOT)/out/cmake
 CMAKE := cmake
 DOTNET := dotnet
 
-PATH := $(MLOS_ROOT)/tools/bin:$(PATH)
+# Make sure to check the usual pip install location for commands.
+PATH := $(PATH):${HOME}/.local/bin
 export PATH
 
 # Make dotnet be a little less noisy.
