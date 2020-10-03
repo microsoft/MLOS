@@ -21,7 +21,7 @@ pythonCmd=$(getPythonCmd)
 $pythonCmd -m pip install -e "$MLOS_ROOT/source/Mlos.Python/"
 $pythonCmd -m pip install pyyaml
 $pythonCmd -m pip install \
-    $("$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
+    $($pythonCmd "$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
 # FIXME: nbconvert 6.0.1 had an error.
 $pythonCmd -m pip install jupyter nbconvert==5.6.1
 
