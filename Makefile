@@ -160,7 +160,7 @@ ifneq ($(filter-out $(ValidMlosBuildBaseArgs),$(MlosBuildBaseArg)),)
     $(error Unhandled MlosBuildBaseArg: $(MlosBuildBaseArg))
 endif
 MlosBuildImageTarget := ${MlosBuildImageTarget}
-ifeq ($(MlosImageTarget),)
+ifeq ($(MlosBuildImageTarget),)
     MlosBuildImageTarget = mlos-build-base-$(MlosBuildBaseArg)
 endif
 ValidMlosBuildImageTargets := mlos-build-base-with-source mlos-build-base-with-extras mlos-build-base-without-extras mlos-build-base-with-python
