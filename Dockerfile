@@ -162,6 +162,8 @@ WORKDIR /src/MLOS
 
 # Expose the typical port that we start mlos microservice optimizer on by default.
 EXPOSE 50051/tcp
+# Also expose the nginx port for website build testing.
+EXPOSE 8080/tcp
 
 # By default execute a bash shell for interactive usage.
 # This can also be overridden on the "docker run" command line with

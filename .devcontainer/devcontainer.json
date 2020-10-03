@@ -1,0 +1,8 @@
+{
+    "name": "mlos-build-ubuntu-20.04",
+    "extensions": [],
+    "forwardPorts": [8080, 50051],
+    "image": "ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04:latest",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/src/MLOS,type=bind,consistency=cached",
+    "workspaceFolder": "/src/MLOS"
+}
