@@ -169,11 +169,11 @@ ifneq ($(filter-out $(ValidMlosBuildImageTargets),$(MlosBuildImageTarget)),)
 endif
 .PHONY: docker-image
 docker-image:
+	docker pull ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-$(UbuntuVersion):latest
 	docker build . --target $(MlosBuildImageTarget) \
 	    --build-arg=MlosBuildBaseArg=$(MlosBuildBaseArg) \
 	    --build-arg=UbuntuVersion=$(UbuntuVersion) \
 	    --build-arg=http_proxy=${http_proxy} \
-	    --cache-from ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-$(UbuntuVersion) \
 	    -t mlos-build-ubuntu-$(UbuntuVersion)
 	@ echo Finished building mlos-build-ubuntu-$(UbuntuVersion) image.
 	@ echo Run "docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)" to start an instance.
