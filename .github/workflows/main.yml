@@ -488,10 +488,9 @@ jobs:
       uses: actions/cache@v2
       with:
         path: /tmp/.buildx-cache
-        # Store the output to the -latest cache key, for reuse by the docker-image-cached-build
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
         # Load the output cache from the docker-image-cached-build job.
-        restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ needs.prep-vars.outputs.main-sha }}
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
+        #restore-keys: (no fallback)
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
       if: steps.load-docker-cache.outputs.cache-hit != 'true'
