@@ -15,7 +15,7 @@
 #   docker build . --target mlos-build-base-without-extras \
 #       --build-arg=UbuntuVersion=$UbuntuVersion \
 #       -t mlos-build-ubuntu-$UbuntuVersion \
-#       --cache-from ghcr.io/microsoft/mlos/mlos-build-ubuntu-$UbuntuVersion
+#       --cache-from ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-$UbuntuVersion
 #
 # Note: to optionally reference a local proxy cache, also add the following argument:
 #       --build-arg=http_proxy=http://some-proxy-host:3128

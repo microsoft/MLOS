@@ -20,15 +20,15 @@ jobs:
     outputs:
       # docker only recognizes lower case registry names and doesn't provide a native function,
       # so we need to perform a small shell transformation
-      registry-name-tolower: ${{ steps.registry-name-tolower.outputs.registry-name-tolower }}
+      repository-name-tolower: ${{ steps.repository-name-tolower.outputs.repository-name-tolower }}
       utc-date: ${{ steps.utc-date.outputs.utc-date }}
       utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
       main-sha: ${{ steps.main-sha.outputs.main-sha }}
     steps:
-    - id: registry-name-tolower
+    - id: repository-name-tolower
       name: Compute the lowercase github docker package registry name
       shell: bash
-      run: echo "::set-output name=registry-name-tolower::${{ github.repository }}" | tr A-Z a-z
+      run: echo "::set-output name=repository-name-tolower::${{ github.repository }}" | tr A-Z a-z
     - id: utc-date
       # Used as an additional cache-busting aid to make sure we do a fresh image build every day.
       shell: bash
@@ -94,10 +94,10 @@ jobs:
         tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          ghcr.io/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
           docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          ghcr.io/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         #cache-to: (none)
         load: true
     # Now, start the image as a new container instance.

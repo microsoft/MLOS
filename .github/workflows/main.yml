@@ -66,15 +66,15 @@ jobs:
     outputs:
       # docker only recognizes lower case registry names and doesn't provide a native function,
       # so we need to perform a small shell transformation
-      registry-name-tolower: ${{ steps.registry-name-tolower.outputs.registry-name-tolower }}
+      repository-name-tolower: ${{ steps.repository-name-tolower.outputs.repository-name-tolower }}
       utc-date: ${{ steps.utc-date.outputs.utc-date }}
       utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
       main-sha: ${{ steps.main-sha.outputs.main-sha }}
     steps:
-    - id: registry-name-tolower
+    - id: repository-name-tolower
       name: Compute the lowercase github docker package registry name
       shell: bash
-      run: echo "::set-output name=registry-name-tolower::${{ github.repository }}" | tr A-Z a-z
+      run: echo "::set-output name=repository-name-tolower::${{ github.repository }}" | tr A-Z a-z
     - id: utc-date
       # Used as an additional cache-busting aid to make sure we do a fresh image build every day.
       shell: bash
@@ -182,10 +182,10 @@ jobs:
         # Even if the local cache doesn't have anything, allow using the latest published version.
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          ghcr.io/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
           docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          ghcr.io/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         cache-to: type=local,dest=/tmp/.buildx-cache
         #load: true
 
@@ -538,11 +538,22 @@ jobs:
       # registry manually (there's currently no API for that).
       run: |
         docker tag mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
-          docker.pkg.github.com/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-        docker push docker.pkg.github.com/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+        docker push docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
     # Optionally push to the new Github Container Registry service, if the
     # current repo has the appropriate personal access token secrets setup.
     # This service allows anonymous pulls.
+    - id: get-gcr-reg
+      name: Compute Github Docker Container Registry service Registry Name
+      shell: bash
+      # If specified, the current repo can override the computed registry path with a secret (which isn't really secret).
+      # For, the production Microsoft/MLOS repo, we currently set the ghcr.io path to microsoft-cisl/mlos.
+      run: |
+        if [ -n "${{ secrets.MLOS_GCR_REG }}" ]; then
+          echo "::set-output name=name::${{ secrets.MLOS_GCR_REG }}" | tr A-Z a-z
+        else
+          echo "::set-output name=name::${{ needs.prep-vars.outputs.repository-name-tolower }}"
+        fi
     - name: Github Docker Container Registry Login
       if: ${{ env.MLOS_GCR_USR != '' }}
       uses: docker/login-action@v1
@@ -558,5 +569,5 @@ jobs:
       # registry manually (there's currently no API for that).
       run: |
         docker tag mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
-          ghcr.io/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-        docker push ghcr.io/${{ needs.prep-vars.outputs.registry-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/${{ steps.get-gcr-reg.outputs.name }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+        docker push ghcr.io/${{ steps.get-gcr-reg.outputs.name }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest

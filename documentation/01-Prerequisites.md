@@ -96,7 +96,7 @@ Please see the official Docker install documenation for distribution specific do
 ##### Pull the upstream docker image
 
 ```sh
-docker pull ghcr.io/microsoft/mlos/mlos-build-ubuntu-20.04
+docker pull ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04
 ```
 
 ##### Local docker image build
@@ -106,7 +106,7 @@ To automatically setup a Linux build environment using `docker`, run the followi
 ```sh
 # Build the docker image:
 docker build . --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 \
-    --cache-from ghcr.io/microsoft/mlos/mlos-build-ubuntu-20.04
+    --cache-from ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04
 ```
 
 > Where `20.04` can also be replaced with another [supported `UbuntuVersion`](#linux-distribution-requirements).
