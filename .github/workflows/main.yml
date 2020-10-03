@@ -238,6 +238,7 @@ jobs:
     - name: Start ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
+        echo $UID
         docker run -it -d -v $PWD:/src/MLOS -u $UID --env CONFIGURATION=${{ matrix.configuration }} \
           --name mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
