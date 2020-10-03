@@ -75,6 +75,10 @@ RUN apt-get update && \
         exuberant-ctags vim-nox bash-completion less && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
+# A few quality of life improvements:
+# Don't beep/bell on tab completion failure.
+RUN echo "set bell-style none" >> /etc/inputrc
+
 # Setup a regular user that we can use for running the container.
 # Use 1000:1000 as the ids (they're the typical default in most cases so should
 # work well with bind mounts).
@@ -82,12 +86,9 @@ RUN addgroup --gid 1000 mlos-docker && \
     adduser --shell /bin/bash --gecos 'MLOS Docker User' --disabled-password --uid 1000 --gid 1000 mlos-docker && \
     echo 'mlos-docker ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# A few quality of life improvements:
-# Don't beep/bell on tab completion failure.
-RUN echo "set bell-style none" >> /etc/inputrc
-
 # Create directory for our scripts to go.
-RUN mkdir -p /tmp/MLOS/scripts
+RUN sudo mkdir -p /tmp/MLOS/scripts /tmp/MLOS/tools && \
+    sudo chown -R mlos-docker:mlos-docker /tmp/MLOS
 
 FROM mlos-build-base AS mlos-build-base-with-python
 
