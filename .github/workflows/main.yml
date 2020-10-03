@@ -510,8 +510,6 @@ jobs:
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         # Add some labels for publishing.
         labels: |
-          org.opencontainers.image.title=mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
-          org.opencontainers.image.description="MLOS Build environment for Ubuntu ${{ matrix.UbuntuVersion }}"
           org.opencontainers.image.url=https://github.com/${{ github.repository }}
           org.opencontainers.image.source=https://github.com/${{ github.repository }}
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
