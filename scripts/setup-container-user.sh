@@ -69,3 +69,10 @@ adduser $current_uid_username src
 # Add the user to the sudo group.
 # (by the name associated with the uid in case the uid already existed)
 adduser $current_uid_username sudo
+
+# Try to prime the pip install dir so that the default ~/.profile rules take
+# affect and add it to the PATH.
+user_home=$(getent passwd $uid | cut -d: -f6 | grep '^/home' || true)
+if [ -n "$user_home" ]; then
+    sudo -u $current_uid_username mkdir -p "$user_home/.local/bin" || true
+fi
