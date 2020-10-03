@@ -139,7 +139,14 @@ RUN /bin/bash /tmp/MLOS/scripts/install.cmake.sh && \
     sudo apt-get -y clean && sudo rm -rf /var/lib/apt/lists/*
 
 # Prefetch the necessary local build tools/dependencies.
-COPY ./scripts/setup-cmake.sh \
+RUN sudo mkdir -p \
+    /src/MLOS/out \
+    /src/MLOS/target \
+    /src/MLOS/scripts \
+    /src/MLOS/tools \
+    && sudo chown -R mlos-docker:mlos-docker /src/MLOS
+COPY --chown=mlos-docker:mlos-docker \
+    ./scripts/setup-cmake.sh \
     ./scripts/setup-dotnet.sh ./scripts/dotnet.env ./scripts/util.sh ./scripts/dotnet \
     /src/MLOS/scripts/
 RUN cd /src/MLOS && \
