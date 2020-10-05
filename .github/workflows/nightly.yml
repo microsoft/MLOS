@@ -16,6 +16,7 @@ on:
 jobs:
   # See main.yml for comments on the docker build/cache patterns.
   prep-vars:
+    name: Prepare some variables for dependent jobs
     runs-on: ubuntu-latest
     outputs:
       # docker only recognizes lower case registry names and doesn't provide a native function,
@@ -31,6 +32,7 @@ jobs:
       run: echo "::set-output name=repository-name-tolower::${{ github.repository }}" | tr A-Z a-z
     - id: utc-date
       # Used as an additional cache-busting aid to make sure we do a fresh image build every day.
+      name: Compute current UTC date
       shell: bash
       run: echo ::set-output name=utc-date::$(date -u +%Y-%m-%d)
     - name: Checkout
