@@ -74,8 +74,6 @@
     <Rule Id="CA1812" Action="Hidden" />
     <!-- Member does not access instance data and can be marked as static. -->
     <Rule Id="CA1822" Action="Hidden" />
-    <!-- Do not create tasks without passing a TaskScheduler. #TODO revisit -->
-    <Rule Id="CA2008" Action="Info" />
     <!-- Non-constant fields should not be visible. -->
     <Rule Id="CA2211" Action="Hidden" />
     <!-- Passes string liternal.  Retrieve strings from resource table. -->

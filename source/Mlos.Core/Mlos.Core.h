@@ -118,10 +118,12 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 //
 #include "ProbingPolicy.h"
 #include "SharedConfig.h"
+#include "ComponentConfig.h"
+#include "ArenaAllocator.h"
 #include "GlobalMemoryRegion.h"
 #include "SharedConfigMemoryRegion.h"
-#include "ComponentConfig.h"
 #include "SharedConfigManager.h"
+#include "SharedConfigDictionaryLookup.h"
 
 // Include Mlos Client API.
 //
@@ -137,6 +139,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "MlosContext.inl"
 #include "ComponentConfig.inl"
 #include "SharedChannel.inl"
+#include "SharedConfigDictionaryLookup.inl"
 #include "SharedConfigManager.inl"
 
 // Mlos.Core assembly is always registered first.

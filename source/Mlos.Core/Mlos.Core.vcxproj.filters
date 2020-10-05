@@ -16,6 +16,10 @@
     <ClCompile Include="Security.Windows.cpp" />
     <ClCompile Include="InterProcessMlosContext.cpp" />
     <ClCompile Include="InternalMlosContext.cpp" />
+    <ClCompile Include="SharedConfigDictionary.cpp" />
+    <ClCompile Include="ArenaAllocator.cpp">
+      <Filter>MemoryRegions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_base.h">
@@ -63,6 +67,11 @@
     <ClInclude Include="SharedMemoryRegionView.inl" />
     <ClInclude Include="InterProcessMlosContext.h" />
     <ClInclude Include="InternalMlosContext.h" />
+    <ClInclude Include="SharedConfigDictionaryLookup.h" />
+    <ClInclude Include="SharedConfigDictionaryLookup.inl" />
+    <ClInclude Include="ArenaAllocator.h">
+      <Filter>MemoryRegions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Codegen">

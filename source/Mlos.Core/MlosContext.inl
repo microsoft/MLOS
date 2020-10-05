@@ -55,14 +55,6 @@ HRESULT MlosContext::CreateMemoryRegion(const char* const sharedMemoryName, size
         memoryRegion.MemoryHeader.MemoryRegionId = ++m_globalMemoryRegion.TotalMemoryRegionCount;
     }
 
-    // Send registration message.
-    //
-    Internal::RegisterMemoryRegionRequestMessage msg = { 0 };
-    msg.Name = sharedMemoryName;
-    msg.MemoryRegionSize = memoryRegion.MemoryHeader.MemoryRegionSize;
-    msg.MemoryRegionId = memoryRegion.MemoryHeader.MemoryRegionId;
-    m_controlChannel.SendMessage(msg);
-
     return S_OK;
 }
 

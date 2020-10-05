@@ -19,8 +19,7 @@ namespace Mlos.Core
     /// optimizer connection for those message handlers to use.
     /// </summary>
     /// <remarks>
-    /// See Also: Mlos.Core/MlosContext.h for the corresponding C++ smart
-    /// component side.
+    /// See Also: Mlos.Core/MlosContext.h for the corresponding C++ smart component side.
     /// </remarks>
     public abstract class MlosContext : IDisposable
     {
@@ -38,7 +37,11 @@ namespace Mlos.Core
         /// </summary>
         public static ISharedChannel FeedbackChannel { get; protected set; }
 
-        public static ISharedConfigAccessor SharedConfigManager { get; set; }
+        /// <summary>
+        /// Gets or sets the shared config manager.
+        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
+        /// </summary>
+        public static SharedConfigManager SharedConfigManager { get; protected set; }
 
         /// <summary>
         /// Gets or sets the connection to the optimizer.
@@ -57,7 +60,6 @@ namespace Mlos.Core
         protected SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView;
         protected SharedMemoryMapView controlChannelMemoryMapView;
         protected SharedMemoryMapView feedbackChannelMemoryMapView;
-        protected SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView;
 
         protected NamedEvent controlChannelNamedEvent;
         protected NamedEvent feedbackChannelNamedEvent;
@@ -82,14 +84,17 @@ namespace Mlos.Core
             feedbackChannelMemoryMapView?.Dispose();
             feedbackChannelMemoryMapView = null;
 
-            sharedConfigMemoryMapView?.Dispose();
-            sharedConfigMemoryMapView = null;
-
             controlChannelNamedEvent?.Dispose();
             controlChannelNamedEvent = null;
 
             feedbackChannelNamedEvent?.Dispose();
             feedbackChannelNamedEvent = null;
+
+            // Finally dispose the shared config manager.
+            // #TODO make it not static
+            //
+            SharedConfigManager?.Dispose();
+            SharedConfigManager = null;
 
             isDisposed = true;
         }
@@ -99,10 +104,6 @@ namespace Mlos.Core
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
-        public MlosProxyInternal.GlobalMemoryRegion GlobalMemoryRegion => globalMemoryRegionView.MemoryRegion();
-
-        public MlosProxyInternal.SharedConfigMemoryRegion SharedConfigMemoryRegion => sharedConfigMemoryMapView.MemoryRegion();
 
         /// <summary>
         /// Terminate the control channel.
@@ -141,5 +142,10 @@ namespace Mlos.Core
         {
             return !FeedbackChannel.SyncObject.TerminateChannel.Load();
         }
+
+        /// <summary>
+        /// Gets a global memory region proxy object.
+        /// </summary>
+        public MlosProxyInternal.GlobalMemoryRegion GlobalMemoryRegion => globalMemoryRegionView.MemoryRegion();
     }
 }

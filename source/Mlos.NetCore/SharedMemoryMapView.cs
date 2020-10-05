@@ -111,6 +111,9 @@ namespace Mlos.Core
 
         public ulong MemSize;
 
+        /// <summary>
+        /// Indicates if we should cleanup OS resources when closing the shared memory map view.
+        /// </summary>
         public bool CleanupOnClose;
 
         protected bool isDisposed;
