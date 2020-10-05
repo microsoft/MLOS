@@ -52,7 +52,7 @@ msbuild /m /r source/Mlos.Agent.Server/Mlos.Agent.Server.csproj
 ## Executing
 
 The `Mlos.Agent.Server` has several different operating modes.
-Please see the `--help` usage output for additional detail.s
+Please see the `--help` usage output for additional details.
 
 ```shell
 dotnet target/bin/Release/Mlos.Agent.Server.dll --help
