@@ -54,15 +54,13 @@ msbuild /m /r source/Examples/SmartCache/SmartCache.vcxproj
 #### Linux
 
 ```sh
-dotnet target/bin/Release/Mlos.Agent.Server.dll \
-    --executable target/bin/Release/SmartCache
+dotnet target/bin/Release/Mlos.Agent.Server.dll --executable target/bin/Release/SmartCache
 ```
 
 #### Windows
 
 ```sh
-dotnet target/bin/Release/Mlos.Agent.Server.dll \
-    --executable target/bin/Release/SmartCache.exe
+dotnet target/bin/Release/Mlos.Agent.Server.dll --executable target/bin/Release/SmartCache.exe
 ```
 
 #### Example output
