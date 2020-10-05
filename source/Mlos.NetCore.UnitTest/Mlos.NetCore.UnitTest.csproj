@@ -24,7 +24,7 @@
     <Compile Include="CodegenTests.cs" />
     <Compile Include="CodegenTypeTests.cs" />
     <Compile Include="DummyTests.cs" />
-    <Compile Include="HashTableTests.cs" />
+    <Compile Include="SharedConfigManagerTests.cs" />
     <Compile Include="HashFunctionTests.cs" />
     <Compile Include="SemaphoreTests.Linux.cs" Condition="'$(IsLinux)' == 'true'" />
     <Compile Include="SettingsAssemblyInitializer.cs" />

@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Mlos.Core;
@@ -86,8 +87,8 @@ namespace Mlos.NetCore.UnitTest
                 }
             }
 
-            using Task receiverTask1 = Task.Factory.StartNew(ReceiverAction, TaskCreationOptions.LongRunning);
-            using Task receiverTask2 = Task.Factory.StartNew(ReceiverAction, TaskCreationOptions.LongRunning);
+            using Task receiverTask1 = Task.Factory.StartNew(ReceiverAction, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+            using Task receiverTask2 = Task.Factory.StartNew(ReceiverAction, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current);
 
             // Setup callbacks to verify the message.
             //

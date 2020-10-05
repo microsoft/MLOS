@@ -26,6 +26,8 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup Label="Sources">
+    <ClCompile Include="ArenaAllocator.cpp" />
+    <ClCompile Include="GlobalMemoryRegion.cpp" />
     <ClCompile Include="InternalMlosContext.cpp" />
     <ClCompile Include="InterProcessMlosContext.cpp" />
     <ClCompile Include="Mlos.Core.cpp">
@@ -35,12 +37,13 @@
     <ClCompile Include="NamedEvent.Window.cpp" />
     <ClCompile Include="Security.Windows.cpp" />
     <ClCompile Include="SharedChannel.cpp" />
-    <ClCompile Include="GlobalMemoryRegion.cpp" />
+    <ClCompile Include="SharedConfigDictionary.cpp" />
     <ClCompile Include="SharedConfigManager.cpp" />
     <ClCompile Include="SharedConfigMemoryRegion.cpp" />
     <ClCompile Include="SharedMemoryMapView.Windows.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ArenaAllocator.h" />
     <ClInclude Include="BytePtr.h" />
     <ClInclude Include="ComponentConfig.h" />
     <ClInclude Include="FNVHashFunction.h" />
@@ -64,6 +67,8 @@
     <ClInclude Include="SharedChannel.h" />
     <ClInclude Include="SharedChannelPolicies.h" />
     <ClInclude Include="SharedConfig.h" />
+    <ClInclude Include="SharedConfigDictionaryLookup.h" />
+    <ClInclude Include="SharedConfigDictionaryLookup.inl" />
     <ClInclude Include="SharedConfigManager.h" />
     <ClInclude Include="SharedConfigMemoryRegion.h" />
     <ClInclude Include="SharedMemoryMapView.Windows.h" />

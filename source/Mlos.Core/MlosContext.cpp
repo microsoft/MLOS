@@ -105,7 +105,11 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     registeredSettingAssembly.ApplicationFilePath = szApplicationFullPath;
     registeredSettingAssembly.AssemblyFileName = assemblyFileName;
 
-    hr = RegisterComponentConfig(registeredSettingAssembly);
+    // Register settings assembly in the global shared region.
+    //
+    hr = SharedConfigManager::CreateOrUpdateFrom(
+        m_globalMemoryRegion.SharedConfigDictionary,
+        registeredSettingAssembly);
 
     if (SUCCEEDED(hr))
     {
@@ -115,10 +119,10 @@ HRESULT MlosContext::RegisterSettingsAssembly(
 
         // Send message to Mlos.Agent to load the settings assembly.
         //
-        Internal::RegisterAssemblyRequestMessage registerAssemblyRequestMsg = { 0 };
-        registerAssemblyRequestMsg.AssemblyIndex = assemblyIndex;
+        Internal::RegisterSettingsAssemblyRequestMessage msg = { 0 };
+        msg.AssemblyIndex = assemblyIndex;
 
-        m_controlChannel.SendMessage(registerAssemblyRequestMsg);
+        m_controlChannel.SendMessage(msg);
     }
 
     return hr;
