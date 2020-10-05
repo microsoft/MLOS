@@ -119,9 +119,14 @@ WORKDIR /src/MLOS
 RUN mkdir -p /tmp/MLOS/scripts /tmp/MLOS/tools
 
 # Setup a regular user that we can use for running the container.
+#
 # Use 1000:1000 as the ids (they're the typical default in most cases so should
 # work well with bind mounts).
-# TODO: make this configurable with some build-args?
+#
+# Rather than make this configurable, which would require rebuilding the image
+# in a non-cache friendly way, this script can also be used on a running
+# container instance to setup additional users to match local uid/gid if
+# desired.  See .github/workflows/main.yml for examples.
 COPY ./scripts/setup-container-user.sh /tmp/MLOS/scripts/
 RUN /tmp/MLOS/scripts/setup-container-user.sh mlos-docker 1000 1000
 

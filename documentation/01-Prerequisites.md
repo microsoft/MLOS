@@ -143,8 +143,16 @@ sudo apt-get install liblttng-ctl0 liblttng-ust0 zlib1g libxml2
 > Note: older distros such as Ubuntu 16.04 may also need the `libcurl3` package installed for `dotnet restore` to work, but is unavailable on (or will break) more recent versions of Ubuntu.
 >
 > Note: `libxml2` pulls an appropriate version of `libicu`.
->
-> Note: most other dependencies like `dotnet` and `cmake` are automatically fetched to the `tools/` directory using helpers in `scripts/` and invoked by the `Makefile` and `cmake` tools.
+
+```sh
+# Install dotnet in the system:
+./scripts/install.dotnet.sh
+```
+
+```sh
+# Install cmake in the system:
+./scripts/install.cmake.sh
+```
 
 Optional tools:
 
