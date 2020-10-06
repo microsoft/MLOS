@@ -8,18 +8,16 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <BinplaceDir>$(BinplaceRootDir)/$(AssemblyName)</BinplaceDir>
   </PropertyGroup>
-
   <!-- Allow importing projects to override the default BinplacePattern items list. -->
   <ItemGroup Label="BinplaceOutputs">
     <BinplacePattern Include="$(TargetName)"/>
     <BinplacePattern Include=".dll"/>
     <BinplacePattern Include=".exe" Condition="'$(IsWindows)' == 'true'" />
-    <BinplacePattern Include=".pdb" Condition="'$(IsWindows)' == 'true'" />
+    <BinplacePattern Include=".pdb" />
     <BinplacePattern Include=".so" Condition="'$(IsLinux)' == 'true'" />
     <BinplacePattern Include=".dylib" Condition="'$(IsLinux)' == 'true'" />
     <BinplacePattern Include=".runtimeconfig.json" />
   </ItemGroup>
-
   <!-- Binplace task -->
   <Target Name="Binplace" AfterTargets="Build">
     <PropertyGroup>
@@ -30,7 +28,6 @@
     </ItemGroup>
     <Copy SourceFiles="@(BinplaceInputs)" DestinationFolder="$(BinplaceDir)" UseHardlinksIfPossible="true" />
   </Target>
-
   <!-- Cleanup task -->
   <Target Name="CleanBinplace" BeforeTargets="Clean">
     <PropertyGroup>
@@ -40,5 +37,5 @@
       <BinplaceOutputs Include="$(BinplaceOutputPattern)" />
     </ItemGroup>
     <Delete Files="@(BinplaceOutputs)" />
-  </Target>  
+  </Target>
 </Project>

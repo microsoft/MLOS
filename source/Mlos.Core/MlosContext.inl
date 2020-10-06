@@ -19,7 +19,6 @@ namespace Mlos
 {
 namespace Core
 {
-
 //----------------------------------------------------------------------------
 // NAME: MlosContext::CreateMemoryRegion
 //
@@ -33,7 +32,10 @@ namespace Core
 //  Function opens or creates a shared memory view.
 //
 template<typename T>
-HRESULT MlosContext::CreateMemoryRegion(const char* const sharedMemoryName, size_t memoryRegionSize, _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView)
+HRESULT MlosContext::CreateMemoryRegion(
+    const char* const sharedMemoryName,
+    size_t memoryRegionSize,
+    _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView)
 {
     // Create region view, initialize it on create.
     //
@@ -69,7 +71,7 @@ HRESULT MlosContext::CreateMemoryRegion(const char* const sharedMemoryName, size
 //
 // NOTES:
 //
-template <typename T>
+template<typename T>
 HRESULT MlosContext::RegisterComponentConfig(ComponentConfig<T>& componentConfig)
 {
     // Create or find existing shared configuration.
@@ -125,6 +127,5 @@ void MlosContext::SendTelemetryMessage(const TMessage& message) const
 {
     m_telemetryChannel.SendMessage(message);
 }
-
 }
 }

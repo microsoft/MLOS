@@ -46,12 +46,17 @@
     <ClInclude Include="ArenaAllocator.h" />
     <ClInclude Include="BytePtr.h" />
     <ClInclude Include="ComponentConfig.h" />
+    <ClInclude Include="ComponentConfig.inl" />
+    <ClInclude Include="GlobalMemoryRegion.h" />
     <ClInclude Include="FNVHashFunction.h" />
     <ClInclude Include="Hash.h" />
     <ClInclude Include="InternalMlosContext.h" />
     <ClInclude Include="InterProcessMlosContext.h" />
     <ClInclude Include="Mlos.Core.h" />
     <ClInclude Include="MlosContext.h" />
+    <ClInclude Include="MlosContext.inl" />
+    <ClInclude Include="MlosPlatform.h" />
+    <ClInclude Include="MlosPlatform.Std.inl" />
     <ClInclude Include="NamedEvent.Window.h" />
     <ClInclude Include="ObjectDeserializationCallback.h" />
     <ClInclude Include="ObjectSerialization.h" />
@@ -59,10 +64,10 @@
     <ClInclude Include="MlosPlatform.h" />
     <ClInclude Include="MlosPlatform.Std.inl" />
     <ClInclude Include="ProbingPolicy.h" />
+    <ClInclude Include="ProbingPolicy.inl" />
     <ClInclude Include="PropertyProxy.h" />
     <ClInclude Include="PropertyProxyStringPtr.h" />
     <ClInclude Include="PropertyProxyStringView.h" />
-    <ClInclude Include="GlobalMemoryRegion.h" />
     <ClInclude Include="Security.Windows.h" />
     <ClInclude Include="SharedChannel.h" />
     <ClInclude Include="SharedChannelPolicies.h" />
@@ -70,6 +75,7 @@
     <ClInclude Include="SharedConfigDictionaryLookup.h" />
     <ClInclude Include="SharedConfigDictionaryLookup.inl" />
     <ClInclude Include="SharedConfigManager.h" />
+    <ClInclude Include="SharedConfigManager.inl" />
     <ClInclude Include="SharedConfigMemoryRegion.h" />
     <ClInclude Include="SharedMemoryMapView.Windows.h" />
     <ClInclude Include="SharedMemoryRegionView.inl" />
