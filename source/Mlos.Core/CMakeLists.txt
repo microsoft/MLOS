@@ -6,6 +6,8 @@ include("${MLOS_ROOT}/build/Mlos.Cpp.cmake")
 
 add_library(${PROJECT_NAME} STATIC
     GlobalMemoryRegion.cpp
+    InternalMlosContext.cpp
+    InterProcessMlosContext.cpp
     Mlos.Core.cpp
     MlosContext.cpp
     NamedEvent.Linux.cpp

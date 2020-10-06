@@ -39,6 +39,20 @@ set_tests_properties(CheckForMlosSharedMemories PROPERTIES
 #    FIXTURES_CLEANUP MlosSharedMemoriesChecks)
 # Now other test can add "MlosSharedMemoriesChecks" to their
 # "FIXTURES_REQUIRED" property to invoke these scripts before/after themselves.
+add_test(NAME LocalPipInstallMlos
+    COMMAND ${PYTHON3} -m pip install ${MLOS_ROOT}/source/Mlos.Python)
+add_test(NAME StartMlosOptimizerService
+    COMMAND ${MLOS_ROOT}/build/CMakeHelpers/BackgroundProcessHelper.sh
+        start /tmp/mlos_optimizer_microservice.pid /tmp/mlos_optimizer_microservice.log
+        ${PYTHON3} ${MLOS_ROOT}/source/Mlos.Python/mlos/start_optimizer_microservice.py launch --port 54321)
+add_test(NAME StopMlosOptimizerService
+    COMMAND ${MLOS_ROOT}/build/CMakeHelpers/BackgroundProcessHelper.sh
+        stop /tmp/mlos_optimizer_microservice.pid /tmp/mlos_optimizer_microservice.log)
+set_tests_properties(StartMlosOptimizerService PROPERTIES
+    DEPENDS LocalPipInstallMlos
+    FIXTURES_SETUP MlosOptimizerService)
+set_tests_properties(StopMlosOptimizerService PROPERTIES
+    FIXTURES_CLEANUP MlosOptimizerService)
 
 # Mark all setup/tear down activities involving the shared memory regions as
 # mutually exclusive (no parallel runs).
@@ -59,10 +73,12 @@ set_tests_properties(
 #       MLOS_SETTINGS_REGISTRY_TARGETS Mlos.UnitTest.SettingsRegistry)
 #
 function(add_mlos_agent_server_exe_test_run)
+    set(options WITH_OPTIMIZER)
     set(oneValueArgs NAME EXECUTABLE_TARGET TIMEOUT)
     set(multiValueArgs MLOS_SETTINGS_REGISTRY_TARGETS)
     cmake_parse_arguments(add_mlos_agent_server_exe_test_run "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+    set(WITH_OPTIMIZER ${add_mlos_agent_server_exe_test_run_WITH_OPTIMIZER})
     set(TEST_NAME ${add_mlos_agent_server_exe_test_run_NAME})
     set(TEST_EXECUTABLE_TARGET ${add_mlos_agent_server_exe_test_run_EXECUTABLE_TARGET})
 
@@ -85,8 +101,14 @@ function(add_mlos_agent_server_exe_test_run)
         endif()
     endforeach()
 
+    if(${WITH_OPTIMIZER})
+        set(OPTIMIZER_ARGS --optimizer-uri http://localhost:54321)
+    else()
+        set(OPTIMIZER_ARGS "")
+    endif()
+
     # Basically we want to run:
-    # $ dotnet Mlos.Agent.Server.dll /some/test/exe
+    # $ dotnet Mlos.Agent.Server.dll --executable /some/test/exe
     # However, we need to
     # - Make sure there aren't other things using the shared mem regions in
     #   /dev/shm/ that we're about to create (e.g. from a previous failed test
@@ -95,7 +117,10 @@ function(add_mlos_agent_server_exe_test_run)
     # - Make sure that the Agent can find the SettingsRegistry DLLs that the
     #   /some/test/exe needs to use.
     add_test(NAME ${TEST_NAME}
-        COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RunTestsAndSharedMemChecks.sh ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL> $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>)
+        COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RunTestsAndSharedMemChecks.sh
+            ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL>
+            --executable $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>
+            ${OPTIMIZER_ARGS})
     set_tests_properties(${TEST_NAME} PROPERTIES
         TIMEOUT ${TEST_TIMEOUT}
         # Let the Mlos.Agent.Server know where to find the registry assembly.
@@ -105,6 +130,11 @@ function(add_mlos_agent_server_exe_test_run)
         # This test conflicts with any other test using the MlosSharedMemories
         # (no parallel test runs).
         RESOURCE_LOCK MlosSharedMemories)
+    if(${WITH_OPTIMIZER})
+        set_tests_properties(${TEST_NAME} PROPERTIES
+            FIXTURES_REQUIRED MlosOptimizerService)
+    endif()
     # Include these targets in cmake's "check" target so we can build/test in one shot.
     add_dependencies(check ${TEST_EXECUTABLE_TARGET} Mlos.Agent.Server)
+    add_dependencies(${TEST_EXECUTABLE_TARGET} Mlos.Agent.Server)
 endfunction()

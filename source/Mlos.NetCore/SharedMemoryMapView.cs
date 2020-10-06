@@ -81,11 +81,15 @@ namespace Mlos.Core
             }
         }
 
+        /// <summary>
+        /// Finalizes an instance of the <see cref="SharedMemoryMapView"/> class.
+        /// </summary>
         ~SharedMemoryMapView()
         {
             Dispose(false);
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             // Dispose of unmanaged resources.
@@ -107,6 +111,8 @@ namespace Mlos.Core
 
         public ulong MemSize;
 
-        protected bool disposed = false;
+        public bool CleanupOnClose;
+
+        protected bool isDisposed;
     }
 }

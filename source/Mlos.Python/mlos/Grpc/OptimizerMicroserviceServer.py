@@ -9,6 +9,8 @@ import grpc
 
 from mlos.Grpc import OptimizerService_pb2_grpc
 from mlos.Grpc.OptimizerMicroservice import OptimizerMicroservice
+from mlos.Logger import create_logger
+
 
 
 class OptimizerMicroserviceServer:
@@ -24,6 +26,8 @@ class OptimizerMicroserviceServer:
         self.num_threads = num_threads
         self.started = False
         self._server = None
+        self.logger = create_logger("OptimizerMicroserviceServer init")
+
 
     def start(self):
         assert self._server is None, "Server already started"
@@ -35,9 +39,12 @@ class OptimizerMicroserviceServer:
         self._server.add_insecure_port(f'[::]:{self.port}')
         self._server.start()
         self.started = True
+        self.logger.info("OptimizerMicroserviceServer started")
 
     def stop(self, grace=None):
         self._server.stop(grace=grace)
+        self.logger.info("OptimizerMicroserviceServer stopped")
+
 
     def wait_for_termination(self, timeout=None):
         if self.started:

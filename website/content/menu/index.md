@@ -13,6 +13,7 @@ headless = true
 - [Notebooks]({{< relref "/notebooks" >}})
   - [Bayesian Optimization]({{< relref "/notebooks/BayesianOptimization" >}})
   - [Smart Cache Optimization]({{< relref "/notebooks/SmartCacheOptimization" >}})
+  - [Smart Cache Optimization in C++]({{< relref "/notebooks/SmartCacheCPP" >}})
 
 - API Documentation
   - [Python](/MLOS/python_api/)

@@ -57,3 +57,6 @@ set(DEFAULT_CTEST_TIMEOUT 120)
 
 # See Also: Mlos.NetCore.cmake, Mlos.Common.targets.cmake
 set(DOTNET "${MLOS_ROOT}/tools/bin/dotnet")
+
+find_program(PYTHON3
+    NAMES python3.7 python3)

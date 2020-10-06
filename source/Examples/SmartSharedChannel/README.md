@@ -20,5 +20,5 @@ Here are some brief instructions on how to try it out:
 ```sh
 export MLOS_SETTINGS_REGISTRY_PATH=out/dotnet/source/Mlos.UnitTest/Mlos.UnitTest.SettingsRegistry/obj/AnyCPU:out/dotnet/source/Examples/SmartSharedChannel/SmartSharedChannel.SettingsRegistry/obj/AnyCPU
 
-./tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll out/cmake/Release/source/Examples/SmartSharedChannel/SmartSharedChannel
+./tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll --executable out/cmake/Release/source/Examples/SmartSharedChannel/SmartSharedChannel
 ```

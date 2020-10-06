@@ -29,7 +29,7 @@ $pythonCmd -m pip install jupyter nbconvert==5.6.1
 # downgrade html output because hugo doesn't like raw html
 mkdir -p content/notebooks
 # Restricted set of notebooks that are rendered for inclusion on the webpage:
-notebooks='BayesianOptimization SmartCacheOptimization'
+notebooks='BayesianOptimization SmartCacheOptimization SmartCacheCPP'
 for nb in $notebooks; do
     nb_path="$MLOS_ROOT/source/Mlos.Notebooks/$nb.ipynb"
     echo "Executing and rendering $nb_path"
@@ -74,17 +74,18 @@ cp ../LICENSE.txt content/
         scripts/ \
         source/ \
         test/ \
-        -name '*.md' \
-) | while read md_path; do
-    md_dir=$(dirname "$md_path")
-    md_file=$(basename "$md_path")
-    mkdir -p "content/$md_dir"
-    if [ "$md_file" == 'README.md' ]; then
+        -name '*.md' -or \
+        -name '*.svg' \
+) | while read path; do
+    dir=$(dirname "$path")
+    file=$(basename "$path")
+    mkdir -p "content/$dir"
+    if [ "$file" == 'README.md' ]; then
         # Except for README files - they should be created like directory indexes.
         # NOTE: Each directory that includes an .md should have one of these.
-        cp "$MLOS_ROOT/$md_dir/README.md" "content/$md_dir/_index.md"
+        cp "$MLOS_ROOT/$dir/README.md" "content/$dir/_index.md"
     else
-        cp "$MLOS_ROOT/$md_path" "content/$md_dir/"
+        cp "$MLOS_ROOT/$path" "content/$dir/"
     fi
 done
 

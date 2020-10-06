@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import datetime
 import logging
 import math
 from threading import Thread
-import time
 import unittest
 
 import grpc
@@ -14,13 +12,12 @@ import pandas as pd
 
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 from mlos.Examples.SmartCache import SmartCacheWorkloadGenerator, SmartCache, HitRateMonitor
 from mlos.Examples.SmartCache.TelemetryAggregators.WorkingSetSizeEstimator import WorkingSetSizeEstimator
 from mlos.Mlos.SDK import mlos_globals, MlosExperiment, MlosAgent
-from mlos.Mlos.SDK.CommonAggregators.Timer import Timer
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 
@@ -102,10 +99,9 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
         """ Periodically invokes the optimizer to improve cache performance.
 
         """
-        optimizer_config = BayesianOptimizerConfig.DEFAULT
         self.optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT
+            optimizer_config=bayesian_optimizer_config_store.default
         )
         self.mlos_agent.start_experiment(self.smart_cache_experiment)
 
@@ -126,7 +122,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
             new_config_values = self.optimizer.suggest()
             self.mlos_agent.set_configuration(component_type=SmartCache, new_config_values=new_config_values)
             self.hit_rate_monitor.reset()
-            self.logger.info(f"Previous config: {current_cache_config}")
+            self.logger.info(f"Previous config: {current_cache_config.to_json()}")
             self.logger.info(f"Estimated working set size: {working_set_size_estimate.chapman_estimator}. Hit rate: {hit_rate:.2f}. Num requests: {num_requests} ")
 
 

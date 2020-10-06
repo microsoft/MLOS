@@ -22,10 +22,18 @@ using MlosOptimizer = Mlos.Model.Services.Client.BayesianOptimizer;
 namespace Mlos.Agent.Server
 {
     /// <summary>
-    /// Holds all intelligence. This is a proxy with a cache to the MLOS model service.
+    /// The MlosAgentServer acts as a simple external agent and shim helper to
+    /// wrap the various communication channels (shared memory to/from the smart
+    /// component, grpc to the optimizer, grpc from the notebooks).
     /// </summary>
     public static class MlosAgentServer
     {
+        /// <summary>
+        /// Starts a grpc server listening for requests from the notebook to drive
+        /// the agent interactively.
+        /// </summary>
+        /// <param name="args">unused.</param>
+        /// <returns>grpc server task.</returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
@@ -34,56 +42,67 @@ namespace Mlos.Agent.Server
                     {
                         // Setup a HTTP/2 endpoint without TLS.
                         //
-                        options.ListenLocalhost(5000, o => o.Protocols = HttpProtocols.Http2);
+                        options.ListenAnyIP(5000, o => o.Protocols = HttpProtocols.Http2);
                     });
                     webBuilder.UseStartup<GrpcServer.Startup>();
                 });
 
+        /// <summary>
+        /// The main external agent server.
+        /// </summary>
+        /// <param name="args">command line arguments.</param>
         public static void Main(string[] args)
         {
-            // TODO: use some proper arg parser. For now let's keep it simple.
-            //
             string executableFilePath = null;
-            string modelsDatabaseConnectionDetailsFile = null;
+            Uri optimizerAddressUri = null;
+            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri);
 
-            foreach (string arg in args)
+            // Check for the executable before setting up any shared memory to
+            // reduce cleanup issues.
+            //
+            if (executableFilePath != null && !File.Exists(executableFilePath))
             {
-                if (Path.GetExtension(arg) == ".json")
-                {
-                    modelsDatabaseConnectionDetailsFile = arg;
-                }
-                else
-                {
-                    // Linux executables don't have a suffix by default.
-                    // So, for now just assume that anything else is an executable.
-                    //
-                    executableFilePath = arg;
-                }
+                throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
             }
 
             Console.WriteLine("Mlos.Agent.Server");
             TargetProcessManager targetProcessManager = null;
 
-            // #TODO connect to gRpc optimizer only if user provided json file in the command line argument.
-            // #TODO, make address configurable.
+            // Connect to gRpc optimizer only if user provided an address in the command line.
             //
-            if (modelsDatabaseConnectionDetailsFile != null)
+            if (optimizerAddressUri != null)
             {
-                Console.WriteLine("Connected to Mlos.Optimizer");
+                Console.WriteLine("Connecting to the Mlos.Optimizer");
 
                 // This switch must be set before creating the GrpcChannel/HttpClient.
                 //
                 AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-                Uri optimizerAddressUri = new Uri("http://localhost:50051");
+                // This populates a variable for the various settings registry
+                // callback handlers to use (by means of their individual
+                // AssemblyInitializers) to know how they can connect with the
+                // optimizer.
+                //
+                // See Also: AssemblyInitializer.cs within the SettingsRegistry
+                // assembly project in question.
+                //
                 MlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
             }
 
-            // Create circular buffer shared memory before running the target process.
+            // In the active learning mode, create a new shared memory map before running the target process.
+            // On Linux, we unlink existing shared memory map, if they exist.
+            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
             //
-            MainAgent.InitializeSharedChannel();
+            using MlosContext mlosContext = (executableFilePath != null)
+                ? InterProcessMlosContext.Create()
+                : InterProcessMlosContext.CreateOrOpen();
+            using var mainAgent = new MainAgent();
+            mainAgent.InitializeSharedChannel(mlosContext);
 
-            // Active learning, almost done. In active learning the MlosAgentServer controls the workload against the target component.
+            // Active learning mode.
+            //
+            // TODO: In active learning mode the MlosAgentServer can control the
+            // workload against the target component.
             //
             if (executableFilePath != null)
             {
@@ -100,22 +119,91 @@ namespace Mlos.Agent.Server
 
             Task grpcServerTask = CreateHostBuilder(Array.Empty<string>()).Build().RunAsync(cancellationTokenSource.Token);
 
+            // Start the MainAgent message processing loop as a background thread.
+            //
+            // In MainAgent.RunAgent we loop on the shared memory control and
+            // telemetry channels looking for messages and dispatching them to
+
+            // their registered callback handlers.
+            //
+            // The set of recognized messages is dynamically registered using
+
+            // the RegisterSettingsAssembly method which is called through the
+            // handler for the RegisterAssemblyRequestMessage.
+            //
+            // Once registered, the SettingsAssemblyManager uses reflection to
+
+            // search for an AssemblyInitializer inside those assemblies and
+            // executes it in order to setup the message handler callbacks
+            // within the agent.
+            //
+            // See Also: AssemblyInitializer.cs within the SettingsRegistry
+            // assembly project in question.
+            //
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(
-                MainAgent.RunAgent,
-                TaskCreationOptions.LongRunning);
+                () => mainAgent.RunAgent(),
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Current);
 
-            if (targetProcessManager != null)
-            {
-                targetProcessManager.WaitForTargetProcessToExit();
-                targetProcessManager.Dispose();
-                MainAgent.UninitializeSharedChannel();
-            }
+            Task waitForTargetProcessTask = Task.Factory.StartNew(
+                () =>
+                {
+                    if (targetProcessManager != null)
+                    {
+                        targetProcessManager.WaitForTargetProcessToExit();
+                        targetProcessManager.Dispose();
+                        mainAgent.UninitializeSharedChannel();
+                    }
+                },
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Current);
 
             Console.WriteLine("Waiting for Mlos.Agent to exit");
 
-            mlosAgentTask.Wait();
+            while (true)
+            {
+                Task.WaitAny(mlosAgentTask, waitForTargetProcessTask);
+
+                if (mlosAgentTask.IsFaulted && targetProcessManager != null && !waitForTargetProcessTask.IsCompleted)
+                {
+                    // MlosAgentTask has failed, however the target process is still active.
+                    // Terminate the target process and continue shutdown.
+                    //
+                    targetProcessManager.TerminateTargetProcess();
+                    continue;
+                }
+
+                if (mlosAgentTask.IsCompleted && waitForTargetProcessTask.IsCompleted)
+                {
+                    // MlosAgentTask is no longer processing messages, and target process does no longer exist.
+                    // Shutdown the agent.
+                    //
+                    break;
+                }
+            }
+
+            // Print any exceptions if occurred.
+            //
+            if (mlosAgentTask.Exception != null)
+            {
+                Console.WriteLine($"Exception: {mlosAgentTask.Exception}");
+            }
+
+            if (waitForTargetProcessTask.Exception != null)
+            {
+                Console.WriteLine($"Exception: {waitForTargetProcessTask.Exception}");
+            }
+
+            // Perform some cleanup.
+            //
+            waitForTargetProcessTask.Dispose();
+
             mlosAgentTask.Dispose();
+
+            targetProcessManager?.Dispose();
 
             cancellationTokenSource.Cancel();
             grpcServerTask.Wait();

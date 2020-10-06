@@ -10,15 +10,17 @@ import grpc
 import numpy as np
 import pandas as pd
 
+
 import mlos.global_values as global_values
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
+from mlos.Grpc.OptimizerService_pb2 import Empty
+from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Logger import create_logger
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
-from mlos.Spaces import ContinuousDimension, SimpleHypergrid
 
 
 class TestBayesianOptimizerGrpcClient(unittest.TestCase):
@@ -42,7 +44,7 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
         self.optimizer_monitor = OptimizerMonitor(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         self.objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
 
         self.optimization_problem = OptimizationProblem(
@@ -58,11 +60,18 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         """
         self.server.stop(grace=None)
 
+    def test_echo(self):
+        optimizer_service_stub = OptimizerServiceStub(channel=self.optimizer_service_channel)
+        response = optimizer_service_stub.Echo(Empty())
+        self.assertTrue(isinstance(response, Empty))
+
+
     def test_optimizer_with_default_config(self):
         pre_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
+        print(bayesian_optimizer_config_store.default)
         bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT
+            optimizer_config=bayesian_optimizer_config_store.default
         )
         post_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
 
@@ -85,13 +94,21 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
         # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
         #
-        registered_features_df = pd.read_json(registered_features_df.to_json(orient='index', double_precision=15), orient='index')
-        registered_objectives_df = pd.read_json(registered_objectives_df.to_json(orient='index', double_precision=15), orient='index')
+        registered_features_json = registered_features_df.to_json(orient='index', double_precision=15)
+        registered_objectives_json = registered_objectives_df.to_json(orient='index', double_precision=15)
+
+        # Apparently the jitter is too good and we actually have to use the json strings or they will be optimized away.
+        #
+        assert len(registered_features_json) > 0
+        assert len(registered_objectives_json) > 0
+
+        registered_features_df = pd.read_json(registered_features_json, orient='index')
+        registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
         observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-        self.assertTrue(registered_features_df.equals(observed_features_df))
-        self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
+        self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
+        self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
 
         convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
 
@@ -128,8 +145,15 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
     def test_optimizer_with_random_config(self):
         num_random_restarts = 10
         for i in range(num_random_restarts):
-            optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
-            print(f"[{i+1}/{num_random_restarts}] Creating a bayesian optimizer with config: {optimizer_config.to_dict()}")
+            optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
+
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
+            if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
+                rf_config = optimizer_config.homogeneous_random_forest_regression_model_config
+                rf_config.n_estimators = min(rf_config.n_estimators, 20)
+
+            print(f"[{i+1}/{num_random_restarts}] Creating a bayesian optimizer with config: {optimizer_config}")
+
             bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
                 optimization_problem=self.optimization_problem,
                 optimizer_config=optimizer_config
@@ -138,13 +162,21 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
             #
-            registered_features_df = pd.read_json(registered_features_df.to_json(orient='index', double_precision=15), orient='index')
-            registered_objectives_df = pd.read_json(registered_objectives_df.to_json(orient='index', double_precision=15), orient='index')
+            registered_features_json = registered_features_df.to_json(orient='index', double_precision=15)
+            registered_objectives_json = registered_objectives_df.to_json(orient='index', double_precision=15)
+
+            # Apparently the jitter is too good and we actually have to use the json strings or they will be optimized away.
+            #
+            assert len(registered_features_json) > 0
+            assert len(registered_objectives_json) > 0
+
+            registered_features_df = pd.read_json(registered_features_json, orient='index')
+            registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
             observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-            self.assertTrue(registered_features_df.equals(observed_features_df))
-            self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
+            self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
+            self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
 
 
     @unittest.skip(reason="Not implemented yet.")
@@ -155,17 +187,11 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         registered_features_df = None
         registered_objectives_df = None
         old_optimum = np.inf
-        for _ in range(num_iterations):
+        for i in range(num_iterations):
             suggested_params = optimizer.suggest()
             suggested_params_df = suggested_params.to_dataframe()
-            prediction = optimizer.predict(suggested_params_df)
-            prediction_df = prediction.get_dataframe()
-
             y = self.objective_function.evaluate_point(suggested_params)
-
-            print(f"Params: {suggested_params}, Actual: {y}, Prediction: {str(prediction_df)}")
             optimizer.register(suggested_params_df, y.to_dataframe())
-
             if registered_features_df is None:
                 registered_features_df = suggested_params_df
             else:
@@ -180,5 +206,5 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
             # ensure current optimum doesn't go up
             assert optimum.y <= old_optimum
             old_optimum = optimum.y
-            print(f"Best Params: {best_params}, Best Value: {optimum.y}")
+            print(f"[{i+1}/{num_iterations}]Best Params: {best_params}, Best Value: {optimum.y}")
         return registered_features_df, registered_objectives_df

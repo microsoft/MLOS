@@ -115,8 +115,6 @@ class Prediction:
             if dataframe[sample_variance_col].notnull().any():
                 assert (dataframe[sample_variance_col].notnull() >= 0).all()
 
-
-
     @classmethod
     def get_enum_by_column_name(cls, column_name):
         return Prediction.LegalColumnNames(column_name)
@@ -154,12 +152,13 @@ class Prediction:
         :param invalid_predictions_index:
         :return:
         """
-        assert invalid_predictions_index.intersection(self._dataframe.index).empty, "Valid and invalid indices cannot overlap."
-        if self.LegalColumnNames.IS_VALID_INPUT.value not in self.expected_column_names:
-            self.expected_column_names.append(self.LegalColumnNames.IS_VALID_INPUT.value)
-        invalid_predictions_df = pd.DataFrame(columns=self.expected_column_names, index=invalid_predictions_index)
-        invalid_predictions_df[self.LegalColumnNames.IS_VALID_INPUT.value] = False
-        all_predictions_df = pd.concat([self._dataframe, invalid_predictions_df])
-        all_predictions_df.sort_index(inplace=True)
-        self.validate_dataframe(all_predictions_df)
-        self._dataframe = all_predictions_df
+        if not invalid_predictions_index.empty:
+            assert invalid_predictions_index.intersection(self._dataframe.index).empty, "Valid and invalid indices cannot overlap."
+            if self.LegalColumnNames.IS_VALID_INPUT.value not in self.expected_column_names:
+                self.expected_column_names.append(self.LegalColumnNames.IS_VALID_INPUT.value)
+            invalid_predictions_df = pd.DataFrame(columns=self.expected_column_names, index=invalid_predictions_index)
+            invalid_predictions_df[self.LegalColumnNames.IS_VALID_INPUT.value] = False
+            all_predictions_df = pd.concat([self._dataframe, invalid_predictions_df])
+            all_predictions_df.sort_index(inplace=True)
+            self.validate_dataframe(all_predictions_df)
+            self._dataframe = all_predictions_df

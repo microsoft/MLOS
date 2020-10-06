@@ -13,10 +13,11 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Tracer import Tracer
 
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, BayesianOptimizerConfig
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
@@ -62,7 +63,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         """
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
         random_params_df = objective_function.parameter_space.random_dataframe(num_samples=10000)
 
@@ -77,7 +78,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT,
+            optimizer_config=bayesian_optimizer_config_store.default,
             logger=self.logger
         )
         bayesian_optimizer.register(random_params_df, y_df)
@@ -93,6 +94,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             # Register the observation with the optimizer
             bayesian_optimizer.register(suggested_params.to_dataframe(), target_value.to_dataframe())
 
+        self.validate_optima(bayesian_optimizer)
         best_config_point, best_objective = bayesian_optimizer.optimum()
         self.logger.info(f"Optimum: {best_objective} Best Configuration: {best_config_point}")
         trace_output_path = os.path.join(self.temp_dir, "PreHeatedTrace.json")
@@ -104,7 +106,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         """ Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
         """
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
 
         optimization_problem = OptimizationProblem(
@@ -115,7 +117,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         bayesian_optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT,
+            optimizer_config=bayesian_optimizer_config_store.default,
             logger=self.logger
         )
 
@@ -131,6 +133,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 best_config_point, best_objective = bayesian_optimizer.optimum()
                 self.logger.info(f"[{i}/{num_guided_samples}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
+        self.validate_optima(bayesian_optimizer)
         best_config, optimum = bayesian_optimizer.optimum()
         assert objective_function.parameter_space.contains_point(best_config)
         assert objective_function.output_space.contains_point(optimum)
@@ -141,7 +144,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
     def test_hierarchical_quadratic_cold_start(self):
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
         output_space = SimpleHypergrid(
@@ -161,7 +164,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         for restart_num in range(num_restarts):
             bayesian_optimizer = BayesianOptimizer(
                 optimization_problem=optimization_problem,
-                optimizer_config=BayesianOptimizerConfig.DEFAULT,
+                optimizer_config=bayesian_optimizer_config_store.default,
                 logger=self.logger
             )
 
@@ -174,12 +177,13 @@ class TestBayesianOptimizer(unittest.TestCase):
                 input_values_df = suggested_params.to_dataframe()
                 target_values_df = y.to_dataframe()
                 bayesian_optimizer.register(input_values_df, target_values_df)
+            self.validate_optima(bayesian_optimizer)
             best_config_point, best_objective = bayesian_optimizer.optimum()
             self.logger.info(f"[{restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
 
     def test_hierarchical_quadratic_cold_start_random_configs(self):
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
         output_space = SimpleHypergrid(
@@ -202,10 +206,10 @@ class TestBayesianOptimizer(unittest.TestCase):
             # Let's set up random seeds so that we can easily repeat failed experiments
             #
             random_state.seed(restart_num)
-            BayesianOptimizerConfig.CONFIG_SPACE.random_state = random_state
+            bayesian_optimizer_config_store.parameter_space.random_state = random_state
             objective_function.parameter_space.random_state = random_state
 
-            optimizer_config = BayesianOptimizerConfig.CONFIG_SPACE.random()
+            optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
             # The goal here is to make sure the optimizer works with a lot of different configurations.
             # So let's make sure each run is not too long.
@@ -271,7 +275,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 objectives=[Objective(name="function_value", minimize=minimize)]
             )
 
-            optimizer_config = BayesianOptimizerConfig.DEFAULT.copy()
+            optimizer_config = bayesian_optimizer_config_store.default
             random_forest_config = optimizer_config.homogeneous_random_forest_regression_model_config
 
             random_forest_config.decision_tree_regression_model_config.n_new_samples_before_refit = 1
@@ -301,3 +305,32 @@ class TestBayesianOptimizer(unittest.TestCase):
             best_config_point, best_objective = optimizer.optimum()
             print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
             self.assertLessEqual(sign * best_objective['function_value'], -5.5)
+
+    def validate_optima(self, optimizer):
+        if not optimizer.get_optimizer_convergence_state().surrogate_model_fit_state.fitted:
+            # Computing prediction based optima should fail if the surrogate model is not fitted.
+            #
+            with self.assertRaises(ValueError):
+                optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
+
+            with self.assertRaises(ValueError):
+                optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
+
+            with self.assertRaises(ValueError):
+                optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
+        else:
+            predicted_best_config, predicted_optimum = optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
+            ucb_90_ci_config, ucb_90_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+            ucb_95_ci_config, ucb_95_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+            ucb_99_ci_config, ucb_99_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+
+            lcb_90_ci_config, lcb_90_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
+            lcb_95_ci_config, lcb_95_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
+            lcb_99_ci_config, lcb_99_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
+
+            # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
+            # change width non-linearily both with degrees of freedom, and with prediction variance.
+            #
+            assert lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value
+            assert predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
+

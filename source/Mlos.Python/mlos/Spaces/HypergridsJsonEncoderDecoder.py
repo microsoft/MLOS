@@ -71,7 +71,7 @@ class HypergridJsonEncoder(JSONEncoder):
             }
 
         if isinstance(o, Point):
-            return o.dimension_value_dict
+            return o.to_json()
 
         if isinstance(o, set):
             return {

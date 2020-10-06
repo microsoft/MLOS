@@ -9,14 +9,15 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, RandomSearchOptimizerConfig
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, GlowWormSwarmOptimizerConfig
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel, HomogeneousRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid, Point
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
-from mlos.Tracer import Tracer
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.Tracer import Tracer, trace
 import mlos.global_values as global_values
 
 class TestUtilityFunctionOptimizers(unittest.TestCase):
@@ -42,7 +43,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('2d_quadratic_concave_up')
+        objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
         cls.input_space = objective_function.parameter_space
@@ -51,7 +52,10 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         cls.input_values_dataframe = objective_function.parameter_space.random_dataframe(num_samples=2500)
         cls.output_values_dataframe = objective_function.evaluate_dataframe(cls.input_values_dataframe)
 
-        cls.model_config = HomogeneousRandomForestRegressionModelConfig()
+        cls.model_config = homogeneous_random_forest_config_store.default
+
+        print(cls.model_config)
+
         cls.model = HomogeneousRandomForestRegressionModel(
             model_config=cls.model_config,
             input_space=cls.input_space,
@@ -85,30 +89,33 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
+    @trace()
     def test_random_search_optimizer(self):
         print("##############################################")
         random_search_optimizer = RandomSearchOptimizer(
             optimization_problem=self.optimization_problem,
             utility_function=self.utility_function,
-            optimizer_config=RandomSearchOptimizerConfig.DEFAULT
+            optimizer_config=random_search_optimizer_config_store.default
         )
         for _ in range(5):
             suggested_params = random_search_optimizer.suggest()
-            print(suggested_params)
+            print(suggested_params.to_json())
             self.assertTrue(suggested_params in self.input_space)
 
+    @trace()
     def test_glow_worm_swarm_optimizer(self):
         print("##############################################")
         glow_worm_swarm_optimizer = GlowWormSwarmOptimizer(
             optimization_problem=self.optimization_problem,
             utility_function=self.utility_function,
-            optimizer_config=GlowWormSwarmOptimizerConfig.DEFAULT
+            optimizer_config=glow_worm_swarm_optimizer_config_store.default
         )
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
-            print(suggested_params)
+            print(suggested_params.to_json())
             self.assertTrue(suggested_params in self.input_space)
 
+    @trace()
     def test_glow_worm_on_three_level_quadratic(self):
         output_space = SimpleHypergrid(
             name="output",
@@ -117,7 +124,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
             ]
         )
 
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
         # Let's warm up the model a bit
         #
@@ -147,13 +154,13 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         glow_worm_swarm_optimizer = GlowWormSwarmOptimizer(
             optimization_problem=optimization_problem,
             utility_function=utility_function,
-            optimizer_config=GlowWormSwarmOptimizerConfig.DEFAULT
+            optimizer_config=glow_worm_swarm_optimizer_config_store.default
         )
 
         num_iterations = 5
         for i in range(num_iterations):
             suggested_params = glow_worm_swarm_optimizer.suggest()
-            print(f"[{i+1}/{num_iterations}] {suggested_params}")
+            print(f"[{i+1}/{num_iterations}] {suggested_params.to_json()}")
             self.assertTrue(suggested_params in objective_function.parameter_space)
 
 

@@ -14,7 +14,7 @@ from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import
     RegressionEnhancedRandomForestRegressionModel, \
     RegressionEnhancedRandomForestRegressionModelConfig
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, ObjectiveFunctionConfigStore
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 import mlos.global_values as global_values
 
 
@@ -326,7 +326,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(num_incorrect_terms == 0, 'Estimated gradient coefficients deviated further than expected from known coefficients')
 
     def test_lasso_hierarchical_categorical_predictions(self):
-        objective_function_config = ObjectiveFunctionConfigStore.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
 
@@ -349,16 +349,23 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(rerf.polynomial_features_powers_.shape == (28, 8), 'PolynomalFeature.power_ shape is incorrect')
 
         # test predictions
-        num_test_x = 10
-        x_test_df = objective_function.parameter_space.random_dataframe(num_samples=num_test_x)
-        y_test_df = objective_function.evaluate_dataframe(x_test_df)
-
-        predictions = rerf.predict(x_test_df)
-        pred_df = predictions.get_dataframe()
-
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
-        predicted_y = pred_df[predicted_value_col].to_numpy()
-        y_test = y_test_df.to_numpy().reshape(-1)
+        num_test_x = 10
+
+        # by generating a single X feature on which to make the predictions, the
+        y_test_list = []
+        predicted_y_list = []
+        for _ in range(num_test_x):
+            x_test_df = objective_function.parameter_space.random_dataframe(num_samples=1)
+            y_test_df = objective_function.evaluate_dataframe(x_test_df)
+            y_test_list.append(y_test_df['y'].values[0])
+
+            predictions = rerf.predict(x_test_df)
+            pred_df = predictions.get_dataframe()
+            predicted_y_list.append(pred_df[predicted_value_col].values[0])
+
+        predicted_y = np.array(predicted_y_list)
+        y_test = np.array(y_test_list)
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares

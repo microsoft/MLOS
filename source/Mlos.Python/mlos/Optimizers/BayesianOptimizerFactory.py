@@ -7,7 +7,7 @@ from mlos.Logger import create_logger
 from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, OptimizerInfo
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Grpc.BayesianOptimizerProxy import BayesianOptimizerProxy
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Spaces import Point
 
@@ -24,12 +24,28 @@ class BayesianOptimizerFactory:
         Logger object
     """
 
-    def __init__(self, grpc_channel, logger=None):
+    def __init__(self, grpc_channel=None, logger=None):
         self.logger = logger if logger is not None else create_logger("BayesianOptimizerFactory")
         self._grpc_channel = grpc_channel
-        self._optimizer_service_stub = OptimizerServiceStub(channel=self._grpc_channel)
+        self._optimizer_service_stub = None
+        if self._grpc_channel is not None:
+            self._optimizer_service_stub = OptimizerServiceStub(channel=self._grpc_channel)
 
-    def create_remote_optimizer(self, optimization_problem: OptimizationProblem, optimizer_config: Point = None):
+
+    def create_local_optimizer(self, optimization_problem: OptimizationProblem, optimizer_config: Point = None) -> BayesianOptimizer:
+        if optimizer_config is None:
+            self.logger.info(f"Optimizer config not specified. Using default.")
+            optimizer_config = bayesian_optimizer_config_store.default
+
+        self.logger.info(f"Creating a bayesian optimizer with config: {optimizer_config}.")
+
+        return BayesianOptimizer(
+            optimization_problem=optimization_problem,
+            optimizer_config=optimizer_config
+        )
+
+
+    def create_remote_optimizer(self, optimization_problem: OptimizationProblem, optimizer_config: Point = None) -> BayesianOptimizerProxy:
         """Creates a remote optimizer over a given problem with a given config.
 
         Parameters
@@ -46,8 +62,10 @@ class BayesianOptimizerFactory:
         BayesianOptimizerProxy
 
         """
+        assert self._optimizer_service_stub is not None
+
         if optimizer_config is None:
-            optimizer_config = BayesianOptimizerConfig.DEFAULT
+            optimizer_config = bayesian_optimizer_config_store.default
 
         create_optimizer_request = CreateOptimizerRequest(
             OptimizationProblem=optimization_problem.to_protobuf(),
@@ -65,7 +83,7 @@ class BayesianOptimizerFactory:
             logger=self.logger
         )
 
-    def connect_to_existing_optimizer(self, optimizer_info: OptimizerInfo):
+    def connect_to_existing_remote_optimizer(self, optimizer_info: OptimizerInfo) -> BayesianOptimizerProxy:
         """Connects to an existing optimizer.
 
         Parameters

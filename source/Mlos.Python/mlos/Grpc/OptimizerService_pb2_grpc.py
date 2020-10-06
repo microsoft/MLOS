@@ -51,10 +51,20 @@ class OptimizerServiceStub(object):
                 request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationRequest.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
                 )
+        self.RegisterObservations = channel.unary_unary(
+                '/OptimizerService/RegisterObservations',
+                request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationsRequest.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
+                )
         self.GetAllObservations = channel.unary_unary(
                 '/OptimizerService/GetAllObservations',
                 request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Observations.FromString,
+                )
+        self.Echo = channel.unary_unary(
+                '/OptimizerService/Echo',
+                request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
                 )
 
 
@@ -119,8 +129,24 @@ class OptimizerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RegisterObservations(self, request, context):
+        """Adds observations to the optimizer's data set.
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def GetAllObservations(self, request, context):
         """Returns all observations registered for a given optimizer.
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Echo(self, request, context):
+        """Like ping.
 
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -165,10 +191,20 @@ def add_OptimizerServiceServicer_to_server(servicer, server):
                     request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationRequest.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
             ),
+            'RegisterObservations': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterObservations,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationsRequest.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
+            ),
             'GetAllObservations': grpc.unary_unary_rpc_method_handler(
                     servicer.GetAllObservations,
                     request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Observations.SerializeToString,
+            ),
+            'Echo': grpc.unary_unary_rpc_method_handler(
+                    servicer.Echo,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -295,6 +331,22 @@ class OptimizerService(object):
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def RegisterObservations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/OptimizerService/RegisterObservations',
+            mlos_dot_Grpc_dot_OptimizerService__pb2.RegisterObservationsRequest.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def GetAllObservations(request,
             target,
             options=(),
@@ -307,5 +359,21 @@ class OptimizerService(object):
         return grpc.experimental.unary_unary(request, target, '/OptimizerService/GetAllObservations',
             mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
             mlos_dot_Grpc_dot_OptimizerService__pb2.Observations.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def Echo(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/OptimizerService/Echo',
+            mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerService__pb2.Empty.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
