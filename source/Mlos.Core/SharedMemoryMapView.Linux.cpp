@@ -30,10 +30,10 @@ namespace Core
 //
 SharedMemoryMapView::SharedMemoryMapView() noexcept
  :  MemSize(0),
-    m_fdSharedMemory(INVALID_FD_VALUE),
-    m_sharedMemoryMapName(nullptr),
     Buffer(nullptr),
-    CleanupOnClose(false)
+    CleanupOnClose(false),
+    m_fdSharedMemory(INVALID_FD_VALUE),
+    m_sharedMemoryMapName(nullptr)
 {
 }
 
@@ -53,10 +53,10 @@ SharedMemoryMapView::~SharedMemoryMapView()
 //
 SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept :
     MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
-    m_fdSharedMemory(std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE)),
-    m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr)),
     Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
-    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0))
+    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0)),
+    m_fdSharedMemory(std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE)),
+    m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr))
 {
 }
 

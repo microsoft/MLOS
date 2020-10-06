@@ -17,7 +17,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Make sure to flag all warnings.
 # TODO: We have lots of cross-platform issues in the code gen especially right
 # now that will need #ifdef wrappers.
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-pragmas")
 
 # The codegen output currently relies on __declspec(selectany) attributes to
 # instruct the linker to ignore extra definitions resulting from including the

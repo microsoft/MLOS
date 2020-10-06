@@ -198,13 +198,6 @@ uint64_t RunSharedChannelBenchmark(
         }));
     }
 
-    std::future<bool> resultFromWriter2 = std::async(
-        std::launch::async,
-        [&sharedChannel, &point, &point3d]
-    {
-        return true;
-    });
-
     std::chrono::seconds timespan(microbenchmarkConfig.DurationInSec);
     std::this_thread::sleep_for(timespan);
 
