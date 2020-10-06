@@ -49,7 +49,7 @@ set(CMAKE_BINARY_DIR "${MLOS_ROOT}/out/cmake/${CMAKE_BUILD_TYPE}")
 
 # Set a binplace dir to match the msbuild rules.
 # We will use this in our install() definition rules.
-set(BINPLACE_DIR "${MLOS_ROOT}/target/bin/${CMAKE_BUILD_TYPE}")
+set(BINPLACE_DIR "${MLOS_ROOT}/target/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_PROCESSOR}")
 
 # By default only let any ctest processes last for limited number of seconds.
 # To override on a per test basis, use add_test_properties()

@@ -2,14 +2,16 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <Import Project="$(BaseDir)\build\versions\Mlos.NetCore.Version.props" />
+  <!-- Include binplace properties. -->
+  <Import Project="$(BaseDir)\build\Mlos.Binplace.props" />
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyClsCompliant>false</AssemblyClsCompliant>
     <NoStdLib>true</NoStdLib>
     <Prefer32Bit>false</Prefer32Bit>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <Platform>AnyCPU</Platform>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <PlatformTarget Condition="'$(PlatformTarget)' == ''">AnyCPU</PlatformTarget>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
@@ -27,6 +29,12 @@
       <DebugSymbols>true</DebugSymbols>
       <Optimize>true</Optimize>
     </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Makefile" />
+    <None Remove="CMakeLists.txt" />
+    <None Remove="obj\**" />
+    <None Remove="objd\**" />
   </ItemGroup>
   <PropertyGroup>
     <DocumentationFile>$(BaseOutputPath)\doc\$(AssemblyName).xml</DocumentationFile>

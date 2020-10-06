@@ -274,9 +274,32 @@ Task("Build-CMake")
         CMakeBuild(settings);
     });
 
-Task("Test-CMake")
+Task("Binplace-CMake")
     .WithCriteria(() => IsRunningOnUnix())
     .IsDependentOn("Build-CMake")
+    .Does(() =>
+    {
+        var cmakeBuildTargets = new[]
+        {
+            "install",
+        };
+
+        var settings = new CMakeBuildSettings
+        {
+            BinaryPath = $"{CMakeBuildDir}",
+            Configuration = CMakeConfiguration,
+            Targets = new[]
+            {
+                String.Join(" ", cmakeBuildTargets)
+            },
+        };
+
+        CMakeBuild(settings);
+    });
+
+Task("Test-CMake")
+    .WithCriteria(() => IsRunningOnUnix())
+    .IsDependentOn("Binplace-CMake")
     .Does(() =>
     {
         var cmakeTestTargets = new[]
@@ -303,7 +326,7 @@ Task("Test-CMake")
 //
 private IEnumerable<NuSpecContent> CollectFilesAsNugetContent(string inputDirPath, string nugetOutputDir, params string[] includeFilePatterns)
 {
-    // Make absoluthe path to the input directory.
+    // Make an absolute path to the input directory.
     //
     string inputDirFullPath = MakeAbsolute(new DirectoryPath(inputDirPath)).FullPath;
 
@@ -318,13 +341,23 @@ private IEnumerable<NuSpecContent> CollectFilesAsNugetContent(string inputDirPat
         //
         FilePathCollection inputFiles = GetFiles($"{inputDirFullPath}/**/{includeFilePattern}");
 
+        bool isFilePresent = false;
+
         foreach(var inputFile in inputFiles)
         {
+            isFilePresent = true;
+
             yield return new NuSpecContent
             {
                 Source = inputFile.FullPath,
                 Target = IO.Path.Combine(nugetOutputDir, inputFile.FullPath.Substring(inputDirFullPath.Length + 1))
             };
+        }
+
+        if (!isFilePresent)
+        {
+            Information($"Unable to locate any files in folder {inputDirFullPath} using pattern {includeFilePattern}.");
+            throw new FileNotFoundException($"Unable to locate any files in folder {inputDirFullPath} using pattern {includeFilePattern}.");
         }
     }
 }
@@ -350,7 +383,7 @@ Task("Create-Nuget-Package")
         if (mlosNetCoreSpec == null)
         {
             Information("Unable to locate Mlos.NetCore.dll");
-            throw new InvalidOperationException("Unable to locate Mlos.NetCore.dll");
+            throw new FileNotFoundException("Unable to locate Mlos.NetCore.dll");
         }
 
         // Get version from Mlos.NetCore.dll.

@@ -53,16 +53,24 @@ namespace Mlos.Agent.Server
         /// <param name="args">command line arguments.</param>
         public static void Main(string[] args)
         {
-            string executableFilePath = null;
-            Uri optimizerAddressUri = null;
-            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri);
+            string executableFilePath;
+            Uri optimizerAddressUri;
+            string settingsRegistryPath;
+            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri, out settingsRegistryPath);
 
             // Check for the executable before setting up any shared memory to
             // reduce cleanup issues.
             //
-            if (executableFilePath != null && !File.Exists(executableFilePath))
+            if (!string.IsNullOrEmpty(executableFilePath) && !File.Exists(executableFilePath))
             {
                 throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
+            }
+
+            if (!string.IsNullOrEmpty(settingsRegistryPath))
+            {
+                // #TODO temporary hack
+                //
+                Environment.SetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH", settingsRegistryPath);
             }
 
             Console.WriteLine("Mlos.Agent.Server");
