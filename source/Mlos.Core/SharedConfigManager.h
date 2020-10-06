@@ -64,12 +64,6 @@ public:
     template<typename T>
     static HRESULT Lookup(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig);
 
-public:
-    // Indicates if we should cleanup OS resources when closing the shared memory map view.
-    // No-op on Windows.
-    //
-    bool CleanupOnClose;
-
 private:
     MlosContext& m_mlosContext;
 
@@ -79,6 +73,12 @@ private:
     // #TODO we might need more than one memory region for the configuration objects.
     //
     SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> m_sharedConfigMemRegionView;
+
+public:
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    // No-op on Windows.
+    //
+    bool CleanupOnClose;
 };
 }
 }

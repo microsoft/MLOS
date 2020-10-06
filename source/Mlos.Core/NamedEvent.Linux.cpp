@@ -29,9 +29,9 @@ namespace Core
 // NAME: NamedEvent::Constructor.
 //
 NamedEvent::NamedEvent() noexcept
-  : m_semaphore(SEM_FAILED),
-    m_namedEventName(nullptr),
-    CleanupOnClose(false)
+  : CleanupOnClose(false),
+    m_semaphore(SEM_FAILED),
+    m_namedEventName(nullptr)
 {
 }
 
@@ -42,9 +42,9 @@ NamedEvent::NamedEvent() noexcept
 //  Move constructor.
 //
 NamedEvent::NamedEvent(NamedEvent&& namedEvent) noexcept
-  : m_semaphore(std::exchange(namedEvent.m_semaphore, SEM_FAILED)),
-    m_namedEventName(std::exchange(namedEvent.m_namedEventName, nullptr)),
-    CleanupOnClose(std::exchange(namedEvent.CleanupOnClose, false))
+  : CleanupOnClose(std::exchange(namedEvent.CleanupOnClose, false)),
+    m_semaphore(std::exchange(namedEvent.m_semaphore, SEM_FAILED)),
+    m_namedEventName(std::exchange(namedEvent.m_namedEventName, nullptr))
 {
 }
 

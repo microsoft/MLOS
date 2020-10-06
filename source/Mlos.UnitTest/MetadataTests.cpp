@@ -57,9 +57,9 @@ TEST(MetadataTests, VerifyProxyAccess)
 
     Proxy::Mlos::UnitTest::CompositeStructure2 proxy(buffer, 0);
 
-    WideStringPtr a1 = proxy.Title();
-    WideStringPtr a2 = proxy.BaseComp().Name();
-    StringPtr a3 = proxy.BaseComp().Version();
+    EXPECT_EQ(proxy.Title(), object.Title);
+    EXPECT_EQ(proxy.BaseComp().Name(), object.BaseComp.Name);
+    EXPECT_EQ(proxy.BaseComp().Version(), object.BaseComp.Version);
 }
 
 TEST(MetadataTests, VerifyProxyAccessEnumArray)
