@@ -8,5 +8,12 @@
     "cmake.generator": "Unix Makefiles",
     "cmake.preferredGenerators": [
         "Unix Makefiles"
-    ]
+    ],
+    // Show a vertical line at our code standard's line length limit.
+    "editor.rulers": [
+        132
+    ],
+    // Control how the vim reflow key combo wraps text for comments.
+    // Set it to something less than the code length but not too short.
+    "vim.textwidth": 100
 }
