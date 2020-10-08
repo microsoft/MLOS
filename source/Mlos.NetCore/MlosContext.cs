@@ -23,25 +23,30 @@ namespace Mlos.Core
     /// </remarks>
     public abstract class MlosContext : IDisposable
     {
+        /// <summary>
+        /// Gets or sets the global Mlos context.
+        /// </summary>
+        /// <remarks>
+        /// #TODO, we need an experiment class to be able pass the instance of the context.
+        /// </remarks>
+        public static MlosContext Instance { get; set; }
+
         #region Shared public objects
 
         /// <summary>
         /// Gets or sets the control channel instance.
-        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
         /// </summary>
-        public static ISharedChannel ControlChannel { get; protected set; }
+        public ISharedChannel ControlChannel { get; protected set; }
 
         /// <summary>
         /// Gets or sets the feedback channel instance.
-        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
         /// </summary>
-        public static ISharedChannel FeedbackChannel { get; protected set; }
+        public ISharedChannel FeedbackChannel { get; protected set; }
 
         /// <summary>
         /// Gets or sets the shared config manager.
-        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
         /// </summary>
-        public static SharedConfigManager SharedConfigManager { get; protected set; }
+        public SharedConfigManager SharedConfigManager { get; protected set; }
 
         /// <summary>
         /// Gets or sets the connection to the optimizer.
@@ -53,7 +58,7 @@ namespace Mlos.Core
         /// use (see SmartCache.SettingsRegistry/AssemblyInitializer.cs for an
         /// example).
         /// </remarks>
-        public static IOptimizerFactory OptimizerFactory { get; set; }
+        public IOptimizerFactory OptimizerFactory { get; set; }
 
         #endregion
 
@@ -91,7 +96,6 @@ namespace Mlos.Core
             feedbackChannelNamedEvent = null;
 
             // Finally dispose the shared config manager.
-            // #TODO make it not static
             //
             SharedConfigManager?.Dispose();
             SharedConfigManager = null;

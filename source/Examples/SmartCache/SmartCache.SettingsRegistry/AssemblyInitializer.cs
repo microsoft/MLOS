@@ -146,7 +146,7 @@ namespace SmartCache
             // Note: we read this from a global variable that should have been
             // setup for the Mlos.Agent (e.g. in the Mlos.Agent.Server).
             //
-            IOptimizerFactory optimizerFactory = MlosContext.OptimizerFactory;
+            IOptimizerFactory optimizerFactory = MlosContext.Instance.OptimizerFactory;
             OptimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
         }
 
@@ -177,7 +177,7 @@ namespace SmartCache
         {
             // Get a reference to the smart cache's config stored in shared memory.
             //
-            SmartCacheProxy.SmartCacheConfig smartCacheConfig = MlosContext.SharedConfigManager.Lookup<SmartCacheProxy.SmartCacheConfig>().Config;
+            SmartCacheProxy.SmartCacheConfig smartCacheConfig = MlosContext.Instance.SharedConfigManager.Lookup<SmartCacheProxy.SmartCacheConfig>().Config;
 
             // If we have a connection to the optimizer, then ask it for a new
             // configuration based on the stats from CacheRequestEvent telemetry
@@ -245,7 +245,7 @@ namespace SmartCache
             // version of the config from shared memory.
             //
             SharedConfigUpdatedFeedbackMessage feedbackMsg;
-            MlosContext.FeedbackChannel.SendMessage(ref feedbackMsg);
+            MlosContext.Instance.FeedbackChannel.SendMessage(ref feedbackMsg);
         }
     }
 }

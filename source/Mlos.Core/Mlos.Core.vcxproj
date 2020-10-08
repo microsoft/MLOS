@@ -62,8 +62,6 @@
     <ClInclude Include="ObjectDeserializationCallback.h" />
     <ClInclude Include="ObjectSerialization.h" />
     <ClInclude Include="ObjectSerializationStringView.h" />
-    <ClInclude Include="MlosPlatform.h" />
-    <ClInclude Include="MlosPlatform.Std.inl" />
     <ClInclude Include="ProbingPolicy.h" />
     <ClInclude Include="ProbingPolicy.inl" />
     <ClInclude Include="PropertyProxy.h" />
