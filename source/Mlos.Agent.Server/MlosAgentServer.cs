@@ -76,6 +76,14 @@ namespace Mlos.Agent.Server
             Console.WriteLine("Mlos.Agent.Server");
             TargetProcessManager targetProcessManager = null;
 
+            // In the active learning mode, create a new shared memory map before running the target process.
+            // On Linux, we unlink existing shared memory map, if they exist.
+            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
+            //
+            using MlosContext mlosContext = (executableFilePath != null)
+                ? InterProcessMlosContext.Create()
+                : InterProcessMlosContext.CreateOrOpen();
+
             // Connect to gRpc optimizer only if user provided an address in the command line.
             //
             if (optimizerAddressUri != null)
@@ -94,16 +102,9 @@ namespace Mlos.Agent.Server
                 // See Also: AssemblyInitializer.cs within the SettingsRegistry
                 // assembly project in question.
                 //
-                MlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
+                mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
             }
 
-            // In the active learning mode, create a new shared memory map before running the target process.
-            // On Linux, we unlink existing shared memory map, if they exist.
-            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
-            //
-            using MlosContext mlosContext = (executableFilePath != null)
-                ? InterProcessMlosContext.Create()
-                : InterProcessMlosContext.CreateOrOpen();
             using var mainAgent = new MainAgent();
             mainAgent.InitializeSharedChannel(mlosContext);
 
@@ -131,16 +132,13 @@ namespace Mlos.Agent.Server
             //
             // In MainAgent.RunAgent we loop on the shared memory control and
             // telemetry channels looking for messages and dispatching them to
-
             // their registered callback handlers.
             //
             // The set of recognized messages is dynamically registered using
-
             // the RegisterSettingsAssembly method which is called through the
             // handler for the RegisterAssemblyRequestMessage.
             //
             // Once registered, the SettingsAssemblyManager uses reflection to
-
             // search for an AssemblyInitializer inside those assemblies and
             // executes it in order to setup the message handler callbacks
             // within the agent.
