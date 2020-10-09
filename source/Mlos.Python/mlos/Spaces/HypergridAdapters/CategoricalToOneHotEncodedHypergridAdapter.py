@@ -6,10 +6,17 @@
 import numpy as np
 from pandas import DataFrame
 from sklearn.preprocessing import OneHotEncoder
-from mlos.Spaces import Point, CategoricalDimension, DiscreteDimension, Hypergrid, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Hypergrid, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters.HypergridAdapter import HypergridAdapter
 from mlos.Spaces.HypergridAdapters.HierarchicalToFlatHypergridAdapter import HierarchicalToFlatHypergridAdapter
 from mlos.Spaces.HypergridAdapters.CategoricalToDiscreteHypergridAdapter import CategoricalToDiscreteHypergridAdapter
+
+
+class CategoricalToOneHotEncodingAdapteeTargetMapping:
+    def __init__(self, one_hot_encoder: OneHotEncoder):
+        self.target_dims = []
+        self.one_hot_encoder = one_hot_encoder
+        self.num_dummy_dims = 0
 
 
 class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
@@ -26,23 +33,22 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
         drop: {None, 'first', 'if_binary'}
             Argument passed to sklearn's OHE with same argument name.
             Default=None.
-        dtype: number type
-            Argument passed to sklearn's OHE with same argument name.
-            Default=np.int.
 
         The following sklearn OHE arguments are not supported or are restricted:
         categories: Not supported since the levels a categorical can assume are those specified by the adaptee CategoricalDimension categories.
         drop: Not supporting sklearn's OHE drop argument as a array-like of shape (n_features,).
+        dtype: This adapter will always use float64 so we're able to accommodate np.NaN values in the projected/unprojected dataframes.
         sparse: Not exposed in the adapter since the adapter maintains the OHE instances.
         handle_unknown: This adapter will always set sklearn's OHE instantiation argument handle_unknown='error'.
 
     """
 
-    def __init__(self,
-                 adaptee: Hypergrid,
-                 merge_all_categorical_dimensions: bool = False,
-                 drop: str = None,
-                 dtype=np.int):
+    def __init__(
+            self,
+            adaptee: Hypergrid,
+            merge_all_categorical_dimensions: bool = False,
+            drop: str = None
+    ):
         if not HypergridAdapter.is_like_simple_hypergrid(adaptee):
             raise ValueError("Adaptee must implement a Hypergrid Interface.")
 
@@ -52,35 +58,37 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
         self._merge_all_categorical_dimensions = merge_all_categorical_dimensions
         self._one_hot_encoder_kwargs = {
             'drop': drop,
-            'dtype': dtype,
+            'dtype': np.float64,
             'sparse': False,
             'handle_unknown': 'error'
         }
         self._all_one_hot_encoded_target_dimension_names = []
-        self._adaptee_to_target_data = {}
-        self._target_to_adaptee_data = {}
+        self._adaptee_to_target_data_dict = {}
+        self._adaptee_expected_dimension_name_ordering = []
         self._concatenation_delim = '___'
-        self._merged_categorical_dimension_column_name = 'dimension_cross_product'
+        self._merged_categorical_dimension_column_name = 'ohe_cross_product'
         self.ohe_target_column_suffix = '__ohe'
-        #self._categories_per_dimension = []
-        self._categorical_to_discrete_adapter = None
         self._target: Hypergrid = None
-        self.is_adaptee_hierarchical = self._adaptee.is_hierarchical()
-
-        if self.is_adaptee_hierarchical:
-            self._adaptee = HierarchicalToFlatHypergridAdapter(adaptee=self._adaptee)
+        self.has_adaptee_been_flattened = False
 
         # Since CategoricalDimension values may have different types within the same dimension,
         #  we pass the adaptee through the CategoricalToDiscrete adapter to move all value types to ints
-        # Since this converts categorical dimensions to discrete dimensions, we remember the categorical dim names
+
+        # Because the OneHotEncoder needs to remember the dimension names (which change by the flattening in CategoricalToDiscrete),
+        #  the flattening is performed here so the OneHotEncoder discovers the correct flattened column names
+        if self._adaptee.is_hierarchical():
+            self._adaptee = HierarchicalToFlatHypergridAdapter(adaptee=self._adaptee)
+            self.has_adaptee_been_flattened = True
+
+        # Since the CategoricalToDiscrete adapter converts categorical dimensions to discrete dimensions, we remember the categorical dim names
         self._adaptee_dimension_names_to_transform = []
         for adaptee_dimension in self._adaptee.dimensions:
             if isinstance(adaptee_dimension, CategoricalDimension):
                 self._adaptee_dimension_names_to_transform.append(adaptee_dimension.name)
+            self._adaptee_expected_dimension_name_ordering.append(adaptee_dimension.name)
 
-        if any(isinstance(dimension, CategoricalDimension) for dimension in self._adaptee.dimensions):
-            self._categorical_to_discrete_adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self._adaptee)
-            self._adaptee = self._categorical_to_discrete_adapter
+        if any(isinstance(dimension, CategoricalDimension) for dimension in self._adaptee.dimensions) or self.has_adaptee_been_flattened:
+            self._adaptee = CategoricalToDiscreteHypergridAdapter(adaptee=self._adaptee)
 
         self._build_simple_hypergrid_target()
 
@@ -96,75 +104,19 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
         return self._all_one_hot_encoded_target_dimension_names
 
     def _concatenate_dataframe_columns(self, df: DataFrame, columns_to_concatenate) -> DataFrame:
+        df[columns_to_concatenate] = df[columns_to_concatenate].astype('float64')
         return df[columns_to_concatenate].apply(lambda cat_row: self._concatenation_delim.join(cat_row.map(str)), axis=1)
-
-    def _concatenate_string_list_values(self, row_values) -> str:
-        return self._concatenation_delim.join(row_values)
-
-    def _project_point(self, point: Point) -> Point:
-        projected_point = Point()
-        for dim_name, adaptee_dim_value in point:
-            if dim_name in self._adaptee_dimension_names_to_transform:
-                if self._merge_all_categorical_dimensions:
-                    ohe_dict = self._adaptee_to_target_data[self._merged_categorical_dimension_column_name]
-                    ohe_x = self._concatenate_string_list_values([str(point[dim_name]) for dim_name in self._adaptee_dimension_names_to_transform])
-                else:
-                    ohe_dict = self._adaptee_to_target_data[dim_name]
-                    ohe_x = [str(point[dim_name])]
-                ohe_x = np.array(ohe_x).reshape(-1, 1)
-                target_values = ohe_dict['one_hot_encoder'].transform(ohe_x).tolist()[0]
-                for i, target_value in enumerate(target_values):
-                    target_name = ohe_dict['target_dims'][i]
-                    projected_point[target_name] = target_value
-            else:
-                projected_point[dim_name] = adaptee_dim_value
-        return projected_point
-
-    def _unproject_point(self, point: Point) -> Point:
-        unprojected_point = Point()
-        for target_dim_name, target_dim_value in point:
-            if target_dim_name in self._all_one_hot_encoded_target_dimension_names:
-                adaptee_dim_names = []
-                if self._merge_all_categorical_dimensions:
-                    adaptee_dim_names = self._adaptee_dimension_names_to_transform
-                    if any([adaptee_dim_name in unprojected_point for adaptee_dim_name in adaptee_dim_names]):
-                        continue
-                    ohe_dict = self._adaptee_to_target_data[self._merged_categorical_dimension_column_name]
-                    target_names = ohe_dict['target_dims']
-                    ohe_y = np.array([point[target_name] for target_name in target_names]).reshape(1, -1)
-                    pre_split_adaptee_value = ohe_dict['one_hot_encoder'].inverse_transform(ohe_y)
-                    adaptee_values = pre_split_adaptee_value[0][0].split(self._concatenation_delim)
-                else:
-                    adaptee_dim_name = self._target_to_adaptee_data[target_dim_name]
-                    if adaptee_dim_name in unprojected_point:
-                        continue
-                    adaptee_dim_names.append(adaptee_dim_name)
-                    ohe_dict = self._adaptee_to_target_data[adaptee_dim_name]
-                    target_names = ohe_dict['target_dims']
-                    ohe_y = np.array([point[target_name] for target_name in target_names]).reshape(1, -1)
-                    adaptee_values = ohe_dict['one_hot_encoder'].inverse_transform(ohe_y)
-
-                for i, adaptee_dim_name in enumerate(adaptee_dim_names):
-                    if adaptee_dim_name in unprojected_point:
-                        if self._merge_all_categorical_dimensions:
-                            raise ValueError(
-                                f'Attempting to set previously set adaptee dimension "{adaptee_dim_name}" is unexpected for hierarchical hypergrids.')
-                        if not self._merge_all_categorical_dimensions and (i > 0):
-                            raise ValueError(
-                                f'Found more than one adaptee dimension "{adaptee_dim_name}" and this is unexpected for non-hierarchical hypergrids.')
-                        continue
-                    adaptee_value = adaptee_values[i]
-                    unprojected_point[adaptee_dim_name] = int(adaptee_value[0])
-            else:
-                adaptee_dim_name = target_dim_name
-                unprojected_point[adaptee_dim_name] = target_dim_value
-        return unprojected_point
 
     def _project_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
-
         columns_to_drop = []
+        potentially_missing_columns = list(set.difference(set(self._adaptee_expected_dimension_name_ordering), set(df.columns.values)))
+        for missing_col in potentially_missing_columns:
+            df[missing_col] = np.NaN
+            df[missing_col] = df[missing_col].astype('float64')
+            columns_to_drop.append(missing_col)
+
         columns_to_transform = self._adaptee_dimension_names_to_transform
         if self._merge_all_categorical_dimensions:
             df[self._merged_categorical_dimension_column_name] = self._concatenate_dataframe_columns(df, columns_to_transform)
@@ -172,9 +124,12 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
             columns_to_drop.extend(self._adaptee_dimension_names_to_transform)
 
         for adaptee_column_name in columns_to_transform:
-            my_ohe = self._adaptee_to_target_data[adaptee_column_name]['one_hot_encoder']
+            my_ohe_dict = self._adaptee_to_target_data_dict[adaptee_column_name]
+            my_ohe = my_ohe_dict.one_hot_encoder
+            if not self._merge_all_categorical_dimensions:
+                df[adaptee_column_name] = df[adaptee_column_name].astype('float64')
             ohe_x = df[adaptee_column_name].map(str).to_numpy().reshape(-1, 1)
-            my_ohe_target_columns = self._adaptee_to_target_data[adaptee_column_name]['target_dims']
+            my_ohe_target_columns = my_ohe_dict.target_dims
             df[my_ohe_target_columns] = DataFrame(my_ohe.transform(ohe_x), index=df.index)
             columns_to_drop.append(adaptee_column_name)
 
@@ -186,33 +141,41 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
         if not in_place:
             df = df.copy(deep=True)
 
+        columns_to_return = self._adaptee_expected_dimension_name_ordering
+        if self._merge_all_categorical_dimensions:
+            for column_to_transform in self._adaptee_dimension_names_to_transform:
+                if column_to_transform not in columns_to_return:
+                    columns_to_return.append(column_to_transform)
+
         columns_to_drop = []
         if self._merge_all_categorical_dimensions:
-            my_ohe_dict = self._adaptee_to_target_data[self._merged_categorical_dimension_column_name]
-            target_columns_to_invert = my_ohe_dict['target_dims']
-            my_ohe = my_ohe_dict['one_hot_encoder']
-#            df[self._merged_categorical_dimension_column_name] = my_ohe.inverse_transform(df[target_columns_to_invert])
-#            df[self._adaptee_dimension_names_to_transform] = df[self._merged_categorical_dimension_column_name]\
-#                .str.split(self._concatenation_delim, expand=True)
-            df[self._adaptee_dimension_names_to_transform] = my_ohe.inverse_transform(df[target_columns_to_invert]).astype(int)
+            my_ohe_dict = self._adaptee_to_target_data_dict[self._merged_categorical_dimension_column_name]
+            target_columns_to_invert = my_ohe_dict.target_dims
+            my_ohe = my_ohe_dict.one_hot_encoder
+            df[self._merged_categorical_dimension_column_name] = my_ohe.inverse_transform(df[target_columns_to_invert])
+            df[self._adaptee_dimension_names_to_transform] = df[self._merged_categorical_dimension_column_name]\
+                .str.split(self._concatenation_delim, expand=True)
+            df.loc[:, self._adaptee_dimension_names_to_transform].replace('nan', np.NaN, inplace=True)
+            df[self._adaptee_dimension_names_to_transform] = df[self._adaptee_dimension_names_to_transform].astype('float64')
             columns_to_drop.extend(target_columns_to_invert)
             columns_to_drop.append(self._merged_categorical_dimension_column_name)
+
         else:
             for adaptee_column_name in self._adaptee_dimension_names_to_transform:
-                my_ohe_dict = self._adaptee_to_target_data[adaptee_column_name]
-                target_columns_to_invert = my_ohe_dict['target_dims']
-                my_ohe = my_ohe_dict['one_hot_encoder']
-                df[adaptee_column_name] = my_ohe.inverse_transform(df[target_columns_to_invert]).astype(int)
+                my_ohe_dict = self._adaptee_to_target_data_dict[adaptee_column_name]
+                target_columns_to_invert = my_ohe_dict.target_dims
+                my_ohe = my_ohe_dict.one_hot_encoder
+                df[adaptee_column_name] = my_ohe.inverse_transform(df[target_columns_to_invert])
+                df[adaptee_column_name].replace('nan', np.NaN, inplace=True)
+                df[adaptee_column_name] = df[adaptee_column_name].astype('float64')
                 columns_to_drop.extend(target_columns_to_invert)
 
-        if columns_to_drop:
-            df.drop(columns=columns_to_drop, inplace=True)
-
-        print('my _unproject_dataframe: ', df)
-
-        # # invert the categorical to discrete adapter
-        # if self._categorical_to_discrete_adapter is not None:
-        #     df = self._categorical_to_discrete_adapter.unproject_dataframe(df)
+        columns_to_retain_present_in_df = [column_name for column_name in columns_to_return if column_name in df.columns.values]
+        if in_place:
+            df.loc[:, columns_to_retain_present_in_df].dropna(axis=1, how='all', inplace=in_place)
+            df.drop(columns=columns_to_drop, inplace=in_place)
+        else:
+            df = df[columns_to_retain_present_in_df].dropna(axis=1, how='all', inplace=in_place)
 
         return df
 
@@ -249,19 +212,14 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
                      Since this value should never appear in hierarchical hypergrid derived dataframes, it is popped from
                      the categories when user specifies merge_all_categorical_dimensions==True.
                 """
-                expanded_categories = []
-                if self.is_adaptee_hierarchical:
-                    expanded_categories.append('nan')
-                expanded_categories.extend([str(x) for x in adaptee_dimension.linspace()])
+
+                expanded_categories = ['nan'] + [str(float(x)) for x in adaptee_dimension.linspace()]
                 categories_list_for_ohe_init.append(expanded_categories)
 
                 if not self._merge_all_categorical_dimensions:
                     # do not need to encode the cross product of all categorical dimensions, sufficient info here to add target dimensions
-                    self._adaptee_to_target_data[adaptee_dimension.name] = {
-                        'target_dims': [],
-                        'one_hot_encoder': OneHotEncoder(categories=[expanded_categories], **self._one_hot_encoder_kwargs),
-                        'num_dummy_dims': None
-                    }
+                    self._adaptee_to_target_data_dict[adaptee_dimension.name] = CategoricalToOneHotEncodingAdapteeTargetMapping(
+                        one_hot_encoder=OneHotEncoder(categories=[expanded_categories], **self._one_hot_encoder_kwargs))
                     temp_df_for_fit = DataFrame({adaptee_dimension.name: expanded_categories})
                     self._add_one_hot_encoded_dimensions(adaptee_dimension.name, temp_df_for_fit)
             else:
@@ -270,23 +228,18 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
         if self._merge_all_categorical_dimensions:
             # harvested categories for each categorical dimension in single pass across all adaptee dimensions used to compute the cross product encoding here
             cross_product_categories = self._create_cross_product_categories(categories_list_for_ohe_init)
-            self._adaptee_to_target_data[self._merged_categorical_dimension_column_name] = {
-                'target_dims': [],
-                'one_hot_encoder': OneHotEncoder(categories=[cross_product_categories], **self._one_hot_encoder_kwargs),
-                'num_dummy_dims': None
-            }
+            self._adaptee_to_target_data_dict[self._merged_categorical_dimension_column_name] = CategoricalToOneHotEncodingAdapteeTargetMapping(
+                one_hot_encoder=OneHotEncoder(categories=[cross_product_categories], **self._one_hot_encoder_kwargs))
             temp_df_for_fit = DataFrame({self._merged_categorical_dimension_column_name: cross_product_categories})
             self._add_one_hot_encoded_dimensions(self._merged_categorical_dimension_column_name, temp_df_for_fit)
 
     def _add_one_hot_encoded_dimensions(self, adaptee_dimension_name, temp_df_for_fit: DataFrame) -> None:
-        my_target_data = self._adaptee_to_target_data[adaptee_dimension_name]
-        my_ohe_output = my_target_data['one_hot_encoder'].fit_transform(temp_df_for_fit)
-        num_dummy_dims = my_ohe_output.shape[1]
-        my_target_data['num_dummy_dims'] = my_ohe_output.shape[1]
-        for i in range(num_dummy_dims):
+        my_target_data = self._adaptee_to_target_data_dict[adaptee_dimension_name]
+        my_ohe_output = my_target_data.one_hot_encoder.fit_transform(temp_df_for_fit)
+        my_target_data.num_dummy_dims = my_ohe_output.shape[1]
+        for i in range(my_target_data.num_dummy_dims):
             target_dim_name = f'{adaptee_dimension_name}{self.ohe_target_column_suffix}{i}'
-            my_target_data['target_dims'].append(target_dim_name)
-            self._target_to_adaptee_data[target_dim_name] = adaptee_dimension_name
+            my_target_data.target_dims.append(target_dim_name)
             self._target.add_dimension(DiscreteDimension(name=target_dim_name, min=0, max=1))
             self._all_one_hot_encoded_target_dimension_names.append(target_dim_name)
 
@@ -299,10 +252,9 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
 
         # expect first element arises from 'nan' x ... x 'nan' which cannot appear in hierarchical hypergrids,
         #  so popping this before returning the cross product list
-        if self.is_adaptee_hierarchical and num_categorical_dims > 1:
+        if self.has_adaptee_been_flattened and num_categorical_dims > 1:
             all_nans = self._concatenation_delim.join(['nan'] * num_categorical_dims)
             should_be_all_nans = concatenated_levels.pop(0)
             if should_be_all_nans != all_nans:
                 raise ValueError('Failed to find cross product of nan values when constructing OneHotEncoding with merge_all_categorical_dimensions==True')
-
         return concatenated_levels
