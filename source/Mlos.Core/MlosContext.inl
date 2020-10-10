@@ -47,7 +47,7 @@ HRESULT MlosContext::CreateMemoryRegion(
 
     // Initialize memory region if we created a new mapping, Otherwise assume Mlos.Agent has initialized it.
     //
-    auto& memoryRegion = sharedMemoryRegionView.MemoryRegion();
+    T& memoryRegion = sharedMemoryRegionView.MemoryRegion();
 
     // Update region id if created a new one.
     //

@@ -373,9 +373,8 @@ Task("Create-Nuget-Package")
             .Concat(CollectFilesAsNugetContent($"./out/Mlos.CodeGen.out/{Configuration}/Mlos.Core", "codegen/Mlos.Core", "*.h", "*.cs"))
             .Concat(CollectFilesAsNugetContent($"./out/dotnet/source/Mlos.Agent.Server/{ObjectDirectory}/{AnyCPUPlatform}/", "bin/Mlos.Agent.Server", "*"))
             .Concat(CollectFilesAsNugetContent($"./out/dotnet/source/Mlos.SettingsSystem.CodeGen/{ObjectDirectory}/{AnyCPUPlatform}/", "bin/Mlos.SettingsSystem.CodeGen", "*"))
-            .Concat(CollectFilesAsNugetContent($"./out/dotnet/source/Mlos.Agent.Server/{ObjectDirectory}/{AnyCPUPlatform}/", "lib/netcoreapp3.1", "Mlos.NetCore.*"))
-            .Concat(CollectFilesAsNugetContent($"./out/dotnet/source/Mlos.Agent.Server/{ObjectDirectory}/{AnyCPUPlatform}/", "lib/netcoreapp3.1", "Mlos.SettingsSystem.Attributes.*"))
-            .Concat(CollectFilesAsNugetContent($"./out/dotnet/source/Mlos.Agent.Server/{ObjectDirectory}/{AnyCPUPlatform}/", "lib/netcoreapp3.1", "Mlos.Agent.*"))
+            .Concat(CollectFilesAsNugetContent($"./out/dotnet/source/Mlos.NetCore/{ObjectDirectory}/{AnyCPUPlatform}/", "lib/netcoreapp3.1", "Mlos.NetCore.*"))
+            .Concat(CollectFilesAsNugetContent($"./out/dotnet/source/Mlos.NetCore/{ObjectDirectory}/{AnyCPUPlatform}/", "lib/netcoreapp3.1", "Mlos.SettingsSystem.Attributes.*"))
             .ToArray();
 
         var mlosNetCoreSpec = sourceFiles.FirstOrDefault(r=> IO.Path.GetFileName(r.Source) == "Mlos.NetCore.dll");
