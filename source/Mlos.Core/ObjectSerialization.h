@@ -112,7 +112,7 @@ constexpr inline size_t GetVariableDataSize(const std::array<Mlos::Core::StringP
 {
     size_t length = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::StringPtr& element : object)
     {
         length += GetVariableDataSize(element);
     }
@@ -125,7 +125,7 @@ constexpr inline size_t GetVariableDataSize(const std::array<Mlos::Core::WideStr
 {
     size_t length = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::WideStringPtr& element : object)
     {
         length += GetVariableDataSize(element);
     }
@@ -172,7 +172,7 @@ inline size_t SerializeVariableData(
 {
     size_t dataSize = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::StringPtr& element : object)
     {
         size_t elementDataSize = element.Length;
         memcpy(buffer.Pointer + dataOffset, element.Data, elementDataSize);
@@ -197,7 +197,7 @@ inline size_t SerializeVariableData(
 {
     size_t dataSize = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::WideStringPtr& element : object)
     {
         size_t elementDataSize = element.Length * sizeof(wchar_t);
         memcpy(buffer.Pointer + dataOffset, element.Data, elementDataSize);

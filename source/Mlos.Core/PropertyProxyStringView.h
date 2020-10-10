@@ -47,7 +47,7 @@ public:
     {
         // Get the value_ref and update the data pointer.
         //
-        auto view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
+        Mlos::Core::StringPtr& view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
 
         const byte* dataPtr = reinterpret_cast<const byte*>(view.Data) + reinterpret_cast<uint64_t>(buffer.Pointer);
 
@@ -62,7 +62,7 @@ public:
     //
     bool VerifyVariableData(uint64_t objectOffset, uint64_t totalDataSize, uint64_t& expectedDataOffset) const
     {
-        auto view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
+        Mlos::Core::StringPtr& view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
 
         if (view.Length > totalDataSize)
         {
@@ -107,7 +107,7 @@ public:
     {
         // Get the value_ref and update the data pointer.
         //
-        auto view = *reinterpret_cast<Mlos::Core::WideStringPtr*>(buffer.Pointer);
+        Mlos::Core::WideStringPtr& view = *reinterpret_cast<Mlos::Core::WideStringPtr*>(buffer.Pointer);
 
         const byte* dataPtr = reinterpret_cast<const byte*>(view.Data) + reinterpret_cast<uint64_t>(buffer.Pointer);
 
@@ -122,7 +122,7 @@ public:
     //
     bool VerifyVariableData(uint64_t objectOffset, uint64_t totalDataSize, uint64_t& expectedDataOffset) const
     {
-        auto view = *reinterpret_cast<Mlos::Core::WideStringPtr*>(buffer.Pointer);
+        Mlos::Core::WideStringPtr& view = *reinterpret_cast<Mlos::Core::WideStringPtr*>(buffer.Pointer);
 
         if (view.Length > totalDataSize)
         {
