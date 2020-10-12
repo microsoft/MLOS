@@ -20,6 +20,7 @@
     "workspaceFolder": "/src/MLOS",
     "remoteUser" : "mlos-docker",
     "mounts" : [
+        "source=mlos-build-ubuntu-20.04-bash-history,target=/home/mlos-docker/.histvol,type=volume",
         "source=mlos-build-ubuntu-20.04-vscode-exts,target=/home/mlos-docker/.vscode-server/extensions,type=volume",
         "source=mlos-build-ubuntu-20.04-vscode-exts,target=/home/mlos-docker/.vscode-server-insiders/extensions,type=volume"
     ]
