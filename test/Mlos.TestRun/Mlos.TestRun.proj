@@ -4,8 +4,9 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
   <PropertyGroup>
     <!-- Resolve which Platform is used to build managed projects. -->
-    <DefaultNetCorePlatform Condition="'' == ''">$(Platform)</DefaultNetCorePlatform>
-    <DefaultNetCorePlatform Condition="'$(DefaultPlatform)' == ''">AnyCPU</DefaultNetCorePlatform>
+    <DefaultNetCorePlatform>$(Platform)</DefaultNetCorePlatform>
+    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">$(BuildArchitecture)</DefaultNetCorePlatform>
+    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">AnyCPU</DefaultNetCorePlatform>
     <SettingsAssemblyBinplaceDir>$(BinplaceBaseRootDir)\$(BuildType)\$(DefaultNetCorePlatform)</SettingsAssemblyBinplaceDir>
     <!-- If not defined, use x64 Platform (same as Mlos.Cpp.props). -->
     <Platform Condition="'$(Platform)' == ''">x64</Platform>
