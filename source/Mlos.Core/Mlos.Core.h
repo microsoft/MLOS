@@ -24,6 +24,7 @@
 #include <functional>
 #include <type_traits>
 #include <string.h>
+#include <cwchar>
 
 // Undefine MIN MAX macros.
 //
