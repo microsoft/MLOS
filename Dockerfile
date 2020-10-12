@@ -190,11 +190,15 @@ FROM mlos-build-base-with-python AS mlos-build-base-without-extras
 USER root
 
 # Install LLVM using our script.
+# Also install libstdc++-10-dev (https://github.com/Microsoft/MLOS/pull/133)
 COPY ./scripts/install.llvm-clang.sh /tmp/MLOS/scripts/
 RUN apt-get update && \
     apt-get --no-install-recommends -y install \
         gnupg-agent && \
     /bin/bash /tmp/MLOS/scripts/install.llvm-clang.sh && \
+    if dpkg --compare-versions `lsb_release -r -s` ge-nl 20.04; then \
+        apt-get --no-install-recommends -y install libstdc++-10-dev; \
+    fi && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install some dependencies necessary for dotnet.
