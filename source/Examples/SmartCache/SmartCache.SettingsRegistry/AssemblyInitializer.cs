@@ -25,7 +25,7 @@ namespace SmartCache
     /// <remarks>
     /// This class is instantiated by the C# Mlos.Agent (MainAgent.cs -
     /// RegisterSettingsAssembly) which calls
-    /// <seealso cref="SettingsAssemblyManager.RegisterAssembly" /> to invoke
+    /// <seealso cref="SettingsAssemblyManager" /> to invoke
     /// this one time initialization code for the settings and message handlers
     /// for this component's Settings Registry. This allows the Mlos.Agent (which
     /// is generic) to invoke the appropriate handlers for the component specific

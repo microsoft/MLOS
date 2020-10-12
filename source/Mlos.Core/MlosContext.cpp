@@ -61,28 +61,6 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     const char* assemblyFileName,
     uint32_t assemblyDispatchTableBaseIndex)
 {
-#ifdef _WIN64
-    HMODULE hModule = GetModuleHandleW(nullptr);
-    if (hModule == nullptr)
-    {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-
-    char szApplicationFullPath[MAX_PATH];
-    constexpr size_t cchApplicationFullPath = _countof(szApplicationFullPath);
-
-    if (!GetModuleFileNameA(hModule, szApplicationFullPath, cchApplicationFullPath))
-    {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-#else
-    // For Linux we don't have system methods for discovering the location of dll files.
-    // Instead, we return null here and provide environment variable hooks in Mlos.Agent
-    // to aid searching for the settings registry assembly (akin to LD_LIBRARY_PATH).
-    //
-    char* szApplicationFullPath = nullptr;
-#endif
-
     uint32_t assemblyIndex = m_globalMemoryRegion.RegisteredSettingsAssemblyCount;
 
     // Check if there is already a config for the given assembly index.
@@ -102,7 +80,6 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     // Register assembly information as a config.
     //
     registeredSettingAssembly.DispatchTableBaseIndex = assemblyDispatchTableBaseIndex;
-    registeredSettingAssembly.ApplicationFilePath = szApplicationFullPath;
     registeredSettingAssembly.AssemblyFileName = assemblyFileName;
 
     // Register settings assembly in the global shared region.

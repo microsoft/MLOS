@@ -20,12 +20,18 @@ namespace Mlos.Core
     /// </summary>
     public class SettingsAssemblyManager
     {
-        internal void RegisterAssembly(Assembly assembly)
+        /// <summary>
+        /// Registers settings assembly.
+        /// </summary>
+        /// <param name="assembly"></param>
+        public void RegisterAssembly(Assembly assembly)
         {
             RegisterAssembly(assembly, CodegenTypeCount);
         }
 
-        /// <summary>Registers settings assembly.</summary>
+        /// <summary>
+        /// Registers settings assembly.
+        /// </summary>
         /// <remarks>Update deserialize and dispatch tables.</remarks>
         /// <param name="assembly"></param>
         /// <param name="dispatchTableBaseIndex"></param>
