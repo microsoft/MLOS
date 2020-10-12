@@ -155,19 +155,16 @@ FROM mlos-build-base AS mlos-build-base-with-python
 USER root
 
 # Install python3.7 and its pip dependencies
-RUN mkdir -p /tmp/MLOS/scripts
 COPY ./scripts/install.python.sh /tmp/MLOS/scripts/
-RUN /bin/bash /tmp/MLOS/scripts/install.python.sh
-
-RUN apt-get update && \
+RUN /bin/bash /tmp/MLOS/scripts/install.python.sh && \
+    apt-get update && \
     apt-get --no-install-recommends -y install \
         libfreetype6-dev unixodbc-dev && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 RUN python3.7 -m pip install pip && \
     python3.7 -m pip install --upgrade pip && \
-    python3.7 -m pip install setuptools wheel && \
-    apt-get -y clean && rm -rf /var/lib/apt/lists/*
+    python3.7 -m pip install setuptools wheel
 
 COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
@@ -205,7 +202,8 @@ RUN if [ v`lsb_release -s -r` = 'v16.04' ]; then \
     fi
 # Note: libxml2 automatically pulls in an appropriate version of the ^libicu[0-9]+$ package.
 RUN apt-get update && \
-    apt-get --no-install-recommends -y install liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
+    apt-get --no-install-recommends -y install \
+        liblttng-ctl0 liblttng-ust0 libxml2 zlib1g && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Disable some noisy dotnet messages
