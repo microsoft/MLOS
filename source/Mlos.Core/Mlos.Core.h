@@ -56,7 +56,6 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 
 #define _Check_return_
 #define _Out_
-#define __in
 #define _In_
 #define _In_z_
 
