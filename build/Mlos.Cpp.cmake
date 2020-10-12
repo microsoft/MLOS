@@ -4,7 +4,7 @@
 
 # First search for headers in the current source directory.
 # This takes the place of include_directories(.) in most projects.
-include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${PROJECT_SOURCE_DIR})
 
 # Next, assume that the C++ projects we're building also need to include either
 # Mlos.Core headers and the SettingsProvider code generation output.
