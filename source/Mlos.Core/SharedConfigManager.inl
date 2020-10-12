@@ -48,86 +48,29 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(ComponentConfig<T>& componentCon
         }
     }
 
-    Internal::SharedConfigMemoryRegion& memoryRegion = m_sharedConfigMemRegionView.MemoryRegion();
+    Internal::SharedConfigDictionary& sharedConfigDictionary = m_sharedConfigMemRegionView.MemoryRegion().SharedConfigDictionary;
 
-    uint32_t slotIndex;
-    uint32_t probingCount = 0;
+    return CreateOrUpdateFrom(sharedConfigDictionary, componentConfig);
+}
 
-    Proxy::Mlos::Core::Internal::UIntArray configsArray(m_sharedConfigMemRegionView.Buffer, memoryRegion.ConfigsArrayOffset);
-
-    uint32_t elementCount = configsArray.Count();
-
-    while (true)
-    {
-        slotIndex = TProbingPolicy::CalculateIndex(static_cast<T>(componentConfig), probingCount, elementCount);
-
-        uint32_t offset = configsArray.Elements()[slotIndex];
-        if (offset == 0)
-        {
-            // We found empty slot.
-            //
-            break;
-        }
-
-        SharedConfigHeader* sharedConfigHeader = reinterpret_cast<SharedConfigHeader*>(reinterpret_cast<byte*>(&memoryRegion) + offset);
-        if (sharedConfigHeader->CodegenTypeIndex == TypeMetadataInfo::CodegenTypeIndex<T>())
-        {
-            // The same type, now compare the config key.
-            //
-            if (componentConfig.CompareKey(sharedConfigHeader))
-            {
-                // We found the shared config, update local config instance.
-                //
-                componentConfig.Bind(reinterpret_cast<typename ComponentConfig<T>::SharedConfigType*>(sharedConfigHeader));
-                componentConfig.Update();
-
-                return S_OK;
-            }
-        }
-    }
-
-    // Shared config has not been found, create a new entry.
-    //
-
-    // Allocate memory for shared component config in the shared memory region.
-    //
-    const uint64_t sharedConfigSize = sizeof(typename ComponentConfig<T>::SharedConfigType) + ObjectSerialization::GetSerializedSize(static_cast<T>(componentConfig));
-
-    uint32_t allocatedOffset;
-    HRESULT hr = AllocateInSharedConfigMemoryRegion(
-        memoryRegion,
-        sharedConfigSize,
-        allocatedOffset);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    // #TODO weird api, bind those together
-    // Copy initial config values.
-    //
-    typename ComponentConfig<T>::SharedConfigType* sharedConfig = reinterpret_cast<typename ComponentConfig<T>::SharedConfigType*>(reinterpret_cast<byte*>(&memoryRegion) + allocatedOffset);
-    sharedConfig->Initialize(static_cast<T>(componentConfig));
-
-    // Update local config.
-    //
-    componentConfig.Bind(sharedConfig);
-
-    // #TODO
-    // Serialize
-    //
-    ObjectSerialization::Serialize(BytePtr(&componentConfig.m_sharedConfig->m_config), static_cast<T>(componentConfig));
-
-    // Update hash_map
-    //
-    configsArray.Elements()[slotIndex] = allocatedOffset;
-
-    // Update address #TODO revisit what is going on.
-    //
-    sharedConfig->m_header.Address.Offset = allocatedOffset;
-    sharedConfig->m_header.Address.MemoryRegionId = memoryRegion.MemoryHeader.MemoryRegionId;
-
-    return S_OK;
+//----------------------------------------------------------------------------
+// NAME: SharedConfigManager::CreateOrUpdateFrom
+//
+// PURPOSE:
+//  If component config has been registered, function updates a local config and returns.
+//  Otherwise, it creates a config in the shared config dictionary.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+template <typename T>
+HRESULT SharedConfigManager::CreateOrUpdateFrom(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig)
+{
+    return Internal::SharedConfigDictionaryLookup<SharedConfigManager::TProbingPolicy>::CreateOrUpdateFromInSharedConfigDictionary(
+        sharedConfigDictionary,
+        componentConfig);
 }
 
 //----------------------------------------------------------------------------
@@ -149,45 +92,28 @@ HRESULT SharedConfigManager::Lookup(ComponentConfig<T>& componentConfig)
         return E_NOT_SET;
     }
 
-    Internal::SharedConfigMemoryRegion& memoryRegion = m_sharedConfigMemRegionView.MemoryRegion();
+    Internal::SharedConfigDictionary& sharedConfigDictionary = m_sharedConfigMemRegionView.MemoryRegion().SharedConfigDictionary;
 
-    uint32_t slotIndex;
-    uint32_t probingCount = 0;
+    return Lookup(sharedConfigDictionary, componentConfig);
+}
 
-    Proxy::Mlos::Core::Internal::UIntArray configsArray(m_sharedConfigMemRegionView.Buffer, memoryRegion.ConfigsArrayOffset);
-
-    uint32_t elementCount = configsArray.Count();
-
-    while (true)
-    {
-        slotIndex = TProbingPolicy::CalculateIndex(static_cast<T>(componentConfig), probingCount, elementCount);
-
-        uint32_t offset = configsArray.Elements()[slotIndex];
-        if (offset == 0)
-        {
-            // We found empty slot.
-            //
-            break;
-        }
-
-        SharedConfigHeader* sharedConfigHeader = reinterpret_cast<SharedConfigHeader*>(reinterpret_cast<byte*>(&memoryRegion) + offset);
-        if (sharedConfigHeader->CodegenTypeIndex == TypeMetadataInfo::CodegenTypeIndex<T>())
-        {
-            // The same type, now compare the config key.
-            //
-            if (componentConfig.CompareKey(sharedConfigHeader))
-            {
-                // We found the shared config, update local config instance.
-                //
-                componentConfig.Bind(reinterpret_cast<typename ComponentConfig<T>::SharedConfigType*>(sharedConfigHeader));
-                componentConfig.Update();
-
-                return S_OK;
-            }
-        }
-    }
-
-    return E_NOT_SET;
+//----------------------------------------------------------------------------
+// NAME: SharedConfigManager::LookupSharedConfig
+//
+// PURPOSE:
+//  Locates the shared config.
+//
+// RETURNS:
+//  HRESULT, E_NOT_SET if config is not found.
+//
+// NOTES:
+//
+template <typename T>
+HRESULT SharedConfigManager::Lookup(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig)
+{
+    return Internal::SharedConfigDictionaryLookup<SharedConfigManager::TProbingPolicy>::LookupInSharedConfigDictionary(
+        sharedConfigDictionary,
+        componentConfig);
 }
 
 }

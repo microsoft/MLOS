@@ -155,11 +155,13 @@ FROM mlos-build-base AS mlos-build-base-with-python
 USER root
 
 # Install python3.7 and its pip dependencies
-RUN add-apt-repository -y ppa:deadsnakes/ppa && \
-    apt-get update && \
+RUN mkdir -p /tmp/MLOS/scripts
+COPY ./scripts/install.python.sh /tmp/MLOS/scripts/
+RUN /bin/bash /tmp/MLOS/scripts/install.python.sh
+
+RUN apt-get update && \
     apt-get --no-install-recommends -y install \
-        python3.7 python3-pip \
-        python3.7-dev libfreetype6-dev unixodbc-dev && \
+        libfreetype6-dev unixodbc-dev && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 RUN python3.7 -m pip install pip && \

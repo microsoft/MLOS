@@ -24,13 +24,6 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
     /// </remarks>
     internal class CppTypeMetadataInfoHashCodeWriter : CodeWriter
     {
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        public CppTypeMetadataInfoHashCodeWriter()
-        {
-        }
-
         /// <inheritdoc />
         public override bool Accept(Type sourceType) => sourceType.IsCodegenType();
 

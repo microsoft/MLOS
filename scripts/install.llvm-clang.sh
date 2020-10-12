@@ -29,6 +29,9 @@ if [ "$(type $CLANG_BIN 2>/dev/null)" == "" ]; then
     else
         # Else, we need to add repositories for the current distro we're on.
 
+        sudo apt-get -y --no-install-recommends install \
+            curl lsb-release wget software-properties-common
+
         TOOLS_DIR="$MLOS_ROOT/tools"
         mkdir -p "$TOOLS_DIR"
 

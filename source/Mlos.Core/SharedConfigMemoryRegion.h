@@ -19,24 +19,5 @@ namespace Mlos
 {
 namespace Core
 {
-namespace Internal
-{
-//----------------------------------------------------------------------------
-// NAME: AllocateMemoryInSharedMemoryRegion
-//
-// PURPOSE:
-//  Allocates the memory in the shared memory region.
-//
-// RETURNS:
-//  HRESULT.
-//
-// NOTES:
-//  Dummy allocator. Not thread safe.
-//
-HRESULT AllocateInSharedConfigMemoryRegion(
-    SharedConfigMemoryRegion& memoryRegion,
-    uint64_t size,
-    _Out_ uint32_t& offset);
-}
 }
 }

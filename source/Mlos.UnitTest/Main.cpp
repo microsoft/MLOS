@@ -35,8 +35,8 @@ using ::testing::UnitTest;
 int
 __cdecl
 main(
-    __in int argc,
-    __in char* argv[])
+    _In_ int argc,
+    _In_ char* argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

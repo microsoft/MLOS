@@ -35,7 +35,7 @@ namespace Mlos.Agent.Server
 
             IEnumerable<string> extraArgs = null;
 
-            var cliOptsParser = new Parser(with => with.HelpWriter = null);
+            using var cliOptsParser = new Parser(with => with.HelpWriter = null);
             var cliOptsParseResult = cliOptsParser.ParseArguments<CliOptions>(args)
                 .WithParsed(parsedOptions =>
                 {
@@ -54,8 +54,6 @@ namespace Mlos.Agent.Server
             {
                 ShowUsageHelp(cliOptsParseResult, msg: "ERROR: Unknown arguments: " + string.Join(" ", extraArgs));
             }
-
-            cliOptsParser.Dispose();
 
             // Populate the output variables
             //

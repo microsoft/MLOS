@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Mlos.Core;
@@ -19,6 +20,9 @@ using UnitTestProxy = Proxy.Mlos.UnitTest;
 
 namespace Mlos.NetCore.UnitTest
 {
+    /// <summary>
+    /// #TODO use InternalContext, configure shared memory view map.
+    /// </summary>
     public sealed class SharedChannelTests : IDisposable
     {
         private const string GlobalMemoryMapName = "Mlos.NetCore.Global.UnitTest";
@@ -39,9 +43,9 @@ namespace Mlos.NetCore.UnitTest
 
             // Initialize shared channel.
             //
-            globalChannelMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+            globalChannelMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
             globalChannelMemoryRegionView.CleanupOnClose = true;
-            sharedChannelMemoryMapView = SharedMemoryMapView.Create(SharedChannelMemoryMapName, SharedMemorySize);
+            sharedChannelMemoryMapView = SharedMemoryMapView.CreateNew(SharedChannelMemoryMapName, SharedMemorySize);
             sharedChannelMemoryMapView.CleanupOnClose = true;
 
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalChannelMemoryRegionView.MemoryRegion();
@@ -83,8 +87,8 @@ namespace Mlos.NetCore.UnitTest
                 }
             }
 
-            using Task receiverTask1 = Task.Factory.StartNew(ReceiverAction, TaskCreationOptions.LongRunning);
-            using Task receiverTask2 = Task.Factory.StartNew(ReceiverAction, TaskCreationOptions.LongRunning);
+            using Task receiverTask1 = Task.Factory.StartNew(ReceiverAction, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+            using Task receiverTask2 = Task.Factory.StartNew(ReceiverAction, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Current);
 
             // Setup callbacks to verify the message.
             //

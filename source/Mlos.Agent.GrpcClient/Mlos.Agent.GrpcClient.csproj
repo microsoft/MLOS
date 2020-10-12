@@ -14,12 +14,12 @@
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.Grpc.props" />
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.SingleFile.props" />
   <ItemGroup>
     <Protobuf Include="..\Mlos.Agent.Proto\greet.proto" GrpcServices="Client" Link="ProtoBuffers\greet.proto" OutputDir="$(GrpcOutputDir)"/>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainApp.cs" />
   </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Binplace.targets" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
 </Project>

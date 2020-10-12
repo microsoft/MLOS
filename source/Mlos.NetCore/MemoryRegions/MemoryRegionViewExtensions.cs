@@ -18,7 +18,7 @@ namespace Proxy.Mlos.Core.Internal
     public static class MemoryRegionViewExtensions
     {
         /// <summary>
-        /// Initialize SharedChannelMemoryRegion.
+        /// Initialize GlobalMemoryRegion.
         /// </summary>
         /// <param name="globalMemoryRegion"></param>
         /// <returns></returns>
@@ -30,6 +30,17 @@ namespace Proxy.Mlos.Core.Internal
 
             globalMemoryRegion.RegisteredSettingsAssemblyCount.Store(1);
 
+            var sharedConfigDictionary = globalMemoryRegion.SharedConfigDictionary;
+            var allocator = sharedConfigDictionary.Allocator;
+
+            // Initialize memory allocator.
+            //
+            allocator.InitializeArenaAllocator(globalMemoryRegion.MemoryHeader, (int)globalMemoryRegion.CodegenTypeSize());
+
+            // Initialize shared config dictionary.
+            //
+            sharedConfigDictionary.InitializeSharedConfigDictionary();
+
             return globalMemoryRegion;
         }
 
@@ -40,25 +51,16 @@ namespace Proxy.Mlos.Core.Internal
         /// <returns></returns>
         public static SharedConfigMemoryRegion InitializeMemoryRegion(this SharedConfigMemoryRegion sharedConfigMemoryRegion)
         {
+            var sharedConfigDictionary = sharedConfigMemoryRegion.SharedConfigDictionary;
+            var allocator = sharedConfigDictionary.Allocator;
+
             // Initialize memory allocator.
             //
-            var allocator = sharedConfigMemoryRegion.Allocator;
-            allocator.AllocationBlockOffset = Utils.Align((uint)sharedConfigMemoryRegion.CodegenTypeSize(), 256);
-            allocator.AllocationBlockSize = (uint)sharedConfigMemoryRegion.MemoryHeader.MemoryRegionSize - allocator.AllocationBlockOffset;
+            allocator.InitializeArenaAllocator(sharedConfigMemoryRegion.MemoryHeader, (int)sharedConfigMemoryRegion.CodegenTypeSize());
 
-            allocator.FreeOffset = allocator.AllocationBlockOffset;
-            allocator.AllocationCount = 0;
-            allocator.LastAllocatedOffset = 0;
-
-            // Allocate array for shared config offsets.
+            // Initialize shared config dictionary.
             //
-            uint elementCount = 2048;
-            AllocationEntry allocationEntry = sharedConfigMemoryRegion.Allocate(default(UIntArray).CodegenTypeSize() + (sizeof(uint) * elementCount));
-
-            sharedConfigMemoryRegion.ConfigsArrayOffset = (uint)allocationEntry.Buffer.Offset(sharedConfigMemoryRegion.Buffer) + (uint)default(AllocationEntry).CodegenTypeSize();
-
-            UIntArray configsOffsetArray = sharedConfigMemoryRegion.ConfigsOffsetArray;
-            configsOffsetArray.Count = elementCount;
+            sharedConfigDictionary.InitializeSharedConfigDictionary();
 
             return sharedConfigMemoryRegion;
         }

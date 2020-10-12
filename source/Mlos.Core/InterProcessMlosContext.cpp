@@ -90,12 +90,36 @@ HRESULT InterProcessMlosContextInitializer::Initialize()
 
     if (FAILED(hr))
     {
+        bool cleanupOnClose = false;
+        if (!m_globalMemoryRegionView.Buffer.IsInvalid())
+        {
+            // Decrease the usage counter.
+            //
+            Internal::GlobalMemoryRegion& globalMemoryRegion = m_globalMemoryRegionView.MemoryRegion();
+            uint32_t usageCount = globalMemoryRegion.AttachedProcessesCount.fetch_sub(1);
+            if (usageCount == 1)
+            {
+                // This is the last process using shared memory map.
+                //
+                cleanupOnClose = true;
+            }
+        }
+
         // Close all the shared maps if we fail to create one.
         //
+        m_globalMemoryRegionView.CleanupOnClose |= cleanupOnClose;
         m_globalMemoryRegionView.Close();
+
+        m_controlChannelMemoryMapView.CleanupOnClose |= cleanupOnClose;
         m_controlChannelMemoryMapView.Close();
+
+        m_feedbackChannelMemoryMapView.CleanupOnClose |= cleanupOnClose;
         m_feedbackChannelMemoryMapView.Close();
+
+        m_controlChannelPolicy.m_notificationEvent.CleanupOnClose |= cleanupOnClose;
         m_controlChannelPolicy.m_notificationEvent.Close();
+
+        m_feedbackChannelPolicy.m_notificationEvent.CleanupOnClose |= cleanupOnClose;
         m_feedbackChannelPolicy.m_notificationEvent.Close();
     }
 
@@ -146,6 +170,10 @@ InterProcessMlosContext::~InterProcessMlosContext()
         m_contextInitializer.m_feedbackChannelMemoryMapView.CleanupOnClose = true;
         m_controlChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
         m_feedbackChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
+
+        // Close all the shared config memory regions.
+        //
+        m_sharedConfigManager.CleanupOnClose = true;
     }
 }
 }

@@ -30,7 +30,8 @@
     <BaseIntermediateOutputPath>$(ObjectRoot)\source\$([MSBuild]::MakeRelative($(SourceDir), $(MSBuildProjectDirectory)))\obj</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup>
-    <BinplaceDir>$(BaseDir)\target\bin\$(BuildType)\$(BuildArchitecture)</BinplaceDir>
+    <BinplaceRootDir>$(BaseDir)\target\bin\$(BuildType)\$(BuildArchitecture)</BinplaceRootDir>
+    <BinplaceDir>$(BinplaceRootDir)</BinplaceDir>
     <MlosCodeGenOutputPathRoot Condition="'$(MlosCodeGenOutputPathRoot)' == ''">$(BaseDir)\out\Mlos.CodeGen.out\$(BuildType)</MlosCodeGenOutputPathRoot>
   </PropertyGroup>
   <!-- Configure warning levels and errors. -->

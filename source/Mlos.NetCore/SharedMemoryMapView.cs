@@ -21,15 +21,15 @@ namespace Mlos.Core
         /// <param name="sharedMemorySize"></param>
         /// <exception cref="InvalidOperationException">Thrown when executed on unsupported OS.</exception>
         /// <returns></returns>
-        public static SharedMemoryMapView Create(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static SharedMemoryMapView CreateNew(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return Windows.SharedMemoryMapView.Create(sharedMemoryMapName, sharedMemorySize);
+                return Windows.SharedMemoryMapView.CreateNew(sharedMemoryMapName, sharedMemorySize);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return Linux.SharedMemoryMapView.Create(sharedMemoryMapName, sharedMemorySize);
+                return Linux.SharedMemoryMapView.CreateNew(sharedMemoryMapName, sharedMemorySize);
             }
             else
             {
@@ -65,15 +65,15 @@ namespace Mlos.Core
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static SharedMemoryMapView Open(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static SharedMemoryMapView OpenExisting(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                return Windows.SharedMemoryMapView.Open(sharedMemoryMapName, sharedMemorySize);
+                return Windows.SharedMemoryMapView.OpenExisting(sharedMemoryMapName, sharedMemorySize);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                return Linux.SharedMemoryMapView.Open(sharedMemoryMapName, sharedMemorySize);
+                return Linux.SharedMemoryMapView.OpenExisting(sharedMemoryMapName, sharedMemorySize);
             }
             else
             {
@@ -111,6 +111,9 @@ namespace Mlos.Core
 
         public ulong MemSize;
 
+        /// <summary>
+        /// Indicates if we should cleanup OS resources when closing the shared memory map view.
+        /// </summary>
         public bool CleanupOnClose;
 
         protected bool isDisposed;
