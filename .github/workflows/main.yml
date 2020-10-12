@@ -113,7 +113,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
     steps:
     - name: Check event type
       if: github.event_name != 'schedule'
@@ -158,7 +158,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
@@ -219,7 +219,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
         configuration: [Debug, Release]
     steps:
     - name: Checkout
@@ -451,7 +451,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        #UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
+        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
         UbuntuVersion: [20.04]
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
@@ -526,7 +526,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
