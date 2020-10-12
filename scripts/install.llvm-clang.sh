@@ -29,10 +29,8 @@ if [ "$(type $CLANG_BIN 2>/dev/null)" == "" ]; then
     else
         # Else, we need to add repositories for the current distro we're on.
 
-        set -x
         sudo apt-get -y --no-install-recommends install \
             curl lsb-release wget software-properties-common
-        set +x
 
         TOOLS_DIR="$MLOS_ROOT/tools"
         mkdir -p "$TOOLS_DIR"
@@ -45,28 +43,4 @@ if [ "$(type $CLANG_BIN 2>/dev/null)" == "" ]; then
     fi
 else
     echo "$CLANG_BIN is already available."
-fi
-
-
-# Also install recent std c++ libs (if available).
-# See Also: https://github.com/Microsoft/MLOS/pull/133
-LIBSTDCPP_PKG='libstdc++-10-dev'
-if ! dpkg --no-pager -l $LIBSTDCPP_PKG >/dev/null 2>&1; then
-    echo "Missing $LIBSTDCPP_PKG ..."
-
-    echo "Updating local apt-cache ..."
-    set -x
-    sudo apt-get update >/dev/null
-    set +x
-
-    if apt-cache show $LIBSTDCPP_PKG 2>/dev/null | grep -q "^Package: $LIBSTDCPP_PKG"; then
-        echo "Installing $LIBSTDCPP_PKG via apt ..."
-        set -x
-        sudo apt-get -y --no-install-recommends install $LIBSTDCPP_PKG
-        set +x
-    else
-        echo "$LIBSTDCPP_PKG is not available."
-    fi
-else
-    echo "$LIBSTDCPP_PKG is already available."
 fi
