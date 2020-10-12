@@ -11,10 +11,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.SingleFile.props" />
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.8.0" GeneratePathProperty="true" />
-    <BinplaceFile Include="$(PkgCommandLineParser)/lib/netstandard2.0/CommandLine.dll" />
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SourceDir)\Mlos.Agent\Mlos.Agent.csproj" />
@@ -29,5 +27,6 @@
     <Compile Include="MlosAgentServer.cs" />
     <Compile Include="TargetProcessManager.cs" />
   </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Binplace.targets" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
 </Project>

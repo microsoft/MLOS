@@ -26,7 +26,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
     internal class CppTypeMetadataInfoIndexCodeWriter : CppTypeTableCodeWriter
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CppTypeMetadataInfoIndexCodeWriter"/> class.
         /// </summary>
         /// <param name="sourceTypesAssembly"></param>
         public CppTypeMetadataInfoIndexCodeWriter(Assembly sourceTypesAssembly)

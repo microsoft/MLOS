@@ -19,7 +19,7 @@ namespace Mlos.SettingsSystem.Attributes
         public uint Size { get; }
 
         /// <summary>
-        /// AlignmentSizeAttribute constructor.
+        /// Initializes a new instance of the <see cref="AlignAttribute"/> class.
         /// </summary>
         /// <param name="size">The alignment size for the field.</param>
         public AlignAttribute(uint size)

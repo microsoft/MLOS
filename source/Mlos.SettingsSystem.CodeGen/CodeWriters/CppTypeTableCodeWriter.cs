@@ -27,7 +27,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         protected string DispatchTableCppNamespace { get; private set; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CppTypeTableCodeWriter"/> class.
         /// </summary>
         /// <remarks>
         /// Get DispatchTable namespace from the custom assembly attribute.

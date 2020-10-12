@@ -24,7 +24,7 @@ namespace Mlos.Core.Linux
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Create(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView CreateNew(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             // Try to unlink existing shared memory.
             //
@@ -64,7 +64,7 @@ namespace Mlos.Core.Linux
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Open(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView OpenExisting(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             return new SharedMemoryMapView(
                 sharedMemoryMapName,

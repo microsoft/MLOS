@@ -44,76 +44,23 @@ namespace Mlos.Core.Internal
     }
 
     /// <summary>
-    /// Defines address of the object in the memory region.
+    /// Registered shared memory region.
     /// </summary>
     [CodegenType]
-    internal partial struct MemoryAddress : IEquatable<MemoryAddress>
+    public partial struct RegisteredMemoryRegionConfig
     {
-        /// <summary>
-        /// Operator ==.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator ==(MemoryAddress left, MemoryAddress right) => left.Equals(right);
+        [ScalarSetting(isPrimaryKey: true)]
+        internal uint MemoryRegionIndex;
 
         /// <summary>
-        /// Operator !=.
+        /// Name of the shared memory map.
         /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator !=(MemoryAddress left, MemoryAddress right) => !(left == right);
-
-        /// <inheritdoc/>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is MemoryAddress))
-            {
-                return false;
-            }
-
-            return Equals((MemoryAddress)obj);
-        }
-
-        /// <inheritdoc/>
-        public bool Equals(MemoryAddress other) =>
-            MemoryRegionId == other.MemoryRegionId &&
-            Offset == other.Offset;
-
-        /// <inheritdoc/>
-        public override int GetHashCode() => base.GetHashCode();
-
-        /// <summary>
-        /// Id of the shared memory region.
-        /// </summary>
-        internal uint MemoryRegionId;
-
-        /// <summary>
-        /// Offset from the beginning of the memory region.
-        /// </summary>
-        internal uint Offset;
-    }
-
-    /// <summary>
-    /// Request message to register memory region.
-    /// </summary>
-    [CodegenMessage]
-    internal partial struct RegisterMemoryRegionRequestMessage
-    {
-        /// <summary>
-        /// Shared memory name.
-        /// </summary>
-        internal StringPtr Name;
+        [ScalarSetting]
+        internal StringPtr SharedMemoryMapName;
 
         /// <summary>
         /// Size of the memory region.
         /// </summary>
         internal ulong MemoryRegionSize;
-
-        /// <summary>
-        /// Region memory identifier.
-        /// </summary>
-        internal uint MemoryRegionId;
     }
 }

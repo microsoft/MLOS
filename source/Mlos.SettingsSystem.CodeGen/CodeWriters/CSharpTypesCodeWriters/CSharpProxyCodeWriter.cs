@@ -27,7 +27,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
         private string DispatchTableBaseIndexVariableName { get; set; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CSharpProxyCodeWriter"/> class.
         /// </summary>
         /// <remarks>
         /// Get DispatchTable namespace from the custom assembly attribute.
