@@ -141,6 +141,7 @@ RUN mkdir -p \
     /home/mlos-docker/.histvol \
     /home/mlos-docker/.vscode-server/extensions \
     /home/mlos-docker/.vscode-server-insiders/extensions && \
+    touch /home/mlos-docker/.histvol/bash_history && \
     chown -R mlos-docker \
         /home/mlos-docker/.histvol \
         /home/mlos-docker/.vscode-server \
