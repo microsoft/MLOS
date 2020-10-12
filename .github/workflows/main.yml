@@ -71,6 +71,7 @@ jobs:
       utc-date: ${{ steps.utc-date.outputs.utc-date }}
       utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
       main-sha: ${{ steps.main-sha.outputs.main-sha }}
+      UbuntuVersionMatrix: ${{ steps.UbuntuVersionMatrix.outputs.UbuntuVersionMatrix }}
     steps:
     - id: repository-name-tolower
       name: Compute the lowercase github docker package registry name
@@ -93,6 +94,17 @@ jobs:
       name: Lookup the current git sha for the main branch
       shell: bash
       run: echo ::set-output name=main-sha::$(git rev-parse refs/heads/main)
+    - id: UbuntuVersionMatrix
+      name: Setup UbuntuVersion matrix
+      shell: bash
+      # For PRs, we only check a subset of the UbuntuVersions.
+      # For everything else (nightly, Merge, etc.) we run all of them.
+      run: |
+        if [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == "schedule" ]; then
+          echo '::set-output name=UbuntuVersionMatrix::[16.04, 18.04, 20.04]'
+        else
+          echo '::set-output name=UbuntuVersionMatrix::[16.04, 20.04]'
+        fi
 
   docker-image-fresh-build:
     name: Build fresh Ubuntu ${{ matrix.UbuntuVersion }} image
@@ -101,7 +113,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        UbuntuVersion: [16.04, 18.04, 20.04]
+        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
     steps:
     - name: Check event type
       if: github.event_name != 'schedule'
@@ -146,7 +158,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        UbuntuVersion: [16.04, 18.04, 20.04]
+        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
@@ -207,7 +219,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        UbuntuVersion: [16.04, 18.04, 20.04]
+        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
         configuration: [Debug, Release]
     steps:
     - name: Checkout
@@ -439,7 +451,8 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        UbuntuVersion: [16.04, 18.04, 20.04]
+        #UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: [20.04]
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
@@ -513,7 +526,7 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        UbuntuVersion: [16.04, 18.04, 20.04]
+        UbuntuVersion: ${{ fromJson(needs.prep-output-vars.outputs.UbuntuVersionMatrix) }}
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
