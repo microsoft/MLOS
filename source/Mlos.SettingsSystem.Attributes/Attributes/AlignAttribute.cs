@@ -16,6 +16,9 @@ namespace Mlos.SettingsSystem.Attributes
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Field, AllowMultiple = false)]
     public class AlignAttribute : BaseCodegenFieldAttribute
     {
+        /// <summary>
+        /// Gets the alignment size.
+        /// </summary>
         public uint Size { get; }
 
         /// <summary>

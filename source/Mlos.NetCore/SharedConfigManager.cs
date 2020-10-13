@@ -168,7 +168,7 @@ namespace Mlos.Core
         public MlosProxyInternal.SharedConfigMemoryRegion SharedConfigMemoryRegion => sharedConfigMemoryRegionView.MemoryRegion();
 
         /// <summary>
-        /// Indicates if we should cleanup OS resources when closing the shared memory map view.
+        /// Gets a value indicating whether if we should cleanup OS resources when closing the shared memory map view.
         /// </summary>
         public bool CleanupOnClose { get; internal set; }
 

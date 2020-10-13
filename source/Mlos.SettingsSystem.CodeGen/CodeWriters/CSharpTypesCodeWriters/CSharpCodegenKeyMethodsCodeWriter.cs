@@ -22,7 +22,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
     internal class CSharpCodegenKeyMethodsCodeWriter : CSharpCodeWriter
     {
         /// <summary>
-        /// Name of dispatch table base index variable.
+        /// Gets or sets name of dispatch table base index variable.
         /// </summary>
         private string DispatchTableBaseIndexVariableName { get; set; }
 
