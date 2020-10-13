@@ -61,6 +61,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
             IndentationLevel++;
         }
 
+        /// <inheritdoc/>
         public override void EndVisitType(Type sourceType)
         {
             CppType cppType = CppTypeMapper.GetCppType(sourceType);

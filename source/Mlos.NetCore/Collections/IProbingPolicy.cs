@@ -12,14 +12,25 @@ using System.Text;
 
 namespace Mlos.Core.Collections
 {
+    /// <summary>
+    /// Hash table probing policy interface.
+    /// </summary>
     public interface IProbingPolicy
     {
+        /// <summary>
+        /// Calculates the hash table index of for the given key.
+        /// </summary>
+        /// <param name="codegenKey"></param>
+        /// <param name="probingCount"></param>
+        /// <param name="elementCount"></param>
+        /// <returns></returns>
         uint CalculateIndex(ICodegenKey codegenKey, ref uint probingCount, uint elementCount);
     }
 
     public struct TLinearProbing<THash> : IProbingPolicy
         where THash : IHash<uint>
     {
+        /// <inheritdoc/>
         public uint CalculateIndex(ICodegenKey codegenKey, ref uint probingCount, uint elementCount)
         {
             uint hashValue = codegenKey.GetKeyHashValue<THash>();
