@@ -65,31 +65,30 @@ To build and run the necessary components for this example
 
     - Mlos.Agent.Server:
 
-        `target/bin/Release/Mlos.Agent.Server.dll`
+        `target/bin/Release/AnyCPU/Mlos.Agent.Server/Mlos.Agent.Server.dll`
 
     - SmartCache:
 
-        `target/bin/Release/SmartCache`
+        `target/bin/Release/x86_64/SmartCache`
 
     - SmartCache.SettingsRegistry:
 
-        `target/bin/Release/SmartCache.SettingsRegistry.dll`
+        `target/bin/Release/AnyCPU/SmartCache.SettingsRegistry.dll`
 
 ## Executing
 
 The following commands will start the `Mlos.Server.Agent` and cause it to start the `SmartCache` component microbenchmark:
 
 ```sh
-export MLOS_SETTINGS_REGISTRY_PATH="$PWD/target/bin/Release"
-
-tools/bin/dotnet target/bin/Release/Mlos.Agent.Server.dll \
-    --executable target/bin/Release/SmartCache \
+tools/bin/dotnet target/bin/Release/AnyCPU/Mlos.Agent.Server/Mlos.Agent.Server.dll \
+    --executable target/bin/Release/x86_64/SmartCache \
+    --settings-registry-path target/bin/Release/AnyCPU
     --optimizer-uri http://localhost:50051
 ```
 
 ```txt
 Mlos.Agent.Server
-Starting target/bin/Release/SmartCache
+Starting target/bin/Release/x86_64/SmartCache
 observations: 0
 warn: Microsoft.AspNetCore.Server.Kestrel[0]
       Unable to bind to http://localhost:5000 on the IPv6 loopback interface: 'Cannot assign requested address'.
@@ -102,7 +101,7 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: /src/MLOS
 Starting Mlos.Agent
-Found settings registry assembly at target/bin/Release/SmartCache.SettingsRegistry.dll
+Found settings registry assembly at target/bin/Release/AnyCPU/SmartCache.SettingsRegistry.dll
 observations: 1
 observations: 2
 observations: 3
@@ -120,7 +119,7 @@ Once started, `SmartCache` will attempt to register its component specific set o
 That includes the name of the `SettingsRegistry` assembly (`.dll`) corresponding to that component's settings/messages.
 
 The `Mlos.Agent.Server` needs to be told where it can find those assemblies in order to load them so that it can process the messages sent by the component.
-To do that, before we started the `Mlos.Agent.Server`, we first populated the `MLOS_SETTINGS_REGISTRY_PATH` environment variable with the directory path to the `SmartCache.SettingsRegistry.dll`.
+To do that, we use the `--settings-registry-path` option.
 
 We also tell the `Mlos.Agent.Server` how to connect to the (Python) MLOS Optimizer Service over GRPC so that the application message handlers setup by the `SmartCache.SettingsRegistry` for the agent can request new configuration recommendations on behave of the application.
 

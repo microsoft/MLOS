@@ -14,7 +14,7 @@
     <BinplaceOutputs Include="@(BinplaceFile -> '$(BinplaceDir)\%(Filename)%(Extension)')" />
   </ItemGroup>
   <Target Name="Binplace" AfterTargets="Build" Inputs="@(BinplaceInputs)" Outputs="@(BinplaceOutputs)">
-    <Copy SourceFiles="@(BinplaceInputs)" DestinationFolder="$(BinplaceDir)" />
+    <Copy SourceFiles="@(BinplaceInputs)" DestinationFolder="$(BinplaceDir)" UseHardlinksIfPossible="true" />
   </Target>
   <Target Name="CleanBinplace" BeforeTargets="Clean">
     <Delete Files="@(BinplaceOutputs)" />
