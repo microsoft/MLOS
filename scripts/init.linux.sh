@@ -30,22 +30,18 @@ fi
 scriptdir=$(dirname "$(readlink -f "$sourced")")
 MLOS_ROOT=$(readlink -f "$scriptdir/..")
 
+# Add the local tools dir to the PATH.
+export PATH="$PATH:$MLOS_ROOT/tools/bin"
+
 # Make sure cmake is available.
-if ! [ -x "$MLOS_ROOT/tools/cmake/bin/cmake" ] || ! [ -x "$MLOS_ROOT/tools/bin/cmake" ]; then
-    if ! "$MLOS_ROOT/scripts/fetch-cmake.sh"; then
-        echo "ERROR: Faled to fetch cmake." >&2
-        return -1
-    fi
+if ! type cmake >/dev/null; then
+    echo "Missing cmake.  Please run '$MLOS_ROOT/scripts/install.cmake.sh && $MLOS_ROOT/scripts/setup.cmake.sh." >&2
+    return -1
 fi
 
 # Make sure dotnet is available.
-if ! [ -x "$MLOS_ROOT/tools/dotnet/dotnet" ] || ! [ -x "$MLOS_ROOT/tools/bin/dotnet" ]; then
-    if ! "$MLOS_ROOT/scripts/fetch-dotnet.sh"; then
-        echo "ERROR: Faled to fetch dotnet." >&2
-        return -1
-    fi
+if ! type dotnet >/dev/null; then
+    echo "Missing dotnet.  Please run '$MLOS_ROOT/scripts/install.cmake.sh && $MLOS_ROOT/scripts/setup.cmake.sh." >&2
+    return -1
 fi
 . "$MLOS_ROOT/scripts/dotnet.env"
-
-# Look for local tools first.
-export PATH="$MLOS_ROOT/tools/bin:$PATH"

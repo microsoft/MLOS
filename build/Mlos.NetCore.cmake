@@ -67,7 +67,6 @@ function(add_mlos_dotnet_project)
     )
 
     set(DEPENDENCIES
-        DOTNET_TOOL
         ${CS_SOURCES}
         ${DIRECTORY}/${CSPROJ})
 
