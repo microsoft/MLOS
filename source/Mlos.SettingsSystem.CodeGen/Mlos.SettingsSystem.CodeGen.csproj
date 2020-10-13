@@ -69,5 +69,6 @@
     <Compile Include="TypeMetadataMapper.cs" />
     <Compile Include="TypeCodeGenerator.cs" />
   </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Binplace.targets" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
 </Project>
