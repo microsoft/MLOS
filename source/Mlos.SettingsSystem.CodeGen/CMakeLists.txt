@@ -9,4 +9,5 @@ include("${MLOS_ROOT}/build/Mlos.Common.cmake")
 include("${MLOS_ROOT}/build/Mlos.NetCore.cmake")
 
 add_mlos_dotnet_project(NAME ${PROJECT_NAME}
-    DIRECTORY ${PROJECT_SOURCE_DIR})
+    DIRECTORY ${PROJECT_SOURCE_DIR}
+    WITH_BINPLACE)

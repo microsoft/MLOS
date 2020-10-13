@@ -49,7 +49,22 @@ set(CMAKE_BINARY_DIR "${MLOS_ROOT}/out/cmake/${CMAKE_BUILD_TYPE}")
 
 # Set a binplace dir to match the msbuild rules.
 # We will use this in our install() definition rules.
+# See Also: Mlos.Binplace.props
 set(BINPLACE_DIR "${MLOS_ROOT}/target/bin/${CMAKE_BUILD_TYPE}/${CMAKE_SYSTEM_PROCESSOR}")
+
+# We currently only build for AnyCPU with dotnet.
+set(DOTNET_TARGET_PLATFORM "AnyCPU")
+# Set the corresponding binplace root dir.
+# See Also: Mlos.NetCore.cmake
+set(DOTNET_BINPLACE_ROOT "${MLOS_ROOT}/target/bin/${CMAKE_BUILD_TYPE}/${DOTNET_TARGET_PLATFORM}")
+# Currently settings registry project output dlls are expected to be placed in the same root.
+# To be searched by the Mlos.Agent.Server via --settings-registry-path argument.
+# See Also: Mlos.Cpp.UnitTest.cmake
+set(MLOS_SETTINGS_REGISTRY_BINPLACE_ROOT "${DOTNET_BINPLACE_ROOT}")
+
+# The base output for SettingsSystem codegen output.
+# See Also: Mlos.SettingsSystem.CodeGen.targets
+set(MLOS_CODEGEN_OUTPUT_ROOT "${MLOS_ROOT}/out/Mlos.CodeGen.out/${CMAKE_BUILD_TYPE}")
 
 # By default only let any ctest processes last for limited number of seconds.
 # To override on a per test basis, use add_test_properties()

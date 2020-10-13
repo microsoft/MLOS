@@ -9,7 +9,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 # Next, assume that the C++ projects we're building also need to include either
 # Mlos.Core headers and the SettingsProvider code generation output.
 include_directories(${MLOS_ROOT}/source/Mlos.Core/)
-include_directories(${MLOS_ROOT}/out/Mlos.CodeGen.out/${CMAKE_BUILD_TYPE}/)
+include_directories(${MLOS_CODEGEN_OUTPUT_ROOT}/)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)

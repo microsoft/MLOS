@@ -191,16 +191,20 @@ namespace Mlos.Agent.Server
                 }
             }
 
+            int exitCode = 0;
+
             // Print any exceptions if occurred.
             //
             if (mlosAgentTask.Exception != null)
             {
                 Console.WriteLine($"Exception: {mlosAgentTask.Exception}");
+                exitCode |= 1;
             }
 
             if (waitForTargetProcessTask.Exception != null)
             {
                 Console.WriteLine($"Exception: {waitForTargetProcessTask.Exception}");
+                exitCode |= 2;
             }
 
             // Perform some cleanup.
@@ -218,6 +222,8 @@ namespace Mlos.Agent.Server
             cancellationTokenSource.Dispose();
 
             Console.WriteLine("Mlos.Agent exited.");
+
+            Environment.Exit(exitCode);
         }
     }
 }
