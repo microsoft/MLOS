@@ -20,7 +20,14 @@ namespace Mlos
 {
 namespace Core
 {
-#pragma warning( disable : 4355)
+#ifdef _MSC_VER
+// Disable MSVC warning:
+//  The this pointer is valid only within nonstatic member functions.
+//  It cannot be used in the initializer list for a base class.
+//
+#pragma warning(push)
+#pragma warning(disable : 4355)
+#endif
 
 //----------------------------------------------------------------------------
 // NAME: MlosContext constructor.
@@ -44,7 +51,9 @@ MlosContext::MlosContext(
 {
 }
 
-#pragma warning( default : 4355)
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 //----------------------------------------------------------------------------
 // NAME: MlosContext::RegisterSettingsAssembly

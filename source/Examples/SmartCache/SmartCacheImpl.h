@@ -19,7 +19,7 @@ template<typename TKey, typename TValue>
 class SmartCacheImpl
 {
 private:
-    int m_cacheSize;
+    size_t m_cacheSize;
 
     std::list<TValue> m_elementSequence;
 

@@ -20,10 +20,6 @@
 //
 #include "MlosPlatform.Std.inl"
 
-#pragma warning(push)
-#pragma warning(disable: 4996 4251 4275 4244)
-#include "gtest/gtest.h"
-#pragma warning(pop)
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;

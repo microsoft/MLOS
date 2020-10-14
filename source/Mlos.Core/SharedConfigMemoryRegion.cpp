@@ -43,9 +43,10 @@ Internal::SharedConfigMemoryRegion& SharedMemoryRegionView<Internal::SharedConfi
         sharedConfigMemoryRegion.SharedConfigDictionary,
         sharedConfigMemoryRegion.MemoryHeader,
         sizeof(Internal::SharedConfigMemoryRegion));
-    // Terminate if we are unable to allocate a shared config hashmap.
+
+    // Terminate if we are unable to allocate an array for the shared config dictionary.
     //
-    RETAIL_ASSERT(SUCCEEDED(hr));
+    MLOS_RETAIL_ASSERT(SUCCEEDED(hr));
 
     return sharedConfigMemoryRegion;
 }

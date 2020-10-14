@@ -48,4 +48,8 @@
 //
 #include "Mlos.Core.inl"
 
+// Macros.
+//
+#define UNUSED(x) (void)x
+
 using namespace Mlos::Core;

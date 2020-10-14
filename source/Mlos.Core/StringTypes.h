@@ -32,6 +32,24 @@ public:
     const char* Data;
     uint64_t Length;
 
+    StringPtr()
+      : Data(nullptr),
+        Length(0)
+    {
+    }
+
+    StringPtr(const StringPtr& other)
+      : Data(other.Data),
+        Length(other.Length)
+    {
+    }
+
+    StringPtr(const char* data, uint64_t length)
+      : Data(data),
+        Length(length)
+    {
+    }
+
     StringPtr& operator=(const StringPtr& other)
     {
         Data = other.Data;
@@ -74,6 +92,24 @@ struct WideStringPtr
 public:
     const wchar_t* Data;
     uint64_t Length;
+
+    WideStringPtr()
+      : Data(nullptr),
+        Length(0)
+    {
+    }
+
+    WideStringPtr(const WideStringPtr& other)
+      : Data(other.Data),
+        Length(other.Length)
+    {
+    }
+
+    WideStringPtr(const wchar_t* data, uint64_t length)
+      : Data(data),
+        Length(length)
+    {
+    }
 
     WideStringPtr& operator=(const WideStringPtr& other)
     {
