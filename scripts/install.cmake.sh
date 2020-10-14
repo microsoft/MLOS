@@ -7,7 +7,7 @@
 
 set -eu
 
-if ! [ -x /usr/bin/cmake ]; then
+if ! [ -x /usr/bin/cmake ] || [ "${1:-}" == '--force-upgrade' ]; then
     wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
     set -x
     sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ `lsb_release -c -s` main"
