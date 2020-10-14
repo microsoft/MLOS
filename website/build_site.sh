@@ -57,6 +57,10 @@ done
 # Plus some external project notebooks:
 RenderNotebook "$MLOS_ROOT/external/leveldb/LevelDbTuning.ipynb"
 
+# Make notebook images available in the website:
+mkdir -p content/notebooks/images/
+cp -r $MLOS_ROOT/external/leveldb/images/*.png content/notebooks/images/
+
 # Provide an index file for viewing the set of notebooks that we render at
 # http://microsoft.github.io/MLOS/notebooks/
 notebooks=$(find content/notebooks/ -name '*.md' -printf '%f\n' | sed 's/\.md$//')
@@ -78,10 +82,12 @@ cp ../LICENSE.txt content/
         *.md \
         build/ \
         documentation/ \
+        external/ \
         scripts/ \
         source/ \
         test/ \
         -name '*.md' -or \
+        -name '*.png' -or \
         -name '*.svg' \
 ) | while read path; do
     dir=$(dirname "$path")
