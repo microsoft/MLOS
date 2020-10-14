@@ -56,7 +56,19 @@ set(BINPLACE_DIR "${MLOS_ROOT}/target/bin/${CMAKE_BUILD_TYPE}")
 set(DEFAULT_CTEST_TIMEOUT 120)
 
 # See Also: Mlos.NetCore.cmake, Mlos.Common.targets.cmake
-set(DOTNET "${MLOS_ROOT}/tools/bin/dotnet")
+find_program(DOTNET NAMES dotnet)
+if(NOT DOTNET)
+    find_program(DOTNET NAMES dotnet
+        HINTS "${MLOS_ROOT}/tools/bin")
+endif()
+if(NOT DOTNET)
+    message(WARNING
+        "Unable to find dotnet.  Perhaps you need to run ${MLOS_ROOT}/scripts/install.dotnet.sh")
+endif()
 
 find_program(PYTHON3
     NAMES python3.7 python3)
+if(NOT PYTHON3)
+    message(WARNING
+        "Unable to find and appropriate version of python.  Perhaps you need to run ${MLOS_ROOT}/scripts/install.python.sh")
+endif()

@@ -6,12 +6,12 @@ scriptdir=$(dirname "$(readlink -f "$0")")
 . "$scriptdir/dotnet.env"
 
 if ! [ -x "$scriptdir/../tools/dotnet/dotnet" ]; then
-    echo "ERROR: Missing local dotnet.  Please run scripts/fetch-dotnet.sh first." >&2
+    echo "ERROR: Missing local dotnet.  Please run scripts/setup-dotnet.sh first." >&2
     exit 1
 fi
 
 # Some of the .csproj files need to call `dotnet`, so we make sure it can find
-# this file (symlinked into the $MLOS_ROOT/tools/bin path by fetch-dotnet.sh).
+# this file (symlinked into the $MLOS_ROOT/tools/bin path by setup-dotnet.sh).
 export PATH="$scriptdir/../tools/bin:$PATH"
 
 exec "$scriptdir/../tools/dotnet/dotnet" $*

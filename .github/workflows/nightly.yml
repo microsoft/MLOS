@@ -1,0 +1,126 @@
+# MLOS nightly integration pipelines:
+#
+# - Run long haul tests
+#
+# Note: fresh docker image rebuilds are handled in the main.yml file.
+
+name: Nightly
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  schedule:
+    # Let's run after the fresh docker rebuild job (main.yml).
+    - cron: "0 2 * * *"
+
+jobs:
+  # See main.yml for comments on the docker build/cache patterns.
+  prep-vars:
+    name: Prepare some variables for dependent jobs
+    runs-on: ubuntu-latest
+    outputs:
+      # docker only recognizes lower case registry names and doesn't provide a native function,
+      # so we need to perform a small shell transformation
+      repository-name-tolower: ${{ steps.repository-name-tolower.outputs.repository-name-tolower }}
+      utc-date: ${{ steps.utc-date.outputs.utc-date }}
+      utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
+      main-sha: ${{ steps.main-sha.outputs.main-sha }}
+    steps:
+    - id: repository-name-tolower
+      name: Compute the lowercase github docker package registry name
+      shell: bash
+      run: echo "::set-output name=repository-name-tolower::${{ github.repository }}" | tr A-Z a-z
+    - id: utc-date
+      # Used as an additional cache-busting aid to make sure we do a fresh image build every day.
+      name: Compute current UTC date
+      shell: bash
+      run: echo ::set-output name=utc-date::$(date -u +%Y-%m-%d)
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: main
+    - id: main-sha
+      name: Lookup the current git sha for the main branch
+      shell: bash
+      run: echo ::set-output name=main-sha::$(git rev-parse refs/heads/main)
+
+  linux-python-long-haul-checks:
+    name: Run Python long haul tests on Ubuntu ${{ matrix.UbuntuVersion }}
+    runs-on: ubuntu-latest
+    needs: prep-vars
+    timeout-minutes: 720
+    env:
+      MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
+    strategy:
+      matrix:
+        # This is a long test - let's only run it on a single version of Ubuntu.
+        #UbuntuVersion: [16.04, 18.04, 20.04]
+        UbuntuVersion: [20.04]
+        # TODO: add support for checking different versions of Python
+        # Right now, we install Python 3.7 in the container and default to
+        # using it if available, else fallback to the system python3.
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
+    # we depend on by re-executing (roughly) its same steps.
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Cache Docker layers
+      id: load-docker-cache
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
+        restore-keys: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ needs.prep-vars.outputs.main-sha }}
+    - name: Github Docker Package Registry Login
+      uses: docker/login-action@v1
+      with:
+        registry: docker.pkg.github.com
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Github Docker Container Registry Login
+      if: ${{ env.MLOS_GCR_USR != '' }}
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ secrets.MLOS_GCR_USR }}
+        password: ${{ secrets.MLOS_GCR_PAT }}
+    - name: Build/Import the docker image (from cache)
+      timeout-minutes: 10
+      uses: docker/build-push-action@v2
+      with:
+        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
+        target: mlos-build-base-without-extras
+        tags: mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+          docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+          ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
+        #cache-to: (none)
+        load: true
+    # Now, start the image as a new container instance.
+    - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      # These images are expected to have installed all the pip dependencies already.
+      shell: bash
+      run: |
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
+          --name mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
+    - name: Run python long haul tests (Ubuntu ${{ matrix.UbuntuVersion}})
+      run: |
+        docker exec --workdir /src/MLOS/source/Mlos.Python mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          python3.7 -m unittest discover -p LongHaulTest*.py --verbose
+    - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      shell: bash
+      run: |
+        docker stop mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
+        docker rm mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
