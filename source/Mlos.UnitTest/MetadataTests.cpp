@@ -125,7 +125,7 @@ static_assert(offsetof(struct ::Mlos::UnitTest::TestAlignedTypeMultipleAlignment
 
 TEST(MetadataTests, VerifyStructAligment)
 {
-    Mlos::UnitTest::TestAlignedType object = { 0 };
+    Mlos::UnitTest::TestAlignedType object = {};
     object.Configs[2].ComponentType = 'a';
     object.Configs[4].ComponentType = 'b';
 

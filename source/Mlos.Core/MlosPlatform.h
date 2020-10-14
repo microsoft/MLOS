@@ -20,10 +20,6 @@
 
 #pragma once
 
-// Define RETAIL_ASSERT.
-//
-#define RETAIL_ASSERT(result) { if (!result) Mlos::Core::MlosPlatform::TerminateProcess(); }
-
 namespace Mlos
 {
 namespace Core
@@ -35,6 +31,7 @@ namespace Internal
 extern void MlosPlatformTerminateProcess();
 extern void MlosPlatformWait(uint32_t milliseconds);
 }
+
 //----------------------------------------------------------------------------
 // NAME: MlosPlatform
 //

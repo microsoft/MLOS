@@ -44,14 +44,14 @@ TEST(SharedChannel, VerifyBufferSize)
     //
     {
         TestFlatBuffer<21> buffer;
-        ChannelSynchronization sync = { 0 };
+        ChannelSynchronization sync = {};
         TestSharedChannel sharedChannel(sync, buffer, 21);
 
         EXPECT_EQ(sharedChannel.Size, 16);
     }
     {
         TestFlatBuffer<4095> buffer;
-        ChannelSynchronization sync = { 0 };
+        ChannelSynchronization sync = {};
         TestSharedChannel sharedChannel(sync, buffer, 4095);
 
         EXPECT_EQ(sharedChannel.Size, 2048);
@@ -72,7 +72,7 @@ TEST(SharedChannel, VerifyChannelRestart)
     // Create the test channel.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     // Write the first message.
@@ -154,7 +154,7 @@ TEST(SharedChannel, VerifySyncPositions)
     // Create small buffer.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     Mlos::UnitTest::Point point = { 13, 17 };
@@ -209,7 +209,7 @@ TEST(SharedChannel, VerifySendingReceivingArrayStruct)
     // Create small buffer.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     Mlos::UnitTest::Line line;
@@ -287,7 +287,7 @@ TEST(SharedChannel, StressSendReceive)
         };
 
     TestFlatBuffer<4096> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 4096);
 
     // Setup deserialize callbacks to verify received objects.

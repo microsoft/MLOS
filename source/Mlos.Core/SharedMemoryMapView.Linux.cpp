@@ -159,7 +159,7 @@ HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
         {
             // Obtain the size of the shared map.
             //
-            struct stat statBuffer = { 0 };
+            struct stat statBuffer = { };
             if (fstat(m_fdSharedMemory, &statBuffer) != -1)
             {
                 memSize = statBuffer.st_size;
@@ -228,8 +228,6 @@ void SharedMemoryMapView::Close()
             {
                 shm_unlink(m_sharedMemoryMapName);
             }
-
-            CleanupOnClose = false;
         }
     }
 
@@ -238,6 +236,8 @@ void SharedMemoryMapView::Close()
         free(m_sharedMemoryMapName);
         m_sharedMemoryMapName = nullptr;
     }
+
+    CleanupOnClose = false;
 }
 }
 }

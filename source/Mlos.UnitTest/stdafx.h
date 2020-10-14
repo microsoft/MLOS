@@ -17,10 +17,14 @@
 
 // Include GTest framework.
 //
+#ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4996 4251 4275 4244)
+#pragma warning(disable: 4251 4275 4244)
+#endif
 #include "gtest/gtest.h"
+#ifdef _MSC_VER
 #pragma warning(pop)
+#endif
 
 #include <array>
 #include <functional>
@@ -37,5 +41,9 @@
 // Mlos.Core.
 //
 #include "Mlos.Core.inl"
+
+// Macros.
+//
+#define UNUSED(x) (void)x
 
 using namespace Mlos::Core;

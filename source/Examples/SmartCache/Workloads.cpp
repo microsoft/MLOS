@@ -17,7 +17,7 @@
 #include "SmartCacheImpl.h"
 #include "Workloads.h"
 
-uint64_t CyclicalWorkload(uint64_t sequenceNumber, SmartCacheImpl<int32_t, int32_t>& smartCache)
+void CyclicalWorkload(int32_t sequenceNumber, SmartCacheImpl<int32_t, int32_t>& smartCache)
 {
     for (int32_t i = 1; i < sequenceNumber; i++)
     {
@@ -27,6 +27,4 @@ uint64_t CyclicalWorkload(uint64_t sequenceNumber, SmartCacheImpl<int32_t, int32
             smartCache.Push(i, i);
         }
     }
-
-    return 1;
 }

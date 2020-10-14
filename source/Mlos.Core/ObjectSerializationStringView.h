@@ -25,7 +25,7 @@ namespace ObjectSerialization
 template<>
 constexpr inline size_t GetVariableDataSize(const std::string_view& object)
 {
-    return object.length();
+    return object.length() * sizeof(char);
 }
 
 template<>
@@ -37,27 +37,27 @@ constexpr inline size_t GetVariableDataSize(const std::wstring_view& object)
 template<size_t N>
 constexpr inline size_t GetVariableDataSize(const std::array<std::string_view, N>& object)
 {
-    size_t length = 0;
+    size_t dataSize = 0;
 
     for (const auto& element : object)
     {
-        length += GetVariableDataSize(element);
+        dataSize += GetVariableDataSize(element);
     }
 
-    return length;
+    return dataSize;
 }
 
 template<size_t N>
 constexpr inline size_t GetVariableDataSize(const std::array<std::wstring_view, N>& object)
 {
-    size_t length = 0;
+    size_t dataSize = 0;
 
     for (const auto& element : object)
     {
-        length += GetVariableDataSize(element);
+        dataSize += GetVariableDataSize(element);
     }
 
-    return length;
+    return dataSize;
 }
 
 template<>
@@ -67,12 +67,12 @@ inline size_t SerializeVariableData(
     uint64_t dataOffset,
     const std::string_view& object)
 {
-    size_t length = object.length();
-    memcpy(buffer.Pointer + dataOffset, object.data(), length);
+    size_t dataSize = GetVariableDataSize(object);
+    memcpy(buffer.Pointer + dataOffset, object.data(), size);
     *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
-    *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = length;
+    *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = size;
 
-    return length;
+    return dataSize;
 }
 
 template<>
@@ -82,12 +82,12 @@ inline size_t SerializeVariableData(
     uint64_t dataOffset,
     const std::wstring_view& object)
 {
-    size_t length = object.length() * sizeof(wchar_t);
+    size_t dataSize = GetVariableDataSize(object);
     memcpy(buffer.Pointer + dataOffset, object.data(), length);
     *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
-    *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = length;
+    *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = size;
 
-    return length;
+    return dataSize;
 }
 
 template<size_t N>
@@ -97,22 +97,22 @@ inline size_t SerializeVariableData(
     uint64_t dataOffset,
     const std::array<std::string_view, N>& object)
 {
-    size_t length = 0;
+    size_t dataSize = 0;
 
     for (const auto& element : object)
     {
-        size_t elementLength = element.length();
-        memcpy(buffer.Pointer + dataOffset, element.data(), elementLength);
+        size_t elementDataSize = GetVariableDataSize(element);
+        memcpy(buffer.Pointer + dataOffset, element.data(), elementSize);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
-        *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementLength;
+        *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementDataSize;
 
         objectOffset += sizeof(std::string_view);
-        dataOffset += elementLength;
+        dataOffset += elementDataSize;
 
-        length += elementLength;
+        dataSize += elementDataSize;
     }
 
-    return length;
+    return dataSize;
 }
 
 template<size_t N>
@@ -122,21 +122,21 @@ inline size_t SerializeVariableData(
     uint64_t dataOffset,
     const std::array<std::wstring_view, N>& object)
 {
-    size_t length = 0;
+    size_t dataSize = 0;
 
     for (const auto& element : object)
     {
-        size_t elementLength = element.length() * sizeof(wchar_t);
-        memcpy(buffer.Pointer + dataOffset, element.data(), elementLength);
+        size_t elementDataSize = GetVariableDataSize(element);
+        memcpy(buffer.Pointer + dataOffset, element.data(), elementDataSize);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
-        *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementLength;
+        *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementDataSize;
 
         objectOffset += sizeof(std::wstring_view);
-        dataOffset += elementLength;
+        dataOffset += elementDataSize;
 
-        length += elementLength;
+        dataSize += elementDataSize;
     }
 
-    return length;
+    return dataSize;
 }
 }
