@@ -15,15 +15,18 @@ using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Represents a shared memory region.
+    /// </summary>
     public static class SharedMemoryRegionView
     {
         /// <summary>
         /// Creates a shared memory region view.
         /// </summary>
+        /// <typeparam name="T">Memory region type.</typeparam>
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        /// <typeparam name="T">Memory region type.</typeparam>
         public static SharedMemoryRegionView<T> CreateNew<T>(string sharedMemoryMapName, ulong sharedMemorySize)
             where T : ICodegenProxy, new()
         {
@@ -37,10 +40,10 @@ namespace Mlos.Core
         /// <summary>
         /// Creates or opens a shared memory region view.
         /// </summary>
+        /// <typeparam name="T">Memory region type.</typeparam>
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        /// <typeparam name="T">Memory region type.</typeparam>
         public static SharedMemoryRegionView<T> CreateOrOpen<T>(string sharedMemoryMapName, ulong sharedMemorySize)
             where T : ICodegenProxy, new()
         {
@@ -61,10 +64,10 @@ namespace Mlos.Core
         /// <summary>
         /// Opens an existing shared memory region view.
         /// </summary>
+        /// <typeparam name="T">Memory region type.</typeparam>
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        /// <typeparam name="T">Memory region type.</typeparam>
         public static SharedMemoryRegionView<T> OpenExisting<T>(string sharedMemoryMapName, ulong sharedMemorySize)
             where T : ICodegenProxy, new()
         {
@@ -133,7 +136,7 @@ namespace Mlos.Core
         }
         #endregion
 
-        public SharedMemoryMapView SharedMemoryMapView { get; private set; }
+        internal SharedMemoryMapView SharedMemoryMapView { get; private set; }
 
         private bool isDisposed = false;
 

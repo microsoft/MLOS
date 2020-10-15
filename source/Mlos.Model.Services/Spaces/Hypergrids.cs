@@ -64,8 +64,10 @@ namespace Mlos.Model.Services.Spaces
         // This is for the benefit of the JsonSerializer.
         public enum HypergridType
         {
+            /// <summary>
+            /// Simple hypergrid.
+            /// </summary>
             SimpleHypergrid,
-            CompositeHypergrid,
         }
 
         public string Name { get; set; }

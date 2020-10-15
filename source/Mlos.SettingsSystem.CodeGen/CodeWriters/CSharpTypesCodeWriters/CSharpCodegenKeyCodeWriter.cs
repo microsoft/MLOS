@@ -47,6 +47,9 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
             WriteOpenTypeDeclaration(sourceType);
 
             WriteBlock($@"
+                /// <summary>
+                /// Lookup primary key type definition for: {sourceType.Name}.
+                /// </summary>
                 public partial struct CodegenKey
                 {{");
 

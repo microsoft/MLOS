@@ -62,15 +62,40 @@ namespace Mlos.Core
 
         #endregion
 
+        /// <summary>
+        /// Global memory region.
+        /// </summary>
         protected SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView;
+
+        /// <summary>
+        /// Control channel shared memory map.
+        /// </summary>
         protected SharedMemoryMapView controlChannelMemoryMapView;
+
+        /// <summary>
+        /// Feedback channel shared memory map.
+        /// </summary>
         protected SharedMemoryMapView feedbackChannelMemoryMapView;
 
+        /// <summary>
+        /// Notification event for the control channel.
+        /// </summary>
         protected NamedEvent controlChannelNamedEvent;
+
+        /// <summary>
+        /// Notification event for the feedback channel.
+        /// </summary>
         protected NamedEvent feedbackChannelNamedEvent;
 
+        /// <summary>
+        /// Indicates whether the object has been disposed.
+        /// </summary>
         protected bool isDisposed;
 
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
@@ -103,6 +128,7 @@ namespace Mlos.Core
             isDisposed = true;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(disposing: true);

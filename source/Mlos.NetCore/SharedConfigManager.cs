@@ -25,7 +25,7 @@ namespace Mlos.Core
     /// <remarks>
     /// Config structures are stored in the shared memory.
     /// </remarks>
-    public class SharedConfigManager : ISharedConfigAccessor, IDisposable
+    public sealed class SharedConfigManager : ISharedConfigAccessor, IDisposable
     {
         /// <summary>
         /// Lookup shared config by codegen key in given shared config dictionary.
@@ -73,7 +73,7 @@ namespace Mlos.Core
                 sharedMemoryMapName,
                 memoryRegionSize);
 
-            this.sharedConfigMemoryRegionView = new SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion>(sharedConfigMemoryMapView);
+            sharedConfigMemoryRegionView = new SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion>(sharedConfigMemoryMapView);
         }
 
         /// <inheritdoc/>
@@ -140,7 +140,7 @@ namespace Mlos.Core
             SharedConfigDictionaryLookup<ProbingPolicy>.Add<TType, TProxy>(SharedConfigDictionary, componentConfig);
         }
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
             {
@@ -157,14 +157,21 @@ namespace Mlos.Core
             isDisposed = true;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Gets the shared config dictionary stored in the memory region.
+        /// </summary>
         public MlosProxyInternal.SharedConfigDictionary SharedConfigDictionary => SharedConfigMemoryRegion.SharedConfigDictionary;
 
+        /// <summary>
+        /// Gets the shared config memory region.
+        /// </summary>
         public MlosProxyInternal.SharedConfigMemoryRegion SharedConfigMemoryRegion => sharedConfigMemoryRegionView.MemoryRegion();
 
         /// <summary>
@@ -172,8 +179,8 @@ namespace Mlos.Core
         /// </summary>
         public bool CleanupOnClose { get; internal set; }
 
-        protected SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryRegionView;
+        private SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryRegionView;
 
-        protected bool isDisposed;
+        private bool isDisposed;
     }
 }

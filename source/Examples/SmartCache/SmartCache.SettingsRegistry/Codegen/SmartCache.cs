@@ -41,7 +41,14 @@ namespace SmartCache
 {
     public enum CacheEvictionPolicy
     {
+        /// <summary>
+        /// Least recently used cache eviction policy.
+        /// </summary>
         LeastRecentlyUsed,
+
+        /// <summary>
+        /// Mosty recently used cache eviction policy.
+        /// </summary>
         MostRecentlyUsed,
     }
 

@@ -33,7 +33,7 @@ namespace Mlos.Streaming.Estimators
             return r;
         }
 
-        public static uint GetHashCode(string text)
+        private static uint GetHashCode(string text)
         {
             uint hash = 0;
 
