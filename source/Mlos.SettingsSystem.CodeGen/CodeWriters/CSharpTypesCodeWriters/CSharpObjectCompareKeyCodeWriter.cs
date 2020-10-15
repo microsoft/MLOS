@@ -32,6 +32,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             string proxyTypeFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 public bool CompareKey(ICodegenProxy proxy)
                 {{
                     bool result = true;

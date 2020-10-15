@@ -33,8 +33,6 @@ namespace Mlos.Agent
 
         private DispatchEntry[] globalDispatchTable = Array.Empty<DispatchEntry>();
 
-        public bool KeepRunning = true;
-
         private bool isDisposed;
 
         #region Shared objects
@@ -89,8 +87,6 @@ namespace Mlos.Agent
         /// </summary>
         public void UninitializeSharedChannel()
         {
-            KeepRunning = false;
-
             // Signal named event to close any waiter threads.
             //
             mlosContext.TerminateControlChannel();
@@ -270,6 +266,10 @@ namespace Mlos.Agent
             mlosContext.ControlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
         }
 
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
@@ -285,6 +285,7 @@ namespace Mlos.Agent
             isDisposed = true;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(disposing: true);

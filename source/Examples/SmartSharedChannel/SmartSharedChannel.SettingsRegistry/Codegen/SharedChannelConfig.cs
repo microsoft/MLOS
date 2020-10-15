@@ -48,9 +48,9 @@ namespace SmartSharedChannel
         internal int WriterCount;
     }
 
-    // <summary>
-    // Shared channel reader statistics.
-    // </summary>
+    /// <summary>
+    /// Shared channel reader statistics.
+    /// </summary>
     [CodegenConfig]
     internal partial struct SharedChannelReaderStats
     {

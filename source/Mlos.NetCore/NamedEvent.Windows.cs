@@ -12,6 +12,9 @@ using System.Runtime.InteropServices;
 
 namespace Mlos.Core.Windows
 {
+    /// <summary>
+    /// Windows implementation of named event.
+    /// </summary>
     public class NamedEvent : Core.NamedEvent
     {
         /// <summary>

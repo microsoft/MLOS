@@ -27,6 +27,10 @@ namespace Mlos.Core.Collections
         uint CalculateIndex(ICodegenKey codegenKey, ref uint probingCount, uint elementCount);
     }
 
+    /// <summary>
+    /// Hash table linear probing.
+    /// </summary>
+    /// <typeparam name="THash">Hash implementation.</typeparam>
     public struct TLinearProbing<THash> : IProbingPolicy
         where THash : IHash<uint>
     {

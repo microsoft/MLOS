@@ -71,6 +71,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteBlock($@"
                 public partial struct CodegenKey : ICodegenKey<{typeFullType}, {typeFullType}.CodegenKey, {proxyTypeFullName}>
                 {{
+                    /// <inheritdoc/>
                     public uint GetKeyHashValue<THash>()
                         where THash : global::Mlos.Core.Collections.IHash<uint>
                     {{
@@ -95,10 +96,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             ulong typeHashValue = TypeMetadataMapper.GetTypeHashValue(sourceType);
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 uint global::Mlos.Core.ICodegenKey.CodegenTypeIndex() => {typeIndex} + {DispatchTableBaseIndexVariableName};");
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 ulong global::Mlos.Core.ICodegenKey.CodegenTypeHash() => 0x{typeHashValue:x};");
 

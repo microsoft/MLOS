@@ -35,6 +35,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(StringPtr left, StringPtr right) => !(left == right);
 
+        /// <summary>
+        /// Gets value stored in the buffer as a string.
+        /// </summary>
         public string Value
         {
             get
@@ -139,6 +142,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(WideStringPtr left, WideStringPtr right) => !(left == right);
 
+        /// <summary>
+        /// Gets a string stored in the buffer.
+        /// </summary>
         public string Value
         {
             get
@@ -243,6 +249,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(StringView left, StringView right) => !(left == right);
 
+        /// <summary>
+        /// Gets a string stored in the buffer.
+        /// </summary>
         public string Value
         {
             get
@@ -347,6 +356,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(WideStringView left, WideStringView right) => !(left == right);
 
+        /// <summary>
+        /// Gets a string stored in the buffer.
+        /// </summary>
         public string Value
         {
             get
@@ -368,6 +380,10 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             }
         }
 
+        /// <summary>
+        /// Gets a string stored in the buffer as read only span.
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ReadOnlySpan<char> ValueAsSpan()
         {

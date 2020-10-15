@@ -86,6 +86,10 @@ namespace Mlos.Core.Collections
 
     #region Public implementation
 
+    /// <summary>
+    /// Fowler-Noll-Vo hash implementation.
+    /// </summary>
+    /// <typeparam name="THashValue">Type used to store hash value (uint or ulong).</typeparam>
     public struct FNVHash<THashValue> : IHash<THashValue>
         where THashValue : unmanaged
     {
@@ -150,6 +154,7 @@ namespace Mlos.Core.Collections
             }
         }
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public THashValue CombineHashValue(THashValue hash, string value)
         {
@@ -158,6 +163,7 @@ namespace Mlos.Core.Collections
             return CombineHashValue(hash, span);
         }
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public THashValue CombineHashValue<T>(THashValue hash, T value)
             where T : unmanaged
@@ -170,6 +176,7 @@ namespace Mlos.Core.Collections
             }
         }
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public THashValue GetHashValue(string value)
         {
@@ -178,6 +185,7 @@ namespace Mlos.Core.Collections
             return GetHashValue(span);
         }
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public THashValue GetHashValue<T>(T value)
             where T : unmanaged

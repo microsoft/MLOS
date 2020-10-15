@@ -51,6 +51,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteBlock($@"
                 public partial struct {typeName}
                 {{
+                    /// <inheritdoc/>
                     public bool CompareKey(ICodegenProxy proxy)
                     {{
                         bool result = true;

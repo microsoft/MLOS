@@ -69,6 +69,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
             string proxyFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
 
             WriteBlock($@"
+                [System.CodeDom.Compiler.GeneratedCodeAttribute(""Mlos.SettingsSystem.CodeGen"", """")]
                 public partial struct {typeName} : ICodegenProxy<{typeFullType}, {proxyFullName}>
                 {{
                     public static Action<{typeName}> Callback;");
@@ -88,6 +89,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
             ulong typeHashValue = TypeMetadataMapper.GetTypeHashValue(sourceType);
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 uint global::Mlos.Core.ICodegenKey.CodegenTypeIndex()
                 {{
@@ -95,14 +97,17 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
                 }}");
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 ulong global::Mlos.Core.ICodegenKey.CodegenTypeHash() => 0x{typeHashValue:x};");
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 public ulong CodegenTypeSize() => {cppType.TypeSize};");
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [System.Text.Json.Serialization.JsonIgnore]
                 public IntPtr Buffer
                 {{

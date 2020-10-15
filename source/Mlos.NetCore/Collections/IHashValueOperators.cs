@@ -18,18 +18,40 @@ namespace Mlos.Core.Collections
 #pragma warning disable CA2231 // Overload operator equals on overriding value type Equals
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
-    public interface IHashValueOperators<THash>
-         where THash : struct
+    /// <summary>
+    /// Interface defines operations used to calculate the hash value.
+    /// </summary>
+    /// <typeparam name="THashValue">Type used to store hash value (uint or ulong).</typeparam>
+    public interface IHashValueOperators<THashValue>
+         where THashValue : struct
     {
         /// <summary>
         /// Convert functions.
         /// </summary>
         /// <param name="a"></param>
         /// <returns></returns>
-        THash Convert(byte a);
-        THash Convert(char a);
-        THash Convert(uint a);
-        THash Convert(ulong a);
+        THashValue Convert(byte a);
+
+        /// <summary>
+        /// Convert functions.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        THashValue Convert(char a);
+
+        /// <summary>
+        /// Convert functions.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        THashValue Convert(uint a);
+
+        /// <summary>
+        /// Convert functions.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        THashValue Convert(ulong a);
 
         /// <summary>
         /// Calcuate xor value.
@@ -37,7 +59,7 @@ namespace Mlos.Core.Collections
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        THash Xor(THash a, THash b);
+        THashValue Xor(THashValue a, THashValue b);
 
         /// <summary>
         /// Multiply value.
@@ -45,7 +67,7 @@ namespace Mlos.Core.Collections
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        THash Mul(THash a, THash b);
+        THashValue Mul(THashValue a, THashValue b);
 
         /// <summary>
         /// Shift left a &lt;&lt; b.
@@ -53,7 +75,7 @@ namespace Mlos.Core.Collections
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        THash ShiftLeft(THash a, int b);
+        THashValue ShiftLeft(THashValue a, int b);
 
         /// <summary>
         /// Shift right a>>b.
@@ -61,20 +83,27 @@ namespace Mlos.Core.Collections
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        THash ShiftRight(THash a, int b);
+        THashValue ShiftRight(THashValue a, int b);
     }
 
+    /// <summary>
+    /// Implementation of IHashValueOperators that supports uint values.
+    /// </summary>
     public struct UIntHashValueOperators : IHashValueOperators<uint>
     {
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint Convert(byte a) => a;
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint Convert(char a) => a;
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint Convert(uint a) => a;
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint Convert(ulong a) => throw new NotImplementedException();
 
@@ -95,17 +124,24 @@ namespace Mlos.Core.Collections
         public uint ShiftRight(uint a, int b) => a >> b;
     }
 
+    /// <summary>
+    /// Implementation of IHashValueOperators that supports ulong values.
+    /// </summary>
     public struct ULongHashValueOperators : IHashValueOperators<ulong>
     {
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong Convert(byte a) => a;
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong Convert(char a) => a;
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong Convert(uint a) => a;
 
+        /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong Convert(ulong a) => a;
 

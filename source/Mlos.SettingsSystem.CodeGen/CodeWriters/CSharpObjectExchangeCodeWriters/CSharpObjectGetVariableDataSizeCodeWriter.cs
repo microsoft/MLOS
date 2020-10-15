@@ -30,6 +30,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteOpenTypeDeclaration(sourceType);
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 ulong global::Mlos.Core.ICodegenType.GetVariableDataSize()
                 {{
                     ulong dataSize = 0;");

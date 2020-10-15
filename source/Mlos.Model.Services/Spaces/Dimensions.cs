@@ -12,9 +12,24 @@ namespace Mlos.Model.Services.Spaces
 {
     public enum DimensionTypeName
     {
+        /// <summary>
+        /// Models a dimension that can assume continuous values.
+        /// </summary>
         ContinuousDimension,
+
+        /// <summary>
+        /// Models a dimension whose values can assume uniformly spaced discrete values.
+        /// </summary>
         DiscreteDimension,
+
+        /// <summary>
+        /// A dimension whose values have a total ordering but the distance between consecutive values is unspecified.
+        /// </summary>
         OrdinalDimension,
+
+        /// <summary>
+        /// A dimension whose values have a total ordering but the distance between consecutive values is unspecified.
+        /// </summary>
         CategoricalDimension,
     }
 

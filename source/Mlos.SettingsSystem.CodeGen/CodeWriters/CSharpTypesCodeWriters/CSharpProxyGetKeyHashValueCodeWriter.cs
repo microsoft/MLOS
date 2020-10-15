@@ -51,6 +51,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteBlock($@"
                 public partial struct {typeName}
                 {{
+                    /// <inheritdoc/>
                     public uint GetKeyHashValue<THash>()
                         where THash : global::Mlos.Core.Collections.IHash<uint>
                     {{

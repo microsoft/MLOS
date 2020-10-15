@@ -54,8 +54,19 @@ namespace Mlos.UnitTest
     [Flags]
     public enum Colors : ulong
     {
+        /// <summary>
+        /// Represents red color.
+        /// </summary>
         Red = 2,
+
+        /// <summary>
+        /// Represents green color.
+        /// </summary>
         Green = 4,
+
+        /// <summary>
+        /// Represents blue color.
+        /// </summary>
         Blue = 8,
     }
 
