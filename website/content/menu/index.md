@@ -14,6 +14,7 @@ headless = true
   - [Bayesian Optimization]({{< relref "/notebooks/BayesianOptimization" >}})
   - [Smart Cache Optimization]({{< relref "/notebooks/SmartCacheOptimization" >}})
   - [Smart Cache Optimization in C++]({{< relref "/notebooks/SmartCacheCPP" >}})
+  - [LevelDB External Tuning Example]({{< relref "/notebooks/LevelDbTuning" >}})
 
 - API Documentation
   - [Python](/MLOS/python_api/)
