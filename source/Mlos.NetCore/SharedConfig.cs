@@ -75,13 +75,13 @@ namespace Mlos.Core
         public MlosProxy.SharedConfigHeader Header => new MlosProxy.SharedConfigHeader { Buffer = this.Buffer };
 
         /// <summary>
-        /// Returns true if instance points to config in the shared memory, false otherwise.
+        /// Gets a value indicating whether the instance points to a valid config in the shared memory.
         /// </summary>
         /// <returns></returns>
         public bool HasSharedConfig => Buffer != IntPtr.Zero;
 
         /// <summary>
-        /// Gets config configuration. Configuration is located after the header.
+        /// Gets the proxy object to the configuration stored in the shared memory.
         /// </summary>
         public TProxy Config => new TProxy { Buffer = this.Buffer + SharedConfigHeader.TypeSize };
 

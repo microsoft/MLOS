@@ -79,6 +79,10 @@ namespace Mlos.Core
     public sealed class SharedMemoryRegionView<T> : IDisposable
          where T : ICodegenProxy, new()
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SharedMemoryRegionView{T}"/> class.
+        /// </summary>
+        /// <param name="sharedMemoryMap"></param>
         public SharedMemoryRegionView(SharedMemoryMapView sharedMemoryMap)
         {
             this.SharedMemoryMapView = sharedMemoryMap;
@@ -93,7 +97,7 @@ namespace Mlos.Core
         }
 
         /// <summary>
-        /// Size of the shared memory map.
+        /// Gets size of the shared memory map.
         /// </summary>
         public ulong MemSize => SharedMemoryMapView.MemSize;
 
@@ -134,7 +138,7 @@ namespace Mlos.Core
         private bool isDisposed = false;
 
         /// <summary>
-        /// Indicates if we should cleanup OS resources when closing the shared memory map view.
+        /// Gets or sets a value indicating whether we should cleanup OS resources when closing the shared memory map view.
         /// </summary>
         public bool CleanupOnClose
         {

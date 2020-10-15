@@ -69,8 +69,10 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 
 #endif
 
-#define UNUSED(x) (void)x
-#define ReturnIfFail(hr) if (FAILED(hr)) return hr;
+// Define macros.
+//
+#define MLOS_RETAIL_ASSERT(result) { if (!result) Mlos::Core::MlosPlatform::TerminateProcess(); }
+#define MLOS_UNUSED_ARG(x) (void)x
 
 #include "MlosPlatform.h"
 

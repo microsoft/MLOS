@@ -46,6 +46,6 @@
     <ClInclude Include="GlobalDispatchTable.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
-  <Import Project="$(BaseDir)\build\Mlos.Binplace.targets" />
   <Import Project="$(BaseDir)\build\Mlos.Cpp.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.Binplace.targets" />
 </Project>

@@ -34,7 +34,7 @@ namespace Mlos.Core
         bool VerifyVariableData(ulong objectOffset, ulong totalDataSize, ref ulong expectedDataOffset);
 
         /// <summary>
-        /// Pointer to the shared memory where we store the instance of code gen type.
+        /// Gets or sets pointer to the shared memory where we store the instance of code gen type.
         /// </summary>
         IntPtr Buffer { get; set; }
     }

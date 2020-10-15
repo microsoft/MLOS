@@ -15,21 +15,6 @@
 
 #include "stdafx.h"
 
-#include <assert.h>
-
-// Define retail assert.
-//
-void assert_failed(
-    _In_z_ char const* message,
-    _In_z_ char const* file,
-    _In_ uint32_t line)
-{
-    printf("%s in %s line: %i", message, file, line);
-    std::terminate();
-}
-
-#define rtl_assert(expression) (void)((!!(expression)) || (assert_failed((#expression), (__FILE__), (uint32_t)(__LINE__)), 0) )
-
 //----------------------------------------------------------------------------
 // Smart configurations.
 //
@@ -112,8 +97,8 @@ uint64_t RunSharedChannelBenchmark(
             float x = recvPoint.X();
             float y = recvPoint.Y();
 
-            rtl_assert(point.X == x);
-            rtl_assert(point.Y == y);
+            RTL_ASSERT(point.X == x);
+            RTL_ASSERT(point.Y == y);
         };
 
     // Setup receiver handler to verify.
@@ -125,16 +110,16 @@ uint64_t RunSharedChannelBenchmark(
             double y = recvPoint.Y();
             double z = recvPoint.Z();
 
-            rtl_assert(point3d.X == x);
-            rtl_assert(point3d.Y == y);
-            rtl_assert(point3d.Z == z);
+            RTL_ASSERT(point3d.X == x);
+            RTL_ASSERT(point3d.Y == y);
+            RTL_ASSERT(point3d.Z == z);
         };
 
     std::vector<byte> vectorBuffer;
     vectorBuffer.resize(sharedChannelConfig.BufferSize);
 
     BytePtr buffer(&vectorBuffer.front());
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, sharedChannelConfig.BufferSize);
 
     // Setup deserialize callbacks to verify received objects.
@@ -197,13 +182,6 @@ uint64_t RunSharedChannelBenchmark(
             return i;
         }));
     }
-
-    std::future<bool> resultFromWriter2 = std::async(
-        std::launch::async,
-        [&sharedChannel, &point, &point3d]
-    {
-        return true;
-    });
 
     std::chrono::seconds timespan(microbenchmarkConfig.DurationInSec);
     std::this_thread::sleep_for(timespan);

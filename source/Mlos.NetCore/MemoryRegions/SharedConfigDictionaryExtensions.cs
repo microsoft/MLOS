@@ -37,7 +37,7 @@ namespace Proxy.Mlos.Core.Internal
     public partial struct SharedConfigDictionary
     {
         /// <summary>
-        /// Define property to Config Offsets array, as we allocate it dynamically.
+        /// Gets the config offsets array, as we allocate it dynamically.
         /// </summary>
         public UIntArray ConfigsOffsetArray => new UIntArray() { Buffer = buffer + (int)OffsetToConfigsArray };
     }

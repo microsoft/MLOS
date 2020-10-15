@@ -153,9 +153,7 @@ namespace Mlos.Core
                 controlChannelNamedEvent.CleanupOnClose = true;
                 feedbackChannelNamedEvent.CleanupOnClose = true;
 
-                // #TODO, sharedConfigManager should not be static.
                 // Close all the shared config memory regions.
-                //
                 //
                 SharedConfigManager.CleanupOnClose = true;
             }

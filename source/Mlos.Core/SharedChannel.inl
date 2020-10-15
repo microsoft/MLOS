@@ -19,7 +19,6 @@ namespace Mlos
 {
 namespace Core
 {
-
 //----------------------------------------------------------------------------
 // NAME: ISharedChannel::HasReadersInWaitingState
 //
@@ -108,7 +107,7 @@ BytePtr ISharedChannel::Payload(uint32_t writeOffset)
 // NOTES:
 //  The acquired region is contiguous.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireWriteRegionForFrame(int32_t& frameLength)
 {
     const uint32_t expectedFrameLength = frameLength;
@@ -165,7 +164,7 @@ uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireWriteRegionFo
 //
 // NOTES:
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::NotifyExternalReader()
 {
     ChannelPolicy.NotifyExternalReader();
@@ -186,7 +185,7 @@ void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::NotifyExternalReader()
 //  However it ensures that the next write offset will not be greater than the buffer margin,
 //  so the next writer can write an empty FrameHeader.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireRegionForWrite(int32_t& frameLength)
 {
     while (true)
@@ -275,7 +274,7 @@ uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireRegionForWrit
 //  Reader function.
 //  If the wait has been aborted, it returns uint32_t::max.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitForFrame()
 {
     uint32_t readPosition;
@@ -376,7 +375,7 @@ uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitForFrame()
 // NOTES:
 //  To interrupt wait, set Sync.TerminateReader to true.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 bool SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitAndDispatchFrame(
     DispatchEntry* dispatchTable,
     size_t dispatchEntryCount)
@@ -460,7 +459,7 @@ bool SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitAndDispatchFrame(
 //
 // NOTES:
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ProcessMessages(
     Mlos::Core::DispatchEntry* dispatchTable,
     size_t dispatchEntryCount)
@@ -477,6 +476,5 @@ void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ProcessMessages(
 
     Sync.ActiveReaderCount.fetch_sub(1);
 }
-
 }
 }
