@@ -48,7 +48,7 @@ var OutputDir = Directory("./out/");
 // Output directory for cmake.
 // See Also: Makefile, build/Common.mk
 //
-var CMakeConfiguration = "Release";
+var CMakeConfiguration = Configuration;
 var CMakeBuildDir = Directory($"./out/cmake/{CMakeConfiguration}");
 
 // Docker Test Directory contains the generated dockerfiles and connection string files
@@ -262,6 +262,10 @@ Task("Build-CMake")
         {
             BinaryPath = $"{CMakeBuildDir}",
             Configuration = CMakeConfiguration,
+            Options = new[]
+            {
+                "--jobs", // enable parallel builds using as many processes as CPUs
+            },
             Targets = new[]
             {
                 // Workaround a bug in how CMakeBuildSettings joins the targets
