@@ -86,6 +86,9 @@ Code and documentation for examples of using MLOS to optimize a system are descr
 Additional code is in the  [source/Examples](./source/Examples/#mlos-github-tree-view) source directory.
 You can find the source of the notebooks [on github as well](./source/Mlos.Notebooks/#mlos-github-tree-view).
 
+> Some of the notebooks have been used as lab assignments for a seminar class run in collaboration between Microsoft and UW-Madison:
+> <https://aka.ms/MLOS_Seminar>
+
 ## Documentation
 
 - Additional overview documentation is available in the [documentation](./documentation/) tree.
