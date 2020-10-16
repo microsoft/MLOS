@@ -7,7 +7,7 @@
 
 set -eu
 
-if ! [ -x /usr/bin/dotnet ]; then
+if ! [ -x /usr/bin/dotnet ] || [ "${1:-}" == '--force-upgrade' ]; then
     wget -q -O /tmp/packages-microsoft-prod.deb "https://packages.microsoft.com/config/ubuntu/`lsb_release -r -s`/packages-microsoft-prod.deb"
     set -x
     sudo dpkg -i /tmp/packages-microsoft-prod.deb

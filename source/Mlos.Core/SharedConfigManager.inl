@@ -19,7 +19,6 @@ namespace Mlos
 {
 namespace Core
 {
-
 using TProbingPolicy = Collections::TLinearProbing<Collections::FNVHash<uint32_t>>;
 
 //----------------------------------------------------------------------------
@@ -34,7 +33,7 @@ using TProbingPolicy = Collections::TLinearProbing<Collections::FNVHash<uint32_t
 //
 // NOTES:
 //
-template <typename T>
+template<typename T>
 HRESULT SharedConfigManager::CreateOrUpdateFrom(ComponentConfig<T>& componentConfig)
 {
     // Ensure there is allocated and registered shared config memory region.
@@ -65,8 +64,10 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(ComponentConfig<T>& componentCon
 //
 // NOTES:
 //
-template <typename T>
-HRESULT SharedConfigManager::CreateOrUpdateFrom(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig)
+template<typename T>
+HRESULT SharedConfigManager::CreateOrUpdateFrom(
+    Internal::SharedConfigDictionary& sharedConfigDictionary,
+    ComponentConfig<T>& componentConfig)
 {
     return Internal::SharedConfigDictionaryLookup<SharedConfigManager::TProbingPolicy>::CreateOrUpdateFromInSharedConfigDictionary(
         sharedConfigDictionary,
@@ -84,7 +85,7 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(Internal::SharedConfigDictionary
 //
 // NOTES:
 //
-template <typename T>
+template<typename T>
 HRESULT SharedConfigManager::Lookup(ComponentConfig<T>& componentConfig)
 {
     if (!m_sharedConfigMemRegionView.Buffer.Pointer)
@@ -108,13 +109,12 @@ HRESULT SharedConfigManager::Lookup(ComponentConfig<T>& componentConfig)
 //
 // NOTES:
 //
-template <typename T>
+template<typename T>
 HRESULT SharedConfigManager::Lookup(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig)
 {
     return Internal::SharedConfigDictionaryLookup<SharedConfigManager::TProbingPolicy>::LookupInSharedConfigDictionary(
         sharedConfigDictionary,
         componentConfig);
 }
-
 }
 }

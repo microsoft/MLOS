@@ -9,7 +9,7 @@
 cat *.csproj 2>/dev/null \
     | grep '<ProjectReference Include=".*\.csproj"' \
     | sed -r -e 's|.*[/\\)"]([^"]+)\.csproj".*|\1|' \
-    | tr '\n' ';'
+    | tr '\n' ';' | sed 's/;$//'
 
 # Returns just the name without the extension or its path as specified
 # in the Include attribute of the ProjectReference directive.

@@ -51,6 +51,9 @@ namespace Mlos.Agent
         /// <param name="mlosContext">Mlos context instance.</param>
         public void InitializeSharedChannel(MlosContext mlosContext)
         {
+            // #TODO, implement experiment class.
+            //
+            MlosContext.Instance = mlosContext;
             this.mlosContext = mlosContext;
 
             // Initialize callbacks.
@@ -114,7 +117,7 @@ namespace Mlos.Agent
                 //
                 RegisteredMemoryRegionConfig registeredMemoryRegionConfig = registeredMemoryRegionSharedConfig.Config;
 
-                MlosContext.SharedConfigManager.RegisterSharedConfigMemoryRegion(
+                mlosContext.SharedConfigManager.RegisterSharedConfigMemoryRegion(
                     memoryRegionId: registeredMemoryRegionConfig.MemoryRegionIndex,
                     sharedMemoryMapName: registeredMemoryRegionConfig.SharedMemoryMapName.Value,
                     memoryRegionSize: registeredMemoryRegionConfig.MemoryRegionSize);
@@ -161,20 +164,11 @@ namespace Mlos.Agent
                 //
                 assemblyDirs.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
-                // 2. Try to load assembly from the full path listed in the config.
-                // Note: This doesn't currently work for Linux.
-                // See Also: Mlos.Core/MlosContext.cpp
-                //
-                if (assemblyConfig.ApplicationFilePath.Value != null)
-                {
-                    assemblyDirs.Add(Path.GetDirectoryName(assemblyConfig.ApplicationFilePath.Value));
-                }
-
-                // 3. The current working directory.
+                // 2. The current working directory.
                 //
                 assemblyDirs.Add(".");
 
-                // 4. The search path specified in an environment variable.
+                // 3. The search path specified in an environment variable.
                 // This is akin to an LD_LIBRARY_PATH but specifically for MLOS Settings Registry DLLs.
                 //
                 string settingsRegistryLibraryPath = System.Environment.GetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH");
@@ -273,7 +267,7 @@ namespace Mlos.Agent
         {
             // Process the messages from the control channel.
             //
-            MlosContext.ControlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
+            mlosContext.ControlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
         }
 
         protected virtual void Dispose(bool disposing)

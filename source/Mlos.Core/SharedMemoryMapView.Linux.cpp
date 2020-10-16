@@ -30,10 +30,10 @@ namespace Core
 //
 SharedMemoryMapView::SharedMemoryMapView() noexcept
  :  MemSize(0),
-    m_fdSharedMemory(INVALID_FD_VALUE),
-    m_sharedMemoryMapName(nullptr),
     Buffer(nullptr),
-    CleanupOnClose(false)
+    CleanupOnClose(false),
+    m_fdSharedMemory(INVALID_FD_VALUE),
+    m_sharedMemoryMapName(nullptr)
 {
 }
 
@@ -53,10 +53,10 @@ SharedMemoryMapView::~SharedMemoryMapView()
 //
 SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept :
     MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
-    m_fdSharedMemory(std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE)),
-    m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr)),
     Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
-    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0))
+    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0)),
+    m_fdSharedMemory(std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE)),
+    m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr))
 {
 }
 
@@ -159,7 +159,7 @@ HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
         {
             // Obtain the size of the shared map.
             //
-            struct stat statBuffer = { 0 };
+            struct stat statBuffer = { };
             if (fstat(m_fdSharedMemory, &statBuffer) != -1)
             {
                 memSize = statBuffer.st_size;
@@ -228,8 +228,6 @@ void SharedMemoryMapView::Close()
             {
                 shm_unlink(m_sharedMemoryMapName);
             }
-
-            CleanupOnClose = false;
         }
     }
 
@@ -238,6 +236,8 @@ void SharedMemoryMapView::Close()
         free(m_sharedMemoryMapName);
         m_sharedMemoryMapName = nullptr;
     }
+
+    CleanupOnClose = false;
 }
 }
 }

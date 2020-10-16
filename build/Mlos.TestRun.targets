@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Include binplace properties. -->
+  <Import Project="$(BaseDir)\build\Mlos.Binplace.props" />
   <!-- A basic .proj file to include for test proj files to run properly. -->
   <Target Name="Build" BeforeTargets="Test">
     <MSBuild Projects="@(ProjectReference)" Targets="Build" RunEachTargetSeparately="true" Condition="'$(QBUILD)' != '1' And '$(BuildProjectReferences)' != 'false'" />

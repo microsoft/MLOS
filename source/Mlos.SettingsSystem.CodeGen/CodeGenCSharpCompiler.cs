@@ -117,22 +117,22 @@ namespace Mlos.SettingsSystem.CodeGen
     internal struct CompilerOutput
     {
         /// <summary>
-        /// Contains compiled assembly.
+        /// Gets the compiled assembly.
         /// </summary>
         public Assembly Assembly { get; }
 
         /// <summary>
-        /// Contains compilation results.
+        /// Gets the compilation results.
         /// </summary>
         public EmitResult EmitResult { get; }
 
         /// <summary>
-        /// Contains code comments.
+        /// Gets the code comments reader instance.
         /// </summary>
         public CodeCommentsReader CodeComments { get; }
 
         /// <summary>
-        /// Contains compiled syntax trees.
+        /// Gets the compiled syntax tree.
         /// </summary>
         public CSharpCompilation Compilation { get; }
 

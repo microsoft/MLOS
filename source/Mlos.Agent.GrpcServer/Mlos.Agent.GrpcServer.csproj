@@ -19,7 +19,7 @@
     <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Protobuf Include="..\Mlos.Agent.Proto\greet.proto" GrpcServices="Server" Link="ProtoBuffers\greet.proto" OutputDir="$(GrpcOutputDir)"/>
+    <Protobuf Include="..\Mlos.Agent.Proto\greet.proto" GrpcServices="Server" Link="ProtoBuffers\greet.proto" OutputDir="$(GrpcOutputDir)" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GreeterService.cs" />

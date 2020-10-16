@@ -20,13 +20,13 @@ Here are some brief instructions on how to try it out:
 
     ```sh
     make -C source/Mlos.Agent.Server
-    make -C source/Examples/SmartSharedChannel
+    make -C source/Examples/SmartSharedChannel all install
     ```
 
 ## Executing
 
 ```sh
-export MLOS_SETTINGS_REGISTRY_PATH=out/dotnet/source/Mlos.UnitTest/Mlos.UnitTest.SettingsRegistry/obj/AnyCPU:out/dotnet/source/Examples/SmartSharedChannel/SmartSharedChannel.SettingsRegistry/obj/AnyCPU
-
-./tools/bin/dotnet out/dotnet/source/Mlos.Agent.Server/obj/AnyCPU/Mlos.Agent.Server.dll --executable out/cmake/Release/source/Examples/SmartSharedChannel/SmartSharedChannel
+./tools/bin/dotnet target/bin/Release/AnyCPU/Mlos.Agent.Server/Mlos.Agent.Server.dll \
+    --executable target/bin/Release/x86_64/SmartSharedChannel \
+    --settings-registry-path target/bin/Release/AnyCPU
 ```

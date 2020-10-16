@@ -22,9 +22,9 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
     internal class CSharpProxyCodeWriter : CSharpCodeWriter
     {
         /// <summary>
-        /// Name of dispatch table base index variable.
+        /// Gets name of dispatch table base index variable.
         /// </summary>
-        private string DispatchTableBaseIndexVariableName { get; set; }
+        private string DispatchTableBaseIndexVariableName { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CSharpProxyCodeWriter"/> class.

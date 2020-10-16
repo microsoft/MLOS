@@ -24,7 +24,6 @@ add_mlos_agent_server_exe_test_run(
     NAME MlosTestRun_Mlos.Agent.Server_${PROJECT_NAME}
     EXECUTABLE_TARGET ${PROJECT_NAME}
     TIMEOUT 240
-    MLOS_SETTINGS_REGISTRY_TARGETS SmartCache.SettingsRegistry
     WITH_OPTIMIZER)
 
 # Binplace the outputs for more convenient testing.

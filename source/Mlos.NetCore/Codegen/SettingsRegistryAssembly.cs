@@ -24,12 +24,6 @@ namespace Mlos.Core.Internal
         internal uint AssemblyIndex;
 
         /// <summary>
-        /// Full path to the client application.
-        /// </summary>
-        [ScalarSetting]
-        internal StringPtr ApplicationFilePath;
-
-        /// <summary>
         /// Assembly name.
         /// </summary>
         [ScalarSetting]
