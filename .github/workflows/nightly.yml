@@ -116,7 +116,7 @@ jobs:
         docker exec -u root mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
           /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
     - name: Run python long haul tests (Ubuntu ${{ matrix.UbuntuVersion}})
-      timeout-minutes: 710
+      timeout-minutes: 700
       run: |
         docker exec --workdir /src/MLOS/source/Mlos.Python mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
           python3.7 -m unittest discover -p LongHaulTest*.py --verbose
