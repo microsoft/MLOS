@@ -11,6 +11,8 @@ using System;
 using Mlos.SettingsSystem.Attributes;
 using Mlos.SettingsSystem.StdTypes;
 
+#pragma warning disable 1591 // Missing XML comment for publicly visible type or member {T}.
+
 namespace Mlos.UnitTest
 {
     /// <summary>

@@ -136,9 +136,12 @@ namespace Mlos.Core
         }
         #endregion
 
+        /// <summary>
+        /// Gets a shared memory map view.
+        /// </summary>
         internal SharedMemoryMapView SharedMemoryMapView { get; private set; }
 
-        private bool isDisposed = false;
+        private bool isDisposed;
 
         /// <summary>
         /// Gets or sets a value indicating whether we should cleanup OS resources when closing the shared memory map view.

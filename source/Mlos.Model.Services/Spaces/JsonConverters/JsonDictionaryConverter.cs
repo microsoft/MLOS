@@ -13,6 +13,11 @@ using System.Text.Json.Serialization;
 
 namespace Mlos.Model.Services.Spaces.JsonConverters
 {
+    /// <summary>
+    /// Converts a key value dictionary object to or from JSON.
+    /// </summary>
+    /// <typeparam name="TKey">The type of the keys in the dictionary.</typeparam>
+    /// <typeparam name="TValue">The type of the values in the dictionary.</typeparam>
     public class JsonDictionaryConverter<TKey, TValue> : JsonConverterWithExpectations<Dictionary<TKey, TValue>>
     {
         /// <inheritdoc/>
