@@ -26,48 +26,35 @@ namespace Mlos.Agent.Server
         /// Displays help output and forces a program exit upon errors.
         /// </summary>
         /// <param name="args">The input arguments to parse.</param>
-        /// <param name="executablePath">The path to the executable found in the cli args.</param>
-        /// <param name="optimizerUri">The optimizer uri found in the cli args.</param>
-        /// <param name="settingsRegistryPath">The path to the settings registry folder.</param>
-        public static void ParseArgs(
-            string[] args,
-            out string executablePath,
-            out Uri optimizerUri,
-            out string settingsRegistryPath)
+        /// <returns></returns>
+        internal static CliOptions ParseArgs(string[] args)
         {
-            string executableFilePath = null;
-            Uri optimizerAddressUri = null;
-            string settingsRegistryFolderPath = null;
-
-            IEnumerable<string> extraArgs = null;
+            CliOptions result = null;
 
             using var cliOptsParser = new Parser(with => with.HelpWriter = null);
-            var cliOptsParseResult = cliOptsParser.ParseArguments<CliOptions>(args)
+            var cliOptsParseResult = cliOptsParser.ParseArguments<CliOptions>(args);
+
+            cliOptsParseResult
                 .WithParsed(parsedOptions =>
                 {
-                    executableFilePath = parsedOptions.Executable;
-                    optimizerAddressUri = parsedOptions.OptimizerUri;
-                    settingsRegistryFolderPath = parsedOptions.SettingsRegistryPath;
-                    extraArgs = parsedOptions.ExtraArgs;
+                    if (parsedOptions.ExtraArgs.Any())
+                    {
+                        ShowUsageHelp(cliOptsParseResult, msg: "ERROR: Unknown arguments: " + string.Join(" ", parsedOptions.ExtraArgs.Any()));
+                    }
+
+                    result = parsedOptions;
+                })
+                .WithNotParsed(errors =>
+                {
+                    // Handle command line parsing errors.
+                    //
+                    ShowUsageHelp(
+                        cliOptsParseResult,
+                        errors: errors,
+                        msg: "Failed to parse command line options.");
                 });
 
-            if (cliOptsParseResult.Tag == ParserResultType.NotParsed)
-            {
-                cliOptsParseResult.WithNotParsed(errs => ShowUsageHelp(
-                    cliOptsParseResult,
-                    errors: errs,
-                    msg: "Failed to parse command line options."));
-            }
-            else if (extraArgs != null && extraArgs.Any())
-            {
-                ShowUsageHelp(cliOptsParseResult, msg: "ERROR: Unknown arguments: " + string.Join(" ", extraArgs));
-            }
-
-            // Populate the output variables
-            //
-            executablePath = executableFilePath;
-            optimizerUri = optimizerAddressUri;
-            settingsRegistryPath = settingsRegistryFolderPath;
+            return result;
         }
 
         /// <summary>
@@ -131,7 +118,7 @@ namespace Mlos.Agent.Server
 
                         "usage mode 4:  Start an executable to communicate over freshly prepared global shared memory and "
                         + "prepare to communicate with an MLOS optimizer listening at the given Grpc URI.",
-                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable  --settings-registry-path path/to/settings_assemblies --optimizer-uri http://localhost:50051",
+                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable  --settings-registry-path path/to/settings_assemblies --experiment path/to/Experiment.dll --optimizer-uri http://localhost:50051",
                         string.Empty,
 
                         "Note: the optimizer service used in these examples can be started using the 'start_optimizer_microservice "
@@ -146,7 +133,7 @@ namespace Mlos.Agent.Server
         /// <summary>
         /// The command line options for this application.
         /// </summary>
-        private class CliOptions
+        internal class CliOptions
         {
             [Option("executable", Required = false, Default = null, HelpText = "A path to an executable to start (e.g. 'target/bin/Release/SmartCache').")]
             public string Executable { get; set; }
@@ -157,6 +144,12 @@ namespace Mlos.Agent.Server
             [Option("settings-registry-path", Required = false, Default = null, HelpText = "A path to a folder with the settings registry assemblies.")]
             public string SettingsRegistryPath { get; set; }
 
+            [Option("experiment", Required = false, Default = null, HelpText = "A path to an experiment dll for tuning a smart component in active learning mode.")]
+            public string ExperimentFilePath { get; set; }
+
+            /// <summary>
+            /// Gets or sets collection of extra arguments.
+            /// </summary>
             /// <remarks>
             /// Just used to detect any extra arguments so we can throw a warning.
             /// See Also: https://github.com/microsoft/MLOS/issues/112.

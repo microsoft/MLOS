@@ -58,6 +58,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mlos.Model.Services.Client"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mlos.Agent.GrpcServer", "..\Mlos.Agent.GrpcServer\Mlos.Agent.GrpcServer.csproj", "{09FF0795-659A-454D-95F7-4588A462BA5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartCache.ExperimentSession", "..\Examples\SmartCache\SmartCache.ExperimentSession\SmartCache.ExperimentSession.csproj", "{910C4BEE-2760-4168-BB0C-8F7DEE547F76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,6 +179,13 @@ Global
 		{09FF0795-659A-454D-95F7-4588A462BA5B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{09FF0795-659A-454D-95F7-4588A462BA5B}.Release|x64.ActiveCfg = Release|Any CPU
 		{09FF0795-659A-454D-95F7-4588A462BA5B}.Release|x64.Build.0 = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|x64.ActiveCfg = Debug|x64
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|x64.Build.0 = Debug|x64
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|x64.ActiveCfg = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -193,6 +202,7 @@ Global
 		{02D39538-502B-4536-955D-DE341CD6A9EC} = {E2FE2D85-8635-44E7-8229-23E9B94A3286}
 		{516E3859-CB93-49AF-BF4B-81CE7387B9F7} = {E2FE2D85-8635-44E7-8229-23E9B94A3286}
 		{19F2E5B3-E926-4C2F-B0C1-21413BBFAB9C} = {E2FE2D85-8635-44E7-8229-23E9B94A3286}
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76} = {F7E71C5D-249A-4A48-8DD6-AA24BC119DCC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {06544D88-7921-4992-A52E-CBDE91DE1424}

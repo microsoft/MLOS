@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="AssemblyInitializer.cs" company="Microsoft Corporation">
+// <copyright file="SmartCacheExperimentSession.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root
 // for license information.
@@ -34,25 +34,8 @@ namespace SmartCache
     /// component's shared memory config settings, and pass messages back to the
     /// component on the feedback channel.
     /// </remarks>
-    public static class AssemblyInitializer
+    public class SmartCacheExperimentSession : ExperimentSession
     {
-        // Some variables for the tracking the telemetry received from the smart component.
-
-        /// <summary>
-        /// A running count of the number of hits in the cache.
-        /// </summary>
-        private static int isInCacheCount = 0;
-
-        /// <summary>
-        /// A running count of the total number of requests for the cache.
-        /// </summary>
-        private static int totalRequestCount = 0;
-
-        /// <summary>
-        /// A local reference to the connection to the optimizer service.
-        /// </summary>
-        private static readonly IOptimizerProxy OptimizerProxy;
-
         /// <remarks>
         /// Messages to the optimizer are handled using JSON, so this provides a
         /// standard serialization mechanism from C# Dictionary objects.
@@ -68,7 +51,7 @@ namespace SmartCache
         };
 
         /// <summary>
-        /// Initializes static members of the <see cref="AssemblyInitializer"/> class.
+        /// Initializes a new instance of the <see cref="SmartCacheExperimentSession"/> class.
         /// This is the entry point for setting up the message handlers for the
         /// messages code generated from the (partial) structs defined for this
         /// smart component in the CodeGen/SmartCache.cs.
@@ -76,7 +59,9 @@ namespace SmartCache
         /// <remarks>
         /// See class comments for further details.
         /// </remarks>
-        static AssemblyInitializer()
+        /// <param name="mlosContext"></param>
+        public SmartCacheExperimentSession(MlosContext mlosContext)
+            : base(mlosContext)
         {
             // Setup message callbacks.
             //
@@ -146,15 +131,32 @@ namespace SmartCache
             // Note: we read this from a global variable that should have been
             // setup for the Mlos.Agent (e.g. in the Mlos.Agent.Server).
             //
-            IOptimizerFactory optimizerFactory = MlosContext.Instance.OptimizerFactory;
-            OptimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
+            IOptimizerFactory optimizerFactory = MlosContext.OptimizerFactory;
+            optimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
         }
+
+        // Some variables for the tracking the telemetry received from the smart component.
+
+        /// <summary>
+        /// A running count of the number of hits in the cache.
+        /// </summary>
+        private int isInCacheCount = 0;
+
+        /// <summary>
+        /// A running count of the total number of requests for the cache.
+        /// </summary>
+        private int totalRequestCount = 0;
+
+        /// <summary>
+        /// A local reference to the connection to the optimizer service.
+        /// </summary>
+        private readonly IOptimizerProxy optimizerProxy;
 
         /// <summary>
         /// Handler to be called when receiving a CacheRequestEventMessage.
         /// </summary>
         /// <param name="msg">A reference to the message buffer.</param>
-        private static void CacheRequestEventMessageHandler(SmartCacheProxy.CacheRequestEventMessage msg)
+        private void CacheRequestEventMessageHandler(SmartCacheProxy.CacheRequestEventMessage msg)
         {
             // Update hit rate
             //
@@ -173,7 +175,7 @@ namespace SmartCache
         /// memory region for the component.
         /// </summary>
         /// <param name="msg">A reference to the message buffer (unused).</param>
-        private static void RequestNewConfigurationMessageHandler(SmartCacheProxy.RequestNewConfigurationMessage msg)
+        private void RequestNewConfigurationMessageHandler(SmartCacheProxy.RequestNewConfigurationMessage msg)
         {
             // Get a reference to the smart cache's config stored in shared memory.
             //
@@ -183,7 +185,7 @@ namespace SmartCache
             // configuration based on the stats from CacheRequestEvent telemetry
             // messages we've already received.
             //
-            if (OptimizerProxy != null)
+            if (optimizerProxy != null)
             {
                 if (totalRequestCount != 0)
                 {
@@ -211,12 +213,12 @@ namespace SmartCache
                     //
                     Console.WriteLine("Register an observation");
 
-                    OptimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
+                    optimizerProxy.Register(currentConfigJsonString, "HitRate", hitRate);
                 }
 
                 // Now, ask the optimizer for a new configuration suggestion.
                 //
-                string newConfigJsonString = OptimizerProxy.Suggest();
+                string newConfigJsonString = optimizerProxy.Suggest();
                 Console.WriteLine("Suggesting: " + newConfigJsonString);
 
                 var newConfigDictionary = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(newConfigJsonString);
@@ -245,7 +247,7 @@ namespace SmartCache
             // version of the config from shared memory.
             //
             SharedConfigUpdatedFeedbackMessage feedbackMsg;
-            MlosContext.Instance.FeedbackChannel.SendMessage(ref feedbackMsg);
+            MlosContext.FeedbackChannel.SendMessage(ref feedbackMsg);
         }
     }
 }

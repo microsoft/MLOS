@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace Mlos.Agent.Server
@@ -70,7 +71,16 @@ namespace Mlos.Agent.Server
             };
             targetProcess.ErrorDataReceived += (sendingProcess, outLine) => Console.Error.WriteLine(outLine.Data);
 
-            targetProcess.Start();
+            try
+            {
+                targetProcess.Start();
+            }
+            catch (Win32Exception ex)
+            {
+                // Failed to start the process.
+                //
+                throw new InvalidOperationException($"Failed to start the process: {executableFilePath}", ex);
+            }
 
             targetProcess.BeginOutputReadLine();
             targetProcess.BeginErrorReadLine();
