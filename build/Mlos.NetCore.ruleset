@@ -34,8 +34,6 @@
     <Rule Id="SA1614" Action="Hidden" />
     <!-- Element return value documentation should have text -->
     <Rule Id="SA1616" Action="Info" />
-    <!-- Elements should be separated by blank line -->
-    <Rule Id="SA1516" Action="Info" />
     <!-- Elements should be documented. #TODO remove-->
     <Rule Id="SA1600" Action="Hidden" />
     <!-- File name should match first type name. #TODO remove-->

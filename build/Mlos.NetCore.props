@@ -38,7 +38,7 @@
     <None Remove="objd\**" />
   </ItemGroup>
   <PropertyGroup>
-    <DocumentationFile>$(BaseOutputPath)\doc\$(AssemblyName).xml</DocumentationFile>
+    <DocumentationFile>$(OutputPath)\out\doc\$(AssemblyName).xml</DocumentationFile>
     <!-- Enable documentation file for StyleCop rule SA0001 -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\Mlos.NetCore.ruleset</CodeAnalysisRuleSet>

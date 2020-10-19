@@ -133,6 +133,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe
@@ -278,6 +279,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe
@@ -455,6 +457,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe
@@ -600,6 +603,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe
