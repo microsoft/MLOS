@@ -65,6 +65,10 @@ HRESULT InternalMlosContextInitializer::Initialize()
         hr = m_feedbackChannelMemoryMapView.CreateNew("Test_FeedbackChannelMemory", SharedMemorySize);
     }
 
+    m_globalMemoryRegionView.CleanupOnClose = true;
+    m_controlChannelMemoryMapView.CleanupOnClose = true;
+    m_feedbackChannelMemoryMapView.CleanupOnClose = true;
+
     if (FAILED(hr))
     {
         // Close all the shared maps if we fail to create one.

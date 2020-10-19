@@ -51,26 +51,21 @@ namespace Mlos.Agent.Server
         /// The main external agent server.
         /// </summary>
         /// <param name="args">command line arguments.</param>
-        public static void Main(string[] args)
+        /// <returns>Returns exit code.</returns>
+        public static int Main(string[] args)
         {
-            string executableFilePath;
-            Uri optimizerAddressUri;
-            string settingsRegistryPath;
-            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri, out settingsRegistryPath);
+            CliOptionsParser.CliOptions parserOptions = CliOptionsParser.ParseArgs(args);
 
-            // Check for the executable before setting up any shared memory to
-            // reduce cleanup issues.
-            //
-            if (!string.IsNullOrEmpty(executableFilePath) && !File.Exists(executableFilePath))
+            if (!string.IsNullOrEmpty(parserOptions.ExperimentFilePath) && !File.Exists(parserOptions.ExperimentFilePath))
             {
-                throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
+                throw new FileNotFoundException($"ERROR: --experiment '{parserOptions.ExperimentFilePath}' does not exist.");
             }
 
-            if (!string.IsNullOrEmpty(settingsRegistryPath))
+            if (!string.IsNullOrEmpty(parserOptions.SettingsRegistryPath))
             {
                 // #TODO temporary hack
                 //
-                Environment.SetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH", settingsRegistryPath);
+                Environment.SetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH", parserOptions.SettingsRegistryPath);
             }
 
             Console.WriteLine("Mlos.Agent.Server");
@@ -80,13 +75,13 @@ namespace Mlos.Agent.Server
             // On Linux, we unlink existing shared memory map, if they exist.
             // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
             //
-            using MlosContext mlosContext = (executableFilePath != null)
+            using MlosContext mlosContext = (parserOptions.Executable != null)
                 ? InterProcessMlosContext.Create()
                 : InterProcessMlosContext.CreateOrOpen();
 
             // Connect to gRpc optimizer only if user provided an address in the command line.
             //
-            if (optimizerAddressUri != null)
+            if (parserOptions.OptimizerUri != null)
             {
                 Console.WriteLine("Connecting to the Mlos.Optimizer");
 
@@ -102,21 +97,30 @@ namespace Mlos.Agent.Server
                 // See Also: AssemblyInitializer.cs within the SettingsRegistry
                 // assembly project in question.
                 //
-                mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
+                mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(parserOptions.OptimizerUri);
             }
+
+            var experimentSessionManager = new ExperimentSessionManager(mlosContext);
 
             using var mainAgent = new MainAgent();
             mainAgent.InitializeSharedChannel(mlosContext);
+
+            // If specified, load the experiment assembly.
+            //
+            if (!string.IsNullOrEmpty(parserOptions.ExperimentFilePath))
+            {
+                experimentSessionManager.LoadExperiment(parserOptions.ExperimentFilePath);
+            }
 
             // Active learning mode.
             //
             // TODO: In active learning mode the MlosAgentServer can control the
             // workload against the target component.
             //
-            if (executableFilePath != null)
+            if (parserOptions.Executable != null)
             {
-                Console.WriteLine($"Starting {executableFilePath}");
-                targetProcessManager = new TargetProcessManager(executableFilePath: executableFilePath);
+                Console.WriteLine($"Starting {parserOptions.Executable}");
+                targetProcessManager = new TargetProcessManager(executableFilePath: parserOptions.Executable);
                 targetProcessManager.StartTargetProcess();
             }
             else
@@ -223,7 +227,7 @@ namespace Mlos.Agent.Server
 
             Console.WriteLine("Mlos.Agent exited.");
 
-            Environment.Exit(exitCode);
+            return exitCode;
         }
     }
 }

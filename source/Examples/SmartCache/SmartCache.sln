@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mlos.SettingsSystem.CodeGen
 		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8} = {5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartCache.ExperimentSession", "SmartCache.ExperimentSession\SmartCache.ExperimentSession.csproj", "{910C4BEE-2760-4168-BB0C-8F7DEE547F76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +79,14 @@ Global
 		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Release|Any CPU.Build.0 = Release|Any CPU
 		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Release|x64.ActiveCfg = Release|Any CPU
 		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Release|x64.Build.0 = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|x64.ActiveCfg = Debug|x64
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|x64.Build.0 = Debug|x64
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|x64.ActiveCfg = Release|x64
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

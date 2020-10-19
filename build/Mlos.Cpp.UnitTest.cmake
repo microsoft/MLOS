@@ -74,12 +74,13 @@ set_tests_properties(
 #
 function(add_mlos_agent_server_exe_test_run)
     set(options WITH_OPTIMIZER)
-    set(oneValueArgs NAME EXECUTABLE_TARGET TIMEOUT SETTINGS_REGISTRY_PATH)
+    set(oneValueArgs NAME EXECUTABLE_TARGET TIMEOUT SETTINGS_REGISTRY_PATH EXPERIMENT_SESSION_TARGET)
     cmake_parse_arguments(add_mlos_agent_server_exe_test_run "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     set(WITH_OPTIMIZER ${add_mlos_agent_server_exe_test_run_WITH_OPTIMIZER})
     set(TEST_NAME ${add_mlos_agent_server_exe_test_run_NAME})
     set(TEST_EXECUTABLE_TARGET ${add_mlos_agent_server_exe_test_run_EXECUTABLE_TARGET})
+    set(EXPERIMENT_SESSION_TARGET ${add_mlos_agent_server_exe_test_run_EXPERIMENT_SESSION_TARGET})
 
     if(NOT DEFINED add_mlos_agent_server_exe_test_run_TIMEOUT)
         set(TEST_TIMEOUT ${DEFAULT_CTEST_TIMEOUT})
@@ -99,6 +100,12 @@ function(add_mlos_agent_server_exe_test_run)
         set(OPTIMIZER_ARGS "")
     endif()
 
+    if(DEFINED EXPERIMENT_SESSION_TARGET)
+        set(EXPERIMENT_SESSION_ARGS --experiment "$<TARGET_PROPERTY:${EXPERIMENT_SESSION_TARGET},DOTNET_OUTPUT_DLL>")
+    else()
+        set(EXPERIMENT_SESSION_ARGS "")
+    endif()
+
     # Basically we want to run:
     # $ dotnet Mlos.Agent.Server.dll --executable /some/test/exe
     # However, we need to
@@ -113,6 +120,7 @@ function(add_mlos_agent_server_exe_test_run)
             ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL>
             --executable $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>
             --settings-registry-path "${SETTINGS_REGISTRY_PATH}"
+            ${EXPERIMENT_SESSION_ARGS}
             ${OPTIMIZER_ARGS})
     set_tests_properties(${TEST_NAME} PROPERTIES
         TIMEOUT ${TEST_TIMEOUT}

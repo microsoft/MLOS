@@ -42,6 +42,7 @@
     <Compile Include="ComponentConfig.cs" />
     <Compile Include="DeserializeEntry.cs" />
     <Compile Include="DispatchEntry.cs" />
+    <Compile Include="ExperimentSession.cs" />
     <Compile Include="InterProcessMlosContext.cs" />
     <Compile Include="IntPtrExtensions.cs" />
     <Compile Include="IOptimizationProblem.cs" />
