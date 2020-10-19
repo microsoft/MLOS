@@ -43,7 +43,10 @@ function RenderNotebook()
     # (builds off the nbconvert template)
     nb_basename=$(basename "$nb_path" '.ipynb') # removes .ipynb from file name
     nb_relative_path="$(realpath --relative-to="$MLOS_ROOT" "$(readlink -f "$nb_path")")"
-    sed -i "s|THE_PATH_TO_NOTEBOOK_FROM_MLOS_ROOT|$nb_relative_path|g" "content/notebooks/$nb_basename.md"
+    sed -i \
+        -e "s|THE_PATH_TO_NOTEBOOK_FROM_MLOS_ROOT|$nb_relative_path|g" \
+        -e "s|NOTEBOOK_BASENAME|$nb_basename|g" \
+        "content/notebooks/$nb_basename.md"
 }
 
 # execute and render the notebooks to html
