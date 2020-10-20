@@ -22,7 +22,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
     internal class CppObjectDeserializeRuntimeCallbackCodeWriter : CppCodeWriter
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CppObjectDeserializeRuntimeCallbackCodeWriter"/> class.
         /// </summary>
         public CppObjectDeserializeRuntimeCallbackCodeWriter()
         {

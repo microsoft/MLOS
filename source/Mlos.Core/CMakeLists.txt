@@ -5,6 +5,7 @@ include("${MLOS_ROOT}/build/Mlos.Common.cmake")
 include("${MLOS_ROOT}/build/Mlos.Cpp.cmake")
 
 add_library(${PROJECT_NAME} STATIC
+    ArenaAllocator.cpp
     GlobalMemoryRegion.cpp
     InternalMlosContext.cpp
     InterProcessMlosContext.cpp
@@ -12,6 +13,7 @@ add_library(${PROJECT_NAME} STATIC
     MlosContext.cpp
     NamedEvent.Linux.cpp
     SharedChannel.cpp
+    SharedConfigDictionary.cpp
     SharedConfigManager.cpp
     SharedConfigMemoryRegion.cpp
     SharedMemoryMapView.Linux.cpp)

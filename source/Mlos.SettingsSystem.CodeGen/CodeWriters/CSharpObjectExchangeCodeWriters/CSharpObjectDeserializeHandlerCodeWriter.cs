@@ -22,7 +22,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
     internal class CSharpObjectDeserializeHandlerCodeWriter : CSharpTypeTableCodeWriter
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CSharpObjectDeserializeHandlerCodeWriter"/> class.
         /// </summary>
         /// <param name="sourceTypesAssembly"></param>
         public CSharpObjectDeserializeHandlerCodeWriter(Assembly sourceTypesAssembly)

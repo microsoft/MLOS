@@ -33,6 +33,9 @@ See Also
 
 ### Linux
 
+> You can [pull or build the Docker image](../../../documentation/01-Prerequisites.md#build-the-docker-image) using the
+> [`Dockerfile`](../../../Dockerfile#mlos-github-tree-view) at the root of the repository to get a Linux build environment.
+
 ```sh
 make -C source/Mlos.Agent.Server
 make -C source/Examples/SmartCache all install
@@ -54,20 +57,24 @@ msbuild /m /r source/Examples/SmartCache/SmartCache.vcxproj
 #### Linux
 
 ```sh
-dotnet target/bin/Release/Mlos.Agent.Server.dll --executable target/bin/Release/SmartCache
+dotnet target/bin/Release/Mlos.Agent.Server.dll \
+    --settings-registry-path target/bin/Release/AnyCPU \
+    --executable target/bin/Release/x86_64/SmartCache
 ```
 
 #### Windows
 
-```sh
-dotnet target/bin/Release/Mlos.Agent.Server.dll --executable target/bin/Release/SmartCache.exe
+```cmd
+dotnet target/bin/Release/Mlos.Agent.Server.dll \
+    --settings-registry-path target/bin/Release/AnyCPU \
+    --executable target/bin/Release/x64/SmartCache.exe
 ```
 
 #### Example output
 
 ```txt
 Mlos.Agent.Server
-Starting target/bin/Release/SmartCache
+Starting target/bin/Release/x86_64/SmartCache
 observations: 0
 info: Microsoft.Hosting.Lifetime[0]
       Now listening on: http://localhost:5000
@@ -78,7 +85,7 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: /src/MLOS
 Starting Mlos.Agent
-Found settings registry assembly at target/bin/Release/SmartCache.SettingsRegistry.dll
+Found settings registry assembly at target/bin/Release/AnyCPU/SmartCache.SettingsRegistry.dll
 observations: 1
 observations: 2
 observations: 3
@@ -97,7 +104,7 @@ To also have the SmartCache tune itself by connecting to an optimizer we need to
     start_optimizer_microservice launch --port 50051
     ```
 
-    > This assumes that the `mlos` module has already been installed.
+    > This assumes that the `mlos` module has already been installed and is available on the command search `PATH` environment variable.
     >
     > See the [Python Quickstart documentation](../../../documentation/01-Prerequisites.md#python-quickstart) for details.
 
@@ -106,15 +113,16 @@ To also have the SmartCache tune itself by connecting to an optimizer we need to
 #### Example output
 
 ```sh
-dotnet target/bin/Release/Mlos.Agent.Server.dll \
-    --executable target/bin/Release/SmartCache
+dotnet target/bin/Release/AnyCPU/Mlos.Agent.Server/Mlos.Agent.Server.dll \
+    --executable target/bin/Release/x86_64/SmartCache \
+    --settings-registry-path target/bin/Release/AnyCPU
     --optimizer-uri http://localhost:50051
-```
 
 ```txt
 Mlos.Agent.Server
+<<<<<<< HEAD
 Connecting to the Mlos.Optimizer
-Starting target/bin/Release/SmartCache
+Starting target/bin/Release/x86_64/SmartCache
 observations: 0
 info: Microsoft.Hosting.Lifetime[0]
       Now listening on: http://[::]:5000
@@ -126,7 +134,7 @@ info: Microsoft.Hosting.Lifetime[0]
       Content root path: /src/MLOS
 Starting Mlos.Agent
 Waiting for Mlos.Agent to exit
-Found settings registry assembly at target/bin/Release/SmartCache.SettingsRegistry.dll
+Found settings registry assembly at target/bin/Release/AnyCPU/SmartCache.SettingsRegistry.dll
 Waiting for agent to respond with a new configuration.
 Register {
   "cache_implementation": "LeastRecentlyUsed",
@@ -155,10 +163,9 @@ Once started, `SmartCache` will attempt to register its component specific set o
 That includes the name of the `SettingsRegistry` assembly (`.dll`) corresponding to that component's settings/messages.
 
 The `Mlos.Agent.Server` needs to be told where it can find those assemblies in order to load them so that it can process the messages sent by the component.
-To do that, before we started the `Mlos.Agent.Server`, we can first populate the `MLOS_SETTINGS_REGISTRY_PATH` environment variable with the directory path to the `SmartCache.SettingsRegistry.dll`.
-In this particular case, everything lives in the same directory path and they're found automatically.
+To do that, we use the `--settings-registry-path` option.
 
-In the second example we also tell the `Mlos.Agent.Server` how to connect to the (Python) MLOS Optimizer Service over GRPC so that the application message handlers setup by the `SmartCache.SettingsRegistry` for the agent can request new configuration recommendations on behave of the application
+In the second example we also tell the `Mlos.Agent.Server` how to connect to the (Python) MLOS Optimizer Service over GRPC so that the application message handlers setup by the `SmartCache.SettingsRegistry` for the agent can request new configuration recommendations on behalf of the application.
 
 For additional details, see:
 

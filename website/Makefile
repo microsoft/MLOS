@@ -1,6 +1,10 @@
 # A simple Makefile to help build all of the web page documentation from the
 # source code and repo markdown docs.
 
+# Make sure to check the usual pip install location for commands.
+PATH := $(PATH):${HOME}/.local/bin
+export PATH
+
 .PHONY:
 all: public/python_api public/index.html test
 

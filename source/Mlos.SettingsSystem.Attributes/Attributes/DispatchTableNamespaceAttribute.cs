@@ -20,7 +20,7 @@ namespace Mlos.SettingsSystem.Attributes
     public class DispatchTableNamespaceAttribute : BaseCodegenAttribute
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="DispatchTableNamespaceAttribute"/> class.
         /// </summary>
         /// <param name="namespace"></param>
         public DispatchTableNamespaceAttribute(string @namespace)
@@ -29,8 +29,8 @@ namespace Mlos.SettingsSystem.Attributes
         }
 
         /// <summary>
-        /// DispatchTable namespace.
+        /// Gets dispatchTable namespace.
         /// </summary>
-        public string Namespace { get; private set; }
+        public string Namespace { get; }
     }
 }

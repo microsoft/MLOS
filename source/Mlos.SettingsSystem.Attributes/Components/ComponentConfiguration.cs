@@ -15,11 +15,23 @@ namespace Mlos.SettingsSystem.Components
     /// </summary>
     public struct ComponentConfiguration : IEquatable<ComponentConfiguration>
     {
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static bool operator ==(ComponentConfiguration left, ComponentConfiguration right)
         {
             return left.Equals(right);
         }
 
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
         public static bool operator !=(ComponentConfiguration left, ComponentConfiguration right)
         {
             return !(left == right);
@@ -43,6 +55,7 @@ namespace Mlos.SettingsSystem.Components
                 SuggestedConfigId == other.SuggestedConfigId;
         }
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return base.GetHashCode();

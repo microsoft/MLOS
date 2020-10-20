@@ -20,7 +20,14 @@ namespace Mlos
 {
 namespace Core
 {
-#pragma warning( disable : 4355)
+#ifdef _MSC_VER
+// Disable MSVC warning:
+//  The this pointer is valid only within nonstatic member functions.
+//  It cannot be used in the initializer list for a base class.
+//
+#pragma warning(push)
+#pragma warning(disable : 4355)
+#endif
 
 //----------------------------------------------------------------------------
 // NAME: MlosContext constructor.
@@ -44,7 +51,9 @@ MlosContext::MlosContext(
 {
 }
 
-#pragma warning( default : 4355)
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 //----------------------------------------------------------------------------
 // NAME: MlosContext::RegisterSettingsAssembly
@@ -61,28 +70,6 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     const char* assemblyFileName,
     uint32_t assemblyDispatchTableBaseIndex)
 {
-#ifdef _WIN64
-    HMODULE hModule = GetModuleHandleW(nullptr);
-    if (hModule == nullptr)
-    {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-
-    char szApplicationFullPath[MAX_PATH];
-    constexpr size_t cchApplicationFullPath = _countof(szApplicationFullPath);
-
-    if (!GetModuleFileNameA(hModule, szApplicationFullPath, cchApplicationFullPath))
-    {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-#else
-    // For Linux we don't have system methods for discovering the location of dll files.
-    // Instead, we return null here and provide environment variable hooks in Mlos.Agent
-    // to aid searching for the settings registry assembly (akin to LD_LIBRARY_PATH).
-    //
-    char* szApplicationFullPath = nullptr;
-#endif
-
     uint32_t assemblyIndex = m_globalMemoryRegion.RegisteredSettingsAssemblyCount;
 
     // Check if there is already a config for the given assembly index.
@@ -102,10 +89,13 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     // Register assembly information as a config.
     //
     registeredSettingAssembly.DispatchTableBaseIndex = assemblyDispatchTableBaseIndex;
-    registeredSettingAssembly.ApplicationFilePath = szApplicationFullPath;
     registeredSettingAssembly.AssemblyFileName = assemblyFileName;
 
-    hr = RegisterComponentConfig(registeredSettingAssembly);
+    // Register settings assembly in the global shared region.
+    //
+    hr = SharedConfigManager::CreateOrUpdateFrom(
+        m_globalMemoryRegion.SharedConfigDictionary,
+        registeredSettingAssembly);
 
     if (SUCCEEDED(hr))
     {
@@ -115,10 +105,10 @@ HRESULT MlosContext::RegisterSettingsAssembly(
 
         // Send message to Mlos.Agent to load the settings assembly.
         //
-        Internal::RegisterAssemblyRequestMessage registerAssemblyRequestMsg = { 0 };
-        registerAssemblyRequestMsg.AssemblyIndex = assemblyIndex;
+        Internal::RegisterSettingsAssemblyRequestMessage msg = { 0 };
+        msg.AssemblyIndex = assemblyIndex;
 
-        m_controlChannel.SendMessage(registerAssemblyRequestMsg);
+        m_controlChannel.SendMessage(msg);
     }
 
     return hr;

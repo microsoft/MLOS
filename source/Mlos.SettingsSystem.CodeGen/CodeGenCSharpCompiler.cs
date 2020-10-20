@@ -10,7 +10,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 
 using Microsoft.CodeAnalysis;
@@ -118,27 +117,27 @@ namespace Mlos.SettingsSystem.CodeGen
     internal struct CompilerOutput
     {
         /// <summary>
-        /// Contains compiled assembly.
+        /// Gets the compiled assembly.
         /// </summary>
         public Assembly Assembly { get; }
 
         /// <summary>
-        /// Contains compilation results.
+        /// Gets the compilation results.
         /// </summary>
         public EmitResult EmitResult { get; }
 
         /// <summary>
-        /// Contains code comments.
+        /// Gets the code comments reader instance.
         /// </summary>
         public CodeCommentsReader CodeComments { get; }
 
         /// <summary>
-        /// Contains compiled syntax trees.
+        /// Gets the compiled syntax tree.
         /// </summary>
         public CSharpCompilation Compilation { get; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CompilerOutput"/> struct.
         /// </summary>
         /// <param name="assembly"></param>
         /// <param name="emitResult"></param>

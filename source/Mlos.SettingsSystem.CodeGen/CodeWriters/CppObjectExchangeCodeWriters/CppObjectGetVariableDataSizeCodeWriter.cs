@@ -67,17 +67,15 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
         /// <param name="sourceType"></param>
         public override void BeginVisitType(Type sourceType)
         {
-            // If serialization is sized size, do nothing.
-            //
             string cppElementTypeFullName = CppTypeMapper.GenerateCppFullTypeName(sourceType);
 
             WriteBlock($@"
                 template<>
                 inline size_t GetVariableDataSize<{cppElementTypeFullName}>(const {cppElementTypeFullName}& object)
                 {{
-                    // Define local variable used to calculate total length of variable length fields.
+                    // Define a local variable to calculate total data size for all the variable length fields.
                     //
-                    size_t length = 0;");
+                    size_t dataSize = 0;");
 
             IndentationLevel++;
         }
@@ -88,7 +86,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
         /// <param name="sourceType"></param>
         public override void EndVisitType(Type sourceType)
         {
-            WriteLine("return length;");
+            WriteLine("return dataSize;");
             IndentationLevel--;
             WriteLine("}");
             WriteLine();
@@ -102,14 +100,14 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
         {
             if (!cppField.CppType.HasVariableData)
             {
-                // Ignore field with sized size.
+                // Ignore the fixed size fields.
                 //
                 return;
             }
 
             string fieldName = cppField.FieldInfo.Name;
 
-            WriteLine($"length += {Constants.ObjectSerializationNamespace}::GetVariableDataSize(object.{fieldName});");
+            WriteLine($"dataSize += {Constants.ObjectSerializationNamespace}::GetVariableDataSize(object.{fieldName});");
         }
     }
 }

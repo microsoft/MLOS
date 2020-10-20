@@ -19,26 +19,34 @@ namespace Mlos.Core
     /// optimizer connection for those message handlers to use.
     /// </summary>
     /// <remarks>
-    /// See Also: Mlos.Core/MlosContext.h for the corresponding C++ smart
-    /// component side.
+    /// See Also: Mlos.Core/MlosContext.h for the corresponding C++ smart component side.
     /// </remarks>
     public abstract class MlosContext : IDisposable
     {
+        /// <summary>
+        /// Gets or sets the global Mlos context.
+        /// </summary>
+        /// <remarks>
+        /// #TODO, we need an experiment class to be able pass the instance of the context.
+        /// </remarks>
+        public static MlosContext Instance { get; set; }
+
         #region Shared public objects
 
         /// <summary>
         /// Gets or sets the control channel instance.
-        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
         /// </summary>
-        public static ISharedChannel ControlChannel { get; protected set; }
+        public ISharedChannel ControlChannel { get; protected set; }
 
         /// <summary>
         /// Gets or sets the feedback channel instance.
-        /// #TODO, those should not be static. Pass a MlosContext to the experiment class.
         /// </summary>
-        public static ISharedChannel FeedbackChannel { get; protected set; }
+        public ISharedChannel FeedbackChannel { get; protected set; }
 
-        public static ISharedConfigAccessor SharedConfigManager { get; set; }
+        /// <summary>
+        /// Gets or sets the shared config manager.
+        /// </summary>
+        public SharedConfigManager SharedConfigManager { get; protected set; }
 
         /// <summary>
         /// Gets or sets the connection to the optimizer.
@@ -50,14 +58,13 @@ namespace Mlos.Core
         /// use (see SmartCache.SettingsRegistry/AssemblyInitializer.cs for an
         /// example).
         /// </remarks>
-        public static IOptimizerFactory OptimizerFactory { get; set; }
+        public IOptimizerFactory OptimizerFactory { get; set; }
 
         #endregion
 
         protected SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView;
         protected SharedMemoryMapView controlChannelMemoryMapView;
         protected SharedMemoryMapView feedbackChannelMemoryMapView;
-        protected SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView;
 
         protected NamedEvent controlChannelNamedEvent;
         protected NamedEvent feedbackChannelNamedEvent;
@@ -82,14 +89,16 @@ namespace Mlos.Core
             feedbackChannelMemoryMapView?.Dispose();
             feedbackChannelMemoryMapView = null;
 
-            sharedConfigMemoryMapView?.Dispose();
-            sharedConfigMemoryMapView = null;
-
             controlChannelNamedEvent?.Dispose();
             controlChannelNamedEvent = null;
 
             feedbackChannelNamedEvent?.Dispose();
             feedbackChannelNamedEvent = null;
+
+            // Finally dispose the shared config manager.
+            //
+            SharedConfigManager?.Dispose();
+            SharedConfigManager = null;
 
             isDisposed = true;
         }
@@ -99,10 +108,6 @@ namespace Mlos.Core
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
-
-        public MlosProxyInternal.GlobalMemoryRegion GlobalMemoryRegion => globalMemoryRegionView.MemoryRegion();
-
-        public MlosProxyInternal.SharedConfigMemoryRegion SharedConfigMemoryRegion => sharedConfigMemoryMapView.MemoryRegion();
 
         /// <summary>
         /// Terminate the control channel.
@@ -141,5 +146,10 @@ namespace Mlos.Core
         {
             return !FeedbackChannel.SyncObject.TerminateChannel.Load();
         }
+
+        /// <summary>
+        /// Gets a global memory region proxy object.
+        /// </summary>
+        public MlosProxyInternal.GlobalMemoryRegion GlobalMemoryRegion => globalMemoryRegionView.MemoryRegion();
     }
 }

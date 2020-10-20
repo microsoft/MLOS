@@ -1,12 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- If not specified, be sure to default to 64-bit builds (same as Mlos.Cpp.props). -->
   <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
-  <Import Project="$(BaseDir)\build\Mlos.TestRun.targets" />
+  <PropertyGroup>
+    <!-- Resolve which Platform is used to build managed projects. -->
+    <DefaultNetCorePlatform>$(Platform)</DefaultNetCorePlatform>
+    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">$(BuildArchitecture)</DefaultNetCorePlatform>
+    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">AnyCPU</DefaultNetCorePlatform>
+    <SettingsAssemblyBinplaceDir>$(BinplaceBaseRootDir)\$(BuildType)\$(DefaultNetCorePlatform)</SettingsAssemblyBinplaceDir>
+    <!-- If not defined, use x64 Platform (same as Mlos.Cpp.props). -->
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+  </PropertyGroup>
+  <!-- Include TestRun targets. -->
   <ItemGroup Label="References">
     <ProjectReference Include="$(BaseDir)\source\Mlos.Agent.Server\Mlos.Agent.Server.csproj" />
     <ProjectReference Include="$(BaseDir)\source\Mlos.UnitTest\Mlos.UnitTest.vcxproj" />
     <ProjectReference Include="$(BaseDir)\source\Mlos.NetCore.UnitTest\Mlos.NetCore.UnitTest.csproj" />
+    <ProjectReference Include="$(BaseDir)\source\Examples\SmartCache\SmartCache.vcxproj" />
   </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.TestRun.targets" />
   <!-- Determine the correct path to each of the output of ProjectReferences. -->
   <Target Name="ComputeProjectReferenceOutputs" BeforeTargets="Test">
     <MSBuild Projects="$(BaseDir)\source\Mlos.Agent.Server\Mlos.Agent.Server.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
@@ -21,8 +33,8 @@
   </Target>
   <!-- FIXME: Disabling running tests via QuickBuild for now.  Convert them to QTests (#122). -->
   <Target Name="Test" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(RunUnitTest)' != 'false'">
-    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; --executable &quot;$(BinplaceDir)\Mlos.UnitTest.exe&quot;" />
-    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; --executable &quot;$(BinplaceDir)\SmartCache.exe&quot;" />
+    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)\Mlos.UnitTest.exe&quot;" />
+    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)\SmartCache.exe&quot;" />
     <Exec Command="dotnet test &quot;@(MlosNetCoreUnitTestOutput->'%(fullpath)')&quot;" />
   </Target>
 </Project>

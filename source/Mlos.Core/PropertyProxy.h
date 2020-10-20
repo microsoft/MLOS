@@ -93,7 +93,7 @@ inline bool VerifyVariableData(
 {
     size_t codegenTypeSize = sizeof(typename TProxy::RealObjectType);
 
-    for (int i = 0; i < N; i++)
+    for (uint32_t i = 0; i < N; i++)
     {
         if (!VerifyVariableData(array[i], objectOffset + i * codegenTypeSize, totalDataSize, expectedDataOffset))
         {

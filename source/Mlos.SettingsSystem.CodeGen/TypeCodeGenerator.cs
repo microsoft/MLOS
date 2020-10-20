@@ -18,52 +18,83 @@ using Mlos.SettingsSystem.CodeGen.CodeWriters;
 
 namespace Mlos.SettingsSystem.CodeGen
 {
+    /// <summary>
+    /// Code generator.
+    /// </summary>
     internal class TypeCodeGenerator
     {
+        /// <summary>
+        /// Gets or sets code writer instance.
+        /// </summary>
         internal CodeWriter CodeWriter { get; set; }
+
+        /// <summary>
+        /// Gets or sets source compilation object.
+        /// </summary>
+        /// <remarks>
+        /// Used to locate class or field definition in the source file.
+        /// </remarks>
         internal Compilation SourceCompilation { get; set; }
+
+        /// <summary>
+        /// Gets or sets the code comment reader instance.
+        /// </summary>
         internal CodeCommentsReader SourceCodeComments { get; set; }
+
+        /// <summary>
+        /// Gets or sets list of errors found during code gen phase.
+        /// </summary>
         internal List<CodegenError> CodeGenErrors { get; set; }
 
-        private void AddUnsupportedFieldTypeError(Type sourceType, FieldInfo fieldInfo) => this.CodeGenErrors.Add(new CodegenError
-        {
-            ErrorNumber = "Not supported type",
-            ErrorText = $"Unsupported field type of class '{sourceType.ToString()}'",
-            IsWarning = false,
-            FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
-        });
+        private void AddUnsupportedFieldTypeError(Type sourceType, FieldInfo fieldInfo) =>
+            CodeGenErrors.Add(
+                new CodegenError
+                {
+                    ErrorNumber = "Not supported type",
+                    ErrorText = $"Unsupported field type of class '{sourceType}'",
+                    IsWarning = false,
+                    FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
+                });
 
-        private void AddUntaggedOrNoneScalarPublicSettingRegistryField(Type sourceType, FieldInfo fieldInfo) => this.CodeGenErrors.Add(new CodegenError
-        {
-            ErrorNumber = "Untagged or non-scalar public SettingRegistry field",
-            ErrorText = $"Public field '{fieldInfo.Name}' in SettingsRegistry type '{sourceType.FullName}' is not a scalar or not tagged as an Mlos code gened field.",
-            IsWarning = false,
-            FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
-        });
+        private void AddUntaggedOrNoneScalarPublicSettingRegistryField(Type sourceType, FieldInfo fieldInfo) =>
+            CodeGenErrors.Add(
+                new CodegenError
+                {
+                    ErrorNumber = "Untagged or non-scalar public SettingRegistry field",
+                    ErrorText = $"Public field '{fieldInfo.Name}' in SettingsRegistry type '{sourceType.FullName}' is not a scalar or not tagged as an Mlos code gened field.",
+                    IsWarning = false,
+                    FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
+                });
 
-        private void AddInvalidAlignmentSizeError(Type sourceType, FieldInfo fieldInfo) => this.CodeGenErrors.Add(new CodegenError
-        {
-            ErrorNumber = "Invalid alignment size",
-            ErrorText = "Alignment size is required to be a power of 2.",
-            IsWarning = false,
-            FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
-        });
+        private void AddInvalidAlignmentSizeError(Type sourceType, FieldInfo fieldInfo) =>
+            CodeGenErrors.Add(
+                new CodegenError
+                {
+                    ErrorNumber = "Invalid alignment size",
+                    ErrorText = $"Alignment size for field '{fieldInfo.Name}' of class '{sourceType}' is required to be a power of 2.",
+                    IsWarning = false,
+                    FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
+                });
 
-        private void AddMissingFieldReadonlyModifierError(Type sourceType, FieldInfo fieldInfo) => this.CodeGenErrors.Add(new CodegenError
-        {
-            ErrorNumber = "Missing field readonly modifier",
-            ErrorText = $"Fixed size array field {fieldInfo.Name} of class '{sourceType.ToString()}' should be readonly",
-            IsWarning = false,
-            FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
-        });
+        private void AddMissingFieldReadonlyModifierError(Type sourceType, FieldInfo fieldInfo) =>
+            CodeGenErrors.Add(
+           new CodegenError
+                {
+                    ErrorNumber = "Missing field readonly modifier",
+                    ErrorText = $"Fixed size array field '{fieldInfo.Name}' of class '{sourceType}' should be readonly",
+                    IsWarning = false,
+                    FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
+                });
 
-        private void AddIncorrectDefinitionError(Type sourceType, FieldInfo fieldInfo) => this.CodeGenErrors.Add(new CodegenError
-        {
-            ErrorNumber = "Incorrect definition",
-            ErrorText = $"FixedArray can be only used in class '{sourceType}'",
-            IsWarning = false,
-            FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
-        });
+        private void AddIncorrectDefinitionError(Type sourceType, FieldInfo fieldInfo) =>
+            CodeGenErrors.Add(
+                new CodegenError
+                {
+                    ErrorNumber = "Incorrect definition",
+                    ErrorText = $"FixedArray can be only used in class '{sourceType}'",
+                    IsWarning = false,
+                    FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
+                });
 
         /// <summary>
         /// Generate the necessary code for a given type.
@@ -116,7 +147,7 @@ namespace Mlos.SettingsSystem.CodeGen
             //
             uint cppStructOffset = 0;
 
-            // Calculate the type aligment, this is required when type is used as inner type in other types.
+            // Calculate the type alignment, this is required when type is used as inner type in other types.
             //
             uint alignment = 1;
 
@@ -208,13 +239,13 @@ namespace Mlos.SettingsSystem.CodeGen
             }
             else
             {
-                // Explicity defined size, calculate padding.
+                // Explicitly defined size, calculate padding.
                 //
                 paddingSize = (uint)sourceType.StructLayoutAttribute.Size - cppStructOffset;
                 cppStructOffset += paddingSize;
             }
 
-            // Check the final structure aligment.
+            // Check the final structure alignment.
             //
             AlignAttribute alignmentAttribute = sourceType.GetCustomAttribute<AlignAttribute>();
 
@@ -359,9 +390,24 @@ namespace Mlos.SettingsSystem.CodeGen
     /// </summary>
     internal struct CodegenError
     {
+        /// <summary>
+        /// Gets or sets the compilation error number.
+        /// </summary>
         internal string ErrorNumber { get; set; }
+
+        /// <summary>
+        /// Gets or sets the compilation error text.
+        /// </summary>
         internal string ErrorText { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the value indicating if this is a warning.
+        /// </summary>
         internal bool IsWarning { get; set; }
+
+        /// <summary>
+        /// Gets or sets the file name and line number where the error occurred.
+        /// </summary>
         internal FileLinePositionSpan FileLinePosition { get; set; }
     }
 }

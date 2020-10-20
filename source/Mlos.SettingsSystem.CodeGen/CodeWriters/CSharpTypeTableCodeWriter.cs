@@ -22,12 +22,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
     internal abstract class CSharpTypeTableCodeWriter : CodeWriter
     {
         /// <summary>
-        /// Namespace used to create DispatchTable.
+        /// Gets namespace used to create DispatchTable.
         /// </summary>
         protected string DispatchTableCSharpNamespace { get; private set; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CSharpTypeTableCodeWriter"/> class.
         /// </summary>
         /// <remarks>
         /// Get DispatchTable namespace from the custom assembly attribute.
@@ -111,7 +111,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         }
 
         /// <summary>
-        /// Total number of classes.
+        /// Gets or sets total number of classes.
         /// </summary>
         protected int ClassCount { get; set; }
 

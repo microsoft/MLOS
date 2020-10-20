@@ -26,8 +26,6 @@ namespace Mlos.Core
         private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event"; //// FIXME: Use non-backslashes for Linux environments.
         private const string FeedbackChannelSemaphoreName = @"Global\FeedbackChannel_Event";
 
-        private const string SharedConfigMemoryMapName = "Host_Mlos.Config.SharedMemory";
-
         private const int SharedMemorySize = 65536;
 
         /// <summary>
@@ -38,10 +36,9 @@ namespace Mlos.Core
         {
             // Create or open the memory mapped files.
             //
-            SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.Create(ControlChannelMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.Create(FeedbackChannelMemoryMapName, SharedMemorySize);
-            SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView = SharedMemoryRegionView.Create<MlosProxyInternal.SharedConfigMemoryRegion>(SharedConfigMemoryMapName, SharedMemorySize);
+            SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.CreateNew(ControlChannelMemoryMapName, SharedMemorySize);
+            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.CreateNew(FeedbackChannelMemoryMapName, SharedMemorySize);
 
             // Create channel synchronization primitives.
             //
@@ -52,7 +49,6 @@ namespace Mlos.Core
                 globalMemoryRegionView,
                 controlChannelMemoryMapView,
                 feedbackChannelMemoryMapView,
-                sharedConfigMemoryMapView,
                 controlChannelNamedEvent,
                 feedbackChannelNamedEvent);
         }
@@ -68,7 +64,6 @@ namespace Mlos.Core
             SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
             SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(ControlChannelMemoryMapName, SharedMemorySize);
             SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(FeedbackChannelMemoryMapName, SharedMemorySize);
-            SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.SharedConfigMemoryRegion>(SharedConfigMemoryMapName, SharedMemorySize);
 
             // Create channel synchronization primitives.
             //
@@ -79,26 +74,35 @@ namespace Mlos.Core
                 globalMemoryRegionView,
                 controlChannelMemoryMapView,
                 feedbackChannelMemoryMapView,
-                sharedConfigMemoryMapView,
                 controlChannelNamedEvent,
                 feedbackChannelNamedEvent);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InterProcessMlosContext"/> class.
+        /// </summary>
+        /// <param name="globalMemoryRegionView"></param>
+        /// <param name="controlChannelMemoryMapView"></param>
+        /// <param name="feedbackChannelMemoryMapView"></param>
+        /// <param name="controlChannelNamedEvent"></param>
+        /// <param name="feedbackChannelNamedEvent"></param>
         internal InterProcessMlosContext(
             SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView,
             SharedMemoryMapView controlChannelMemoryMapView,
             SharedMemoryMapView feedbackChannelMemoryMapView,
-            SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView,
             NamedEvent controlChannelNamedEvent,
             NamedEvent feedbackChannelNamedEvent)
         {
             this.globalMemoryRegionView = globalMemoryRegionView;
             this.controlChannelMemoryMapView = controlChannelMemoryMapView;
             this.feedbackChannelMemoryMapView = feedbackChannelMemoryMapView;
-            this.sharedConfigMemoryMapView = sharedConfigMemoryMapView;
 
             this.controlChannelNamedEvent = controlChannelNamedEvent;
             this.feedbackChannelNamedEvent = feedbackChannelNamedEvent;
+
+            // Create the shared config manager.
+            //
+            SharedConfigManager = new SharedConfigManager();
 
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
 
@@ -146,9 +150,12 @@ namespace Mlos.Core
                 globalMemoryRegionView.CleanupOnClose = true;
                 controlChannelMemoryMapView.CleanupOnClose = true;
                 feedbackChannelMemoryMapView.CleanupOnClose = true;
-                sharedConfigMemoryMapView.CleanupOnClose = true;
                 controlChannelNamedEvent.CleanupOnClose = true;
                 feedbackChannelNamedEvent.CleanupOnClose = true;
+
+                // Close all the shared config memory regions.
+                //
+                SharedConfigManager.CleanupOnClose = true;
             }
 
             base.Dispose(disposing);

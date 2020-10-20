@@ -8,6 +8,8 @@
     <RootNamespace>Mlos.Core</RootNamespace>
     <AssemblyName>Mlos.NetCore</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Do not binplace Mlos.NetCore to the Settings Registry Assemblies folder. -->
+    <SkipBinplaceSettingsRegistry>true</SkipBinplaceSettingsRegistry>
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
   <PropertyGroup Label="SettingsRegistryOutput">
@@ -16,21 +18,22 @@
   <ItemGroup Label="SettingsRegistryDefs">
     <SettingsRegistryDef Include="Codegen\ArenaAllocator.cs" />
     <SettingsRegistryDef Include="Codegen\AssemblyInfo.cs" />
-    <SettingsRegistryDef Include="Codegen\ComponentAssembly.cs" />
     <SettingsRegistryDef Include="Codegen\GlobalMemoryRegion.cs" />
     <SettingsRegistryDef Include="Codegen\MemoryRegion.cs" />
+    <SettingsRegistryDef Include="Codegen\SettingsRegistryAssembly.cs" />
     <SettingsRegistryDef Include="Codegen\SharedChannel.cs" />
     <SettingsRegistryDef Include="Codegen\SharedConfig.cs" />
     <SettingsRegistryDef Include="Codegen\SharedConfigMemoryRegion.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Collections\FNVHashFunction.cs" />
     <Compile Include="Collections\IHashValueOperators.cs" />
     <Compile Include="Collections\IProbingPolicy.cs" />
-    <Compile Include="Collections\FNVHashFunction.cs" />
     <Compile Include="Collections\MurMur2HashFunction.cs" />
     <Compile Include="Collections\MurMur3HashFunction.cs" />
+    <Compile Include="MemoryRegions\ArenaAllocatorExtensions.cs" />
     <Compile Include="MemoryRegions\MemoryRegionViewExtensions.cs" />
-    <Compile Include="MemoryRegions\SharedConfigMemoryRegionExtensions.cs" />
+    <Compile Include="MemoryRegions\SharedConfigDictionaryExtensions.cs" />
     <Compile Include="StdTypes\AtomicTypes.cs" />
     <Compile Include="StdTypes\StringTypes.cs" />
     <Compile Include="ArrayExtensions.cs" />
@@ -47,8 +50,8 @@
     <Compile Include="ISharedConfigAccessor.cs" />
     <Compile Include="MlosContext.cs" />
     <Compile Include="NamedEvent.cs" />
-    <Compile Include="NamedSemaphore.Linux.cs" />
     <Compile Include="NamedEvent.Windows.cs" />
+    <Compile Include="NamedSemaphore.Linux.cs" />
     <Compile Include="Native.Linux.cs" />
     <Compile Include="Native.Windows.cs" />
     <Compile Include="PropertyProxyArray.cs" />
@@ -58,6 +61,7 @@
     <Compile Include="SharedChannel.cs" />
     <Compile Include="SharedChannelPolicies.cs" />
     <Compile Include="SharedConfig.cs" />
+    <Compile Include="SharedConfigDictionaryLookup.cs" />
     <Compile Include="SharedConfigManager.cs" />
     <Compile Include="SharedMemoryMapView.cs" />
     <Compile Include="SharedMemoryMapView.Linux.cs" />

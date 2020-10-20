@@ -34,7 +34,7 @@ namespace Mlos.Core
         public static bool operator !=(PropertyProxyArray<T> left, PropertyProxyArray<T> right) => !(left == right);
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="PropertyProxyArray{T}"/> struct.
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="typeSize">Size of the underlaying proxy type.</param>

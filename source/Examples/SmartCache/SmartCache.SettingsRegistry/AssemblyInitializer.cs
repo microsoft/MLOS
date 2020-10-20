@@ -25,7 +25,7 @@ namespace SmartCache
     /// <remarks>
     /// This class is instantiated by the C# Mlos.Agent (MainAgent.cs -
     /// RegisterSettingsAssembly) which calls
-    /// <seealso cref="SettingsAssemblyManager.RegisterAssembly" /> to invoke
+    /// <seealso cref="SettingsAssemblyManager" /> to invoke
     /// this one time initialization code for the settings and message handlers
     /// for this component's Settings Registry. This allows the Mlos.Agent (which
     /// is generic) to invoke the appropriate handlers for the component specific
@@ -68,6 +68,7 @@ namespace SmartCache
         };
 
         /// <summary>
+        /// Initializes static members of the <see cref="AssemblyInitializer"/> class.
         /// This is the entry point for setting up the message handlers for the
         /// messages code generated from the (partial) structs defined for this
         /// smart component in the CodeGen/SmartCache.cs.
@@ -145,7 +146,7 @@ namespace SmartCache
             // Note: we read this from a global variable that should have been
             // setup for the Mlos.Agent (e.g. in the Mlos.Agent.Server).
             //
-            IOptimizerFactory optimizerFactory = MlosContext.OptimizerFactory;
+            IOptimizerFactory optimizerFactory = MlosContext.Instance.OptimizerFactory;
             OptimizerProxy = optimizerFactory?.CreateRemoteOptimizer(optimizationProblem: optimizationProblem);
         }
 
@@ -176,7 +177,7 @@ namespace SmartCache
         {
             // Get a reference to the smart cache's config stored in shared memory.
             //
-            SmartCacheProxy.SmartCacheConfig smartCacheConfig = MlosContext.SharedConfigManager.Lookup<SmartCacheProxy.SmartCacheConfig>().Config;
+            SmartCacheProxy.SmartCacheConfig smartCacheConfig = MlosContext.Instance.SharedConfigManager.Lookup<SmartCacheProxy.SmartCacheConfig>().Config;
 
             // If we have a connection to the optimizer, then ask it for a new
             // configuration based on the stats from CacheRequestEvent telemetry
@@ -244,7 +245,7 @@ namespace SmartCache
             // version of the config from shared memory.
             //
             SharedConfigUpdatedFeedbackMessage feedbackMsg;
-            MlosContext.FeedbackChannel.SendMessage(ref feedbackMsg);
+            MlosContext.Instance.FeedbackChannel.SendMessage(ref feedbackMsg);
         }
     }
 }

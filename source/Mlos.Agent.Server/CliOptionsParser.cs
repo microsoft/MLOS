@@ -28,21 +28,29 @@ namespace Mlos.Agent.Server
         /// <param name="args">The input arguments to parse.</param>
         /// <param name="executablePath">The path to the executable found in the cli args.</param>
         /// <param name="optimizerUri">The optimizer uri found in the cli args.</param>
-        public static void ParseArgs(string[] args, out string executablePath, out Uri optimizerUri)
+        /// <param name="settingsRegistryPath">The path to the settings registry folder.</param>
+        public static void ParseArgs(
+            string[] args,
+            out string executablePath,
+            out Uri optimizerUri,
+            out string settingsRegistryPath)
         {
             string executableFilePath = null;
             Uri optimizerAddressUri = null;
+            string settingsRegistryFolderPath = null;
 
             IEnumerable<string> extraArgs = null;
 
-            var cliOptsParser = new Parser(with => with.HelpWriter = null);
+            using var cliOptsParser = new Parser(with => with.HelpWriter = null);
             var cliOptsParseResult = cliOptsParser.ParseArguments<CliOptions>(args)
                 .WithParsed(parsedOptions =>
                 {
                     executableFilePath = parsedOptions.Executable;
                     optimizerAddressUri = parsedOptions.OptimizerUri;
+                    settingsRegistryFolderPath = parsedOptions.SettingsRegistryPath;
                     extraArgs = parsedOptions.ExtraArgs;
                 });
+
             if (cliOptsParseResult.Tag == ParserResultType.NotParsed)
             {
                 cliOptsParseResult.WithNotParsed(errs => ShowUsageHelp(
@@ -55,12 +63,11 @@ namespace Mlos.Agent.Server
                 ShowUsageHelp(cliOptsParseResult, msg: "ERROR: Unknown arguments: " + string.Join(" ", extraArgs));
             }
 
-            cliOptsParser.Dispose();
-
             // Populate the output variables
             //
             executablePath = executableFilePath;
             optimizerUri = optimizerAddressUri;
+            settingsRegistryPath = settingsRegistryFolderPath;
         }
 
         /// <summary>
@@ -119,12 +126,12 @@ namespace Mlos.Agent.Server
                         string.Empty,
 
                         "usage mode 3:  Start an executable to communicate over freshly prepared global shared memory.",
-                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable",
+                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable --settings-registry-path path/to/settings_assemblies",
                         string.Empty,
 
                         "usage mode 4:  Start an executable to communicate over freshly prepared global shared memory and "
                         + "prepare to communicate with an MLOS optimizer listening at the given Grpc URI.",
-                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable --optimizer-uri http://localhost:50051",
+                        "    dotnet Mlos.Agent.Server.dll --executable path/to/executable  --settings-registry-path path/to/settings_assemblies --optimizer-uri http://localhost:50051",
                         string.Empty,
 
                         "Note: the optimizer service used in these examples can be started using the 'start_optimizer_microservice "
@@ -146,6 +153,9 @@ namespace Mlos.Agent.Server
 
             [Option("optimizer-uri", Required = false, Default = null, HelpText = "A URI to connect to the MLOS Optimizer service over GRPC (e.g. 'http://localhost:50051').")]
             public Uri OptimizerUri { get; set; }
+
+            [Option("settings-registry-path", Required = false, Default = null, HelpText = "A path to a folder with the settings registry assemblies.")]
+            public string SettingsRegistryPath { get; set; }
 
             /// <remarks>
             /// Just used to detect any extra arguments so we can throw a warning.

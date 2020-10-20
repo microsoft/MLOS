@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="ComponentAssembly.cs" company="Microsoft Corporation">
+// <copyright file="SettingsRegistryAssembly.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root
 // for license information.
@@ -11,17 +11,17 @@ using Mlos.SettingsSystem.StdTypes;
 
 namespace Mlos.Core.Internal
 {
+    /// <summary>
+    /// The structure contains information about registered assembly settings.
+    /// </summary>
+    /// <remarks>
+    /// Registered settings assemblies are stored in the global memory shared dictionary.
+    /// </remarks>
     [CodegenConfig]
     public partial struct RegisteredSettingsAssemblyConfig
     {
         [ScalarSetting(isPrimaryKey: true)]
         internal uint AssemblyIndex;
-
-        /// <summary>
-        /// Full path to the client application.
-        /// </summary>
-        [ScalarSetting]
-        internal StringPtr ApplicationFilePath;
 
         /// <summary>
         /// Assembly name.
@@ -37,10 +37,10 @@ namespace Mlos.Core.Internal
     }
 
     /// <summary>
-    /// Request message to register component type assembly.
+    /// Request message to register settings assembly.
     /// </summary>
     [CodegenMessage]
-    internal partial struct RegisterAssemblyRequestMessage
+    internal partial struct RegisterSettingsAssemblyRequestMessage
     {
         /// <summary>
         /// Assembly index.

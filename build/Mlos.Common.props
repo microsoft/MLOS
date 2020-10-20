@@ -15,13 +15,13 @@
   <!-- Configure folder paths. -->
   <PropertyGroup>
     <BaseDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</BaseDir>
+    <BinplaceBaseRootDir>$(BaseDir)\target\bin</BinplaceBaseRootDir>
     <SourceDir>$(BaseDir)\source</SourceDir>
   </PropertyGroup>
   <!-- For Non CoreXT builds, change output folder. -->
   <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <BuildType>$(Configuration)</BuildType>
-    <BuildArchitecture>$(Platform)</BuildArchitecture>
     <BUILD_ALT_DIR Condition="'$(BUILD_ALT_DIR)'=='' AND '$(BuildType)'=='debug'">d</BUILD_ALT_DIR>
     <ObjectDirectory Condition="'$(ObjectDirectory)' == ''">obj$(BUILD_ALT_DIR)</ObjectDirectory>
     <!-- In this case "dotnet" is simply to distinguish it from the default CoreXT build location. -->
@@ -30,7 +30,6 @@
     <BaseIntermediateOutputPath>$(ObjectRoot)\source\$([MSBuild]::MakeRelative($(SourceDir), $(MSBuildProjectDirectory)))\obj</BaseIntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup>
-    <BinplaceDir>$(BaseDir)\target\bin\$(BuildType)\$(BuildArchitecture)</BinplaceDir>
     <MlosCodeGenOutputPathRoot Condition="'$(MlosCodeGenOutputPathRoot)' == ''">$(BaseDir)\out\Mlos.CodeGen.out\$(BuildType)</MlosCodeGenOutputPathRoot>
   </PropertyGroup>
   <!-- Configure warning levels and errors. -->

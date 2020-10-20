@@ -12,6 +12,9 @@ using System.Collections.Generic;
 using Proxy.Mlos.Core.Internal;
 
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
+
+// Open hash table probing policy.
+//
 using ProbingPolicy = Mlos.Core.Collections.TLinearProbing<Mlos.Core.Collections.FNVHash<uint>>;
 
 namespace Mlos.Core
@@ -22,11 +25,55 @@ namespace Mlos.Core
     /// <remarks>
     /// Config structures are stored in the shared memory.
     /// </remarks>
-    public class SharedConfigManager : ISharedConfigAccessor
+    public class SharedConfigManager : ISharedConfigAccessor, IDisposable
     {
-        public void SetMemoryRegion(MlosProxyInternal.SharedConfigMemoryRegion sharedConfigMemoryRegion)
+        /// <summary>
+        /// Lookup shared config by codegen key in given shared config dictionary.
+        /// </summary>
+        /// <typeparam name="TType">Codegen type.</typeparam>
+        /// <typeparam name="TKey">Codegen key type.</typeparam>
+        /// <typeparam name="TProxy">Codegen proxy.</typeparam>
+        /// <param name="sharedConfigDictionary"></param>
+        /// <param name="codegenKey"></param>
+        /// <returns></returns>
+        public static SharedConfig<TProxy> Lookup<TType, TKey, TProxy>(SharedConfigDictionary sharedConfigDictionary, ICodegenKey<TType, TKey, TProxy> codegenKey)
+            where TType : ICodegenType, new()
+            where TKey : ICodegenKey, new()
+            where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
-            this.sharedConfigMemoryRegion = sharedConfigMemoryRegion;
+            uint slotIndex = 0;
+            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(sharedConfigDictionary, codegenKey, ref slotIndex);
+        }
+
+        /// <summary>
+        /// Registers a shared config memory region created by the target process.
+        /// </summary>
+        /// <param name="memoryRegionId"></param>
+        /// <param name="sharedMemoryMapName"></param>
+        /// <param name="memoryRegionSize"></param>
+        public void RegisterSharedConfigMemoryRegion(uint memoryRegionId, string sharedMemoryMapName, ulong memoryRegionSize)
+        {
+            if (sharedConfigMemoryRegionView != null)
+            {
+                if (sharedConfigMemoryRegionView.MemoryRegion().MemoryHeader.MemoryRegionId == memoryRegionId)
+                {
+                    // Shared memory region has been already registered.
+                    //
+                    return;
+                }
+                else
+                {
+                    throw new NotImplementedException("Only a single shared config memory region is currently supported.");
+                }
+            }
+
+            // Create a shared config memory region.
+            //
+            SharedMemoryMapView sharedConfigMemoryMapView = SharedMemoryMapView.OpenExisting(
+                sharedMemoryMapName,
+                memoryRegionSize);
+
+            this.sharedConfigMemoryRegionView = new SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion>(sharedConfigMemoryMapView);
         }
 
         /// <inheritdoc/>
@@ -36,7 +83,7 @@ namespace Mlos.Core
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
             uint slotIndex = 0;
-            return sharedConfigMemoryRegion.Get<ProbingPolicy, TProxy>(codegenKey, ref slotIndex);
+            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, codegenKey, ref slotIndex);
         }
 
         /// <inheritdoc/>
@@ -45,7 +92,7 @@ namespace Mlos.Core
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
             uint slotIndex = 0;
-            return sharedConfigMemoryRegion.Get<ProbingPolicy, TProxy>(codegenType, ref slotIndex);
+            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, codegenType, ref slotIndex);
         }
 
         /// <inheritdoc/>
@@ -55,7 +102,7 @@ namespace Mlos.Core
             // #TODO make sure, ICodegenProxy does not have any fields to compare
             //
             uint slotIndex = 0;
-            return sharedConfigMemoryRegion.Get<ProbingPolicy, TProxy>(default(TProxy), ref slotIndex);
+            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, default(TProxy), ref slotIndex);
         }
 
         /// <summary>
@@ -70,7 +117,7 @@ namespace Mlos.Core
         {
             uint slotIndex = 0;
 
-            SharedConfig<TProxy> sharedConfig = sharedConfigMemoryRegion.Get<ProbingPolicy, TProxy>(componentConfig.Config, ref slotIndex);
+            SharedConfig<TProxy> sharedConfig = SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, componentConfig.Config, ref slotIndex);
 
             if (sharedConfig.Buffer == IntPtr.Zero)
             {
@@ -90,9 +137,43 @@ namespace Mlos.Core
             where TType : ICodegenType, new()
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
-            sharedConfigMemoryRegion.Add<ProbingPolicy, TType, TProxy>(componentConfig);
+            SharedConfigDictionaryLookup<ProbingPolicy>.Add<TType, TProxy>(SharedConfigDictionary, componentConfig);
         }
 
-        private MlosProxyInternal.SharedConfigMemoryRegion sharedConfigMemoryRegion;
+        protected virtual void Dispose(bool disposing)
+        {
+            if (isDisposed || !disposing)
+            {
+                return;
+            }
+
+            if (sharedConfigMemoryRegionView != null)
+            {
+                sharedConfigMemoryRegionView.CleanupOnClose |= CleanupOnClose;
+                sharedConfigMemoryRegionView.Dispose();
+                sharedConfigMemoryRegionView = null;
+            }
+
+            isDisposed = true;
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public MlosProxyInternal.SharedConfigDictionary SharedConfigDictionary => SharedConfigMemoryRegion.SharedConfigDictionary;
+
+        public MlosProxyInternal.SharedConfigMemoryRegion SharedConfigMemoryRegion => sharedConfigMemoryRegionView.MemoryRegion();
+
+        /// <summary>
+        /// Gets a value indicating whether if we should cleanup OS resources when closing the shared memory map view.
+        /// </summary>
+        public bool CleanupOnClose { get; internal set; }
+
+        protected SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryRegionView;
+
+        protected bool isDisposed;
     }
 }

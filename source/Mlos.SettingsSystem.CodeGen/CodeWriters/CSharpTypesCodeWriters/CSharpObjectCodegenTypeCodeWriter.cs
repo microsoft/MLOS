@@ -22,12 +22,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
     internal class CSharpObjectCodegenTypeCodeWriter : CSharpCodeWriter
     {
         /// <summary>
-        /// Namespace used to create DispatchTable.
+        /// Gets or sets namespace used to create DispatchTable.
         /// </summary>
         private string DispatchTableCSharpNamespace { get; set; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CSharpObjectCodegenTypeCodeWriter"/> class.
         /// </summary>
         /// <remarks>
         /// Get DispatchTable namespace from the custom assembly attribute.

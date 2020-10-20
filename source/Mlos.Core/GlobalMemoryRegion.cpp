@@ -41,7 +41,20 @@ Internal::GlobalMemoryRegion& SharedMemoryRegionView<Internal::GlobalMemoryRegio
     //
     globalMemoryRegion.TotalMemoryRegionCount = 1;
 
+    // Mlos.NetCore is always registered first.
+    //
     globalMemoryRegion.RegisteredSettingsAssemblyCount.store(1);
+
+    // Initialize the shared config dictionary.
+    //
+    HRESULT hr = InitializeSharedConfigDictionary(
+        globalMemoryRegion.SharedConfigDictionary,
+        globalMemoryRegion.MemoryHeader,
+        sizeof(Internal::GlobalMemoryRegion));
+
+    // Terminate if we are unable to allocate an array for the shared config dictionary.
+    //
+    MLOS_RETAIL_ASSERT(SUCCEEDED(hr));
 
     return globalMemoryRegion;
 }
