@@ -140,7 +140,7 @@ class TestCategoricalToOneHotEncodedHypergridAdapter(unittest.TestCase):
         projected_df = adapter.project_dataframe(df=original_df, in_place=False)
         self.assertTrue(id(original_df) != id(projected_df))
         for column in adapter.get_one_hot_encoded_column_names():
-            self.assertTrue(projected_df[column].between(0, 1).all())
+            self.assertTrue(projected_df[column].isin([0, 1]).all())
         unprojected_df = adapter.unproject_dataframe(df=projected_df, in_place=False)
         self.assertTrue(original_df.equals(unprojected_df))
 
@@ -166,6 +166,16 @@ class TestCategoricalToOneHotEncodedHypergridAdapter(unittest.TestCase):
             # Now let's ascertain that each coordinate in the projected point is in fact a number.
             #
             self.assertTrue(all(isinstance(dim_value, Number) for dim_name, dim_value in projected_point))
+
+            # Now make sure previous categorical dimensions are not present
+            #
+            original_categorical_dim_names = adapter.get_original_categorical_column_names()
+            self.assertTrue(all(original_cat_dim_name not in projected_point for original_cat_dim_name in original_categorical_dim_names))
+
+            # Now make sure one hot encoded dimensions are 0 and 1 only
+            #
+            ohe_dim_names = adapter.get_one_hot_encoded_column_names()
+            self.assertTrue(all(projected_point[dim_name] in [0, 1] for dim_name in ohe_dim_names))
 
             # Now let's make sure that the unprojected_point is the same as the original
             #

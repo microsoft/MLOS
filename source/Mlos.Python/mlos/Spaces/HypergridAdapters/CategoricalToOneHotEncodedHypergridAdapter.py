@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-
+from typing import Dict
 import numpy as np
 from pandas import DataFrame
 from sklearn.preprocessing import OneHotEncoder
@@ -13,6 +13,11 @@ from mlos.Spaces.HypergridAdapters.CategoricalToDiscreteHypergridAdapter import 
 
 
 class CategoricalToOneHotEncodingAdapteeTargetMapping:
+    """ Retains the list of target Hypergrid's (one hot encoded) dimensions
+        together with the sklearn OneHotEncoder instance used to transform/inverse transform.
+        The class is instantiated with the sklearn OneHotEncoder instance and target dimension names are added directly.
+    """
+
     def __init__(self, one_hot_encoder: OneHotEncoder):
         self.target_dims = []
         self.one_hot_encoder = one_hot_encoder
@@ -63,7 +68,7 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
             'handle_unknown': 'error'
         }
         self._all_one_hot_encoded_target_dimension_names = []
-        self._adaptee_to_target_data_dict = {}
+        self._adaptee_to_target_data_dict: Dict[str, CategoricalToOneHotEncodingAdapteeTargetMapping] = {}
         self._adaptee_expected_dimension_name_ordering = []
         self._concatenation_delim = '___'
         self._merged_categorical_dimension_column_name = 'ohe_cross_product'
@@ -99,6 +104,9 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
     @property
     def target(self) -> Hypergrid:
         return self._target
+
+    def get_original_categorical_column_names(self):
+        return self._adaptee_to_target_data_dict.keys()
 
     def get_one_hot_encoded_column_names(self):
         return self._all_one_hot_encoded_target_dimension_names
