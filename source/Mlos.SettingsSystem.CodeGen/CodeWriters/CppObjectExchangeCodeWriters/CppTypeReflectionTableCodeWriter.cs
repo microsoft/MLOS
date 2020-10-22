@@ -20,7 +20,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
     internal class CppTypeReflectionTableCodeWriter : CppTypeTableCodeWriter
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CppTypeReflectionTableCodeWriter"/> class.
         /// </summary>
         /// <param name="sourceTypesAssembly"></param>
         public CppTypeReflectionTableCodeWriter(Assembly sourceTypesAssembly)

@@ -21,20 +21,48 @@ namespace Core
 {
 class MlosContext;
 
+//----------------------------------------------------------------------------
+// NAME: SharedConfigManager
+//
+// PURPOSE:
+//  Class provies methods to manage shared configurations.
+//  It is also resposible for managing the shared config memory region.
+//
+// NOTES:
+//
 class SharedConfigManager
 {
 public:
+    // Open hash table probing policy.
+    //
+    using TProbingPolicy = Collections::TLinearProbing<Collections::FNVHash<uint32_t>>;
+
+public:
     SharedConfigManager(MlosContext& mlosContext) noexcept;
+
+    ~SharedConfigManager();
 
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
     HRESULT CreateOrUpdateFrom(ComponentConfig<T>& componentConfig);
 
+    // Creates a new shared config or updates from the shared config in the shared memory.
+    //
+    template<typename T>
+    static HRESULT CreateOrUpdateFrom(
+        Internal::SharedConfigDictionary& sharedConfigDictionary,
+        ComponentConfig<T>& componentConfig);
+
     // Locates the component config.
     //
     template<typename T>
     HRESULT Lookup(ComponentConfig<T>& componentConfig);
+
+    // Locates the component config.
+    //
+    template<typename T>
+    static HRESULT Lookup(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig);
 
 private:
     MlosContext& m_mlosContext;
@@ -45,6 +73,12 @@ private:
     // #TODO we might need more than one memory region for the configuration objects.
     //
     SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> m_sharedConfigMemRegionView;
+
+public:
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    // No-op on Windows.
+    //
+    bool CleanupOnClose;
 };
 }
 }

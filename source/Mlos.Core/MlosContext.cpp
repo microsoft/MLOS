@@ -20,7 +20,14 @@ namespace Mlos
 {
 namespace Core
 {
-#pragma warning( disable : 4355)
+#ifdef _MSC_VER
+// Disable MSVC warning:
+//  The this pointer is valid only within nonstatic member functions.
+//  It cannot be used in the initializer list for a base class.
+//
+#pragma warning(push)
+#pragma warning(disable : 4355)
+#endif
 
 //----------------------------------------------------------------------------
 // NAME: MlosContext constructor.
@@ -44,7 +51,9 @@ MlosContext::MlosContext(
 {
 }
 
-#pragma warning( default : 4355)
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 //----------------------------------------------------------------------------
 // NAME: MlosContext::RegisterSettingsAssembly
@@ -61,28 +70,6 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     const char* assemblyFileName,
     uint32_t assemblyDispatchTableBaseIndex)
 {
-#ifdef _WIN64
-    HMODULE hModule = GetModuleHandleW(nullptr);
-    if (hModule == nullptr)
-    {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-
-    char szApplicationFullPath[MAX_PATH];
-    constexpr size_t cchApplicationFullPath = _countof(szApplicationFullPath);
-
-    if (!GetModuleFileNameA(hModule, szApplicationFullPath, cchApplicationFullPath))
-    {
-        return HRESULT_FROM_WIN32(GetLastError());
-    }
-#else
-    // For Linux we don't have system methods for discovering the location of dll files.
-    // Instead, we return null here and provide environment variable hooks in Mlos.Agent
-    // to aid searching for the settings registry assembly (akin to LD_LIBRARY_PATH).
-    //
-    char* szApplicationFullPath = nullptr;
-#endif
-
     uint32_t assemblyIndex = m_globalMemoryRegion.RegisteredSettingsAssemblyCount;
 
     // Check if there is already a config for the given assembly index.
@@ -102,10 +89,13 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     // Register assembly information as a config.
     //
     registeredSettingAssembly.DispatchTableBaseIndex = assemblyDispatchTableBaseIndex;
-    registeredSettingAssembly.ApplicationFilePath = szApplicationFullPath;
     registeredSettingAssembly.AssemblyFileName = assemblyFileName;
 
-    hr = RegisterComponentConfig(registeredSettingAssembly);
+    // Register settings assembly in the global shared region.
+    //
+    hr = SharedConfigManager::CreateOrUpdateFrom(
+        m_globalMemoryRegion.SharedConfigDictionary,
+        registeredSettingAssembly);
 
     if (SUCCEEDED(hr))
     {
@@ -115,10 +105,10 @@ HRESULT MlosContext::RegisterSettingsAssembly(
 
         // Send message to Mlos.Agent to load the settings assembly.
         //
-        Internal::RegisterAssemblyRequestMessage registerAssemblyRequestMsg = { 0 };
-        registerAssemblyRequestMsg.AssemblyIndex = assemblyIndex;
+        Internal::RegisterSettingsAssemblyRequestMessage msg = { 0 };
+        msg.AssemblyIndex = assemblyIndex;
 
-        m_controlChannel.SendMessage(registerAssemblyRequestMsg);
+        m_controlChannel.SendMessage(msg);
     }
 
     return hr;
@@ -225,166 +215,6 @@ bool MlosContext::IsControlChannelActive()
 bool MlosContext::IsFeedbackChannelActive()
 {
     return !(m_feedbackChannel.Sync.TerminateChannel);
-}
-
-//----------------------------------------------------------------------------
-// NAME: InternalMlosContextInitializer::Constructor.
-//
-// PURPOSE:
-//  Move constructor.
-//
-// NOTES:
-//
-InternalMlosContextInitializer::InternalMlosContextInitializer(InternalMlosContextInitializer&& initializer) noexcept
-  : m_globalMemoryRegionView(std::move(initializer.m_globalMemoryRegionView)),
-    m_controlChannelMemoryMapView(std::move(initializer.m_controlChannelMemoryMapView)),
-    m_feedbackChannelMemoryMapView(std::move(initializer.m_feedbackChannelMemoryMapView))
-{
-}
-
-//----------------------------------------------------------------------------
-// NAME: InternalMlosContextInitializer::Initialize
-//
-// PURPOSE:
-//  Opens the shared memory used for the communication channel.
-//
-// NOTES:
-//
-HRESULT InternalMlosContextInitializer::Initialize()
-{
-    const size_t SharedMemorySize = 65536;
-
-    HRESULT hr = m_globalMemoryRegionView.Create("Test_Mlos.GlobalMemory", SharedMemorySize);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = m_controlChannelMemoryMapView.Create("Test_SharedChannelMemory", SharedMemorySize);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = m_feedbackChannelMemoryMapView.Create("Test_FeedbackChannelMemory", SharedMemorySize);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    return hr;
-}
-
-//----------------------------------------------------------------------------
-// NAME: InternalMlosContext::Constructor
-//
-// PURPOSE:
-//  Creates InternalMlosContext.
-//
-// NOTES:
-//
-InternalMlosContext::InternalMlosContext(InternalMlosContextInitializer&& initializer) noexcept
-  : MlosContext(initializer.m_globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
-    m_contextInitializer(std::move(initializer)),
-    m_controlChannel(
-        m_contextInitializer.m_globalMemoryRegionView.MemoryRegion().ControlChannelSynchronization,
-        m_contextInitializer.m_controlChannelMemoryMapView),
-    m_feedbackChannel(
-        m_contextInitializer.m_globalMemoryRegionView.MemoryRegion().FeedbackChannelSynchronization,
-        m_contextInitializer.m_feedbackChannelMemoryMapView)
-{
-}
-
-//----------------------------------------------------------------------------
-// NAME: InterProcessMlosContextInitializer::Constructor.
-//
-// PURPOSE:
-//  Move constructor.
-//
-// NOTES:
-//
-InterProcessMlosContextInitializer::InterProcessMlosContextInitializer(InterProcessMlosContextInitializer&& initializer) noexcept
-  : m_globalMemoryRegionView(std::move(initializer.m_globalMemoryRegionView)),
-    m_controlChannelMemoryMapView(std::move(initializer.m_controlChannelMemoryMapView)),
-    m_feedbackChannelMemoryMapView(std::move(initializer.m_feedbackChannelMemoryMapView)),
-    m_controlChannelPolicy(std::move(initializer.m_controlChannelPolicy)),
-    m_feedbackChannelPolicy(std::move(initializer.m_feedbackChannelPolicy))
-{
-}
-
-//----------------------------------------------------------------------------
-// NAME: InterProcessMlosContextInitializer::Initialize
-//
-// PURPOSE:
-//  Opens the shared memory and synchronization primitives used for the communication channel.
-//
-// NOTES:
-//
-HRESULT InterProcessMlosContextInitializer::Initialize()
-{
-    // #TODO const as codegen, pass a config struct ?
-    //
-    const size_t SharedMemorySize = 65536;
-
-    // TODO: Make these config regions configurable to support multiple processes.
-
-    // Note: Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
-
-    HRESULT hr = m_globalMemoryRegionView.CreateOrOpen("Host_Mlos.GlobalMemory", SharedMemorySize);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = m_controlChannelMemoryMapView.CreateOrOpen("Host_Mlos.ControlChannel", SharedMemorySize);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = m_feedbackChannelMemoryMapView.CreateOrOpen("Host_Mlos.FeedbackChannel", SharedMemorySize);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    // FIXME: Use non-backslashes for Linux environments.
-
-    hr = m_controlChannelPolicy.m_notificationEvent.CreateOrOpen("Global\\ControlChannel_Event");
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    hr = m_feedbackChannelPolicy.m_notificationEvent.CreateOrOpen("Global\\FeedbackChannel_Event");
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    return hr;
-}
-
-//----------------------------------------------------------------------------
-// NAME: InterProcessMlosContext::Constructor
-//
-// PURPOSE:
-//  Creates InterProcessMlosContext.
-//
-// NOTES:
-//
-InterProcessMlosContext::InterProcessMlosContext(InterProcessMlosContextInitializer&& initializer) noexcept
-  : MlosContext(initializer.m_globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
-    m_contextInitializer(std::move(initializer)),
-    m_controlChannel(
-        m_contextInitializer.m_globalMemoryRegionView.MemoryRegion().ControlChannelSynchronization,
-        m_contextInitializer.m_controlChannelMemoryMapView,
-        std::move(m_contextInitializer.m_controlChannelPolicy)),
-    m_feedbackChannel(
-        m_contextInitializer.m_globalMemoryRegionView.MemoryRegion().FeedbackChannelSynchronization,
-        m_contextInitializer.m_feedbackChannelMemoryMapView,
-        std::move(m_contextInitializer.m_feedbackChannelPolicy))
-{
 }
 }
 }

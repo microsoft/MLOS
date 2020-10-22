@@ -10,13 +10,16 @@ import grpc
 import numpy as np
 import pandas as pd
 
+
 import mlos.global_values as global_values
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
+from mlos.Grpc.OptimizerService_pb2 import Empty
+from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Logger import create_logger
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 
 
@@ -57,6 +60,12 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
         """
         self.server.stop(grace=None)
 
+    def test_echo(self):
+        optimizer_service_stub = OptimizerServiceStub(channel=self.optimizer_service_channel)
+        response = optimizer_service_stub.Echo(Empty())
+        self.assertTrue(isinstance(response, Empty))
+
+
     def test_optimizer_with_default_config(self):
         pre_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
         print(bayesian_optimizer_config_store.default)
@@ -85,13 +94,21 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
         # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
         #
-        registered_features_df = pd.read_json(registered_features_df.to_json(orient='index', double_precision=15), orient='index')
-        registered_objectives_df = pd.read_json(registered_objectives_df.to_json(orient='index', double_precision=15), orient='index')
+        registered_features_json = registered_features_df.to_json(orient='index', double_precision=15)
+        registered_objectives_json = registered_objectives_df.to_json(orient='index', double_precision=15)
+
+        # Apparently the jitter is too good and we actually have to use the json strings or they will be optimized away.
+        #
+        assert len(registered_features_json) > 0
+        assert len(registered_objectives_json) > 0
+
+        registered_features_df = pd.read_json(registered_features_json, orient='index')
+        registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
         observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-        self.assertTrue(registered_features_df.equals(observed_features_df))
-        self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
+        self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
+        self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
 
         convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
 
@@ -145,13 +162,21 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
             #
-            registered_features_df = pd.read_json(registered_features_df.to_json(orient='index', double_precision=15), orient='index')
-            registered_objectives_df = pd.read_json(registered_objectives_df.to_json(orient='index', double_precision=15), orient='index')
+            registered_features_json = registered_features_df.to_json(orient='index', double_precision=15)
+            registered_objectives_json = registered_objectives_df.to_json(orient='index', double_precision=15)
+
+            # Apparently the jitter is too good and we actually have to use the json strings or they will be optimized away.
+            #
+            assert len(registered_features_json) > 0
+            assert len(registered_objectives_json) > 0
+
+            registered_features_df = pd.read_json(registered_features_json, orient='index')
+            registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
             observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-            self.assertTrue(registered_features_df.equals(observed_features_df))
-            self.assertTrue(registered_objectives_df.equals(observed_objectives_df))
+            self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
+            self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
 
 
     @unittest.skip(reason="Not implemented yet.")

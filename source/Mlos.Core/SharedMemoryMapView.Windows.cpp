@@ -28,7 +28,8 @@ namespace Core
 SharedMemoryMapView::SharedMemoryMapView() noexcept
   : MemSize(0),
     m_hMapFile(nullptr),
-    Buffer(nullptr)
+    Buffer(nullptr),
+    CleanupOnClose(false)
 {
 }
 
@@ -41,7 +42,8 @@ SharedMemoryMapView::SharedMemoryMapView() noexcept
 SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept
   : MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
     m_hMapFile(std::exchange(sharedMemoryMapView.m_hMapFile, nullptr)),
-    Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr))
+    Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
+    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0))
 {
 }
 
@@ -54,18 +56,20 @@ SharedMemoryMapView::~SharedMemoryMapView()
 }
 
 //----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::Create
+// NAME: SharedMemoryMapView::CreateNew
 //
 // PURPOSE:
-//  Creates a shared memory map view.
+//  Creates a new shared memory map view.
 //
 // RETURNS:
 //  HRESULT.
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::Create(const char* const sharedMemoryMapName, size_t memSize) noexcept
+HRESULT SharedMemoryMapView::CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept
 {
+    Close();
+
     PSECURITY_DESCRIPTOR pSecurityDescriptor = nullptr;
 
     HRESULT hr = Security::CreateDefaultSecurityDescriptor(pSecurityDescriptor);
@@ -113,7 +117,37 @@ HRESULT SharedMemoryMapView::Create(const char* const sharedMemoryMapName, size_
 }
 
 //----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::Open
+// NAME: SharedMemoryMapView::CreateOrOpen
+//
+// PURPOSE:
+//  Creates or opens a shared memory view.
+//
+// RETURNS:
+//  S_OK if created a new shared memory view.
+//  S_FALSE if we open existing shared memory view.
+//
+// NOTES:
+//
+HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
+{
+    Close();
+
+    // Try to open existing shared memory map.
+    //
+    HRESULT hr = OpenExisting(sharedMemoryMapName);
+
+    if (SUCCEEDED(hr))
+    {
+        // Return S_FALSE, we opened existing shared memory view.
+        //
+        return S_FALSE;
+    }
+
+    return CreateNew(sharedMemoryMapName, memSize);
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::OpenExisting
 //
 // PURPOSE:
 //  Opens already created shared memory view.
@@ -123,8 +157,10 @@ HRESULT SharedMemoryMapView::Create(const char* const sharedMemoryMapName, size_
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::Open(const char* const sharedMemoryMapName) noexcept
+HRESULT SharedMemoryMapView::OpenExisting(const char* const sharedMemoryMapName) noexcept
 {
+    Close();
+
     HRESULT hr = S_OK;
 
     m_hMapFile = OpenFileMappingA(
@@ -154,34 +190,6 @@ HRESULT SharedMemoryMapView::Open(const char* const sharedMemoryMapName) noexcep
     }
 
     return hr;
-}
-
-//----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::CreateOrOpen
-//
-// PURPOSE:
-//  Creates or opens a shared memory view.
-//
-// RETURNS:
-//  S_OK if created a new shared memory view.
-//  S_FALSE if we open existing shared memory view.
-//
-// NOTES:
-//
-HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
-{
-    // Open if the mapping already exists.
-    //
-    HRESULT hr = Open(sharedMemoryMapName);
-
-    if (SUCCEEDED(hr))
-    {
-        // Return S_FALSE, we opened existing shared memory view.
-        //
-        return S_FALSE;
-    }
-
-    return Create(sharedMemoryMapName, memSize);
 }
 
 //----------------------------------------------------------------------------
@@ -245,6 +253,10 @@ HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
 //
 void SharedMemoryMapView::Close()
 {
+    // Windows OS will remove the shared memory map once the last process detaches from it, just reset the flag.
+    //
+    CleanupOnClose = false;
+
     UnmapViewOfFile(Buffer.Pointer);
     Buffer.Pointer = nullptr;
 

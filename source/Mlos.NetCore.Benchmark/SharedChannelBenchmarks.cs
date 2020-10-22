@@ -51,8 +51,8 @@ public class BaseSharedChannelBenchmark : IDisposable
 
     public BaseSharedChannelBenchmark()
     {
-        globalChannelMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
-        sharedChannelMemoryMapView = SharedMemoryMapView.Create(SharedChannelMemoryMapName, SharedMemorySize);
+        globalChannelMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+        sharedChannelMemoryMapView = SharedMemoryMapView.CreateNew(SharedChannelMemoryMapName, SharedMemorySize);
 
         MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalChannelMemoryRegionView.MemoryRegion();
 

@@ -46,11 +46,12 @@ public:
     {
         // Get the value_ref and update the data pointer.
         //
-        auto view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
+        uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
+        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
-        const byte* dataPtr = reinterpret_cast<const byte*>(view.Data) + reinterpret_cast<uint64_t>(buffer.Pointer);
+        const byte* dataPtr = reinterpret_cast<const byte*>(buffer.Pointer) + offset;
 
-        return Mlos::Core::StringPtr { reinterpret_cast<const char*>(dataPtr), view.Length };
+        return Mlos::Core::StringPtr(reinterpret_cast<const char*>(dataPtr), dataSize);
     }
 
     // Setting the value is not supported.
@@ -61,14 +62,14 @@ public:
     //
     bool VerifyVariableData(uint64_t objectOffset, uint64_t totalDataSize, uint64_t& expectedDataOffset) const
     {
-        auto view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
+        uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
+        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
-        if (view.Length > totalDataSize)
+        if (dataSize > totalDataSize)
         {
             return false;
         }
 
-        uint64_t offset = reinterpret_cast<uint64_t>(view.Data);
         offset += objectOffset;
 
         if (expectedDataOffset != offset)
@@ -76,7 +77,7 @@ public:
             return false;
         }
 
-        expectedDataOffset += view.Length;
+        expectedDataOffset += dataSize;
         return true;
     }
 };
@@ -106,11 +107,12 @@ public:
     {
         // Get the value_ref and update the data pointer.
         //
-        auto view = *reinterpret_cast<Mlos::Core::WideStringPtr*>(buffer.Pointer);
+        uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
+        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
-        const byte* dataPtr = reinterpret_cast<const byte*>(view.Data) + reinterpret_cast<uint64_t>(buffer.Pointer);
+        const byte* dataPtr = reinterpret_cast<const byte*>(buffer.Pointer) + offset;
 
-        return Mlos::Core::WideStringPtr { reinterpret_cast<const wchar_t*>(dataPtr), view.Length / sizeof(wchar_t) };
+        return Mlos::Core::WideStringPtr(reinterpret_cast<const wchar_t*>(dataPtr), dataSize / sizeof(wchar_t));
     }
 
     // Setting the value is not supported.
@@ -121,14 +123,14 @@ public:
     //
     bool VerifyVariableData(uint64_t objectOffset, uint64_t totalDataSize, uint64_t& expectedDataOffset) const
     {
-        auto view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
+        uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
+        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
-        if (view.Length > totalDataSize)
+        if (dataSize > totalDataSize)
         {
             return false;
         }
 
-        uint64_t offset = reinterpret_cast<uint64_t>(view.Data);
         offset += objectOffset;
 
         if (expectedDataOffset != offset)
@@ -136,7 +138,7 @@ public:
             return false;
         }
 
-        expectedDataOffset += view.Length;
+        expectedDataOffset += dataSize;
         return true;
     }
 };

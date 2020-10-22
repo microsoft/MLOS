@@ -13,8 +13,14 @@ namespace Mlos.Core.Internal
     [CodegenType]
     internal partial class UIntArray
     {
+        /// <summary>
+        /// Number of elements in the array.
+        /// </summary>
         internal uint Count;
 
+        /// <summary>
+        /// Elements array is dynamically allocated during the initialization.
+        /// </summary>
         [FixedSizeArray(1)]
         internal readonly uint[] Elements;
     }
@@ -39,14 +45,22 @@ namespace Mlos.Core.Internal
     internal partial struct ArenaAllocator
     {
         /// <summary>
+        /// Offset to the allocator from the beginning of the memory region.
+        /// </summary>
+        internal int OffsetToAllocator;
+
+        /// <summary>
+        /// Offset to start of allocation block in the memory region.
+        /// </summary>
+        /// <remarks>
+        /// Allocator is using the memory located after the region header.
+        /// </remarks>
+        internal uint FirstAllocationOffset;
+
+        /// <summary>
         /// Size of the memory we are allocating from.
         /// </summary>
         internal uint AllocationBlockSize;
-
-        /// <summary>
-        /// Offset to start of allocation block in the memory regtion.
-        /// </summary>
-        internal uint AllocationBlockOffset;
 
         /// <summary>
         /// Total number of Allocations.

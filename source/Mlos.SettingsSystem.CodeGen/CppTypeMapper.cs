@@ -251,7 +251,7 @@ namespace Mlos.SettingsSystem.CodeGen
         internal bool IsCodegenType;
 
         /// <summary>
-        /// True if a type has defined a proxy class.
+        /// Gets a value indicating whether if a type has defined a proxy class.
         /// </summary>
         internal bool HasDefinedProxy => !string.IsNullOrEmpty(ProxyTypeName);
     }

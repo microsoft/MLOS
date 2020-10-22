@@ -103,13 +103,13 @@ namespace Mlos.Core
                 return;
             }
 
-            ulong elementLength = (ulong)Marshal.SizeOf<T>();
+            ulong elementSize = (ulong)Marshal.SizeOf<T>();
 
             for (int i = 0; i < (int)elementCount; i++)
             {
                 SerializeFixedPart(collection[i], buffer, objectOffset);
 
-                objectOffset += elementLength;
+                objectOffset += elementSize;
             }
         }
 
@@ -124,10 +124,10 @@ namespace Mlos.Core
 
             for (int i = 0; i < (int)elementCount; i++)
             {
-                ulong elementLength = collection[i].CodegenTypeSize();
+                ulong elementSize = collection[i].CodegenTypeSize();
                 collection[i].SerializeFixedPart(buffer, objectOffset);
 
-                objectOffset += elementLength;
+                objectOffset += elementSize;
             }
         }
 

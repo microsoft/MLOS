@@ -32,6 +32,11 @@ namespace Mlos.Core
         /// </summary>
         /// <param name="dispatchTable"></param>
         void ProcessMessages(ref DispatchEntry[] dispatchTable);
+
+        /// <summary>
+        /// Gets channel synchronization object.
+        /// </summary>
+        internal MlosProxy.ChannelSynchronization SyncObject { get; }
     }
 
     /// <summary>
@@ -763,5 +768,8 @@ namespace Mlos.Core
         /// Channel control policy.
         /// </summary>
         public TChannelPolicy ChannelPolicy;
+
+        /// <inheritdoc/>
+        MlosProxy.ChannelSynchronization ISharedChannel.SyncObject => Sync;
     }
 }

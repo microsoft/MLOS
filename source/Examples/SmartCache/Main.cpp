@@ -43,7 +43,7 @@ using namespace SmartCache;
 // HRESULTs are an error code encoding mechanism typically used in Windows environments.
 // See Also: https://en.wikipedia.org/wiki/HRESULT
 //
-void CheckHR(HRESULT hr)
+void ThrowIfFail(HRESULT hr)
 {
     if (FAILED(hr))
     {
@@ -54,8 +54,8 @@ void CheckHR(HRESULT hr)
 int
 __cdecl
 main(
-    __in int argc,
-    __in char* argv[])
+    _In_ int argc,
+    _In_ char* argv[])
 {
     UNUSED(argc);
     UNUSED(argv);
@@ -74,7 +74,7 @@ main(
     //
     Mlos::Core::InterProcessMlosContextInitializer mlosContextInitializer;
     HRESULT hr = mlosContextInitializer.Initialize();
-    CheckHR(hr);
+    ThrowIfFail(hr);
 
     Mlos::Core::InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
 
@@ -124,7 +124,7 @@ main(
     hr = mlosContext.RegisterSettingsAssembly(
         "SmartCache.SettingsRegistry.dll",
         SmartCache::ObjectDeserializationHandler::DispatchTableBaseIndex());
-    CheckHR(hr);
+    ThrowIfFail(hr);
 
     // Create a component configuration object.
     // This will be stored in a shared memory region below for use by both the
@@ -145,7 +145,7 @@ main(
     // config for this component and if not creates it.
     //
     hr = mlosContext.RegisterComponentConfig(config);
-    CheckHR(hr);
+    ThrowIfFail(hr);
 
     // Create an instance of our SmartCache component to tune.
     //
@@ -179,7 +179,7 @@ main(
         std::condition_variable waitForConfigCondVar;
 
         // Also, setup a callback lambda function for handling the
-        // SharedConfigUpdatedFeedbackeMessage we expect to receive from the
+        // SharedConfigUpdatedFeedbackMessage we expect to receive from the
         // agent after we request a config update with a RequestNewConfigurationMessage.
         //
         // Note: this lambda will be invoked by the background task setup above

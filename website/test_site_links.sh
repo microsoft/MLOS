@@ -39,7 +39,7 @@ if ! [ -x /usr/bin/linklint ]; then
 fi
 
 container_name='mlos-website-link-checker'
-if ! areInDockerContainer; then
+if ! areInDockerContainer && [ -x /usr/bin/docker ]; then
     echo "INFO: Starting $container_name container to serve website content for link checking." >&2
 
     # Make sure there's no container from a previous run hanging around first.
@@ -57,11 +57,15 @@ else
         set +x
     fi
     if ! [ -L /etc/nginx/conf.d/mlos.conf ]; then
+        set -x
         sudo rm -f /etc/nginx/conf.d/mlos.conf
         sudo ln -s $PWD/nginx.conf /etc/nginx/conf.d/mlos.conf
+        set +x
     fi
-    service nginx start >/dev/null
-    service nginx reload >/dev/null
+    set -x
+    sudo service nginx start >/dev/null
+    sudo service nginx reload >/dev/null
+    set +x
 fi
 
 echo "INFO: Performing link checking." >&2
@@ -76,7 +80,9 @@ if ! areInDockerContainer; then
         echo "WARNING: Failed to cleanup $container_name container." >&2
     fi
 else
-    service nginx stop >/dev/null &
+    set -x
+    sudo service nginx stop >/dev/null &
+    set +x
 fi
 
 if [ -n "$linklint_output" ]; then

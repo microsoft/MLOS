@@ -22,7 +22,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
     internal class CppObjectDeserializeEntryCountCodeWriter : CppTypeTableCodeWriter
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CppObjectDeserializeEntryCountCodeWriter"/> class.
         /// </summary>
         /// <param name="sourceTypesAssembly"></param>
         public CppObjectDeserializeEntryCountCodeWriter(Assembly sourceTypesAssembly)

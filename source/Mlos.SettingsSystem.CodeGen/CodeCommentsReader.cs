@@ -137,27 +137,27 @@ namespace Mlos.SettingsSystem.CodeGen
     internal struct CodeComment
     {
         /// <summary>
-        /// Name of the function, property or field where comment was written.
+        /// Gets or sets name of the function, property or field where comment was written.
         /// </summary>
         public string Name { get; internal set; }
 
         /// <summary>
-        /// Comment summary.
+        /// Gets or sets comment summary.
         /// </summary>
         public string Summary { get; internal set; }
 
         /// <summary>
-        /// Comment for remarks statement.
+        /// Gets or sets comment for remarks statement.
         /// </summary>
         public string Remarks { get; internal set; }
 
         /// <summary>
-        /// Comment for return statement.
+        /// Gets or sets comment for return statement.
         /// </summary>
         public string Returns { get; internal set; }
 
         /// <summary>
-        /// Comments for function parameters.
+        /// Gets or sets comments for function parameters.
         /// </summary>
         public List<CodeComment> Parameters { get; internal set; }
 

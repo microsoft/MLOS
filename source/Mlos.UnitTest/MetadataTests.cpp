@@ -57,9 +57,9 @@ TEST(MetadataTests, VerifyProxyAccess)
 
     Proxy::Mlos::UnitTest::CompositeStructure2 proxy(buffer, 0);
 
-    WideStringPtr a1 = proxy.Title();
-    WideStringPtr a2 = proxy.BaseComp().Name();
-    StringPtr a3 = proxy.BaseComp().Version();
+    EXPECT_EQ(proxy.Title(), object.Title);
+    EXPECT_EQ(proxy.BaseComp().Name(), object.BaseComp.Name);
+    EXPECT_EQ(proxy.BaseComp().Version(), object.BaseComp.Version);
 }
 
 TEST(MetadataTests, VerifyProxyAccessEnumArray)
@@ -125,7 +125,7 @@ static_assert(offsetof(struct ::Mlos::UnitTest::TestAlignedTypeMultipleAlignment
 
 TEST(MetadataTests, VerifyStructAligment)
 {
-    Mlos::UnitTest::TestAlignedType object = { 0 };
+    Mlos::UnitTest::TestAlignedType object = {};
     object.Configs[2].ComponentType = 'a';
     object.Configs[4].ComponentType = 'b';
 

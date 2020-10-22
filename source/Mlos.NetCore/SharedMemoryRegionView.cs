@@ -24,10 +24,10 @@ namespace Mlos.Core
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
         /// <typeparam name="T">Memory region type.</typeparam>
-        public static SharedMemoryRegionView<T> Create<T>(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static SharedMemoryRegionView<T> CreateNew<T>(string sharedMemoryMapName, ulong sharedMemorySize)
             where T : ICodegenProxy, new()
         {
-            var memoryRegionView = new SharedMemoryRegionView<T>(SharedMemoryMapView.Create(sharedMemoryMapName, sharedMemorySize));
+            var memoryRegionView = new SharedMemoryRegionView<T>(SharedMemoryMapView.CreateNew(sharedMemoryMapName, sharedMemorySize));
 
             MlosProxyInternal.MemoryRegionInitializer<T> memoryRegionInitializer = default;
             memoryRegionInitializer.Initalize(memoryRegionView);
@@ -46,11 +46,11 @@ namespace Mlos.Core
         {
             try
             {
-                return new SharedMemoryRegionView<T>(SharedMemoryMapView.Open(sharedMemoryMapName, sharedMemorySize));
+                return new SharedMemoryRegionView<T>(SharedMemoryMapView.OpenExisting(sharedMemoryMapName, sharedMemorySize));
             }
             catch (FileNotFoundException)
             {
-                var memoryRegionView = new SharedMemoryRegionView<T>(SharedMemoryMapView.Create(sharedMemoryMapName, sharedMemorySize));
+                var memoryRegionView = new SharedMemoryRegionView<T>(SharedMemoryMapView.CreateNew(sharedMemoryMapName, sharedMemorySize));
 
                 MlosProxyInternal.MemoryRegionInitializer<T> memoryRegionInitializer = default;
                 memoryRegionInitializer.Initalize(memoryRegionView);
@@ -65,10 +65,10 @@ namespace Mlos.Core
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
         /// <typeparam name="T">Memory region type.</typeparam>
-        public static SharedMemoryRegionView<T> Open<T>(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static SharedMemoryRegionView<T> OpenExisting<T>(string sharedMemoryMapName, ulong sharedMemorySize)
             where T : ICodegenProxy, new()
         {
-            return new SharedMemoryRegionView<T>(SharedMemoryMapView.Open(sharedMemoryMapName, sharedMemorySize));
+            return new SharedMemoryRegionView<T>(SharedMemoryMapView.OpenExisting(sharedMemoryMapName, sharedMemorySize));
         }
     }
 
@@ -79,9 +79,13 @@ namespace Mlos.Core
     public sealed class SharedMemoryRegionView<T> : IDisposable
          where T : ICodegenProxy, new()
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SharedMemoryRegionView{T}"/> class.
+        /// </summary>
+        /// <param name="sharedMemoryMap"></param>
         public SharedMemoryRegionView(SharedMemoryMapView sharedMemoryMap)
         {
-            this.sharedMemoryMap = sharedMemoryMap;
+            this.SharedMemoryMapView = sharedMemoryMap;
 
             var memoryRegion = new MlosProxyInternal.MemoryRegion
             {
@@ -92,7 +96,10 @@ namespace Mlos.Core
             };
         }
 
-        public ulong MemSize => sharedMemoryMap.MemSize;
+        /// <summary>
+        /// Gets size of the shared memory map.
+        /// </summary>
+        public ulong MemSize => SharedMemoryMapView.MemSize;
 
         /// <summary>
         /// Returns an instance of MemoryRegionProxy.
@@ -101,25 +108,22 @@ namespace Mlos.Core
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T MemoryRegion()
         {
-            return new T { Buffer = sharedMemoryMap.Buffer };
+            return new T { Buffer = SharedMemoryMapView.Buffer };
         }
 
         #region IDisposable Support
 
         private void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                sharedMemoryMap?.Dispose();
-                sharedMemoryMap = null;
-            }
+            SharedMemoryMapView?.Dispose();
+            SharedMemoryMapView = null;
 
-            disposed = true;
+            isDisposed = true;
         }
 
         /// <inheritdoc/>
@@ -129,8 +133,17 @@ namespace Mlos.Core
         }
         #endregion
 
-        private SharedMemoryMapView sharedMemoryMap;
+        public SharedMemoryMapView SharedMemoryMapView { get; private set; }
 
-        private bool disposed = false;
+        private bool isDisposed = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether we should cleanup OS resources when closing the shared memory map view.
+        /// </summary>
+        public bool CleanupOnClose
+        {
+            get { return SharedMemoryMapView.CleanupOnClose; }
+            set { SharedMemoryMapView.CleanupOnClose = value; }
+        }
     }
 }

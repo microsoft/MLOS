@@ -11,8 +11,6 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-using CommandLine;
-
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
@@ -55,33 +53,36 @@ namespace Mlos.Agent.Server
         /// <param name="args">command line arguments.</param>
         public static void Main(string[] args)
         {
-            string executableFilePath = null;
-            Uri optimizerAddressUri = null;
-
-            var cliOptsParseResult = CommandLine.Parser.Default.ParseArguments<CliOptions>(args)
-                .WithParsed(parsedOptions =>
-                {
-                    executableFilePath = parsedOptions.Executable;
-                    optimizerAddressUri = parsedOptions.OptimizerUri;
-                });
-            if (cliOptsParseResult.Tag == ParserResultType.NotParsed)
-            {
-                // CommandLine already prints the help text for us in this case.
-                //
-                Console.Error.WriteLine("Failed to parse command line options.");
-                Environment.Exit(1);
-            }
+            string executableFilePath;
+            Uri optimizerAddressUri;
+            string settingsRegistryPath;
+            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri, out settingsRegistryPath);
 
             // Check for the executable before setting up any shared memory to
             // reduce cleanup issues.
             //
-            if (executableFilePath != null && !File.Exists(executableFilePath))
+            if (!string.IsNullOrEmpty(executableFilePath) && !File.Exists(executableFilePath))
             {
                 throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
             }
 
+            if (!string.IsNullOrEmpty(settingsRegistryPath))
+            {
+                // #TODO temporary hack
+                //
+                Environment.SetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH", settingsRegistryPath);
+            }
+
             Console.WriteLine("Mlos.Agent.Server");
             TargetProcessManager targetProcessManager = null;
+
+            // In the active learning mode, create a new shared memory map before running the target process.
+            // On Linux, we unlink existing shared memory map, if they exist.
+            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
+            //
+            using MlosContext mlosContext = (executableFilePath != null)
+                ? InterProcessMlosContext.Create()
+                : InterProcessMlosContext.CreateOrOpen();
 
             // Connect to gRpc optimizer only if user provided an address in the command line.
             //
@@ -101,13 +102,11 @@ namespace Mlos.Agent.Server
                 // See Also: AssemblyInitializer.cs within the SettingsRegistry
                 // assembly project in question.
                 //
-                MlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
+                mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
             }
 
-            // Create (or open) the circular buffer shared memory before running the target process.
-            //
             using var mainAgent = new MainAgent();
-            mainAgent.InitializeSharedChannel();
+            mainAgent.InitializeSharedChannel(mlosContext);
 
             // Active learning mode.
             //
@@ -133,16 +132,13 @@ namespace Mlos.Agent.Server
             //
             // In MainAgent.RunAgent we loop on the shared memory control and
             // telemetry channels looking for messages and dispatching them to
-
             // their registered callback handlers.
             //
             // The set of recognized messages is dynamically registered using
-
             // the RegisterSettingsAssembly method which is called through the
             // handler for the RegisterAssemblyRequestMessage.
             //
             // Once registered, the SettingsAssemblyManager uses reflection to
-
             // search for an AssemblyInitializer inside those assemblies and
             // executes it in order to setup the message handler callbacks
             // within the agent.
@@ -153,7 +149,9 @@ namespace Mlos.Agent.Server
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(
                 () => mainAgent.RunAgent(),
-                TaskCreationOptions.LongRunning);
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Current);
 
             Task waitForTargetProcessTask = Task.Factory.StartNew(
                 () =>
@@ -165,13 +163,15 @@ namespace Mlos.Agent.Server
                         mainAgent.UninitializeSharedChannel();
                     }
                 },
-                TaskCreationOptions.LongRunning);
+                CancellationToken.None,
+                TaskCreationOptions.LongRunning,
+                TaskScheduler.Current);
 
             Console.WriteLine("Waiting for Mlos.Agent to exit");
 
             while (true)
             {
-                Task.WaitAny(new[] { mlosAgentTask, waitForTargetProcessTask });
+                Task.WaitAny(mlosAgentTask, waitForTargetProcessTask);
 
                 if (mlosAgentTask.IsFaulted && targetProcessManager != null && !waitForTargetProcessTask.IsCompleted)
                 {
@@ -191,16 +191,20 @@ namespace Mlos.Agent.Server
                 }
             }
 
-            // Print any exceptions if occured.
+            int exitCode = 0;
+
+            // Print any exceptions if occurred.
             //
             if (mlosAgentTask.Exception != null)
             {
                 Console.WriteLine($"Exception: {mlosAgentTask.Exception}");
+                exitCode |= 1;
             }
 
             if (waitForTargetProcessTask.Exception != null)
             {
                 Console.WriteLine($"Exception: {waitForTargetProcessTask.Exception}");
+                exitCode |= 2;
             }
 
             // Perform some cleanup.
@@ -218,18 +222,8 @@ namespace Mlos.Agent.Server
             cancellationTokenSource.Dispose();
 
             Console.WriteLine("Mlos.Agent exited.");
-        }
 
-        /// <summary>
-        /// The command line options for this application.
-        /// </summary>
-        private class CliOptions
-        {
-            [Option("executable", Required = false, Default = null, HelpText = "A path to an executable to start (e.g. 'target/bin/Release/SmartCache').")]
-            public string Executable { get; set; }
-
-            [Option("optimizer-uri", Required = false, Default = null, HelpText = "A URI to connect to the MLOS Optimizer service over GRPC (e.g. 'http://localhost:50051').")]
-            public Uri OptimizerUri { get; set; }
+            Environment.Exit(exitCode);
         }
     }
 }

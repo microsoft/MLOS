@@ -20,9 +20,9 @@ namespace Mlos
 namespace Core
 {
 template<typename T>
-HRESULT SharedMemoryRegionView<T>::Create(const char* const sharedMemoryMapName, size_t memSize) noexcept
+HRESULT SharedMemoryRegionView<T>::CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept
 {
-    HRESULT hr = SharedMemoryMapView::Create(sharedMemoryMapName, memSize);
+    HRESULT hr = SharedMemoryMapView::CreateNew(sharedMemoryMapName, memSize);
     if (FAILED(hr))
     {
         return hr;
@@ -55,13 +55,9 @@ HRESULT SharedMemoryRegionView<T>::CreateOrOpen(const char* const sharedMemoryMa
 }
 
 template<typename T>
-HRESULT SharedMemoryRegionView<T>::Open(const char* const sharedMemoryMapName) noexcept
+HRESULT SharedMemoryRegionView<T>::OpenExisting(const char* const sharedMemoryMapName) noexcept
 {
-    HRESULT hr = SharedMemoryMapView::Open(sharedMemoryMapName);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
+    HRESULT hr = SharedMemoryMapView::OpenExisting(sharedMemoryMapName);
 
     return hr;
 }

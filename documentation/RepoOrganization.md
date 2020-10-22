@@ -33,7 +33,7 @@ Auto generated content:
   - `out/dotnet` contains the `msbuild` and `dotnet build` outputs (for Windows)
   - `out/Mlos.CodeGen.out` contains code generation output from each `SettingsRegistry` project, organized by originating `source/` project directory
   - `out/Grpc.out` contains the output for the grpc messages between the `Mlos.Agent`s
-- `target/` contains final binaries and libraries produced by `msbuild` that are suitable for execution
+- `target/` contains final binaries and libraries produced by `msbuild` and `make install` that are suitable for execution
 - `out/cmake/{Release,Debug}/` contains most of the output from `cmake`
   > Note: this is by convention.  Though we provide some configurations to help use this path, other tools or IDEs may override it or may need to be configured to work with it.
 - `tools/` is where local versions of `dotnet`, `cmake`, and `cake` are fetched and installed.

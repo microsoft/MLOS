@@ -9,7 +9,7 @@
 cat *.csproj 2>/dev/null \
     | egrep '<(Compile|SettingsRegistryDef) Include=".*\.cs"' \
     | sed -r -e 's/.*Include="([^"]+\.cs)".*/\1/' -e 's|\\|/|g' \
-    | tr '\n' ';'
+    | tr '\n' ';' | sed 's/;$//'
 
 # Returns the full file name and path as specified in the Include
 # attribute of the Compile directive.
