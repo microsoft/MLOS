@@ -12,7 +12,6 @@
     <StartupObject>Mlos.SettingsSystem.CodeGen.MainCodeGen</StartupObject>
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.SingleFile.props" />
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
@@ -70,5 +69,6 @@
     <Compile Include="TypeMetadataMapper.cs" />
     <Compile Include="TypeCodeGenerator.cs" />
   </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Binplace.targets" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
 </Project>

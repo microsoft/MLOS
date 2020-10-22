@@ -13,8 +13,9 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Mlos.Core;
-using Proxy.Mlos.Core;
+using Proxy.Mlos.Core.Internal;
 
+using MlosInternal = Mlos.Core.Internal;
 using MlosProxy = Proxy.Mlos.Core;
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
@@ -28,23 +29,7 @@ namespace Mlos.Agent
     /// </remarks>
     public class MainAgent : IDisposable
     {
-        /// <remarks>
-        /// Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
-        /// TODO: Make these config regions configurable to support multiple processes.
-        /// </remarks>
-        private const string GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
-        private const string ControlChannelMemoryMapName = "Host_Mlos.ControlChannel";
-        private const string FeedbackChannelMemoryMapName = "Host_Mlos.FeedbackChannel";
-        private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event"; //// FIXME: Use non-backslashes for Linux environments.
-        private const string FeedbackChannelSemaphoreName = @"Global\FeedbackChannel_Event";
-        private const string SharedConfigMemoryMapName = "Host_Mlos.Config.SharedMemory";
-        private const int SharedMemorySize = 65536;
-
         private readonly SettingsAssemblyManager settingsAssemblyManager = new SettingsAssemblyManager();
-
-        private readonly Dictionary<uint, SharedMemoryMapView> memoryRegions = new Dictionary<uint, SharedMemoryMapView>();
-
-        private readonly SharedConfigManager sharedConfigManager = new SharedConfigManager();
 
         private DispatchEntry[] globalDispatchTable = Array.Empty<DispatchEntry>();
 
@@ -53,15 +38,9 @@ namespace Mlos.Agent
         private bool isDisposed;
 
         #region Shared objects
-        private SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView;
 
-        private SharedMemoryMapView controlChannelMemoryMapView;
-        private SharedMemoryMapView feedbackChannelMemoryMapView;
+        private MlosContext mlosContext;
 
-        private NamedEvent controlChannelNamedEvent;
-        private NamedEvent feedbackChannelNamedEvent;
-
-        private SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryMapView;
         #endregion
 
         #region Mlos.Agent setup
@@ -69,45 +48,17 @@ namespace Mlos.Agent
         /// <summary>
         /// Initialize shared channel.
         /// </summary>
-        public void InitializeSharedChannel()
+        /// <param name="mlosContext">Mlos context instance.</param>
+        public void InitializeSharedChannel(MlosContext mlosContext)
         {
-            // Create or open the memory mapped files.
+            // #TODO, implement experiment class.
             //
-            globalMemoryRegionView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
-            controlChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(ControlChannelMemoryMapName, SharedMemorySize);
-            feedbackChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(FeedbackChannelMemoryMapName, SharedMemorySize);
-            sharedConfigMemoryMapView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.SharedConfigMemoryRegion>(SharedConfigMemoryMapName, SharedMemorySize);
-
-            // Create channel synchronization primitives.
-            //
-            controlChannelNamedEvent = NamedEvent.CreateOrOpen(ControlChannelSemaphoreName);
-            feedbackChannelNamedEvent = NamedEvent.CreateOrOpen(FeedbackChannelSemaphoreName);
-
-            // Setup feedback channel.
-            //
-            MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-
-            var feedbackChannel = new SharedChannel<InterProcessSharedChannelPolicy, SharedChannelSpinPolicy>(
-                buffer: feedbackChannelMemoryMapView.Buffer,
-                size: (uint)feedbackChannelMemoryMapView.MemSize,
-                sync: globalMemoryRegion.FeedbackChannelSynchronization)
-            {
-                ChannelPolicy = { NotificationEvent = feedbackChannelNamedEvent },
-            };
-
-            // Set SharedConfig memory region.
-            //
-            sharedConfigManager.SetMemoryRegion(new MlosProxyInternal.SharedConfigMemoryRegion { Buffer = sharedConfigMemoryMapView.MemoryRegion().Buffer });
-
-            // Setup MlosContext.
-            //
-            MlosContext.FeedbackChannel = feedbackChannel;
-            MlosContext.SharedConfigManager = sharedConfigManager;
+            MlosContext.Instance = mlosContext;
+            this.mlosContext = mlosContext;
 
             // Initialize callbacks.
             //
-            MlosProxyInternal.RegisterAssemblyRequestMessage.Callback = RegisterAssemblyCallback;
-            MlosProxyInternal.RegisterMemoryRegionRequestMessage.Callback = RegisterMemoryRegionMessageCallback;
+            MlosProxyInternal.RegisterSettingsAssemblyRequestMessage.Callback = RegisterSettingsAssemblyCallback;
             MlosProxyInternal.RegisterSharedConfigMemoryRegionRequestMessage.Callback = RegisterSharedConfigMemoryRegionRequestMessageCallback;
             MlosProxy.TerminateReaderThreadRequestMessage.Callback = TerminateReaderThreadRequestMessageCallback;
 
@@ -115,10 +66,19 @@ namespace Mlos.Agent
             //
             RegisterAssembly(typeof(MlosContext).Assembly, dispatchTableBaseIndex: 0);
 
+            // Register shared config memory regions.
+            //
+            for (uint index = 1; index < mlosContext.GlobalMemoryRegion.TotalMemoryRegionCount; index++)
+            {
+                // Skip first one as this is global memory region, and it does not require registration.
+                //
+                RegisterSharedConfigMemoryRegion(sharedMemoryRegionIndex: index + 1);
+            }
+
             // Register assemblies from the shared config.
             // Assembly Mlos.NetCore does not have a config, as it is always registered first.
             //
-            for (uint index = 1; index < globalMemoryRegion.RegisteredSettingsAssemblyCount.Load(); index++)
+            for (uint index = 1; index < mlosContext.GlobalMemoryRegion.RegisteredSettingsAssemblyCount.Load(); index++)
             {
                 RegisterSettingsAssembly(assemblyIndex: index);
             }
@@ -133,8 +93,35 @@ namespace Mlos.Agent
 
             // Signal named event to close any waiter threads.
             //
-            controlChannelNamedEvent.Signal();
-            feedbackChannelNamedEvent.Signal();
+            mlosContext.TerminateControlChannel();
+            mlosContext.TerminateFeedbackChannel();
+        }
+
+        /// <summary>
+        /// Register shared config memory region.
+        /// </summary>
+        /// <param name="sharedMemoryRegionIndex">Index of the shared memory region.</param>
+        private void RegisterSharedConfigMemoryRegion(uint sharedMemoryRegionIndex)
+        {
+            MlosInternal.RegisteredMemoryRegionConfig.CodegenKey codegenKey = default;
+            codegenKey.MemoryRegionIndex = sharedMemoryRegionIndex;
+
+            // Locate shared memory region config.
+            //
+            SharedConfig<RegisteredMemoryRegionConfig> registeredMemoryRegionSharedConfig =
+                SharedConfigManager.Lookup(mlosContext.GlobalMemoryRegion.SharedConfigDictionary, codegenKey);
+
+            if (registeredMemoryRegionSharedConfig.HasSharedConfig)
+            {
+                // Config exists, register memory region with the shared config manager.
+                //
+                RegisteredMemoryRegionConfig registeredMemoryRegionConfig = registeredMemoryRegionSharedConfig.Config;
+
+                mlosContext.SharedConfigManager.RegisterSharedConfigMemoryRegion(
+                    memoryRegionId: registeredMemoryRegionConfig.MemoryRegionIndex,
+                    sharedMemoryMapName: registeredMemoryRegionConfig.SharedMemoryMapName.Value,
+                    memoryRegionSize: registeredMemoryRegionConfig.MemoryRegionSize);
+            }
         }
 
         /// <summary>
@@ -162,7 +149,8 @@ namespace Mlos.Agent
                 AssemblyIndex = assemblyIndex,
             };
 
-            SharedConfig<MlosProxyInternal.RegisteredSettingsAssemblyConfig> assemblySharedConfig = MlosContext.SharedConfigManager.Lookup(assemblyConfigKey);
+            SharedConfig<MlosProxyInternal.RegisteredSettingsAssemblyConfig> assemblySharedConfig =
+                SharedConfigManager.Lookup(mlosContext.GlobalMemoryRegion.SharedConfigDictionary, assemblyConfigKey);
 
             if (assemblySharedConfig.HasSharedConfig)
             {
@@ -176,37 +164,27 @@ namespace Mlos.Agent
                 //
                 assemblyDirs.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
 
-                // 2. Try to load assembly from the full path listed in the config.
-                // Note: This doesn't currently work for Linux.
-                // See Also: Mlos.Core/MlosContext.cpp
-                //
-                if (assemblyConfig.ApplicationFilePath.Value != null)
-                {
-                    assemblyDirs.Add(Path.GetDirectoryName(assemblyConfig.ApplicationFilePath.Value));
-                }
-
-                // 3. The current working directory.
+                // 2. The current working directory.
                 //
                 assemblyDirs.Add(".");
 
-                // 4. The search path specified in an environment variable.
+                // 3. The search path specified in an environment variable.
                 // This is akin to an LD_LIBRARY_PATH but specifically for MLOS Settings Registry DLLs.
                 //
                 string settingsRegistryLibraryPath = System.Environment.GetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH");
                 if (!string.IsNullOrEmpty(settingsRegistryLibraryPath))
                 {
-                    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
                         assemblyDirs.AddRange(settingsRegistryLibraryPath.Split(';'));
                     }
-                    else if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                     {
                         assemblyDirs.AddRange(settingsRegistryLibraryPath.Split(':'));
                     }
                     else
                     {
-                        throw new NotImplementedException(
-                            string.Format("Unhandled OS: '{0}'", System.Runtime.InteropServices.RuntimeInformation.OSDescription ?? "Unknown"));
+                        throw new NotImplementedException($"Unhandled OS: '{RuntimeInformation.OSDescription}'");
                     }
                 }
 
@@ -253,26 +231,10 @@ namespace Mlos.Agent
         /// <summary>
         /// Register Settings Assembly.
         /// </summary>
-        /// <param name="registerAssemblyRequestMsg"></param>
-        private void RegisterAssemblyCallback(MlosProxyInternal.RegisterAssemblyRequestMessage registerAssemblyRequestMsg)
-        {
-            RegisterSettingsAssembly(registerAssemblyRequestMsg.AssemblyIndex);
-        }
-
-        /// <summary>
-        /// Register memory region.
-        /// </summary>
         /// <param name="msg"></param>
-        private void RegisterMemoryRegionMessageCallback(MlosProxyInternal.RegisterMemoryRegionRequestMessage msg)
+        private void RegisterSettingsAssemblyCallback(MlosProxyInternal.RegisterSettingsAssemblyRequestMessage msg)
         {
-            if (!memoryRegions.ContainsKey(msg.MemoryRegionId))
-            {
-                SharedMemoryMapView sharedMemoryMapView = SharedMemoryMapView.Open(
-                    msg.Name.Value,
-                    msg.MemoryRegionSize);
-
-                memoryRegions.Add(msg.MemoryRegionId, sharedMemoryMapView);
-            }
+            RegisterSettingsAssembly(msg.AssemblyIndex);
         }
 
         /// <summary>
@@ -281,24 +243,18 @@ namespace Mlos.Agent
         /// <param name="msg"></param>
         private void RegisterSharedConfigMemoryRegionRequestMessageCallback(MlosProxyInternal.RegisterSharedConfigMemoryRegionRequestMessage msg)
         {
-            // Store shared config memory region.
-            //
-            SharedMemoryMapView sharedConfigMemoryMapView = memoryRegions[msg.MemoryRegionId];
-
-            sharedConfigManager.SetMemoryRegion(new MlosProxyInternal.SharedConfigMemoryRegion() { Buffer = sharedConfigMemoryMapView.Buffer });
+            RegisterSharedConfigMemoryRegion(msg.MemoryRegionId);
         }
 
         /// <summary>
         /// #TODO remove, this is not required.
-        /// set the terminate channel in sync object and signal.
         /// </summary>
         /// <param name="msg"></param>
-        private void TerminateReaderThreadRequestMessageCallback(TerminateReaderThreadRequestMessage msg)
+        private void TerminateReaderThreadRequestMessageCallback(MlosProxy.TerminateReaderThreadRequestMessage msg)
         {
             // Terminate the channel.
             //
-            MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-            ChannelSynchronization controlChannelSync = globalMemoryRegion.ControlChannelSynchronization;
+            MlosProxy.ChannelSynchronization controlChannelSync = mlosContext.GlobalMemoryRegion.ControlChannelSynchronization;
             controlChannelSync.TerminateChannel.Store(true);
         }
 
@@ -309,20 +265,9 @@ namespace Mlos.Agent
         /// </summary>
         public void RunAgent()
         {
-            // Create the shared memory control channel.
-            //
-            var globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-            var controlChannel = new SharedChannel<InterProcessSharedChannelPolicy, SharedChannelSpinPolicy>(
-                buffer: controlChannelMemoryMapView.Buffer,
-                size: (uint)controlChannelMemoryMapView.MemSize,
-                sync: globalMemoryRegion.ControlChannelSynchronization)
-            {
-                ChannelPolicy = { NotificationEvent = controlChannelNamedEvent },
-            };
-
             // Process the messages from the control channel.
             //
-            controlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
+            mlosContext.ControlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -332,32 +277,16 @@ namespace Mlos.Agent
                 return;
             }
 
-            // Close shared memory.
+            // Dispose MlosContext.
             //
-            globalMemoryRegionView?.Dispose();
-            globalMemoryRegionView = null;
-
-            controlChannelMemoryMapView?.Dispose();
-            controlChannelMemoryMapView = null;
-
-            feedbackChannelMemoryMapView?.Dispose();
-            feedbackChannelMemoryMapView = null;
-
-            sharedConfigMemoryMapView?.Dispose();
-            sharedConfigMemoryMapView = null;
-
-            controlChannelNamedEvent?.Dispose();
-            controlChannelNamedEvent = null;
-
-            feedbackChannelNamedEvent?.Dispose();
-            feedbackChannelNamedEvent = null;
+            mlosContext?.Dispose();
+            mlosContext = null;
 
             isDisposed = true;
         }
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

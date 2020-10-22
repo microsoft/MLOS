@@ -25,7 +25,8 @@ namespace Core
 // NAME: NamedEvent::Constructor.
 //
 NamedEvent::NamedEvent() noexcept
-  : m_hEvent(nullptr)
+  : m_hEvent(nullptr),
+    CleanupOnClose(false)
 {
 }
 
@@ -36,7 +37,8 @@ NamedEvent::NamedEvent() noexcept
 //  Move constructor.
 //
 NamedEvent::NamedEvent(NamedEvent&& namedEvent) noexcept
-  : m_hEvent(std::exchange(namedEvent.m_hEvent, nullptr))
+  : m_hEvent(std::exchange(namedEvent.m_hEvent, nullptr)),
+    CleanupOnClose(std::exchange(namedEvent.CleanupOnClose, false))
 {
 }
 
@@ -101,7 +103,7 @@ HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
 // NAME: NamedEvent::Open
 //
 // PURPOSE:
-//  Opens a named event object.
+//  Opens an existing named event object.
 //
 // RETURNS:
 //  HRESULT.
@@ -141,6 +143,10 @@ HRESULT NamedEvent::Open(const char* const namedEventName) noexcept
 //
 void NamedEvent::Close()
 {
+    // Windows OS will remove the named event once the last process using it will terminate, just reset the flag.
+    //
+    CleanupOnClose = false;
+
     CloseHandle(m_hEvent);
     m_hEvent = nullptr;
 }

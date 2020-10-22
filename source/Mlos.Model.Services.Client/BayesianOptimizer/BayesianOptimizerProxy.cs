@@ -96,7 +96,7 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
                 });
 
             string suggestedParameter = configurationParameters.ParametersJsonString;
-            Console.WriteLine($"Suggest {random} {suggestedParameter}");
+            Console.WriteLine($"Suggest random={random} {suggestedParameter}");
             return suggestedParameter;
         }
     }

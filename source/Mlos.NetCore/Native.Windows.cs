@@ -36,6 +36,17 @@ namespace Mlos.Core.Windows
         internal static IntPtr InvalidPointer = IntPtr.Subtract(IntPtr.Zero, 1);
 
         #region WinAPI
+
+        /// <summary>
+        /// Creates or opens a named or unnamed file mapping object for a specified file.
+        /// </summary>
+        /// <param name="fileHandle"></param>
+        /// <param name="fileMappingAttributes"></param>
+        /// <param name="fileMapProtect"></param>
+        /// <param name="maximumSizeHigh"></param>
+        /// <param name="maximumSizeLow"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [DllImport(KernelLib, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern SharedMemorySafeHandle CreateFileMapping(
             IntPtr fileHandle,
@@ -45,12 +56,28 @@ namespace Mlos.Core.Windows
             uint maximumSizeLow,
             string name);
 
+        /// <summary>
+        /// Opens a named file mapping object.
+        /// </summary>
+        /// <param name="desiredAccess"></param>
+        /// <param name="inheritHandle"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [DllImport(KernelLib, SetLastError = true, CharSet = CharSet.Unicode)]
         internal static extern SharedMemorySafeHandle OpenFileMapping(
             MemoryMappedFileAccess desiredAccess,
             bool inheritHandle,
             string name);
 
+        /// <summary>
+        /// Maps a view of a file mapping into the address space of a calling process.
+        /// </summary>
+        /// <param name="fileMapping"></param>
+        /// <param name="desiredAccess"></param>
+        /// <param name="fileOffsetHigh"></param>
+        /// <param name="fileOffsetLow"></param>
+        /// <param name="numberOfBytesToMap"></param>
+        /// <returns></returns>
         [DllImport(KernelLib, SetLastError = true)]
         internal static extern MemoryMappingSafeHandle MapViewOfFile(
             SharedMemorySafeHandle fileMapping,
@@ -59,15 +86,41 @@ namespace Mlos.Core.Windows
             int fileOffsetLow,
             int numberOfBytesToMap);
 
+        /// <summary>
+        /// Closes an open object handle.
+        /// </summary>
+        /// <param name="handle"></param>
+        /// <returns></returns>
         [DllImport(KernelLib, SetLastError = true)]
         internal static extern bool CloseHandle(IntPtr handle);
 
+        /// <summary>
+        /// Retrieves information about a range of pages within the virtual address space of a specified process.
+        /// </summary>
+        /// <param name="hProcess"></param>
+        /// <param name="lpAddress"></param>
+        /// <param name="lpBuffer"></param>
+        /// <param name="dwLength"></param>
+        /// <returns></returns>
         [DllImport(KernelLib, SetLastError = true)]
         internal static extern int VirtualQueryEx(IntPtr hProcess, IntPtr lpAddress, out MEMORY_BASIC_INFORMATION lpBuffer, uint dwLength);
 
+        /// <summary>
+        /// Unmaps a mapped view of a file from the calling process's address space.
+        /// </summary>
+        /// <param name="lpBaseAddress"></param>
+        /// <returns></returns>
         [DllImport(KernelLib, SetLastError = true)]
         internal static extern bool UnmapViewOfFile(IntPtr lpBaseAddress);
 
+        /// <summary>
+        /// Creates or opens a named or unnamed event object.
+        /// </summary>
+        /// <param name="fileMappingAttributes"></param>
+        /// <param name="manualReset"></param>
+        /// <param name="initialState"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [DllImport(KernelLib, CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern EventSafeHandle CreateEvent(
             ref SECURITY_ATTRIBUTES fileMappingAttributes,
@@ -158,13 +211,31 @@ namespace Mlos.Core.Windows
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool EqualSid(IntPtr sid1, IntPtr sid2);
 
+        /// <summary>
+        /// Copies a security identifier (SID) to a buffer.
+        /// </summary>
+        /// <param name="destinationSidLength"></param>
+        /// <param name="destinationSid"></param>
+        /// <param name="sourceSid"></param>
+        /// <returns></returns>
         [DllImport(AdvapiLib, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool CopySid(uint destinationSidLength, SecurityIdentifierSafePtr destinationSid, IntPtr sourceSid);
 
+        /// <summary>
+        /// Compares a SID to a well-known SID and returns true if they match.
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
         [DllImport(AdvapiLib, EntryPoint = "IsWellKnownSid", CallingConvention = CallingConvention.Winapi, SetLastError = true)]
         internal static extern bool IsWellKnownSid(IntPtr sid, WellKnownSidType type);
 
+        /// <summary>
+        /// Returns the length, in bytes, of a valid security identifier (SID).
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
         [DllImport(AdvapiLib)]
         internal static extern uint GetLengthSid(IntPtr sid);
 
@@ -461,11 +532,16 @@ namespace Mlos.Core.Windows
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     internal class LocalAllocSafePtr : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public LocalAllocSafePtr()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LocalAllocSafePtr"/> class.
+        /// Constructor.
+        /// </summary>
+        internal LocalAllocSafePtr()
             : base(true)
         {
         }
 
+        /// <inheritdoc/>
         protected override bool ReleaseHandle()
         {
             return Native.LocalFree(handle) == IntPtr.Zero;
@@ -498,11 +574,15 @@ namespace Mlos.Core.Windows
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     internal class SharedMemorySafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public SharedMemorySafeHandle()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SharedMemorySafeHandle"/> class.
+        /// </summary>
+        internal SharedMemorySafeHandle()
             : base(true)
         {
         }
 
+        /// <inheritdoc/>
         protected override bool ReleaseHandle()
         {
             return Native.CloseHandle(handle);
@@ -516,11 +596,15 @@ namespace Mlos.Core.Windows
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     internal class MemoryMappingSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryMappingSafeHandle"/> class.
+        /// </summary>
         public MemoryMappingSafeHandle()
             : base(true)
         {
         }
 
+        /// <inheritdoc/>
         protected override bool ReleaseHandle()
         {
             return Native.UnmapViewOfFile(handle);
@@ -534,11 +618,15 @@ namespace Mlos.Core.Windows
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     internal class EventSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public EventSafeHandle()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventSafeHandle"/> class.
+        /// </summary>
+        internal EventSafeHandle()
             : base(true)
         {
         }
 
+        /// <inheritdoc/>
         protected override bool ReleaseHandle()
         {
             return Native.CloseHandle(handle);
@@ -552,11 +640,15 @@ namespace Mlos.Core.Windows
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     internal class AccessTokenSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public AccessTokenSafeHandle()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AccessTokenSafeHandle"/> class.
+        /// </summary>
+        internal AccessTokenSafeHandle()
             : base(true)
         {
         }
 
+        /// <inheritdoc/>
         protected override bool ReleaseHandle()
         {
             return Native.CloseHandle(handle);
@@ -570,11 +662,15 @@ namespace Mlos.Core.Windows
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     internal class ProcessTokenSafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProcessTokenSafeHandle"/> class.
+        /// </summary>
         public ProcessTokenSafeHandle()
             : base(true)
         {
         }
 
+        /// <inheritdoc/>
         protected override bool ReleaseHandle()
         {
             return Native.CloseHandle(handle);

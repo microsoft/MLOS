@@ -25,6 +25,7 @@ namespace Mlos.SettingsSystem.Attributes
         public uint Length { get; }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="FixedSizeArrayAttribute"/> class.
         /// Constructor.
         /// </summary>
         /// <param name="length"></param>

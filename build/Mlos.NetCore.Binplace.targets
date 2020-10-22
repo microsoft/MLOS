@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+  Binplace NetCore application to the dedicated folder.
+  -->
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <BinplaceDir>$(BinplaceRootDir)/$(AssemblyName)</BinplaceDir>
+  </PropertyGroup>
+  <!-- Allow importing projects to override the default BinplacePattern items list. -->
+  <ItemGroup Label="BinplaceOutputs">
+    <BinplacePattern Include="$(TargetName)"/>
+    <BinplacePattern Include=".dll"/>
+    <BinplacePattern Include=".exe" Condition="'$(IsWindows)' == 'true'" />
+    <BinplacePattern Include=".pdb" />
+    <BinplacePattern Include=".so" Condition="'$(IsLinux)' == 'true'" />
+    <BinplacePattern Include=".dylib" Condition="'$(IsLinux)' == 'true'" />
+    <BinplacePattern Include=".runtimeconfig.json" />
+  </ItemGroup>
+  <!-- Binplace task -->
+  <Target Name="Binplace" AfterTargets="Build">
+    <PropertyGroup>
+     <BinplaceInputPattern>@(BinplacePattern->'$(OutputPath)**\*%(Identity)')</BinplaceInputPattern>
+    </PropertyGroup>
+    <ItemGroup Label="BinplaceFiles">
+      <BinplaceInputs Include="$(BinplaceInputPattern)" />
+    </ItemGroup>
+    <Copy SourceFiles="@(BinplaceInputs)" DestinationFolder="$(BinplaceDir)" UseHardlinksIfPossible="true" />
+  </Target>
+  <!-- Cleanup task -->
+  <Target Name="CleanBinplace" BeforeTargets="Clean">
+    <PropertyGroup>
+     <BinplaceOutputPattern>@(BinplacePattern->'$(BinplaceDir)**\*%(Identity)')</BinplaceOutputPattern>
+    </PropertyGroup>
+    <ItemGroup Label="BinplaceFiles">
+      <BinplaceOutputs Include="$(BinplaceOutputPattern)" />
+    </ItemGroup>
+    <Delete Files="@(BinplaceOutputs)" />
+  </Target>
+</Project>

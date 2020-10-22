@@ -25,18 +25,19 @@ namespace Core
 template<typename TProxy>
 class SharedConfig
 {
-private:
-    void Initialize(const TProxy& initConfig)
+public:
+    // Initializes the shared config from the component one.
+    //
+    void InitializeFromDefaultConfig(const TProxy& defaultConfig)
     {
         static_assert(sizeof(SharedConfigHeader) == 32, "SharedConfigHeader has incorrect size.");
 
         m_header.ConfigId = 1;
         m_header.CodegenTypeIndex = TypeMetadataInfo::CodegenTypeIndex<TProxy>();
 
-        // #TODO hacky, we assume the header has been updated
-        // m_header.Address = { 0 };
-        // #TODO remove address, not needed
-        m_config = initConfig;
+        // Copy given config to the shared memory.
+        //
+        ObjectSerialization::Serialize(BytePtr(&m_config), defaultConfig);
     }
 
 private:

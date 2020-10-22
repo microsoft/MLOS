@@ -13,6 +13,8 @@ These are one-time setup instructions that should be executed prior to following
     - [Option 1: Linux Docker Build Env](#option-1-linux-docker-build-env)
       - [Install Docker](#install-docker)
       - [Build the Docker Image](#build-the-docker-image)
+        - [Pull the upstream docker image](#pull-the-upstream-docker-image)
+        - [Local docker image build](#local-docker-image-build)
     - [Option 2: Manual Build Tools Install](#option-2-manual-build-tools-install)
     - [Install Python on Linux](#install-python-on-linux)
       - [Option 1: Docker Python Install](#option-1-docker-python-install)
@@ -91,14 +93,27 @@ Please see the official Docker install documenation for distribution specific do
 
 #### Build the Docker Image
 
+##### Pull the upstream docker image
+
+```sh
+docker pull ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04
+```
+
+##### Local docker image build
+
 To automatically setup a Linux build environment using `docker`, run the following to build the image locally:
 
 ```sh
 # Build the docker image:
-docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
+docker build . --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 \
+    --cache-from ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04
 ```
 
 > Where `20.04` can also be replaced with another [supported `UbuntuVersion`](#linux-distribution-requirements).
+>
+> Note: in Linux environments, you can also simply execute `make docker-image`
+>
+> See the [`Makefile`](../Makefile#mlos-github-tree-view) for advanced usage details.
 
 See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
 
@@ -128,8 +143,16 @@ sudo apt-get install liblttng-ctl0 liblttng-ust0 zlib1g libxml2
 > Note: older distros such as Ubuntu 16.04 may also need the `libcurl3` package installed for `dotnet restore` to work, but is unavailable on (or will break) more recent versions of Ubuntu.
 >
 > Note: `libxml2` pulls an appropriate version of `libicu`.
->
-> Note: most other dependencies like `dotnet` and `cmake` are automatically fetched to the `tools/` directory using helpers in `scripts/` and invoked by the `Makefile` and `cmake` tools.
+
+```sh
+# Install dotnet in the system:
+./scripts/install.dotnet.sh
+```
+
+```sh
+# Install cmake in the system:
+./scripts/install.cmake.sh
+```
 
 Optional tools:
 

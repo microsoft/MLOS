@@ -12,6 +12,9 @@ using System.Runtime.InteropServices;
 
 namespace Mlos.Core.Windows
 {
+    /// <summary>
+    /// Windows implementation of shared memory map view.
+    /// </summary>
     public class SharedMemoryMapView : Mlos.Core.SharedMemoryMapView
     {
         /// <summary>
@@ -20,7 +23,7 @@ namespace Mlos.Core.Windows
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Create(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView CreateNew(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             return CreateOrOpen(sharedMemoryMapName, sharedMemorySize);
         }
@@ -74,7 +77,7 @@ namespace Mlos.Core.Windows
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Open(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView OpenExisting(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             SharedMemorySafeHandle sharedMemoryHandle = Native.OpenFileMapping(
                 Native.MemoryMappedFileAccess.FileMapRead | Native.MemoryMappedFileAccess.FileMapWrite,
@@ -115,23 +118,20 @@ namespace Mlos.Core.Windows
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                // Close the memory mapping.
-                //
-                memoryMappingHandle?.Dispose();
+            // Close the memory mapping.
+            //
+            memoryMappingHandle?.Dispose();
 
-                // Close the shared memory.
-                //
-                sharedMemoryHandle?.Dispose();
-            }
+            // Close the shared memory.
+            //
+            sharedMemoryHandle?.Dispose();
 
-            disposed = true;
+            isDisposed = true;
         }
 
         private readonly MemoryMappingSafeHandle memoryMappingHandle;

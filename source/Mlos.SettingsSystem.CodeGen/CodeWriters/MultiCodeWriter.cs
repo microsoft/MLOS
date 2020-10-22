@@ -20,7 +20,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
     internal class MultiCodeWriter : CodeWriter
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="MultiCodeWriter"/> class.
         /// </summary>
         /// <param name="writers"></param>
         public MultiCodeWriter(IEnumerable<CodeWriter> writers)

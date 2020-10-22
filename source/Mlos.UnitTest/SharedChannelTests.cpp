@@ -44,14 +44,14 @@ TEST(SharedChannel, VerifyBufferSize)
     //
     {
         TestFlatBuffer<21> buffer;
-        ChannelSynchronization sync = { 0 };
+        ChannelSynchronization sync = {};
         TestSharedChannel sharedChannel(sync, buffer, 21);
 
         EXPECT_EQ(sharedChannel.Size, 16);
     }
     {
         TestFlatBuffer<4095> buffer;
-        ChannelSynchronization sync = { 0 };
+        ChannelSynchronization sync = {};
         TestSharedChannel sharedChannel(sync, buffer, 4095);
 
         EXPECT_EQ(sharedChannel.Size, 2048);
@@ -72,7 +72,7 @@ TEST(SharedChannel, VerifyChannelRestart)
     // Create the test channel.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     // Write the first message.
@@ -154,7 +154,7 @@ TEST(SharedChannel, VerifySyncPositions)
     // Create small buffer.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     Mlos::UnitTest::Point point = { 13, 17 };
@@ -162,8 +162,8 @@ TEST(SharedChannel, VerifySyncPositions)
 
     // Setup empty callbacks.
     //
-    ObjectDeserializationCallback::Mlos::UnitTest::Point_Callback = [point](Proxy::Mlos::UnitTest::Point&&) {};
-    ObjectDeserializationCallback::Mlos::UnitTest::Point3D_Callback = [point3d](Proxy::Mlos::UnitTest::Point3D&&) {};
+    ObjectDeserializationCallback::Mlos::UnitTest::Point_Callback = [](Proxy::Mlos::UnitTest::Point&&) {};
+    ObjectDeserializationCallback::Mlos::UnitTest::Point3D_Callback = [](Proxy::Mlos::UnitTest::Point3D&&) {};
 
     // Send first message.
     //
@@ -200,7 +200,7 @@ TEST(SharedChannel, VerifySyncPositions)
     EXPECT_EQ(sharedChannel.Sync.WritePosition, 128);
 }
 
-// Verify if structes containing fixed size arrays can be serialized and read by the receiver.
+// Verify if structures containing fixed size arrays can be serialized and read by the receiver.
 //
 TEST(SharedChannel, VerifySendingReceivingArrayStruct)
 {
@@ -209,7 +209,7 @@ TEST(SharedChannel, VerifySendingReceivingArrayStruct)
     // Create small buffer.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     Mlos::UnitTest::Line line;
@@ -287,7 +287,7 @@ TEST(SharedChannel, StressSendReceive)
         };
 
     TestFlatBuffer<4096> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 4096);
 
     // Setup deserialize callbacks to verify received objects.
@@ -320,11 +320,13 @@ TEST(SharedChannel, StressSendReceive)
             return true;
         });
 
-    constexpr uint32_t numberOfIterations = 10 * 1000 * 1000;
+    // Use uint32_t (not const) to allow clang capture the variable.
+    //
+    uint32_t numberOfIterations = 10 * 1000 * 1000;
 
     std::future<bool> resultFromWriter1 = std::async(
         std::launch::async,
-        [&sharedChannel, &point, &point3d, numberOfIterations]
+        [&sharedChannel, &point, &point3d, &numberOfIterations]
         {
             for (uint32_t i = 0; i < numberOfIterations; i++)
             {
@@ -345,7 +347,7 @@ TEST(SharedChannel, StressSendReceive)
 
     std::future<bool> resultFromWriter2 = std::async(
         std::launch::async,
-        [&sharedChannel, &point, &point3d, numberOfIterations]
+        [&sharedChannel, &point, &point3d, &numberOfIterations]
         {
             for (uint32_t i = 0; i < numberOfIterations; i++)
             {

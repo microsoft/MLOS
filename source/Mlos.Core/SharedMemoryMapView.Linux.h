@@ -31,17 +31,21 @@ public:
     // Creates a shared memory view.
     //
     _Check_return_
-    HRESULT Create(const char* const sharedMemoryMapName, size_t memSize) noexcept;
-
-    // Opens already created shared memory view.
-    //
-    _Check_return_
-    HRESULT Open(const char* const sharedMemoryMapName) noexcept;
+    HRESULT CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
     // Creates or opens a shared memory view.
     //
     _Check_return_
     HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+
+    // Opens already created shared memory view.
+    //
+    _Check_return_
+    HRESULT OpenExisting(const char* const sharedMemoryMapName) noexcept;
+
+    // Closes a shared memory view.
+    //
+    void Close();
 
 private:
     _Check_return_
@@ -51,8 +55,13 @@ public:
     size_t MemSize;
     BytePtr Buffer;
 
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    //
+    bool CleanupOnClose;
+
 private:
     int m_fdSharedMemory;
+    char* m_sharedMemoryMapName;
 };
 
 }

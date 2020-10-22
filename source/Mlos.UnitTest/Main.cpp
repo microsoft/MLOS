@@ -20,10 +20,6 @@
 //
 #include "MlosPlatform.Std.inl"
 
-#pragma warning(push)
-#pragma warning(disable: 4996 4251 4275 4244)
-#include "gtest/gtest.h"
-#pragma warning(pop)
 using ::testing::EmptyTestEventListener;
 using ::testing::InitGoogleTest;
 using ::testing::Test;
@@ -35,8 +31,8 @@ using ::testing::UnitTest;
 int
 __cdecl
 main(
-    __in int argc,
-    __in char* argv[])
+    _In_ int argc,
+    _In_ char* argv[])
 {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

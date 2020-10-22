@@ -30,6 +30,11 @@ namespace Mlos.Core.Internal
         internal ChannelSynchronization FeedbackChannelSynchronization;
 
         /// <summary>
+        /// Gets or sets information how many processes are using the global memory region.
+        /// </summary>
+        internal AtomicUInt32 AttachedProcessesCount;
+
+        /// <summary>
         /// Total number of regions.
         /// </summary>
         internal uint TotalMemoryRegionCount;
@@ -38,5 +43,15 @@ namespace Mlos.Core.Internal
         /// Number of registered settings assembly.
         /// </summary>
         internal AtomicUInt32 RegisteredSettingsAssemblyCount;
+
+        /// <summary>
+        /// Shared configurations stored in the lookup table.
+        /// </summary>
+        /// <remarks>
+        /// In the global memory region we keep the information about:
+        /// - registered settings assembly,
+        /// - registered shared config memory regions.
+        /// </remarks>
+        internal SharedConfigDictionary SharedConfigDictionary;
     }
 }

@@ -4,20 +4,19 @@
 
 # First search for headers in the current source directory.
 # This takes the place of include_directories(.) in most projects.
-include_directories(${CMAKE_CURRENT_LIST_DIR})
+include_directories(${PROJECT_SOURCE_DIR})
 
 # Next, assume that the C++ projects we're building also need to include either
 # Mlos.Core headers and the SettingsProvider code generation output.
 include_directories(${MLOS_ROOT}/source/Mlos.Core/)
-include_directories(${MLOS_ROOT}/out/Mlos.CodeGen.out/${CMAKE_BUILD_TYPE}/)
+include_directories(${MLOS_CODEGEN_OUTPUT_ROOT}/)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Make sure to flag all warnings.
-# TODO: We have lots of cross-platform issues in the code gen especially right
-# now that will need #ifdef wrappers.
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+add_link_options(-Wall -Wextra -Wpedantic -Werror)
 
 # The codegen output currently relies on __declspec(selectany) attributes to
 # instruct the linker to ignore extra definitions resulting from including the
@@ -30,9 +29,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
 # than having to switch to using NDEBUG.
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
-# Also include debug symbols for optimized builds.
-# TODO: Strip them and keep the symbols separately.
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_RELEASE} -g")
+# Always include symbols to make debugging reasonable.
+# TODO: For optimized builds, strip them and keep the symbols separately.
+add_compile_options(-g)
+add_link_options(-g)
 
 # TODO: Search for clang compiler and set the appropriate C/CXX compiler variables.
 #if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))

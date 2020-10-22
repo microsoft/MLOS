@@ -164,12 +164,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         private readonly StringBuilder stringBuilder = new StringBuilder();
 
         /// <summary>
-        /// Indentation level.
+        /// Gets or sets indentation level.
         /// </summary>
         protected int IndentationLevel { get; set; }
 
         /// <summary>
-        /// An indentation string.
+        /// Gets an indentation string.
         /// </summary>
         private string IndentationString => new string(IndentationChar, IndentationLevel * IndentationScalar);
     }

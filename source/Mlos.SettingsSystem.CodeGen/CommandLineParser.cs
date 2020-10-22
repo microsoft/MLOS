@@ -12,18 +12,21 @@ using System.Linq;
 
 namespace Mlos.SettingsSystem.CodeGen
 {
+    /// <summary>
+    /// Codegen command line parser class.
+    /// </summary>
     public static class CommandLineParser
     {
         /// <summary>
         /// The expected output name of the command executable.
         /// </summary>
-        public const string CmdName = "Mlos.SettingsSystem.CodeGen";
+        private const string CmdName = "Mlos.SettingsSystem.CodeGen";
 
         /// <summary>
         /// Prints usage text to stdout on the cli and exits.
         /// </summary>
         /// <param name="msg">Optional error message to output to stderr.</param>
-        internal static void Usage(string msg = null)
+        private static void Usage(string msg = null)
         {
             if (msg != null)
             {

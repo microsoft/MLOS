@@ -114,6 +114,8 @@ protected:
 public:
     ChannelSynchronization& Sync;
 
+    BytePtr Buffer;
+
     // Size of the buffer.
     //
     uint32_t Size;
@@ -121,8 +123,6 @@ public:
     // Size of the buffer - sizeof(FrameHeader);
     //
     uint32_t Margin;
-
-    BytePtr Buffer;
 };
 
 //----------------------------------------------------------------------------

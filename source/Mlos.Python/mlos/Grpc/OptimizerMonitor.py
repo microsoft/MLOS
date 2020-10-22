@@ -4,12 +4,12 @@
 #
 from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerHandle
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 
 
 class OptimizerMonitor:
-    """ Enables monitoring optimizers existing within the OptimizerMicroservice.
+    """Enables monitoring optimizers existing within the OptimizerMicroservice.
 
     """
 
@@ -19,8 +19,11 @@ class OptimizerMonitor:
         self._optimizer_service_stub = OptimizerServiceStub(channel=self._grpc_channel)
         self._optimizer_factory = BayesianOptimizerFactory(grpc_channel=self._grpc_channel, logger=self.logger)
 
+    def __repr__(self):
+        return f"OptimizerMonitor(grpc_channel='{self._grpc_channel._channel.target().decode()}')"  # pylint: disable=protected-access
+
     def get_existing_optimizers(self):
-        """ Returns proxies to all existing optimizers.
+        """Returns proxies to all existing optimizers.
 
         :return:
         """
@@ -28,19 +31,19 @@ class OptimizerMonitor:
         optimizer_list = self._optimizer_service_stub.ListExistingOptimizers(request)
 
         optimizer_proxies = [
-            self._optimizer_factory.connect_to_existing_optimizer(optimizer_info)
+            self._optimizer_factory.connect_to_existing_remote_optimizer(optimizer_info)
             for optimizer_info
             in optimizer_list.Optimizers
         ]
         return optimizer_proxies
 
     def get_optimizer_by_id(self, optimizer_id):
-        """ Returns a proxy to an optimizer with a specified Id.
+        """Returns a proxy to an optimizer with a specified Id.
 
         :param optimizer_id:
         :return:
         """
         optimizer_handle = OptimizerHandle(Id=optimizer_id)
         optimizer_info = self._optimizer_service_stub.GetOptimizerInfo(optimizer_handle)
-        optimizer_proxy = self._optimizer_factory.connect_to_existing_optimizer(optimizer_info)
+        optimizer_proxy = self._optimizer_factory.connect_to_existing_remote_optimizer(optimizer_info)
         return optimizer_proxy

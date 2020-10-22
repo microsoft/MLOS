@@ -23,7 +23,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
     internal class CppObjectDeserializeFunctionCallbackCodeWriter : CppTypeTableCodeWriter
     {
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CppObjectDeserializeFunctionCallbackCodeWriter"/> class.
         /// </summary>
         /// <param name="sourceTypesAssembly"></param>
         public CppObjectDeserializeFunctionCallbackCodeWriter(Assembly sourceTypesAssembly)

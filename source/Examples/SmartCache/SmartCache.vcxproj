@@ -50,6 +50,6 @@
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_callbacks.h" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_dispatch.h" />
   </ItemGroup>
-  <Import Project="$(BaseDir)\build\Mlos.Binplace.targets" />
   <Import Project="$(BaseDir)\build\Mlos.Cpp.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.Cpp.Binplace.targets" />
 </Project>

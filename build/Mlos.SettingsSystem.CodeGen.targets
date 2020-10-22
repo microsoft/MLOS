@@ -4,16 +4,14 @@
     <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" ReferenceOutputAssembly="true" />
     <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.CodeGen\Mlos.SettingsSystem.CodeGen.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
-
   <!-- Figure out folder path to the Codegen executable. -->
-  <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
-    <SettingsSystemCodeGenPath>$(ObjectRoot)\source\Mlos.SettingsSystem.CodeGen\$(ObjectDirectory)\$(Platform)\</SettingsSystemCodeGenPath>
+  <PropertyGroup>
+    <SettingsSystemCodeGenPath>$(BinplaceRootDir)\Mlos.SettingsSystem.CodeGen</SettingsSystemCodeGenPath>
   </PropertyGroup>
   <!-- Set path to Codegen executable. -->
   <PropertyGroup>
-    <SettingsSystemCodeGenExe>dotnet $(SettingsSystemCodeGenPath)\Mlos.SettingsSystem.CodeGen.dll</SettingsSystemCodeGenExe>
+    <SettingsSystemCodeGenExe>dotnet $(SettingsSystemCodeGenPath)/Mlos.SettingsSystem.CodeGen.dll</SettingsSystemCodeGenExe>
   </PropertyGroup>
-
   <PropertyGroup>
     <!--
       With multiple SettingsProviders generated for a large project, we may need to name them differently for disambiguation.
@@ -22,11 +20,14 @@
     <SettingsSystemCodeGenOutputPath Condition="'$(SettingsSystemCodeGenOutputPath)' == ''">$([MSBuild]::MakeRelative($(SourceDir), $(MSBuildProjectDirectory)))</SettingsSystemCodeGenOutputPath>
     <!-- Turn that into an absolute path -->
     <SettingsSystemCodeGenAbsoluteOutputPath Condition="'$(SettingsSystemCodeGenAbsoluteOutputPath)' == ''">$(MlosCodeGenOutputPathRoot)\$(SettingsSystemCodeGenOutputPath)</SettingsSystemCodeGenAbsoluteOutputPath>
-
     <!-- Base file name for generated code files -->
     <SettingsSystemCodeGenOutputBasename Condition="'$(SettingsSystemCodeGenOutputBasename)' == ''">SettingsProvider_gen</SettingsSystemCodeGenOutputBasename>
   </PropertyGroup>
-
+  <!-- Binplace settings registry to the target folder -->
+  <PropertyGroup>
+    <!-- Provide a property for external projects to override where the output of the settings registry dlls should be placed -->
+    <SettingsRegistryBinplaceDir Condition="'$(SettingsRegistryBinplaceDir)' == ''">$(BinplaceDir)</SettingsRegistryBinplaceDir>
+  </PropertyGroup>
   <!-- Track the set of code gen outputs *from this project* (reference projects handled next) for incremental build purposes. -->
   <ItemGroup Label="Mlos CodeGen Outputs" Condition="'@(SettingsRegistryDef->Count())' != 0">
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_callbacks.h" />
@@ -37,19 +38,16 @@
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_deserialize.cs" />
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="@(SettingsRegistryDef -> '%(FullPath)')" />
     <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.cs" />
     <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_deserialize.cs" />
     <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.cs" />
   </ItemGroup>
-
   <!--
     Note: To simplify/consolidate the logic, Input properties for these codegen Targets is now removed
     so that they always run and the CodeGen process itself avoids overwriting files if their output hasn't changed.
   -->
-
   <!-- Codegen using internal compiler -->
   <Target Name="SettingsSystemRegistryDefCodeGen" AfterTargets="AfterResolveReferences" Outputs="@(MlosCodeGenOutput)" Condition="'@(SettingsRegistryDef->Count())' != 0">
     <PropertyGroup>
@@ -63,17 +61,10 @@
 
   <!-- Provide a meta-target for easier dependency/cli specification -->
   <Target Name="SettingsSystemCodeGen" DependsOnTargets="SettingsSystemRegistryDefCodeGen" />
-
   <!-- Binplace settings registry to the target folder -->
-  <PropertyGroup>
-    <!-- Provide a property for external projects to override where the output of the settings registry dlls should be placed -->
-    <SettingsRegistryBinplaceDir Condition="'$(SettingsRegistryBinplaceDir)' == ''">$(BinplaceDir)</SettingsRegistryBinplaceDir>
-  </PropertyGroup>
-  <!-- By default we don't need to binplace to BinplaceDir since Mlos.NetCore.targets already do that for us. -->
-  <Target Name="BinplaceSettingsRegistry" AfterTargets="Build" Condition="'$(SettingsRegistryBinplaceDir)' != '$(BinplaceDir)'">
+  <Target Name="BinplaceSettingsRegistry" AfterTargets="Build" Condition="'$(SkipBinplaceSettingsRegistry)' == ''" >
     <Copy SourceFiles="$(OutputPath)\$(TargetFileName)" DestinationFolder="$(SettingsRegistryBinplaceDir)" />
   </Target>
-
   <Target Name="CleanSettingsSystemCodeGen" BeforeTargets="BeforeClean">
     <RemoveDir Directories="$(SettingsSystemCodeGenAbsoluteOutputPath)" />
   </Target>

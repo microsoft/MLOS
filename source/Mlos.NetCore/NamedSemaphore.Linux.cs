@@ -6,10 +6,15 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System.Threading;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Mlos.Core.Linux
 {
+    /// <summary>
+    /// Named semaphore.
+    /// </summary>
     public class NamedSemaphore : Mlos.Core.NamedEvent
     {
         /// <summary>
@@ -31,6 +36,15 @@ namespace Mlos.Core.Linux
                 openFlags,
                 Native.ModeFlags.S_IRUSR | Native.ModeFlags.S_IWUSR,
                 0);
+
+            if (semaphoreHandle.IsInvalid)
+            {
+                throw new IOException(
+                    $"Failed to create a NamedSemaphore {name}",
+                    innerException: new Win32Exception(Marshal.GetLastWin32Error()));
+            }
+
+            semaphoreName = name;
         }
 
         /// <inheritdoc/>
@@ -55,19 +69,30 @@ namespace Mlos.Core.Linux
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
+            semaphoreHandle?.Dispose();
+
+            if (CleanupOnClose)
             {
-                semaphoreHandle?.Dispose();
+                // Unlink semaphore. Ignore the errors.
+                //
+                if (semaphoreName != null)
+                {
+                    _ = Native.SemaphoreUnlink(semaphoreName);
+                }
+
+                CleanupOnClose = false;
             }
 
-            disposed = true;
+            isDisposed = true;
         }
 
         private readonly SemaphoreSafeHandle semaphoreHandle;
+
+        private readonly string semaphoreName;
     }
 }

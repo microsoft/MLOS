@@ -25,6 +25,12 @@ class OptimizerBase(ABC):
         self.optimization_problem = optimization_problem
         self.optimizer_config = None # TODO: pass from subclasses.
 
+        # To avoid repeated calls to .predict() if no change is expected. Must be cleared on every call to .register()
+        #
+        self.cached_predictions_for_observations = None
+
+
+
     @abstractmethod
     def get_optimizer_convergence_state(self):
         raise NotImplementedError("All subclasses must implement this method.")
