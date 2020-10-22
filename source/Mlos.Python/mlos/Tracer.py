@@ -64,7 +64,8 @@ def trace():
 
 
 def add_trace_event(name, phase, category='', timestamp_ns=None, actor_id=None, thread_id=None, arguments=None):
-    if global_values.tracer is not None:
+    tracer = getattr(global_values, 'tracer', None)
+    if tracer is not None:
         global_values.tracer.add_trace_event(
             name,
             phase,

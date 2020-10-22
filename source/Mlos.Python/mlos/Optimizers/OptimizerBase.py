@@ -159,7 +159,7 @@ class OptimizerBase(ABC):
                 if objective.minimize:
                     index_of_best = lower_confidence_bounds.idxmin()
                 else:
-                    index_of_best = lower_confidence_bounds.idx_max()
+                    index_of_best = lower_confidence_bounds.idxmax()
                 optimum_value = Point(lower_confidence_bound=lower_confidence_bounds.loc[index_of_best])
             else:
                 raise RuntimeError(f"Unknown optimum definition.")

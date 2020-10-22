@@ -37,11 +37,12 @@ class BayesianOptimizerFactory:
             self.logger.info(f"Optimizer config not specified. Using default.")
             optimizer_config = bayesian_optimizer_config_store.default
 
-        self.logger.info(f"Creating a bayesian optimizer with config: {optimizer_config}.")
+        self.logger.info(f"Creating a bayesian optimizer with config: {optimizer_config.to_json(indent=2)}.")
 
         return BayesianOptimizer(
             optimization_problem=optimization_problem,
-            optimizer_config=optimizer_config
+            optimizer_config=optimizer_config,
+            logger=self.logger
         )
 
 
