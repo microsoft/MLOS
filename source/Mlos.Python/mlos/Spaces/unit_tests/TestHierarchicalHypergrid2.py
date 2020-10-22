@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import random
+import pickle
 import unittest
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
@@ -182,5 +182,10 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
                 on_external_dimension=CategoricalDimension(name='cache_implementation_name', values=['associative_cache'])
             )
 
-
+    def test_pickling(self):
+        for _ in range(100):
+            random_point = self.cache_param_space.random()
+            pickled = pickle.dumps(random_point)
+            unpickled = pickle.loads(pickled)
+            self.assertTrue(unpickled == random_point)
 

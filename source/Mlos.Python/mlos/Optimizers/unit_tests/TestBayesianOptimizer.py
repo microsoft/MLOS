@@ -4,6 +4,7 @@
 #
 import math
 import os
+import pickle
 import random
 import unittest
 import warnings
@@ -402,6 +403,13 @@ class TestBayesianOptimizer(unittest.TestCase):
                 best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
                 self.validate_optima(optimizer=bayesian_optimizer)
+
+            # Test if pickling works
+            #
+            pickled_optimizer = pickle.dumps(local_optimizer)
+            unpickled_optimizer = pickle.loads(pickled_optimizer)
+            for _ in range(10):
+                self.assertTrue(unpickled_optimizer.suggest() == local_optimizer.suggest())
 
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
