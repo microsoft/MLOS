@@ -102,18 +102,18 @@ class ThreeLevelQuadratic(ObjectiveFunctionBase):
 
         lows = dataframe[dataframe['vertex_height'] == "low"]
         if not lows.empty:
-            y_for_lows = lows["low_quadratic_params.x_1"] ** 2 + lows["low_quadratic_params.x_1"] ** 2
+            y_for_lows = lows["low_quadratic_params.x_1"] ** 2 + lows["low_quadratic_params.x_2"] ** 2
             all_ys.append(y_for_lows)
 
         mids = dataframe[dataframe['vertex_height'] == 5]
         if not mids.empty:
-            y_for_mids = mids["medium_quadratic_params.x_1"] ** 2 + mids["medium_quadratic_params.x_1"] ** 2
+            y_for_mids = mids["medium_quadratic_params.x_1"] ** 2 + mids["medium_quadratic_params.x_2"] ** 2
             all_ys.append(y_for_mids)
 
         highs = dataframe[dataframe['vertex_height'] == 15]
 
         if not highs.empty:
-            y_for_highs = highs["high_quadratic_params.x_1"] ** 2 + highs["high_quadratic_params.x_1"] ** 2
+            y_for_highs = highs["high_quadratic_params.x_1"] ** 2 + highs["high_quadratic_params.x_2"] ** 2
             all_ys.append(y_for_highs)
 
         concatenated_ys = pd.concat(all_ys)
