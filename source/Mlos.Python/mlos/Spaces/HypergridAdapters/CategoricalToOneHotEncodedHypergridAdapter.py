@@ -204,23 +204,21 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
            2) Since sklearn's OHE will handle both project and unproject dataframe transforms, prepare the OHE class.
               This requires constructing the 'categories' argument for OHE (all categorical dims or 1 cross product dim).
               The dimension's .linspace() method provides the order list of values but doesn't include possible np.NaN values,
-               hence that list is augmented to include the string 'nan' which pandas.DataFrame.apply(map(str)) will produce from a np.NaN value.
+              hence that list is augmented to include the string 'nan' which pandas.DataFrame.apply(map(str)) will produce from a np.NaN value.
               All values (output from CategoricalToDiscrete adapter are converted to strings prior to initializing the OHE object.
-               This will allow the code to accommodate any missing values in the dataframes passed to .project_dataframe and .unproject_dataframe.
+              This will allow the code to accommodate any missing values in the dataframes passed to .project_dataframe and .unproject_dataframe.
            3) If the cross product of all categorical dimensions have been requested, construct the cross product
         """
-
         categories_list_for_ohe_init = []
         for adaptee_dimension in self._adaptee.dimensions:
             if adaptee_dimension.name in self._adaptee_dimension_names_to_transform:
                 """ conversion to str allows accommodation of np.NaN values in dataframes
                     np.NaN values will not appear in the .linspace() list but will be present in dataframes generated from hierarchical hypergrids.
-                     So 'nan' is included to allow OHE to map np.NaNs in ._project_dataframe() and ._unproject_dataframe().
+                    So 'nan' is included to allow OHE to map np.NaNs in ._project_dataframe() and ._unproject_dataframe().
                     The value 'nan' is placed first in the list so the 'nan' x ... x 'nan' cross product value is first ([0]).
-                     Since this value should never appear in hierarchical hypergrid derived dataframes, it is popped from
-                     the categories when user specifies merge_all_categorical_dimensions==True.
+                    Since this value should never appear in hierarchical hypergrid derived dataframes, it is popped from
+                    the categories when user specifies merge_all_categorical_dimensions==True.
                 """
-
                 expanded_categories = ['nan'] + [str(float(x)) for x in adaptee_dimension.linspace()]
                 categories_list_for_ohe_init.append(expanded_categories)
 
