@@ -214,7 +214,7 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
         for adaptee_dimension in self._adaptee.dimensions:
             if adaptee_dimension.name in self._adaptee_dimension_names_to_transform:
                 """ conversion to str allows accommodation of np.NaN values in dataframes
-                    np.NaN values will not appear in the .linspace() list but will be present in dataframes generated from hierarchical hypergrods.
+                    np.NaN values will not appear in the .linspace() list but will be present in dataframes generated from hierarchical hypergrids.
                      So 'nan' is included to allow OHE to map np.NaNs in ._project_dataframe() and ._unproject_dataframe().
                     The value 'nan' is placed first in the list so the 'nan' x ... x 'nan' cross product value is first ([0]).
                      Since this value should never appear in hierarchical hypergrid derived dataframes, it is popped from
