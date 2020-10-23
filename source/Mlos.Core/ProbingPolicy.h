@@ -25,7 +25,10 @@ template<typename THash>
 struct TLinearProbing
 {
     template<typename TKey>
-    static uint32_t CalculateIndex(TKey codegenKey, uint32_t& probingCount, uint32_t elementCount);
+    static uint32_t CalculateIndex(
+        _In_ TKey codegenKey,
+        _Inout_ uint32_t& probingCount,
+        _In_ uint32_t elementCount);
 };
 }
 }

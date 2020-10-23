@@ -192,7 +192,7 @@ HRESULT Security::CreateDefaultSecurityDescriptor(_Out_ PSECURITY_DESCRIPTOR& se
 //
 _Check_return_
 HRESULT Security::CreateSecurityDescriptorFromString(
-    _In_ const wchar_t* const securityDescriptorString,
+    _In_z_ const wchar_t* const securityDescriptorString,
     _Out_ PSECURITY_DESCRIPTOR& securityDescriptor)
 {
     HRESULT hr = S_OK;
@@ -224,7 +224,7 @@ HRESULT Security::CreateSecurityDescriptorFromString(
 //  HRESULT.
 //
 _Check_return_
-HRESULT Security::VerifyHandleOwner(HANDLE handle)
+HRESULT Security::VerifyHandleOwner(_In_ HANDLE handle)
 {
     PSECURITY_DESCRIPTOR securityDescriptor = nullptr;
     PSID handleOwnerSid = nullptr;

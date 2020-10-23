@@ -31,12 +31,12 @@ public:
     // Creates or opens a named event object.
     //
     _Check_return_
-    HRESULT CreateOrOpen(const char* const namedEventName) noexcept;
+    HRESULT CreateOrOpen(_In_z_ const char* const namedEventName) noexcept;
 
     // Opens an existing named event object.
     //
     _Check_return_
-    HRESULT Open(const char* const namedEventName) noexcept;
+    HRESULT Open(_In_z_ const char* const namedEventName) noexcept;
 
     // Closes a named event object.
     //

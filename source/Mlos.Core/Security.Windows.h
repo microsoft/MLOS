@@ -42,13 +42,13 @@ public:
     //
     _Check_return_
     static HRESULT CreateSecurityDescriptorFromString(
-        _In_ const wchar_t* const securityDescriptorString,
+        _In_z_ const wchar_t* const securityDescriptorString,
         _Out_ PSECURITY_DESCRIPTOR& securityDescriptor);
 
     // Checks if handle has been created by authorized user.
     //
     _Check_return_
-    static HRESULT VerifyHandleOwner(HANDLE handle);
+    static HRESULT VerifyHandleOwner(_In_ HANDLE handle);
 };
 }
 }

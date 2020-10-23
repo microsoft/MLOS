@@ -36,13 +36,15 @@ struct Hash
 {
 public:
     template<typename T>
-    inline static THashValue CombineHashValue(THashValue hashValue, const T& value)
+    inline static THashValue CombineHashValue(
+        _In_ THashValue hashValue,
+        _In_ const T& value)
     {
         return THashFunction::CombineHashValue(hashValue, reinterpret_cast<const byte*>(&value), sizeof(value));
     }
 
     template<typename T>
-    inline static THashValue GetHashValue(const T& value)
+    inline static THashValue GetHashValue(_In_ const T& value)
     {
         static_assert(is_hash_function<THashFunction>::value, "THashFunction is not valid hash function.");
         static_assert(std::is_integral<THashValue>::value, "THashValue is not integral type.");
