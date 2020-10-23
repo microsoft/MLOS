@@ -484,7 +484,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                 # If the the prediction for predicted_value has too few degrees of freedom, it's impossible to construct a confidence interval for it.
                 # If it was possible, then the inequality above would always hold. If it's not possible, then the inequality above can fail.
                 #
-                optimum_predicted_value_prediction = self.optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
                 optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
                 degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
                 if degrees_of_freedom == 0:
@@ -494,7 +494,7 @@ class TestBayesianOptimizer(unittest.TestCase):
                     self.assertTrue(False)
 
             if not (predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound):
-                optimum_predicted_value_prediction = self.optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
                 optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
                 degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
                 if degrees_of_freedom == 0:
