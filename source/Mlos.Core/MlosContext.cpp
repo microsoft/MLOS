@@ -39,10 +39,10 @@ namespace Core
 //  The constructor creates communication channels from shared memory views.
 //
 MlosContext::MlosContext(
-    Internal::GlobalMemoryRegion& globalMemoryRegion,
-    ISharedChannel& controlChannel,
-    ISharedChannel& telemetryChannel,
-    ISharedChannel& feedbackChannel) noexcept
+    _In_ Internal::GlobalMemoryRegion& globalMemoryRegion,
+    _In_ ISharedChannel& controlChannel,
+    _In_ ISharedChannel& telemetryChannel,
+    _In_ ISharedChannel& feedbackChannel) noexcept
   : m_sharedConfigManager(*this),
     m_globalMemoryRegion(globalMemoryRegion),
     m_controlChannel(controlChannel),
@@ -67,8 +67,8 @@ MlosContext::MlosContext(
 // NOTES:
 //
 HRESULT MlosContext::RegisterSettingsAssembly(
-    const char* assemblyFileName,
-    uint32_t assemblyDispatchTableBaseIndex)
+    _In_z_ const char* assemblyFileName,
+    _In_ uint32_t assemblyDispatchTableBaseIndex)
 {
     uint32_t assemblyIndex = m_globalMemoryRegion.RegisteredSettingsAssemblyCount;
 

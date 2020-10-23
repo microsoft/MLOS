@@ -35,7 +35,7 @@ public:
     _Check_return_
     HRESULT Initialize();
 
-    InterProcessMlosContextInitializer(InterProcessMlosContextInitializer&& initializer) noexcept;
+    InterProcessMlosContextInitializer(_In_ InterProcessMlosContextInitializer&& initializer) noexcept;
 
     InterProcessMlosContextInitializer(const InterProcessMlosContextInitializer&) = delete;
 
@@ -74,7 +74,7 @@ private:
 class InterProcessMlosContext : public MlosContext
 {
 public:
-    InterProcessMlosContext(InterProcessMlosContextInitializer&&) noexcept;
+    InterProcessMlosContext(_In_ InterProcessMlosContextInitializer&&) noexcept;
 
     ~InterProcessMlosContext();
 

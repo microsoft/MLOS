@@ -33,8 +33,8 @@ namespace Core
 //
 template<typename T>
 HRESULT MlosContext::CreateMemoryRegion(
-    const char* const sharedMemoryName,
-    size_t memoryRegionSize,
+    _In_z_ const char* const sharedMemoryName,
+    _In_ size_t memoryRegionSize,
     _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView)
 {
     // Create region view, initialize it on create.
@@ -72,12 +72,11 @@ HRESULT MlosContext::CreateMemoryRegion(
 // NOTES:
 //
 template<typename T>
-HRESULT MlosContext::RegisterComponentConfig(ComponentConfig<T>& componentConfig)
+HRESULT MlosContext::RegisterComponentConfig(_Inout_ ComponentConfig<T>& componentConfig)
 {
     // Create or find existing shared configuration.
     //
-    HRESULT hr = m_sharedConfigManager.CreateOrUpdateFrom(componentConfig);
-    return hr;
+    return m_sharedConfigManager.CreateOrUpdateFrom(componentConfig);
 }
 
 //----------------------------------------------------------------------------
@@ -91,7 +90,7 @@ HRESULT MlosContext::RegisterComponentConfig(ComponentConfig<T>& componentConfig
 // NOTES:
 //
 template<typename TMessage>
-void MlosContext::SendControlMessage(TMessage& message)
+void MlosContext::SendControlMessage(_In_ TMessage& message)
 {
     m_controlChannel.SendMessage(message);
 }
@@ -107,7 +106,7 @@ void MlosContext::SendControlMessage(TMessage& message)
 // NOTES:
 //
 template<typename TMessage>
-void MlosContext::SendFeedbackMessage(TMessage& message)
+void MlosContext::SendFeedbackMessage(_In_ TMessage& message)
 {
     m_feedbackChannel.SendMessage(message);
 }
@@ -123,7 +122,7 @@ void MlosContext::SendFeedbackMessage(TMessage& message)
 // NOTES:
 //
 template<typename TMessage>
-void MlosContext::SendTelemetryMessage(const TMessage& message) const
+void MlosContext::SendTelemetryMessage(_In_ const TMessage& message) const
 {
     m_telemetryChannel.SendMessage(message);
 }

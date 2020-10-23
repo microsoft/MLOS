@@ -28,7 +28,8 @@ namespace Core
 //
 // NOTES:
 //
-InterProcessMlosContextInitializer::InterProcessMlosContextInitializer(InterProcessMlosContextInitializer&& initializer) noexcept
+InterProcessMlosContextInitializer::InterProcessMlosContextInitializer(
+    _In_ InterProcessMlosContextInitializer&& initializer) noexcept
   : m_globalMemoryRegionView(std::move(initializer.m_globalMemoryRegionView)),
     m_controlChannelMemoryMapView(std::move(initializer.m_controlChannelMemoryMapView)),
     m_feedbackChannelMemoryMapView(std::move(initializer.m_feedbackChannelMemoryMapView)),
@@ -134,7 +135,7 @@ HRESULT InterProcessMlosContextInitializer::Initialize()
 //
 // NOTES:
 //
-InterProcessMlosContext::InterProcessMlosContext(InterProcessMlosContextInitializer&& initializer) noexcept
+InterProcessMlosContext::InterProcessMlosContext(_In_ InterProcessMlosContextInitializer&& initializer) noexcept
   : MlosContext(initializer.m_globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
     m_contextInitializer(std::move(initializer)),
     m_controlChannel(

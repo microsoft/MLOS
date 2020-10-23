@@ -32,9 +32,9 @@ namespace Internal
 //
 _Check_return_
 HRESULT InitializeSharedConfigDictionary(
-    SharedConfigDictionary& sharedConfigDictionary,
-    MemoryRegion& memoryRegion,
-    int32_t allocationBlockOffset);
+    _Inout_ SharedConfigDictionary& sharedConfigDictionary,
+    _Inout_ MemoryRegion& memoryRegion,
+    _In_ int32_t allocationBlockOffset);
 
 //----------------------------------------------------------------------------
 // NAME: SharedConfigDictionaryLookup
@@ -53,16 +53,16 @@ private:
     template<typename T>
     _Check_return_
     static HRESULT CreateOrUpdateFromInSharedConfigDictionary(
-        SharedConfigDictionary& sharedConfigDictionary,
-        ComponentConfig<T>& componentConfig);
+        _Inout_ SharedConfigDictionary& sharedConfigDictionary,
+        _Inout_ ComponentConfig<T>& componentConfig);
 
     // Locates the component config.
     //
     template<typename T>
     _Check_return_
     static HRESULT LookupInSharedConfigDictionary(
-        SharedConfigDictionary& sharedConfigDictionary,
-        ComponentConfig<T>& componentConfig);
+        _Inout_ SharedConfigDictionary& sharedConfigDictionary,
+        _Inout_ ComponentConfig<T>& componentConfig);
 
     friend class ::Mlos::Core::SharedConfigManager;
 };

@@ -34,7 +34,7 @@ using TProbingPolicy = Collections::TLinearProbing<Collections::FNVHash<uint32_t
 // NOTES:
 //
 template<typename T>
-HRESULT SharedConfigManager::CreateOrUpdateFrom(ComponentConfig<T>& componentConfig)
+HRESULT SharedConfigManager::CreateOrUpdateFrom(_Inout_ ComponentConfig<T>& componentConfig)
 {
     // Ensure there is allocated and registered shared config memory region.
     //
@@ -66,8 +66,8 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(ComponentConfig<T>& componentCon
 //
 template<typename T>
 HRESULT SharedConfigManager::CreateOrUpdateFrom(
-    Internal::SharedConfigDictionary& sharedConfigDictionary,
-    ComponentConfig<T>& componentConfig)
+    _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
+    _Inout_ ComponentConfig<T>& componentConfig)
 {
     return Internal::SharedConfigDictionaryLookup<SharedConfigManager::TProbingPolicy>::CreateOrUpdateFromInSharedConfigDictionary(
         sharedConfigDictionary,
@@ -86,7 +86,7 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(
 // NOTES:
 //
 template<typename T>
-HRESULT SharedConfigManager::Lookup(ComponentConfig<T>& componentConfig)
+HRESULT SharedConfigManager::Lookup(_Inout_ ComponentConfig<T>& componentConfig)
 {
     if (!m_sharedConfigMemRegionView.Buffer.Pointer)
     {
@@ -110,7 +110,9 @@ HRESULT SharedConfigManager::Lookup(ComponentConfig<T>& componentConfig)
 // NOTES:
 //
 template<typename T>
-HRESULT SharedConfigManager::Lookup(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig)
+HRESULT SharedConfigManager::Lookup(
+    _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
+    _Inout_ ComponentConfig<T>& componentConfig)
 {
     return Internal::SharedConfigDictionaryLookup<SharedConfigManager::TProbingPolicy>::LookupInSharedConfigDictionary(
         sharedConfigDictionary,

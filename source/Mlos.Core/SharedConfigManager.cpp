@@ -29,7 +29,7 @@ namespace Core
 //
 // NOTES:
 //
-SharedConfigManager::SharedConfigManager(MlosContext& mlosContext) noexcept
+SharedConfigManager::SharedConfigManager(_In_ MlosContext& mlosContext) noexcept
   : m_mlosContext(mlosContext),
     CleanupOnClose(false)
 {

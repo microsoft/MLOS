@@ -38,21 +38,21 @@ public:
     using TProbingPolicy = Collections::TLinearProbing<Collections::FNVHash<uint32_t>>;
 
 public:
-    SharedConfigManager(MlosContext& mlosContext) noexcept;
+    SharedConfigManager(_In_ MlosContext& mlosContext) noexcept;
 
     ~SharedConfigManager();
 
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
-    HRESULT CreateOrUpdateFrom(ComponentConfig<T>& componentConfig);
+    HRESULT CreateOrUpdateFrom(_Inout_ ComponentConfig<T>& componentConfig);
 
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
     static HRESULT CreateOrUpdateFrom(
-        Internal::SharedConfigDictionary& sharedConfigDictionary,
-        ComponentConfig<T>& componentConfig);
+        _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
+        _Inout_ ComponentConfig<T>& componentConfig);
 
     // Locates the component config.
     //
@@ -62,7 +62,9 @@ public:
     // Locates the component config.
     //
     template<typename T>
-    static HRESULT Lookup(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig);
+    static HRESULT Lookup(
+        _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
+        _Inout_ ComponentConfig<T>& componentConfig);
 
 private:
     MlosContext& m_mlosContext;

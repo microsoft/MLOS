@@ -28,7 +28,7 @@ namespace Core
 // NOTES:
 //
 template<typename T>
-void ComponentConfig<T>::Bind(SharedConfigType* sharedConfig)
+void ComponentConfig<T>::Bind(_In_ SharedConfigType* sharedConfig)
 {
     m_sharedConfig = sharedConfig;
 }
@@ -60,7 +60,7 @@ void ComponentConfig<T>::Update()
 // NOTES:
 //
 template<typename T>
-bool ComponentConfig<T>::CompareKey(SharedConfigHeader* sharedConfigHeader)
+bool ComponentConfig<T>::CompareKey(_In_ SharedConfigHeader* sharedConfigHeader)
 {
     return TypeMetadataInfo::CompareKey<T>(
         *this,
@@ -79,7 +79,7 @@ bool ComponentConfig<T>::CompareKey(SharedConfigHeader* sharedConfigHeader)
 //
 template<typename T>
 template<typename TMessage>
-void ComponentConfig<T>::SendTelemetryMessage(const TMessage& message) const
+void ComponentConfig<T>::SendTelemetryMessage(_In_ const TMessage& message) const
 {
     // #TODO
     // - add object as parameter

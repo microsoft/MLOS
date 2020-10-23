@@ -20,7 +20,10 @@ namespace Mlos
 namespace Core
 {
 template<typename T>
-HRESULT SharedMemoryRegionView<T>::CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept
+_Check_return_
+HRESULT SharedMemoryRegionView<T>::CreateNew(
+    _In_z_ const char* const sharedMemoryMapName,
+    _In_ size_t memSize) noexcept
 {
     HRESULT hr = SharedMemoryMapView::CreateNew(sharedMemoryMapName, memSize);
     if (FAILED(hr))
@@ -34,7 +37,10 @@ HRESULT SharedMemoryRegionView<T>::CreateNew(const char* const sharedMemoryMapNa
 }
 
 template<typename T>
-HRESULT SharedMemoryRegionView<T>::CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
+_Check_return_
+HRESULT SharedMemoryRegionView<T>::CreateOrOpen(
+    _In_z_ const char* const sharedMemoryMapName,
+    _In_ size_t memSize) noexcept
 {
     HRESULT hr = SharedMemoryMapView::CreateOrOpen(sharedMemoryMapName, memSize);
     if (FAILED(hr))
@@ -55,11 +61,10 @@ HRESULT SharedMemoryRegionView<T>::CreateOrOpen(const char* const sharedMemoryMa
 }
 
 template<typename T>
-HRESULT SharedMemoryRegionView<T>::OpenExisting(const char* const sharedMemoryMapName) noexcept
+_Check_return_
+HRESULT SharedMemoryRegionView<T>::OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept
 {
-    HRESULT hr = SharedMemoryMapView::OpenExisting(sharedMemoryMapName);
-
-    return hr;
+    return SharedMemoryMapView::OpenExisting(sharedMemoryMapName);
 }
 
 //----------------------------------------------------------------------------
