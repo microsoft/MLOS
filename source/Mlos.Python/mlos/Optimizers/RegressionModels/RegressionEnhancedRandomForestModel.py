@@ -20,6 +20,7 @@ from mlos.Optimizers.RegressionModels.SklearnRidgeRegressionModelConfig import S
 from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
 from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
+from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
 from mlos.Tracer import trace
 
 # sklearn injects many warnings, so from
@@ -98,43 +99,6 @@ class RegressionEnhancedRandomForestRegressionModelConfig(metaclass=DefaultConfi
     def contains(cls, config):
         return config in cls.CONFIG_SPACE
 
-    # @classmethod
-    # def create_from_config_point(cls, config_point):
-    #     assert cls.contains(config_point)
-    #     config_key_value_pairs = {param_name: value for param_name, value in config_point}
-    #     return cls(**config_key_value_pairs)
-    #
-    # def __init__(
-    #         self,
-    #         max_basis_function_degree=_DEFAULT.max_basis_function_degree,
-    #         boosting_root_model_name=_DEFAULT.boosting_root_model_name,
-    #         min_abs_root_model_coef=_DEFAULT.min_abs_root_model_coef,
-    #         boosting_root_model_config: Point() = _DEFAULT.sklearn_lasso_regression_model_config,
-    #         random_forest_model_config: Point() = _DEFAULT.sklearn_random_forest_regression_model_config,
-    #         residual_model_name=_DEFAULT.residual_model_name,
-    #         perform_initial_root_model_hyper_parameter_search=_DEFAULT.perform_initial_root_model_hyper_parameter_search,
-    #         perform_initial_random_forest_hyper_parameter_search=_DEFAULT.perform_initial_random_forest_hyper_parameter_search
-    # ):
-    #     self.max_basis_function_degree = max_basis_function_degree
-    #     self.residual_model_name = residual_model_name
-    #     self.min_abs_root_model_coef = min_abs_root_model_coef
-    #     self.perform_initial_root_model_hyper_parameter_search = perform_initial_root_model_hyper_parameter_search
-    #     self.perform_initial_random_forest_hyper_parameter_search = perform_initial_random_forest_hyper_parameter_search
-    #
-    #     self.boosting_root_model_name = boosting_root_model_name
-    #     self.boosting_root_model_config = None
-    #     if self.boosting_root_model_name == SklearnLassoRegressionModelConfig.__name__:
-    #         self.boosting_root_model_config = SklearnLassoRegressionModelConfig \
-    #             .create_from_config_point(boosting_root_model_config)
-    #     elif self.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
-    #         self.boosting_root_model_config = SklearnRidgeRegressionModelConfig \
-    #             .create_from_config_point(boosting_root_model_config)
-    #     else:
-    #         print('Unrecognized boosting_root_model_name "{}"'.format(self.boosting_root_model_name))
-    #
-    #     self.random_forest_model_config = SklearnRandomForestRegressionModelConfig \
-    #         .create_from_config_point(random_forest_model_config)
-
 
 class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     """ Regression-Enhanced RandomForest Regression model
@@ -182,6 +146,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             output_space=output_space
         )
         self.model_config = model_config
+
+        # one hot encode categorical input dimensions
+        self.input_space = CategoricalToOneHotEncodedHypergridAdapter(adaptee=input_space, merge_all_categorical_dimensions=True, drop='first')
+
         self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
         self.output_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
 
@@ -203,12 +171,14 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.variance_estimate_ = None
         self.root_model_gradient_coef_ = None
         self.polynomial_features_powers_ = None
+
         self.num_dummy_vars_ = None
         self.num_categorical_dims_ = None
         self.continuous_dim_col_names_ = None
         self.categorical_dim_col_names_ = None
         self.dummy_var_map_ = None
         self.dummy_var_cols_ = None
+
         self.categorical_zero_cols_idx_to_delete_ = None
 
     @trace()
