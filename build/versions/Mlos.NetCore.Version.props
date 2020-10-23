@@ -15,4 +15,7 @@
       <Link>Properties\PipelineAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
+  <PropertyGroup>
+    <HaveIncludedMlosNetCoreVersionProps>true</HaveIncludedMlosNetCoreVersionProps>
+  </PropertyGroup>
 </Project>

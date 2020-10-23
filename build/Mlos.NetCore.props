@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-  <Import Project="$(BaseDir)\build\versions\Mlos.NetCore.Version.props" />
+  <Import Project="$(BaseDir)\build\versions\Mlos.NetCore.Version.props" Condition="'$(HaveIncludedMlosNetCoreVersionProps)' != 'true'" />
   <!-- Include binplace properties. -->
   <Import Project="$(BaseDir)\build\Mlos.Binplace.props" />
   <PropertyGroup>
