@@ -12,7 +12,6 @@ from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitM
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
 from mlos.Spaces import Hypergrid
-from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 from mlos.Tracer import trace
 
 
@@ -139,18 +138,3 @@ class RegressionModel(ABC):
         )
         self.fit_state.set_gof_metrics(data_set_type, gof_metrics)
         return gof_metrics
-
-class RegressionModelConfig(ABC, metaclass=DefaultConfigMeta):
-    """ An abstract class for all regression models config to implement.
-
-    """
-
-    @classmethod
-    @abstractmethod
-    def contains(cls, config):
-        """
-
-        :param config:
-        :return:
-        """
-        raise NotImplementedError
