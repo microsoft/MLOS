@@ -4,13 +4,10 @@
 #
 from enum import Enum
 
-from mlos.Spaces import SimpleHypergrid, \
-    ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
+from mlos.Spaces import SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 
-from .RegressionModel import RegressionModelConfig
-
-
-class SklearnLassoRegressionModelConfig(RegressionModelConfig):
+class SklearnLassoRegressionModelConfig(metaclass=DefaultConfigMeta):
     class Selection(Enum):
         """
         Parameter to sklearn lasso regressor controlling how model coefficients are selected for update.
