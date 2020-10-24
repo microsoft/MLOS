@@ -256,7 +256,8 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = num_categorical_levels_expected + num_continuous_dimensions
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
-        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1) - len(rerf.categorical_zero_cols_idx_to_delete_)
+        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1)\
+                                  - len(rerf.categorical_zero_cols_idx_to_delete_)
         num_detected_features = len(rerf.detected_feature_indices_)
 
         self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
@@ -296,7 +297,8 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = num_categorical_levels_expected + num_continuous_dimensions
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
-        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1) - len(rerf.categorical_zero_cols_idx_to_delete_)
+        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1)\
+                                  - len(rerf.categorical_zero_cols_idx_to_delete_)
         num_detected_features = len(rerf.detected_feature_indices_)
 
         self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')

@@ -173,13 +173,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.root_model_gradient_coef_ = None
         self.polynomial_features_powers_ = None
 
-        self.num_dummy_vars_ = None
-        self.num_categorical_dims_ = None
-        self.continuous_dim_col_names_ = None
-        #self.categorical_dim_col_names_ = None
-        #self.dummy_var_map_ = None
-        self.dummy_var_cols_ = None
-
         self.categorical_zero_cols_idx_to_delete_ = None
 
     @trace()
@@ -199,7 +192,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # pull X and y values from data frames passed
         y = target_values_pandas_frame[self.output_dimension_names].to_numpy().reshape(-1)
         x_df = self.one_hot_encoder_adapter.project_dataframe(df=feature_values_pandas_frame, in_place=False)
-        #x_df = feature_values_pandas_frame[self.input_dimension_names]
         fit_x = self.transform_x(x_df, what_to_return='fit_x')
 
         # run root regression
@@ -514,13 +506,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         """
         fit_x = x
 
-        if self.continuous_dim_col_names_ is None:
-            self.continuous_dim_col_names_ = list(set.difference(set(x.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
-        continuous_dim_col_names = self.continuous_dim_col_names_
-        if self.num_categorical_dims_ is None:
-            self.num_categorical_dims_ = len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
-        num_categorical_dims_ = self.num_categorical_dims_
-
+        continuous_dim_col_names = list(set.difference(set(x.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
+        num_categorical_dims_ = len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
         if num_categorical_dims_ > 0:
             # use the following to create one hot encoding columns prior to constructing fit_x and powers_ table
             working_x = x[continuous_dim_col_names].copy()
