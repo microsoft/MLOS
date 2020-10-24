@@ -86,11 +86,13 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
             self.has_adaptee_been_flattened = True
 
         # Since the CategoricalToDiscrete adapter converts categorical dimensions to discrete dimensions, we remember the categorical dim names
+        self._adaptee_contains_categorical_dimensions = False
         self._adaptee_dimension_names_to_transform = []
         for adaptee_dimension in self._adaptee.dimensions:
             if isinstance(adaptee_dimension, CategoricalDimension):
                 self._adaptee_dimension_names_to_transform.append(adaptee_dimension.name)
             self._adaptee_expected_dimension_name_ordering.append(adaptee_dimension.name)
+        self._adaptee_contains_categorical_dimensions = len(self._adaptee_dimension_names_to_transform) > 0
 
         if any(isinstance(dimension, CategoricalDimension) for dimension in self._adaptee.dimensions) or self.has_adaptee_been_flattened:
             self._adaptee = CategoricalToDiscreteHypergridAdapter(adaptee=self._adaptee)
@@ -126,7 +128,7 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
             columns_to_drop.append(missing_col)
 
         columns_to_transform = self._adaptee_dimension_names_to_transform
-        if self._merge_all_categorical_dimensions:
+        if self._merge_all_categorical_dimensions and self._adaptee_contains_categorical_dimensions:
             df[self._merged_categorical_dimension_column_name] = self._concatenate_dataframe_columns(df, columns_to_transform)
             columns_to_transform = [self._merged_categorical_dimension_column_name]
             columns_to_drop.extend(self._adaptee_dimension_names_to_transform)
@@ -150,13 +152,13 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
             df = df.copy(deep=True)
 
         columns_to_return = self._adaptee_expected_dimension_name_ordering
-        if self._merge_all_categorical_dimensions:
+        if self._merge_all_categorical_dimensions and self._adaptee_contains_categorical_dimensions:
             for column_to_transform in self._adaptee_dimension_names_to_transform:
                 if column_to_transform not in columns_to_return:
                     columns_to_return.append(column_to_transform)
 
         columns_to_drop = []
-        if self._merge_all_categorical_dimensions:
+        if self._merge_all_categorical_dimensions and self._adaptee_contains_categorical_dimensions:
             my_ohe_dict = self._adaptee_to_target_data_dict[self._merged_categorical_dimension_column_name]
             target_columns_to_invert = my_ohe_dict.target_dims
             my_ohe = my_ohe_dict.one_hot_encoder
@@ -222,7 +224,7 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
                 expanded_categories = ['nan'] + [str(float(x)) for x in adaptee_dimension.linspace()]
                 categories_list_for_ohe_init.append(expanded_categories)
 
-                if not self._merge_all_categorical_dimensions:
+                if not self._merge_all_categorical_dimensions and self._adaptee_contains_categorical_dimensions:
                     # do not need to encode the cross product of all categorical dimensions, sufficient info here to add target dimensions
                     self._adaptee_to_target_data_dict[adaptee_dimension.name] = CategoricalToOneHotEncodingAdapteeTargetMapping(
                         one_hot_encoder=OneHotEncoder(categories=[expanded_categories], **self._one_hot_encoder_kwargs))
@@ -231,7 +233,7 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
             else:
                 self._target.add_dimension(adaptee_dimension.copy())
 
-        if self._merge_all_categorical_dimensions:
+        if self._merge_all_categorical_dimensions and self._adaptee_contains_categorical_dimensions:
             # harvested categories for each categorical dimension in single pass across all adaptee dimensions used to compute the cross product encoding here
             cross_product_categories = self._create_cross_product_categories(categories_list_for_ohe_init)
             self._adaptee_to_target_data_dict[self._merged_categorical_dimension_column_name] = CategoricalToOneHotEncodingAdapteeTargetMapping(

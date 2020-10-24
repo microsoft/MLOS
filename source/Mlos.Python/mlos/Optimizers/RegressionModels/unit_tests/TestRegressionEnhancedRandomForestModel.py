@@ -251,12 +251,12 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         x_train_df, y_train_df = self.generate_points_nonhierarchical_categorical_quadratic(num_train_x)
         rerf.fit(x_train_df, y_train_df)
 
-        num_categorical_levels_expected = len(x_train_df['x0'].unique()) * len(x_train_df['i0'].unique())
+        num_categorical_levels_expected = len(rerf.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
         num_continuous_dimensions = 2  # x1 and x2
-        final_num_features = num_categorical_levels_expected - 1 + num_continuous_dimensions
+        final_num_features = num_categorical_levels_expected + num_continuous_dimensions
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
-        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * num_categorical_levels_expected
+        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1) - len(rerf.categorical_zero_cols_idx_to_delete_)
         num_detected_features = len(rerf.detected_feature_indices_)
 
         self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
@@ -291,12 +291,12 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         x_df, y_df = self.generate_points_nonhierarchical_categorical_quadratic(num_points)
         rerf.fit(x_df, y_df)
 
-        num_categorical_levels_expected = len(x_df['x0'].unique()) * len(x_df['i0'].unique())
+        num_categorical_levels_expected = len(rerf.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
         num_continuous_dimensions = 2  # x1 and x2
-        final_num_features = num_categorical_levels_expected - 1 + num_continuous_dimensions
+        final_num_features = num_categorical_levels_expected + num_continuous_dimensions
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
-        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * num_categorical_levels_expected
+        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1) - len(rerf.categorical_zero_cols_idx_to_delete_)
         num_detected_features = len(rerf.detected_feature_indices_)
 
         self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
@@ -305,21 +305,61 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
 
         # test gradient coefficients
-        true_gradient_coef = np.zeros((36, 7))
-        true_gradient_coef[0] = np.array([3, 7, 0, 10, 10, 15, 25])
-        true_gradient_coef[1] = np.array([12, -11, 0, -11, -11, -3, -3])
-        true_gradient_coef[11] = np.array([12, 12, 0, 12, 12, -7, -7])
-        true_gradient_coef[13] = np.array([-3, -11, 0, 0, 0, 2, 2])
-        true_gradient_coef[15] = np.array([4, 12, 0, 0, 0, 3, 3])
-        true_gradient_coef[17] = np.array([-3, -7, 0, 0, 0, 0, 0])
-        true_gradient_coef[19] = np.array([4, 6, 0, 0, 0, 0, 0])
-        true_gradient_coef[21] = np.array([0, -7, 0, 0, 0, 0, 0])
-        true_gradient_coef[23] = np.array([0, 6, 0, 0, 0, 0, 0])
+        print(rerf.root_model_gradient_coef_.shape)
+        print(rerf.root_model_gradient_coef_)
+        true_gradient_coef = np.zeros((42, 13))
+        # true_gradient_coef[0:21, :] = np.array([
+        #     [-0.88923257, -1.80685348, 0, 0, 0, -37.95940666, -37.95680438, 0, -27.96056314, -27.96181644, 0, -22.95675436, -12.95597631],
+        #     [1.64393929, 5.39040704, 0, 0, 0, 7.88887524, 7.88906753, 0, -3.11034223, -3.11049021, 0, 0.88860922, 0.88915106],
+        #     [5.39040704, 1.26819354, 0, 0, 0, 4.80646378, 4.8065159, 0,   4.80727136, 4.80677374, 0, 1.80669593, 1.80646945],
+        #     [7.88887524, 4.80646378, 0, 0, 0, -0.82209434, -0.82215961, 0, -0.82206655, -0.8220557, 0, 2.17795658, 2.17784683],
+        #     [-1.64418868, -5.39041784, 0, 0, 0, -5.39041784, -5.39038081, 0,   6.60961819, 6.60959012, 0, -5.39038292, -5.39040983],
+        #     [-5.39041784, -1.26836587, 0, 0, 0, -0.63418294, -0.63419727, 0, -0.63409985, -0.63410744, 0, 1.36580166, 1.36585864],
+        #     [7.88906753, 4.8065159, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-1.64431922, -5.39038081, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-5.39038081, -1.26839454, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-3.11034223, 4.80727136, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-1.6441331, 6.60961819, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [6.60961819, -1.26819971, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-3.11049021, 4.80677374, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-1.6441114, 6.60959012, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [6.60959012, -1.26821488, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [0.88860922, 1.80669593, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [4.35591316, -5.39038292, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-5.39038292, 2.73160333, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [0.88915106, 1.80646945, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [4.35569365, -5.39040983, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+        #     [-5.39040983, 2.73171727, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.]
+        # ])
+        true_gradient_coef[0:21, :] = np.array([
+            [-1, -2, 0, 0, 0, -38, -38, 0, -28, -28, 0, -23, -13],
+            [2, 5, 0, 0, 0, 8, 8, 0, -3, -3, 0, 1, 1],
+            [5, 1, 0, 0, 0, 5, 5, 0, 5, 5, 0, 2, 2],
+            [8, 5, 0, 0, 0, -1, -1, 0, -1, -1, 0, 2, 2],
+            [-2, -5, 0, 0, 0, -5, -5, 0, 7, 7, 0, -5, -5],
+            [-5, -1, 0, 0, 0, -1, -1, 0, -1, -1, 0, 1, 1],
+            [8, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-2, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-5, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-2, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [7, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-3, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-2, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [7, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [4, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-5, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [4, -5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.],
+            [-5, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.]
+        ])
 
         epsilon = 10 ** -2
         estimated_gradient_coef = rerf.root_model_gradient_coef_
         coef_abs_diff = np.abs(true_gradient_coef - estimated_gradient_coef)
         coef_abs_relative_error = np.divide(coef_abs_diff, np.abs(true_gradient_coef))
+        print(coef_abs_relative_error)
         incorrect_terms = np.where(coef_abs_relative_error > epsilon)[0]
         num_incorrect_terms = len(incorrect_terms)
 
@@ -346,7 +386,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
         self.assertTrue(rerf.fit_X_.shape == (num_train_x, rerf.polynomial_features_powers_.shape[0]), 'Design matrix shape is incorrect')
         self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (28, 8), 'PolynomalFeature.power_ shape is incorrect')
+        self.assertTrue(rerf.polynomial_features_powers_.shape == (34, 9), 'PolynomalFeature.power_ shape is incorrect')
 
         # test predictions
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
