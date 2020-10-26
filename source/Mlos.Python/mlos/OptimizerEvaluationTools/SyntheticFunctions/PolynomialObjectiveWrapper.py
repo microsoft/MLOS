@@ -11,7 +11,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctio
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 
 class PolynomialObjectiveWrapper(ObjectiveFunctionBase):
-    """ Wraps the PolynomialObjective to provide the interface defined in the ObjectiveFunctionBase.
+    """Wraps the PolynomialObjective to provide the interface defined in the ObjectiveFunctionBase.
 
     """
 

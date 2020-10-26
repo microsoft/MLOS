@@ -12,7 +12,16 @@ from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjectiveWrapper import PolynomialObjectiveWrapper
 
 class NestedPolynomialObjective(ObjectiveFunctionBase):
-    """ Wraps the PolynomialObjective to provide the interface defined in the ObjectiveFunctionBase.
+    """A hierarchical function with multiple nested polynomials.
+
+    The value of num_nested_polynomials controls how many polynomials are created. All polynomials are created according to (identical)
+    configs specified by the polynomial_objective_config value.
+
+    The idea here is to provide a more general version of ThreeLevelQuadratic. In ThreeLevelQuadratic we have three two-dimensional,
+    degree two polynomials, and we select between them using the "vertex" parameter.
+
+    Here we have num_nested_polynomials functions, with configurable dimensions, degrees, and coefficient of variation. Optimizing this
+    synthetic function is analogous to optimizing a component with multiple mutually-exclusive implementations.
     """
 
     def __init__(self, objective_function_config: Point):
