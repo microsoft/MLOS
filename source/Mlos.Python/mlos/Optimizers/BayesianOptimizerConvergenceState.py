@@ -12,4 +12,4 @@ class BayesianOptimizerConvergenceState:
 
     """
     def __init__(self, surrogate_model_fit_state: RegressionModelFitState):
-        self.surrogate_model_fit_state = surrogate_model_fit_state
+        self.surrogate_model_fit_state: RegressionModelFitState = surrogate_model_fit_state
