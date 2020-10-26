@@ -42,7 +42,8 @@ class ComponentConfigStore:
 
     def add_config_by_name(self, config_point: Point, config_name: str, description: str = None) -> None:
         if config_point not in self.parameter_space:
-            raise PointOutOfDomainException(f"The supplied point: {config_point.to_json(indent=2)} does not belong to the components parameter space \n{self.parameter_space}")
+            raise PointOutOfDomainException(f"The supplied point: {config_point.to_json(indent=2)} "
+                                            f"does not belong to the components parameter space \n{self.parameter_space}")
 
         self._named_configs[config_name] = config_point
         self._named_configs_descriptions[config_name] = description

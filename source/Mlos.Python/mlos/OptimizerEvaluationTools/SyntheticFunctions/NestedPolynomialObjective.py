@@ -38,6 +38,7 @@ class NestedPolynomialObjective(ObjectiveFunctionBase):
         )
 
         polynomial_objective_config = self.objective_function_config.polynomial_objective_config
+        self._polynomial_objective_config = polynomial_objective_config
         self._polynomials = []
         # Let's create the required number of polynomials.
         #
