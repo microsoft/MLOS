@@ -15,7 +15,7 @@ class PolynomialObjectiveWrapper(ObjectiveFunctionBase):
 
     """
 
-    def __init__(self, objective_function_config: Point):
+    def __init__(self, objective_function_config: Point, domain_name: str = None):
         assert objective_function_config in PolynomialObjective.CONFIG_SPACE
         ObjectiveFunctionBase.__init__(self, objective_function_config)
         self._polynomial_objective_config = objective_function_config
@@ -31,13 +31,16 @@ class PolynomialObjectiveWrapper(ObjectiveFunctionBase):
             noise_coefficient_of_variation=objective_function_config.noise_coefficient_of_variation,
         )
 
+        if domain_name is None:
+            domain_name = "domain"
+
         self._parameter_space = SimpleHypergrid(
-            name="domain",
+            name=domain_name,
             dimensions=[
                 ContinuousDimension(
                     name=f"x_{i}",
-                    min=objective_function_config.coefficient_domain_min,
-                    max=objective_function_config.coefficient_domain_min + objective_function_config.coefficient_domain_width
+                    min=objective_function_config.input_domain_min,
+                    max=objective_function_config.input_domain_min + objective_function_config.input_domain_width
                 ) for i in range(objective_function_config.input_domain_dimension)
             ]
         )
