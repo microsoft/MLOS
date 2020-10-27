@@ -39,15 +39,15 @@ decision_tree_config_store = ComponentConfigStore(
             CategoricalDimension(name="criterion", values=[criterion.value for criterion in Criterion]),
             CategoricalDimension(name="splitter", values=[splitter.value for splitter in Splitter]),
             DiscreteDimension(name="max_depth", min=0, max=2**10),
-            DiscreteDimension(name="min_samples_split", min=2, max=2**10),
-            DiscreteDimension(name="min_samples_leaf", min=3, max=2**10),
+            DiscreteDimension(name="min_samples_split", min=2, max=32),
+            DiscreteDimension(name="min_samples_leaf", min=3, max=32),
             ContinuousDimension(name="min_weight_fraction_leaf", min=0.0, max=0.5),
             CategoricalDimension(name="max_features", values=[function.value for function in MaxFeaturesFunc]),
             DiscreteDimension(name="max_leaf_nodes", min=0, max=2**10),
             ContinuousDimension(name="min_impurity_decrease", min=0.0, max=2**10),
             ContinuousDimension(name="ccp_alpha", min=0.0, max=2**10),
-            DiscreteDimension(name="min_samples_to_fit", min=1, max=2 ** 32),
-            DiscreteDimension(name="n_new_samples_before_refit", min=1, max=2**32)
+            DiscreteDimension(name="min_samples_to_fit", min=1, max=32),
+            DiscreteDimension(name="n_new_samples_before_refit", min=1, max=32)
         ]
     ),
     default=Point(
