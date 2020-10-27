@@ -42,16 +42,16 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                 unsafe
                 {
                     ulong offset = *(ulong*)Buffer;
-                    ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                    ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                    if (length == 0)
+                    if (dataSize == 0)
                     {
                         return null;
                     }
 
                     sbyte* dataPtr = (sbyte*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)length / sizeof(sbyte));
+                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(sbyte));
                 }
             }
         }
@@ -94,9 +94,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         {
             unsafe
             {
-                ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                if (length > totalDataSize)
+                if (dataSize > totalDataSize)
                 {
                     return false;
                 }
@@ -109,7 +109,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return false;
                 }
 
-                expectedDataOffset += length;
+                expectedDataOffset += dataSize;
                 return true;
             }
         }
@@ -146,16 +146,16 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                 unsafe
                 {
                     ulong offset = *(ulong*)Buffer;
-                    ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                    ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                    if (length == 0)
+                    if (dataSize == 0)
                     {
                         return null;
                     }
 
                     char* dataPtr = (char*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)length / sizeof(char));
+                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(char));
                 }
             }
         }
@@ -198,9 +198,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         {
             unsafe
             {
-                ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                if (length > totalDataSize)
+                if (dataSize > totalDataSize)
                 {
                     return false;
                 }
@@ -213,7 +213,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return false;
                 }
 
-                expectedDataOffset += length;
+                expectedDataOffset += dataSize;
                 return true;
             }
         }
@@ -250,16 +250,16 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                 unsafe
                 {
                     ulong offset = *(ulong*)Buffer;
-                    ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                    ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                    if (length == 0)
+                    if (dataSize == 0)
                     {
                         return null;
                     }
 
                     sbyte* dataPtr = (sbyte*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)length / sizeof(sbyte));
+                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(sbyte));
                 }
             }
         }
@@ -302,9 +302,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         {
             unsafe
             {
-                ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                if (length > totalDataSize)
+                if (dataSize > totalDataSize)
                 {
                     return false;
                 }
@@ -317,7 +317,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return false;
                 }
 
-                expectedDataOffset += length;
+                expectedDataOffset += dataSize;
                 return true;
             }
         }
@@ -354,16 +354,16 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                 unsafe
                 {
                     ulong offset = *(ulong*)Buffer;
-                    ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                    ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                    if (length == 0)
+                    if (dataSize == 0)
                     {
                         return null;
                     }
 
                     char* dataPtr = (char*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)length / sizeof(char));
+                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(char));
                 }
             }
         }
@@ -421,9 +421,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         {
             unsafe
             {
-                ulong length = *(ulong*)(Buffer + sizeof(ulong));
+                ulong dataSize = *(ulong*)(Buffer + sizeof(ulong));
 
-                if (length > totalDataSize)
+                if (dataSize > totalDataSize)
                 {
                     return false;
                 }
@@ -436,7 +436,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return false;
                 }
 
-                expectedDataOffset += length;
+                expectedDataOffset += dataSize;
                 return true;
             }
         }

@@ -173,13 +173,14 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
             non_null_observations = estimators_df[estimators_df.notnull().all(axis=1)]
             targets_for_non_null_observations = target_values_pandas_frame.loc[non_null_observations.index]
 
+            n_samples_for_tree = math.ceil(min(self.model_config.samples_fraction_per_estimator * len(estimators_df.index), len(non_null_observations.index)))
             observations_for_tree_training = non_null_observations.sample(
-                frac=self.model_config.samples_fraction_per_estimator,
+                n=n_samples_for_tree,
                 replace=False, # TODO: add options to control bootstrapping vs. subsampling,
                 random_state=i,
                 axis='index'
             )
-            if self.model_config.bootstrap:
+            if self.model_config.bootstrap and n_samples_for_tree < len(estimators_df.index):
                 bootstrapped_observations_for_tree_training = observations_for_tree_training.sample(
                     frac=1.0/self.model_config.samples_fraction_per_estimator,
                     replace=True,
@@ -196,7 +197,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 tree.fit(
                     feature_values_pandas_frame=bootstrapped_observations_for_tree_training,
                     target_values_pandas_frame=bootstrapped_targets_for_tree_training,
-                    iteration_number=iteration_number
+                    iteration_number=len(feature_values_pandas_frame.index)
                 )
                 targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
                 tree.compute_goodness_of_fit(features_df=observations_for_tree_training, target_df=targets_for_tree_training, data_set_type=DataSetType.TRAIN)

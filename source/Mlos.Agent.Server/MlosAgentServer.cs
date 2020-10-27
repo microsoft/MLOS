@@ -53,20 +53,36 @@ namespace Mlos.Agent.Server
         /// <param name="args">command line arguments.</param>
         public static void Main(string[] args)
         {
-            string executableFilePath = null;
-            Uri optimizerAddressUri = null;
-            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri);
+            string executableFilePath;
+            Uri optimizerAddressUri;
+            string settingsRegistryPath;
+            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri, out settingsRegistryPath);
 
             // Check for the executable before setting up any shared memory to
             // reduce cleanup issues.
             //
-            if (executableFilePath != null && !File.Exists(executableFilePath))
+            if (!string.IsNullOrEmpty(executableFilePath) && !File.Exists(executableFilePath))
             {
                 throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
             }
 
+            if (!string.IsNullOrEmpty(settingsRegistryPath))
+            {
+                // #TODO temporary hack
+                //
+                Environment.SetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH", settingsRegistryPath);
+            }
+
             Console.WriteLine("Mlos.Agent.Server");
             TargetProcessManager targetProcessManager = null;
+
+            // In the active learning mode, create a new shared memory map before running the target process.
+            // On Linux, we unlink existing shared memory map, if they exist.
+            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
+            //
+            using MlosContext mlosContext = (executableFilePath != null)
+                ? InterProcessMlosContext.Create()
+                : InterProcessMlosContext.CreateOrOpen();
 
             // Connect to gRpc optimizer only if user provided an address in the command line.
             //
@@ -86,16 +102,9 @@ namespace Mlos.Agent.Server
                 // See Also: AssemblyInitializer.cs within the SettingsRegistry
                 // assembly project in question.
                 //
-                MlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
+                mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
             }
 
-            // In the active learning mode, create a new shared memory map before running the target process.
-            // On Linux, we unlink existing shared memory map, if they exist.
-            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
-            //
-            using MlosContext mlosContext = (executableFilePath != null)
-                ? InterProcessMlosContext.Create()
-                : InterProcessMlosContext.CreateOrOpen();
             using var mainAgent = new MainAgent();
             mainAgent.InitializeSharedChannel(mlosContext);
 
@@ -123,16 +132,13 @@ namespace Mlos.Agent.Server
             //
             // In MainAgent.RunAgent we loop on the shared memory control and
             // telemetry channels looking for messages and dispatching them to
-
             // their registered callback handlers.
             //
             // The set of recognized messages is dynamically registered using
-
             // the RegisterSettingsAssembly method which is called through the
             // handler for the RegisterAssemblyRequestMessage.
             //
             // Once registered, the SettingsAssemblyManager uses reflection to
-
             // search for an AssemblyInitializer inside those assemblies and
             // executes it in order to setup the message handler callbacks
             // within the agent.
@@ -185,16 +191,20 @@ namespace Mlos.Agent.Server
                 }
             }
 
+            int exitCode = 0;
+
             // Print any exceptions if occurred.
             //
             if (mlosAgentTask.Exception != null)
             {
                 Console.WriteLine($"Exception: {mlosAgentTask.Exception}");
+                exitCode |= 1;
             }
 
             if (waitForTargetProcessTask.Exception != null)
             {
                 Console.WriteLine($"Exception: {waitForTargetProcessTask.Exception}");
+                exitCode |= 2;
             }
 
             // Perform some cleanup.
@@ -212,6 +222,8 @@ namespace Mlos.Agent.Server
             cancellationTokenSource.Dispose();
 
             Console.WriteLine("Mlos.Agent exited.");
+
+            Environment.Exit(exitCode);
         }
     }
 }

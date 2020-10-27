@@ -19,13 +19,6 @@ endif
 DotnetBaseOutDir := $(MLOS_ROOT)/out/dotnet
 DotnetOutputPath := $(DotnetBaseOutDir)/$(RelativeSourceDir)
 
-# Makes sure that our local dotnet install/wrapper is available.
-# Check the timestamps on both the wrapper and the symlink.
-DOTNET_REAL := $(MLOS_ROOT)/tools/dotnet/dotnet
-.NOTPARALLEL: $(DOTNET) $(DOTNET_REAL)
-$(DOTNET) $(DOTNET_REAL): $(MLOS_ROOT)/scripts/fetch-dotnet.sh
-	@ $(MLOS_ROOT)/scripts/fetch-dotnet.sh
-
 # Find all the *.csproj, dirs.proj files in this directory and make some
 # corresponding fake targets for the "all" target to depend on.
 Csprojs := $(wildcard *.csproj)
@@ -38,17 +31,17 @@ DirsProjTestTarget := $(DirsProj:.proj=.proj.fake-test-target)
 
 # To be added to the including Makefile's all target.
 .PHONY: dotnet-build
-dotnet-build: $(DOTNET) $(CsprojBuildTargets) $(DirsProjBuildTarget)
+dotnet-build: $(CsprojBuildTargets) $(DirsProjBuildTarget)
 	@ echo "make dotnet-build target finished."
 
 # A target for quickly rebuilding just a given project and none of its dependencies.
 # Note: this doesn't make sense to use with dirs.proj, so we skip it here.
 .PHONY: dotnet-build-quick
-dotnet-build-quick: $(DOTNET) $(CsprojBuildQuickTargets)
+dotnet-build-quick: $(CsprojBuildQuickTargets)
 	@ echo "make dotnet-build-quick target finished."
 
 .PHONY: dotnet-test
-dotnet-test: $(DOTNET) $(CsprojTestTargets) $(DirsProjTestTarget)
+dotnet-test: $(CsprojTestTargets) $(DirsProjTestTarget)
 	@ echo "make dotnet-test target finished."
 
 .PHONY: dotnet-install
@@ -59,13 +52,13 @@ dotnet-install:
 # corresponding *.csproj file
 # We won't track any inputs/outputs/dependencies - we just let "dotnet build" handle that.
 # Additionally, we let it handle the output directory via the .csproj file (see above).
-%.fake-build-target: $(DOTNET)
+%.fake-build-target:
 	@ # Note: This command currently also does a "dotnet restore" first,
 	@ # which can be slow, however is difficult to check when it is unnecessary.
 	@ # Note: -m tells it to build in parallel.
 	@ $(DOTNET) build -m --configuration $(CONFIGURATION) $(@:.fake-build-target=)
 
-%.fake-build-quick-target: $(DOTNET)
+%.fake-build-quick-target:
 	@ # A target to allow quickly rebuilding just a given project and none of its dependencies.
 	@ $(DOTNET) build -m --configuration $(CONFIGURATION) --no-restore /p:BuildProjectReferences=false $(@:.fake-build-quick-target=)
 
@@ -91,4 +84,4 @@ dotnet-clean:
 
 handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
     $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-clean $(DOTNET) $(DOTNET_REAL)
+    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-clean

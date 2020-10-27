@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="Mlos.CSharp.ruleset" Description="Default rules and overrides for C# in Mlos" ToolsVersion="Current">
   <!-- Import some defaults -->
   <!--Include Path="$(PkgFxCopAnalyzers)\rulesets\AllRulesEnabled.ruleset" Action="Default" /-->
@@ -34,16 +34,10 @@
     <Rule Id="SA1614" Action="Hidden" />
     <!-- Element return value documentation should have text -->
     <Rule Id="SA1616" Action="Info" />
-    <!-- The property's documentation should begin with: Gets (or Sets) -->
-    <Rule Id="SA1623" Action="Info" />
-    <!-- The file header is missing or not located at the top of the file -->
-    <Rule Id="SA1633" Action="Error" />
     <!-- Elements should be separated by blank line -->
     <Rule Id="SA1516" Action="Info" />
     <!-- Elements should be documented. #TODO remove-->
     <Rule Id="SA1600" Action="Hidden" />
-    <!-- Constructor documentation summary should include standard text -->
-    <Rule Id="SA1642" Action="Info" />
     <!-- File name should match first type name. #TODO remove-->
     <Rule Id="SA1649" Action="Hidden" />
   </Rules>
@@ -68,16 +62,12 @@
     <Rule Id="CA1305" Action="Info" />
     <!-- Microsoft.Globalization : Specify CultureInfo on string.Equals. -->
     <Rule Id="CA1307" Action="Info" />
-    <!-- Parameter of method is never used. -->
-    <Rule Id="CA1801" Action="Hidden" />
     <!-- Initialize all static fields and remove the explicit static constructor. -->
     <Rule Id="CA1810" Action="Hidden" />
     <!-- Line is an internal class that is apparently never instantiated. -->
     <Rule Id="CA1812" Action="Hidden" />
     <!-- Member does not access instance data and can be marked as static. -->
     <Rule Id="CA1822" Action="Hidden" />
-    <!-- Do not create tasks without passing a TaskScheduler. #TODO revisit -->
-    <Rule Id="CA2008" Action="Info" />
     <!-- Non-constant fields should not be visible. -->
     <Rule Id="CA2211" Action="Hidden" />
     <!-- Passes string liternal.  Retrieve strings from resource table. -->

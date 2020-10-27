@@ -107,6 +107,13 @@ class Point:
     def __str__(self):
         return str(self.to_json(indent=2))
 
+    def __getstate__(self):
+        return self.to_json()
+
+    def __setstate__(self, state):
+        temp_point = self.from_json(state)
+        self.dimension_value_dict = temp_point.dimension_value_dict
+
     def to_json(self, indent=None):
         if indent is not None:
             return json.dumps(self.to_dict(), indent=indent)
@@ -120,7 +127,7 @@ class Point:
     def to_dict(self):
         return_dict = {}
         for param_name, value in self:
-            if isinstance(value, Number) and int(value) == value:
+            if isinstance(value, Number) and int(value) == value and not isinstance(value, bool):
                 value = int(value)
             return_dict[param_name] = value
         return return_dict

@@ -51,7 +51,7 @@ namespace Mlos.SettingsSystem.StdTypes
         public override int GetHashCode() => Value.GetHashCode();
 
         /// <summary>
-        /// String value.
+        /// Gets or sets string value.
         /// </summary>
         public string Value { get; set; }
 
@@ -148,6 +148,9 @@ namespace Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCulture);
 
+        /// <summary>
+        /// Gets or sets string value.
+        /// </summary>
         public string Value { get; set; }
 
         /// <inheritdoc />
@@ -239,6 +242,9 @@ namespace Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCulture);
 
+        /// <summary>
+        /// Gets or sets string value.
+        /// </summary>
         public string Value { get; set; }
 
         /// <inheritdoc />
@@ -334,6 +340,9 @@ namespace Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCulture);
 
+        /// <summary>
+        /// Gets or sets string value.
+        /// </summary>
         public string Value { get; set; }
 
         /// <inheritdoc/>

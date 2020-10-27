@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="HashTableTests.cs" company="Microsoft Corporation">
+// <copyright file="SharedConfigManagerTests.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root
 // for license information.
@@ -11,7 +11,6 @@ using Mlos.UnitTest;
 
 using Xunit;
 
-using MlosProxy = Proxy.Mlos.Core;
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 using UnitTestProxy = Proxy.Mlos.UnitTest;
 
@@ -24,12 +23,12 @@ using UnitTestProxy = Proxy.Mlos.UnitTest;
 //
 namespace Mlos.NetCore.UnitTest
 {
-    public class HashTableTests
+    public class SharedConfigManagerTests
     {
         private const int SharedMemorySize = 65536 * 4;
         private const string SharedMemoryMapName = "Mlos.NetCore.SharedMemory.UnitTest";
 
-        public HashTableTests()
+        public SharedConfigManagerTests()
         {
             // Load the registry settings assemblies.
             //
@@ -39,13 +38,16 @@ namespace Mlos.NetCore.UnitTest
         [Fact]
         public void Insert()
         {
-            using var sharedMemoryRegionView = SharedMemoryRegionView.Create<MlosProxyInternal.SharedConfigMemoryRegion>(SharedMemoryMapName, SharedMemorySize);
+            // Create a shared memory map.
+            //
+            using var sharedMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.SharedConfigMemoryRegion>(SharedMemoryMapName, SharedMemorySize);
             sharedMemoryRegionView.CleanupOnClose = true;
 
-            MlosProxyInternal.SharedConfigMemoryRegion sharedConfigMemoryRegion = sharedMemoryRegionView.MemoryRegion();
-
-            var hashTable = new SharedConfigManager();
-            hashTable.SetMemoryRegion(sharedConfigMemoryRegion);
+            // Create a shared config manager, and register created test shared memory map.
+            //
+            using var sharedConfigManager = new SharedConfigManager();
+            sharedConfigManager.RegisterSharedConfigMemoryRegion(memoryRegionId: 1, sharedMemoryMapName: SharedMemoryMapName, memoryRegionSize: SharedMemorySize);
+            sharedConfigManager.CleanupOnClose = true;
 
             for (int i = 0; i < 500; i++)
             {
@@ -57,7 +59,7 @@ namespace Mlos.NetCore.UnitTest
 
                     var componentConfig = ComponentConfig.Create(config);
 
-                    hashTable.Insert(componentConfig);
+                    sharedConfigManager.Insert(componentConfig);
                 }
 
                 {
@@ -66,7 +68,7 @@ namespace Mlos.NetCore.UnitTest
                     componentConfig.Config.ComponentType = (uint)(i + 1);
                     componentConfig.Config.Category = 2;
 
-                    hashTable.UpdateConfig(componentConfig);
+                    sharedConfigManager.UpdateConfig(componentConfig);
                     Assert.Equal<double>(5, componentConfig.Config.Delay);
                 }
 
@@ -76,7 +78,7 @@ namespace Mlos.NetCore.UnitTest
                     componentConfig.Config.RefCount.Value = 5;
                     componentConfig.Config.Counters[0].Value = 2;
 
-                    hashTable.Insert(componentConfig);
+                    sharedConfigManager.Insert(componentConfig);
                 }
             }
 
@@ -88,7 +90,7 @@ namespace Mlos.NetCore.UnitTest
                     componentConfig.Config.ComponentType = (uint)(i + 1);
                     componentConfig.Config.Category = 2;
 
-                    hashTable.UpdateConfig(componentConfig);
+                    sharedConfigManager.UpdateConfig(componentConfig);
                     Assert.Equal<double>(5, componentConfig.Config.Delay);
                 }
 
@@ -96,7 +98,7 @@ namespace Mlos.NetCore.UnitTest
                     var componentConfig = new ComponentConfig<TestComponentStatistics, UnitTestProxy.TestComponentStatistics>();
                     componentConfig.Config.Id = i;
 
-                    hashTable.UpdateConfig(componentConfig);
+                    sharedConfigManager.UpdateConfig(componentConfig);
 
                     Assert.Equal<ulong>(5, componentConfig.Config.RefCount.Value);
                     Assert.Equal<ulong>(2, componentConfig.Config.Counters[0].Value);
@@ -104,14 +106,14 @@ namespace Mlos.NetCore.UnitTest
 
                 {
                     var componentStatistics = new TestComponentStatistics() { Id = i };
-                    SharedConfig<UnitTestProxy.TestComponentStatistics> sharedConfig = hashTable.Lookup(componentStatistics);
+                    SharedConfig<UnitTestProxy.TestComponentStatistics> sharedConfig = sharedConfigManager.Lookup(componentStatistics);
                 }
 
                 {
                     TestComponentStatistics.CodegenKey codegenKey = default;
                     codegenKey.Id = i;
 
-                    SharedConfig<UnitTestProxy.TestComponentStatistics> sharedConfig = hashTable.Lookup(codegenKey);
+                    SharedConfig<UnitTestProxy.TestComponentStatistics> sharedConfig = sharedConfigManager.Lookup(codegenKey);
 
                     Assert.Equal<ulong>(5, sharedConfig.Config.RefCount.Load());
                     Assert.Equal<ulong>(2, sharedConfig.Config.Counters[0].Load());

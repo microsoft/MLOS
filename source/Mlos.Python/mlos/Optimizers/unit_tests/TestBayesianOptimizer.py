@@ -4,6 +4,7 @@
 #
 import math
 import os
+import pickle
 import random
 import unittest
 import warnings
@@ -403,6 +404,13 @@ class TestBayesianOptimizer(unittest.TestCase):
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
                 self.validate_optima(optimizer=bayesian_optimizer)
 
+            # Test if pickling works
+            #
+            pickled_optimizer = pickle.dumps(local_optimizer)
+            unpickled_optimizer = pickle.loads(pickled_optimizer)
+            for _ in range(10):
+                self.assertTrue(unpickled_optimizer.suggest() == local_optimizer.suggest())
+
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = bayesian_optimizer_config_store.default
@@ -472,5 +480,25 @@ class TestBayesianOptimizer(unittest.TestCase):
             # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
             # change width non-linearily both with degrees of freedom, and with prediction variance.
             #
-            assert lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value
-            assert predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
+            if not (lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value):
+                # If the the prediction for predicted_value has too few degrees of freedom, it's impossible to construct a confidence interval for it.
+                # If it was possible, then the inequality above would always hold. If it's not possible, then the inequality above can fail.
+                #
+                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
+                degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
+                if degrees_of_freedom == 0:
+                    self.assertTrue(lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound)
+                else:
+                    print(lcb_99_ci_optimum.lower_confidence_bound, lcb_95_ci_optimum.lower_confidence_bound, lcb_90_ci_optimum.lower_confidence_bound, predicted_optimum.predicted_value)
+                    self.assertTrue(False)
+
+            if not (predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound):
+                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
+                degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
+                if degrees_of_freedom == 0:
+                    self.assertTrue(ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound)
+                else:
+                    print(predicted_optimum.predicted_value, ucb_90_ci_optimum.upper_confidence_bound, ucb_95_ci_optimum.upper_confidence_bound, ucb_99_ci_optimum.upper_confidence_bound)
+                    self.assertTrue(False)

@@ -28,10 +28,13 @@ namespace Mlos.SettingsSystem.CodeGen
 
         private static readonly Dictionary<Type, Tuple<ulong, uint>> TypeHashValueMapping = new Dictionary<Type, Tuple<ulong, uint>>();
 
+        /// <summary>
+        /// Gets or sets csharp compilation object.
+        /// </summary>
         internal static CSharpCompilation Compilation { get; set; }
 
         /// <summary>
-        /// Get hash value for given type.
+        /// Gets the hash value for the given type.
         /// </summary>
         /// <param name="sourceType"></param>
         /// <returns></returns>
@@ -48,7 +51,7 @@ namespace Mlos.SettingsSystem.CodeGen
         }
 
         /// <summary>
-        /// Get a index for given type.
+        /// Gets a type index for the given type.
         /// </summary>
         /// <param name="sourceType"></param>
         /// <returns></returns>
@@ -65,7 +68,7 @@ namespace Mlos.SettingsSystem.CodeGen
         }
 
         /// <summary>
-        /// Compute and store hash for the Codegen type.
+        /// Computes and stores hash value for the codegen type.
         /// </summary>
         /// <param name="sourceType"></param>
         internal static void ComputeAndStoreHash(Type sourceType)

@@ -61,18 +61,11 @@ namespace Mlos.Core
 
         /// <inheritdoc/>
         public bool Equals(SharedConfigHeader other) =>
-            Address == other.Address &&
             CodegenTypeIndex == other.CodegenTypeIndex &&
             ConfigId == other.ConfigId;
 
         /// <inheritdoc/>
         public override int GetHashCode() => base.GetHashCode();
-
-        /// #TODO Remove it.
-        /// <summary>
-        /// Config address in the shared memory.
-        /// </summary>
-        internal Internal.MemoryAddress Address;
 
         /// <summary>
         /// Component CodegenType Index.
@@ -89,6 +82,9 @@ namespace Mlos.Core
 
     #region Messages
 
+    /// <summary>
+    /// The feedback message is sent from the agent to the target process after the shared config has been updated.
+    /// </summary>
     [CodegenMessage]
     public partial struct SharedConfigUpdatedFeedbackMessage : IEquatable<SharedConfigUpdatedFeedbackMessage>
     {

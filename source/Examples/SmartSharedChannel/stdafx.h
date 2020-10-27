@@ -27,6 +27,7 @@
 //
 #include "Mlos.Core.inl"
 
+#include <iostream>
 #include <future>
 #include <vector>
 
@@ -45,3 +46,13 @@ HRESULT RegisterSmartConfigs(MlosContext& mlosContext);
 uint64_t RunSharedChannelBenchmark(
     const SharedChannelConfig& sharedChannelConfig,
     const MicrobenchmarkConfig& microbenchmarkConfig);
+
+void AssertFailed(
+    _In_z_ char const* message,
+    _In_z_ char const* file,
+    _In_ uint32_t line);
+
+// Macros.
+//
+#define UNUSED(x) (void)x
+#define RTL_ASSERT(expression) (void)((!!(expression)) || (AssertFailed((#expression), (__FILE__), (uint32_t)(__LINE__)), 0) )

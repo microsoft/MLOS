@@ -16,7 +16,7 @@ random_search_optimizer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="random_search_optimizer_config",
         dimensions=[
-            DiscreteDimension(name="num_samples_per_iteration", min=1, max=1000)
+            DiscreteDimension(name="num_samples_per_iteration", min=1, max=100000)
         ]
     ),
     default=Point(

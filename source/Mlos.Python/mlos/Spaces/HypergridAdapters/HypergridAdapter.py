@@ -113,7 +113,7 @@ class HypergridAdapter(Hypergrid):
         :return:
         """
         original_dataframe = point.to_dataframe()
-        projected_dataframe = self.project_dataframe(original_dataframe)
+        projected_dataframe = self._project_dataframe(original_dataframe, in_place=True)
         projected_point = Point.from_dataframe(projected_dataframe)
         return projected_point
 
@@ -127,7 +127,7 @@ class HypergridAdapter(Hypergrid):
         :return:
         """
         original_dataframe = point.to_dataframe()
-        unprojected_dataframe = self.unproject_dataframe(original_dataframe)
+        unprojected_dataframe = self._unproject_dataframe(original_dataframe, in_place=True)
         unprojected_point = Point.from_dataframe(unprojected_dataframe)
         return unprojected_point
 

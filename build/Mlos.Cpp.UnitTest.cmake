@@ -70,12 +70,11 @@ set_tests_properties(
 #       NAME MlosTestRun_Mlos.Agent.Server_${PROJECT_NAME}
 #       EXECUTABLE_TARGET ${PROJECT_NAME}
 #       TIMEOUT 240
-#       MLOS_SETTINGS_REGISTRY_TARGETS Mlos.UnitTest.SettingsRegistry)
+#       SETTINGS_REGISTRY_PATH "${MLOS_SETTINGS_REGISTRY_BINPLACE_ROOT}")
 #
 function(add_mlos_agent_server_exe_test_run)
     set(options WITH_OPTIMIZER)
-    set(oneValueArgs NAME EXECUTABLE_TARGET TIMEOUT)
-    set(multiValueArgs MLOS_SETTINGS_REGISTRY_TARGETS)
+    set(oneValueArgs NAME EXECUTABLE_TARGET TIMEOUT SETTINGS_REGISTRY_PATH)
     cmake_parse_arguments(add_mlos_agent_server_exe_test_run "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     set(WITH_OPTIMIZER ${add_mlos_agent_server_exe_test_run_WITH_OPTIMIZER})
@@ -88,18 +87,11 @@ function(add_mlos_agent_server_exe_test_run)
         set(TEST_TIMEOUT ${add_mlos_agent_server_exe_test_run_TIMEOUT})
     endif()
 
-    if(NOT DEFINED add_mlos_agent_server_exe_test_run_MLOS_SETTINGS_REGISTRY_TARGETS)
-        message(SEND_ERROR
-            "Missing MLOS_SETTINGS_REGISTRY_TARGETS for ${TEST_NAME}")
+    if(NOT DEFINED add_mlos_agent_server_exe_test_run_SETTINGS_REGISTRY_PATH)
+        set(SETTINGS_REGISTRY_PATH ${MLOS_SETTINGS_REGISTRY_BINPLACE_ROOT})
+    else()
+        set(SETTINGS_REGISTRY_PATH ${add_mlos_agent_server_exe_test_run_SETTINGS_REGISTRY_PATH})
     endif()
-
-    foreach(SETTINGS_REGISTRY_TGT in ${add_mlos_agent_server_exe_test_run_MLOS_SETTINGS_REGISTRY_TARGETS})
-        if(NOT DEFINED MLOS_SETTINGS_REGISTRY)
-            set(MLOS_SETTINGS_REGISTRY_PATH $<TARGET_PROPERTY:${SETTINGS_REGISTRY_TGT},DOTNET_OUTPUT_DIR>)
-        else()
-            set(MLOS_SETTINGS_REGISTRY_PATH ${MLOS_SETTINGS_REGISTRY_PATH}:$<TARGET_PROPERTY:${SETTINGS_REGISTRY_TGT},DOTNET_OUTPUT_DIR>)
-        endif()
-    endforeach()
 
     if(${WITH_OPTIMIZER})
         set(OPTIMIZER_ARGS --optimizer-uri http://localhost:54321)
@@ -120,11 +112,10 @@ function(add_mlos_agent_server_exe_test_run)
         COMMAND ${MLOS_ROOT}/build/CMakeHelpers/RunTestsAndSharedMemChecks.sh
             ${DOTNET} $<TARGET_PROPERTY:Mlos.Agent.Server,DOTNET_OUTPUT_DLL>
             --executable $<TARGET_FILE:${TEST_EXECUTABLE_TARGET}>
+            --settings-registry-path "${SETTINGS_REGISTRY_PATH}"
             ${OPTIMIZER_ARGS})
     set_tests_properties(${TEST_NAME} PROPERTIES
         TIMEOUT ${TEST_TIMEOUT}
-        # Let the Mlos.Agent.Server know where to find the registry assembly.
-        ENVIRONMENT MLOS_SETTINGS_REGISTRY_PATH=${MLOS_SETTINGS_REGISTRY_PATH}
         # Make sure to check for existing shared registry memories before hand.
         FIXTURES_REQUIRED MlosSharedMemoriesChecks
         # This test conflicts with any other test using the MlosSharedMemories

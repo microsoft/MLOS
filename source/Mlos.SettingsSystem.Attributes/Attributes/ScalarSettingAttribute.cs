@@ -21,12 +21,12 @@ namespace Mlos.SettingsSystem.Attributes
         //
 
         /// <summary>
-        /// Is primary key.
+        /// Gets a value indicating whether is primary key.
         /// </summary>
         public bool IsPrimaryKey { get; private set; }
 
         /// <summary>
-        /// ScalarSettingAttribute constructors.
+        /// Initializes a new instance of the <see cref="ScalarSettingAttribute"/> class.
         /// </summary>
         /// <param name="isPrimaryKey">If true the field is part of the shared config primary key.</param>
         public ScalarSettingAttribute(bool isPrimaryKey = false)

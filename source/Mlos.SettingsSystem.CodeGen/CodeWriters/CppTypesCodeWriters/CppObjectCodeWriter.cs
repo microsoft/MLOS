@@ -28,7 +28,9 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
         /// <inheritdoc />
         public override void WriteBeginFile()
         {
+            WriteLine("#ifdef _MSC_VER");
             WriteLine("#pragma warning(disable : 4324) // alignas operator");
+            WriteLine("#endif");
             WriteLine();
             WriteBlock(@"
                 /// Structures.
@@ -38,8 +40,10 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
         /// <inheritdoc />
         public override void WriteEndFile()
         {
-          WriteLine("#pragma warning(default:4324) // restore alignas operator warning");
-          WriteLine();
+            WriteLine("#ifdef _MSC_VER");
+            WriteLine("#pragma warning(default:4324) // restore alignas operator warning");
+            WriteLine("#endif");
+            WriteLine();
         }
 
         /// <inheritdoc />
@@ -50,17 +54,18 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
 
             AlignAttribute alignmentAttribute = sourceType.GetCustomAttribute<AlignAttribute>();
             string structAlignAsCodeString = alignmentAttribute == null
-                ? string.Empty
+                ? " "
                 : $"alignas({alignmentAttribute.Size})";
 
             WriteBlock($@"
-                    struct {structAlignAsCodeString} {cppClassName}
+                    struct {structAlignAsCodeString}{cppClassName}
                     {{
                         typedef {cppProxyTypeFullName} ProxyObjectType;");
 
             IndentationLevel++;
         }
 
+        /// <inheritdoc/>
         public override void EndVisitType(Type sourceType)
         {
             CppType cppType = CppTypeMapper.GetCppType(sourceType);

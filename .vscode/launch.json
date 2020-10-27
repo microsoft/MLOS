@@ -29,11 +29,10 @@
                 //"--optimizer-uri",
                 //"http://localhost:50051",
                 "--executable",
-                "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest"
+                "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest",
+                "--settings-registry-path",
+                "${workspaceFolder}/out/dotnet/source/Mlos.UnitTest/Mlos.UnitTest.SettingsRegistry/objd/AnyCPU"
             ],
-            "env": {
-                "MLOS_SETTINGS_REGISTRY_PATH": "${workspaceFolder}/out/dotnet/source/Mlos.UnitTest/Mlos.UnitTest.SettingsRegistry/objd/AnyCPU"
-            },
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"
@@ -48,11 +47,10 @@
                 //"--optimizer-uri",
                 //"http://localhost:50051",
                 "--executable",
-                "${workspaceFolder}/out/cmake/Debug/source/Examples/SmartCache/SmartCache"
+                "${workspaceFolder}/out/cmake/Debug/source/Examples/SmartCache/SmartCache",
+                "--settings-registry-path",
+                "${workspaceFolder}/out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/objd/AnyCPU"
             ],
-            "env": {
-                "MLOS_SETTINGS_REGISTRY_PATH": "${workspaceFolder}/out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/objd/AnyCPU"
-            },
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
             "console": "internalConsole"

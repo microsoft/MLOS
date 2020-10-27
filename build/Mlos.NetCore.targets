@@ -17,6 +17,5 @@
     </ItemGroup>
   </Target>
   <Import Project="$(MSBuildThisFileDirectory)\Mlos.Common.targets" />
-  <Import Project="$(MSBuildThisFileDirectory)\Mlos.Binplace.targets" Condition="'$(BinplaceNetcore)' != 'false'" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

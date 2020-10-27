@@ -16,6 +16,11 @@ namespace Mlos.SettingsSystem.Attributes
     /// </summary>
     public static class AssemblyExtensionMethods
     {
+        /// <summary>
+        /// Returns instance to ObjectDeserializeHandler.DispatchTableBaseIndex.
+        /// </summary>
+        /// <param name="assembly"></param>
+        /// <returns></returns>
         internal static string GetDispatchTableBaseIndexVariableName(this Assembly assembly)
         {
             DispatchTableNamespaceAttribute dispatchTableCSharpNamespaceAttribute = assembly.GetCustomAttribute<DispatchTableNamespaceAttribute>();

@@ -16,6 +16,9 @@ using GrpcGreeter;
 
 namespace Mlos.Agent.GrpcClient
 {
+    /// <summary>
+    /// Mlos.Agent client test application.
+    /// </summary>
     public static class MainApp
     {
         private static async Task Test()
@@ -34,7 +37,10 @@ namespace Mlos.Agent.GrpcClient
             Console.WriteLine("Press any key to exit...");
         }
 
-        public static void Main(string[] args)
+        /// <summary>
+        /// Main function.
+        /// </summary>
+        public static void Main()
         {
             // This switch must be set before creating the GrpcChannel/HttpClient.
             //

@@ -33,7 +33,7 @@ namespace Mlos.NetCore.UnitTest
         {
             // Create a new shared memory maps.
             //
-            var newsSharedChannelMemoryMap = SharedMemoryMapView.Create(SharedMemoryMapName, SharedMemorySize);
+            var newsSharedChannelMemoryMap = SharedMemoryMapView.CreateNew(SharedMemoryMapName, SharedMemorySize);
             newsSharedChannelMemoryMap.CleanupOnClose = true;
             newsSharedChannelMemoryMap.Dispose();
 
@@ -41,7 +41,7 @@ namespace Mlos.NetCore.UnitTest
             {
                 // Verify we can open already created shared memory.
                 //
-                using var openedSharedChannelMemoryMap = SharedMemoryMapView.Open(SharedMemoryMapName, SharedMemorySize);
+                using var openedSharedChannelMemoryMap = SharedMemoryMapView.OpenExisting(SharedMemoryMapName, SharedMemorySize);
                 newsSharedChannelMemoryMap.CleanupOnClose = true;
 
                 Assert.False(true, "Shared memory map should be deleted");

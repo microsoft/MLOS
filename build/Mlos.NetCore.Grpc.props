@@ -7,38 +7,10 @@
     <ProtobufVersion>3.12.0</ProtobufVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" GeneratePathProperty="true" />
-
-    <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <PackageReference Include="Grpc.Core.Api" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-
-    <PackageReference Include="Grpc.Net.Common" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-
-    <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(GrpcServices)' == 'Server' Or '$(GrpcServices)' == 'Both'">
-    <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <PackageReference Include="Grpc.AspNetCore.Server" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <PackageReference Include="Grpc.AspNetCore.Server.ClientFactory" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(GrpcServices)' == 'Client' Or '$(GrpcServices)' == 'Both'">
-    <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-    <PackageReference Include="Grpc.Net.ClientFactory" Version="$(GrpcVersion)" GeneratePathProperty="true" />
-  </ItemGroup>
-
-  <!--
-    Add a reference to a separate project that consolidates the binplace rules
-    for those packages in order to avoid duplicate copy operations which upsets
-    some build systems.
-  -->
-  <PropertyGroup>
-    <MlosGrpcBinplaceProj>$([System.IO.Path]::GetFullPath('$(BaseDir)\source\Mlos.Grpc.Binplace\Mlos.Grpc.Binplace.csproj'))</MlosGrpcBinplaceProj>
-    <NormalizedProjectPath>$([System.IO.Path]::GetFullPath('$(MSBuildProjectFullPath)'))</NormalizedProjectPath>
-  </PropertyGroup>
-  <!-- Prevent circular dependencies -->
-  <ItemGroup Condition="'$(NormalizedProjectPath)' != '$(MlosGrpcBinplaceProj)'">
-    <ProjectReference Include="$(MlosGrpcBinplaceProj)" />
+    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
+    <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" Condition="'$(GrpcServices)' == 'Server' Or '$(GrpcServices)' == 'Both'" />
+    <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" />
+    <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" Condition="'$(GrpcServices)' == 'Client' OR '$(GrpcServices)' == 'Both'" />
+    <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" />
   </ItemGroup>
 </Project>
