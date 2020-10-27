@@ -20,7 +20,7 @@ class TestObjectiveFunctionFactory(unittest.TestCase):
     def setUp(self):
         ...
 
-    def test_default(self):
+    def test_named_configs(self):
 
         named_configs = objective_function_config_store.list_named_configs()
 
