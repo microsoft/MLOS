@@ -16,6 +16,10 @@ clean: dotnet-clean
 .PHONY: distclean
 distclean: clean
 
+.PHONY: pack
+pack: dotnet-pack
+	@ echo "make pack target finished."
+
 .PHONY: test
 test: dotnet-test
 	@ echo "make test target finished."

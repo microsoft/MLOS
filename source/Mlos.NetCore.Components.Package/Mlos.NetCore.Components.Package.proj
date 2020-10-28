@@ -3,12 +3,8 @@
   This is a meta project to call the "pack" target on a subset
   of other projects to build nugets for external consumption.
 -->
-<Project ToolsVersion="Current" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="Current" DefaultTargets="Build;Pack" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
-  <PropertyGroup>
-    <ProjectGuid>{9D762D20-BCB8-417E-84A7-127B3C7852AF}</ProjectGuid>
-  </PropertyGroup>
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
   <ItemGroup Label="lib">
     <ProjectReference Include="$(SourceDir)/Mlos.Agent/Mlos.Agent.csproj" />
     <ProjectReference Include="$(SourceDir)/Mlos.Agent.GrpcServer/Mlos.Agent.GrpcServer.csproj" />
@@ -22,16 +18,10 @@
     <ProjectReference Include="$(SourceDir)/Mlos.Agent.Server/Mlos.Agent.Server.csproj" />
     <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
   </ItemGroup>
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
+  <Import Project="$(BaseDir)\build\Mlos.MetaProj.targets" />
   <!-- Override the default Pack target for this meta project. -->
-  <Target Name="Build" DependsOnTargets="Restore;ResolveReferences">
-    <Message Text="This is a meta-package, so there's nothing from it to build." Importance="low" />
-  </Target>
-  <Target Name="Pack" AfterTargets="Build">
-    <Message Text="This is a meta-package, so there's nothing from it to pack." Importance="low" />
-  </Target>
   <!-- Now, call "pack" on all of our referenced projects. -->
-  <Target Name="BuildMlosNugetPackages" DependsOnTargets="Build" AfterTargets="Build;Pack" Condition="'$(QBUILD)' != '1'">
+  <Target Name="Pack" AfterTargets="Build" Condition="'$(QBUILD)' != '1'">
     <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="true" Properties="Configuration=$(Configuration);NoBuild=true;" />
   </Target>
 </Project>

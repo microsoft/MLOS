@@ -17,6 +17,7 @@ endif
 # Needed for "clean" target.
 # See Also: Mlos.Common.props
 DotnetBaseOutDir := $(MLOS_ROOT)/out/dotnet
+DotnetBasePkgDir := $(MLOS_ROOT)/target/pkg/$(CONFIGURATION)
 DotnetOutputPath := $(DotnetBaseOutDir)/$(RelativeSourceDir)
 NugetPackagesDir := $(MLOS_ROOT)/tools/.nuget/packages
 
@@ -24,10 +25,13 @@ NugetPackagesDir := $(MLOS_ROOT)/tools/.nuget/packages
 # corresponding fake targets for the "all" target to depend on.
 Csprojs := $(wildcard *.csproj)
 CsprojBuildTargets := $(Csprojs:.csproj=.csproj.fake-build-target)
+CsprojPackTargets := $(Csprojs:.csproj=.csproj.fake-pack-target)
 CsprojBuildQuickTargets := $(Csprojs:.csproj=.csproj.fake-build-quick-target)
 CsprojTestTargets := $(Csprojs:.csproj=.csproj.fake-test-target)
-DirsProj := $(wildcard dirs.proj)
+# Actually, include other *.proj files as well.
+DirsProj := $(wildcard *.proj)
 DirsProjBuildTarget := $(DirsProj:.proj=.proj.fake-build-target)
+DirsProjPackTarget := $(DirsProj:.proj=.proj.fake-pack-target)
 DirsProjTestTarget := $(DirsProj:.proj=.proj.fake-test-target)
 
 # To be added to the including Makefile's all target.
@@ -40,6 +44,10 @@ dotnet-build: $(CsprojBuildTargets) $(DirsProjBuildTarget)
 .PHONY: dotnet-build-quick
 dotnet-build-quick: $(CsprojBuildQuickTargets)
 	@ echo "make dotnet-build-quick target finished."
+
+.PHONY: dotnet-pack
+dotnet-pack: $(CsprojPackTargets) $(DirsProjPackTarget)
+	@ echo "make dotnet-pack target finished."
 
 .PHONY: dotnet-test
 dotnet-test: $(CsprojTestTargets) $(DirsProjTestTarget)
@@ -63,6 +71,12 @@ dotnet-install:
 	@ # A target to allow quickly rebuilding just a given project and none of its dependencies.
 	@ $(DOTNET) build -m --configuration $(CONFIGURATION) --no-restore /p:BuildProjectReferences=false $(@:.fake-build-quick-target=)
 
+# For each of the fake test targets, just call "dotnet pack" on its
+# corresponding *.csproj file
+# For now, don't force a rebuild first.
+%.fake-pack-target: #%.fake-build-target
+	@ $(DOTNET) pack --no-build -m --configuration $(CONFIGURATION) $(@:.fake-pack-target=)
+
 # By default don't run certain tests.
 # To override, run with:
 #   DOTNET_TEST_FILTER=' ' make dotnet-test
@@ -82,12 +96,18 @@ endif
 .PHONY: dotnet-clean
 dotnet-clean:
 	@ $(RM) $(DotnetOutputPath)
+	@ $(MKDIR) $(DotnetOutputPath)
 
+.PHONY: dotnet-pkg-clean
+dotnet-pkg-clean:
+	@ $(RM) $(DotnetBasePkgDir)
+	@ $(MKDIR) $(DotnetBasePkgDir)
+
+.PHONY: nuget-clean
 nuget-clean:
 	@ $(RM) $(NugetPackagesDir)
 	@ $(MKDIR) $(NugetPackagesDir)
 
 handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
     $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-clean \
-    nuget-clean
+    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-pack dotnet-pkg-clean dotnet-clean nuget-clean
