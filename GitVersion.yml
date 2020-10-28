@@ -1,8 +1,10 @@
-# config for the GitVersionTask tool used in build/Mlos.NetCore.Package.props
+# config for the GitVersionTask tool used in build/versions/Mlos.NetCore.Version.props
 mode: Mainline
 branches:
   master:
     # Remove the "master" branch name from consideration.
     regex: ^main$
-    increment: Patch
-    tag: ''
+    #increment: Patch
+    tag: beta
+# feature:
+#   tag: alpha

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-  <Import Project="$(BaseDir)\build\versions\Mlos.NetCore.Version.props" Condition="'$(HaveIncludedMlosNetCoreVersionProps)' != 'true'" />
+  <Import Project="$(BaseDir)\build\versions\Mlos.NetCore.Version.props" />
   <!-- Include binplace properties. -->
   <Import Project="$(BaseDir)\build\Mlos.Binplace.props" />
   <PropertyGroup>
@@ -30,6 +30,21 @@
       <Optimize>true</Optimize>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup>
+    <!-- Stash nuget packages inside the repo to make it easier to clean them during local package development. -->
+    <MlosRestorePackagesPath>$(BaseDir)/tools/.nuget/packages</MlosRestorePackagesPath>
+    <RestorePackagesPath>$(MlosRestorePackagesPath)</RestorePackagesPath>
+    <!-- Unless specified on the commandline, set the default package output to the target/ dir. -->
+    <MlosPkgOutputBaseDir>$(BaseDir)/target/pkg</MlosPkgOutputBaseDir>
+    <MlosPkgOutputDir>$(MlosPkgOutputBaseDir)/$(Configuration)</MlosPkgOutputDir>
+    <PackageOutputPath>$(MlosPkgOutputDir)/</PackageOutputPath>
+    <!-- Also allow restoring from our package output. -->
+    <!-- FIXME: This isn't as relevant here - just saving it for future external project usage for now.
+    <RestoreIgnoreFailedSources>true</RestoreIgnoreFailedSources>
+    <RestoreAdditionalProjectSources>$(MlosPkgOutputBaseDir)/Release;$(MlosPkgOutputBaseDir)/Debug</RestoreAdditionalProjectSources>
+    -->
+  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Package.props" />
   <ItemGroup>
     <None Remove="Makefile" />
     <None Remove="CMakeLists.txt" />

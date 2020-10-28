@@ -18,6 +18,7 @@ endif
 # See Also: Mlos.Common.props
 DotnetBaseOutDir := $(MLOS_ROOT)/out/dotnet
 DotnetOutputPath := $(DotnetBaseOutDir)/$(RelativeSourceDir)
+NugetPackagesDir := $(MLOS_ROOT)/tools/.nuget/packages
 
 # Find all the *.csproj, dirs.proj files in this directory and make some
 # corresponding fake targets for the "all" target to depend on.
@@ -82,6 +83,11 @@ endif
 dotnet-clean:
 	@ $(RM) $(DotnetOutputPath)
 
+nuget-clean:
+	@ $(RM) $(NugetPackagesDir)
+	@ $(MKDIR) $(NugetPackagesDir)
+
 handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
     $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-clean
+    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-clean \
+    nuget-clean

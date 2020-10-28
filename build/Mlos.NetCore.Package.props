@@ -4,74 +4,10 @@
   so that we can build directly with .csproj files using "dotnet pack".
 -->
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <!-- Note: The Copyright property comes from the Mlos.NetCore.Version.props file. -->
-  <Import Project="$(BaseDir)\build\versions\Mlos.NetCore.Version.props" Condition="'$(HaveIncludedMlosNetCoreVersionProps)' != 'true'" />
-
-  <PropertyGroup>
-    <!-- Use git versioning by default, unless we're in a certain pipeline mode. -->
-    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == '' And '$(UsePipeLineVersion)' != 'true'">true</PackageUsesGitVersionInfo>
-  </PropertyGroup>
-
-  <!-- Add a build tool for discovering version info from the repository. -->
-  <ItemGroup>
-    <PackageReference Include="GitVersionTask" Version="5.3.7">
-      <!-- Don't include its assets in any build output or dependency references. -->
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
   <!--
-    But don't let it automatically update the assembly version info for now.
-    In the future we may explore of more fully integrated solution to let GitVersion
-    manage the SemVer details for us from git branches/tags automatically.
+    Set some .nuspec style properties
+    Note: The Copyright property also comes from the Mlos.NetCore.Version.props file.
   -->
-  <PropertyGroup>
-    <GetVersion>true</GetVersion>
-    <UpdateAssemblyInfo>false</UpdateAssemblyInfo>
-    <UpdateVersionProperties>false</UpdateVersionProperties>
-    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
-    <GenerateGitVersionInformation>false</GenerateGitVersionInformation>
-  </PropertyGroup>
-  <!-- Make sure the GitVersionTask runs using a "Depends" before we assign properties. -->
-  <PropertyGroup>
-    <GenerateNuspecDependsOn>$(GenerateNuspecDependsOn);SetupPackageVersionInfo</GenerateNuspecDependsOn>
-  </PropertyGroup>
-  <Target Name="SetupPackageVersionInfo" BeforeTargets="GenerateNuspec;Pack" DependsOnTargets="GetVersion">
-    <PropertyGroup>
-      <RepositoryBranch Condition="'$(RepositoryBranch)' == ''">$(GitVersion_BranchName)</RepositoryBranch>
-      <RepositoryCommit Condition="'$(RepositoryCommit)' == ''">$(GitVersion_Sha)</RepositoryCommit>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(PackageUsesGitVersionInfo)' == 'true'">
-      <!--
-        By default NuGet will automatically use the AssemblyVersion info to assign the
-        Version and then the PackageVersion property.
-        Ideally we wouldn't reinvent that logic, but those assignments happen before we
-
-        For now, we also default to "prerelease" versioning if not otherwise specified.
-
-        Note: once packaged, nugets are assumed to be immutable and will not overwrite,
-        so you may need to manully remove them or build with ForceRebuild=true when
-        doing local development.
-      -->
-      <!-- Unfortunately ShortSha is not currently automatically setup by GitVersionTask -->
-      <GitVersion_ShortSha Condition="'$(GitVersion_Sha)' != '' And '$(GitVersion_ShortSha)' == ''">$(GitVersion_Sha.Substring(0, 7))</GitVersion_ShortSha>
-      <!--
-        CommitsSinceVersionSource sorts more naturally than ShortSha
-      <PackageVersionSuffix>+$(GitVersion_ShortSha)</PackageVersionSuffix>
-      -->
-      <!--
-        Use -alpha instead of the branch name (as in the SemVer).
-
-        Note: this could also be controlled in a GitVersion.yml file if we wanted,
-        but for now we only use that to help find the "main" branch to set the version.
-      -->
-      <PackageVersionSuffix Condition="'$(GitVersion_Branch)' != 'main'">-alpha.$(GitVersion_CommitsSinceVersionSource)</PackageVersionSuffix>
-      <PackageVersionPrefix>$(GitVersion_MajorMinorPatch)</PackageVersionPrefix>
-      <PackageVersion>$(PackageVersionPrefix)$(PackageVersionSuffix)</PackageVersion>
-    </PropertyGroup>
-  </Target>
-
-
-  <!-- Set some .nuspec style properties -->
   <PropertyGroup>
     <PackageProjectUrl>https://github.com/Microsoft/MLOS</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Microsoft/MLOS.git</RepositoryUrl>
@@ -79,31 +15,69 @@
     <Authors>Microsoft</Authors>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-
-    <!-- Unless specified on the commandline, set the default package output to the target/ dir. -->
-    <PackageOutputPath>$(BaseDir)/target/pkg/$(Configuration)/</PackageOutputPath>
   </PropertyGroup>
 
-  <!-- For debugging version info -->
-  <Target Name="PrintPackVersionInfo" AfterTargets="SetupPackageVersionInfo" Condition="'$(PrintPackageVersionInfo)' == 'true'">
-    <Message Text="GitVersion_ShortSha: $(GitVersion_ShortSha)" Importance="high" />
-    <Message Text="GitVersion_Sha: $(GitVersion_Sha)" Importance="high" />
-    <Message Text="GitVersion_SemVer: $(GitVersion_SemVer)" Importance="high" />
-    <Message Text="GitVersion_PreReleaseTag: $(GitVersion_PreReleaseTag)" Importance="high" />
-    <Message Text="GitVersion_PreReleaseTagWithDash: $(GitVersion_PreReleaseTagWithDash)" Importance="high" />
-    <Message Text="GitVersion_PreReleaseLabel: $(GitVersion_PreReleaseLabel)" Importance="high" />
-    <Message Text="GitVersion_PreReleaseNumber: $(GitVersion_PreReleaseNumber)" Importance="high" />
-    <Message Text="GitVersion_NuGetPreReleaseTagV2: $(GitVersion_NuGetPreReleaseTagV2)" Importance="high" />
-    <Message Text="GitVersion_NuGetPreReleaseTag: $(GitVersion_NuGetPreReleaseTag)" Importance="high" />
-    <Message Text="GitVersion_NuGetV2: $(GitVersion_NuGetTagV2)" Importance="high" />
-    <Message Text="GitVersion_NuGetTag: $(GitVersion_NuGetTag)" Importance="high" />
-    <Message Text="GitVersion_InformationalVersion: $(GitVersion_InformationalVersion)" Importance="high" />
-    <Message Text="VersionPrefix: $(VersionPrefix)" Importance="high" />
-    <Message Text="VersionSuffix: $(VersionSuffix)" Importance="high" />
-    <Message Text="Version: $(Version)" Importance="high" />
-    <Message Text="PackageVersionPrefix: $(PackageVersionPrefix)" Importance="high" />
-    <Message Text="PackageVersionSuffix: $(PackageVersionSuffix)" Importance="high" />
-    <Message Text="PackageVersion: $(PackageVersion)" Importance="high" />
-    <Message Text="TargetFramework: $(TargetFramework)" Importance="high" />
+  <!--
+    Optionally adjust the package name to include an OS identifier
+    (e.g. if it includes OS specific resources like .so files), by
+    setting AppendOsIdToPackageName=true in the project's .csproj file.
+  -->
+  <PropertyGroup Condition="'$(AppendOsIdToPackageName)' == 'true'">
+    <!-- Setup a default if not already specified. -->
+    <PackageId Condition="'$(PackageId)' == ''">$(AssemblyName)</PackageId>
+    <!-- Append an OS identifier -->
+    <PackageId>$(PackageId).$(OsIdString)</PackageId>
+  </PropertyGroup>
+
+  <!-- Make sure to cleanup after the packages as well. -->
+  <Target Name="CleanNetCorePackage" DependsOnTargets="GetVersion" AfterTargets="Clean;GetVersion">
+    <!-- FIXME: PackageVersion is getting stripped of the +N portion of the version -->
+    <Delete Files="$(PackageOutputPath)/$(PackageId).$(PackageVersion).nupkg" />
+  </Target>
+
+  <Target Name="PrintPackageVersions" DependsOnTargets="GetVersion">
+    <Message Text=" " Importance="High" />
+    <Message Text="AssemblyName: $(AssemblyName)" Importance="High" />
+
+<Message Text="PackageVersion: $(PackageVersion)" Importance="High" />
+<Message Text="PackageVersionPrefix: $(PackageVersionPrefix)" Importance="High" />
+<Message Text="PackageVersionSuffix: $(PackageVersionSuffix)" Importance="High" />
+<Message Text="Version: $(Version)" Importance="High" />
+<Message Text="VersionPrefix: $(VersionPrefix)" Importance="High" />
+<Message Text="VersionSuffix: $(VersionSuffix)" Importance="High" />
+<Message Text="InformationalVersion: $(InformationalVersion)" Importance="High" />
+<Message Text="InformationalVersionPrefix: $(InformationalVersionPrefix)" Importance="High" />
+<Message Text="InformationalVersionSuffix: $(InformationalVersionSuffix)" Importance="High" />
+<Message Text="FileVersion: $(FileVersion)" Importance="High" />
+<Message Text="FileVersionPrefix: $(FileVersionPrefix)" Importance="High" />
+<Message Text="FileVersionSuffix: $(FileVersionSuffix)" Importance="High" />
+
+<Message Text="GitVersion_Major: $(GitVersion_Major)" Importance="High" />
+<Message Text="GitVersion_Minor: $(GitVersion_Minor)" Importance="High" />
+<Message Text="GitVersion_Patch: $(GitVersion_Patch)" Importance="High" />
+<Message Text="GitVersion_PreReleaseTag: $(GitVersion_PreReleaseTag)" Importance="High" />
+<Message Text="GitVersion_PreReleaseTagWithDash: $(GitVersion_PreReleaseTagWithDash)" Importance="High" />
+<Message Text="GitVersion_PreReleaseLabel: $(GitVersion_PreReleaseLabel)" Importance="High" />
+<Message Text="$(GitVersion_PreReleaseNumber" />
+<Message Text="GitVersion_BuildMetaData: $(GitVersion_BuildMetaData)" Importance="High" />
+<Message Text="GitVersion_BuildMetaDataPadded: $(GitVersion_BuildMetaDataPadded)" Importance="High" />
+<Message Text="GitVersion_FullBuildMetaData: $(GitVersion_FullBuildMetaData)" Importance="High" />
+<Message Text="GitVersion_MajorMinorPatch: $(GitVersion_MajorMinorPatch)" Importance="High" />
+<Message Text="GitVersion_SemVer: $(GitVersion_SemVer)" Importance="High" />
+<Message Text="GitVersion_LegacySemVer: $(GitVersion_LegacySemVer)" Importance="High" />
+<Message Text="GitVersion_LegacySemVerPadded: $(GitVersion_LegacySemVerPadded)" Importance="High" />
+<Message Text="GitVersion_AssemblySemVer: $(GitVersion_AssemblySemVer)" Importance="High" />
+<Message Text="GitVersion_AssemblySemFileVer: $(GitVersion_AssemblySemFileVer)" Importance="High" />
+<Message Text="GitVersion_FullSemVer: $(GitVersion_FullSemVer)" Importance="High" />
+<Message Text="GitVersion_InformationalVersion: $(GitVersion_InformationalVersion)" Importance="High" />
+<Message Text="GitVersion_BranchName: $(GitVersion_BranchName)" Importance="High" />
+<Message Text="GitVersion_Sha: $(GitVersion_Sha)" Importance="High" />
+<Message Text="GitVersion_NuGetVersionV2: $(GitVersion_NuGetVersionV2)" Importance="High" />
+<Message Text="GitVersion_NuGetVersion: $(GitVersion_NuGetVersion)" Importance="High" />
+<Message Text="GitVersion_NuGetPreReleaseTagV2: $(GitVersion_NuGetPreReleaseTagV2)" Importance="High" />
+<Message Text="GitVersion_NuGetPreReleaseTag: $(GitVersion_NuGetPreReleaseTag)" Importance="High" />
+<Message Text="GitVersion_CommitDate: $(GitVersion_CommitDate)" Importance="High" />
+<Message Text="GitVersion_CommitsSinceVersionSource: $(GitVersion_CommitsSinceVersionSource)" Importance="High" />
+<Message Text="GitVersion_CommitsSinceVersionSourcePadded: $(GitVersion_CommitsSinceVersionSourcePadded)" Importance="High" />
   </Target>
 </Project>

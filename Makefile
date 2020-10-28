@@ -37,7 +37,7 @@ install: dotnet-install cmake-install
 clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean
 
 .PHONY: distclean
-distclean: clean cmake-distclean
+distclean: clean cmake-distclean nuget-clean
 
 .PHONY: rebuild
 rebuild: clean all

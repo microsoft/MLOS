@@ -12,6 +12,26 @@
     <StartupObject>Mlos.SettingsSystem.CodeGen.MainCodeGen</StartupObject>
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <PropertyGroup Label="PackageProps">
+    <!-- Projects using a PackageReference to tool should not attempt to link against it. -->
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <!-- Place the outputs in the tools/ directory instead of the lib/ directory. -->
+    <IsTool>true</IsTool>
+    <!-- Since we did that, there are no items in the lib/ directory, so we need to ignore that warning. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+    <!--
+      Alternatively, using PackAsTool would allow us to install this on the PATH with "dotnet tool install".
+      However, there's little utility in that without the build target rules to go with it.
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>Mlos.SettingsSystem.CodeGen</ToolCommandName>
+    -->
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Provide the build rules in the package -->
+    <!-- TODO: -->
+    <Content Include="build/Mlos.SettingsSystem.CodeGen.targets" />
+    <Content Include="build/Mlos.SettingsSystem.CodeGen.props" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.6.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
