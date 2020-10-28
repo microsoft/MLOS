@@ -441,7 +441,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             #
             predictions_df = predictions_df[
                 predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value].notna() &
-                predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value] != 0
+                (predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value] != 0)
             ]
 
             if len(predictions_df.index) == 0:
