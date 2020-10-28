@@ -29,55 +29,9 @@
     <PackageId>$(PackageId).$(OsIdString)</PackageId>
   </PropertyGroup>
 
-  <!-- Make sure to cleanup after the packages as well. -->
-  <Target Name="CleanNetCorePackage" DependsOnTargets="GetVersion" AfterTargets="Clean;GetVersion">
-    <!-- FIXME: PackageVersion is getting stripped of the +N portion of the version -->
-    <Delete Files="$(PackageOutputPath)/$(PackageId).$(PackageVersion).nupkg" />
-  </Target>
-
-  <Target Name="PrintPackageVersions" DependsOnTargets="GetVersion">
-    <Message Text=" " Importance="High" />
-    <Message Text="AssemblyName: $(AssemblyName)" Importance="High" />
-
-<Message Text="PackageVersion: $(PackageVersion)" Importance="High" />
-<Message Text="PackageVersionPrefix: $(PackageVersionPrefix)" Importance="High" />
-<Message Text="PackageVersionSuffix: $(PackageVersionSuffix)" Importance="High" />
-<Message Text="Version: $(Version)" Importance="High" />
-<Message Text="VersionPrefix: $(VersionPrefix)" Importance="High" />
-<Message Text="VersionSuffix: $(VersionSuffix)" Importance="High" />
-<Message Text="InformationalVersion: $(InformationalVersion)" Importance="High" />
-<Message Text="InformationalVersionPrefix: $(InformationalVersionPrefix)" Importance="High" />
-<Message Text="InformationalVersionSuffix: $(InformationalVersionSuffix)" Importance="High" />
-<Message Text="FileVersion: $(FileVersion)" Importance="High" />
-<Message Text="FileVersionPrefix: $(FileVersionPrefix)" Importance="High" />
-<Message Text="FileVersionSuffix: $(FileVersionSuffix)" Importance="High" />
-
-<Message Text="GitVersion_Major: $(GitVersion_Major)" Importance="High" />
-<Message Text="GitVersion_Minor: $(GitVersion_Minor)" Importance="High" />
-<Message Text="GitVersion_Patch: $(GitVersion_Patch)" Importance="High" />
-<Message Text="GitVersion_PreReleaseTag: $(GitVersion_PreReleaseTag)" Importance="High" />
-<Message Text="GitVersion_PreReleaseTagWithDash: $(GitVersion_PreReleaseTagWithDash)" Importance="High" />
-<Message Text="GitVersion_PreReleaseLabel: $(GitVersion_PreReleaseLabel)" Importance="High" />
-<Message Text="$(GitVersion_PreReleaseNumber" />
-<Message Text="GitVersion_BuildMetaData: $(GitVersion_BuildMetaData)" Importance="High" />
-<Message Text="GitVersion_BuildMetaDataPadded: $(GitVersion_BuildMetaDataPadded)" Importance="High" />
-<Message Text="GitVersion_FullBuildMetaData: $(GitVersion_FullBuildMetaData)" Importance="High" />
-<Message Text="GitVersion_MajorMinorPatch: $(GitVersion_MajorMinorPatch)" Importance="High" />
-<Message Text="GitVersion_SemVer: $(GitVersion_SemVer)" Importance="High" />
-<Message Text="GitVersion_LegacySemVer: $(GitVersion_LegacySemVer)" Importance="High" />
-<Message Text="GitVersion_LegacySemVerPadded: $(GitVersion_LegacySemVerPadded)" Importance="High" />
-<Message Text="GitVersion_AssemblySemVer: $(GitVersion_AssemblySemVer)" Importance="High" />
-<Message Text="GitVersion_AssemblySemFileVer: $(GitVersion_AssemblySemFileVer)" Importance="High" />
-<Message Text="GitVersion_FullSemVer: $(GitVersion_FullSemVer)" Importance="High" />
-<Message Text="GitVersion_InformationalVersion: $(GitVersion_InformationalVersion)" Importance="High" />
-<Message Text="GitVersion_BranchName: $(GitVersion_BranchName)" Importance="High" />
-<Message Text="GitVersion_Sha: $(GitVersion_Sha)" Importance="High" />
-<Message Text="GitVersion_NuGetVersionV2: $(GitVersion_NuGetVersionV2)" Importance="High" />
-<Message Text="GitVersion_NuGetVersion: $(GitVersion_NuGetVersion)" Importance="High" />
-<Message Text="GitVersion_NuGetPreReleaseTagV2: $(GitVersion_NuGetPreReleaseTagV2)" Importance="High" />
-<Message Text="GitVersion_NuGetPreReleaseTag: $(GitVersion_NuGetPreReleaseTag)" Importance="High" />
-<Message Text="GitVersion_CommitDate: $(GitVersion_CommitDate)" Importance="High" />
-<Message Text="GitVersion_CommitsSinceVersionSource: $(GitVersion_CommitsSinceVersionSource)" Importance="High" />
-<Message Text="GitVersion_CommitsSinceVersionSourcePadded: $(GitVersion_CommitsSinceVersionSourcePadded)" Importance="High" />
-  </Target>
+  <!--
+    Note: PackTask alters the PackageVersion property slightly when writing the file,
+    so it is difficult to provide a "clean" target for removing packages.
+    For now, just remove the target/pkg/... directory/files.
+  -->
 </Project>
