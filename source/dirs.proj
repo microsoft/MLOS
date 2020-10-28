@@ -16,6 +16,10 @@
     <ProjectReference Include="Mlos.Agent.GrpcClient\Mlos.Agent.GrpcClient.csproj" />
     <ProjectReference Include="Mlos.Agent.GrpcServer\Mlos.Agent.GrpcServer.csproj" />
     <ProjectReference Include="Mlos.Agent.Server\Mlos.Agent.Server.csproj" />
+    <!--
+    Don't build the packages by default.
+    <ProjectReference Include="Mlos.NetCore.Components.Packages\Mlos.NetCore.Components.Packages.proj" />
+    -->
     <ProjectReference Include="Examples\dirs.proj" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.Dirs.targets" />
