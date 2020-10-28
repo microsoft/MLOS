@@ -16,6 +16,11 @@
     </Compile>
   </ItemGroup>
 
+  <!--
+    TODO: FIXME: When there are multiple remotes, then each time there's a new commit, this task emits a warning as it has issues
+    finding which remote to reference when considering the "main" branch.
+  -->
+
   <!-- If we're not using the pipeline version, then use the git version by default. -->
   <PropertyGroup>
     <PackageUsesGitVersionInfo Condition="'$(UsePipelineVersion)' == 'true'">false</PackageUsesGitVersionInfo>
