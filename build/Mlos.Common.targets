@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Target Name="RestoreReferences" AfterTargets="Restore" Condition="'$(BuildProjectReferences)' != 'false'">
-    <MSBuild Projects="@(ProjectReference)" Targets="Restore" RunEachTargetSeparately="true" />
-    <MSBuild Projects="@(ProjectFile)" Targets="Restore" RunEachTargetSeparately="true" />
+    <MSBuild Projects="@(ProjectReference)" Targets="Restore" RunEachTargetSeparately="true" Properties="Configuration=$(Configuration)" />
+    <MSBuild Projects="@(ProjectFile)" Targets="Restore" RunEachTargetSeparately="true" Properties="Configuration=$(Configuration)" />
   </Target>
   <Target Name="CreateLocalNugetSourceDirs" BeforeTargets="Restore">
     <MakeDir Directories="$(BaseDir)/target/pkg/Release" />

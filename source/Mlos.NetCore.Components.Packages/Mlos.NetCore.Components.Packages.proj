@@ -19,9 +19,9 @@
     <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.MetaProj.targets" />
-  <!-- Override the default Pack target for this meta project. -->
-  <!-- Now, call "pack" on all of our referenced projects. -->
   <Target Name="Pack" AfterTargets="Build" Condition="'$(QBUILD)' != '1'">
-    <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="true" Properties="Configuration=$(Configuration);NoBuild=true;" />
+    <!-- Don't repeat the build - we probably just did it. -->
+    <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="false"
+      Properties="Configuration=$(Configuration);NoBuild=true" />
   </Target>
 </Project>
