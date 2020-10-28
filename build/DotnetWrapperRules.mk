@@ -25,14 +25,20 @@ NugetPackagesDir := $(MLOS_ROOT)/tools/.nuget/packages
 # corresponding fake targets for the "all" target to depend on.
 Csprojs := $(wildcard *.csproj)
 CsprojBuildTargets := $(Csprojs:.csproj=.csproj.fake-build-target)
-CsprojPackTargets := $(Csprojs:.csproj=.csproj.fake-pack-target)
 CsprojBuildQuickTargets := $(Csprojs:.csproj=.csproj.fake-build-quick-target)
+CsprojPackTargets := $(Csprojs:.csproj=.csproj.fake-pack-target)
 CsprojTestTargets := $(Csprojs:.csproj=.csproj.fake-test-target)
+CsprojCleanTargets := $(Csprojs:.csproj=.csproj.fake-clean-target)
+CsprojCleanQuickTargets := $(Csprojs:.csproj=.csproj.fake-clean-quick-target)
 # Actually, include other *.proj files as well.
 DirsProj := $(wildcard *.proj)
 DirsProjBuildTarget := $(DirsProj:.proj=.proj.fake-build-target)
 DirsProjPackTarget := $(DirsProj:.proj=.proj.fake-pack-target)
 DirsProjTestTarget := $(DirsProj:.proj=.proj.fake-test-target)
+DirsProjCleanTarget := $(DirsProj:.proj=.proj.fake-clean-target)
+
+# Increase log verbosity slightly.
+#MSBUILD_ARGS := -v:normal
 
 # To be added to the including Makefile's all target.
 .PHONY: dotnet-build
@@ -53,6 +59,14 @@ dotnet-pack: $(CsprojPackTargets) $(DirsProjPackTarget)
 dotnet-test: $(CsprojTestTargets) $(DirsProjTestTarget)
 	@ echo "make dotnet-test target finished."
 
+.PHONY: dotnet-clean
+dotnet-clean: $(CsprojCleanTargets) $(DirsProjCleanTarget)
+	@ echo "make dotnet-clean target finished."
+
+.PHONY: dotnet-clean-quick
+dotnet-clean-quick: $(CsprojCleanQuickTargets)
+	@ echo "make dotnet-clean-quick target finished."
+
 .PHONY: dotnet-install
 dotnet-install:
 	@ echo "make dotnet-install is currently a no-op."
@@ -65,17 +79,17 @@ dotnet-install:
 	@ # Note: This command currently also does a "dotnet restore" first,
 	@ # which can be slow, however is difficult to check when it is unnecessary.
 	@ # Note: -m tells it to build in parallel.
-	@ $(DOTNET) build -m --configuration $(CONFIGURATION) $(@:.fake-build-target=)
+	@ $(DOTNET) build $(MSBUILD_ARGS) -m --configuration $(CONFIGURATION) $(@:.fake-build-target=)
 
 %.fake-build-quick-target:
 	@ # A target to allow quickly rebuilding just a given project and none of its dependencies.
-	@ $(DOTNET) build -m --configuration $(CONFIGURATION) --no-restore /p:BuildProjectReferences=false $(@:.fake-build-quick-target=)
+	@ $(DOTNET) build $(MSBUILD_ARGS) -m --configuration $(CONFIGURATION) --no-restore /p:BuildProjectReferences=false $(@:.fake-build-quick-target=)
 
 # For each of the fake test targets, just call "dotnet pack" on its
 # corresponding *.csproj file
 # For now, don't force a rebuild first.
 %.fake-pack-target: #%.fake-build-target
-	@ $(DOTNET) pack --no-build -m --configuration $(CONFIGURATION) $(@:.fake-pack-target=)
+	@ $(DOTNET) pack $(MSBUILD_ARGS) --no-build -m --configuration $(CONFIGURATION) $(@:.fake-pack-target=)
 
 # By default don't run certain tests.
 # To override, run with:
@@ -89,18 +103,24 @@ endif
 # corresponding *.csproj file
 # For now, don't force a rebuild first.
 %.fake-test-target: #%.fake-build-target
-	$(DOTNET) test --no-build -m --configuration $(CONFIGURATION) $(DOTNET_TEST_FILTER) $(@:.fake-test-target=)
+	$(DOTNET) test $(MSBUILD_ARGS) --no-build -m --configuration $(CONFIGURATION) $(DOTNET_TEST_FILTER) $(@:.fake-test-target=)
+
+%.fake-clean-target:
+	$(DOTNET) build $(MSBUILD_ARGS) /t:clean --no-restore -m --configuration $(CONFIGURATION) $(@:.fake-clean-target=)
+
+%.fake-clean-quick-target:
+	$(DOTNET) build $(MSBUILD_ARGS) /t:clean /p:BuildProjectReferences=false --no-restore -m --configuration $(CONFIGURATION) $(@:.fake-clean-quick-target=)
 
 # Note: this clean method somewhat lazily removes both Debug and Release build outputs.
 # To be added to the including Makefile's clean target.
-.PHONY: dotnet-clean
-dotnet-clean:
-	@ $(RM) $(DotnetOutputPath)
+.PHONY: dotnet-distclean
+dotnet-distclean:
+	$(RM) $(DotnetOutputPath)
 	@ $(MKDIR) $(DotnetOutputPath)
 
-.PHONY: dotnet-pkg-clean
-dotnet-pkg-clean:
-	@ $(RM) $(DotnetBasePkgDir)
+.PHONY: dotnet-pkgs-clean
+dotnet-pkgs-clean:
+	$(RM) $(DotnetBasePkgDir)
 	@ $(MKDIR) $(DotnetBasePkgDir)
 
 .PHONY: nuget-clean
@@ -108,6 +128,11 @@ nuget-clean:
 	@ $(RM) $(NugetPackagesDir)
 	@ $(MKDIR) $(NugetPackagesDir)
 
-handledtargets += $(Csprojs) $(CsProjBuildTargets) $(CsProjTestTargets) \
-    $(DirsProj) $(DirsProjBuildTarget) $(DirsProjTestTarget) \
-    dotnet-build dotnet-build-quick dotnet-install dotnet-test dotnet-pack dotnet-pkg-clean dotnet-clean nuget-clean
+handledtargets += $(Csprojs) $(DirsProj) \
+    dotnet-build $(CsprojBuildTargets) $(DirsProjBuildTarget) \
+    dotnet-build-quick $(CsprojBuildQuickTargets) \
+    dotnet-pack $(CsprojPackTargets) $(DirsProjPackTarget) \
+    dotnet-test $(CsprojTestTargets) $(DirsProjTestTarget) \
+    dotnet-clean $(CsprojCleanTargets) $(DirsProjCleanTarget) \
+    dotnet-clean-quick $(CsprojCleanQuickTargets) \
+    dotnet-install dotnet-pkgs-clean dotnet-distclean nuget-clean

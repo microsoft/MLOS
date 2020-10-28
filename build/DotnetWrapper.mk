@@ -14,7 +14,7 @@ install: dotnet-install
 clean: dotnet-clean
 
 .PHONY: distclean
-distclean: clean
+distclean: dotnet-distclean
 
 .PHONY: pack
 pack: dotnet-pack
