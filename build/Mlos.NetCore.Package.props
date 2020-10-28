@@ -17,6 +17,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
+  <!-- TODO: Remove this? -->
   <!--
     Optionally adjust the package name to include an OS identifier
     (e.g. if it includes OS specific resources like .so files), by
