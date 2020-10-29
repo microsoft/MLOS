@@ -36,6 +36,8 @@
     <DisableGitVersionTask>true</DisableGitVersionTask>
     <DisableGitVersionTask Condition="'$(PackageUsesGitVersionInfo)' == 'true'">false</DisableGitVersionTask>
     <GitVersion_NoFetchEnabled>true</GitVersion_NoFetchEnabled>
+    <!-- Be less noisy -->
+    <WriteVersionInfoToBuildLog Condition="'$(WriteVersionInfoToBuildLog)' == ''">false</WriteVersionInfoToBuildLog>
     <!--
     <GetVersion>$(PackageUsesGitVersionInfo)</GetVersion>
     <UpdateAssemblyInfo>$(PackageUsesGitVersionInfo)</UpdateAssemblyInfo>
