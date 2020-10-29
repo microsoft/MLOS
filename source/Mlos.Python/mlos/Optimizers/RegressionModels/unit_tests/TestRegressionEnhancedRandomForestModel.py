@@ -118,7 +118,6 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
             output_space=self.test_case_globals['output_space']
         )
 
-        np.random.seed(17)
         num_points = 100
         x_df, y_df = self.generate_points_simple_quadratic(num_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
         rerf.fit(x_df, y_df)
@@ -140,47 +139,13 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(num_diffs == 0, 'Base model failed to find expected features')
 
     # @unittest.expectedFailure # The configs don't belong to their respective config spaces
-    def test_lasso_polynomial_coefficients(self):
+    def test_lasso_polynomial_coefficient_invariants(self):
         rerf = RegressionEnhancedRandomForestRegressionModel(
             model_config=self.model_config,
             input_space=self.test_case_globals['2d_X_input_space'],
             output_space=self.test_case_globals['output_space']
         )
 
-        np.random.seed(23)
-        num_points = 1000
-        x_df, y_df = self.generate_points_simple_quadratic(num_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
-        rerf.fit(x_df, y_df)
-
-        final_num_features = 2
-        polynomial_degree = self.model_config.max_basis_function_degree
-        num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
-        num_detected_features = len(rerf.detected_feature_indices_)
-
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
-
-        # test fit coef match known coef
-        y_coef_true = self.get_simple_quadratic_coefficients()
-        epsilon = 10 ** -2
-        expected_non_zero_coef = y_coef_true[np.where(y_coef_true != 0.0)[0]]
-        fit_poly_coef = [rerf.base_regressor_.intercept_]
-        fit_poly_coef.extend(rerf.base_regressor_.coef_)
-        incorrect_terms = np.where(np.abs(fit_poly_coef - expected_non_zero_coef) > epsilon)[0]
-        num_incorrect_terms = len(incorrect_terms)
-        self.assertTrue(num_incorrect_terms == 0, 'Estimated polynomial coefficients deviated further than expected from known coefficients')
-
-    # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
-    def test_lasso_polynomial_gradient(self):
-        rerf = RegressionEnhancedRandomForestRegressionModel(
-            model_config=self.model_config,
-            input_space=self.test_case_globals['2d_X_input_space'],
-            output_space=self.test_case_globals['output_space']
-        )
-
-        np.random.seed(13)
         num_points = 100
         x_df, y_df = self.generate_points_simple_quadratic(num_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
         rerf.fit(x_df, y_df)
@@ -195,12 +160,27 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
         self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
 
-        # test gradient at X
-        epsilon = 10 ** -2
-        true_gradient_coef = np.array([[-3, -0.5 * 2, 0, 0, 0, 0], [-4, -2.0 * 2, 0, 0, 0, 0]]).transpose()
-        incorrect_terms = np.where(np.abs(true_gradient_coef - rerf.root_model_gradient_coef_) > epsilon)[0]
-        num_incorrect_terms = len(incorrect_terms)
-        self.assertTrue(num_incorrect_terms == 0, 'Estimated gradient coefficients deviated further than expected from known coefficients')
+    # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
+    def test_lasso_polynomial_gradient_invariants(self):
+        rerf = RegressionEnhancedRandomForestRegressionModel(
+            model_config=self.model_config,
+            input_space=self.test_case_globals['2d_X_input_space'],
+            output_space=self.test_case_globals['output_space']
+        )
+
+        num_points = 100
+        x_df, y_df = self.generate_points_simple_quadratic(num_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
+        rerf.fit(x_df, y_df)
+
+        final_num_features = 2
+        polynomial_degree = self.model_config.max_basis_function_degree
+        num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
+        num_detected_features = len(rerf.detected_feature_indices_)
+
+        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
+        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
+        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
+        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
 
     # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
     def test_lasso_predictions(self):
@@ -209,7 +189,6 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
             input_space=self.test_case_globals['2d_X_input_space'],
             output_space=self.test_case_globals['output_space']
         )
-        np.random.seed(13)
 
         num_train_points = 100
         x_train_df, y_train_df = self.generate_points_simple_quadratic(num_train_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
@@ -236,9 +215,11 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         y_test = y_test_df.to_numpy().reshape(-1)
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
-        r2 = 1 - residual_sum_of_squares / total_sum_of_squares
+        unexplained_variance = residual_sum_of_squares / total_sum_of_squares
 
-        self.assertTrue(r2 > 1 - 10**-4, '1 - R^2 larger than expected')
+        test_threshold = 10 ** -3
+        self.assertTrue(unexplained_variance < test_threshold,
+                        f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold}')
 
     def test_lasso_categorical_predictions(self):
         rerf = RegressionEnhancedRandomForestRegressionModel(
@@ -284,7 +265,6 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
-
         rerf = RegressionEnhancedRandomForestRegressionModel(
             model_config=self.model_config,
             input_space=objective_function.parameter_space,
@@ -324,4 +304,5 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
-        self.assertTrue(unexplained_variance < 10**-3, '1 - R^2 larger than expected')
+        test_threshold = 10**-3
+        self.assertTrue(unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold}')

@@ -10,7 +10,7 @@ from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
@@ -174,6 +174,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.polynomial_features_powers_ = None
 
         self.categorical_zero_cols_idx_to_delete_ = None
+        self.scaler_ = StandardScaler()
 
     @trace()
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number=0):
@@ -192,6 +193,9 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # pull X and y values from data frames passed
         y = target_values_pandas_frame[self.output_dimension_names].to_numpy().reshape(-1)
         x_df = self.one_hot_encoder_adapter.project_dataframe(df=feature_values_pandas_frame, in_place=False)
+        continuous_dim_col_names = list(set.difference(set(x_df.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
+        x_df[continuous_dim_col_names] = self.scaler_.fit_transform(x_df[continuous_dim_col_names])
+
         fit_x = self.transform_x(x_df, what_to_return='fit_x')
 
         # run root regression
@@ -392,6 +396,9 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         for missing_column_name in missing_column_names:
             feature_values_pandas_frame[missing_column_name] = np.NaN
         x_df = self.one_hot_encoder_adapter.project_dataframe(df=feature_values_pandas_frame, in_place=False)
+        continuous_dim_col_names = list(set.difference(set(x_df.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
+        x_df[continuous_dim_col_names] = self.scaler_.transform(x_df[continuous_dim_col_names])
+
         x_star = self.transform_x(x_df)
 
         base_predicted = self.base_regressor_.predict(x_star)
