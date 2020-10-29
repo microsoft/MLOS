@@ -238,12 +238,11 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = num_categorical_levels_expected + num_continuous_dimensions
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
-        """ 1 is added to the num_categorical_levels_expected to account for "level 0" which the one hot encoder in RERF drops the first level,
-            while the design matrix contains a polynomial fit for that level.
-            Since it is possible not all categorical levels will be present in the training set, RERF eliminates zero columns arising from
-            OneHotEncoder knowing the missing levels are possible.  The list of the dropped columns is established in RERF.fit() and used in the
-            RERF.predict() method.
-        """
+        # 1 is added to the num_categorical_levels_expected to account for "level 0" which the one hot encoder in RERF drops the first level,
+        # while the design matrix contains a polynomial fit for that level.
+        # Since it is possible not all categorical levels will be present in the training set, RERF eliminates zero columns arising from
+        # OneHotEncoder knowing the missing levels are possible.  The list of the dropped columns is established in RERF.fit() and used in the
+        # RERF.predict() method.
         num_cols_in_design_matrix = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1)\
                                   - len(rerf.categorical_zero_cols_idx_to_delete_)
         num_detected_features = len(rerf.detected_feature_indices_)
@@ -308,4 +307,3 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
         test_threshold = 10**-3
         self.assertTrue(unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
-
