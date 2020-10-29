@@ -24,16 +24,9 @@
   <!-- If we're not using the pipeline version, then use the git version by default. -->
   <PropertyGroup>
     <PackageUsesGitVersionInfo Condition="'$(UsePipelineVersion)' == 'true'">false</PackageUsesGitVersionInfo>
-    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == ''">true</PackageUsesGitVersionInfo>
+    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == '' And '$(BUILD_COREXT)' != '1'">true</PackageUsesGitVersionInfo>
     <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' != 'true'">false</PackageUsesGitVersionInfo>
   </PropertyGroup>
-  <!-- Add a build tool for discovering version info from the repository. -->
-  <ItemGroup>
-    <PackageReference Include="GitVersionTask" Version="5.5.0">
-      <!-- Don't include its assets in any build output or dependency references. -->
-      <PrivateAssets>All</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
   <!--
     When packaging, we need to be able to reference consistent and unique versions.
     The easiest way to do that is to let GitVersionTask update them in the assemblies for us.
@@ -51,4 +44,11 @@
     <GenerateGitVersionInformation>$(PackageUsesGitVersionInfo)</GenerateGitVersionInformation>
     -->
   </PropertyGroup>
+  <!-- Add a build tool for discovering version info from the repository. -->
+  <ItemGroup Condition="'$(BUILD_COREXT)' != '1'">
+    <PackageReference Include="GitVersionTask" Version="5.5.0">
+      <!-- Don't include its assets in any build output or dependency references. -->
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>
