@@ -237,14 +237,20 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         final_num_features = num_categorical_levels_expected + num_continuous_dimensions
         polynomial_degree = self.model_config.max_basis_function_degree
         num_terms_in_polynomial_per_categorical_level = self.n_choose_k(polynomial_degree + num_continuous_dimensions, num_continuous_dimensions)
-        num_terms_in_polynomial = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1)\
+        """ 1 is added to the num_categorical_levels_expected to account for "level 0" which the one hot encoder in RERF drops the first level,
+            while the design matrix contains a polynomial fit for that level.
+            Since it is possible not all categorical levels will be present in the training set, RERF eliminates zero columns arising from
+            OneHotEncoder knowing the missing levels are possible.  The list of the dropped columns is established in RERF.fit() and used in the
+            RERF.predict() method.
+        """
+        num_cols_in_design_matrix = num_terms_in_polynomial_per_categorical_level * (num_categorical_levels_expected + 1)\
                                   - len(rerf.categorical_zero_cols_idx_to_delete_)
         num_detected_features = len(rerf.detected_feature_indices_)
 
         self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_train_x, num_terms_in_polynomial), 'Design matrix shape is incorrect')
+        self.assertTrue(rerf.fit_X_.shape == (num_train_x, num_cols_in_design_matrix), 'Design matrix shape is incorrect')
         self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
+        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_cols_in_design_matrix, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
 
         # generate new random to test predictions
         num_test_points = 50
