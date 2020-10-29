@@ -49,7 +49,15 @@
     so that they always run and the CodeGen process itself avoids overwriting files if their output hasn't changed.
   -->
   <!-- Codegen using internal compiler -->
-  <Target Name="SettingsSystemRegistryDefCodeGen" AfterTargets="AfterResolveReferences" Outputs="@(MlosCodeGenOutput)" Condition="'@(SettingsRegistryDef->Count())' != 0">
+  <!--
+    Make sure that codegen is run whenever compile is.
+    Note: We don't use AfterTargets="AfterResolveReferences" since Pack targets also use it Restore dependencies,
+    but Pack may not actually need to re-build.
+  -->
+  <PropertyGroup>
+    <BuildDependsOn>$(BuildDependsOn);SettingsSystemRegistryDefCodeGen</BuildDependsOn>
+  </PropertyGroup>
+  <Target Name="SettingsSystemRegistryDefCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Outputs="@(MlosCodeGenOutput)" Condition="'@(SettingsRegistryDef->Count())' != 0">
     <PropertyGroup>
       <SettingsSystemCodeGenInputArgs>@(SettingsRegistryDef -> '--input-cs=&quot;%(FullPath)&quot;', ' ')</SettingsSystemCodeGenInputArgs>
     </PropertyGroup>
