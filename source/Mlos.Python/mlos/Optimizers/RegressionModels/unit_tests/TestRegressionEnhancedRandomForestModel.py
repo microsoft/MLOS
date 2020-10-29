@@ -93,8 +93,8 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
 
         x_df = pd.DataFrame({
             'x0': np.random.choice(['a', 'b', 'c'], size=num_points),
-            'x1': np.random.uniform(-10, 10, size=num_points),
-            'x2': np.random.uniform(-10, 10, size=num_points),
+            'x1': np.random.uniform(0, 5, size=num_points),
+            'x2': np.random.uniform(0, 5, size=num_points),
             'i0': np.random.choice(['-5', '5'], size=num_points)
         })
 
@@ -228,7 +228,8 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
             output_space=self.test_case_globals['output_space']
         )
 
-        num_train_x = 300
+        # input space consists of 6 2-d domains that are 5 x 5 units wide.  Hence placing 25 points in each domain.
+        num_train_x = 100
         x_train_df, y_train_df = self.generate_points_nonhierarchical_categorical_quadratic(num_train_x)
         rerf.fit(x_train_df, y_train_df)
 
@@ -280,7 +281,10 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         )
 
         # fit model with same degree as true y
-        num_train_x = 100
+        # The input space consists of 3 2-d domains 200 x 200 units.  Hence random samples smaller than a certain size will produce too few points to
+        # train reliable models.
+        # TODO: Good place to use a non-random training set design
+        num_train_x = 300
         x_train_df = objective_function.parameter_space.random_dataframe(num_samples=num_train_x)
         y_train_df = objective_function.evaluate_dataframe(x_train_df)
         rerf.fit(x_train_df, y_train_df)
