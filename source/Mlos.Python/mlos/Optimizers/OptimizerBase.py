@@ -139,7 +139,7 @@ class OptimizerBase(ABC):
 
             # Drop nulls and zeroes.
             #
-            predictions_df = predictions_df[predictions_df[dof_column_name].notna() & predictions_df[dof_column_name] != 0]
+            predictions_df = predictions_df[predictions_df[dof_column_name].notna() & (predictions_df[dof_column_name] != 0)]
 
             if len(predictions_df.index) == 0:
                 raise ValueError("Insufficient data to compute confidence-bound based optimum.")

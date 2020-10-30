@@ -23,22 +23,21 @@ class BufferingHandler(logging.StreamHandler):
 
     def emit(self, record):
         if self.level <= record.levelno:
-            event = {
-                'timestamp': record.asctime,
-                'level': record.levelname,
-                'filename': record.filename,
-                'line': record.lineno,
-                'function': record.funcName,
-                'message': record.message.replace("'", '"'),
-                'exception_text': record.exc_text.replace("'", '"') if record.exc_text is not None else None
-            }
-            self.buffered_log_records.append(event)
+            self.buffered_log_records.append(record)
 
     def get_records(self, clear_buffer=False):
         records = self.buffered_log_records
         if clear_buffer:
-            self.buffered_log_records = []
+            self.clear()
         return records
+
+    def clear(self):
+        self.buffered_log_records = []
+
+    def dump_to_file(self, output_file_path):
+        with open(output_file_path, 'a+') as out_file:
+            for record in self.buffered_log_records:
+                out_file.write(self.format(record=record))
 
 
 def create_logger(logger_name, create_console_handler=True, create_file_handler=False, create_buffering_handler=False, logging_level=logging.INFO):

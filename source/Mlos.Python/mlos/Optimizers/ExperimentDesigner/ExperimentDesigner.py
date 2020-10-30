@@ -41,6 +41,18 @@ experiment_designer_config_store = ComponentConfigStore(
     )
 )
 
+experiment_designer_config_store.add_config_by_name(
+    config_name="default_glow_worm_config",
+    config_point=Point(
+        utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
+        numeric_optimizer_implementation=GlowWormSwarmOptimizer.__name__,
+        confidence_bound_utility_function_config=confidence_bound_utility_function_config_store.default,
+        glow_worm_swarm_optimizer_config=glow_worm_swarm_optimizer_config_store.default,
+        fraction_random_suggestions=0.5
+    ),
+    description="Experiment designer config with glow worm swarm optimizer as a utility function optimizer."
+)
+
 class ExperimentDesigner:
     """ Portion of a BayesianOptimizer concerned with Design of Experiments.
 
