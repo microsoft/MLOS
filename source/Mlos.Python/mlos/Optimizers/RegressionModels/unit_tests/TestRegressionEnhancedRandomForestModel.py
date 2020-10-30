@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 import unittest
-
+import random
 import math
 import pandas as pd
 import numpy as np
@@ -270,6 +270,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
                         f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
 
     def test_lasso_hierarchical_categorical_predictions(self):
+        random.seed(11001)
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
@@ -283,7 +284,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         # The input space consists of 3 2-d domains 200 x 200 units.  Hence random samples smaller than a certain size will produce too few points to
         # train reliable models.
         # TODO: Good place to use a non-random training set design
-        num_train_x = 300
+        num_train_x = 600
         x_train_df = objective_function.parameter_space.random_dataframe(num_samples=num_train_x)
         y_train_df = objective_function.evaluate_dataframe(x_train_df)
         rerf.fit(x_train_df, y_train_df)
@@ -296,7 +297,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
 
         # test predictions
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
-        num_test_x = 200
+        num_test_x = 50
         x_test_df = objective_function.parameter_space.random_dataframe(num_samples=num_test_x)
         predictions = rerf.predict(x_test_df)
         pred_df = predictions.get_dataframe()
