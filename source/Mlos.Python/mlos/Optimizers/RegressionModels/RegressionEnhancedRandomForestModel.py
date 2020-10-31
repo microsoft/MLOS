@@ -211,6 +211,12 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.dummy_var_cols_ = None
         self.categorical_zero_cols_idx_to_delete_ = None
 
+        self._trained = False
+
+    @property
+    def trained(self):
+        return self._trained
+
     @trace()
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number=0):
         """ Fits the RegressionEnhancedRandomForest
@@ -272,7 +278,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.dof_ = fit_x.shape[0] - len(self.base_regressor_.coef_)
         self.variance_estimate_ = residual_sum_of_squares / float(self.dof_)
 
-        self.fitted = True
+        self._trained = True
         return self
 
     def _fit_root_regression(self, x, y):

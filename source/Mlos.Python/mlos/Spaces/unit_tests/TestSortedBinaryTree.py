@@ -189,7 +189,6 @@ class SortedBinaryTreeTest(unittest.TestCase):
                 for set_key, tree_node in zip(sorted(inserted), sorted_binary_tree.enumerate()):
                     self.assertTrue(set_key == tree_node.key)
 
-    @unittest.skip
     def test_stack_overflow(self):
         """ Inserts 10000 consecutive nodes which should cause stack overflow in the recursive implementation.
 

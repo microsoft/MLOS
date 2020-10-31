@@ -25,7 +25,6 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmO
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
-from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
@@ -241,18 +240,12 @@ class TestBayesianOptimizer(unittest.TestCase):
                     assert optimum.y <= old_optimum
                     old_optimum = optimum.y
                     self.validate_optima(optimizer=bayesian_optimizer)
-                    convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
-                    random_forest_fit_state = convergence_state.surrogate_model_fit_state
-                    random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+                    random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
                     print(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}, Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
 
-            convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
-            random_forest_fit_state = convergence_state.surrogate_model_fit_state
-            random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+            random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
             self.assertTrue(random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations)
             models_gof_metrics = [random_forest_gof_metrics]
-            for decision_tree_fit_state in random_forest_fit_state.decision_trees_fit_states:
-                models_gof_metrics.append(decision_tree_fit_state.current_train_gof_metrics)
 
             for model_gof_metrics in models_gof_metrics:
                 self.assertTrue(0 <= model_gof_metrics.relative_absolute_error <= 1)  # This could fail if the models are really wrong. Not expected in this unit test though.
@@ -264,15 +257,6 @@ class TestBayesianOptimizer(unittest.TestCase):
 
                 # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
                 self.assertTrue(model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate)
-
-            goodness_of_fit_df = random_forest_fit_state.get_goodness_of_fit_dataframe(data_set_type=DataSetType.TRAIN)
-            print(goodness_of_fit_df.head())
-
-            goodness_of_fit_df = random_forest_fit_state.get_goodness_of_fit_dataframe(
-                data_set_type=DataSetType.TRAIN,
-                deep=True
-            )
-            print(goodness_of_fit_df.head())
 
     @trace()
     def test_hierarchical_quadratic_cold_start(self):
@@ -425,7 +409,7 @@ class TestBayesianOptimizer(unittest.TestCase):
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
         should_raise_for_confidence_bounds = False
-        if not optimizer.get_surrogate_model_fit_state().fitted:
+        if not optimizer.trained:
             should_raise_for_predicted_value = True
             should_raise_for_confidence_bounds = True
         else:

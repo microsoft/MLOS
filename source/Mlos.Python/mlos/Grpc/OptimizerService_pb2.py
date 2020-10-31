@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\025Mlos.OptimizerService',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\"\x81\x01\n\x16\x43reateOptimizerRequest\x12\x31\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32\x14.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"f\n\x0eSuggestRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x19\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\x08.Context\"j\n\x1aRegisterObservationRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12!\n\x0bObservation\x18\x02 \x01(\x0b\x32\x0c.Observation\"m\n\x1bRegisterObservationsRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12#\n\x0cObservations\x18\x02 \x01(\x0b\x32\r.Observations\"\x9f\x01\n\x13OptimizationProblem\x12\"\n\x0eParameterSpace\x18\x01 \x01(\x0b\x32\n.Hypergrid\x12 \n\x0c\x43ontextSpace\x18\x02 \x01(\x0b\x32\n.Hypergrid\x12\"\n\x0eObjectiveSpace\x18\x03 \x01(\x0b\x32\n.Hypergrid\x12\x1e\n\nObjectives\x18\x04 \x03(\x0b\x32\n.Objective\"\x1d\n\x0fOptimizerHandle\x12\n\n\x02Id\x18\x01 \x01(\t\"\x90\x01\n\rOptimizerInfo\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12!\n\x19OptimizerConfigJsonString\x18\x02 \x01(\t\x12\x31\n\x13OptimizationProblem\x18\x03 \x01(\x0b\x32\x14.OptimizationProblem\"s\n\x19OptimizerConvergenceState\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12+\n#SerializedOptimizerConvergenceState\x18\x02 \x01(\t\"3\n\rOptimizerList\x12\"\n\nOptimizers\x18\x01 \x03(\x0b\x32\x0e.OptimizerInfo\"U\n\x0bObservation\x12\x1b\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32\t.Features\x12)\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\x10.ObjectiveValues\"V\n\x0cObservations\x12\x1b\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32\t.Features\x12)\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\x10.ObjectiveValues\"&\n\x08\x46\x65\x61tures\x12\x1a\n\x12\x46\x65\x61turesJsonString\x18\x01 \x01(\t\"7\n\x17\x43onfigurationParameters\x12\x1c\n\x14ParametersJsonString\x18\x01 \x01(\t\"$\n\x07\x43ontext\x12\x19\n\x11\x43ontextJsonString\x18\x01 \x01(\t\"X\n\x0ePredictRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12\x1b\n\x08\x46\x65\x61tures\x18\x02 \x01(\x0b\x32\t.Features\"4\n\x0fObjectiveValues\x12!\n\x19ObjectiveValuesJsonString\x18\x01 \x01(\t\"(\n\tHypergrid\x12\x1b\n\x13HypergridJsonString\x18\x01 \x01(\t\"+\n\tObjective\x12\x0c\n\x04Name\x18\x01 \x01(\t\x12\x10\n\x08Minimize\x18\x02 \x01(\x08\"Y\n\x19SingleObjectivePrediction\x12\x15\n\rObjectiveName\x18\x01 \x01(\t\x12%\n\x1dPredictionDataFrameJsonString\x18\x02 \x01(\t\"K\n\x0fPredictResponse\x12\x38\n\x14ObjectivePredictions\x18\x01 \x03(\x0b\x32\x1a.SingleObjectivePrediction\"\x07\n\x05\x45mpty2\xb3\x04\n\x10OptimizerService\x12\x30\n\x16ListExistingOptimizers\x12\x06.Empty\x1a\x0e.OptimizerList\x12\x34\n\x10GetOptimizerInfo\x12\x10.OptimizerHandle\x1a\x0e.OptimizerInfo\x12L\n\x1cGetOptimizerConvergenceState\x12\x10.OptimizerHandle\x1a\x1a.OptimizerConvergenceState\x12<\n\x0f\x43reateOptimizer\x12\x17.CreateOptimizerRequest\x1a\x10.OptimizerHandle\x12\x34\n\x07Suggest\x12\x0f.SuggestRequest\x1a\x18.ConfigurationParameters\x12,\n\x07Predict\x12\x0f.PredictRequest\x1a\x10.PredictResponse\x12:\n\x13RegisterObservation\x12\x1b.RegisterObservationRequest\x1a\x06.Empty\x12<\n\x14RegisterObservations\x12\x1c.RegisterObservationsRequest\x1a\x06.Empty\x12\x35\n\x12GetAllObservations\x12\x10.OptimizerHandle\x1a\r.Observations\x12\x16\n\x04\x45\x63ho\x12\x06.Empty\x1a\x06.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceb\x06proto3'
+  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\"\x81\x01\n\x16\x43reateOptimizerRequest\x12\x31\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32\x14.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"f\n\x0eSuggestRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x19\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\x08.Context\"j\n\x1aRegisterObservationRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12!\n\x0bObservation\x18\x02 \x01(\x0b\x32\x0c.Observation\"m\n\x1bRegisterObservationsRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12#\n\x0cObservations\x18\x02 \x01(\x0b\x32\r.Observations\"\x9f\x01\n\x13OptimizationProblem\x12\"\n\x0eParameterSpace\x18\x01 \x01(\x0b\x32\n.Hypergrid\x12 \n\x0c\x43ontextSpace\x18\x02 \x01(\x0b\x32\n.Hypergrid\x12\"\n\x0eObjectiveSpace\x18\x03 \x01(\x0b\x32\n.Hypergrid\x12\x1e\n\nObjectives\x18\x04 \x03(\x0b\x32\n.Objective\"\x1d\n\x0fOptimizerHandle\x12\n\n\x02Id\x18\x01 \x01(\t\"\x90\x01\n\rOptimizerInfo\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12!\n\x19OptimizerConfigJsonString\x18\x02 \x01(\t\x12\x31\n\x13OptimizationProblem\x18\x03 \x01(\x0b\x32\x14.OptimizationProblem\"s\n\x19OptimizerConvergenceState\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12+\n#SerializedOptimizerConvergenceState\x18\x02 \x01(\t\"3\n\rOptimizerList\x12\"\n\nOptimizers\x18\x01 \x03(\x0b\x32\x0e.OptimizerInfo\"U\n\x0bObservation\x12\x1b\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32\t.Features\x12)\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\x10.ObjectiveValues\"V\n\x0cObservations\x12\x1b\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32\t.Features\x12)\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\x10.ObjectiveValues\"&\n\x08\x46\x65\x61tures\x12\x1a\n\x12\x46\x65\x61turesJsonString\x18\x01 \x01(\t\"7\n\x17\x43onfigurationParameters\x12\x1c\n\x14ParametersJsonString\x18\x01 \x01(\t\"$\n\x07\x43ontext\x12\x19\n\x11\x43ontextJsonString\x18\x01 \x01(\t\"X\n\x0ePredictRequest\x12)\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\x10.OptimizerHandle\x12\x1b\n\x08\x46\x65\x61tures\x18\x02 \x01(\x0b\x32\t.Features\"4\n\x0fObjectiveValues\x12!\n\x19ObjectiveValuesJsonString\x18\x01 \x01(\t\"(\n\tHypergrid\x12\x1b\n\x13HypergridJsonString\x18\x01 \x01(\t\"+\n\tObjective\x12\x0c\n\x04Name\x18\x01 \x01(\t\x12\x10\n\x08Minimize\x18\x02 \x01(\x08\"Y\n\x19SingleObjectivePrediction\x12\x15\n\rObjectiveName\x18\x01 \x01(\t\x12%\n\x1dPredictionDataFrameJsonString\x18\x02 \x01(\t\"K\n\x0fPredictResponse\x12\x38\n\x14ObjectivePredictions\x18\x01 \x03(\x0b\x32\x1a.SingleObjectivePrediction\"\x1e\n\rSimpleBoolean\x12\r\n\x05Value\x18\x01 \x01(\x08\"\x1d\n\x0cSimpleString\x12\r\n\x05Value\x18\x01 \x01(\t\"\x07\n\x05\x45mpty2\xa2\x05\n\x10OptimizerService\x12\x30\n\x16ListExistingOptimizers\x12\x06.Empty\x1a\x0e.OptimizerList\x12\x34\n\x10GetOptimizerInfo\x12\x10.OptimizerHandle\x1a\x0e.OptimizerInfo\x12L\n\x1cGetOptimizerConvergenceState\x12\x10.OptimizerHandle\x1a\x1a.OptimizerConvergenceState\x12>\n\x1b\x43omputeGoodnessOfFitMetrics\x12\x10.OptimizerHandle\x1a\r.SimpleString\x12<\n\x0f\x43reateOptimizer\x12\x17.CreateOptimizerRequest\x1a\x10.OptimizerHandle\x12-\n\tIsTrained\x12\x10.OptimizerHandle\x1a\x0e.SimpleBoolean\x12\x34\n\x07Suggest\x12\x0f.SuggestRequest\x1a\x18.ConfigurationParameters\x12,\n\x07Predict\x12\x0f.PredictRequest\x1a\x10.PredictResponse\x12:\n\x13RegisterObservation\x12\x1b.RegisterObservationRequest\x1a\x06.Empty\x12<\n\x14RegisterObservations\x12\x1c.RegisterObservationsRequest\x1a\x06.Empty\x12\x35\n\x12GetAllObservations\x12\x10.OptimizerHandle\x1a\r.Observations\x12\x16\n\x04\x45\x63ho\x12\x06.Empty\x1a\x06.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceb\x06proto3'
 )
 
 
@@ -784,6 +784,70 @@ _PREDICTRESPONSE = _descriptor.Descriptor(
 )
 
 
+_SIMPLEBOOLEAN = _descriptor.Descriptor(
+  name='SimpleBoolean',
+  full_name='SimpleBoolean',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='Value', full_name='SimpleBoolean.Value', index=0,
+      number=1, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1710,
+  serialized_end=1740,
+)
+
+
+_SIMPLESTRING = _descriptor.Descriptor(
+  name='SimpleString',
+  full_name='SimpleString',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='Value', full_name='SimpleString.Value', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1742,
+  serialized_end=1771,
+)
+
+
 _EMPTY = _descriptor.Descriptor(
   name='Empty',
   full_name='Empty',
@@ -804,8 +868,8 @@ _EMPTY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1710,
-  serialized_end=1717,
+  serialized_start=1773,
+  serialized_end=1780,
 )
 
 _CREATEOPTIMIZERREQUEST.fields_by_name['OptimizationProblem'].message_type = _OPTIMIZATIONPROBLEM
@@ -850,6 +914,8 @@ DESCRIPTOR.message_types_by_name['Hypergrid'] = _HYPERGRID
 DESCRIPTOR.message_types_by_name['Objective'] = _OBJECTIVE
 DESCRIPTOR.message_types_by_name['SingleObjectivePrediction'] = _SINGLEOBJECTIVEPREDICTION
 DESCRIPTOR.message_types_by_name['PredictResponse'] = _PREDICTRESPONSE
+DESCRIPTOR.message_types_by_name['SimpleBoolean'] = _SIMPLEBOOLEAN
+DESCRIPTOR.message_types_by_name['SimpleString'] = _SIMPLESTRING
 DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -993,6 +1059,20 @@ PredictResponse = _reflection.GeneratedProtocolMessageType('PredictResponse', (_
   })
 _sym_db.RegisterMessage(PredictResponse)
 
+SimpleBoolean = _reflection.GeneratedProtocolMessageType('SimpleBoolean', (_message.Message,), {
+  'DESCRIPTOR' : _SIMPLEBOOLEAN,
+  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
+  # @@protoc_insertion_point(class_scope:SimpleBoolean)
+  })
+_sym_db.RegisterMessage(SimpleBoolean)
+
+SimpleString = _reflection.GeneratedProtocolMessageType('SimpleString', (_message.Message,), {
+  'DESCRIPTOR' : _SIMPLESTRING,
+  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
+  # @@protoc_insertion_point(class_scope:SimpleString)
+  })
+_sym_db.RegisterMessage(SimpleString)
+
 Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), {
   'DESCRIPTOR' : _EMPTY,
   '__module__' : 'mlos.Grpc.OptimizerService_pb2'
@@ -1010,8 +1090,8 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1720,
-  serialized_end=2283,
+  serialized_start=1783,
+  serialized_end=2457,
   methods=[
   _descriptor.MethodDescriptor(
     name='ListExistingOptimizers',
@@ -1044,9 +1124,19 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
+    name='ComputeGoodnessOfFitMetrics',
+    full_name='OptimizerService.ComputeGoodnessOfFitMetrics',
+    index=3,
+    containing_service=None,
+    input_type=_OPTIMIZERHANDLE,
+    output_type=_SIMPLESTRING,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
     name='CreateOptimizer',
     full_name='OptimizerService.CreateOptimizer',
-    index=3,
+    index=4,
     containing_service=None,
     input_type=_CREATEOPTIMIZERREQUEST,
     output_type=_OPTIMIZERHANDLE,
@@ -1054,9 +1144,19 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
+    name='IsTrained',
+    full_name='OptimizerService.IsTrained',
+    index=5,
+    containing_service=None,
+    input_type=_OPTIMIZERHANDLE,
+    output_type=_SIMPLEBOOLEAN,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
     name='Suggest',
     full_name='OptimizerService.Suggest',
-    index=4,
+    index=6,
     containing_service=None,
     input_type=_SUGGESTREQUEST,
     output_type=_CONFIGURATIONPARAMETERS,
@@ -1066,7 +1166,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='Predict',
     full_name='OptimizerService.Predict',
-    index=5,
+    index=7,
     containing_service=None,
     input_type=_PREDICTREQUEST,
     output_type=_PREDICTRESPONSE,
@@ -1076,7 +1176,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='RegisterObservation',
     full_name='OptimizerService.RegisterObservation',
-    index=6,
+    index=8,
     containing_service=None,
     input_type=_REGISTEROBSERVATIONREQUEST,
     output_type=_EMPTY,
@@ -1086,7 +1186,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='RegisterObservations',
     full_name='OptimizerService.RegisterObservations',
-    index=7,
+    index=9,
     containing_service=None,
     input_type=_REGISTEROBSERVATIONSREQUEST,
     output_type=_EMPTY,
@@ -1096,7 +1196,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='GetAllObservations',
     full_name='OptimizerService.GetAllObservations',
-    index=8,
+    index=10,
     containing_service=None,
     input_type=_OPTIMIZERHANDLE,
     output_type=_OBSERVATIONS,
@@ -1106,7 +1206,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   _descriptor.MethodDescriptor(
     name='Echo',
     full_name='OptimizerService.Echo',
-    index=9,
+    index=11,
     containing_service=None,
     input_type=_EMPTY,
     output_type=_EMPTY,
