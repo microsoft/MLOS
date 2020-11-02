@@ -34,12 +34,12 @@ class OptimizerEvaluator:
     """
 
     def __init__(
-        self,
-        optimizer_evaluator_config: Point,
-        optimizer: OptimizerBase = None,
-        optimizer_config: Point = None,
-        objective_function: ObjectiveFunctionBase = None,
-        objective_function_config: Point = None,
+            self,
+            optimizer_evaluator_config: Point,
+            optimizer: OptimizerBase = None,
+            optimizer_config: Point = None,
+            objective_function: ObjectiveFunctionBase = None,
+            objective_function_config: Point = None
     ):
         assert optimizer_evaluator_config in optimizer_evaluator_config_store.parameter_space
         assert (optimizer is None) != (optimizer_config is None), "A valid optimizer XOR a valid optimizer_config must be supplied."
@@ -100,7 +100,7 @@ class OptimizerEvaluator:
 
 
     @trace()
-    def evaluate_optimizer(self) -> OptimizerEvaluationReport:
+    def evaluate_optimizer(self) -> OptimizerEvaluationReport: # pylint: disable=too-many-statements
         evaluation_report = OptimizerEvaluationReport(
             optimizer_configuration=self.optimizer_config,
             objective_function_configuration=self.objective_function_config,
@@ -167,11 +167,15 @@ class OptimizerEvaluator:
 
                             for optimum_name, optimum_over_time in optima_over_time.items():
                                 try:
-                                    optimum_config, optimum_value = self.optimizer.optimum(
+                                    config, value = self.optimizer.optimum(
                                         optimum_definition=optimum_over_time.optimum_definition,
                                         alpha=optimum_over_time.alpha
                                     )
-                                    optima_over_time[optimum_name].add_optimum_at_iteration(iteration=i, optimum_config=optimum_config, optimum_value=optimum_value)
+                                    optima_over_time[optimum_name].add_optimum_at_iteration(
+                                        iteration=i,
+                                        optimum_config=config,
+                                        optimum_value=value
+                                    )
                                 except ValueError as e:
                                     print(e)
                 evaluation_report.success = True
@@ -190,11 +194,11 @@ class OptimizerEvaluator:
 
             for optimum_name, optimum_over_time in optima_over_time.items():
                 try:
-                    optimum_config, optimum_value = self.optimizer.optimum(optimum_definition=optimum_over_time.optimum_definition, alpha=optimum_over_time.alpha)
+                    config, value = self.optimizer.optimum(optimum_definition=optimum_over_time.optimum_definition, alpha=optimum_over_time.alpha)
                     optima_over_time[optimum_name].add_optimum_at_iteration(
                         iteration=self.optimizer_evaluator_config.num_iterations,
-                        optimum_config=optimum_config,
-                        optimum_value=optimum_value
+                        optimum_config=config,
+                        optimum_value=value
                     )
                 except Exception as e:
                     print(e)
