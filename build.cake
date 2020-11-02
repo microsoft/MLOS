@@ -399,6 +399,8 @@ Task("Create-Nuget-Package")
         string assemblyPath = mlosNetCoreSpec.Source;
         var asmVersion = FileVersionInfo.GetVersionInfo(assemblyPath);
 
+        // FIXME: This currently lacks "dependency" elements for the Projects that make up the nuget package.
+
         // Create nuget package in Target directory.
         //
         NuGetPack("./nuspec/Mlos.nuspec",
