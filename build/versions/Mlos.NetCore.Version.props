@@ -15,16 +15,15 @@
       <Link>Properties\PipelineAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
-
-  <!--
-    TODO: FIXME: When there are multiple remotes, then each time there's a new commit, this task emits a warning as it has issues
-    finding which remote to reference when considering the "main" branch.
-  -->
+  <PropertyGroup>
+    <!-- https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning -->
+    <CdpxBuildPipeline Condition="'$(CDP_COMMIT_ID)' != '' Or '$(CDP_BUILD_NUMBER)' != ''">true</CdpxBuildPipeline>
+  </PropertyGroup>
 
   <!-- If we're not using the pipeline version, then use the git version by default. -->
   <PropertyGroup>
     <PackageUsesGitVersionInfo Condition="'$(UsePipelineVersion)' == 'true'">false</PackageUsesGitVersionInfo>
-    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == '' And '$(BUILD_COREXT)' != '1'">true</PackageUsesGitVersionInfo>
+    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == '' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">true</PackageUsesGitVersionInfo>
     <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' != 'true'">false</PackageUsesGitVersionInfo>
   </PropertyGroup>
   <!--
@@ -45,7 +44,7 @@
     -->
   </PropertyGroup>
   <!-- Add a build tool for discovering version info from the repository. -->
-  <ItemGroup Condition="'$(BUILD_COREXT)' != '1'">
+  <ItemGroup Condition="'$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">
     <PackageReference Include="GitVersionTask" Version="5.5.0">
       <!-- Don't include its assets in any build output or dependency references. -->
       <PrivateAssets>All</PrivateAssets>

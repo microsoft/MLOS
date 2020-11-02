@@ -19,7 +19,7 @@
     <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.MetaProj.targets" />
-  <Target Name="Pack" AfterTargets="Build" Condition="'$(QBUILD)' != '1'">
+  <Target Name="Pack" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">
     <!-- Don't repeat the build - we probably just did it. -->
     <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="false"
       Properties="Configuration=$(Configuration);NoBuild=true" />
