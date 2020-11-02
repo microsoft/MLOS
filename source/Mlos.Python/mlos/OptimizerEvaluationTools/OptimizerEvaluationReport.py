@@ -6,7 +6,6 @@ import json
 import os
 import pickle
 from typing import Dict, List
-from mlos.Logger import BufferingHandler, create_logger
 from mlos.OptimizerEvaluationTools.OptimumOverTime import OptimumOverTime
 from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
 from mlos.Spaces import Point
@@ -34,16 +33,16 @@ class OptimizerEvaluationReport:
     """
 
     def __init__(
-        self,
-        optimizer_configuration: Point = None,
-        objective_function_configuration: Point = None,
-        pickled_objective_function_initial_state: str = None,
-        pickled_objective_function_final_state: str = None,
-        num_optimization_iterations: int = None,
-        evaluation_frequency: int = None,
-        regression_model_goodness_of_fit_state: RegressionModelFitState = None,
-        optima_over_time: Dict[str, OptimumOverTime] = None,
-        execution_trace: List[Dict[str, object]] = None
+            self,
+            optimizer_configuration: Point = None,
+            objective_function_configuration: Point = None,
+            pickled_objective_function_initial_state: str = None,
+            pickled_objective_function_final_state: str = None,
+            num_optimization_iterations: int = None,
+            evaluation_frequency: int = None,
+            regression_model_goodness_of_fit_state: RegressionModelFitState = None,
+            optima_over_time: Dict[str, OptimumOverTime] = None,
+            execution_trace: List[Dict[str, object]] = None
     ):
         self.success = False
         self.exception = None
@@ -129,6 +128,3 @@ class OptimizerEvaluationReport:
                 'exception_stack_trace': self.exception_traceback
             }
             json.dump(execution_info_dict, out_file, indent=2)
-
-
-

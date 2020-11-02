@@ -24,7 +24,7 @@ class GoodnessOfFitMetrics(NamedTuple):
         https://medium.com/microsoftazure/how-to-better-evaluate-the-goodness-of-fit-of-regressions-990dbf1c0091
     """
 
-    last_refit_iteration_number: int
+    last_refit_iteration_number: int = 0
     observation_count: int = 0
     prediction_count: int = 0
     data_set_type: DataSetType = DataSetType.TRAIN

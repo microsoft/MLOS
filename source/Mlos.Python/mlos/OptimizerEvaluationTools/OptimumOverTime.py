@@ -13,10 +13,10 @@ class OptimumOverTime:
 
     """
     def __init__(
-        self,
-        optimization_problem: OptimizationProblem,
-        optimum_definition: OptimumDefinition,
-        alpha: float = 0.05
+            self,
+            optimization_problem: OptimizationProblem,
+            optimum_definition: OptimumDefinition,
+            alpha: float = 0.05
     ):
         self.optimization_problem = optimization_problem
         self.optimum_definition = optimum_definition
@@ -50,7 +50,4 @@ class OptimumOverTime:
     def get_last_optimum(self):
         if len(self._optimal_configs) > 0 and len(self._optimum_values) > 0:
             return self._optimal_configs[-1], self._optimum_values[-1]
-        else:
-            raise ValueError("No optima were added.")
-
-
+        raise ValueError("No optima were added.")

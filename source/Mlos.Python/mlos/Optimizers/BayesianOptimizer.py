@@ -10,7 +10,7 @@ from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerC
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
-from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType, GoodnessOfFitMetrics
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Tracer import trace
 from mlos.Spaces import Point
@@ -89,7 +89,11 @@ class BayesianOptimizer(OptimizerBase):
     def compute_surrogate_model_goodness_of_fit(self):
         if not self.surrogate_model.trained:
             raise RuntimeError("Model has not been trained yet.")
-        return self.surrogate_model.compute_goodness_of_fit(features_df=self._feature_values_df.copy(), target_df=self._target_values_df.copy(), data_set_type=DataSetType.TRAIN)
+        return self.surrogate_model.compute_goodness_of_fit(
+            features_df=self._feature_values_df.copy(),
+            target_df=self._target_values_df.copy(),
+            data_set_type=DataSetType.TRAIN
+        )
 
     def get_optimizer_convergence_state(self):
         return self._optimizer_convergence_state
