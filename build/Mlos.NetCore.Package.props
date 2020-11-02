@@ -15,24 +15,25 @@
     <Authors>Microsoft</Authors>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>MLOS;Machine Learning;Optimization;Systems</PackageTags>
   </PropertyGroup>
 
-  <!-- TODO: Remove this? -->
-  <!--
-    Optionally adjust the package name to include an OS identifier
-    (e.g. if it includes OS specific resources like .so files), by
-    setting AppendOsIdToPackageName=true in the project's .csproj file.
-  -->
-  <PropertyGroup Condition="'$(AppendOsIdToPackageName)' == 'true'">
-    <!-- Setup a default if not already specified. -->
-    <PackageId Condition="'$(PackageId)' == ''">$(AssemblyName)</PackageId>
-    <!-- Append an OS identifier -->
-    <PackageId>$(PackageId).$(OsIdString)</PackageId>
+  <!-- Unless specified on the commandline, set the default package output to the target/ dir. -->
+  <PropertyGroup>
+    <MlosPkgOutputBaseDir>$(BaseDir)/target/pkg</MlosPkgOutputBaseDir>
+    <MlosPkgOutputDir>$(MlosPkgOutputBaseDir)/$(Configuration)</MlosPkgOutputDir>
+    <PackageOutputPath>$(MlosPkgOutputDir)/</PackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Also create a .snupkg along side the package for eventual publishing of symbols to nuget.org -->
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <!--
     Note: PackTask alters the PackageVersion property slightly when writing the file,
-    so it is difficult to provide a "clean" target for removing packages.
-    For now, just remove the target/pkg/... directory/files.
+    (e.g. dropping the "+{commitNumber}") so it is difficult to provide a "clean" target
+    for removing packages. For now, just remove the target/pkg/... directory/files.
   -->
 </Project>

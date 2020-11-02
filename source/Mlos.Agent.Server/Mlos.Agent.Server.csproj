@@ -14,10 +14,7 @@
   <PropertyGroup Label="PackageProps">
     <!-- Projects using a PackageReference to tool should not attempt to link against it. -->
     <DevelopmentDependency>true</DevelopmentDependency>
-    <!--
-      Alternatively, using PackAsTool would allow us to install this on the PATH with "dotnet tool install".
-      However, there's little utility in that without the build target rules to go with it.
-    -->
+    <!-- Let us install this on the PATH with "dotnet tool install". -->
     <PackAsTool>true</PackAsTool>
     <PackageId>Mlos.Agent.Server.Tool</PackageId>
     <ToolCommandName>Mlos.Agent.Server</ToolCommandName>

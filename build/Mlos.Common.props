@@ -12,11 +12,6 @@
     <IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
     <IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
   </PropertyGroup>
-  <PropertyGroup>
-    <OsIdString>UNKNOWN</OsIdString>
-    <OsIdString Condition="'$(IsWindows)' == 'true'">Windows</OsIdString>
-    <OsIdString Condition="'$(IsLinux)' == 'true'">Linux</OsIdString>
-  </PropertyGroup>
   <!-- Configure folder paths. -->
   <PropertyGroup>
     <BaseDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))</BaseDir>

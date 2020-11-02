@@ -33,16 +33,6 @@
   <PropertyGroup>
     <!-- Stash nuget packages inside the repo to make it easier to clean them during local package development. -->
     <MlosRestorePackagesPath>$(BaseDir)/tools/.nuget/packages</MlosRestorePackagesPath>
-    <RestorePackagesPath>$(MlosRestorePackagesPath)</RestorePackagesPath>
-    <!-- Unless specified on the commandline, set the default package output to the target/ dir. -->
-    <MlosPkgOutputBaseDir>$(BaseDir)/target/pkg</MlosPkgOutputBaseDir>
-    <MlosPkgOutputDir>$(MlosPkgOutputBaseDir)/$(Configuration)</MlosPkgOutputDir>
-    <PackageOutputPath>$(MlosPkgOutputDir)/</PackageOutputPath>
-    <!-- Also allow restoring from our package output. -->
-    <!-- FIXME: This isn't as relevant here - just saving it for future external project usage for now.
-    <RestoreIgnoreFailedSources>true</RestoreIgnoreFailedSources>
-    <RestoreAdditionalProjectSources>$(MlosPkgOutputBaseDir)/Release;$(MlosPkgOutputBaseDir)/Debug</RestoreAdditionalProjectSources>
-    -->
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.Package.props" />
   <ItemGroup>
