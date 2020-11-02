@@ -10,4 +10,4 @@ set -eu
 scriptdir=$(readlink -f "$(dirname "$0")")
 cd "$scriptdir/.."
 
-pytest -svx source\Mlos.Python
+pytest -svx source/Mlos.Python
