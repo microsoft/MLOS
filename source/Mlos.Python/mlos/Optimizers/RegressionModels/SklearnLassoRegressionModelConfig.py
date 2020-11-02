@@ -42,7 +42,7 @@ class SklearnLassoRegressionModelConfig(metaclass=DefaultConfigMeta):
         # sklearn model expects precompute type str, bool, array-like, so setting to default and exclude list option
         precompute=False,
         copy_x=True,
-        max_iter=1000,
+        max_iter=2000,
         tol=10 ** -4,
         warm_start=False,
         positive=False
