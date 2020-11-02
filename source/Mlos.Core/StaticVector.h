@@ -31,7 +31,7 @@ public:
     // Create an object in aligned storage.
     //
     template<typename... Args>
-    _Check_return_
+    _Must_inspect_result_
     bool EmplaceBack(Args&&... args)
     {
         if (m_size >= N)

@@ -25,8 +25,8 @@ class MlosContext;
 // NAME: SharedConfigManager
 //
 // PURPOSE:
-//  Class provies methods to manage shared configurations.
-//  It is also resposible for managing the shared config memory region.
+//  Class provides methods to manage shared configurations.
+//  It is also responsible for managing the shared config memory region.
 //
 // NOTES:
 //
@@ -45,11 +45,13 @@ public:
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
+    _Must_inspect_result_
     HRESULT CreateOrUpdateFrom(_Inout_ ComponentConfig<T>& componentConfig);
 
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
+    _Must_inspect_result_
     static HRESULT CreateOrUpdateFrom(
         _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
         _Inout_ ComponentConfig<T>& componentConfig);
@@ -57,11 +59,13 @@ public:
     // Locates the component config.
     //
     template<typename T>
+    _Must_inspect_result_
     HRESULT Lookup(ComponentConfig<T>& componentConfig);
 
     // Locates the component config.
     //
     template<typename T>
+    _Must_inspect_result_
     static HRESULT Lookup(
         _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
         _Inout_ ComponentConfig<T>& componentConfig);
@@ -69,6 +73,7 @@ public:
 private:
     MlosContext& m_mlosContext;
 
+    _Must_inspect_result_
     HRESULT RegisterSharedConfigMemoryRegion();
 
     // Shared memory region used to keep all the shared component configurations.

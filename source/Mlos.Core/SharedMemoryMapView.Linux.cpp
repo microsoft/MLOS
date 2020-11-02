@@ -136,14 +136,22 @@ HRESULT SharedMemoryMapView::OpenExisting(const char* const sharedMemoryMapName)
     }
 
     m_fdSharedMemory = shm_open(sharedMemoryMapName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-    if (m_fdSharedMemory == INVALID_FD_VALUE)
-    {
-        return HRESULT_FROM_ERRNO(errno);
-    }
 
     return MapMemoryView(0 /* memSize */);
 }
 
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::MapMemoryView
+//
+// PURPOSE:
+//  Creates a memory map.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+_Must_inspect_result_
 HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
 {
     HRESULT hr = S_OK;

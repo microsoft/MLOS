@@ -32,7 +32,7 @@ class InterProcessMlosContextInitializer
 public:
     InterProcessMlosContextInitializer() {}
 
-    _Check_return_
+    _Must_inspect_result_
     HRESULT Initialize();
 
     InterProcessMlosContextInitializer(_In_ InterProcessMlosContextInitializer&& initializer) noexcept;
@@ -77,6 +77,9 @@ public:
     InterProcessMlosContext(_In_ InterProcessMlosContextInitializer&&) noexcept;
 
     ~InterProcessMlosContext();
+
+    _Must_inspect_result_
+    HRESULT HandleFdRequests();
 
 private:
     InterProcessMlosContextInitializer m_contextInitializer;

@@ -20,7 +20,7 @@ namespace Mlos
 namespace Core
 {
 template<typename T>
-_Check_return_
+_Must_inspect_result_
 HRESULT SharedMemoryRegionView<T>::CreateNew(
     _In_z_ const char* const sharedMemoryMapName,
     _In_ size_t memSize) noexcept
@@ -37,7 +37,7 @@ HRESULT SharedMemoryRegionView<T>::CreateNew(
 }
 
 template<typename T>
-_Check_return_
+_Must_inspect_result_
 HRESULT SharedMemoryRegionView<T>::CreateOrOpen(
     _In_z_ const char* const sharedMemoryMapName,
     _In_ size_t memSize) noexcept
@@ -61,7 +61,7 @@ HRESULT SharedMemoryRegionView<T>::CreateOrOpen(
 }
 
 template<typename T>
-_Check_return_
+_Must_inspect_result_
 HRESULT SharedMemoryRegionView<T>::OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept
 {
     return SharedMemoryMapView::OpenExisting(sharedMemoryMapName);

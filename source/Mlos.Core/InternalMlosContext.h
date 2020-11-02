@@ -32,7 +32,7 @@ class InternalMlosContextInitializer
 public:
     InternalMlosContextInitializer() {}
 
-    _Check_return_
+    _Must_inspect_result_
     HRESULT Initialize();
 
     InternalMlosContextInitializer(_In_ InternalMlosContextInitializer&& initializer) noexcept;

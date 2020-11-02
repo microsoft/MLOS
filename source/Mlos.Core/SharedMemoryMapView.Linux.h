@@ -30,17 +30,20 @@ public:
 
     // Creates a shared memory view.
     //
-    _Check_return_
+    _Must_inspect_result_
     HRESULT CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept;
 
     // Creates or opens a shared memory view.
     //
-    _Check_return_
+    _Must_inspect_result_
     HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+
+    _Must_inspect_result_
+    HRESULT OpenExistingFromFileDescriptor(int sharedMemoryFd, size_t memSize) noexcept;
 
     // Opens already created shared memory view.
     //
-    _Check_return_
+    _Must_inspect_result_
     HRESULT OpenExisting(const char* const sharedMemoryMapName) noexcept;
 
     // Closes a shared memory view.
@@ -48,7 +51,7 @@ public:
     void Close();
 
 private:
-    _Check_return_
+    _Must_inspect_result_
     HRESULT MapMemoryView(size_t memSize) noexcept;
 
 public:
