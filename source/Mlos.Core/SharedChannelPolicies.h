@@ -75,7 +75,13 @@ struct InterProcessSharedChannelPolicy
 
     inline void NotifyExternalReader()
     {
-        m_notificationEvent.Signal();
+        HRESULT hr = m_notificationEvent.Signal();
+        if (FAILED(hr))
+        {
+            // In case of failue, terminate the process.
+            //
+            Mlos::Core::MlosPlatform::TerminateProcess();
+        }
     }
 
     // Called when reader thread is no longer processing the messages.
@@ -83,7 +89,13 @@ struct InterProcessSharedChannelPolicy
     //
     inline void WaitForFrame()
     {
-        m_notificationEvent.Wait();
+        HRESULT hr = m_notificationEvent.Wait();
+        if (FAILED(hr))
+        {
+            // In case of failue, terminate the process.
+            //
+            Mlos::Core::MlosPlatform::TerminateProcess();
+        }
     }
 
 public:

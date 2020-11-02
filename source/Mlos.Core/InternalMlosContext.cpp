@@ -43,7 +43,7 @@ InternalMlosContextInitializer::InternalMlosContextInitializer(_In_ InternalMlos
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InternalMlosContextInitializer::Initialize()
 {
     const size_t SharedMemorySize = 65536;

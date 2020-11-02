@@ -46,7 +46,7 @@ InterProcessMlosContextInitializer::InterProcessMlosContextInitializer(
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InterProcessMlosContextInitializer::Initialize()
 {
     // #TODO const as codegen, pass a config struct ?

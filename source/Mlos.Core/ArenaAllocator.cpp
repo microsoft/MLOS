@@ -32,7 +32,7 @@ namespace Internal
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InitializeArenaAllocator(
     _Inout_ ArenaAllocator& allocator,
     _Inout_ MemoryRegion& memoryRegion,
@@ -64,7 +64,7 @@ HRESULT InitializeArenaAllocator(
 //
 //  #TODO revisit thread safety
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT AllocateInMemoryRegion(
     _Inout_ ArenaAllocator& allocator,
     _In_ uint64_t size,

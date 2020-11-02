@@ -30,7 +30,7 @@ namespace Internal
 // NOTES:
 //  Lookup functions are implemented in SharedConfigDictionaryLookup<TProbingPolicy>.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InitializeSharedConfigDictionary(
     _Inout_ SharedConfigDictionary& sharedConfigDictionary,
     _Inout_ MemoryRegion& memoryRegion,
@@ -51,7 +51,7 @@ private:
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
-    _Check_return_
+    _Must_inspect_result_
     static HRESULT CreateOrUpdateFromInSharedConfigDictionary(
         _Inout_ SharedConfigDictionary& sharedConfigDictionary,
         _Inout_ ComponentConfig<T>& componentConfig);
@@ -59,7 +59,7 @@ private:
     // Locates the component config.
     //
     template<typename T>
-    _Check_return_
+    _Must_inspect_result_
     static HRESULT LookupInSharedConfigDictionary(
         _Inout_ SharedConfigDictionary& sharedConfigDictionary,
         _Inout_ ComponentConfig<T>& componentConfig);

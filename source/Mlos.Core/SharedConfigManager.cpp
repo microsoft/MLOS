@@ -60,6 +60,7 @@ SharedConfigManager::~SharedConfigManager()
 //
 // NOTES:
 //
+_Must_inspect_result_
 HRESULT SharedConfigManager::RegisterSharedConfigMemoryRegion()
 {
     // Create (allocate and register) shared config memory region.

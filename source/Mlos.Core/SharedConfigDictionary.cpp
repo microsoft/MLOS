@@ -32,7 +32,7 @@ namespace Internal
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InitializeSharedConfigDictionary(
     _Inout_ SharedConfigDictionary& sharedConfigDictionary,
     _Inout_ MemoryRegion& memoryRegion,

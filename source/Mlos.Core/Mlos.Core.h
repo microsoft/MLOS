@@ -53,8 +53,8 @@ typedef unsigned char byte;
 constexpr int32_t INVALID_FD_VALUE = -1;
 
 // Ignore some SAL annotations in Linux
-
-#define _Check_return_
+//
+#define _Must_inspect_result_ __attribute__((warn_unused_result))
 #define _Out_
 #define _In_
 #define _Inout_

@@ -34,7 +34,7 @@ namespace Internal
 //
 template<typename TProbingPolicy>
 template<typename T>
-_Check_return_
+_Must_inspect_result_
 HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::CreateOrUpdateFromInSharedConfigDictionary(
     _Inout_ SharedConfigDictionary& sharedConfigDictionary,
     _Inout_ ComponentConfig<T>& componentConfig)
@@ -128,7 +128,7 @@ HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::CreateOrUpdateFromInShared
 //
 template<typename TProbingPolicy>
 template<typename T>
-_Check_return_
+_Must_inspect_result_
 HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::LookupInSharedConfigDictionary(
     _Inout_ SharedConfigDictionary& sharedConfigDictionary,
     _Inout_ ComponentConfig<T>& componentConfig)
