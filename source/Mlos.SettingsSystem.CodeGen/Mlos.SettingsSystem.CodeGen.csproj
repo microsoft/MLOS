@@ -19,18 +19,13 @@
     <IsTool>true</IsTool>
     <!-- Since we did that, there are no items in the lib/ directory, so we need to ignore that warning. -->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
-    <!--
-      Alternatively, using PackAsTool would allow us to install this on the PATH with "dotnet tool install".
-      However, there's little utility in that without the build target rules to go with it.
-    <PackAsTool>true</PackAsTool>
-    <ToolCommandName>Mlos.SettingsSystem.CodeGen</ToolCommandName>
-    -->
   </PropertyGroup>
   <ItemGroup>
-    <!-- Provide the build rules in the package -->
-    <!-- TODO: -->
-    <Content Include="build/Mlos.SettingsSystem.CodeGen.targets" />
-    <Content Include="build/Mlos.SettingsSystem.CodeGen.props" />
+    <!-- Include our build rules in the package, but not in the TargetFramework specific path. -->
+    <None Include="build/$(PackageId).*">
+      <PackagePath>build/</PackagePath>
+      <Pack>true</Pack>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.6.0" />
