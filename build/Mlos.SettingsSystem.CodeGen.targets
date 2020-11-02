@@ -33,7 +33,6 @@
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_callbacks.h" />
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.h" />
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.h" />
-    <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_python.h" />
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.cs" />
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_deserialize.cs" />
     <MlosCodeGenOutput Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.cs" />
