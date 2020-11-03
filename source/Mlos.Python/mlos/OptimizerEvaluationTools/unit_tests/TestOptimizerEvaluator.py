@@ -121,6 +121,13 @@ class TestOptimizerEvaluator(unittest.TestCase):
         self.assertTrue(all(
             gof_df[col_name].is_monotonic for col_name in ["last_refit_iteration_number", "observation_count", "prediction_count"]))
 
+        with open(os.path.join(self.temp_dir, "optima_over_time.pickle"), "rb") as in_file:
+            unpickled_optima_over_time = pickle.load(in_file)
+
+        for key, optimum_over_time in unpickled_optima_over_time.items():
+            self.assertTrue(optimizer_evaluation_report.optima_over_time[key].get_dataframe().equals(optimum_over_time.get_dataframe()))
+
+
         with open(os.path.join(self.temp_dir, "optimizer_config.json")) as in_file:
             optimizer_config_json_str = in_file.read()
         deserialized_optimizer_config = Point.from_json(optimizer_config_json_str)
