@@ -65,6 +65,7 @@ class TestOptimizerEvaluator(unittest.TestCase):
         )
 
         optimizer_evaluation_report = optimizer_evaluator.evaluate_optimizer()
+        self.assertTrue(optimizer_evaluation_report.success)
 
         with pd.option_context('display.max_columns', 100):
             print(optimizer_evaluation_report.regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
@@ -162,9 +163,6 @@ class TestOptimizerEvaluator(unittest.TestCase):
 
         for _ in range(100):
             self.assertTrue(final_optimizer_from_disk.suggest() == final_optimizer_from_report.suggest())
-
-
-
 
 
     def test_named_configs(self):
