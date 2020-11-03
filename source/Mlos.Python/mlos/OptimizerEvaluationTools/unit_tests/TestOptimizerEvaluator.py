@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import concurrent.futures
+import json
 import os
 import pickle
 import unittest
@@ -14,7 +15,8 @@ from mlos.OptimizerEvaluationTools.OptimizerEvaluator import OptimizerEvaluator
 from mlos.OptimizerEvaluationTools.OptimizerEvaluatorConfigStore import optimizer_evaluator_config_store
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import objective_function_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import bayesian_optimizer_config_store
-from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType, GoodnessOfFitMetrics
+from mlos.Spaces import Point
 from mlos.Tracer import Tracer, traced
 
 
@@ -39,6 +41,7 @@ class TestOptimizerEvaluator(unittest.TestCase):
     def test_defaults(self):
         """Tests default optimizer configurations against default objective functions."""
         optimizer_evaluator_config = optimizer_evaluator_config_store.default
+        optimizer_evaluator_config.num_iterations = 100
 
         # We want to test this functionality so let's make sure that nobody accidentally disables it in the default config.
         #
@@ -71,8 +74,6 @@ class TestOptimizerEvaluator(unittest.TestCase):
                 print(optimum_over_time.get_dataframe().tail(10))
                 print("#####################################################################################################")
 
-        optimizer_evaluation_report.write_to_disk(target_folder=self.temp_dir)
-
         # Now let's do it again with the unpickled optimizer.
         #
         unpickled_objective_function = pickle.loads(optimizer_evaluation_report.pickled_objective_function_initial_state)
@@ -91,6 +92,72 @@ class TestOptimizerEvaluator(unittest.TestCase):
                 print(optimum_name)
                 print(optimum_over_time.get_dataframe().tail(10))
                 print("#####################################################################################################")
+
+
+
+        optimizer_evaluation_report.write_to_disk(target_folder=self.temp_dir)
+
+        # Validate that all files were created as expected.
+        #
+        with open(os.path.join(self.temp_dir, "execution_info.json")) as in_file:
+            execution_info = json.load(in_file)
+        self.assertTrue(execution_info["success"])
+        self.assertTrue(execution_info["num_optimization_iterations"] == optimizer_evaluator_config.num_iterations)
+        self.assertTrue(execution_info["evaluation_frequency"] == optimizer_evaluator_config.evaluation_frequency)
+        self.assertTrue(execution_info["exception"] is None)
+        self.assertTrue(execution_info["exception_stack_trace"] is None)
+
+        with open(os.path.join(self.temp_dir, "execution_trace.json")) as in_file:
+            trace = json.load(in_file)
+        self.assertTrue(len(trace) > 100)
+        self.assertTrue(all(key in trace[0] for key in ["ts", "name", "ph", "cat", "pid", "tid", "args"]))
+
+        with open(os.path.join(self.temp_dir, "goodness_of_fit.pickle"), "rb") as in_file:
+            unpickled_gof = pickle.load(in_file)
+
+        gof_df = unpickled_gof.get_goodness_of_fit_dataframe()
+        self.assertTrue(len(gof_df.index) > 0)
+        self.assertTrue(all((col_name in gof_df.columns.values or col_name == "data_set_type") for col_name in GoodnessOfFitMetrics._fields))
+        self.assertTrue(all(
+            gof_df[col_name].is_monotonic for col_name in ["last_refit_iteration_number", "observation_count", "prediction_count"]))
+
+        with open(os.path.join(self.temp_dir, "optimizer_config.json")) as in_file:
+            optimizer_config_json_str = in_file.read()
+        deserialized_optimizer_config = Point.from_json(optimizer_config_json_str)
+        self.assertTrue(deserialized_optimizer_config == optimizer_config)
+
+        with open(os.path.join(self.temp_dir, "objective_function_config.json")) as in_file:
+            objective_function_json_str = in_file.read()
+        deserialized_objective_function_config = Point.from_json(objective_function_json_str)
+        self.assertTrue(deserialized_objective_function_config == objective_function_config)
+
+        objective_function_pickle_file_names = ["objective_function_final_state.pickle", "objective_function_initial_state.pickle"]
+        for file_name in objective_function_pickle_file_names:
+            with open(os.path.join(self.temp_dir, file_name), "rb") as in_file:
+                unpickled_objective_function = pickle.load(in_file)
+                self.assertTrue(unpickled_objective_function.objective_function_config == objective_function_config.polynomial_objective_config)
+
+                for _ in range(10):
+                    random_pt = unpickled_objective_function.parameter_space.random()
+                    self.assertTrue(unpickled_objective_function.evaluate_point(random_pt) in unpickled_objective_function.output_space)
+
+        # Lastly let's double check the pickled optimizers
+        #
+        pickled_optimizers_dir = os.path.join(self.temp_dir, "pickled_optimizers")
+        num_pickled_optimizers = len([name for name in os.listdir(pickled_optimizers_dir) if os.path.isfile(os.path.join(pickled_optimizers_dir, name))])
+        self.assertTrue(num_pickled_optimizers == 11)
+
+        # Finally, let's make sure that the optimizers serialized to disk are usable.
+        #
+        with open(os.path.join(pickled_optimizers_dir, "99.pickle"), "rb") as in_file:
+            final_optimizer_from_disk = pickle.load(in_file)
+        final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
+
+        for _ in range(100):
+            self.assertTrue(final_optimizer_from_disk.suggest() == final_optimizer_from_report.suggest())
+
+
+
 
 
     def test_named_configs(self):
@@ -134,6 +201,7 @@ class TestOptimizerEvaluator(unittest.TestCase):
 
             for future in done_futures:
                 optimizer_evaluation_report = future.result()
+                self.assertTrue(optimizer_evaluation_report.success)
                 mlos.global_values.tracer.trace_events.extend(optimizer_evaluation_report.execution_trace)
 
                 with pd.option_context('display.max_columns', 100):

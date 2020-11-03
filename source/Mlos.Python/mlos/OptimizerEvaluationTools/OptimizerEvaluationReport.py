@@ -62,7 +62,6 @@ class OptimizerEvaluationReport:
         self.optima_over_time = optima_over_time
         self.execution_trace = execution_trace
 
-    @trace()
     def add_pickled_optimizer(self, iteration: int, pickled_optimizer: bytes):
         assert iteration >= 0
         self.pickled_optimizers_over_time[iteration] = pickled_optimizer
@@ -124,7 +123,7 @@ class OptimizerEvaluationReport:
                 'success': self.success,
                 'num_optimization_iterations': self.num_optimization_iterations,
                 'evaluation_frequency': self.evaluation_frequency,
-                'exception': str(self.exception),
+                'exception': str(self.exception) if self.exception is not None else None,
                 'exception_stack_trace': self.exception_traceback
             }
             json.dump(execution_info_dict, out_file, indent=2)
