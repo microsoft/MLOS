@@ -9,7 +9,7 @@ from typing import Dict, List
 from mlos.OptimizerEvaluationTools.OptimumOverTime import OptimumOverTime
 from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
 from mlos.Spaces import Point
-from mlos.Tracer import trace, Tracer
+from mlos.Tracer import Tracer
 
 
 class OptimizerEvaluationReport:
