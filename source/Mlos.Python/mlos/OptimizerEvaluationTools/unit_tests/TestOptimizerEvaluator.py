@@ -94,13 +94,17 @@ class TestOptimizerEvaluator(unittest.TestCase):
 
 
     def test_named_configs(self):
-        """Tests all named optimizer configurations against all named objective functions."""
+        """Tests named optimizer configurations against named objective functions.
+
+        It is prohibitively expensive to test the entire cross product so we test only its subset, but in such a way that
+        each configuration will be tested at least once.
+        """
         optimizer_named_configs = bayesian_optimizer_config_store.list_named_configs()
         num_optimizer_configs = len(optimizer_named_configs)
         objective_function_named_configs = objective_function_config_store.list_named_configs()
         num_objective_function_configs = len(objective_function_named_configs)
 
-        num_tests = 7
+        num_tests = max(num_optimizer_configs, num_objective_function_configs)
 
         with traced(scope_name="parallel_tests"), concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
             outstanding_futures = set()
