@@ -24,7 +24,8 @@ from mlos.Tracer import trace, traced, Tracer
 class OptimizerEvaluator:
     """Evaluates optimizers against objective functions.
 
-    This class are responsible for:
+    This class is responsible for:
+
         1. instantiating an optimizer
         2. instantiating an objective function
         3. launching an optimizer against that objective function
