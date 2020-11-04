@@ -68,7 +68,8 @@ class OptimizerEvaluator:
             #
             assert False, "A valid objective_function XOR a valid objective_function_config must be specified"
 
-        # Let's get the optimzier and its config assigned to self's fields.
+        # Let's get the optimizer and its config assigned to self's fields.
+
         #
         if (optimizer_config is not None) and (optimizer is None):
             assert optimizer_config in bayesian_optimizer_config_store.parameter_space
