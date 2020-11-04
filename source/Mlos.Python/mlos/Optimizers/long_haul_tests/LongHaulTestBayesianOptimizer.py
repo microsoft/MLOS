@@ -307,8 +307,8 @@ class TestBayesianOptimizer(unittest.TestCase):
             self.assertLessEqual(sign * best_objective['function_value'], -5.5)
 
     def validate_optima(self, optimizer):
-        if not optimizer.get_optimizer_convergence_state().surrogate_model_fit_state.fitted:
-            # Computing prediction based optima should fail if the surrogate model is not fitted.
+        if not optimizer.trained:
+            # Computing prediction based optima should fail if the surrogate model is not trained.
             #
             with self.assertRaises(ValueError):
                 optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)

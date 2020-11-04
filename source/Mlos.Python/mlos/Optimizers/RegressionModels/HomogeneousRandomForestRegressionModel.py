@@ -11,7 +11,6 @@ from mlos.Spaces import Dimension, Hypergrid, Point, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters import HierarchicalToFlatHypergridAdapter
 from mlos.Tracer import trace
 from mlos.Logger import create_logger
-from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.DecisionTreeRegressionModel import DecisionTreeRegressionModel
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
@@ -60,7 +59,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
             model_config=model_config,
             input_space=input_space,
             output_space=output_space,
-            fit_state=HomogeneousRandomForestFitState(input_space=input_space, output_space=output_space)
+            fit_state=HomogeneousRandomForestFitState()
         )
 
         self._input_space_adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.input_space)
@@ -72,6 +71,11 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
         self._decision_trees = []
         self._create_estimators()
+        self._trained = False
+
+    @property
+    def trained(self):
+        return self._trained
 
     @trace()
     def _create_estimators(self):
@@ -189,7 +193,6 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 )
             else:
                 bootstrapped_observations_for_tree_training = observations_for_tree_training.copy()
-            observations_for_tree_validation = non_null_observations.loc[non_null_observations.index.difference(observations_for_tree_training.index)]
             num_selected_observations = len(observations_for_tree_training.index)
             if tree.should_fit(num_selected_observations):
                 bootstrapped_targets_for_tree_training = targets_for_non_null_observations.loc[bootstrapped_observations_for_tree_training.index]
@@ -199,18 +202,9 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                     target_values_pandas_frame=bootstrapped_targets_for_tree_training,
                     iteration_number=len(feature_values_pandas_frame.index)
                 )
-                targets_for_tree_training = targets_for_non_null_observations.loc[observations_for_tree_training.index]
-                tree.compute_goodness_of_fit(features_df=observations_for_tree_training, target_df=targets_for_tree_training, data_set_type=DataSetType.TRAIN)
-                if not observations_for_tree_validation.empty:
-                    targets_for_tree_validation = targets_for_non_null_observations.loc[observations_for_tree_validation.index]
-                    tree.compute_goodness_of_fit(
-                        features_df=observations_for_tree_validation,
-                        target_df=targets_for_tree_validation,
-                        data_set_type=DataSetType.VALIDATION
-                    )
 
         self.last_refit_iteration_number = max(tree.last_refit_iteration_number for tree in self._decision_trees)
-        self.fitted = any(tree.fitted for tree in self._decision_trees)
+        self._trained = any(tree.trained for tree in self._decision_trees)
 
     @trace()
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
@@ -224,7 +218,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         """
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
-        feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame)
+        feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
 
         # dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
