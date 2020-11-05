@@ -42,6 +42,12 @@
     Combine the user provided settings registry definitions with the C# code gen output
     we created from them when compiling the output settings registry assembly dll.
   -->
+  <PropertyGroup Label="MlosSettingsRegistryCompileSettings">
+    <!-- TODO? Unnecessary?
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+    -->
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="@(MlosSettingsRegistryDefinition -> '%(FullPath)')" />
     <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.cs" />

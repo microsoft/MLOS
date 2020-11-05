@@ -1,39 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- TODO: This is currently just a copy from Mlos.UnitTest and needs to be fixed up to use the Mlos.SettingsSystem.CodeGen nuget -->
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildThisFileDirectory)..\..\..\build\Mlos.Common.props" />
-  <PropertyGroup>
-    <!--
-      Note: Change this to a unique uuid/guid when creating a new project.
-    -->
+<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
+  <!-- In a large project some properties will be reused across components. -->
+  <Import Project="$(MSBuildProjectDirectory)/Common.props" />
+  <PropertyGroup Label="GeneralProjectProperties">
+    <!-- Note: Change this to a unique uuid/guid when creating a new project. -->
     <ProjectGuid>{7747149E-BB3B-4F9A-8F1B-D94A062B492F}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mlos.UnitTest.SettingsRegistry</RootNamespace>
-    <AssemblyName>Mlos.UnitTest.SettingsRegistry</AssemblyName>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+    <RootNamespace>ExternalIntegrationExample</RootNamespace>
+    <AssemblyName>ExternalIntegrationExample.SettingsRegistry</AssemblyName>
   </PropertyGroup>
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <PropertyGroup Label="MlosCodeGenProperties">
+    <MlosSettingsSystemCodeGenOutputDirectory>$(MlosSettingsSystemCodeGenOutputBaseDir)/ExternalIntegrationExample</MlosSettingsSystemCodeGenOutputDirectory>
+  </PropertyGroup>
+  <!-- TODO:
+    Just for connecting the testing example:
+    - add a reference to the Pack target for that package.
+    - add the Mlos output package dir to the nuget sources
+    - use another import for that for now
+  -->
   <ItemGroup>
-    <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" />
-    <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
+    <!-- Pull in the Mlos codegen package tool (any version for now) -->
+    <!-- TODO: Make sure it doesn't add any build dependencies -->
+    <PackageReference Include="Mlos.SettingsSystem.CodeGen" Version="*-*" />
   </ItemGroup>
-  <PropertyGroup>
-    <SettingsSystemCodeGenOutputPath>Mlos.UnitTest</SettingsSystemCodeGenOutputPath>
-  </PropertyGroup>
-  <ItemGroup Label="SettingsRegistryDefs">
-    <SettingsRegistryDef Include="Codegen\AssemblyInfo.cs" />
-    <SettingsRegistryDef Include="Codegen\DemoComponentConfig.cs" />
-    <SettingsRegistryDef Include="Codegen\UpdateConfigTestMessage.cs" />
-    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry1.cs" />
-    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry2.cs" />
-    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry3.cs" />
-    <SettingsRegistryDef Include="Codegen\TestSettingsRegistry4.cs" />
+  <!--
+    List data structures for the settings and messages to be used for code generation.
+  -->
+  <ItemGroup Label="MlosSettingsRegistryDefinitions">
+    <MlosSettingsRegistryDefinition Include="Codegen/AssemblyInfo.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/DemoComponentConfig.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/UpdateConfigTestMessage.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry1.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry2.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry3.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry4.cs" />
   </ItemGroup>
+  <!--
+    Add any additional .cs files necessary for compilation for the output assembly
+    to use when loading in the Mlos.Agent.Server.Tool.
+    (e.g. for some initialization code at registration/load time).
+  -->
   <ItemGroup>
     <Compile Include="AssemblyInitializer.cs" />
   </ItemGroup>
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
-  <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />
 </Project>
