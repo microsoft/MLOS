@@ -1,1 +1,27 @@
-<!-- TODO: -->
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="MlosSettingsSystemCodeGenProps">
+    <!--
+      With multiple SettingsProviders generated for a large project, we may need to name them differently for disambiguation.
+      This path property is expected to be set by the including project referencing this package.
+      On the C++ consumer side, it is also the path to add to the cmake target_include_directories().
+      We recommend using a BaseDir path combined with the ProjectName for this path.
+
+      TODO: Add a reasonable default here.  Maybe something in the source tree? (*yuck*)
+    -->
+    <MlosSettingsSystemCodeGenOutputDirectory Condition="'$(MlosSettingsSystemCodeGenOutputDirectory)' == ''"></MlosSettingsSystemCodeGenOutputDirectory>
+
+    <!--
+      The desired basename of the codegen output files.
+    -->
+    <MlosSettingsSystemCodeGenOutputBasename Condition="'$(MlosSettingsSystemCodeGenOutputBasename)' == ''">SettingsProvider_gen</MlosSettingsSystemCodeGenOutputBasename>
+
+    <!--
+      Optional: The desired output location for the set of SettingsRegistry assembly dlls.
+      (Making this a common output directory can make it easier to interact with the Mlos.Agent.Server, for instance)
+
+      TODO: Add a reasonable default here?  Maybe something in the source tree? (*yuck*)
+    -->
+    <MlosSettingsRegistryAssemblyOutputDirectory Condition="'$(MlosSettingsRegistryAssemblyOutputDirectory)' == ''"></MlosSettingsRegistryAssemblyOutputDirectory>
+  </PropertyGroup>
+</Project>
