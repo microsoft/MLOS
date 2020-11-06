@@ -28,8 +28,36 @@
   <!-- Also create a .snupkg along side the package for eventual publishing of symbols to nuget.org -->
   <PropertyGroup>
     <IncludeSymbols>true</IncludeSymbols>
+    <!--
+      When this property is omitted disabled, we a separate .symbols.nupkg file is created
+      that includes both the .dll and .pdb.
+    -->
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <!-- Include the .pdb symbols file in the standard package to make debugging easier. -->
+  <PropertyGroup>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
+  <PropertyGroup>
+<!-- TODO: Remove this (or fix it's dependencies) - it forces a Build target dependency so doesn't work with NoBuild. -->
+    <!--Include Project References output -->
+    <!--
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
+    -->
+  </PropertyGroup>
+
+<!-- TODO: Remove this (or fix it's dependencies) - it forces a Build target dependency so doesn't work with NoBuild. -->
+  <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
+    <ItemGroup>
+      <!--Include DLLs of Project References -->
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
+
+      <!--Include PDBs of Project References -->
+      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->Replace('.dll', '.pdb'))"/>
+    </ItemGroup>
+  </Target>
 
   <!--
     Note: PackTask alters the PackageVersion property slightly when writing the file,
