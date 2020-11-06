@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="CommonComponentProjectSettings">
-    <!-- Declare the target framework for all SettingsRegistry projects. -->
-    <TargetFramework>netcoreapp3.1</TargetFramework>
 
-    <!-- FIXME? Can we specify this in the codegen package's build/*.targets? -->
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
+  <!--
+    Set some Mlos codegen related properties that should be common for
+    all SettingsRegistry projects for this external system example.
+  -->
+  <PropertyGroup Label="CommonComponentProjectMlosSettings">
     <!--
       Define the base directory of the codegen output.
 
-      Here we specify it relative to this file for self-container demonstration purposes, though likely it should be
+      Here we specify it relative to this file for self-contained demonstration purposes,
+      though likely it should be in some shared location for all components to use.
 
-      Note: This should likely match the cmake include_directory() specficiation so that the
+      Note: This should match the cmake include_directory() specficiation so that the
       output SettingsProvider_gen_base.h and related files can be found.
     -->
-    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildThisFileDirectory)/../../../out/Mlos.CodeGen.out/$(Configuration)</MlosSettingsSystemCodeGenOutputBaseDir>
+    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildThisFileDirectory/../Mlos.CodeGen.out/$(Configuration)</MlosSettingsSystemCodeGenOutputBaseDir>
 
     <!--
       Specify the version of the Mlos.SettingsSystem.* nuget packages to use.
@@ -29,11 +27,43 @@
     <MlosSettingsSystem_PackageVersion>*-*</MlosSettingsSystem_PackageVersion>
   </PropertyGroup>
 
+  <!-- Set some other standard .NET.Sdk properties for all projects. -->
+  <PropertyGroup Label="CommonComponentProjectNetCoreSettings">
+    <!-- Declare the target framework for all SettingsRegistry projects. -->
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
   <!-- TODO: Optional: Configure stylecop analyzers. -->
 
   <!--
     For local testing, use a locally built package instead of the one pulled from
     NOTE: this section should be *removed* in your own examples.
+  -->
+  <PropertyGroup Label="AdjustNugetSourcesAndTargetsForLocalTesting">
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)/../../../out/dotnet/test/nuget/packages</RestorePackagesPath>
+    <MlosLocalPkgOutput>$(MSBuildThisFileDirectory)/../../../target/pkg/$(Configuration)</MlosLocalPkgOutput>
+    <RestoreSources>$(MlosLocalPkgOutput);$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
+  </PropertyGroup>
+  <!-- FIXME: This is being run twice? Add a canary property or file? -->
+  <Target Name="ForceMlosPackageRebuildRestore" Condition="'$(RestoreForce)' == 'true'" BeforeTargets="PackDependenciesForLocalTesting">
+    <!--
+      Delete the restored Mlos packages whenever doing local dev/test/rebuilds to force a restore
+      even when the version changes (e.g. due to no new commits, just edits).
+    -->
+    <ItemGroup>
+      <RestoredMlosPackageDirsToRemove Include="$([System.IO.Directory]::GetDirectories('$(RestorePackagesPath)', 'mlos.*'))" />
+      <MlosPackagesToRemove Include="$(MlosLocalPkgOutput)/Mlos.SettingsSystem.Attributes.*nupkg" />
+      <MlosPackagesToRemove Include="$(MlosLocalPkgOutput)/Mlos.SettingsSystem.CodeGen.*nupkg" />
+      <MlosPackagesToRemove Include="$(MlosLocalPkgOutput)/Mlos.NetCore.*nupkg" />
+    </ItemGroup>
+    <Message Text="Removing previously restored Mlos packages: @(RestoredMlosPackageDirsToRemove)" Importance="high" Condition="@(RestoredMlosPackageDirsToRemove->Count()) != 0" />
+    <RemoveDir Directories="@(RestoredMlosPackageDirsToRemove)" />
+    <Message Text="Removing old Mlos packages: @(MlosPackagesToRemove)" Importance="high" Condition="@(MlosPackagesToRemove->Count()) != 0" />
+    <Delete Files="@(MlosPackageFilesToRemove)" />
+  </Target>
+  <!-- TODO:
+    Rather than always generating these, first check to see if a property was set asking for that.
+    Else, just check to see if they exist first and then reference them.
   -->
   <Target Name="PackDependenciesForLocalTesting" BeforeTargets="BeforeResolveReferences;Restore">
     <ItemGroup Label="ProjectDependenciesForLocalTesting">
@@ -41,10 +71,14 @@
       <LocalPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
       <LocalPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.NetCore/Mlos.NetCore.csproj" />
     </ItemGroup>
-    <MSBuild Projects="@(LocalPackProjectDependency)" Targets="Build;Pack" RunEachTargetSeparately="false" Properties="Configuration=$(Configuration);RestoreForce=$(RestoreForce);RestoreNoCache=$(RestoreNoCache);BuildProjectReferences=false" />
+    <!-- These projects (in this order) build upon one another so we don't need to repeat the dependent builds each time. -->
+    <PropertyGroup>
+      <LocalPackProjectTargets>Pack</LocalPackProjectTargets>
+      <!--
+      -->
+      <LocalPackProjectTargets Condition="'$(RestoreForce)' == 'true'">Restore;$(LocalPackProjectTargets)</LocalPackProjectTargets>
+    </PropertyGroup>
+    <MSBuild Projects="@(LocalPackProjectDependency)" Targets="$(LocalPackProjectTargets)" RunEachTargetSeparately="false"
+      Properties="Configuration=$(Configuration);RestoreForce=$(RestoreForce);NoBuild=true;BuildProjectReferences=false" />
   </Target>
-  <PropertyGroup Label="AdjustNugetSourcesAndTargetsForLocalTesting">
-    <RestorePackagesPath>$(MSBuildThisFileDirectory)/../../../out/dotnet/test/nuget/packages</RestorePackagesPath>
-    <RestoreSources>$(MSBuildThisFileDirectory)/../../../target/pkg/$(Configuration);$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
-  </PropertyGroup>
 </Project>

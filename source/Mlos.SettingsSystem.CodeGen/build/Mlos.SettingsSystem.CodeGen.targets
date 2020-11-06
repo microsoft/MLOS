@@ -8,6 +8,14 @@
     See TODO-FIXME.csproj for example usage.
   -->
 
+  <PropertyGroup>
+    <!--
+      A semi-colon separated list of supported TargetFrameworks.
+      (for error checking target tasks below)
+    -->
+    <MlosSupportedTargetFrameworks>;netcoreapp3.1;</MlosSupportedTargetFrameworks>
+  </PropertyGroup>
+
   <!-- Set path to Codegen executable. -->
   <PropertyGroup>
     <!--
@@ -42,40 +50,11 @@
     Combine the user provided settings registry definitions with the C# code gen output
     we created from them when compiling the output settings registry assembly dll.
   -->
-  <PropertyGroup Label="MlosSettingsRegistryCompileSettings">
-    <!-- TODO? Unnecessary?
-    <UseNETCoreGenerator>true</UseNETCoreGenerator>
-    -->
-    <!-- FIXME: This doesn't work when specified here -->
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!-- FIXME: This doesn't work when specified here -->
-    <!-- Disable .NET.Sdk behavior of including all *.cs files within the project's directory by default. -->
-    <EnableDefaultItems>false</EnableDefaultItems>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="@(MlosSettingsRegistryDefinition -> '%(FullPath)')" />
     <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_base.cs" />
     <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_deserialize.cs" />
     <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.cs" />
-  </ItemGroup>
-
-  <!-- When compiling, be sure to reference a few other nugets by default -->
-  <PropertyGroup Label="LookupNugetPackageVersion">
-    <!-- First, lookup the nuget package version in use so that we pull the same version for the other dependencies. -->
-    <MlosCodeGenPackageVersion Condition="'$(MlosCodeGenPackageVersion)' == ''">*-*</MlosCodeGenPackageVersion>
-  </PropertyGroup>
-  <!-- Lookup the current nuget package version -->
-  <!-- FIXME: An alternative to that would be to do a sed/replace on a PACKAGE_VERSION string in this file prior to including it in the output package -->
-  <Target Name="LookupCurrentMlosCodeGenPackageVersion" BeforeTargets="Build" AfterTargets="BeforeBuild"> <!-- FIXME: This should be before restore -->
-    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)/../mlos.settingssystem.codegen.nuspec" Query="/package/metadata/version/text()">
-      <Output TaskParameter="Result" ItemName="MlosCodeGenPackageVersions" />
-    </XmlPeek>
-    <Message Text="MlosCodeGenPackageVersions: @(MlosCodeGenPackageVersions)" Importance="high" />
-  </Target>
-  <ItemGroup>
-    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="*-*" /><!-- FIXME: Specify the same version as this package. -->
-    <PackageReference Include="Mlos.NetCore" Version="*-*" /><!-- FIXME -->
   </ItemGroup>
 
   <!-- Codegen using internal compiler in the Mlos.SettingsSystem.CodeGen tool -->
@@ -88,16 +67,24 @@
     <BuildDependsOn>$(BuildDependsOn);MlosSettingsSystemCodeGen</BuildDependsOn>
   </PropertyGroup>
   <!--
+    Don't check the input file timestamps against the outputs for now.
+    We have separate logic in the codegen tool to only overwrite output files when their content changes.
   <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Inputs="@(MlosSettingsRegistryDefinition);$(MlosSettingsSystemCodeGenDll)" Outputs="@(MlosSettingsSystemCodeGenOutput)">
   -->
   <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Outputs="@(MlosSettingsSystemCodeGenOutput)">
-    <PropertyGroup>
-      <MlosSettingsSystemCodeGenInputArgs>@(MlosSettingsRegistryDefinition -> '--input-cs=&quot;%(FullPath)&quot;', ' ')</MlosSettingsSystemCodeGenInputArgs>
-    </PropertyGroup>
+    <!-- Perform some error checking. -->
     <Message Text="Running Mlos.SettingsSystem.CodeGen on '@(MlosSettingsRegistryDefinition)'" Importance="high" />
     <Error Text="MlosSettingsSystemCodeGenOutputDirectory is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsSystemCodeGenAbsoluteOutputPath)' == ''" />
     <Error Text="MlosSettingsSystemCodeGenOutputBasename is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsSystemCodeGenOutputBasename)' == ''" />
     <Error Text="No MlosSettingsRegistryDefinition Items found for '$(MSBuildProjectFile)' project." Condition="'@(MlosSettingsRegistryDefinition->Count())' == 0" />
+    <Error Text="Unsupported TargetFramework ('$(TargetFramework)') for '$(MSBuildProjectFile)' project.  Mlos.SettingsSystem.CodeGen only supports the following TargetFrameworks: $(MlosSupportedTargetFrameworks)" Condition="$(MlosSupportedTargetFrameworks.Contains(';$(TargetFramework);')) == false" />
+
+    <!-- Construct the arguments. -->
+    <PropertyGroup>
+      <MlosSettingsSystemCodeGenInputArgs>@(MlosSettingsRegistryDefinition -> '--input-cs=&quot;%(FullPath)&quot;', ' ')</MlosSettingsSystemCodeGenInputArgs>
+    </PropertyGroup>
+
+    <!-- Run the tool. -->
     <Exec ConsoleToMsBuild="true" Condition="'$(SkipMlosSettingsSystemCodeGen)' != 'true'" Command="$(MlosSettingsSystemCodeGenExe) $(MlosSettingsSystemCodeGenInputArgs) --output-path=&quot;$(MlosSettingsSystemCodeGenAbsoluteOutputPath)&quot; --output-basename=$(MlosSettingsSystemCodeGenOutputBasename)">
       <Output TaskParameter="ConsoleOutput" ItemName="OutputOfExec" />
     </Exec>

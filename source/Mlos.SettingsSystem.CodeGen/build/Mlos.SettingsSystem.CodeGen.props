@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Label="MlosSettingsSystemCodeGenProps">
+  <!-- A set of properties that the PackageReference-ing project should set. -->
+  <PropertyGroup Label="MlosSettingsSystemCodeGenProjectProps">
     <!--
       With multiple SettingsProviders generated for a large project, we may need to name them differently for disambiguation.
       This path property is expected to be set by the including project referencing this package.
@@ -23,5 +24,39 @@
       TODO: Add a reasonable default here?  Maybe something in the source tree? (*yuck*)
     -->
     <MlosSettingsRegistryAssemblyOutputDirectory Condition="'$(MlosSettingsRegistryAssemblyOutputDirectory)' == ''"></MlosSettingsRegistryAssemblyOutputDirectory>
+  </PropertyGroup>
+
+  <!-- When compiling, be sure to reference a few other nugets by default -->
+  <PropertyGroup Label="LookupNugetPackageVersion">
+    <!-- First, lookup the nuget package version in use so that we pull the same version for the other dependencies. -->
+    <MlosCodeGenPackageVersion Condition="'$(MlosCodeGenPackageVersion)' == ''">*-*</MlosCodeGenPackageVersion>
+  </PropertyGroup>
+  <!-- Lookup the current nuget package version -->
+  <!-- FIXME: An alternative to that would be to do a sed/replace on a PACKAGE_VERSION string in this file prior to including it in the output package -->
+  <Target Name="LookupCurrentMlosCodeGenPackageVersion" BeforeTargets="Build" AfterTargets="BeforeBuild"> <!-- FIXME: This should be before restore -->
+    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)/../mlos.settingssystem.codegen.nuspec"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd'/&gt;"
+             Query="/ns:package/ns:metadata/ns:version/text()">
+      <Output TaskParameter="Result" PropertyName="MlosCodeGenPackageVersion" />
+    </XmlPeek>
+    <Message Text="MlosCodeGenPackageVersion: $(MlosCodeGenPackageVersion)" Importance="high" />
+  </Target>
+  <ItemGroup>
+    <!-- The settings registry definitions will reference the Mlos.SettingsSystem.Attributes. -->
+    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="$(MlosCodeGenPackageVersion)" />
+    <!-- Some of the codegen output has "using Mlos.Core;" statements. -->
+    <PackageReference Include="Mlos.NetCore" Version="$(MlosCodeGenPackageVersion)" />
+  </ItemGroup>
+
+  <!-- Adjust some compilation and NET.Sdk .csproj settings. -->
+  <PropertyGroup Label="MlosSettingsRegistryCompileSettings">
+    <!-- TODO? Unnecessary?
+    <UseNETCoreGenerator>true</UseNETCoreGenerator>
+    -->
+    <!-- Our codegen output needs to interface with raw memory buffers for interop with C++. -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Disable .NET.Sdk behavior of including all *.cs files within the project's directory by default. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <!--EnableDefaultItems>false</EnableDefaultItems-->
   </PropertyGroup>
 </Project>
