@@ -17,15 +17,18 @@
   <!-- Pull in the Mlos codegen package tool and its build target rules. -->
   <ItemGroup>
     <!-- TODO: Make sure it doesn't add any build dependencies -->
+    <!--
+      TODO: See if we can add this, and the Mlos.NetCore dependency through the CodeGen package.
+    -->
     <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="$(MlosSettingsSystem_PackageVersion)" />
     <PackageReference Include="Mlos.SettingsSystem.CodeGen" Version="$(MlosSettingsSystem_PackageVersion)" />
-    <!--DotNetCliToolReference Include="Mlos.SettingsSystem.CodeGen" Version="$(MlosSettingsSystem_PackageVersion)" /-->
+    <PackageReference Include="Mlos.NetCore" Version="$(MlosSettingsSystem_PackageVersion)" />
   </ItemGroup>
   <!-- List data structures for the settings and messages to be used for code generation. -->
   <ItemGroup Label="MlosSettingsRegistryDefinitions">
-    <MlosSettingsRegistryDefinition Include="Codegen/AssemblyInfo.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/SmartComponentExampleConfig.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/SmartComponentExampleMessages.cs" />
+    <MlosSettingsRegistryDefinition Include="CodeGen/AssemblyInfo.cs" />
+    <MlosSettingsRegistryDefinition Include="CodeGen/SmartComponentExampleConfig.cs" />
+    <MlosSettingsRegistryDefinition Include="CodeGen/SmartComponentExampleMessages.cs" />
   </ItemGroup>
   <!--
     Add any additional .cs files necessary for compilation for the output assembly

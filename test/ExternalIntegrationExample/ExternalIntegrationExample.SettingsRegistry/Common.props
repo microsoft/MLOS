@@ -7,6 +7,7 @@
     <!-- FIXME? Can we specify this in the codegen package's build/*.targets? -->
     <EnableDefaultItems>false</EnableDefaultItems>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!--
       Define the base directory of the codegen output.
@@ -16,7 +17,7 @@
       Note: This should likely match the cmake include_directory() specficiation so that the
       output SettingsProvider_gen_base.h and related files can be found.
     -->
-    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildThisFileDirectory)/../../../out/Mlos.CodeGen.out</MlosSettingsSystemCodeGenOutputBaseDir>
+    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildThisFileDirectory)/../../../out/Mlos.CodeGen.out/$(Configuration)</MlosSettingsSystemCodeGenOutputBaseDir>
 
     <!--
       Specify the version of the Mlos.SettingsSystem.* nuget packages to use.
@@ -28,6 +29,8 @@
     <MlosSettingsSystem_PackageVersion>*-*</MlosSettingsSystem_PackageVersion>
   </PropertyGroup>
 
+  <!-- TODO: Optional: Configure stylecop analyzers. -->
+
   <!--
     For local testing, use a locally built package instead of the one pulled from
     NOTE: this section should be *removed* in your own examples.
@@ -36,8 +39,9 @@
     <ItemGroup Label="ProjectDependenciesForLocalTesting">
       <LocalPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
       <LocalPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
+      <LocalPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.NetCore/Mlos.NetCore.csproj" />
     </ItemGroup>
-    <MSBuild Projects="@(LocalPackProjectDependency)" Targets="Build;Pack" RunEachTargetSeparately="false" Properties="Configuration=$(Configuration);RestoreForce=$(RestoreForce);RestoreNoCache=$(RestoreNoCache);" />
+    <MSBuild Projects="@(LocalPackProjectDependency)" Targets="Build;Pack" RunEachTargetSeparately="false" Properties="Configuration=$(Configuration);RestoreForce=$(RestoreForce);RestoreNoCache=$(RestoreNoCache);BuildProjectReferences=false" />
   </Target>
   <PropertyGroup Label="AdjustNugetSourcesAndTargetsForLocalTesting">
     <RestorePackagesPath>$(MSBuildThisFileDirectory)/../../../out/dotnet/test/nuget/packages</RestorePackagesPath>

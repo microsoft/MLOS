@@ -23,18 +23,18 @@
   </PropertyGroup>
   <!-- Since we can't use PackAsTool but want to be able to run the packaged version as one we need to include it's dependencies. -->
   <PropertyGroup>
-    <GenerateNuspecDependsOn>IncludeDependentAssembliesInToolsPackage;$(GenerateNuspecDependsOn);$(GetPackageVersionDependsOn)</GenerateNuspecDependsOn>
-    <!-- TODO: since we do this now we can skip including the dependencies in the generated nuspec -->
+    <GenerateNuspecDependsOn>IncludeDependentAssembliesInToolsPackage;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
+    <!-- Since we copy those dependencies in directly now we could possibly skip including the dependencies in the generated nuspec. -->
+    <!--SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking-->
   </PropertyGroup>
-  <Target Name="IncludeDependentAssembliesInToolsPackage" BeforeTargets="Pack" AfterTargets="Build" Condition="'$(IsTool)' == 'true'">
+  <!-- TODO: Move this to the Mlos.NetCore.Package.props -->
+  <Target Name="IncludeDependentAssembliesInToolsPackage" BeforeTargets="Pack;_LoadPackInputItems;_GetTargetFrameworksOutput" AfterTargets="Build" Condition="'$(IsTool)' == 'true'">
     <ItemGroup>
-    <!-- FIXME: -->
       <None Include="$(OutputPath)/*.dll" Exclude="$(OutputPath)/$(TargetName)$(TargetExt);$(OutputPath)/$(TargetName).pdb">
         <Pack>true</Pack>
         <PackagePath>tools/</PackagePath>
       </None>
     </ItemGroup>
-    <Message Text="None: @(None)" Importance="high" />
   </Target>
   <!-- Include our build rules in the package, but not in the TargetFramework specific path. -->
   <ItemGroup>

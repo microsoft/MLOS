@@ -44,9 +44,11 @@
   -->
   <PropertyGroup Label="MlosSettingsRegistryCompileSettings">
     <!-- TODO? Unnecessary?
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseNETCoreGenerator>true</UseNETCoreGenerator>
     -->
+    <!-- FIXME: This doesn't work when specified here -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- FIXME: This doesn't work when specified here -->
     <!-- Disable .NET.Sdk behavior of including all *.cs files within the project's directory by default. -->
     <EnableDefaultItems>false</EnableDefaultItems>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
