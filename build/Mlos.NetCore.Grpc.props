@@ -11,6 +11,9 @@
     <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" Condition="'$(GrpcServices)' == 'Server' Or '$(GrpcServices)' == 'Both'" />
     <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" />
     <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" Condition="'$(GrpcServices)' == 'Client' OR '$(GrpcServices)' == 'Both'" />
-    <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" />
+    <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>
