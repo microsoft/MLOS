@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
+<Project Sdk="Microsoft.NET.Sdk">
   <!-- In a large project some properties will be reused across components. -->
-  <Import Project="$(MSBuildProjectDirectory)/Common.props" />
+  <Import Project="$(MSBuildThisFileDirectory)/Common.props" />
+  <!-- Set some project specific settings. -->
   <PropertyGroup Label="GeneralProjectProperties">
     <!-- Note: Change this to a unique uuid/guid when creating a new project. -->
     <ProjectGuid>{7747149E-BB3B-4F9A-8F1B-D94A062B492F}</ProjectGuid>
@@ -9,31 +10,22 @@
     <RootNamespace>ExternalIntegrationExample</RootNamespace>
     <AssemblyName>ExternalIntegrationExample.SettingsRegistry</AssemblyName>
   </PropertyGroup>
+  <!-- Inform the Mlos codegen tool where we want the output files place. -->
   <PropertyGroup Label="MlosCodeGenProperties">
     <MlosSettingsSystemCodeGenOutputDirectory>$(MlosSettingsSystemCodeGenOutputBaseDir)/ExternalIntegrationExample</MlosSettingsSystemCodeGenOutputDirectory>
   </PropertyGroup>
-  <!-- TODO:
-    Just for connecting the testing example:
-    - add a reference to the Pack target for that package.
-    - add the Mlos output package dir to the nuget sources
-    - use another import for that for now
-  -->
+  <!-- Pull in the Mlos codegen package tool and its build target rules. -->
   <ItemGroup>
-    <!-- Pull in the Mlos codegen package tool (any version for now) -->
     <!-- TODO: Make sure it doesn't add any build dependencies -->
-    <PackageReference Include="Mlos.SettingsSystem.CodeGen" Version="*-*" />
+    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="$(MlosSettingsSystem_PackageVersion)" />
+    <PackageReference Include="Mlos.SettingsSystem.CodeGen" Version="$(MlosSettingsSystem_PackageVersion)" />
+    <!--DotNetCliToolReference Include="Mlos.SettingsSystem.CodeGen" Version="$(MlosSettingsSystem_PackageVersion)" /-->
   </ItemGroup>
-  <!--
-    List data structures for the settings and messages to be used for code generation.
-  -->
+  <!-- List data structures for the settings and messages to be used for code generation. -->
   <ItemGroup Label="MlosSettingsRegistryDefinitions">
     <MlosSettingsRegistryDefinition Include="Codegen/AssemblyInfo.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/DemoComponentConfig.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/UpdateConfigTestMessage.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry1.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry2.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry3.cs" />
-    <MlosSettingsRegistryDefinition Include="Codegen/TestSettingsRegistry4.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/SmartComponentExampleConfig.cs" />
+    <MlosSettingsRegistryDefinition Include="Codegen/SmartComponentExampleMessages.cs" />
   </ItemGroup>
   <!--
     Add any additional .cs files necessary for compilation for the output assembly

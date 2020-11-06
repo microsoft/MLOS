@@ -30,12 +30,12 @@
 
   <!-- Track the set of code gen outputs *from this project* (reference projects handled next) for incremental build purposes. -->
   <ItemGroup Label="Mlos CodeGen Outputs" Condition="'@(MlosSettingsRegistryDefinition->Count())' != 0">
-    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(SettingsSystemCodeGenOutputBasename)_callbacks.h" />
-    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(SettingsSystemCodeGenOutputBasename)_dispatch.h" />
-    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(SettingsSystemCodeGenOutputBasename)_base.h" />
-    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(SettingsSystemCodeGenOutputBasename)_base.cs" />
-    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(SettingsSystemCodeGenOutputBasename)_deserialize.cs" />
-    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(SettingsSystemCodeGenOutputBasename)_dispatch.cs" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_callbacks.h" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.h" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_base.h" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_base.cs" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_deserialize.cs" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.cs" />
   </ItemGroup>
 
   <!--
@@ -47,12 +47,15 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseNETCoreGenerator>true</UseNETCoreGenerator>
     -->
+    <!-- Disable .NET.Sdk behavior of including all *.cs files within the project's directory by default. -->
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="@(MlosSettingsRegistryDefinition -> '%(FullPath)')" />
-    <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_base.cs" />
-    <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_deserialize.cs" />
-    <Compile Include="$(SettingsSystemCodeGenAbsoluteOutputPath)\$(SettingsSystemCodeGenOutputBasename)_dispatch.cs" />
+    <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_base.cs" />
+    <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_deserialize.cs" />
+    <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.cs" />
   </ItemGroup>
 
   <!-- Codegen using internal compiler in the Mlos.SettingsSystem.CodeGen tool -->
@@ -65,14 +68,16 @@
     <BuildDependsOn>$(BuildDependsOn);MlosSettingsSystemCodeGen</BuildDependsOn>
   </PropertyGroup>
   <!--
-  <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Inputs="@(MlosSettingsRegistryDefinition);$(MlosSettingsSystemCodeGenDll)" Outputs="@(MlosSettingsSystemCodeGenOutput)" Condition="'@(MlosSettingsRegistryDefinition->Count())' != 0">
+  <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Inputs="@(MlosSettingsRegistryDefinition);$(MlosSettingsSystemCodeGenDll)" Outputs="@(MlosSettingsSystemCodeGenOutput)">
   -->
-  <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Outputs="@(MlosSettingsSystemCodeGenOutput)" Condition="'@(MlosSettingsRegistryDefinition->Count())' != 0">
+  <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Outputs="@(MlosSettingsSystemCodeGenOutput)">
     <PropertyGroup>
       <MlosSettingsSystemCodeGenInputArgs>@(MlosSettingsRegistryDefinition -> '--input-cs=&quot;%(FullPath)&quot;', ' ')</MlosSettingsSystemCodeGenInputArgs>
     </PropertyGroup>
     <Message Text="Running Mlos.SettingsSystem.CodeGen on '@(MlosSettingsRegistryDefinition)'" Importance="high" />
     <Error Text="MlosSettingsSystemCodeGenOutputDirectory is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsSystemCodeGenAbsoluteOutputPath)' == ''" />
+    <Error Text="MlosSettingsSystemCodeGenOutputBasename is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsSystemCodeGenOutputBasename)' == ''" />
+    <Error Text="No MlosSettingsRegistryDefinition Items found for '$(MSBuildProjectFile)' project." Condition="'@(MlosSettingsRegistryDefinition->Count())' == 0" />
     <Exec ConsoleToMsBuild="true" Condition="'$(SkipMlosSettingsSystemCodeGen)' != 'true'" Command="$(MlosSettingsSystemCodeGenExe) $(MlosSettingsSystemCodeGenInputArgs) --output-path=&quot;$(MlosSettingsSystemCodeGenAbsoluteOutputPath)&quot; --output-basename=$(MlosSettingsSystemCodeGenOutputBasename)">
       <Output TaskParameter="ConsoleOutput" ItemName="OutputOfExec" />
     </Exec>
@@ -81,7 +86,7 @@
   <!-- Binplace settings registry assembly dlls to the requested target folder -->
   <Target Name="BinplaceMlosSettingsRegistryDll" AfterTargets="Build">
     <Message Text="WARNING: MlosSettingsRegistryAssemblyOutputDirectory is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' != ''" Importance="high" />
-    <Copy SourceFiles="$(OutputPath)\$(TargetFileName)" DestinationFolder="$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)/" UseHardlinksIfPossible="true" Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' != ''" />
+    <Copy SourceFiles="$(OutputPath)/$(TargetFileName)" DestinationFolder="$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)/" UseHardlinksIfPossible="true" Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' != ''" />
   </Target>
 
   <Target Name="CleanMlosSettingsSystemCodeGen" AfterTargets="BeforeClean">
