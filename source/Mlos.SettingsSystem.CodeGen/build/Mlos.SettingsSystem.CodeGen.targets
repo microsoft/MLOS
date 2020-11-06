@@ -60,6 +60,24 @@
     <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.cs" />
   </ItemGroup>
 
+  <!-- When compiling, be sure to reference a few other nugets by default -->
+  <PropertyGroup Label="LookupNugetPackageVersion">
+    <!-- First, lookup the nuget package version in use so that we pull the same version for the other dependencies. -->
+    <MlosCodeGenPackageVersion Condition="'$(MlosCodeGenPackageVersion)' == ''">*-*</MlosCodeGenPackageVersion>
+  </PropertyGroup>
+  <!-- Lookup the current nuget package version -->
+  <!-- FIXME: An alternative to that would be to do a sed/replace on a PACKAGE_VERSION string in this file prior to including it in the output package -->
+  <Target Name="LookupCurrentMlosCodeGenPackageVersion" BeforeTargets="Build" AfterTargets="BeforeBuild"> <!-- FIXME: This should be before restore -->
+    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)/../mlos.settingssystem.codegen.nuspec" Query="/package/metadata/version/text()">
+      <Output TaskParameter="Result" ItemName="MlosCodeGenPackageVersions" />
+    </XmlPeek>
+    <Message Text="MlosCodeGenPackageVersions: @(MlosCodeGenPackageVersions)" Importance="high" />
+  </Target>
+  <ItemGroup>
+    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="*-*" /><!-- FIXME: Specify the same version as this package. -->
+    <PackageReference Include="Mlos.NetCore" Version="*-*" /><!-- FIXME -->
+  </ItemGroup>
+
   <!-- Codegen using internal compiler in the Mlos.SettingsSystem.CodeGen tool -->
   <!--
     Make sure that codegen is run whenever compile is.
