@@ -18,7 +18,7 @@ class TestPolynomialObjective():
     def classSetUp(cls):
         global_values.declare_singletons()
 
-    def setUp(self):
+    def setup_method(self, method):
         """ Let's create three polynomial response functions that'll be used to test the PolynomialObjective class
             The three polynomial instances are initialized and held in a dictionary together with
             parameters used to create the polynomials

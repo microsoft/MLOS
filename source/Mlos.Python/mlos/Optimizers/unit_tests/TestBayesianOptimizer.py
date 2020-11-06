@@ -7,6 +7,7 @@ import os
 import pickle
 import random
 import warnings
+import pytest
 
 import grpc
 import numpy as np

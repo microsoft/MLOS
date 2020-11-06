@@ -12,7 +12,7 @@ from mlos.Spaces.SimpleHypergrid import SimpleHypergrid
 
 class TestSimpleSpaces():
 
-    def setUp(self) -> None:
+    def setup_method(self, method) -> None:
         self.small_square = SimpleHypergrid(
             name="small_square",
             dimensions=[

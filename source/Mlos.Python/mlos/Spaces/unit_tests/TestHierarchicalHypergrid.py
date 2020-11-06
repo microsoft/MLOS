@@ -8,7 +8,7 @@ from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHy
 
 class TestHierarchicalSpaces():
 
-    def setUp(self):
+    def setup_method(self, method):
         self.emergency_buffer_settings = SimpleHypergrid(
             name='emergency_buffer_config',
             dimensions=[

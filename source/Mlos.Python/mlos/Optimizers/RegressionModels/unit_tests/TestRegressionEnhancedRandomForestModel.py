@@ -23,7 +23,7 @@ class TestRegressionEnhancedRandomForestRegressionModel():
     def setup_class(cls):
         global_values.declare_singletons()
 
-    def setUp(self):
+    def setup_method(self, method):
         self.model_config = RegressionEnhancedRandomForestRegressionModelConfig.DEFAULT
 
         self.test_case_globals = {

@@ -28,7 +28,7 @@ class StackTest():
 
 class SortedBinaryTreeTest():
 
-    def setUp(self):
+    def setup_method(self, method):
         self.random_sorted_binary_tree = SortedBinaryTree()
         self.inserted_values = set()
         random.seed(1)

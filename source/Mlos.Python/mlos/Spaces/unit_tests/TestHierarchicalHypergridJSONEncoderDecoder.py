@@ -19,7 +19,7 @@ from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonEncoder
 
 class TestHierarchicalSpaces():
 
-    def setUp(self):
+    def setup_method(self, method):
         self.original_root_communication_channel_parameter_space = SimpleHypergrid(
             name='communication_channel_parameter_space',
             dimensions=[

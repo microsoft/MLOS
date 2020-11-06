@@ -31,7 +31,7 @@ class TestDecisionTreeRegressionModel():
         print(f"Dumping trace to {trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
-    def setUp(self):
+    def setup_method(self, method):
         # Let's create a simple linear mapping
         self.slope = 10
         self.y_intercept = 10

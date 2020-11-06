@@ -4,6 +4,7 @@
 #
 import math
 import random
+import pytest
 
 import mlos.Spaces.Dimensions.DimensionCalculator
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
@@ -20,7 +21,7 @@ def fibonacci(max, one_ago=0, next=1):
 
 class TestContinuousDimension():
 
-    def setUp(self):
+    def setup_method(self, method):
         self.empty = ContinuousDimension(name='x', min=0, max=0, include_min=False, include_max=False)
         self.unbounded_continuous = ContinuousDimension(name='x', min=0, max=math.inf)
         self.unbounded_discrete = DiscreteDimension(name='x', min=0, max=math.inf)
@@ -181,14 +182,16 @@ class TestCompositeDimension():
         C3 = C1 - C2
         D = DiscreteDimension(name='x', min=0, max=1)
 
-        self.assertRaises(TypeError, C1.intersection, D)
-        self.assertRaises(TypeError, C3.intersection, D)
-        self.assertRaises(TypeError, D.intersection, C1)
-
+        with pytest.raises(TypeError):
+            C1.intersection(D)
+        with pytest.raises(TypeError):
+            C3.intersection(D)
+        with pytest.raises(TypeError):
+            D.intersection(C1)
 
 class TestDiscreteDimension():
 
-    def setUp(self):
+    def setup_method(self, method):
         self.just_one = DiscreteDimension(name='x', min=1, max=1)
         self.one_two = DiscreteDimension(name='x', min=1, max=2)
         self.one_two_three = DiscreteDimension(name='x', min=1, max=3)

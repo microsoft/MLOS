@@ -16,9 +16,6 @@ class TestObjectiveFunctionFactory():
         mlos.global_values.declare_singletons()
         warnings.simplefilter("error", category=FutureWarning)
 
-    def setUp(self):
-        ...
-
     def test_named_configs(self):
 
         named_configs = objective_function_config_store.list_named_configs()

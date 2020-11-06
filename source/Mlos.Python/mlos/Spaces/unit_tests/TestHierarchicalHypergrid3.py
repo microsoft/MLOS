@@ -23,7 +23,7 @@ class TestHierarchicalHypergrid3():
 
     """
 
-    def setUp(self):
+    def setup_method(self, method):
 
         self.cache_param_space = SimpleHypergrid(
             name='cache_param_space',

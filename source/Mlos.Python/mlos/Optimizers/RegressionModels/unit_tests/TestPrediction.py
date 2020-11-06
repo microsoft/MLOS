@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import pytest
 import numpy as np
 import pandas as pd
 
@@ -26,7 +27,7 @@ class TestPrediction():
     def classSetUp(cls):
         global_values.declare_singletons()
 
-    def setUp(self):
+    def setup_method(self, method):
         # Create a mock regression model prediction class
         self.test_regression_prediction = TestPrediction.MockValidRegressionModelPrediction(objective_name='y_test')
 

@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import pickle
+import pytest
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
@@ -16,7 +17,7 @@ class TestHierarchicalHypergrid2():
 
     """
 
-    def setUp(self):
+    def setup_method(self, method):
 
         self.lru_cache_param_space = SimpleHypergrid(
             name='lru_cache_config',

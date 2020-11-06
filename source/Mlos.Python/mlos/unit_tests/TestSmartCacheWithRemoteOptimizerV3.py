@@ -30,7 +30,7 @@ class TestSmartCacheWithRemoteOptimizer():
     3. Optimize the SmartCache with the help of the remote or in-process optimizer.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         mlos_globals.init_mlos_global_context()
         mlos_globals.mlos_global_context.start_clock()
         self.logger = create_logger('TestSmartCacheWithRemoteOptimizer')
@@ -88,7 +88,7 @@ class TestSmartCacheWithRemoteOptimizer():
             objectives=[Objective(name="hit_rate", minimize=False)]
         )
 
-    def teardown(self):
+    def teardown_method(self, method):
         mlos_globals.mlos_global_context.stop_clock()
         self.mlos_agent.stop_all()
         self.server.stop(grace=None)

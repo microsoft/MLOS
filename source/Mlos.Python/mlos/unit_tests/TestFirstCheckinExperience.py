@@ -16,7 +16,7 @@ class TestFirstCheckinExperience():
     easily commit their first change into the MLOS repository.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         self.logger = create_logger("FirstCheckinExperienceTests")
         self.logger.level = logging.INFO
 
