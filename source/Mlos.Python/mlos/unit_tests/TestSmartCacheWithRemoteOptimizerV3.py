@@ -88,7 +88,7 @@ class TestSmartCacheWithRemoteOptimizer():
             objectives=[Objective(name="hit_rate", minimize=False)]
         )
 
-    def tearDown(self):
+    def teardown(self):
         mlos_globals.mlos_global_context.stop_clock()
         self.mlos_agent.stop_all()
         self.server.stop(grace=None)
