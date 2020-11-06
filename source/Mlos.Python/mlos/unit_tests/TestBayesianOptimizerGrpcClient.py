@@ -23,7 +23,7 @@ from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 
 
-class TestBayesianOptimizerGrpcClient():
+class TestBayesianOptimizerGrpcClient:
     """ Tests the E2E Grpc Client-Service workflow.
 
     """
@@ -33,7 +33,7 @@ class TestBayesianOptimizerGrpcClient():
         warnings.simplefilter("error")
         global_values.declare_singletons()
 
-    def setUp(self):
+    def setup_method(self, method):
         self.logger = create_logger(self.__class__.__name__)
         # Start up the gRPC service.
         #
@@ -53,8 +53,8 @@ class TestBayesianOptimizerGrpcClient():
             objectives=[Objective(name='y', minimize=True)]
         )
 
-    def tearDown(self):
-        """ We need to tear down the gRPC server and client here.
+    def teardown_method(self, method):
+        """ We need to tear down the gRPC server here.
 
         :return:
         """
