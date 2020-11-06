@@ -5,13 +5,12 @@
 import random
 import time
 from threading import Thread
-import unittest
 
 
 from mlos.Mlos.Infrastructure import CommunicationChannel
 
 
-class TestCommunicationChannel(unittest.TestCase):
+class TestCommunicationChannel():
 
 
     def test_multithreaded_communication(self):

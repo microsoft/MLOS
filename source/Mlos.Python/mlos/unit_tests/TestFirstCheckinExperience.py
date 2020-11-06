@@ -3,13 +3,12 @@
 # Licensed under the MIT License.
 #
 import logging
-import unittest
 
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension
 from mlos.Logger import create_logger
 
 
-class TestFirstCheckinExperience(unittest.TestCase):
+class TestFirstCheckinExperience():
     """ A suite of tests exposing for folks onboarding to Mlos to get familiar with this code base.
 
 
@@ -31,4 +30,4 @@ class TestFirstCheckinExperience(unittest.TestCase):
         )
 
         random_member = mlos_team.random()
-        self.assertTrue(random_member in mlos_team)
+        assert random_member in mlos_team

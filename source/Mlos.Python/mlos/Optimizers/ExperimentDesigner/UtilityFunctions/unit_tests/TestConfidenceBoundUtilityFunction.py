@@ -4,7 +4,6 @@
 #
 import math
 from scipy.stats import t
-import unittest
 
 import numpy as np
 import pandas as pd
@@ -20,10 +19,10 @@ import mlos.global_values as global_values
 
 
 
-class TestConfidenceBoundUtilityFunction(unittest.TestCase):
+class TestConfidenceBoundUtilityFunction():
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setup_class(cls) -> None:
         global_values.declare_singletons()
 
         cls.slope = 10
@@ -82,7 +81,7 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
         expected_utility_function_values = prediction_df[predicted_value_col] - confidence_interval_radii
         utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)['utility']
         for expected, actual in zip(expected_utility_function_values, utility_function_values):
-            self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))
+            assert (expected == actual) or (np.isnan(expected) and np.isnan(actual))
 
     def test_random_function_configs(self):
         for i in range(100):
@@ -109,4 +108,4 @@ class TestConfidenceBoundUtilityFunction(unittest.TestCase):
             utility_function_values = utility_function(self.sample_inputs_pandas_dataframe)['utility']
 
             for expected, actual in zip(expected_utility_function_values, utility_function_values):
-                self.assertTrue((expected == actual) or (np.isnan(expected) and np.isnan(actual)))
+                assert (expected == actual) or (np.isnan(expected) and np.isnan(actual))

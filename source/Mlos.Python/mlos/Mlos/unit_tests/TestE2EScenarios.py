@@ -5,7 +5,6 @@
 import logging
 from threading import Thread
 import time
-import unittest
 
 from mlos.Logger import create_logger
 
@@ -16,13 +15,13 @@ from mlos.Mlos.Infrastructure import CommunicationChannel, SharedConfig
 from mlos.Mlos.SDK import mlos_globals, MlosGlobalContext, MlosExperiment, MlosAgent
 from mlos.Mlos.SDK.CommonAggregators.Timer import Timer
 
-class TestE2EScenarios(unittest.TestCase):
+class TestE2EScenarios():
     """ Tests aggregators based on the timer.
 
     """
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setup_class(cls) -> None:
         mlos_globals.init_mlos_global_context()
         cls.logger = create_logger('TestE2EScenarios')
         cls.logger.level = logging.INFO
@@ -38,7 +37,7 @@ class TestE2EScenarios(unittest.TestCase):
         cls.mlos_agent.add_allowed_component_type(SmartCacheWorkloadGenerator)
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def teardown_class(cls) -> None:
         cls.mlos_agent.stop_all()
         mlos_globals.mlos_global_context.stop_clock()
 
@@ -51,7 +50,7 @@ class TestE2EScenarios(unittest.TestCase):
         epsilon_ms = 10
 
         def _process_clock_event(elapsed_time_ms):
-            self.assertTrue(elapsed_time_ms + epsilon_ms > timeout_ms)
+            assert elapsed_time_ms + epsilon_ms > timeout_ms
             self.logger.debug(f"Processed clock event. Elapsed time: {elapsed_time_ms}")
 
         timer = Timer(
@@ -159,7 +158,7 @@ class TestE2EScenarios(unittest.TestCase):
             # First check that the config has been consumed
             #if smart_cache_workload.current_config.values != self.current_workload_config_values:
             #    print("Put breakpoint here.")
-            #self.assertTrue(smart_cache_workload.current_config.values == self.current_workload_config_values)
+            #assert smart_cache_workload.current_config.values == self.current_workload_config_values
 
             new_config_values = SmartCacheWorkloadGenerator.parameter_search_space.random()
             self.mlos_agent.set_configuration(
@@ -223,7 +222,7 @@ class TestE2EScenarios(unittest.TestCase):
         smart_cache_workload_thread.join()
 
         all_registered_mlos_objects = set((component_type, runtime_attributes) for component_type ,runtime_attributes in self.mlos_agent.enumerate_active_smart_components())
-        self.assertTrue(
+        assert (
             (smart_cache_workload.mlos_object.owning_component_type, smart_cache_workload.mlos_object.owning_component_runtime_attributes)
             in all_registered_mlos_objects
         )
@@ -234,4 +233,4 @@ class TestE2EScenarios(unittest.TestCase):
         all_registered_mlos_objects = set(mlos_object for mlos_object in self.mlos_agent.enumerate_active_smart_components())
         if len(all_registered_mlos_objects) != 0:
             print("Put breakpoint here")
-        self.assertTrue(len(all_registered_mlos_objects) == 0)
+        assert len(all_registered_mlos_objects) == 0

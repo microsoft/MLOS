@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 import os
-import unittest
 import warnings
 
 import pandas as pd
@@ -15,10 +14,10 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmO
 from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point
 from mlos.Tracer import Tracer, trace, traced
 
-class TestFilteringOutInvalidRows(unittest.TestCase):
+class TestFilteringOutInvalidRows():
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """Sets up all the singletons needed to test the BayesianOptimizer.
 
         """
@@ -28,7 +27,7 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
         cls.logger = create_logger(logger_name=cls.__name__)
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def teardown_class(cls) -> None:
         temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -44,8 +43,8 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
 
         # Just to make sure we are testing both hierarchical and flat code paths.
         #
-        self.assertTrue(any(space.is_hierarchical() for space in spaces))
-        self.assertTrue(any(not space.is_hierarchical() for space in spaces))
+        assert any(space.is_hierarchical() for space in spaces)
+        assert any(not space.is_hierarchical() for space in spaces)
 
         num_samples = 1000
         for space in spaces:
@@ -69,13 +68,13 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
                 expected_valid_rows_index = pd.Index(valid_indices)
 
             print(f"{len(expected_valid_rows_index)}/{len(random_dataframe_with_invalid_rows.index)} rows are valid.")
-            self.assertTrue(0 < len(expected_valid_rows_index))
-            self.assertTrue(len(expected_valid_rows_index) < num_samples)
+            assert 0 < len(expected_valid_rows_index)
+            assert len(expected_valid_rows_index) < num_samples
 
             # Let's filter out invalid rows the fast way.
             #
             actual_valid_rows_index = space.filter_out_invalid_rows(original_dataframe=random_dataframe_with_invalid_rows, exclude_extra_columns=True).index
-            self.assertTrue(expected_valid_rows_index.equals(actual_valid_rows_index))
+            assert expected_valid_rows_index.equals(actual_valid_rows_index)
 
             if not space.is_hierarchical():
                 # For flat spaces we can choose between the column-wise operators and the row-wise validation. This is to get the tracing data to see the
@@ -86,7 +85,7 @@ class TestFilteringOutInvalidRows(unittest.TestCase):
                         lambda row: Point(**{dim_name: row[i] for i, dim_name in enumerate(space.dimension_names)}) in space,
                         axis=1
                     )].index
-                self.assertTrue(expected_valid_rows_index_2.equals(actual_valid_rows_index))
+                assert expected_valid_rows_index_2.equals(actual_valid_rows_index)
 
 
 

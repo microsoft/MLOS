@@ -5,7 +5,6 @@
 import math
 import os
 import random
-import unittest
 
 import numpy as np
 import pandas as pd
@@ -24,13 +23,13 @@ from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
 import mlos.global_values as global_values
 
-class TestBayesianOptimizer(unittest.TestCase):
+class TestBayesianOptimizer():
     """ Tests if the random search optimizer can work with a lot of random configs and a ton of samples.
 
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """ Set's up all the objects needed to test the RandomSearchOptimizer
 
         To test the RandomSearchOptimizer we need to first construct:
@@ -53,7 +52,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         cls.logger = create_logger(logger_name=cls.__name__)
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def teardown_class(cls) -> None:
         trace_output_path = os.path.join(cls.temp_dir, "OptimizerTestTrace.json")
         global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
 
@@ -304,19 +303,19 @@ class TestBayesianOptimizer(unittest.TestCase):
                 run_optimization(optimizer)
             best_config_point, best_objective = optimizer.optimum()
             print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
-            self.assertLessEqual(sign * best_objective['function_value'], -5.5)
+            assert sign * best_objective['function_value'] < -5.5
 
     def validate_optima(self, optimizer):
         if not optimizer.trained:
             # Computing prediction based optima should fail if the surrogate model is not trained.
             #
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
 
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
 
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
         else:
             predicted_best_config, predicted_optimum = optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)

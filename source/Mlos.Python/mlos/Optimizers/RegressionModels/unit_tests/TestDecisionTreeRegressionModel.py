@@ -5,7 +5,6 @@
 import datetime
 import math
 import os
-import unittest
 
 import numpy as np
 import pandas as pd
@@ -16,15 +15,15 @@ from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer
 
-class TestDecisionTreeRegressionModel(unittest.TestCase):
+class TestDecisionTreeRegressionModel():
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setup_class(cls) -> None:
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def teardown_class(cls) -> None:
         temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)

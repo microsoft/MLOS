@@ -2,12 +2,11 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import unittest
 
 from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
 
 
-class TestCategoricalDimension(unittest.TestCase):
+class TestCategoricalDimension():
 
 
     def test_categorical_dimension_api(self):
@@ -49,18 +48,18 @@ class TestCategoricalDimension(unittest.TestCase):
             ]
         )
 
-        self.assertTrue(warm_colors in rainbow_colors)
-        self.assertTrue(cool_colors in rainbow_colors)
-        self.assertTrue(warm_colors.union(cool_colors) in rainbow_colors)
-        self.assertFalse(rainbow_colors in warm_colors.union(cool_colors))
-        self.assertTrue('infra-red' in rainbow_colors)
-        self.assertTrue('infra-red' in rainbow_colors - warm_colors - cool_colors)
-        self.assertTrue('red' not in rainbow_colors - warm_colors)
-        self.assertTrue(warm_colors.intersects(rainbow_colors))
-        self.assertFalse(warm_colors.intersects(cool_colors))
-        self.assertTrue(rainbow_colors.intersection(warm_colors) == warm_colors)
-        self.assertTrue(len(rainbow_colors - warm_colors - cool_colors) == 2)
-        self.assertTrue(all(color in rainbow_colors for color in warm_colors.linspace()))
+        assert warm_colors in rainbow_colors
+        assert cool_colors in rainbow_colors
+        assert warm_colors.union(cool_colors) in rainbow_colors
+        assert not rainbow_colors in warm_colors.union(cool_colors)
+        assert 'infra-red' in rainbow_colors
+        assert 'infra-red' in rainbow_colors - warm_colors - cool_colors
+        assert 'red' not in rainbow_colors - warm_colors
+        assert warm_colors.intersects(rainbow_colors)
+        assert not warm_colors.intersects(cool_colors)
+        assert rainbow_colors.intersection(warm_colors) == warm_colors
+        assert len(rainbow_colors - warm_colors - cool_colors) == 2
+        assert all(color in rainbow_colors for color in warm_colors.linspace())
 
 
 

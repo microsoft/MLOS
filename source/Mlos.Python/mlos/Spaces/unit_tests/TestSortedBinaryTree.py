@@ -3,14 +3,13 @@
 # Licensed under the MIT License.
 #
 import random
-import unittest
 
 from mlos.Spaces.Dimensions.SortedBinaryTree import SortedBinaryTree, Stack
 
 NUM_KEYS = 10000
 RANGE = 100 * NUM_KEYS
 
-class StackTest(unittest.TestCase):
+class StackTest():
 
     def test_stack(self):
         stack = Stack()
@@ -22,12 +21,12 @@ class StackTest(unittest.TestCase):
 
         try:
             stack.pop()
-            self.assertTrue(False)
+            assert False
         except:
-            self.assertTrue(True)
+            assert True
 
 
-class SortedBinaryTreeTest(unittest.TestCase):
+class SortedBinaryTreeTest():
 
     def setUp(self):
         self.random_sorted_binary_tree = SortedBinaryTree()
@@ -50,25 +49,25 @@ class SortedBinaryTreeTest(unittest.TestCase):
             while key in already_inserted:
                 key = random.randint(0, 10000)
             sorted_binary_tree.add(key)
-            self.assertTrue(sorted_binary_tree.contains(key))
+            assert sorted_binary_tree.contains(key)
             already_inserted.add(key)
 
         for key in already_inserted:
-            self.assertTrue(sorted_binary_tree.contains(key))
+            assert sorted_binary_tree.contains(key)
 
     def test_traversal(self):
         previous_node = None
         for node in self.random_sorted_binary_tree.enumerate():
             if previous_node is not None:
-                self.assertTrue(node.key >= previous_node.key)
+                assert node.key >= previous_node.key
             previous_node = node
 
     def test_pop(self):
         sorted_binary_tree = SortedBinaryTree()
         sorted_binary_tree.add(key=1, payload='one')
-        self.assertTrue(sorted_binary_tree.contains(1))
-        self.assertTrue(sorted_binary_tree.pop(1) == 'one')
-        self.assertFalse(sorted_binary_tree.contains(1))
+        assert sorted_binary_tree.contains(1)
+        assert sorted_binary_tree.pop(1) == 'one'
+        assert not sorted_binary_tree.contains(1)
 
         keys = [i for i in range(10)]
         keys = sorted(keys, key=lambda x: random.random())
@@ -77,15 +76,15 @@ class SortedBinaryTreeTest(unittest.TestCase):
             sorted_binary_tree.add(key=key, payload=str(key))
 
         for key in keys:
-            self.assertTrue(sorted_binary_tree.contains(key))
+            assert sorted_binary_tree.contains(key)
 
         for key in keys:
             payload = sorted_binary_tree.pop(key)
             sorted_binary_tree.assert_invariants()
-            self.assertTrue(payload == str(key))
+            assert payload == str(key)
 
         for key in keys:
-            self.assertFalse(sorted_binary_tree.contains(key))
+            assert not sorted_binary_tree.contains(key)
 
     def test_sanity(self):
         """ This test will exercise all functions of the tree by: inserting, looking up, removing keys.
@@ -140,37 +139,37 @@ class SortedBinaryTreeTest(unittest.TestCase):
             elif OPERATION_TYPE == INSERT_EXISTING:
                 try:
                     sorted_binary_tree.add(existing_key)
-                    self.assertTrue(False)
+                    assert False
                 except:
-                    self.assertTrue(True)
+                    assert True
 
             elif OPERATION_TYPE == LOOKUP_EXISTING:
-                self.assertTrue(sorted_binary_tree.contains(existing_key))
-                self.assertTrue(sorted_binary_tree.get(existing_key) == str(existing_key))
+                assert sorted_binary_tree.contains(existing_key)
+                assert sorted_binary_tree.get(existing_key) == str(existing_key)
                 continue # No need to check invariants for read-only operations
 
             elif OPERATION_TYPE == LOOKUP_NONEXISTENT:
-                self.assertFalse(sorted_binary_tree.contains(new_key))
+                assert not sorted_binary_tree.contains(new_key)
                 try:
                     sorted_binary_tree.get(new_key)
-                    self.assertTrue(False)
+                    assert False
                 except:
-                    self.assertTrue(True)
+                    assert True
 
             elif OPERATION_TYPE == POP_EXISTING:
-                self.assertTrue(sorted_binary_tree.contains(existing_key))
-                self.assertTrue(sorted_binary_tree.pop(existing_key) == str(existing_key))
-                self.assertFalse(sorted_binary_tree.contains(existing_key))
+                assert sorted_binary_tree.contains(existing_key)
+                assert sorted_binary_tree.pop(existing_key) == str(existing_key)
+                assert not sorted_binary_tree.contains(existing_key)
                 inserted.remove(existing_key)
                 removed.add(existing_key)
 
             elif OPERATION_TYPE == POP_NONEXISTENT:
-                self.assertFalse(sorted_binary_tree.contains(new_key))
+                assert not sorted_binary_tree.contains(new_key)
                 try:
                     sorted_binary_tree.get(new_key)
-                    self.assertTrue(False)
+                    assert False
                 except:
-                    self.assertTrue(True)
+                    assert True
 
             else:
                 assert False
@@ -178,16 +177,16 @@ class SortedBinaryTreeTest(unittest.TestCase):
             # let's validate invariants
             ## let's make sure that all keys are present
             for key in inserted:
-                self.assertTrue(sorted_binary_tree.contains(key))
+                assert sorted_binary_tree.contains(key)
 
             ## let's make sure that all removed keys are not present
             for key in removed:
-                self.assertFalse(sorted_binary_tree.contains(key))
+                assert not sorted_binary_tree.contains(key)
 
             ## let's make sure that the ordering is maintained
             if not sorted_binary_tree.is_empty():
                 for set_key, tree_node in zip(sorted(inserted), sorted_binary_tree.enumerate()):
-                    self.assertTrue(set_key == tree_node.key)
+                    assert set_key == tree_node.key
 
     def test_stack_overflow(self):
         """ Inserts 10000 consecutive nodes which should cause stack overflow in the recursive implementation.
@@ -195,20 +194,20 @@ class SortedBinaryTreeTest(unittest.TestCase):
         """
         sorted_binary_tree = SortedBinaryTree()
         for key in range(5000, 10000):
-            self.assertFalse(sorted_binary_tree.contains(key))
+            assert not sorted_binary_tree.contains(key)
             sorted_binary_tree.add(key=key, payload=str(key))
 
         for key in range(5000):
-            self.assertFalse(sorted_binary_tree.contains(key))
+            assert not sorted_binary_tree.contains(key)
             sorted_binary_tree.add(key=key, payload=str(key))
 
         for expected_key, node in zip(range(10000), sorted_binary_tree.enumerate()):
-            self.assertTrue(expected_key == node.key)
+            assert expected_key == node.key
 
         for key in range(5000, 10000):
             sorted_binary_tree.get(key)
             sorted_binary_tree.pop(key)
-        self.assertTrue(True)
+        assert True
 
     def test_binary_tree_enumeration(self):
         sorted_binary_tree = SortedBinaryTree()
@@ -220,10 +219,10 @@ class SortedBinaryTreeTest(unittest.TestCase):
         post_order_keys = [25, 75, 50, 150, 250, 200, 100]
 
         for expected_key, node in zip(pre_order_keys, sorted_binary_tree.enumerate(order=sorted_binary_tree.PRE_ORDER)):
-            self.assertTrue(expected_key == node.key)
+            assert expected_key == node.key
 
         for expected_key, node in zip(in_order_keys, sorted_binary_tree.enumerate(order=sorted_binary_tree.IN_ORDER)):
-            self.assertTrue(expected_key == node.key)
+            assert expected_key == node.key
 
         for expected_key, node in zip(post_order_keys, sorted_binary_tree.enumerate(order=sorted_binary_tree.POST_ORDER)):
-            self.assertTrue(expected_key == node.key)
+            assert expected_key == node.key

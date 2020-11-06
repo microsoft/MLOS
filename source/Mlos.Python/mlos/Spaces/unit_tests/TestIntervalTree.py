@@ -3,12 +3,11 @@
 # Licensed under the MIT License.
 #
 import random
-import unittest
 
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.IntervalTree import IntervalTree
 
-class TestIntervalTreeWithContinuousDimension(unittest.TestCase):
+class TestIntervalTreeWithContinuousDimension():
     """ Comprehensively tests all
 
     """
@@ -29,9 +28,9 @@ class TestIntervalTreeWithContinuousDimension(unittest.TestCase):
         interval_tree.add(five_to_seven)
 
         overlapping_chunks = interval_tree.pop_overlapping_chunks(chunk=minus_one_to_four)
-        self.assertTrue(len(overlapping_chunks) == 2)
+        assert len(overlapping_chunks) == 2
         for chunk in overlapping_chunks:
-            self.assertTrue(chunk in (zero_to_one, two_to_three))
+            assert chunk in (zero_to_one, two_to_three)
 
     def test_inserting_overlapping_chunks(self):
         zero_to_ten = ContinuousDimension(name='x', min=0, max=10)
@@ -42,12 +41,12 @@ class TestIntervalTreeWithContinuousDimension(unittest.TestCase):
         interval_tree.add(five_to_fifteen)
 
         only_node = interval_tree.root
-        self.assertTrue(only_node.left is None)
-        self.assertTrue(only_node.right is None)
-        self.assertTrue(only_node.parent is None)
+        assert only_node.left is None
+        assert only_node.right is None
+        assert only_node.parent is None
         resulting_chunk = only_node.payload
-        self.assertTrue(resulting_chunk.min == 0)
-        self.assertTrue(resulting_chunk.max == 15)
+        assert resulting_chunk.min == 0
+        assert resulting_chunk.max == 15
 
     def test_pop_overlapping_chunks_2(self):
         """ Exercises IntervalTree.pop_overlapping_chunks() method more throughly.
@@ -82,9 +81,9 @@ class TestIntervalTreeWithContinuousDimension(unittest.TestCase):
                 interval_tree = self.make_tree(intervals)
                 overlapping_chunks = interval_tree.pop_overlapping_chunks(possibly_overlapping_interval)
                 if overlaps:
-                    self.assertTrue(overlapping_chunks[0] == overlapping_interval)
+                    assert overlapping_chunks[0] == overlapping_interval
                 else:
-                    self.assertTrue(len(overlapping_chunks) == 0)
+                    assert len(overlapping_chunks) == 0
 
 
     def make_tree(self, intervals):
@@ -147,5 +146,5 @@ class TestIntervalTreeWithContinuousDimension(unittest.TestCase):
 
 
 
-class TestIntervalTreeWithDiscreteDimension(unittest.TestCase):
+class TestIntervalTreeWithDiscreteDimension():
     pass

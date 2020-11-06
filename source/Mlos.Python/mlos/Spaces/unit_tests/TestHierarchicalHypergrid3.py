@@ -3,11 +3,10 @@
 # Licensed under the MIT License.
 #
 import random
-import unittest
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
-class TestHierarchicalHypergrid3(unittest.TestCase):
+class TestHierarchicalHypergrid3():
     """ Tests the join on external dimension in hypergrids.
 
     In particular:

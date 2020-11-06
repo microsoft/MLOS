@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import unittest
 import warnings
 
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
@@ -10,7 +9,7 @@ import mlos.global_values
 
 
 
-class TestObjectiveFunctionFactory(unittest.TestCase):
+class TestObjectiveFunctionFactory():
 
     @classmethod
     def classSetUp(cls):
@@ -35,9 +34,9 @@ class TestObjectiveFunctionFactory(unittest.TestCase):
             for _ in range(100):
                 random_point = default_polynomials_domain.random()
                 value = objective_function.evaluate_point(random_point)
-                self.assertTrue(value in objective_function.output_space)
+                assert value in objective_function.output_space
 
             for i in range(1, 100):
                 random_dataframe = default_polynomials_domain.random_dataframe(num_samples=i)
                 values_df = objective_function.evaluate_dataframe(random_dataframe)
-                self.assertTrue(values_df.index.equals(random_dataframe.index))
+                assert values_df.index.equals(random_dataframe.index)

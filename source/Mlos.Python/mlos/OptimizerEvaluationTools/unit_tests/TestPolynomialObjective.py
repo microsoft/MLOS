@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import unittest
 import numpy as np
 from scipy import stats
 
@@ -13,7 +12,7 @@ import mlos.global_values as global_values
 global_values.declare_singletons()
 
 
-class TestPolynomialObjective(unittest.TestCase):
+class TestPolynomialObjective():
 
     @classmethod
     def classSetUp(cls):

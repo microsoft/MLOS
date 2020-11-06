@@ -4,12 +4,11 @@
 #
 import json
 import time
-import unittest
 
 from mlos.Tracer import Tracer, trace, add_trace_event
 import mlos.global_values as global_values
 
-class TestTracer(unittest.TestCase):
+class TestTracer():
     """ Validates the global singleton Tracer can be properly initialized and used.
 
     """
@@ -24,7 +23,7 @@ class TestTracer(unittest.TestCase):
             pass
         trace_events = global_values.tracer.trace_events
         reformatted_events = Tracer.reformat_events(trace_events)
-        self.assertTrue(len(trace_events) > 0)
+        assert len(trace_events) > 0
         print(json.dumps(reformatted_events, indent=2))
 
     @trace()

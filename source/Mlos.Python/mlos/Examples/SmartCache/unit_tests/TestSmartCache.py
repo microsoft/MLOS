@@ -4,7 +4,6 @@
 #
 import logging
 import random
-import unittest
 
 from mlos.Examples.SmartCache import SmartCache
 from mlos.Examples.SmartCache.CacheImplementations.MruCache import MruCache
@@ -15,7 +14,7 @@ from mlos.Mlos.SDK import mlos_globals
 
 from mlos.Logger import  create_logger
 
-class TestSmartCache(unittest.TestCase):
+class TestSmartCache():
     """ Functionally tests the smart cache.
 
     The various implementations and parameters in the smart cache should be robust to be usable within
@@ -24,19 +23,13 @@ class TestSmartCache(unittest.TestCase):
     """
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setup_class(cls) -> None:
         cls.logger = create_logger("TestSmartCache", logging_level=logging.DEBUG)
         mlos_globals.init_mlos_global_context()
 
     @classmethod
-    def tearDownClass(cls) -> None:
-        ...
-
-    def setUp(self):
-        ...
-
-    def tearDown(self):
-        ...
+    def treardown_class(cls) -> None:
+        pass
 
     def test_lru_cache(self):
 
@@ -72,9 +65,9 @@ class TestSmartCache(unittest.TestCase):
         # that the element at n-10 has been evicted
 
         for i in range(10, 100):
-            self.assertTrue(i - 10 in lru_cache)
+            assert i - 10 in lru_cache
             lru_cache.push(CacheEntry(key=i, value=str(i)))
-            self.assertFalse(i - 10 in lru_cache)
+            assert not i - 10 in lru_cache
 
     def test_mru_cache_eviction_order(self):
         """ Tests whether a small mru cache does in fact evict in most recently used order. """
@@ -91,11 +84,11 @@ class TestSmartCache(unittest.TestCase):
         for i in range(10, 100):
 
             for i in range(9):
-                self.assertTrue(i in mru_cache)
+                assert i in mru_cache
             mru_cache.push(CacheEntry(key=i, value=str(i)))
 
             for i in range(9):
-                self.assertTrue(i in mru_cache)
+                assert i in mru_cache
 
 
 
