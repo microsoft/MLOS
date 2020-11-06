@@ -99,9 +99,11 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
         """ Periodically invokes the optimizer to improve cache performance.
 
         """
+        optimizer_config = bayesian_optimizer_config_store.default
+        optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 5
         self.optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
-            optimizer_config=bayesian_optimizer_config_store.default
+            optimizer_config=optimizer_config
         )
         self.mlos_agent.start_experiment(self.smart_cache_experiment)
 
@@ -128,15 +130,10 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
 
         self.mlos_agent.stop_experiment(self.smart_cache_experiment)
 
-        convergence_state = self.optimizer.get_optimizer_convergence_state()
-
-        # Now let's make sure we the convergence state is looks reasonable.
-        #
-        random_forest_fit_state = convergence_state.surrogate_model_fit_state
 
         # Let's look at the goodness of fit.
         #
-        random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+        random_forest_gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
 
         # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
         # and should make this test not very flaky.
@@ -144,9 +141,6 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
 
         # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
         models_gof_metrics = [random_forest_gof_metrics]
-        for decision_tree_fit_state in random_forest_fit_state.decision_trees_fit_states:
-            if decision_tree_fit_state.fitted:
-                models_gof_metrics.append(decision_tree_fit_state.current_train_gof_metrics)
 
         for model_gof_metrics in models_gof_metrics:
             # Those relative errors should generally be between 0 and 1 unless the model's predictions are worse than predicting average...
