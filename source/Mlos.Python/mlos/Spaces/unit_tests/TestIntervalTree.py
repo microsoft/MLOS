@@ -7,7 +7,7 @@ import random
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.IntervalTree import IntervalTree
 
-class TestIntervalTreeWithContinuousDimension():
+class TestIntervalTreeWithContinuousDimension:
     """ Comprehensively tests all
 
     """
@@ -146,5 +146,5 @@ class TestIntervalTreeWithContinuousDimension():
 
 
 
-class TestIntervalTreeWithDiscreteDimension():
+class TestIntervalTreeWithDiscreteDimension:
     pass

@@ -19,7 +19,7 @@ def fibonacci(max, one_ago=0, next=1):
         one_ago, next = next, one_ago + next
 
 
-class TestContinuousDimension():
+class TestContinuousDimension:
 
     def setup_method(self, method):
         self.empty = ContinuousDimension(name='x', min=0, max=0, include_min=False, include_max=False)
@@ -149,7 +149,7 @@ class TestContinuousDimension():
             assert self.one_to_five.random() not in self.six_to_ten
 
 
-class TestCompositeDimension():
+class TestCompositeDimension:
 
     def test_union_of_continuous_dimensions(self):
         A = ContinuousDimension(name='x', min=0, max=1)
@@ -189,7 +189,7 @@ class TestCompositeDimension():
         with pytest.raises(TypeError):
             D.intersection(C1)
 
-class TestDiscreteDimension():
+class TestDiscreteDimension:
 
     def setup_method(self, method):
         self.just_one = DiscreteDimension(name='x', min=1, max=1)
@@ -263,7 +263,7 @@ class TestDiscreteDimension():
             assert self.one_two.random() in self.one_two_three
 
 
-class TestDimensions():
+class TestDimensions:
     def test_containment(self):
         long_segment = ContinuousDimension(name='x', min=0, max=100*1000)
         short_segment = ContinuousDimension(name='x', min=0, max=100)

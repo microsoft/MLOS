@@ -10,7 +10,7 @@ from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
 from mlos.Spaces.SimpleHypergrid import SimpleHypergrid
 
 
-class TestSimpleSpaces():
+class TestSimpleSpaces:
 
     def setup_method(self, method) -> None:
         self.small_square = SimpleHypergrid(

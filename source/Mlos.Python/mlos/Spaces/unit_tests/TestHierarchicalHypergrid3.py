@@ -6,7 +6,7 @@ import random
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
-class TestHierarchicalHypergrid3():
+class TestHierarchicalHypergrid3:
     """ Tests the join on external dimension in hypergrids.
 
     In particular:

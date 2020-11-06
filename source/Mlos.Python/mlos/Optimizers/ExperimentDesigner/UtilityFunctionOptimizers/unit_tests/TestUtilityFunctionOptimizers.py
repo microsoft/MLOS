@@ -19,7 +19,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 from mlos.Tracer import Tracer, trace
 import mlos.global_values as global_values
 
-class TestUtilityFunctionOptimizers():
+class TestUtilityFunctionOptimizers:
     """ Tests if the random search optimizer does anything useful at all.
 
     """

@@ -9,7 +9,7 @@ import mlos.global_values
 
 
 
-class TestObjectiveFunctionFactory():
+class TestObjectiveFunctionFactory:
 
     @classmethod
     def classSetUp(cls):

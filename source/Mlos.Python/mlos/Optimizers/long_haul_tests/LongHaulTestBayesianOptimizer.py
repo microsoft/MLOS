@@ -24,7 +24,7 @@ from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 
 import mlos.global_values as global_values
 
-class TestBayesianOptimizer():
+class TestBayesianOptimizer:
     """ Tests if the random search optimizer can work with a lot of random configs and a ton of samples.
 
     """

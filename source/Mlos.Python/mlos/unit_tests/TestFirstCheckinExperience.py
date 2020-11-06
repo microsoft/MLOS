@@ -8,7 +8,7 @@ from mlos.Spaces import SimpleHypergrid, CategoricalDimension
 from mlos.Logger import create_logger
 
 
-class TestFirstCheckinExperience():
+class TestFirstCheckinExperience:
     """ A suite of tests exposing for folks onboarding to Mlos to get familiar with this code base.
 
 

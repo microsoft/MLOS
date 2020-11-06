@@ -10,7 +10,7 @@ from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonEncoder
 
 
-class TestHypergridJsonEncoderDecoderForDimensions():
+class TestHypergridJsonEncoderDecoderForDimensions:
     """ Tests JSON encoding and decoding for hypergrids and dimensions.
 
     """

@@ -17,7 +17,7 @@ from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonEncoder
 
 
-class TestHierarchicalSpaces():
+class TestHierarchicalSpaces:
 
     def setup_method(self, method):
         self.original_root_communication_channel_parameter_space = SimpleHypergrid(

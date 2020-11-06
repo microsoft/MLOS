@@ -31,7 +31,7 @@ from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
 
 
-class TestBayesianOptimizer():
+class TestBayesianOptimizer:
     """ Tests if the random search optimizer does anything useful at all.
 
     """
@@ -56,7 +56,7 @@ class TestBayesianOptimizer():
 
 
     @classmethod
-    def tear_down_class(cls) -> None:
+    def teardown_class(cls) -> None:
         cls.server.stop(grace=None)
 
         cls.temp_dir = os.path.join(os.getcwd(), "temp")

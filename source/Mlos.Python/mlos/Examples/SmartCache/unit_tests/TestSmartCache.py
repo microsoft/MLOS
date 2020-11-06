@@ -14,7 +14,7 @@ from mlos.Mlos.SDK import mlos_globals
 
 from mlos.Logger import  create_logger
 
-class TestSmartCache():
+class TestSmartCache:
     """ Functionally tests the smart cache.
 
     The various implementations and parameters in the smart cache should be robust to be usable within

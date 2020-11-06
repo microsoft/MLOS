@@ -21,7 +21,7 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 
 
-class TestSmartCacheWithRemoteOptimizer():
+class TestSmartCacheWithRemoteOptimizer:
     """ Tests SmartCache that's being tuned by the remote optimizer.
 
     This test will:

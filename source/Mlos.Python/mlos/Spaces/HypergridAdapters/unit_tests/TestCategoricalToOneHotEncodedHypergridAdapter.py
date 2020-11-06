@@ -9,7 +9,7 @@ from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimensi
 from mlos.Spaces.HypergridAdapters import CategoricalToOneHotEncodedHypergridAdapter
 
 
-class TestCategoricalToOneHotEncodedHypergridAdapter():
+class TestCategoricalToOneHotEncodedHypergridAdapter:
 
     @classmethod
     def setup_class(cls) -> None:

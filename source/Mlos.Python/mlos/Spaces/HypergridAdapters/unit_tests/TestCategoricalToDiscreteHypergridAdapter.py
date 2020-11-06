@@ -10,7 +10,7 @@ from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimensi
 from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter, DiscreteToUnitContinuousHypergridAdapter,\
     HierarchicalToFlatHypergridAdapter
 
-class TestCategoricalToDiscreteHypergridAdapter():
+class TestCategoricalToDiscreteHypergridAdapter:
 
     @classmethod
     def setup_class(cls) -> None:

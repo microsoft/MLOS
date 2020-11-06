@@ -14,7 +14,7 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmO
 from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point
 from mlos.Tracer import Tracer, trace, traced
 
-class TestFilteringOutInvalidRows():
+class TestFilteringOutInvalidRows:
 
     @classmethod
     def setup_class(cls):

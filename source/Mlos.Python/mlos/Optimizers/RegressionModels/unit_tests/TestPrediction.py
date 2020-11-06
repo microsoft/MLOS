@@ -11,7 +11,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 import mlos.global_values as global_values
 global_values.declare_singletons()
 
-class TestPrediction():
+class TestPrediction:
 
     class MockValidRegressionModelPrediction(Prediction):
         all_prediction_fields = Prediction.LegalColumnNames

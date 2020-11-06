@@ -5,7 +5,7 @@
 
 from mlos.Mlos.SDK import MlosObject
 
-class TestMlosObject():
+class TestMlosObject:
 
     def test_reconfiguration_lock(self):
         mlos_object = MlosObject(int, int)

@@ -17,7 +17,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 import mlos.global_values as global_values
 
 
-class TestRegressionEnhancedRandomForestRegressionModel():
+class TestRegressionEnhancedRandomForestRegressionModel:
 
     @classmethod
     def setup_class(cls):

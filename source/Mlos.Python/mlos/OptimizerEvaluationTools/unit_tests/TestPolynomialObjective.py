@@ -12,7 +12,7 @@ import mlos.global_values as global_values
 global_values.declare_singletons()
 
 
-class TestPolynomialObjective():
+class TestPolynomialObjective:
 
     @classmethod
     def classSetUp(cls):

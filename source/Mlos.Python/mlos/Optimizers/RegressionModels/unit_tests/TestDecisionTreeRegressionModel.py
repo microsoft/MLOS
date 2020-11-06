@@ -15,7 +15,7 @@ from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer
 
-class TestDecisionTreeRegressionModel():
+class TestDecisionTreeRegressionModel:
 
     @classmethod
     def setup_class(cls) -> None:

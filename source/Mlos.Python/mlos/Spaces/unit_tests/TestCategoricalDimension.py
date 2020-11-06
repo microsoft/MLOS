@@ -6,7 +6,7 @@
 from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
 
 
-class TestCategoricalDimension():
+class TestCategoricalDimension:
 
 
     def test_categorical_dimension_api(self):

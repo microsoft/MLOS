@@ -10,7 +10,7 @@ from threading import Thread
 from mlos.Mlos.Infrastructure import CommunicationChannel
 
 
-class TestCommunicationChannel():
+class TestCommunicationChannel:
 
 
     def test_multithreaded_communication(self):

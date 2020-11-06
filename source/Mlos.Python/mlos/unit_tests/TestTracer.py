@@ -8,7 +8,7 @@ import time
 from mlos.Tracer import Tracer, trace, add_trace_event
 import mlos.global_values as global_values
 
-class TestTracer():
+class TestTracer:
     """ Validates the global singleton Tracer can be properly initialized and used.
 
     """

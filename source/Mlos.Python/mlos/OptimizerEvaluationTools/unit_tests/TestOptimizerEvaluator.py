@@ -20,7 +20,7 @@ from mlos.Tracer import Tracer, traced
 
 
 
-class TestOptimizerEvaluator():
+class TestOptimizerEvaluator:
 
     @classmethod
     def setup_class(cls) -> None:

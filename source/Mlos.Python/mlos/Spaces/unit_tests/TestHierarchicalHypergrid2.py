@@ -7,7 +7,7 @@ import pytest
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
-class TestHierarchicalHypergrid2():
+class TestHierarchicalHypergrid2:
     """ Tests the improved implementation of the Hypergrids.
 
     In particular:

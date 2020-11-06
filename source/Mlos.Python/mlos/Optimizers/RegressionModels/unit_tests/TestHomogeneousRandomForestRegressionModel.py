@@ -12,7 +12,7 @@ from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 import mlos.global_values as global_values
 
 
-class TestHomogeneousRandomForestRegressionModel():
+class TestHomogeneousRandomForestRegressionModel:
 
     @classmethod
     def setup_class(cls) -> None:

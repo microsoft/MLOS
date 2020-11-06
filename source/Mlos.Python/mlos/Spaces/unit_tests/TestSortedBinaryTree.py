@@ -9,7 +9,7 @@ from mlos.Spaces.Dimensions.SortedBinaryTree import SortedBinaryTree, Stack
 NUM_KEYS = 10000
 RANGE = 100 * NUM_KEYS
 
-class StackTest():
+class StackTest:
 
     def test_stack(self):
         stack = Stack()
@@ -26,7 +26,7 @@ class StackTest():
             assert True
 
 
-class SortedBinaryTreeTest():
+class SortedBinaryTreeTest:
 
     def setup_method(self, method):
         self.random_sorted_binary_tree = SortedBinaryTree()

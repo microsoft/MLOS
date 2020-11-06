@@ -6,7 +6,7 @@ import random
 
 from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
 
-class TestHierarchicalSpaces():
+class TestHierarchicalSpaces:
 
     def setup_method(self, method):
         self.emergency_buffer_settings = SimpleHypergrid(

@@ -15,7 +15,7 @@ from mlos.Mlos.Infrastructure import CommunicationChannel, SharedConfig
 from mlos.Mlos.SDK import mlos_globals, MlosGlobalContext, MlosExperiment, MlosAgent
 from mlos.Mlos.SDK.CommonAggregators.Timer import Timer
 
-class TestE2EScenarios():
+class TestE2EScenarios:
     """ Tests aggregators based on the timer.
 
     """

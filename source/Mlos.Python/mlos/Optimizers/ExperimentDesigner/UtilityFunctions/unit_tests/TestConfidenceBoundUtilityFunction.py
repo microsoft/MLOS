@@ -19,7 +19,7 @@ import mlos.global_values as global_values
 
 
 
-class TestConfidenceBoundUtilityFunction():
+class TestConfidenceBoundUtilityFunction:
 
     @classmethod
     def setup_class(cls) -> None:
