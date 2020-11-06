@@ -54,11 +54,14 @@ class TestBayesianOptimizerGrpcClient():
         )
 
     def tearDown(self):
-        """ We need to tear down the gRPC server here.
+        """ We need to tear down the gRPC server and client here.
 
         :return:
         """
-        self.server.stop(grace=None)
+        self.server.stop(grace=None).wait(timeout=1)
+        self.server.wait_for_termination(timeout=1)
+        self.optimizer_service_channel.close()
+
 
     def test_echo(self):
         optimizer_service_stub = OptimizerServiceStub(channel=self.optimizer_service_channel)
