@@ -13,26 +13,48 @@
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
   <PropertyGroup Label="PackageProps">
-    <!-- Projects using a PackageReference to tool should not attempt to link against it. -->
+    <!-- Projects using a PackageReference to this tool should not attempt to link against it. -->
     <DevelopmentDependency>true</DevelopmentDependency>
     <!-- Place the outputs in the tools/ directory instead of the lib/ directory. -->
+    <!-- Note: We can't use PackAsTool since it won't allow us to PackageReference it or automatically pull in our build/ rules. -->
     <IsTool>true</IsTool>
     <!-- Since we did that, there are no items in the lib/ directory, so we need to ignore that warning. -->
     <NoWarn>$(NoWarn);NU5128</NoWarn>
   </PropertyGroup>
+  <!-- Since we can't use PackAsTool but want to be able to run the packaged version as one we need to include it's dependencies. -->
+  <PropertyGroup>
+    <GenerateNuspecDependsOn>IncludeDependentAssembliesInToolsPackage;$(GenerateNuspecDependsOn);$(GetPackageVersionDependsOn)</GenerateNuspecDependsOn>
+    <!-- TODO: since we do this now we can skip including the dependencies in the generated nuspec -->
+  </PropertyGroup>
+  <Target Name="IncludeDependentAssembliesInToolsPackage" BeforeTargets="Pack" AfterTargets="Build" Condition="'$(IsTool)' == 'true'">
+    <ItemGroup>
+    <!-- FIXME: -->
+      <None Include="$(OutputPath)/*.dll" Exclude="$(OutputPath)/$(TargetName)$(TargetExt);$(OutputPath)/$(TargetName).pdb">
+        <Pack>true</Pack>
+        <PackagePath>tools/</PackagePath>
+      </None>
+    </ItemGroup>
+    <Message Text="None: @(None)" Importance="high" />
+  </Target>
+  <!-- Include our build rules in the package, but not in the TargetFramework specific path. -->
   <ItemGroup>
-    <!-- Include our build rules in the package, but not in the TargetFramework specific path. -->
     <None Include="build/$(PackageId).*">
-      <PackagePath>build/</PackagePath>
       <Pack>true</Pack>
+      <PackagePath>build/</PackagePath>
     </None>
   </ItemGroup>
+  <PropertyGroup>
+    <MicrosoftCodeAnalysis_PackageVersion>3.6.0</MicrosoftCodeAnalysis_PackageVersion>
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.6.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
+    <!-- TODO? Included these in the package? With PrivateAssets=true? -->
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
+    <!-- Marked as Private so that when Packing, we can execute the dll directly as a tool. -->
+    <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectDeserializeEntryCountCodeWriter.cs" />
