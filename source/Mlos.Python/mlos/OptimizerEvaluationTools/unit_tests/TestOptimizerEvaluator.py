@@ -118,8 +118,7 @@ class TestOptimizerEvaluator:
         gof_df = unpickled_gof.get_goodness_of_fit_dataframe()
         assert len(gof_df.index) > 0
         assert all((col_name in gof_df.columns.values or col_name == "data_set_type") for col_name in GoodnessOfFitMetrics._fields)
-        assert (all(
-            gof_df[col_name].is_monotonic for col_name in ["last_refit_iteration_number", "observation_count", "prediction_count"]))
+        assert all(gof_df[col_name].is_monotonic for col_name in ["last_refit_iteration_number", "observation_count", "prediction_count"])
 
         with open(os.path.join(self.temp_dir, "optima_over_time.pickle"), "rb") as in_file:
             unpickled_optima_over_time = pickle.load(in_file)

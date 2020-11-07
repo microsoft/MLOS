@@ -143,8 +143,5 @@ class TestIntervalTreeWithContinuousDimension:
 
 
 
-
-
-
 class TestIntervalTreeWithDiscreteDimension:
     pass

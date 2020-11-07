@@ -304,7 +304,7 @@ class TestBayesianOptimizer:
                 run_optimization(optimizer)
             best_config_point, best_objective = optimizer.optimum()
             print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
-            assert sign * best_objective['function_value'] < -5.5
+            assert sign * best_objective['function_value'] <= -5.5
 
     def validate_optima(self, optimizer):
         if not optimizer.trained:
