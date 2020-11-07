@@ -5,7 +5,7 @@
     a) Generate output code from the MlosSettingsRegistryDefinition input-cs, and
     b) And (for the case of C#) combine and compile them with the resulting .cs files to produce a SettingsRegistry dll.
 
-    See TODO-FIXME.csproj for example usage.
+    See ExternalIntegrationExample.csproj for example usage.
   -->
 
   <PropertyGroup>

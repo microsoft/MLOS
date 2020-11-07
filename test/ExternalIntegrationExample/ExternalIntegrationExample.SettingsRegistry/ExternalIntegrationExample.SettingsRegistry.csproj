@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+
   <!-- In a large project some properties will be reused across components. -->
   <Import Project="$(MSBuildThisFileDirectory)/Common.props" />
+
   <!-- Set some project specific settings. -->
   <PropertyGroup Label="GeneralProjectProperties">
     <!-- Note: Change this to a unique uuid/guid when creating a new project. -->
@@ -10,28 +12,31 @@
     <RootNamespace>ExternalIntegrationExample</RootNamespace>
     <AssemblyName>ExternalIntegrationExample.SettingsRegistry</AssemblyName>
   </PropertyGroup>
+
   <!-- Inform the Mlos codegen tool where we want the output files place. -->
   <PropertyGroup Label="MlosCodeGenProperties">
     <MlosSettingsSystemCodeGenOutputDirectory>$(MlosSettingsSystemCodeGenOutputBaseDir)/ExternalIntegrationExample</MlosSettingsSystemCodeGenOutputDirectory>
   </PropertyGroup>
-  <!-- Pull in the Mlos codegen package tool and its build target rules. -->
   <ItemGroup>
-    <!-- TODO: Make sure it doesn't add any build dependencies -->
+    <!-- Pull in the Mlos codegen package tool and its build target rules. -->
+    <PackageReference Include="Mlos.SettingsSystem.CodeGen" Version="$(MlosPackageVersion)" />
+    <!-- We'll also need to link against some additional Mlos packages. -->
+    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="$(MlosPackageVersion)" />
+    <PackageReference Include="Mlos.NetCore" Version="$(MlosPackageVersion)" />
     <!--
-      TODO: See if we can add this, and the Mlos.NetCore dependency through the CodeGen package.
-    -->
-    <PackageReference Include="Mlos.SettingsSystem.CodeGen" Version="$(MlosSettingsSystem_PackageVersion)" />
-    <!--
-    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="$(MlosSettingsSystem_PackageVersion)" />
-    <PackageReference Include="Mlos.NetCore" Version="$(MlosSettingsSystem_PackageVersion)" />
+      Include this if you want to interface with the Mlos Optimizer service over Grpc
+      from your message handlers in your AssemblyInitializer code.
+    <PackageReference Include="Mlos.Model.Services.Client" Version="$(MlosPackageVersion)" />
     -->
   </ItemGroup>
+
   <!-- List data structures for the settings and messages to be used for code generation. -->
   <ItemGroup Label="MlosSettingsRegistryDefinitions">
     <MlosSettingsRegistryDefinition Include="CodeGen/AssemblyInfo.cs" />
     <MlosSettingsRegistryDefinition Include="CodeGen/SmartComponentExampleConfig.cs" />
     <MlosSettingsRegistryDefinition Include="CodeGen/SmartComponentExampleMessages.cs" />
   </ItemGroup>
+
   <!--
     Add any additional .cs files necessary for compilation for the output assembly
     to use when loading in the Mlos.Agent.Server.Tool.

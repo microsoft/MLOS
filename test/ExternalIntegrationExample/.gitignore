@@ -1,2 +1,3 @@
 # Ignore the local MLOS codegen output for this example:
 ./Mlos.CodeGen.out/
+./ExternalIntegrationExample/.nuget/

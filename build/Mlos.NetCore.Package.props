@@ -36,32 +36,11 @@
   </PropertyGroup>
 
   <!-- Include the .pdb symbols file in the standard package to make debugging easier. -->
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
 
-  <PropertyGroup>
-<!-- TODO: Remove this (or fix it's dependencies) - it forces a Build target dependency so doesn't work with NoBuild. -->
-    <!--Include Project References output -->
-    <!--
-    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);CopyProjectReferencesToPackage</TargetsForTfmSpecificBuildOutput>
-    -->
-  </PropertyGroup>
-
-<!-- TODO: Remove this (or fix it's dependencies) - it forces a Build target dependency so doesn't work with NoBuild. -->
-  <Target DependsOnTargets="ResolveReferences" Name="CopyProjectReferencesToPackage">
-    <ItemGroup>
-      <!--Include DLLs of Project References -->
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference'))"/>
-
-      <!--Include PDBs of Project References -->
-      <BuildOutputInPackage Include="@(ReferenceCopyLocalPaths->WithMetadataValue('ReferenceSourceTarget', 'ProjectReference')->Replace('.dll', '.pdb'))"/>
-    </ItemGroup>
+  <Target Name="SavePackageVersion" AfterTargets="Pack">
+    <WriteLinesToFile File="$(MlosPkgOutputDir)/.last-pack-version" Lines="$(PackageVersion)" Overwrite="true" />
   </Target>
-
-  <!--
-    Note: PackTask alters the PackageVersion property slightly when writing the file,
-    (e.g. dropping the "+{commitNumber}") so it is difficult to provide a "clean" target
-    for removing packages. For now, just remove the target/pkg/... directory/files.
-  -->
 </Project>

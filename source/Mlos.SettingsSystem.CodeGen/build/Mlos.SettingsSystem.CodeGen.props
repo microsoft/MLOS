@@ -7,10 +7,8 @@
       This path property is expected to be set by the including project referencing this package.
       On the C++ consumer side, it is also the path to add to the cmake target_include_directories().
       We recommend using a BaseDir path combined with the ProjectName for this path.
-
-      TODO: Add a reasonable default here.  Maybe something in the source tree? (*yuck*)
     -->
-    <MlosSettingsSystemCodeGenOutputDirectory Condition="'$(MlosSettingsSystemCodeGenOutputDirectory)' == ''"></MlosSettingsSystemCodeGenOutputDirectory>
+    <MlosSettingsSystemCodeGenOutputDirectory Condition="'$(MlosSettingsSystemCodeGenOutputDirectory)' == ''">$(MSBuildThisFileDirectory)/Mlos.CodeGen.out/$(Configuration)/$(MSBuildProjectName)</MlosSettingsSystemCodeGenOutputDirectory>
 
     <!--
       The desired basename of the codegen output files.
@@ -26,37 +24,24 @@
     <MlosSettingsRegistryAssemblyOutputDirectory Condition="'$(MlosSettingsRegistryAssemblyOutputDirectory)' == ''"></MlosSettingsRegistryAssemblyOutputDirectory>
   </PropertyGroup>
 
-  <!-- When compiling, be sure to reference a few other nugets by default -->
-  <PropertyGroup Label="LookupNugetPackageVersion">
-    <!-- First, lookup the nuget package version in use so that we pull the same version for the other dependencies. -->
-    <MlosCodeGenPackageVersion Condition="'$(MlosCodeGenPackageVersion)' == ''">*-*</MlosCodeGenPackageVersion>
-  </PropertyGroup>
-  <!-- Lookup the current nuget package version -->
-  <!-- FIXME: An alternative to that would be to do a sed/replace on a PACKAGE_VERSION string in this file prior to including it in the output package -->
-  <Target Name="LookupCurrentMlosCodeGenPackageVersion" BeforeTargets="Build" AfterTargets="BeforeBuild"> <!-- FIXME: This should be before restore -->
-    <XmlPeek XmlInputPath="$(MSBuildThisFileDirectory)/../mlos.settingssystem.codegen.nuspec"
-             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd'/&gt;"
-             Query="/ns:package/ns:metadata/ns:version/text()">
-      <Output TaskParameter="Result" PropertyName="MlosCodeGenPackageVersion" />
-    </XmlPeek>
-    <Message Text="MlosCodeGenPackageVersion: $(MlosCodeGenPackageVersion)" Importance="high" />
-  </Target>
-  <ItemGroup>
-    <!-- The settings registry definitions will reference the Mlos.SettingsSystem.Attributes. -->
-    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="$(MlosCodeGenPackageVersion)" />
-    <!-- Some of the codegen output has "using Mlos.Core;" statements. -->
-    <PackageReference Include="Mlos.NetCore" Version="$(MlosCodeGenPackageVersion)" />
-  </ItemGroup>
-
   <!-- Adjust some compilation and NET.Sdk .csproj settings. -->
   <PropertyGroup Label="MlosSettingsRegistryCompileSettings">
-    <!-- TODO? Unnecessary?
-    <UseNETCoreGenerator>true</UseNETCoreGenerator>
-    -->
+    <!--UseNETCoreGenerator>true</UseNETCoreGenerator-->
     <!-- Our codegen output needs to interface with raw memory buffers for interop with C++. -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <!-- Disable .NET.Sdk behavior of including all *.cs files within the project's directory by default. -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <!--EnableDefaultItems>false</EnableDefaultItems-->
   </PropertyGroup>
+
+  <!-- When compiling, be sure to reference a few other nugets by default -->
+  <!-- Note: The version string below is replaced at project/package build time using the PackageVersion property. -->
+  <ItemGroup>
+    <!-- The settings registry definitions will reference the Mlos.SettingsSystem.Attributes. -->
+    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="MLOS_CODEGEN_PACKAGE_VERSION" />
+    <!-- Some of the codegen output has "using Mlos.Core;" statements. -->
+    <PackageReference Include="Mlos.NetCore" Version="MLOS_CODEGEN_PACKAGE_VERSION" />
+  </ItemGroup>
+  <!-- FIXME: Those rules don't work (which makes sense - we're in the middle of Restore target already at this point. -->
+  <!-- TODO: Instead, let's add a Target that gets to see if those were listed as a PackageReference in the MSBuildProjectFile. -->
 </Project>
