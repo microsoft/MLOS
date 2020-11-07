@@ -4,7 +4,6 @@
 #
 import math
 import os
-import unittest
 
 import numpy as np
 import pandas as pd
@@ -20,13 +19,13 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 from mlos.Tracer import Tracer, trace
 import mlos.global_values as global_values
 
-class TestUtilityFunctionOptimizers(unittest.TestCase):
+class TestUtilityFunctionOptimizers:
     """ Tests if the random search optimizer does anything useful at all.
 
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """ Set's up all the objects needed to test the RandomSearchOptimizer
 
         To test the RandomSearchOptimizer we need to first construct:
@@ -81,7 +80,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         )
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def teardown_class(cls) -> None:
         temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(temp_dir):
             os.mkdir(temp_dir)
@@ -100,7 +99,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         for _ in range(5):
             suggested_params = random_search_optimizer.suggest()
             print(suggested_params.to_json())
-            self.assertTrue(suggested_params in self.input_space)
+            assert suggested_params in self.input_space
 
     @trace()
     def test_glow_worm_swarm_optimizer(self):
@@ -113,7 +112,7 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
             print(suggested_params.to_json())
-            self.assertTrue(suggested_params in self.input_space)
+            assert suggested_params in self.input_space
 
     @trace()
     def test_glow_worm_on_three_level_quadratic(self):
@@ -161,6 +160,6 @@ class TestUtilityFunctionOptimizers(unittest.TestCase):
         for i in range(num_iterations):
             suggested_params = glow_worm_swarm_optimizer.suggest()
             print(f"[{i+1}/{num_iterations}] {suggested_params.to_json()}")
-            self.assertTrue(suggested_params in objective_function.parameter_space)
+            assert suggested_params in objective_function.parameter_space
 
 

@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 import math
-import unittest
+import pytest
 import warnings
 
 import grpc
@@ -23,17 +23,17 @@ from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 
 
-class TestBayesianOptimizerGrpcClient(unittest.TestCase):
+class TestBayesianOptimizerGrpcClient:
     """ Tests the E2E Grpc Client-Service workflow.
 
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         warnings.simplefilter("error")
         global_values.declare_singletons()
 
-    def setUp(self):
+    def setup_method(self, method):
         self.logger = create_logger(self.__class__.__name__)
         # Start up the gRPC service.
         #
@@ -53,17 +53,20 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
             objectives=[Objective(name='y', minimize=True)]
         )
 
-    def tearDown(self):
+    def teardown_method(self, method):
         """ We need to tear down the gRPC server here.
 
         :return:
         """
-        self.server.stop(grace=None)
+        self.server.stop(grace=None).wait(timeout=1)
+        self.server.wait_for_termination(timeout=1)
+        self.optimizer_service_channel.close()
+
 
     def test_echo(self):
         optimizer_service_stub = OptimizerServiceStub(channel=self.optimizer_service_channel)
         response = optimizer_service_stub.Echo(Empty())
-        self.assertTrue(isinstance(response, Empty))
+        assert isinstance(response, Empty)
 
 
     def test_optimizer_with_default_config(self):
@@ -81,13 +84,13 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
             if optimizer_id not in pre_existing_optimizers
         }
 
-        self.assertTrue(len(new_optimizers) == 1)
+        assert len(new_optimizers) == 1
 
         new_optimizer_id = list(new_optimizers.keys())[0]
         new_optimizer = new_optimizers[new_optimizer_id]
 
-        self.assertTrue(new_optimizer_id == bayesian_optimizer.id)
-        self.assertTrue(new_optimizer.optimizer_config == bayesian_optimizer.optimizer_config)
+        assert new_optimizer_id == bayesian_optimizer.id
+        assert new_optimizer.optimizer_config == bayesian_optimizer.optimizer_config
 
         num_iterations = 100
         registered_features_df, registered_objectives_df = self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=num_iterations)
@@ -107,8 +110,8 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
         observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-        self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
-        self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
+        assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
+        assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
         # Let's look at the goodness of fit.
         #
@@ -116,22 +119,22 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
         # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
         # and should make this test not very flaky.
-        self.assertTrue(random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations)
+        assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
 
         # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
         models_gof_metrics = [random_forest_gof_metrics]
 
         for model_gof_metrics in models_gof_metrics:
-            self.assertTrue(0 <= model_gof_metrics.relative_absolute_error <= 1) # This could fail if the models are really wrong. Not expected in this unit test though.
-            self.assertTrue(0 <= model_gof_metrics.relative_squared_error <= 1)
+            assert 0 <= model_gof_metrics.relative_absolute_error <= 1 # This could fail if the models are really wrong. Not expected in this unit test though.
+            assert 0 <= model_gof_metrics.relative_squared_error <= 1
 
             # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
             n = model_gof_metrics.last_refit_iteration_number
-            self.assertTrue(model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error)
+            assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
 
             # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
-            self.assertTrue(model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate)
-            self.assertTrue(0 <= model_gof_metrics.coefficient_of_determination <= 1)
+            assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
+            assert 0 <= model_gof_metrics.coefficient_of_determination <= 1
 
 
     def test_optimizer_with_random_config(self):
@@ -167,11 +170,11 @@ class TestBayesianOptimizerGrpcClient(unittest.TestCase):
 
             observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-            self.assertTrue((np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all())
-            self.assertTrue((np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all())
+            assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
+            assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
 
-    @unittest.skip(reason="Not implemented yet.")
+    @pytest.mark.skip(reason="Not implemented yet.")
     def test_optimizer_with_named_config(self):
         ...
 

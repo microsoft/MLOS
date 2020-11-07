@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import unittest
 import random
 import math
 import pandas as pd
@@ -18,13 +17,13 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 import mlos.global_values as global_values
 
 
-class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
+class TestRegressionEnhancedRandomForestRegressionModel:
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         global_values.declare_singletons()
 
-    def setUp(self):
+    def setup_method(self, method):
         self.model_config = RegressionEnhancedRandomForestRegressionModelConfig.DEFAULT
 
         self.test_case_globals = {
@@ -127,16 +126,16 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
         num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
+        assert rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect'
+        assert rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect'
+        assert rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect'
+        assert rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect'
 
         # test if expected non-zero terms were found
         expected_fit_model_terms = {1, 2, 3, 5}
         expected_symm_diff_found = expected_fit_model_terms - set(rerf.detected_feature_indices_)
         num_diffs = len(list(expected_symm_diff_found))
-        self.assertTrue(num_diffs == 0, 'Base model failed to find expected features')
+        assert num_diffs == 0, 'Base model failed to find expected features'
 
     # @unittest.expectedFailure # The configs don't belong to their respective config spaces
     def test_lasso_polynomial_coefficient_invariants(self):
@@ -155,10 +154,10 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
         num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
+        assert rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect'
+        assert rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect'
+        assert rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect'
+        assert rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect'
 
     # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
     def test_lasso_polynomial_gradient_invariants(self):
@@ -177,10 +176,10 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
         num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
+        assert rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect'
+        assert rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect'
+        assert rerf.fit_X_.shape == (num_points, num_terms_in_polynomial), 'Design matrix shape is incorrect'
+        assert rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect'
 
     # @unittest.expectedFailure  # The configs don't belong to their respective config spaces
     def test_lasso_predictions(self):
@@ -199,10 +198,10 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         num_terms_in_polynomial = self.n_choose_k(polynomial_degree + final_num_features, final_num_features)
         num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_train_points, num_terms_in_polynomial), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
+        assert rerf.polynomial_features_powers_.shape == (num_terms_in_polynomial, final_num_features), 'PolynomalFeature.power_ shape is incorrect'
+        assert rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect'
+        assert rerf.fit_X_.shape == (num_train_points, num_terms_in_polynomial), 'Design matrix shape is incorrect'
+        assert rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect'
 
         # generate new random sample to test predictions
         num_test_points = 50
@@ -218,7 +217,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
 
         test_threshold = 10 ** -3
-        self.assertTrue(unexplained_variance < test_threshold,
+        assert (unexplained_variance < test_threshold,
                         f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
 
     def test_lasso_categorical_predictions(self):
@@ -247,10 +246,10 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
                                   - len(rerf.categorical_zero_cols_idx_to_delete_)
         num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_train_x, num_cols_in_design_matrix), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (num_cols_in_design_matrix, final_num_features), 'PolynomalFeature.power_ shape is incorrect')
+        assert rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect'
+        assert rerf.fit_X_.shape == (num_train_x, num_cols_in_design_matrix), 'Design matrix shape is incorrect'
+        assert rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect'
+        assert rerf.polynomial_features_powers_.shape == (num_cols_in_design_matrix, final_num_features), 'PolynomalFeature.power_ shape is incorrect'
 
         # generate new random to test predictions
         num_test_points = 50
@@ -266,7 +265,7 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
         test_threshold = 10 ** -3
-        self.assertTrue(unexplained_variance < test_threshold,
+        assert (unexplained_variance < test_threshold,
                         f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
 
     def test_lasso_hierarchical_categorical_predictions(self):
@@ -290,10 +289,10 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         rerf.fit(x_train_df, y_train_df)
         num_detected_features = len(rerf.detected_feature_indices_)
 
-        self.assertTrue(rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect')
-        self.assertTrue(rerf.fit_X_.shape == (num_train_x, rerf.polynomial_features_powers_.shape[0]), 'Design matrix shape is incorrect')
-        self.assertTrue(rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect')
-        self.assertTrue(rerf.polynomial_features_powers_.shape == (34, 9), 'PolynomalFeature.power_ shape is incorrect')
+        assert rerf.root_model_gradient_coef_.shape == rerf.polynomial_features_powers_.shape, 'Gradient coefficient shape is incorrect'
+        assert rerf.fit_X_.shape == (num_train_x, rerf.polynomial_features_powers_.shape[0]), 'Design matrix shape is incorrect'
+        assert rerf.partial_hat_matrix_.shape == (num_detected_features, num_detected_features), 'Hat matrix shape is incorrect'
+        assert rerf.polynomial_features_powers_.shape == (34, 9), 'PolynomalFeature.power_ shape is incorrect'
 
         # test predictions
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
@@ -307,4 +306,4 @@ class TestRegressionEnhancedRandomForestRegressionModel(unittest.TestCase):
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
         test_threshold = 10**-3
-        self.assertTrue(unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
+        assert unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})'
