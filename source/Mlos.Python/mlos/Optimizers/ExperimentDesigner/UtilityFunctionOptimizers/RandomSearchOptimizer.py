@@ -72,14 +72,3 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         index_of_max_value = target_values.argmax() if num_target_values > 0 else 0
         return Point.from_dataframe(config_values_dataframe.iloc[[index_of_max_value]])
 
-    @trace()
-    def suggest(self, context_values_dataframe=None):
-        """ Returns the next best configuration to try.
-
-        It does so by generating num_samples_per_iteration random configurations,
-        passing them through the utility function and selecting the configuration with
-        the highest utility value.
-        """
-        config_to_suggest = self.maximize(self.utility_function, context_values_dataframe=context_values_dataframe)
-        self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
-        return config_to_suggest

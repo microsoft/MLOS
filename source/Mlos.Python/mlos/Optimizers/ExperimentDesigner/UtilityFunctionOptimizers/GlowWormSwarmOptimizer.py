@@ -77,7 +77,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         self.dimension_names = [dimension.name for dimension in self.parameter_adapter.dimensions]
 
     @trace()
-    def suggest(self, context_values_dataframe=None):  # pylint: disable=unused-argument
+    def maximize(self, target_function, context_values_dataframe=None):  # pylint: disable=unused-argument
         """ Returns the next best configuration to try.
 
         The idea is pretty simple:
@@ -95,7 +95,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(
             num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
         )
-        utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
+        utility_function_values = target_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)
         if num_utility_function_values == 0:
             config_to_suggest = Point.from_dataframe(feature_values_dataframe.iloc[[0]])
