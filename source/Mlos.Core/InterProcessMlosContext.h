@@ -78,9 +78,6 @@ public:
 
     ~InterProcessMlosContext();
 
-    _Must_inspect_result_
-    HRESULT HandleFdRequests();
-
 private:
     InterProcessMlosContextInitializer m_contextInitializer;
 
