@@ -124,8 +124,8 @@ namespace Mlos.Core.Linux
         [DllImport(RtLib, EntryPoint = "close", CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern int Close(IntPtr handle);
 
-        [DllImport(RtLib, CharSet = CharSet.Ansi)]
-        internal static extern void perror(string name);
+        [DllImport(RtLib, EntryPoint ="perror", CharSet = CharSet.Ansi)]
+        internal static extern void PrintError(string name);
 
 #pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
 
@@ -133,7 +133,7 @@ namespace Mlos.Core.Linux
         internal enum OpenFlags : int
         {
             O_RDONLY = 0,
-            o_WRONLY = 1,
+            O_WRONLY = 1,
             O_RDWR = 2,
 
             /// <summary>

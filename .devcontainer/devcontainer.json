@@ -1,0 +1,27 @@
+{
+    "name": "mlos-build-ubuntu-20.04",
+    "extensions": [
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools",
+        "ms-dotnettools.csharp",
+        "ms-python.python",
+        "zxh404.vscode-proto3",
+        "editorconfig.editorconfig",
+        "davidanson.vscode-markdownlint",
+        "yzhang.markdown-all-in-one",
+        "shd101wyy.markdown-preview-enhanced",
+        "bpruitt-goddard.mermaid-markdown-syntax-highlighting",
+        "streetsidesoftware.code-spell-checker",
+        "austin.code-gnu-global"
+    ],
+    "forwardPorts": [8080, 50051],
+    "image": "ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04:latest",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/src/MLOS,type=bind,consistency=cached",
+    "workspaceFolder": "/src/MLOS",
+    "remoteUser" : "mlos-docker",
+    "mounts" : [
+        "source=mlos-build-ubuntu-20.04-bash-history,target=/home/mlos-docker/.histvol,type=volume",
+        "source=mlos-build-ubuntu-20.04-vscode-exts,target=/home/mlos-docker/.vscode-server/extensions,type=volume",
+        "source=mlos-build-ubuntu-20.04-vscode-exts,target=/home/mlos-docker/.vscode-server-insiders/extensions,type=volume"
+    ]
+}

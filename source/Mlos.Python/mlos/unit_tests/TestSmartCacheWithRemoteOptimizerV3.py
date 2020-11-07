@@ -2,11 +2,9 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import datetime
 import logging
 import math
 from threading import Thread
-import time
 import unittest
 
 import grpc
@@ -14,13 +12,12 @@ import pandas as pd
 
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
-from mlos.Grpc.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 from mlos.Examples.SmartCache import SmartCacheWorkloadGenerator, SmartCache, HitRateMonitor
 from mlos.Examples.SmartCache.TelemetryAggregators.WorkingSetSizeEstimator import WorkingSetSizeEstimator
 from mlos.Mlos.SDK import mlos_globals, MlosExperiment, MlosAgent
-from mlos.Mlos.SDK.CommonAggregators.Timer import Timer
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizerConfig
+from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 
@@ -102,10 +99,11 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
         """ Periodically invokes the optimizer to improve cache performance.
 
         """
-        optimizer_config = BayesianOptimizerConfig.DEFAULT
+        optimizer_config = bayesian_optimizer_config_store.default
+        optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 5
         self.optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
-            optimizer_config=BayesianOptimizerConfig.DEFAULT
+            optimizer_config=optimizer_config
         )
         self.mlos_agent.start_experiment(self.smart_cache_experiment)
 
@@ -126,21 +124,16 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
             new_config_values = self.optimizer.suggest()
             self.mlos_agent.set_configuration(component_type=SmartCache, new_config_values=new_config_values)
             self.hit_rate_monitor.reset()
-            self.logger.info(f"Previous config: {current_cache_config}")
+            self.logger.info(f"Previous config: {current_cache_config.to_json()}")
             self.logger.info(f"Estimated working set size: {working_set_size_estimate.chapman_estimator}. Hit rate: {hit_rate:.2f}. Num requests: {num_requests} ")
 
 
         self.mlos_agent.stop_experiment(self.smart_cache_experiment)
 
-        convergence_state = self.optimizer.get_optimizer_convergence_state()
-
-        # Now let's make sure we the convergence state is looks reasonable.
-        #
-        random_forest_fit_state = convergence_state.surrogate_model_fit_state
 
         # Let's look at the goodness of fit.
         #
-        random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+        random_forest_gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
 
         # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
         # and should make this test not very flaky.
@@ -148,9 +141,6 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
 
         # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
         models_gof_metrics = [random_forest_gof_metrics]
-        for decision_tree_fit_state in random_forest_fit_state.decision_trees_fit_states:
-            if decision_tree_fit_state.fitted:
-                models_gof_metrics.append(decision_tree_fit_state.current_train_gof_metrics)
 
         for model_gof_metrics in models_gof_metrics:
             # Those relative errors should generally be between 0 and 1 unless the model's predictions are worse than predicting average...

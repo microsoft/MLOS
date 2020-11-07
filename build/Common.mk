@@ -34,11 +34,18 @@ endif
 # keep msbuild props/targets files in build/
 CmakeBuildDir := $(MLOS_ROOT)/out/cmake
 
-CMAKE := $(MLOS_ROOT)/tools/cmake/bin/cmake
-DOTNET := $(MLOS_ROOT)/tools/bin/dotnet
+CMAKE := cmake
+DOTNET := dotnet
 
-PATH := $(MLOS_ROOT)/tools/bin:$(PATH)
+# Make sure to check the usual pip install location for commands.
+PATH := $(PATH):${HOME}/.local/bin
 export PATH
+
+# Make dotnet be a little less noisy.
+DOTNET_SKIP_FIRST_TIME_EXPERIENCE := 1
+DOTNET_CLI_TELEMETRY_OPTOUT := 1
+export DOTNET_CLI_TELEMETRY_OPTOUT
+export DOTNET_SKIP_FIRST_TIME_EXPERIENCE
 
 # Recognized configurations.
 SupportedConfigurations := Release Debug
@@ -68,7 +75,7 @@ ifeq ($(filter $(CONFIGURATION),$(SupportedConfigurations)),)
 endif
 
 # Variables tracking additional targets to be added to by later Makefile wrappers.
-handledtargets = all test check clean distclean rebuild ctags
+handledtargets = all test check install clean distclean rebuild ctags
 
 # Mark this file as imported.
 MlosCommonMkImported := true

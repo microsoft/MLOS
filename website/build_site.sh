@@ -21,17 +21,13 @@ pythonCmd=$(getPythonCmd)
 $pythonCmd -m pip install -e "$MLOS_ROOT/source/Mlos.Python/"
 $pythonCmd -m pip install pyyaml
 $pythonCmd -m pip install \
-    $("$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
+    $($pythonCmd "$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
 # FIXME: nbconvert 6.0.1 had an error.
 $pythonCmd -m pip install jupyter nbconvert==5.6.1
 
-# execute and render the notebooks to html
-# downgrade html output because hugo doesn't like raw html
-mkdir -p content/notebooks
-# Restricted set of notebooks that are rendered for inclusion on the webpage:
-notebooks='BayesianOptimization SmartCacheOptimization'
-for nb in $notebooks; do
-    nb_path="$MLOS_ROOT/source/Mlos.Notebooks/$nb.ipynb"
+function RenderNotebook()
+{
+    local nb_path="$1"
     echo "Executing and rendering $nb_path"
     $pythonCmd -m jupyter nbconvert "$nb_path" \
         --to markdown --output-dir content/notebooks/ \
@@ -42,16 +38,35 @@ for nb in $notebooks; do
 #        --execute \
 #        --ExecutePreprocessor.kernel_name=python3 \
 #        --ExecutePreprocessor.timeout=600 \
-done
 
-# place links to github in notebook files
-# (builds off the nbconvert template)
-for f in content/notebooks/*.md; do
-    base=$(basename "$f" '.md') # removes .md from file name
-    sed -i "s/FILENAME/$base/g" "$f"
-done
+    # place links to github in notebook files
+    # (builds off the nbconvert template)
+    nb_basename=$(basename "$nb_path" '.ipynb') # removes .ipynb from file name
+    nb_relative_path="$(realpath --relative-to="$MLOS_ROOT" "$(readlink -f "$nb_path")")"
+    sed -i \
+        -e "s|THE_PATH_TO_NOTEBOOK_FROM_MLOS_ROOT|$nb_relative_path|g" \
+        -e "s|NOTEBOOK_BASENAME|$nb_basename|g" \
+        "content/notebooks/$nb_basename.md"
+}
 
-# Provide
+# execute and render the notebooks to html
+# downgrade html output because hugo doesn't like raw html
+mkdir -p content/notebooks
+# Restricted set of notebooks that are rendered for inclusion on the webpage:
+mlos_notebooks='BayesianOptimization SmartCacheOptimization SmartCacheCPP'
+for nb in $mlos_notebooks; do
+    RenderNotebook "$MLOS_ROOT/source/Mlos.Notebooks/$nb.ipynb"
+done
+# Plus some external project notebooks:
+RenderNotebook "$MLOS_ROOT/external/leveldb/LevelDbTuning.ipynb"
+
+# Make notebook images available in the website:
+mkdir -p content/notebooks/images/
+cp -r $MLOS_ROOT/external/leveldb/images/*.png content/notebooks/images/
+
+# Provide an index file for viewing the set of notebooks that we render at
+# http://microsoft.github.io/MLOS/notebooks/
+notebooks=$(find content/notebooks/ -name '*.md' -printf '%f\n' | sed 's/\.md$//')
 cat > content/notebooks/_index.md <<HERE
 # MLOS Sample Notebooks
 
@@ -70,20 +85,23 @@ cp ../LICENSE.txt content/
         *.md \
         build/ \
         documentation/ \
+        external/ \
         scripts/ \
         source/ \
         test/ \
-        -name '*.md' \
-) | while read md_path; do
-    md_dir=$(dirname "$md_path")
-    md_file=$(basename "$md_path")
-    mkdir -p "content/$md_dir"
-    if [ "$md_file" == 'README.md' ]; then
+        -name '*.md' -or \
+        -name '*.png' -or \
+        -name '*.svg' \
+) | while read path; do
+    dir=$(dirname "$path")
+    file=$(basename "$path")
+    mkdir -p "content/$dir"
+    if [ "$file" == 'README.md' ]; then
         # Except for README files - they should be created like directory indexes.
         # NOTE: Each directory that includes an .md should have one of these.
-        cp "$MLOS_ROOT/$md_dir/README.md" "content/$md_dir/_index.md"
+        cp "$MLOS_ROOT/$dir/README.md" "content/$dir/_index.md"
     else
-        cp "$MLOS_ROOT/$md_path" "content/$md_dir/"
+        cp "$MLOS_ROOT/$path" "content/$dir/"
     fi
 done
 

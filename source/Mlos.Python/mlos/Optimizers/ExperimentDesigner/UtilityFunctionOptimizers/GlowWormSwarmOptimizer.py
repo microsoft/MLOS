@@ -9,18 +9,19 @@ from sklearn.metrics.pairwise import euclidean_distances
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
-from mlos.Tracer import trace, traced
-from mlos.Spaces import ContinuousDimension, DiscreteDimension, DefaultConfigMeta, Point, SimpleHypergrid
+from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Spaces.HypergridAdapters import DiscreteToUnitContinuousHypergridAdapter
+from mlos.Tracer import trace, traced
 
 
-class GlowWormSwarmOptimizerConfig(metaclass=DefaultConfigMeta):
-    CONFIG_SPACE = SimpleHypergrid(
+glow_worm_swarm_optimizer_config_store = ComponentConfigStore(
+    parameter_space=SimpleHypergrid(
         name="glow_worm_swarm_optimizer_config",
         dimensions=[
             DiscreteDimension(name="num_initial_points_multiplier", min=1, max=10),
-            DiscreteDimension(name="num_worms", min=1, max=1000),
-            DiscreteDimension(name="num_iterations", min=1, max=1000), # TODO: consider other stopping criteria too
+            DiscreteDimension(name="num_worms", min=10, max=1000),
+            DiscreteDimension(name="num_iterations", min=1, max=20), # TODO: consider other stopping criteria too
             ContinuousDimension(name="luciferin_decay_constant", min=0, max=1),
             ContinuousDimension(name="luciferin_enhancement_constant", min=0, max=1),
             ContinuousDimension(name="step_size", min=0, max=1),  # TODO: make this adaptive
@@ -29,9 +30,8 @@ class GlowWormSwarmOptimizerConfig(metaclass=DefaultConfigMeta):
             DiscreteDimension(name="desired_num_neighbors", min=1, max=100),  # TODO: add constraint to make it smaller than num_worms
             ContinuousDimension(name="decision_radius_adjustment_constant", min=0, max=1)
         ]
-    )
-
-    _DEFAULT = Point(
+    ),
+    default=Point(
         num_initial_points_multiplier=5,
         num_worms=100,
         num_iterations=10,
@@ -43,8 +43,7 @@ class GlowWormSwarmOptimizerConfig(metaclass=DefaultConfigMeta):
         desired_num_neighbors=10,
         decision_radius_adjustment_constant=0.05
     )
-
-    assert _DEFAULT in CONFIG_SPACE
+)
 
 
 class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):

@@ -26,7 +26,30 @@
             "preLaunchTask": "", //"build",
             "program": "${workspaceFolder}/out/dotnet/source/Mlos.Agent.Server/objd/AnyCPU/Mlos.Agent.Server.dll",
             "args": [
-                "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest"
+                //"--optimizer-uri",
+                //"http://localhost:50051",
+                "--executable",
+                "${workspaceFolder}/out/cmake/Debug/source/Mlos.UnitTest/Mlos.UnitTest",
+                "--settings-registry-path",
+                "${workspaceFolder}/out/dotnet/source/Mlos.UnitTest/Mlos.UnitTest.SettingsRegistry/objd/AnyCPU"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        },
+        {
+            "name": ".NET Core Launch (console) - Mlos.Agent.Server - SmartCache",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "", //"build",
+            "program": "${workspaceFolder}/out/dotnet/source/Mlos.Agent.Server/objd/AnyCPU/Mlos.Agent.Server.dll",
+            "args": [
+                //"--optimizer-uri",
+                //"http://localhost:50051",
+                "--executable",
+                "${workspaceFolder}/out/cmake/Debug/source/Examples/SmartCache/SmartCache",
+                "--settings-registry-path",
+                "${workspaceFolder}/out/dotnet/source/Examples/SmartCache/SmartCache.SettingsRegistry/objd/AnyCPU"
             ],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,

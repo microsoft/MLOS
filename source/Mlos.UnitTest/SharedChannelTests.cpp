@@ -44,20 +44,105 @@ TEST(SharedChannel, VerifyBufferSize)
     //
     {
         TestFlatBuffer<21> buffer;
-        ChannelSynchronization sync = { 0 };
+        ChannelSynchronization sync = {};
         TestSharedChannel sharedChannel(sync, buffer, 21);
 
         EXPECT_EQ(sharedChannel.Size, 16);
     }
     {
         TestFlatBuffer<4095> buffer;
-        ChannelSynchronization sync = { 0 };
+        ChannelSynchronization sync = {};
         TestSharedChannel sharedChannel(sync, buffer, 4095);
 
         EXPECT_EQ(sharedChannel.Size, 2048);
     }
 }
 #endif // !DEBUG
+
+// Verify channel restart.
+//
+TEST(SharedChannel, VerifyChannelRestart)
+{
+    auto globalDispatchTable = GlobalDispatchTable();
+
+    // Define objects (used as a messages).
+    //
+    Mlos::UnitTest::Point point = { 13, 17 };
+
+    // Create the test channel.
+    //
+    TestFlatBuffer<128> buffer;
+    ChannelSynchronization sync = {};
+    TestSharedChannel sharedChannel(sync, buffer, 128);
+
+    // Write the first message.
+    //
+    sharedChannel.SendMessage(point);
+
+    // Read the first message, do not advance the free region.
+    //
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+
+    // Write second message.
+    //
+    sharedChannel.SendMessage(point);
+
+    // Write the third message as partially written.
+    //
+    uint32_t writePosition = sync.WritePosition;
+    sharedChannel.SendMessage(point);
+    *reinterpret_cast<uint32_t*>(buffer.Pointer + writePosition) |= 1;
+
+    // Write the fourth message.
+    //
+    sharedChannel.SendMessage(point);
+
+    // Simulate start processing of the written frames.
+    //
+    sync.ReadPosition.store(sync.WritePosition.load());
+
+    // Simulate channel restart.
+    //
+    sharedChannel.InitializeChannel();
+
+    // First frame is fully processed.
+    // Read position points to first unprocessed frame.
+    //
+    EXPECT_EQ(sharedChannel.Sync.FreePosition, 24);
+    EXPECT_EQ(sharedChannel.Sync.ReadPosition, 24);
+
+    // Next message was fully written, expect it to be processed.
+    //
+    bool isProcessed = false;
+    ObjectDeserializationCallback::Mlos::UnitTest::Point_Callback = [&isProcessed](Proxy::Mlos::UnitTest::Point&& recvPoint)
+        {
+            UNUSED(recvPoint);
+            isProcessed = true;
+        };
+
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+    EXPECT_EQ(isProcessed, true);
+
+    // Next message was partially written, so it will not be processed.
+    //
+    isProcessed = false;
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+    EXPECT_EQ(isProcessed, false);
+
+    // Last message was fully written, expect it to be processed.
+    //
+    sharedChannel.WaitAndDispatchFrame(globalDispatchTable.data(), globalDispatchTable.size());
+    EXPECT_EQ(isProcessed, true);
+
+    // We should process all the written frames.
+    //
+    EXPECT_EQ(sync.ReadPosition.load(), sync.WritePosition.load());
+
+    // Cleanup process frames.
+    //
+    sharedChannel.AdvanceFreePosition();
+    EXPECT_EQ(sync.FreePosition.load(), sync.WritePosition.load());
+}
 
 // Verify synchronization positions.
 // Send and receive objects and each step will verify if shared channel sync positions are correct.
@@ -69,7 +154,7 @@ TEST(SharedChannel, VerifySyncPositions)
     // Create small buffer.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     Mlos::UnitTest::Point point = { 13, 17 };
@@ -77,8 +162,8 @@ TEST(SharedChannel, VerifySyncPositions)
 
     // Setup empty callbacks.
     //
-    ObjectDeserializationCallback::Mlos::UnitTest::Point_Callback = [point](Proxy::Mlos::UnitTest::Point&&) {};
-    ObjectDeserializationCallback::Mlos::UnitTest::Point3D_Callback = [point3d](Proxy::Mlos::UnitTest::Point3D&&) {};
+    ObjectDeserializationCallback::Mlos::UnitTest::Point_Callback = [](Proxy::Mlos::UnitTest::Point&&) {};
+    ObjectDeserializationCallback::Mlos::UnitTest::Point3D_Callback = [](Proxy::Mlos::UnitTest::Point3D&&) {};
 
     // Send first message.
     //
@@ -115,7 +200,7 @@ TEST(SharedChannel, VerifySyncPositions)
     EXPECT_EQ(sharedChannel.Sync.WritePosition, 128);
 }
 
-// Verify if structes containing fixed size arrays can be serialized and read by the receiver.
+// Verify if structures containing fixed size arrays can be serialized and read by the receiver.
 //
 TEST(SharedChannel, VerifySendingReceivingArrayStruct)
 {
@@ -124,7 +209,7 @@ TEST(SharedChannel, VerifySendingReceivingArrayStruct)
     // Create small buffer.
     //
     TestFlatBuffer<128> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
     Mlos::UnitTest::Line line;
@@ -202,7 +287,7 @@ TEST(SharedChannel, StressSendReceive)
         };
 
     TestFlatBuffer<4096> buffer;
-    ChannelSynchronization sync = { 0 };
+    ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 4096);
 
     // Setup deserialize callbacks to verify received objects.
@@ -221,7 +306,7 @@ TEST(SharedChannel, StressSendReceive)
         std::launch::async,
         [&sharedChannel, &globalDispatchTable]
         {
-            sharedChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+            sharedChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         });
@@ -230,16 +315,18 @@ TEST(SharedChannel, StressSendReceive)
         std::launch::async,
         [&sharedChannel, &globalDispatchTable]
         {
-            sharedChannel.ReaderThreadLoop(globalDispatchTable.data(), globalDispatchTable.size());
+            sharedChannel.ProcessMessages(globalDispatchTable.data(), globalDispatchTable.size());
 
             return true;
         });
 
-    constexpr uint32_t numberOfIterations = 10 * 1000 * 1000;
+    // Use uint32_t (not const) to allow clang capture the variable.
+    //
+    uint32_t numberOfIterations = 10 * 1000 * 1000;
 
     std::future<bool> resultFromWriter1 = std::async(
         std::launch::async,
-        [&sharedChannel, &point, &point3d, numberOfIterations]
+        [&sharedChannel, &point, &point3d, &numberOfIterations]
         {
             for (uint32_t i = 0; i < numberOfIterations; i++)
             {
@@ -260,7 +347,7 @@ TEST(SharedChannel, StressSendReceive)
 
     std::future<bool> resultFromWriter2 = std::async(
         std::launch::async,
-        [&sharedChannel, &point, &point3d, numberOfIterations]
+        [&sharedChannel, &point, &point3d, &numberOfIterations]
         {
             for (uint32_t i = 0; i < numberOfIterations; i++)
             {

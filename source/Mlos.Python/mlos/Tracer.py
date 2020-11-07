@@ -3,15 +3,16 @@
 # Licensed under the MIT License.
 #
 from contextlib import contextmanager
-import json
-import time
-
 from functools import wraps
+import json
+import os
+import time
+from threading import current_thread
 from typing import Dict
 
 import pandas as pd
 
-from . import global_values
+from mlos import global_values
 
 
 # This is defined outside of the class, because the first parameter has to be
@@ -23,23 +24,35 @@ def trace():
             tracer = getattr(global_values, 'tracer', None)
             if tracer is not None:
                 start_timestamp_ns = int(time.time() * 1000000)
-                tracer.add_trace_event(name=wrapped_function.__qualname__, phase='B', timestamp_ns=start_timestamp_ns,
-                                       arguments=kwargs)
+                thread_id = current_thread().ident
+                tracer.add_trace_event(name=wrapped_function.__qualname__, phase='B', timestamp_ns=start_timestamp_ns, thread_id=thread_id, arguments=kwargs)
                 try:
                     result = wrapped_function(*args, **kwargs)
                     end_timestamp_ns = int(time.time() * 1000000)
-                    if end_timestamp_ns <= start_timestamp_ns:
+                    while end_timestamp_ns <= start_timestamp_ns:
                         end_timestamp_ns += 100
                     arguments = None
                     if result is not None and isinstance(result, (str, int, float, bool)):
                         arguments = {'result': result}
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, arguments=arguments)
+                    tracer.add_trace_event(
+                        name=wrapped_function.__qualname__,
+                        phase='E',
+                        timestamp_ns=end_timestamp_ns,
+                        thread_id=thread_id,
+                        arguments=arguments
+                    )
                 except Exception as e:
                     arguments = {'exception': str(e)}
                     end_timestamp_ns = int(time.time() * 1000000)
-                    if end_timestamp_ns <= start_timestamp_ns:
+                    while end_timestamp_ns <= start_timestamp_ns:
                         end_timestamp_ns += 100
-                    tracer.add_trace_event(name=wrapped_function.__qualname__, phase='E', timestamp_ns=end_timestamp_ns, arguments=arguments)
+                    tracer.add_trace_event(
+                        name=wrapped_function.__qualname__,
+                        phase='E',
+                        timestamp_ns=end_timestamp_ns,
+                        thread_id=thread_id,
+                        arguments=arguments
+                    )
                     raise e
 
             else:
@@ -51,30 +64,60 @@ def trace():
     return tracing_decorator
 
 
+def add_trace_event(name, phase, category='', timestamp_ns=None, actor_id=None, thread_id=None, arguments=None):
+    tracer = getattr(global_values, 'tracer', None)
+    if tracer is not None:
+        tracer.add_trace_event(
+            name,
+            phase,
+            timestamp_ns=timestamp_ns,
+            category=category,
+            actor_id=actor_id,
+            thread_id=thread_id,
+            arguments=arguments
+        )
 
-def add_trace_event(name, phase, category='', actor_id=None, thread_id=None, arguments=None):
-    if global_values.tracer is not None:
-        global_values.tracer.add_trace_event(name, phase, category=category, actor_id=actor_id, thread_id=thread_id, arguments=arguments)
 
 @contextmanager
 def traced(scope_name):
-    add_trace_event(name=scope_name, phase="B")
+    start_timestamp_ns = int(time.time() * 1000000)
+    thread_id = current_thread().ident
+    add_trace_event(name=scope_name, phase="B", timestamp_ns=start_timestamp_ns, thread_id=thread_id)
+
     yield
-    add_trace_event(name=scope_name, phase="E")
+
+    end_timestamp_ns = int(time.time() * 1000000)
+    while end_timestamp_ns <= start_timestamp_ns:
+        end_timestamp_ns += 100
+    add_trace_event(name=scope_name, phase="E", timestamp_ns=end_timestamp_ns, thread_id=thread_id)
+
 
 class Tracer:
     """ Collects a trace of events to be displayed by chrome://tracing.
 
     """
 
-    def __init__(self, actor_id, thread_id):
+    def __init__(self, actor_id=None, thread_id=None):
+        pid = os.getpid()
+
+        if actor_id is None:
+            actor_id = pid
+        else:
+            actor_id = f"{actor_id}.{pid}"
         self.actor_id = actor_id
+
+        if thread_id is None:
+            thread_id = current_thread().ident
         self.thread_id = thread_id
         self._trace_events = []
 
     @property
     def trace_events(self):
         return self._trace_events
+
+    @trace_events.setter
+    def trace_events(self, value):
+        self._trace_events = value
 
     @staticmethod
     def reformat_events(events):

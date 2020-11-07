@@ -1,10 +1,24 @@
+//*********************************************************************
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root
+// for license information.
+//
+// @File: MlosContext.inl
+//
+// Purpose:
+//      <description>
+//
+// Notes:
+//      <special-instructions>
+//
+//*********************************************************************
+
 #pragma once
 
 namespace Mlos
 {
 namespace Core
 {
-
 //----------------------------------------------------------------------------
 // NAME: MlosContext::CreateMemoryRegion
 //
@@ -18,7 +32,10 @@ namespace Core
 //  Function opens or creates a shared memory view.
 //
 template<typename T>
-HRESULT MlosContext::CreateMemoryRegion(const char* const sharedMemoryName, size_t memoryRegionSize, _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView)
+HRESULT MlosContext::CreateMemoryRegion(
+    const char* const sharedMemoryName,
+    size_t memoryRegionSize,
+    _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView)
 {
     // Create region view, initialize it on create.
     //
@@ -30,7 +47,7 @@ HRESULT MlosContext::CreateMemoryRegion(const char* const sharedMemoryName, size
 
     // Initialize memory region if we created a new mapping, Otherwise assume Mlos.Agent has initialized it.
     //
-    auto& memoryRegion = sharedMemoryRegionView.MemoryRegion();
+    T& memoryRegion = sharedMemoryRegionView.MemoryRegion();
 
     // Update region id if created a new one.
     //
@@ -39,14 +56,6 @@ HRESULT MlosContext::CreateMemoryRegion(const char* const sharedMemoryName, size
     {
         memoryRegion.MemoryHeader.MemoryRegionId = ++m_globalMemoryRegion.TotalMemoryRegionCount;
     }
-
-    // Send registration message.
-    //
-    Internal::RegisterMemoryRegionRequestMessage msg = { 0 };
-    msg.Name = sharedMemoryName;
-    msg.MemoryRegionSize = memoryRegion.MemoryHeader.MemoryRegionSize;
-    msg.MemoryRegionId = memoryRegion.MemoryHeader.MemoryRegionId;
-    m_controlChannel.SendMessage(msg);
 
     return S_OK;
 }
@@ -62,18 +71,13 @@ HRESULT MlosContext::CreateMemoryRegion(const char* const sharedMemoryName, size
 //
 // NOTES:
 //
-template <typename T>
+template<typename T>
 HRESULT MlosContext::RegisterComponentConfig(ComponentConfig<T>& componentConfig)
 {
     // Create or find existing shared configuration.
     //
     HRESULT hr = m_sharedConfigManager.CreateOrUpdateFrom(componentConfig);
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    return S_OK;
+    return hr;
 }
 
 //----------------------------------------------------------------------------
@@ -123,6 +127,5 @@ void MlosContext::SendTelemetryMessage(const TMessage& message) const
 {
     m_telemetryChannel.SendMessage(message);
 }
-
 }
 }

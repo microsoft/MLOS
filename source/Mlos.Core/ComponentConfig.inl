@@ -1,10 +1,24 @@
+//*********************************************************************
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root
+// for license information.
+//
+// @File: ComponentConfig.inl
+//
+// Purpose:
+//      <description>
+//
+// Notes:
+//      <special-instructions>
+//
+//*********************************************************************
+
 #pragma once
 
 namespace Mlos
 {
 namespace Core
 {
-
 //----------------------------------------------------------------------------
 // NAME: ComponentConfig<T>::Bind
 //
@@ -31,7 +45,7 @@ template<typename T>
 void ComponentConfig<T>::Update()
 {
     // #TODO, not fully implemented.
-    // - take a snapshot 
+    // - take a snapshot
     // - if current version does not match snapshot version try again.
     //
     *static_cast<T*>(this) = m_sharedConfig->m_config;
@@ -48,7 +62,9 @@ void ComponentConfig<T>::Update()
 template<typename T>
 bool ComponentConfig<T>::CompareKey(SharedConfigHeader* sharedConfigHeader)
 {
-    return TypeMetadataInfo::CompareKey<T>(*this, (reinterpret_cast<const ComponentConfig<T>::SharedConfigType*>(sharedConfigHeader))->m_config);
+    return TypeMetadataInfo::CompareKey<T>(
+        *this,
+        (reinterpret_cast<const ComponentConfig<T>::SharedConfigType*>(sharedConfigHeader))->m_config);
 }
 
 //----------------------------------------------------------------------------
@@ -65,12 +81,11 @@ template<typename T>
 template<typename TMessage>
 void ComponentConfig<T>::SendTelemetryMessage(const TMessage& message) const
 {
-    // #TODO 
+    // #TODO
     // - add object as parameter
     // - update current configuration id.
     //
     m_mlosContext.m_telemetryChannel.SendMessage(message);
 }
-
 }
 }

@@ -3,12 +3,14 @@
   <PropertyGroup>
     <!-- Protobuf gen output path. -->
     <GrpcOutputDir>$(BaseDir)\out\Grpc.out\$(GrpcServices)\$(BuildType)</GrpcOutputDir>
+    <GrpcVersion>2.29.0</GrpcVersion>
+    <ProtobufVersion>3.12.0</ProtobufVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.12.0" />
-    <PackageReference Include="Grpc.AspNetCore" Version="2.29.0" Condition="'$(GrpcServices)' == 'Server'" />
-    <PackageReference Include="Grpc.Core" Version="2.29.0" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.29.0" Condition="'$(GrpcServices)' == 'Client'" />
-    <PackageReference Include="Grpc.Tools" Version="2.29.0" />
+    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
+    <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" Condition="'$(GrpcServices)' == 'Server' Or '$(GrpcServices)' == 'Both'" />
+    <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" />
+    <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" Condition="'$(GrpcServices)' == 'Client' OR '$(GrpcServices)' == 'Both'" />
+    <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)" />
   </ItemGroup>
 </Project>

@@ -6,13 +6,15 @@ These are one-time setup instructions that should be executed prior to following
 
 - [Prerequisites for building and using MLOS](#prerequisites-for-building-and-using-mlos)
   - [Contents](#contents)
-  - [Cloning the repository](#clone-the-repository)
+  - [Clone the repository](#clone-the-repository)
   - [Python quickstart](#python-quickstart)
   - [Linux](#linux)
     - [Linux Distribution Requirements](#linux-distribution-requirements)
     - [Option 1: Linux Docker Build Env](#option-1-linux-docker-build-env)
       - [Install Docker](#install-docker)
       - [Build the Docker Image](#build-the-docker-image)
+        - [Pull the upstream docker image](#pull-the-upstream-docker-image)
+        - [Local docker image build](#local-docker-image-build)
     - [Option 2: Manual Build Tools Install](#option-2-manual-build-tools-install)
     - [Install Python on Linux](#install-python-on-linux)
       - [Option 1: Docker Python Install](#option-1-docker-python-install)
@@ -21,10 +23,10 @@ These are one-time setup instructions that should be executed prior to following
     - [Step 1: Install Python](#step-1-install-python)
     - [Step 2: Install Docker on Windows](#step-2-install-docker-on-windows)
     - [Step 3: Install Windows Build Tools](#step-3-install-windows-build-tools)
+    - [Step 4: Build the Docker image](#step-4-build-the-docker-image)
 
 MLOS currently supports 64-bit Intel/AMD platforms, though ARM64 support is under development.
 It supports Windows and Linux environments. Below we provide instructions for each OS.
-
 
 ## Clone the repository
 
@@ -79,7 +81,6 @@ All of them require `git` and, of course, a Linux installation:
 
 > Other distros/versions may work, but are untested.
 
-
 ### Option 1: Linux Docker Build Env
 
 #### Install Docker
@@ -92,14 +93,27 @@ Please see the official Docker install documenation for distribution specific do
 
 #### Build the Docker Image
 
+##### Pull the upstream docker image
+
+```sh
+docker pull ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04
+```
+
+##### Local docker image build
+
 To automatically setup a Linux build environment using `docker`, run the following to build the image locally:
 
 ```sh
 # Build the docker image:
-docker build --build-arg=UbuntuVersion=20.04 -t mlos/build:ubuntu-20.04 .
+docker build . --build-arg=UbuntuVersion=20.04 -t mlos-build-ubuntu-20.04 \
+    --cache-from ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-20.04
 ```
 
 > Where `20.04` can also be replaced with another [supported `UbuntuVersion`](#linux-distribution-requirements).
+>
+> Note: in Linux environments, you can also simply execute `make docker-image`
+>
+> See the [`Makefile`](../Makefile#mlos-github-tree-view) for advanced usage details.
 
 See [02-Build.md](./02-Build.md#docker) for instructions on how to run this image.
 
@@ -129,8 +143,16 @@ sudo apt-get install liblttng-ctl0 liblttng-ust0 zlib1g libxml2
 > Note: older distros such as Ubuntu 16.04 may also need the `libcurl3` package installed for `dotnet restore` to work, but is unavailable on (or will break) more recent versions of Ubuntu.
 >
 > Note: `libxml2` pulls an appropriate version of `libicu`.
->
-> Note: most other dependencies like `dotnet` and `cmake` are automatically fetched to the `tools/` directory using helpers in `scripts/` and invoked by the `Makefile` and `cmake` tools.
+
+```sh
+# Install dotnet in the system:
+./scripts/install.dotnet.sh
+```
+
+```sh
+# Install cmake in the system:
+./scripts/install.cmake.sh
+```
 
 Optional tools:
 
@@ -154,8 +176,6 @@ Follow the [Python Quickstart](#python-quickstart) above.
 
 MLOS is easiest to use on Windows 10, Version 1903 (March 2019) or newer.
 
-
-
 ### Step 1: Install Python
 
 Follow the [Python Quickstart](#python-quickstart) above.
@@ -173,3 +193,7 @@ Download and install Visual Studio 2019 (free) Community Edition:
 <https://visualstudio.microsoft.com/vs/community/>
 
 Be sure to include support for .Net Core and C++.
+
+### Step 4: Build the Docker image
+
+The instructions for [building the docker image](#build-the-docker-image) are the same as for Linux.

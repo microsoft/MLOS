@@ -1,4 +1,36 @@
+# Python Tools for Visual Studio (PTVS)
+__pycache__/
+*.pyc
+*.egg-info/
+
+# vim swap files
 *.*swp
+
+# Python checkpoints
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# build output directories
 out/
 target/
 tools/
+temp/
+
+# ctags output
+tags
+
+# duplicated/copied proto file for python code generation
+#source/Mlos.Proto/mlos/Grpc/OptimizerService.proto
+
+# generated website
+website/public
+website/content
+!website/content/menu/index.md
+website/resources
+website/themes
+website/sphinx/_build
+website/sphinx/api
+website/python_api
+
+# python code coverage
+coverage

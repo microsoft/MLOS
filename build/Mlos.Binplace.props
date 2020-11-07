@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Set the binplace properties, (what is the final folder to binplace binaries). -->
+  <PropertyGroup>
+    <BuildArchitecture Condition="'$(BuildArchitecture)' == ''">$(Platform)</BuildArchitecture>
+    <BinplaceRootDir>$(BinplaceBaseRootDir)\$(BuildType)\$(BuildArchitecture)</BinplaceRootDir>
+    <BinplaceDir>$(BinplaceRootDir)</BinplaceDir>
+  </PropertyGroup>
+</Project>

@@ -11,7 +11,7 @@ from scipy.stats import t
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitMetrics, DataSetType
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
-from mlos.Spaces import DefaultConfigMeta, Hypergrid
+from mlos.Spaces import Hypergrid
 from mlos.Tracer import trace
 
 
@@ -29,17 +29,14 @@ class RegressionModel(ABC):
         self.input_space = input_space
         self.output_space = output_space
         self.input_dimension_names = None
-        self.target_dimension_names = None
-        self.fit_state = fit_state if fit_state is not None else RegressionModelFitState(input_space=self.input_space, output_space=self.output_space)
+        self.target_dimension_names = self.target_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
+        self.fit_state = fit_state if fit_state is not None else RegressionModelFitState()
         self.last_refit_iteration_number = 0  # Every time we refit, we update this. It serves as a version number.
 
     @property
-    def fitted(self):
-        return self.fit_state.fitted
-
-    @fitted.setter
-    def fitted(self, value):
-        self.fit_state.fitted = value
+    @abstractmethod
+    def trained(self):
+        raise NotImplementedError
 
     @abstractmethod
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number):
@@ -49,28 +46,13 @@ class RegressionModel(ABC):
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
         raise NotImplementedError
 
-    def should_compute_goodness_of_fit(self, data_set_type):
-        if not self.fit_state.fitted:
-            return False
-        if data_set_type != DataSetType.TRAIN:
-            return True
-        if not self.fit_state.has_any_train_gof_metrics:
-            return True
-        if self.fit_state.current_train_gof_metrics.last_refit_iteration_number == self.last_refit_iteration_number:
-            return False
-        return True
-
-
     @trace()
     def compute_goodness_of_fit(self, features_df: pd.DataFrame, target_df: pd.DataFrame, data_set_type: DataSetType):
-
-        if not self.should_compute_goodness_of_fit(data_set_type):
-            return
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         sample_var_col = Prediction.LegalColumnNames.SAMPLE_VARIANCE.value
-        dof_col = Prediction.LegalColumnNames.DEGREES_OF_FREEDOM.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         predictions = self.predict(features_df.copy()) # TODO: remove the copy
         predictions_df = predictions.get_dataframe()
@@ -107,13 +89,16 @@ class RegressionModel(ABC):
             # TODO: Ask Ed about which degrees of freedom to use here...
             # adjusted_coefficient_of_determination = ...
 
-            t_values_90_percent = t.ppf(0.95, predictions_df[dof_col])
-            # t_values_95_percent = t.ppf(0.975, predictions_df[dof_col])
-            # t_values_99_percent = t.ppf(0.995, predictions_df[dof_col])
-            prediction_90_ci_radius = t_values_90_percent * np.sqrt(predictions_df[predicted_value_var_col])
-            sample_90_ci_radius = t_values_90_percent * np.sqrt(predictions_df[sample_var_col])
-            prediction_90_ci_hit_rate = (absolute_error < prediction_90_ci_radius).mean()
-            sample_90_ci_hit_rate = (absolute_error < sample_90_ci_radius).mean()
+            if not (predictions_df[dof_col] == 0).any():
+                t_values_90_percent = t.ppf(0.95, predictions_df[dof_col])
+                # t_values_95_percent = t.ppf(0.975, predictions_df[dof_col])
+                # t_values_99_percent = t.ppf(0.995, predictions_df[dof_col])
+                prediction_90_ci_radius = t_values_90_percent * np.sqrt(predictions_df[predicted_value_var_col])
+
+                if sample_var_col in predictions_df.columns.values:
+                    sample_90_ci_radius = t_values_90_percent * np.sqrt(predictions_df[sample_var_col])
+                    sample_90_ci_hit_rate = (absolute_error < sample_90_ci_radius).mean()
+                prediction_90_ci_hit_rate = (absolute_error < prediction_90_ci_radius).mean()
 
         gof_metrics = GoodnessOfFitMetrics(
             last_refit_iteration_number=self.last_refit_iteration_number,
@@ -133,19 +118,4 @@ class RegressionModel(ABC):
             # sample_95_ci_hit_rate=None,
             # sample_99_ci_hit_rate=None,
         )
-        self.fit_state.set_gof_metrics(data_set_type, gof_metrics)
-
-class RegressionModelConfig(ABC, metaclass=DefaultConfigMeta):
-    """ An abstract class for all regression models config to implement.
-
-    """
-
-    @classmethod
-    @abstractmethod
-    def contains(cls, config):
-        """
-
-        :param config:
-        :return:
-        """
-        raise NotImplementedError
+        return gof_metrics

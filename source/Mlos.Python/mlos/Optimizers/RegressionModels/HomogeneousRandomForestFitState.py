@@ -7,7 +7,6 @@ import pandas as pd
 
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
-from mlos.Spaces import Hypergrid
 
 
 class HomogeneousRandomForestFitState(RegressionModelFitState):
@@ -17,11 +16,11 @@ class HomogeneousRandomForestFitState(RegressionModelFitState):
     constituent decision tree.
     """
 
-    def __init__(self, input_space: Hypergrid, output_space: Hypergrid):
-        RegressionModelFitState.__init__(self, input_space, output_space)
+    def __init__(self):
+        RegressionModelFitState.__init__(self)
         self.decision_trees_fit_states: List[RegressionModelFitState] = []
 
-    def get_goodness_of_fit_dataframe(self, data_set_type: DataSetType, deep=False):
+    def get_goodness_of_fit_dataframe(self, data_set_type: DataSetType = DataSetType.TRAIN, deep=False):
         random_forest_dataframe = RegressionModelFitState.get_goodness_of_fit_dataframe(self, data_set_type=data_set_type)
         if not deep:
             return random_forest_dataframe

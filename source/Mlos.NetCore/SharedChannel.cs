@@ -28,22 +28,21 @@ namespace Mlos.Core
             where TMessage : ICodegenType;
 
         /// <summary>
-        /// Waits for a new frame then call proper dispatcher.
+        /// Reader loop, process received messages.
         /// </summary>
         /// <param name="dispatchTable"></param>
-        /// <returns>
-        /// Returns true if reader successfully processed the frame. If the wait has been aborted, it returns false.
-        /// </returns>
-        /// <remarks>
-        /// To interrupt wait, set buffer.Sync.TerminateReader to true.
-        /// </remarks>
-        bool WaitAndDispatchFrame(DispatchEntry[] dispatchTable);
+        void ProcessMessages(ref DispatchEntry[] dispatchTable);
+
+        /// <summary>
+        /// Gets channel synchronization object.
+        /// </summary>
+        internal MlosProxy.ChannelSynchronization SyncObject { get; }
     }
 
     /// <summary>
     /// Shared channel.
     /// Exchange protocol based on circular buffer.
-    /// More details in: Doc\CircularBuffer.md.
+    /// More details in: Doc/CircularBuffer.md.
     /// </summary>
     /// <typeparam name="TChannelPolicy">Shared channel policy.</typeparam>
     /// <typeparam name="TChannelSpinPolicy">Shared channel spin policy.</typeparam>
@@ -94,14 +93,14 @@ namespace Mlos.Core
         }
 
         /// <summary>
-        /// Follows free links until we reach read position.
+        /// Follows the free links until we reach the current read position.
         /// </summary>
         /// <remarks>
         /// While we follow the links, the method is not cleaning the memory.
-        ///  The memory is cleared by the reader after processing the frame.
-        ///  The whole memory region is clean except locations where negative frame length values are stored
-        ///  to signal that the message has been read and the frame is free-able.
-        ///  Those locations are always aligned to the size of uint32_t. The current reader continues to spin if it reads negative frame length.
+        /// The memory is cleared by the reader after processing the frame.
+        /// The whole memory region is clean except locations where negative frame length values are stored
+        /// to signal that the message has been read and the frame is free-able.
+        /// Those locations are always aligned to the size of uint32_t. The current reader continues to spin if it reads negative frame length.
         /// </remarks>
         internal void AdvanceFreePosition()
         {
@@ -122,14 +121,13 @@ namespace Mlos.Core
                 return;
             }
 
-            // For diagnostic purposes, following the free links we should get the same distance.
+            // For diagnostic purposes, by following the free links, we should get the same distance.
             //
             uint distance = readPosition - freePosition;
 
-            // Follow the free links up to a current read position.
-            // Cleanup is completed when free position is equal to read position.
-            // However by the time this cleanup is completed,
-            // the reader threads might process more frames and advance read position.
+            // Follow the free links up to the current read position.
+            // The cleanup is completed when the free position is equal to the read position.
+            // However, by the time this cleanup is completed, the reader threads might process more frames and advance the read position.
             //
             while (freePosition != readPosition)
             {
@@ -382,7 +380,14 @@ namespace Mlos.Core
                         frameLength = frame.Length.Load();
                     }
 
-                    break;
+                    if (frameLength > 0)
+                    {
+                        break;
+                    }
+
+                    // Frame might have been cleared.
+                    //
+                    continue;
                 }
 
                 channelSpinPolicy.WaitForNewFrame();
@@ -427,7 +432,16 @@ namespace Mlos.Core
             return readPosition % Size;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Waits for a new frame then call proper dispatcher.
+        /// </summary>
+        /// <param name="dispatchTable"></param>
+        /// <returns>
+        /// Returns true if reader successfully processed the frame. If the wait has been aborted, it returns false.
+        /// </returns>
+        /// <remarks>
+        /// To interrupt wait, set buffer.Sync.TerminateReader to true.
+        /// </remarks>
         public bool WaitAndDispatchFrame(DispatchEntry[] dispatchTable)
         {
             TChannelPolicy channelPolicy = default;
@@ -485,9 +499,20 @@ namespace Mlos.Core
             }
             else
             {
-                // Just a link frame, clean circular region.
-                //
-                ClearOverlappedPayload(readOffset, frameLength, Size);
+                if (codegenTypeIndex == 0)
+                {
+                    // Just a link frame, clear the circular region.
+                    //
+                    ClearLinkPayload(readOffset, frameLength, Size);
+                }
+                else
+                {
+                    // Received invalid frame, channel policy decides what how to handle it.
+                    //
+                    channelPolicy.ReceivedInvalidFrame();
+
+                    ClearPayload(readOffset, frameLength);
+                }
             }
 
             // Mark frame that processing is completed (negative length).
@@ -497,40 +522,23 @@ namespace Mlos.Core
             return true;
         }
 
-        /*
-        //----------------------------------------------------------------------------
-        // NAME: SharedCircularBufferChannel::ReaderThreadLoop
-        //
-        // PURPOSE:
-        //  Reader loop, receives frames and processes them.
-        //
-        // RETURNS:
-        //
-        // NOTES:
-        //
-        void SharedCircularBufferChannel::ReaderThreadLoop(
-            CircularBuffer& buffer,
-            DispatchEntry* dispatchTable,
-            size_t dispatchEntryCount)
+        /// <inheritdoc/>
+        public void ProcessMessages(ref DispatchEntry[] dispatchTable)
         {
+            Sync.TerminateChannel.Store(false);
+
+            Sync.ActiveReaderCount.FetchAdd(1);
+
             // Receiver thread.
             //
-            while (true)
+            bool result = true;
+            while (result)
             {
-                if (WaitAndDispatchFrame(buffer, dispatchTable, dispatchEntryCount))
-                {
-                    continue;
-                }
-
-                // The wait has been interrupted, we are done.
-                //
-                break;
+              result = WaitAndDispatchFrame(dispatchTable);
             }
-        }
 
+            Sync.ActiveReaderCount.FetchSub(1);
         }
-        }
-        */
 
         /// <inheritdoc/>
         public void SendMessage<TMessage>(ref TMessage msg)
@@ -581,6 +589,7 @@ namespace Mlos.Core
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SharedChannel{TChannelPolicy, TChannelSpinPolicy}"/> class.
         /// Constructor.
         /// </summary>
         /// <param name="sharedMemoryMapView"></param>
@@ -591,6 +600,7 @@ namespace Mlos.Core
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="SharedChannel{TChannelPolicy, TChannelSpinPolicy}"/> class.
         /// Constructor.
         /// </summary>
         /// <param name="buffer"></param>
@@ -612,6 +622,68 @@ namespace Mlos.Core
                 Size = size;
                 margin = Size - (uint)sizeof(FrameHeader);
             }
+
+            // Initialize channel.
+            //
+            InitializeChannel();
+        }
+
+        /// <summary>
+        /// Initializes the shared channel.
+        /// </summary>
+        /// <remarks>
+        /// The method handles the failures when one of the processes has terminated unexpectedly.
+        /// </remarks>
+        private void InitializeChannel()
+        {
+            Sync.TerminateChannel.Store(false);
+
+            // Recover from the previous failures.
+            //
+
+            // Advance free region. Follow the free links up to a current read position.
+            //
+            AdvanceFreePosition();
+
+            // We reached first unprocessed frame. Follow the frames untill we reach writePosition.
+            // Clear the partially written frames and convert processed frames into empty ones, so the reader can ignore them.
+            //
+            uint freePosition = Sync.FreePosition.Load();
+            uint writePosition = Sync.WritePosition.LoadRelaxed();
+
+            while (freePosition != writePosition)
+            {
+                // Check the current state of the frame by inspecting it's length.
+                //
+                uint freeOffset = freePosition % Size;
+                MlosProxy.FrameHeader frame = Frame(freeOffset);
+
+                int frameLength = frame.Length.Load();
+
+                if (frameLength < 0 || (frameLength & 1) == 1)
+                {
+                    // The frame has been processed or the frame has been partially written.
+                    //
+                    frameLength = frameLength > 0 ? frameLength : -frameLength;
+                    frameLength &= ~1;
+
+                    // The frame is partially written. Ignore it.
+                    //
+                    ClearPayload(freeOffset, frameLength);
+
+                    frame.Length.Store(frameLength);
+                }
+
+                // Move to next frame.
+                //
+                freePosition += (uint)frameLength;
+            }
+
+            // Set readPosition to freePostion to reprocess the frames.
+            //
+            freePosition = Sync.FreePosition.Load();
+            uint readPosition = Sync.ReadPosition.Load();
+            Sync.ReadPosition.CompareExchange(freePosition, readPosition);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -621,13 +693,22 @@ namespace Mlos.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void ClearOverlappedPayload(uint writeOffset, int frameLength, uint bufferSize)
+        private void ClearLinkPayload(uint writeOffset, int frameLength, uint bufferSize)
         {
             writeOffset += sizeof(uint);
             frameLength -= sizeof(uint);
 
-            ZeroMemory(Buffer + (int)writeOffset, (int)(bufferSize - writeOffset));
-            ZeroMemory(Buffer, frameLength + (int)(writeOffset - bufferSize));
+            if (writeOffset + frameLength > bufferSize)
+            {
+                // Overlapped link.
+                //
+                ZeroMemory(Buffer + (int)writeOffset, (int)(bufferSize - writeOffset));
+                ZeroMemory(Buffer, frameLength + (int)(writeOffset - bufferSize));
+            }
+            else
+            {
+                ZeroMemory(Buffer + (int)writeOffset, frameLength);
+            }
         }
 
         /// <summary>
@@ -687,5 +768,8 @@ namespace Mlos.Core
         /// Channel control policy.
         /// </summary>
         public TChannelPolicy ChannelPolicy;
+
+        /// <inheritdoc/>
+        MlosProxy.ChannelSynchronization ISharedChannel.SyncObject => Sync;
     }
 }

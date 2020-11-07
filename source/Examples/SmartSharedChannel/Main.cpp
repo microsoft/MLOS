@@ -15,6 +15,8 @@
 
 #include "stdafx.h"
 
+// Include Mlos platform implementation.
+//
 #include "MlosPlatform.Std.inl"
 
 //----------------------------------------------------------------------------
@@ -39,6 +41,27 @@ void CheckHR(HRESULT hr)
 }
 
 //----------------------------------------------------------------------------
+// NAME: AssertFailed
+//
+// PURPOSE:
+//  Retail assert.
+//
+// RETURNS:
+//
+// NOTES:
+//  Prints the error message to the console and terminates the application.
+//
+void AssertFailed(
+    _In_z_ char const* expression,
+    _In_z_ char const* file,
+    _In_ uint32_t line)
+
+{
+    std::cerr << "[ASSERT]: Expression: '" << expression << "' failed in file: '" << file << "' at line " << line << std::endl;
+    std::terminate();
+}
+
+//----------------------------------------------------------------------------
 // NAME: main
 //
 // PURPOSE:
@@ -51,8 +74,8 @@ void CheckHR(HRESULT hr)
 int
 __cdecl
 main(
-    __in int argc,
-    __in char* argv[])
+    _In_ int argc,
+    _In_ char* argv[])
 {
     UNUSED(argc);
     UNUSED(argv);
@@ -93,5 +116,5 @@ main(
     uint64_t messageCount = RunSharedChannelBenchmark(
         g_SharedChannelConfig,
         g_MicrobenchmarkConfig);
-    (void)messageCount;
+    UNUSED(messageCount);
 }

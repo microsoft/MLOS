@@ -66,10 +66,10 @@ To achieve this MLOS provides:
 
     Once hooks are created in the target system, iteration on the external agent can be more rapidly developed and deployed.
 
-## Python quickstart
+## Python Quickstart
+
 The easiest way to get started with MLOS is to just the Python package.
 You can find installation instructions in the [Prerequisites: Python Quickstart](./documentation/01-Prerequisites.md#python-quickstart).
-
 
 ## Full Build (C# and C++ components)
 
@@ -85,6 +85,9 @@ For detailed instructions, please refer to:
 Code and documentation for examples of using MLOS to optimize a system are described in the [Notebooks](https://microsoft.github.io/MLOS/notebooks/) section.
 Additional code is in the  [source/Examples](./source/Examples/#mlos-github-tree-view) source directory.
 You can find the source of the notebooks [on github as well](./source/Mlos.Notebooks/#mlos-github-tree-view).
+
+> Some of the notebooks have been used as lab assignments for a seminar class run in collaboration between Microsoft and UW-Madison:
+> <https://aka.ms/MLOS_Seminar>
 
 ## Documentation
 

@@ -29,6 +29,8 @@ Here's a document describing the layout of the repository:
 
 - [RepoOrganization.md](./RepoOrganization.md)
 
+We also have a collection of [Troubleshooting Tips](./Troubleshooting.md) started.
+
 ## Contributing
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for notes on making changes to MLOS itself.

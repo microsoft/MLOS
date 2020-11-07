@@ -1,10 +1,24 @@
+//*********************************************************************
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root
+// for license information.
+//
+// @File: SharedConfig.inl
+//
+// Purpose:
+//      <description>
+//
+// Notes:
+//      <special-instructions>
+//
+//*********************************************************************
+
 #pragma once
 
 namespace Mlos
 {
 namespace Core
 {
-
 //----------------------------------------------------------------------------
 // NAME: ISharedChannel::HasReadersInWaitingState
 //
@@ -93,7 +107,7 @@ BytePtr ISharedChannel::Payload(uint32_t writeOffset)
 // NOTES:
 //  The acquired region is contiguous.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireWriteRegionForFrame(int32_t& frameLength)
 {
     const uint32_t expectedFrameLength = frameLength;
@@ -150,91 +164,10 @@ uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireWriteRegionFo
 //
 // NOTES:
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::NotifyExternalReader()
 {
     ChannelPolicy.NotifyExternalReader();
-}
-
-//----------------------------------------------------------------------------
-// NAME: SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AdvanceFreePosition
-//
-// PURPOSE:
-//  Follows free links until we reach read position.
-//
-// RETURNS: None.
-//
-// NOTES:
-//  While we follow the links, the method is not cleaning the memory.
-//  The memory is cleared by the reader after processing the frame.
-//  The whole memory region is clean except locations where negative frame length values are stored
-//  to signal that the message has been read and the frame is free-able.
-//  Those locations are always aligned to the size of uint32_t. The current reader continues to spin if it reads negative frame length.
-//
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
-void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AdvanceFreePosition()
-{
-    // Move free position and allow the writer to advance.
-    //
-    uint32_t freePosition = Sync.FreePosition.load(std::memory_order_acquire);
-    uint32_t readPosition = Sync.ReadPosition.load(std::memory_order_relaxed);
-
-    if (freePosition == readPosition)
-    {
-        // Free position points to the current read position.
-        //
-        return;
-    }
-
-    // For diagnostic purposes, following the free links we should get the same distance.
-    //
-    uint32_t distance = readPosition - freePosition;
-
-    // Follow the free links up to a current read position.
-    // Cleanup is completed when free position is equal to read position.
-    // However by the time this cleanup is completed,
-    // the reader threads might process more frames and advance read position.
-    //
-    while (freePosition != readPosition)
-    {
-        // Load a frame from the beginning of the free region.
-        // However, other writer threads might already advance the free position.
-        // In this case, local free position points to the write region and
-        // we will fail to advance free offset.
-        //
-        const uint32_t freeOffset = freePosition % Size;
-        const FrameHeader& frame = Frame(freeOffset);
-        int32_t frameLength = frame.Length.load(std::memory_order_acquire);
-
-        if (frameLength >= 0)
-        {
-            // Frame is currently processed or has been already cleared.
-            // Other writer thread advanced free position, there is no point to check using compare_exchange_weak.
-            // Local free offset is now the write region.
-            //
-            return;
-        }
-
-        // Advance free position. The frame length is negative.
-        //
-        uint32_t expectedFreePosition = freePosition;
-        uint32_t nextFreePosition = (freePosition - frameLength);
-
-        if (!Sync.FreePosition.compare_exchange_weak(expectedFreePosition, nextFreePosition))
-        {
-            // Advanced by another writer, local free offset is now the write region.
-            //
-            return;
-        }
-
-        freePosition = nextFreePosition;
-
-        // Frame length is negative.
-        //
-        distance += frameLength;
-    }
-
-    assert(distance == 0);
 }
 
 //----------------------------------------------------------------------------
@@ -252,7 +185,7 @@ void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AdvanceFreePosition()
 //  However it ensures that the next write offset will not be greater than the buffer margin,
 //  so the next writer can write an empty FrameHeader.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireRegionForWrite(int32_t& frameLength)
 {
     while (true)
@@ -341,7 +274,7 @@ uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireRegionForWrit
 //  Reader function.
 //  If the wait has been aborted, it returns uint32_t::max.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitForFrame()
 {
     uint32_t readPosition;
@@ -442,7 +375,7 @@ uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitForFrame()
 // NOTES:
 //  To interrupt wait, set Sync.TerminateReader to true.
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
 bool SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitAndDispatchFrame(
     DispatchEntry* dispatchTable,
     size_t dispatchEntryCount)
@@ -493,9 +426,20 @@ bool SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitAndDispatchFrame(
     }
     else
     {
-        // Just a link frame, clean circular region.
-        //
-        ClearOverlappedPayload(readOffset, frameLength, Size);
+        if (codegenTypeIndex == 0)
+        {
+            // Just a link frame, clear the circular region.
+            //
+            ClearLinkPayload(readOffset, frameLength, Size);
+        }
+        else
+        {
+            // Received invalid frame, channel policy decides what how to handle it.
+            //
+            ChannelPolicy.ReceivedInvalidFrame();
+
+            ClearPayload(readOffset, frameLength);
+        }
     }
 
     // Mark frame that processing is completed (negative length).
@@ -506,17 +450,17 @@ bool SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitAndDispatchFrame(
 }
 
 //----------------------------------------------------------------------------
-// NAME: SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ReaderThreadLoop
+// NAME: SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ProcessMessages
 //
 // PURPOSE:
-//  Reader loop, receives frames and processes them.
+//  Reader loop, process received messages.
 //
 // RETURNS:
 //
 // NOTES:
 //
-template <typename TChannelPolicy, typename TChannelSpinPolicy>
-void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ReaderThreadLoop(
+template<typename TChannelPolicy, typename TChannelSpinPolicy>
+void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ProcessMessages(
     Mlos::Core::DispatchEntry* dispatchTable,
     size_t dispatchEntryCount)
 {
@@ -524,20 +468,13 @@ void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ReaderThreadLoop(
 
     // Receiver thread.
     //
-    while (true)
+    bool result = true;
+    while (result)
     {
-        if (WaitAndDispatchFrame(dispatchTable, dispatchEntryCount))
-        {
-            continue;
-        }
-
-        // The wait has been interrupted, we are done.
-        //
-        break;
+        result = WaitAndDispatchFrame(dispatchTable, dispatchEntryCount);
     }
 
     Sync.ActiveReaderCount.fetch_sub(1);
 }
-
 }
 }

@@ -13,6 +13,9 @@ using System.Runtime.InteropServices;
 
 namespace Mlos.Core.Linux
 {
+    /// <summary>
+    /// Linux implementation of shared memory map view.
+    /// </summary>
     public sealed class SharedMemoryMapView : Mlos.Core.SharedMemoryMapView
     {
         /// <summary>
@@ -21,7 +24,7 @@ namespace Mlos.Core.Linux
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Create(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView CreateNew(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             // Try to unlink existing shared memory.
             //
@@ -61,7 +64,7 @@ namespace Mlos.Core.Linux
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static new SharedMemoryMapView Open(string sharedMemoryMapName, ulong sharedMemorySize)
+        public static new SharedMemoryMapView OpenExisting(string sharedMemoryMapName, ulong sharedMemorySize)
         {
             return new SharedMemoryMapView(
                 sharedMemoryMapName,
@@ -121,27 +124,32 @@ namespace Mlos.Core.Linux
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposed)
+            if (isDisposed || !disposing)
             {
                 return;
             }
 
-            if (disposing)
-            {
-                // Close shared memory.
-                //
-                sharedMemoryHandle?.Dispose();
+            // Close shared memory.
+            //
+            sharedMemoryHandle?.Dispose();
 
+            if (CleanupOnClose)
+            {
                 // Unlink shared map. Ignore the errors.
                 //
-                _ = Native.SharedMemoryUnlink(sharedMemoryMapName);
+                if (sharedMemoryMapName != null)
+                {
+                    _ = Native.SharedMemoryUnlink(sharedMemoryMapName);
+                }
+
+                CleanupOnClose = false;
             }
 
-            disposed = true;
+            isDisposed = true;
         }
 
-        private readonly string sharedMemoryMapName;
-
         private SharedMemorySafeHandle sharedMemoryHandle;
+
+        private readonly string sharedMemoryMapName;
     }
 }

@@ -54,11 +54,15 @@ public:
         // Check if user passed optimal buffer size value.
         //
         assert(size == Size);
+
+        // Initialize channel.
+        //
+        InitializeChannel();
     }
 
     virtual uint32_t AcquireWriteRegionForFrame(int32_t& frameLength) = 0;
 
-    virtual void ReaderThreadLoop(DispatchEntry* dispatchTable, size_t dispatchEntryCount) = 0;
+    virtual void ProcessMessages(DispatchEntry* dispatchTable, size_t dispatchEntryCount) = 0;
 
     virtual void NotifyExternalReader() = 0;
 
@@ -71,13 +75,46 @@ public:
     template<typename TMessage>
     inline void SendMessage(const TMessage& object);
 
+    // Follows free links until we reach read position.
+    //
+    void AdvanceFreePosition();
+
+    // Initializes the channel.
+    //
+    void InitializeChannel();
+
 protected:
     inline FrameHeader& Frame(uint32_t offset);
 
     inline BytePtr Payload(uint32_t writeOffset);
 
+    inline void ClearPayload(uint32_t writeOffset, uint32_t frameLength)
+    {
+        memset(Buffer.Pointer + writeOffset + sizeof(uint32_t), 0, frameLength - sizeof(uint32_t));
+    }
+
+    inline void ClearLinkPayload(uint32_t writeOffset, uint32_t frameLength, uint32_t bufferSize)
+    {
+        writeOffset += sizeof(uint32_t);
+        frameLength -= sizeof(uint32_t);
+
+        if (writeOffset + frameLength > bufferSize)
+        {
+            // Overlapped link.
+            //
+            memset(Buffer.Pointer + writeOffset, 0, bufferSize - writeOffset);
+            memset(Buffer.Pointer, 0, frameLength + (writeOffset - bufferSize));
+        }
+        else
+        {
+            memset(Buffer.Pointer + writeOffset, 0, frameLength);
+        }
+    }
+
 public:
     ChannelSynchronization& Sync;
+
+    BytePtr Buffer;
 
     // Size of the buffer.
     //
@@ -86,8 +123,6 @@ public:
     // Size of the buffer - sizeof(FrameHeader);
     //
     uint32_t Margin;
-
-    BytePtr Buffer;
 };
 
 //----------------------------------------------------------------------------
@@ -124,23 +159,8 @@ public:
     {
     }
 
-    inline void ClearPayload(uint32_t writeOffset, uint32_t frameLength)
-    {
-        memset(Buffer.Pointer + writeOffset + sizeof(uint32_t), 0, frameLength - sizeof(uint32_t));
-    }
-
-    inline void ClearOverlappedPayload(uint32_t writeOffset, uint32_t frameLength, uint32_t bufferSize)
-    {
-        writeOffset += sizeof(uint32_t);
-        frameLength -= sizeof(uint32_t);
-
-        memset(Buffer.Pointer + writeOffset, 0, bufferSize - writeOffset);
-
-        memset(Buffer.Pointer, 0, frameLength + (writeOffset - bufferSize));
-    }
-
 public:
-    void ReaderThreadLoop(DispatchEntry* dispatchTable, size_t dispatchEntryCount) override;
+    void ProcessMessages(DispatchEntry* dispatchTable, size_t dispatchEntryCount) override;
 
     bool WaitAndDispatchFrame(DispatchEntry* dispatchTable, size_t dispatchEntryCount);
 
@@ -151,8 +171,6 @@ private:
     virtual uint32_t AcquireWriteRegionForFrame(int32_t& frameLength) override;
 
     virtual void NotifyExternalReader() override;
-
-    void AdvanceFreePosition();
 
     uint32_t AcquireRegionForWrite(int32_t& frameLength);
 

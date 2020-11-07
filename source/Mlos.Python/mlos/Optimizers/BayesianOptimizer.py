@@ -5,42 +5,16 @@
 import pandas as pd
 
 from mlos.Logger import create_logger
-from mlos.Tracer import trace
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid, DefaultConfigMeta
-
+from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
-from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, ExperimentDesignerConfig
+from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel,\
-    HomogeneousRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Tracer import trace
+from mlos.Spaces import Point
 
-
-class BayesianOptimizerConfig(metaclass=DefaultConfigMeta):
-
-    CONFIG_SPACE = SimpleHypergrid(
-        name="bayesian_optimizer_config",
-        dimensions=[
-            CategoricalDimension(name="surrogate_model_implementation", values=[HomogeneousRandomForestRegressionModel.__name__]),
-            CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__]),
-            DiscreteDimension(name="min_samples_required_for_guided_design_of_experiments", min=2, max=10000)
-        ]
-    ).join(
-        subgrid=HomogeneousRandomForestRegressionModelConfig.CONFIG_SPACE,
-        on_external_dimension=CategoricalDimension(name="surrogate_model_implementation", values=[HomogeneousRandomForestRegressionModel.__name__])
-    ).join(
-        subgrid=ExperimentDesignerConfig.CONFIG_SPACE,
-        on_external_dimension=CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__])
-    )
-
-    _DEFAULT = Point(
-        surrogate_model_implementation=HomogeneousRandomForestRegressionModel.__name__,
-        experiment_designer_implementation=ExperimentDesigner.__name__,
-        min_samples_required_for_guided_design_of_experiments=10,
-        homogeneous_random_forest_regression_model_config=HomogeneousRandomForestRegressionModelConfig.DEFAULT,
-        experiment_designer_config=ExperimentDesignerConfig.DEFAULT
-    )
 
 
 class BayesianOptimizer(OptimizerBase):
@@ -57,6 +31,7 @@ class BayesianOptimizer(OptimizerBase):
     experiment_designer: ExperimentDesigner
 
     """
+    @trace()
     def __init__(
             self,
             optimization_problem: OptimizationProblem,
@@ -71,7 +46,7 @@ class BayesianOptimizer(OptimizerBase):
         assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
         OptimizerBase.__init__(self, optimization_problem)
 
-        assert optimizer_config in BayesianOptimizerConfig.CONFIG_SPACE, "Invalid config."
+        assert optimizer_config in bayesian_optimizer_config_store.parameter_space, "Invalid config."
         self.optimizer_config = optimizer_config
 
         # Now let's put together the surrogate model.
@@ -104,8 +79,21 @@ class BayesianOptimizer(OptimizerBase):
         self._target_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.objective_space.dimensions])
 
     @property
+    def trained(self):
+        return self.surrogate_model.trained
+
+    @property
     def num_observed_samples(self):
         return len(self._feature_values_df.index)
+
+    def compute_surrogate_model_goodness_of_fit(self):
+        if not self.surrogate_model.trained:
+            raise RuntimeError("Model has not been trained yet.")
+        return self.surrogate_model.compute_goodness_of_fit(
+            features_df=self._feature_values_df.copy(),
+            target_df=self._target_values_df.copy(),
+            data_set_type=DataSetType.TRAIN
+        )
 
     def get_optimizer_convergence_state(self):
         return self._optimizer_convergence_state
@@ -140,7 +128,6 @@ class BayesianOptimizer(OptimizerBase):
                 target_values_pandas_frame=self._target_values_df,
                 iteration_number=len(self._feature_values_df.index)
             )
-            self.surrogate_model.compute_goodness_of_fit(features_df=self._feature_values_df, target_df=self._target_values_df, data_set_type=DataSetType.TRAIN)
 
     @trace()
     def predict(self, feature_values_pandas_frame, t=None):

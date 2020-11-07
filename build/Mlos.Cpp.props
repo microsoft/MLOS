@@ -32,13 +32,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <!-- Place output files outside of the source dir -->
+  <!-- Place output files outside of the source dir. -->
   <PropertyGroup>
     <IntermediateOutputPath Condition="'$(BUILD_COREXT)' != '1'">$(BaseIntermediateOutputPath)$(BUILD_ALT_DIR)\$(Platform)\</IntermediateOutputPath>
     <OutDir>$(IntermediateOutputPath)</OutDir>
   </PropertyGroup>
   <Import Project="$(ExtendedTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(ExtendedTargetsPath)\Microsoft.Cpp.props" />
+  <!-- Include binplace properties. -->
+  <Import Project="$(BaseDir)\build\Mlos.Binplace.props" />
   <ItemDefinitionGroup Label="Compilation Settings">
     <ClCompile>
       <PreprocessorDefinitions>

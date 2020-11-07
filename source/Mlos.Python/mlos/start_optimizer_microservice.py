@@ -3,10 +3,6 @@
 # Licensed under the MIT License.
 #
 """ Launches the mlos Optimizer gRPC service.
-
-The difference between this and start_mlos_optimization_runtime.py is that we are using
-gRPC and BayesianOptimizer here, whereas we are using SqlRPC and bayes_opt there. In other
-words, this script is meant to supersede the start_mlos_optimization_runtime.py.
 """
 import argparse
 import signal
@@ -46,6 +42,7 @@ def main():
 
     global_values.declare_singletons()
     signal.signal(signal.SIGINT, ctrl_c_handler)
+    signal.signal(signal.SIGTERM, ctrl_c_handler)
     print("Starting Optimizer Microservice ...")
     server.start()
     server.wait_for_termination()

@@ -43,7 +43,7 @@ namespace Mlos.UnitTest
         {
             // Update config.
             //
-            var channelReaderStats = MlosContext.SharedConfigManager.Lookup<MlosCoreProxy.ChannelReaderStats>().Config;
+            var channelReaderStats = MlosContext.Instance.SharedConfigManager.Lookup<MlosCoreProxy.ChannelReaderStats>().Config;
             channelReaderStats.SpinCount++;
         }
     }

@@ -42,21 +42,22 @@ constexpr inline bool VerifyVariableData(
     uint64_t totalDataSize,
     uint64_t& expectedDataOffset)
 {
-    // Verify fixed size structure is no-op. Ignore the arguments.
+    // Verification of fixed size structure is no-op.
+    // Ignore the arguments.
     //
-    UNUSED(object);
-    UNUSED(objectOffset);
-    UNUSED(totalDataSize);
-    UNUSED(expectedDataOffset);
+    MLOS_UNUSED_ARG(object);
+    MLOS_UNUSED_ARG(objectOffset);
+    MLOS_UNUSED_ARG(totalDataSize);
+    MLOS_UNUSED_ARG(expectedDataOffset);
 
     return true;
 }
 
 template<typename TProxy>
-constexpr inline bool VerifyVariableData(TProxy object, int32_t frameLength)
+constexpr inline bool VerifyVariableData(TProxy object, uint64_t frameLength)
 {
     uint64_t expectedDataOffset = sizeof(typename TProxy::RealObjectType);
-    uint64_t totalDataSize = static_cast<uint64_t>(frameLength) - expectedDataOffset;
+    uint64_t totalDataSize = frameLength - expectedDataOffset;
 
     bool isValid = VerifyVariableData(object, 0, totalDataSize, expectedDataOffset);
 
@@ -98,7 +99,7 @@ inline void Serialize(Mlos::Core::BytePtr buffer, const T& object)
 template<>
 constexpr inline size_t GetVariableDataSize(const Mlos::Core::StringPtr& object)
 {
-    return object.Length;
+    return object.Length * sizeof(char);
 }
 
 template<>
@@ -110,27 +111,27 @@ constexpr inline size_t GetVariableDataSize(const Mlos::Core::WideStringPtr& obj
 template<size_t N>
 constexpr inline size_t GetVariableDataSize(const std::array<Mlos::Core::StringPtr, N>& object)
 {
-    size_t length = 0;
+    size_t dataSize = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::StringPtr& element : object)
     {
-        length += GetVariableDataSize(element);
+        dataSize += GetVariableDataSize(element);
     }
 
-    return length;
+    return dataSize;
 }
 
 template<size_t N>
 constexpr inline size_t GetVariableDataSize(const std::array<Mlos::Core::WideStringPtr, N>& object)
 {
-    size_t length = 0;
+    size_t dataSize = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::WideStringPtr& element : object)
     {
-        length += GetVariableDataSize(element);
+        dataSize += GetVariableDataSize(element);
     }
 
-    return length;
+    return dataSize;
 }
 
 template<>
@@ -140,7 +141,7 @@ inline size_t SerializeVariableData(
     uint64_t dataOffset,
     const Mlos::Core::StringPtr& object)
 {
-    size_t dataSize = object.Length;
+    size_t dataSize = GetVariableDataSize(object);
     memcpy(buffer.Pointer + dataOffset, object.Data, dataSize);
     *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
     *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = dataSize;
@@ -155,7 +156,7 @@ inline size_t SerializeVariableData(
     uint64_t dataOffset,
     const Mlos::Core::WideStringPtr& object)
 {
-    size_t dataSize = object.Length * sizeof(wchar_t);
+    size_t dataSize = GetVariableDataSize(object);
     memcpy(buffer.Pointer + dataOffset, object.Data, dataSize);
     *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
     *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = dataSize;
@@ -172,9 +173,9 @@ inline size_t SerializeVariableData(
 {
     size_t dataSize = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::StringPtr& element : object)
     {
-        size_t elementDataSize = element.Length;
+        size_t elementDataSize = GetVariableDataSize(element);
         memcpy(buffer.Pointer + dataOffset, element.Data, elementDataSize);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementDataSize;
@@ -197,9 +198,9 @@ inline size_t SerializeVariableData(
 {
     size_t dataSize = 0;
 
-    for (const auto& element : object)
+    for (const Mlos::Core::WideStringPtr& element : object)
     {
-        size_t elementDataSize = element.Length * sizeof(wchar_t);
+        size_t elementDataSize = GetVariableDataSize(element);
         memcpy(buffer.Pointer + dataOffset, element.Data, elementDataSize);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset)) = (dataOffset - objectOffset);
         *(reinterpret_cast<uint64_t*>(buffer.Pointer + objectOffset + sizeof(uint64_t))) = elementDataSize;

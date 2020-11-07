@@ -22,12 +22,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
     internal abstract class CppTypeTableCodeWriter : CodeWriter
     {
         /// <summary>
-        /// Namespace used to create DispatchTable.
+        /// Gets namespace used to create DispatchTable.
         /// </summary>
         protected string DispatchTableCppNamespace { get; private set; }
 
         /// <summary>
-        /// Constructor.
+        /// Initializes a new instance of the <see cref="CppTypeTableCodeWriter"/> class.
         /// </summary>
         /// <remarks>
         /// Get DispatchTable namespace from the custom assembly attribute.

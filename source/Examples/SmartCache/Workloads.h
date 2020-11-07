@@ -15,4 +15,4 @@
 
 #pragma once
 
-uint64_t CyclicalWorkload(uint64_t sequenceNumber, SmartCacheImpl<int32_t, int32_t>& smartCache);
+void CyclicalWorkload(int32_t sequenceNumber, SmartCacheImpl<int32_t, int32_t>& smartCache);
