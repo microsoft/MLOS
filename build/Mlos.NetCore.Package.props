@@ -39,8 +39,4 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-
-  <Target Name="SavePackageVersion" AfterTargets="Pack">
-    <WriteLinesToFile File="$(MlosPkgOutputDir)/.last-pack-version" Lines="$(PackageVersion)" Overwrite="true" />
-  </Target>
 </Project>

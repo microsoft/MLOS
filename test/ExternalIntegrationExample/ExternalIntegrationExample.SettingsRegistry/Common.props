@@ -18,11 +18,9 @@
 
     <!--
       Specify the version of the Mlos.SettingsSystem.* nuget packages to use.
+    <MlosPackageVersion>0.1.2</MlosPackageVersion>
     -->
-    <!--
-      Pull in any version (even prerelease) of the Mlos codegen package tool for now.
-    <MlosPackageVersion>0.1.1-*</MlosPackageVersion>
-    -->
+    <!-- Pull in any version (even prerelease) of the Mlos codegen package tool for now. -->
     <MlosPackageVersion>*-*</MlosPackageVersion>
   </PropertyGroup>
 

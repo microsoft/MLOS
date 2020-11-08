@@ -20,9 +20,15 @@
   <ItemGroup>
     <!-- Pull in the Mlos codegen package tool and its build target rules. -->
     <PackageReference Include="Mlos.SettingsSystem.CodeGen" Version="$(MlosPackageVersion)" />
-    <!-- We'll also need to link against some additional Mlos packages. -->
+    <!--
+      We'll also need to link against some additional Mlos packages.
+      Note: These should all reference the same nuget package versions.
+      To make that easier, we specify the version in the Common.props file.
+    -->
+    <!--
     <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="$(MlosPackageVersion)" />
     <PackageReference Include="Mlos.NetCore" Version="$(MlosPackageVersion)" />
+    -->
     <!--
       Include this if you want to interface with the Mlos Optimizer service over Grpc
       from your message handlers in your AssemblyInitializer code.

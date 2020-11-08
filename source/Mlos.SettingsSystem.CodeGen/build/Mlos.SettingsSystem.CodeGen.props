@@ -29,19 +29,30 @@
     <!--UseNETCoreGenerator>true</UseNETCoreGenerator-->
     <!-- Our codegen output needs to interface with raw memory buffers for interop with C++. -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
     <!-- Disable .NET.Sdk behavior of including all *.cs files within the project's directory by default. -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <!--EnableDefaultItems>false</EnableDefaultItems-->
+
+    <!-- Default to 64-bit AnyCPU -->
+    <Prefer32Bit>False</Prefer32Bit>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
   </PropertyGroup>
 
-  <!-- When compiling, be sure to reference a few other nugets by default -->
-  <!-- Note: The version string below is replaced at project/package build time using the PackageVersion property. -->
-  <ItemGroup>
-    <!-- The settings registry definitions will reference the Mlos.SettingsSystem.Attributes. -->
-    <PackageReference Include="Mlos.SettingsSystem.Attributes" Version="MLOS_CODEGEN_PACKAGE_VERSION" />
-    <!-- Some of the codegen output has "using Mlos.Core;" statements. -->
-    <PackageReference Include="Mlos.NetCore" Version="MLOS_CODEGEN_PACKAGE_VERSION" />
-  </ItemGroup>
-  <!-- FIXME: Those rules don't work (which makes sense - we're in the middle of Restore target already at this point. -->
-  <!-- TODO: Instead, let's add a Target that gets to see if those were listed as a PackageReference in the MSBuildProjectFile. -->
+  <!-- When compiling, be sure to reference a few other nugets by default. -->
+  <!-- We can't PackageRefernce them here, but we can at least check for them. -->
+  <Target Name="CheckReferences" AfterTargets="ResolvePackageAssets">
+    <ItemGroup>
+      <MlosPackageRefs Include="%(RuntimeCopyLocalItems.PackageName)" Condition="$([System.String]::new('%(PackageName)').StartsWith('Mlos.'))">
+        <PackageName>@(RuntimeCopyLocalItems->'%(PackageName)')</PackageName>
+        <PackageVersion>@(RuntimeCopyLocalItems->'%(PackageVersion)')</PackageVersion>
+      </MlosPackageRefs>
+    </ItemGroup>
+    <RemoveDuplicates Inputs="%(MlosPackageRefs.PackageVersion)">
+      <Output TaskParameter="Filtered" ItemName="MlosUniquePackageVersions" />
+    </RemoveDuplicates>
+    <Error Text="Missing Mlos.SettingsSystem.Attributes PackageReference in '$(MSBuildProjectFile)' project." Condition="$([System.String]::new(';@(MlosPackageRefs);').Contains('Mlos.SettingsSystem.Attributes'))" />
+    <Error Text="Missing Mlos.NetCore PackageReference in '$(MSBuildProjectFile)' project." Condition="$([System.String]::new(';@(MlosPackageRefs);').Contains('Mlos.NetCore'))" />
+    <Error Text="Multiple Mlos.* PackageReference Versions found in '$(MSBuildProjectFile)' project: @(MlosUniquePackageVersions)" Condition="'@(MlosUniquePackageVersions->Count())' != '1'" />
+  </Target>
 </Project>
