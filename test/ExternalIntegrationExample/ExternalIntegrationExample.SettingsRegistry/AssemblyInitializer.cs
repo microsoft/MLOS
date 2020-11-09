@@ -7,7 +7,6 @@
 // -----------------------------------------------------------------------
 
 using Mlos.Core;
-
 using MlosCoreProxy = Proxy.Mlos.Core;
 
 namespace ExternalIntegrationExample

@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <!-- In a large project some properties will be reused across components. -->
-  <Import Project="$(MSBuildThisFileDirectory)/Common.props" />
+  <Import Project="$(MSBuildThisFileDirectory)/build/Common.props" />
 
   <!-- Set some project specific settings. -->
   <PropertyGroup Label="GeneralProjectProperties">

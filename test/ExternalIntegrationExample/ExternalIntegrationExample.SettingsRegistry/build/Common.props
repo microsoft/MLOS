@@ -14,7 +14,7 @@
       Note: This should match the cmake include_directory() specficiation so that the
       output SettingsProvider_gen_base.h and related files can be found.
     -->
-    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildThisFileDirectory)/../Mlos.CodeGen.out/$(Configuration)</MlosSettingsSystemCodeGenOutputBaseDir>
+    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildProjectDirectory)/../Mlos.CodeGen.out/$(Configuration)</MlosSettingsSystemCodeGenOutputBaseDir>
 
     <!--
       Specify the version of the Mlos.SettingsSystem.* nuget packages to use.
@@ -36,10 +36,8 @@
     <WarningsAsErrors>true</WarningsAsErrors>
     <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
     <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
-    <!--
-      Optional: Define a local set of code analysis rule overrides.
-    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/../../../build/Mlos.NetCore.ruleset</CodeAnalysisRuleSet>
-    -->
+    <!-- Optional: Define a local set of code analysis rule overrides. -->
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/ExternalIntegrationExample.Stylecop.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <!-- Optional: Configure stylecop analyzers. -->
@@ -53,7 +51,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
 		<!-- Provide your own stylecop.json config (for this example we reuse the core MLOS one) -->
-    <AdditionalFiles Include="$(MSBuildThisFileDirectory)/../../../build/stylecop.json" Visible="false">
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)/stylecop.json" Visible="false">
       <Link>stylecop.json</Link>
     </AdditionalFiles>
   </ItemGroup>

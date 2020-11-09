@@ -9,7 +9,7 @@
     <RestorePackagesPath>$(MSBuildThisFileDirectory)/.nuget/packages</RestorePackagesPath>
 
     <!-- Prefer to use the local Mlos build PackOutputPath first. -->
-    <MlosLocalPkgOutput>$(MSBuildThisFileDirectory)/../../../target/pkg/$(Configuration)</MlosLocalPkgOutput>
+    <MlosLocalPkgOutput>$(MSBuildThisFileDirectory)/../../../../target/pkg/$(Configuration)</MlosLocalPkgOutput>
     <RestoreSources>$(MlosLocalPkgOutput);$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
   </PropertyGroup>
 
@@ -52,9 +52,9 @@
     </PropertyGroup>
 
     <ItemGroup Label="MlosProjectDependenciesForLocalTesting">
-      <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
-      <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
-      <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.NetCore/Mlos.NetCore.csproj" />
+      <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../../source/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
+      <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../../source/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
+      <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../../source/Mlos.NetCore/Mlos.NetCore.csproj" />
     </ItemGroup>
 
     <Message Text="Building local Mlos nuget packages from local repo for local testing: @(LocalMlosPackProjectDependency->'%(Filename)')" Importance="high" />
