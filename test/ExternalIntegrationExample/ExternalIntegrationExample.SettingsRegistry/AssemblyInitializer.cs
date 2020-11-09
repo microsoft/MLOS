@@ -10,8 +10,11 @@ using Mlos.Core;
 
 using MlosCoreProxy = Proxy.Mlos.Core;
 
-namespace Mlos.UnitTest
+namespace ExternalIntegrationExample
 {
+    /// <summary>
+    /// A static class for the Mlos.Agent.Server to use help setup the message handler code for this SettingsRegistry assembly.
+    /// </summary>
     public static class AssemblyInitializer
     {
         static AssemblyInitializer()

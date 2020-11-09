@@ -37,5 +37,8 @@
     <!-- Default to 64-bit AnyCPU -->
     <Prefer32Bit>False</Prefer32Bit>
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+
+    <!-- Enable documentation file for StyleCop rule SA0001 -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 </Project>

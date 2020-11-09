@@ -29,8 +29,34 @@
     <!-- Declare the target framework for all SettingsRegistry projects. -->
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+  <!-- Configure warning levels and errors. -->
+  <PropertyGroup>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+    <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
+    <!--
+      Optional: Define a local set of code analysis rule overrides.
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)/../../../build/Mlos.NetCore.ruleset</CodeAnalysisRuleSet>
+    -->
+  </PropertyGroup>
 
-  <!-- TODO: Optional: Configure stylecop analyzers. -->
+  <!-- Optional: Configure stylecop analyzers. -->
+	<ItemGroup Label="EnableStyleCopForExample">
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+		<!-- Provide your own stylecop.json config (for this example we reuse the core MLOS one) -->
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)/../../../build/stylecop.json" Visible="false">
+      <Link>stylecop.json</Link>
+    </AdditionalFiles>
+  </ItemGroup>
 
   <!--
     For local testing, use a locally built package instead of the one pulled from

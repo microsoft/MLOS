@@ -12,6 +12,43 @@ using Mlos.SettingsSystem.StdTypes;
 namespace ExternalIntegrationExample
 {
     /// <summary>
+    /// An enum describing the request type for this component.
+    /// </summary>
+    public enum ComponentRequestType
+    {
+        /// <summary>
+        /// A Get request type.
+        /// </summary>
+        Get,
+
+        /// <summary>
+        /// A Put request type.
+        /// </summary>
+        Put,
+
+        /// <summary>
+        /// A Delete request type.
+        /// </summary>
+        Delete,
+    }
+
+    /// <summary>
+    /// An enum describing the response type for the request.
+    /// </summary>
+    public enum ComponentResponseType
+    {
+        /// <summary>
+        /// A Success response type.
+        /// </summary>
+        Success,
+
+        /// <summary>
+        /// A Failure response type.
+        /// </summary>
+        Failure,
+    }
+
+    /// <summary>
     /// A message to ask optimizer for the new configuration.
     /// </summary>
     /// <remarks>
@@ -24,25 +61,6 @@ namespace ExternalIntegrationExample
     }
 
     /// <summary>
-    /// An enum describing the request type for this component.
-    /// </summary>
-    public enum ComponentRequestType
-    {
-        Get,
-        Put,
-        Delete,
-    }
-
-    /// <summary>
-    /// An enum describing the response type for the request.
-    /// </summary>
-    public enum ComponentResponseType
-    {
-        Success,
-        Failure,
-    }
-
-    /// <summary>
     /// A telemetry message to inform the agent of the smart component's activity/state.
     /// </summary>
     /// <remarks>
@@ -52,7 +70,7 @@ namespace ExternalIntegrationExample
     internal partial struct SmartComponentExampleTelemetryMessage
     {
         /// <summary>
-        /// The
+        /// The key for the Request.
         /// </summary>
         [ScalarSetting]
         internal long RequestKey;
