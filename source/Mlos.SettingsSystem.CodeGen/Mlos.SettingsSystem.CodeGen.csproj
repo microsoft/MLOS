@@ -38,23 +38,21 @@
         <PackagePath>tools/</PackagePath>
       </None>
     </ItemGroup>
-
-    <!--
-      Include our build rules in the package, but not in the TargetFramework specific path.
-    -->
-    <ItemGroup>
-      <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).props">
-        <Pack>true</Pack>
-        <PackagePath>build/</PackagePath>
-      </None>
-    </ItemGroup>
-    <ItemGroup>
-      <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).targets">
-        <Pack>true</Pack>
-        <PackagePath>build/</PackagePath>
-      </None>
-    </ItemGroup>
   </Target>
+
+  <!--
+    Include our build rules in the package, but not in the TargetFramework specific path.
+  -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).props">
+      <Pack>true</Pack>
+      <PackagePath>build/</PackagePath>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).targets">
+      <Pack>true</Pack>
+      <PackagePath>build/</PackagePath>
+    </None>
+  </ItemGroup>
 
   <PropertyGroup>
     <MicrosoftCodeAnalysis_PackageVersion>3.6.0</MicrosoftCodeAnalysis_PackageVersion>
@@ -69,8 +67,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Marked as Private so that during Pack, we can execute the dll directly as a tool. -->
-    <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" PrivateAssets="all" />
+    <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
   </ItemGroup>
 
   <ItemGroup>

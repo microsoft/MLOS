@@ -30,11 +30,7 @@
       <Optimize>true</Optimize>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup>
-    <!-- Stash nuget packages inside the repo to make it easier to clean them during local package development. -->
-    <MlosRestorePackagesPath>$(BaseDir)/tools/.nuget/packages</MlosRestorePackagesPath>
-  </PropertyGroup>
-  <Import Project="$(BaseDir)\build\Mlos.NetCore.Package.props" />
+  <Import Project="$(BaseDir)/build/Mlos.NetCore.Package.props" />
   <ItemGroup>
     <None Remove="Makefile" />
     <None Remove="CMakeLists.txt" />

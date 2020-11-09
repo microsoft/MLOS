@@ -12,6 +12,7 @@
     <PackageReference Include="Grpc.Core" Version="$(GrpcVersion)" />
     <PackageReference Include="Grpc.Net.Client" Version="$(GrpcVersion)" Condition="'$(GrpcServices)' == 'Client' OR '$(GrpcServices)' == 'Both'" />
     <PackageReference Include="Grpc.Tools" Version="$(GrpcVersion)">
+      <!-- Grpc.Tools is a build time dependency only - don't include it in any nugets we create. -->
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>

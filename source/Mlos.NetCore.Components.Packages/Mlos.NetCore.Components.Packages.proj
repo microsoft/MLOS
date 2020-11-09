@@ -19,6 +19,10 @@
     <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.MetaProj.targets" />
+  <!--
+    For now we're only creating the .nupkg files locally.
+    TODO: Add keys for signing the package prior to publishing as well.
+  -->
   <Target Name="Pack" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">
     <!-- Don't repeat the build - we probably just did it. -->
     <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="false"

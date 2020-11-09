@@ -13,7 +13,12 @@
     <RestoreSources>$(MlosLocalPkgOutput);$(RestoreSources);https://api.nuget.org/v3/index.json</RestoreSources>
   </PropertyGroup>
 
-  <!-- For more convenient dev loops, build with "/p:CleanMlosPackages=true" to force a rebuild and re-restore of the local packages. -->
+  <!-- Make sure that those directories exist before attempting to search them for restore. -->
+  <Target Name="CreateLocalNugetSourceDirs" BeforeTargets="Restore">
+    <MakeDir Directories="$(MlosLocalPkgOutput)" />
+  </Target>
+
+  <!-- For more convenient dev loops, build with "/p:PackMlosDependencies=true /p:CleanMlosPackages=true" to force a rebuild and re-restore of the local packages. -->
   <!-- Make sure this target only ever runs once. -->
   <PropertyGroup>
     <CleanMlosPackagesTargetRan>false</CleanMlosPackagesTargetRan>
@@ -38,16 +43,20 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="PackMlosDependenciesForLocalTesting" BeforeTargets="Restore">
+  <!-- Automatically rebuild the dependent Mlos packages with "dotnet build /p:PackMlosDependencies=true" -->
+  <Target Name="PackMlosDependenciesForLocalTesting" BeforeTargets="Restore" Condition="'$(PackMlosDependencies)' == 'true'">
+    <!-- Use CallTarget to avoid some repeat target execution issues when using Before/After/DependsOn-Targets properites. -->
     <CallTarget Targets="CleanMlosPackages" Condition="'$(CleanMlosPackages)' == 'true' And '$(CleanMlosPackagesTargetRun)' != 'true'" />
     <PropertyGroup>
       <CleanMlosPackagesTargetRan>true</CleanMlosPackagesTargetRan>
     </PropertyGroup>
+
     <ItemGroup Label="MlosProjectDependenciesForLocalTesting">
       <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
       <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
       <LocalMlosPackProjectDependency Include="$(MSBuildThisFileDirectory)/../../../source/Mlos.NetCore/Mlos.NetCore.csproj" />
     </ItemGroup>
+
     <Message Text="Building local Mlos nuget packages from local repo for local testing: @(LocalMlosPackProjectDependency->'%(Filename)')" Importance="high" />
     <!-- These projects (in this order) build upon one another so we don't need to repeat the dependent builds each time. -->
     <MSBuild Projects="@(LocalMlosPackProjectDependency)" Targets="Restore;Build;Pack" RunEachTargetSeparately="false"

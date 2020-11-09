@@ -16,10 +16,6 @@
       <Analyzer Remove="@(Analyzer)" />
     </ItemGroup>
   </Target>
-  <Target Name="CleanMlosRestorePackages">
-    <RemoveDir Condition="'$(MlosRestorePackagesPath)' != ''" Directories="$(MlosRestorePackagesPath)" />
-    <MakeDir Directories="$(MlosRestorePackagesPath)" />
-  </Target>
   <Import Project="$(MSBuildThisFileDirectory)\Mlos.Common.targets" />
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

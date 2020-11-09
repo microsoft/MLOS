@@ -4,8 +4,4 @@
     <MSBuild Projects="@(ProjectReference)" Targets="Restore" RunEachTargetSeparately="true" Properties="Configuration=$(Configuration)" />
     <MSBuild Projects="@(ProjectFile)" Targets="Restore" RunEachTargetSeparately="true" Properties="Configuration=$(Configuration)" />
   </Target>
-  <Target Name="CreateLocalNugetSourceDirs" BeforeTargets="Restore">
-    <MakeDir Directories="$(BaseDir)/target/pkg/Release" />
-    <MakeDir Directories="$(BaseDir)/target/pkg/Debug" />
-  </Target>
 </Project>
