@@ -24,6 +24,7 @@
   </PropertyGroup>
 
   <!-- Since we can't use PackAsTool but want to be able to run the packaged version as one we need to include it's dependencies. -->
+  <!-- TODO? Move this logic to build/Mlos.NetCore.Package.props to make it more reusable?  This is the only place we need this currently. -->
   <PropertyGroup>
     <GenerateNuspecDependsOn>IncludeDependentAssembliesInToolsPackage;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
     <!-- Since we copy those dependencies in directly now we could possibly skip including the dependencies in the generated nuspec. -->
@@ -31,7 +32,7 @@
   </PropertyGroup>
   <Target Name="IncludeDependentAssembliesInToolsPackage" BeforeTargets="Pack;_LoadPackInputItems;_GetTargetFrameworksOutput" AfterTargets="Build" Condition="'$(IsTool)' == 'true'">
     <ItemGroup>
-      <!-- Note: this does not currently include the localization dlls. -->
+      <!-- Note: this does not currently include any localization dlls. -->
       <None Include="$(OutputPath)/*.dll" Exclude="$(OutputPath)/$(TargetName)$(TargetExt);$(OutputPath)/$(TargetName).pdb">
         <Pack>true</Pack>
         <PackagePath>tools/</PackagePath>
@@ -42,43 +43,33 @@
       Include our build rules in the package, but not in the TargetFramework specific path.
     -->
     <ItemGroup>
-      <None Include="$(OutputPath)/build/$(PackageId).props">
+      <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).props">
         <Pack>true</Pack>
         <PackagePath>build/</PackagePath>
       </None>
     </ItemGroup>
     <ItemGroup>
-      <None Include="$(OutputPath)/build/$(PackageId).targets">
+      <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).targets">
         <Pack>true</Pack>
         <PackagePath>build/</PackagePath>
       </None>
     </ItemGroup>
-  </Target>
-  <!--
-      Before we do that, we first set some version numbers in them.
-  -->
-  <Target Name="UpdateVersionInPackageBuildRulesFiles" BeforeTargets="AfterBuild">
-    <MakeDir Directories="$(OutputPath)/build" />
-    <Delete Files="$(OutputPath)/build/*" />
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)/build/$(PackageId).props" DestinationFolder="$(OutputPath)/build" />
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)/build/$(PackageId).targets" DestinationFolder="$(OutputPath)/build" />
-    <Message Text="PackageVersion: $(PackageVersion)" Importance="high" />
-    <XmlPoke XmlInputPath="$(OutputPath)/build/$(PackageId).props"
-             Namespaces="&lt;Namespace Prefix='msb' Uri='http://schemas.microsoft.com/developer/msbuild/2003'/&gt;"
-             Query="/msb:Project/msb:ItemGroup/msb:PackageReference[starts-with(@Include, 'Mlos.')]/@Version"
-             Value="$(PackageVersion)" />
   </Target>
 
   <PropertyGroup>
     <MicrosoftCodeAnalysis_PackageVersion>3.6.0</MicrosoftCodeAnalysis_PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <!--PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysis_PackageVersion)" /-->
+    <!--
+      Note: This is a meta package that pulls in lots of extra unnecessary stuff
+      and actually doesn't include Microsoft.CodeAnalysis.dll
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
+    -->
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
-    <!-- Marked as Private so that when Packing, we can execute the dll directly as a tool. -->
+    <!-- Marked as Private so that during Pack, we can execute the dll directly as a tool. -->
     <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" PrivateAssets="all" />
   </ItemGroup>
 

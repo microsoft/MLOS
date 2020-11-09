@@ -99,4 +99,50 @@
   <Target Name="CleanMlosSettingsSystemCodeGen" AfterTargets="BeforeClean">
     <RemoveDir Directories="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)" Condition="'$(MlosSettingsSystemCodeGenAbsoluteOutputPath)' != ''" />
   </Target>
+
+  <!--
+    Note: We can't add PackageReference items here because we're already in the Restore target by the time this file is evaluated,
+    but we can at least add some sanity checks for them to make it easier to author correct .csproj files that use MLOS CodeGen.
+  -->
+  <Target Name="CheckReferences" AfterTargets="ResolvePackageAssets">
+    <!-- Lookup the resolved packages for the current project and filter to just the Mlos packages. -->
+    <ItemGroup>
+      <MlosPackageRefs Include="%(RuntimeCopyLocalItems.PackageName)" Condition="$([System.String]::new('%(PackageName)').StartsWith('Mlos.'))">
+        <PackageName>@(RuntimeCopyLocalItems->'%(PackageName)')</PackageName>
+        <PackageVersion>@(RuntimeCopyLocalItems->'%(PackageVersion)')</PackageVersion>
+      </MlosPackageRefs>
+    </ItemGroup>
+
+    <!-- Check for some additional compile library requirements. -->
+    <PropertyGroup>
+      <MlosPackageNames>;@(MlosPackageRefs->'%(PackageName)');</MlosPackageNames>
+    </PropertyGroup>
+    <Error Text="Missing Mlos.SettingsSystem.Attributes PackageReference in '$(MSBuildProjectFile)' project."
+      Condition="$(MlosPackageNames.Contains(';Mlos.SettingsSystem.Attributes;')) == false" />
+    <Error Text="Missing Mlos.NetCore PackageReference in '$(MSBuildProjectFile)' project."
+      Condition="$(MlosPackageNames.Contains(';Mlos.NetCore;')) == false" />
+
+    <!-- Lookup this package's version. -->
+    <ItemGroup>
+      <MlosCodeGenPackageNuspecs Include="$(MSBuildThisFileDirectory)/../*.nuspec" />
+    </ItemGroup>
+    <Error Text="Expecting a single package nuspec: @(MlosCodeGenPackageNuspecs" Condition="@(MlosCodeGenPackageNuspecs->Count()) != 1" />
+    <XmlPeek XmlInputPath="@(MlosCodeGenPackageNuspecs)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd'/&gt;"
+             Query="/ns:package/ns:metadata/ns:version/text()">
+      <Output TaskParameter="Result" PropertyName="MlosCodeGenPackageVersion" />
+    </XmlPeek>
+    <Error Text="Failed to lookup package version." Condition="'$(MlosCodeGenPackageVersion)' == ''" />
+    <!-- Combine it with the library package versions. -->
+		<ItemGroup>
+      <MlosPackageVersions Include="%(MlosPackageRefs.PackageVersion)" />
+      <MlosPackageVersions Include="$(MlosCodeGenPackageVersion)" />
+    </ItemGroup>
+    <!-- Make sure they're consistent. -->
+    <RemoveDuplicates Inputs="@(MlosPackageVersions)">
+      <Output TaskParameter="Filtered" ItemName="MlosUniquePackageVersions" />
+    </RemoveDuplicates>
+    <Error Text="Multiple Mlos.* PackageReference Versions found in '$(MSBuildProjectFile)' project: @(MlosUniquePackageVersions)"
+      Condition="'@(MlosUniquePackageVersions->Count())' != '1'" />
+  </Target>
 </Project>
