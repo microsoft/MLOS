@@ -1,5 +1,15 @@
-RelativePathToProjectRoot := ../../..
-MSBUILD_ARGS := /p:PackMlosDependencies=true $(MSBUILD_ARGS)
-#MSBUILD_ARGS := /p:CleanMlosPackages=true $(MSBUILD_ARGS)
-include $(RelativePathToProjectRoot)/build/DotnetWrapper.mk
-#include $(RelativePathToProjectRoot)/build/CMakeWrapper.mk
+all: dotnet-build
+
+clean: dotnet-clean
+
+dotnet-build:
+	dotnet build /p:PackMlosDependencies=true
+
+dotnet-build-quick:
+	dotnet build --no-restore
+
+dotnet-rebuild-all:
+	dotnet build /p:PackMlosDependencies=true /p:CleanMlosPackages=true
+
+dotnet-clean:
+	dotnet build --no-restore /t:clean
