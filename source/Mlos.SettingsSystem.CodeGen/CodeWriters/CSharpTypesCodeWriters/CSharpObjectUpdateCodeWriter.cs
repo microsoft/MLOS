@@ -11,7 +11,7 @@ using System.Reflection;
 
 using Mlos.SettingsSystem.Attributes;
 
-namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriters
+namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 {
     /// <summary>
     /// Writes C# method to update values from the proxy.
