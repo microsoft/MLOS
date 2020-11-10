@@ -21,7 +21,7 @@ namespace Core
 {
 namespace Collections
 {
-// #TODO change interace
+// #TODO change interface
 // add final mix
 //
 
