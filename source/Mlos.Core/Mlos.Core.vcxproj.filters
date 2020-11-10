@@ -39,9 +39,7 @@
     <ClInclude Include="PropertyProxy.h" />
     <ClInclude Include="PropertyProxyStringView.h" />
     <ClInclude Include="SharedMemoryMapView.Windows.h" />
-    <ClInclude Include="StaticSingleton.h" />
     <ClInclude Include="StringTypes.h" />
-    <ClInclude Include="StaticVector.h" />
     <ClInclude Include="Utils.h" />
     <ClInclude Include="SharedConfigMemoryRegion.h">
       <Filter>MemoryRegions</Filter>
@@ -72,6 +70,14 @@
     <ClInclude Include="ArenaAllocator.h">
       <Filter>MemoryRegions</Filter>
     </ClInclude>
+    <ClInclude Include="ComponentConfig.inl" />
+    <ClInclude Include="Mlos.Core.inl" />
+    <ClInclude Include="MlosContext.inl" />
+    <ClInclude Include="ProbingPolicy.inl" />
+    <ClInclude Include="SharedChannel.inl" />
+    <ClInclude Include="SharedConfigManager.inl" />
+    <ClInclude Include="AlignedInstance.h" />
+    <ClInclude Include="AlignedVector.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Codegen">
@@ -83,15 +89,5 @@
     <Filter Include="MemoryRegions">
       <UniqueIdentifier>{9fc7c27a-be53-48f3-b356-d240db1e1cc8}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="MlosContext.inl" />
-    <None Include="SharedConfigManager.inl" />
-    <None Include="ComponentConfig.inl" />
-    <None Include="SharedChannel.inl" />
-    <None Include="Mlos.Core.inl" />
-    <None Include="ProbingPolicy.inl">
-      <Filter>Collections</Filter>
-    </None>
   </ItemGroup>
 </Project>

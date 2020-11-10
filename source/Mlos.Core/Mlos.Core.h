@@ -142,11 +142,11 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 
 // Include Mlos Client API.
 //
+#include "AlignedInstance.h"
+#include "AlignedVector.h"
 #include "MlosContext.h"
 #include "InternalMlosContext.h"
 #include "InterProcessMlosContext.h"
-#include "StaticSingleton.h"
-#include "StaticVector.h"
 
 // Implementation.
 //
