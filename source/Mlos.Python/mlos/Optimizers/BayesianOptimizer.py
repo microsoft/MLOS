@@ -133,53 +133,6 @@ class BayesianOptimizer(OptimizerBase):
     def predict(self, feature_values_pandas_frame, t=None):
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
-    @trace()
-    def optimum(self, empirical=True, context=None, stay_focused=False):
-        """Return current optimum of optimization problem.
-
-        Parameters
-        ----------
-        empirical : boolean, default=True
-            Whether to return the best observed value so far (True) or optimize the current surrogate (False).
-
-        contest : DataFrame, default=None
-            Context features to condition on when finding the default.
-
-        stay_focused : boolean
-            Ignored.
-        """
-        objective_name = self.optimization_problem.objectives[0].name
-
-        if empirical:
-            if context is not None:
-                raise ValueError("Empirical optimum with context not supported.")
-
-            if self.optimization_problem.objectives[0].minimize:
-                index_of_best_target = self._target_values_df.idxmin()[0]
-            else:
-                index_of_best_target = self._target_values_df.idxmax()[0]
-            best_objective_value = self._target_values_df.loc[index_of_best_target][objective_name]
-
-            param_names = [dimension.name for dimension in self.optimization_problem.parameter_space.dimensions]
-            params_for_best_objective = self._feature_values_df.loc[index_of_best_target]
-            optimal_config_and_target = {
-                objective_name: best_objective_value,
-            }
-
-            for param_name in param_names:
-                optimal_config_and_target[param_name] = params_for_best_objective[param_name]
-
-        else:
-            def target_function(config_values):
-                sign = -1 if self.experiment_designer.optimization_problem.objectives[0].minimize else 1
-                return sign * self.experiment_designer.surrogate_model.predict(config_values).get_dataframe().predicted_value
-            params_for_best_objective = self.experiment_designer.numeric_optimizer.maximize(
-                target_function=target_function, context_values_dataframe=context)
-            # FIXME we're lying here as we don't actually return the target because we're not evaluatings
-            optimal_config_and_target = params_for_best_objective.to_dict()
-
-        return optimal_config_and_target
-
     def focus(self, subspace):
         ...
 

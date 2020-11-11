@@ -80,7 +80,8 @@ class OptimizerBase(ABC):
         """
         raise NotImplementedError("All subclasses must implement this method.")
 
-    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05, ccontext=None) -> Tuple[Point, Point]:
+
+    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05, context=None) -> Tuple[Point, Point]:
         """Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
@@ -101,8 +102,10 @@ class OptimizerBase(ABC):
             raise ValueError("Can't compute optimum before registering any observations.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
+            if context is not None:
+                raise ValueError("OptimumDefinition.BEST_OBSERVATION not supported if context is provided.")
             return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha)
+        return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha, context=context)
 
 
     @trace()
