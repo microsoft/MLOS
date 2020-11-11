@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 import random
-import unittest
 
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
@@ -11,9 +10,9 @@ from mlos.Spaces.Dimensions.DiscreteDimension import DiscreteDimension
 from mlos.Spaces.SimpleHypergrid import SimpleHypergrid
 
 
-class TestSimpleSpaces(unittest.TestCase):
+class TestSimpleSpaces:
 
-    def setUp(self) -> None:
+    def setup_method(self, method) -> None:
         self.small_square = SimpleHypergrid(
             name="small_square",
             dimensions=[
@@ -56,20 +55,20 @@ class TestSimpleSpaces(unittest.TestCase):
 
     def test_simple_hypergrid(self):
 
-        self.assertTrue(self.big_square.contains_space(self.small_square))
-        self.assertFalse(self.small_square.contains_space(self.big_square))
-        self.assertTrue(self.big_grid.contains_space(self.small_grid))
-        self.assertFalse(self.small_grid.contains_space(self.big_grid))
+        assert self.big_square.contains_space(self.small_square)
+        assert not self.small_square.contains_space(self.big_square)
+        assert self.big_grid.contains_space(self.small_grid)
+        assert not self.small_grid.contains_space(self.big_grid)
 
-        self.assertTrue(self.small_square.contains_space(self.small_grid))
-        self.assertFalse(self.small_grid.contains_space(self.small_square))
+        assert self.small_square.contains_space(self.small_grid)
+        assert not self.small_grid.contains_space(self.small_square)
 
-        self.assertFalse(self.big_square.contains_space(self.big_grid))
+        assert not self.big_square.contains_space(self.big_grid)
 
     def test_random_point_generation(self):
         for grid in self.all_grids:
             for _ in range(100):
-                self.assertTrue(grid.random() in grid)
+                assert grid.random() in grid
 
     def test_reseeding_random_state(self):
         """ Validates that we can generate the same sequence of random points.
@@ -93,5 +92,5 @@ class TestSimpleSpaces(unittest.TestCase):
 
                 # let's make sure they match up
                 for first_pass_point, second_pass_point in zip(first_pass_points, second_pass_points):
-                    self.assertTrue(first_pass_point == second_pass_point)
+                    assert first_pass_point == second_pass_point
 

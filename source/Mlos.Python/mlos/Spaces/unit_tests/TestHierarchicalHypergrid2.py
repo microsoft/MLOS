@@ -3,11 +3,11 @@
 # Licensed under the MIT License.
 #
 import pickle
-import unittest
+import pytest
 
 from mlos.Spaces import CategoricalDimension, Dimension, DiscreteDimension, OrdinalDimension, Point, SimpleHypergrid
 
-class TestHierarchicalHypergrid2(unittest.TestCase):
+class TestHierarchicalHypergrid2:
     """ Tests the improved implementation of the Hypergrids.
 
     In particular:
@@ -17,7 +17,7 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
 
     """
 
-    def setUp(self):
+    def setup_method(self, method):
 
         self.lru_cache_param_space = SimpleHypergrid(
             name='lru_cache_config',
@@ -93,19 +93,19 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
 
         :return:
         """
-        self.assertTrue(self.cache_param_space.name == 'cache_param_space')
+        assert self.cache_param_space.name == 'cache_param_space'
 
         subgrids_joined_on_cache_implementation_name_dimension = set(joined_subgrid.subgrid for joined_subgrid in self.cache_param_space.joined_subgrids_by_pivot_dimension['cache_implementation_name'])
-        self.assertTrue(self.lru_cache_param_space in subgrids_joined_on_cache_implementation_name_dimension)
-        self.assertTrue(self.associative_cache_implementation_param_space in subgrids_joined_on_cache_implementation_name_dimension)
+        assert self.lru_cache_param_space in subgrids_joined_on_cache_implementation_name_dimension
+        assert self.associative_cache_implementation_param_space in subgrids_joined_on_cache_implementation_name_dimension
 
         subgrids_joined_on_hash_function_name_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.associative_cache_implementation_param_space.joined_subgrids_by_pivot_dimension['hash_function_name'])
-        self.assertTrue(self.mod_prime_hash_function_param_space in subgrids_joined_on_hash_function_name_dimension)
-        self.assertTrue(self.lowest_bits_param_space in subgrids_joined_on_hash_function_name_dimension)
+        assert self.mod_prime_hash_function_param_space in subgrids_joined_on_hash_function_name_dimension
+        assert self.lowest_bits_param_space in subgrids_joined_on_hash_function_name_dimension
 
         subgrids_joined_on_bucket_implementation_dimension = set(guest_subgrid.subgrid for guest_subgrid in self.associative_cache_implementation_param_space.joined_subgrids_by_pivot_dimension['bucket_implementation'])
-        self.assertTrue(self.binary_search_tree_param_space in subgrids_joined_on_bucket_implementation_dimension)
-        self.assertTrue(self.linked_list_param_space in subgrids_joined_on_bucket_implementation_dimension)
+        assert self.binary_search_tree_param_space in subgrids_joined_on_bucket_implementation_dimension
+        assert self.linked_list_param_space in subgrids_joined_on_bucket_implementation_dimension
 
     def test_name_flattening(self):
         num_tests = 1000
@@ -127,7 +127,7 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
             )
 
             flat_random_config = random_config.flat_copy()
-            self.assertTrue(flat_random_config in flat_cache_param_space)
+            assert flat_random_config in flat_cache_param_space
 
             # let's try another random config
             another_random_config = self.cache_param_space.random()
@@ -135,9 +135,9 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
             try:
                 if flattened_config in flat_cache_param_space:
                     ...
-                self.assertTrue(True)
+                assert True
             except:
-                self.assertTrue(False)
+                assert False
 
     def test_that_getitem_returns_subgrid(self):
         """ Tests if we can use the __getitem__ operator to retrieve a subgrid.
@@ -146,8 +146,8 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
         """
         lru_cache_param_space = self.cache_param_space['lru_cache_config']
         for _ in range(1000):
-            self.assertTrue(lru_cache_param_space.random() in self.lru_cache_param_space)
-            self.assertTrue(self.lru_cache_param_space.random() in lru_cache_param_space)
+            assert lru_cache_param_space.random() in self.lru_cache_param_space
+            assert self.lru_cache_param_space.random() in lru_cache_param_space
 
     def test_that_getitem_returns_dimensions(self):
         """ Tests if we can use the __getitem__ operator to retrieve a dimension.
@@ -155,12 +155,12 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
         :return:
         """
         cache_implementation_dimension = self.cache_param_space["cache_implementation_name"]
-        self.assertTrue(cache_implementation_dimension ==CategoricalDimension(name='cache_implementation_name', values=['lru_cache', 'associative_cache']))
+        assert cache_implementation_dimension ==CategoricalDimension(name='cache_implementation_name', values=['lru_cache', 'associative_cache'])
         num_bits_dimension = self.cache_param_space["associative_cache_config"]["lowest_bits"]["num_bits"]
-        self.assertTrue(num_bits_dimension == self.lowest_bits_param_space["num_bits"])
+        assert num_bits_dimension == self.lowest_bits_param_space["num_bits"]
 
     def test_getitem_throws(self):
-        with self.assertRaises(KeyError):
+        with pytest.raises(KeyError):
             self.cache_param_space["non_existent_dimension"]
 
     def test_that_collision_throws(self):
@@ -170,7 +170,7 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
 
         :return:
         """
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             SimpleHypergrid(
                 name="collisions",
                 dimensions=[
@@ -187,5 +187,5 @@ class TestHierarchicalHypergrid2(unittest.TestCase):
             random_point = self.cache_param_space.random()
             pickled = pickle.dumps(random_point)
             unpickled = pickle.loads(pickled)
-            self.assertTrue(unpickled == random_point)
+            assert unpickled == random_point
 

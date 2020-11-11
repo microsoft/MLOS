@@ -5,7 +5,6 @@
 import logging
 import math
 from threading import Thread
-import unittest
 
 import grpc
 import pandas as pd
@@ -22,7 +21,7 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, Point, SimpleHypergrid
 
 
-class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
+class TestSmartCacheWithRemoteOptimizer:
     """ Tests SmartCache that's being tuned by the remote optimizer.
 
     This test will:
@@ -31,7 +30,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
     3. Optimize the SmartCache with the help of the remote or in-process optimizer.
     """
 
-    def setUp(self):
+    def setup_method(self, method):
         mlos_globals.init_mlos_global_context()
         mlos_globals.mlos_global_context.start_clock()
         self.logger = create_logger('TestSmartCacheWithRemoteOptimizer')
@@ -89,7 +88,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
             objectives=[Objective(name="hit_rate", minimize=False)]
         )
 
-    def tearDown(self):
+    def teardown_method(self, method):
         mlos_globals.mlos_global_context.stop_clock()
         self.mlos_agent.stop_all()
         self.server.stop(grace=None)
@@ -137,7 +136,7 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
 
         # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
         # and should make this test not very flaky.
-        self.assertTrue(random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations)
+        assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
 
         # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
         models_gof_metrics = [random_forest_gof_metrics]
@@ -148,16 +147,16 @@ class TestSmartCacheWithRemoteOptimizer(unittest.TestCase):
             # Note, the point of this test is to check sanity. We'll use a separate suite to evaluate models' performance from an ML standpoint.
             self.logger.info(f"Relative absolute error: {model_gof_metrics.relative_absolute_error}")
             self.logger.info(f"Relative squared error: {model_gof_metrics.relative_squared_error}")
-            self.assertTrue(model_gof_metrics.relative_absolute_error is None or (0 <= model_gof_metrics.relative_absolute_error <= 2))
-            self.assertTrue(model_gof_metrics.relative_squared_error is None or (0 <= model_gof_metrics.relative_squared_error <= 2))
+            assert model_gof_metrics.relative_absolute_error is None or (0 <= model_gof_metrics.relative_absolute_error <= 2)
+            assert model_gof_metrics.relative_squared_error is None or (0 <= model_gof_metrics.relative_squared_error <= 2)
 
             # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
             n = model_gof_metrics.last_refit_iteration_number
             self.logger.info(f"Last refit iteration number: {n}")
             self.logger.info(f"Mean absolute error: {model_gof_metrics.mean_absolute_error}")
             self.logger.info(f"Root mean squared error: {model_gof_metrics.root_mean_squared_error}")
-            self.assertTrue(model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error)
+            assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
 
             # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
-            self.assertTrue(model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate)
+            assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
 

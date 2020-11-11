@@ -4,7 +4,6 @@
 #
 import datetime
 import math
-import unittest
 import numpy as np
 import pandas as pd
 
@@ -13,13 +12,13 @@ from mlos.Spaces import SimpleHypergrid, ContinuousDimension
 import mlos.global_values as global_values
 
 
-class TestHomogeneousRandomForestRegressionModel(unittest.TestCase):
+class TestHomogeneousRandomForestRegressionModel:
 
     @classmethod
-    def setUpClass(cls) -> None:
+    def setup_class(cls) -> None:
         global_values.declare_singletons()
 
-    def setUp(self):
+    def setup_method(self, method):
         # Let's create a simple linear mapping
         self.slope = 10
         self.y_intercept = 10

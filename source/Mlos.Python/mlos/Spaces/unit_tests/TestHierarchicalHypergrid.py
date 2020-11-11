@@ -3,13 +3,12 @@
 # Licensed under the MIT License.
 #
 import random
-import unittest
 
 from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
 
-class TestHierarchicalSpaces(unittest.TestCase):
+class TestHierarchicalSpaces:
 
-    def setUp(self):
+    def setup_method(self, method):
         self.emergency_buffer_settings = SimpleHypergrid(
             name='emergency_buffer_config',
             dimensions=[
@@ -50,14 +49,14 @@ class TestHierarchicalSpaces(unittest.TestCase):
             log2_buffer_size=10,
             use_emergency_buffer=False
         )
-        self.assertTrue(valid_config_no_emergency_buffer in self.hierarchical_settings)
+        assert valid_config_no_emergency_buffer in self.hierarchical_settings
 
         valid_emergency_buffer_config = Point(
             log2_emergency_buffer_size=2,
             use_colors=False
         )
 
-        self.assertTrue(valid_emergency_buffer_config in self.emergency_buffer_settings)
+        assert valid_emergency_buffer_config in self.emergency_buffer_settings
 
         valid_config_with_emergency_buffer = Point(
             num_readers=1,
@@ -65,14 +64,14 @@ class TestHierarchicalSpaces(unittest.TestCase):
             use_emergency_buffer=True,
             emergency_buffer_config=valid_emergency_buffer_config
         )
-        self.assertTrue(valid_config_with_emergency_buffer in self.hierarchical_settings)
+        assert valid_config_with_emergency_buffer in self.hierarchical_settings
 
         valid_emergency_buffer_color_config = Point(
             color='Crimson'
         )
         valid_emergency_buffer_color_config_with_pivot_dimension = valid_emergency_buffer_color_config.copy()
         valid_emergency_buffer_color_config_with_pivot_dimension['use_colors'] = True
-        self.assertTrue(valid_emergency_buffer_color_config_with_pivot_dimension in self.emergency_buffer_color)
+        assert valid_emergency_buffer_color_config_with_pivot_dimension in self.emergency_buffer_color
 
         valid_colorful_emergency_buffer_config = Point(
             log2_emergency_buffer_size=2,
@@ -81,7 +80,7 @@ class TestHierarchicalSpaces(unittest.TestCase):
         )
         valid_colorful_emergency_buffer_config_with_pivot_dimension = valid_colorful_emergency_buffer_config.copy()
         valid_colorful_emergency_buffer_config_with_pivot_dimension['use_emergency_buffer'] = True
-        self.assertTrue(valid_colorful_emergency_buffer_config_with_pivot_dimension in self.emergency_buffer_settings_with_color)
+        assert valid_colorful_emergency_buffer_config_with_pivot_dimension in self.emergency_buffer_settings_with_color
 
         valid_config_with_emergency_buffer_colors = Point(
             num_readers=1,
@@ -96,7 +95,7 @@ class TestHierarchicalSpaces(unittest.TestCase):
             use_emergency_buffer=False,
             log2_emergency_buffer_size=2
         )
-        self.assertTrue(valid_config_with_emergency_buffer_and_redundant_coordinates in self.hierarchical_settings)
+        assert valid_config_with_emergency_buffer_and_redundant_coordinates in self.hierarchical_settings
 
         another_invalid_config_with_emergency_buffer = Point(
             num_readers=1,
@@ -111,13 +110,13 @@ class TestHierarchicalSpaces(unittest.TestCase):
             log2_emergency_buffer_size=40
         )
 
-        self.assertTrue(valid_config_no_emergency_buffer in self.hierarchical_settings)
-        self.assertTrue(valid_config_no_emergency_buffer in self.hierarchical_settings)
-        self.assertTrue(valid_config_with_emergency_buffer in self.hierarchical_settings)
-        self.assertTrue(valid_config_with_emergency_buffer_colors in self.hierarchical_settings)
-        self.assertTrue(valid_config_with_emergency_buffer_and_redundant_coordinates in self.hierarchical_settings)
-        self.assertTrue(another_invalid_config_with_emergency_buffer not in self.hierarchical_settings)
-        self.assertTrue(yet_another_invalid_config_with_emergency_buffer not in self.hierarchical_settings)
+        assert valid_config_no_emergency_buffer in self.hierarchical_settings
+        assert valid_config_no_emergency_buffer in self.hierarchical_settings
+        assert valid_config_with_emergency_buffer in self.hierarchical_settings
+        assert valid_config_with_emergency_buffer_colors in self.hierarchical_settings
+        assert valid_config_with_emergency_buffer_and_redundant_coordinates in self.hierarchical_settings
+        assert another_invalid_config_with_emergency_buffer not in self.hierarchical_settings
+        assert yet_another_invalid_config_with_emergency_buffer not in self.hierarchical_settings
 
     def test_generating_random_configs(self):
         used_emergency_buffer = False
@@ -131,15 +130,15 @@ class TestHierarchicalSpaces(unittest.TestCase):
 
         for _ in range(100):
             random_config = self.hierarchical_settings.random()
-            self.assertTrue(random_config in self.hierarchical_settings)
+            assert random_config in self.hierarchical_settings
             used_emergency_buffer = used_emergency_buffer or random_config['use_emergency_buffer']
             if random_config['use_emergency_buffer']:
                 used_color = used_color or random_config['emergency_buffer_config']['use_colors']
                 if random_config['emergency_buffer_config']['use_colors']:
                     used_crimson = used_crimson or (random_config['emergency_buffer_config']['emergency_buffer_color']['color'] == 'Crimson')
-        self.assertTrue(used_emergency_buffer)
-        self.assertTrue(used_color)
-        self.assertTrue(used_crimson)
+        assert used_emergency_buffer
+        assert used_color
+        assert used_crimson
 
     def test_reseeding_random_state(self):
         previous_iteration_first_pass_points = None
@@ -160,11 +159,11 @@ class TestHierarchicalSpaces(unittest.TestCase):
             second_pass_points = [self.hierarchical_settings.random() for _ in range(100)]
 
             for first_pass_point, second_pass_point in zip(first_pass_points, second_pass_points):
-                self.assertTrue(first_pass_point == second_pass_point)
+                assert first_pass_point == second_pass_point
 
             if previous_iteration_first_pass_points is not None:
                 # Let's make sure we keep changing the points
-                self.assertTrue(
+                assert (
                     any(
                         previous != current
                         for previous, current
