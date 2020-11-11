@@ -99,15 +99,17 @@ class OptimizerBase(ABC):
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
             return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        elif optimum_definition != OptimumDefinition.BEST_PREDICTED_WITHIN_CONTEXT:
+        elif optimum_definition == OptimumDefinition.BEST_PREDICTED_WITHIN_CONTEXT:
             if context is None:
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
-            return self._optimum_within_context(features_df=features_df, context=context)
+            return self._optimum_within_context(context=context)
         return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha)
 
     @trace()
-    def _optimum_within_context(self, features_df: pd.DataFrame, context: pd.DataFrame):
-        self.maximize(self.utility_function, context_values_dataframe=context)
+    def _optimum_within_context(self, context: pd.DataFrame):
+        return self.experiment_designer.numeric_optimizer.maximize(
+            lambda features: self.experiment_designer.utility_function(features).utility,
+            context_values_dataframe=context)
 
     @trace()
     def _best_observation_optimum(self, features_df: pd.DataFrame, objectives_df: pd.DataFrame) -> Tuple[Point, Point]:
