@@ -6,7 +6,8 @@
   -->
   <PropertyGroup Label="AdjustNugetSourcesAndTargetsForLocalTesting">
     <!-- Stash the restored packages for this example in a local directory (so we can easily clean them). -->
-    <RestorePackagesPath>$(MSBuildThisFileDirectory)/.nuget/packages</RestorePackagesPath>
+    <!-- Try to keep this path somewhat short so that we don't run into length issues on Windows. -->
+    <RestorePackagesPath>$(MSBuildThisFileDirectory)/../../.nuget/packages</RestorePackagesPath>
 
     <!-- Prefer to use the local Mlos build PackOutputPath first. -->
     <MlosLocalPkgOutput>$(MSBuildThisFileDirectory)/../../../../target/pkg/$(Configuration)</MlosLocalPkgOutput>
