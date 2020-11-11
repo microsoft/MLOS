@@ -28,6 +28,13 @@ class UtilityFunctionOptimizer(ABC):
         self.optimization_problem = optimization_problem
         self.utility_function = utility_function
 
-    @abstractmethod
     def suggest(self, context_values_dataframe: pd.DataFrame) -> Point:
+        config_to_suggest = self.maximize(lambda features: self.utility_function(features).utility,
+                                          context_values_dataframe=context_values_dataframe)
+        self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
+        return config_to_suggest
+
+    @abstractmethod
+    def maximize(self, target_function, context_values_dataframe=None):
+        """Maximize the target function"""
         raise NotImplementedError

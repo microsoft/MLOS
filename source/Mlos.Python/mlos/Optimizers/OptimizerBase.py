@@ -48,14 +48,7 @@ class OptimizerBase(ABC):
         passing them through the utility function and selecting the configuration with
         the highest utility value.
         """
-        config_to_suggest = self.maximize(self.utility_function, context_values_dataframe=context_values_dataframe)
-        self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
-        return config_to_suggest
 
-    @abstractmethod
-    def maximize(self, target_function, context_values_dataframe=None):
-        """Maximize the target function"""
-        raise NotImplementedError
 
     @abstractmethod
     def register(self, feature_values_pandas_frame, target_values_pandas_frame) -> None:
@@ -81,7 +74,7 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
 
-    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05, context=None) -> Tuple[Point, Point]:
+    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05, context: pd.DataFrame=None) -> Tuple[Point, Point]:
         """Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
@@ -101,12 +94,20 @@ class OptimizerBase(ABC):
         if not len(features_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
 
-        if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
-            if context is not None:
-                raise ValueError("OptimumDefinition.BEST_OBSERVATION not supported if context is provided.")
-            return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha, context=context)
+        if context is not None and optimum_definition != OptimumDefinition.BEST_PREDICTED_WITHIN_CONTEXT:
+                raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
+        if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
+            return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
+        elif optimum_definition != OptimumDefinition.BEST_PREDICTED_WITHIN_CONTEXT:
+            if context is None:
+                raise ValueError(f"{optimum_definition} requires context to be not None.")
+            return self._optimum_within_context(features_df=features_df, context=context)
+        return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha)
+
+    @trace()
+    def _optimum_within_context(self, features_df: pd.DataFrame, context: pd.DataFrame):
+        self.maximize(self.utility_function, context_values_dataframe=context)
 
     @trace()
     def _best_observation_optimum(self, features_df: pd.DataFrame, objectives_df: pd.DataFrame) -> Tuple[Point, Point]:
@@ -122,7 +123,6 @@ class OptimizerBase(ABC):
     @trace()
     def _prediction_based_optimum(self, features_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
-
         predictions = self.predict(feature_values_pandas_frame=features_df)
         predictions_df = predictions.get_dataframe()
 
@@ -176,7 +176,7 @@ class OptimizerBase(ABC):
                     index_of_best = lower_confidence_bounds.idxmax()
                 optimum_value = Point(lower_confidence_bound=lower_confidence_bounds.loc[index_of_best])
             else:
-                raise RuntimeError(f"Unknown optimum definition.")
+                raise RuntimeError(f"Unknown optimum definition: {optimum_definition}")
 
         config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value
