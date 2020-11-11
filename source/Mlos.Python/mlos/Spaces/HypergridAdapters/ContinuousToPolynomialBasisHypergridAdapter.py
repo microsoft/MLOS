@@ -8,6 +8,7 @@ from pandas import DataFrame
 from sklearn.preprocessing import PolynomialFeatures
 from mlos.Spaces import ContinuousDimension, Hypergrid, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters.HypergridAdapter import HypergridAdapter
+from mlos.Spaces.HypergridAdapters.HierarchicalToFlatHypergridAdapter import HierarchicalToFlatHypergridAdapter
 
 
 class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
@@ -46,6 +47,9 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
             'order': 'C'
         }
         self._target: Hypergrid = None
+
+        if self._adaptee.is_hierarchical():
+            self._adaptee = HierarchicalToFlatHypergridAdapter(adaptee=self._adaptee)
 
         # Record which adaptee dimensions are continuous
         self._adaptee_contains_dimensions_to_transform = False
@@ -141,8 +145,15 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         # replace NaNs with zeros
         df.fillna(0, inplace=True)
 
-        # transform the continuous columns and add the higher order columns to the df
-        x_to_transform = np.array(df[self._adaptee_dimension_names_to_transform].to_numpy())
+        # Transform the continuous columns and add the higher order columns to the df
+        # Filtering columns to transform b/c dataframes coming from hierarchical hypergrid points
+        # may not contain all possible dimensions knowable from hypergrid
+        init_x = np.zeros((len(df.index), len(self._adaptee_dimension_names_to_transform)))
+        x_to_transform = np.array(init_x)
+        for i, dim_name in enumerate(self._adaptee_dimension_names_to_transform):
+            if dim_name in df.columns.values:
+                x_to_transform[:, i] = df[dim_name]
+
         all_poly_features = self._polynomial_features.transform(x_to_transform)
         for i, target_dim_name in enumerate(self._target_polynomial_feature_map):
             df[target_dim_name] = all_poly_features[:, i]
@@ -151,7 +162,6 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
     def _unproject_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
-        print(df.columns.values)
         # unproject simply drops the higher degree polynomial feature columns
         df.drop(columns=self._target_polynomial_feature_map.keys(), inplace=True)
         return df
