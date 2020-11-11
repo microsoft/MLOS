@@ -151,6 +151,7 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
     def _unproject_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
+        print(df.columns.values)
         # unproject simply drops the higher degree polynomial feature columns
-        df.drop(list(self._target_polynomial_feature_map.keys()), in_place=True)
+        df.drop(columns=self._target_polynomial_feature_map.keys(), inplace=True)
         return df
