@@ -40,7 +40,7 @@ set_tests_properties(CheckForMlosSharedMemories PROPERTIES
 # Now other test can add "MlosSharedMemoriesChecks" to their
 # "FIXTURES_REQUIRED" property to invoke these scripts before/after themselves.
 add_test(NAME LocalPipInstallMlos
-    COMMAND ${PYTHON3} -m pip install ${MLOS_ROOT}/source/Mlos.Python)
+    COMMAND ${PYTHON3} -m pip install -e ${MLOS_ROOT}/source/Mlos.Python)
 add_test(NAME StartMlosOptimizerService
     COMMAND ${MLOS_ROOT}/build/CMakeHelpers/BackgroundProcessHelper.sh
         start /tmp/mlos_optimizer_microservice.pid /tmp/mlos_optimizer_microservice.log
