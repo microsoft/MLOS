@@ -488,13 +488,6 @@ class TestBayesianOptimizer:
             optimizer.register(input_df, only_invalid_outputs_df)
 
 
-
-
-
-
-
-
-
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
         should_raise_for_confidence_bounds = False

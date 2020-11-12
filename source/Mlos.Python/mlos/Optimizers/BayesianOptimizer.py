@@ -48,7 +48,7 @@ class BayesianOptimizer(OptimizerBase):
         OptimizerBase.__init__(self, optimization_problem)
 
         # Since the optimization_problem.objective_space can now be multi-dimensional (as a milestone towards multi-objective
-        # optimization), we have to prepare a smaller search space for the surrogate model.
+        # optimization), we have to prepare a smaller objective space for the surrogate model.
         # TODO: create multiple models each predicting a different objective. Also consider multi-objective models.
         #
         assert not optimization_problem.objective_space.is_hierarchical(), "Not supported."
