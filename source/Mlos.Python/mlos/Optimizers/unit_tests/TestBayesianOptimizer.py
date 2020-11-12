@@ -441,8 +441,32 @@ class TestBayesianOptimizer:
 
             optimizer.register(input.to_dataframe(), output.to_dataframe())
 
-        prediction = optimizer.predict(feature_values_pandas_frame=input.to_dataframe())
-        print(prediction.get_dataframe())
+        num_predictions = 100
+        prediction = optimizer.predict(feature_values_pandas_frame=input_space.random_dataframe(num_predictions))
+        prediction_df = prediction.get_dataframe()
+        assert len(prediction_df.index) == num_predictions
+
+        # Let's test invalid observations.
+        #
+        input = input_space.random()
+        input_df = input.to_dataframe()
+
+        # We should only remember the valid dimensions.
+        #
+        output_with_extra_dimension = Point(y_1=input.x_1, y_2=input.x_2, invalid_dimension=42)
+        output_with_extra_dimension_df = output_with_extra_dimension.to_dataframe()
+        optimizer.register(input_df, output_with_extra_dimension_df)
+
+        # Let's make sure that the invalid_dimension was not remembered.
+        #
+        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+        assert all(column.value for column in all_inputs_df.columns in {'y_1', 'y_2'})
+
+
+
+
+
+
 
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
