@@ -13,7 +13,7 @@ from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesi
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Tracer import trace
-from mlos.Spaces import Point
+from mlos.Spaces import Point, SimpleHypergrid
 
 
 
@@ -41,10 +41,22 @@ class BayesianOptimizer(OptimizerBase):
         if logger is None:
             logger = create_logger("BayesianOptimizer")
         self.logger = logger
+
         # Let's initialize the optimizer.
         #
         assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
         OptimizerBase.__init__(self, optimization_problem)
+
+        # Since the optimization_problem.objective_space can now be multi-dimensional (as a milestone towards multi-objective
+        # optimization), we have to prepare a smaller search space for the surrogate model.
+        # TODO: create multiple models each predicting a different objective. Also consider multi-objective models.
+        #
+        assert not optimization_problem.objective_space.is_hierarchical(), "Not supported."
+        only_objective = optimization_problem.objectives[0]
+        self.surrogate_model_output_space = SimpleHypergrid(
+            name="surrogate_model_output_space",
+            dimensions=[optimization_problem.objective_space[only_objective.name]]
+        )
 
         assert optimizer_config in bayesian_optimizer_config_store.parameter_space, "Invalid config."
         self.optimizer_config = optimizer_config
@@ -55,7 +67,7 @@ class BayesianOptimizer(OptimizerBase):
         self.surrogate_model = HomogeneousRandomForestRegressionModel(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.parameter_space, # TODO: change to feature space
-            output_space=self.optimization_problem.objective_space,
+            output_space=self.surrogate_model_output_space,
             logger=self.logger
         )
 
