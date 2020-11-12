@@ -460,7 +460,34 @@ class TestBayesianOptimizer:
         # Let's make sure that the invalid_dimension was not remembered.
         #
         all_inputs_df, all_outputs_df = optimizer.get_all_observations()
-        assert all(column.value for column in all_inputs_df.columns in {'y_1', 'y_2'})
+        assert all(column in {'y_1', 'y_2'} for column in all_outputs_df.columns)
+
+        # We should accept inputs with missing output dimensions, as long as at least one is specified.
+        #
+        output_with_missing_dimension = Point(y_1=input.x_1)
+        output_with_missing_dimension_df = output_with_missing_dimension.to_dataframe()
+        optimizer.register(input_df, output_with_missing_dimension_df)
+        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+
+        # Let's make sure the missing dimension ends up being a null.
+        #
+        last_observation = all_outputs_df.iloc[[-1]]
+        assert last_observation['y_2'].isnull().values.all()
+
+        # Inserting an observation with no valid dimensions should fail.
+        #
+        empty_output = Point()
+        empty_output_df = empty_output.to_dataframe()
+        with pytest.raises(ValueError):
+            optimizer.register(input_df, empty_output_df)
+
+        only_invalid_outputs = Point(invalid_col1=0, invalid_col2=2)
+        only_invalid_outputs_df = only_invalid_outputs.to_dataframe()
+
+        with pytest.raises(ValueError):
+            optimizer.register(input_df, only_invalid_outputs_df)
+
+
 
 
 

@@ -86,9 +86,15 @@ class BayesianOptimizer(OptimizerBase):
         )
 
         # Also let's make sure we have the dataframes we need for the surrogate model.
-        # TODO: this will need a better home - either a DataSet class or the surrogate model itself.
-        self._feature_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.parameter_space.dimensions])
-        self._target_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.objective_space.dimensions])
+        #
+        self._feature_names = [dimension.name for dimension in self.optimization_problem.parameter_space.dimensions]
+        self._feature_names_set = set(self._feature_names)
+
+        self._target_names = [dimension.name for dimension in self.optimization_problem.objective_space.dimensions]
+        self._target_names_set = set(self._target_names)
+
+        self._feature_values_df = pd.DataFrame(columns=self._feature_names)
+        self._target_values_df = pd.DataFrame(columns=self._target_names)
 
     @property
     def trained(self):
@@ -125,6 +131,26 @@ class BayesianOptimizer(OptimizerBase):
     def register(self, feature_values_pandas_frame, target_values_pandas_frame):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
+
+        feature_columns_to_retain = [column for column in feature_values_pandas_frame.columns if column in self._feature_names_set]
+        target_columns_to_retain = [column for column in target_values_pandas_frame.columns if column in self._target_names_set]
+
+        if len(feature_columns_to_retain) == 0:
+            raise ValueError(f"None of the {feature_columns_to_retain} is a feature recognized by this optimizer.")
+
+        if len(target_columns_to_retain) == 0:
+            raise ValueError(f"None of the {target_columns_to_retain} is a target recognized by this optimizer.")
+
+        feature_values_pandas_frame = feature_values_pandas_frame[feature_columns_to_retain]
+        target_values_pandas_frame = target_values_pandas_frame[target_columns_to_retain]
+
+        all_null_features = feature_values_pandas_frame[feature_values_pandas_frame.isnull().all(axis=1)]
+        if len(all_null_features.index) > 0:
+            raise ValueError(f"{len(all_null_features.index)} of the observations contain(s) no valid features.")
+
+        all_null_targets = target_values_pandas_frame[target_values_pandas_frame.isnull().all(axis=1)]
+        if len(all_null_targets.index) > 0:
+            raise ValueError(f"{len(all_null_targets.index)} of the observations contain(s) no valid targets")
 
         self._feature_values_df = self._feature_values_df.append(feature_values_pandas_frame, ignore_index=True)
         self._target_values_df = self._target_values_df.append(target_values_pandas_frame, ignore_index=True)
