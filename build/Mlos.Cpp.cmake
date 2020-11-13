@@ -55,6 +55,7 @@ if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
         "Please re-run (c)make with 'CC=clang-10 CXX=clang++-10' set.\n")
 endif()
 
+# FIXME: When clang-tidy is actually available - this gets redefined and causes problems.
 # TODO: This just finds the program, but doesn't actually enable it as a
 # target.  To use clang-tidy, we will need to provide a .clang-format config
 # and probably reformat some code again.

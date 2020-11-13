@@ -1,3 +1,7 @@
 # Ignore the local MLOS codegen output for this example:
 ./Mlos.CodeGen.out/
 .nuget/
+Makefile
+CMakeCache.txt
+cmake_install.cmake
+ExternalIntegrationExample

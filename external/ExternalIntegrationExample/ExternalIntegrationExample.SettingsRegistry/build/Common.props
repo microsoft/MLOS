@@ -14,7 +14,7 @@
       Note: This should match the cmake include_directory() specficiation so that the
       output SettingsProvider_gen_base.h and related files can be found.
     -->
-    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildProjectDirectory)/../Mlos.CodeGen.out/$(Configuration)</MlosSettingsSystemCodeGenOutputBaseDir>
+    <MlosSettingsSystemCodeGenOutputBaseDir>$(MSBuildProjectDirectory)/../Mlos.CodeGen.out/</MlosSettingsSystemCodeGenOutputBaseDir>
 
     <!--
       Specify the version of the Mlos.SettingsSystem.* nuget packages to use.
