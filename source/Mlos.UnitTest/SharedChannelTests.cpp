@@ -29,7 +29,7 @@ private:
     std::array<byte, T> array = { 0 };
 };
 
-namespace
+namespace SharedChannelTests
 {
 #ifndef DEBUG
 // Verify buffer size.
@@ -212,7 +212,7 @@ TEST(SharedChannel, VerifySendingReceivingArrayStruct)
     ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
-    Mlos::UnitTest::Line line;
+    Mlos::UnitTest::Line line = {};
     line.Points[0] = { 3, 5 };
     line.Points[1] = { 7, 9 };
     line.Height = { 1.3f, 3.9f };
@@ -376,5 +376,7 @@ TEST(SharedChannel, StressSendReceive)
     result =
         resultFromReader1.get() &&
         resultFromReader2.get();
+
+    EXPECT_EQ(result, true);
 }
 }

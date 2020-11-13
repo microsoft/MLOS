@@ -74,6 +74,21 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define MLOS_RETAIL_ASSERT(result) { if (!result) Mlos::Core::MlosPlatform::TerminateProcess(); }
 #define MLOS_UNUSED_ARG(x) (void)x
 
+#ifdef _MSC_VER
+#define MLOS_SELECTANY_LINKER_ATTR __declspec(selectany)
+#define MLOS_CDECL_ATTR __cdecl
+#elif __clang__
+// Note: this requires compiling with -fdeclspec.
+#define MLOS_SELECTANY_LINKER_ATTR __declspec(selectany)
+#define MLOS_CDECL_ATTR __cdecl
+#elif __GNUC__
+#define MLOS_SELECTANY_LINKER_ATTR __attribute__((weak))
+// cdecl is unnecessary (and emits a warning) when compiling for x86-64, which is currently the only platform we support
+#define MLOS_CDECL_ATTR /* __attribute__((cdecl))__ */
+#else
+#warning Unhandled compiler.
+#endif
+
 #include "MlosPlatform.h"
 
 #include "BytePtr.h"

@@ -18,11 +18,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 add_link_options(-Wall -Wextra -Wpedantic -Werror)
 
-# The codegen output currently relies on __declspec(selectany) attributes to
-# instruct the linker to ignore extra definitions resulting from including the
+# The codegen output currently relies on asking the compiler to select one of
+# our equivalent but duplicative definitions that results from including the
 # same header in multiple places.
-# NOTE: This option is only available with clang, not gcc.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
+# For clang, make use of the original __declspec(selectany) attributes that msvc
+# uses.
+# For gcc, we use __attribute__((weak)) to achieve the same.
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
+endif()
 
 # When compiling for Debug build, make sure that DEBUG is defined for the compiler.
 # This is to mimic MSVC behavior so that our #ifdefs can remain the same rather
@@ -33,27 +37,6 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 # TODO: For optimized builds, strip them and keep the symbols separately.
 add_compile_options(-g)
 add_link_options(-g)
-
-# TODO: Search for clang compiler and set the appropriate C/CXX compiler variables.
-#if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-#    # TODO: Add local version of clang to use?
-#    find_program(CLANGCPP
-#        NAMES clang++-10
-#        #PATHS ENV PATH
-#        )
-#    if(CLANGCPP)
-#        message(WARNING "Forcing CXX compiler to ${CLANGCPP}")
-#        set(CMAKE_CXX_COMPILER ${CLANGPP})
-#        set(CMAKE_CXX_COMPILER_ID "Clang")
-#    endif()
-#endif()
-
-# For now we just abort if Clang is not the compiler selected.
-if(NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-    message(SEND_ERROR
-        "MLOS currently only supports clang (not '${CMAKE_CXX_COMPILER_ID}') for compilation.\n"
-        "Please re-run (c)make with 'CC=clang-10 CXX=clang++-10' set.\n")
-endif()
 
 # https://github.com/google/sanitizers/wiki/AddressSanitizer
 #
