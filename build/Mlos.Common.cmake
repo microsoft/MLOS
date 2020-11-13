@@ -18,16 +18,26 @@ if(NOT DEFINED MLOS_ROOT)
         "CMakeLists.txt error: MLOS_ROOT is not defined.")
 endif()
 
+# Set the possible values of build type for cmake-gui
+# Note: these options need to match the ones we support in the dotnet build.
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release") # "MinSizeRel" "RelWithDebInfo")
 # Set a default build type if none was specified.
 # (used in the codegen output determination)
 set(default_build_type "Release")
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+if(NOT CMAKE_BUILD_TYPE) # AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${default_build_type}' since none was specified.")
   set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
       STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release") # "MinSizeRel" "RelWithDebInfo")
+endif()
+# Allow an easy way of overwritting the build type when MLOS is used with FetchContent.
+if(DEFINED MLOS_CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "${MLOS_CMAKE_BUILD_TYPE}")
+endif()
+# Check to make sure we're using an appropriate build type.
+if(NOT ((${CMAKE_BUILD_TYPE} STREQUAL "Release") OR (${CMAKE_BUILD_TYPE} STREQUAL "Debug")))
+    message(FATAL_ERROR
+        "Unsupported CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()
 
 # When MLOS is included in another project using FetchContent, then the CMAKE_SOURCE_DIR is from the parent.
