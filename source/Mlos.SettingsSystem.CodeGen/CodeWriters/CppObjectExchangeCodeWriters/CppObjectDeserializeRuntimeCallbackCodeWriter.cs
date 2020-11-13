@@ -82,7 +82,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
             //
             string cppTypeNameAsField = $"{sourceType.Name}_Callback";
 
-            WriteLine($"__declspec(selectany) std::function<void ({cppProxyTypeFullName}&&)> {cppTypeNameAsField} = nullptr;");
+            WriteLine($"MLOS_SELECTANY_LINKER_ATTR std::function<void ({cppProxyTypeFullName}&&)> {cppTypeNameAsField} = nullptr;");
             WriteLine();
         }
 

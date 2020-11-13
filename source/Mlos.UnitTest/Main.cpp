@@ -29,7 +29,7 @@ using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 int
-__cdecl
+MLOS_CDECL_ATTR
 main(
     _In_ int argc,
     _In_ char* argv[])
