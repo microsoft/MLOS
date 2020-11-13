@@ -120,16 +120,8 @@ class BayesianOptimizer(OptimizerBase):
 
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
             raise ValueError("Context space required by optimization problem but not provided.")
-
-        # prefix column names to adhere to dimensions in hierarchical hypergrid
-        feature_values = config_values_pandas_frame.rename(lambda x: f"{self.optimization_problem.parameter_space.name}.{x}", axis=1)
-        if context_values_pandas_frame is not None:
-            renamed_context_values = context_values_pandas_frame.rename(lambda x: f"{self.optimization_problem.context_space.name}.{x}", axis=1)
-            feature_values = pd.concat([feature_values, renamed_context_values], axis=1)
-            feature_values['contains_context'] = True
-        else:
-            feature_values['contains_context'] = False
-
+        feature_values = self.optimization_problem.construct_feature_dataframe(config_values=config_values_pandas_frame,
+                                                                               context_values=context_values_pandas_frame)
         self._feature_values_df = self._feature_values_df.append(feature_values, ignore_index=True)
         self._target_values_df = self._target_values_df.append(target_values_pandas_frame, ignore_index=True)
 

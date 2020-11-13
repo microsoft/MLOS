@@ -6,6 +6,8 @@ from collections import namedtuple
 import json
 from typing import List
 
+import pandas as pd
+
 from mlos.Grpc import OptimizerService_pb2
 from mlos.Spaces import Hypergrid, SimpleHypergrid, CategoricalDimension
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, HypergridJsonEncoder
@@ -118,6 +120,31 @@ class OptimizationProblem:
                 subgrid=self.context_space,
                 on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
         )
+
+    def construct_feature_dataframe(self, config_values, context_values=None, product=False):
+        """Construct feature value dataframe from config value and context value dataframes.
+
+        If product is True, creates a cartesian product, otherwise appends columns.
+
+        """
+        if self.context_space is not None and context_values is None:
+            raise ValueError("Context space required by optimization problem but not provided.")
+        if product is False and len(config_values) != len(context_values):
+            raise ValueError(f"Incompatible shape of configuration and context: {config_values.shape} and {context_values.shape}.")
+        # prefix column names to adhere to dimensions in hierarchical hypergrid
+        feature_values = config_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
+        if context_values is not None:
+            renamed_context_values = context_values.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
+            feature_values['contains_context'] = True
+            if product:
+                renamed_context_values['contains_context'] = True
+                feature_values = feature_values.merge(renamed_context_values, how='outer', on='contains_context')
+            else:
+                feature_values = pd.concat([feature_values, renamed_context_values], axis=1)
+
+        else:
+            feature_values['contains_context'] = False
+        return feature_values
 
     def to_dict(self):
         return {
