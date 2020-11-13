@@ -103,18 +103,20 @@ class OptimizationProblem:
 
         # Fit functions / surrogate models will be fed features consisting of both context and parameters.
         # Thus, the feature space is comprised of both context and parameters.
+        has_context = self.context_space is not None
         self.feature_space = SimpleHypergrid(
             name="features",
             dimensions=[
-                CategoricalDimension(name="contains_parameters", values=[True]),
-                CategoricalDimension(name="contains_context", values=[self.context_space is not None])
+                CategoricalDimension(name="contains_context", values=[has_context])
             ]
         ).join(
             subgrid=self.parameter_space,
-            on_external_dimension=CategoricalDimension(name="contains_parameters", values=[True])
-        ).join(
-            subgrid=self.context_space,
-            on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
+            on_external_dimension=CategoricalDimension(name="contains_context", values=[has_context])
+        )
+        if has_context:
+            self.feature_space = self.feature_space.join(
+                subgrid=self.context_space,
+                on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
         )
 
     def to_dict(self):
