@@ -37,6 +37,8 @@ public:
 
     ~SharedMemoryMapView();
 
+    void Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept;
+
     // Creates a new shared memory view.
     //
     _Must_inspect_result_

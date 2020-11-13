@@ -64,18 +64,15 @@ main(
     // In this case we use an interprocess implementation to communicate with an
     // external agent.
     // There are 3 (unidirectional) channels setup:
-    // 1. Control: for registering components and memory for their configs in
-    // the global region
-    // 2. Telemetry: for sending messages from/about the application component
-    // to the agent (e.g. performance metrics)
-    // 3. Feedback: for receiving messages from the agent (e.g. configuration
-    // updates)
+    // 1. Control: for registering components and memory for their configs in the global region
+    // 2. Telemetry: for sending messages from/about the application component to the agent (e.g. performance metrics)
+    // 3. Feedback: for receiving messages from the agent (e.g. configuration updates)
     //
-    Mlos::Core::InterProcessMlosContextInitializer mlosContextInitializer;
-    HRESULT hr = mlosContextInitializer.Initialize();
+    DefaultMlosContextFactory mlosContextFactory;
+    HRESULT hr = mlosContextFactory.Create();
     ThrowIfFail(hr);
 
-    Mlos::Core::InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
+    MlosContext& mlosContext = mlosContextFactory.m_context;
 
     // Create a feedback channel receiver thread.
     //

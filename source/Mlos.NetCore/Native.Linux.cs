@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
 
@@ -27,6 +28,26 @@ namespace Mlos.Core.Linux
         internal static IntPtr InvalidPointer = IntPtr.Subtract(IntPtr.Zero, 1);
 
 #pragma warning disable CA2101 // Specify marshaling for P/Invoke string arguments (CharSet.Ansi is considered unsafe).
+
+        /// <summary>
+        /// Receives a message on a socket.
+        /// </summary>
+        /// <returns>Returns number of bytes read.</returns>
+        /// <param name="socketFd"></param>
+        /// <param name="msg"></param>
+        /// <param name="flags"></param>
+        [DllImport(RtLib, EntryPoint = "recvmsg", SetLastError = true)]
+        internal static extern ulong ReceiveMessage(IntPtr socketFd, ref MessageHeader msg, int flags);
+
+        /// <summary>
+        /// Sends a message on a socket.
+        /// </summary>
+        /// <returns>Returns number of bytes written.</returns>
+        /// <param name="socketFd"></param>
+        /// <param name="msg"></param>
+        /// <param name="flags"></param>
+        [DllImport(RtLib, EntryPoint = "sendmsg", SetLastError = true)]
+        internal static extern ulong SendMessage(IntPtr socketFd, ref MessageHeader msg, int flags);
 
         /// <summary>
         /// Creates a new POSIX semaphore or opens an existing semaphore.  The semaphore is identified by name.
@@ -54,7 +75,7 @@ namespace Mlos.Core.Linux
         /// </summary>
         /// <param name="handle"></param>
         /// <returns>
-        /// Returns 0 on success; on error, the value of the semaphore is left unchanged, -1 is returned, and errno is set to indicate theerror.
+        /// Returns 0 on success; on error, the value of the semaphore is left unchanged, -1 is returned, and errno is set to indicate the error.
         /// </returns>
         [DllImport(RtLib, EntryPoint = "sem_post", SetLastError = true)]
         internal static extern int SemaphorePost(SemaphoreSafeHandle handle);
@@ -128,7 +149,6 @@ namespace Mlos.Core.Linux
         internal static extern void PrintError(string name);
 
 #pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
-
         [Flags]
         internal enum OpenFlags : int
         {
@@ -180,7 +200,15 @@ namespace Mlos.Core.Linux
             PROT_READ = 0x1,
             PROT_WRITE = 0x2,
             PROT_EXEC = 0x4,
-            PROT_GROWNSDOWN = 0x1000000,
+
+            /// <summary>
+            /// Extend change to start of growsdown vma (mprotect only).
+            /// </summary>
+            PROT_GROWSDOWN = 0x1000000,
+
+            /// <summary>
+            /// Extend change to start of growsup vma (mprotect only).
+            /// </summary>
             PROT_GROWNSUP = 0x2000000,
         }
 
@@ -249,6 +277,7 @@ namespace Mlos.Core.Linux
         {
         }
 
+        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         protected override bool ReleaseHandle()
         {
             return Native.SemaphoreClose(handle) == 0;
@@ -262,14 +291,144 @@ namespace Mlos.Core.Linux
     [SecurityPermission(SecurityAction.Demand, UnmanagedCode = true)]
     internal class SharedMemorySafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public SharedMemorySafeHandle()
+        /// <summary>
+        /// Invalid handle.
+        /// </summary>
+        internal static readonly SharedMemorySafeHandle Invalid = new SharedMemorySafeHandle();
+
+        internal SharedMemorySafeHandle()
             : base(true)
         {
         }
 
+        internal SharedMemorySafeHandle(IntPtr fileDescriptor)
+            : base(true)
+        {
+            SetHandle(fileDescriptor);
+        }
+
+        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         protected override bool ReleaseHandle()
         {
             return Native.Close(handle) == 0;
         }
+    }
+
+    /// <summary>
+    /// Definition of structure iovec.
+    /// This must match the definitions in struct_iovec.h.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential, Pack=8)]
+    internal struct IoVec
+    {
+        /// <summary>
+        /// Pointer to data.
+        /// </summary>
+        internal IntPtr IovBase;
+
+        /// <summary>
+        /// Length of data.
+        /// </summary>
+        internal ulong IovLength;
+    }
+
+    [StructLayout(LayoutKind.Sequential, Pack=8)]
+    internal struct MessageHeader
+    {
+        /// <summary>
+        /// Address to send to/receive from.
+        /// </summary>
+        internal IntPtr MessageName;
+
+        /// <summary>
+        /// Length of address data.
+        /// </summary>
+        internal uint MessageNameLength;
+
+        /// <summary>
+        /// Vector of data to send/receive into.
+        /// </summary>
+        internal unsafe IoVec* MessageIoVec;
+
+        /// <summary>
+        /// Number of elements in the vector.
+        /// </summary>
+        public ulong MessageIoVecLength;
+
+        /// <summary>
+        /// Ancillary data (eg BSD file descriptor passing).
+        /// </summary>
+        internal unsafe ControlMessageHeader* MessageControl;
+
+        /// <summary>
+        /// Ancillary data buffer length.
+        /// </summary>
+        internal ulong MessageControlLength;
+
+        /// <summary>
+        /// Flags on received message.
+        /// </summary>
+        internal int MessageFlags;
+    }
+
+    /// <summary>
+    /// Socket level message types.
+    /// This must match the definitions in linux/socket.h.
+    /// </summary>
+    internal enum SocketLevelMessageType : int
+    {
+        /// <summary>
+        /// Transfer file descriptors.
+        /// </summary>
+        ScmRights = 0x01,
+
+        /// <summary>
+        /// Credentials passing.
+        /// </summary>
+        ScmCredentials = 0x02,
+    }
+
+    /// <summary>
+    /// Structure used for storage of ancillary data object information.
+    /// </summary>
+    /// <remarks>
+    /// Struct cmsghdr.
+    /// </remarks>
+    [StructLayout(LayoutKind.Sequential, Pack=8)]
+    internal struct ControlMessageHeader
+    {
+        /// <summary>
+        /// Length of data in cmsg_data plus length of cmsghdr structure.
+        /// </summary>
+        internal ulong ControlMessageLength;
+
+        /// <summary>
+        /// Originating protocol.
+        /// </summary>
+        internal int ControlMessageLevel;
+
+        /// <summary>
+        /// Protocol specific type.
+        /// </summary>
+        internal SocketLevelMessageType ControlMessageType;
+    }
+
+    /// <summary>
+    /// Structure used for storage of ancillary data object information of type {T}.
+    /// </summary>
+    /// <typeparam name="T">Type of stored object.</typeparam>
+    [StructLayout(LayoutKind.Sequential, Pack=1)]
+    internal struct ControlMessage<T>
+        where T : struct
+    {
+        /// <summary>
+        /// Cmsghdr struct.
+        /// </summary>
+        internal ControlMessageHeader Header;
+
+        /// <summary>
+        /// Value included in the message.
+        /// </summary>
+        internal T Value;
     }
 }

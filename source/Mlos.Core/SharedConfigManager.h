@@ -42,6 +42,12 @@ public:
 
     ~SharedConfigManager();
 
+    _Must_inspect_result_
+    HRESULT CreateSharedConfigMemoryRegion();
+
+    void AssignSharedConfigMemoryRegion(
+        _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView);
+
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
@@ -73,13 +79,11 @@ public:
 private:
     MlosContext& m_mlosContext;
 
-    _Must_inspect_result_
-    HRESULT RegisterSharedConfigMemoryRegion();
-
+public:
     // Shared memory region used to keep all the shared component configurations.
     // #TODO we might need more than one memory region for the configuration objects.
     //
-    SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> m_sharedConfigMemRegionView;
+    SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> m_sharedConfigMemoryRegionView;
 
 public:
     // Indicates if we should cleanup OS resources when closing the shared memory map view.

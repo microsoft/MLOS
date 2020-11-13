@@ -34,7 +34,7 @@ namespace Mlos.Agent.Server
         /// </summary>
         /// <param name="args">unused.</param>
         /// <returns>grpc server task.</returns>
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -69,15 +69,29 @@ namespace Mlos.Agent.Server
             }
 
             Console.WriteLine("Mlos.Agent.Server");
-            TargetProcessManager targetProcessManager = null;
 
-            // In the active learning mode, create a new shared memory map before running the target process.
-            // On Linux, we unlink existing shared memory map, if they exist.
-            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
+            // Active learning mode.
             //
-            using MlosContext mlosContext = (parserOptions.Executable != null)
-                ? InterProcessMlosContext.Create()
-                : InterProcessMlosContext.CreateOrOpen();
+            // TODO: In active learning mode the MlosAgentServer can control the
+            // workload against the target component.
+            //
+            TargetProcessManager targetProcessManager = null;
+            if (parserOptions.Executable != null)
+            {
+                Console.WriteLine($"Starting: '{parserOptions.Executable}'");
+                targetProcessManager = new TargetProcessManager(executableFilePath: parserOptions.Executable);
+                targetProcessManager.StartTargetProcess();
+
+                Console.WriteLine($"Launched process: '{Path.GetFileName(parserOptions.Executable)}'");
+            }
+            else
+            {
+                Console.WriteLine("No executable given to launch.  Will wait for agent to connect independently.");
+            }
+
+            // Create a Mlos context.
+            //
+            using MlosContext mlosContext = MlosContextFactory.Create();
 
             // Connect to gRpc optimizer only if user provided an address in the command line.
             //
@@ -110,22 +124,6 @@ namespace Mlos.Agent.Server
             if (!string.IsNullOrEmpty(parserOptions.ExperimentFilePath))
             {
                 experimentSessionManager.LoadExperiment(parserOptions.ExperimentFilePath);
-            }
-
-            // Active learning mode.
-            //
-            // TODO: In active learning mode the MlosAgentServer can control the
-            // workload against the target component.
-            //
-            if (parserOptions.Executable != null)
-            {
-                Console.WriteLine($"Starting {parserOptions.Executable}");
-                targetProcessManager = new TargetProcessManager(executableFilePath: parserOptions.Executable);
-                targetProcessManager.StartTargetProcess();
-            }
-            else
-            {
-                Console.WriteLine("No executable given to launch.  Will wait for agent to connect independently.");
             }
 
             var cancellationTokenSource = new CancellationTokenSource();

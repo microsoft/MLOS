@@ -20,6 +20,18 @@ namespace Mlos
 {
 namespace Core
 {
+// Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
+//
+const char* const GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
+const char* const ControlChannelMemoryMapName = "Host_Mlos.ControlChannel";
+const char* const FeedbackChannelMemoryMapName = "Host_Mlos.FeedbackChannel";
+
+// Synchronization OS primitive names.
+//
+const char* const ControlChannelEventName = "Global\\ControlChannel_Event";
+const char* const FeedbackChannelEventName = "Global\\FeedbackChannel_Event";
+const char* const TargetProcessEventName = "Global\\Mlos_Global";
+
 //----------------------------------------------------------------------------
 // NAME: InterProcessMlosContextInitializer::Constructor.
 //
@@ -34,7 +46,8 @@ InterProcessMlosContextInitializer::InterProcessMlosContextInitializer(
     m_controlChannelMemoryMapView(std::move(initializer.m_controlChannelMemoryMapView)),
     m_feedbackChannelMemoryMapView(std::move(initializer.m_feedbackChannelMemoryMapView)),
     m_controlChannelPolicy(std::move(initializer.m_controlChannelPolicy)),
-    m_feedbackChannelPolicy(std::move(initializer.m_feedbackChannelPolicy))
+    m_feedbackChannelPolicy(std::move(initializer.m_feedbackChannelPolicy)),
+    m_targetProcessNamedEvent(std::move(initializer.m_targetProcessNamedEvent))
 {
 }
 
@@ -54,9 +67,8 @@ HRESULT InterProcessMlosContextInitializer::Initialize()
     const size_t SharedMemorySize = 65536;
 
     // TODO: Make these config regions configurable to support multiple processes.
-    // Note: Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
     //
-    HRESULT hr = m_globalMemoryRegionView.CreateOrOpen("Host_Mlos.GlobalMemory", SharedMemorySize);
+    HRESULT hr = m_globalMemoryRegionView.CreateOrOpen(GlobalMemoryMapName, SharedMemorySize);
     if (SUCCEEDED(hr))
     {
         // Increase the usage counter. When closing global shared memory, we will decrease the counter.
@@ -69,24 +81,32 @@ HRESULT InterProcessMlosContextInitializer::Initialize()
 
     if (SUCCEEDED(hr))
     {
-        hr = m_controlChannelMemoryMapView.CreateOrOpen("Host_Mlos.ControlChannel", SharedMemorySize);
+        hr = m_controlChannelMemoryMapView.CreateOrOpen(ControlChannelMemoryMapName, SharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = m_feedbackChannelMemoryMapView.CreateOrOpen("Host_Mlos.FeedbackChannel", SharedMemorySize);
-    }
-
-    // FIXME: Use non-backslashes for Linux environments.
-    //
-    if (SUCCEEDED(hr))
-    {
-        hr = m_controlChannelPolicy.m_notificationEvent.CreateOrOpen("Global\\ControlChannel_Event");
+        hr = m_feedbackChannelMemoryMapView.CreateOrOpen(FeedbackChannelMemoryMapName, SharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = m_feedbackChannelPolicy.m_notificationEvent.CreateOrOpen("Global\\FeedbackChannel_Event");
+        hr = m_controlChannelPolicy.m_notificationEvent.CreateOrOpen(ControlChannelEventName);
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        hr = m_feedbackChannelPolicy.m_notificationEvent.CreateOrOpen(FeedbackChannelEventName);
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        hr = m_targetProcessNamedEvent.CreateOrOpen(TargetProcessEventName);
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        hr = m_targetProcessNamedEvent.Signal();
     }
 
     if (FAILED(hr))
@@ -171,6 +191,7 @@ InterProcessMlosContext::~InterProcessMlosContext()
         m_contextInitializer.m_feedbackChannelMemoryMapView.CleanupOnClose = true;
         m_controlChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
         m_feedbackChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
+        m_contextInitializer.m_targetProcessNamedEvent.CleanupOnClose = true;
 
         // Close all the shared config memory regions.
         //

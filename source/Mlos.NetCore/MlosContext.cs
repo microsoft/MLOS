@@ -7,11 +7,45 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Runtime.InteropServices;
 
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Creates an instance of MlosContext class.
+    /// </summary>
+    public static class MlosContextFactory
+    {
+        public static MlosContext Create()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return CreateUsingNamedMemoryMap();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return CreateUsingAnonymousMemoryMap();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private static MlosContext CreateUsingAnonymousMemoryMap()
+        {
+            MlosContext mlosContext = Linux.AnonymousMemoryMlosContext.Create();
+            return mlosContext;
+        }
+
+        private static MlosContext CreateUsingNamedMemoryMap()
+        {
+            return InterProcessMlosContext.CreateOrOpen();
+        }
+    }
+
     /// <summary>
     /// MlosContext encapsulates the shared memory regions for config and
     /// feedback for the Mlos.Agent when processing messages from smart
