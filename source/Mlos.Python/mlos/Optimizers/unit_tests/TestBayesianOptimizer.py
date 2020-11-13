@@ -27,7 +27,7 @@ from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension
+from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
 
 
@@ -405,6 +405,88 @@ class TestBayesianOptimizer:
         assert original_config.min_samples_required_for_guided_design_of_experiments == 10
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
+
+
+    def test_registering_multiple_objectives(self):
+
+        input_space = SimpleHypergrid(
+            name='input',
+            dimensions=[
+                ContinuousDimension(name="x_1", min=0, max=10),
+                ContinuousDimension(name="x_2", min=0, max=10)
+            ]
+        )
+
+        output_space = SimpleHypergrid(
+            name='output',
+            dimensions=[
+                ContinuousDimension(name="y_1", min=0, max=10),
+                ContinuousDimension(name="y_2", min=0, max=10)
+            ]
+        )
+
+        optimization_problem = OptimizationProblem(
+            parameter_space=input_space,
+            objective_space=output_space,
+            objectives=[Objective(name='y_1', minimize=True)]
+        )
+
+        optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+            optimization_problem=optimization_problem
+        )
+
+        for _ in range(100):
+            input = optimizer.suggest()
+            output = Point(y_1=input.x_1, y_2=input.x_2)
+
+            optimizer.register(input.to_dataframe(), output.to_dataframe())
+
+        num_predictions = 100
+        prediction = optimizer.predict(feature_values_pandas_frame=input_space.random_dataframe(num_predictions))
+        prediction_df = prediction.get_dataframe()
+        assert len(prediction_df.index) == num_predictions
+
+        # Let's test invalid observations.
+        #
+        input = input_space.random()
+        input_df = input.to_dataframe()
+
+        # We should only remember the valid dimensions.
+        #
+        output_with_extra_dimension = Point(y_1=input.x_1, y_2=input.x_2, invalid_dimension=42)
+        output_with_extra_dimension_df = output_with_extra_dimension.to_dataframe()
+        optimizer.register(input_df, output_with_extra_dimension_df)
+
+        # Let's make sure that the invalid_dimension was not remembered.
+        #
+        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+        assert all(column in {'y_1', 'y_2'} for column in all_outputs_df.columns)
+
+        # We should accept inputs with missing output dimensions, as long as at least one is specified.
+        #
+        output_with_missing_dimension = Point(y_1=input.x_1)
+        output_with_missing_dimension_df = output_with_missing_dimension.to_dataframe()
+        optimizer.register(input_df, output_with_missing_dimension_df)
+        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+
+        # Let's make sure the missing dimension ends up being a null.
+        #
+        last_observation = all_outputs_df.iloc[[-1]]
+        assert last_observation['y_2'].isnull().values.all()
+
+        # Inserting an observation with no valid dimensions should fail.
+        #
+        empty_output = Point()
+        empty_output_df = empty_output.to_dataframe()
+        with pytest.raises(ValueError):
+            optimizer.register(input_df, empty_output_df)
+
+        only_invalid_outputs = Point(invalid_col1=0, invalid_col2=2)
+        only_invalid_outputs_df = only_invalid_outputs.to_dataframe()
+
+        with pytest.raises(ValueError):
+            optimizer.register(input_df, only_invalid_outputs_df)
+
 
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
