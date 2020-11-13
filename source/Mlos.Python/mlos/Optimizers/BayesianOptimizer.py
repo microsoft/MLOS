@@ -75,7 +75,7 @@ class BayesianOptimizer(OptimizerBase):
 
         # Also let's make sure we have the dataframes we need for the surrogate model.
         # TODO: this will need a better home - either a DataSet class or the surrogate model itself.
-        self._feature_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.parameter_space.dimensions])
+        self._feature_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.feature_space.dimensions])
         self._target_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.objective_space.dimensions])
 
     @property
@@ -114,11 +114,23 @@ class BayesianOptimizer(OptimizerBase):
         return suggested_config
 
     @trace()
-    def register(self, feature_values_pandas_frame, target_values_pandas_frame):
+    def register(self, config_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
 
-        self._feature_values_df = self._feature_values_df.append(feature_values_pandas_frame, ignore_index=True)
+        if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
+            raise ValueError("Context space required by optimization problem but not provided.")
+
+        # prefix column names to adhere to dimensions in hierarchical hypergrid
+        feature_values = config_values_pandas_frame.rename(lambda x: f"{self.optimization_problem.parameter_space.name}.{x}", axis=1)
+        if context_values_pandas_frame is not None:
+            renamed_context_values = context_values_pandas_frame.rename(lambda x: f"{self.optimization_problem.context_space.name}.{x}", axis=1)
+            feature_values = pd.concat([feature_values, renamed_context_values], axis=1)
+            feature_values['contains_context'] = True
+        else:
+            feature_values['contains_context'] = False
+
+        self._feature_values_df = self._feature_values_df.append(feature_values, ignore_index=True)
         self._target_values_df = self._target_values_df.append(target_values_pandas_frame, ignore_index=True)
 
         # TODO: ascertain that min_samples_required ... is more than min_samples to fit the model
