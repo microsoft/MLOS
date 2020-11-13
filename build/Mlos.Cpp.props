@@ -17,6 +17,7 @@
   <PropertyGroup Label="NetCoreReferences properties">
     <NoStdLib>true</NoStdLib>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <GenerateDesktopDeployRecipeFile>false</GenerateDesktopDeployRecipeFile>
   </PropertyGroup>
   <!-- If not specified, be sure to default to 64-bit builds -->
   <PropertyGroup>
