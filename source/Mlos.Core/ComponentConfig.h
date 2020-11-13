@@ -36,7 +36,7 @@ public:
     using SharedConfigType = SharedConfig<T>;
     using TProxyObjectType = typename T::ProxyObjectType;
 
-    ComponentConfig(_In_ MlosContext& mlosContext) noexcept
+    explicit ComponentConfig(_In_ MlosContext& mlosContext) noexcept
       : m_mlosContext(mlosContext),
         m_sharedConfig(nullptr)
     {}

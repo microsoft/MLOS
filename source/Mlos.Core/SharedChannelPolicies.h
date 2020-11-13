@@ -60,8 +60,7 @@ struct InternalSharedChannelPolicy
 //
 struct InterProcessSharedChannelPolicy
 {
-    InterProcessSharedChannelPolicy() noexcept
-    {}
+    InterProcessSharedChannelPolicy() noexcept = default;
 
     InterProcessSharedChannelPolicy(InterProcessSharedChannelPolicy&& channelPolicy) noexcept
       : m_notificationEvent(std::move(channelPolicy.m_notificationEvent))
@@ -78,7 +77,7 @@ struct InterProcessSharedChannelPolicy
         HRESULT hr = m_notificationEvent.Signal();
         if (FAILED(hr))
         {
-            // In case of failue, terminate the process.
+            // In case of failure, terminate the process.
             //
             Mlos::Core::MlosPlatform::TerminateProcess();
         }
@@ -92,7 +91,7 @@ struct InterProcessSharedChannelPolicy
         HRESULT hr = m_notificationEvent.Wait();
         if (FAILED(hr))
         {
-            // In case of failue, terminate the process.
+            // In case of failure, terminate the process.
             //
             Mlos::Core::MlosPlatform::TerminateProcess();
         }

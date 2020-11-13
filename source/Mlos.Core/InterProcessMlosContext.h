@@ -62,6 +62,10 @@ private:
     //
     InterProcessSharedChannelPolicy m_feedbackChannelPolicy;
 
+    // Notification event signalled after the target process initialized Mlos context.
+    //
+    NamedEvent m_targetProcessNamedEvent;
+
     friend class InterProcessMlosContext;
 };
 
@@ -71,9 +75,13 @@ private:
 // PURPOSE:
 //  Implementation of an inter-process MlosContext.
 //
+// NOTES:
+//
 class InterProcessMlosContext : public MlosContext
 {
 public:
+    typedef InterProcessMlosContextInitializer InitializerType;
+
     InterProcessMlosContext(_In_ InterProcessMlosContextInitializer&&) noexcept;
 
     ~InterProcessMlosContext();

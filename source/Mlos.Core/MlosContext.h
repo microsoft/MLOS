@@ -27,8 +27,7 @@ namespace Core
 //  (external) agent over shared memory channels.
 //
 //  Application components use this class to
-//  1. Register their settings assembly so the external agent can process the
-//  application component messages.
+//  1. Register their settings assembly so the external agent can process the application component messages.
 //  2. Send different types of messages (e.g. control, telemetry, etc.)
 //
 // NOTES:
@@ -110,6 +109,24 @@ protected:
 
     template<typename T>
     friend class ComponentConfig;
+};
+
+//----------------------------------------------------------------------------
+// NAME: MlosContextFactory
+//
+// PURPOSE:
+//  Creates a Mlos context instance.
+//
+// NOTES:
+//
+template<typename TMlosContext>
+class MlosContextFactory
+{
+public:
+    _Must_inspect_result_
+    HRESULT Create();
+
+    AlignedInstance<TMlosContext> m_context;
 };
 }
 }

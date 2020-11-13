@@ -72,6 +72,26 @@ namespace Mlos.Core.Linux
                 Native.OpenFlags.O_RDWR);
         }
 
+        /// <summary>
+        /// Opens an anonymous shared memory map from the file descriptor.
+        /// </summary>
+        /// <param name="sharedMemoryFd"></param>
+        /// <param name="sharedMemorySize"></param>
+        /// <returns></returns>
+        public static SharedMemoryMapView OpenAnonymousFromFileDescriptor(IntPtr sharedMemoryFd, ulong sharedMemorySize)
+        {
+            return new SharedMemoryMapView(
+                sharedMemoryFd,
+                sharedMemorySize);
+        }
+
+        private SharedMemoryMapView(IntPtr sharedMemoryFd, ulong sharedMemorySize)
+        {
+            sharedMemoryHandle = new SharedMemorySafeHandle(sharedMemoryFd);
+
+            CreateMemoryMap(sharedMemorySize);
+        }
+
         private SharedMemoryMapView(string sharedMemoryMapName, ulong sharedMemorySize, Native.OpenFlags openFlags)
         {
             this.sharedMemoryMapName = sharedMemoryMapName;
@@ -92,6 +112,11 @@ namespace Mlos.Core.Linux
                     innerException: new Win32Exception(errno));
             }
 
+            CreateMemoryMap(sharedMemorySize);
+        }
+
+        private void CreateMemoryMap(ulong sharedMemorySize)
+        {
             if (Native.FileTruncate(sharedMemoryHandle, (long)sharedMemorySize) == -1)
             {
                 int errno = Marshal.GetLastWin32Error();
@@ -148,7 +173,7 @@ namespace Mlos.Core.Linux
             isDisposed = true;
         }
 
-        private SharedMemorySafeHandle sharedMemoryHandle;
+        private readonly SharedMemorySafeHandle sharedMemoryHandle;
 
         private readonly string sharedMemoryMapName;
     }

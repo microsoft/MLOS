@@ -9,8 +9,6 @@
 using System;
 using System.Collections.Generic;
 
-using Proxy.Mlos.Core.Internal;
-
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
 // Open hash table probing policy.
@@ -36,26 +34,26 @@ namespace Mlos.Core
         /// <param name="sharedConfigDictionary"></param>
         /// <param name="codegenKey"></param>
         /// <returns></returns>
-        public static SharedConfig<TProxy> Lookup<TType, TKey, TProxy>(SharedConfigDictionary sharedConfigDictionary, ICodegenKey<TType, TKey, TProxy> codegenKey)
+        public static SharedConfig<TProxy> Lookup<TType, TKey, TProxy>(MlosProxyInternal.SharedConfigDictionary sharedConfigDictionary, ICodegenKey<TType, TKey, TProxy> codegenKey)
             where TType : ICodegenType, new()
             where TKey : ICodegenKey, new()
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
             uint slotIndex = 0;
-            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(sharedConfigDictionary, codegenKey, ref slotIndex);
+            return MlosProxyInternal.SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(sharedConfigDictionary, codegenKey, ref slotIndex);
         }
 
         /// <summary>
         /// Registers a shared config memory region created by the target process.
         /// </summary>
-        /// <param name="memoryRegionId"></param>
+        /// <param name="sharedMemoryRegionIndex"></param>
         /// <param name="sharedMemoryMapName"></param>
         /// <param name="memoryRegionSize"></param>
-        public void RegisterSharedConfigMemoryRegion(uint memoryRegionId, string sharedMemoryMapName, ulong memoryRegionSize)
+        public void RegisterSharedConfigMemoryRegion(uint sharedMemoryRegionIndex, string sharedMemoryMapName, ulong memoryRegionSize)
         {
             if (sharedConfigMemoryRegionView != null)
             {
-                if (sharedConfigMemoryRegionView.MemoryRegion().MemoryHeader.MemoryRegionId == memoryRegionId)
+                if (sharedConfigMemoryRegionView.MemoryRegion().MemoryHeader.MemoryRegionId.Index == sharedMemoryRegionIndex)
                 {
                     // Shared memory region has been already registered.
                     //
@@ -76,6 +74,15 @@ namespace Mlos.Core
             sharedConfigMemoryRegionView = new SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion>(sharedConfigMemoryMapView);
         }
 
+        /// <summary>
+        /// Registers a shared config memory region created by the target process.
+        /// </summary>
+        /// <param name="sharedConfigMemoryRegionView"></param>
+        public void RegisterSharedConfigMemoryRegion(SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryRegionView)
+        {
+            this.sharedConfigMemoryRegionView = sharedConfigMemoryRegionView;
+        }
+
         /// <inheritdoc/>
         public SharedConfig<TProxy> Lookup<TType, TKey, TProxy>(ICodegenKey<TType, TKey, TProxy> codegenKey)
             where TType : ICodegenType, new()
@@ -83,7 +90,7 @@ namespace Mlos.Core
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
             uint slotIndex = 0;
-            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, codegenKey, ref slotIndex);
+            return MlosProxyInternal.SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, codegenKey, ref slotIndex);
         }
 
         /// <inheritdoc/>
@@ -92,7 +99,7 @@ namespace Mlos.Core
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
             uint slotIndex = 0;
-            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, codegenType, ref slotIndex);
+            return MlosProxyInternal.SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, codegenType, ref slotIndex);
         }
 
         /// <inheritdoc/>
@@ -102,7 +109,7 @@ namespace Mlos.Core
             // #TODO make sure, ICodegenProxy does not have any fields to compare
             //
             uint slotIndex = 0;
-            return SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, default(TProxy), ref slotIndex);
+            return MlosProxyInternal.SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, default(TProxy), ref slotIndex);
         }
 
         /// <summary>
@@ -117,7 +124,7 @@ namespace Mlos.Core
         {
             uint slotIndex = 0;
 
-            SharedConfig<TProxy> sharedConfig = SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, componentConfig.Config, ref slotIndex);
+            SharedConfig<TProxy> sharedConfig = MlosProxyInternal.SharedConfigDictionaryLookup<ProbingPolicy>.Get<TProxy>(SharedConfigDictionary, componentConfig.Config, ref slotIndex);
 
             if (sharedConfig.Buffer == IntPtr.Zero)
             {
@@ -137,7 +144,7 @@ namespace Mlos.Core
             where TType : ICodegenType, new()
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
-            SharedConfigDictionaryLookup<ProbingPolicy>.Add<TType, TProxy>(SharedConfigDictionary, componentConfig);
+            MlosProxyInternal.SharedConfigDictionaryLookup<ProbingPolicy>.Add<TType, TProxy>(SharedConfigDictionary, componentConfig);
         }
 
         private void Dispose(bool disposing)

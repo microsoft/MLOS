@@ -38,16 +38,16 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(_Inout_ ComponentConfig<T>& comp
 {
     // Ensure there is allocated and registered shared config memory region.
     //
-    if (!m_sharedConfigMemRegionView.Buffer.Pointer)
+    if (!m_sharedConfigMemoryRegionView.Buffer.Pointer)
     {
-        HRESULT hr = RegisterSharedConfigMemoryRegion();
+        HRESULT hr = CreateSharedConfigMemoryRegion();
         if (FAILED(hr))
         {
             return hr;
         }
     }
 
-    Internal::SharedConfigDictionary& sharedConfigDictionary = m_sharedConfigMemRegionView.MemoryRegion().SharedConfigDictionary;
+    Internal::SharedConfigDictionary& sharedConfigDictionary = m_sharedConfigMemoryRegionView.MemoryRegion().SharedConfigDictionary;
 
     return CreateOrUpdateFrom(sharedConfigDictionary, componentConfig);
 }
@@ -88,12 +88,12 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(
 template<typename T>
 HRESULT SharedConfigManager::Lookup(_Inout_ ComponentConfig<T>& componentConfig)
 {
-    if (!m_sharedConfigMemRegionView.Buffer.Pointer)
+    if (!m_sharedConfigMemoryRegionView.Buffer.Pointer)
     {
         return E_NOT_SET;
     }
 
-    Internal::SharedConfigDictionary& sharedConfigDictionary = m_sharedConfigMemRegionView.MemoryRegion().SharedConfigDictionary;
+    Internal::SharedConfigDictionary& sharedConfigDictionary = m_sharedConfigMemoryRegionView.MemoryRegion().SharedConfigDictionary;
 
     return Lookup(sharedConfigDictionary, componentConfig);
 }

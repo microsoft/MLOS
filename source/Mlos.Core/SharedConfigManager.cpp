@@ -20,8 +20,12 @@ namespace Mlos
 {
 namespace Core
 {
+// Shared memory mapping name for to store shared configs.
+//
+const char* const ApplicationConfigSharedMemoryName = "Host_Mlos.Config.SharedMemory";
+
 //----------------------------------------------------------------------------
-// NAME: SharedConfigManager::Contructor
+// NAME: SharedConfigManager::Constructor
 //
 // PURPOSE:
 //
@@ -46,7 +50,22 @@ SharedConfigManager::SharedConfigManager(_In_ MlosContext& mlosContext) noexcept
 //
 SharedConfigManager::~SharedConfigManager()
 {
-    m_sharedConfigMemRegionView.CleanupOnClose |= CleanupOnClose;
+    m_sharedConfigMemoryRegionView.CleanupOnClose |= CleanupOnClose;
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedConfigManager::AssignSharedConfigMemoryRegion
+//
+// PURPOSE:
+//
+// RETURNS:
+//
+// NOTES:
+//
+void SharedConfigManager::AssignSharedConfigMemoryRegion(
+    _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView)
+{
+    m_sharedConfigMemoryRegionView.Assign(std::move(sharedConfigMemoryRegionView));
 }
 
 //----------------------------------------------------------------------------
@@ -61,30 +80,32 @@ SharedConfigManager::~SharedConfigManager()
 // NOTES:
 //
 _Must_inspect_result_
-HRESULT SharedConfigManager::RegisterSharedConfigMemoryRegion()
+HRESULT SharedConfigManager::CreateSharedConfigMemoryRegion()
 {
     // Create (allocate and register) shared config memory region.
     // See Also: Mlos.Agent/MainAgent.cs
     // #TODO now it can be configurable.
     //
-    const char* const appConfigSharedMemoryName = "Host_Mlos.Config.SharedMemory";
-
     const size_t SharedMemorySize = 65536;
 
-    HRESULT hr = m_mlosContext.CreateMemoryRegion(appConfigSharedMemoryName, SharedMemorySize, m_sharedConfigMemRegionView);
+    HRESULT hr = m_mlosContext.CreateMemoryRegion(
+        ApplicationConfigSharedMemoryName,
+        SharedMemorySize,
+        m_sharedConfigMemoryRegionView);
     if (FAILED(hr))
     {
         return hr;
     }
 
-    Internal::SharedConfigMemoryRegion& sharedConfigMemoryRegion = m_sharedConfigMemRegionView.MemoryRegion();
+    Internal::SharedConfigMemoryRegion& sharedConfigMemoryRegion = m_sharedConfigMemoryRegionView.MemoryRegion();
 
     // Register shared memory region.
     //
     ComponentConfig<Internal::RegisteredMemoryRegionConfig> registeredMemoryRegion(m_mlosContext);
 
-    registeredMemoryRegion.MemoryRegionIndex = sharedConfigMemoryRegion.MemoryHeader.MemoryRegionId;
-    registeredMemoryRegion.SharedMemoryMapName = appConfigSharedMemoryName;
+    registeredMemoryRegion.MemoryRegionType = sharedConfigMemoryRegion.MemoryHeader.MemoryRegionId.Type;
+    registeredMemoryRegion.MemoryRegionIndex = sharedConfigMemoryRegion.MemoryHeader.MemoryRegionId.Index;
+    registeredMemoryRegion.SharedMemoryMapName = ApplicationConfigSharedMemoryName;
     registeredMemoryRegion.MemoryRegionSize = SharedMemorySize;
 
     // Register memory map region in the global shared region.
@@ -95,8 +116,8 @@ HRESULT SharedConfigManager::RegisterSharedConfigMemoryRegion()
 
     // Register a shared config memory region.
     //
-    Internal::RegisterSharedConfigMemoryRegionRequestMessage msg = { 0 };
-    msg.MemoryRegionId = sharedConfigMemoryRegion.MemoryHeader.MemoryRegionId;
+    Internal::RegisterSharedConfigMemoryRegionRequestMessage msg = {};
+    msg.SharedMemoryRegionIndex = sharedConfigMemoryRegion.MemoryHeader.MemoryRegionId.Index;
 
     m_mlosContext.SendControlMessage(msg);
 

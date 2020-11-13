@@ -40,7 +40,7 @@ public:
     //
     template<typename... TArgs>
     _Must_inspect_result_
-    bool EmplaceBack(TArgs&&... args)
+    bool EmplaceBack(_In_ TArgs&&... args)
     {
         if (m_size >= N)
         {

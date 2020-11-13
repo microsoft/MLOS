@@ -71,6 +71,8 @@ private:
 class InternalMlosContext : public MlosContext
 {
 public:
+    typedef InternalMlosContextInitializer InitializerType;
+
     InternalMlosContext(_In_ InternalMlosContextInitializer&&) noexcept;
 
 private:
