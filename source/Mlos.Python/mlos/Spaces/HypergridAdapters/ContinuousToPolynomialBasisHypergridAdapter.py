@@ -14,6 +14,8 @@ from mlos.Spaces.HypergridAdapters.HierarchicalToFlatHypergridAdapter import Hie
 class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
     """ Adds polynomial basis function features for each continuous dimension in the adaptee hypergrid using
         https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.PolynomialFeatures.html.
+        All non-continuous adaptee dimensions will be present in the target hypergrid.
+        Beware: Because HierarchicalHypergrids may have NaN values for some points, these NaNs will be replaced by zeros.
 
         Parameters
         ----------
@@ -43,7 +45,7 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         self._polynomial_features_kwargs = {
             'degree': degree,
             'interaction_only': interaction_only,
-            'include_bias': True,
+            'include_bias': False,
             'order': 'C'
         }
         self._target: Hypergrid = None
@@ -60,13 +62,20 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         self._num_dimensions_to_transform = len(self._adaptee_dimension_names_to_transform)
         self._adaptee_contains_dimensions_to_transform = self._num_dimensions_to_transform > 0
 
+        # see definition of _get_polynomial_feature_names() for usage
+        self._internal_feature_name_terminal_char = '_'
+
+        # Since sklearn PolynomialFeatures does not accept NaNs and these may appear in data frames from hierarchical hypergrids,
+        # the NaNs will be replaced with an imputed (finite) value.  The following sets the value used.
+        self._nan_imputed_finite_value = 0
+
         # instantiate sklearn's polynomial features instance
         self._polynomial_features = PolynomialFeatures(**self._polynomial_features_kwargs)
         # because the exact number of additional dimensions that will be added depends on the parameters to sklearn's PF,
         # *and* the sklearn PF instance above doesn't determine this information until after the .fit() method is called (requiring a dataframe),
         # *and* the target hypergrid can not be constructed without knowing the resulting number of continuous dimensions,
         # a trivial dataframe is constructed (all 1s) and .fit_transform() of _polynomial_features instance is called.
-        trivial_continuous_dim_x = np.array(np.ones((1, self._num_dimensions_to_transform))).reshape(1, -1)
+        trivial_continuous_dim_x = np.ones((1, self._num_dimensions_to_transform))
         trivial_polynomial_features_y = self._polynomial_features.fit_transform(trivial_continuous_dim_x)
         self._polynomial_features_powers = self._polynomial_features.powers_
         self._num_polynomial_basis_dimensions_in_target = trivial_polynomial_features_y.shape[1]
@@ -80,7 +89,8 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
             random_state=self._adaptee.random_state
         )
 
-        # since linear terms will always be included in the polynomial basis functions, add all dimensions
+        # Add all adaptee dimensions to the target
+        # This aligns with this adapter's goal since the linear terms will always be included in the polynomial basis functions
         for adaptee_dimension in self._adaptee.dimensions:
             self._target.add_dimension(adaptee_dimension.copy())
 
@@ -90,10 +100,10 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         # add new dimensions to be created by sklearn PolynomialFeatures
 
         # construct target dim names using adaptee dim names and polynomial feature powers matrix
-        # The polynomial feature "feature names" look like: ['1', 'x0', 'x1', 'x0^2', 'x0 x1', 'x1^2']
-        # and this is independent of the adaptee dimension names (since the sklearn class doesn't take the x feature names as inputs).
-        poly_feature_dim_names = self._polynomial_features.get_feature_names().copy()
-
+        # This logic is worked out explicitly here so we have control over the derived dimension names.
+        # Currently, the code only substitutes adaptee feature names into the default feature_names produced by
+        # sklearn's PolynomialFeatures .get_feature_names() method.
+        poly_feature_dim_names = self._get_polynomial_feature_names()
         for i, poly_feature_name in enumerate(poly_feature_dim_names):
             ith_terms_powers = self._polynomial_features_powers[i]
 
@@ -101,18 +111,18 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
                 # the constant term is skipped and the linear terms are already included in _target
                 continue
             else:
-                # replace adaptee dim names for poly feature name {x0, x1, ...} representatives
+                # replace adaptee dim names for poly feature name {x0_, x1_, ...} representatives
                 target_dim_name = poly_feature_name
                 for j, adaptee_dim_name in enumerate(self._adaptee_dimension_names_to_transform):
                     adaptee_dim_power = ith_terms_powers[j]
                     if adaptee_dim_power == 0:
                         continue
                     if adaptee_dim_power == 1:
-                        poly_feature_adaptee_dim_name_standin = f'x{j}'
+                        poly_feature_adaptee_dim_name_standin = f'x{j}{self._internal_feature_name_terminal_char}'
                         adaptee_dim_replacement_name = adaptee_dim_name
                     else:
                         # power > 1 cases
-                        poly_feature_adaptee_dim_name_standin = f'x{j}^{adaptee_dim_power}'
+                        poly_feature_adaptee_dim_name_standin = f'x{j}{self._internal_feature_name_terminal_char}^{adaptee_dim_power}'
                         adaptee_dim_replacement_name = f'{adaptee_dim_name}^{adaptee_dim_power}'
 
                     target_dim_name = target_dim_name.replace(poly_feature_adaptee_dim_name_standin, adaptee_dim_replacement_name)
@@ -133,30 +143,42 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         return self._target
 
     def get_column_names_for_polynomial_features(self):
-        return list(set.union(set(self._adaptee_dimension_names_to_transform), set(self._target_polynomial_feature_map.keys())))
+        return self._adaptee_dimension_names_to_transform + list(self._target_polynomial_feature_map.keys())
 
     def get_polynomial_feature_powers_table(self):
         return self._polynomial_features_powers
+
+    def _get_polynomial_feature_names(self):
+        # The default polynomial feature feature names returned from .get_feature_names() look like: ['1', 'x0', 'x1', 'x0^2', 'x0 x1', 'x1^2']
+        # They are altered below by adding a terminal char so string substitutions don't confuse
+        # a derived feature named 'x1 x12' with another potentially derived feature named 'x10 x124'
+        replaceable_feature_names = []
+        for i in range(len(self._adaptee_dimension_names_to_transform)):
+            replaceable_feature_names.append(f'x{i}{self._internal_feature_name_terminal_char}')
+        return self._polynomial_features.get_feature_names(replaceable_feature_names)
 
     def _project_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
 
         # replace NaNs with zeros
-        df.fillna(0, inplace=True)
+        df.fillna(self._nan_imputed_finite_value, inplace=True)
 
         # Transform the continuous columns and add the higher order columns to the df
         # Filtering columns to transform b/c dataframes coming from hierarchical hypergrid points
         # may not contain all possible dimensions knowable from hypergrid
-        init_x = np.zeros((len(df.index), len(self._adaptee_dimension_names_to_transform)))
-        x_to_transform = np.array(init_x)
+        x_to_transform = np.zeros((len(df.index), len(self._adaptee_dimension_names_to_transform)))
         for i, dim_name in enumerate(self._adaptee_dimension_names_to_transform):
             if dim_name in df.columns.values:
                 x_to_transform[:, i] = df[dim_name]
+            else:
+                # need placeholder for all expected input dimensions
+                x_to_transform[:, i] = np.zeros((len(df.index), 1))
 
         all_poly_features = self._polynomial_features.transform(x_to_transform)
-        for i, target_dim_name in enumerate(self._target_polynomial_feature_map):
-            df[target_dim_name] = all_poly_features[:, i]
+        for target_dim_name in self._target_polynomial_feature_map:
+            target_dim_index = self._target_polynomial_feature_map[target_dim_name]
+            df[target_dim_name] = all_poly_features[:, target_dim_index]
         return df
 
     def _unproject_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:

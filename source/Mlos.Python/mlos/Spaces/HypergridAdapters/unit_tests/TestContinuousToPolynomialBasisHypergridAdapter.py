@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import math
+import numpy as np
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimension, DiscreteDimension, OrdinalDimension
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
 from mlos.Spaces.HypergridAdapters import ContinuousToPolynomialBasisHypergridAdapter
@@ -135,11 +136,11 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         self._test_dataframe_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
 
     def test_balanced_hierarchical_hypergrid_degree_two_interactions_only_dataframe(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
+        adapter_kwargs = {'degree': 2, 'interaction_only': True}
         self._test_dataframe_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
 
     def test_balanced_hierarchical_hypergrid_degree_three_interactions_only_dataframe(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
+        adapter_kwargs = {'degree': 3, 'interaction_only': True}
         self._test_dataframe_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
 
     # point projection tests
@@ -152,12 +153,19 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         self._test_point_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
 
     def test_balanced_hierarchical_hypergrid_degree_two_interactions_only_point(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
+        adapter_kwargs = {'degree': 2, 'interaction_only': True}
         self._test_point_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
 
     def test_balanced_hierarchical_hypergrid_degree_three_interactions_only_point(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
+        adapter_kwargs = {'degree': 3, 'interaction_only': True}
         self._test_point_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
+
+    # @pytest.mark.parametrize("degree", [2, 11])
+    # @pytest.mark.parametrize("interaction_only", [True, False])
+    # @pytest.mark.parmaetrize("adaptee", [self.simple_hypergrid, self.unbalanced_hierarchical_hypergrid, self.balanced_hierarchical_hypergrid])
+    # def test_dataframe_projection_parameterized(self, adaptee, degree, interaction_only):
+    #     adaptee_kwargs = {'degree': degree, 'interaction_only': interaction_only}
+    #     self._test_dataframe_projection(adaptee, adaptee_kwargs, num_random_points=10)
 
     def _test_dataframe_projection(self, adaptee, adapter_kwargs, num_random_points):
         num_adaptee_continuous_dims = 0
@@ -166,11 +174,12 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
                 num_adaptee_continuous_dims += 1
 
         # count the number of polynomial terms expected excluding the constant term
-        num_target_continuous_dims_expected = self.n_choose_k(adapter_kwargs['degree'] + num_adaptee_continuous_dims, num_adaptee_continuous_dims) - 1
         if adapter_kwargs['interaction_only']:
             num_target_continuous_dims_expected = 0
             for i in range(adapter_kwargs['degree']):
                 num_target_continuous_dims_expected += self.n_choose_k(num_adaptee_continuous_dims, i+1)
+        else:
+            num_target_continuous_dims_expected = self.n_choose_k(adapter_kwargs['degree'] + num_adaptee_continuous_dims, num_adaptee_continuous_dims) - 1
 
         adapter = ContinuousToPolynomialBasisHypergridAdapter(adaptee=adaptee, **adapter_kwargs)
         num_polynomial_features = len(adapter.get_column_names_for_polynomial_features())
@@ -182,6 +191,9 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         projected_df = adapter.project_dataframe(df=original_df, in_place=False)
         assert id(original_df) != id(projected_df)
         assert all([target_dim_name in projected_df.columns.values for target_dim_name in adapter.get_column_names_for_polynomial_features()])
+
+        # test values are as expected
+        self._test_polynomial_feature_values_are_as_expected(adapter, projected_df)
 
         unprojected_df = adapter.unproject_dataframe(df=projected_df, in_place=False)
         # since NaNs can not be passed through sklearn's PolynomialFeatures transform(), they are replaced w/ 0s during projection
@@ -196,6 +208,9 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         assert all([target_dim_name in projected_in_place_df.columns.values for target_dim_name in
                     adapter.get_column_names_for_polynomial_features()])
 
+        # test values are as expected
+        self._test_polynomial_feature_values_are_as_expected(adapter, projected_in_place_df)
+
         unprojected_in_place_df = adapter.unproject_dataframe(df=projected_in_place_df, in_place=True)
         assert original_df_with_fillna_zeros.equals(unprojected_in_place_df)
 
@@ -208,3 +223,32 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
             projected_point = adapter.project_point(original_point)
             unprojected_point = adapter.unproject_point(projected_point)
             assert original_point == unprojected_point
+
+    @staticmethod
+    def _test_polynomial_feature_values_are_as_expected(adapter, projected_df):
+        # Determine if target column values contain the expected polynomial feature values
+        # This is done using the PolynomialFeatures powers_ table where the rows correspond to the target features
+        # and the columns to the adaptee dimensions being transformed
+        target_dim_names = adapter.get_column_names_for_polynomial_features()
+        for i, ith_target_dim_powers in enumerate(adapter.get_polynomial_feature_powers_table()):
+            # only testing higher degree monomials since the adaptee continuous dimensions are not altered
+            if ith_target_dim_powers.sum() <= 1:
+                continue
+            target_dim_name = target_dim_names[i]
+            observed_values = projected_df[target_dim_name].to_numpy().reshape(-1, 1)
+
+            # construct expected ith target values
+            expected_values = np.ones((len(projected_df.index.values), 1))
+            for j, jth_adaptee_dim_power in enumerate(ith_target_dim_powers):
+                if jth_adaptee_dim_power == 0:
+                    continue
+                jth_dim_name = target_dim_names[j]
+                input_values = projected_df[jth_dim_name].to_numpy().reshape(-1, 1)
+                expected_values = expected_values * (input_values ** jth_adaptee_dim_power)
+
+            epsilon = 10 ** -9
+            sum_diffs = np.abs(expected_values - observed_values).sum()
+            if sum_diffs >= epsilon:
+                print('expected: ', expected_values)
+                print('observed: ', observed_values)
+            assert sum_diffs < epsilon
