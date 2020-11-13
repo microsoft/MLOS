@@ -65,19 +65,18 @@ class OptimizationProblem:
     Parameters
     ----------
     parameter_space : Hypergrid
-        Space of input parameters to tune.
-    objective_space : Hypergrid
-        Output space of objective.
-    objectives : List[Objective]
-        List of objectives to optimize.
-    context_space : Hypergrid (default=None)
-        Additional context features that vary between instances but are not optimized over.
+        Input parameter space for objective, i.e. the search space.
+    objective_space : Hypergrid(
+        Output space for the objective, can be (-inf, +inf)
+    objectives : list[Objective]
+        Objective function(s) to optimize, with input from parameter_space and output in objective_space.
+    context_space : Hypergrid, default=None
+        Additional run-time context features.
 
     Attributes
     ----------
     feature_space : Hypergrid
         Joint space of parameters and context.
-
     """
 
     # The dimensions that we inject to keep track of individual subspaces, but which are worthless
@@ -104,12 +103,19 @@ class OptimizationProblem:
 
         # Fit functions / surrogate models will be fed features consisting of both context and parameters.
         # Thus, the feature space is comprised of both context and parameters.
-        parameter_names = {parameter.name for parameter in parameter_space.root_dimensions}
-        context_names = [context.name for context in context_space.root_dimensions]
-        if parameter_names.intersection(context_names):
-            raise ValueError("Parameter space and context space can't share dimensions.")
-        self.feature_space = SimpleHypergrid(name='features',
-                                             dimensions=[*parameter_space.dimensions, *context_space.dimensions])
+        self.feature_space = SimpleHypergrid(
+            name="features",
+            dimensions=[
+                CategoricalDimension(name="contains_parameters", values=[True]),
+                CategoricalDimension(name="contains_context", values=[self.context_space is not None])
+            ]
+        ).join(
+            subgrid=self.parameter_space,
+            on_external_dimension=CategoricalDimension(name="contains_parameters", values=[True])
+        ).join(
+            subgrid=self.context_space,
+            on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
+        )
 
     def to_dict(self):
         return {

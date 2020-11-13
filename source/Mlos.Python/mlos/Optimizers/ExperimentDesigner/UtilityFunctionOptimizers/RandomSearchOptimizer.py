@@ -43,32 +43,21 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         UtilityFunctionOptimizer.__init__(self, optimizer_config, optimization_problem, utility_function, logger)
 
     @trace()
-    def maximize(self, target_function, context_values_dataframe=None):
-        """Maximize callable target function.
+    def suggest(self, context_values_dataframe: pd.DataFrame = None):  # pylint: disable=unused-argument
+        """ Returns the next best configuration to try.
 
-        Parameters
-        ----------
-        target_function : callable
-            Function to maximize.
-        context_values_dataframe : DataFrame (default=None)
-            Context for optimization.
+        It does so by generating num_samples_per_iteration random configurations,
+        passing them through the utility function and selecting the configuration with
+        the highest utility value.
 
-        Returns
-        -------
-        position_of_optimum : Point
+        TODO: make it capable of consuming the context values
+        :return:
         """
-        config_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.optimizer_config.num_samples_per_iteration)
-        if context_values_dataframe is not None:
-            assert len(context_values_dataframe) == 1
-            config_values_dataframe['_join_key'] = 0
-            copied_context = context_values_dataframe.copy()
-            copied_context['_join_key'] = 0
-            feature_values_dataframe = config_values_dataframe.merge(copied_context, how='outer').drop(columns='_join_key')
-            config_values_dataframe = config_values_dataframe.drop(columns='_join_key')
-        else:
-            feature_values_dataframe = config_values_dataframe
-        target_values = target_function(feature_values_dataframe.copy(deep=False))
-        num_target_values = len(target_values)
-        index_of_max_value = target_values.argmax() if num_target_values > 0 else 0
-        return Point.from_dataframe(config_values_dataframe.iloc[[index_of_max_value]])
 
+        feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.optimizer_config.num_samples_per_iteration)
+        utility_function_values = self.utility_function(feature_values_dataframe.copy(deep=False))
+        num_utility_function_values = len(utility_function_values.index)
+        index_of_max_value = utility_function_values[['utility']].idxmax()['utility'] if num_utility_function_values > 0 else 0
+        config_to_suggest = Point.from_dataframe(feature_values_dataframe.loc[[index_of_max_value]])
+        self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
+        return config_to_suggest
