@@ -366,12 +366,7 @@ private IEnumerable<NuSpecContent> CollectFilesAsNugetContent(string inputDirPat
     }
 }
 
-// Note: this target currently fails on Linux due to lack of nuspec support by dotnet.
-// Fixing this would require a mono install as well, which is a bit excessive.
-//
 Task("Create-Nuget-Package")
-    .IsDependentOn("Build-NetCore")
-    .IsDependentOn("Binplace-CMake")
     .Does(()=>
     {
         var sourcePath = new DirectoryPath("./source/Mlos.Core");
@@ -399,9 +394,7 @@ Task("Create-Nuget-Package")
         string assemblyPath = mlosNetCoreSpec.Source;
         var asmVersion = FileVersionInfo.GetVersionInfo(assemblyPath);
 
-        // FIXME: This currently lacks "dependency" elements for the Projects that make up the nuget package.
-
-        // Create nuget package in Target directory.
+        // Create nuget package in Taget directory.
         //
         NuGetPack("./nuspec/Mlos.nuspec",
             new NuGetPackSettings
@@ -520,6 +513,9 @@ Task("Default")
     .IsDependentOn("Run-Unit-Tests")
     .IsDependentOn("Test-CMake")
     .IsDependentOn("Generate-MlosModelServices-Dockerfile");
+
+//    .IsDependentOn("Create-Nuget-Package")
+//    .IsDependentOn("Test-Docker-E2E");
 
 //
 // EXECUTION
