@@ -213,7 +213,7 @@ jobs:
         #load: true
 
   linux-build-test:
-    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} build/test C++/C#
+    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} build/test C++/C# (${{ matrix.cxx }})
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 30
