@@ -4,6 +4,7 @@
 #
 from abc import ABC, abstractmethod
 from typing import Tuple
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import GreedyUtilityFunction
 
 import numpy as np
 import pandas as pd
@@ -107,9 +108,10 @@ class OptimizerBase(ABC):
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):
-        return self.experiment_designer.numeric_optimizer.maximize(
-            lambda features: self.experiment_designer.utility_function(features).utility,
-            context_values_dataframe=context)
+        greedy_utility = GreedyUtilityFunction(
+            self.surrogate_model, minimize=self.experiment_designer.optimization_problem.objectives[0].minimize)
+        utility_optimizer = self.experiment_designer.make_optimizer_for_utility(greedy_utility)
+        return utility_optimizer.suggest(context_values_dataframe=context)
 
     @trace()
     def _best_observation_optimum(self, features_df: pd.DataFrame, objectives_df: pd.DataFrame) -> Tuple[Point, Point]:
