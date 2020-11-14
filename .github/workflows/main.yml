@@ -33,6 +33,8 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     # Runs multiple commands using the runners shell
     - name: Run ${{ matrix.configuration }} msbuild
       timeout-minutes: 15
@@ -224,6 +226,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
