@@ -41,15 +41,11 @@ class OptimizerBase(ABC):
     def get_surrogate_model_fit_state(self):
         return self.get_optimizer_convergence_state().surrogate_model_fit_state
 
-    @trace()
-    def suggest(self, context_values_dataframe=None):
-        """ Returns the next best configuration to try.
-
-        It does so by generating num_samples_per_iteration random configurations,
-        passing them through the utility function and selecting the configuration with
-        the highest utility value.
+    @abstractmethod
+    def suggest(self, random=False, context=None) -> Point:
+        """Suggest the next set of parameters to try.
         """
-
+        raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
     def register(self, feature_values_pandas_frame, target_values_pandas_frame) -> None:
