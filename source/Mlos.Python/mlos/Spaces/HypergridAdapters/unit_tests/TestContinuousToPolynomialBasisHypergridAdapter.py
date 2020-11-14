@@ -4,6 +4,7 @@
 #
 import math
 import numpy as np
+import pytest
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimension, DiscreteDimension, OrdinalDimension
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
 from mlos.Spaces.HypergridAdapters import ContinuousToPolynomialBasisHypergridAdapter
@@ -55,117 +56,15 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
     def n_choose_k(n, k):
         return math.factorial(n) / math.factorial(k) / math.factorial(n - k)
 
-    ## simple_hypergrid tests
-    # dataframe projections
-    def test_simple_hypergrid_degree_two_all_terms_dataframe(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
-        self._test_dataframe_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_simple_hypergrid_degree_three_all_terms_dataframe(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
-        self._test_dataframe_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_simple_hypergrid_degree_two_no_interaction_terms_dataframe(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': True}
-        self._test_dataframe_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_simple_hypergrid_degree_three_no_interaction_terms_dataframe(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': True}
-        self._test_dataframe_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    # point projections
-    def test_simple_hypergrid_degree_two_all_terms_point(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
-        self._test_point_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_simple_hypergrid_degree_three_all_terms_point(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
-        self._test_point_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_simple_hypergrid_degree_two_interactions_only_terms_point(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': True}
-        self._test_point_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_simple_hypergrid_degree_three_interactions_only_terms_point(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': True}
-        self._test_point_projection(adaptee=self.simple_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    ## unbalanced_hierarchical_hypergrid tests
-    # dataframe projection tests
-    def test_unbalanced_hierarchical_hypergrid_degree_two_all_terms_dataframe(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
-        self._test_dataframe_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_unbalanced_hierarchical_hypergrid_degree_three_all_terms_dataframe(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
-        self._test_dataframe_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_unbalanced_hierarchical_hypergrid_degree_two_interactions_only_dataframe(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': True}
-        self._test_dataframe_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_unbalanced_hierarchical_hypergrid_degree_three_interactions_only_dataframe(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': True}
-        self._test_dataframe_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    # point projection tests
-    def test_unbalanced_hierarchical_hypergrid_degree_two_all_terms_point(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
-        self._test_point_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_unbalanced_hierarchical_hypergrid_degree_three_all_terms_point(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
-        self._test_point_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_unbalanced_hierarchical_hypergrid_degree_two_interactions_only_point(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': True}
-        self._test_point_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_unbalanced_hierarchical_hypergrid_degree_three_interactions_only_point(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': True}
-        self._test_point_projection(adaptee=self.unbalanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    ## balanced_hierarchical_hypergrid_tests
-    # dataframe projection tests
-    def test_balanced_hierarchical_hypergrid_degree_two_all_terms_dataframe(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
-        self._test_dataframe_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_balanced_hierarchical_hypergrid_degree_three_all_terms_dataframe(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
-        self._test_dataframe_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_balanced_hierarchical_hypergrid_degree_two_interactions_only_dataframe(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': True}
-        self._test_dataframe_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_balanced_hierarchical_hypergrid_degree_three_interactions_only_dataframe(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': True}
-        self._test_dataframe_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    # point projection tests
-    def test_balanced_hierarchical_hypergrid_degree_two_all_terms_point(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': False}
-        self._test_point_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_balanced_hierarchical_hypergrid_degree_three_all_terms_point(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': False}
-        self._test_point_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_balanced_hierarchical_hypergrid_degree_two_interactions_only_point(self):
-        adapter_kwargs = {'degree': 2, 'interaction_only': True}
-        self._test_point_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    def test_balanced_hierarchical_hypergrid_degree_three_interactions_only_point(self):
-        adapter_kwargs = {'degree': 3, 'interaction_only': True}
-        self._test_point_projection(adaptee=self.balanced_hierarchical_hypergrid, adapter_kwargs=adapter_kwargs, num_random_points=10)
-
-    # @pytest.mark.parametrize("degree", [2, 11])
-    # @pytest.mark.parametrize("interaction_only", [True, False])
-    # @pytest.mark.parmaetrize("adaptee", [self.simple_hypergrid, self.unbalanced_hierarchical_hypergrid, self.balanced_hierarchical_hypergrid])
-    # def test_dataframe_projection_parameterized(self, adaptee, degree, interaction_only):
-    #     adaptee_kwargs = {'degree': degree, 'interaction_only': interaction_only}
-    #     self._test_dataframe_projection(adaptee, adaptee_kwargs, num_random_points=10)
+    @pytest.mark.parametrize("degree", [2, 3, 5])
+    @pytest.mark.parametrize("interaction_only", [True, False])
+    def test_dataframe_projection_parameterized(self, degree, interaction_only):
+        adaptee_kwargs = {'degree': degree, 'interaction_only': interaction_only}
+        for adaptee in [self.simple_hypergrid,
+                        self.unbalanced_hierarchical_hypergrid,
+                        self.balanced_hierarchical_hypergrid]:
+            print(f'running test for adaptee: {adaptee.name}')
+            self._test_dataframe_projection(adaptee, adaptee_kwargs, num_random_points=10)
 
     def _test_dataframe_projection(self, adaptee, adapter_kwargs, num_random_points):
         num_adaptee_continuous_dims = 0
@@ -177,7 +76,8 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         if adapter_kwargs['interaction_only']:
             num_target_continuous_dims_expected = 0
             for i in range(adapter_kwargs['degree']):
-                num_target_continuous_dims_expected += self.n_choose_k(num_adaptee_continuous_dims, i+1)
+                if i + 1 <= num_adaptee_continuous_dims:
+                    num_target_continuous_dims_expected += self.n_choose_k(num_adaptee_continuous_dims, i+1)
         else:
             num_target_continuous_dims_expected = self.n_choose_k(adapter_kwargs['degree'] + num_adaptee_continuous_dims, num_adaptee_continuous_dims) - 1
 
@@ -214,6 +114,16 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         unprojected_in_place_df = adapter.unproject_dataframe(df=projected_in_place_df, in_place=True)
         assert original_df_with_fillna_zeros.equals(unprojected_in_place_df)
 
+    @pytest.mark.parametrize("degree", [2, 3, 5])
+    @pytest.mark.parametrize("interaction_only", [True, False])
+    def test_point_projection_parameterized(self, degree, interaction_only):
+        adaptee_kwargs = {'degree': degree, 'interaction_only': interaction_only}
+        for adaptee in [self.simple_hypergrid,
+                        self.unbalanced_hierarchical_hypergrid,
+                        self.balanced_hierarchical_hypergrid]:
+            print(f'running test for adaptee: {adaptee.name}')
+            self._test_point_projection(adaptee, adaptee_kwargs, num_random_points=10)
+
     @staticmethod
     def _test_point_projection(adaptee, adapter_kwargs, num_random_points):
         adapter = ContinuousToPolynomialBasisHypergridAdapter(adaptee=adaptee, **adapter_kwargs)
@@ -246,8 +156,11 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
                 input_values = projected_df[jth_dim_name].to_numpy().reshape(-1, 1)
                 expected_values = expected_values * (input_values ** jth_adaptee_dim_power)
 
-            epsilon = 10 ** -9
+            # as the monomial degree increases, rounding errors accumulate -as one would expect
+            # the threshold used for the sum of differences has been working for monomial degrees<= 5, but are known to fail
+            # if epsilon is decreased or high degrees are tested
             sum_diffs = np.abs(expected_values - observed_values).sum()
+            epsilon = 10 ** -5
             if sum_diffs >= epsilon:
                 print('expected: ', expected_values)
                 print('observed: ', observed_values)
