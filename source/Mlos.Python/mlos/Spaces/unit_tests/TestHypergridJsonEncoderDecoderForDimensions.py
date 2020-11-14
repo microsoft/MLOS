@@ -3,7 +3,6 @@
 # Licensed under the MIT License.
 #
 import json
-import unittest
 
 from mlos.Spaces import EmptyDimension, ContinuousDimension
 
@@ -11,7 +10,7 @@ from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonEncoder
 
 
-class TestHypergridJsonEncoderDecoderForDimensions(unittest.TestCase):
+class TestHypergridJsonEncoderDecoderForDimensions:
     """ Tests JSON encoding and decoding for hypergrids and dimensions.
 
     """
@@ -22,12 +21,12 @@ class TestHypergridJsonEncoderDecoderForDimensions(unittest.TestCase):
         deserialized_dict = json.loads(serialized)
         deserialized_empty_dimension = json.loads(serialized, cls=HypergridJsonDecoder)
 
-        self.assertTrue(deserialized_dict["ObjectType"] == "EmptyDimension")
-        self.assertTrue(deserialized_dict["Type"] == "ContinuousDimension")
-        self.assertTrue(deserialized_dict["Name"] == "empty")
+        assert deserialized_dict["ObjectType"] == "EmptyDimension"
+        assert deserialized_dict["Type"] == "ContinuousDimension"
+        assert deserialized_dict["Name"] == "empty"
 
-        self.assertTrue(empty_dimension in deserialized_empty_dimension)
-        self.assertTrue(deserialized_empty_dimension in empty_dimension)
+        assert empty_dimension in deserialized_empty_dimension
+        assert deserialized_empty_dimension in empty_dimension
 
     def test_composite_dimension(self):
         original_A = ContinuousDimension(name='x', min=0, max=1)
@@ -51,25 +50,25 @@ class TestHypergridJsonEncoderDecoderForDimensions(unittest.TestCase):
         E = json.loads(serialized_E, cls=HypergridJsonDecoder)
         F = json.loads(serialized_F, cls=HypergridJsonDecoder)
 
-        self.assertTrue(A in original_A)
-        self.assertTrue(B in original_B)
-        self.assertTrue(C in original_C)
-        self.assertTrue(D in original_D)
-        self.assertTrue(E in original_E)
-        self.assertTrue(F in original_F)
+        assert A in original_A
+        assert B in original_B
+        assert C in original_C
+        assert D in original_D
+        assert E in original_E
+        assert F in original_F
 
-        self.assertTrue(original_A in A)
-        self.assertTrue(original_B in B)
-        self.assertTrue(original_C in C)
-        self.assertTrue(original_D in D)
-        self.assertTrue(original_E in E)
-        self.assertTrue(original_F in F)
+        assert original_A in A
+        assert original_B in B
+        assert original_C in C
+        assert original_D in D
+        assert original_E in E
+        assert original_F in F
 
-        self.assertTrue(0.5 in D)
-        self.assertTrue(1.5 not in D)
-        self.assertTrue(2.5 not in D)
-        self.assertTrue(3.4 not in D)
-        self.assertTrue(35 not in D)
-        self.assertTrue(2 in E)
-        self.assertTrue(2.5 not in E)
-        self.assertTrue(0 in F and 1 in F and 1.5 not in F and 2 in F and 2.5 not in F)
+        assert 0.5 in D
+        assert 1.5 not in D
+        assert 2.5 not in D
+        assert 3.4 not in D
+        assert 35 not in D
+        assert 2 in E
+        assert 2.5 not in E
+        assert 0 in F and 1 in F and 1.5 not in F and 2 in F and 2.5 not in F

@@ -47,9 +47,14 @@ def declare_singletons():
     global rpc_handlers  # pylint: disable=global-variable-undefined
     global tracer  # pylint: disable=global-variable-undefined
 
-    ml_model_services_proxy = None
-    rpc_handlers = None
-    tracer = None
+    if 'tracer' not in globals():
+        tracer = None
+
+    if 'ml_model_services_proxy' not in globals():
+        ml_model_services_proxy = None
+
+    if 'rpc_handlers' not in globals():
+        rpc_handlers = None
 
 def serialize_to_bytes_string(obj):
     return codecs.encode(pickle.dumps(obj), "base64").decode()

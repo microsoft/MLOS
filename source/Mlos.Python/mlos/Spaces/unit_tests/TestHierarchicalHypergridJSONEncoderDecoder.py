@@ -5,7 +5,6 @@
 import json
 import os
 import random
-import unittest
 
 from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Spaces.SimpleHypergrid import SimpleHypergrid
@@ -18,9 +17,9 @@ from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonEncoder
 
 
-class TestHierarchicalSpaces(unittest.TestCase):
+class TestHierarchicalSpaces:
 
-    def setUp(self):
+    def setup_method(self, method):
         self.original_root_communication_channel_parameter_space = SimpleHypergrid(
             name='communication_channel_parameter_space',
             dimensions=[
@@ -143,13 +142,13 @@ class TestHierarchicalSpaces(unittest.TestCase):
             )
         )
 
-        self.assertTrue(valid_config_no_emergency_buffer in self.root_communication_channel_parameter_space)
-        self.assertTrue(valid_config_no_emergency_buffer in self.hierarchical_settings)
-        self.assertTrue(valid_config_with_emergency_buffer in self.hierarchical_settings)
-        self.assertTrue(valid_config_with_emergency_buffer_colors in self.hierarchical_settings)
-        self.assertTrue(valid_config_with_emergency_buffer_and_redundant_coordinates in self.hierarchical_settings)
-        self.assertTrue(another_invalid_config_with_emergency_buffer not in self.hierarchical_settings)
-        self.assertTrue(yet_another_invalid_config_with_emergency_buffer not in self.hierarchical_settings)
+        assert valid_config_no_emergency_buffer in self.root_communication_channel_parameter_space
+        assert valid_config_no_emergency_buffer in self.hierarchical_settings
+        assert valid_config_with_emergency_buffer in self.hierarchical_settings
+        assert valid_config_with_emergency_buffer_colors in self.hierarchical_settings
+        assert valid_config_with_emergency_buffer_and_redundant_coordinates in self.hierarchical_settings
+        assert another_invalid_config_with_emergency_buffer not in self.hierarchical_settings
+        assert yet_another_invalid_config_with_emergency_buffer not in self.hierarchical_settings
 
     def test_generating_random_configs(self):
         used_emergency_buffer = False
@@ -163,15 +162,15 @@ class TestHierarchicalSpaces(unittest.TestCase):
 
         for _ in range(100):
             random_config = self.hierarchical_settings.random()
-            self.assertTrue(random_config in self.hierarchical_settings)
+            assert random_config in self.hierarchical_settings
             used_emergency_buffer = used_emergency_buffer or random_config['use_emergency_buffer']
             if random_config['use_emergency_buffer']:
                 used_color = used_color or random_config['emergency_buffer_config']['use_colors']
                 if random_config['emergency_buffer_config']['use_colors']:
                     used_crimson = used_crimson or (random_config['emergency_buffer_config']['emergency_buffer_color']['color'] == 'Crimson')
-        self.assertTrue(used_emergency_buffer)
-        self.assertTrue(used_color)
-        self.assertTrue(used_crimson)
+        assert used_emergency_buffer
+        assert used_color
+        assert used_crimson
 
     def test_reseeding_random_state(self):
         previous_iteration_first_pass_points = None
@@ -192,11 +191,11 @@ class TestHierarchicalSpaces(unittest.TestCase):
             second_pass_points = [self.hierarchical_settings.random() for _ in range(100)]
 
             for first_pass_point, second_pass_point in zip(first_pass_points, second_pass_points):
-                self.assertTrue(first_pass_point == second_pass_point)
+                assert first_pass_point == second_pass_point
 
             if previous_iteration_first_pass_points is not None:
                 # Let's make sure we keep changing the points
-                self.assertTrue(
+                assert (
                     any(
                         previous != current
                         for previous, current
@@ -232,8 +231,8 @@ class TestHierarchicalSpaces(unittest.TestCase):
                 deserialized_hypergrid = json.load(in_file, cls=HypergridJsonDecoder)
             # Since the __eq__ is not yet implemented, let's assert that all points in one, are in the other.
             for _ in range(1000):
-                self.assertTrue(hypergrid.random() in deserialized_hypergrid)
-                self.assertTrue(deserialized_hypergrid.random() in hypergrid)
+                assert hypergrid.random() in deserialized_hypergrid
+                assert deserialized_hypergrid.random() in hypergrid
 
     def test_print_output(self):
         for hypergrid, expected_print_output_file_path in self.expected_print_outputs_file_paths:
@@ -245,4 +244,4 @@ class TestHierarchicalSpaces(unittest.TestCase):
             with open(expected_print_output_file_path, 'r') as in_file:
                 expected_output = in_file.read()
 
-            self.assertTrue(expected_output.strip() == str(hypergrid).strip())
+            assert expected_output.strip() == str(hypergrid).strip()

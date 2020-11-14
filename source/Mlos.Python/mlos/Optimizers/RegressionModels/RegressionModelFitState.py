@@ -5,7 +5,6 @@
 from typing import Dict, List
 import pandas as pd
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitMetrics, DataSetType
-from mlos.Spaces import Hypergrid
 
 
 class RegressionModelFitState:
@@ -21,11 +20,7 @@ class RegressionModelFitState:
 
     The owning model is responsible for keeping this data up to date and present it on when required.
     """
-    def __init__(self, input_space: Hypergrid, output_space: Hypergrid):
-        self.input_space = input_space
-        self.output_space = output_space
-        self.fitted = False
-
+    def __init__(self):
         self.historical_gof_metrics: Dict[DataSetType, List[GoodnessOfFitMetrics]] = {
             DataSetType.TRAIN: [],
             DataSetType.VALIDATION: [],
@@ -51,7 +46,7 @@ class RegressionModelFitState:
         return self.current_train_gof_metrics.observation_count
 
     # pylint: disable=unused-argument
-    def get_goodness_of_fit_dataframe(self, data_set_type: DataSetType, deep=False):
+    def get_goodness_of_fit_dataframe(self, data_set_type: DataSetType = DataSetType.TRAIN, deep=False):
         """ Converts the historical goodness of fit metrics into a data frame.
 
         :param data_set_type:
@@ -66,8 +61,7 @@ class RegressionModelFitState:
             for i, col_name in enumerate(column_names):
                 values[col_name].append(gof_record[i])
 
-        index = pd.Index(values['last_refit_iteration_number'])
-        del values['last_refit_iteration_number']
         del values['data_set_type']
-        df = pd.DataFrame(values, index=index)
+        df = pd.DataFrame(values)
+        df = df.drop_duplicates(subset=['last_refit_iteration_number'], keep='last').sort_index()
         return df

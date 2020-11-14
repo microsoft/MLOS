@@ -4,7 +4,7 @@
 #
 import math
 import random
-import unittest
+import pytest
 
 import mlos.Spaces.Dimensions.DimensionCalculator
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
@@ -19,9 +19,9 @@ def fibonacci(max, one_ago=0, next=1):
         one_ago, next = next, one_ago + next
 
 
-class TestContinuousDimension(unittest.TestCase):
+class TestContinuousDimension:
 
-    def setUp(self):
+    def setup_method(self, method):
         self.empty = ContinuousDimension(name='x', min=0, max=0, include_min=False, include_max=False)
         self.unbounded_continuous = ContinuousDimension(name='x', min=0, max=math.inf)
         self.unbounded_discrete = DiscreteDimension(name='x', min=0, max=math.inf)
@@ -41,58 +41,58 @@ class TestContinuousDimension(unittest.TestCase):
         self.six_to_ten = ContinuousDimension(name='x', min=6, max=10)
 
     def test_string_representation(self):
-        self.assertTrue(str(self.empty) == "x: (0.00, 0.00)")
-        self.assertTrue(str(self.should_be_empty) == "x: (0.00, 0.00)")
-        self.assertTrue(str(self.should_be_empty_too) == "x: (0.00, 0.00)")
-        self.assertTrue(str(self.should_contain_zero) == "x: [0.00, 0.00]")
-        self.assertTrue(str(self.closed) == "x: [0.00, 1.00]")
-        self.assertTrue(str(self.left_open) == "x: (0.00, 1.00]")
-        self.assertTrue(str(self.right_open) == "x: [0.00, 1.00)")
-        self.assertTrue(str(self.open) == "x: (0.00, 1.00)")
-        self.assertTrue(str(self.inner) == "x: [0.20, 0.80]")
-        self.assertTrue(str(self.outer) == "x: [-0.20, 1.20]")
-        self.assertTrue(str(self.left_overlapping) == "x: [-0.20, 0.80]")
-        self.assertTrue(str(self.right_overlapping) == "x: [0.20, 1.20]")
-        self.assertTrue(str(self.inner_wrongly_named) == "y: [0.20, 0.80]")
+        assert str(self.empty) == "x: (0.00, 0.00)"
+        assert str(self.should_be_empty) == "x: (0.00, 0.00)"
+        assert str(self.should_be_empty_too) == "x: (0.00, 0.00)"
+        assert str(self.should_contain_zero) == "x: [0.00, 0.00]"
+        assert str(self.closed) == "x: [0.00, 1.00]"
+        assert str(self.left_open) == "x: (0.00, 1.00]"
+        assert str(self.right_open) == "x: [0.00, 1.00)"
+        assert str(self.open) == "x: (0.00, 1.00)"
+        assert str(self.inner) == "x: [0.20, 0.80]"
+        assert str(self.outer) == "x: [-0.20, 1.20]"
+        assert str(self.left_overlapping) == "x: [-0.20, 0.80]"
+        assert str(self.right_overlapping) == "x: [0.20, 1.20]"
+        assert str(self.inner_wrongly_named) == "y: [0.20, 0.80]"
 
     def test_point_containment(self):
 
-        self.assertTrue(
+        assert (
             0 not in self.empty
             and 0 not in self.should_be_empty
             and 0 not in self.should_be_empty_too
             and 0 in self.should_contain_zero
         )
 
-        self.assertTrue(
+        assert (
             -1 not in self.closed
             and -1 not in self.left_open
             and -1 not in self.right_open
             and -1 not in self.open
         )
 
-        self.assertTrue(
+        assert (
             0 in self.closed
             and 0 not in self.left_open
             and 0 in self.right_open
             and 0 not in self.open
         )
 
-        self.assertTrue(
+        assert (
             0.5 in self.closed
             and 0.5 in self.left_open
             and 0.5 in self.right_open
             and 0.5 in self.open
         )
 
-        self.assertTrue(
+        assert (
             1 in self.closed
             and 1 in self.left_open
             and 1 not in self.right_open
             and 1 not in self.open
         )
 
-        self.assertTrue(
+        assert (
             2 not in self.closed
             and 2 not in self.left_open
             and 2 not in self.right_open
@@ -100,64 +100,64 @@ class TestContinuousDimension(unittest.TestCase):
         )
 
     def test_continuous_dimension_containment(self):
-        self.assertTrue(self.open in self.closed)
-        self.assertTrue(self.left_open in self.closed)
-        self.assertTrue(self.right_open in self.closed)
+        assert self.open in self.closed
+        assert self.left_open in self.closed
+        assert self.right_open in self.closed
 
-        self.assertTrue(self.left_open not in self.open)
-        self.assertTrue(self.right_open not in self.open)
-        self.assertTrue(self.closed not in self.open)
+        assert self.left_open not in self.open
+        assert self.right_open not in self.open
+        assert self.closed not in self.open
 
-        self.assertTrue(self.left_open not in self.right_open)
-        self.assertTrue(self.right_open not in self.left_open)
+        assert self.left_open not in self.right_open
+        assert self.right_open not in self.left_open
 
-        self.assertTrue(self.inner in self.closed)
-        self.assertTrue(self.inner in self.open)
-        self.assertTrue(self.inner in self.left_open)
-        self.assertTrue(self.inner in self.right_open)
+        assert self.inner in self.closed
+        assert self.inner in self.open
+        assert self.inner in self.left_open
+        assert self.inner in self.right_open
 
-        self.assertTrue(self.closed in self.outer)
-        self.assertTrue(self.open in self.outer)
-        self.assertTrue(self.left_open in self.outer)
-        self.assertTrue(self.right_open in self.outer)
+        assert self.closed in self.outer
+        assert self.open in self.outer
+        assert self.left_open in self.outer
+        assert self.right_open in self.outer
 
-        self.assertTrue(self.inner_wrongly_named not in self.closed)
-        self.assertTrue(self.inner_wrongly_named not in self.open)
-        self.assertTrue(self.inner_wrongly_named not in self.left_open)
-        self.assertTrue(self.inner_wrongly_named not in self.right_open)
+        assert self.inner_wrongly_named not in self.closed
+        assert self.inner_wrongly_named not in self.open
+        assert self.inner_wrongly_named not in self.left_open
+        assert self.inner_wrongly_named not in self.right_open
 
     def test_continuous_dimension_set_operations(self):
-        self.assertTrue(self.inner in self.inner.union(self.closed))
-        self.assertTrue(self.inner in self.inner.intersection(self.closed))
+        assert self.inner in self.inner.union(self.closed)
+        assert self.inner in self.inner.intersection(self.closed)
 
-        self.assertTrue(self.open in self.open.intersection(self.closed))
-        self.assertTrue(self.closed not in self.open.intersection(self.closed))
-        self.assertTrue(self.closed in self.open.union(self.closed))
-        self.assertTrue(self.closed in self.left_open.union(self.right_open))
-        self.assertTrue(self.left_open.intersection(self.right_open) in self.open)
+        assert self.open in self.open.intersection(self.closed)
+        assert self.closed not in self.open.intersection(self.closed)
+        assert self.closed in self.open.union(self.closed)
+        assert self.closed in self.left_open.union(self.right_open)
+        assert self.left_open.intersection(self.right_open) in self.open
 
     def test_random(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.empty.random()
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             self.unbounded_continuous.random()
-        with self.assertRaises(OverflowError):
+        with pytest.raises(OverflowError):
             self.unbounded_discrete.random()
 
-        self.assertTrue(self.outer.random() in self.outer)
+        assert self.outer.random() in self.outer
         for _ in range(1000):
-            self.assertTrue(self.one_to_five.random() not in self.six_to_ten)
+            assert self.one_to_five.random() not in self.six_to_ten
 
 
-class TestCompositeDimension(unittest.TestCase):
+class TestCompositeDimension:
 
     def test_union_of_continuous_dimensions(self):
         A = ContinuousDimension(name='x', min=0, max=1)
         B = ContinuousDimension(name='x', min=2, max=3)
         C = A.union(B)
-        self.assertTrue(0.5 in C)
-        self.assertTrue(2.5 in C)
-        self.assertTrue(1.5 not in C)
+        assert 0.5 in C
+        assert 2.5 in C
+        assert 1.5 not in C
 
     def test_arbitrary_composition_of_continuous_dimensions(self):
         A = ContinuousDimension(name='x', min=0, max=1)
@@ -167,14 +167,14 @@ class TestCompositeDimension(unittest.TestCase):
         E = B - C
         F = A.union(E)
 
-        self.assertTrue(0.5 in D)
-        self.assertTrue(1.5 not in D)
-        self.assertTrue(2.5 not in D)
-        self.assertTrue(3.4 not in D)
-        self.assertTrue(35 not in D)
-        self.assertTrue(2 in E)
-        self.assertTrue(2.5 not in E)
-        self.assertTrue(0 in F and 1 in F and 1.5 not in F and 2 in F and 2.5 not in F)
+        assert 0.5 in D
+        assert 1.5 not in D
+        assert 2.5 not in D
+        assert 3.4 not in D
+        assert 35 not in D
+        assert 2 in E
+        assert 2.5 not in E
+        assert 0 in F and 1 in F and 1.5 not in F and 2 in F and 2.5 not in F
 
     def test_composition_of_arbitrary_dimensions(self):
         C1 = ContinuousDimension(name='x', min=0, max=1)
@@ -182,14 +182,16 @@ class TestCompositeDimension(unittest.TestCase):
         C3 = C1 - C2
         D = DiscreteDimension(name='x', min=0, max=1)
 
-        self.assertRaises(TypeError, C1.intersection, D)
-        self.assertRaises(TypeError, C3.intersection, D)
-        self.assertRaises(TypeError, D.intersection, C1)
+        with pytest.raises(TypeError):
+            C1.intersection(D)
+        with pytest.raises(TypeError):
+            C3.intersection(D)
+        with pytest.raises(TypeError):
+            D.intersection(C1)
 
+class TestDiscreteDimension:
 
-class TestDiscreteDimension(unittest.TestCase):
-
-    def setUp(self):
+    def setup_method(self, method):
         self.just_one = DiscreteDimension(name='x', min=1, max=1)
         self.one_two = DiscreteDimension(name='x', min=1, max=2)
         self.one_two_three = DiscreteDimension(name='x', min=1, max=3)
@@ -205,25 +207,25 @@ class TestDiscreteDimension(unittest.TestCase):
         ]
 
     def test_string_representation(self):
-        self.assertTrue(str(self.just_one) == "x: {1}")
-        self.assertTrue(str(self.one_two) == "x: {1, 2}")
-        self.assertTrue(str(self.one_two_three) == "x: {1, 2, 3}")
-        self.assertTrue(str(self.one_two_three_four) == "x: {1, 2, ... , 4}")
-        self.assertTrue(str(self.one_to_hundred) == "x: {1, 2, ... , 100}")
+        assert str(self.just_one) == "x: {1}"
+        assert str(self.one_two) == "x: {1, 2}"
+        assert str(self.one_two_three) == "x: {1, 2, 3}"
+        assert str(self.one_two_three_four) == "x: {1, 2, ... , 4}"
+        assert str(self.one_to_hundred) == "x: {1, 2, ... , 100}"
 
     def test_point_containment(self):
-        self.assertTrue(1 in self.just_one)
+        assert 1 in self.just_one
 
     def test_discrete_dimension_containment(self):
-        self.assertTrue(self.just_one in self.one_two)
-        self.assertTrue(self.just_one in self.one_two_three)
+        assert self.just_one in self.one_two
+        assert self.just_one in self.one_two_three
 
     def test_discrete_dimension_set_operations(self):
 
-        self.assertTrue(self.just_one not in self.one_two_three - self.one_two)
-        self.assertTrue(1 in self.just_one.intersection(self.one_two).intersection(self.one_two_three))
-        self.assertTrue(1 not in self.just_one - self.just_one)
-        self.assertTrue(42 not in self.just_one.union(self.just_one))
+        assert self.just_one not in self.one_two_three - self.one_two
+        assert 1 in self.just_one.intersection(self.one_two).intersection(self.one_two_three)
+        assert 1 not in self.just_one - self.just_one
+        assert 42 not in self.just_one.union(self.just_one)
 
 
     def test_arbitrary_composition_of_discrete_dimensions(self):
@@ -253,15 +255,15 @@ class TestDiscreteDimension(unittest.TestCase):
                         should_belong = should_belong and (value in intersects[j])
 
                     if not should_belong == (value in resulting_set):
-                        self.assertTrue(False)
+                        assert False
 
     def test_random(self):
-        self.assertTrue(self.just_one.random() in self.just_one)
+        assert self.just_one.random() in self.just_one
         for _ in range(10):
-            self.assertTrue(self.one_two.random() in self.one_two_three)
+            assert self.one_two.random() in self.one_two_three
 
 
-class TestDimensions(unittest.TestCase):
+class TestDimensions:
     def test_containment(self):
         long_segment = ContinuousDimension(name='x', min=0, max=100*1000)
         short_segment = ContinuousDimension(name='x', min=0, max=100)
@@ -293,9 +295,9 @@ class TestDimensions(unittest.TestCase):
 
         for dimension in [short_segment, long_linear_sequence, short_linear_sequence, long_fibonacci_sequence,
                           short_fibonacci_sequence, a_few_options]:
-            self.assertTrue(dimension in long_segment)
+            assert dimension in long_segment
 
-        self.assertTrue(short_fibonacci_sequence in long_fibonacci_sequence)
-        self.assertTrue(a_few_options in short_fibonacci_sequence)
-        self.assertTrue(True in boolean_choice)
-        self.assertTrue(12 in long_segment)
+        assert short_fibonacci_sequence in long_fibonacci_sequence
+        assert a_few_options in short_fibonacci_sequence
+        assert True in boolean_choice
+        assert 12 in long_segment

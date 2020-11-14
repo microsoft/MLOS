@@ -21,6 +21,8 @@ class PolynomialObjective:
         dimensions=[
             DiscreteDimension(name='seed', min=1, max=2 ** 32),
             DiscreteDimension(name='input_domain_dimension', min=1, max=5),
+            ContinuousDimension(name='input_domain_min', min=-2 ** 20, max=2 ** 20),
+            ContinuousDimension(name='input_domain_width', min=1, max=2 ** 21),
             DiscreteDimension(name='max_degree', min=1, max=5),
             CategoricalDimension(name='include_mixed_coefficients', values=[False, True]),
             ContinuousDimension(name='percent_coefficients_zeroed', min=0.0, max=1.0),
@@ -35,6 +37,8 @@ class PolynomialObjective:
     _DEFAULT = Point(
         seed=17,
         input_domain_dimension=2,
+        input_domain_min=-2 ** 10,
+        input_domain_width=2 ** 11,
         max_degree=2,
         include_mixed_coefficients=True,
         percent_coefficients_zeroed=0.0,

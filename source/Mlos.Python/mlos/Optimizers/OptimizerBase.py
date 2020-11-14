@@ -25,11 +25,13 @@ class OptimizerBase(ABC):
         self.optimization_problem = optimization_problem
         self.optimizer_config = None # TODO: pass from subclasses.
 
-        # To avoid repeated calls to .predict() if no change is expected. Must be cleared on every call to .register()
-        #
-        self.cached_predictions_for_observations = None
+    @property
+    def trained(self):
+        raise NotImplementedError
 
-
+    @abstractmethod
+    def compute_surrogate_model_goodness_of_fit(self):
+        raise NotImplementedError
 
     @abstractmethod
     def get_optimizer_convergence_state(self):
@@ -139,7 +141,7 @@ class OptimizerBase(ABC):
 
             # Drop nulls and zeroes.
             #
-            predictions_df = predictions_df[predictions_df[dof_column_name].notna() & predictions_df[dof_column_name] != 0]
+            predictions_df = predictions_df[predictions_df[dof_column_name].notna() & (predictions_df[dof_column_name] != 0)]
 
             if len(predictions_df.index) == 0:
                 raise ValueError("Insufficient data to compute confidence-bound based optimum.")
@@ -159,7 +161,7 @@ class OptimizerBase(ABC):
                 if objective.minimize:
                     index_of_best = lower_confidence_bounds.idxmin()
                 else:
-                    index_of_best = lower_confidence_bounds.idx_max()
+                    index_of_best = lower_confidence_bounds.idxmax()
                 optimum_value = Point(lower_confidence_bound=lower_confidence_bounds.loc[index_of_best])
             else:
                 raise RuntimeError(f"Unknown optimum definition.")
