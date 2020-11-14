@@ -283,6 +283,14 @@ jobs:
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make dotnet-test
+    - name: Run ${{ matrix.configuration }} dotnet pack test
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make -C source/Mlos.NetCore.Components.Packages/
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          dotnet build external/ExternalIntegrationExample/ExternalIntegrationExample.SettingsRegistry/
     - name: Run ${{ matrix.configuration }} cmake build
       timeout-minutes: 5
       shell: bash
