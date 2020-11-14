@@ -39,4 +39,4 @@ class GreedyUtilityFunction(UtilityFunction):
         predictions_df = predictions.get_dataframe()
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
 
-        return predictions_df[[predicted_value_col]].rename(columns={predicted_value_col: 'utility'})
+        return self._sign * predictions_df[[predicted_value_col]].rename(columns={predicted_value_col: 'utility'})
