@@ -19,8 +19,12 @@ MKDIR	:= mkdir -p
 
 # We currently depend on clang due to use of __declspec(selectany) and other
 # attributes in the codegen output.
-CC	:= clang-10
-CXX	:= clang++-10
+ifeq ($(CC),)
+    CC  := clang-10
+endif
+ifeq ($(CXX),)
+    CXX := clang++-10
+endif
 export CC
 export CXX
 
