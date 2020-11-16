@@ -213,7 +213,7 @@ jobs:
         #load: true
 
   linux-build-test:
-    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} build/test C++/C# (${{ matrix.cxx }})
+    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} ${{ matrix.cxx }} build/test C++/C#
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 30
@@ -285,7 +285,7 @@ jobs:
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make dotnet-test
-    - name: Run ${{ matrix.configuration }} cmake build
+    - name: Run ${{ matrix.configuration }} cmake build (CXX=${{ matrix.cxx }})
       timeout-minutes: 5
       shell: bash
       run: |
