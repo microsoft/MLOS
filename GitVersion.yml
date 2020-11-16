@@ -14,7 +14,8 @@ increment: Patch
 branches:
   master:
     # Remove the "master" branch name from consideration.
-    regex: ^((origin|github)/)?main$
+    # Also allow matching the "main" branch from "origin" remote on CI pipelines with shallow fetches.
+    regex: ^((origin|upstream|github)/)?main$
     # Mark any packages produced directly from main as "prerelease" for now.
     tag: beta
     # We don't currently have develop or release/{vers} branches to look for.
