@@ -130,7 +130,8 @@ class OptimizationProblem:
         if (self.context_space is not None) and (context_values is None):
 
             raise ValueError("Context space required by optimization problem but not provided.")
-        if product is False and len(config_values) != len(context_values):
+        if (product is False) and (len(config_values.index) != len(context_values.index)):
+
             raise ValueError(f"Incompatible shape of configuration and context: {config_values.shape} and {context_values.shape}.")
         # prefix column names to adhere to dimensions in hierarchical hypergrid
         feature_values = config_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
