@@ -50,4 +50,10 @@ class TestParetoFrontier:
             objectives_df=random_objectives_df
         )
 
+        # Now let's make sure that no point in pareto is by any non-pareto point.
+        #
+        non_pareto_index = random_objectives_df.index.difference(pareto_df.index)
+        for i, row in pareto_df.iterrows():
+            (random_objectives_df.loc[non_pareto_index] < row).any(axis=1).sum() == len(non_pareto_index)
+
 
