@@ -41,7 +41,7 @@
   </PropertyGroup>
 
   <!-- Optional: Configure stylecop analyzers. -->
-	<ItemGroup Label="EnableStyleCopForExample">
+  <ItemGroup Label="EnableStyleCopForExample">
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
@@ -50,7 +50,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-		<!-- Provide your own stylecop.json config (for this example we reuse the core MLOS one) -->
+    <!-- Provide your own stylecop.json config (for this example we reuse the core MLOS one) -->
     <AdditionalFiles Include="$(MSBuildThisFileDirectory)/stylecop.json" Visible="false">
       <Link>stylecop.json</Link>
     </AdditionalFiles>

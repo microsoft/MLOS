@@ -136,7 +136,7 @@
     </XmlPeek>
     <Error Text="Failed to lookup package version." Condition="'$(MlosCodeGenPackageVersion)' == ''" />
     <!-- Combine it with the library package versions. -->
-		<ItemGroup>
+    <ItemGroup>
       <MlosPackageVersions Include="%(MlosPackageRefs.PackageVersion)" />
       <MlosPackageVersions Include="$(MlosCodeGenPackageVersion)" />
     </ItemGroup>
