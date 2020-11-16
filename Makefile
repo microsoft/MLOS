@@ -41,7 +41,7 @@ pack:
 clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean
 
 .PHONY: distclean
-distclean: clean dotnet-distclean dotnet-pkgs-clean cmake-distclean nuget-clean
+distclean: clean dotnet-distclean dotnet-pkgs-clean cmake-distclean
 
 .PHONY: rebuild
 rebuild: clean all
