@@ -68,9 +68,10 @@ class TestParetoFrontier:
             assert (pareto_df.loc[other_rows] > row).all(axis=1).sum() == 0
 
 
+    @pytest.mark.parametrize("minimize", [True, False])
     @pytest.mark.parametrize("num_output_dimensions", [2, 10])
     @pytest.mark.parametrize("num_points", [100, 10000])
-    def test_hyperspheres(self, num_output_dimensions, num_points):
+    def test_hyperspheres(self, minimize, num_output_dimensions, num_points):
         """Use polar coordinates to generate cartesian coordinates of points on the surface and interior of a hypershpere.
 
         The idea is that we can know which points are optimal upfront.
@@ -85,7 +86,10 @@ class TestParetoFrontier:
         ]
 
         for i in range(1, num_output_dimensions):
-            parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=0, max=math.pi / 2))
+            if minimize:
+                parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=math.pi, max=math.pi * 1.5))
+            else:
+                parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=0, max=math.pi / 2))
 
         parameter_space = SimpleHypergrid(
             name='polar_coordinates',
@@ -103,7 +107,7 @@ class TestParetoFrontier:
         optimization_problem = OptimizationProblem(
             parameter_space=parameter_space,
             objective_space=objective_space,
-            objectives=[Objective(name=f'y{i}', minimize=False) for i in range(num_output_dimensions)]
+            objectives=[Objective(name=f'y{i}', minimize=minimize) for i in range(num_output_dimensions)]
         )
 
         random_params_df = optimization_problem.feature_space.random_dataframe(num_points)
@@ -132,5 +136,3 @@ class TestParetoFrontier:
         # We know that all of the pareto efficient points must be on the frontier.
         #
         assert pareto_df.index.intersection(optimal_points_index).difference(optimal_points_index).empty
-
-
