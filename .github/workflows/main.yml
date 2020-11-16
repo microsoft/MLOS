@@ -36,12 +36,18 @@ jobs:
       with:
         fetch-depth: 0
     # Runs multiple commands using the runners shell
-    - name: Run ${{ matrix.configuration }} msbuild
+    - name: Msbuild/test ${{ matrix.configuration }}
       timeout-minutes: 15
       shell: cmd
       run: |
         set Configuration=${{ matrix.configuration }}
         scripts\build.windows.cmd
+    - name: Pack/test ${{ matrix.configuration }}
+      timeout-minutes: 15
+      shell: cmd
+      run: |
+        set Configuration=${{ matrix.configuration }}
+        scripts\package.windows.cmd
 
   # Docker build process overview:
   # - We currently use the docker.pkg.github.com package registry as a staging
