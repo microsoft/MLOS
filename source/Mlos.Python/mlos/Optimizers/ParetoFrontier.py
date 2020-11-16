@@ -84,6 +84,12 @@ class ParetoFrontier:
             pareto_df = pareto_df[non_dominated]
             current_row_index += 1
 
+        # Let's unflip the signs
+        #
+        for objective in optimization_problem.objectives:
+            if objective.minimize:
+                pareto_df[objective.name] = -pareto_df[objective.name]
+
         return pareto_df
 
 
