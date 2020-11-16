@@ -227,9 +227,6 @@ jobs:
             cc: clang-10
           - cxx: g++
             cc: gcc
-        exclude:
-          - UbuntuVersion: 16.04
-            cxx: g++
     steps:
     - name: Checkout
       uses: actions/checkout@v2
