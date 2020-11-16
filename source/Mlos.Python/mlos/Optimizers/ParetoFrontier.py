@@ -69,9 +69,8 @@ class ParetoFrontier:
 
         # By presorting we guarantee, that all dominated points are below the currently considered point.
         #
-        objective_names = [objective.name for objective in optimization_problem.objectives]
         pareto_df.sort_values(
-            by=objective_names,
+            by=optimization_problem.objectives[0].name,
             ascending=False, # We want the maxima up top.
             inplace=True,
             na_position='last', # TODO: figure out what to do with NaNs.
