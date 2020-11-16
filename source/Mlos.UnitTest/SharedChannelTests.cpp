@@ -26,7 +26,7 @@ public:
     }
 
 private:
-    std::array<byte, T> array {{ 0 }};
+    std::array<byte, T> array { { 0 } };
 };
 
 namespace SharedChannelTests
