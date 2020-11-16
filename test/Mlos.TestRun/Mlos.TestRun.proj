@@ -19,6 +19,6 @@
   <Target Name="Test" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(RunUnitTest)' != 'false'">
     <Exec Command="dotnet &quot;$(MlosAgentServerFilePath)&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)Mlos.UnitTest&quot;" />
     <Exec Command="dotnet &quot;$(MlosAgentServerFilePath)&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)SmartCache&quot; --experiment &quot;$(NetCoreBinplaceDir)/SmartCache.ExperimentSession/SmartCache.ExperimentSession.dll&quot;" />
-    <Exec Command="dotnet test &quot;$(ObjectRoot)/source/Mlos.NetCore.UnitTest/$(ObjectDirectory)\$(DefaultNetCorePlatform)/Mlos.NetCore.UnitTest.dll&quot;" />
+    <Exec Command="dotnet test &quot;$(ObjectRoot)/source/Mlos.NetCore.UnitTest/$(ObjectDirectory)/$(DefaultNetCorePlatform)/Mlos.NetCore.UnitTest.dll&quot;" />
   </Target>
 </Project>
