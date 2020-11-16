@@ -40,3 +40,14 @@ class TestParetoFrontier:
                 Objective(name='y2', minimize=False)
             ]
         )
+
+        num_rows = 100
+        random_params_df = parameter_space.random_dataframe(num_rows)
+        random_objectives_df = objective_space.random_dataframe(num_rows)
+
+        pareto_df = ParetoFrontier.compute_pareto(
+            optimization_problem=optimization_problem,
+            objectives_df=random_objectives_df
+        )
+
+

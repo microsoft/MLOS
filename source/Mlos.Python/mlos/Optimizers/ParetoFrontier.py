@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import numpy as np
 import pandas as pd
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
@@ -31,8 +32,11 @@ class ParetoFrontier:
         objectives_df: pd.DataFrame
     ):
         assert len(features_df.index) == len(objectives_df.index)
-        assert all(column in optimization_problem.feature_space.dimension_names for column in features_df.columns)
-        assert all(column in optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
+        if features_df is not None:
+            assert all(column in optimization_problem.feature_space.dimension_names for column in features_df.columns)
+
+        if objectives_df is not None:
+            assert all(column in optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
 
         # TODO: maybe prealloate larger arrays...
         self.optimization_problem = optimization_problem
@@ -53,7 +57,33 @@ class ParetoFrontier:
 
         assert all(column in optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
 
+        # Let's copy it, since we are going to mess it up.
+        #
+        pareto_df = objectives_df.copy(deep=True)
+
+        # First, let's turn it into a maximization problem, by flipping the sign of all objectives that are to be minimized.
+        #
+        for objective in optimization_problem.objectives:
+            if objective.minimize:
+                pareto_df[objective.name] = -pareto_df[objective.name]
+
         # By presorting we guarantee, that all dominated points are below the currently considered point.
         #
-        
+        objective_names = [objective.name for objective in optimization_problem.objectives]
+        pareto_df.sort_values(
+            by=objective_names,
+            ascending=False, # We want the maxima up top.
+            inplace=True,
+            na_position='last', # TODO: figure out what to do with NaNs.
+            ignore_index=False
+        )
+
+        current_row_index = 0
+        while current_row_index < len(pareto_df.index):
+            non_dominated = (pareto_df >= pareto_df.iloc[current_row_index]).any(axis=1)
+            pareto_df = pareto_df[non_dominated]
+            current_row_index += 1
+
+        return pareto_df
+
 
