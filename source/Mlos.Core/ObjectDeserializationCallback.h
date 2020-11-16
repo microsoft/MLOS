@@ -53,12 +53,12 @@ public:
     {
         DispatchTable<N + N1> result = {};
 
-        for (size_t i = 0; i < N; ++i)
+        for (size_t i = 0; i != N; ++i)
         {
             result[i] = (*this)[i];
         }
 
-        for (size_t i = 0; i < N1; ++i)
+        for (size_t i = 0; i != N1; ++i)
         {
             result[i + N] = arr[i];
         }
