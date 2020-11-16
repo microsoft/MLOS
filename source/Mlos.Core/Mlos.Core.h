@@ -75,12 +75,11 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define MLOS_UNUSED_ARG(x) (void)x
 
 #ifdef _MSC_VER
-#define MLOS_SELECTANY_LINKER_ATTR __declspec(selectany)
+#define MLOS_SELECTANY_ATTR __declspec(selectany)
 #elif __clang__
-// Note: this requires compiling with -fdeclspec.
-#define MLOS_SELECTANY_LINKER_ATTR __declspec(selectany)
+#define MLOS_SELECTANY_ATTR __attribute__((weak))
 #elif __GNUC__
-#define MLOS_SELECTANY_LINKER_ATTR __attribute__((weak))
+#define MLOS_SELECTANY_ATTR __attribute__((weak))
 #else
 #warning Unhandled compiler.
 #endif

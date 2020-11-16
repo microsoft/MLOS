@@ -18,15 +18,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 add_compile_options(-Wall -Wextra -Wpedantic -Werror)
 add_link_options(-Wall -Wextra -Wpedantic -Werror)
 
-# The codegen output currently relies on asking the compiler to select one of
-# our equivalent but duplicative definitions that results from including the
-# same header in multiple places.
-# For clang, make use of the original __declspec(selectany) attributes that msvc uses.
-# For gcc, we use __attribute__((weak)) to achieve the same.
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdeclspec")
-endif()
-
 # When compiling for Debug build, make sure that DEBUG is defined for the compiler.
 # This is to mimic MSVC behavior so that our #ifdefs can remain the same rather
 # than having to switch to using NDEBUG.
