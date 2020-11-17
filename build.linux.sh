@@ -60,8 +60,15 @@ if [ "$CAKE_VERSION" != "$CAKE_INSTALLED_VERSION" ]; then
     fi
 fi
 
-#export CC=/usr/bin/clang-$CLANG_VERSION
-#export CXX=/usr/bin/clang++-$CLANG_VERSION
+if [ "$CC" == '' ] || [ "$CXX" == '' ]; then
+    echo "Defaulting to CXX=clang++-$CLANG_VERSION"
+    export CC=/usr/bin/clang-$CLANG_VERSION
+    export CXX=/usr/bin/clang++-$CLANG_VERSION
+fi
+
+if [ -z "$(which "$CXX" || true)" ]; then
+    echo "WARNING: CXX=$CXX not found." >&2
+fi
 
 $CXX --version
 
