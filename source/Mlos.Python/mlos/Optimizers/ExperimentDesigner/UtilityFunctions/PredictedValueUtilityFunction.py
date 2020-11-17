@@ -12,7 +12,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from .UtilityFunction import UtilityFunction
 
 
-class GreedyUtilityFunction(UtilityFunction):
+class PredictedValueUtilityFunction(UtilityFunction):
     def __init__(self, surrogate_model, minimize, logger=None):
         if logger is None:
             logger = create_logger(self.__class__.__name__)
