@@ -17,7 +17,7 @@ FetchContent_Declare(
     # However, in the future we expect to be able to reference an upstream
     # release version, branch name, or commit hash.
     #GIT_TAG         v0.1.2
-    GIT_TAG         codegen-nuget-for-external-project-integration
+    GIT_TAG         external-cmake-project-integration
     # TODO: Can we do this and still get reasonable nuget versions out?
     GIT_SHALLOW     ON
 )
