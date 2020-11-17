@@ -442,7 +442,7 @@ class TestBayesianOptimizer:
             optimizer.register(input.to_dataframe(), output.to_dataframe())
 
         num_predictions = 100
-        prediction = optimizer.predict(parameter_values_pandas_frame=optimization_problem.input_space.random_dataframe(num_predictions))
+        prediction = optimizer.predict(parameter_values_pandas_frame=optimization_problem.parameter_space.random_dataframe(num_predictions))
         prediction_df = prediction.get_dataframe()
         assert len(prediction_df.index) == num_predictions
 
