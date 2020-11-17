@@ -18,7 +18,7 @@ bayesian_optimizer_config_store = ComponentConfigStore(
                 HomogeneousRandomForestRegressionModel.__name__,
             ]),
             CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__]),
-            DiscreteDimension(name="min_samples_required_for_guided_design_of_experiments", min=2, max=10000)
+            DiscreteDimension(name="min_samples_required_for_guided_design_of_experiments", min=2, max=100)
         ]
     ).join(
         subgrid=homogeneous_random_forest_config_store.parameter_space,
@@ -45,4 +45,17 @@ optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators 
 bayesian_optimizer_config_store.add_config_by_name(
     config_name='default_refit_tree_every_time',
     config_point=optimizer_config
+)
+
+# Add a default config with glowworm swarm optimizer
+#
+bayesian_optimizer_config_store.add_config_by_name(
+    config_name="default_with_glow_worm",
+    config_point=Point(
+        surrogate_model_implementation=HomogeneousRandomForestRegressionModel.__name__,
+        experiment_designer_implementation=ExperimentDesigner.__name__,
+        min_samples_required_for_guided_design_of_experiments=10,
+        homogeneous_random_forest_regression_model_config=homogeneous_random_forest_config_store.default,
+        experiment_designer_config=experiment_designer_config_store.get_config_by_name("default_glow_worm_config")
+    )
 )

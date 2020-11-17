@@ -42,10 +42,11 @@ class OptimizerMicroserviceServer:
         self.logger.info("OptimizerMicroserviceServer started")
 
     def stop(self, grace=None):
-        self._server.stop(grace=grace)
-        self.logger.info("OptimizerMicroserviceServer stopped")
-
+        stop_event = self._server.stop(grace=grace)
+        self.logger.info("OptimizerMicroserviceServer stop requested")
+        return stop_event
 
     def wait_for_termination(self, timeout=None):
-        if self.started:
-            self._server.wait_for_termination(timeout=timeout)
+        if self._server:
+            return self._server.wait_for_termination(timeout=timeout)
+        return True

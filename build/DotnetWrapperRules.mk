@@ -19,7 +19,6 @@ endif
 DotnetBaseOutDir := $(MLOS_ROOT)/out/dotnet
 DotnetBasePkgDir := $(MLOS_ROOT)/target/pkg/$(CONFIGURATION)
 DotnetOutputPath := $(DotnetBaseOutDir)/$(RelativeSourceDir)
-NugetPackagesDir := $(MLOS_ROOT)/tools/.nuget/packages
 
 # Find all the *.csproj, dirs.proj files in this directory and make some
 # corresponding fake targets for the "all" target to depend on.
@@ -123,11 +122,6 @@ dotnet-pkgs-clean:
 	$(RM) $(DotnetBasePkgDir)
 	@ $(MKDIR) $(DotnetBasePkgDir)
 
-.PHONY: nuget-clean
-nuget-clean:
-	@ $(RM) $(NugetPackagesDir)
-	@ $(MKDIR) $(NugetPackagesDir)
-
 handledtargets += $(Csprojs) $(DirsProj) \
     dotnet-build $(CsprojBuildTargets) $(DirsProjBuildTarget) \
     dotnet-build-quick $(CsprojBuildQuickTargets) \
@@ -135,4 +129,4 @@ handledtargets += $(Csprojs) $(DirsProj) \
     dotnet-test $(CsprojTestTargets) $(DirsProjTestTarget) \
     dotnet-clean $(CsprojCleanTargets) $(DirsProjCleanTarget) \
     dotnet-clean-quick $(CsprojCleanQuickTargets) \
-    dotnet-install dotnet-pkgs-clean dotnet-distclean nuget-clean
+    dotnet-install dotnet-pkgs-clean dotnet-distclean

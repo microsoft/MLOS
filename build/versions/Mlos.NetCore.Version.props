@@ -15,15 +15,11 @@
       <Link>Properties\PipelineAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
-  <PropertyGroup>
-    <!-- https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning -->
-    <CdpxBuildPipeline Condition="'$(CDP_COMMIT_ID)' != '' Or '$(CDP_BUILD_NUMBER)' != ''">true</CdpxBuildPipeline>
-  </PropertyGroup>
 
   <!-- If we're not using the pipeline version, then use the git version by default. -->
   <PropertyGroup>
     <PackageUsesGitVersionInfo Condition="'$(UsePipelineVersion)' == 'true'">false</PackageUsesGitVersionInfo>
-    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == '' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">true</PackageUsesGitVersionInfo>
+    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == '' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true' And '$(HasAdoPipeline)' != 'true'">true</PackageUsesGitVersionInfo>
     <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' != 'true'">false</PackageUsesGitVersionInfo>
   </PropertyGroup>
   <!--
@@ -35,6 +31,7 @@
     <DisableGitVersionTask>true</DisableGitVersionTask>
     <DisableGitVersionTask Condition="'$(PackageUsesGitVersionInfo)' == 'true'">false</DisableGitVersionTask>
     <GitVersion_NoFetchEnabled>true</GitVersion_NoFetchEnabled>
+    <WriteVersionInfoToBuildLog>false</WriteVersionInfoToBuildLog>
     <!--
     <GetVersion>$(PackageUsesGitVersionInfo)</GetVersion>
     <UpdateAssemblyInfo>$(PackageUsesGitVersionInfo)</UpdateAssemblyInfo>
@@ -44,7 +41,7 @@
     -->
   </PropertyGroup>
   <!-- Add a build tool for discovering version info from the repository. -->
-  <ItemGroup Condition="'$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">
+  <ItemGroup Condition="'$(PackageUsesGitVersionInfo)' == 'true' And '$(DisableGitVersionTask)' != 'true'">
     <PackageReference Include="GitVersionTask" Version="5.5.0">
       <!-- Don't include its assets in any build output or dependency references. -->
       <PrivateAssets>All</PrivateAssets>

@@ -11,10 +11,10 @@ from mlos.global_values import deserialize_from_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
 from mlos.Tracer import trace
-
 
 class BayesianOptimizerProxy(OptimizerBase):
     """ Client to remote BayesianOptimizer.
@@ -63,10 +63,20 @@ class BayesianOptimizerProxy(OptimizerBase):
     def optimizer_handle(self):
         return OptimizerService_pb2.OptimizerHandle(Id=self.id)
 
+    @property
+    def trained(self):
+        response = self._optimizer_stub.IsTrained(self.optimizer_handle)
+        return response.Value
+
     @trace()
     def get_optimizer_convergence_state(self):
         optimizer_convergence_state_response = self._optimizer_stub.GetOptimizerConvergenceState(self.optimizer_handle)
         return deserialize_from_bytes_string(optimizer_convergence_state_response.SerializedOptimizerConvergenceState)
+
+    @trace()
+    def compute_surrogate_model_goodness_of_fit(self):
+        response = self._optimizer_stub.ComputeGoodnessOfFitMetrics(self.optimizer_handle)
+        return GoodnessOfFitMetrics.from_json(response.Value)
 
     @trace()
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument

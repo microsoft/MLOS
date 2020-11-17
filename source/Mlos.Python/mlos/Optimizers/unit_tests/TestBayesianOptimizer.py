@@ -4,9 +4,10 @@
 #
 import math
 import os
+import pickle
 import random
-import unittest
 import warnings
+import pytest
 
 import grpc
 import numpy as np
@@ -24,20 +25,19 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmO
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
-from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension
+from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
 
 
-class TestBayesianOptimizer(unittest.TestCase):
+class TestBayesianOptimizer:
     """ Tests if the random search optimizer does anything useful at all.
 
     """
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         """ Sets up all the singletons needed to test the BayesianOptimizer.
 
         """
@@ -56,7 +56,7 @@ class TestBayesianOptimizer(unittest.TestCase):
 
 
     @classmethod
-    def tearDownClass(cls) -> None:
+    def teardown_class(cls) -> None:
         cls.server.stop(grace=None)
 
         cls.temp_dir = os.path.join(os.getcwd(), "temp")
@@ -117,7 +117,7 @@ class TestBayesianOptimizer(unittest.TestCase):
         for bayesian_optimizer in optimizers:
             # A call to .optimum() should throw before we feed any data to the optimizer.
             #
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
             self.validate_optima(optimizer=bayesian_optimizer)
 
@@ -166,7 +166,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             optimizer_config=bayesian_optimizer_config_store.default
         )
 
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             bayesian_optimizer.optimum()
 
         bayesian_optimizer.register(feature_values_pandas_frame=pd.DataFrame({'x': [0.]}), target_values_pandas_frame=pd.DataFrame({'y': [1.]}))
@@ -240,38 +240,23 @@ class TestBayesianOptimizer(unittest.TestCase):
                     assert optimum.y <= old_optimum
                     old_optimum = optimum.y
                     self.validate_optima(optimizer=bayesian_optimizer)
-                    convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
-                    random_forest_fit_state = convergence_state.surrogate_model_fit_state
-                    random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
+                    random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
                     print(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}, Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
 
-            convergence_state = bayesian_optimizer.get_optimizer_convergence_state()
-            random_forest_fit_state = convergence_state.surrogate_model_fit_state
-            random_forest_gof_metrics = random_forest_fit_state.current_train_gof_metrics
-            self.assertTrue(random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations)
+            random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
+            assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
             models_gof_metrics = [random_forest_gof_metrics]
-            for decision_tree_fit_state in random_forest_fit_state.decision_trees_fit_states:
-                models_gof_metrics.append(decision_tree_fit_state.current_train_gof_metrics)
 
             for model_gof_metrics in models_gof_metrics:
-                self.assertTrue(0 <= model_gof_metrics.relative_absolute_error <= 1)  # This could fail if the models are really wrong. Not expected in this unit test though.
-                self.assertTrue(0 <= model_gof_metrics.relative_squared_error <= 1)
+                assert 0 <= model_gof_metrics.relative_absolute_error <= 1  # This could fail if the models are really wrong. Not expected in this unit test though.
+                assert 0 <= model_gof_metrics.relative_squared_error <= 1
 
                 # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
                 n = model_gof_metrics.last_refit_iteration_number
-                self.assertTrue(model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error)
+                assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
 
                 # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
-                self.assertTrue(model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate)
-
-            goodness_of_fit_df = random_forest_fit_state.get_goodness_of_fit_dataframe(data_set_type=DataSetType.TRAIN)
-            print(goodness_of_fit_df.head())
-
-            goodness_of_fit_df = random_forest_fit_state.get_goodness_of_fit_dataframe(
-                data_set_type=DataSetType.TRAIN,
-                deep=True
-            )
-            print(goodness_of_fit_df.head())
+                assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
 
     @trace()
     def test_hierarchical_quadratic_cold_start(self):
@@ -403,6 +388,13 @@ class TestBayesianOptimizer(unittest.TestCase):
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
                 self.validate_optima(optimizer=bayesian_optimizer)
 
+            # Test if pickling works
+            #
+            pickled_optimizer = pickle.dumps(local_optimizer)
+            unpickled_optimizer = pickle.loads(pickled_optimizer)
+            for _ in range(10):
+                assert unpickled_optimizer.suggest() == local_optimizer.suggest()
+
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
         config = bayesian_optimizer_config_store.default
@@ -414,10 +406,92 @@ class TestBayesianOptimizer(unittest.TestCase):
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
+
+    def test_registering_multiple_objectives(self):
+
+        input_space = SimpleHypergrid(
+            name='input',
+            dimensions=[
+                ContinuousDimension(name="x_1", min=0, max=10),
+                ContinuousDimension(name="x_2", min=0, max=10)
+            ]
+        )
+
+        output_space = SimpleHypergrid(
+            name='output',
+            dimensions=[
+                ContinuousDimension(name="y_1", min=0, max=10),
+                ContinuousDimension(name="y_2", min=0, max=10)
+            ]
+        )
+
+        optimization_problem = OptimizationProblem(
+            parameter_space=input_space,
+            objective_space=output_space,
+            objectives=[Objective(name='y_1', minimize=True)]
+        )
+
+        optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+            optimization_problem=optimization_problem
+        )
+
+        for _ in range(100):
+            input = optimizer.suggest()
+            output = Point(y_1=input.x_1, y_2=input.x_2)
+
+            optimizer.register(input.to_dataframe(), output.to_dataframe())
+
+        num_predictions = 100
+        prediction = optimizer.predict(feature_values_pandas_frame=input_space.random_dataframe(num_predictions))
+        prediction_df = prediction.get_dataframe()
+        assert len(prediction_df.index) == num_predictions
+
+        # Let's test invalid observations.
+        #
+        input = input_space.random()
+        input_df = input.to_dataframe()
+
+        # We should only remember the valid dimensions.
+        #
+        output_with_extra_dimension = Point(y_1=input.x_1, y_2=input.x_2, invalid_dimension=42)
+        output_with_extra_dimension_df = output_with_extra_dimension.to_dataframe()
+        optimizer.register(input_df, output_with_extra_dimension_df)
+
+        # Let's make sure that the invalid_dimension was not remembered.
+        #
+        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+        assert all(column in {'y_1', 'y_2'} for column in all_outputs_df.columns)
+
+        # We should accept inputs with missing output dimensions, as long as at least one is specified.
+        #
+        output_with_missing_dimension = Point(y_1=input.x_1)
+        output_with_missing_dimension_df = output_with_missing_dimension.to_dataframe()
+        optimizer.register(input_df, output_with_missing_dimension_df)
+        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+
+        # Let's make sure the missing dimension ends up being a null.
+        #
+        last_observation = all_outputs_df.iloc[[-1]]
+        assert last_observation['y_2'].isnull().values.all()
+
+        # Inserting an observation with no valid dimensions should fail.
+        #
+        empty_output = Point()
+        empty_output_df = empty_output.to_dataframe()
+        with pytest.raises(ValueError):
+            optimizer.register(input_df, empty_output_df)
+
+        only_invalid_outputs = Point(invalid_col1=0, invalid_col2=2)
+        only_invalid_outputs_df = only_invalid_outputs.to_dataframe()
+
+        with pytest.raises(ValueError):
+            optimizer.register(input_df, only_invalid_outputs_df)
+
+
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
         should_raise_for_confidence_bounds = False
-        if not optimizer.get_surrogate_model_fit_state().fitted:
+        if not optimizer.trained:
             should_raise_for_predicted_value = True
             should_raise_for_confidence_bounds = True
         else:
@@ -433,7 +507,7 @@ class TestBayesianOptimizer(unittest.TestCase):
             #
             predictions_df = predictions_df[
                 predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value].notna() &
-                predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value] != 0
+                (predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value] != 0)
             ]
 
             if len(predictions_df.index) == 0:
@@ -442,11 +516,11 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         if should_raise_for_predicted_value:
 
-            self.assertTrue(should_raise_for_confidence_bounds)
+            assert should_raise_for_confidence_bounds
 
             # Computing prediction based optima should fail if the surrogate model is not fitted.
             #
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 optimizer.optimum(OptimumDefinition.PREDICTED_VALUE_FOR_OBSERVED_CONFIG)
 
         else:
@@ -454,10 +528,10 @@ class TestBayesianOptimizer(unittest.TestCase):
 
         if should_raise_for_confidence_bounds:
 
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
 
-            with self.assertRaises(ValueError):
+            with pytest.raises(ValueError):
                 optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG)
         else:
             ucb_90_ci_config, ucb_90_ci_optimum = optimizer.optimum(OptimumDefinition.UPPER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.1)
@@ -472,5 +546,25 @@ class TestBayesianOptimizer(unittest.TestCase):
             # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
             # change width non-linearily both with degrees of freedom, and with prediction variance.
             #
-            assert lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value
-            assert predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
+            if not (lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value):
+                # If the the prediction for predicted_value has too few degrees of freedom, it's impossible to construct a confidence interval for it.
+                # If it was possible, then the inequality above would always hold. If it's not possible, then the inequality above can fail.
+                #
+                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
+                degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
+                if degrees_of_freedom == 0:
+                    assert lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound
+                else:
+                    print(lcb_99_ci_optimum.lower_confidence_bound, lcb_95_ci_optimum.lower_confidence_bound, lcb_90_ci_optimum.lower_confidence_bound, predicted_optimum.predicted_value)
+                    assert False
+
+            if not (predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound):
+                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
+                degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
+                if degrees_of_freedom == 0:
+                    assert ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
+                else:
+                    print(predicted_optimum.predicted_value, ucb_90_ci_optimum.upper_confidence_bound, ucb_95_ci_optimum.upper_confidence_bound, ucb_99_ci_optimum.upper_confidence_bound)
+                    assert False

@@ -33,11 +33,15 @@ check: all test
 install: dotnet-install cmake-install
 	@ echo "make install target finished."
 
+.PHONY: pack
+pack:
+	$(MAKE) -C source/Mlos.NetCore.Components.Packages
+
 .PHONY: clean
 clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean
 
 .PHONY: distclean
-distclean: clean dotnet-distclean dotnet-pkgs-clean cmake-distclean nuget-clean
+distclean: clean dotnet-distclean dotnet-pkgs-clean cmake-distclean
 
 .PHONY: rebuild
 rebuild: clean all

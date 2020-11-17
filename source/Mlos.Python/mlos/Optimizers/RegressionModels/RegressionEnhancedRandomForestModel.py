@@ -10,18 +10,18 @@ from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import PolynomialFeatures
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 
-from mlos.Spaces import Hypergrid, SimpleHypergrid, \
-    ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
-from mlos.Tracer import trace
 from mlos.Logger import create_logger
-
-from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel, RegressionModelConfig
+from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.SklearnLassoRegressionModelConfig import SklearnLassoRegressionModelConfig
 from mlos.Optimizers.RegressionModels.SklearnRidgeRegressionModelConfig import SklearnRidgeRegressionModelConfig
 from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
+from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
+from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
+from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
+from mlos.Tracer import trace
 
 # sklearn injects many warnings, so from
 #   https://stackoverflow.com/questions/32612180/eliminating-warnings-from-scikit-learn
@@ -45,7 +45,7 @@ class RegressionEnhancedRandomForestRegressionModelPrediction(Prediction):
         super().__init__(objective_name=objective_name, predictor_outputs=RegressionEnhancedRandomForestRegressionModelPrediction.OUTPUT_FIELDS)
 
 
-class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig):
+class RegressionEnhancedRandomForestRegressionModelConfig(metaclass=DefaultConfigMeta):
     """A configuration object for RERF model.
 
     Class responsible for validating its objects are valid hyper parameters for the sklearn classes:
@@ -99,43 +99,6 @@ class RegressionEnhancedRandomForestRegressionModelConfig(RegressionModelConfig)
     def contains(cls, config):
         return config in cls.CONFIG_SPACE
 
-    # @classmethod
-    # def create_from_config_point(cls, config_point):
-    #     assert cls.contains(config_point)
-    #     config_key_value_pairs = {param_name: value for param_name, value in config_point}
-    #     return cls(**config_key_value_pairs)
-    #
-    # def __init__(
-    #         self,
-    #         max_basis_function_degree=_DEFAULT.max_basis_function_degree,
-    #         boosting_root_model_name=_DEFAULT.boosting_root_model_name,
-    #         min_abs_root_model_coef=_DEFAULT.min_abs_root_model_coef,
-    #         boosting_root_model_config: Point() = _DEFAULT.sklearn_lasso_regression_model_config,
-    #         random_forest_model_config: Point() = _DEFAULT.sklearn_random_forest_regression_model_config,
-    #         residual_model_name=_DEFAULT.residual_model_name,
-    #         perform_initial_root_model_hyper_parameter_search=_DEFAULT.perform_initial_root_model_hyper_parameter_search,
-    #         perform_initial_random_forest_hyper_parameter_search=_DEFAULT.perform_initial_random_forest_hyper_parameter_search
-    # ):
-    #     self.max_basis_function_degree = max_basis_function_degree
-    #     self.residual_model_name = residual_model_name
-    #     self.min_abs_root_model_coef = min_abs_root_model_coef
-    #     self.perform_initial_root_model_hyper_parameter_search = perform_initial_root_model_hyper_parameter_search
-    #     self.perform_initial_random_forest_hyper_parameter_search = perform_initial_random_forest_hyper_parameter_search
-    #
-    #     self.boosting_root_model_name = boosting_root_model_name
-    #     self.boosting_root_model_config = None
-    #     if self.boosting_root_model_name == SklearnLassoRegressionModelConfig.__name__:
-    #         self.boosting_root_model_config = SklearnLassoRegressionModelConfig \
-    #             .create_from_config_point(boosting_root_model_config)
-    #     elif self.boosting_root_model_name == SklearnRidgeRegressionModelConfig.__name__:
-    #         self.boosting_root_model_config = SklearnRidgeRegressionModelConfig \
-    #             .create_from_config_point(boosting_root_model_config)
-    #     else:
-    #         print('Unrecognized boosting_root_model_name "{}"'.format(self.boosting_root_model_name))
-    #
-    #     self.random_forest_model_config = SklearnRandomForestRegressionModelConfig \
-    #         .create_from_config_point(random_forest_model_config)
-
 
 class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     """ Regression-Enhanced RandomForest Regression model
@@ -183,6 +146,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             output_space=output_space
         )
         self.model_config = model_config
+
+        # one hot encode categorical input dimensions
+        self.one_hot_encoder_adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=input_space, merge_all_categorical_dimensions=True, drop='first')
+        self.input_space = input_space
+
         self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
         self.output_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
 
@@ -204,13 +172,15 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.variance_estimate_ = None
         self.root_model_gradient_coef_ = None
         self.polynomial_features_powers_ = None
-        self.num_dummy_vars_ = None
-        self.num_categorical_dims_ = None
-        self.continuous_dim_col_names_ = None
-        self.categorical_dim_col_names_ = None
-        self.dummy_var_map_ = None
-        self.dummy_var_cols_ = None
+
         self.categorical_zero_cols_idx_to_delete_ = None
+        self.scaler_ = StandardScaler()
+
+        self._trained = False
+
+    @property
+    def trained(self):
+        return self._trained
 
     @trace()
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number=0):
@@ -228,7 +198,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         """
         # pull X and y values from data frames passed
         y = target_values_pandas_frame[self.output_dimension_names].to_numpy().reshape(-1)
-        x_df = feature_values_pandas_frame[self.input_dimension_names]
+        x_df = self.one_hot_encoder_adapter.project_dataframe(df=feature_values_pandas_frame, in_place=False)
+        continuous_dim_col_names = list(set.difference(set(x_df.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
+        x_df[continuous_dim_col_names] = self.scaler_.fit_transform(x_df[continuous_dim_col_names])
+
         fit_x = self.transform_x(x_df, what_to_return='fit_x')
 
         # run root regression
@@ -273,7 +246,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.dof_ = fit_x.shape[0] - len(self.base_regressor_.coef_)
         self.variance_estimate_ = residual_sum_of_squares / float(self.dof_)
 
-        self.fitted = True
+        self._trained = True
         return self
 
     def _fit_root_regression(self, x, y):
@@ -428,7 +401,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
                                               set(feature_values_pandas_frame.columns.values))
         for missing_column_name in missing_column_names:
             feature_values_pandas_frame[missing_column_name] = np.NaN
-        x_df = feature_values_pandas_frame[self.input_dimension_names]
+        x_df = self.one_hot_encoder_adapter.project_dataframe(df=feature_values_pandas_frame, in_place=False)
+        continuous_dim_col_names = list(set.difference(set(x_df.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
+        x_df[continuous_dim_col_names] = self.scaler_.transform(x_df[continuous_dim_col_names])
+
         x_star = self.transform_x(x_df)
 
         base_predicted = self.base_regressor_.predict(x_star)
@@ -466,24 +442,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         predictions_df = predictions.get_dataframe()
         r2 = r2_score(y, predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE.value])
         return r2
-
-    def _create_one_hot_encoding_map(self, categorical_values):
-        if self.dummy_var_map_ is not None and self.dummy_var_cols_ is not None:
-            return self.dummy_var_cols_, self.dummy_var_map_
-
-        sorted_unique_categorical_levels = np.sort(categorical_values.unique()).tolist()
-        num_dummy_vars = len(sorted_unique_categorical_levels) - 1  # dropping first
-        dummy_var_cols = []
-        dummy_var_map = {sorted_unique_categorical_levels.pop(0): np.zeros(num_dummy_vars)}
-        for i, level in enumerate(sorted_unique_categorical_levels):
-            dummy_var_map[level] = np.zeros(num_dummy_vars)
-            dummy_var_map[level][i] = 1
-            dummy_var_cols.append(f'ohe_{i}')
-
-        self.dummy_var_map_ = dummy_var_map
-        self.dummy_var_cols_ = dummy_var_cols
-
-        return dummy_var_cols, dummy_var_map
 
     def _set_categorical_powers_table(self,
                                       num_continuous_dims=0,
@@ -561,39 +519,20 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         """
         fit_x = x
 
-        # find categorical features
-        if self.categorical_dim_col_names_ is None:
-            self.categorical_dim_col_names_ = [x.columns.values[i] for i in range(len(x.columns.values)) if x.dtypes[i] == object]
-        categorical_dim_col_names = self.categorical_dim_col_names_
-        if self.continuous_dim_col_names_ is None:
-            self.continuous_dim_col_names_ = [x.columns.values[i] for i in range(len(x.columns.values)) if x.dtypes[i] != object]
-        continuous_dim_col_names = self.continuous_dim_col_names_
-        if self.num_categorical_dims_ is None:
-            self.num_categorical_dims_ = len(categorical_dim_col_names)
-        num_categorical_dims_ = self.num_categorical_dims_
-
+        continuous_dim_col_names = list(set.difference(set(x.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
+        num_categorical_dims_ = len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
         if num_categorical_dims_ > 0:
             # use the following to create one hot encoding columns prior to constructing fit_x and powers_ table
             working_x = x[continuous_dim_col_names].copy()
 
-            # create dummy variables for OneHotEncoding with dropped first category level
-            x['flattened_categoricals'] = x[categorical_dim_col_names].apply(
-                lambda cat_row: '-'.join(cat_row.map(str)),
-                axis=1)
-            dummy_var_cols, dummy_var_map = self._create_one_hot_encoding_map(x['flattened_categoricals'])
-            working_x[dummy_var_cols] = x.apply(lambda row: dummy_var_map[row['flattened_categoricals']],
-                                                axis=1,
-                                                result_type="expand")
+            dummy_var_cols = self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()
+            num_dummy_vars = len(dummy_var_cols)
+            working_x[dummy_var_cols] = x[dummy_var_cols]
 
-            # create transformed x for linear fit with dummy variable (one hot encoding)
-            # add continuous dimension columns corresponding to each categorical level
-            if self.num_dummy_vars_ is None:
-                self.num_dummy_vars_ = len(dummy_var_cols)
-            num_dummy_vars = self.num_dummy_vars_
-            for i in range(num_dummy_vars):
+            for dummy_var_col in dummy_var_cols:
                 for cont_dim_name in continuous_dim_col_names:
-                    dummy_times_x_col_name = f'{cont_dim_name}*ohe_{i}'
-                    working_x[dummy_times_x_col_name] = working_x[cont_dim_name] * working_x[dummy_var_cols[i]]
+                    dummy_times_x_col_name = f'{cont_dim_name}*{dummy_var_col}'
+                    working_x[dummy_times_x_col_name] = working_x[cont_dim_name] * working_x[dummy_var_col]
 
             # add exploded x weighted by oneHotEncoded columns
             # add polynomial for 000...000 encoding
@@ -606,7 +545,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             # add polynomial for non-000...000 encodings
             last_col_filled = num_terms_in_poly
             for ohe_col_name in dummy_var_cols:
-                cols_for_poly_transform = [cn for cn in working_x.columns.values if cn.find(ohe_col_name) > 0]
+                cols_for_poly_transform = [cn for cn in working_x.columns.values if cn.endswith(ohe_col_name) and cn != ohe_col_name]
                 ohe_poly = self.polynomial_features_transform_.fit_transform(working_x[cols_for_poly_transform])
                 ohe_poly[:, 0] = ohe_poly[:, 0] * working_x[ohe_col_name]  # replace global intercept w/ intercept offset term
                 fit_x[:, last_col_filled:last_col_filled + num_terms_in_poly] = ohe_poly
@@ -624,14 +563,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             if self.polynomial_features_powers_ is None:
                 self._set_categorical_powers_table(
                     num_continuous_dims=len(continuous_dim_col_names),
-                    num_categorical_levels=len(x['flattened_categoricals'].unique()),
+                    num_categorical_levels=num_dummy_vars+1,
                     num_terms_in_poly=num_terms_in_poly,
                     num_dummy_vars=num_dummy_vars,
                     zero_cols_idx=zero_cols_idx
                 )
-
-            # remove temporary fields
-            x.drop(columns=['flattened_categoricals'], inplace=True)
 
         elif self.model_config.max_basis_function_degree > 1:
             fit_x = self.polynomial_features_transform_.fit_transform(x)

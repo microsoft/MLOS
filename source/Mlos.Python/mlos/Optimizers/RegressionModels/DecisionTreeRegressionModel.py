@@ -80,9 +80,15 @@ class DecisionTreeRegressionModel(RegressionModel):
         self._sample_variance_per_leaf = dict()
         self._count_per_leaf = dict()
 
+        self._trained = False
+
+    @property
+    def trained(self):
+        return self._trained
+
     @property
     def num_observations_used_to_fit(self):
-        return self.fit_state.train_set_size
+        return self.last_refit_iteration_number
 
     def should_fit(self, num_samples):
         """ Returns true if the model should be fitted.
@@ -94,7 +100,7 @@ class DecisionTreeRegressionModel(RegressionModel):
         :param num_samples:
         :return:
         """
-        if not self.fitted:
+        if not self.trained:
             return num_samples > self.model_config.min_samples_to_fit
         num_new_samples = num_samples - self.num_observations_used_to_fit
         return num_new_samples >= self.model_config.n_new_samples_before_refit
@@ -142,7 +148,7 @@ class DecisionTreeRegressionModel(RegressionModel):
             self._sample_variance_per_leaf[node_index] = leaf_sample_variance
             self._count_per_leaf[node_index] = len(observations_at_leaf)
 
-        self.fitted = True
+        self._trained = True
         self.last_refit_iteration_number = iteration_number
 
     @trace()
@@ -159,7 +165,7 @@ class DecisionTreeRegressionModel(RegressionModel):
 
         valid_rows_index = None
         features_df = None
-        if self.fitted:
+        if self.trained:
             features_df = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
             features_df = self._input_space_adapter.filter_out_invalid_rows(original_dataframe=features_df, exclude_extra_columns=True)
             valid_rows_index = features_df.index

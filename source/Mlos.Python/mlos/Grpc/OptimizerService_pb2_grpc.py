@@ -31,10 +31,20 @@ class OptimizerServiceStub(object):
                 request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerConvergenceState.FromString,
                 )
+        self.ComputeGoodnessOfFitMetrics = channel.unary_unary(
+                '/OptimizerService/ComputeGoodnessOfFitMetrics',
+                request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.SimpleString.FromString,
+                )
         self.CreateOptimizer = channel.unary_unary(
                 '/OptimizerService/CreateOptimizer',
                 request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.CreateOptimizerRequest.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.FromString,
+                )
+        self.IsTrained = channel.unary_unary(
+                '/OptimizerService/IsTrained',
+                request_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.SimpleBoolean.FromString,
                 )
         self.Suggest = channel.unary_unary(
                 '/OptimizerService/Suggest',
@@ -97,8 +107,24 @@ class OptimizerServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ComputeGoodnessOfFitMetrics(self, request, context):
+        """Returns the computed goodness of fit metrics.
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def CreateOptimizer(self, request, context):
         """Creates an optimizer with the specified configuration.
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def IsTrained(self, request, context):
+        """Check if optimizer has been trained.
 
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -171,10 +197,20 @@ def add_OptimizerServiceServicer_to_server(servicer, server):
                     request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerConvergenceState.SerializeToString,
             ),
+            'ComputeGoodnessOfFitMetrics': grpc.unary_unary_rpc_method_handler(
+                    servicer.ComputeGoodnessOfFitMetrics,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.SimpleString.SerializeToString,
+            ),
             'CreateOptimizer': grpc.unary_unary_rpc_method_handler(
                     servicer.CreateOptimizer,
                     request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.CreateOptimizerRequest.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
+            ),
+            'IsTrained': grpc.unary_unary_rpc_method_handler(
+                    servicer.IsTrained,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerService__pb2.SimpleBoolean.SerializeToString,
             ),
             'Suggest': grpc.unary_unary_rpc_method_handler(
                     servicer.Suggest,
@@ -267,6 +303,22 @@ class OptimizerService(object):
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
+    def ComputeGoodnessOfFitMetrics(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/OptimizerService/ComputeGoodnessOfFitMetrics',
+            mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerService__pb2.SimpleString.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
     def CreateOptimizer(request,
             target,
             options=(),
@@ -279,6 +331,22 @@ class OptimizerService(object):
         return grpc.experimental.unary_unary(request, target, '/OptimizerService/CreateOptimizer',
             mlos_dot_Grpc_dot_OptimizerService__pb2.CreateOptimizerRequest.SerializeToString,
             mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def IsTrained(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/OptimizerService/IsTrained',
+            mlos_dot_Grpc_dot_OptimizerService__pb2.OptimizerHandle.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerService__pb2.SimpleBoolean.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
 

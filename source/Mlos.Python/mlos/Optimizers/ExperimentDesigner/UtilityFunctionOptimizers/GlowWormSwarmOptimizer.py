@@ -20,8 +20,8 @@ glow_worm_swarm_optimizer_config_store = ComponentConfigStore(
         name="glow_worm_swarm_optimizer_config",
         dimensions=[
             DiscreteDimension(name="num_initial_points_multiplier", min=1, max=10),
-            DiscreteDimension(name="num_worms", min=1, max=1000),
-            DiscreteDimension(name="num_iterations", min=1, max=1000), # TODO: consider other stopping criteria too
+            DiscreteDimension(name="num_worms", min=10, max=1000),
+            DiscreteDimension(name="num_iterations", min=1, max=20), # TODO: consider other stopping criteria too
             ContinuousDimension(name="luciferin_decay_constant", min=0, max=1),
             ContinuousDimension(name="luciferin_enhancement_constant", min=0, max=1),
             ContinuousDimension(name="step_size", min=0, max=1),  # TODO: make this adaptive

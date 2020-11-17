@@ -72,7 +72,7 @@ class Prediction:
 
         # validate passed args
         for output_enum in predictor_outputs:
-            assert output_enum in Prediction.LegalColumnNames, \
+            assert output_enum in set(column_name for column_name in Prediction.LegalColumnNames), \
                 f'PredictionSchema Error: Passed PredictionSchema enum "{output_enum}" not in Prediction.PredictionSchema'
         self.predictor_outputs = predictor_outputs
 

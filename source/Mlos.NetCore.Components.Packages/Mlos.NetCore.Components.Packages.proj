@@ -25,7 +25,6 @@
   -->
   <Target Name="Pack" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">
     <!-- Don't repeat the build - we probably just did it. -->
-    <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="false"
-      Properties="Configuration=$(Configuration);NoBuild=true" />
+    <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="false" Properties="NoBuild=true" />
   </Target>
 </Project>

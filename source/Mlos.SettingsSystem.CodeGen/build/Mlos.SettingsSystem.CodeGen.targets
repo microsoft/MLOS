@@ -107,9 +107,11 @@
   <Target Name="CheckReferences" AfterTargets="ResolvePackageAssets">
     <!-- Lookup the resolved packages for the current project and filter to just the Mlos packages. -->
     <ItemGroup>
-      <MlosPackageRefs Include="%(RuntimeCopyLocalItems.PackageName)" Condition="$([System.String]::new('%(PackageName)').StartsWith('Mlos.'))">
-        <PackageName>@(RuntimeCopyLocalItems->'%(PackageName)')</PackageName>
-        <PackageVersion>@(RuntimeCopyLocalItems->'%(PackageVersion)')</PackageVersion>
+      <MlosPackageRefs Include="%(RuntimeCopyLocalItems.Identity)" Condition="$([System.String]::new('%(NuGetPackageId)').StartsWith('Mlos.'))">
+        <PackageName Condition="'@(RuntimeCopyLocalItems->'%(NugetPackageId)')' != ''">@(RuntimeCopyLocalItems->'%(NuGetPackageId)')</PackageName>
+        <PackageName Condition="'@(RuntimeCopyLocalItems->'%(PackageName)')' != ''">@(RuntimeCopyLocalItems->'%(PackageName)')</PackageName>
+        <PackageVersion Condition="'@(RuntimeCopyLocalItems->'%(NugetPackageVersion)')' != ''">@(RuntimeCopyLocalItems->'%(NuGetPackageVersion)')</PackageVersion>
+        <PackageVersion Condition="'@(RuntimeCopyLocalItems->'%(PackageVersion)')' != ''">@(RuntimeCopyLocalItems->'%(PackageVersion)')</PackageVersion>
       </MlosPackageRefs>
     </ItemGroup>
 
@@ -134,7 +136,7 @@
     </XmlPeek>
     <Error Text="Failed to lookup package version." Condition="'$(MlosCodeGenPackageVersion)' == ''" />
     <!-- Combine it with the library package versions. -->
-		<ItemGroup>
+    <ItemGroup>
       <MlosPackageVersions Include="%(MlosPackageRefs.PackageVersion)" />
       <MlosPackageVersions Include="$(MlosCodeGenPackageVersion)" />
     </ItemGroup>

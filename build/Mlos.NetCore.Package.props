@@ -29,7 +29,7 @@
   <PropertyGroup>
     <IncludeSymbols>true</IncludeSymbols>
     <!--
-      When this property is omitted disabled, we a separate .symbols.nupkg file is created
+      When this property is omitted a separate .symbols.nupkg file is created
       that includes both the .dll and .pdb.
     -->
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

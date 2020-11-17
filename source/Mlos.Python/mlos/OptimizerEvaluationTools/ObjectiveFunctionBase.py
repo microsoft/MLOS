@@ -52,7 +52,7 @@ class ObjectiveFunctionBase(ABC):
     def get_context(self) -> Point:
         """ Returns a context value for this objective function.
 
-        If the context changes on every invokation, this should return the latest one.
+        If the context changes on every invocation, this should return the latest one.
         :return:
         """
         raise NotImplementedError
