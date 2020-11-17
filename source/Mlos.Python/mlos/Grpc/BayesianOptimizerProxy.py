@@ -90,9 +90,6 @@ class BayesianOptimizerProxy(OptimizerBase):
 
     @trace()
     def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
-
-        if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
-            raise ValueError("Context space required by optimization problem but not provided.")
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
                                                                                             context_values=context_values_pandas_frame)
         register_request = OptimizerService_pb2.RegisterObservationsRequest(
@@ -114,9 +111,11 @@ class BayesianOptimizerProxy(OptimizerBase):
         return features_df, objectives_df
 
     @trace()
-    def predict(self, feature_values_pandas_frame, t=None):  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
+                                                                                            context_values=context_values_pandas_frame)
         feature_values_dict = feature_values_pandas_frame.to_dict(orient='list')
         prediction_request = OptimizerService_pb2.PredictRequest(
             OptimizerHandle=self.optimizer_handle,

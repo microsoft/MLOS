@@ -62,14 +62,13 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def predict(self, feature_values_pandas_frame, t=None) -> Prediction:
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:
         """Predict target value based on the parameters supplied.
 
         :param params:
         :return:
         """
         raise NotImplementedError("All subclasses must implement this method.")
-
 
     def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05, context: pd.DataFrame=None) -> Tuple[Point, Point]:
         """Return the optimal value found so far along with the related parameter values.
@@ -123,7 +122,7 @@ class OptimizerBase(ABC):
     @trace()
     def _prediction_based_optimum(self, features_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
-        predictions = self.predict(feature_values_pandas_frame=features_df)
+        predictions = self.predict(parameter_values_pandas_frame=features_df)
         predictions_df = predictions.get_dataframe()
 
         if len(predictions_df.index) == 0:

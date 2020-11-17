@@ -174,7 +174,11 @@ class BayesianOptimizer(OptimizerBase):
             )
 
     @trace()
-    def predict(self, feature_values_pandas_frame, t=None):
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument
+        # TODO: make this streaming and/or using arrow.
+        #
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
+                                                                                            context_values=context_values_pandas_frame)
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
     def focus(self, subspace):
