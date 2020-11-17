@@ -4,12 +4,6 @@
 #
 from abc import ABC, abstractmethod
 
-import pandas as pd
-
-from mlos.Tracer import trace
-from mlos.Logger import create_logger
-from mlos.Optimizers.RegressionModels.Prediction import Prediction
-
 
 class UtilityFunction(ABC):
     """ Base class for all Utility Functions.

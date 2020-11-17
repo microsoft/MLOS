@@ -133,14 +133,14 @@ class BayesianOptimizer(OptimizerBase):
         return suggested_config
 
     @trace()
-    def register(self, parameter_values_pandas_frame , target_values_pandas_frame, context_values_pandas_frame=None):
+    def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
 
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
             raise ValueError("Context space required by optimization problem but not provided.")
-        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
-                                                                                            context_values=context_values_pandas_frame)
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
+            parameter_values=parameter_values_pandas_frame, context_values=context_values_pandas_frame)
 
         feature_columns_to_retain = [column for column in feature_values_pandas_frame.columns if column in self._feature_names_set]
         target_columns_to_retain = [column for column in target_values_pandas_frame.columns if column in self._target_names_set]

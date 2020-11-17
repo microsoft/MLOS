@@ -106,13 +106,14 @@ class ExperimentDesigner:
                 utility_function=utility_function,
                 logger=self.logger
             )
-        elif self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+        if self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             return GlowWormSwarmOptimizer(
                 optimizer_config=self.config.glow_worm_swarm_optimizer_config,
                 optimization_problem=self.optimization_problem,
                 utility_function=utility_function,
                 logger=self.logger
             )
+        raise ValueError(f"Unknown numeric_optimizer_implementation: {self.config.numeric_optimizer_implementation}.")
 
     def suggest(self, context_values_dataframe=None, random=False):
         self.logger.debug(f"Suggest(random={random})")
