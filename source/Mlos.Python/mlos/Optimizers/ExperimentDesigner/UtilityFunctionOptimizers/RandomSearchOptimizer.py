@@ -53,8 +53,8 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         TODO: make it capable of consuming the context values
         :return:
         """
-        config_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.optimizer_config.num_samples_per_iteration)
-        feature_values_dataframe = self.optimization_problem.construct_feature_dataframe(config_values=config_values_dataframe, context_values=context_values_dataframe, product=True)
+        parameter_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.optimizer_config.num_samples_per_iteration)
+        feature_values_dataframe = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_dataframe, context_values=context_values_dataframe, product=True)
         utility_function_values = self.utility_function(feature_values_dataframe.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)
         index_of_max_value = utility_function_values[['utility']].idxmax()['utility'] if num_utility_function_values > 0 else 0

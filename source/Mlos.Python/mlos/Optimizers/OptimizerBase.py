@@ -48,7 +48,7 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def register(self, config_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None)) -> None:
+    def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None)) -> None:
         """Registers a new result with the optimizer.
 
         :param params:

@@ -121,7 +121,7 @@ class OptimizationProblem:
                 on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
         )
 
-    def construct_feature_dataframe(self, config_values, context_values=None, product=False):
+    def construct_feature_dataframe(self, parameter_values, context_values=None, product=False):
         """Construct feature value dataframe from config value and context value dataframes.
 
         If product is True, creates a cartesian product, otherwise appends columns.
@@ -130,11 +130,11 @@ class OptimizationProblem:
         if (self.context_space is not None) and (context_values is None):
 
             raise ValueError("Context space required by optimization problem but not provided.")
-        if (product is False) and (len(config_values.index) != len(context_values.index)):
+        if (product is False) and (len(parameter_values.index) != len(context_values.index)):
 
-            raise ValueError(f"Incompatible shape of configuration and context: {config_values.shape} and {context_values.shape}.")
+            raise ValueError(f"Incompatible shape of configuration and context: {parameter_values.shape} and {context_values.shape}.")
         # prefix column names to adhere to dimensions in hierarchical hypergrid
-        feature_values = config_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
+        feature_values = parameter_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
         if context_values is not None:
             renamed_context_values = context_values.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
             feature_values['contains_context'] = True
