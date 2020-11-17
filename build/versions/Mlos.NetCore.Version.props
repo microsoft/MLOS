@@ -30,7 +30,7 @@
   <PropertyGroup>
     <DisableGitVersionTask>true</DisableGitVersionTask>
     <DisableGitVersionTask Condition="'$(PackageUsesGitVersionInfo)' == 'true'">false</DisableGitVersionTask>
-    <GitVersion_NoFetchEnabled>true</GitVersion_NoFetchEnabled>
+    <GitVersion_NoFetchEnabled>false</GitVersion_NoFetchEnabled>
     <WriteVersionInfoToBuildLog>false</WriteVersionInfoToBuildLog>
     <!--
     <GetVersion>$(PackageUsesGitVersionInfo)</GetVersion>
