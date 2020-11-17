@@ -49,7 +49,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
 
             // Define a global dispatch table.
             //
-            WriteLine("__declspec(selectany) ::Mlos::Core::DispatchEntry DispatchTable[] = ");
+            WriteLine("MLOS_SELECTANY_ATTR ::Mlos::Core::DispatchEntry DispatchTable[] = ");
             WriteLine("{");
 
             IndentationLevel++;

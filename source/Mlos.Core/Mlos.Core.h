@@ -74,6 +74,16 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define MLOS_RETAIL_ASSERT(result) { if (!result) Mlos::Core::MlosPlatform::TerminateProcess(); }
 #define MLOS_UNUSED_ARG(x) (void)x
 
+#ifdef _MSC_VER
+#define MLOS_SELECTANY_ATTR __declspec(selectany)
+#elif __clang__
+#define MLOS_SELECTANY_ATTR __attribute__((weak))
+#elif __GNUC__
+#define MLOS_SELECTANY_ATTR __attribute__((weak))
+#else
+#warning Unhandled compiler.
+#endif
+
 #include "MlosPlatform.h"
 
 #include "BytePtr.h"
