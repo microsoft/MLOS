@@ -43,7 +43,7 @@ class OptimumDefinition(Enum):
     #
     LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG = 'prediction_lower_confidence_bound_for_observed_config'
 
-    BEST_SPECULATIVE_WITHIN_CONTEXT  = 'best_speculative_within_context'
+    BEST_SPECULATIVE_WITHIN_CONTEXT = 'best_speculative_within_context'
 
     # These three definitions will be similar to the values above, except they are speculative. They could potentially return a configuration that
     # has not been observed. Exercise caution.

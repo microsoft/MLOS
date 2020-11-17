@@ -119,7 +119,7 @@ class OptimizationProblem:
             self.feature_space = self.feature_space.join(
                 subgrid=self.context_space,
                 on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
-        )
+            )
 
     def construct_feature_dataframe(self, parameter_values, context_values=None, product=False):
         """Construct feature value dataframe from config value and context value dataframes.

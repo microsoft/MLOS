@@ -70,7 +70,7 @@ class OptimizerBase(ABC):
         """
         raise NotImplementedError("All subclasses must implement this method.")
 
-    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05, context: pd.DataFrame=None) -> Tuple[Point, Point]:
+    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05, context: pd.DataFrame = None) -> Tuple[Point, Point]:
         """Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
@@ -95,7 +95,7 @@ class OptimizerBase(ABC):
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
             return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        elif optimum_definition == OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
+        if optimum_definition == OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
             if context is None:
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
             return self._optimum_within_context(context=context)
