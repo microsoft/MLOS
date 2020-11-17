@@ -4,7 +4,7 @@
 #
 from abc import ABC, abstractmethod
 from typing import Tuple
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import GreedyUtilityFunction
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.PredictedValueUtilityFunction import PredictedValueUtilityFunction
 
 import numpy as np
 import pandas as pd
@@ -104,7 +104,7 @@ class OptimizerBase(ABC):
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):
-        greedy_utility = GreedyUtilityFunction(
+        greedy_utility = PredictedValueUtilityFunction(
             self.surrogate_model, minimize=self.experiment_designer.optimization_problem.objectives[0].minimize)
         utility_optimizer = self.experiment_designer.make_optimizer_for_utility(greedy_utility)
         return utility_optimizer.suggest(context_values_dataframe=context)
