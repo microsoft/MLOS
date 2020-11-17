@@ -26,7 +26,7 @@ public:
     }
 
 private:
-    std::array<byte, T> array = { 0 };
+    std::array<byte, T> array { { 0 } };
 };
 
 namespace SharedChannelTests
@@ -222,8 +222,8 @@ TEST(SharedChannel, VerifySendingReceivingArrayStruct)
     //
     ObjectDeserializationCallback::Mlos::UnitTest::Line_Callback = [line](Proxy::Mlos::UnitTest::Line&& recvLine)
         {
-            EXPECT_EQ(recvLine.Points()[0].X(), 3.0);
-            EXPECT_EQ(recvLine.Points()[0].Y(), 5);
+            EXPECT_EQ(recvLine.Points()[0].X(), line.Points[0].X);
+            EXPECT_EQ(recvLine.Points()[0].Y(), line.Points[0].Y);
             EXPECT_EQ(recvLine.Points()[1].X(), 7);
             EXPECT_EQ(recvLine.Points()[1].Y(), 9);
             EXPECT_EQ(recvLine.Height()[0], 1.3f);
@@ -368,6 +368,7 @@ TEST(SharedChannel, StressSendReceive)
     bool result =
         resultFromWriter1.get() &&
         resultFromWriter2.get();
+    MLOS_UNUSED_ARG(result);
 
     sharedChannel.SendMessage(Mlos::Core::TerminateReaderThreadRequestMessage());
 

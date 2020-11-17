@@ -72,7 +72,6 @@ void AssertFailed(
 // NOTES:
 //
 int
-MLOS_CDECL_ATTR
 main(
     _In_ int argc,
     _In_ char* argv[])
