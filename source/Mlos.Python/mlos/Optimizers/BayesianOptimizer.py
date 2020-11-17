@@ -13,7 +13,7 @@ from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesi
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Tracer import trace
-from mlos.Spaces import Point
+from mlos.Spaces import Point, SimpleHypergrid
 
 
 
@@ -41,10 +41,22 @@ class BayesianOptimizer(OptimizerBase):
         if logger is None:
             logger = create_logger("BayesianOptimizer")
         self.logger = logger
+
         # Let's initialize the optimizer.
         #
         assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
         OptimizerBase.__init__(self, optimization_problem)
+
+        # Since the optimization_problem.objective_space can now be multi-dimensional (as a milestone towards multi-objective
+        # optimization), we have to prepare a smaller objective space for the surrogate model.
+        # TODO: create multiple models each predicting a different objective. Also consider multi-objective models.
+        #
+        assert not optimization_problem.objective_space.is_hierarchical(), "Not supported."
+        only_objective = optimization_problem.objectives[0]
+        self.surrogate_model_output_space = SimpleHypergrid(
+            name="surrogate_model_output_space",
+            dimensions=[optimization_problem.objective_space[only_objective.name]]
+        )
 
         assert optimizer_config in bayesian_optimizer_config_store.parameter_space, "Invalid config."
         self.optimizer_config = optimizer_config
@@ -55,7 +67,7 @@ class BayesianOptimizer(OptimizerBase):
         self.surrogate_model = HomogeneousRandomForestRegressionModel(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.feature_space,
-            output_space=self.optimization_problem.objective_space,
+            output_space=self.surrogate_model_output_space
             logger=self.logger
         )
 
@@ -74,9 +86,15 @@ class BayesianOptimizer(OptimizerBase):
         )
 
         # Also let's make sure we have the dataframes we need for the surrogate model.
-        # TODO: this will need a better home - either a DataSet class or the surrogate model itself.
-        self._feature_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.feature_space.dimensions])
-        self._target_values_df = pd.DataFrame(columns=[dimension.name for dimension in self.optimization_problem.objective_space.dimensions])
+        #
+        self._feature_names = [dimension.name for dimension in self.optimization_problem.feature_space.dimensions]
+        self._feature_names_set = set(self._feature_names)
+
+        self._target_names = [dimension.name for dimension in self.optimization_problem.objective_space.dimensions]
+        self._target_names_set = set(self._target_names)
+
+        self._feature_values_df = pd.DataFrame(columns=self._feature_names)
+        self._target_values_df = pd.DataFrame(columns=self._target_names)
 
     @property
     def trained(self):
@@ -120,9 +138,30 @@ class BayesianOptimizer(OptimizerBase):
 
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
             raise ValueError("Context space required by optimization problem but not provided.")
-        feature_values = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
                                                                                context_values=context_values_pandas_frame)
-        self._feature_values_df = self._feature_values_df.append(feature_values, ignore_index=True)
+
+        feature_columns_to_retain = [column for column in feature_values_pandas_frame.columns if column in self._feature_names_set]
+        target_columns_to_retain = [column for column in target_values_pandas_frame.columns if column in self._target_names_set]
+
+        if len(feature_columns_to_retain) == 0:
+            raise ValueError(f"None of the {feature_columns_to_retain} is a feature recognized by this optimizer.")
+
+        if len(target_columns_to_retain) == 0:
+            raise ValueError(f"None of the {target_columns_to_retain} is a target recognized by this optimizer.")
+
+        feature_values_pandas_frame = feature_values_pandas_frame[feature_columns_to_retain]
+        target_values_pandas_frame = target_values_pandas_frame[target_columns_to_retain]
+
+        all_null_features = feature_values_pandas_frame[feature_values_pandas_frame.isnull().all(axis=1)]
+        if len(all_null_features.index) > 0:
+            raise ValueError(f"{len(all_null_features.index)} of the observations contain(s) no valid features.")
+
+        all_null_targets = target_values_pandas_frame[target_values_pandas_frame.isnull().all(axis=1)]
+        if len(all_null_targets.index) > 0:
+            raise ValueError(f"{len(all_null_targets.index)} of the observations contain(s) no valid targets")
+
+        self._feature_values_df = self._feature_values_df.append(feature_values_pandas_frame, ignore_index=True)
         self._target_values_df = self._target_values_df.append(target_values_pandas_frame, ignore_index=True)
 
         # TODO: ascertain that min_samples_required ... is more than min_samples to fit the model
