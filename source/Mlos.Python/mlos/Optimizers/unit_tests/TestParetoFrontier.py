@@ -212,8 +212,8 @@ class TestParetoFrontier:
             y2      = radius * sin(theta0) * sin(theta1) * cos(theta2)
             y3      = radius * sin(theta0) * sin(theta1) * sin(theta2) * cos(theta3)
             ...
-            y{N-2}  = radius * sin(theta0) * sin(theta1) * ... * sin(theta{n-1}) * cos(thetaN)
-            y{N-1}  = radius * sin(theta0) * sin(theta1) * ... * sin(theta{n-1}) * sin(thetaN)
+            y{N-2}  = radius * sin(theta0) * sin(theta1) * ... * sin(theta{N-2}) * cos(theta{N-1})
+            y{N-1}  = radius * sin(theta0) * sin(theta1) * ... * sin(theta{N-2}) * sin(theta{N-1})
                                                                                     ^ !! sin instead of cos !!
 
         1) Maximizing all objectives.
@@ -256,6 +256,9 @@ class TestParetoFrontier:
             ContinuousDimension(name="radius", min=0, max=hypersphere_radius)
         ]
 
+        theta_min = None
+        theta_max = None
+
         if minimize == "all":
             # Let's keep angles in second quadrant.
             #
@@ -265,6 +268,17 @@ class TestParetoFrontier:
         elif minimize == "none":
             # Let's keep all angles in the first quadrant.
             #
+            theta_min = 0
+            theta_max = math.pi / 2
+
+        elif minimize == "some":
+            # Let's keep all angles in the fourth quadrant.
+            #
+            theta_min = 1.5 * math.pi
+            theta_max = 2 * math.pi
+
+        else:
+            assert False
 
 
         # Keep track of which objectives to minimize.
@@ -275,11 +289,8 @@ class TestParetoFrontier:
             if minimize == "all":
                 minimize_this_objective = True
 
-
-
             elif minimize == "none":
                 minimize_this_objective = False
-
 
             elif minimize == "some":
                 # Alternate between first and third quarters. Let's minimize odd ones, that way the y{N-1} doesn't require a sign flip.
@@ -290,15 +301,7 @@ class TestParetoFrontier:
 
             minimize_mask.append(minimize_this_objective)
 
-            if minimize_this_objective:
-                minimum = math.pi
-                maximum = math.pi * 1.5
-            else:
-                minimum = 0
-                maximum = math.pi / 2
-
-
-            parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=minimum, max=maximum))
+            parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=theta_min, max=theta_max))
 
         parameter_space = SimpleHypergrid(
             name='polar_coordinates',
