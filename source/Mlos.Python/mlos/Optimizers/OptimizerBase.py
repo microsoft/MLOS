@@ -91,12 +91,12 @@ class OptimizerBase(ABC):
         if not len(features_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
 
-        if context is not None and optimum_definition != OptimumDefinition.BEST_PREDICTED_WITHIN_CONTEXT:
+        if context is not None and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT :
                 raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
             return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        elif optimum_definition == OptimumDefinition.BEST_PREDICTED_WITHIN_CONTEXT:
+        elif optimum_definition == OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT :
             if context is None:
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
             return self._optimum_within_context(context=context)
