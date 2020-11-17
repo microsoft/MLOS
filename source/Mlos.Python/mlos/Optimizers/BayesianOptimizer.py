@@ -67,7 +67,7 @@ class BayesianOptimizer(OptimizerBase):
         self.surrogate_model = HomogeneousRandomForestRegressionModel(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.feature_space,
-            output_space=self.surrogate_model_output_space
+            output_space=self.surrogate_model_output_space,
             logger=self.logger
         )
 
