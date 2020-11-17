@@ -18,8 +18,8 @@ FetchContent_Declare(
     # release version, branch name, or commit hash.
     #GIT_TAG         v0.1.2
     GIT_TAG         external-cmake-project-integration
-    # TODO: Can we do this and still get reasonable nuget versions out?
-    GIT_SHALLOW     ON
+    # Since we use GitVersionTask for versioning nugets we need a non-shallow fetch.
+    GIT_SHALLOW     OFF
 )
 FetchContent_GetProperties(mlos)
 # Allow building the MLOS projects with a different build type than the rest parent project.
