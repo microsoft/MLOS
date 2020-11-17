@@ -181,9 +181,12 @@ class TestParetoFrontier:
     @pytest.mark.parametrize("num_output_dimensions", [2])
     @pytest.mark.parametrize("num_points", [100, 10000])
     def test_hyperspheres_2(self, minimize, num_output_dimensions, num_points):
-        """Uses polar coordinates to generate cartesian coordinates of points on the surface and interior of a hypershpere.
+        """Uses a hypersphere to validate that ParetoFrontier can correctly identify pareto-optimal points.
 
-        The idea is that we want to find a pareto frontier that optimizes the cartesian coordinates.
+
+        The idea is that we want to find a pareto frontier that optimizes the cartesian coordinates of points defined using random
+        spherical coordinates.
+
         By setting the radius of some of the points to the radius of the hypersphere, we guarantee that they are non-dominated.
         Such points must appear on the pareto frontier, though it's quite possible that other non-dominated points from the interior
         of the sphere could appear as well. The intuition in 2D is that we can draw a secant between two neighboring pareto efficient
@@ -252,24 +255,25 @@ class TestParetoFrontier:
         """
         hypersphere_radius = 10
 
-        parameter_dimensions = [
-            ContinuousDimension(name="radius", min=0, max=hypersphere_radius)
-        ]
-
+        # Let's figure out the quadrant and which objectives to minimize.
+        #
         theta_min = None
         theta_max = None
+        minimize_mask: List[bool] = []
 
         if minimize == "all":
             # Let's keep angles in second quadrant.
             #
             theta_min = math.pi / 2
             theta_max = math.pi
+            minimize_mask = [True for _ in range(num_output_dimensions)]
 
         elif minimize == "none":
             # Let's keep all angles in the first quadrant.
             #
             theta_min = 0
             theta_max = math.pi / 2
+            minimize_mask = [False for _ in range(num_output_dimensions)]
 
         elif minimize == "some":
             # Let's keep all angles in the fourth quadrant.
@@ -277,34 +281,21 @@ class TestParetoFrontier:
             theta_min = 1.5 * math.pi
             theta_max = 2 * math.pi
 
+            # Let's minimize odd ones, that way the y{N-1} doesn't require a sign flip.
+            #
+            minimize_mask = [(i % 2) == 1 for i in range(num_output_dimensions)]
+
         else:
             assert False
 
-
-        # Keep track of which objectives to minimize.
+        # Let's put together the optimization problem.
         #
-        minimize_mask: List[bool] = []
-
+        parameter_dimensions = [ContinuousDimension(name="radius", min=0, max=hypersphere_radius)]
         for i in range(num_output_dimensions):
-            if minimize == "all":
-                minimize_this_objective = True
-
-            elif minimize == "none":
-                minimize_this_objective = False
-
-            elif minimize == "some":
-                # Alternate between first and third quarters. Let's minimize odd ones, that way the y{N-1} doesn't require a sign flip.
-                #
-                minimize_this_objective = ((i % 2) == 1)
-            else:
-                assert False
-
-            minimize_mask.append(minimize_this_objective)
-
             parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=theta_min, max=theta_max))
 
         parameter_space = SimpleHypergrid(
-            name='polar_coordinates',
+            name='spherical_coordinates',
             dimensions=parameter_dimensions
         )
 
@@ -319,8 +310,7 @@ class TestParetoFrontier:
         optimization_problem = OptimizationProblem(
             parameter_space=parameter_space,
             objective_space=objective_space,
-            objectives=[Objective(name=f'y{i}', minimize=minimize_objective) for i, minimize_objective in
-                        enumerate(minimize_mask)]
+            objectives=[Objective(name=f'y{i}', minimize=minimize_objective) for i, minimize_objective in enumerate(minimize_mask)]
         )
 
         optimization_problem.feature_space.random_state = random.Random(42)
@@ -334,14 +324,24 @@ class TestParetoFrontier:
             axis='index'
         ).index
 
-        random_params_df.loc[optimal_points_index, ['polar_coordinates.radius']] = hypersphere_radius
+        random_params_df.loc[optimal_points_index, ['spherical_coordinates.radius']] = hypersphere_radius
 
+        # We can compute our objectives more efficiently, by maintaining a prefix of r * sin(theta0) * ... * sin(theta{i-1})
+        #
+        prefix = random_params_df['spherical_coordinates.radius']
         objectives_df = pd.DataFrame(
-            {'y0': random_params_df['polar_coordinates.radius'] * np.cos(random_params_df['polar_coordinates.theta1'])})
+            {'y0': prefix * np.cos(random_params_df['spherical_coordinates.theta0'])}
+        )
+
+        assert False
+        for i in range(1, num_output_dimensions):
+            objectives_df[f'y{i}'] = prefix * np.cos(random_params_df[f'spherical_coordinates.theta{i-1}'])
+            prefix = prefix * np.sin(random_params_df[f'spherical_coordinates.theta{i-1}'])
+
 
         for i in range(1, num_output_dimensions):
-            objectives_df[f'y{i}'] = random_params_df['polar_coordinates.radius'] * np.sin(
-                random_params_df[f'polar_coordinates.theta{i}'])
+            objectives_df[f'y{i}'] = random_params_df['spherical_coordinates.radius'] * np.sin(
+                random_params_df[f'spherical_coordinates.theta{i}'])
 
         pareto_df = ParetoFrontier.compute_pareto(
             optimization_problem=optimization_problem,
