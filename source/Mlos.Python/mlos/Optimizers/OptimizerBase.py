@@ -91,12 +91,12 @@ class OptimizerBase(ABC):
         if not len(features_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
 
-        if context is not None and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT :
-                raise ValueError(f"{optimum_definition} not supported if context is provided.")
+        if context is not None and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
+            raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
             return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        elif optimum_definition == OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT :
+        elif optimum_definition == OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
             if context is None:
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
             return self._optimum_within_context(context=context)
@@ -118,7 +118,7 @@ class OptimizerBase(ABC):
             index_of_best = objectives_df[objective.name].idxmax()
         optimum_value = Point.from_dataframe(objectives_df.loc[[index_of_best]])
         config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
-        return config_at_optimum, optimum_value
+        return config_at_optimum[self.optimization_problem.parameter_space.name], optimum_value
 
     @trace()
     def _prediction_based_optimum(self, features_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
@@ -179,7 +179,7 @@ class OptimizerBase(ABC):
                 raise RuntimeError(f"Unknown optimum definition: {optimum_definition}")
 
         config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
-        return config_at_optimum, optimum_value
+        return config_at_optimum[self.optimization_problem.parameter_space.name], optimum_value
 
     @abstractmethod
     def focus(self, subspace):

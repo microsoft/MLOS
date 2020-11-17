@@ -121,7 +121,7 @@ class TestBayesianOptimizer:
                 bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
             self.validate_optima(optimizer=bayesian_optimizer)
 
-            bayesian_optimizer.register(feature_values_pandas_frame=input_values_dataframe, target_values_pandas_frame=output_values_dataframe)
+            bayesian_optimizer.register(parameter_values_pandas_frame=input_values_dataframe, target_values_pandas_frame=output_values_dataframe)
             observed_best_config, observed_best_optimum = bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
             assert observed_best_optimum.y == output_values_dataframe['y'].min()
 
@@ -142,7 +142,7 @@ class TestBayesianOptimizer:
                 target_values_df = pd.DataFrame({'y': [target_value]})
 
                 # Register the observation with the optimizer
-                bayesian_optimizer.register(feature_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+                bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
 
             best_config_point, best_objective = bayesian_optimizer.optimum()
             print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
@@ -169,7 +169,7 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError):
             bayesian_optimizer.optimum()
 
-        bayesian_optimizer.register(feature_values_pandas_frame=pd.DataFrame({'x': [0.]}), target_values_pandas_frame=pd.DataFrame({'y': [1.]}))
+        bayesian_optimizer.register(parameter_values_pandas_frame=pd.DataFrame({'x': [0.]}), target_values_pandas_frame=pd.DataFrame({'y': [1.]}))
         bayesian_optimizer.optimum()
 
     @trace()
@@ -229,7 +229,7 @@ class TestBayesianOptimizer:
                 input_values_df = pd.DataFrame({param_name: [param_value] for param_name, param_value in suggested_params_dict.items()})
                 target_values_df = pd.DataFrame({'y': [target_value]})
 
-                bayesian_optimizer.register(feature_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+                bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
                 if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
                     _, all_targets = bayesian_optimizer.get_all_observations()
                     best_config, optimum = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
@@ -309,7 +309,7 @@ class TestBayesianOptimizer:
                         for param_name, param_value in suggested_params
                     })
                     target_values_df = y.to_dataframe()
-                    bayesian_optimizer.register(feature_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+                    bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
                 best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
                 self.validate_optima(optimizer=bayesian_optimizer)
@@ -382,7 +382,7 @@ class TestBayesianOptimizer:
                         for param_name, param_value in suggested_params
                     })
                     target_values_df = y.to_dataframe()
-                    bayesian_optimizer.register(feature_values_pandas_frame=input_values_df,target_values_pandas_frame=target_values_df)
+                    bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df,target_values_pandas_frame=target_values_df)
 
                 best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")

@@ -151,7 +151,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
 
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(feature_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
+            optimizer.register(parameter_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
 
         return Empty()
 
@@ -163,7 +163,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objectives_df = pd.read_json(observations.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
 
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(feature_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
+            optimizer.register(parameter_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
 
         return Empty()
 

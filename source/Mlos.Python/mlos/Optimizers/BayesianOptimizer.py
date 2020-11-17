@@ -127,7 +127,8 @@ class BayesianOptimizer(OptimizerBase):
                 raise ValueError("Non-empty context space but no context given.")
             assert context in self.optimization_problem.context_space
         random = random or self.num_observed_samples < self.optimizer_config.min_samples_required_for_guided_design_of_experiments
-        suggested_config = self.experiment_designer.suggest(random=random, context_values_dataframe=context.to_dataframe())
+        context_values = context.to_dataframe() if context is not None else None
+        suggested_config = self.experiment_designer.suggest(random=random, context_values_dataframe=context_values)
         assert suggested_config in self.optimization_problem.parameter_space
         return suggested_config
 
@@ -139,7 +140,7 @@ class BayesianOptimizer(OptimizerBase):
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
             raise ValueError("Context space required by optimization problem but not provided.")
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
-                                                                               context_values=context_values_pandas_frame)
+                                                                                            context_values=context_values_pandas_frame)
 
         feature_columns_to_retain = [column for column in feature_values_pandas_frame.columns if column in self._feature_names_set]
         target_columns_to_retain = [column for column in target_values_pandas_frame.columns if column in self._target_names_set]

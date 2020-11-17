@@ -128,11 +128,8 @@ class OptimizationProblem:
 
         """
         if (self.context_space is not None) and (context_values is None):
-
             raise ValueError("Context space required by optimization problem but not provided.")
-        if (product is False) and (len(parameter_values.index) != len(context_values.index)):
 
-            raise ValueError(f"Incompatible shape of configuration and context: {parameter_values.shape} and {context_values.shape}.")
         # prefix column names to adhere to dimensions in hierarchical hypergrid
         feature_values = parameter_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
         if context_values is not None:
@@ -142,6 +139,8 @@ class OptimizationProblem:
                 renamed_context_values['contains_context'] = True
                 feature_values = feature_values.merge(renamed_context_values, how='outer', on='contains_context')
             else:
+                if len(parameter_values.index) != len(context_values.index):
+                    raise ValueError(f"Incompatible shape of configuration and context: {parameter_values.shape} and {context_values.shape}.")
                 feature_values = pd.concat([feature_values, renamed_context_values], axis=1)
 
         else:
