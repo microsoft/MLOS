@@ -286,7 +286,7 @@ jobs:
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make dotnet-test
     - name: Run ${{ matrix.configuration }} cmake build (CXX=${{ matrix.cxx }})
-      timeout-minutes: 5
+      timeout-minutes: 10
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
@@ -294,7 +294,7 @@ jobs:
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           test -e target/bin/${{ matrix.configuration }}/x86_64/Mlos.UnitTest
     - name: Run ${{ matrix.configuration }} cmake test
-      timeout-minutes: 5
+      timeout-minutes: 10
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
