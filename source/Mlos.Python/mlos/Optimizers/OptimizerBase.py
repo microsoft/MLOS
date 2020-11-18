@@ -4,7 +4,6 @@
 #
 from abc import ABC, abstractmethod
 from typing import Tuple
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.PredictedValueUtilityFunction import PredictedValueUtilityFunction
 
 import numpy as np
 import pandas as pd
@@ -13,6 +12,8 @@ import scipy.stats
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.PredictedValueUtilityFunction import PredictedValueUtilityFunction
+
 from mlos.Spaces import Point
 from mlos.Tracer import trace
 
@@ -25,6 +26,8 @@ class OptimizerBase(ABC):
     def __init__(self, optimization_problem: OptimizationProblem):
         self.optimization_problem = optimization_problem
         self.optimizer_config = None # TODO: pass from subclasses.
+        self.surrogate_model = None
+        self.experiment_designer = None
 
     @property
     def trained(self):

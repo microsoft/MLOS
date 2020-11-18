@@ -522,6 +522,12 @@ class TestBayesianOptimizer:
              local_optimizer.register(parameter_values_pandas_frame=parameter_df,
                                       target_values_pandas_frame=target_df)
 
+
+        with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
+            local_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                     target_values_pandas_frame=target_df,
+                                     context_values_pandas_frame=context_df.iloc[:-1])
+
         local_optimizer.register(parameter_values_pandas_frame=parameter_df,
                                  target_values_pandas_frame=target_df,
                                  context_values_pandas_frame=context_df)
@@ -532,6 +538,19 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError, match="Context required"):
             local_optimizer.predict(parameter_values_pandas_frame=parameter_df)
 
+        suggestion = local_optimizer.suggest(context=context_space.random())
+        assert isinstance(suggestion, Point)
+        assert input_space.contains_point(suggestion)
+
+        with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
+            # unaligned parameters and context
+            local_optimizer.predict(parameter_values_pandas_frame=parameter_df,
+                                    context_values_pandas_frame=context_df.iloc[:-1])
+
+        predictions = local_optimizer.predict(parameter_values_pandas_frame=parameter_df,
+                                              context_values_pandas_frame=context_df)
+        predictions_df = predictions.get_dataframe()
+        assert len(predictions_df) == len(parameter_df)
 
         remote_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=optimization_problem,
