@@ -13,14 +13,15 @@ class ParetoFrontier:
     This class will have several pieces of functionality:
         1. It will be able to construct and maintain a pareto frontier from a set of observations for one or more objectives.
         2. It will be able to update the frontier upon receiving a new observation.
-        3. It will be able to decide whether any given point is dominated or not (needed for Monte Carlo utility functions)
+        3. It will be able to decide whether any given point is dominated or not (needed for Monte Carlo utility functions).
 
     Each point will be characterized by:
         1. Configuration parameters
         2. Objective function values
+        3. Possibly context values
 
     A point belongs to a pareto frontier if it is not dominated by any other point. So if two points have the exact same values
-    for all objectives (but different configurations), we will consider both of them to be pareto efficient.
+    for all objectives (but possibly different configurations), we will consider both of them to be pareto efficient.
 
 
     """
