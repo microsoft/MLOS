@@ -73,114 +73,9 @@ class TestParetoFrontier:
 
 
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])
-    @pytest.mark.parametrize("num_output_dimensions", [2])
+    @pytest.mark.parametrize("num_output_dimensions", [2, 10])
     @pytest.mark.parametrize("num_points", [100, 10000])
     def test_hyperspheres(self, minimize, num_output_dimensions, num_points):
-        """Use polar coordinates to generate cartesian coordinates of points on the surface and interior of a hypershpere.
-
-        The idea is that we can know which points are optimal upfront.
-
-        :param self:
-        :return:
-        """
-        max_radius = 10
-
-        parameter_dimensions = [
-            ContinuousDimension(name="radius", min=0, max=max_radius)
-        ]
-
-        # Keep track of which objectives to minimize.
-        #
-        minimize_by_objective: List[bool] = []
-
-        for i in range(num_output_dimensions):
-            if minimize == "all":
-                minimize_this_objective = True
-            elif minimize == "none":
-                minimize_this_objective = False
-            elif minimize == "some":
-                # Alternate between first and third quarters.
-                #
-                minimize_this_objective = ((i % 2) == 1)
-            else:
-                assert False
-
-            minimize_by_objective.append(minimize_this_objective)
-
-            if minimize_this_objective:
-                minimum = math.pi
-                maximum = math.pi * 1.5
-            else:
-                minimum = 0
-                maximum = math.pi / 2
-
-            if i == 0:
-                continue
-
-            parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=minimum, max=maximum))
-
-
-        parameter_space = SimpleHypergrid(
-            name='polar_coordinates',
-            dimensions=parameter_dimensions
-        )
-
-        objective_space = SimpleHypergrid(
-            name='rectangular_coordinates',
-            dimensions=[
-                ContinuousDimension(name=f"y{i}", min=0, max=max_radius)
-                for i in range(num_output_dimensions)
-            ]
-        )
-
-        optimization_problem = OptimizationProblem(
-            parameter_space=parameter_space,
-            objective_space=objective_space,
-            objectives=[Objective(name=f'y{i}', minimize=minimize_objective) for i, minimize_objective in enumerate(minimize_by_objective)]
-        )
-
-        optimization_problem.feature_space.random_state = random.Random(42)
-        random_params_df = optimization_problem.feature_space.random_dataframe(num_points)
-
-        # Let's randomly subsample 10% of points in random_params_df and make those points pareto optimal.
-        #
-        optimal_points_index = random_params_df.sample(
-            frac=0.1,
-            replace=False,
-            axis='index'
-        ).index
-
-        random_params_df.loc[optimal_points_index, ['polar_coordinates.radius']] = max_radius
-
-        objectives_df = pd.DataFrame({'y0': random_params_df['polar_coordinates.radius'] * np.cos(random_params_df['polar_coordinates.theta1'])})
-
-        for i in range(1, num_output_dimensions):
-            objectives_df[f'y{i}'] = random_params_df['polar_coordinates.radius'] * np.sin(random_params_df[f'polar_coordinates.theta{i}'])
-
-
-        pareto_df = ParetoFrontier.compute_pareto(
-            optimization_problem=optimization_problem,
-            objectives_df=objectives_df
-        )
-
-        if not optimal_points_index.difference(pareto_df.index.intersection(optimal_points_index)).empty:
-            objectives_df_copy = objectives_df.copy(deep=True)
-            objectives_df_copy['y1'] = -objectives_df_copy['y1']
-            objectives_df.plot.scatter("y0", "y1")
-            objectives_df_copy.plot.scatter("y0", "y1")
-            objectives_df.loc[optimal_points_index].plot.scatter("y0", "y1")
-            pareto_df.plot.scatter("y0", "y1", marker='x')
-            plt.show()
-
-        # We know that all of the pareto efficient points must be on the frontier.
-        #
-        assert optimal_points_index.difference(pareto_df.index.intersection(optimal_points_index)).empty
-        assert len(pareto_df.index) >= len(optimal_points_index)
-
-    @pytest.mark.parametrize("minimize", ["all", "none", "some"])
-    @pytest.mark.parametrize("num_output_dimensions", [2])
-    @pytest.mark.parametrize("num_points", [100, 10000])
-    def test_hyperspheres_2(self, minimize, num_output_dimensions, num_points):
         """Uses a hypersphere to validate that ParetoFrontier can correctly identify pareto-optimal points.
 
 
@@ -329,19 +224,42 @@ class TestParetoFrontier:
         # We can compute our objectives more efficiently, by maintaining a prefix of r * sin(theta0) * ... * sin(theta{i-1})
         #
         prefix = random_params_df['spherical_coordinates.radius']
-        objectives_df = pd.DataFrame(
-            {'y0': prefix * np.cos(random_params_df['spherical_coordinates.theta0'])}
-        )
+        objectives_df = pd.DataFrame()
 
-        assert False
-        for i in range(1, num_output_dimensions):
-            objectives_df[f'y{i}'] = prefix * np.cos(random_params_df[f'spherical_coordinates.theta{i-1}'])
-            prefix = prefix * np.sin(random_params_df[f'spherical_coordinates.theta{i-1}'])
+        for i in range(num_output_dimensions-1):
+            objectives_df[f'y{i}'] = prefix * np.cos(random_params_df[f'spherical_coordinates.theta{i}'])
+            prefix = prefix * np.sin(random_params_df[f'spherical_coordinates.theta{i}'])
+
+        # Conveniently, by the time the loop exits, the prefix is the value of our last objective.
+        #
+        if minimize == "all":
+            # Must flip the prefix first, since an even number of sin factors contributed to it.
+            #
+            objectives_df[f'y{num_output_dimensions-1}'] = -prefix
+        else:
+            objectives_df[f'y{num_output_dimensions - 1}'] = prefix
 
 
-        for i in range(1, num_output_dimensions):
-            objectives_df[f'y{i}'] = random_params_df['spherical_coordinates.radius'] * np.sin(
-                random_params_df[f'spherical_coordinates.theta{i}'])
+        # Just as conveniently, we can double check all of our math by invoking Pythagoras. Basically:
+        #
+        #   assert y0**2 + y1**2 + ... == radius**2
+        #
+        assert (np.power(objectives_df, 2).sum(axis=1)-np.power(random_params_df["spherical_coordinates.radius"], 2) < 0.000001).all()
+
+
+        # Just a few more sanity checks before we do the pareto computation.
+        #
+        if minimize == "all":
+            assert (objectives_df <= 0).all().all()
+        elif minimize == "none":
+            assert (objectives_df >= 0).all().all()
+        else:
+            for column, minimize_column in zip(objectives_df, minimize_mask):
+                if minimize_column:
+                    assert (objectives_df[column] <= 0).all()
+                else:
+                    assert (objectives_df[column] >= 0).all()
+
 
         pareto_df = ParetoFrontier.compute_pareto(
             optimization_problem=optimization_problem,
