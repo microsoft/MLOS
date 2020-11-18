@@ -112,10 +112,11 @@ class BayesianOptimizer(OptimizerBase):
     def compute_surrogate_model_goodness_of_fit(self):
         if not self.surrogate_model.trained:
             raise RuntimeError("Model has not been trained yet.")
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=self._parameter_values_df.copy(),
+                                                                                            context_values=self._context_values_df.copy())
         return self.surrogate_model.compute_goodness_of_fit(
-            parameters_df=self._parameter_values_df.copy(),
+            features_df=feature_values_pandas_frame,
             target_df=self._target_values_df.copy(),
-            context_df=self._context_values_df.copy(),
             data_set_type=DataSetType.TRAIN
         )
 
