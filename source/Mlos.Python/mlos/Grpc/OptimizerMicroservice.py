@@ -134,12 +134,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         # TODO: return an error if optimizer not found
         #
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            print(request.Context)
-            if request.Context.ContextJsonString != "":
-                request_context = Point(**json.loads(request.Context.ContextJsonString))
-            else:
-                request_context = None
-            suggested_params = optimizer.suggest(random=request.Random, context=request_context)
+            suggested_params = optimizer.suggest(random=request.Random, context=request.Context)
 
         return OptimizerService_pb2.ConfigurationParameters(
             ParametersJsonString=json.dumps(suggested_params.to_dict())
@@ -156,7 +151,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
 
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(parameter_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
+            optimizer.register(feature_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
 
         return Empty()
 
@@ -164,16 +159,11 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         # TODO: stop ignoring context
         #
         observations = request.Observations
-        parameters_df = pd.read_json(observations.ConfigurationParameters.ParametersJsonString, orient='index')
-        if observations.Context.ContextJsonString:
-            context_df = pd.read_json(observations.Context.ContextJsonString, orient='index')
-        else:
-            context_df = None
+        features_df = pd.read_json(observations.Features.FeaturesJsonString, orient='index')
         objectives_df = pd.read_json(observations.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
 
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(parameter_values_pandas_frame=parameters_df, target_values_pandas_frame=objectives_df,
-                               context_values_pandas_frame=context_df)
+            optimizer.register(feature_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
 
         return Empty()
 

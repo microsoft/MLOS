@@ -91,8 +91,9 @@ class BayesianOptimizerProxy(OptimizerBase):
 
     @trace()
     def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
-        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
-                                                                                            context_values=context_values_pandas_frame)
+        if context_values_pandas_frame is not None:
+            raise NotImplementedError("Context not supported on remote optimizers")
+        feature_values_pandas_frame = parameter_values_pandas_frame
         register_request = OptimizerService_pb2.RegisterObservationsRequest(
             OptimizerHandle=self.optimizer_handle,
             Observations=OptimizerService_pb2.Observations(
@@ -115,9 +116,9 @@ class BayesianOptimizerProxy(OptimizerBase):
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
-        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
-                                                                                            context_values=context_values_pandas_frame)
-        feature_values_dict = feature_values_pandas_frame.to_dict(orient='list')
+        if context_values_pandas_frame is not None:
+            raise NotImplementedError("Context not supported on remote optimizers")
+        feature_values_dict = parameter_values_pandas_frame.to_dict(orient='list')
         prediction_request = OptimizerService_pb2.PredictRequest(
             OptimizerHandle=self.optimizer_handle,
             Features=OptimizerService_pb2.Features(
