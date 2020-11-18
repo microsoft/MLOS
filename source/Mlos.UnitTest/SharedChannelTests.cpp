@@ -26,10 +26,10 @@ public:
     }
 
 private:
-    std::array<byte, T> array = { 0 };
+    std::array<byte, T> array { { 0 } };
 };
 
-namespace
+namespace SharedChannelTests
 {
 #ifndef DEBUG
 // Verify buffer size.
@@ -212,7 +212,7 @@ TEST(SharedChannel, VerifySendingReceivingArrayStruct)
     ChannelSynchronization sync = {};
     TestSharedChannel sharedChannel(sync, buffer, 128);
 
-    Mlos::UnitTest::Line line;
+    Mlos::UnitTest::Line line = {};
     line.Points[0] = { 3, 5 };
     line.Points[1] = { 7, 9 };
     line.Height = { 1.3f, 3.9f };
@@ -222,8 +222,8 @@ TEST(SharedChannel, VerifySendingReceivingArrayStruct)
     //
     ObjectDeserializationCallback::Mlos::UnitTest::Line_Callback = [line](Proxy::Mlos::UnitTest::Line&& recvLine)
         {
-            EXPECT_EQ(recvLine.Points()[0].X(), 3.0);
-            EXPECT_EQ(recvLine.Points()[0].Y(), 5);
+            EXPECT_EQ(recvLine.Points()[0].X(), line.Points[0].X);
+            EXPECT_EQ(recvLine.Points()[0].Y(), line.Points[0].Y);
             EXPECT_EQ(recvLine.Points()[1].X(), 7);
             EXPECT_EQ(recvLine.Points()[1].Y(), 9);
             EXPECT_EQ(recvLine.Height()[0], 1.3f);
@@ -368,6 +368,7 @@ TEST(SharedChannel, StressSendReceive)
     bool result =
         resultFromWriter1.get() &&
         resultFromWriter2.get();
+    MLOS_UNUSED_ARG(result);
 
     sharedChannel.SendMessage(Mlos::Core::TerminateReaderThreadRequestMessage());
 
@@ -376,5 +377,7 @@ TEST(SharedChannel, StressSendReceive)
     result =
         resultFromReader1.get() &&
         resultFromReader2.get();
+
+    EXPECT_EQ(result, true);
 }
 }

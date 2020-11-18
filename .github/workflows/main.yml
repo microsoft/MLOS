@@ -213,7 +213,7 @@ jobs:
         #load: true
 
   linux-build-test:
-    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} build/test C++/C#
+    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} ${{ matrix.cxx }} build/test C++/C#
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 30
@@ -221,6 +221,12 @@ jobs:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
         configuration: [Debug, Release]
+        cxx: [clang++-10, g++]
+        include:
+          - cxx: clang++-10
+            cc: clang-10
+          - cxx: g++
+            cc: gcc
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -258,8 +264,8 @@ jobs:
     - name: Start ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
-        echo $UID
         docker run -it -d -v $PWD:/src/MLOS -u $UID --env CONFIGURATION=${{ matrix.configuration }} \
+          --env CC=${{ matrix.cc }} --env CXX=${{ matrix.cxx }} \
           --name mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container
@@ -279,7 +285,7 @@ jobs:
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make dotnet-test
-    - name: Run ${{ matrix.configuration }} cmake build
+    - name: Run ${{ matrix.configuration }} cmake build (CXX=${{ matrix.cxx }})
       timeout-minutes: 5
       shell: bash
       run: |

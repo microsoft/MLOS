@@ -50,7 +50,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
         public override void WriteEndFile()
         {
             IndentationLevel--;
-            WriteLine("};");
+            WriteLine("}");
             WriteLine();
         }
 
@@ -99,7 +99,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
             WriteLine("return totalDataSize;");
             IndentationLevel--;
 
-            WriteLine("};");
+            WriteLine("}");
             WriteLine();
         }
 
