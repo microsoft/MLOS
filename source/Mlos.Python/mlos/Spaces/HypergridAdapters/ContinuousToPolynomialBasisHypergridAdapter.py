@@ -148,6 +148,14 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
     def target(self) -> Hypergrid:
         return self._target
 
+    @property
+    def polynomial_features_kwargs(self) -> dict:
+        return self._polynomial_features_kwargs
+
+    @property
+    def nan_imputed_finite_value(self):
+        return self._nan_imputed_finite_value
+
     def get_column_names_for_polynomial_features(self, degree=None):
         # column names ordered by target dimension index as this coincides with the polynomial_features.powers_ table
         sorted_by_column_index = {k: v for k, v in sorted(self._target_polynomial_feature_map.items(), key=lambda item: item[1])}
@@ -191,9 +199,6 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         for i, dim_name in enumerate(self._adaptee_dimension_names_to_transform):
             if dim_name in df.columns.values:
                 x_to_transform[:, i] = df[dim_name]
-            else:
-                # need placeholder for all expected input dimensions
-                x_to_transform[:, i] = np.zeros((len(df.index), 1))
 
         all_poly_features = self._polynomial_features.transform(x_to_transform)
         for target_dim_name in self._target_polynomial_feature_map:
@@ -204,6 +209,15 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
     def _unproject_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
-        # unproject simply drops the higher degree polynomial feature columns
-        df.drop(columns=self._target_polynomial_feature_map.keys(), inplace=True)
+
+        # unproject simply drops the monomial columns whose degree is not 1
+        polynomial_feature_powers = self.get_polynomial_feature_powers_table()
+        column_names_to_drop = []
+        for target_dim_name, powers_table_index in self._target_polynomial_feature_map.items():
+            target_powers = polynomial_feature_powers[powers_table_index]
+            if target_powers.sum() == 1:
+                continue
+            column_names_to_drop.append(target_dim_name)
+        df.drop(columns=column_names_to_drop, inplace=True)
+
         return df
