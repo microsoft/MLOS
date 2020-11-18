@@ -29,13 +29,17 @@ if(NOT mlos_POPULATED)
     add_subdirectory("${mlos_SOURCE_DIR}" "${mlos_BINARY_DIR}" EXCLUDE_FROM_ALL)
 endif()
 
-# Add the Mlos project's codegen output directories to our
-# TODO: make this use target_include_directories?
-include_directories("${mlos_SOURCE_DIR}/out/Mlos.CodeGen.out/${MLOS_CMAKE_BUILD_TYPE}")
-
 # We instruct it look in the following path for Mlos codegen outputs.
 # Note: This should match the path set in the C# build props.
 # See Also:
 # - ExternalIntegrationExample.SettingsRegistry/ExternalIntegrationExample.SettingsRegistry.csproj
 # - ExternalIntegrationExample.SettingsRegistry/build/Common.props
 include_directories(./Mlos.Codegen.out)
+
+# TODO: Add this part as a function that we provide in a .cmake file in the mlos_SOURCE_DIR that's also included by the user:
+
+# Add the Mlos project's codegen output directories to our
+# TODO: make this use target_include_directories?
+include_directories("${mlos_SOURCE_DIR}/out/Mlos.CodeGen.out/${MLOS_CMAKE_BUILD_TYPE}")
+
+
