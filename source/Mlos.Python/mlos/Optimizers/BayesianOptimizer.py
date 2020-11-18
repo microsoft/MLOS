@@ -91,7 +91,7 @@ class BayesianOptimizer(OptimizerBase):
         self._parameter_names_set = set(self._parameter_names)
 
         self._context_names = ([dimension.name for dimension in self.optimization_problem.context_space.dimensions]
-                                if self.optimization_problem.context_space else [])
+                               if self.optimization_problem.context_space else [])
         self._context_names_set = set(self._context_names)
 
         self._target_names = [dimension.name for dimension in self.optimization_problem.objective_space.dimensions]
