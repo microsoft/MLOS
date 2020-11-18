@@ -32,6 +32,12 @@
   <PropertyGroup>
     <MlosCodeGenOutputPathRoot Condition="'$(MlosCodeGenOutputPathRoot)' == ''">$(BaseDir)\out\Mlos.CodeGen.out\$(BuildType)</MlosCodeGenOutputPathRoot>
   </PropertyGroup>
+  <!-- Convenience properties to detect when we're in certain build environments. -->
+  <PropertyGroup>
+    <!-- https://onebranch.visualstudio.com/Pipeline/_wiki/wikis/Pipeline.wiki/325/Versioning -->
+    <CdpxBuildPipeline Condition="'$(CDP_COMMIT_ID)' != '' Or '$(CDP_BUILD_NUMBER)' != ''">true</CdpxBuildPipeline>
+    <HasAdoPipeline Condition="Exists('$(BaseDir)\.pipelines\pipeline.user.windows.yml')">true</HasAdoPipeline>
+  </PropertyGroup>
   <!-- Configure warning levels and errors. -->
   <PropertyGroup>
     <WarningLevel>4</WarningLevel>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    This file provides the build targets to use the Mlos.SettingsSystem.CodeGen tool to
+    a) Generate output code from the MlosSettingsRegistryDefinition input-cs, and
+    b) And (for the case of C#) combine and compile them with the resulting .cs files to produce a SettingsRegistry dll.
+
+    See ExternalIntegrationExample.csproj for example usage.
+  -->
+
+  <PropertyGroup>
+    <!--
+      A semi-colon separated list of supported TargetFrameworks.
+      (for error checking target tasks below)
+    -->
+    <MlosSupportedTargetFrameworks>;netcoreapp3.1;</MlosSupportedTargetFrameworks>
+  </PropertyGroup>
+
+  <!-- Set path to Codegen executable. -->
+  <PropertyGroup>
+    <!--
+      Find the relative path to the codegen tool from this file based on the package layout construction.
+      Note: This expects "dotnet" to be on the environment search PATH.
+    -->
+    <MlosSettingsSystemCodeGenDll>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)/../tools/Mlos.SettingsSystem.CodeGen.dll'))</MlosSettingsSystemCodeGenDll>
+    <MlosSettingsSystemCodeGenExe>dotnet &quot;$(MlosSettingsSystemCodeGenDll)&quot;</MlosSettingsSystemCodeGenExe>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- Turn the project provided MlosSettingsSystemCodeGenOutputDirectory into an absolute path -->
+    <MlosSettingsSystemCodeGenAbsoluteOutputPath></MlosSettingsSystemCodeGenAbsoluteOutputPath><!-- Initialize as empty -->
+    <MlosSettingsSystemCodeGenAbsoluteOutputPath Condition="'$(MlosSettingsSystemCodeGenOutputDirectory)' != ''">$([System.IO.Path]::GetFullPath('$(MlosSettingsSystemCodeGenOutputDirectory)'))</MlosSettingsSystemCodeGenAbsoluteOutputPath>
+
+    <!-- Turn the project provided settings registry binplace output dir into an absoluate path -->
+    <MlosSettingsRegistryAssemblyAbsoluteOutputPath></MlosSettingsRegistryAssemblyAbsoluteOutputPath><!-- Intialize as empty -->
+    <MlosSettingsRegistryAssemblyAbsoluteOutputPath Condition="'$(MlosSettingsRegistryAssemblyOutputDirectory)' != ''">$([System.IO.Path]::GetFullPath('$(MlosSettingsRegistryAssemblyOutputDirectory)'))</MlosSettingsRegistryAssemblyAbsoluteOutputPath>
+  </PropertyGroup>
+
+  <!-- Track the set of code gen outputs *from this project* (reference projects handled next) for incremental build purposes. -->
+  <ItemGroup Label="Mlos CodeGen Outputs" Condition="'@(MlosSettingsRegistryDefinition->Count())' != 0">
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_callbacks.h" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.h" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_base.h" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_base.cs" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_deserialize.cs" />
+    <MlosSettingsSystemCodeGenOutput Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.cs" />
+  </ItemGroup>
+
+  <!--
+    Combine the user provided settings registry definitions with the C# code gen output
+    we created from them when compiling the output settings registry assembly dll.
+  -->
+  <ItemGroup>
+    <Compile Include="@(MlosSettingsRegistryDefinition -> '%(FullPath)')" />
+    <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_base.cs" />
+    <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_deserialize.cs" />
+    <Compile Include="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)/$(MlosSettingsSystemCodeGenOutputBasename)_dispatch.cs" />
+  </ItemGroup>
+
+  <!-- Codegen using internal compiler in the Mlos.SettingsSystem.CodeGen tool -->
+  <!--
+    Make sure that codegen is run whenever compile is.
+    Note: We don't use AfterTargets="AfterResolveReferences" since Pack targets also use it Restore dependencies,
+    but Pack may not actually need to re-build.
+  -->
+  <PropertyGroup>
+    <BuildDependsOn>$(BuildDependsOn);MlosSettingsSystemCodeGen</BuildDependsOn>
+  </PropertyGroup>
+  <!--
+    Don't check the input file timestamps against the outputs for now.
+    We have separate logic in the codegen tool to only overwrite output files when their content changes.
+  <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Inputs="@(MlosSettingsRegistryDefinition);$(MlosSettingsSystemCodeGenDll)" Outputs="@(MlosSettingsSystemCodeGenOutput)">
+  -->
+  <Target Name="MlosSettingsSystemCodeGen" BeforeTargets="BeforeCompile;_GenerateCompileInputs" Outputs="@(MlosSettingsSystemCodeGenOutput)">
+    <!-- Perform some error checking. -->
+    <Message Text="Running Mlos.SettingsSystem.CodeGen on '@(MlosSettingsRegistryDefinition)'" Importance="high" />
+    <Error Text="MlosSettingsSystemCodeGenOutputDirectory is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsSystemCodeGenAbsoluteOutputPath)' == ''" />
+    <Error Text="MlosSettingsSystemCodeGenOutputBasename is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsSystemCodeGenOutputBasename)' == ''" />
+    <Error Text="No MlosSettingsRegistryDefinition Items found for '$(MSBuildProjectFile)' project." Condition="'@(MlosSettingsRegistryDefinition->Count())' == 0" />
+    <Error Text="Unsupported TargetFramework ('$(TargetFramework)') for '$(MSBuildProjectFile)' project.  Mlos.SettingsSystem.CodeGen only supports the following TargetFrameworks: $(MlosSupportedTargetFrameworks)" Condition="$(MlosSupportedTargetFrameworks.Contains(';$(TargetFramework);')) == false" />
+
+    <!-- Construct the arguments. -->
+    <PropertyGroup>
+      <MlosSettingsSystemCodeGenInputArgs>@(MlosSettingsRegistryDefinition -> '--input-cs=&quot;%(FullPath)&quot;', ' ')</MlosSettingsSystemCodeGenInputArgs>
+    </PropertyGroup>
+
+    <!-- Run the tool. -->
+    <Exec ConsoleToMsBuild="true" Condition="'$(SkipMlosSettingsSystemCodeGen)' != 'true'" Command="$(MlosSettingsSystemCodeGenExe) $(MlosSettingsSystemCodeGenInputArgs) --output-path=&quot;$(MlosSettingsSystemCodeGenAbsoluteOutputPath)&quot; --output-basename=$(MlosSettingsSystemCodeGenOutputBasename)">
+      <Output TaskParameter="ConsoleOutput" ItemName="OutputOfExec" />
+    </Exec>
+  </Target>
+
+  <!-- Binplace settings registry assembly dlls to the requested target folder -->
+  <Target Name="BinplaceMlosSettingsRegistryDll" AfterTargets="Build">
+    <Message Text="WARNING: MlosSettingsRegistryAssemblyOutputDirectory is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' != ''" Importance="high" />
+    <Copy SourceFiles="$(OutputPath)/$(TargetFileName)" DestinationFolder="$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)/" UseHardlinksIfPossible="true" Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' != ''" />
+  </Target>
+
+  <Target Name="CleanMlosSettingsSystemCodeGen" AfterTargets="BeforeClean">
+    <RemoveDir Directories="$(MlosSettingsSystemCodeGenAbsoluteOutputPath)" Condition="'$(MlosSettingsSystemCodeGenAbsoluteOutputPath)' != ''" />
+  </Target>
+
+  <!--
+    Note: We can't add PackageReference items here because we're already in the Restore target by the time this file is evaluated,
+    but we can at least add some sanity checks for them to make it easier to author correct .csproj files that use MLOS CodeGen.
+  -->
+  <Target Name="CheckReferences" AfterTargets="ResolvePackageAssets">
+    <!-- Lookup the resolved packages for the current project and filter to just the Mlos packages. -->
+    <ItemGroup>
+      <MlosPackageRefs Include="%(RuntimeCopyLocalItems.Identity)" Condition="$([System.String]::new('%(NuGetPackageId)').StartsWith('Mlos.'))">
+        <PackageName Condition="'@(RuntimeCopyLocalItems->'%(NugetPackageId)')' != ''">@(RuntimeCopyLocalItems->'%(NuGetPackageId)')</PackageName>
+        <PackageName Condition="'@(RuntimeCopyLocalItems->'%(PackageName)')' != ''">@(RuntimeCopyLocalItems->'%(PackageName)')</PackageName>
+        <PackageVersion Condition="'@(RuntimeCopyLocalItems->'%(NugetPackageVersion)')' != ''">@(RuntimeCopyLocalItems->'%(NuGetPackageVersion)')</PackageVersion>
+        <PackageVersion Condition="'@(RuntimeCopyLocalItems->'%(PackageVersion)')' != ''">@(RuntimeCopyLocalItems->'%(PackageVersion)')</PackageVersion>
+      </MlosPackageRefs>
+    </ItemGroup>
+
+    <!-- Check for some additional compile library requirements. -->
+    <PropertyGroup>
+      <MlosPackageNames>;@(MlosPackageRefs->'%(PackageName)');</MlosPackageNames>
+    </PropertyGroup>
+    <Error Text="Missing Mlos.SettingsSystem.Attributes PackageReference in '$(MSBuildProjectFile)' project."
+      Condition="$(MlosPackageNames.Contains(';Mlos.SettingsSystem.Attributes;')) == false" />
+    <Error Text="Missing Mlos.NetCore PackageReference in '$(MSBuildProjectFile)' project."
+      Condition="$(MlosPackageNames.Contains(';Mlos.NetCore;')) == false" />
+
+    <!-- Lookup this package's version. -->
+    <ItemGroup>
+      <MlosCodeGenPackageNuspecs Include="$(MSBuildThisFileDirectory)/../*.nuspec" />
+    </ItemGroup>
+    <Error Text="Expecting a single package nuspec: @(MlosCodeGenPackageNuspecs" Condition="@(MlosCodeGenPackageNuspecs->Count()) != 1" />
+    <XmlPeek XmlInputPath="@(MlosCodeGenPackageNuspecs)"
+             Namespaces="&lt;Namespace Prefix='ns' Uri='http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd'/&gt;"
+             Query="/ns:package/ns:metadata/ns:version/text()">
+      <Output TaskParameter="Result" PropertyName="MlosCodeGenPackageVersion" />
+    </XmlPeek>
+    <Error Text="Failed to lookup package version." Condition="'$(MlosCodeGenPackageVersion)' == ''" />
+    <!-- Combine it with the library package versions. -->
+    <ItemGroup>
+      <MlosPackageVersions Include="%(MlosPackageRefs.PackageVersion)" />
+      <MlosPackageVersions Include="$(MlosCodeGenPackageVersion)" />
+    </ItemGroup>
+    <!-- Make sure they're consistent. -->
+    <RemoveDuplicates Inputs="@(MlosPackageVersions)">
+      <Output TaskParameter="Filtered" ItemName="MlosUniquePackageVersions" />
+    </RemoveDuplicates>
+    <Error Text="Multiple Mlos.* PackageReference Versions found in '$(MSBuildProjectFile)' project: @(MlosUniquePackageVersions)"
+      Condition="'@(MlosUniquePackageVersions->Count())' != '1'" />
+  </Target>
+</Project>

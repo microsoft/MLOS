@@ -71,4 +71,11 @@
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
   <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />
+  <!-- Add Mlos.Core codegen output to the package. -->
+  <ItemGroup Label="AdditionalPackageContent">
+    <None Include="@(MlosCodeGenOutput)">
+      <PackagePath>source/Mlos.CodeGen.out/$(SettingsSystemCodeGenOutputPath)/</PackagePath>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
 </Project>

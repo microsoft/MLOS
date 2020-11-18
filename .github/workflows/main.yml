@@ -33,13 +33,21 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     # Runs multiple commands using the runners shell
-    - name: Run ${{ matrix.configuration }} msbuild
+    - name: Msbuild/test ${{ matrix.configuration }}
       timeout-minutes: 15
       shell: cmd
       run: |
         set Configuration=${{ matrix.configuration }}
         scripts\build.windows.cmd
+    - name: Pack/test ${{ matrix.configuration }}
+      timeout-minutes: 15
+      shell: cmd
+      run: |
+        set Configuration=${{ matrix.configuration }}
+        scripts\package.windows.cmd
 
   # Docker build process overview:
   # - We currently use the docker.pkg.github.com package registry as a staging
@@ -230,6 +238,8 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
@@ -285,6 +295,14 @@ jobs:
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make dotnet-test
+    - name: Run ${{ matrix.configuration }} dotnet pack test
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make -C source/Mlos.NetCore.Components.Packages/
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          dotnet build external/ExternalIntegrationExample/ExternalIntegrationExample.SettingsRegistry/
     - name: Run ${{ matrix.configuration }} cmake build (CXX=${{ matrix.cxx }})
       timeout-minutes: 5
       shell: bash

@@ -15,4 +15,36 @@
       <Link>Properties\PipelineAssemblyInfo.cs</Link>
     </Compile>
   </ItemGroup>
+
+  <!-- If we're not using the pipeline version, then use the git version by default. -->
+  <PropertyGroup>
+    <PackageUsesGitVersionInfo Condition="'$(UsePipelineVersion)' == 'true'">false</PackageUsesGitVersionInfo>
+    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' == '' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true' And '$(HasAdoPipeline)' != 'true'">true</PackageUsesGitVersionInfo>
+    <PackageUsesGitVersionInfo Condition="'$(PackageUsesGitVersionInfo)' != 'true'">false</PackageUsesGitVersionInfo>
+  </PropertyGroup>
+  <!--
+    When packaging, we need to be able to reference consistent and unique versions.
+    The easiest way to do that is to let GitVersionTask update them in the assemblies for us.
+    Note: We only do this when not using the pipeline version.
+  -->
+  <PropertyGroup>
+    <DisableGitVersionTask>true</DisableGitVersionTask>
+    <DisableGitVersionTask Condition="'$(PackageUsesGitVersionInfo)' == 'true'">false</DisableGitVersionTask>
+    <GitVersion_NoFetchEnabled>true</GitVersion_NoFetchEnabled>
+    <WriteVersionInfoToBuildLog>false</WriteVersionInfoToBuildLog>
+    <!--
+    <GetVersion>$(PackageUsesGitVersionInfo)</GetVersion>
+    <UpdateAssemblyInfo>$(PackageUsesGitVersionInfo)</UpdateAssemblyInfo>
+    <UpdateVersionProperties>$(PackageUsesGitVersionInfo)</UpdateVersionProperties>
+    <UseFullSemVerForNuGet>$(PackageUsesGitVersionInfo)</UseFullSemVerForNuGet>
+    <GenerateGitVersionInformation>$(PackageUsesGitVersionInfo)</GenerateGitVersionInformation>
+    -->
+  </PropertyGroup>
+  <!-- Add a build tool for discovering version info from the repository. -->
+  <ItemGroup Condition="'$(PackageUsesGitVersionInfo)' == 'true' And '$(DisableGitVersionTask)' != 'true'">
+    <PackageReference Include="GitVersionTask" Version="5.5.0">
+      <!-- Don't include its assets in any build output or dependency references. -->
+      <PrivateAssets>All</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 </Project>
