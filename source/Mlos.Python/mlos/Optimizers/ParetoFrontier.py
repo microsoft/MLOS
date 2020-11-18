@@ -39,7 +39,6 @@ class ParetoFrontier:
         if objectives_df is not None:
             assert all(column in optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
 
-        # TODO: maybe prealloate larger arrays...
         self.optimization_problem = optimization_problem
         self.features_df = features_df
         self.objectives_df = objectives_df
@@ -91,5 +90,4 @@ class ParetoFrontier:
                 pareto_df[objective.name] = -pareto_df[objective.name]
 
         return pareto_df
-
 
