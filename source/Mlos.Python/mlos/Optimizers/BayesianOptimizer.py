@@ -182,7 +182,7 @@ class BayesianOptimizer(OptimizerBase):
         # TODO: ascertain that min_samples_required ... is more than min_samples to fit the model
         if self.num_observed_samples >= self.optimizer_config.min_samples_required_for_guided_design_of_experiments:
             feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
-                parameter_values=parameter_values_pandas_frame, context_values=context_values_pandas_frame)
+                parameter_values=self._parameter_values_df, context_values=self._context_values_df)
             self.surrogate_model.fit(
                 feature_values_pandas_frame=feature_values_pandas_frame,
                 target_values_pandas_frame=self._target_values_df,
