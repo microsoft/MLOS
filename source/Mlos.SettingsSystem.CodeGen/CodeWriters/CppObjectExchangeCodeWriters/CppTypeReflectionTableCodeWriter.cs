@@ -84,7 +84,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
             // Write a class name using std::array.
             // std::array<5, char> = { 'C', 'l', 'a', 's', 's', '\0' };
             //
-            WriteLine($"std::array<char, {nameLength}> TypeName_{cppClassName} =  {{ {string.Join(",", cppClassName.Select(r => $"'{r}'"))}, '\\0' }};");
+            WriteLine($"std::array<char, {nameLength}> TypeName_{cppClassName} {{{{ {string.Join(",", cppClassName.Select(r => $"'{r}'"))}, '\\0' }}}};");
 
             metadataOffset += nameLength + sizeof(uint);
 

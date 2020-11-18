@@ -19,8 +19,13 @@ MKDIR	:= mkdir -p
 
 # We currently depend on clang due to use of __declspec(selectany) and other
 # attributes in the codegen output.
-CC	:= clang-10
-CXX	:= clang++-10
+# gcc is now in part supported, but we still prefer clang if available
+ifeq ($(origin CC),default)
+    CC  := clang-10
+endif
+ifeq ($(origin CXX),default)
+    CXX := clang++-10
+endif
 export CC
 export CXX
 
@@ -75,7 +80,7 @@ ifeq ($(filter $(CONFIGURATION),$(SupportedConfigurations)),)
 endif
 
 # Variables tracking additional targets to be added to by later Makefile wrappers.
-handledtargets = all test check install clean distclean rebuild ctags
+handledtargets = all test check install pack clean distclean rebuild ctags
 
 # Mark this file as imported.
 MlosCommonMkImported := true

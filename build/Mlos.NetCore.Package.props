@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This file effectively takes the place of a number of .nuspec declarations
+  so that we can build directly with .csproj files using "dotnet pack".
+-->
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+    Set some .nuspec style properties
+    Note: The Copyright property also comes from the Mlos.NetCore.Version.props file.
+  -->
+  <PropertyGroup>
+    <PackageProjectUrl>https://github.com/Microsoft/MLOS</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Microsoft/MLOS.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>Microsoft</Authors>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageTags>MLOS;Machine Learning;Optimization;Systems</PackageTags>
+  </PropertyGroup>
+
+  <!-- Unless specified on the commandline, set the default package output to the target/ dir. -->
+  <PropertyGroup>
+    <MlosPkgOutputBaseDir>$(BaseDir)/target/pkg</MlosPkgOutputBaseDir>
+    <MlosPkgOutputDir>$(MlosPkgOutputBaseDir)/$(Configuration)</MlosPkgOutputDir>
+    <PackageOutputPath>$(MlosPkgOutputDir)/</PackageOutputPath>
+  </PropertyGroup>
+
+  <!-- Also create a .snupkg along side the package for eventual publishing of symbols to nuget.org -->
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <!--
+      When this property is omitted a separate .symbols.nupkg file is created
+      that includes both the .dll and .pdb.
+    -->
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!-- Include the .pdb symbols file in the standard package to make debugging easier. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+</Project>

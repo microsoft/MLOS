@@ -1,0 +1,22 @@
+# This is the config file for the GitVersionTask tool used in build/versions/Mlos.NetCore.Version.props
+# To see the resulting config use the following commands
+#   dotnet tool install --global gitversion.tool
+#   dotnet-gitversion /showconfig # should be run from this directory
+
+# We currently merge everything to main and don't yet have release/{major.minor} branches
+mode: Mainline
+# Note: GitVersionTask will still search the history for v{major.minor.patch} tags to automatically
+# increment the .patch portion of the versions it produces and calculate the number of commits since
+# branch for the SemVers .{branchName}+{commits} suffix.
+# So, to do releases in this way, from time to time we need to decide that certain commits should be
+# tagged with a new v{major.minor.0} version.
+increment: Patch
+branches:
+  master:
+    # Remove the "master" branch name from consideration.
+    # Also allow matching the "main" branch from "origin" remote on CI pipelines with shallow fetches.
+    regex: ^((origin|upstream|github)/)?main$
+    # Mark any packages produced directly from main as "prerelease" for now.
+    tag: beta
+    # We don't currently have develop or release/{vers} branches to look for.
+    source-branches: []
