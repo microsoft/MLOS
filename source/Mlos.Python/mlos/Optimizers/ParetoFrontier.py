@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import numpy as np
 import pandas as pd
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
@@ -27,10 +26,10 @@ class ParetoFrontier:
     """
 
     def __init__(
-        self,
-        optimization_problem: OptimizationProblem,
-        features_df: pd.DataFrame,
-        objectives_df: pd.DataFrame
+            self,
+            optimization_problem: OptimizationProblem,
+            features_df: pd.DataFrame,
+            objectives_df: pd.DataFrame
     ):
         assert len(features_df.index) == len(objectives_df.index)
         if features_df is not None:
@@ -90,4 +89,3 @@ class ParetoFrontier:
                 pareto_df[objective.name] = -pareto_df[objective.name]
 
         return pareto_df
-
