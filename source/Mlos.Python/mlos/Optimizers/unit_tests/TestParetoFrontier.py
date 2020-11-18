@@ -230,7 +230,8 @@ class TestParetoFrontier:
         # Conveniently, by the time the loop exits, the prefix is the value of our last objective.
         #
         if minimize == "all":
-            # Must flip the prefix first, since an even number of sin factors contributed to it.
+            # Must flip the prefix first, since there was no negative cosine to do it for us.
+
             #
             objectives_df[f'y{num_output_dimensions-1}'] = -prefix
         else:
@@ -285,4 +286,3 @@ class TestParetoFrontier:
             #
             other_rows = pareto_df.index.difference([i])
             assert (pareto_df.loc[other_rows] > row).all(axis=1).sum() == 0
-
