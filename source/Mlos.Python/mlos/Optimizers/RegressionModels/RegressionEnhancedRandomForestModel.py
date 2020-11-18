@@ -139,7 +139,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.model_config = model_config
 
         # one hot encode categorical input dimensions
-        self.one_hot_encoder_adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=input_space, merge_all_categorical_dimensions=True, drop='first')
+        self.one_hot_encoder_adapter = CategoricalToOneHotEncodedHypergridAdapter(
+            adaptee=input_space,
+            merge_all_categorical_dimensions=True,
+            drop='first'
+        )
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
         self.polynomial_features_adapter = ContinuousToPolynomialBasisHypergridAdapter(
@@ -482,13 +486,14 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         x_df = self.one_hot_encoder_adapter.project_dataframe(df=x, in_place=False)
         x_df = self.polynomial_features_adapter.project_dataframe(df=x_df, in_place=True)
 
-        # impute 0s for NaNs (NaNs can come from hierarchical hypergrids
+        # impute 0s for NaNs (NaNs can come from hierarchical hypergrids)
         x_df.fillna(value=0, inplace=True)
         if len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()) > 0:
             fit_x = self._create_one_hot_encoded_design_matrix(x_df)
         else:
             fit_x = x_df.to_numpy()
             self.polynomial_features_powers_ = self.polynomial_features_adapter.get_polynomial_feature_powers_table()
+        #fit_x = self.scaler_.fit_transform(fit_x)
         self.fit_X_ = fit_x
 
         if what_to_return.upper() == 'fit_x'.upper():
@@ -497,7 +502,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # restrict to features selected by previous lasso fit
         #   serve as inputs to both regression and random forest on the residuals
         x_filtered_to_discovered_features = self._filter_to_detected_features(fit_x)
-        # TODO Needed? : self.fit_X_ = fit_x
 
         return x_filtered_to_discovered_features
 

@@ -163,9 +163,7 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
             return list(sorted_by_column_index.keys())
 
         dim_names = []
-        for i, poly_feature_name in enumerate(self._get_polynomial_feature_names()):
-            ith_terms_powers = self._polynomial_features_powers[i]
-
+        for ith_terms_powers, poly_feature_name  in zip(self._polynomial_features_powers, self._get_polynomial_feature_names()):
             if ith_terms_powers.sum() == degree:
                 dim_names.append(poly_feature_name)
         return dim_names
