@@ -153,20 +153,20 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         sorted_by_column_index = {k: v for k, v in sorted(self._target_polynomial_feature_map.items(), key=lambda item: item[1])}
         if degree is None:
             return list(sorted_by_column_index.keys())
-        else:
-            dim_names = []
-            for i, poly_feature_name in enumerate(self._get_polynomial_feature_names()):
-                ith_terms_powers = self._polynomial_features_powers[i]
 
-                if ith_terms_powers.sum() == degree:
-                    dim_names.append(poly_feature_name)
-            return dim_names
+        dim_names = []
+        for i, poly_feature_name in enumerate(self._get_polynomial_feature_names()):
+            ith_terms_powers = self._polynomial_features_powers[i]
+
+            if ith_terms_powers.sum() == degree:
+                dim_names.append(poly_feature_name)
+        return dim_names
 
     def get_polynomial_feature_powers_table(self):
         return self._polynomial_features_powers
 
     def get_num_polynomial_features(self):
-        return(self._polynomial_features_powers.shape[0])
+        return self._polynomial_features_powers.shape[0]
 
     def _get_polynomial_feature_names(self):
         # The default polynomial feature feature names returned from .get_feature_names() look like: ['1', 'x0', 'x1', 'x0^2', 'x0 x1', 'x1^2']
