@@ -76,12 +76,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             // Define a dispatch table base index.
             //
             WriteBlock(@"
-                // <summary>
-                // Base assembly type index.
-                // </summary>
-                // <remarks>
-                // Mlos.Agent updates this value when assembly is registered.
-                // </remarks>
+                /// <summary>
+                /// Base assembly type index.
+                /// </summary>
+                /// <remarks>
+                /// Mlos.Agent updates this value when assembly is registered.
+                /// </remarks>
                 public static uint DispatchTableBaseIndex = 0;");
 
             IndentationLevel--;

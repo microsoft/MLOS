@@ -14,7 +14,11 @@ install: dotnet-install
 clean: dotnet-clean
 
 .PHONY: distclean
-distclean: clean
+distclean: dotnet-distclean
+
+.PHONY: pack
+pack: dotnet-pack
+	@ echo "make pack target finished."
 
 .PHONY: test
 test: dotnet-test

@@ -23,7 +23,7 @@ using Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters;
 namespace Mlos.SettingsSystem.CodeGen
 {
     /// <summary>
-    /// The main executable class responsible for walking configs via Relection
+    /// The main executable class responsible for walking configs via reflection
     /// and calling into code generation handlers.
     /// </summary>
     public static class MainCodeGen

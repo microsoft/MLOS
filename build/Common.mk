@@ -80,7 +80,7 @@ ifeq ($(filter $(CONFIGURATION),$(SupportedConfigurations)),)
 endif
 
 # Variables tracking additional targets to be added to by later Makefile wrappers.
-handledtargets = all test check install clean distclean rebuild ctags
+handledtargets = all test check install pack clean distclean rebuild ctags
 
 # Mark this file as imported.
 MlosCommonMkImported := true

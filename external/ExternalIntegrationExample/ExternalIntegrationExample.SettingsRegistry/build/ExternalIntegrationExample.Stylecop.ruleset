@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="ExternalIntegrationExample.Stylecop.ruleset" Description="Default rules and overrides for C# in ExternalIntegrationExample" ToolsVersion="Current">
+  <!-- Import some defaults -->
+  <!--Include Path="$(PkgFxCopAnalyzers)\rulesets\AllRulesEnabled.ruleset" Action="Default" /-->
+  <Include Path="$(PkgFxCopAnalyzers)\rulesets\legacy\MinimumRecommendedRules.ruleset" Action="Default" />
+  <!--
+    Apply some local overrides
+    See Also: stylecop.json for other control options.
+  -->
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <!-- Missing XML comment for publicly visible type or member. -->
+    <!--Rule Id="CS1591" Action="Hidden" /-->
+  </Rules>
+</RuleSet>
+
+

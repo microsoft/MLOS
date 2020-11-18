@@ -12,13 +12,64 @@
     <StartupObject>Mlos.SettingsSystem.CodeGen.MainCodeGen</StartupObject>
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+
+  <PropertyGroup Label="PackageProps">
+    <!-- Projects using a PackageReference to this tool should not attempt to link against it. -->
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <!-- Place the outputs in the tools/ directory instead of the lib/ directory. -->
+    <!-- Note: We can't use PackAsTool since it won't allow us to PackageReference it or automatically pull in our build/ rules. -->
+    <IsTool>true</IsTool>
+    <!-- Since we did that, there are no items in the lib/ directory, so we need to ignore that warning. -->
+    <NoWarn>$(NoWarn);NU5128</NoWarn>
+  </PropertyGroup>
+
+  <!-- Since we can't use PackAsTool but want to be able to run the packaged version as one we need to include it's dependencies. -->
+  <!-- TODO? Move this logic to build/Mlos.NetCore.Package.props to make it more reusable?  This is the only place we need this currently. -->
+  <PropertyGroup>
+    <GenerateNuspecDependsOn>IncludeDependentAssembliesInToolsPackage;$(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
+    <!-- Since we copy those dependencies in directly now we could possibly skip including the dependencies in the generated nuspec. -->
+    <!--SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking-->
+  </PropertyGroup>
+  <Target Name="IncludeDependentAssembliesInToolsPackage" BeforeTargets="Pack;_LoadPackInputItems;_GetTargetFrameworksOutput" AfterTargets="Build" Condition="'$(IsTool)' == 'true'">
+    <ItemGroup>
+      <!-- Note: this does not currently include any localization dlls. -->
+      <None Include="$(OutputPath)/*.dll" Exclude="$(OutputPath)/$(TargetName)$(TargetExt);$(OutputPath)/$(TargetName).pdb">
+        <Pack>true</Pack>
+        <PackagePath>tools/</PackagePath>
+      </None>
+    </ItemGroup>
+  </Target>
+
+  <!--
+    Include our build rules in the package, but not in the TargetFramework specific path.
+  -->
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.6.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.6.0" />
+    <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).props">
+      <Pack>true</Pack>
+      <PackagePath>build/</PackagePath>
+    </None>
+    <None Include="$(MSBuildThisFileDirectory)/build/$(PackageId).targets">
+      <Pack>true</Pack>
+      <PackagePath>build/</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <MicrosoftCodeAnalysis_PackageVersion>3.6.0</MicrosoftCodeAnalysis_PackageVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <!--
+      Note: This is a meta package that pulls in lots of extra unnecessary stuff
+      and actually doesn't include Microsoft.CodeAnalysis.dll
+    <PackageReference Include="Microsoft.CodeAnalysis" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
+    -->
+    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(MicrosoftCodeAnalysis_PackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
   </ItemGroup>
+
   <ItemGroup>
     <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectDeserializeEntryCountCodeWriter.cs" />
     <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppObjectDeserializeFunctionCallbackCodeWriter.cs" />
@@ -69,6 +120,7 @@
     <Compile Include="TypeMetadataMapper.cs" />
     <Compile Include="TypeCodeGenerator.cs" />
   </ItemGroup>
+
   <Import Project="$(BaseDir)\build\Mlos.NetCore.Binplace.targets" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
 </Project>
