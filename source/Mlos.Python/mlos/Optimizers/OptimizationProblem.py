@@ -132,7 +132,7 @@ class OptimizationProblem:
 
         # prefix column names to adhere to dimensions in hierarchical hypergrid
         feature_values = parameter_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
-        if context_values is not None:
+        if context_values is not None and len(context_values) > 0:
             renamed_context_values = context_values.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
             feature_values['contains_context'] = True
             if product:

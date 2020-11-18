@@ -171,7 +171,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
     def GetAllObservations(self, request, context): # pylint: disable=unused-argument
         with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
-            features_df, objectives_df = optimizer.get_all_observations()
+            features_df, objectives_df, context_df = optimizer.get_all_observations()
 
         return Observations(
             Features=Features(FeaturesJsonString=features_df.to_json(orient='index', double_precision=15)),

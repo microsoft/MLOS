@@ -231,7 +231,7 @@ class TestBayesianOptimizer:
 
                 bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
                 if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
-                    _, all_targets = bayesian_optimizer.get_all_observations()
+                    _, all_targets, _ = bayesian_optimizer.get_all_observations()
                     best_config, optimum = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                     print(f"[{i}/{num_iterations}] Optimum: {optimum}")
                     assert optimum.y == all_targets.min()[0]
@@ -459,7 +459,7 @@ class TestBayesianOptimizer:
 
         # Let's make sure that the invalid_dimension was not remembered.
         #
-        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+        all_inputs_df, all_outputs_df, _ = optimizer.get_all_observations()
         assert all(column in {'y_1', 'y_2'} for column in all_outputs_df.columns)
 
         # We should accept inputs with missing output dimensions, as long as at least one is specified.
@@ -467,7 +467,7 @@ class TestBayesianOptimizer:
         output_with_missing_dimension = Point(y_1=input.x_1)
         output_with_missing_dimension_df = output_with_missing_dimension.to_dataframe()
         optimizer.register(input_df, output_with_missing_dimension_df)
-        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+        all_inputs_df, all_outputs_df, _ = optimizer.get_all_observations()
 
         # Let's make sure the missing dimension ends up being a null.
         #
@@ -495,8 +495,8 @@ class TestBayesianOptimizer:
             should_raise_for_predicted_value = True
             should_raise_for_confidence_bounds = True
         else:
-            features_df, _ = optimizer.get_all_observations()
-            predictions = optimizer.predict(parameter_values_pandas_frame=features_df)
+            parameters_df, _, _ = optimizer.get_all_observations()
+            predictions = optimizer.predict(parameter_values_pandas_frame=parameters_df)
             predictions_df = predictions.get_dataframe()
 
             if len(predictions_df.index) == 0:

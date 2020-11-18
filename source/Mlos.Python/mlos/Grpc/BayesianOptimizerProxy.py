@@ -106,11 +106,11 @@ class BayesianOptimizerProxy(OptimizerBase):
         self._optimizer_stub.RegisterObservations(register_request)
 
     @trace()
-    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         response = self._optimizer_stub.GetAllObservations(self.optimizer_handle)
         features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
         objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
-        return features_df, objectives_df
+        return features_df, objectives_df, None
 
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument

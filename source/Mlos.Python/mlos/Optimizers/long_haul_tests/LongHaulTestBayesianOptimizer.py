@@ -137,7 +137,7 @@ class TestBayesianOptimizer:
         best_config, optimum = bayesian_optimizer.optimum()
         assert objective_function.parameter_space.contains_point(best_config)
         assert objective_function.output_space.contains_point(optimum)
-        _, all_targets = bayesian_optimizer.get_all_observations()
+        _, all_targets, _ = bayesian_optimizer.get_all_observations()
         assert optimum.y == all_targets.min()[0]
         self.logger.info(f"Optimum: {optimum} best configuration: {best_config}")
 
