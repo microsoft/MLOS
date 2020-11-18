@@ -231,7 +231,6 @@ class TestParetoFrontier:
         #
         if minimize == "all":
             # Must flip the prefix first, since there was no negative cosine to do it for us.
-
             #
             objectives_df[f'y{num_output_dimensions-1}'] = -prefix
         else:
