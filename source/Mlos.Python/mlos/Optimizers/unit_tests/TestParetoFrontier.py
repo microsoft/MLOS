@@ -4,10 +4,7 @@
 #
 import math
 import pytest
-import random
 from typing import List
-
-import matplotlib.pyplot as plt
 
 import numpy as np
 import pandas as pd
@@ -64,7 +61,7 @@ class TestParetoFrontier:
         for i, row in pareto_df.iterrows():
             # Now let's make sure that no point in pareto is dominated by any non-pareto point.
             #
-            (random_objectives_df.loc[non_pareto_index] < row).any(axis=1).sum() == len(non_pareto_index)
+            assert (random_objectives_df.loc[non_pareto_index] < row).any(axis=1).sum() == len(non_pareto_index)
 
             # Let's also make sure that no point on the pareto is dominated by any other point there.
             #
@@ -74,7 +71,7 @@ class TestParetoFrontier:
 
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])
     @pytest.mark.parametrize("num_output_dimensions", [2, 10])
-    @pytest.mark.parametrize("num_points", [100, 10000])
+    @pytest.mark.parametrize("num_points", [100, 1000])
     def test_hyperspheres(self, minimize, num_output_dimensions, num_points):
         """Uses a hypersphere to validate that ParetoFrontier can correctly identify pareto-optimal points.
 
@@ -208,7 +205,6 @@ class TestParetoFrontier:
             objectives=[Objective(name=f'y{i}', minimize=minimize_objective) for i, minimize_objective in enumerate(minimize_mask)]
         )
 
-        optimization_problem.feature_space.random_state = random.Random(42)
         random_params_df = optimization_problem.feature_space.random_dataframe(num_points)
 
         # Let's randomly subsample 10% of points in random_params_df and make those points pareto optimal.
@@ -244,7 +240,7 @@ class TestParetoFrontier:
         #
         #   assert y0**2 + y1**2 + ... == radius**2
         #
-        assert (np.power(objectives_df, 2).sum(axis=1)-np.power(random_params_df["spherical_coordinates.radius"], 2) < 0.000001).all()
+        assert (np.power(objectives_df, 2).sum(axis=1) - np.power(random_params_df["spherical_coordinates.radius"], 2) < 0.000001).all()
 
 
         # Just a few more sanity checks before we do the pareto computation.
@@ -266,17 +262,26 @@ class TestParetoFrontier:
             objectives_df=objectives_df
         )
 
-        if not optimal_points_index.difference(pareto_df.index.intersection(optimal_points_index)).empty:
-            objectives_df_copy = objectives_df.copy(deep=True)
-            objectives_df_copy['y1'] = -objectives_df_copy['y1']
-            objectives_df.plot.scatter("y0", "y1")
-            objectives_df_copy.plot.scatter("y0", "y1")
-            objectives_df.loc[optimal_points_index].plot.scatter("y0", "y1")
-            pareto_df.plot.scatter("y0", "y1", marker='x')
-            plt.show()
-
         # We know that all of the pareto efficient points must be on the frontier.
         #
         assert optimal_points_index.difference(pareto_df.index.intersection(optimal_points_index)).empty
         assert len(pareto_df.index) >= len(optimal_points_index)
+
+        # If we flip all minimized objectives, we can assert on even more things.
+        #
+        for column, minimize_column in zip(objectives_df, minimize_mask):
+            if minimize_column:
+                objectives_df[column] = -objectives_df[column]
+                pareto_df[column] = - pareto_df[column]
+
+        non_pareto_index = objectives_df.index.difference(pareto_df.index)
+        for i, row in pareto_df.iterrows():
+            # Now let's make sure that no point in pareto is dominated by any non-pareto point.
+            #
+            assert (objectives_df.loc[non_pareto_index] < row).any(axis=1).sum() == len(non_pareto_index)
+
+            # Let's also make sure that no point on the pareto is dominated by any other point there.
+            #
+            other_rows = pareto_df.index.difference([i])
+            assert (pareto_df.loc[other_rows] > row).all(axis=1).sum() == 0
 
