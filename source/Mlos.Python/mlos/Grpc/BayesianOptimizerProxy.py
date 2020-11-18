@@ -82,7 +82,8 @@ class BayesianOptimizerProxy(OptimizerBase):
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
         suggestion_request = OptimizerService_pb2.SuggestRequest(
             OptimizerHandle=self.optimizer_handle,
-            Random=random
+            Random=random,
+            Context=context
         )
         suggestion_response = self._optimizer_stub.Suggest(suggestion_request)
         suggested_params_dict = json.loads(suggestion_response.ParametersJsonString)
