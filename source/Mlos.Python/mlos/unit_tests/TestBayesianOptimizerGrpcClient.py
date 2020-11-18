@@ -109,8 +109,9 @@ class TestBayesianOptimizerGrpcClient:
         registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
         observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
+        registered_features_prefixed = self.optimization_problem.construct_feature_dataframe(registered_features_df)
 
-        assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
+        assert (np.abs(registered_features_prefixed[['domain.x_0', 'domain.x_1']] - observed_features_df[['domain.x_0', 'domain.x_1']]) < 0.00000001).all().all()
         assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
         # Let's look at the goodness of fit.
@@ -170,7 +171,9 @@ class TestBayesianOptimizerGrpcClient:
 
             observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
 
-            assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
+            registered_features_prefixed = self.optimization_problem.construct_feature_dataframe(registered_features_df)
+
+            assert (np.abs(registered_features_prefixed[['domain.x_0', 'domain.x_1']] - observed_features_df[['domain.x_0', 'domain.x_1']]) < 0.00000001).all().all()
             assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
 
