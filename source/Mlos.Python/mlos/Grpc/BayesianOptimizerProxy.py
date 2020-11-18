@@ -80,6 +80,8 @@ class BayesianOptimizerProxy(OptimizerBase):
 
     @trace()
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
+        if context is not None:
+            raise NotImplementedError("Context not supported on remote optimizers")
         suggestion_request = OptimizerService_pb2.SuggestRequest(
             OptimizerHandle=self.optimizer_handle,
             Random=random,

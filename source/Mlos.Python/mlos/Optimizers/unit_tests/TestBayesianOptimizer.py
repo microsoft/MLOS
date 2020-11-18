@@ -488,6 +488,60 @@ class TestBayesianOptimizer:
             optimizer.register(input_df, only_invalid_outputs_df)
 
 
+    def test_optimization_with_context(self):
+        # Gaussian blob in x with position dependent on context variable y.
+        def f(x, y):
+            return -np.exp(-50 * (x - 0.5 * y -0.5) ** 2)
+        # single continuous input dimension between 0 and 1
+        input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name="x", min=0, max=1)])
+        # define output space, we might not know the exact ranges
+        output_space = SimpleHypergrid(name="objective",
+                                    dimensions=[ContinuousDimension(name="function_value", min=-10, max=10)])
+        # use a context space between -1 and 1
+        context_space = SimpleHypergrid(name="context", dimensions=[ContinuousDimension(name="y", min=-1, max=1)])
+
+        optimization_problem = OptimizationProblem(
+            parameter_space=input_space,
+            objective_space=output_space,
+            # we want to minimize the function
+            objectives=[Objective(name="function_value", minimize=True)],
+            context_space=context_space
+        )
+
+        # create some data points to eval
+        n_samples = 100
+        parameter_df = input_space.random_dataframe(n_samples)
+        context_df = context_space.random_dataframe(n_samples)
+        target_df = f(parameter_df, context_df)
+
+        local_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+            optimization_problem=optimization_problem,
+        )
+
+
+        remote_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+            optimization_problem=optimization_problem,
+        )
+
+        # can't register, predict, suggest with context on remote optimizer
+        with pytest.raises(NotImplementedError, match="Context not supported"):
+            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                      target_values_pandas_frame=target_df,
+                                      context_values_pandas_frame=context_df)
+
+        with pytest.raises(NotImplementedError, match="Context not supported"):
+            remote_optimizer.predict(parameter_values_pandas_frame=parameter_df,
+                                    context_values_pandas_frame=context_df)
+
+        with pytest.raises(NotImplementedError, match="Context not supported"):
+            remote_optimizer.suggest(context=context_df)
+
+        # context is missing but required by problem, should give error
+        with pytest.raises(grpc.RpcError):
+            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                      target_values_pandas_frame=target_df)
+
+
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
         should_raise_for_confidence_bounds = False
