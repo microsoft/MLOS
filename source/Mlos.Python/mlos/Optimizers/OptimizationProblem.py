@@ -128,7 +128,7 @@ class OptimizationProblem:
 
         """
         if (self.context_space is not None) and (context_values is None):
-            raise ValueError("Context space required by optimization problem but not provided.")
+            raise ValueError("Context required by optimization problem but not provided.")
 
         # prefix column names to adhere to dimensions in hierarchical hypergrid
         feature_values = parameter_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)

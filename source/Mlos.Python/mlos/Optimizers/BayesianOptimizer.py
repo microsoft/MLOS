@@ -131,7 +131,7 @@ class BayesianOptimizer(OptimizerBase):
         # TODO: pass context to the suggest method
         if self.optimization_problem.context_space is not None:
             if context is None:
-                raise ValueError("Non-empty context space but no context given.")
+                raise ValueError("Context required by optimization problem but not provided.")
             assert context in self.optimization_problem.context_space
         random = random or self.num_observed_samples < self.optimizer_config.min_samples_required_for_guided_design_of_experiments
         context_values = context.to_dataframe() if context is not None else None
@@ -145,16 +145,16 @@ class BayesianOptimizer(OptimizerBase):
         # TODO: and should be able to refit automatically.
 
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
-            raise ValueError("Context space required by optimization problem but not provided.")
+            raise ValueError("Context required by optimization problem but not provided.")
 
         parameter_columns_to_retain = [column for column in parameter_values_pandas_frame.columns if column in self._parameter_names_set]
         target_columns_to_retain = [column for column in target_values_pandas_frame.columns if column in self._target_names_set]
 
         if len(parameter_columns_to_retain) == 0:
-            raise ValueError(f"None of the {parameter_columns_to_retain} is a parameter recognized by this optimizer.")
+            raise ValueError(f"None of the {parameter_values_pandas_frame.columns} is a parameter recognized by this optimizer.")
 
         if len(target_columns_to_retain) == 0:
-            raise ValueError(f"None of the {target_columns_to_retain} is a target recognized by this optimizer.")
+            raise ValueError(f"None of {target_values_pandas_frame.columns} is a target recognized by this optimizer.")
 
         parameter_values_pandas_frame = parameter_values_pandas_frame[parameter_columns_to_retain]
         target_values_pandas_frame = target_values_pandas_frame[target_columns_to_retain]
@@ -176,7 +176,7 @@ class BayesianOptimizer(OptimizerBase):
         if context_values_pandas_frame is not None:
             context_columns_to_retain = [column for column in context_values_pandas_frame.columns if column in self._context_names_set]
             if len(context_columns_to_retain) == 0:
-                raise ValueError(f"None of the {context_columns_to_retain} is a context recognized by this optimizer.")
+                raise ValueError(f"None of the {context_values_pandas_frame.columns} is a context recognized by this optimizer.")
             context_values_pandas_frame = context_values_pandas_frame[context_columns_to_retain]
             self._context_values_df = self._context_values_df.append(context_values_pandas_frame, ignore_index=True)
 
