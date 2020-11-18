@@ -99,7 +99,8 @@ class TestParetoFrontier:
         For N objectives we will specify the following parameters:
             1. radius - distance of a point from origin.
             2. theta0, theta1, ..., theta{i}, ..., theta{N-1} - angle between the radius segment and the and the hyperplane containing
-                unit vectors along y0, y1, ..., y{i}
+                unit vectors along y0, y1, ..., y{i-1}
+
 
         And the following N objectives that are computed from parameters:
             y0      = radius * cos(theta0)
