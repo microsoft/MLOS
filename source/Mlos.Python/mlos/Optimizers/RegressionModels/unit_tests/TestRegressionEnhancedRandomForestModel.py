@@ -264,7 +264,8 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
-        test_threshold = 10 ** -3
+        test_threshold = 10 ** -4
+        print(unexplained_variance, test_threshold)
         assert (unexplained_variance < test_threshold,
                         f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
 
@@ -283,7 +284,7 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         # The input space consists of 3 2-d domains 200 x 200 units.  Hence random samples smaller than a certain size will produce too few points to
         # train reliable models.
         # TODO: Good place to use a non-random training set design
-        num_train_x = 600
+        num_train_x = 300
         x_train_df = objective_function.parameter_space.random_dataframe(num_samples=num_train_x)
         y_train_df = objective_function.evaluate_dataframe(x_train_df)
         rerf.fit(x_train_df, y_train_df)
@@ -305,5 +306,6 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
-        test_threshold = 10**-3
+        test_threshold = 10**-6
+        print(unexplained_variance, test_threshold)
         assert unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})'

@@ -10,7 +10,7 @@ from sklearn import linear_model
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
@@ -21,17 +21,8 @@ from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig i
 from mlos.Spaces import Hypergrid, SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.Configs.DefaultConfigMeta import DefaultConfigMeta
 from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
+from mlos.Spaces.HypergridAdapters.ContinuousToPolynomialBasisHypergridAdapter import ContinuousToPolynomialBasisHypergridAdapter
 from mlos.Tracer import trace
-
-# sklearn injects many warnings, so from
-#   https://stackoverflow.com/questions/32612180/eliminating-warnings-from-scikit-learn
-# TODO: fix what causes Lasso regression to throw warnings during convergence
-#       suspect these result from not standardizing X
-#       The following code silences these in Jupyter notebooks, but not sure how best to execute these in Mlos context
-#import warnings
-# def warn(*args, **kwargs):
-#    pass
-# warnings.warn = warn
 
 
 class RegressionEnhancedRandomForestRegressionModelPrediction(Prediction):
@@ -149,6 +140,14 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         # one hot encode categorical input dimensions
         self.one_hot_encoder_adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=input_space, merge_all_categorical_dimensions=True, drop='first')
+        # Explode continuous dimensions to polynomial features up to model config specified monomial degree
+        # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
+        self.polynomial_features_adapter = ContinuousToPolynomialBasisHypergridAdapter(
+            adaptee=self.one_hot_encoder_adapter.target,
+            degree=self.model_config.max_basis_function_degree,
+            include_bias=True,
+            interaction_only=False
+        )
         self.input_space = input_space
 
         self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
@@ -156,10 +155,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         self.base_regressor_ = None
         self.random_forest_regressor_ = None
-
-        # set up basis feature transform
-        self.polynomial_features_transform_ = \
-            PolynomialFeatures(degree=self.model_config.max_basis_function_degree)
 
         self.random_forest_kwargs = None
         self.root_model_kwargs = None
@@ -196,45 +191,40 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         :param target_values_pandas_frame:
         :return:
         """
-        # pull X and y values from data frames passed
         y = target_values_pandas_frame[self.output_dimension_names].to_numpy().reshape(-1)
-        x_df = self.one_hot_encoder_adapter.project_dataframe(df=feature_values_pandas_frame, in_place=False)
-        continuous_dim_col_names = list(set.difference(set(x_df.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
-        x_df[continuous_dim_col_names] = self.scaler_.fit_transform(x_df[continuous_dim_col_names])
-
-        fit_x = self.transform_x(x_df, what_to_return='fit_x')
+        fit_x = self.transform_x(feature_values_pandas_frame, what_to_return='fit_x')
 
         # run root regression
         self._fit_root_regression(fit_x, y)
 
         # restrict X to features selected from lasso/Ridge regression
-        x_star = self._filter_to_detected_features(fit_x)
+        x_filtered_to_detected_features = self._filter_to_detected_features(fit_x)
 
         # compute residuals for random forest regression
-        base_predicted_y = self.base_regressor_.predict(x_star).reshape(-1)
+        base_predicted_y = self.base_regressor_.predict(x_filtered_to_detected_features).reshape(-1)
         y_residuals = y - base_predicted_y
 
         # fit random forest on lasso residuals
-        self._fit_random_forest_regression(x_star, y_residuals)
+        self._fit_random_forest_regression(x_filtered_to_detected_features, y_residuals)
 
         # retain inverse(fit_X.T * fit_X) to use for confidence intervals on predicted values
-        condition_number = np.linalg.cond(x_star)
+        condition_number = np.linalg.cond(x_filtered_to_detected_features)
         if condition_number > 10.0 ** 10:
             # add small noise to fit_x to remove singularity,
             #  expect prediction confidence to be reduced (wider intervals) by doing this
             self.logger.info(
                 f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^10."
             )
-            x_star += np.random.normal(0, 10.0**-4, size=x_star.shape)
-            condition_number = np.linalg.cond(x_star)
+            x_filtered_to_detected_features += np.random.normal(0, 10.0**-4, size=x_filtered_to_detected_features.shape)
+            condition_number = np.linalg.cond(x_filtered_to_detected_features)
             self.logger.info(
                 f"Resulting condition number {condition_number}."
             )
-        x_transpose_times_x = np.matmul(x_star.T, x_star)
+        x_transpose_times_x = np.matmul(x_filtered_to_detected_features.T, x_filtered_to_detected_features)
         self.partial_hat_matrix_ = np.linalg.inv(x_transpose_times_x)
 
         # retain standard error from base model (used for prediction confidence intervals)
-        base_predicted_y = self.base_regressor_.predict(x_star)
+        base_predicted_y = self.base_regressor_.predict(x_filtered_to_detected_features)
         base_residual_y = y - base_predicted_y
         residual_sum_of_squares = np.sum(base_residual_y ** 2)
         dof = fit_x.shape[0] - (len(self.base_regressor_.coef_) + 1)  # +1 for intercept
@@ -351,7 +341,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         return self
 
-    def _execute_grid_search_for_random_forest_regressor_model(self, x_star, y_residuals):
+    def _execute_grid_search_for_random_forest_regressor_model(self, x_filtered_to_detected_features, y_residuals):
         model_config = self.model_config.sklearn_random_forest_regression_model_config
         self.random_forest_regressor_ = RandomForestRegressor(
             n_estimators=model_config.n_estimators,
@@ -370,7 +360,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             ccp_alpha=model_config.ccp_alpha,
             max_samples=model_config.max_samples if model_config.max_samples > 0 else None
         )
-        num_features = len(x_star[0])
+
+        num_features = x_filtered_to_detected_features.shape[1]
         max_feature_param = [1]
         p_floor_3 = round(num_features / 3)
         if p_floor_3 > 0:
@@ -383,7 +374,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         }
 
         rf_gscv = GridSearchCV(self.random_forest_regressor_, rf_params)
-        rf_gscv.fit(x_star, y_residuals)
+        rf_gscv.fit(x_filtered_to_detected_features, y_residuals)
 
         # retrieve best random forest model and hyper parameters
         self.random_forest_regressor_ = rf_gscv.best_estimator_
@@ -395,20 +386,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
         check_is_fitted(self)
 
-        # confirm feature_values_pandas_frame contains all expected columns
-        #  if any are missing, impute NaN values
-        missing_column_names = set.difference(set(self.input_dimension_names),
-                                              set(feature_values_pandas_frame.columns.values))
-        for missing_column_name in missing_column_names:
-            feature_values_pandas_frame[missing_column_name] = np.NaN
-        x_df = self.one_hot_encoder_adapter.project_dataframe(df=feature_values_pandas_frame, in_place=False)
-        continuous_dim_col_names = list(set.difference(set(x_df.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
-        x_df[continuous_dim_col_names] = self.scaler_.transform(x_df[continuous_dim_col_names])
+        x_filtered_to_detected_features = self.transform_x(feature_values_pandas_frame)
 
-        x_star = self.transform_x(x_df)
-
-        base_predicted = self.base_regressor_.predict(x_star)
-        residual_predicted = self.random_forest_regressor_.predict(x_star)
+        base_predicted = self.base_regressor_.predict(x_filtered_to_detected_features)
+        residual_predicted = self.random_forest_regressor_.predict(x_filtered_to_detected_features)
         y_predicted = base_predicted + residual_predicted
 
         # dataframe column shortcuts
@@ -425,7 +406,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         # compute variance needed for prediction interval
         var_list = []
-        for xi in x_star:
+        for xi in x_filtered_to_detected_features:
             leverage_x = np.matmul(np.matmul(xi.T, self.partial_hat_matrix_), xi)
             prediction_var = self.base_regressor_standard_error_ * (1.0 + leverage_x)
             var_list.append(prediction_var)
@@ -451,20 +432,19 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
                                       zero_cols_idx=None):
         """
         _set_categorical_powers_table() defines a table (similar to PolynomialFeature.powers_ indicating
-           the power of a feature associated with each term in the polynomial expansion created by _explode_x()
-        If no dummy variables are present, this table is already set using PolynomialFeature.powers_.
+           the power of a feature associated with each term in the polynomial expansion created by _create_one_hot_encoded_design_matrix()
+        If no dummy variables are present, this table is already set using self.polynomial_features_adapter.get_polynomial_feature_powers_table().
         The presence of categorical features increases dimensionality of the feature space
-          (in addition to the basis function expansion), and hence the equivalent .powers_ table needs to
-          be constructed as done in _set_categorical_powers_table().
+          (in addition to the basis function expansion), and hence the equivalent .powers_ table needs to be constructed.
 
         param zero_cols_index:
         Since the Hierarchical HyperGrid feature spaces can have missing feature values, the
         the dummy variable creation process produces design matrices with columns of
-        zeros (singular matrices), which are detected and dropped in _explode_x().
-        Passing the indices of these zero columns with zero_cols_index allows those dropped
+        zeros (singular matrices), which are detected and dropped in _create_one_hot_encoded_design_matrix().
+        Passing the indices of these zero columns with as arg zero_cols_index allows those dropped
         derived features to also be removed from the internal copy of the ".powers_" table.
         """
-        base_powers_ = self.polynomial_features_transform_.powers_
+        base_powers_ = self.polynomial_features_adapter.get_polynomial_feature_powers_table()
         self.polynomial_features_powers_ = np.zeros((num_terms_in_poly * num_categorical_levels,
                                                      num_dummy_vars + num_continuous_dims))
 
@@ -493,91 +473,81 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
           3. Once Lasso/Ridge regression identifies feature dimensions of little predictive value, those dimensions
              are "filtered" from the expanded feature space.
         """
-        x.fillna(value=0, inplace=True)
-        fit_x = self._explode_x(x)
+        # confirm feature_values_pandas_frame contains all expected columns
+        #  if any are missing, impute NaN values
+        missing_column_names = set.difference(set(self.input_dimension_names), set(x.columns.values))
+        for missing_column_name in missing_column_names:
+            x[missing_column_name] = np.NaN
+
+        x_df = self.one_hot_encoder_adapter.project_dataframe(df=x, in_place=False)
+        x_df = self.polynomial_features_adapter.project_dataframe(df=x_df, in_place=True)
+
+        # impute 0s for NaNs (NaNs can come from hierarchical hypergrids
+        x_df.fillna(value=0, inplace=True)
+        if len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()) > 0:
+            fit_x = self._create_one_hot_encoded_design_matrix(x_df)
+        else:
+            fit_x = x_df.to_numpy()
+            self.polynomial_features_powers_ = self.polynomial_features_adapter.get_polynomial_feature_powers_table()
         self.fit_X_ = fit_x
+
         if what_to_return.upper() == 'fit_x'.upper():
             return fit_x
 
         # restrict to features selected by previous lasso fit
         #   serve as inputs to both regression and random forest on the residuals
-        x_star = self._filter_to_detected_features(fit_x)
+        x_filtered_to_discovered_features = self._filter_to_detected_features(fit_x)
+        # TODO Needed? : self.fit_X_ = fit_x
 
-        return x_star
+        return x_filtered_to_discovered_features
 
-    def _explode_x(self, x):
-        """
-        _explode_x(x) transforms x (from component input space) into the model fit/predict input space as follows:
-         * based on the model's max_basis_function_degree dimension value, columns are added to x corresponding to
-           each term in the full polynomial, e.g. x[0], x[1], x[0]^2, x[0]*x[1], x[1]^2, etc.
-         * if categorical dimensions exist in x, dummy variables are added to x (via a OneHotEncoder) together with
-           the basis function columns so each level of the cross product of all categorical levels are fit with
-           their own distinct polynomial (of the specified degree).
-         At this time, no dummy variable interaction terms are included.
-        Note: While _explode_x(x) "explodes" the dimension of the input features x, the Lasso/Ridge regression will
-         eliminate any (including those added by _explode_x()) that fail to contribute to the model fit.
-        """
-        fit_x = x
+    def _create_one_hot_encoded_design_matrix(self, x):
+        assert len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()) > 0
 
-        continuous_dim_col_names = list(set.difference(set(x.columns.values), set(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())))
-        num_categorical_dims_ = len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
-        if num_categorical_dims_ > 0:
-            # use the following to create one hot encoding columns prior to constructing fit_x and powers_ table
-            working_x = x[continuous_dim_col_names].copy()
+        # use the following to create one hot encoding columns prior to constructing fit_x and powers_ table
+        continuous_dim_col_names = self.polynomial_features_adapter.get_column_names_for_polynomial_features(degree=1)
+        polynomial_features_x = x[self.polynomial_features_adapter.get_column_names_for_polynomial_features()]
 
-            dummy_var_cols = self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()
-            num_dummy_vars = len(dummy_var_cols)
-            working_x[dummy_var_cols] = x[dummy_var_cols]
+        dummy_var_cols = self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()
+        num_dummy_vars = len(dummy_var_cols)
+        num_terms_in_poly = self.polynomial_features_adapter.get_num_polynomial_features()
 
-            for dummy_var_col in dummy_var_cols:
-                for cont_dim_name in continuous_dim_col_names:
-                    dummy_times_x_col_name = f'{cont_dim_name}*{dummy_var_col}'
-                    working_x[dummy_times_x_col_name] = working_x[cont_dim_name] * working_x[dummy_var_col]
+        # initialize the design matrix
+        fit_x = np.zeros((x.shape[0], num_terms_in_poly * (num_dummy_vars + 1)))
 
-            # add exploded x weighted by oneHotEncoded columns
-            # add polynomial for 000...000 encoding
-            cont_poly = self.polynomial_features_transform_.fit_transform(x[continuous_dim_col_names])
-            num_terms_in_poly = self.polynomial_features_transform_.powers_.shape[0]
+        # add polynomial features weighted by oneHotEncoded columns
+        # add polynomial for 000...000 encoding
+        fit_x[:, 0:num_terms_in_poly] = polynomial_features_x.copy().to_numpy()
 
-            fit_x = np.ndarray((fit_x.shape[0], num_terms_in_poly * (num_dummy_vars + 1)))
-            fit_x[:, 0:num_terms_in_poly] = cont_poly
+        # add ohe * polynomial terms for non-000...000 encodings
+        last_col_filled = num_terms_in_poly
+        for ohe_col_name in dummy_var_cols:
+            fit_x[:, last_col_filled:last_col_filled + num_terms_in_poly] = x[ohe_col_name].to_numpy().reshape(-1, 1) * polynomial_features_x.copy().to_numpy()
+            last_col_filled += num_terms_in_poly
 
-            # add polynomial for non-000...000 encodings
-            last_col_filled = num_terms_in_poly
-            for ohe_col_name in dummy_var_cols:
-                cols_for_poly_transform = [cn for cn in working_x.columns.values if cn.endswith(ohe_col_name) and cn != ohe_col_name]
-                ohe_poly = self.polynomial_features_transform_.fit_transform(working_x[cols_for_poly_transform])
-                ohe_poly[:, 0] = ohe_poly[:, 0] * working_x[ohe_col_name]  # replace global intercept w/ intercept offset term
-                fit_x[:, last_col_filled:last_col_filled + num_terms_in_poly] = ohe_poly
-                last_col_filled += num_terms_in_poly
+        # check for zero columns (expected with hierarchical feature hypergrids containing NaNs for some features)
+        #  this should eliminate singular design matrix errors from lasso/ridge regressions
+        if self.categorical_zero_cols_idx_to_delete_ is None:
+            self.categorical_zero_cols_idx_to_delete_ = np.argwhere(np.all(fit_x[..., :] == 0, axis=0))
+        zero_cols_idx = self.categorical_zero_cols_idx_to_delete_
+        if zero_cols_idx.any():
+            fit_x = np.delete(fit_x, zero_cols_idx, axis=1)
 
-            # check for zero columns (expected with hierarchical feature hypergrids containing NaNs for some features
-            #  this should eliminate singular design matrix errors from lasso/ridge regressions
-            if self.categorical_zero_cols_idx_to_delete_ is None:
-                self.categorical_zero_cols_idx_to_delete_ = np.argwhere(np.all(fit_x[..., :] == 0, axis=0))
-            zero_cols_idx = self.categorical_zero_cols_idx_to_delete_
-            if zero_cols_idx.any():
-                fit_x = np.delete(fit_x, zero_cols_idx, axis=1)
-
-            # construct the regressor_model.powers_ table to enable construction of algebraic gradients
-            if self.polynomial_features_powers_ is None:
-                self._set_categorical_powers_table(
-                    num_continuous_dims=len(continuous_dim_col_names),
-                    num_categorical_levels=num_dummy_vars+1,
-                    num_terms_in_poly=num_terms_in_poly,
-                    num_dummy_vars=num_dummy_vars,
-                    zero_cols_idx=zero_cols_idx
-                )
-
-        elif self.model_config.max_basis_function_degree > 1:
-            fit_x = self.polynomial_features_transform_.fit_transform(x)
-            self.polynomial_features_powers_ = self.polynomial_features_transform_.powers_
+        # construct the regressor_model.powers_ table to enable construction of algebraic gradients
+        if self.polynomial_features_powers_ is None:
+            self._set_categorical_powers_table(
+                num_continuous_dims=len(continuous_dim_col_names),
+                num_categorical_levels=num_dummy_vars+1,
+                num_terms_in_poly=num_terms_in_poly,
+                num_dummy_vars=num_dummy_vars,
+                zero_cols_idx=zero_cols_idx
+            )
 
         return fit_x
 
     def _filter_to_detected_features(self, fit_x):
-        x_star = fit_x[:, self.detected_feature_indices_]
-        return x_star
+        x_filtered_to_detected_features = fit_x[:, self.detected_feature_indices_]
+        return x_filtered_to_detected_features
 
     def _set_polynomial_gradient_coef(self):
         gradient_coef_matrix = []
@@ -623,6 +593,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.root_model_gradient_coef_ = augmented_grad_poly_coef
 
     def gradient_at_x(self, x):
-        fit_x = self._explode_x(x)
+        fit_x = self._create_one_hot_encoded_design_matrix(x)
         gradient_at_x = np.matmul(fit_x, self.root_model_gradient_coef_)
         return gradient_at_x
