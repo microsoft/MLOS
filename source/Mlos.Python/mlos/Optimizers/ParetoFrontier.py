@@ -44,10 +44,16 @@ class ParetoFrontier:
 
     @staticmethod
     def compute_pareto(optimization_problem: OptimizationProblem, objectives_df: pd.DataFrame) -> pd.DataFrame:
-        """Computes a pareto frontier for the given objectives_df.
+        """Computes a pareto frontier for the given objectives_df (including weak-pareto-optimal points).
 
-        We do this by consecutively removing dominated points from objectives_df until none are left.
+        We do this by consecutively removing points on the interior of the pareto frontier from objectives_df until none are left.
 
+        We retain the points that fall onto the frontier line, for the following reasons:
+            1. The code is more efficient.
+            2. If they were jiggled only a little bit outwards they would be included.
+            3. In real life we expect it to be an extremely rare occurrence.
+
+        We retain duplicated points because they could be due to different configurations.
 
         :param optimization_problem:
         :param objectives_df:
