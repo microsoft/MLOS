@@ -57,9 +57,10 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         return math.factorial(n) / math.factorial(k) / math.factorial(n - k)
 
     @pytest.mark.parametrize("degree", [2, 3, 5])
+    @pytest.mark.parametrize("include_bias", [True, False])
     @pytest.mark.parametrize("interaction_only", [True, False])
-    def test_dataframe_projection_parameterized(self, degree, interaction_only):
-        adaptee_kwargs = {'degree': degree, 'interaction_only': interaction_only}
+    def test_dataframe_projection_parameterized(self, degree, interaction_only, include_bias):
+        adaptee_kwargs = {'degree': degree, 'interaction_only': interaction_only, 'include_bias': include_bias}
         for adaptee in [self.simple_hypergrid,
                         self.unbalanced_hierarchical_hypergrid,
                         self.balanced_hierarchical_hypergrid]:
@@ -80,6 +81,8 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
                     num_target_continuous_dims_expected += self.n_choose_k(num_adaptee_continuous_dims, i+1)
         else:
             num_target_continuous_dims_expected = self.n_choose_k(adapter_kwargs['degree'] + num_adaptee_continuous_dims, num_adaptee_continuous_dims) - 1
+        if adapter_kwargs['include_bias']:
+            num_target_continuous_dims_expected += 1
 
         adapter = ContinuousToPolynomialBasisHypergridAdapter(adaptee=adaptee, **adapter_kwargs)
         num_polynomial_features = len(adapter.get_column_names_for_polynomial_features())
@@ -98,7 +101,7 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         unprojected_df = adapter.unproject_dataframe(df=projected_df, in_place=False)
         # since NaNs can not be passed through sklearn's PolynomialFeatures transform(), they are replaced w/ 0s during projection
         # hence the unprojected data frame will have 0s where the original had NaNs.
-        original_df_with_fillna_zeros = original_df.fillna(0)
+        original_df_with_fillna_zeros = original_df.fillna(adapter.nan_imputed_finite_value)
         assert original_df_with_fillna_zeros.equals(unprojected_df)
 
         # test in_place=True
@@ -132,7 +135,12 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
             original_point = adaptee.random()
             projected_point = adapter.project_point(original_point)
             unprojected_point = adapter.unproject_point(projected_point)
-            assert original_point == unprojected_point
+            # since points from hierarchical hypergrids may lack some possible dimensions,
+            # *and* this adapter's .project_dataframe() method imputes a fixed value,
+            # *and* the rows at which imputation was performed are not tracked,
+            # it is impossible to know if an unprojected point dimension was imputed during project,
+            # the following only tests the dimensions known to exist in the original_point
+            assert all([unprojected_point[original_dim] == original_point[original_dim] for original_dim in original_point.to_dict().keys()])
 
     @staticmethod
     def _test_polynomial_feature_values_are_as_expected(adapter, projected_df):
@@ -140,6 +148,7 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
         # This is done using the PolynomialFeatures powers_ table where the rows correspond to the target features
         # and the columns to the adaptee dimensions being transformed
         target_dim_names = adapter.get_column_names_for_polynomial_features()
+
         for i, ith_target_dim_powers in enumerate(adapter.get_polynomial_feature_powers_table()):
             # only testing higher degree monomials since the adaptee continuous dimensions are not altered
             if ith_target_dim_powers.sum() <= 1:
@@ -152,7 +161,11 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
             for j, jth_adaptee_dim_power in enumerate(ith_target_dim_powers):
                 if jth_adaptee_dim_power == 0:
                     continue
-                jth_dim_name = target_dim_names[j]
+                if adapter.polynomial_features_kwargs['include_bias']:
+                    jth_dim_name = target_dim_names[j+1]
+                else:
+                    jth_dim_name = target_dim_names[j]
+
                 input_values = projected_df[jth_dim_name].to_numpy().reshape(-1, 1)
                 expected_values = expected_values * (input_values ** jth_adaptee_dim_power)
 
