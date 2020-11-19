@@ -105,11 +105,10 @@ namespace Mlos.Agent.Server
 
                 // This populates a variable for the various settings registry
                 // callback handlers to use (by means of their individual
-                // AssemblyInitializers) to know how they can connect with the
-                // optimizer.
+                // ExperimentSession instances) to know how they can connect with
+                // the optimizer.
                 //
-                // See Also: AssemblyInitializer.cs within the SettingsRegistry
-                // assembly project in question.
+                // See SmartCacheExperimentSession.cs for an example.
                 //
                 mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(parserOptions.OptimizerUri);
             }
@@ -140,13 +139,12 @@ namespace Mlos.Agent.Server
             // the RegisterSettingsAssembly method which is called through the
             // handler for the RegisterAssemblyRequestMessage.
             //
-            // Once registered, the SettingsAssemblyManager uses reflection to
-            // search for an AssemblyInitializer inside those assemblies and
-            // executes it in order to setup the message handler callbacks
-            // within the agent.
+            // Once registered, the ExperimentSessionManager can creates an
+            // instance of the requested ExperimentSession in order to setup the
+            // message handler callbacks for the components messages within the
+            // agent.
             //
-            // See Also: AssemblyInitializer.cs within the SettingsRegistry
-            // assembly project in question.
+            // See SmartCacheExperimentSession.cs for an example.
             //
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(

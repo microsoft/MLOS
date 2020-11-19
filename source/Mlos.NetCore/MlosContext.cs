@@ -89,8 +89,7 @@ namespace Mlos.Core
         /// Typically this will be assigned for a deployment specific situation
         /// (see Mlos.Agent.Server/MlosAgentServer.cs for an example) prior to
         /// starting the Mlos.Agent and made available for message handlers to
-        /// use (see SmartCache.SettingsRegistry/AssemblyInitializer.cs for an
-        /// example).
+        /// use. See SmartCacheExperimentSession.cs for an example.
         /// </remarks>
         public IOptimizerFactory OptimizerFactory { get; set; }
 

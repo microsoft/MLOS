@@ -26,7 +26,7 @@ Here are some brief instructions on how to try it out:
 ## Executing
 
 ```sh
-./tools/bin/dotnet target/bin/Release/AnyCPU/Mlos.Agent.Server/Mlos.Agent.Server.dll \
+dotnet target/bin/Release/AnyCPU/Mlos.Agent.Server/Mlos.Agent.Server.dll \
     --executable target/bin/Release/x86_64/SmartSharedChannel \
     --settings-registry-path target/bin/Release/AnyCPU
 ```
