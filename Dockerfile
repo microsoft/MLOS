@@ -174,6 +174,8 @@ RUN python3.7 -m pip install pip && \
 
 COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
+RUN python3.7 -m pip install coveralls
+
 
 # Expose the typical port that we start mlos microservice optimizer on by default.
 EXPOSE 50051/tcp
