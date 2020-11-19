@@ -148,7 +148,8 @@ HRESULT SendMessageAndFileDescriptor(
     cmptr->cmsg_len = CMSG_LEN(sizeof(int));
     cmptr->cmsg_level = SOL_SOCKET;
     cmptr->cmsg_type = SCM_RIGHTS;
-    *(reinterpret_cast<int*>(CMSG_DATA(cmptr))) = exchangeFd;
+    int* cm_data_ptr = reinterpret_cast<int*>(CMSG_DATA(cmptr));
+    *cm_data_ptr = exchangeFd;
 
     msg.msg_name = nullptr;
     msg.msg_namelen = 0;
@@ -242,7 +243,8 @@ HRESULT ReceiveMessageAndFileDescriptor(
         if (cmptr->cmsg_len == CMSG_LEN(sizeof(int)) &&
             cmptr->cmsg_type == SCM_RIGHTS)
         {
-            receivedFd = *(reinterpret_cast<int*>(CMSG_DATA(cmptr)));
+            int* cm_data_ptr = reinterpret_cast<int*>(CMSG_DATA(cmptr));
+            receivedFd = *cm_data_ptr;
         }
         else
         {
