@@ -79,10 +79,7 @@ class ParetoFrontier:
 
         current_row_index = 0
         while current_row_index < len(pareto_df.index):
-            non_dominated = np.concatenate([
-                np.ones(current_row_index+1, dtype=bool),
-                (pareto_df.iloc[current_row_index+1:] >= pareto_df.iloc[current_row_index]).any(axis=1)
-            ])
+            non_dominated = (pareto_df >= pareto_df.iloc[current_row_index]).any(axis=1)
             pareto_df = pareto_df[non_dominated]
             current_row_index += 1
 
