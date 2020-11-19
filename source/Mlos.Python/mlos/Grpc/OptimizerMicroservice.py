@@ -136,6 +136,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         if request.Context.ContextJsonString != "":
             raise NotImplementedError("context not supported in remote optimizers")
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
+            # TODO handle context here
             suggested_params = optimizer.suggest(random=request.Random)
 
         return OptimizerService_pb2.ConfigurationParameters(
