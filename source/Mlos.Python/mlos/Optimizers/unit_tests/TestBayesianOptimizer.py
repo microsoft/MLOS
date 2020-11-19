@@ -544,7 +544,7 @@ class TestBayesianOptimizer:
 
         suggestion = local_optimizer.suggest(context=context_space.random())
         assert isinstance(suggestion, Point)
-        assert input_space.contains_point(suggestion)
+        assert suggestion in input_space
 
         with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
             # unaligned parameters and context
