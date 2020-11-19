@@ -68,7 +68,7 @@ class TestOptimizationProblem:
         )
         optimization_problem = OptimizationProblem(
             parameter_space=objective_function.parameter_space,
-            objective_space=output_space,
+            objective_space=objective_function.output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
         n_samples = 100
