@@ -80,16 +80,24 @@ class BayesianOptimizerProxy(OptimizerBase):
 
     @trace()
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
+        if context is not None:
+            raise NotImplementedError("Context not currently supported on remote optimizers")
+
         suggestion_request = OptimizerService_pb2.SuggestRequest(
             OptimizerHandle=self.optimizer_handle,
-            Random=random
+            Random=random,
+            Context=context
         )
         suggestion_response = self._optimizer_stub.Suggest(suggestion_request)
         suggested_params_dict = json.loads(suggestion_response.ParametersJsonString)
         return Point(**suggested_params_dict)
 
     @trace()
-    def register(self, feature_values_pandas_frame, target_values_pandas_frame):
+    def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
+        if context_values_pandas_frame is not None:
+            raise NotImplementedError("Context not currently supported on remote optimizers")
+
+        feature_values_pandas_frame = parameter_values_pandas_frame
         register_request = OptimizerService_pb2.RegisterObservationsRequest(
             OptimizerHandle=self.optimizer_handle,
             Observations=OptimizerService_pb2.Observations(
@@ -102,17 +110,20 @@ class BayesianOptimizerProxy(OptimizerBase):
         self._optimizer_stub.RegisterObservations(register_request)
 
     @trace()
-    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         response = self._optimizer_stub.GetAllObservations(self.optimizer_handle)
         features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
         objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
-        return features_df, objectives_df
+        context_df = None
+        return features_df, objectives_df, context_df
 
     @trace()
-    def predict(self, feature_values_pandas_frame, t=None):  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
-        feature_values_dict = feature_values_pandas_frame.to_dict(orient='list')
+        if context_values_pandas_frame is not None:
+            raise NotImplementedError("Context not currently supported on remote optimizers")
+        feature_values_dict = parameter_values_pandas_frame.to_dict(orient='list')
         prediction_request = OptimizerService_pb2.PredictRequest(
             OptimizerHandle=self.optimizer_handle,
             Features=OptimizerService_pb2.Features(

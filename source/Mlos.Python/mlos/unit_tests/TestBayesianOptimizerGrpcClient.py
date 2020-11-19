@@ -108,7 +108,7 @@ class TestBayesianOptimizerGrpcClient:
         registered_features_df = pd.read_json(registered_features_json, orient='index')
         registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
-        observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
+        observed_features_df, observed_objectives_df, _ = bayesian_optimizer.get_all_observations()
 
         assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
         assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
@@ -168,7 +168,7 @@ class TestBayesianOptimizerGrpcClient:
             registered_features_df = pd.read_json(registered_features_json, orient='index')
             registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
-            observed_features_df, observed_objectives_df = bayesian_optimizer.get_all_observations()
+            observed_features_df, observed_objectives_df, _ = bayesian_optimizer.get_all_observations()
 
             assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
             assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()

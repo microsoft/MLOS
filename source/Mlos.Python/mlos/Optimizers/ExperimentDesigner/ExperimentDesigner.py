@@ -95,21 +95,25 @@ class ExperimentDesigner:
             minimize=self.optimization_problem.objectives[0].minimize,
             logger=self.logger
         )
+        self.numeric_optimizer = self.make_optimizer_for_utility(self.utility_function)
 
+    def make_optimizer_for_utility(self, utility_function):
+        """Return numeric optimizer instance for utility function according to config."""
         if self.config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
-            self.numeric_optimizer = RandomSearchOptimizer(
+            return RandomSearchOptimizer(
                 optimizer_config=self.config.random_search_optimizer_config,
                 optimization_problem=self.optimization_problem,
-                utility_function=self.utility_function,
+                utility_function=utility_function,
                 logger=self.logger
             )
-        elif self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
-            self.numeric_optimizer = GlowWormSwarmOptimizer(
+        if self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+            return GlowWormSwarmOptimizer(
                 optimizer_config=self.config.glow_worm_swarm_optimizer_config,
                 optimization_problem=self.optimization_problem,
-                utility_function=self.utility_function,
+                utility_function=utility_function,
                 logger=self.logger
             )
+        raise ValueError(f"Unknown numeric_optimizer_implementation: {self.config.numeric_optimizer_implementation}.")
 
     def suggest(self, context_values_dataframe=None, random=False):
         self.logger.debug(f"Suggest(random={random})")
