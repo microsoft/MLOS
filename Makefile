@@ -169,7 +169,7 @@ endif
 .PHONY: docker-image
 docker-image:
 	docker pull ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-$(UbuntuVersion):latest
-	docker build . --target $(MlosBuildImageTarget) \
+	docker build . $(DOCKER_BUILD_ARGS) --target $(MlosBuildImageTarget) \
 	    --build-arg=MlosBuildBaseArg=$(MlosBuildBaseArg) \
 	    --build-arg=UbuntuVersion=$(UbuntuVersion) \
 	    --build-arg=http_proxy=${http_proxy} \
