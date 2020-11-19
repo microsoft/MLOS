@@ -571,16 +571,16 @@ class TestBayesianOptimizer:
 
 
         # can't register, predict, suggest with context on remote optimizer
-        with pytest.raises(NotImplementedError, match="Context not supported"):
+        with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
                                       target_values_pandas_frame=target_df,
                                       context_values_pandas_frame=context_df)
 
-        with pytest.raises(NotImplementedError, match="Context not supported"):
+        with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.predict(parameter_values_pandas_frame=parameter_df,
                                     context_values_pandas_frame=context_df)
 
-        with pytest.raises(NotImplementedError, match="Context not supported"):
+        with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.suggest(context=context_df)
 
         # context is missing but required by problem, should give error
