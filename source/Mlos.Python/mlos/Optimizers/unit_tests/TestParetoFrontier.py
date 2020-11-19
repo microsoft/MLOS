@@ -285,3 +285,52 @@ class TestParetoFrontier:
             #
             other_rows = pareto_df.index.difference([i])
             assert (pareto_df.loc[other_rows] > row).all(axis=1).sum() == 0
+
+
+    def test_repeated_values(self):
+        """Validates that the algorithm does its job in the presence of repeated values.
+
+        :return:
+        """
+
+        optimization_problem = OptimizationProblem(
+            parameter_space=None,
+            objective_space=SimpleHypergrid(
+                name="objectives",
+                dimensions=[
+                    ContinuousDimension(name='y1', min=0, max=5),
+                    ContinuousDimension(name='y2', min=0, max=5)
+                ]
+            ),
+            objectives=[
+                Objective(name='y1', minimize=False),
+                Objective(name='y2', minimize=False)
+            ]
+        )
+
+        expected_pareto_df = pd.DataFrame(
+            [
+                [1, 2],
+                [1, 2],
+                [2, 1],
+                [0.5, 2],
+                [1, 1],
+                [2, 0.5]
+            ],
+            columns=['y1', 'y2']
+        )
+
+        dominated_df = pd.DataFrame(
+            [
+                [0.5, 0.5],
+                [0.5, 1],
+                [0.5, 1.5],
+                [1, 0.5],
+                [1.5, 0.5]
+            ],
+            columns=['y1', 'y2']
+        )
+
+        all_objectives_df = pd.concat([dominated_df, expected_pareto_df])
+        computed_pareto_df = ParetoFrontier.compute_pareto(optimization_problem, all_objectives_df)
+        assert computed_pareto_df.sort_values(by=['y1','y2']).equals(expected_pareto_df.sort_values(by=['y1', 'y2']))
