@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import math
+from math import e
 import os
 import pickle
 import random
@@ -491,7 +492,12 @@ class TestBayesianOptimizer:
     def test_optimization_with_context(self):
         # Gaussian blob in x with position dependent on context variable y.
         def f(parameters, context):
-            return pd.DataFrame({'function_value': -np.exp(-50 * (parameters.x - 0.5 * context.y -0.5) ** 2)})
+            if isinstance(parameters, pd.DataFrame):
+                index = parameters.index
+            else:
+                index = [0]
+            return pd.DataFrame({'function_value': -np.exp(-50 * (parameters.x - 0.5 * context.y -0.5) ** 2)},
+                                 index=index)
         input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name="x", min=0, max=1)])
         output_space = SimpleHypergrid(name="objective",
                                        dimensions=[ContinuousDimension(name="function_value", min=-10, max=10)])
@@ -508,6 +514,7 @@ class TestBayesianOptimizer:
         # create some data points to eval
         n_samples = 100
         parameter_df = input_space.random_dataframe(n_samples)
+        context_df = context_space.random_dataframe(n_samples)
 
         target_df = f(parameter_df, context_df)
 
@@ -553,6 +560,16 @@ class TestBayesianOptimizer:
             optimization_problem=optimization_problem,
         )
 
+        with pytest.raises(ValueError, match="not supported if context is provided"):
+            local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION, context=Point(y=0).to_dataframe())
+
+        with pytest.raises(ValueError, match="not supported if context is provided"):
+            local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
+
+        with pytest.raises(ValueError, match="requires context to be not None"):
+            local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT)
+
+
         # can't register, predict, suggest with context on remote optimizer
         with pytest.raises(NotImplementedError, match="Context not supported"):
             remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
@@ -570,6 +587,22 @@ class TestBayesianOptimizer:
         with pytest.raises(grpc.RpcError):
             remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
                                       target_values_pandas_frame=target_df)
+
+        # run some iterations on local optimizer to see we do something sensible
+        for _ in range(100):
+            # pick context at random
+            context = context_space.random()
+            suggested_config = local_optimizer.suggest(context=context)
+            target_values = f(suggested_config, context)
+            local_optimizer.register(parameter_values_pandas_frame=suggested_config.to_dataframe(),
+                                     target_values_pandas_frame=target_values,
+                                     context_values_pandas_frame=context.to_dataframe())
+
+        optimum_y_1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=-1).to_dataframe())
+        optimum_y1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=1).to_dataframe())
+        assert optimum_y1.x > .8
+        assert optimum_y_1.x < .2
+
 
 
     def validate_optima(self, optimizer: OptimizerBase):

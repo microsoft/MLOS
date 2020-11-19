@@ -94,8 +94,8 @@ class OptimizerBase(ABC):
 
         if not len(parameters_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
-
-        if context is not None and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
+        have_context = (context is not None) or (self.experiment_designer.optimization_problem.context_space is not None)
+        if have_context and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
             raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
