@@ -128,7 +128,6 @@ class BayesianOptimizer(OptimizerBase):
 
     @trace()
     def suggest(self, random=False, context: Point = None):
-        # TODO: pass context to the suggest method
         if self.optimization_problem.context_space is not None:
             if context is None:
                 raise ValueError("Context required by optimization problem but not provided.")
