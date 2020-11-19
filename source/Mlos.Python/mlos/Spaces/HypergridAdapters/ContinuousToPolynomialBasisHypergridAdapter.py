@@ -28,12 +28,17 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
             (so not x[1] ** 2, x[0] * x[2] ** 3, etc.).
             Default = False
 
+        include_bias: boolean
+            If True, then include a bias column, the feature in which all polynomial powers are zero
+            (i.e. a column of ones - acts as an intercept term in a linear model).
+            Default = True
     """
 
     def __init__(
             self,
             adaptee: Hypergrid,
             degree: int = 2,
+            include_bias: bool = True,
             interaction_only: bool = False
     ):
         if not HypergridAdapter.is_like_simple_hypergrid(adaptee):
@@ -45,7 +50,7 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         self._polynomial_features_kwargs = {
             'degree': degree,
             'interaction_only': interaction_only,
-            'include_bias': False,
+            'include_bias': include_bias,
             'order': 'C'
         }
         self._target: Hypergrid = None
@@ -92,7 +97,8 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         # Add all adaptee dimensions to the target
         # This aligns with this adapter's goal since the linear terms will always be included in the polynomial basis functions
         for adaptee_dimension in self._adaptee.dimensions:
-            self._target.add_dimension(adaptee_dimension.copy())
+            if not adaptee_dimension.name in self._adaptee_dimension_names_to_transform:
+                self._target.add_dimension(adaptee_dimension.copy())
 
         if not self._adaptee_contains_dimensions_to_transform:
             return
@@ -107,8 +113,8 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         for i, poly_feature_name in enumerate(poly_feature_dim_names):
             ith_terms_powers = self._polynomial_features_powers[i]
 
-            if ith_terms_powers.sum() <= 1:
-                # the constant term is skipped and the linear terms are already included in _target
+            if not self._polynomial_features_kwargs['include_bias'] and ith_terms_powers.sum() == 0:
+                # the constant term is skipped
                 continue
             else:
                 # replace adaptee dim names for poly feature name {x0_, x1_, ...} representatives
@@ -142,11 +148,31 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
     def target(self) -> Hypergrid:
         return self._target
 
-    def get_column_names_for_polynomial_features(self):
-        return self._adaptee_dimension_names_to_transform + list(self._target_polynomial_feature_map.keys())
+    @property
+    def polynomial_features_kwargs(self) -> dict:
+        return self._polynomial_features_kwargs
+
+    @property
+    def nan_imputed_finite_value(self):
+        return self._nan_imputed_finite_value
+
+    def get_column_names_for_polynomial_features(self, degree=None):
+        # column names ordered by target dimension index as this coincides with the polynomial_features.powers_ table
+        sorted_by_column_index = {k: v for k, v in sorted(self._target_polynomial_feature_map.items(), key=lambda item: item[1])}
+        if degree is None:
+            return list(sorted_by_column_index.keys())
+
+        dim_names = []
+        for ith_terms_powers, poly_feature_name  in zip(self._polynomial_features_powers, self._get_polynomial_feature_names()):
+            if ith_terms_powers.sum() == degree:
+                dim_names.append(poly_feature_name)
+        return dim_names
 
     def get_polynomial_feature_powers_table(self):
         return self._polynomial_features_powers
+
+    def get_num_polynomial_features(self):
+        return self._polynomial_features_powers.shape[0]
 
     def _get_polynomial_feature_names(self):
         # The default polynomial feature feature names returned from .get_feature_names() look like: ['1', 'x0', 'x1', 'x0^2', 'x0 x1', 'x1^2']
@@ -171,9 +197,6 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
         for i, dim_name in enumerate(self._adaptee_dimension_names_to_transform):
             if dim_name in df.columns.values:
                 x_to_transform[:, i] = df[dim_name]
-            else:
-                # need placeholder for all expected input dimensions
-                x_to_transform[:, i] = np.zeros((len(df.index), 1))
 
         all_poly_features = self._polynomial_features.transform(x_to_transform)
         for target_dim_name in self._target_polynomial_feature_map:
@@ -184,6 +207,15 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
     def _unproject_dataframe(self, df: DataFrame, in_place=True) -> DataFrame:
         if not in_place:
             df = df.copy(deep=True)
-        # unproject simply drops the higher degree polynomial feature columns
-        df.drop(columns=self._target_polynomial_feature_map.keys(), inplace=True)
+
+        # unproject simply drops the monomial columns whose degree is not 1
+        polynomial_feature_powers = self.get_polynomial_feature_powers_table()
+        column_names_to_drop = []
+        for target_dim_name, powers_table_index in self._target_polynomial_feature_map.items():
+            target_powers = polynomial_feature_powers[powers_table_index]
+            if target_powers.sum() == 1:
+                continue
+            column_names_to_drop.append(target_dim_name)
+        df.drop(columns=column_names_to_drop, inplace=True)
+
         return df

@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import math
+from math import e
 import os
 import pickle
 import random
@@ -121,7 +122,7 @@ class TestBayesianOptimizer:
                 bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
             self.validate_optima(optimizer=bayesian_optimizer)
 
-            bayesian_optimizer.register(feature_values_pandas_frame=input_values_dataframe, target_values_pandas_frame=output_values_dataframe)
+            bayesian_optimizer.register(parameter_values_pandas_frame=input_values_dataframe, target_values_pandas_frame=output_values_dataframe)
             observed_best_config, observed_best_optimum = bayesian_optimizer.optimum(OptimumDefinition.BEST_OBSERVATION)
             assert observed_best_optimum.y == output_values_dataframe['y'].min()
 
@@ -142,7 +143,7 @@ class TestBayesianOptimizer:
                 target_values_df = pd.DataFrame({'y': [target_value]})
 
                 # Register the observation with the optimizer
-                bayesian_optimizer.register(feature_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+                bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
 
             best_config_point, best_objective = bayesian_optimizer.optimum()
             print(f"Optimum config: {best_config_point}, optimum objective: {best_objective}")
@@ -169,7 +170,7 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError):
             bayesian_optimizer.optimum()
 
-        bayesian_optimizer.register(feature_values_pandas_frame=pd.DataFrame({'x': [0.]}), target_values_pandas_frame=pd.DataFrame({'y': [1.]}))
+        bayesian_optimizer.register(parameter_values_pandas_frame=pd.DataFrame({'x': [0.]}), target_values_pandas_frame=pd.DataFrame({'y': [1.]}))
         bayesian_optimizer.optimum()
 
     @trace()
@@ -229,9 +230,9 @@ class TestBayesianOptimizer:
                 input_values_df = pd.DataFrame({param_name: [param_value] for param_name, param_value in suggested_params_dict.items()})
                 target_values_df = pd.DataFrame({'y': [target_value]})
 
-                bayesian_optimizer.register(feature_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+                bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
                 if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
-                    _, all_targets = bayesian_optimizer.get_all_observations()
+                    _, all_targets, _ = bayesian_optimizer.get_all_observations()
                     best_config, optimum = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                     print(f"[{i}/{num_iterations}] Optimum: {optimum}")
                     assert optimum.y == all_targets.min()[0]
@@ -309,7 +310,7 @@ class TestBayesianOptimizer:
                         for param_name, param_value in suggested_params
                     })
                     target_values_df = y.to_dataframe()
-                    bayesian_optimizer.register(feature_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+                    bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
                 best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
                 self.validate_optima(optimizer=bayesian_optimizer)
@@ -382,7 +383,7 @@ class TestBayesianOptimizer:
                         for param_name, param_value in suggested_params
                     })
                     target_values_df = y.to_dataframe()
-                    bayesian_optimizer.register(feature_values_pandas_frame=input_values_df,target_values_pandas_frame=target_values_df)
+                    bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df,target_values_pandas_frame=target_values_df)
 
                 best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
                 print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
@@ -442,7 +443,7 @@ class TestBayesianOptimizer:
             optimizer.register(input.to_dataframe(), output.to_dataframe())
 
         num_predictions = 100
-        prediction = optimizer.predict(feature_values_pandas_frame=input_space.random_dataframe(num_predictions))
+        prediction = optimizer.predict(parameter_values_pandas_frame=optimization_problem.parameter_space.random_dataframe(num_predictions))
         prediction_df = prediction.get_dataframe()
         assert len(prediction_df.index) == num_predictions
 
@@ -459,7 +460,7 @@ class TestBayesianOptimizer:
 
         # Let's make sure that the invalid_dimension was not remembered.
         #
-        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+        all_inputs_df, all_outputs_df, _ = optimizer.get_all_observations()
         assert all(column in {'y_1', 'y_2'} for column in all_outputs_df.columns)
 
         # We should accept inputs with missing output dimensions, as long as at least one is specified.
@@ -467,7 +468,7 @@ class TestBayesianOptimizer:
         output_with_missing_dimension = Point(y_1=input.x_1)
         output_with_missing_dimension_df = output_with_missing_dimension.to_dataframe()
         optimizer.register(input_df, output_with_missing_dimension_df)
-        all_inputs_df, all_outputs_df = optimizer.get_all_observations()
+        all_inputs_df, all_outputs_df, _ = optimizer.get_all_observations()
 
         # Let's make sure the missing dimension ends up being a null.
         #
@@ -488,6 +489,122 @@ class TestBayesianOptimizer:
             optimizer.register(input_df, only_invalid_outputs_df)
 
 
+    def test_optimization_with_context(self):
+        # Gaussian blob in x with position dependent on context variable y.
+        def f(parameters, context):
+            if isinstance(parameters, pd.DataFrame):
+                index = parameters.index
+            else:
+                index = [0]
+            return pd.DataFrame({'function_value': -np.exp(-50 * (parameters.x - 0.5 * context.y -0.5) ** 2)},
+                                 index=index)
+        input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name="x", min=0, max=1)])
+        output_space = SimpleHypergrid(name="objective",
+                                       dimensions=[ContinuousDimension(name="function_value", min=-10, max=10)])
+        context_space = SimpleHypergrid(name="context", dimensions=[ContinuousDimension(name="y", min=-1, max=1)])
+
+        optimization_problem = OptimizationProblem(
+            parameter_space=input_space,
+            objective_space=output_space,
+            # we want to minimize the function
+            objectives=[Objective(name="function_value", minimize=True)],
+            context_space=context_space
+        )
+
+        # create some data points to eval
+        n_samples = 100
+        parameter_df = input_space.random_dataframe(n_samples)
+        context_df = context_space.random_dataframe(n_samples)
+
+        target_df = f(parameter_df, context_df)
+
+        local_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+            optimization_problem=optimization_problem,
+        )
+
+        with pytest.raises(ValueError, match="Context required"):
+             local_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                      target_values_pandas_frame=target_df)
+
+
+        with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
+            local_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                     target_values_pandas_frame=target_df,
+                                     context_values_pandas_frame=context_df.iloc[:-1])
+
+        local_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                 target_values_pandas_frame=target_df,
+                                 context_values_pandas_frame=context_df)
+
+        with pytest.raises(ValueError, match="Context required"):
+            local_optimizer.suggest()
+
+        with pytest.raises(ValueError, match="Context required"):
+            local_optimizer.predict(parameter_values_pandas_frame=parameter_df)
+
+        suggestion = local_optimizer.suggest(context=context_space.random())
+        assert isinstance(suggestion, Point)
+        assert suggestion in input_space
+
+        with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
+            # unaligned parameters and context
+            local_optimizer.predict(parameter_values_pandas_frame=parameter_df,
+                                    context_values_pandas_frame=context_df.iloc[:-1])
+
+        predictions = local_optimizer.predict(parameter_values_pandas_frame=parameter_df,
+                                              context_values_pandas_frame=context_df)
+        predictions_df = predictions.get_dataframe()
+        assert len(predictions_df) == len(parameter_df)
+
+        remote_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+            optimization_problem=optimization_problem,
+        )
+
+        with pytest.raises(ValueError, match="not supported if context is provided"):
+            local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION, context=Point(y=0).to_dataframe())
+
+        with pytest.raises(ValueError, match="not supported if context is provided"):
+            local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
+
+        with pytest.raises(ValueError, match="requires context to be not None"):
+            local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT)
+
+
+        # can't register, predict, suggest with context on remote optimizer
+        with pytest.raises(NotImplementedError, match="Context not currently supported"):
+            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                      target_values_pandas_frame=target_df,
+                                      context_values_pandas_frame=context_df)
+
+        with pytest.raises(NotImplementedError, match="Context not currently supported"):
+            remote_optimizer.predict(parameter_values_pandas_frame=parameter_df,
+                                    context_values_pandas_frame=context_df)
+
+        with pytest.raises(NotImplementedError, match="Context not currently supported"):
+            remote_optimizer.suggest(context=context_df)
+
+        # context is missing but required by problem, should give error
+        with pytest.raises(grpc.RpcError):
+            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
+                                      target_values_pandas_frame=target_df)
+
+        # run some iterations on local optimizer to see we do something sensible
+        for _ in range(100):
+            # pick context at random
+            context = context_space.random()
+            suggested_config = local_optimizer.suggest(context=context)
+            target_values = f(suggested_config, context)
+            local_optimizer.register(parameter_values_pandas_frame=suggested_config.to_dataframe(),
+                                     target_values_pandas_frame=target_values,
+                                     context_values_pandas_frame=context.to_dataframe())
+
+        optimum_y_1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=-1).to_dataframe())
+        optimum_y1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=1).to_dataframe())
+        assert optimum_y1.x > .8
+        assert optimum_y_1.x < .2
+
+
+
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
         should_raise_for_confidence_bounds = False
@@ -495,8 +612,8 @@ class TestBayesianOptimizer:
             should_raise_for_predicted_value = True
             should_raise_for_confidence_bounds = True
         else:
-            features_df, _ = optimizer.get_all_observations()
-            predictions = optimizer.predict(feature_values_pandas_frame=features_df)
+            parameters_df, _, _ = optimizer.get_all_observations()
+            predictions = optimizer.predict(parameter_values_pandas_frame=parameters_df)
             predictions_df = predictions.get_dataframe()
 
             if len(predictions_df.index) == 0:
@@ -550,7 +667,7 @@ class TestBayesianOptimizer:
                 # If the the prediction for predicted_value has too few degrees of freedom, it's impossible to construct a confidence interval for it.
                 # If it was possible, then the inequality above would always hold. If it's not possible, then the inequality above can fail.
                 #
-                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction = optimizer.predict(parameter_values_pandas_frame=predicted_best_config.to_dataframe())
                 optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
                 degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
                 if degrees_of_freedom == 0:
@@ -560,7 +677,7 @@ class TestBayesianOptimizer:
                     assert False
 
             if not (predicted_optimum.predicted_value <= ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound):
-                optimum_predicted_value_prediction = optimizer.predict(feature_values_pandas_frame=predicted_best_config.to_dataframe())
+                optimum_predicted_value_prediction = optimizer.predict(parameter_values_pandas_frame=predicted_best_config.to_dataframe())
                 optimum_predicted_value_prediction_df = optimum_predicted_value_prediction.get_dataframe()
                 degrees_of_freedom = optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value][0]
                 if degrees_of_freedom == 0:

@@ -133,8 +133,11 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
         # TODO: return an error if optimizer not found
         #
+        if request.Context.ContextJsonString != "":
+            raise NotImplementedError("Context not currently supported in remote optimizers")
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            suggested_params = optimizer.suggest(random=request.Random, context=request.Context)
+            # TODO handle context here
+            suggested_params = optimizer.suggest(random=request.Random)
 
         return OptimizerService_pb2.ConfigurationParameters(
             ParametersJsonString=json.dumps(suggested_params.to_dict())
@@ -151,7 +154,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
 
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(feature_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
+            optimizer.register(parameter_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
 
         return Empty()
 
@@ -163,13 +166,13 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objectives_df = pd.read_json(observations.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
 
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(feature_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
+            optimizer.register(parameter_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
 
         return Empty()
 
     def GetAllObservations(self, request, context): # pylint: disable=unused-argument
         with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
-            features_df, objectives_df = optimizer.get_all_observations()
+            features_df, objectives_df, _ = optimizer.get_all_observations()
 
         return Observations(
             Features=Features(FeaturesJsonString=features_df.to_json(orient='index', double_precision=15)),

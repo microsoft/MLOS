@@ -92,10 +92,15 @@ class TestRegressionEnhancedRandomForestRegressionModel:
 
         x_df = pd.DataFrame({
             'x0': np.random.choice(['a', 'b', 'c'], size=num_points),
-            'x1': np.random.uniform(0, 5, size=num_points),
-            'x2': np.random.uniform(0, 5, size=num_points),
             'i0': np.random.choice(['-5', '5'], size=num_points)
         })
+        x_df['x1'] = np.zeros((num_points, 1))
+        x_df['x2'] = np.zeros((num_points, 1))
+        num_points_in_grid_per_dim = int(math.sqrt(num_points))
+        assert num_points_in_grid_per_dim * num_points_in_grid_per_dim == num_points
+        x_linspace = np.linspace(0, 5, num_points_in_grid_per_dim)
+        x1, x2 = np.meshgrid(x_linspace, x_linspace)
+        x_df[['x1', 'x2']] = np.array([x1, x2]).reshape(2, -1).T
 
         y_poly_feature = PolynomialFeatures(degree=2)
         for x0 in x_df['x0'].unique():
@@ -189,7 +194,7 @@ class TestRegressionEnhancedRandomForestRegressionModel:
             output_space=self.test_case_globals['output_space']
         )
 
-        num_train_points = 100
+        num_train_points = 50
         x_train_df, y_train_df = self.generate_points_simple_quadratic(num_train_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
         rerf.fit(x_train_df, y_train_df)
 
@@ -216,9 +221,8 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
 
-        test_threshold = 10 ** -3
-        assert (unexplained_variance < test_threshold,
-                        f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
+        test_threshold = 10 ** -5
+        assert unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})'
 
     def test_lasso_categorical_predictions(self):
         rerf = RegressionEnhancedRandomForestRegressionModel(
@@ -228,7 +232,7 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         )
 
         # input space consists of 6 2-d domains that are 5 x 5 units wide.  Hence placing 25 points in each domain.
-        num_train_x = 100
+        num_train_x = 20 * 20
         x_train_df, y_train_df = self.generate_points_nonhierarchical_categorical_quadratic(num_train_x)
         rerf.fit(x_train_df, y_train_df)
 
@@ -252,7 +256,7 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         assert rerf.polynomial_features_powers_.shape == (num_cols_in_design_matrix, final_num_features), 'PolynomalFeature.power_ shape is incorrect'
 
         # generate new random to test predictions
-        num_test_points = 50
+        num_test_points = 5 * 5
         x_test_df, y_test_df = self.generate_points_nonhierarchical_categorical_quadratic(num_test_points)
 
         predictions = rerf.predict(x_test_df)
@@ -264,9 +268,9 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
-        test_threshold = 10 ** -3
-        assert (unexplained_variance < test_threshold,
-                        f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})')
+        test_threshold = 10 ** -4
+        print(unexplained_variance, test_threshold)
+        assert unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})'
 
     def test_lasso_hierarchical_categorical_predictions(self):
         random.seed(11001)
@@ -283,7 +287,7 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         # The input space consists of 3 2-d domains 200 x 200 units.  Hence random samples smaller than a certain size will produce too few points to
         # train reliable models.
         # TODO: Good place to use a non-random training set design
-        num_train_x = 600
+        num_train_x = 300
         x_train_df = objective_function.parameter_space.random_dataframe(num_samples=num_train_x)
         y_train_df = objective_function.evaluate_dataframe(x_train_df)
         rerf.fit(x_train_df, y_train_df)
@@ -305,5 +309,6 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
-        test_threshold = 10**-3
+        test_threshold = 10**-6
+        print(unexplained_variance, test_threshold)
         assert unexplained_variance < test_threshold, f'1 - R^2 = {unexplained_variance} larger than expected ({test_threshold})'
