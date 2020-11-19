@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  This is a meta project to call the "pack" target on a subset
+  of other projects to build nugets for external consumption.
+-->
+<Project ToolsVersion="Current" DefaultTargets="Build;Pack" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
+  <ItemGroup Label="lib">
+    <ProjectReference Include="$(SourceDir)/Mlos.Agent/Mlos.Agent.csproj" />
+    <ProjectReference Include="$(SourceDir)/Mlos.Agent.GrpcServer/Mlos.Agent.GrpcServer.csproj" />
+    <ProjectReference Include="$(SourceDir)/Mlos.Model.Services/Mlos.Model.Services.csproj" />
+    <ProjectReference Include="$(SourceDir)/Mlos.Model.Services.Client/Mlos.Model.Services.Client.csproj" />
+    <ProjectReference Include="$(SourceDir)/Mlos.NetCore/Mlos.NetCore.csproj" />
+    <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.Attributes/Mlos.SettingsSystem.Attributes.csproj" />
+    <ProjectReference Include="$(SourceDir)/Mlos.Streaming/Mlos.Streaming.csproj" />
+  </ItemGroup>
+  <ItemGroup Label="tools">
+    <ProjectReference Include="$(SourceDir)/Mlos.Agent.Server/Mlos.Agent.Server.csproj" />
+    <ProjectReference Include="$(SourceDir)/Mlos.SettingsSystem.CodeGen/Mlos.SettingsSystem.CodeGen.csproj" />
+  </ItemGroup>
+  <Import Project="$(BaseDir)\build\Mlos.MetaProj.targets" />
+  <!--
+    For now we're only creating the .nupkg files locally.
+    TODO: Add keys for signing the package prior to publishing as well.
+  -->
+  <Target Name="Pack" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(BUILD_COREXT)' != '1' And '$(CdpxBuildPipeline)' != 'true'">
+    <!-- Don't repeat the build - we probably just did it. -->
+    <MSBuild Projects="@(ProjectReference)" Targets="Pack" RunEachTargetSeparately="false" Properties="NoBuild=true" />
+  </Target>
+</Project>

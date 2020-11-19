@@ -43,7 +43,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
         public override void WriteEndFile()
         {
             IndentationLevel--;
-            WriteLine("};");
+            WriteLine("}");
             WriteLine();
         }
 
