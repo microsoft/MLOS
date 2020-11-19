@@ -492,12 +492,9 @@ class TestBayesianOptimizer:
         # Gaussian blob in x with position dependent on context variable y.
         def f(parameters, context):
             return pd.DataFrame({'function_value': -np.exp(-50 * (parameters.x - 0.5 * context.y -0.5) ** 2)})
-        # single continuous input dimension between 0 and 1
         input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name="x", min=0, max=1)])
-        # define output space, we might not know the exact ranges
         output_space = SimpleHypergrid(name="objective",
                                        dimensions=[ContinuousDimension(name="function_value", min=-10, max=10)])
-        # use a context space between -1 and 1
         context_space = SimpleHypergrid(name="context", dimensions=[ContinuousDimension(name="y", min=-1, max=1)])
 
         optimization_problem = OptimizationProblem(
@@ -511,7 +508,7 @@ class TestBayesianOptimizer:
         # create some data points to eval
         n_samples = 100
         parameter_df = input_space.random_dataframe(n_samples)
-        context_df = context_space.random_dataframe(n_samples)
+
         target_df = f(parameter_df, context_df)
 
         local_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
