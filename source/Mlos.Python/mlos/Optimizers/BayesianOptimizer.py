@@ -173,7 +173,8 @@ class BayesianOptimizer(OptimizerBase):
 
         if context_values_pandas_frame is not None:
             if len(parameter_values_pandas_frame) != len(context_values_pandas_frame):
-                raise ValueError(f"Incompatible shape of parameters and context: {parameter_values_pandas_frame.shape} and {context_values_pandas_frame.shape}.")
+                raise ValueError(f"Incompatible shape of parameters and context: "
+                                 f"{parameter_values_pandas_frame.shape} and {context_values_pandas_frame.shape}.")
             context_columns_to_retain = [column for column in context_values_pandas_frame.columns if column in self._context_names_set]
             if len(context_columns_to_retain) == 0:
                 raise ValueError(f"None of the {context_values_pandas_frame.columns} is a context recognized by this optimizer.")
