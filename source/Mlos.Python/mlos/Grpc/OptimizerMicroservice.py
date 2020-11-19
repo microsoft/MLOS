@@ -134,7 +134,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         # TODO: return an error if optimizer not found
         #
         if request.Context.ContextJsonString != "":
-            raise NotImplementedError("context not supported in remote optimizers")
+            raise NotImplementedError("Context currently not supported in remote optimizers")
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             # TODO handle context here
             suggested_params = optimizer.suggest(random=request.Random)

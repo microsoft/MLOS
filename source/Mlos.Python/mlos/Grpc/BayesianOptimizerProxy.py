@@ -122,7 +122,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         # TODO: make this streaming and/or using arrow.
         #
         if context_values_pandas_frame is not None:
-            raise NotImplementedError("Context not supported on remote optimizers")
+            raise NotImplementedError("Context currently not supported on remote optimizers")
         feature_values_dict = parameter_values_pandas_frame.to_dict(orient='list')
         prediction_request = OptimizerService_pb2.PredictRequest(
             OptimizerHandle=self.optimizer_handle,
