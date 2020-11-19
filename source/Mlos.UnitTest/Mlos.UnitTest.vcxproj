@@ -45,7 +45,7 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup Label="Components">
-    <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" ReferenceOutputAssembly="false" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_base.h" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_callbacks.h" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.UnitTest\SettingsProvider_gen_dispatch.h" />
