@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import numpy as np
 import pandas as pd
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 
