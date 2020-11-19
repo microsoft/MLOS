@@ -94,7 +94,7 @@ class OptimizerBase(ABC):
 
         if not len(parameters_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
-        have_context = (context is not None) or (self.experiment_designer.optimization_problem.context_space is not None)
+        have_context = (context is not None) or (self.optimization_problem.context_space is not None)
         if have_context and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
             raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
@@ -110,7 +110,7 @@ class OptimizerBase(ABC):
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):
         greedy_utility = PredictedValueUtilityFunction(
-            self.surrogate_model, minimize=self.experiment_designer.optimization_problem.objectives[0].minimize)
+            self.surrogate_model, minimize=self.optimization_problem.objectives[0].minimize)
         utility_optimizer = self.experiment_designer.make_optimizer_for_utility(greedy_utility)
         return utility_optimizer.suggest(context_values_dataframe=context)
 
