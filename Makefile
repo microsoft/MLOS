@@ -33,11 +33,15 @@ check: all test
 install: dotnet-install cmake-install
 	@ echo "make install target finished."
 
+.PHONY: pack
+pack:
+	$(MAKE) -C source/Mlos.NetCore.Components.Packages
+
 .PHONY: clean
 clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean
 
 .PHONY: distclean
-distclean: clean cmake-distclean
+distclean: clean dotnet-distclean dotnet-pkgs-clean cmake-distclean
 
 .PHONY: rebuild
 rebuild: clean all
@@ -165,13 +169,13 @@ endif
 .PHONY: docker-image
 docker-image:
 	docker pull ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-$(UbuntuVersion):latest
-	docker build . --target $(MlosBuildImageTarget) \
+	docker build . $(DOCKER_BUILD_ARGS) --target $(MlosBuildImageTarget) \
 	    --build-arg=MlosBuildBaseArg=$(MlosBuildBaseArg) \
 	    --build-arg=UbuntuVersion=$(UbuntuVersion) \
 	    --build-arg=http_proxy=${http_proxy} \
 	    -t mlos-build-ubuntu-$(UbuntuVersion)
 	@ echo Finished building mlos-build-ubuntu-$(UbuntuVersion) image.
-	@ echo Run "docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)" to start an instance.
+	@ echo "Run 'docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)' to start an instance."
 
 # Cleanup the outputs produced by cmake.
 .PHONY: cmake-distclean

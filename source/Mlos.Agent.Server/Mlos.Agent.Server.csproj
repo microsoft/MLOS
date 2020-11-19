@@ -11,6 +11,14 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
+  <PropertyGroup Label="PackageProps">
+    <!-- Projects using a PackageReference to tool should not attempt to link against it. -->
+    <DevelopmentDependency>true</DevelopmentDependency>
+    <!-- Let us install this on the PATH with "dotnet tool install". -->
+    <PackAsTool>true</PackAsTool>
+    <PackageId>Mlos.Agent.Server.Tool</PackageId>
+    <ToolCommandName>Mlos.Agent.Server</ToolCommandName>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
   </ItemGroup>

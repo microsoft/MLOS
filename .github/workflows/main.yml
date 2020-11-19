@@ -33,13 +33,21 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     # Runs multiple commands using the runners shell
-    - name: Run ${{ matrix.configuration }} msbuild
+    - name: Msbuild/test ${{ matrix.configuration }}
       timeout-minutes: 15
       shell: cmd
       run: |
         set Configuration=${{ matrix.configuration }}
         scripts\build.windows.cmd
+    - name: Pack/test ${{ matrix.configuration }}
+      timeout-minutes: 15
+      shell: cmd
+      run: |
+        set Configuration=${{ matrix.configuration }}
+        scripts\package.windows.cmd
 
   # Docker build process overview:
   # - We currently use the docker.pkg.github.com package registry as a staging
@@ -213,7 +221,7 @@ jobs:
         #load: true
 
   linux-build-test:
-    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} build/test C++/C#
+    name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} ${{ matrix.cxx }} build/test C++/C#
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 30
@@ -221,9 +229,17 @@ jobs:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
         configuration: [Debug, Release]
+        cxx: [clang++-10, g++]
+        include:
+          - cxx: clang++-10
+            cc: clang-10
+          - cxx: g++
+            cc: gcc
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
@@ -258,8 +274,8 @@ jobs:
     - name: Start ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
-        echo $UID
         docker run -it -d -v $PWD:/src/MLOS -u $UID --env CONFIGURATION=${{ matrix.configuration }} \
+          --env CC=${{ matrix.cc }} --env CXX=${{ matrix.cxx }} \
           --name mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container
@@ -279,7 +295,15 @@ jobs:
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make dotnet-test
-    - name: Run ${{ matrix.configuration }} cmake build
+    - name: Run ${{ matrix.configuration }} dotnet pack test
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make -C source/Mlos.NetCore.Components.Packages/
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          dotnet build external/ExternalIntegrationExample/ExternalIntegrationExample.SettingsRegistry/
+    - name: Run ${{ matrix.configuration }} cmake build (CXX=${{ matrix.cxx }})
       timeout-minutes: 5
       shell: bash
       run: |

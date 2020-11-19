@@ -29,7 +29,6 @@ using ::testing::TestPartResult;
 using ::testing::UnitTest;
 
 int
-__cdecl
 main(
     _In_ int argc,
     _In_ char* argv[])
