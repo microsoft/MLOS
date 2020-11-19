@@ -95,7 +95,8 @@ class BayesianOptimizerProxy(OptimizerBase):
     @trace()
     def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
         if context_values_pandas_frame is not None:
-            raise NotImplementedError("Context not supported on remote optimizers")
+            raise NotImplementedError("Context not currently supported on remote optimizers")
+
         feature_values_pandas_frame = parameter_values_pandas_frame
         register_request = OptimizerService_pb2.RegisterObservationsRequest(
             OptimizerHandle=self.optimizer_handle,
