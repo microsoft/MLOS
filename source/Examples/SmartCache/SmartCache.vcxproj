@@ -40,7 +40,7 @@
     <ClInclude Include="Workloads.h" />
   </ItemGroup>
   <ItemGroup Label="SettingsRegistry">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\SmartCache.SettingsRegistry\SmartCache.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\SmartCache.SettingsRegistry\SmartCache.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" ReferenceOutputAssembly="false" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartCache\SettingsProvider_gen_base.h" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartCache\SettingsProvider_gen_callbacks.h" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartCache\SettingsProvider_gen_dispatch.h" />
