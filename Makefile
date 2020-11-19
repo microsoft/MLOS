@@ -175,7 +175,7 @@ docker-image:
 	    --build-arg=http_proxy=${http_proxy} \
 	    -t mlos-build-ubuntu-$(UbuntuVersion)
 	@ echo Finished building mlos-build-ubuntu-$(UbuntuVersion) image.
-	@ echo Run "docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)" to start an instance.
+	@ echo "Run 'docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)' to start an instance."
 
 # Cleanup the outputs produced by cmake.
 .PHONY: cmake-distclean
