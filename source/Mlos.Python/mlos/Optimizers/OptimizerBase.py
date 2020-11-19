@@ -12,6 +12,8 @@ import scipy.stats
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.PredictedValueUtilityFunction import PredictedValueUtilityFunction
+
 from mlos.Spaces import Point
 from mlos.Tracer import trace
 
@@ -24,6 +26,8 @@ class OptimizerBase(ABC):
     def __init__(self, optimization_problem: OptimizationProblem):
         self.optimization_problem = optimization_problem
         self.optimizer_config = None # TODO: pass from subclasses.
+        self.surrogate_model = None
+        self.experiment_designer = None
 
     @property
     def trained(self):
@@ -43,13 +47,11 @@ class OptimizerBase(ABC):
     @abstractmethod
     def suggest(self, random=False, context=None) -> Point:
         """Suggest the next set of parameters to try.
-
-        :return:
         """
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def register(self, feature_values_pandas_frame, target_values_pandas_frame) -> None:
+    def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None) -> None:
         """Registers a new result with the optimizer.
 
         :param params:
@@ -59,11 +61,11 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def predict(self, feature_values_pandas_frame, t=None) -> Prediction:
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:
         """Predict target value based on the parameters supplied.
 
         :param params:
@@ -71,7 +73,8 @@ class OptimizerBase(ABC):
         """
         raise NotImplementedError("All subclasses must implement this method.")
 
-    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION, alpha: float = 0.05) -> Tuple[Point, Point]:
+    def optimum(self, optimum_definition: OptimumDefinition = OptimumDefinition.BEST_OBSERVATION,
+                alpha: float = 0.05, context: pd.DataFrame = None) -> Tuple[Point, Point]:
         """Return the optimal value found so far along with the related parameter values.
 
         This could be either min or max, depending on the settings.
@@ -87,31 +90,45 @@ class OptimizerBase(ABC):
         """
         assert optimum_definition in OptimumDefinition
 
-        features_df, objectives_df = self.get_all_observations()
-        if not len(features_df.index):
+        parameters_df, objectives_df, _ = self.get_all_observations()
+
+        if not len(parameters_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
+        have_context = (context is not None) or (self.optimization_problem.context_space is not None)
+        if have_context and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
+            raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
-            return self._best_observation_optimum(features_df=features_df, objectives_df=objectives_df)
-        return self._prediction_based_optimum(features_df=features_df, optimum_definition=optimum_definition, alpha=alpha)
 
+            return self._best_observation_optimum(parameters_df=parameters_df, objectives_df=objectives_df)
+        if optimum_definition == OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
+            if context is None:
+                raise ValueError(f"{optimum_definition} requires context to be not None.")
+            return self._optimum_within_context(context=context)
+        return self._prediction_based_optimum(parameters_df=parameters_df, optimum_definition=optimum_definition, alpha=alpha)
 
     @trace()
-    def _best_observation_optimum(self, features_df: pd.DataFrame, objectives_df: pd.DataFrame) -> Tuple[Point, Point]:
+    def _optimum_within_context(self, context: pd.DataFrame):
+        greedy_utility = PredictedValueUtilityFunction(
+            self.surrogate_model, minimize=self.optimization_problem.objectives[0].minimize)
+        utility_optimizer = self.experiment_designer.make_optimizer_for_utility(greedy_utility)
+        return utility_optimizer.suggest(context_values_dataframe=context)
+
+    @trace()
+    def _best_observation_optimum(self, parameters_df: pd.DataFrame, objectives_df: pd.DataFrame) -> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
         if objective.minimize:
             index_of_best = objectives_df[objective.name].idxmin()
         else:
             index_of_best = objectives_df[objective.name].idxmax()
         optimum_value = Point.from_dataframe(objectives_df.loc[[index_of_best]])
-        config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
+        config_at_optimum = Point.from_dataframe(parameters_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value
 
     @trace()
-    def _prediction_based_optimum(self, features_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
+    def _prediction_based_optimum(self, parameters_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
-
-        predictions = self.predict(feature_values_pandas_frame=features_df)
+        predictions = self.predict(parameter_values_pandas_frame=parameters_df)
         predictions_df = predictions.get_dataframe()
 
         if len(predictions_df.index) == 0:
@@ -119,7 +136,7 @@ class OptimizerBase(ABC):
 
         # Predictions index must be a subset of features index.
         #
-        assert features_df.index.intersection(predictions_df.index).equals(predictions_df.index)
+        assert parameters_df.index.intersection(predictions_df.index).equals(predictions_df.index)
 
         predicted_value_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         dof_column_name = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
@@ -164,9 +181,9 @@ class OptimizerBase(ABC):
                     index_of_best = lower_confidence_bounds.idxmax()
                 optimum_value = Point(lower_confidence_bound=lower_confidence_bounds.loc[index_of_best])
             else:
-                raise RuntimeError(f"Unknown optimum definition.")
+                raise RuntimeError(f"Unknown optimum definition: {optimum_definition}")
 
-        config_at_optimum = Point.from_dataframe(features_df.loc[[index_of_best]])
+        config_at_optimum = Point.from_dataframe(parameters_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value
 
     @abstractmethod

@@ -181,7 +181,7 @@ class ModelTomograph:
                 current_y_resolution = len(y_dim_linspace)
 
                 features_df = self._create_features_dataframe(x_dim, y_dim, point)
-                predictions = self.optimizer.predict(feature_values_pandas_frame=features_df, t=time)
+                predictions = self.optimizer.predict(parameter_values_pandas_frame=features_df, t=time)
                 predictions.add_invalid_rows_at_missing_indices(desired_index=features_df.index)
                 predictions_df = predictions.get_dataframe()
                 if not predictions_df.empty and predictions_df[Prediction.LegalColumnNames.IS_VALID_INPUT.value].any():
