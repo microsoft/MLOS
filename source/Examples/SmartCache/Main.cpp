@@ -112,10 +112,11 @@ main(
     // component.
     //
     // When the (C#) agent receives that message it dynamically loads the
-    // specified dll into its address space and calls an AssemblyInitializer
-    // static class within that dll to setup the message handlers (callbacks).
+    // specified dll into its address space.
+    // A corresponding ExperimentSession class for the component, can then be
+    // used to setup the message handlers (callbacks).
     //
-    // See Also: SmartCache.SettingsRegistry/AssemblyInitializer.cs
+    // See Also: SmartCache.ExperimentSession/SmartCacheExperimentSession.cs
     //
     hr = mlosContext.RegisterSettingsAssembly(
         "SmartCache.SettingsRegistry.dll",
@@ -216,7 +217,7 @@ main(
         //
         // To see how the external agent will process the request, see the
         // RequestNewConfigurationMessage handler in
-        // SmartCache.SettingsRegistry/AssemblyInitializer.cs.
+        // SmartCacheExperimentSession.cs
         //
         std::unique_lock<std::mutex> lock(waitForConfigMutex);
         while (!isConfigReady)
