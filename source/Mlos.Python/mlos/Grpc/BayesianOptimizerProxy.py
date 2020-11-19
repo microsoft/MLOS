@@ -115,7 +115,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
         objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
         context_df = None
-        return features_df, objectives_df, context_df 
+        return features_df, objectives_df, context_df
 
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument
