@@ -12,8 +12,8 @@
     <ProjectReference Include="$(SourceDir)\Mlos.Core\Mlos.Core.vcxproj" />
   </ItemGroup>
   <ItemGroup Label="SettingsRegistry">
-    <ProjectReference Include="$(MSBuildThisFileDirectory)\SmartSharedChannel.SettingsRegistry\SmartSharedChannel.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />
-    <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\SmartSharedChannel.SettingsRegistry\SmartSharedChannel.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" SkipGetTargetFrameworkProperties="true" ReferenceOutputAssembly="false" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_base.h" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_callbacks.h" />
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\SmartSharedChannel\SettingsProvider_gen_dispatch.h" />
