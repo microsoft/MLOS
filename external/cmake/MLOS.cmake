@@ -59,6 +59,7 @@ function(add_mlos_settings_registry)
     if(${USE_LOCAL_MLOS_NUGETS})
         set(MlosLocalPkgOutput "${MLOS_ROOT}/target/pkg/${MLOS_CMAKE_BUILD_TYPE}")
         set(NUGET_RESTORE_ARGS "'/p:RestoreSources=${MlosLocalPkgOutput}\;https://api.nuget.org/v3/index.json'")
+        set(MLOS_PKGVERS_ARGS "'/p:MlosPackageVersion=*-*'")
         set(MlosLocalPkgTargetDeps Mlos.NetCore.Components.Packages)
     else()
         set(NUGET_RESTORE_ARGS "")
@@ -90,7 +91,7 @@ function(add_mlos_settings_registry)
         # we compose the dependency graph already above, so we can skip
         # building project references here in order to avoid some parallel
         # dotnet processes accessing the same files.
-        COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} ${NUGET_RESTORE_ARGS} ${CODEGEN_OUTPUT_DIR_ARGS} ${BINPLACE_DIR_ARGS} "${CSPROJ}"
+        COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} ${NUGET_RESTORE_ARGS} ${MLOS_PKGVERS_ARGS} ${CODEGEN_OUTPUT_DIR_ARGS} ${BINPLACE_DIR_ARGS} "${CSPROJ}"
         # Also, "dotnet build" doesn't update timestamps in a make compatible
         # way, so we also mark the projects as having been built using touch.
         COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTDIR}"
