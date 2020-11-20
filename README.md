@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/microsoft/MLOS/branch/main/graph/badge.svg?token=14T6RFL2KR)](https://codecov.io/gh/microsoft/MLOS)
+
 # MLOS: Machine Learning Optimized Systems
 
 ## MLOS: An Infrastructure for Automated Software Performance Engineering
