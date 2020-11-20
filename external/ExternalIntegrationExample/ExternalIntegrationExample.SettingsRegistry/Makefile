@@ -20,4 +20,4 @@ dotnet-clean:
 cmake-build:
 	mkdir -p ../build
 	cd ../build && cmake ../build
-	make -C ../build/ ExternalIntegration.SettingsRegistry
+	make -C ../build/ ExternalIntegrationExample.SettingsRegistry
