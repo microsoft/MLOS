@@ -3,6 +3,14 @@
 all: cmake-build
 
 cmake-build:
-	mkdir -p build
-	cd build && cmake ..
-	cd build && make -j
+	mkdir -p ./build
+	cd ./build/ && cmake ..
+	cd ./build/ && make -j
+
+clean:
+	make -C ExternalIntegrationExample.SettingsRegistry/ clean
+	cd ./build/ && make clean || true
+
+distclean: clean
+	make -C ExternalIntegrationExample.SettingsRegistry/ distclean
+	rm -rf ./build/
