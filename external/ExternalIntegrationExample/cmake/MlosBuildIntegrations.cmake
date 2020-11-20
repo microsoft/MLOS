@@ -54,3 +54,10 @@ include(MLOS)
 #
 set(MlosCodeGenBaseOutDir "${CMAKE_SOURCE_DIR}/Mlos.CodeGen.out")
 include_directories(${MlosCodeGenBaseOutDir})
+
+# The path to place the Mlos SettingRegistry dlls.
+#
+# See Also:
+# - ExternalIntegrationExample.SettingsRegistry/CMakeLists.txt
+#
+set(MlosSettingsRegistryDllDir "${CMAKE_BINARY_DIR}/SettingsRegistryDlls")
