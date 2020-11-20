@@ -15,3 +15,9 @@ dotnet-rebuild-all:
 
 dotnet-clean:
 	dotnet build $(MSBUILD_ARGS) -c $(CONFIGURATION) --no-restore /t:clean
+
+# A quick wrapper for invoking testing the CMakeLists.txt wrapper.
+cmake-build:
+	mkdir -p ../build
+	cd ../build && cmake ../build
+	make -C ../build/ ExternalIntegration.SettingsRegistry

@@ -4,12 +4,20 @@ cmake_minimum_required(VERSION 3.15)
 
 project(ExternalIntegrationExample)
 
+# This is a simple existing project definition.
+#
 add_executable(${PROJECT_NAME}
     ExternalIntegrationExample.cpp
 )
 
-# TODO: Now, we start adding MLOS integrations.
+# Now, we start adding MLOS integrations.
+
+# First, include some cross component/target cmake rules for
+# fetching the MLOS source code and registering its cmake targets.
+#
 include(./MlosBuildIntegrations.cmake)
 
-# TODO: Move this to a function:
 target_link_libraries(${PROJECT_NAME} Mlos.Core)
+
+add_subdirectory(ExternalIntegrationExample.SettingsRegistry)
+add_dependencies(${PROJECT_NAME} ExternalIntegrationExample.SettingsRegistry)
