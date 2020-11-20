@@ -20,21 +20,26 @@ execute_process(
     #COMMAND_ECHO STDERR
 )
 
-set(CSPROJ "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.csproj")
+set(PROJ "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.proj")
 
 set(DEPENDENCIES
-    ${CSPROJ}
+    ${PROJ}
     ${CS_PROJS})
 
 file(RELATIVE_PATH RelativeProjectSourcePath "${MLOS_ROOT}" "${PROJECT_SOURCE_DIR}")
 set(ProjectBuildStampFile "${CMAKE_BINARY_DIR}/${RelativeProjectSourcePath}/build.stamp")
 
 add_custom_command(OUTPUT "${ProjectBuildStampFile}"
-    COMMAND dotnet build -c ${CMAKE_BUILD_TYPE} "${CSPROJ}"
+    COMMAND dotnet build -c ${CMAKE_BUILD_TYPE} "${PROJ}"
     COMMAND ${CMAKE_COMMAND} -E touch "${ProjectBuildStampFile}"
-    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     DEPENDS "${DEPENDENCIES}"
+    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
     COMMENT "Creating MLOS Nuget Packages")
 
 add_custom_target(${PROJECT_NAME} ALL
     DEPENDS "${ProjectBuildStampFile}")
+
+# Note: wildcards don't appear to work with this, so instead we simply remove the
+# entire nuget pkg output directory.
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES ADDITIONAL_CLEAN_FILES "${MLOS_ROOT}/target/pkg/${CMAKE_BUILD_TYPE}")
