@@ -541,6 +541,7 @@ jobs:
       with:
         file: ./coverage.xml
         flags: unittests
+        fail_ci_if_error: true
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
