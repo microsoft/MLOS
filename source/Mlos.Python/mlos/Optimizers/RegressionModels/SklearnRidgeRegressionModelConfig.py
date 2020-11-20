@@ -53,7 +53,7 @@ class SklearnRidgeRegressionModelConfig(metaclass=DefaultConfigMeta):
     )
     _DEFAULT = Point(
         alpha=1.0,
-        fit_intercept=True,
+        fit_intercept=False,
         normalize=False,
         copy_x=True,
         max_iter=1000,
