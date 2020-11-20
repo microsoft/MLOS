@@ -45,6 +45,7 @@ function(add_mlos_settings_registry)
     if(CODEGEN_OUTPUT_DIR)
         get_filename_component(CODEGEN_OUTPUT_DIR "${CODEGEN_OUTPUT_DIR}" ABSOLUTE)
         set(CODEGEN_OUTPUT_DIR_ARGS "'/p:MlosSettingsSystemCodeGenOutputDirectory=${CODEGEN_OUTPUT_DIR}'")
+        message(SEND_ERROR "CODEGEN_OUTPUT_ARGS ${CODEGEN_OUTPUT_ARGS}")
     else()
         set(CODEGEN_OUTPUT_DIR_ARGS "")
     endif()
@@ -52,11 +53,12 @@ function(add_mlos_settings_registry)
     if(BINPLACE_DIR)
         get_filename_component(BINPLACE_DIR "${BINPLACE_DIR}" ABSOLUTE)
         set(BINPLACE_DIR_ARGS "'/p:MlosSettingsRegistryAssemblyOutputDirectory=${BINPLACE_DIR}'")
+        message(SEND_ERROR "BINPLACE_DIR_ARGS ${BINPLACE_DIR_ARGS}")
     else()
         set(BINPLACE_DIR_ARGS "")
     endif()
 
-    if(USE_LOCAL_MLOS_NUGETS)
+    if(${USE_LOCAL_MLOS_NUGETS})
         set(MlosLocalPkgOutput "${MLOS_ROOT}/target/pkg/${MLOS_CMAKE_BUILD_TYPE}")
         set(NUGET_RESTORE_ARGS "'/p:RestoreSources=${MlosLocalPkgOutput}\;https://api.nuget.org/v3/index.json'")
         set(MlosLocalPkgTargetDeps "Mlos.NetCore.Components.Packages")
@@ -76,7 +78,8 @@ function(add_mlos_settings_registry)
     # we'll simply use a build.stamp file in the cmake output dir to mark when the "dotnet build" last succeeded.
     get_filename_component(DIRECTORY "${DIRECTORY}" ABSOLUTE)
     file(RELATIVE_PATH DIRECTORY_RELATIVE_TO_SOURCE_ROOT "${CMAKE_SOURCE_DIR}" "${DIRECTORY}")
-    set(BUILD_STAMP "${CMAKE_BINARY_DIR}/${DIRECTORY_RELATIVE_TO_SOURCE_ROOT}/build.stamp")
+    set(OUTDIR "${CMAKE_BINARY_DIR}/${DIRECTORY_RELATIVE_TO_SOURCE_ROOT}")
+    set(BUILD_STAMP "${OUTDIR}/build.stamp")
 
     set(CSPROJ ${NAME}.csproj)
 
@@ -92,6 +95,7 @@ function(add_mlos_settings_registry)
         COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} ${NUGET_RESTORE_ARGS} ${CODEGEN_OUTPUT_DIR_ARGS} ${BINPLACE_DIR_ARGS} "${CSPROJ}"
         # Also, "dotnet build" doesn't update timestamps in a make compatible
         # way, so we also mark the projects as having been built using touch.
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTDIR}"
         COMMAND ${CMAKE_COMMAND} -E touch "${BUILD_STAMP}"
         DEPENDS "${DEPENDENCIES}"
         WORKING_DIRECTORY "${DIRECTORY}"
