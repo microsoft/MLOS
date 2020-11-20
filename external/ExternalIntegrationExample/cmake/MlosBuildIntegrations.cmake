@@ -12,7 +12,7 @@ FetchContent_Declare(
     # Normally we'd fetch directly from the upstream repo,
     #GIT_REPOSITORY  https://github.com/microsoft/MLOS.git
     # however for local testing, we just reference the current checkout.
-    GIT_REPOSITORY  file://${CMAKE_CURRENT_LIST_DIR}/../..
+    GIT_REPOSITORY  file://${CMAKE_CURRENT_LIST_DIR}/../../..
     # FIXME: For now, we need to specify a branch name that supports the
     # external project integration logic that we're adding.
     # However, in the future we expect to be able to reference an upstream

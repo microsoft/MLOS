@@ -18,7 +18,7 @@ add_executable(${PROJECT_NAME}
 # First, include some cross component/target cmake rules for
 # fetching the MLOS source code and registering its cmake targets.
 #
-include(./build/MlosBuildIntegrations.cmake)
+include(./cmake/MlosBuildIntegrations.cmake)
 
 target_link_libraries(${PROJECT_NAME} Mlos.Core)
 
