@@ -4,22 +4,25 @@
 #
 # Since it is not available in packaged form yet, we simply grab the sources for now.
 
+# Normally we'd fetch directly from the upstream repo,
+#set(MLOS_GIT_URL "https://github.com/microsoft/MLOS.git")
+# and would specify a particular stable version.
+#set(MLOS_GIT_TAG v0.1.2)
+
+# However for local (and CI pipeline) testing, we just reference the current checkout.
+set(MLOS_GIT_URL "file://${CMAKE_CURRENT_LIST_DIR}/../../..")
+set(MLOS_GIT_TAG "HEAD")
+
 # Instruct cmake how to find the Mlos source code.
 include(FetchContent)
 #set(FETCHCONTENT_QUIET OFF)
 FetchContent_Declare(
+    # The name of the dependency (used to form variable names later on).  By convention listed in lowercase.
     mlos
-    # Normally we'd fetch directly from the upstream repo,
-    #GIT_REPOSITORY  https://github.com/microsoft/MLOS.git
-    # however for local testing, we just reference the current checkout.
-    GIT_REPOSITORY  file://${CMAKE_CURRENT_LIST_DIR}/../../..
-    # FIXME: For now, we need to specify a branch name that supports the
-    # external project integration logic that we're adding.
-    # However, in the future we expect to be able to reference an upstream
-    # release version, branch name, or commit hash.
-    #GIT_TAG         v0.1.2
-    #GIT_TAG         external-cmake-project-integration
-    GIT_TAG         HEAD
+    # Where to fetch it from.
+    GIT_REPOSITORY  "${MLOS_GIT_URL}"
+    # and which version.
+    GIT_TAG         "${MLOS_GIT_TAG}"
     # Since we use GitVersionTask for versioning nugets we need a non-shallow fetch.
     GIT_SHALLOW     OFF
 )
@@ -31,10 +34,18 @@ if(NOT mlos_POPULATED)
     # Actually fetch the mlos code (at generation time).
     FetchContent_Populate(mlos)
 
-    # In case we checked out an unnamed version, give it a local branch name.
-    execute_process(
-        COMMAND git checkout -b local-cmake-checkout
-        WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+    # In case we checked out an unnamed version, give it a local branch name for GitVersionTask to compute from.
+    if("${MLOS_GIT_TAG}" STREQUAL "HEAD")
+        execute_process(
+            COMMAND git checkout --detach
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
+            COMMAND git branch --no-track -f local-cmake-checkout origin/HEAD
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
+            COMMAND git checkout local-cmake-checkout
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+    endif()
 
     # Make the MLOS project targets available for other cmake targets to reference as dependencies.
     add_subdirectory("${mlos_SOURCE_DIR}" "${mlos_BINARY_DIR}" EXCLUDE_FROM_ALL)
