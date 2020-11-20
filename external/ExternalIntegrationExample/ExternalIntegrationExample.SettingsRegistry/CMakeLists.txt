@@ -17,7 +17,7 @@ add_mlos_settings_registry(
     #
     # This is equivalent to "dotnet build /p:MlosSettingsSystemCodeGenOutputDirectory=/basepath-to-all-codegen-output/specific-component"
     CODEGEN_OUTPUT_DIR "${MlosCodeGenBaseOutDir}/ExternalIntegrationExample"
-    # This is equivalent to "dotnet build /p:MlosSettingsRegistryAssemblyOutputDirectory=/basepath-to-all-settings-registry-dll-outputs"
+    # This is equivalent to "dotnet build /p:MlosSettingsRegistryAssemblyOutputDirectory=/path-to-all-settings-registry-dll-outputs"
     BINPLACE_DIR "${MlosSettingsRegistryDllDir}"
     # Optionally build, pack, and restore the nugets from the local Mlos repo checkout.
     # (since we aren't yet publishing these nugets, this is currently required)

@@ -44,22 +44,24 @@ function(add_mlos_settings_registry)
 
     if(CODEGEN_OUTPUT_DIR)
         get_filename_component(CODEGEN_OUTPUT_DIR "${CODEGEN_OUTPUT_DIR}" ABSOLUTE)
-        set(CODEGEN_OUTPUT_DIR_ARGS "'/p:MlosSettingsSystemCodeGenOutputDirectory=${CODEGEN_OUTPUT_DIR}'")
+        set(CODEGEN_OUTPUT_DIR_ARGS "/p:MlosSettingsSystemCodeGenOutputDirectory=${CODEGEN_OUTPUT_DIR}")
+        message(WARNING "CODEGEN_OUTPUT_DIR_ARGS: ${CODEGEN_OUTPUT_DIR_ARGS}")
     else()
         set(CODEGEN_OUTPUT_DIR_ARGS "")
     endif()
 
     if(BINPLACE_DIR)
         get_filename_component(BINPLACE_DIR "${BINPLACE_DIR}" ABSOLUTE)
-        set(BINPLACE_DIR_ARGS "'/p:MlosSettingsRegistryAssemblyOutputDirectory=${BINPLACE_DIR}'")
+        set(BINPLACE_DIR_ARGS "/p:MlosSettingsRegistryAssemblyOutputDirectory=${BINPLACE_DIR}")
+        message(WARNING "BINPLACE_DIR_ARGS: ${BINPLACE_DIR_ARGS}")
     else()
         set(BINPLACE_DIR_ARGS "")
     endif()
 
     if(${USE_LOCAL_MLOS_NUGETS})
         set(MlosLocalPkgOutput "${MLOS_ROOT}/target/pkg/${MLOS_CMAKE_BUILD_TYPE}")
-        set(NUGET_RESTORE_ARGS "'/p:RestoreSources=${MlosLocalPkgOutput}\;https://api.nuget.org/v3/index.json'")
-        set(MlosLocalPkgTargetDeps "Mlos.NetCore.Components.Packages")
+        set(NUGET_RESTORE_ARGS "/p:RestoreSources=${MlosLocalPkgOutput}\;https://api.nuget.org/v3/index.json")
+        set(MlosLocalPkgTargetDeps Mlos.NetCore.Components.Packages)
     else()
         set(NUGET_RESTORE_ARGS "")
     endif()
@@ -72,13 +74,6 @@ function(add_mlos_settings_registry)
         #COMMAND_ECHO STDERR
     )
 
-    # Rather than track the outputs from the "dotnet build" (which could change according to how the build was authored),
-    # we'll simply use a build.stamp file in the cmake output dir to mark when the "dotnet build" last succeeded.
-    get_filename_component(DIRECTORY "${DIRECTORY}" ABSOLUTE)
-    file(RELATIVE_PATH DIRECTORY_RELATIVE_TO_SOURCE_ROOT "${CMAKE_SOURCE_DIR}" "${DIRECTORY}")
-    set(OUTDIR "${CMAKE_BINARY_DIR}/${DIRECTORY_RELATIVE_TO_SOURCE_ROOT}")
-    set(BUILD_STAMP "${OUTDIR}/build.stamp")
-
     set(CSPROJ ${NAME}.csproj)
 
     set(DEPENDENCIES
@@ -86,11 +81,18 @@ function(add_mlos_settings_registry)
         ${CS_SOURCES}
         ${MlosLocalPkgOutput} ${MlosLocalPkgTargetDeps})
 
+    # Rather than track the outputs from the "dotnet build" (which could change according to how the build was authored),
+    # we'll simply use a build.stamp file in the cmake output dir to mark when the "dotnet build" last succeeded.
+    get_filename_component(DIRECTORY "${DIRECTORY}" ABSOLUTE)
+    file(RELATIVE_PATH DIRECTORY_RELATIVE_TO_SOURCE_ROOT "${CMAKE_SOURCE_DIR}" "${DIRECTORY}")
+    set(OUTDIR "${CMAKE_BINARY_DIR}/${DIRECTORY_RELATIVE_TO_SOURCE_ROOT}")
+    set(BUILD_STAMP "${OUTDIR}/build.stamp")
+
     add_custom_command(OUTPUT "${BUILD_STAMP}" "${CODEGEN_OUTPUT_DIR}"
         # we compose the dependency graph already above, so we can skip
         # building project references here in order to avoid some parallel
         # dotnet processes accessing the same files.
-        COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} ${NUGET_RESTORE_ARGS} ${CODEGEN_OUTPUT_DIR_ARGS} ${BINPLACE_DIR_ARGS} "${CSPROJ}"
+        COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} "${NUGET_RESTORE_ARGS}" "${CODEGEN_OUTPUT_DIR_ARGS}" "${BINPLACE_DIR_ARGS}" "${CSPROJ}"
         # Also, "dotnet build" doesn't update timestamps in a make compatible
         # way, so we also mark the projects as having been built using touch.
         COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTDIR}"
