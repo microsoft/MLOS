@@ -37,7 +37,7 @@ class SklearnLassoRegressionModelConfig(metaclass=DefaultConfigMeta):
     _DEFAULT = Point(
         selection=Selection.CYCLIC.value,
         alpha=1.0,
-        fit_intercept=True,
+        fit_intercept=False,
         normalize=False,
         # sklearn model expects precompute type str, bool, array-like, so setting to default and exclude list option
         precompute=False,
