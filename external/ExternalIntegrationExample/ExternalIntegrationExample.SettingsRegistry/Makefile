@@ -19,5 +19,5 @@ dotnet-clean:
 # A quick wrapper for invoking testing the CMakeLists.txt wrapper.
 cmake-build:
 	mkdir -p ../build
-	cd ../build && cmake ../build
-	make -C ../build/ ExternalIntegrationExample.SettingsRegistry
+	cd ../build && cmake ..
+	cd ../build && make -j ExternalIntegrationExample.SettingsRegistry
