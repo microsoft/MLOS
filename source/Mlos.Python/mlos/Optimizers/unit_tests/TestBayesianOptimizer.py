@@ -600,8 +600,8 @@ class TestBayesianOptimizer:
 
         optimum_y_1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=-1).to_dataframe())
         optimum_y1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=1).to_dataframe())
-        assert optimum_y1.x > .8
-        assert optimum_y_1.x < .2
+        assert optimum_y1.x > .6
+        assert optimum_y_1.x < .4
 
 
 
