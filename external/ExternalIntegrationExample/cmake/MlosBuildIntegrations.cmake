@@ -37,6 +37,9 @@ if(NOT mlos_POPULATED)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${mlos_SOURCE_DIR}/external/cmake")
 endif()
 
+# Include the MLOS cmake module (from the path above).
+include(MLOS)
+
 # Now, we instruct all the external project component targets to look in the
 # following path for their Mlos codegen outputs.
 #
