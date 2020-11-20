@@ -28,10 +28,12 @@ set(DEPENDENCIES
     ${CS_PROJS})
 
 file(RELATIVE_PATH RelativeProjectSourcePath "${MLOS_ROOT}" "${PROJECT_SOURCE_DIR}")
-set(ProjectBuildStampFile "${CMAKE_BINARY_DIR}/${RelativeProjectSourcePath}/build.stamp")
+set(OUTDIR "${MLOS_ROOT}/out/dotnet/${RelativeProjectSourcePath}")
+set(ProjectBuildStampFile "${OUTDIR}/build.stamp")
 
 add_custom_command(OUTPUT "${ProjectBuildStampFile}" "${PKG_OUTPUT_DIR}"
     COMMAND dotnet build -c ${CMAKE_BUILD_TYPE} "${PROJ}"
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${OUTDIR}"
     COMMAND ${CMAKE_COMMAND} -E touch "${ProjectBuildStampFile}"
     DEPENDS "${DEPENDENCIES}"
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
