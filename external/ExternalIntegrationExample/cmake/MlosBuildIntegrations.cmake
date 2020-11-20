@@ -18,7 +18,8 @@ FetchContent_Declare(
     # However, in the future we expect to be able to reference an upstream
     # release version, branch name, or commit hash.
     #GIT_TAG         v0.1.2
-    GIT_TAG         external-cmake-project-integration
+    #GIT_TAG        external-cmake-project-integration
+    GIT_TAG         HEAD
     # Since we use GitVersionTask for versioning nugets we need a non-shallow fetch.
     GIT_SHALLOW     OFF
 )
