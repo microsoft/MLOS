@@ -6,8 +6,8 @@
 
 # In our example, we want to enforce very strict compiler warnings to make sure
 # the MLOS code we include will work easily in most places.
-add_compile_options(-Wall -Wpendantic -Werror)
-add_link_options(-Wall -Wpendantic -Werror)
+add_compile_options(-Wall -Wpedantic -Werror)
+add_link_options(-Wall -Wpedantic -Werror)
 
 # Include debug symbols.
 #add_compile_options(-g)
