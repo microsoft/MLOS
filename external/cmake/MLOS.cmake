@@ -58,7 +58,7 @@ function(add_mlos_settings_registry)
 
     if(USE_LOCAL_MLOS_NUGETS)
         set(MlosLocalPkgOutput "${MLOS_ROOT}/target/pkg/${MLOS_CMAKE_BUILD_TYPE}")
-        set(NUGET_RESTORE_ARGS "'/p:RestoreSources=${MlosLocalPkgOutput};https://api.nuget.org/v3/index.json'")
+        set(NUGET_RESTORE_ARGS "'/p:RestoreSources=${MlosLocalPkgOutput}\;https://api.nuget.org/v3/index.json'")
         set(MlosLocalPkgTargetDeps "Mlos.NetCore.Components.Packages")
     else()
         set(NUGET_RESTORE_ARGS "")
