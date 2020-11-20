@@ -18,8 +18,8 @@ FetchContent_Declare(
     # However, in the future we expect to be able to reference an upstream
     # release version, branch name, or commit hash.
     #GIT_TAG         v0.1.2
-    GIT_TAG        external-cmake-project-integration
-    #GIT_TAG         HEAD
+    #GIT_TAG         external-cmake-project-integration
+    GIT_TAG         HEAD
     # Since we use GitVersionTask for versioning nugets we need a non-shallow fetch.
     GIT_SHALLOW     OFF
 )
@@ -30,6 +30,11 @@ set(MLOS_CMAKE_BUILD_TYPE Release)
 if(NOT mlos_POPULATED)
     # Actually fetch the mlos code (at generation time).
     FetchContent_Populate(mlos)
+
+    # In case we checked out an unnamed version, give it a local branch name.
+    execute_process(
+        COMMAND git checkout -b local-cmake-checkout
+        WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
 
     # Make the MLOS project targets available for other cmake targets to reference as dependencies.
     add_subdirectory("${mlos_SOURCE_DIR}" "${mlos_BINARY_DIR}" EXCLUDE_FROM_ALL)
