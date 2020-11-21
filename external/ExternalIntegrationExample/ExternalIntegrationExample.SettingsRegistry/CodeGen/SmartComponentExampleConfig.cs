@@ -32,6 +32,6 @@ namespace ExternalIntegrationExample
         /// The size for the smart component example.
         /// </summary>
         [ScalarSetting]
-        internal int Size;
+        internal long Size;
     }
 }

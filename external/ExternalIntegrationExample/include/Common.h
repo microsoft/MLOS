@@ -18,6 +18,7 @@
 // Existing project includes:
 #include <iostream>
 #include <string>
+#include <future>
 
 // Now we start adding Mlos items:
 
