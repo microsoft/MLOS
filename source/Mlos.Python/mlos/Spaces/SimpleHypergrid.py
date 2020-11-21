@@ -9,9 +9,17 @@ from mlos.Spaces.Point import Point
 
 
 class SimpleHypergrid(Hypergrid):
-    """ Models a space comprized of Continuous, Discrete, Ordinal and Categorical Dimensions.
+    """ Models a space comprised of Continuous, Discrete, Ordinal and Categorical Dimensions.
 
     Can be flat or hierarchical, depending if any join operations were performed.
+
+    Parameters
+    ----------
+    name : str
+        Identifier
+
+    dimensions : list of Dimension
+        List of dimension objects. The space is the cartesian product of these.
 
     """
     class JoinedSubgrid:

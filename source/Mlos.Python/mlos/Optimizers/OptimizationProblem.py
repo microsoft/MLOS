@@ -6,6 +6,8 @@ from collections import namedtuple
 import json
 from typing import List
 
+import pandas as pd
+
 from mlos.Grpc import OptimizerService_pb2
 from mlos.Spaces import Hypergrid, SimpleHypergrid, CategoricalDimension
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, HypergridJsonEncoder
@@ -70,9 +72,13 @@ class OptimizationProblem:
         Output space for the objective, can be (-inf, +inf)
     objectives : list[Objective]
         Objective function(s) to optimize, with input from parameter_space and output in objective_space.
-    context_space : Hypergrid
+    context_space : Hypergrid, default=None
         Additional run-time context features.
 
+    Attributes
+    ----------
+    feature_space : Hypergrid
+        Joint space of parameters and context.
     """
 
     # The dimensions that we inject to keep track of individual subspaces, but which are worthless
@@ -99,19 +105,47 @@ class OptimizationProblem:
 
         # Fit functions / surrogate models will be fed features consisting of both context and parameters.
         # Thus, the feature space is comprised of both context and parameters.
+        has_context = self.context_space is not None
         self.feature_space = SimpleHypergrid(
             name="features",
             dimensions=[
-                CategoricalDimension(name="contains_parameters", values=[True]),
-                CategoricalDimension(name="contains_context", values=[self.context_space is not None])
+                CategoricalDimension(name="contains_context", values=[has_context])
             ]
         ).join(
             subgrid=self.parameter_space,
-            on_external_dimension=CategoricalDimension(name="contains_parameters", values=[True])
-        ).join(
-            subgrid=self.context_space,
-            on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
+            on_external_dimension=CategoricalDimension(name="contains_context", values=[has_context])
         )
+        if has_context:
+            self.feature_space = self.feature_space.join(
+                subgrid=self.context_space,
+                on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
+            )
+
+    def construct_feature_dataframe(self, parameter_values, context_values=None, product=False):
+        """Construct feature value dataframe from config value and context value dataframes.
+
+        If product is True, creates a cartesian product, otherwise appends columns.
+
+        """
+        if (self.context_space is not None) and (context_values is None):
+            raise ValueError("Context required by optimization problem but not provided.")
+
+        # prefix column names to adhere to dimensions in hierarchical hypergrid
+        feature_values = parameter_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
+        if context_values is not None and len(context_values) > 0:
+            renamed_context_values = context_values.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
+            feature_values['contains_context'] = True
+            if product:
+                renamed_context_values['contains_context'] = True
+                feature_values = feature_values.merge(renamed_context_values, how='outer', on='contains_context')
+            else:
+                if len(parameter_values) != len(context_values):
+                    raise ValueError(f"Incompatible shape of parameters and context: {parameter_values.shape} and {context_values.shape}.")
+                feature_values = pd.concat([feature_values, renamed_context_values], axis=1)
+
+        else:
+            feature_values['contains_context'] = False
+        return feature_values
 
     def to_dict(self):
         return {

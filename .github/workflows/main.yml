@@ -536,6 +536,13 @@ jobs:
     - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion }})
       timeout-minutes: 30
       run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
+    - name: Upload coverage to codecov
+      if: ${{ github.repository == 'microsoft/mlos' }}
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        fail_ci_if_error: true
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
@@ -591,7 +598,7 @@ jobs:
         # Add some labels for publishing.
         labels: |
           org.opencontainers.image.title=mlos-build-ubuntu-${{ matrix.UbuntuVersion }}
-          org.opencontainers.image.description="MLOS build environment for Ubuntu ${{ matrix.UbuntuVersion }}"
+          org.opencontainers.image.description=MLOS build environment for Ubuntu ${{ matrix.UbuntuVersion }}
           org.opencontainers.image.url=https://github.com/${{ github.repository }}
           org.opencontainers.image.source=https://github.com/${{ github.repository }}
           org.opencontainers.image.licenses=${{ github.event.repository.license.spdx_id }}
