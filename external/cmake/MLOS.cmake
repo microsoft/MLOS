@@ -12,6 +12,8 @@ endif()
 # TODO: Convert these to target_include_directories() using some macros?
 # Make sure to include the Mlos project's codegen output directories to the include search path.
 include_directories("${MLOS_ROOT}/out/Mlos.CodeGen.out/${MLOS_CMAKE_BUILD_TYPE}")
+# Also include the Mlos.Core source in the headers search path.
+include_directories("${MLOS_ROOT}/source/Mlos.Core")
 
 # add_mlos_settings_registry()
 #
