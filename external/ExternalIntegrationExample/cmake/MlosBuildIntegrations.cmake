@@ -47,6 +47,9 @@ if(NOT mlos_POPULATED)
             COMMAND git branch -v -a
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
+            COMMAND git tag -l
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
             COMMAND git remote -v
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
