@@ -49,10 +49,13 @@ if(NOT mlos_POPULATED)
 
 # TODO: REMOVE THESE:
         execute_process(
+            COMMAND find .git/refs/ -ls
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
             COMMAND git branch -v -l
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
-            COMMAND git branch -v -l -r origin/*
+            COMMAND git branch -v -r -l origin/*
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
             COMMAND git tag -l
