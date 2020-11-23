@@ -27,6 +27,8 @@ headless = true
   - [Mlos.Core Shared Memory Communication Channel]({{< relref "/source/Mlos.Core/doc" >}})
   - [Mlos.Agent.Server]({{< relref "/source/Mlos.Agent.Server" >}})
 
+- [External Integration]({{< relref "/external" >}})
+
 - [Code of Conduct]({{< relref "/CODE_OF_CONDUCT" >}})
 - [Contributing]({{< relref "/CONTRIBUTING" >}})
 - [MLOS Github Repository](https://github.com/Microsoft/MLOS)

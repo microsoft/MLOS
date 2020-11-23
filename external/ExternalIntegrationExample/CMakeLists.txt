@@ -22,5 +22,8 @@ include(./cmake/MlosBuildIntegrations.cmake)
 
 target_link_libraries(${PROJECT_NAME} Mlos.Core)
 
+# SettingsRegistry projects produce C++ codegen artifacts, that this project
+# consumes, so we mark that project as a dependency.
+#
 add_subdirectory(ExternalIntegrationExample.SettingsRegistry)
 add_dependencies(${PROJECT_NAME} ExternalIntegrationExample.SettingsRegistry)

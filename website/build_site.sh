@@ -92,6 +92,9 @@ cp ../LICENSE.txt content/
         -name '*.md' -or \
         -name '*.png' -or \
         -name '*.svg' \
+    | grep -v \
+        -e '/\.nuget/packages/' \
+        -e '/build/_deps/' \
 ) | while read path; do
     dir=$(dirname "$path")
     file=$(basename "$path")

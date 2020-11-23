@@ -26,6 +26,7 @@ clean-hugo-site:
 	rm -rf content/source
 	rm -rf content/test
 	rm -rf content/notebooks
+	rm -rf content/external
 	rm -rf public
 
 .PHONY:

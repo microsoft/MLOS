@@ -1,3 +1,5 @@
+# This is a simple Makefile used mostly for local interactive development.
+
 CONFIGURATION ?= Release
 
 all: dotnet-build

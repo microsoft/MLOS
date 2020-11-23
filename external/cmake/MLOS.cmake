@@ -1,3 +1,7 @@
+# A cmake module to help integrating MLOS codegen into other cmake based projects.
+# Currently expected to be used with FetchContent()
+# See the ExternalIntegrationExample for a detailed example.
+
 cmake_minimum_required(VERSION 3.15)
 
 get_filename_component(MLOS_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." ABSOLUTE)
@@ -36,10 +40,6 @@ function(add_mlos_settings_registry)
     set(BINPLACE_DIR ${add_mlos_settings_registry_BINPLACE_DIR})
     set(USE_LOCAL_MLOS_NUGETS ${add_mlos_settings_registry_USE_LOCAL_MLOS_NUGETS})
 
-    # TODO: Add dependencies for the target.
-    # - the *.cs files
-    # - the Mlos nuget target
-
     # In the "dotnet build" command update some properites
     # - BinplaceDir
     # - Codegen Output Dir
@@ -62,6 +62,7 @@ function(add_mlos_settings_registry)
         set(MlosLocalPkgOutput "${MLOS_ROOT}/target/pkg/${MLOS_CMAKE_BUILD_TYPE}")
         set(NUGET_RESTORE_ARGS "'/p:RestoreSources=${MlosLocalPkgOutput}\;https://api.nuget.org/v3/index.json'")
         set(MLOS_PKGVERS_ARGS "'/p:MlosPackageVersion=*-*'")
+        # Add a dependency on the local nuget packaging build step in the main MLOS repo.
         set(MlosLocalPkgTargetDeps Mlos.NetCore.Components.Packages)
     else()
         set(NUGET_RESTORE_ARGS "")
