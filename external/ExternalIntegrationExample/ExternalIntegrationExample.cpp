@@ -20,8 +20,6 @@
 //
 #include "MlosPlatform.Std.inl"
 
-#define IGNORE_UNUSED_VAR(x) (void)x
-
 void ThrowIfFail(HRESULT hr)
 {
     if (FAILED(hr))
