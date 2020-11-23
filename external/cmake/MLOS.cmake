@@ -21,11 +21,13 @@ include_directories("${MLOS_ROOT}/source/Mlos.Core")
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 14)
+    message(STATUS "Defaulting to CMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}.")
 endif()
+message(STATUS "Defaulted to CMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}.")
 if(CMAKE_CXX_STANDARD LESS 14)
     message(SEND_ERROR "CMAKE_CXX_STANDARD >= 14 is required by MLOS codegen output.")
 endif()
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # add_mlos_settings_registry()
 #
