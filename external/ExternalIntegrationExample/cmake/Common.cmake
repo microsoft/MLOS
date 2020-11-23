@@ -1,7 +1,6 @@
 # This file would contain whatever common build definitions the external project needed.
 
-# TODO: TESTME:
-#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD 14)
 #set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # In our example, we want to enforce very strict compiler warnings to make sure
@@ -10,5 +9,5 @@ add_compile_options(-Wall -Wpedantic -Werror)
 add_link_options(-Wall -Wpedantic -Werror)
 
 # Include debug symbols.
-#add_compile_options(-g)
-#add_link_options(-g)
+add_compile_options(-g)
+add_link_options(-g)

@@ -43,7 +43,6 @@ int main()
     // Create a feedback channel receiver thread.
     //
     ISharedChannel& feedbackChannel = mlosContext.FeedbackChannel();
-    IGNORE_UNUSED_VAR(feedbackChannel);
 
     // This background thread uses a lambda to monitor the feedback channel for
     // new messages and process them using the callbacks registered for each
@@ -105,7 +104,9 @@ int main()
     msg.ResponseType = ExternalIntegrationExample::ComponentResponseType::Success;
     msg.Size = config.Size;
 
-    // For now we aren't bothering to try and receive the message from an agent.
+    mlosContext.SendTelemetryMessage(msg);
+
+    // For now we aren't bothering to try and receive any message from an agent.
 
     std::cout << "Hello World!" << std::endl;
 
