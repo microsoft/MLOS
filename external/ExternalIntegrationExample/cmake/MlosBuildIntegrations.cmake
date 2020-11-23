@@ -38,7 +38,7 @@ if(NOT mlos_POPULATED)
     # give it a local branch name for GitVersionTask to compute from.
     if("${MLOS_GIT_TAG}" STREQUAL "HEAD")
         execute_process(
-            COMMAND git checkout --detach
+            COMMAND git checkout --quiet --detach
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
             COMMAND git branch -f local-cmake-checkout
