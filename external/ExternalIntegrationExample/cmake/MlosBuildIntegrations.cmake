@@ -41,6 +41,9 @@ if(NOT mlos_POPULATED)
             COMMAND git checkout --detach
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
+            COMMAND git branch -f main origin/main
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
             COMMAND git branch -f local-cmake-checkout
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
 
@@ -49,7 +52,7 @@ if(NOT mlos_POPULATED)
             COMMAND git branch -v -l
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
-            COMMAND git branch -v -r origin/*
+            COMMAND git branch -v -l -r origin/*
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
             COMMAND git tag -l
