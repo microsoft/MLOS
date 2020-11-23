@@ -41,34 +41,24 @@ if(NOT mlos_POPULATED)
             COMMAND git checkout --detach
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
-            COMMAND git branch -f main origin/main
-            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
-        execute_process(
             COMMAND git branch -f local-cmake-checkout
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
-
-# TODO: REMOVE THESE:
-        execute_process(
-            COMMAND find .git/refs/ -ls
-            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
-        execute_process(
-            COMMAND git branch -v -l
-            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
-        execute_process(
-            COMMAND git branch -v -r -l origin/*
-            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
-        execute_process(
-            COMMAND git tag -l
-            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
-        execute_process(
-            COMMAND git remote -v
-            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
-
         execute_process(
             COMMAND git branch --no-track -f local-cmake-checkout origin/HEAD
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
             COMMAND git checkout local-cmake-checkout
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+
+        # Also make the upstream/main available for comparison.
+        execute_process(
+            COMMAND git remote add upstream https://github.com/microsoft/MLOS
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
+            COMMAND git fetch -q upstream
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
+            COMMAND git branch -f main upstream/main
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
     endif()
 
