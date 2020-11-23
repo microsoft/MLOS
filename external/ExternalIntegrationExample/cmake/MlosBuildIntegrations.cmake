@@ -43,6 +43,8 @@ if(NOT mlos_POPULATED)
         execute_process(
             COMMAND git branch -f local-cmake-checkout
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+
+# TODO: REMOVE THESE:
         execute_process(
             COMMAND git branch -v -a
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
@@ -52,6 +54,7 @@ if(NOT mlos_POPULATED)
         execute_process(
             COMMAND git remote -v
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+
         execute_process(
             COMMAND git branch --no-track -f local-cmake-checkout origin/HEAD
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
