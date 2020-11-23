@@ -76,14 +76,16 @@ class TestParetoFrontier:
         """Uses a hypersphere to validate that ParetoFrontier can correctly identify pareto-optimal points.
 
 
-        The idea is that we want to find a pareto frontier that optimizes the cartesian coordinates of points defined using random
-        spherical coordinates.
+        The idea is that we want to find a pareto frontier that optimizes the cartesian coordinates
+        of points defined using random spherical coordinates.
 
-        By setting the radius of some of the points to the radius of the hypersphere, we guarantee that they are non-dominated.
-        Such points must appear on the pareto frontier, though it's quite possible that other non-dominated points from the interior
-        of the sphere could appear as well. The intuition in 2D is that we can draw a secant between two neighboring pareto efficient
-        points on the perimeter. Any point that is between that secant and the perimeter is not dominated and would thus be pareto
-        efficient as well. (Actually even more points are pareto efficient, but this subset is easiest to explain in text).
+        By setting the radius of some of the points to the radius of the hypersphere, we guarantee
+        that they are non-dominated. Such points must appear on the pareto frontier, though it's
+        quite possible that other non-dominated points from the interior of the sphere could appear
+        as well. The intuition in 2D is that we can draw a secant between two neighboring pareto
+        efficient points on the perimeter. Any point that is between that secant and the perimeter
+        is not dominated and would thus be pareto efficient as well. (Actually even more points
+        are pareto efficient, but this subset is easiest to explain in text).
 
 
         We want to test scenarios where:
@@ -91,16 +93,16 @@ class TestParetoFrontier:
             2) all objectives are minimized,
             3) some objectives are maximized and some are minimized.
 
-        We want to be able to do that for an arbitrary number of dimensions so as to extract maximum coverage from this simple test.
+        We want to be able to do that for an arbitrary number of dimensions so as to extract
+        maximum coverage from this simple test.
 
 
         How the test works?
         -------------------
         For N objectives we will specify the following parameters:
             1. radius - distance of a point from origin.
-            2. theta0, theta1, ..., theta{i}, ..., theta{N-1} - angle between the radius segment and the and the hyperplane containing
-                unit vectors along y0, y1, ..., y{i-1}
-
+            2. theta0, theta1, ..., theta{i}, ..., theta{N-1} - angle between the radius
+                segment and the and the hyperplane containing unit vectors along y0, y1, ..., y{i-1}
 
         And the following N objectives that are computed from parameters:
             y0      = radius * cos(theta0)
@@ -110,32 +112,39 @@ class TestParetoFrontier:
             ...
             y{N-2}  = radius * sin(theta0) * sin(theta1) * ... * sin(theta{N-2}) * cos(theta{N-1})
             y{N-1}  = radius * sin(theta0) * sin(theta1) * ... * sin(theta{N-2}) * sin(theta{N-1})
-                                                                                    ^ !! sin instead of cos !!
+                                                            !! sin instead of cos !! ^
 
         1) Maximizing all objectives.
-            To maximize all objectives we need to be them to be non-negative. In such as setup all points with r == sphere_radius
-            will be pareto efficient. And we can assert that the computed pareto frontier contains them.
+            To maximize all objectives we need to be them to be non-negative. In such as setup
+            all points with r == sphere_radius will be pareto efficient. And we can assert that
+            the computed pareto frontier contains them.
 
             This can be guaranteed, by keeping all angles theta in the first quadrant (0 .. pi/2) since both sin and cos are
             positive there. Thus their product will be too.
 
         2) Minimizing all objectives.
-            Similarily, to minimize all objectives we need them to be non-positive. In such a setup we know that all points with
-            r == sphere_radius are pareto efficient and we can assert that they are returned in the computation.
+            Similarily, to minimize all objectives we need them to be non-positive. In such
+            a setup we know that all points with r == sphere_radius are pareto efficient and
+            we can assert that they are returned in the computation.
 
-            We observe that all objectives except for the last one contain any number of sin factors and a single cosine factor.
-            Cosine is guaranteed to be negative in the second quadrant (pi/2 .. pi) and sine is guaranteed to be positive there.
-            So keeping all thetas in the range [pi/2 .. pi] makes all objectives negative except for the last one (which we can
-            simply flip manually)
+            We observe that all objectives except for the last one contain any number of sin
+            factors and a single cosine factor. Cosine is guaranteed to be negative in the
+            second quadrant (pi/2 .. pi) and sine is guaranteed to be positive there.
+            So keeping all thetas in the range [pi/2 .. pi] makes all objectives negative
+            except for the last one (which we can simply flip manually).
 
         3) Maximizing some objectives while minimizing others.
-            We can take advantage of the fact that every second objective has an odd number of sin factors, whilst the rest has
-            has an even number (again, except for the last one). So if we keep all sin factors negative, and all the cos factors
-            positive, we get a neat situation of alternating objectives` signs.
+            We can take advantage of the fact that every second objective has an odd number
+            of sin factors, whilst the rest has has an even number (again, except for the last
+            one). So if we keep all sin factors negative, and all the cos factors positive, we
+            get a neat situation of alternating objectives` signs.
 
-            This is true in the fourth quadrant (3 * pi / 2 .. 2 * pi), where sin values are negative, and cos values are positive.
+            This is true in the fourth quadrant (3 * pi / 2 .. 2 * pi), where sin values are
+            negative, and cos values are positive.
 
-            The last objective - y{N-1} - will have N negative terms, so it will be positive if (N % 2) == 0 and negative otherwise.
+            The last objective - y{N-1} - will have N negative terms, so it will be positive if
+            (N % 2) == 0 and negative otherwise.
+
             In other words:
                 if (N % 2) == 0:
                     maximize y{N-1}
