@@ -19,6 +19,14 @@ include_directories("${MLOS_ROOT}/out/Mlos.CodeGen.out/${MLOS_CMAKE_BUILD_TYPE}"
 # Also include the Mlos.Core source in the headers search path.
 include_directories("${MLOS_ROOT}/source/Mlos.Core")
 
+if(NOT DEFINED CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)
+endif()
+if(NOT (CMAKE_CXX_STANDARD LESS 14))
+    message(SEND_ERROR "CMAKE_CXX_STANDARD >= 14 is required by MLOS codegen output.")
+endif()
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
 # add_mlos_settings_registry()
 #
 # A wrapper function build an MLOS C# SettingsRegistry .csproj using "dotnet build".
