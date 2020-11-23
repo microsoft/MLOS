@@ -3,13 +3,13 @@
 # Licensed under the MIT License.
 #
 import math
-from typing import List
 
 import numpy as np
 import pandas as pd
 
-from mlos.Spaces import ContinuousDimension, Hypergrid, Point, SimpleHypergrid
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctionBase
+from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
+from mlos.Spaces import ContinuousDimension, Hypergrid, Point, SimpleHypergrid
 
 class Hypersphere(ObjectiveFunctionBase):
     """Multi-objective function that converts spherical coordinates to cartesian ones.
@@ -91,87 +91,106 @@ class Hypersphere(ObjectiveFunctionBase):
 
     """
 
-
-
     def __init__(self, objective_function_config: Point = None):
         ObjectiveFunctionBase.__init__(self, objective_function_config)
 
+        self.num_objectives = self.objective_function_config.num_objectives
+        self.radius = self.objective_function_config.radius
+        self.minimize = self.objective_function_config.minimize
+
         # Let's figure out the quadrant and which objectives to minimize.
         #
-        self.minimize_mask: List[bool] = []
-
-        if self.objective_function_config.minimize == "all":
+        if self.minimize == "all":
             # Let's keep angles in second quadrant.
             #
-            theta_min = math.pi / 2
-            theta_max = math.pi
-            minimize_mask = [True for _ in range(self.objective_function_config.num_output_dimensions)]
+            self.theta_min = math.pi / 2
+            self.theta_max = math.pi
+            self.minimize_mask = [True for _ in range(self.num_objectives)]
 
-        elif self.objective_function_config.minimize == "none":
+        elif self.minimize == "none":
             # Let's keep all angles in the first quadrant.
             #
-            theta_min = 0
-            theta_max = math.pi / 2
-            minimize_mask = [False for _ in range(num_output_dimensions)]
+            self.theta_min = 0
+            self.theta_max = math.pi / 2
+            self.minimize_mask = [False for _ in range(self.num_objectives)]
 
         elif self.objective_function_config.minimize == "some":
             # Let's keep all angles in the fourth quadrant.
             #
-            theta_min = 1.5 * math.pi
-            theta_max = 2 * math.pi
+            self.theta_min = 1.5 * math.pi
+            self.theta_max = 2 * math.pi
 
             # Let's minimize odd ones, that way the y{N-1} doesn't require a sign flip.
             #
-            minimize_mask = [(i % 2) == 1 for i in range(num_output_dimensions)]
+            self.minimize_mask = [(i % 2) == 1 for i in range(self.num_objectives)]
 
         else:
             assert False
 
         # Let's put together the optimization problem.
         #
-        parameter_dimensions = [ContinuousDimension(name="radius", min=0, max=hypersphere_radius)]
-        for i in range(num_output_dimensions):
-            parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=theta_min, max=theta_max))
+        parameter_dimensions = [ContinuousDimension(name="radius", min=0, max=self.radius)]
+        for i in range(self.num_objectives):
+            parameter_dimensions.append(ContinuousDimension(name=f"theta{i}", min=self.theta_min, max=self.theta_max))
 
-        parameter_space = SimpleHypergrid(
+        self._parameter_space = SimpleHypergrid(
             name='spherical_coordinates',
             dimensions=parameter_dimensions
         )
 
-        objective_space = SimpleHypergrid(
+        objective_dimensions = []
+        for i, minimize in enumerate(self.minimize_mask):
+            if minimize:
+                objective_dimensions.append(ContinuousDimension(name=f"y{i}", min=-self.radius, max=0))
+            else:
+                objective_dimensions.append(ContinuousDimension(name=f"y{i}", min=0, max=self.radius))
+
+        self._objective_space = SimpleHypergrid(
             name='rectangular_coordinates',
-            dimensions=[
-                ContinuousDimension(name=f"y{i}", min=0, max=hypersphere_radius)
-                for i in range(num_output_dimensions)
-            ]
+            dimensions=objective_dimensions
         )
 
-        optimization_problem = OptimizationProblem(
-            parameter_space=parameter_space,
-            objective_space=objective_space,
-            objectives=[Objective(name=f'y{i}', minimize=minimize_objective) for i, minimize_objective in enumerate(minimize_mask)]
+        # TODO: add this to the ObjectiveFunctionBase interface.
+        #
+        self.default_optimization_problem = OptimizationProblem(
+            parameter_space=self._parameter_space,
+            objective_space=self._objective_space,
+            objectives=[
+                Objective(name=f'y{i}', minimize=minimize_objective)
+                for i, minimize_objective
+                in enumerate(self.minimize_mask)
+            ]
         )
 
 
     @property
     def parameter_space(self) -> Hypergrid:
-        return self._domain
+        return self._parameter_space
 
     @property
     def output_space(self) -> Hypergrid:
-        return self._range
+        return self._objective_space
 
 
     def evaluate_dataframe(self, dataframe: pd.DataFrame):
-        a = 1
-        b = 2
-        c = 4
-        x = dataframe.to_numpy()
-        sum_of_squares = np.sum(x**2, axis=1)
-        x_norm = np.sqrt(sum_of_squares)
-        values = a * x_norm + b * np.sin(c * np.arctan2(x[:, 0], x[:, 1]))
-        return pd.DataFrame({'y': values})
+        # We can compute our objectives more efficiently, by maintaining a prefix of r * sin(theta0) * ... * sin(theta{i-1})
+        #
+        prefix = dataframe['radius']
+        objectives_df = pd.DataFrame()
+        for i in range(self.num_objectives - 1):
+            objectives_df[f'y{i}'] = prefix * np.cos(dataframe[f'theta{i}'])
+            prefix = prefix * np.sin(dataframe[f'theta{i}'])
 
+        # Conveniently, by the time the loop exits, the prefix is the value of our last objective.
+        #
+        if self.minimize == "all":
+            # Must flip the prefix first, since there was no negative cosine to do it for us.
+            #
+            objectives_df[f'y{self.num_objectives - 1}'] = -prefix
+        else:
+            objectives_df[f'y{self.num_objectives - 1}'] = prefix
+
+        return objectives_df
 
     def get_context(self) -> Point:
         """ Returns a context value for this objective function.
@@ -179,4 +198,4 @@ class Hypersphere(ObjectiveFunctionBase):
         If the context changes on every invokation, this should return the latest one.
         :return:
         """
-        return Point()
+        return Point(radius=self.radius)

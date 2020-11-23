@@ -17,6 +17,12 @@ namespace Mlos.Core
     /// </summary>
     public static class CodegenTypeExtensions
     {
+        /// <summary>
+        /// Serializes the given object instance to the buffer.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="buffer"></param>
+        /// <typeparam name="T">Instance type.</typeparam>
         public static void Serialize<T>(T instance, IntPtr buffer)
             where T : ICodegenType
         {
@@ -50,6 +56,13 @@ namespace Mlos.Core
             return size;
         }
 
+        /// <summary>
+        /// Calculates the variable data size for all the elements in the given array.
+        /// </summary>
+        /// <typeparam name="T">Type of the collection element.</typeparam>
+        /// <param name="collection"></param>
+        /// <param name="elementCount"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong GetVariableDataSize<T>(this T[] collection, uint elementCount)
             where T : ICodegenType
@@ -64,6 +77,16 @@ namespace Mlos.Core
             return dataSize;
         }
 
+        /// <summary>
+        /// Serializes the variable data of all the elements in the given array to the buffer.
+        /// </summary>
+        /// <typeparam name="T">Element type.</typeparam>
+        /// <param name="collection"></param>
+        /// <param name="elementCount"></param>
+        /// <param name="buffer"></param>
+        /// <param name="objectOffset"></param>
+        /// <param name="dataOffset"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ulong SerializeVariableData<T>(this T[] collection, uint elementCount, IntPtr buffer, ulong objectOffset, ulong dataOffset)
             where T : ICodegenType
@@ -84,6 +107,13 @@ namespace Mlos.Core
             return dataSize;
         }
 
+        /// <summary>
+        /// Serializes the fixed part of the given object instance to the buffer.
+        /// </summary>
+        /// <typeparam name="T">Instance type.</typeparam>
+        /// <param name="value"></param>
+        /// <param name="buffer"></param>
+        /// <param name="objectOffset"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SerializeFixedPart<T>(T value, IntPtr buffer, ulong objectOffset)
             where T : unmanaged
@@ -94,6 +124,14 @@ namespace Mlos.Core
             }
         }
 
+        /// <summary>
+        /// Serializes the fixed part of all the elements in the given array to the buffer.
+        /// </summary>
+        /// <typeparam name="T">Element type.</typeparam>
+        /// <param name="collection"></param>
+        /// <param name="elementCount"></param>
+        /// <param name="buffer"></param>
+        /// <param name="objectOffset"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SerializeFixedPartPrimitiveTypeArray<T>(this T[] collection, uint elementCount, IntPtr buffer, ulong objectOffset)
             where T : unmanaged
@@ -113,8 +151,16 @@ namespace Mlos.Core
             }
         }
 
+        /// <summary>
+        /// Serializes the fixed part of all the elements in the given array to the buffer.
+        /// </summary>
+        /// <typeparam name="T">Element type.</typeparam>
+        /// <param name="collection"></param>
+        /// <param name="elementCount"></param>
+        /// <param name="buffer"></param>
+        /// <param name="objectOffset"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void SerializeFixedPartCodetypeArray<T>(this T[] collection, uint elementCount, IntPtr buffer, ulong objectOffset)
+        public static void SerializeFixedPartCodegenTypeArray<T>(this T[] collection, uint elementCount, IntPtr buffer, ulong objectOffset)
             where T : ICodegenType
         {
             if (collection == null)
@@ -132,7 +178,7 @@ namespace Mlos.Core
         }
 
         /// <summary>
-        /// #TODO is update the best name ?.
+        /// Updates the element by copying data from the proxy.
         /// </summary>
         /// <typeparam name="T">Array element type.</typeparam>
         /// <param name="collection"></param>
@@ -148,6 +194,14 @@ namespace Mlos.Core
             }
         }
 
+        /// <summary>
+        /// Updates the element by copying data from the proxy.
+        /// </summary>
+        /// <typeparam name="T">Instance type.</typeparam>
+        /// <typeparam name="TProxy">Proxy type.</typeparam>
+        /// <param name="collection"></param>
+        /// <param name="proxyArray"></param>
+        /// <param name="elementCount"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void UpdatePropertyProxyArray<T, TProxy>(this T[] collection, PropertyProxyArray<TProxy> proxyArray, uint elementCount)
             where T : ICodegenType

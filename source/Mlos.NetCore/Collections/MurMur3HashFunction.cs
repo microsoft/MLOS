@@ -19,6 +19,12 @@ namespace Mlos.Core.Collections
 #pragma warning disable CA2231 // Overload operator equals on overriding value type Equals
 #pragma warning disable CS0659 // Type overrides Object.Equals(object o) but does not override Object.GetHashCode()
 
+    /// <summary>
+    /// MurMur3 hash function.
+    /// </summary>
+    /// <remarks>
+    /// Not implemented.
+    /// </remarks>
     public struct MurMur3HashFunction
     {
     }

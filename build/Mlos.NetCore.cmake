@@ -114,11 +114,10 @@ function(add_mlos_dotnet_project)
         # we compose the dependency graph already above, so we can skip
         # building project references here in order to avoid some parallel
         # dotnet processes accessing the same files.
-        #
+        COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} /p:BuildProjectReferences=false "${CSPROJ}"
         # Also, "dotnet build" doesn't update timestamps in a make compatible
         # way, so we also mark the projects as having been built using touch.
-        COMMAND ${DOTNET} build -m --configuration ${CMAKE_BUILD_TYPE} /p:BuildProjectReferences=false "${CSPROJ}" &&
-            touch -c "${CSPROJ}" "${OUTPUT_DLL}" "${BINPLACE_DLL}"
+        COMMAND ${CMAKE_COMMAND} -E touch_nocreate "${CSPROJ}" "${OUTPUT_DLL}" "${BINPLACE_DLL}"
         DEPENDS "${DEPENDENCIES}"
         WORKING_DIRECTORY "${DIRECTORY}"
         COMMENT "Building dotnet assembly ${NAME}.dll")

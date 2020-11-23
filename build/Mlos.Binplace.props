@@ -3,7 +3,7 @@
   <!-- Set the binplace properties, (what is the final folder to binplace binaries). -->
   <PropertyGroup>
     <BuildArchitecture Condition="'$(BuildArchitecture)' == ''">$(Platform)</BuildArchitecture>
-    <BinplaceRootDir>$(BinplaceBaseRootDir)\$(BuildType)\$(BuildArchitecture)</BinplaceRootDir>
+    <BinplaceRootDir>$(BinplaceBaseRootDir)\$(BuildType)\$(BuildArchitecture)\</BinplaceRootDir>
     <BinplaceDir>$(BinplaceRootDir)</BinplaceDir>
   </PropertyGroup>
 </Project>

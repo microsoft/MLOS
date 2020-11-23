@@ -29,6 +29,11 @@ string ObjectDirectory
     }
 }
 
+bool IsRunningInGithub()
+{
+    return !string.IsNullOrEmpty(EnvironmentVariable<string>("GITHUB_WORKFLOW", ""));
+}
+
 var MsBuildSettings = new DotNetCoreMSBuildSettings { MaxCpuCount = 0 };
 
 //
@@ -172,7 +177,7 @@ Task("Build-NetCore")
         });
     });
 
-Task("Run-NetCore-Unit-Tests")
+Task("Run-NetCore-UnitTests")
     .IsDependentOn("Build-NetCore")
     .Does(() =>
     {
@@ -209,7 +214,7 @@ Task("Build-MSBuild")
         }
     });
 
-Task("Run-Unit-Tests")
+Task("Run-MSBuild-UnitTests")
     .IsDependentOn("Build-MSBuild")
     .WithCriteria(() => IsRunningOnWindows())
     .Does(() =>
@@ -231,7 +236,6 @@ Task("Run-Unit-Tests")
 
 Task("Generate-CMake")
     .WithCriteria(() => IsRunningOnUnix())
-    .IsDependentOn("Build-NetCore")
     .Does(() =>
     {
         var cmakeSettings = new CMakeSettings
@@ -239,6 +243,10 @@ Task("Generate-CMake")
             Generator = "Unix Makefiles",
             OutputPath = $"{CMakeBuildDir}",
             SourcePath = ".",
+            Options = new[]
+            {
+                $"-DCMAKE_BUILD_TYPE={CMakeConfiguration}",
+            },
         };
 
         CMake(cmakeSettings);
@@ -303,6 +311,7 @@ Task("Binplace-CMake")
 
 Task("Test-CMake")
     .WithCriteria(() => IsRunningOnUnix())
+    .WithCriteria(() => !IsRunningInGithub()) // github pipelines already test this via `make cmake-test`
     .IsDependentOn("Binplace-CMake")
     .Does(() =>
     {
@@ -324,6 +333,23 @@ Task("Test-CMake")
         };
 
         CMakeBuild(settings);
+    });
+
+
+// This does *almost* the same thing as Test-CMake but using the Mlos.TestRun.proj to invoke the tests instead of ctest.
+//
+Task("Run-CMake-UnitTests")
+    .IsDependentOn("Binplace-CMake")
+    .WithCriteria(() => IsRunningOnUnix())
+    .Does(() =>
+    {
+        var dotNetCoreMSBuildSettings = new DotNetCoreMSBuildSettings { MaxCpuCount = 0 };
+        dotNetCoreMSBuildSettings.SetConfiguration(CMakeConfiguration);
+
+        foreach (string testProjectFilePath in TestProjectsFilePaths)
+        {
+            DotNetCoreMSBuild(testProjectFilePath, dotNetCoreMSBuildSettings);
+        }
     });
 
 // Return list of files as nuget spec content from given input folder.
@@ -509,9 +535,10 @@ Task("Test-Docker-E2E")
 //
 
 Task("Default")
-    .IsDependentOn("Run-NetCore-Unit-Tests")
-    .IsDependentOn("Run-Unit-Tests")
     .IsDependentOn("Test-CMake")
+    .IsDependentOn("Run-NetCore-UnitTests")
+    .IsDependentOn("Run-CMake-UnitTests")
+    .IsDependentOn("Run-MSBuild-UnitTests")
     .IsDependentOn("Generate-MlosModelServices-Dockerfile");
 
 //    .IsDependentOn("Create-Nuget-Package")

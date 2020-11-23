@@ -11,8 +11,6 @@
   </PropertyGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
   <ItemGroup>
-    <ProjectReference Include="$(SourceDir)\Mlos.Model.Services\Mlos.Model.Services.csproj" />
-    <ProjectReference Include="$(SourceDir)\Mlos.Model.Services.Client\Mlos.Model.Services.Client.csproj" />
     <ProjectReference Include="$(SourceDir)\Mlos.SettingsSystem.Attributes\Mlos.SettingsSystem.Attributes.csproj" />
     <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
   </ItemGroup>
@@ -22,9 +20,6 @@
   <ItemGroup Label="SettingsRegistryDefs">
     <SettingsRegistryDef Include="Codegen\AssemblyInfo.cs" />
     <SettingsRegistryDef Include="Codegen\SmartCache.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AssemblyInitializer.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
   <Import Project="$(BaseDir)\build\Mlos.SettingsSystem.CodeGen.targets" />

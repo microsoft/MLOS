@@ -2,13 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
-from mlos.Spaces.Configs import ComponentConfigStore
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Flower import Flower
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.HypersphereConfigStore import hypersphere_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs import ComponentConfigStore
 
 objective_function_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
@@ -38,14 +39,7 @@ objective_function_config_store = ComponentConfigStore(
         ),
         on_external_dimension=CategoricalDimension(name="implementation", values=[NestedPolynomialObjective.__name__])
     ).join(
-        subgrid=SimpleHypergrid(
-            name="hypersphere_config",
-            dimensions=[
-                DiscreteDimension(name="num_objectives", min=1, max=100),
-                CategoricalDimension(name="minimize", values=["all", "none", "some"]),
-                ContinuousDimension(name="radius", min=0, max=100, include_min=False)
-            ]
-        ),
+        subgrid=hypersphere_config_store.parameter_space,
         on_external_dimension=CategoricalDimension(name="implementation", values=[Hypersphere.__name__])
     ),
     default=Point(
@@ -169,18 +163,12 @@ objective_function_config_store.add_config_by_name(
     )
 )
 
-for num_objectives in [2, 10]:
-    for minimize in ["all", "none", "some"]:
-        objective_function_config_store.add_config_by_name(
-            config_name=f"{num_objectives}d_hypersphere_minimize_{minimize}",
-            config_point=Point(
-                implementation=Hypersphere.__name__,
-                hypersphere_config=Point(
-                    num_objectives=num_objectives,
-                    minimize=minimize,
-                    radius=10
-                )
-            ),
-            description=f"An objective function with {num_objectives + 1} parameters "
-                        f"and {num_objectives} objectives to maximize."
+for named_hypersphere_config in hypersphere_config_store.list_named_configs():
+    objective_function_config_store.add_config_by_name(
+        config_name=named_hypersphere_config.name,
+        config_point=Point(
+            implementation=Hypersphere.__name__,
+            hypersphere_config=named_hypersphere_config.config_point,
+            description=named_hypersphere_config.description
         )
+    )

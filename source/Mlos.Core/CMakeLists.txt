@@ -5,7 +5,9 @@ include("${MLOS_ROOT}/build/Mlos.Common.cmake")
 include("${MLOS_ROOT}/build/Mlos.Cpp.cmake")
 
 add_library(${PROJECT_NAME} STATIC
+    AnonymousMemoryMlosContext.Linux.cpp
     ArenaAllocator.cpp
+    FileDescriptorExchange.Linux.cpp
     GlobalMemoryRegion.cpp
     InternalMlosContext.cpp
     InterProcessMlosContext.cpp

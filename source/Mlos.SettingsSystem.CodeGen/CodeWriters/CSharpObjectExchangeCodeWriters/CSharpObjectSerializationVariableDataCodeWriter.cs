@@ -32,9 +32,10 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             CppType cppType = CppTypeMapper.GetCppType(sourceType);
 
             WriteBlock($@"
-                    ulong global::Mlos.Core.ICodegenType.SerializeVariableData(IntPtr buffer, ulong objectOffset, ulong dataOffset)
-                    {{
-                        ulong totalDataSize = 0;");
+                /// <inheritdoc/>
+                ulong global::Mlos.Core.ICodegenType.SerializeVariableData(IntPtr buffer, ulong objectOffset, ulong dataOffset)
+                {{
+                    ulong totalDataSize = 0;");
 
             IndentationLevel++;
 

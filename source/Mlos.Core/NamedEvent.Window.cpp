@@ -59,8 +59,8 @@ NamedEvent::~NamedEvent()
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
-HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
+_Must_inspect_result_
+HRESULT NamedEvent::CreateOrOpen(const _In_z_ char* const namedEventName) noexcept
 {
     PSECURITY_DESCRIPTOR securityDescriptor = nullptr;
 
@@ -108,8 +108,8 @@ HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
-HRESULT NamedEvent::Open(const char* const namedEventName) noexcept
+_Must_inspect_result_
+HRESULT NamedEvent::Open(const _In_z_ char* const namedEventName) noexcept
 {
     HRESULT hr = S_OK;
 
@@ -160,7 +160,7 @@ void NamedEvent::Close()
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT NamedEvent::Signal()
 {
     BOOL result = SetEvent(m_hEvent);
@@ -177,7 +177,7 @@ HRESULT NamedEvent::Signal()
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT NamedEvent::Wait()
 {
     DWORD result = WaitForSingleObject(m_hEvent, INFINITE);

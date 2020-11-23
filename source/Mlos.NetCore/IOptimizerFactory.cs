@@ -8,6 +8,9 @@
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Optimizer factory interface.
+    /// </summary>
     public interface IOptimizerFactory
     {
         /// <summary>

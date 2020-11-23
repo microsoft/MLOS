@@ -32,10 +32,10 @@ class InterProcessMlosContextInitializer
 public:
     InterProcessMlosContextInitializer() {}
 
-    _Check_return_
+    _Must_inspect_result_
     HRESULT Initialize();
 
-    InterProcessMlosContextInitializer(InterProcessMlosContextInitializer&& initializer) noexcept;
+    InterProcessMlosContextInitializer(_In_ InterProcessMlosContextInitializer&& initializer) noexcept;
 
     InterProcessMlosContextInitializer(const InterProcessMlosContextInitializer&) = delete;
 
@@ -62,6 +62,10 @@ private:
     //
     InterProcessSharedChannelPolicy m_feedbackChannelPolicy;
 
+    // Notification event signalled after the target process initialized Mlos context.
+    //
+    NamedEvent m_targetProcessNamedEvent;
+
     friend class InterProcessMlosContext;
 };
 
@@ -71,10 +75,14 @@ private:
 // PURPOSE:
 //  Implementation of an inter-process MlosContext.
 //
+// NOTES:
+//
 class InterProcessMlosContext : public MlosContext
 {
 public:
-    InterProcessMlosContext(InterProcessMlosContextInitializer&&) noexcept;
+    typedef InterProcessMlosContextInitializer InitializerType;
+
+    InterProcessMlosContext(_In_ InterProcessMlosContextInitializer&&) noexcept;
 
     ~InterProcessMlosContext();
 

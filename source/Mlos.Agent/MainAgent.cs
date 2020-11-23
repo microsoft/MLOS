@@ -13,7 +13,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 
 using Mlos.Core;
-using Proxy.Mlos.Core.Internal;
 
 using MlosInternal = Mlos.Core.Internal;
 using MlosProxy = Proxy.Mlos.Core;
@@ -32,8 +31,6 @@ namespace Mlos.Agent
         private readonly SettingsAssemblyManager settingsAssemblyManager = new SettingsAssemblyManager();
 
         private DispatchEntry[] globalDispatchTable = Array.Empty<DispatchEntry>();
-
-        public bool KeepRunning = true;
 
         private bool isDisposed;
 
@@ -68,11 +65,11 @@ namespace Mlos.Agent
 
             // Register shared config memory regions.
             //
-            for (uint index = 1; index < mlosContext.GlobalMemoryRegion.TotalMemoryRegionCount; index++)
+            for (ushort index = 1; index < mlosContext.GlobalMemoryRegion.GlobalMemoryRegionIndex; index++)
             {
                 // Skip first one as this is global memory region, and it does not require registration.
                 //
-                RegisterSharedConfigMemoryRegion(sharedMemoryRegionIndex: index + 1);
+                RegisterSharedConfigMemoryRegion(sharedMemoryRegionIndex: (ushort)(index + 1));
             }
 
             // Register assemblies from the shared config.
@@ -89,8 +86,6 @@ namespace Mlos.Agent
         /// </summary>
         public void UninitializeSharedChannel()
         {
-            KeepRunning = false;
-
             // Signal named event to close any waiter threads.
             //
             mlosContext.TerminateControlChannel();
@@ -98,34 +93,35 @@ namespace Mlos.Agent
         }
 
         /// <summary>
-        /// Register shared config memory region.
+        /// Registers the shared config memory region.
         /// </summary>
-        /// <param name="sharedMemoryRegionIndex">Index of the shared memory region.</param>
-        private void RegisterSharedConfigMemoryRegion(uint sharedMemoryRegionIndex)
+        /// <param name="sharedMemoryRegionIndex">Index of the shared config region.</param>
+        private void RegisterSharedConfigMemoryRegion(ushort sharedMemoryRegionIndex)
         {
             MlosInternal.RegisteredMemoryRegionConfig.CodegenKey codegenKey = default;
+            codegenKey.MemoryRegionType = MlosInternal.MemoryRegionType.SharedConfig;
             codegenKey.MemoryRegionIndex = sharedMemoryRegionIndex;
 
             // Locate shared memory region config.
             //
-            SharedConfig<RegisteredMemoryRegionConfig> registeredMemoryRegionSharedConfig =
+            SharedConfig<MlosProxyInternal.RegisteredMemoryRegionConfig> registeredMemoryRegionSharedConfig =
                 SharedConfigManager.Lookup(mlosContext.GlobalMemoryRegion.SharedConfigDictionary, codegenKey);
 
             if (registeredMemoryRegionSharedConfig.HasSharedConfig)
             {
                 // Config exists, register memory region with the shared config manager.
                 //
-                RegisteredMemoryRegionConfig registeredMemoryRegionConfig = registeredMemoryRegionSharedConfig.Config;
+                MlosProxyInternal.RegisteredMemoryRegionConfig registeredMemoryRegionConfig = registeredMemoryRegionSharedConfig.Config;
 
                 mlosContext.SharedConfigManager.RegisterSharedConfigMemoryRegion(
-                    memoryRegionId: registeredMemoryRegionConfig.MemoryRegionIndex,
+                    sharedMemoryRegionIndex: sharedMemoryRegionIndex,
                     sharedMemoryMapName: registeredMemoryRegionConfig.SharedMemoryMapName.Value,
                     memoryRegionSize: registeredMemoryRegionConfig.MemoryRegionSize);
             }
         }
 
         /// <summary>
-        /// Register Component Assembly.
+        /// Registers the settings assembly.
         /// </summary>
         /// <param name="assembly"></param>
         /// <param name="dispatchTableBaseIndex"></param>
@@ -137,7 +133,7 @@ namespace Mlos.Agent
         }
 
         /// <summary>
-        /// Register next settings assembly.
+        /// Registers next settings assembly.
         /// </summary>
         /// <param name="assemblyIndex"></param>
         public void RegisterSettingsAssembly(uint assemblyIndex)
@@ -243,7 +239,7 @@ namespace Mlos.Agent
         /// <param name="msg"></param>
         private void RegisterSharedConfigMemoryRegionRequestMessageCallback(MlosProxyInternal.RegisterSharedConfigMemoryRegionRequestMessage msg)
         {
-            RegisterSharedConfigMemoryRegion(msg.MemoryRegionId);
+            RegisterSharedConfigMemoryRegion(msg.SharedMemoryRegionIndex);
         }
 
         /// <summary>
@@ -270,6 +266,10 @@ namespace Mlos.Agent
             mlosContext.ControlChannel.ProcessMessages(dispatchTable: ref globalDispatchTable);
         }
 
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
@@ -285,6 +285,7 @@ namespace Mlos.Agent
             isDisposed = true;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(disposing: true);

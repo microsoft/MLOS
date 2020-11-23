@@ -49,6 +49,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteBlock($@"
                 public partial struct {typeName}
                 {{
+                    /// <inheritdoc/>
                     bool ICodegenProxy.VerifyVariableData(ulong objectOffset, ulong totalDataSize, ref ulong expectedDataOffset)
                     {{
                         bool isValid = true;");

@@ -35,9 +35,9 @@ namespace Mlos.Core.Internal
         internal AtomicUInt32 AttachedProcessesCount;
 
         /// <summary>
-        /// Total number of regions.
+        /// Global counter for memory regions.
         /// </summary>
-        internal uint TotalMemoryRegionCount;
+        internal ushort GlobalMemoryRegionIndex;
 
         /// <summary>
         /// Number of registered settings assembly.

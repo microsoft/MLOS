@@ -13,7 +13,7 @@ namespace Mlos.Streaming
     public static partial class Join
     {
         /// <summary>
-        /// Brings two observerable streams into two buffers.
+        /// Brings two observable streams into two buffers.
         /// Once any of the buffers reaches given capacity, both buffers are published as collections.
         /// </summary>
         /// <typeparam name="T1">Element type of the first Streamable stream.</typeparam>

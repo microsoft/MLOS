@@ -8,6 +8,9 @@
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Optimizer proxy interface.
+    /// </summary>
     public interface IOptimizerProxy
     {
         /// <summary>

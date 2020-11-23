@@ -13,7 +13,7 @@ using GrpcGreeter;
 
 namespace Mlos.Agent.GrpcServer
 {
-    public class GreeterService : global::GrpcGreeter.Greeter.GreeterBase
+    internal class GreeterService : global::GrpcGreeter.Greeter.GreeterBase
     {
         public override Task<EchoReply> Echo(EchoRequest request, ServerCallContext context)
         {

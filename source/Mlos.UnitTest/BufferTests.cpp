@@ -25,13 +25,14 @@ namespace
 //
 TEST(BufferChannel, CreateMemory)
 {
-    // Create InterProcessMlosContext.
+    // Create a default MlosContext.
+    // Default implementation depends on the OS (Mlos.Core.h).
     //
-    InterProcessMlosContextInitializer mlosContextInitializer;
-    HRESULT hr = mlosContextInitializer.Initialize();
+    DefaultMlosContextFactory mlosContextFactory;
+    HRESULT hr = mlosContextFactory.Create();
     EXPECT_EQ(hr, S_OK);
 
-    InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
+    MlosContext& mlosContext = mlosContextFactory.m_context;
 
     // Register Mlos.UnitTest Settings assembly.
     //
@@ -45,7 +46,8 @@ TEST(BufferChannel, CreateMemory)
     //
     ComponentConfig<ChannelReaderStats> localComponentConfig(mlosContext);
     localComponentConfig.SpinCount = 1;
-    mlosContext.RegisterComponentConfig(localComponentConfig);
+    hr = mlosContext.RegisterComponentConfig(localComponentConfig);
+    EXPECT_EQ(hr, S_OK);
 
     // Create a feedback channel receiver thread.
     //
@@ -131,7 +133,7 @@ TEST(BufferChannel, CreateMemory)
     EXPECT_LE(localComponentConfig.SpinCount, configProxy.SpinCount());
 
     // First terminate feedback channel.
-    // Wait untill there are no active readers on the channel.
+    // Wait until there are no active readers on the channel.
     //
     mlosContext.TerminateFeedbackChannel();
 

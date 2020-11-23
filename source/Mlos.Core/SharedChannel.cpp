@@ -24,13 +24,15 @@ namespace Core
 // NAME: SignalFrameIsReady
 //
 // PURPOSE:
-//  Signals readers that the frame is available to process.
+//  Notifies the reader threads that the frame is available to process.
 //
 // RETURNS:
 //
 // NOTES:
 //
-void SignalFrameIsReady(FrameHeader& frame, int32_t frameLength)
+void SignalFrameIsReady(
+    _Inout_ FrameHeader& frame,
+    _In_ int32_t frameLength)
 {
     frame.Length.store(frameLength, std::memory_order_release);
 }
@@ -39,7 +41,7 @@ void SignalFrameIsReady(FrameHeader& frame, int32_t frameLength)
 // NAME: SignalFrameForCleanup
 //
 // PURPOSE:
-//  Notify the cleanup thread, that the frame has been processed.
+//  Notifies the cleanup thread, that the frame has been processed.
 //
 // RETURNS:
 //  Nothing.
@@ -47,7 +49,9 @@ void SignalFrameIsReady(FrameHeader& frame, int32_t frameLength)
 // NOTES:
 //  Reader function.
 //
-void SignalFrameForCleanup(FrameHeader& frame, int32_t frameLength)
+void SignalFrameForCleanup(
+    _Inout_ FrameHeader& frame,
+    _In_ int32_t frameLength)
 {
     frame.Length.store(-frameLength, std::memory_order_release);
 }

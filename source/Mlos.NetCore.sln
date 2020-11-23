@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mlos.UnitTest.SettingsRegis
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mlos.Agent.GrpcServer", "Mlos.Agent.GrpcServer\Mlos.Agent.GrpcServer.csproj", "{09FF0795-659A-454D-95F7-4588A462BA5B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartCache.ExperimentSession", "Examples\SmartCache\SmartCache.ExperimentSession\SmartCache.ExperimentSession.csproj", "{910C4BEE-2760-4168-BB0C-8F7DEE547F76}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -111,6 +113,10 @@ Global
 		{D5541CE5-B4EB-4CAB-86B4-36E187841C33}.Debug|AnyCPU.Build.0 = Debug|Any CPU
 		{D5541CE5-B4EB-4CAB-86B4-36E187841C33}.Release|AnyCPU.ActiveCfg = Release|Any CPU
 		{D5541CE5-B4EB-4CAB-86B4-36E187841C33}.Release|AnyCPU.Build.0 = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{910C4BEE-2760-4168-BB0C-8F7DEE547F76}.Release|AnyCPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

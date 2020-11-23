@@ -27,6 +27,13 @@ Some notes on the directory layout organization in this repo.
 - [`test/`](../test/#mlos-github-tree-view) contains a directory and project to invoke each of the unit tests.
   - i.e. running `msbuild` or `make` in the `test/` directory will also run all of the tests.
 - [`scripts/`](../scripts/#mlos-github-tree-view) contains some helper scripts to initialize development environments, install tools, invoke build pipelines, run tests, etc.
+- [`external/`](../external/#mlos-github-tree-view) contains code, config, and examples for build integration for use of MLOS with external projects.
+
+  For instance:
+
+  - [`external/cmake/`](../external/cmake/) contains an `MLOS` module for use in projects using the `cmake` build system.
+  - [`ExternalIntegrationExample`](../external/ExternalIntegrationExample/) contains a stripped down example showing how to use it.
+  - [`leveldb`](../external/leveldb/) contains examples of how to use portions of MLOS to tune [LevelDb](https://github.com/google/leveldb).
 
 Auto generated content:
 

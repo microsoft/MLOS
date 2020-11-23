@@ -21,8 +21,17 @@ namespace Mlos
 {
 namespace Core
 {
-void SignalFrameIsReady(FrameHeader& frame, int32_t frameLength);
-void SignalFrameForCleanup(FrameHeader& frame, int32_t frameLength);
+// Notifies the reader threads that the frame is available to process.
+//
+void SignalFrameIsReady(
+    _Inout_ FrameHeader& frame,
+    _In_ int32_t frameLength);
+
+// Notifies the cleanup thread, that the frame has been processed.
+//
+void SignalFrameForCleanup(
+    _Inout_ FrameHeader& frame,
+    _In_ int32_t frameLength);
 
 //----------------------------------------------------------------------------
 // NAME: ISharedChannel
@@ -88,12 +97,17 @@ protected:
 
     inline BytePtr Payload(uint32_t writeOffset);
 
-    inline void ClearPayload(uint32_t writeOffset, uint32_t frameLength)
+    inline void ClearPayload(
+        _In_ uint32_t writeOffset,
+        _In_ uint32_t frameLength)
     {
         memset(Buffer.Pointer + writeOffset + sizeof(uint32_t), 0, frameLength - sizeof(uint32_t));
     }
 
-    inline void ClearLinkPayload(uint32_t writeOffset, uint32_t frameLength, uint32_t bufferSize)
+    inline void ClearLinkPayload(
+        _In_ uint32_t writeOffset,
+        _In_ uint32_t frameLength,
+        _In_ uint32_t bufferSize)
     {
         writeOffset += sizeof(uint32_t);
         frameLength -= sizeof(uint32_t);
@@ -138,19 +152,19 @@ class SharedChannel : public ISharedChannel
 {
 public:
     SharedChannel(
-        Mlos::Core::ChannelSynchronization& sync,
-        Mlos::Core::BytePtr buffer,
-        uint32_t size,
-        TChannelPolicy channelPolicy = TChannelPolicy()) noexcept
+        _In_ Mlos::Core::ChannelSynchronization& sync,
+        _In_ Mlos::Core::BytePtr buffer,
+        _In_ uint32_t size,
+        _In_ TChannelPolicy channelPolicy = TChannelPolicy()) noexcept
       : ISharedChannel(sync, buffer, size),
         ChannelPolicy(std::move(channelPolicy))
     {
     }
 
     SharedChannel(
-        Mlos::Core::ChannelSynchronization& sync,
-        Mlos::Core::SharedMemoryMapView& channelMemoryMapView,
-        TChannelPolicy channelPolicy = TChannelPolicy()) noexcept
+        _In_ Mlos::Core::ChannelSynchronization& sync,
+        _In_ Mlos::Core::SharedMemoryMapView& channelMemoryMapView,
+        _In_ TChannelPolicy channelPolicy = TChannelPolicy()) noexcept
       : SharedChannel(
             sync,
             channelMemoryMapView.Buffer,
@@ -160,19 +174,23 @@ public:
     }
 
 public:
-    void ProcessMessages(DispatchEntry* dispatchTable, size_t dispatchEntryCount) override;
+    void ProcessMessages(
+        _In_reads_(dispatchEntryCount) DispatchEntry * dispatchTable,
+        _In_ size_t dispatchEntryCount) override;
 
-    bool WaitAndDispatchFrame(DispatchEntry* dispatchTable, size_t dispatchEntryCount);
+    bool WaitAndDispatchFrame(
+        _In_reads_(dispatchEntryCount) DispatchEntry * dispatchTable,
+        _In_ size_t dispatchEntryCount);
 
 public:
     TChannelPolicy ChannelPolicy;
 
 private:
-    virtual uint32_t AcquireWriteRegionForFrame(int32_t& frameLength) override;
+    virtual uint32_t AcquireWriteRegionForFrame(_Inout_ int32_t& frameLength) override;
 
     virtual void NotifyExternalReader() override;
 
-    uint32_t AcquireRegionForWrite(int32_t& frameLength);
+    uint32_t AcquireRegionForWrite(_Inout_ int32_t& frameLength);
 
     uint32_t WaitForFrame();
 };

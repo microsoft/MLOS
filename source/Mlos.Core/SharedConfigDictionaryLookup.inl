@@ -34,10 +34,10 @@ namespace Internal
 //
 template<typename TProbingPolicy>
 template<typename T>
-_Check_return_
+_Must_inspect_result_
 HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::CreateOrUpdateFromInSharedConfigDictionary(
-    SharedConfigDictionary& sharedConfigDictionary,
-    ComponentConfig<T>& componentConfig)
+    _Inout_ SharedConfigDictionary& sharedConfigDictionary,
+    _Inout_ ComponentConfig<T>& componentConfig)
 {
     uint32_t slotIndex;
     uint32_t probingCount = 0;
@@ -128,10 +128,10 @@ HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::CreateOrUpdateFromInShared
 //
 template<typename TProbingPolicy>
 template<typename T>
-_Check_return_
+_Must_inspect_result_
 HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::LookupInSharedConfigDictionary(
-    SharedConfigDictionary& sharedConfigDictionary,
-    ComponentConfig<T>& componentConfig)
+    _Inout_ SharedConfigDictionary& sharedConfigDictionary,
+    _Inout_ ComponentConfig<T>& componentConfig)
 {
     uint32_t slotIndex;
     uint32_t probingCount = 0;

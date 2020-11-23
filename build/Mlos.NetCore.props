@@ -13,6 +13,7 @@
     <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <PlatformTarget Condition="'$(PlatformTarget)' == ''">AnyCPU</PlatformTarget>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
   </PropertyGroup>
   <PropertyGroup Condition="'$(BUILD_COREXT)' != '1'">
     <!-- For dotnet builds change BaseOutputPath. -->
@@ -38,7 +39,7 @@
     <None Remove="objd\**" />
   </ItemGroup>
   <PropertyGroup>
-    <DocumentationFile>$(BaseOutputPath)\doc\$(AssemblyName).xml</DocumentationFile>
+    <DocumentationFile>$(OutputPath)\out\doc\$(AssemblyName).xml</DocumentationFile>
     <!-- Enable documentation file for StyleCop rule SA0001 -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\Mlos.NetCore.ruleset</CodeAnalysisRuleSet>

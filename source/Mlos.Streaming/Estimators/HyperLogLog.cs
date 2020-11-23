@@ -12,7 +12,7 @@ using System.Collections.Generic;
 namespace Mlos.Streaming.Estimators
 {
     /// <summary>
-    /// Implementation of HyperLogLog algorithm. Aproximates the number of distinct elements in the multiset.
+    /// Implementation of HyperLogLog algorithm. Approximates the number of distinct elements in the multiset.
     /// </summary>
     /// <remarks>
     /// More details:
@@ -33,7 +33,7 @@ namespace Mlos.Streaming.Estimators
             return r;
         }
 
-        public static uint GetHashCode(string text)
+        private static uint GetHashCode(string text)
         {
             uint hash = 0;
 
@@ -56,6 +56,10 @@ namespace Mlos.Streaming.Estimators
         private readonly int kComplement;
         private readonly Dictionary<int, int> lookup = new Dictionary<int, int>();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HyperLogLog"/> class.
+        /// </summary>
+        /// <param name="stdError"></param>
         public HyperLogLog(double stdError)
         {
             mapSize = 1.04 / stdError;
@@ -77,17 +81,20 @@ namespace Mlos.Streaming.Estimators
             }
         }
 
+        /// <summary>
+        /// Returns estimated number of distinct elements in the multiset.
+        /// </summary>
+        /// <returns></returns>
         public double Count()
         {
             double c = 0;
-            double estimator;
 
             for (var i = 0; i < mapSize; i++)
             {
                 c += 1.0 / Math.Pow(2, lookup[i]);
             }
 
-            estimator = alphaM * mapSize * mapSize / c;
+            double estimator = alphaM * mapSize * mapSize / c;
 
             // Make corrections & smoothen things.
             if (estimator <= 5.0 * mapSize / 2.0)

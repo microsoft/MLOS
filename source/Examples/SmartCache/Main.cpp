@@ -64,18 +64,15 @@ main(
     // In this case we use an interprocess implementation to communicate with an
     // external agent.
     // There are 3 (unidirectional) channels setup:
-    // 1. Control: for registering components and memory for their configs in
-    // the global region
-    // 2. Telemetry: for sending messages from/about the application component
-    // to the agent (e.g. performance metrics)
-    // 3. Feedback: for receiving messages from the agent (e.g. configuration
-    // updates)
+    // 1. Control: for registering components and memory for their configs in the global region
+    // 2. Telemetry: for sending messages from/about the application component to the agent (e.g. performance metrics)
+    // 3. Feedback: for receiving messages from the agent (e.g. configuration updates)
     //
-    Mlos::Core::InterProcessMlosContextInitializer mlosContextInitializer;
-    HRESULT hr = mlosContextInitializer.Initialize();
+    DefaultMlosContextFactory mlosContextFactory;
+    HRESULT hr = mlosContextFactory.Create();
     ThrowIfFail(hr);
 
-    Mlos::Core::InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
+    MlosContext& mlosContext = mlosContextFactory.m_context;
 
     // Create a feedback channel receiver thread.
     //
@@ -115,10 +112,11 @@ main(
     // component.
     //
     // When the (C#) agent receives that message it dynamically loads the
-    // specified dll into its address space and calls an AssemblyInitializer
-    // static class within that dll to setup the message handlers (callbacks).
+    // specified dll into its address space.
+    // A corresponding ExperimentSession class for the component, can then be
+    // used to setup the message handlers (callbacks).
     //
-    // See Also: SmartCache.SettingsRegistry/AssemblyInitializer.cs
+    // See Also: SmartCache.ExperimentSession/SmartCacheExperimentSession.cs
     //
     hr = mlosContext.RegisterSettingsAssembly(
         "SmartCache.SettingsRegistry.dll",
@@ -219,7 +217,7 @@ main(
         //
         // To see how the external agent will process the request, see the
         // RequestNewConfigurationMessage handler in
-        // SmartCache.SettingsRegistry/AssemblyInitializer.cs.
+        // SmartCacheExperimentSession.cs
         //
         std::unique_lock<std::mutex> lock(waitForConfigMutex);
         while (!isConfigReady)

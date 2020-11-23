@@ -92,7 +92,7 @@
 
   <!-- Binplace settings registry assembly dlls to the requested target folder -->
   <Target Name="BinplaceMlosSettingsRegistryDll" AfterTargets="Build">
-    <Message Text="WARNING: MlosSettingsRegistryAssemblyOutputDirectory is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' != ''" Importance="high" />
+    <Message Text="WARNING: MlosSettingsRegistryAssemblyOutputDirectory is not set for '$(MSBuildProjectFile)' project." Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' == ''" Importance="high" />
     <Copy SourceFiles="$(OutputPath)/$(TargetFileName)" DestinationFolder="$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)/" UseHardlinksIfPossible="true" Condition="'$(MlosSettingsRegistryAssemblyAbsoluteOutputPath)' != ''" />
   </Target>
 

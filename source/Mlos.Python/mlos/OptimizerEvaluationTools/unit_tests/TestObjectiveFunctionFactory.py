@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import pytest
 import warnings
 
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
@@ -16,24 +17,18 @@ class TestObjectiveFunctionFactory:
         mlos.global_values.declare_singletons()
         warnings.simplefilter("error", category=FutureWarning)
 
-    def test_named_configs(self):
+    @pytest.mark.parametrize("config_name", [config.name for config in objective_function_config_store.list_named_configs()])
+    def test_named_configs(self, config_name):
+        objective_function_config = objective_function_config_store.get_config_by_name(config_name)
+        print(objective_function_config.to_json(indent=2))
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
-        named_configs = objective_function_config_store.list_named_configs()
+        for _ in range(100):
+            random_point = objective_function.parameter_space.random()
+            value = objective_function.evaluate_point(random_point)
+            assert value in objective_function.output_space
 
-        objective_function_configs_to_test = [
-            named_config.config_point for named_config in named_configs
-        ]
-
-        for objective_function_config in objective_function_configs_to_test:
-            print(objective_function_config.to_json(indent=2))
-            objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
-            default_polynomials_domain = objective_function.parameter_space
-            for _ in range(100):
-                random_point = default_polynomials_domain.random()
-                value = objective_function.evaluate_point(random_point)
-                assert value in objective_function.output_space
-
-            for i in range(1, 100):
-                random_dataframe = default_polynomials_domain.random_dataframe(num_samples=i)
-                values_df = objective_function.evaluate_dataframe(random_dataframe)
-                assert values_df.index.equals(random_dataframe.index)
+        for i in range(1, 100):
+            random_dataframe = objective_function.parameter_space.random_dataframe(num_samples=i)
+            values_df = objective_function.evaluate_dataframe(random_dataframe)
+            assert values_df.index.equals(random_dataframe.index)

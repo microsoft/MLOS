@@ -26,24 +26,33 @@ public:
     SharedMemoryRegionView() noexcept
     {}
 
-    SharedMemoryRegionView(SharedMemoryRegionView<T>&& sharedMemoryRegionView) noexcept
+    SharedMemoryRegionView(_In_ SharedMemoryRegionView<T>&& sharedMemoryRegionView) noexcept
       : SharedMemoryMapView(std::move(sharedMemoryRegionView))
     {}
 
-    // Opens already created shared memory view.
+    // Creates an anonymous shared memory region.
     //
-    _Check_return_
-    HRESULT CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+    _Must_inspect_result_
+    HRESULT CreateAnonymous(_In_ size_t memSize) noexcept;
 
-    // Creates or opens a shared memory view.
+    // Opens already created shared memory region.
     //
-    _Check_return_
-    HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+    _Must_inspect_result_
+    HRESULT CreateNew(
+        _In_z_ const char* const sharedMemoryMapName,
+        _In_ size_t memSize) noexcept;
 
-    // Opens already created shared memory view.
+    // Creates or opens a shared memory region.
     //
-    _Check_return_
-    HRESULT OpenExisting(const char* const sharedMemoryMapName) noexcept;
+    _Must_inspect_result_
+    HRESULT CreateOrOpen(
+        _In_z_ const char* const sharedMemoryMapName,
+        _In_ size_t memSize) noexcept;
+
+    // Opens already created shared memory region.
+    //
+    _Must_inspect_result_
+    HRESULT OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept;
 
     T& MemoryRegion()
     {
@@ -51,7 +60,7 @@ public:
     }
 
     template<typename TCodegenType>
-    TCodegenType& GetCodegenObject(uint64_t offset)
+    TCodegenType& GetCodegenObject(_In_ uint64_t offset)
     {
         return *reinterpret_cast<TCodegenType*>(Buffer.Pointer + offset);
     }

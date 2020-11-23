@@ -32,11 +32,11 @@ namespace Internal
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InitializeSharedConfigDictionary(
-    SharedConfigDictionary& sharedConfigDictionary,
-    MemoryRegion& memoryRegion,
-    int32_t allocationBlockOffset)
+    _Inout_ SharedConfigDictionary& sharedConfigDictionary,
+    _Inout_ MemoryRegion& memoryRegion,
+    _In_ int32_t allocationBlockOffset)
 {
     // Initialize allocator.
     //

@@ -300,9 +300,9 @@ jobs:
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
-          make -C source/Mlos.NetCore.Components.Packages/
+          dotnet build -c ${{ matrix.configuration }} source/Mlos.NetCore.Components.Packages/
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
-          dotnet build external/ExternalIntegrationExample/ExternalIntegrationExample.SettingsRegistry/
+          dotnet build -c ${{ matrix.configuration }} external/ExternalIntegrationExample/ExternalIntegrationExample.SettingsRegistry/
     - name: Run ${{ matrix.configuration }} cmake build (CXX=${{ matrix.cxx }})
       timeout-minutes: 5
       shell: bash
@@ -312,7 +312,7 @@ jobs:
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           test -e target/bin/${{ matrix.configuration }}/x86_64/Mlos.UnitTest
     - name: Run ${{ matrix.configuration }} cmake test
-      timeout-minutes: 5
+      timeout-minutes: 10
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
@@ -321,8 +321,15 @@ jobs:
       timeout-minutes: 10
       shell: bash
       run: |
-        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+        docker exec --env GITHUB_WORKFLOW=$GITHUB_WORKFLOW \
+          mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           ./build.linux.sh --Configuration=${{ matrix.configuration }}
+    - name: Run ${{ matrix.configuration }} external cmake integration build/test
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make -C external/ExternalIntegrationExample all test
     - name: Cleanup ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
@@ -431,7 +438,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install licenseheaders
+        pip install 'licenseheaders!=0.8.6'
     - name: Run licenseheaders tool and check to see if it caused any changes
       shell: bash
       run: |
@@ -445,7 +452,7 @@ jobs:
   windows-python-checks:
     name: Run Python checks on Windows
     runs-on: windows-2019
-    timeout-minutes: 30
+    timeout-minutes: 45
     strategy:
       matrix:
         # FIXME: MLOS currently fails pylint checks for 3.8
@@ -467,14 +474,15 @@ jobs:
       timeout-minutes: 2
       run: scripts\run-python-checks.cmd
     - name: Run Python unit tests (Windows)
-      timeout-minutes: 30
+      timeout-minutes: 40
       run: scripts\run-python-tests.cmd
 
+  # Run pylint only in this test and make the container image publish task depend on this.
   linux-python-checks:
     name: Run Python checks on Ubuntu ${{ matrix.UbuntuVersion }}
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
-    timeout-minutes: 30
+    timeout-minutes: 15
     strategy:
       matrix:
         #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -533,13 +541,81 @@ jobs:
     - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion }})
       timeout-minutes: 2
       run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-checks
+    - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      shell: bash
+      run: |
+        docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
+        docker rm mlos-build-python-${{ matrix.UbuntuVersion }}
+
+  # Run the python unit tests separately from the pylint checks so that flakiness here doesn't block docker image publish step.
+  linux-python-tests:
+    name: Run Python unit tests on Ubuntu ${{ matrix.UbuntuVersion }}
+    runs-on: ubuntu-latest
+    needs: [prep-vars, docker-image-cached-build]
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: [20.04]
+        # TODO: add support for checking different versions of Python
+        # Right now, we install Python 3.7 in the container and default to
+        # using it if available, else fallback to the system python3.
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
+    # we depend on by re-executing (roughly) its same steps.
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Cache Docker layers
+      id: load-docker-cache
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
+      timeout-minutes: 10
+      uses: docker/build-push-action@v2
+      with:
+        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
+        # For this task we can get a slight speed up by skipping the dotnet,
+        # clang, cmake layers.
+        target: mlos-build-base-with-python
+        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+        #cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
+    # Now, start the image as a new container instance.
+    - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      # These images are expected to have installed all the pip dependencies already.
+      shell: bash
+      run: |
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
+          --name mlos-build-python-${{ matrix.UbuntuVersion }} \
+          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
+          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
     - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion }})
-      timeout-minutes: 30
+      timeout-minutes: 45
       run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
     - name: Upload coverage to codecov
       if: ${{ github.repository == 'microsoft/mlos' }}
       uses: codecov/codecov-action@v1
       with:
+        token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
         flags: unittests
         fail_ci_if_error: true

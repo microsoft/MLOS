@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+
 using Microsoft.CodeAnalysis;
 
 namespace Mlos.SettingsSystem.CodeGen
@@ -19,7 +20,7 @@ namespace Mlos.SettingsSystem.CodeGen
     /// Extension methods for Roslyn Compiler class.
     /// </summary>
     /// <remarks>
-    /// Used to locate types defintion in the source file.
+    /// Used to locate types definition in the source file.
     /// </remarks>
     public static class CompilationExtensions
     {
@@ -62,7 +63,7 @@ namespace Mlos.SettingsSystem.CodeGen
         public static string GetTypeDefinition(this Compilation compilation, Type sourceType)
         {
             INamedTypeSymbol sourceTypeSymbol = compilation.GetTypeByMetadataName(sourceType.FullName);
-            StringBuilder builder = new StringBuilder();
+            var builder = new StringBuilder();
 
             foreach (Location location in sourceTypeSymbol.Locations)
             {

@@ -7,8 +7,8 @@
 // -----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
+
 using Mlos.Core;
 using Mlos.Model.Services.Spaces;
 
@@ -19,9 +19,9 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
     /// </summary>
     public class BayesianOptimizerProxy : IOptimizerProxy
     {
-        private OptimizerService.OptimizerService.OptimizerServiceClient client;
+        private readonly OptimizerService.OptimizerService.OptimizerServiceClient client;
 
-        private OptimizerService.OptimizerHandle optimizerHandle;
+        private readonly OptimizerService.OptimizerHandle optimizerHandle;
 
         public BayesianOptimizerProxy(OptimizerService.OptimizerService.OptimizerServiceClient client, OptimizerService.OptimizerHandle optimizerHandle)
         {

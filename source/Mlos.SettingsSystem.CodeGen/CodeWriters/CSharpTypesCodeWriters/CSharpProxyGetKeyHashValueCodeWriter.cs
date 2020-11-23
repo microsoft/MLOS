@@ -10,7 +10,7 @@ using System;
 
 using Mlos.SettingsSystem.Attributes;
 
-namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriters
+namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 {
     /// <summary>
     /// Code writer class for CSharp ICodegenType implementation.
@@ -51,6 +51,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteBlock($@"
                 public partial struct {typeName}
                 {{
+                    /// <inheritdoc/>
                     public uint GetKeyHashValue<THash>()
                         where THash : global::Mlos.Core.Collections.IHash<uint>
                     {{

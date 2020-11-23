@@ -17,6 +17,7 @@ add_subdirectory(Mlos.Agent EXCLUDE_FROM_ALL)
 add_subdirectory(Mlos.Agent.GrpcClient EXCLUDE_FROM_ALL)
 add_subdirectory(Mlos.Agent.GrpcServer EXCLUDE_FROM_ALL)
 add_subdirectory(Mlos.Agent.Server EXCLUDE_FROM_ALL)
+add_subdirectory(Mlos.NetCore.Components.Packages EXCLUDE_FROM_ALL)
 
 # Start listing our other C++ sub projects.
 # See Also: dirs.proj

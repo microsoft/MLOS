@@ -77,9 +77,9 @@ namespace Mlos.Core
         protected abstract void Dispose(bool disposing);
 
         /// <summary>
-        /// True if object has been disposed.
+        /// Indicates whether the object has been disposed.
         /// </summary>
-        protected bool isDisposed = false;
+        protected bool isDisposed;
 
         /// <summary>
         /// Indicates if we should cleanup OS resources when closing the shared memory map view.

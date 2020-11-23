@@ -59,6 +59,7 @@ msbuild /m /r source/Examples/SmartCache/SmartCache.vcxproj
 ```sh
 dotnet target/bin/Release/Mlos.Agent.Server.dll \
     --settings-registry-path target/bin/Release/AnyCPU \
+    --experiment target/bin/Release/AnyCPU/SmartCache.ExperimentSession/SmartCache.ExperimentSession.dll \
     --executable target/bin/Release/x86_64/SmartCache
 ```
 
@@ -67,6 +68,7 @@ dotnet target/bin/Release/Mlos.Agent.Server.dll \
 ```cmd
 dotnet target/bin/Release/Mlos.Agent.Server.dll \
     --settings-registry-path target/bin/Release/AnyCPU \
+    --experiment target/bin/Release/AnyCPU/SmartCache.ExperimentSession/SmartCache.ExperimentSession.dll \
     --executable target/bin/Release/x64/SmartCache.exe
 ```
 
@@ -115,12 +117,12 @@ To also have the SmartCache tune itself by connecting to an optimizer we need to
 ```sh
 dotnet target/bin/Release/AnyCPU/Mlos.Agent.Server/Mlos.Agent.Server.dll \
     --executable target/bin/Release/x86_64/SmartCache \
-    --settings-registry-path target/bin/Release/AnyCPU
+    --settings-registry-path target/bin/Release/AnyCPU \
+    --experiment target/bin/Release/AnyCPU/SmartCache.ExperimentSession/SmartCache.ExperimentSession.dll \
     --optimizer-uri http://localhost:50051
 
 ```txt
 Mlos.Agent.Server
-<<<<<<< HEAD
 Connecting to the Mlos.Optimizer
 Starting target/bin/Release/x86_64/SmartCache
 observations: 0
@@ -162,17 +164,18 @@ In this case, `Mlos.Agent.Server` itself starts the component.
 Once started, `SmartCache` will attempt to register its component specific set of shared memory messages with the `Mlos.Agent` in the `Mlos.Agent.Server` using `RegisterComponentConfig` and `RegisterAssemblyRequestMessage` from `Mlos.Core` and `Mlos.NetCore`.
 That includes the name of the `SettingsRegistry` assembly (`.dll`) corresponding to that component's settings/messages.
 
-The `Mlos.Agent.Server` needs to be told where it can find those assemblies in order to load them so that it can process the messages sent by the component.
+The `Mlos.Agent.Server` needs to be told where it can find those assemblies in order to load them so that it can parse the messages sent by the component.
 To do that, we use the `--settings-registry-path` option.
+We also need to provide the path to a corresponding `ExperimentSession` dll in the `--experiment` option in order to tell the agent how to process those messages for this experiment.
 
 In the second example we also tell the `Mlos.Agent.Server` how to connect to the (Python) MLOS Optimizer Service over GRPC so that the application message handlers setup by the `SmartCache.SettingsRegistry` for the agent can request new configuration recommendations on behalf of the application.
 
 For additional details, see:
 
-- [Mlos.Agent.Server/MlosAgentServer.cs](https://github.com/Microsoft/MLOS/tree/main/source/Mlos.Agent.Server/MlosAgentServer.cs#mlos-github-tree-view)
-- [SmartCache/Main.cpp](https://github.com/Microsoft/MLOS/tree/main/source/Examples/SmartCache/Main.cpp#mlos-github-tree-view)
-- [SmartCache.SettingsRegistry/AssemblyInitializer.cs](https://github.com/Microsoft/MLOS/tree/main/source/Examples/SmartCache/SmartCache.SettingsRegistry/AssemblyInitializer.cs#mlos-github-tree-view)
-- [SmartCache.SettingsRegistry/Codegen/SmartCache.cs](https://github.com/Microsoft/MLOS/tree/main/source/Examples/SmartCache/SmartCache.SettingsRegistry/Codegen/SmartCache.cs#mlos-github-tree-view)
+- [Mlos.Agent.Server/MlosAgentServer.cs](../../Mlos.Agent.Server/MlosAgentServer.cs#mlos-github-tree-view)
+- [SmartCache/Main.cpp](./Main.cpp#mlos-github-tree-view)
+- [SmartCache.ExperimentSession/SmartCacheExperimentSession.cs](./SmartCache.ExperimentSession/SmartCacheExperimentSession.cs#mlos-github-tree-view)
+- [SmartCache.SettingsRegistry/Codegen/SmartCache.cs](./SmartCache.SettingsRegistry/Codegen/SmartCache.cs#mlos-github-tree-view)
 
 ## See Also
 

@@ -15,6 +15,16 @@ namespace Mlos.Core
     /// </summary>
     public static class CodegenProxyExtensions
     {
+        /// <summary>
+        /// Verifies serialized variable data.
+        /// </summary>
+        /// <typeparam name="T">Instance type.</typeparam>
+        /// <param name="array"></param>
+        /// <param name="elementCount"></param>
+        /// <param name="objectOffset"></param>
+        /// <param name="totalDataSize"></param>
+        /// <param name="expectedDataOffset"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool VerifyVariableData<T>(this PropertyProxyArray<T> array, uint elementCount, ulong objectOffset, ulong totalDataSize, ref ulong expectedDataOffset)
             where T : ICodegenProxy, new()
@@ -32,6 +42,13 @@ namespace Mlos.Core
             return true;
         }
 
+        /// <summary>
+        /// Verifies serialized variable data.
+        /// </summary>
+        /// <typeparam name="T">Type of the serialized object.</typeparam>
+        /// <param name="proxy"></param>
+        /// <param name="frameLength"></param>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool VerifyVariableData<T>(this T proxy, int frameLength)
             where T : ICodegenProxy, new()

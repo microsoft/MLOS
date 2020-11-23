@@ -31,7 +31,7 @@ namespace Core
 class BytePtr
 {
 public:
-    BytePtr(const void* buffer)
+    BytePtr(_In_ const void* buffer)
       : Pointer(reinterpret_cast<byte*>(const_cast<void*>(buffer)))
     {}
 

@@ -43,6 +43,8 @@
     <ClCompile Include="SharedMemoryMapView.Windows.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AlignedInstance.h" />
+    <ClInclude Include="AlignedVector.h" />
     <ClInclude Include="ArenaAllocator.h" />
     <ClInclude Include="BytePtr.h" />
     <ClInclude Include="ComponentConfig.h" />
@@ -80,8 +82,6 @@
     <ClInclude Include="SharedMemoryMapView.Windows.h" />
     <ClInclude Include="SharedMemoryRegionView.inl" />
     <ClInclude Include="SharedMemoryRegionView.h" />
-    <ClInclude Include="StaticSingleton.h" />
-    <ClInclude Include="StaticVector.h" />
     <ClInclude Include="StringTypes.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
