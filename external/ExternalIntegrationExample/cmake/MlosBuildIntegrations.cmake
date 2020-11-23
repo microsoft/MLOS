@@ -34,10 +34,17 @@ if(NOT mlos_POPULATED)
     # Actually fetch the mlos code (at generation time).
     FetchContent_Populate(mlos)
 
-    # In case we checked out an unnamed version, give it a local branch name for GitVersionTask to compute from.
+    # In case we checked out an unnamed version (e.g. in Github Actions CI),
+    # give it a local branch name for GitVersionTask to compute from.
     if("${MLOS_GIT_TAG}" STREQUAL "HEAD")
         execute_process(
             COMMAND git checkout --detach
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
+            COMMAND git branch -f local-cmake-checkout
+            WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
+        execute_process(
+            COMMAND git remote -v
             WORKING_DIRECTORY "${mlos_SOURCE_DIR}")
         execute_process(
             COMMAND git branch --no-track -f local-cmake-checkout origin/HEAD
