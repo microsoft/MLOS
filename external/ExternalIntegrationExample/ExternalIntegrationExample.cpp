@@ -119,7 +119,5 @@ int main()
     //
     mlosContext.TerminateControlChannel();
 
-    // FIXME: It's hanging ...
-
     return 0;
 }
