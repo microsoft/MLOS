@@ -119,7 +119,7 @@ jobs:
       timeout-minutes: 700
       run: |
         docker exec --workdir /src/MLOS/source/Mlos.Python mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
-          python3.7 -m pytest -sv mlos/Optimizers/long_haul_test/*
+          python3.7 -m pytest -sv mlos/Optimizers/long_haul_tests/*.py
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
