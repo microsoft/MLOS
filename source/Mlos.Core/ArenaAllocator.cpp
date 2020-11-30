@@ -101,7 +101,7 @@ HRESULT AllocateInMemoryRegion(
     // Update current allocated entry.
     //
     AllocationEntry* allocationEntry = reinterpret_cast<AllocationEntry*>(memoryRegionPtr.Pointer + offset);
-    allocationEntry->PrevEntryoffset = allocator.LastAllocatedOffset;
+    allocationEntry->PrevEntryOffset = allocator.LastAllocatedOffset;
 
     allocator.LastAllocatedOffset = offset;
 

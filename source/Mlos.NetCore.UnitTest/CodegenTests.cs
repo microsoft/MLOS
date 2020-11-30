@@ -19,11 +19,11 @@ namespace Mlos.NetCore.UnitTest
         {
             TestComponentConfig config = default;
             ulong hashCode = ((ICodegenKey)config).CodegenTypeHash();
-            Assert.Equal<ulong>(0x92ab3b94501efa6c, hashCode);
+            Assert.Equal<ulong>(expected: 0x92ab3b94501efa6c, actual: hashCode);
 
             Point point = default;
             ulong pointHashCode = ((ICodegenKey)point).CodegenTypeHash();
-            Assert.Equal<ulong>(0x7b7fb0279242f8d7, pointHashCode);
+            Assert.Equal<ulong>(expected: 0x80D34F1D0805C19D, actual: pointHashCode);
         }
     }
 }

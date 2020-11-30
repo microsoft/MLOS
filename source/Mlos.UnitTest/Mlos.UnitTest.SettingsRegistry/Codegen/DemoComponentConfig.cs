@@ -11,7 +11,7 @@ using Mlos.SettingsSystem.Attributes;
 namespace Mlos.UnitTest
 {
     [CodegenConfig]
-    internal partial struct DemoComponentConfig
+    public partial struct DemoComponentConfig
     {
         /// <summary>
         /// Set by the agent upon suggesting new config.

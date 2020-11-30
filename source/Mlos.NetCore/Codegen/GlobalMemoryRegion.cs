@@ -12,8 +12,13 @@ using Mlos.SettingsSystem.StdTypes;
 namespace Mlos.Core.Internal
 {
     [CodegenType]
-    internal partial struct GlobalMemoryRegion
+    public partial struct GlobalMemoryRegion
     {
+        /// <summary>
+        /// Default memory size.
+        /// </summary>
+        public const int GlobalSharedMemorySize = 65536;
+
         /// <summary>
         /// Memory region header.
         /// </summary>

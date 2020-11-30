@@ -11,7 +11,7 @@ using Mlos.SettingsSystem.Attributes;
 namespace Mlos.Core.Internal
 {
     [CodegenType]
-    internal partial class UIntArray
+    public partial class UIntArray
     {
         /// <summary>
         /// Number of elements in the array.
@@ -32,17 +32,17 @@ namespace Mlos.Core.Internal
     /// #TODO move to ArenaAllocator allocator.
     /// </remarks>
     [CodegenType]
-    internal partial struct AllocationEntry
+    public partial struct AllocationEntry
     {
         internal uint NextEntryOffset;
-        internal uint PrevEntryoffset;
+        internal uint PrevEntryOffset;
     }
 
     /// <summary>
     /// Simple memory allocator.
     /// </summary>
     [CodegenType]
-    internal partial struct ArenaAllocator
+    public partial struct ArenaAllocator
     {
         /// <summary>
         /// Offset to the allocator from the beginning of the memory region.

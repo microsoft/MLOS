@@ -85,7 +85,7 @@ namespace Proxy.Mlos.Core.Internal
                 Buffer = memoryRegionPtr + (int)offset,
             };
 
-            allocationEntry.PrevEntryoffset = allocator.LastAllocatedOffset;
+            allocationEntry.PrevEntryOffset = allocator.LastAllocatedOffset;
 
             allocator.LastAllocatedOffset = offset;
 

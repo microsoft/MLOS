@@ -14,7 +14,7 @@ namespace SmartSharedChannel
     /// SharedChannel Config.
     /// </summary>
     [CodegenConfig]
-    internal partial struct SharedChannelConfig
+    public partial struct SharedChannelConfig
     {
         /// <summary>
         /// Size of the communication buffer.
@@ -33,7 +33,7 @@ namespace SmartSharedChannel
     /// Parameters of shared channel microbenchark.
     /// </summary>
     [CodegenConfig]
-    internal partial struct MicrobenchmarkConfig
+    public partial struct MicrobenchmarkConfig
     {
         /// <summary>
         /// Duration of microbenchmark in seconds.
@@ -52,7 +52,7 @@ namespace SmartSharedChannel
     /// Shared channel reader statistics.
     /// </summary>
     [CodegenConfig]
-    internal partial struct SharedChannelReaderStats
+    public partial struct SharedChannelReaderStats
     {
         [ScalarSetting]
         internal ulong MessagesRead;
