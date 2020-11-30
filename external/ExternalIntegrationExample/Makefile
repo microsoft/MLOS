@@ -19,7 +19,7 @@ test: cmake-build
 
 clean:
 	make -C ExternalIntegrationExample.SettingsRegistry/ clean
-	cd ./build/ && make clean || true
+	cd ./build/ 2>/dev/null && make clean 2>/dev/null || true
 
 distclean: clean
 	make -C ExternalIntegrationExample.SettingsRegistry/ distclean
