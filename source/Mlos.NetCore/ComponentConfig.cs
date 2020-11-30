@@ -10,6 +10,9 @@ using System.Runtime.CompilerServices;
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Component configuration helper class.
+    /// </summary>
     public static class ComponentConfig
     {
         /// <summary>
@@ -32,7 +35,7 @@ namespace Mlos.Core
     }
 
     /// <summary>
-    /// Component configuration.
+    /// Represents component configuration stored in the target process.
     /// </summary>
     /// <typeparam name="TType">Codegen type.</typeparam>
     /// <typeparam name="TProxy">Proxy type of the configuration.</typeparam>
@@ -74,11 +77,18 @@ namespace Mlos.Core
                 && codegenType.CompareKey(sharedConfig.Config);
         }
 
-        public void Assign(SharedConfig<TProxy> sharedConfig)
+        /// <summary>
+        /// Binds the component config located in the shared memory to the local component config.
+        /// </summary>
+        /// <param name="sharedConfig"></param>
+        public void Bind(SharedConfig<TProxy> sharedConfig)
         {
             this.sharedConfig = sharedConfig;
         }
 
+        /// <summary>
+        /// Copies shared memory config to the local config instance.
+        /// </summary>
         public void Update()
         {
             uint configId = sharedConfig.Header.ConfigId.LoadRelaxed();

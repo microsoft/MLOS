@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <!-- Resolve which Platform is used to build managed projects. -->
+    <DefaultNetCorePlatform>$(Platform)</DefaultNetCorePlatform>
+    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">$(BuildArchitecture)</DefaultNetCorePlatform>
+    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">AnyCPU</DefaultNetCorePlatform>
+    <!-- Resolve binplace folder, settings registry folder and path to Mlos.Agent.Server. -->
+    <NetCoreBinplaceDir>$(BinplaceBaseRootDir)/$(BuildType)/$(DefaultNetCorePlatform)</NetCoreBinplaceDir>
+    <SettingsAssemblyBinplaceDir>$(NetCoreBinplaceDir)</SettingsAssemblyBinplaceDir>
+    <MlosAgentServerFilePath>$(NetCoreBinplaceDir)/Mlos.Agent.Server/Mlos.Agent.Server.dll</MlosAgentServerFilePath>
+    <!-- If not defined, use x64 Platform (same as Mlos.Cpp.props). -->
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsWindows)' == 'true'">
+    <Platform Condition="'$(Platform)' == ''">x64</Platform>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(IsLinux)' == 'true'">
+    <Platform Condition="'$(Platform)' == ''">x86_64</Platform>
+ </PropertyGroup>
+</Project>

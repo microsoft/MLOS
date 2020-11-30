@@ -21,7 +21,7 @@ namespace Core
 {
 namespace Collections
 {
-// #TODO change interace
+// #TODO change interface
 // add final mix
 //
 
@@ -33,7 +33,10 @@ private:
     constexpr static THashValue OffsetBasis();
 
 public:
-    static inline THashValue CombineHashValue(THashValue hashValue, const byte* buffer, uint32_t length)
+    static inline THashValue CombineHashValue(
+        _In_ THashValue hashValue,
+        _In_reads_bytes_(length) const byte* buffer,
+        _In_ uint32_t length)
     {
         for (uint32_t i = 0; i < length; i++)
         {
@@ -44,7 +47,9 @@ public:
         return hashValue;
     }
 
-    static inline THashValue GetHashValue(const byte* buffer, uint32_t length)
+    static inline THashValue GetHashValue(
+        _In_reads_bytes_(length) const byte* buffer,
+        _In_ uint32_t length)
     {
         THashValue hashValue = OffsetBasis();
 

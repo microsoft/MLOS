@@ -36,8 +36,8 @@ using namespace SmartSharedChannel;
 
 // Configs declarations.
 //
-extern StaticSingleton<ComponentConfig<SharedChannelConfig>> g_SharedChannelConfig;
-extern StaticSingleton<ComponentConfig<MicrobenchmarkConfig>> g_MicrobenchmarkConfig;
+extern AlignedInstance<ComponentConfig<SharedChannelConfig>> g_SharedChannelConfig;
+extern AlignedInstance<ComponentConfig<MicrobenchmarkConfig>> g_MicrobenchmarkConfig;
 
 // Functions declarations.
 //

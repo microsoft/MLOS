@@ -32,11 +32,11 @@ namespace Internal
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InitializeArenaAllocator(
-    ArenaAllocator& allocator,
-    MemoryRegion& memoryRegion,
-    int32_t firstAllocationOffset)
+    _Inout_ ArenaAllocator& allocator,
+    _Inout_ MemoryRegion& memoryRegion,
+    _In_ int32_t firstAllocationOffset)
 {
     allocator.OffsetToAllocator = static_cast<int32_t>(BytePtr(&allocator).Pointer - BytePtr(&memoryRegion).Pointer);
 
@@ -64,10 +64,10 @@ HRESULT InitializeArenaAllocator(
 //
 //  #TODO revisit thread safety
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT AllocateInMemoryRegion(
-    ArenaAllocator& allocator,
-    uint64_t size,
+    _Inout_ ArenaAllocator& allocator,
+    _In_ uint64_t size,
     _Out_ uint32_t& offset)
 {
     size += sizeof(Internal::AllocationEntry);

@@ -53,11 +53,14 @@ typedef unsigned char byte;
 constexpr int32_t INVALID_FD_VALUE = -1;
 
 // Ignore some SAL annotations in Linux
-
-#define _Check_return_
+//
+#define _Must_inspect_result_ __attribute__((warn_unused_result))
 #define _Out_
 #define _In_
+#define _Inout_
 #define _In_z_
+#define _In_reads_(x)
+#define _In_reads_bytes_(x)
 
 #define SUCCEEDED(x) (x >= 0)
 #define FAILED(x) (x < 0)
@@ -73,6 +76,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 //
 #define MLOS_RETAIL_ASSERT(result) { if (!result) Mlos::Core::MlosPlatform::TerminateProcess(); }
 #define MLOS_UNUSED_ARG(x) (void)x
+#define MLOS_IGNORE_HR(x) (void)x
 
 #ifdef _MSC_VER
 #define MLOS_SELECTANY_ATTR __declspec(selectany)
@@ -87,15 +91,6 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "MlosPlatform.h"
 
 #include "BytePtr.h"
-
-#ifdef _WIN64
-#include "Security.Windows.h"
-#include "SharedMemoryMapView.Windows.h"
-#include "NamedEvent.Window.h"
-#else
-#include "SharedMemoryMapView.Linux.h"
-#include "NamedEvent.Linux.h"
-#endif
 
 #include "Hash.h"
 #include "FNVHashFunction.h"
@@ -118,6 +113,16 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "Mlos.Core/SettingsProvider_gen_callbacks.h"
 #include "Mlos.Core/SettingsProvider_gen_dispatch.h"
 
+#ifdef _WIN64
+#include "Security.Windows.h"
+#include "SharedMemoryMapView.Windows.h"
+#include "NamedEvent.Window.h"
+#else
+#include "SharedMemoryMapView.Linux.h"
+#include "NamedEvent.Linux.h"
+#include "FileDescriptorExchange.Linux.h"
+#endif
+
 #include "SharedMemoryRegionView.h"
 #include "SharedMemoryRegionView.inl"
 
@@ -139,15 +144,14 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 
 // Include Mlos Client API.
 //
+#include "AlignedInstance.h"
+#include "AlignedVector.h"
 #include "MlosContext.h"
 #include "InternalMlosContext.h"
 #include "InterProcessMlosContext.h"
-#include "StaticSingleton.h"
-#include "StaticVector.h"
 
 // Implementation.
 //
-#include "MlosContext.inl"
 #include "MlosContext.inl"
 #include "ComponentConfig.inl"
 #include "SharedChannel.inl"
@@ -166,6 +170,16 @@ constexpr uint32_t DispatchTableBaseIndex() { return 0; }
 }
 }
 }
+
+// Depending on OS, we are using different Mlos context implementation.
+// Define a default Mlos context factory.
+//
+#ifdef _WIN64
+using DefaultMlosContextFactory = Mlos::Core::MlosContextFactory<Mlos::Core::InterProcessMlosContext>;
+#else
+#include "AnonymousMemoryMlosContext.Linux.h"
+using DefaultMlosContextFactory = Mlos::Core::MlosContextFactory<Mlos::Core::AnonymousMemoryMlosContext>;
+#endif
 
 // Restore min/max macros.
 //

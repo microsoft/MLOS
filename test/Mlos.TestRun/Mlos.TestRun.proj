@@ -2,39 +2,23 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <!-- If not specified, be sure to default to 64-bit builds (same as Mlos.Cpp.props). -->
   <Import Project="$(MSBuildThisFileDirectory)..\..\build\Mlos.Common.props" />
-  <PropertyGroup>
-    <!-- Resolve which Platform is used to build managed projects. -->
-    <DefaultNetCorePlatform>$(Platform)</DefaultNetCorePlatform>
-    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">$(BuildArchitecture)</DefaultNetCorePlatform>
-    <DefaultNetCorePlatform Condition="'$(DefaultNetCorePlatform)' == ''">AnyCPU</DefaultNetCorePlatform>
-    <SettingsAssemblyBinplaceDir>$(BinplaceBaseRootDir)\$(BuildType)\$(DefaultNetCorePlatform)</SettingsAssemblyBinplaceDir>
-    <!-- If not defined, use x64 Platform (same as Mlos.Cpp.props). -->
-    <Platform Condition="'$(Platform)' == ''">x64</Platform>
-  </PropertyGroup>
+  <Import Project="$(BaseDir)\build\Mlos.TestRun.props" />
   <!-- Include TestRun targets. -->
   <ItemGroup Label="References">
     <ProjectReference Include="$(BaseDir)\source\Mlos.Agent.Server\Mlos.Agent.Server.csproj" />
-    <ProjectReference Include="$(BaseDir)\source\Mlos.UnitTest\Mlos.UnitTest.vcxproj" />
+    <!-- Mlos.UnitTest. -->
+    <ProjectReference Include="$(BaseDir)\source\Mlos.UnitTest\Mlos.UnitTest.vcxproj" Condition="'$(IsWindows)' == 'true'" />
+    <!-- Mlos.NetCore.UnitTest. -->
     <ProjectReference Include="$(BaseDir)\source\Mlos.NetCore.UnitTest\Mlos.NetCore.UnitTest.csproj" />
-    <ProjectReference Include="$(BaseDir)\source\Examples\SmartCache\SmartCache.vcxproj" />
+    <!-- SmartCache. -->
+    <ProjectReference Include="$(BaseDir)\source\Examples\SmartCache\SmartCache.vcxproj" Condition="'$(IsWindows)' == 'true'" />
+    <ProjectReference Include="$(BaseDir)\source\Examples\SmartCache\SmartCache.ExperimentSession\SmartCache.ExperimentSession.csproj" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.TestRun.targets" />
-  <!-- Determine the correct path to each of the output of ProjectReferences. -->
-  <Target Name="ComputeProjectReferenceOutputs" BeforeTargets="Test">
-    <MSBuild Projects="$(BaseDir)\source\Mlos.Agent.Server\Mlos.Agent.Server.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
-      <Output TaskParameter="TargetOutputs" ItemName="MlosAgentServerOutput" />
-    </MSBuild>
-    <Error Text="Missing or invalid MlosAgentServerOutput: @(MlosAgentServerOutput->'%(fullpath)'" Condition="'@(MlosAgentServerOutput->Count())' != '1'" />
-
-    <MSBuild Projects="$(BaseDir)\source\Mlos.NetCore.UnitTest\Mlos.NetCore.UnitTest.csproj" Targets="GetTargetPath" Properties="Configuration=$(Configuration)">
-      <Output TaskParameter="TargetOutputs" ItemName="MlosNetCoreUnitTestOutput" />
-    </MSBuild>
-    <Error Text="Missing or invalid MlosNetCoreUnitTestOutput: @(MlosNetCoreUnitTestOutput->'%(fullpath)'" Condition="'@(MlosNetCoreUnitTestOutput->Count())' != '1'" />
-  </Target>
   <!-- FIXME: Disabling running tests via QuickBuild for now.  Convert them to QTests (#122). -->
   <Target Name="Test" AfterTargets="Build" Condition="'$(QBUILD)' != '1' And '$(RunUnitTest)' != 'false'">
-    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)\Mlos.UnitTest.exe&quot;" />
-    <Exec Command="dotnet &quot;@(MlosAgentServerOutput->'%(fullpath)')&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)\SmartCache.exe&quot;" />
-    <Exec Command="dotnet test &quot;@(MlosNetCoreUnitTestOutput->'%(fullpath)')&quot;" />
+    <Exec Command="dotnet &quot;$(MlosAgentServerFilePath)&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)Mlos.UnitTest&quot;" />
+    <Exec Command="dotnet &quot;$(MlosAgentServerFilePath)&quot; --settings-registry-path &quot;$(SettingsAssemblyBinplaceDir)&quot; --executable &quot;$(BinplaceDir)SmartCache&quot; --experiment &quot;$(NetCoreBinplaceDir)/SmartCache.ExperimentSession/SmartCache.ExperimentSession.dll&quot;" />
+    <Exec Command="dotnet test &quot;$(ObjectRoot)/source/Mlos.NetCore.UnitTest/$(ObjectDirectory)/$(DefaultNetCorePlatform)/Mlos.NetCore.UnitTest.dll&quot;" />
   </Target>
 </Project>

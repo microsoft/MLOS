@@ -27,8 +27,8 @@ namespace Core
 //
 SharedMemoryMapView::SharedMemoryMapView() noexcept
   : MemSize(0),
-    m_hMapFile(nullptr),
     Buffer(nullptr),
+    m_hMapFile(nullptr),
     CleanupOnClose(false)
 {
 }
@@ -39,7 +39,7 @@ SharedMemoryMapView::SharedMemoryMapView() noexcept
 // PURPOSE:
 //  Move constructor.
 //
-SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept
+SharedMemoryMapView::SharedMemoryMapView(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept
   : MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
     m_hMapFile(std::exchange(sharedMemoryMapView.m_hMapFile, nullptr)),
     Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
@@ -56,6 +56,20 @@ SharedMemoryMapView::~SharedMemoryMapView()
 }
 
 //----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::Assign
+//
+// PURPOSE:
+//  Assign method.
+//
+void SharedMemoryMapView::Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept
+{
+    MemSize = std::exchange(sharedMemoryMapView.MemSize, 0);
+    m_hMapFile = std::exchange(sharedMemoryMapView.m_hMapFile, nullptr);
+    Buffer = std::exchange(sharedMemoryMapView.Buffer, nullptr);
+    CleanupOnClose = std::exchange(sharedMemoryMapView.CleanupOnClose, 0);
+}
+
+//----------------------------------------------------------------------------
 // NAME: SharedMemoryMapView::CreateNew
 //
 // PURPOSE:
@@ -66,7 +80,10 @@ SharedMemoryMapView::~SharedMemoryMapView()
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::CreateNew(
+    _In_z_ const char* const sharedMemoryMapName,
+    _In_ size_t memSize) noexcept
 {
     Close();
 
@@ -128,7 +145,10 @@ HRESULT SharedMemoryMapView::CreateNew(const char* const sharedMemoryMapName, si
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::CreateOrOpen(
+    _In_z_ const char* const sharedMemoryMapName,
+    _In_ size_t memSize) noexcept
 {
     Close();
 
@@ -157,7 +177,8 @@ HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName,
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::OpenExisting(const char* const sharedMemoryMapName) noexcept
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept
 {
     Close();
 
@@ -204,7 +225,8 @@ HRESULT SharedMemoryMapView::OpenExisting(const char* const sharedMemoryMapName)
 // NOTES:
 //  If the size is not specified, function will query OS to obtain the size of the file mapping.
 //
-HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::MapMemoryView(_In_ size_t memSize) noexcept
 {
     HRESULT hr = S_OK;
 

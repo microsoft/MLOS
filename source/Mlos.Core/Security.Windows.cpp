@@ -28,7 +28,7 @@ namespace Core
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT Security::GetCurrentUserSid(_Out_ PSID& currentUserSid)
 {
     HRESULT hr = S_OK;
@@ -116,7 +116,7 @@ HRESULT Security::GetCurrentUserSid(_Out_ PSID& currentUserSid)
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT Security::GetCurrentUserSidString(_Out_ wchar_t*& currentUserSidString)
 {
     HRESULT hr = S_OK;
@@ -148,7 +148,7 @@ HRESULT Security::GetCurrentUserSidString(_Out_ wchar_t*& currentUserSidString)
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT Security::CreateDefaultSecurityDescriptor(_Out_ PSECURITY_DESCRIPTOR& securityDescriptor)
 {
     const int maxSDDLStringLength = 1024;
@@ -190,9 +190,9 @@ HRESULT Security::CreateDefaultSecurityDescriptor(_Out_ PSECURITY_DESCRIPTOR& se
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT Security::CreateSecurityDescriptorFromString(
-    _In_ const wchar_t* const securityDescriptorString,
+    _In_z_ const wchar_t* const securityDescriptorString,
     _Out_ PSECURITY_DESCRIPTOR& securityDescriptor)
 {
     HRESULT hr = S_OK;
@@ -223,8 +223,8 @@ HRESULT Security::CreateSecurityDescriptorFromString(
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
-HRESULT Security::VerifyHandleOwner(HANDLE handle)
+_Must_inspect_result_
+HRESULT Security::VerifyHandleOwner(_In_ HANDLE handle)
 {
     PSECURITY_DESCRIPTOR securityDescriptor = nullptr;
     PSID handleOwnerSid = nullptr;

@@ -26,7 +26,7 @@ namespace Core
 //
 // NOTES:
 //
-inline constexpr uint32_t lower_uint32(const uint64_t value)
+inline constexpr uint32_t lower_uint32(_In_ const uint64_t value)
 {
     return static_cast<uint32_t>(value);
 }
@@ -38,7 +38,7 @@ inline constexpr uint32_t lower_uint32(const uint64_t value)
 //
 // NOTES:
 //
-inline constexpr uint32_t higher_uint32(const uint64_t value)
+inline constexpr uint32_t higher_uint32(_In_ const uint64_t value)
 {
     return static_cast<uint32_t>((value >> 32) & std::numeric_limits<uint32_t>::max());
 }
@@ -51,7 +51,7 @@ inline constexpr uint32_t higher_uint32(const uint64_t value)
 // NOTES:
 //
 template<int N>
-inline constexpr int32_t align(const int32_t size)
+inline constexpr int32_t align(_In_ const int32_t size)
 {
     return ((size + N - 1) / N) * N;
 }
@@ -64,7 +64,7 @@ inline constexpr int32_t align(const int32_t size)
 // NOTES:
 //
 template<int N>
-inline constexpr size_t align(const size_t size)
+inline constexpr size_t align(_In_ const size_t size)
 {
     return ((size + N - 1) / N) * N;
 }
@@ -77,7 +77,7 @@ inline constexpr size_t align(const size_t size)
 // NOTES:
 //
 template<typename T>
-inline constexpr uint8_t most_significant_bit(T value)
+inline constexpr uint8_t most_significant_bit(_In_ T value)
 {
     uint8_t result = 0;
     while (value >>= 1)

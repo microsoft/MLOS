@@ -32,9 +32,10 @@ namespace Core
 //  Function opens or creates a shared memory view.
 //
 template<typename T>
+_Must_inspect_result_
 HRESULT MlosContext::CreateMemoryRegion(
-    const char* const sharedMemoryName,
-    size_t memoryRegionSize,
+    _In_z_ const char* const sharedMemoryName,
+    _In_ size_t memoryRegionSize,
     _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView)
 {
     // Create region view, initialize it on create.
@@ -49,12 +50,12 @@ HRESULT MlosContext::CreateMemoryRegion(
     //
     T& memoryRegion = sharedMemoryRegionView.MemoryRegion();
 
-    // Update region id if created a new one.
-    //
     const bool createdNewRegion = (hr == S_OK);
     if (createdNewRegion)
     {
-        memoryRegion.MemoryHeader.MemoryRegionId = ++m_globalMemoryRegion.TotalMemoryRegionCount;
+        // Update region index counter if created a new one.
+        //
+        memoryRegion.MemoryHeader.MemoryRegionId.Index = ++m_globalMemoryRegion.GlobalMemoryRegionIndex;
     }
 
     return S_OK;
@@ -72,12 +73,12 @@ HRESULT MlosContext::CreateMemoryRegion(
 // NOTES:
 //
 template<typename T>
-HRESULT MlosContext::RegisterComponentConfig(ComponentConfig<T>& componentConfig)
+_Must_inspect_result_
+HRESULT MlosContext::RegisterComponentConfig(_Inout_ ComponentConfig<T>& componentConfig)
 {
     // Create or find existing shared configuration.
     //
-    HRESULT hr = m_sharedConfigManager.CreateOrUpdateFrom(componentConfig);
-    return hr;
+    return m_sharedConfigManager.CreateOrUpdateFrom(componentConfig);
 }
 
 //----------------------------------------------------------------------------
@@ -91,7 +92,7 @@ HRESULT MlosContext::RegisterComponentConfig(ComponentConfig<T>& componentConfig
 // NOTES:
 //
 template<typename TMessage>
-void MlosContext::SendControlMessage(TMessage& message)
+void MlosContext::SendControlMessage(_In_ TMessage& message)
 {
     m_controlChannel.SendMessage(message);
 }
@@ -107,7 +108,7 @@ void MlosContext::SendControlMessage(TMessage& message)
 // NOTES:
 //
 template<typename TMessage>
-void MlosContext::SendFeedbackMessage(TMessage& message)
+void MlosContext::SendFeedbackMessage(_In_ TMessage& message)
 {
     m_feedbackChannel.SendMessage(message);
 }
@@ -123,9 +124,36 @@ void MlosContext::SendFeedbackMessage(TMessage& message)
 // NOTES:
 //
 template<typename TMessage>
-void MlosContext::SendTelemetryMessage(const TMessage& message) const
+void MlosContext::SendTelemetryMessage(_In_ const TMessage& message) const
 {
     m_telemetryChannel.SendMessage(message);
+}
+
+//----------------------------------------------------------------------------
+// NAME: MlosContextFactory::Create
+//
+// PURPOSE:
+//  Creates a MlosContext instance.
+//
+// RETURNS:
+//
+// NOTES:
+//
+template<typename TMlosContext>
+_Must_inspect_result_
+HRESULT MlosContextFactory<TMlosContext>::Create()
+{
+    typename TMlosContext::InitializerType initializer;
+    HRESULT hr = initializer.Initialize();
+
+    if (SUCCEEDED(hr))
+    {
+        // Create Mlos context.
+        //
+        m_context.Initialize(std::move(initializer));
+    }
+
+    return hr;
 }
 }
 }

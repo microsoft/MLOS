@@ -28,7 +28,7 @@ namespace Core
 //
 // NOTES:
 //
-InternalMlosContextInitializer::InternalMlosContextInitializer(InternalMlosContextInitializer&& initializer) noexcept
+InternalMlosContextInitializer::InternalMlosContextInitializer(_In_ InternalMlosContextInitializer&& initializer) noexcept
   : m_globalMemoryRegionView(std::move(initializer.m_globalMemoryRegionView)),
     m_controlChannelMemoryMapView(std::move(initializer.m_controlChannelMemoryMapView)),
     m_feedbackChannelMemoryMapView(std::move(initializer.m_feedbackChannelMemoryMapView))
@@ -43,7 +43,7 @@ InternalMlosContextInitializer::InternalMlosContextInitializer(InternalMlosConte
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InternalMlosContextInitializer::Initialize()
 {
     const size_t SharedMemorySize = 65536;
@@ -65,6 +65,10 @@ HRESULT InternalMlosContextInitializer::Initialize()
         hr = m_feedbackChannelMemoryMapView.CreateNew("Test_FeedbackChannelMemory", SharedMemorySize);
     }
 
+    m_globalMemoryRegionView.CleanupOnClose = true;
+    m_controlChannelMemoryMapView.CleanupOnClose = true;
+    m_feedbackChannelMemoryMapView.CleanupOnClose = true;
+
     if (FAILED(hr))
     {
         // Close all the shared maps if we fail to create one.
@@ -85,7 +89,7 @@ HRESULT InternalMlosContextInitializer::Initialize()
 //
 // NOTES:
 //
-InternalMlosContext::InternalMlosContext(InternalMlosContextInitializer&& initializer) noexcept
+InternalMlosContext::InternalMlosContext(_In_ InternalMlosContextInitializer&& initializer) noexcept
   : MlosContext(initializer.m_globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
     m_contextInitializer(std::move(initializer)),
     m_controlChannel(

@@ -18,8 +18,8 @@
 //----------------------------------------------------------------------------
 // Smart configurations.
 //
-StaticSingleton<ComponentConfig<SharedChannelConfig>> g_SharedChannelConfig;
-StaticSingleton<ComponentConfig<MicrobenchmarkConfig>> g_MicrobenchmarkConfig;
+AlignedInstance<ComponentConfig<SharedChannelConfig>> g_SharedChannelConfig;
+AlignedInstance<ComponentConfig<MicrobenchmarkConfig>> g_MicrobenchmarkConfig;
 
 //----------------------------------------------------------------------------
 // NAME: RegisterSmartConfigs

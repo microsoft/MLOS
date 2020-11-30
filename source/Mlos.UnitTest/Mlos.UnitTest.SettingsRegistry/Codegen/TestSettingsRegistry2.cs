@@ -11,6 +11,8 @@ using System.Runtime.InteropServices;
 
 using Mlos.SettingsSystem.Attributes;
 
+#pragma warning disable 1591 // Missing XML comment for publicly visible type or member {T}.
+
 namespace Mlos.UnitTest
 {
     /// <summary>
@@ -54,8 +56,19 @@ namespace Mlos.UnitTest
     [Flags]
     public enum Colors : ulong
     {
+        /// <summary>
+        /// Represents red color.
+        /// </summary>
         Red = 2,
+
+        /// <summary>
+        /// Represents green color.
+        /// </summary>
         Green = 4,
+
+        /// <summary>
+        /// Represents blue color.
+        /// </summary>
         Blue = 8,
     }
 

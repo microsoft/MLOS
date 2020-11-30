@@ -32,11 +32,11 @@ namespace Internal
 //
 // NOTES:
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT InitializeArenaAllocator(
-    ArenaAllocator& allocator,
-    MemoryRegion& memoryRegion,
-    int32_t allocationBlockOffset);
+    _Inout_ ArenaAllocator& allocator,
+    _Inout_ MemoryRegion& memoryRegion,
+    _In_ int32_t firstAllocationOffset);
 
 //----------------------------------------------------------------------------
 // NAME: AllocateInMemoryRegion
@@ -50,10 +50,10 @@ HRESULT InitializeArenaAllocator(
 // NOTES:
 //  Incremental allocator. Not thread safe.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT AllocateInMemoryRegion(
-    ArenaAllocator& allocator,
-    uint64_t size,
+    _Inout_ ArenaAllocator& allocator,
+    _In_ uint64_t size,
     _Out_ uint32_t& offset);
 }
 }

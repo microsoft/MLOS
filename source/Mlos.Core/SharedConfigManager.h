@@ -25,8 +25,8 @@ class MlosContext;
 // NAME: SharedConfigManager
 //
 // PURPOSE:
-//  Class provies methods to manage shared configurations.
-//  It is also resposible for managing the shared config memory region.
+//  Class provides methods to manage shared configurations.
+//  It is also responsible for managing the shared config memory region.
 //
 // NOTES:
 //
@@ -38,41 +38,52 @@ public:
     using TProbingPolicy = Collections::TLinearProbing<Collections::FNVHash<uint32_t>>;
 
 public:
-    SharedConfigManager(MlosContext& mlosContext) noexcept;
+    SharedConfigManager(_In_ MlosContext& mlosContext) noexcept;
 
     ~SharedConfigManager();
 
-    // Creates a new shared config or updates from the shared config in the shared memory.
-    //
-    template<typename T>
-    HRESULT CreateOrUpdateFrom(ComponentConfig<T>& componentConfig);
+    _Must_inspect_result_
+    HRESULT CreateSharedConfigMemoryRegion();
+
+    void AssignSharedConfigMemoryRegion(
+        _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView);
 
     // Creates a new shared config or updates from the shared config in the shared memory.
     //
     template<typename T>
+    _Must_inspect_result_
+    HRESULT CreateOrUpdateFrom(_Inout_ ComponentConfig<T>& componentConfig);
+
+    // Creates a new shared config or updates from the shared config in the shared memory.
+    //
+    template<typename T>
+    _Must_inspect_result_
     static HRESULT CreateOrUpdateFrom(
-        Internal::SharedConfigDictionary& sharedConfigDictionary,
-        ComponentConfig<T>& componentConfig);
+        _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
+        _Inout_ ComponentConfig<T>& componentConfig);
 
     // Locates the component config.
     //
     template<typename T>
+    _Must_inspect_result_
     HRESULT Lookup(ComponentConfig<T>& componentConfig);
 
     // Locates the component config.
     //
     template<typename T>
-    static HRESULT Lookup(Internal::SharedConfigDictionary& sharedConfigDictionary, ComponentConfig<T>& componentConfig);
+    _Must_inspect_result_
+    static HRESULT Lookup(
+        _Inout_ Internal::SharedConfigDictionary& sharedConfigDictionary,
+        _Inout_ ComponentConfig<T>& componentConfig);
 
 private:
     MlosContext& m_mlosContext;
 
-    HRESULT RegisterSharedConfigMemoryRegion();
-
+public:
     // Shared memory region used to keep all the shared component configurations.
     // #TODO we might need more than one memory region for the configuration objects.
     //
-    SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> m_sharedConfigMemRegionView;
+    SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> m_sharedConfigMemoryRegionView;
 
 public:
     // Indicates if we should cleanup OS resources when closing the shared memory map view.

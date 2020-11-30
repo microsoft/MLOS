@@ -27,8 +27,7 @@ namespace Core
 //  (external) agent over shared memory channels.
 //
 //  Application components use this class to
-//  1. Register their settings assembly so the external agent can process the
-//  application component messages.
+//  1. Register their settings assembly so the external agent can process the application component messages.
 //  2. Send different types of messages (e.g. control, telemetry, etc.)
 //
 // NOTES:
@@ -37,35 +36,35 @@ class MlosContext
 {
 protected:
     MlosContext(
-        Internal::GlobalMemoryRegion& globalMemoryRegion,
-        ISharedChannel& controlChannel,
-        ISharedChannel& telemetryChannel,
-        ISharedChannel& feedbackChannel) noexcept;
+        _In_ Internal::GlobalMemoryRegion& globalMemoryRegion,
+        _In_ ISharedChannel& controlChannel,
+        _In_ ISharedChannel& telemetryChannel,
+        _In_ ISharedChannel& feedbackChannel) noexcept;
 
 public:
     // Registers the settings assembly.
     //
     HRESULT RegisterSettingsAssembly(
-        const char* assemblyFileName,
-        uint32_t assemblyDispatchTableBaseIndex);
+        _In_z_ const char* assemblyFileName,
+        _In_ uint32_t assemblyDispatchTableBaseIndex);
 
     // Registers the component config.
     //
     template<typename T>
-    HRESULT RegisterComponentConfig(ComponentConfig<T>& componentConfig);
+    HRESULT RegisterComponentConfig(_Inout_ ComponentConfig<T>& componentConfig);
 
     ISharedChannel& ControlChannel() const;
 
     ISharedChannel& FeedbackChannel() const;
 
     template<typename TMessage>
-    void SendControlMessage(TMessage& message);
+    void SendControlMessage(_In_ TMessage& message);
 
     template<typename TMessage>
-    void SendFeedbackMessage(TMessage& message);
+    void SendFeedbackMessage(_In_ TMessage& message);
 
     template<typename TMessage>
-    void SendTelemetryMessage(const TMessage& message) const;
+    void SendTelemetryMessage(_In_ const TMessage& message) const;
 
     void TerminateControlChannel();
 
@@ -80,8 +79,8 @@ protected:
     //
     template<typename T>
     HRESULT CreateMemoryRegion(
-        const char* const sharedMemoryName,
-        size_t memoryRegionSize,
+        _In_z_ const char* const sharedMemoryName,
+        _In_ size_t memoryRegionSize,
         _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView);
 
     // Shared config manager.
@@ -110,6 +109,24 @@ protected:
 
     template<typename T>
     friend class ComponentConfig;
+};
+
+//----------------------------------------------------------------------------
+// NAME: MlosContextFactory
+//
+// PURPOSE:
+//  Creates a Mlos context instance.
+//
+// NOTES:
+//
+template<typename TMlosContext>
+class MlosContextFactory
+{
+public:
+    _Must_inspect_result_
+    HRESULT Create();
+
+    AlignedInstance<TMlosContext> m_context;
 };
 }
 }

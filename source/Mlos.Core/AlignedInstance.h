@@ -3,7 +3,7 @@
 // Licensed under the MIT License. See License.txt in the project root
 // for license information.
 //
-// @File: StaticSingleton.h
+// @File: AlignedInstance.h
 //
 // Purpose:
 //      <description>
@@ -19,22 +19,30 @@ namespace Mlos
 {
 namespace Core
 {
+//----------------------------------------------------------------------------
+// NAME: AlignedInstance
+//
+// PURPOSE:
+//  A container holding a single instance of the object.
+//
+// NOTES:
+//
 template<class T>
-class StaticSingleton
+class AlignedInstance
 {
-    // Properly aligned uninitialized storage for T.
+    // Aligned uninitialized storage for T.
     //
     typename std::aligned_storage<sizeof(T), alignof(T)>::type data;
 
 public:
-    // Create an object in aligned storage.
+    // Creates an object in aligned storage.
     //
-    template<typename... Args>
-    void Initialize(T&& instance)
+    template<typename... TArg>
+    void Initialize(_In_ TArg&&... args)
     {
-        // Construct value in memory of aligned storage using inplace operator new.
+        // Construct an object in the memory of aligned storage using inplace operator new.
         //
-        new(&data) T(std::forward<T>(instance));
+        new(&data) T(std::forward<TArg>(args)...);
     }
 
     // Access an object in aligned storage.
@@ -44,9 +52,9 @@ public:
         return *reinterpret_cast<T*>(&data);
     }
 
-    // Delete objects from aligned storage.
+    // Deletes the object from the aligned storage.
     //
-    ~StaticSingleton()
+    ~AlignedInstance()
     {
         reinterpret_cast<T*>(&data)->~T();
     }

@@ -9,6 +9,7 @@
 using System;
 
 using Mlos.Core;
+using Mlos.Core.Internal;
 
 namespace Proxy.Mlos.Core.Internal
 {
@@ -26,16 +27,20 @@ namespace Proxy.Mlos.Core.Internal
         {
             // Initialize properties.
             //
-            globalMemoryRegion.TotalMemoryRegionCount = 1;
+            globalMemoryRegion.GlobalMemoryRegionIndex = 1;
 
             globalMemoryRegion.RegisteredSettingsAssemblyCount.Store(1);
+
+            MemoryRegion memoryHeader = globalMemoryRegion.MemoryHeader;
+            MemoryRegionId memoryRegionId = memoryHeader.MemoryRegionId;
+            memoryRegionId.Type = MemoryRegionType.Global;
 
             var sharedConfigDictionary = globalMemoryRegion.SharedConfigDictionary;
             var allocator = sharedConfigDictionary.Allocator;
 
             // Initialize memory allocator.
             //
-            allocator.InitializeArenaAllocator(globalMemoryRegion.MemoryHeader, (int)globalMemoryRegion.CodegenTypeSize());
+            allocator.InitializeArenaAllocator(memoryHeader, (int)globalMemoryRegion.CodegenTypeSize());
 
             // Initialize shared config dictionary.
             //
@@ -53,6 +58,10 @@ namespace Proxy.Mlos.Core.Internal
         {
             var sharedConfigDictionary = sharedConfigMemoryRegion.SharedConfigDictionary;
             var allocator = sharedConfigDictionary.Allocator;
+
+            MemoryRegion memoryHeader = sharedConfigMemoryRegion.MemoryHeader;
+            MemoryRegionId memoryRegionId = memoryHeader.MemoryRegionId;
+            memoryRegionId.Type = MemoryRegionType.SharedConfig;
 
             // Initialize memory allocator.
             //
@@ -73,7 +82,7 @@ namespace Proxy.Mlos.Core.Internal
     internal struct MemoryRegionInitializer<T>
          where T : ICodegenProxy, new()
     {
-        internal void Initalize(SharedMemoryRegionView<T> sharedMemory)
+        internal void Initialize(SharedMemoryRegionView<T> sharedMemory)
         {
             if (typeof(T) == typeof(GlobalMemoryRegion))
             {

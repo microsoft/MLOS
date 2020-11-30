@@ -25,9 +25,9 @@ It provides
 
 Since it is meant as a reusable agent for different components, it contains no specific message processing logic itself.
 
-Rather, it starts an [`Mlos.Agent`](../Mlos.Agent/#mlos-github-tree-view) message processing loop which loads each component's `SettingsRegistry` assembly dlls upon registration request (via the `RegisterComponentConfig` and `RegisterAssemblyRequestMessage` from [`Mlos.Core`](../Mlos.Core/#mlos-github-tree-view) and [`Mlos.NetCore`](../Mlos.NetCore/#mlos-github-tree-view)) and runs their `AssemblyInitializer` constructor to setup the component specific message handler callbacks.
+Rather, it starts an [`Mlos.Agent`](../Mlos.Agent/#mlos-github-tree-view) message processing loop which loads each component's `SettingsRegistry` assembly dlls upon registration request (via the `RegisterComponentConfig` and `RegisterAssemblyRequestMessage` from [`Mlos.Core`](../Mlos.Core/#mlos-github-tree-view) and [`Mlos.NetCore`](../Mlos.NetCore/#mlos-github-tree-view)) and uses the specified `ExperimentSession` class to setup the message callbacks that handle compnent and experiment specific things like aggregating and summarizing telemetry messages, interfacing with the optimizer using different parameter and/or context search spaces, and relaying component reconfiguration requests, etc.
 
-See the [`SmartCache`](../Examples/SmartCache/#mlos-github-tree-view) code, especially it's SettingsRegistry's [`AssemblyInitializer.cs`](../Examples/SmartCache/SmartCache.SettingsRegistry/AssemblyInitializer.cs#mlos-github-tree-view) for a more detailed example.
+See the [`SmartCache`](../Examples/SmartCache/#mlos-github-tree-view) code, especially its [`ExperimentSession` class](../Examples/SmartCache/SmartCache.ExperimentSession/SmartCacheExperimentSession.cs#mlos-github-tree-view) for a more detailed example.
 
 ## Building
 
@@ -60,22 +60,6 @@ dotnet target/bin/Release/Mlos.Agent.Server.dll --help
 
 ## Caveats
 
-- The system currently only supports one shared memory region and doesn't always cleanup the shared memory after itself if something goes wrong.
+- The system currently only supports a single tunable process at a time.
+  Multiple agent/target-process pairs support (e.g. via configurable unix socket domain path for anonymous shared memory exchange) are planned for future development.
 
-    As such, you may see hung processes when restarting after a failed experiment.
-
-    To help with this, we currently provide a helper script to remove previous incarnations of the shared memory regions:
-
-    ```sh
-    build/CMakeHelpers/RemoveMlosSharedMemories.sh
-    ```
-
-    You may also need to make sure that the processes using them are killed off.
-    For instance:
-
-    ```sh
-    pkill $YourSmartComponentProcess # e.g. SmartCache
-    pkill -f dotnet.*Mlos.Agent.Server.dll
-    ```
-
-    > Note: each of these commands should be executed inside the `Mlos.Agent.Server` execution environment (e.g. inside the docker container).

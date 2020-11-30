@@ -293,18 +293,71 @@ namespace Mlos.Core.Windows
         #endregion
 
         #region Enums
+
+        /// <summary>
+        /// The SecurityInformation data type identifies the object-related security information being set or queried.
+        /// </summary>
         [Flags]
         internal enum SecurityInformation : uint
         {
+            /// <summary>
+            /// OWNER_SECURITY_INFORMATION.
+            /// The owner identifier of the object is being referenced.
+            /// </summary>
             OwnerSecurityInformation = 0x00000001,
+
+            /// <summary>
+            /// GROUP_SECURITY_INFORMATION.
+            /// The primary group identifier of the object is being referenced.
+            /// </summary>
             GroupSecurityInformation = 0x00000002,
+
+            /// <summary>
+            /// DACL_SECURITY_INFORMATION.
+            /// The DACL of the object is being referenced.
+            /// </summary>
             DAclSecurityInformation = 0x00000004,
+
+            /// <summary>
+            /// SACL_SECURITY_INFORMATION.
+            /// The SACL of the object is being referenced.
+            /// </summary>
             SAclSecurityInformation = 0x00000008,
+
+            /// <summary>
+            /// ATTRIBUTE_SECURITY_INFORMATION.
+            /// The resource properties of the object being referenced.
+            /// </summary>
             AttributeSecurityInformation = 0x00000020,
+
+            /// <summary>
+            /// SCOPE_SECURITY_INFORMATION.
+            /// The Central Access Policy (CAP) identifier applicable on the object that is being referenced.
+            /// </summary>
             ScopeSecurityInformation = 0x00000040,
+
+            /// <summary>
+            /// UNPROTECTED_SACL_SECURITY_INFORMATION.
+            /// The SACL inherits ACEs from the parent object.
+            /// </summary>
             UnprotectedSAclSecurityInformation = 0x10000000,
+
+            /// <summary>
+            /// UNPROTECTED_DACL_SECURITY_INFORMATION.
+            /// The DACL inherits ACEs from the parent object.
+            /// </summary>
             UnprotectedDAclSecurityInformation = 0x20000000,
+
+            /// <summary>
+            /// PROTECTED_SACL_SECURITY_INFORMATION.
+            /// The SACL cannot inherit ACEs.
+            /// </summary>
             ProtectedSAclSecurityInformation = 0x40000000,
+
+            /// <summary>
+            /// PROTECTED_DACL_SECURITY_INFORMATION.
+            /// The DACL cannot inherit access control entries (ACEs).
+            /// </summary>
             ProtectedDAclSecurityInformation = 0x80000000,
         }
 
@@ -366,13 +419,32 @@ namespace Mlos.Core.Windows
         [Flags]
         internal enum AccessRights : uint
         {
+            /// <summary>
+            /// Required to delete the object.
+            /// </summary>
             Delete = 0x00010000,
+
+            /// <summary>
+            /// Required to read information in the security descriptor for the object, not including the information in the SACL.
+            /// </summary>
             ReadControl = 0x00020000,
+
+            /// <summary>
+            /// The right to use the object for synchronization. This enables a thread to wait until the object is in the signaled state.
+            /// </summary>
             Synchronize = 0x00100000,
+
             StandardRightsAll = 0x001F0000,
             StandardRightsRequired = 0x000F0000,
 
+            /// <summary>
+            /// Modify state access, which is required for the SetEvent, ResetEvent and PulseEvent functions.
+            /// </summary>
             EventModifyState = 0x0002,
+
+            /// <summary>
+            /// All possible access rights for an event object.
+            /// </summary>
             EventAllAccess = 0x001F0003,
 
             TokenAssignPrimary = 0x0001,

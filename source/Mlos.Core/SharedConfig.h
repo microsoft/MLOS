@@ -28,7 +28,7 @@ class SharedConfig
 public:
     // Initializes the shared config from the component one.
     //
-    void InitializeFromDefaultConfig(const TProxy& defaultConfig)
+    void InitializeFromDefaultConfig(_In_ const TProxy& defaultConfig)
     {
         static_assert(sizeof(SharedConfigHeader) == 32, "SharedConfigHeader has incorrect size.");
 

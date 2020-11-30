@@ -60,8 +60,7 @@ struct InternalSharedChannelPolicy
 //
 struct InterProcessSharedChannelPolicy
 {
-    InterProcessSharedChannelPolicy() noexcept
-    {}
+    InterProcessSharedChannelPolicy() noexcept = default;
 
     InterProcessSharedChannelPolicy(InterProcessSharedChannelPolicy&& channelPolicy) noexcept
       : m_notificationEvent(std::move(channelPolicy.m_notificationEvent))
@@ -75,7 +74,13 @@ struct InterProcessSharedChannelPolicy
 
     inline void NotifyExternalReader()
     {
-        m_notificationEvent.Signal();
+        HRESULT hr = m_notificationEvent.Signal();
+        if (FAILED(hr))
+        {
+            // In case of failure, terminate the process.
+            //
+            Mlos::Core::MlosPlatform::TerminateProcess();
+        }
     }
 
     // Called when reader thread is no longer processing the messages.
@@ -83,7 +88,13 @@ struct InterProcessSharedChannelPolicy
     //
     inline void WaitForFrame()
     {
-        m_notificationEvent.Wait();
+        HRESULT hr = m_notificationEvent.Wait();
+        if (FAILED(hr))
+        {
+            // In case of failure, terminate the process.
+            //
+            Mlos::Core::MlosPlatform::TerminateProcess();
+        }
     }
 
 public:

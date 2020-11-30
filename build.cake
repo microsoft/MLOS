@@ -172,7 +172,7 @@ Task("Build-NetCore")
         });
     });
 
-Task("Run-NetCore-Unit-Tests")
+Task("Run-NetCore-UnitTests")
     .IsDependentOn("Build-NetCore")
     .Does(() =>
     {
@@ -209,7 +209,7 @@ Task("Build-MSBuild")
         }
     });
 
-Task("Run-Unit-Tests")
+Task("Run-MSBuild-UnitTests")
     .IsDependentOn("Build-MSBuild")
     .WithCriteria(() => IsRunningOnWindows())
     .Does(() =>
@@ -324,6 +324,21 @@ Task("Test-CMake")
         };
 
         CMakeBuild(settings);
+    });
+
+
+Task("Run-CMake-UnitTests")
+    .IsDependentOn("Binplace-CMake")
+    .WithCriteria(() => IsRunningOnUnix())
+    .Does(() =>
+    {
+        var dotNetCoreMSBuildSettings = new DotNetCoreMSBuildSettings { MaxCpuCount = 0 };
+        dotNetCoreMSBuildSettings.SetConfiguration(CMakeConfiguration);
+
+        foreach (string testProjectFilePath in TestProjectsFilePaths)
+        {
+            DotNetCoreMSBuild(testProjectFilePath, dotNetCoreMSBuildSettings);
+        }
     });
 
 // Return list of files as nuget spec content from given input folder.
@@ -509,9 +524,10 @@ Task("Test-Docker-E2E")
 //
 
 Task("Default")
-    .IsDependentOn("Run-NetCore-Unit-Tests")
-    .IsDependentOn("Run-Unit-Tests")
     .IsDependentOn("Test-CMake")
+    .IsDependentOn("Run-NetCore-UnitTests")
+    .IsDependentOn("Run-CMake-UnitTests")
+    .IsDependentOn("Run-MSBuild-UnitTests")
     .IsDependentOn("Generate-MlosModelServices-Dockerfile");
 
 //    .IsDependentOn("Create-Nuget-Package")

@@ -11,7 +11,7 @@ using System.Reflection;
 
 using Mlos.SettingsSystem.Attributes;
 
-namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriters
+namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 {
     /// <summary>
     /// Code writer class for CSharp ICodegenType implementation.
@@ -59,6 +59,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteBlock($@"
                 partial {typeRepresentation} {typeName} : global::Mlos.Core.ICodegenType<{typeFullType}, {proxyFullName}>
                 {{
+                    /// <inheritdoc/>
                     public uint GetKeyHashValue<THash>()
                         where THash : global::Mlos.Core.Collections.IHash<uint>
                     {{
@@ -89,14 +90,17 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
                 + "ObjectDeserializeHandler.DispatchTableBaseIndex";
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 uint global::Mlos.Core.ICodegenKey.CodegenTypeIndex() => {typeIndex} + {dispatchTableBaseIndexVariable};");
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 ulong global::Mlos.Core.ICodegenKey.CodegenTypeHash() => 0x{typeHashValue:x};");
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 ulong global::Mlos.Core.ICodegenType.CodegenTypeSize() => {cppType.TypeSize};");
 

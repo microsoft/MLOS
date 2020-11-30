@@ -15,7 +15,7 @@ using Mlos.Model.Services.Spaces;
 namespace Mlos.Model.Services
 {
     /// <summary>
-    /// Models and Optimization Problem which is generally comprized of Decision Variables (Parameter Space), Context Values (Context Space) and Objectives.
+    /// Models and Optimization Problem which is generally comprised of Decision Variables (Parameter Space), Context Values (Context Space) and Objectives.
     /// In the future we may wish to extend this to include constraints as well, though right now most of them are expressed by the SimpleHypergrid class.
     /// </summary>
     public class OptimizationProblem : IOptimizationProblem
@@ -32,6 +32,10 @@ namespace Mlos.Model.Services
         [JsonPropertyName("objectives")]
         public List<OptimizationObjective> Objectives { get; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OptimizationProblem"/> class.
+        /// Ctor.
+        /// </summary>
         public OptimizationProblem()
         {
             Objectives = new List<OptimizationObjective>();

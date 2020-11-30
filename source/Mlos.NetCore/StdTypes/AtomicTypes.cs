@@ -78,6 +78,10 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             }
         }
 
+        /// <summary>
+        /// Returns a bool value.
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool LoadRelaxed()
         {
@@ -129,6 +133,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe
@@ -274,6 +279,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe
@@ -349,6 +355,10 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             }
         }
 
+        /// <summary>
+        /// Returns a 32-bit value.
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint LoadRelaxed()
         {
@@ -447,6 +457,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe
@@ -510,7 +521,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         }
 
         /// <summary>
-        /// Returns a 32-bit value, loaded as an atomic operation.
+        /// Returns a 64-bit value, loaded as an atomic operation.
         /// </summary>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -522,6 +533,10 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             }
         }
 
+        /// <summary>
+        /// Returns a 64-bit value.
+        /// </summary>
+        /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ulong LoadRelaxed()
         {
@@ -588,6 +603,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
                     return new IntPtr(ptr);
                 }
             }
+
             set
             {
                 unsafe

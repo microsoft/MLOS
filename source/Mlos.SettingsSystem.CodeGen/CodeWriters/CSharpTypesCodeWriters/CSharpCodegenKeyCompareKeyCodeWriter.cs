@@ -10,7 +10,7 @@ using System;
 
 using Mlos.SettingsSystem.Attributes;
 
-namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriters
+namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 {
     /// <summary>
     /// Code writer class for CSharp ICodegenProxy implementation.
@@ -33,6 +33,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteBlock($@"
                 public partial struct CodegenKey
                 {{
+                    /// <inheritdoc/>
                     public bool CompareKey(ICodegenProxy proxy)
                     {{
                         bool result = true;");
