@@ -32,11 +32,11 @@ int main()
 {
     // Create the MlosContext.
     //
-    Mlos::Core::InterProcessMlosContextInitializer mlosContextInitializer;
-    HRESULT hr = mlosContextInitializer.Initialize();
+    DefaultMlosContextFactory mlosContextFactory;
+    HRESULT hr = mlosContextFactory.Create();
     ThrowIfFail(hr);
 
-    Mlos::Core::InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
+    Mlos::Core::MlosContext& mlosContext = mlosContextFactory.m_context;
 
     // Create a feedback channel receiver thread.
     //
