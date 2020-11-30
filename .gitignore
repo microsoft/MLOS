@@ -431,3 +431,4 @@ website/python_api
 
 # python code coverage
 coverage
+.coverage.*
