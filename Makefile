@@ -24,7 +24,7 @@ all: dotnet-build cmake-build python-checks
 	@ echo "make all target finished."
 
 .PHONY: test
-test: dotnet-test cmake-test python-test external-integration-test
+test: dotnet-test cmake-test python-test #external-integration-test
 	@ echo "make test target finished."
 
 .PHONY: check
