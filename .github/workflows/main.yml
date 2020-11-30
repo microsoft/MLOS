@@ -323,17 +323,17 @@ jobs:
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           ./build.linux.sh --Configuration=${{ matrix.configuration }}
-    - name: Cleanup ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      shell: bash
-      run: |
-        docker stop mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
-        docker rm mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
     - name: Run ${{ matrix.configuration }} external cmake integration build/test
       timeout-minutes: 5
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make -C external/ExternalIntegrationExample all test
+    - name: Cleanup ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      shell: bash
+      run: |
+        docker stop mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
+        docker rm mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
 
   # Check in-repo markdown links
   markdown-link-check:
