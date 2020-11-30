@@ -30,14 +30,23 @@ namespace Mlos.Core
     /// Offset = Position % Buffer.Size.
     /// </remarks>
     [CodegenType]
-    internal partial struct ChannelSynchronization
+    public partial struct ChannelSynchronization
     {
+        /// <summary>
+        /// Read position.
+        /// </summary>
         [Align(32)]
         internal AtomicUInt32 ReadPosition;
 
+        /// <summary>
+        /// Write position.
+        /// </summary>
         [Align(32)]
         internal AtomicUInt32 WritePosition;
 
+        /// <summary>
+        /// Free position.
+        /// </summary>
         [Align(32)]
         internal AtomicUInt32 FreePosition;
 
@@ -140,7 +149,7 @@ namespace Mlos.Core
     /// Shared circular buffer channel settings.
     /// </summary>
     [CodegenConfig]
-    internal partial struct ChannelSettings
+    public partial struct ChannelSettings
     {
         /// <summary>
         /// Size of the buffer. To avoid arithmetic overflow, buffer size must be power of two.
@@ -156,31 +165,26 @@ namespace Mlos.Core
     }
 
     [CodegenConfig]
-    internal partial class ChannelStats
+    public partial struct ChannelReaderStats
     {
-        [FixedSizeArray(length: 16)]
-        internal readonly ChannelReaderStats[] ReaderStats;
-    }
-
-    [CodegenConfig]
-    internal partial struct ChannelReaderStats
-    {
+        /// <summary>
+        /// Number of read messages.
+        /// </summary>
         [ScalarSetting]
         internal ulong MessagesRead;
 
+        /// <summary>
+        /// Total spin count.
+        /// </summary>
         [ScalarSetting]
         internal ulong SpinCount;
     }
-
-    #region Control Messages
 
     /// <summary>
     /// Represents the message request to signal termination of the circular buffer reader thread.
     /// </summary>
     [CodegenMessage]
-    internal partial struct TerminateReaderThreadRequestMessage
+    public partial struct TerminateReaderThreadRequestMessage
     {
     }
-
-    #endregion
 }

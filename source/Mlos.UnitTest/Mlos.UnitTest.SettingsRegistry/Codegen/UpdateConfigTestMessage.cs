@@ -12,7 +12,7 @@ using Mlos.SettingsSystem.StdTypes;
 namespace Mlos.UnitTest
 {
     [CodegenMessage]
-    internal partial struct UpdateConfigTestMessage
+    public partial struct UpdateConfigTestMessage
     {
     }
 }

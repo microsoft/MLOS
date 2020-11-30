@@ -96,7 +96,7 @@ namespace Mlos.Core.Internal
     /// Definition of memory region.
     /// </summary>
     [CodegenType]
-    internal partial struct MemoryRegion
+    public partial struct MemoryRegion
     {
         /// <summary>
         /// Size of the memory region.

@@ -19,7 +19,7 @@ namespace Mlos.UnitTest
     /// 3D Point class.
     /// </summary>
     [CodegenType]
-    internal partial struct Point3D
+    public partial struct Point3D
     {
         /// <summary>
         /// Field X.
@@ -39,14 +39,14 @@ namespace Mlos.UnitTest
 
     [CodegenType]
     [StructLayout(LayoutKind.Sequential, Size = 11)]
-    internal partial struct Index2D
+    public partial struct Index2D
     {
         internal int I;
         internal int J;
     }
 
     [CodegenType]
-    internal partial struct Index3D
+    public partial struct Index3D
     {
         internal int I;
         internal int J;
@@ -73,7 +73,7 @@ namespace Mlos.UnitTest
     }
 
     [CodegenType]
-    internal partial struct Point4D
+    public partial struct Point4D
     {
         internal Point3D Point3D;
         internal Colors Color;
