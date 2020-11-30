@@ -7,7 +7,6 @@
 // -----------------------------------------------------------------------
 
 using System;
-using System.Reflection;
 
 using Mlos.SettingsSystem.Attributes;
 
@@ -36,7 +35,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
                 public bool CompareKey(ICodegenProxy proxy)
                 {{
                     bool result = true;
-                    var instance = ({proxyTypeFullName})proxy;");
+                    var other = ({proxyTypeFullName})proxy;");
 
             IndentationLevel++;
         }
@@ -65,7 +64,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 
             string fieldName = cppField.FieldInfo.Name;
 
-            WriteLine($"result &= this.{fieldName} == instance.{fieldName};");
+            WriteLine($"result &= other.{fieldName} == this.{fieldName};");
         }
     }
 }

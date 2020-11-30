@@ -197,15 +197,15 @@ namespace Mlos.Core
         /// <summary>
         /// Updates the element by copying data from the proxy.
         /// </summary>
-        /// <typeparam name="T">Instance type.</typeparam>
-        /// <typeparam name="TProxy">Proxy type.</typeparam>
+        /// <typeparam name="TType">Codegen type.</typeparam>
+        /// <typeparam name="TProxy">Codegen proxy type.</typeparam>
         /// <param name="collection"></param>
         /// <param name="proxyArray"></param>
         /// <param name="elementCount"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static void UpdatePropertyProxyArray<T, TProxy>(this T[] collection, PropertyProxyArray<TProxy> proxyArray, uint elementCount)
-            where T : ICodegenType
-            where TProxy : ICodegenProxy, new()
+        public static void UpdatePropertyProxyArray<TType, TProxy>(this TType[] collection, PropertyProxyArray<TType, TProxy> proxyArray, uint elementCount)
+            where TType : ICodegenType, new()
+            where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
             for (int i = 0; i < (int)elementCount; i++)
             {

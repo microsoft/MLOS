@@ -25,47 +25,12 @@ namespace Mlos.Core
     /// </remarks>
     [CodegenType]
     [StructLayout(LayoutKind.Sequential, Size = SharedConfigHeader.TypeSize)]
-    public partial struct SharedConfigHeader : IEquatable<SharedConfigHeader>
+    public partial struct SharedConfigHeader
     {
         /// <summary>
         /// Size of the structure.
         /// </summary>
         public const int TypeSize = 32;
-
-        /// <summary>
-        /// Operator ==.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator ==(SharedConfigHeader left, SharedConfigHeader right) => left.Equals(right);
-
-        /// <summary>
-        /// Operator !=.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator !=(SharedConfigHeader left, SharedConfigHeader right) => !(left == right);
-
-        /// <inheritdoc/>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is SharedConfigHeader))
-            {
-                return false;
-            }
-
-            return Equals((SharedConfigHeader)obj);
-        }
-
-        /// <inheritdoc/>
-        public bool Equals(SharedConfigHeader other) =>
-            CodegenTypeIndex == other.CodegenTypeIndex &&
-            ConfigId == other.ConfigId;
-
-        /// <inheritdoc/>
-        public override int GetHashCode() => base.GetHashCode();
 
         /// <summary>
         /// Component CodegenType Index.
@@ -86,42 +51,10 @@ namespace Mlos.Core
     /// The feedback message is sent from the agent to the target process after the shared config has been updated.
     /// </summary>
     [CodegenMessage]
-    public partial struct SharedConfigUpdatedFeedbackMessage : IEquatable<SharedConfigUpdatedFeedbackMessage>
+    public partial struct SharedConfigUpdatedFeedbackMessage
     {
         // #TODO include config primary key
-
-        /// <summary>
-        /// Operator ==.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator ==(SharedConfigUpdatedFeedbackMessage left, SharedConfigUpdatedFeedbackMessage right) => left.Equals(right);
-
-        /// <summary>
-        /// Operator !=.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator !=(SharedConfigUpdatedFeedbackMessage left, SharedConfigUpdatedFeedbackMessage right) => !(left == right);
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            if (!(obj is StringPtr))
-            {
-                return false;
-            }
-
-            return Equals((StringPtr)obj);
-        }
-
-        /// <inheritdoc />
-        public bool Equals(SharedConfigUpdatedFeedbackMessage other) => true;
-
-        /// <inheritdoc />
-        public override int GetHashCode() => 0;
+        //
     }
     #endregion
 }

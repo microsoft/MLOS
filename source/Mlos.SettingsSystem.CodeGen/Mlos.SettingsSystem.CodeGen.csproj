@@ -80,7 +80,7 @@
     <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppProxyVerifyVariableDataCodeWriter.cs" />
     <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppTypeMetadataInfoHashCodeWriter.cs" />
     <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppTypeMetadataInfoIndexCodeWriter.cs" />
-    <Compile Include="CodeWriters\CppObjectExchangeCodeWriters\CppTypeReflectionTableCodeWriter.cs" />
+    <Compile Include="CodeWriters\CppTypesCodeWriters\CppObjectEqualsCodeWriter.cs" />
     <Compile Include="CodeWriters\CppTypesCodeWriters\CppTypeMetadataCompareKeyCodeWriter.cs" />
     <Compile Include="CodeWriters\CppTypesCodeWriters\CppTypeMetadataGetKeyHashCodeWriter.cs" />
     <Compile Include="CodeWriters\CppTypesCodeWriters\CppEnumCodeWriter.cs" />
@@ -95,6 +95,9 @@
     <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpCodegenKeyCodeWriter.cs" />
     <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpCodegenKeyCompareKeyCodeWriter.cs" />
     <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpCodegenKeyMethodsCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpObjectEqualsCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpProxyEqualsProxyCodeWriter.cs" />
+    <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpProxyEqualsTypeCodeWriter.cs" />
     <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpProxyCompareKeyCodeWriter.cs" />
     <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpProxyGetKeyHashValueCodeWriter.cs" />
     <Compile Include="CodeWriters\CSharpTypesCodeWriters\CSharpObjectCodegenTypeCodeWriter.cs" />

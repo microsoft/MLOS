@@ -14,7 +14,7 @@ namespace Mlos.Core
     /// Property array accessor class.
     /// </summary>
     /// <typeparam name="T">Proxy type.</typeparam>
-    public struct ProxyArray<T> : IEquatable<ProxyArray<T>>
+    public struct ProxyArray<T> : IEquatable<ProxyArray<T>>, IEquatable<T[]>
         where T : unmanaged
     {
         /// <summary>
@@ -32,6 +32,22 @@ namespace Mlos.Core
         /// <param name="right"></param>
         /// <returns></returns>
         public static bool operator !=(ProxyArray<T> left, ProxyArray<T> right) => !(left == right);
+
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(ProxyArray<T> left, T[] right) => left.Equals(right);
+
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(ProxyArray<T> left, T[] right) => !(left == right);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProxyArray{T}"/> struct.
@@ -71,18 +87,36 @@ namespace Mlos.Core
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is ProxyArray<T>))
+            if (obj is ProxyArray<T> proxyArray)
             {
-                return false;
+                return Equals(proxyArray);
+            }
+            else if (obj is T[] array)
+            {
+                return Equals(array);
             }
 
-            return Equals((ProxyArray<T>)obj);
+            return false;
         }
 
         /// <inheritdoc />
         public bool Equals(ProxyArray<T> other) =>
             buffer == other.buffer &&
             typeSize == other.typeSize;
+
+        /// <inheritdoc />
+        public bool Equals(T[] other)
+        {
+            for (int i = 0; i < other.Length; i++)
+            {
+                if (!this[i].Equals(other[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         /// <inheritdoc />
         public override int GetHashCode() => buffer.GetHashCode();
