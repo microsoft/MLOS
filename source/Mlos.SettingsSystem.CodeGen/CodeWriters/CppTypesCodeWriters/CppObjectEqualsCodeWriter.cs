@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="CppTypeMetadataCompareKeyCodeWriter.cs" company="Microsoft Corporation">
+// <copyright file="CppObjectEqualsCodeWriter.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root
 // for license information.
@@ -13,50 +13,25 @@ using Mlos.SettingsSystem.Attributes;
 namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
 {
     /// <summary>
-    /// Cpp type metadata code writer.
-    /// Generates a method to compare structure primary key.
+    /// Code writer class which generates the equality operator for C++ structures.
     /// </summary>
-    internal class CppTypeMetadataCompareKeyCodeWriter : CodeWriter
+    internal class CppObjectEqualsCodeWriter : CppCodeWriter
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Only interested in struct type.
+        /// </summary>
+        /// <param name="sourceType"></param>
+        /// <returns></returns>
         public override bool Accept(Type sourceType) => sourceType.IsCodegenType();
 
         /// <inheritdoc />
-        public override void WriteOpenTypeNamespace(string @namespace)
-        {
-        }
-
-        /// <inheritdoc />
-        public override void WriteCloseTypeNamespace(string @namespace)
-        {
-        }
-
-        /// <summary>
-        /// Write beginning of the file.
-        /// </summary>
-        /// <remarks>
-        /// Proxy structures are defined in namespace Proxy.
-        /// </remarks>
         public override void WriteBeginFile()
         {
-            // Declare a hash function.
-            //
-            WriteBlock($@"
-                namespace {Constants.TypeMetadataInfoNamespace}
-                {{
-                    template<typename T>
-                    bool CompareKey(const T& a, const T& b);");
-
-            IndentationLevel++;
-            WriteLine();
         }
 
         /// <inheritdoc />
         public override void WriteEndFile()
         {
-            IndentationLevel--;
-            WriteLine($"}} // end {Constants.TypeMetadataInfoNamespace} namespace");
-            WriteLine();
         }
 
         /// <inheritdoc />
@@ -65,8 +40,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
             string cppTypeFullName = CppTypeMapper.GenerateCppFullTypeName(sourceType);
 
             WriteBlock($@"
-                template <>
-                inline bool CompareKey<{cppTypeFullName}>(const {cppTypeFullName}& a, const {cppTypeFullName}& b)
+                inline bool operator==(const {cppTypeFullName}& a, const {cppTypeFullName}& b)
                 {{
                     (void)a;
                     (void)b;
@@ -86,13 +60,6 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
         /// <inheritdoc />
         public override void VisitField(CppField cppField)
         {
-            if (!cppField.FieldInfo.IsPrimaryKey())
-            {
-                // The field is not a primary key, ignore it.
-                //
-                return;
-            }
-
             string fieldName = cppField.FieldInfo.Name;
 
             WriteLine($"result &= (a.{fieldName} == b.{fieldName});");
@@ -111,8 +78,5 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
             // Nothing.
             //
         }
-
-        /// <inheritdoc />
-        public override string FilePostfix => "_base.h";
     }
 }

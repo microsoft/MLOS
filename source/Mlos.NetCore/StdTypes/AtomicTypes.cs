@@ -7,18 +7,21 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 using Mlos.Core;
 using Mlos.Core.Collections;
 
+using MlosStdTypes = global::Mlos.SettingsSystem.StdTypes;
+
 namespace Proxy.Mlos.SettingsSystem.StdTypes
 {
     /// <summary>
-    /// CSharp proxy for std::atomic_bool.
+    /// Codegen proxy for std::atomic_bool.
     /// </summary>
-    public struct AtomicBool : IEquatable<AtomicBool>, ICodegenProxy
+    public struct AtomicBool : ICodegenProxy<MlosStdTypes.AtomicBool, AtomicBool>, IEquatable<AtomicBool>, IEquatable<MlosStdTypes.AtomicBool>
     {
         /// <summary>
         /// Operator ==.
@@ -36,15 +39,35 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(AtomicBool left, AtomicBool right) => !(left == right);
 
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(AtomicBool left, MlosStdTypes.AtomicBool right) => left.Equals(right);
+
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(AtomicBool left, MlosStdTypes.AtomicBool right) => !(left == right);
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is AtomicBool))
+            if (obj is AtomicBool)
             {
-                return false;
+                return Equals((AtomicBool)obj);
+            }
+            else if (obj is MlosStdTypes.AtomicBool)
+            {
+                return Equals((MlosStdTypes.AtomicBool)obj);
             }
 
-            return Equals((AtomicBool)obj);
+            return false;
         }
 
         /// <inheritdoc />
@@ -54,6 +77,12 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             {
                 return ptr == other.ptr;
             }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.AtomicBool other)
+        {
+            return Load() == other.Value;
         }
 
         /// <inheritdoc />
@@ -147,9 +176,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
     }
 
     /// <summary>
-    /// CSharp proxy for std::atomic_int32_t.
+    /// Codegen proxy for std::atomic_int32_t.
     /// </summary>
-    public struct AtomicInt32 : IEquatable<AtomicInt32>, ICodegenProxy
+    public struct AtomicInt32 : ICodegenProxy<MlosStdTypes.AtomicInt32, AtomicInt32>, IEquatable<AtomicInt32>, IEquatable<MlosStdTypes.AtomicInt32>
     {
         /// <summary>
         /// Operator ==.
@@ -160,6 +189,14 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         public static bool operator ==(AtomicInt32 left, AtomicInt32 right) => left.Equals(right);
 
         /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(AtomicInt32 left, MlosStdTypes.AtomicInt32 right) => left.Equals(right);
+
+        /// <summary>
         /// Operator !=.
         /// </summary>
         /// <param name="left"></param>
@@ -167,15 +204,27 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(AtomicInt32 left, AtomicInt32 right) => !(left == right);
 
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(AtomicInt32 left, MlosStdTypes.AtomicInt32 right) => !(left == right);
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is AtomicInt32))
+            if (obj is AtomicInt32)
             {
-                return false;
+                return Equals((AtomicInt32)obj);
+            }
+            else if (obj is MlosStdTypes.AtomicInt32)
+            {
+                return Equals((MlosStdTypes.AtomicInt32)obj);
             }
 
-            return Equals((AtomicInt32)obj);
+            return false;
         }
 
         /// <inheritdoc />
@@ -185,6 +234,12 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             {
                 return ptr == other.ptr;
             }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.AtomicInt32 other)
+        {
+            return Load() == other.Value;
         }
 
         /// <inheritdoc />
@@ -293,9 +348,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
     }
 
     /// <summary>
-    /// CSharp proxy for std::atomic_uint32_t.
+    /// Codegen proxy for std::atomic_uint32_t.
     /// </summary>
-    public struct AtomicUInt32 : IEquatable<AtomicUInt32>, ICodegenProxy
+    public struct AtomicUInt32 : ICodegenProxy<MlosStdTypes.AtomicUInt32, AtomicUInt32>, IEquatable<AtomicUInt32>, IEquatable<MlosStdTypes.AtomicUInt32>
     {
         /// <summary>
         /// Operator ==.
@@ -306,6 +361,14 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         public static bool operator ==(AtomicUInt32 left, AtomicUInt32 right) => left.Equals(right);
 
         /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(AtomicUInt32 left, MlosStdTypes.AtomicUInt32 right) => left.Equals(right);
+
+        /// <summary>
         /// Operator !=.
         /// </summary>
         /// <param name="left"></param>
@@ -313,15 +376,27 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(AtomicUInt32 left, AtomicUInt32 right) => !(left == right);
 
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(AtomicUInt32 left, MlosStdTypes.AtomicUInt32 right) => !(left == right);
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is AtomicUInt32))
+            if (obj is AtomicUInt32)
             {
-                return false;
+                return Equals((AtomicUInt32)obj);
+            }
+            else if (obj is MlosStdTypes.AtomicUInt32)
+            {
+                return Equals((MlosStdTypes.AtomicUInt32)obj);
             }
 
-            return Equals((AtomicUInt32)obj);
+            return false;
         }
 
         /// <inheritdoc />
@@ -331,6 +406,12 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             {
                 return ptr == other.ptr;
             }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.AtomicUInt32 other)
+        {
+            return Load() == other.Value;
         }
 
         /// <inheritdoc />
@@ -471,9 +552,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
     }
 
     /// <summary>
-    /// CSharp proxy for std::atomic_int64_t.
+    /// Codegen proxy for std::atomic_int64_t.
     /// </summary>
-    public struct AtomicUInt64 : IEquatable<AtomicUInt64>, ICodegenProxy
+    public struct AtomicUInt64 : ICodegenProxy<MlosStdTypes.AtomicUInt64, AtomicUInt64>, IEquatable<AtomicUInt64>, IEquatable<MlosStdTypes.AtomicUInt64>
     {
         /// <summary>
         /// Operator ==.
@@ -491,15 +572,35 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <returns></returns>
         public static bool operator !=(AtomicUInt64 left, AtomicUInt64 right) => !(left == right);
 
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(AtomicUInt64 left, MlosStdTypes.AtomicUInt64 right) => left.Equals(right);
+
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(AtomicUInt64 left, MlosStdTypes.AtomicUInt64 right) => !(left == right);
+
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is AtomicUInt64))
+            if (obj is AtomicUInt64)
             {
-                return false;
+                return Equals((AtomicUInt64)obj);
+            }
+            else if (obj is MlosStdTypes.AtomicUInt64)
+            {
+                return Equals((MlosStdTypes.AtomicUInt64)obj);
             }
 
-            return Equals((AtomicUInt64)obj);
+            return false;
         }
 
         /// <inheritdoc />
@@ -508,6 +609,15 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
             unsafe
             {
                 return ptr == other.ptr;
+            }
+        }
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.AtomicUInt64 other)
+        {
+            unsafe
+            {
+                return Load() == other.Value;
             }
         }
 
@@ -547,7 +657,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         }
 
         /// <summary>
-        /// Stores 32-bit value.
+        /// Stores 64-bit value.
         /// </summary>
         /// <param name="value"></param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

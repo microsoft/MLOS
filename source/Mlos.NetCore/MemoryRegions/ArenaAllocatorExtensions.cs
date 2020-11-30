@@ -70,7 +70,7 @@ namespace Proxy.Mlos.Core.Internal
             //
             if (allocator.LastAllocatedOffset != 0)
             {
-                AllocationEntry lastAllocationEntry = new AllocationEntry
+                var lastAllocationEntry = new AllocationEntry
                 {
                     Buffer = memoryRegionPtr + (int)allocator.LastAllocatedOffset,
                 };
@@ -80,7 +80,7 @@ namespace Proxy.Mlos.Core.Internal
 
             // Update current allocated entry.
             //
-            AllocationEntry allocationEntry = new AllocationEntry
+            var allocationEntry = new AllocationEntry
             {
                 Buffer = memoryRegionPtr + (int)offset,
             };
@@ -103,7 +103,7 @@ namespace Proxy.Mlos.Core.Internal
         {
             AllocationEntry allocationEntry = allocator.Allocate(default(T).CodegenTypeSize());
 
-            T codegenProxy = new T() { Buffer = allocationEntry.Buffer + (int)default(AllocationEntry).CodegenTypeSize() };
+            T codegenProxy = new T { Buffer = allocationEntry.Buffer + (int)default(AllocationEntry).CodegenTypeSize() };
 
             return codegenProxy;
         }

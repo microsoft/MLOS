@@ -93,6 +93,13 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
         }
 
         /// <inheritdoc />
+        public override void VisitConstField(CppConstField cppConstField)
+        {
+            // Nothing.
+            //
+        }
+
+        /// <inheritdoc />
         public override void WriteComments(CodeComment codeComment)
         {
             // Nothing.

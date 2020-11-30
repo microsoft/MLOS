@@ -24,7 +24,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         /// <summary>
         /// Gets namespace used to create DispatchTable.
         /// </summary>
-        protected string DispatchTableCSharpNamespace { get; private set; }
+        private string DispatchTableCSharpNamespace { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CSharpTypeTableCodeWriter"/> class.
@@ -68,6 +68,13 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         public sealed override void VisitField(CppField cppField)
         {
             // Do not generate information about structure fields.
+            //
+        }
+
+        /// <inheritdoc />
+        public override void VisitConstField(CppConstField cppField)
+        {
+            // Nothing.
             //
         }
 

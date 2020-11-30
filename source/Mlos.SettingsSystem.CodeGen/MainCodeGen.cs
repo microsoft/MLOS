@@ -95,10 +95,10 @@ namespace Mlos.SettingsSystem.CodeGen
                 {
                     new CppEnumCodeWriter(),                                                    // enum types
                     new CppProxyDeclarationCodeWriter(),                                        // proxy declaration
-                    new CppObjectCodeWriter(),                                                  // basic structures
+                    new CppObjectCodeWriter(),                                                  // C++ struct definition
+                    new CppObjectEqualsCodeWriter(),                                            // C++ operator ==.
                     new CppObjectOffsetStaticAssertCodeWriter(),                                // verifies the offset
                     new CppProxyCodeWriter(),                                                   // proxy view of structures
-                    new CppTypeReflectionTableCodeWriter(sourceTypesAssembly),                  // reflection, run time struct information
                     new CppTypeMetadataInfoIndexCodeWriter(sourceTypesAssembly),                // type metadata info, compile time struct information
                     new CppTypeMetadataInfoHashCodeWriter(),                                    // type metadata info, hash
                     new CppTypeMetadataCompareKeyCodeWriter(),                                  // compare keys
@@ -126,6 +126,9 @@ namespace Mlos.SettingsSystem.CodeGen
                     new CSharpCodegenKeyCompareKeyCodeWriter(),                                 // csharp proxy compare codegen key
                     new CSharpProxyGetKeyHashValueCodeWriter(),                                 // csharp proxy get key hash value
                     new CSharpProxyVerifyVariableDataCodeWriter(),                              // csharp proxy verify correctness of the variable data
+                    new CSharpObjectEqualsCodeWriter(),                                         // C# codegen type equals methods
+                    new CSharpProxyEqualsTypeCodeWriter(),                                      // c# codegen proxy to type Equals method
+                    new CSharpProxyEqualsProxyCodeWriter(),                                     // c# codegen proxy to proxy Equals method
                 });
         }
 

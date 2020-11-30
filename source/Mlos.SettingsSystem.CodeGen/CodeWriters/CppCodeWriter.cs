@@ -72,6 +72,13 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         }
 
         /// <inheritdoc />
+        public override void VisitConstField(CppConstField cppConstField)
+        {
+            // Nothing.
+            //
+        }
+
+        /// <inheritdoc />
         public override string FilePostfix => "_base.h";
     }
 }

@@ -120,6 +120,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
             acceptedCodeWriters.ForEach(r => r.VisitField(cppField));
         }
 
+        /// <inheritdoc />
+        public override void VisitConstField(CppConstField cppConstField)
+        {
+            acceptedCodeWriters.ForEach(r => r.VisitConstField(cppConstField));
+        }
+
         #endregion
 
         /// <summary>

@@ -52,12 +52,13 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
             WriteOpenTypeDeclaration(sourceType.DeclaringType);
 
             string typeName = sourceType.Name;
-            string typeFullType = $"global::{sourceType.GetTypeFullName()}";
-            string proxyFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
+            string typeFullName = $"global::{sourceType.GetTypeFullName()}";
+            string proxyTypeFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
             string typeRepresentation = sourceType.IsClass ? "class" : "struct";
 
             WriteBlock($@"
-                partial {typeRepresentation} {typeName} : global::Mlos.Core.ICodegenType<{typeFullType}, {proxyFullName}>
+                [System.CodeDom.Compiler.GeneratedCode(""Mlos.SettingsSystem.CodeGen"", """")]
+                partial {typeRepresentation} {typeName} : global::Mlos.Core.ICodegenType<{typeFullName}, {proxyTypeFullName}>, IEquatable<{typeFullName}>
                 {{
                     /// <inheritdoc/>
                     public uint GetKeyHashValue<THash>()

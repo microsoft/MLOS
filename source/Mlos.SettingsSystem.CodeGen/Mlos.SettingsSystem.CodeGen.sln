@@ -9,18 +9,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mlos.SettingsSystem.Attribu
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Release|x64 = Release|x64
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Debug|x64.Build.0 = Debug|Any CPU
-		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Release|x64.ActiveCfg = Release|Any CPU
-		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Release|x64.Build.0 = Release|Any CPU
-		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Debug|x64.Build.0 = Debug|Any CPU
-		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Release|x64.ActiveCfg = Release|Any CPU
-		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Release|x64.Build.0 = Release|Any CPU
+		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{283A0331-2EAD-4DD2-A3FE-20D229E2D277}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E949A04-C24C-48C9-BFE6-34AD0F99F7F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

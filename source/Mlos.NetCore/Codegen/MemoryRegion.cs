@@ -43,24 +43,8 @@ namespace Mlos.Core.Internal
     /// Memory region identifier.
     /// </summary>
     [CodegenType]
-    public partial struct MemoryRegionId : IEquatable<MemoryRegionId>
+    public partial struct MemoryRegionId
     {
-        /// <summary>
-        /// Operator ==.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator ==(MemoryRegionId left, MemoryRegionId right) => left.Equals(right);
-
-        /// <summary>
-        /// Operator !=.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator !=(MemoryRegionId left, MemoryRegionId right) => !(left == right);
-
         /// <summary>
         /// Memory region type.
         /// </summary>
@@ -73,23 +57,6 @@ namespace Mlos.Core.Internal
         /// Default 0.
         /// </remarks>
         public ushort Index;
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            if (!(obj is MemoryRegionId))
-            {
-                return false;
-            }
-
-            return Equals((MemoryRegionId)obj);
-        }
-
-        /// <inheritdoc />
-        public bool Equals(MemoryRegionId other) => Type == other.Type && Index == other.Index;
-
-        /// <inheritdoc />
-        public override int GetHashCode() => (((ulong)Type << 16) + Index).GetHashCode();
     }
 
     /// <summary>

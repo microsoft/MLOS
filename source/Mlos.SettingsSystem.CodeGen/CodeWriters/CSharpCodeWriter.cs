@@ -16,8 +16,6 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
     /// </summary>
     internal abstract class CSharpCodeWriter : CodeWriter
     {
-        private static ISet<Type> typesStarted = new HashSet<Type>();
-
         /// <inheritdoc />
         public override void WriteBeginFile()
         {
@@ -70,6 +68,13 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
             WriteLine();
         }
 
+        /// <inheritdoc />
+        public override void VisitConstField(CppConstField cppConstField)
+        {
+            // By default, ignore the const fields.
+            //
+        }
+
         /// <summary>
         /// Open type declaration.
         /// </summary>
@@ -85,14 +90,6 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
 
             string typeName = sourceType.Name;
             string typeRepresentation = sourceType.IsClass ? "class" : "struct";
-
-            if (!typesStarted.Contains(sourceType))
-            {
-                // Make sure this attribute only appears once per (partial) type definition.
-                //
-                WriteLine(@"[System.CodeDom.Compiler.GeneratedCode(""Mlos.SettingsSystem.CodeGen"", """")]");
-                typesStarted.Add(sourceType);
-            }
 
             WriteBlock($@"
                 partial {typeRepresentation} {typeName}

@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="CSharpProxyCompareKeyCodeWriter.cs" company="Microsoft Corporation">
+// <copyright file="CSharpProxyEqualsTypeCodeWriter.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root
 // for license information.
@@ -18,7 +18,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
     /// <remarks>
     /// Writes all properties.
     /// </remarks>
-    internal class CSharpProxyCompareKeyCodeWriter : CSharpCodeWriter
+    internal class CSharpProxyEqualsTypeCodeWriter : CSharpCodeWriter
     {
         /// <inheritdoc />
         public override bool Accept(Type sourceType) => sourceType.IsCodegenType();
@@ -47,15 +47,32 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
             WriteOpenTypeDeclaration(sourceType.DeclaringType);
 
             string typeName = sourceType.Name;
+            string typeFullName = $"global::{sourceType.GetTypeFullName()}";
+            string proxyTypeFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
 
             WriteBlock($@"
                 public partial struct {typeName}
                 {{
+                    /// <summary>
+                    /// Operator ==.
+                    /// </summary>
+                    /// <param name=""left""></param>
+                    /// <param name=""right""></param>
+                    /// <returns></returns>
+                    public static bool operator ==({proxyTypeFullName} left, {typeFullName} right) => left.Equals(right);
+
+                    /// <summary>
+                    /// Operator !=.
+                    /// </summary>
+                    /// <param name=""left""></param>
+                    /// <param name=""right""></param>
+                    /// <returns></returns>
+                    public static bool operator !=({proxyTypeFullName} left, {typeFullName} right) => !(left == right);
+
                     /// <inheritdoc/>
-                    public bool CompareKey(ICodegenProxy proxy)
+                    public bool Equals({typeFullName} other)
                     {{
-                        bool result = true;
-                        var instance = ({typeName})proxy;");
+                        bool result = true;");
 
             IndentationLevel += 2;
         }
@@ -75,16 +92,9 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
         /// <inheritdoc />
         public override void VisitField(CppField cppField)
         {
-            if (!cppField.FieldInfo.IsPrimaryKey())
-            {
-                // The field is not of the primary key, ignore it.
-                //
-                return;
-            }
-
             string fieldName = cppField.FieldInfo.Name;
 
-            WriteLine($"result &= instance.{fieldName} == this.{fieldName};");
+            WriteLine($"result &= this.{fieldName}.Equals(other.{fieldName});");
         }
     }
 }

@@ -84,6 +84,13 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         }
 
         /// <inheritdoc />
+        public sealed override void VisitConstField(CppConstField cppConstField)
+        {
+            // Do not generate information about structure fields.
+            //
+        }
+
+        /// <inheritdoc />
         public sealed override void WriteComments(CodeComment codeComment)
         {
             // No comments.

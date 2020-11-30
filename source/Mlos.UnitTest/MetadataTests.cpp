@@ -17,28 +17,6 @@
 
 namespace
 {
-// Enumerate metadata.
-// If we generate a corrupt or invalid table, the test will crash.
-//
-TEST(MetadataTests, VerifyReflectionTable)
-{
-    // Scan metadata.
-    //
-    Mlos::UnitTest::ObjectDeserializationHandler::ReflectionTable reflectionTable;
-    byte* typeEntry = reinterpret_cast<byte*>(&reflectionTable);
-    uint32_t offset = 0;
-
-    for (uint32_t i = 0; i < reflectionTable.TotalClassCount; i++)
-    {
-        std::string structName = std::string(reinterpret_cast<char*>(typeEntry + offset + sizeof(uint32_t)));
-        std::cout << structName << std::endl;
-
-        offset = *(reinterpret_cast<uint32_t*>(typeEntry + offset));
-    }
-
-    EXPECT_EQ(1, 1);
-}
-
 TEST(MetadataTests, VerifyProxyAccess)
 {
     Mlos::UnitTest::CompositeStructure2 object;
