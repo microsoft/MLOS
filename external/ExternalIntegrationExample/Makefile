@@ -10,12 +10,8 @@ cmake-build:
 	cd ./build/ && make -j
 
 test: cmake-build
-	# Check for pre-existing shared memory remnants.
-	../../build/CMakeHelpers/CheckForMlosSharedMemories.sh
 	# Run the test program.
 	./build/ExternalIntegrationExample
-	# Make sure to cleanup after ourselves.
-	../../build/CMakeHelpers/RemoveMlosSharedMemories.sh
 
 clean:
 	make -C ExternalIntegrationExample.SettingsRegistry/ clean
