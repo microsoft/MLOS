@@ -25,7 +25,7 @@ set(PKG_OUTPUT_DIR "${MLOS_ROOT}/target/pkg/${CMAKE_BUILD_TYPE}")
 
 set(DEPENDENCIES
     ${PROJ}
-    #${CS_PROJS}
+    ${CS_PROJS}
 )
 
 file(RELATIVE_PATH RelativeProjectSourcePath "${MLOS_ROOT}" "${PROJECT_SOURCE_DIR}")
