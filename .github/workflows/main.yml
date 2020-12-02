@@ -322,6 +322,7 @@ jobs:
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          --env GITHUB_WORKFLOW=$GITHUB_WORKFLOW \
           ./build.linux.sh --Configuration=${{ matrix.configuration }}
     - name: Run ${{ matrix.configuration }} external cmake integration build/test
       timeout-minutes: 5
