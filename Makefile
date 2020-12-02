@@ -15,6 +15,7 @@ handledtargets += cmake-build cmake-install cmake-test cmake-check \
 		  python-checks python-test python-clean \
 		  website website-clean \
 		  grpc-clean mlos-codegen-clean \
+		  external-integration-test external-integration-test-clean external-integration-test-distclean \
 		  docker-image
 
 # Build using dotnet and the Makefile produced by cmake.
@@ -23,7 +24,7 @@ all: dotnet-build cmake-build python-checks
 	@ echo "make all target finished."
 
 .PHONY: test
-test: dotnet-test cmake-test python-test
+test: dotnet-test cmake-test python-test #external-integration-test
 	@ echo "make test target finished."
 
 .PHONY: check
@@ -38,10 +39,10 @@ pack:
 	$(MAKE) -C source/Mlos.NetCore.Components.Packages
 
 .PHONY: clean
-clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean
+clean: cmake-clean dotnet-clean grpc-clean mlos-codegen-clean website-clean python-clean external-integration-test-clean
 
 .PHONY: distclean
-distclean: clean dotnet-distclean dotnet-pkgs-clean cmake-distclean
+distclean: clean dotnet-distclean dotnet-pkgs-clean cmake-distclean external-integration-test-distclean
 
 .PHONY: rebuild
 rebuild: clean all
@@ -133,6 +134,18 @@ python-checks:
 python-test:
 	@ ./scripts/run-python-tests.sh
 	@ echo "make python-test target finished."
+
+.PHONY: external-integration-test
+external-integration-test:
+	@ $(MAKE) -C external/ExternalIntegrationExample all test
+
+.PHONY: external-integration-test-clean
+external-integration-test-clean:
+	@ $(MAKE) -C external/ExternalIntegrationExample clean
+
+.PHONY: external-integration-test-distclean
+external-integration-test-distclean:
+	@ $(MAKE) -C external/ExternalIntegrationExample distclean
 
 # Don't force cmake regen every time we run ctags - only if it doesn't exist
 .PHONY: ctags

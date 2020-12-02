@@ -85,6 +85,7 @@ function(add_mlos_agent_server_exe_test_run)
         # This test conflicts with any other test using the MlosSharedMemories
         # (no parallel test runs for the moment).
         RESOURCE_LOCK MlosSharedMemories)
+
     if(${WITH_OPTIMIZER})
         # Add some test fixtures to use for setup/tear down of other Mlos unit tests.
         #

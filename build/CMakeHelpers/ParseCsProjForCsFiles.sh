@@ -7,7 +7,7 @@
 # CMakeLists.txt wrappers around .csproj files.
 
 cat *.csproj 2>/dev/null \
-    | egrep '<(Compile|SettingsRegistryDef) Include=".*\.cs"' \
+    | egrep '<(Compile|SettingsRegistryDef|MlosSettingsRegistryDefinition) Include=".*\.cs"' \
     | sed -r -e 's/.*Include="([^"]+\.cs)".*/\1/' -e 's|\\|/|g' \
     | tr '\n' ';' | sed 's/;$//'
 

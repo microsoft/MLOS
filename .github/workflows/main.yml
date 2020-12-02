@@ -300,9 +300,9 @@ jobs:
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
-          make -C source/Mlos.NetCore.Components.Packages/
+          dotnet build -c ${{ matrix.configuration }} source/Mlos.NetCore.Components.Packages/
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
-          dotnet build external/ExternalIntegrationExample/ExternalIntegrationExample.SettingsRegistry/
+          dotnet build -c ${{ matrix.configuration }} external/ExternalIntegrationExample/ExternalIntegrationExample.SettingsRegistry/
     - name: Run ${{ matrix.configuration }} cmake build (CXX=${{ matrix.cxx }})
       timeout-minutes: 5
       shell: bash
@@ -312,7 +312,7 @@ jobs:
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           test -e target/bin/${{ matrix.configuration }}/x86_64/Mlos.UnitTest
     - name: Run ${{ matrix.configuration }} cmake test
-      timeout-minutes: 5
+      timeout-minutes: 10
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
@@ -323,6 +323,12 @@ jobs:
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           ./build.linux.sh --Configuration=${{ matrix.configuration }}
+    - name: Run ${{ matrix.configuration }} external cmake integration build/test
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
+          make -C external/ExternalIntegrationExample all test
     - name: Cleanup ${{ matrix.configuration }} docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |

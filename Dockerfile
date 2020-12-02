@@ -93,13 +93,15 @@ RUN mkdir -p \
     /src/MLOS/out \
     /src/MLOS/target \
     /src/MLOS/temp \
-    /src/MLOS/tools && \
+    /src/MLOS/tools \
+    /src/MLOS/external/ExternalIntegrationExample/build && \
     chgrp -R src /src/MLOS && \
     chmod 0775 \
         /src/MLOS/out \
         /src/MLOS/target \
         /src/MLOS/temp \
-        /src/MLOS/tools
+        /src/MLOS/tools \
+        /src/MLOS/external/ExternalIntegrationExample/build
 
 # Declare a volume that we can bind mount the current MLOS repo into in-place
 # instead of the default copy.
@@ -112,6 +114,8 @@ VOLUME /src/MLOS/out
 VOLUME /src/MLOS/target
 VOLUME /src/MLOS/tools
 VOLUME /src/MLOS/temp
+
+VOLUME /src/MLOS/external/ExternalIntegrationExample/build
 
 WORKDIR /src/MLOS
 
