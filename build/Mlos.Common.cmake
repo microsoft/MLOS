@@ -18,26 +18,43 @@ if(NOT DEFINED MLOS_ROOT)
         "CMakeLists.txt error: MLOS_ROOT is not defined.")
 endif()
 
+# Set the possible values of build type for cmake-gui
+# Note: these options need to match the ones we support in the dotnet build.
+set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release") # "MinSizeRel" "RelWithDebInfo")
 # Set a default build type if none was specified.
 # (used in the codegen output determination)
 set(default_build_type "Release")
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+if(NOT CMAKE_BUILD_TYPE) # AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${default_build_type}' since none was specified.")
   set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE
       STRING "Choose the type of build." FORCE)
-  # Set the possible values of build type for cmake-gui
-  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-    "Debug" "Release") # "MinSizeRel" "RelWithDebInfo")
+endif()
+# Allow an easy way of overwritting the build type when MLOS is used with FetchContent.
+if(DEFINED MLOS_CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "${MLOS_CMAKE_BUILD_TYPE}")
+endif()
+# Check to make sure we're using an appropriate build type.
+if(NOT ((${CMAKE_BUILD_TYPE} STREQUAL "Release") OR (${CMAKE_BUILD_TYPE} STREQUAL "Debug")))
+    message(FATAL_ERROR
+        "Unsupported CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 endif()
 
-if(NOT (${CMAKE_SOURCE_DIR} STREQUAL ${MLOS_ROOT}))
+# When MLOS is included in another project using FetchContent, then the CMAKE_SOURCE_DIR is from the parent.
+# In that case, we expect the MLOS_ROOT to be nested under that.
+# If we're just building MLOS on its own, then we expect the variables to be the same,
+# or at least CMAKE_SOURCE_DIR not to be nested under MLOS_ROOT for the case of
+# attempting to build one of its subcomponents standalone).
+string(FIND "${MLOS_ROOT}" "${CMAKE_SOURCE_DIR}" CMAKE_SOURCE_DIR_IndexIn_MLOS_ROOT)
+if(NOT(CMAKE_SOURCE_DIR_IndexIn_MLOS_ROOT EQUAL 0))
     message(FATAL_ERROR
-        "Please run 'cmake' from '${MLOS_ROOT}'.")
+        "CMAKE_SOURCE_DIR ('${CMAKE_SOURCE_DIR}') is not contained in or equal to MLOS_ROOT.\n"
+        "Please run 'cmake' from MLOS_ROOT ('${MLOS_ROOT}').")
 endif()
 
 # Prevent in-source builds as well as the default build/ directory
 # - it conflicts with our MSBuild config location.
-if((${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR}) OR (${CMAKE_BINARY_DIR} STREQUAL "build"))
+if((${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR}) OR (${CMAKE_BINARY_DIR} STREQUAL "${MLOS_ROOT}/build"))
     message(FATAL_ERROR
         "In-source builds not allowed. Please run\n"
         "# make\n"
@@ -45,7 +62,7 @@ if((${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR}) OR (${CMAKE_BINARY_DIR} ST
         "# rm -f CMakeCache.txt && cmake -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -S ${MLOS_ROOT} -B ${MLOS_ROOT}/out/cmake/${CMAKE_BUILD_TYPE}\n"
         "to place CMake build outputs in the out/cmake/${CMAKE_BUILD_TYPE}/ directory.\n")
 endif()
-set(CMAKE_BINARY_DIR "${MLOS_ROOT}/out/cmake/${CMAKE_BUILD_TYPE}")
+#set(CMAKE_BINARY_DIR "${MLOS_ROOT}/out/cmake/${CMAKE_BUILD_TYPE}")
 
 # Set a binplace dir to match the msbuild rules.
 # We will use this in our install() definition rules.

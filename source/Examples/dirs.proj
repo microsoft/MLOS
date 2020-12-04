@@ -3,6 +3,7 @@
   <Import Project="..\..\build\Mlos.Dirs.props" />
   <ItemGroup>
     <ProjectReference Include="SmartCache\SmartCache.vcxproj" Condition="'$(IsWindows)' == 'true'" />
+    <ProjectReference Include="SmartCache\SmartCache.ExperimentSession\SmartCache.ExperimentSession.csproj"/>
     <ProjectReference Include="SmartSharedChannel\SmartSharedChannel.vcxproj" Condition="'$(IsWindows)' == 'true'" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.Dirs.targets" />

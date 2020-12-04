@@ -8,6 +8,9 @@
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Optimization problem interface.
+    /// </summary>
     public interface IOptimizationProblem
     {
     }

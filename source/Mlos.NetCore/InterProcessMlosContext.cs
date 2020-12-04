@@ -6,7 +6,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using MlosProxy = Proxy.Mlos.Core;
+using System.IO;
+
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
 namespace Mlos.Core
@@ -23,35 +24,11 @@ namespace Mlos.Core
         private const string GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
         private const string ControlChannelMemoryMapName = "Host_Mlos.ControlChannel";
         private const string FeedbackChannelMemoryMapName = "Host_Mlos.FeedbackChannel";
-        private const string ControlChannelSemaphoreName = @"Global\ControlChannel_Event"; //// FIXME: Use non-backslashes for Linux environments.
-        private const string FeedbackChannelSemaphoreName = @"Global\FeedbackChannel_Event";
+        private const string ControlChannelEventName = @"Global\ControlChannel_Event"; //// FIXME: Use non-backslashes for Linux environments.
+        private const string FeedbackChannelEventName = @"Global\FeedbackChannel_Event";
+        private const string TargetProcessEventName = "Global\\Mlos_Global";
 
         private const int SharedMemorySize = 65536;
-
-        /// <summary>
-        /// Always create...
-        /// </summary>
-        /// <returns>InterProcessMlosContext instance.</returns>
-        public static InterProcessMlosContext Create()
-        {
-            // Create or open the memory mapped files.
-            //
-            SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.CreateNew<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.CreateNew(ControlChannelMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.CreateNew(FeedbackChannelMemoryMapName, SharedMemorySize);
-
-            // Create channel synchronization primitives.
-            //
-            NamedEvent controlChannelNamedEvent = NamedEvent.CreateOrOpen(ControlChannelSemaphoreName);
-            NamedEvent feedbackChannelNamedEvent = NamedEvent.CreateOrOpen(FeedbackChannelSemaphoreName);
-
-            return new InterProcessMlosContext(
-                globalMemoryRegionView,
-                controlChannelMemoryMapView,
-                feedbackChannelMemoryMapView,
-                controlChannelNamedEvent,
-                feedbackChannelNamedEvent);
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InterProcessMlosContext"/> class.
@@ -59,23 +36,53 @@ namespace Mlos.Core
         /// <returns>InterProcessMlosContext instance.</returns>
         public static InterProcessMlosContext CreateOrOpen()
         {
-            // Create or open the memory mapped files.
-            //
-            SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.CreateOrOpen<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(ControlChannelMemoryMapName, SharedMemorySize);
-            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.CreateOrOpen(FeedbackChannelMemoryMapName, SharedMemorySize);
+            NamedEvent targetProcessNamedEvent = NamedEvent.CreateOrOpen(TargetProcessEventName);
+            {
+                bool shouldWaitForTargetProcess = false;
+
+                try
+                {
+                    // Try open a global shared memory and check if the tager process is fully initialized.
+                    //
+                    using SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> targetProcessMemoryRegionView = SharedMemoryRegionView.OpenExisting<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+
+                    if (targetProcessMemoryRegionView.MemoryRegion().GlobalMemoryRegionIndex == 1)
+                    {
+                        shouldWaitForTargetProcess = true;
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    // If the target process is not running.
+                    //
+                    shouldWaitForTargetProcess = true;
+                }
+
+                if (shouldWaitForTargetProcess)
+                {
+                    // If the target process is not fully initialized, wait for the signal.
+                    //
+                    targetProcessNamedEvent.Wait();
+                    targetProcessNamedEvent.Signal();
+                }
+            }
+
+            SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView = SharedMemoryRegionView.OpenExisting<MlosProxyInternal.GlobalMemoryRegion>(GlobalMemoryMapName, SharedMemorySize);
+            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.OpenExisting(ControlChannelMemoryMapName, SharedMemorySize);
+            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.OpenExisting(FeedbackChannelMemoryMapName, SharedMemorySize);
 
             // Create channel synchronization primitives.
             //
-            NamedEvent controlChannelNamedEvent = NamedEvent.CreateOrOpen(ControlChannelSemaphoreName);
-            NamedEvent feedbackChannelNamedEvent = NamedEvent.CreateOrOpen(FeedbackChannelSemaphoreName);
+            NamedEvent controlChannelNamedEvent = NamedEvent.CreateOrOpen(ControlChannelEventName);
+            NamedEvent feedbackChannelNamedEvent = NamedEvent.CreateOrOpen(FeedbackChannelEventName);
 
             return new InterProcessMlosContext(
                 globalMemoryRegionView,
                 controlChannelMemoryMapView,
                 feedbackChannelMemoryMapView,
                 controlChannelNamedEvent,
-                feedbackChannelNamedEvent);
+                feedbackChannelNamedEvent,
+                targetProcessNamedEvent);
         }
 
         /// <summary>
@@ -86,12 +93,14 @@ namespace Mlos.Core
         /// <param name="feedbackChannelMemoryMapView"></param>
         /// <param name="controlChannelNamedEvent"></param>
         /// <param name="feedbackChannelNamedEvent"></param>
+        /// <param name="targetProcessNamedEvent"></param>
         internal InterProcessMlosContext(
             SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView,
             SharedMemoryMapView controlChannelMemoryMapView,
             SharedMemoryMapView feedbackChannelMemoryMapView,
             NamedEvent controlChannelNamedEvent,
-            NamedEvent feedbackChannelNamedEvent)
+            NamedEvent feedbackChannelNamedEvent,
+            NamedEvent targetProcessNamedEvent)
         {
             this.globalMemoryRegionView = globalMemoryRegionView;
             this.controlChannelMemoryMapView = controlChannelMemoryMapView;
@@ -99,6 +108,7 @@ namespace Mlos.Core
 
             this.controlChannelNamedEvent = controlChannelNamedEvent;
             this.feedbackChannelNamedEvent = feedbackChannelNamedEvent;
+            this.targetProcessNamedEvent = targetProcessNamedEvent;
 
             // Create the shared config manager.
             //
@@ -152,13 +162,20 @@ namespace Mlos.Core
                 feedbackChannelMemoryMapView.CleanupOnClose = true;
                 controlChannelNamedEvent.CleanupOnClose = true;
                 feedbackChannelNamedEvent.CleanupOnClose = true;
+                targetProcessNamedEvent.CleanupOnClose = true;
 
                 // Close all the shared config memory regions.
                 //
                 SharedConfigManager.CleanupOnClose = true;
             }
 
-            base.Dispose(disposing);
+            base.Dispose(disposing: true);
         }
+
+        /// <summary>
+        /// Notification event for the target process to avoid race conditions when creating
+        /// shared memory regions. Target process signal this even after Mlos context is created.
+        /// </summary>
+        private readonly NamedEvent targetProcessNamedEvent;
     }
 }

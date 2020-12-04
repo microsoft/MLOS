@@ -67,6 +67,9 @@ namespace Mlos.Core
     [StructLayout(LayoutKind.Sequential, Size = FrameHeader.TypeSize)]
     public partial struct FrameHeader : IEquatable<FrameHeader>
     {
+        /// <summary>
+        /// Size of the frame header structure.
+        /// </summary>
         public const int TypeSize = 16;
 
         /// <summary>

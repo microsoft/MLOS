@@ -6,7 +6,7 @@
 # We use this to help dynamically build up the set of dependencies for our
 # CMakeLists.txt wrappers around .csproj files.
 
-cat *.csproj 2>/dev/null \
+cat *.csproj *.proj 2>/dev/null \
     | grep '<ProjectReference Include=".*\.csproj"' \
     | sed -r -e 's|.*[/\\)"]([^"]+)\.csproj".*|\1|' \
     | tr '\n' ';' | sed 's/;$//'

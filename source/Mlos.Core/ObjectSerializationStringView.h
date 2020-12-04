@@ -23,19 +23,19 @@
 namespace ObjectSerialization
 {
 template<>
-constexpr inline size_t GetVariableDataSize(const std::string_view& object)
+constexpr inline size_t GetVariableDataSize(_In_ const std::string_view& object)
 {
     return object.length() * sizeof(char);
 }
 
 template<>
-constexpr inline size_t GetVariableDataSize(const std::wstring_view& object)
+constexpr inline size_t GetVariableDataSize(_In_ const std::wstring_view& object)
 {
     return object.length() * sizeof(wchar_t);
 }
 
 template<size_t N>
-constexpr inline size_t GetVariableDataSize(const std::array<std::string_view, N>& object)
+constexpr inline size_t GetVariableDataSize(_In_ const std::array<std::string_view, N>& object)
 {
     size_t dataSize = 0;
 
@@ -48,7 +48,7 @@ constexpr inline size_t GetVariableDataSize(const std::array<std::string_view, N
 }
 
 template<size_t N>
-constexpr inline size_t GetVariableDataSize(const std::array<std::wstring_view, N>& object)
+constexpr inline size_t GetVariableDataSize(_In_ const std::array<std::wstring_view, N>& object)
 {
     size_t dataSize = 0;
 
@@ -62,10 +62,10 @@ constexpr inline size_t GetVariableDataSize(const std::array<std::wstring_view, 
 
 template<>
 inline size_t SerializeVariableData(
-    Mlos::Core::BytePtr buffer,
-    uint64_t objectOffset,
-    uint64_t dataOffset,
-    const std::string_view& object)
+    _In_ Mlos::Core::BytePtr buffer,
+    _In_ uint64_t objectOffset,
+    _In_ uint64_t dataOffset,
+    _In_ const std::string_view& object)
 {
     size_t dataSize = GetVariableDataSize(object);
     memcpy(buffer.Pointer + dataOffset, object.data(), size);
@@ -77,10 +77,10 @@ inline size_t SerializeVariableData(
 
 template<>
 inline size_t SerializeVariableData(
-    Mlos::Core::BytePtr buffer,
-    uint64_t objectOffset,
-    uint64_t dataOffset,
-    const std::wstring_view& object)
+    _In_ Mlos::Core::BytePtr buffer,
+    _In_ uint64_t objectOffset,
+    _In_ uint64_t dataOffset,
+    _In_ const std::wstring_view& object)
 {
     size_t dataSize = GetVariableDataSize(object);
     memcpy(buffer.Pointer + dataOffset, object.data(), length);
@@ -92,10 +92,10 @@ inline size_t SerializeVariableData(
 
 template<size_t N>
 inline size_t SerializeVariableData(
-    Mlos::Core::BytePtr buffer,
-    uint64_t objectOffset,
-    uint64_t dataOffset,
-    const std::array<std::string_view, N>& object)
+    _In_ Mlos::Core::BytePtr buffer,
+    _In_ uint64_t objectOffset,
+    _In_ uint64_t dataOffset,
+    _In_ const std::array<std::string_view, N>& object)
 {
     size_t dataSize = 0;
 
@@ -117,10 +117,10 @@ inline size_t SerializeVariableData(
 
 template<size_t N>
 inline size_t SerializeVariableData(
-    Mlos::Core::BytePtr buffer,
-    uint64_t objectOffset,
-    uint64_t dataOffset,
-    const std::array<std::wstring_view, N>& object)
+    _In_ Mlos::Core::BytePtr buffer,
+    _In_ uint64_t objectOffset,
+    _In_ uint64_t dataOffset,
+    _In_ const std::array<std::wstring_view, N>& object)
 {
     size_t dataSize = 0;
 

@@ -61,6 +61,6 @@ namespace Mlos.Core.Internal
     [CodegenMessage]
     internal partial struct RegisterSharedConfigMemoryRegionRequestMessage
     {
-        internal uint MemoryRegionId;
+        internal ushort SharedMemoryRegionIndex;
     }
 }

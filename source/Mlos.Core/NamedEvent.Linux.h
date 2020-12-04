@@ -33,12 +33,12 @@ public:
 
     // Creates or opens a named event object.
     //
-    _Check_return_
+    _Must_inspect_result_
     HRESULT CreateOrOpen(const char* const namedEventName) noexcept;
 
     // Opens a named event object.
     //
-    _Check_return_
+    _Must_inspect_result_
     HRESULT Open(const char* const namedEventName) noexcept;
 
     // Closes a named event object.
@@ -47,12 +47,12 @@ public:
 
     // Sets the named event object to the signaled state.
     //
-    _Check_return_
+    _Must_inspect_result_
     HRESULT Signal();
 
     // Waits until the named event object is in the signaled state.
     //
-    _Check_return_
+    _Must_inspect_result_
     HRESULT Wait();
 
 public:

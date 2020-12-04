@@ -32,10 +32,10 @@ class InternalMlosContextInitializer
 public:
     InternalMlosContextInitializer() {}
 
-    _Check_return_
+    _Must_inspect_result_
     HRESULT Initialize();
 
-    InternalMlosContextInitializer(InternalMlosContextInitializer&& initializer) noexcept;
+    InternalMlosContextInitializer(_In_ InternalMlosContextInitializer&& initializer) noexcept;
 
     InternalMlosContextInitializer(const InternalMlosContextInitializer&) = delete;
 
@@ -71,7 +71,9 @@ private:
 class InternalMlosContext : public MlosContext
 {
 public:
-    InternalMlosContext(InternalMlosContextInitializer&&) noexcept;
+    typedef InternalMlosContextInitializer InitializerType;
+
+    InternalMlosContext(_In_ InternalMlosContextInitializer&&) noexcept;
 
 private:
     InternalMlosContextInitializer m_contextInitializer;

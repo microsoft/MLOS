@@ -57,7 +57,7 @@ NamedEvent::NamedEvent(NamedEvent&& namedEvent) noexcept
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
 {
     HRESULT hr = S_OK;
@@ -86,7 +86,7 @@ HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT NamedEvent::Open(const char* const namedEventName) noexcept
 {
     return CreateOrOpen(namedEventName);
@@ -140,7 +140,7 @@ void NamedEvent::Close()
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT NamedEvent::Signal()
 {
     if (sem_post(m_semaphore) == -1)
@@ -160,7 +160,7 @@ HRESULT NamedEvent::Signal()
 // RETURNS:
 //  HRESULT.
 //
-_Check_return_
+_Must_inspect_result_
 HRESULT NamedEvent::Wait()
 {
     if (sem_wait(m_semaphore) == -1)

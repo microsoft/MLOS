@@ -37,7 +37,9 @@ class PropertyProxy<std::string_view> : protected PropertyProxyBase
 public:
     typedef std::string_view RealObjectType;
 
-    PropertyProxy(BytePtr buffer, uint32_t offset)
+    PropertyProxy(
+        _In_ BytePtr buffer,
+        _In_ uint32_t offset)
       : PropertyProxyBase(buffer, offset)
     {}
 
@@ -60,7 +62,10 @@ public:
 
     // Verify variable data.
     //
-    bool VerifyVariableData(uint64_t objectOffset, uint64_t totalDataSize, uint64_t& expectedDataOffset) const
+    bool VerifyVariableData(
+        _In_ uint64_t objectOffset,
+        _In_ uint64_t totalDataSize,
+        _Inout_ uint64_t& expectedDataOffset) const
     {
         Mlos::Core::StringPtr& view = *reinterpret_cast<Mlos::Core::StringPtr*>(buffer.Pointer);
 
@@ -97,7 +102,9 @@ class PropertyProxy<std::wstring_view> : protected PropertyProxyBase
 public:
     typedef std::wstring_view RealObjectType;
 
-    PropertyProxy(BytePtr buffer, uint32_t offset)
+    PropertyProxy(
+        _In_ BytePtr buffer,
+        _In_ uint32_t offset)
       : PropertyProxyBase(buffer, offset)
     {}
 
@@ -120,7 +127,10 @@ public:
 
     // Verify variable data.
     //
-    bool VerifyVariableData(uint64_t objectOffset, uint64_t totalDataSize, uint64_t& expectedDataOffset) const
+    bool VerifyVariableData(
+        _In_ uint64_t objectOffset,
+        _In_ uint64_t totalDataSize,
+        _Inout_ uint64_t& expectedDataOffset) const
     {
         Mlos::Core::WideStringPtr& view = *reinterpret_cast<Mlos::Core::WideStringPtr*>(buffer.Pointer);
 
@@ -148,20 +158,20 @@ namespace ObjectSerialization
 {
 template<>
 inline bool VerifyVariableData(
-    Mlos::Core::PropertyProxy<std::string_view> object,
-    uint64_t objectOffset,
-    uint64_t totalDataSize,
-    uint64_t& expectedDataOffset)
+    _In_ Mlos::Core::PropertyProxy<std::string_view> object,
+    _In_ uint64_t objectOffset,
+    _In_ uint64_t totalDataSize,
+    _Inout_ uint64_t& expectedDataOffset)
 {
     return object.VerifyVariableData(objectOffset, totalDataSize, expectedDataOffset);
 }
 
 template<>
 inline bool VerifyVariableData(
-    Mlos::Core::PropertyProxy<std::wstring_view> object,
-    uint64_t objectOffset,
-    uint64_t totalDataSize,
-    uint64_t& expectedDataOffset)
+    _In_ Mlos::Core::PropertyProxy<std::wstring_view> object,
+    _In_ uint64_t objectOffset,
+    _In_ uint64_t totalDataSize,
+    _Inout_ uint64_t& expectedDataOffset)
 {
     return object.VerifyVariableData(objectOffset, totalDataSize, expectedDataOffset);
 }

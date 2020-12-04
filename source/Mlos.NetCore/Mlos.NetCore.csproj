@@ -36,12 +36,15 @@
     <Compile Include="MemoryRegions\SharedConfigDictionaryExtensions.cs" />
     <Compile Include="StdTypes\AtomicTypes.cs" />
     <Compile Include="StdTypes\StringTypes.cs" />
+    <Compile Include="AnonymousMemoryMlosContext.Linux.cs" />
     <Compile Include="ArrayExtensions.cs" />
     <Compile Include="CodegenProxyExtensions.cs" />
     <Compile Include="CodegenTypeExtensions.cs" />
     <Compile Include="ComponentConfig.cs" />
     <Compile Include="DeserializeEntry.cs" />
     <Compile Include="DispatchEntry.cs" />
+    <Compile Include="ExperimentSession.cs" />
+    <Compile Include="FileDescriptorExchangeServer.Linux.cs" />
     <Compile Include="InterProcessMlosContext.cs" />
     <Compile Include="IntPtrExtensions.cs" />
     <Compile Include="IOptimizationProblem.cs" />
@@ -67,6 +70,7 @@
     <Compile Include="SharedMemoryMapView.Linux.cs" />
     <Compile Include="SharedMemoryMapView.Windows.cs" />
     <Compile Include="SharedMemoryRegionView.cs" />
+    <Compile Include="SocketExtension.Linux.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />

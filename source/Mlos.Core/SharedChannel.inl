@@ -39,7 +39,7 @@ bool ISharedChannel::HasReadersInWaitingState() const
 // NOTES:
 //
 template<typename TMessage>
-void ISharedChannel::SendMessage(const TMessage& msg)
+void ISharedChannel::SendMessage(_In_ const TMessage& msg)
 {
     // Calculate frame size.
     //
@@ -85,12 +85,12 @@ void ISharedChannel::SendMessage(const TMessage& msg)
     }
 }
 
-FrameHeader& ISharedChannel::Frame(uint32_t offset)
+FrameHeader& ISharedChannel::Frame(_In_ uint32_t offset)
 {
     return *reinterpret_cast<FrameHeader*>(Buffer.Pointer + offset);
 }
 
-BytePtr ISharedChannel::Payload(uint32_t writeOffset)
+BytePtr ISharedChannel::Payload(_In_ uint32_t writeOffset)
 {
     return BytePtr(Buffer.Pointer + writeOffset + sizeof(FrameHeader));
 }
@@ -108,7 +108,7 @@ BytePtr ISharedChannel::Payload(uint32_t writeOffset)
 //  The acquired region is contiguous.
 //
 template<typename TChannelPolicy, typename TChannelSpinPolicy>
-uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireWriteRegionForFrame(int32_t& frameLength)
+uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireWriteRegionForFrame(_Inout_ int32_t& frameLength)
 {
     const uint32_t expectedFrameLength = frameLength;
 
@@ -186,7 +186,7 @@ void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::NotifyExternalReader()
 //  so the next writer can write an empty FrameHeader.
 //
 template<typename TChannelPolicy, typename TChannelSpinPolicy>
-uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireRegionForWrite(int32_t& frameLength)
+uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::AcquireRegionForWrite(_Inout_ int32_t& frameLength)
 {
     while (true)
     {
@@ -377,8 +377,8 @@ uint32_t SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitForFrame()
 //
 template<typename TChannelPolicy, typename TChannelSpinPolicy>
 bool SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitAndDispatchFrame(
-    DispatchEntry* dispatchTable,
-    size_t dispatchEntryCount)
+    _In_reads_(dispatchEntryCount) DispatchEntry* dispatchTable,
+    _In_ size_t dispatchEntryCount)
 {
     const uint32_t readOffset = WaitForFrame();
 
@@ -461,8 +461,8 @@ bool SharedChannel<TChannelPolicy, TChannelSpinPolicy>::WaitAndDispatchFrame(
 //
 template<typename TChannelPolicy, typename TChannelSpinPolicy>
 void SharedChannel<TChannelPolicy, TChannelSpinPolicy>::ProcessMessages(
-    Mlos::Core::DispatchEntry* dispatchTable,
-    size_t dispatchEntryCount)
+    _In_reads_(dispatchEntryCount) Mlos::Core::DispatchEntry* dispatchTable,
+    _In_ size_t dispatchEntryCount)
 {
     Sync.ActiveReaderCount.fetch_add(1);
 

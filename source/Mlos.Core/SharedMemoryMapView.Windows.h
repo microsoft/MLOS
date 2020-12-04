@@ -33,32 +33,38 @@ class SharedMemoryMapView
 public:
     SharedMemoryMapView() noexcept;
 
-    SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept;
+    SharedMemoryMapView(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept;
 
     ~SharedMemoryMapView();
 
+    void Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept;
+
     // Creates a new shared memory view.
     //
-    _Check_return_
-    HRESULT CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+    _Must_inspect_result_
+    HRESULT CreateNew(
+        _In_z_ const char* const sharedMemoryMapName,
+        _In_ size_t memSize) noexcept;
 
     // Creates or opens a shared memory view.
     //
-    _Check_return_
-    HRESULT CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept;
+    _Must_inspect_result_
+    HRESULT CreateOrOpen(
+        _In_z_ const char* const sharedMemoryMapName,
+        _In_ size_t memSize) noexcept;
 
     // Opens already created shared memory view.
     //
-    _Check_return_
-    HRESULT OpenExisting(const char* const sharedMemoryMapName) noexcept;
+    _Must_inspect_result_
+    HRESULT OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept;
 
     // Closes a shared memory handle.
     //
     void Close();
 
 private:
-    _Check_return_
-    HRESULT MapMemoryView(size_t memSize) noexcept;
+    _Must_inspect_result_
+    HRESULT MapMemoryView(_In_ size_t memSize) noexcept;
 
 public:
     size_t MemSize;

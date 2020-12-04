@@ -37,6 +37,10 @@ Internal::SharedConfigMemoryRegion& SharedMemoryRegionView<Internal::SharedConfi
 {
     Internal::SharedConfigMemoryRegion& sharedConfigMemoryRegion = MemoryRegion();
 
+    // Initialize properties.
+    //
+    sharedConfigMemoryRegion.MemoryHeader.MemoryRegionId.Type = Internal::MemoryRegionType::SharedConfig;
+
     // Initialize the shared config dictionary.
     //
     HRESULT hr = InitializeSharedConfigDictionary(

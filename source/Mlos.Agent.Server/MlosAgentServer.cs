@@ -34,7 +34,7 @@ namespace Mlos.Agent.Server
         /// </summary>
         /// <param name="args">unused.</param>
         /// <returns>grpc server task.</returns>
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        private static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -51,42 +51,51 @@ namespace Mlos.Agent.Server
         /// The main external agent server.
         /// </summary>
         /// <param name="args">command line arguments.</param>
-        public static void Main(string[] args)
+        /// <returns>Returns exit code.</returns>
+        public static int Main(string[] args)
         {
-            string executableFilePath;
-            Uri optimizerAddressUri;
-            string settingsRegistryPath;
-            CliOptionsParser.ParseArgs(args, out executableFilePath, out optimizerAddressUri, out settingsRegistryPath);
+            CliOptionsParser.CliOptions parserOptions = CliOptionsParser.ParseArgs(args);
 
-            // Check for the executable before setting up any shared memory to
-            // reduce cleanup issues.
-            //
-            if (!string.IsNullOrEmpty(executableFilePath) && !File.Exists(executableFilePath))
+            if (!string.IsNullOrEmpty(parserOptions.ExperimentFilePath) && !File.Exists(parserOptions.ExperimentFilePath))
             {
-                throw new FileNotFoundException($"ERROR: --executable '{executableFilePath}' does not exist.");
+                throw new FileNotFoundException($"ERROR: --experiment '{parserOptions.ExperimentFilePath}' does not exist.");
             }
 
-            if (!string.IsNullOrEmpty(settingsRegistryPath))
+            if (!string.IsNullOrEmpty(parserOptions.SettingsRegistryPath))
             {
                 // #TODO temporary hack
                 //
-                Environment.SetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH", settingsRegistryPath);
+                Environment.SetEnvironmentVariable("MLOS_SETTINGS_REGISTRY_PATH", parserOptions.SettingsRegistryPath);
             }
 
             Console.WriteLine("Mlos.Agent.Server");
-            TargetProcessManager targetProcessManager = null;
 
-            // In the active learning mode, create a new shared memory map before running the target process.
-            // On Linux, we unlink existing shared memory map, if they exist.
-            // If the agent is not in the active learning mode, create new or open existing to communicate with the target process.
+            // Active learning mode.
             //
-            using MlosContext mlosContext = (executableFilePath != null)
-                ? InterProcessMlosContext.Create()
-                : InterProcessMlosContext.CreateOrOpen();
+            // TODO: In active learning mode the MlosAgentServer can control the
+            // workload against the target component.
+            //
+            TargetProcessManager targetProcessManager = null;
+            if (parserOptions.Executable != null)
+            {
+                Console.WriteLine($"Starting: '{parserOptions.Executable}'");
+                targetProcessManager = new TargetProcessManager(executableFilePath: parserOptions.Executable);
+                targetProcessManager.StartTargetProcess();
+
+                Console.WriteLine($"Launched process: '{Path.GetFileName(parserOptions.Executable)}'");
+            }
+            else
+            {
+                Console.WriteLine("No executable given to launch.  Will wait for agent to connect independently.");
+            }
+
+            // Create a Mlos context.
+            //
+            using MlosContext mlosContext = MlosContextFactory.Create();
 
             // Connect to gRpc optimizer only if user provided an address in the command line.
             //
-            if (optimizerAddressUri != null)
+            if (parserOptions.OptimizerUri != null)
             {
                 Console.WriteLine("Connecting to the Mlos.Optimizer");
 
@@ -96,32 +105,24 @@ namespace Mlos.Agent.Server
 
                 // This populates a variable for the various settings registry
                 // callback handlers to use (by means of their individual
-                // AssemblyInitializers) to know how they can connect with the
-                // optimizer.
+                // ExperimentSession instances) to know how they can connect with
+                // the optimizer.
                 //
-                // See Also: AssemblyInitializer.cs within the SettingsRegistry
-                // assembly project in question.
+                // See SmartCacheExperimentSession.cs for an example.
                 //
-                mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(optimizerAddressUri);
+                mlosContext.OptimizerFactory = new MlosOptimizer.BayesianOptimizerFactory(parserOptions.OptimizerUri);
             }
+
+            var experimentSessionManager = new ExperimentSessionManager(mlosContext);
 
             using var mainAgent = new MainAgent();
             mainAgent.InitializeSharedChannel(mlosContext);
 
-            // Active learning mode.
+            // If specified, load the experiment assembly.
             //
-            // TODO: In active learning mode the MlosAgentServer can control the
-            // workload against the target component.
-            //
-            if (executableFilePath != null)
+            if (!string.IsNullOrEmpty(parserOptions.ExperimentFilePath))
             {
-                Console.WriteLine($"Starting {executableFilePath}");
-                targetProcessManager = new TargetProcessManager(executableFilePath: executableFilePath);
-                targetProcessManager.StartTargetProcess();
-            }
-            else
-            {
-                Console.WriteLine("No executable given to launch.  Will wait for agent to connect independently.");
+                experimentSessionManager.LoadExperiment(parserOptions.ExperimentFilePath);
             }
 
             var cancellationTokenSource = new CancellationTokenSource();
@@ -138,13 +139,12 @@ namespace Mlos.Agent.Server
             // the RegisterSettingsAssembly method which is called through the
             // handler for the RegisterAssemblyRequestMessage.
             //
-            // Once registered, the SettingsAssemblyManager uses reflection to
-            // search for an AssemblyInitializer inside those assemblies and
-            // executes it in order to setup the message handler callbacks
-            // within the agent.
+            // Once registered, the ExperimentSessionManager can creates an
+            // instance of the requested ExperimentSession in order to setup the
+            // message handler callbacks for the components messages within the
+            // agent.
             //
-            // See Also: AssemblyInitializer.cs within the SettingsRegistry
-            // assembly project in question.
+            // See SmartCacheExperimentSession.cs for an example.
             //
             Console.WriteLine("Starting Mlos.Agent");
             Task mlosAgentTask = Task.Factory.StartNew(
@@ -223,7 +223,7 @@ namespace Mlos.Agent.Server
 
             Console.WriteLine("Mlos.Agent exited.");
 
-            Environment.Exit(exitCode);
+            return exitCode;
         }
     }
 }

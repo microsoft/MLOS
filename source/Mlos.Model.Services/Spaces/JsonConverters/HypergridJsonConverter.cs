@@ -13,6 +13,9 @@ using System.Text.Json;
 
 namespace Mlos.Model.Services.Spaces.JsonConverters
 {
+    /// <summary>
+    /// Converts a hypergrid object to or from JSON.
+    /// </summary>
     public class HypergridJsonConverter : JsonConverterWithExpectations<Hypergrid>
     {
         /// <inheritdoc/>

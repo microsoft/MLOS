@@ -7,11 +7,45 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Runtime.InteropServices;
 
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Creates an instance of MlosContext class.
+    /// </summary>
+    public static class MlosContextFactory
+    {
+        public static MlosContext Create()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return CreateUsingNamedMemoryMap();
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return CreateUsingAnonymousMemoryMap();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private static MlosContext CreateUsingAnonymousMemoryMap()
+        {
+            MlosContext mlosContext = Linux.AnonymousMemoryMlosContext.Create();
+            return mlosContext;
+        }
+
+        private static MlosContext CreateUsingNamedMemoryMap()
+        {
+            return InterProcessMlosContext.CreateOrOpen();
+        }
+    }
+
     /// <summary>
     /// MlosContext encapsulates the shared memory regions for config and
     /// feedback for the Mlos.Agent when processing messages from smart
@@ -55,22 +89,46 @@ namespace Mlos.Core
         /// Typically this will be assigned for a deployment specific situation
         /// (see Mlos.Agent.Server/MlosAgentServer.cs for an example) prior to
         /// starting the Mlos.Agent and made available for message handlers to
-        /// use (see SmartCache.SettingsRegistry/AssemblyInitializer.cs for an
-        /// example).
+        /// use. See SmartCacheExperimentSession.cs for an example.
         /// </remarks>
         public IOptimizerFactory OptimizerFactory { get; set; }
 
         #endregion
 
+        /// <summary>
+        /// Global memory region.
+        /// </summary>
         protected SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView;
+
+        /// <summary>
+        /// Control channel shared memory map.
+        /// </summary>
         protected SharedMemoryMapView controlChannelMemoryMapView;
+
+        /// <summary>
+        /// Feedback channel shared memory map.
+        /// </summary>
         protected SharedMemoryMapView feedbackChannelMemoryMapView;
 
+        /// <summary>
+        /// Notification event for the control channel.
+        /// </summary>
         protected NamedEvent controlChannelNamedEvent;
+
+        /// <summary>
+        /// Notification event for the feedback channel.
+        /// </summary>
         protected NamedEvent feedbackChannelNamedEvent;
 
+        /// <summary>
+        /// Indicates whether the object has been disposed.
+        /// </summary>
         protected bool isDisposed;
 
+        /// <summary>
+        /// Protected implementation of Dispose pattern.
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
@@ -103,6 +161,7 @@ namespace Mlos.Core
             isDisposed = true;
         }
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(disposing: true);

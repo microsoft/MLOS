@@ -27,6 +27,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             WriteOpenTypeDeclaration(sourceType);
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 void global::Mlos.Core.ICodegenType.SerializeFixedPart(IntPtr buffer, ulong objectOffset)
                 {{");
 
@@ -58,25 +59,15 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
                 //
                 FixedSizeArrayAttribute arrayAttribute = cppField.FieldInfo.GetCustomAttribute<FixedSizeArrayAttribute>();
 
-                if (cppField.CppType.IsCodegenType)
-                {
-                    WriteLine($"this.{cppField.FieldInfo.Name}.SerializeFixedPartCodetypeArray({arrayAttribute.Length}, buffer, objectOffset + {cppField.CppStructOffset});");
-                }
-                else
-                {
-                    WriteLine($"this.{cppField.FieldInfo.Name}.SerializeFixedPartPrimitiveTypeArray({arrayAttribute.Length}, buffer, objectOffset + {cppField.CppStructOffset});");
-                }
+                WriteLine(cppField.CppType.IsCodegenType
+                    ? $"this.{cppField.FieldInfo.Name}.SerializeFixedPartCodegenTypeArray({arrayAttribute.Length}, buffer, objectOffset + {cppField.CppStructOffset});"
+                    : $"this.{cppField.FieldInfo.Name}.SerializeFixedPartPrimitiveTypeArray({arrayAttribute.Length}, buffer, objectOffset + {cppField.CppStructOffset});");
             }
             else
             {
-                if (cppField.CppType.IsCodegenType)
-                {
-                    WriteLine($"((global::Mlos.Core.ICodegenType)this.{cppField.FieldInfo.Name}).SerializeFixedPart(buffer, objectOffset + {cppField.CppStructOffset});");
-                }
-                else
-                {
-                    WriteLine($"CodegenTypeExtensions.SerializeFixedPart(this.{cppField.FieldInfo.Name}, buffer, objectOffset + {cppField.CppStructOffset});");
-                }
+                WriteLine(cppField.CppType.IsCodegenType
+                    ? $"((global::Mlos.Core.ICodegenType)this.{cppField.FieldInfo.Name}).SerializeFixedPart(buffer, objectOffset + {cppField.CppStructOffset});"
+                    : $"CodegenTypeExtensions.SerializeFixedPart(this.{cppField.FieldInfo.Name}, buffer, objectOffset + {cppField.CppStructOffset});");
             }
 
             WriteLine();

@@ -38,19 +38,21 @@ public:
     {
     }
 
-    StringPtr(const StringPtr& other)
+    StringPtr(_In_ const StringPtr& other)
       : Data(other.Data),
         Length(other.Length)
     {
     }
 
-    StringPtr(const char* data, uint64_t length)
+    StringPtr(
+        _In_reads_(length) const char* data,
+        _In_ uint64_t length)
       : Data(data),
         Length(length)
     {
     }
 
-    StringPtr& operator=(const StringPtr& other)
+    StringPtr& operator=(_In_ const StringPtr& other)
     {
         Data = other.Data;
         Length = other.Length;
@@ -58,7 +60,7 @@ public:
         return *this;
     }
 
-    StringPtr& operator=(const char* string)
+    StringPtr& operator=(_In_z_ const char* string)
     {
         Data = string;
         Length = string != nullptr ? strlen(string) : 0;
@@ -75,7 +77,9 @@ public:
 //
 // NOTES:
 //
-inline bool operator==(const StringPtr& lhs, const StringPtr& rhs)
+inline bool operator==(
+    _In_ const StringPtr& lhs,
+    _In_ const StringPtr& rhs)
 {
     return lhs.Length == rhs.Length && (lhs.Length == 0 || (strncmp(lhs.Data, rhs.Data, lhs.Length) == 0));
 }
@@ -99,19 +103,21 @@ public:
     {
     }
 
-    WideStringPtr(const WideStringPtr& other)
+    WideStringPtr(_In_ const WideStringPtr& other)
       : Data(other.Data),
         Length(other.Length)
     {
     }
 
-    WideStringPtr(const wchar_t* data, uint64_t length)
+    WideStringPtr(
+        _In_reads_(length) const wchar_t* data,
+        _In_ uint64_t length)
       : Data(data),
         Length(length)
     {
     }
 
-    WideStringPtr& operator=(const WideStringPtr& other)
+    WideStringPtr& operator=(_In_ const WideStringPtr& other)
     {
         Data = other.Data;
         Length = other.Length;
@@ -119,7 +125,7 @@ public:
         return *this;
     }
 
-    WideStringPtr& operator=(const wchar_t* string)
+    WideStringPtr& operator=(_In_z_ const wchar_t* string)
     {
         Data = string;
         Length = string != nullptr ? wcslen(string) : 0;
@@ -136,7 +142,9 @@ public:
 //
 // NOTES:
 //
-inline bool operator==(const WideStringPtr& lhs, const WideStringPtr& rhs)
+inline bool operator==(
+    _In_ const WideStringPtr& lhs,
+    _In_ const WideStringPtr& rhs)
 {
     return lhs.Length == rhs.Length && (lhs.Length == 0 || (wcsncmp(lhs.Data, rhs.Data, lhs.Length) == 0));
 }

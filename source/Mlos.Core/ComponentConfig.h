@@ -36,14 +36,14 @@ public:
     using SharedConfigType = SharedConfig<T>;
     using TProxyObjectType = typename T::ProxyObjectType;
 
-    ComponentConfig(MlosContext& mlosContext) noexcept
+    explicit ComponentConfig(_In_ MlosContext& mlosContext) noexcept
       : m_mlosContext(mlosContext),
         m_sharedConfig(nullptr)
     {}
 
     // Binds the component config located in the shared memory to the local component config.
     //
-    void Bind(SharedConfigType* sharedConfig);
+    void Bind(_In_ SharedConfigType* sharedConfig);
 
     // Updates the component config from the shared config.
     //
@@ -51,7 +51,7 @@ public:
 
     // Compares the configs by the key.
     //
-    bool CompareKey(SharedConfigHeader* sharedConfigHeader);
+    bool CompareKey(_In_ SharedConfigHeader* sharedConfigHeader);
 
     // Gets the proxy object to the config located in the shared memory.
     //
@@ -63,7 +63,7 @@ public:
     // Sends the telemetry message.
     //
     template<typename TMessage>
-    void SendTelemetryMessage(const TMessage& message) const;
+    void SendTelemetryMessage(_In_ const TMessage& message) const;
 
 private:
     // MlosContext.

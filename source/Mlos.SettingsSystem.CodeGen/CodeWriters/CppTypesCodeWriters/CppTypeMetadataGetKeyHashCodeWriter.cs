@@ -10,7 +10,7 @@ using System;
 
 using Mlos.SettingsSystem.Attributes;
 
-namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppObjectExchangeCodeWriters
+namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
 {
     /// <summary>
     /// Cpp type metadata code writer.

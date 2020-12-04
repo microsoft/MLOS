@@ -11,7 +11,7 @@ using System.Reflection;
 
 using Mlos.SettingsSystem.Attributes;
 
-namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriters
+namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 {
     /// <summary>
     /// Code writer class for CSharp ICodegenProxy implementation.
@@ -32,6 +32,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpObjectExchangeCodeWriter
             string proxyTypeFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
 
             WriteBlock($@"
+                /// <inheritdoc/>
                 public bool CompareKey(ICodegenProxy proxy)
                 {{
                     bool result = true;

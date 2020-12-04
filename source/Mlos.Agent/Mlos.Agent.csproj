@@ -16,6 +16,7 @@
     <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExperimentSessionManager.cs" />
     <Compile Include="MainAgent.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />

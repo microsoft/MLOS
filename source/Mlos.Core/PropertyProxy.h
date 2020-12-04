@@ -26,7 +26,9 @@ namespace Core
 class PropertyProxyBase
 {
 public:
-    PropertyProxyBase(BytePtr buffer, uint32_t offset)
+    PropertyProxyBase(
+        _In_ BytePtr buffer,
+        _In_ uint32_t offset)
       : buffer(buffer.Pointer + offset)
     {}
 
@@ -43,7 +45,9 @@ class PropertyProxy : public PropertyProxyBase
 public:
     typedef T RealObjectType;
 
-    PropertyProxy(BytePtr buffer, uint32_t offset)
+    PropertyProxy(
+        _In_ BytePtr buffer,
+        _In_ uint32_t offset)
       : PropertyProxyBase(buffer, offset)
     {}
 
@@ -56,7 +60,7 @@ public:
 
     // Set the value.
     //
-    inline const PropertyProxy<T>& operator=(const T value)
+    inline const PropertyProxy<T>& operator=(_In_ const T value)
     {
         *reinterpret_cast<T*>(buffer.Pointer) = value;
 
@@ -70,11 +74,13 @@ template<typename TProxy, uint32_t N>
 class PropertyArrayProxy : protected PropertyProxyBase
 {
 public:
-    PropertyArrayProxy(BytePtr buffer, uint32_t offset)
+    PropertyArrayProxy(
+        _In_ BytePtr buffer,
+        _In_ uint32_t offset)
       : PropertyProxyBase(buffer, offset)
     {}
 
-    TProxy operator[](uint32_t index) noexcept
+    TProxy operator[](_In_ uint32_t index) noexcept
     {
         return TProxy(buffer, index * sizeof(typename TProxy::RealObjectType));
     }
@@ -86,10 +92,10 @@ namespace ObjectSerialization
 {
 template<typename TProxy, uint32_t N>
 inline bool VerifyVariableData(
-    Mlos::Core::PropertyArrayProxy<TProxy, N> array,
-    uint64_t objectOffset,
-    uint64_t totalDataSize,
-    uint64_t& expectedDataOffset)
+    _In_ Mlos::Core::PropertyArrayProxy<TProxy, N> array,
+    _In_ uint64_t objectOffset,
+    _In_ uint64_t totalDataSize,
+    _Inout_ uint64_t& expectedDataOffset)
 {
     size_t codegenTypeSize = sizeof(typename TProxy::RealObjectType);
 

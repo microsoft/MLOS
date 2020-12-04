@@ -8,6 +8,10 @@
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Shared config accessor interface.
+    /// Defines an interface for the shared configurations lookup.
+    /// </summary>
     public interface ISharedConfigAccessor
     {
         /// <summary>

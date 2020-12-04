@@ -15,9 +15,10 @@
 
 #include "Mlos.Core.h"
 
+#include <linux/memfd.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/types.h>
+#include <sys/syscall.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -26,7 +27,24 @@ namespace Mlos
 namespace Core
 {
 //----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::Constructor.
+// NAME: memfd_create
+//
+// PURPOSE:
+//  Creates an anonymous file.
+//
+// RETURNS:
+//  Returns a file descriptor that refers to anonymous file.
+//
+// NOTES:
+//  Use syscall as memfd_create function is not always defined in the system's version of libc (memfd_create was added in 2.27 for glibc).
+//
+int memfd_create(const char* name, unsigned int flags)
+{
+    return syscall(SYS_memfd_create, name, flags);
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::Constructor
 //
 SharedMemoryMapView::SharedMemoryMapView() noexcept
  :  MemSize(0),
@@ -46,18 +64,57 @@ SharedMemoryMapView::~SharedMemoryMapView()
 }
 
 //----------------------------------------------------------------------------
-// NAME: SharedMemoryMapView::Constructor.
+// NAME: SharedMemoryMapView::Constructor
 //
 // PURPOSE:
 //  Move constructor.
 //
-SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapView) noexcept :
+SharedMemoryMapView::SharedMemoryMapView(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept :
     MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
     Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
     CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0)),
     m_fdSharedMemory(std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE)),
     m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr))
 {
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::Assign
+//
+// PURPOSE:
+//  Assign method.
+//
+// RETURNS:
+//
+// NOTES:
+//
+void SharedMemoryMapView::Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept
+{
+    MemSize = std::exchange(sharedMemoryMapView.MemSize, 0);
+    Buffer = std::exchange(sharedMemoryMapView.Buffer, nullptr);
+    CleanupOnClose = std::exchange(sharedMemoryMapView.CleanupOnClose, 0);
+    m_fdSharedMemory = std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE);
+    m_sharedMemoryMapName = std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr);
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::CreateAnonymous
+//
+// PURPOSE:
+//  Creates an anonymous shared memory view.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::CreateAnonymous(_In_ size_t memSize) noexcept
+{
+    Close();
+
+    m_fdSharedMemory = memfd_create("mlos", MFD_CLOEXEC);
+    return MapMemoryView(memSize);
 }
 
 //----------------------------------------------------------------------------
@@ -71,7 +128,10 @@ SharedMemoryMapView::SharedMemoryMapView(SharedMemoryMapView&& sharedMemoryMapVi
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::CreateNew(const char* const sharedMemoryMapName, size_t memSize) noexcept
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::CreateNew(
+    _In_z_ const char* const sharedMemoryMapName,
+    _In_ size_t memSize) noexcept
 {
     Close();
 
@@ -99,7 +159,10 @@ HRESULT SharedMemoryMapView::CreateNew(const char* const sharedMemoryMapName, si
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName, size_t memSize) noexcept
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::CreateOrOpen(
+    _In_z_ const char* const sharedMemoryMapName,
+    _In_ size_t memSize) noexcept
 {
     Close();
 
@@ -125,7 +188,8 @@ HRESULT SharedMemoryMapView::CreateOrOpen(const char* const sharedMemoryMapName,
 //
 // NOTES:
 //
-HRESULT SharedMemoryMapView::OpenExisting(const char* const sharedMemoryMapName) noexcept
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept
 {
     Close();
 
@@ -136,15 +200,44 @@ HRESULT SharedMemoryMapView::OpenExisting(const char* const sharedMemoryMapName)
     }
 
     m_fdSharedMemory = shm_open(sharedMemoryMapName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
-    if (m_fdSharedMemory == INVALID_FD_VALUE)
-    {
-        return HRESULT_FROM_ERRNO(errno);
-    }
 
     return MapMemoryView(0 /* memSize */);
 }
 
-HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::OpenExistingFromFileDescriptor
+//
+// PURPOSE:
+//  Opens already created shared memory region.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::OpenExistingFromFileDescriptor(
+    _In_ int sharedMemoryFd,
+    _In_ size_t memSize) noexcept
+{
+    m_fdSharedMemory = sharedMemoryFd;
+
+    return MapMemoryView(memSize);
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::MapMemoryView
+//
+// PURPOSE:
+//  Creates a memory map.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::MapMemoryView(_In_ size_t memSize) noexcept
 {
     HRESULT hr = S_OK;
 
@@ -181,7 +274,7 @@ HRESULT SharedMemoryMapView::MapMemoryView(size_t memSize) noexcept
 
     if (SUCCEEDED(hr))
     {
-        void* pointer = mmap(0, memSize, PROT_READ | PROT_WRITE, MAP_SHARED, m_fdSharedMemory, 0);
+        void* pointer = mmap(nullptr, memSize, PROT_READ | PROT_WRITE, MAP_SHARED, m_fdSharedMemory, 0);
         if (pointer != MAP_FAILED)
         {
             Buffer.Pointer = reinterpret_cast<byte*>(pointer);
@@ -238,6 +331,17 @@ void SharedMemoryMapView::Close()
     }
 
     CleanupOnClose = false;
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::GetFileDescriptor
+//
+// PURPOSE:
+//  Gets a shared memory file descriptor.
+//
+int SharedMemoryMapView::GetFileDescriptor() const
+{
+    return m_fdSharedMemory;
 }
 }
 }

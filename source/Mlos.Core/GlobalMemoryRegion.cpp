@@ -39,7 +39,8 @@ Internal::GlobalMemoryRegion& SharedMemoryRegionView<Internal::GlobalMemoryRegio
 
     // Initialize properties.
     //
-    globalMemoryRegion.TotalMemoryRegionCount = 1;
+    globalMemoryRegion.GlobalMemoryRegionIndex = 1;
+    globalMemoryRegion.MemoryHeader.MemoryRegionId.Type = Internal::MemoryRegionType::Global;
 
     // Mlos.NetCore is always registered first.
     //

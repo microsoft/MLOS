@@ -12,6 +12,9 @@ using System.Runtime.InteropServices;
 
 namespace Mlos.Core
 {
+    /// <summary>
+    /// Cross-platform implementation of shared memory map view.
+    /// </summary>
     public abstract class SharedMemoryMapView : CriticalFinalizerObject, IDisposable
     {
         /// <summary>
@@ -107,8 +110,14 @@ namespace Mlos.Core
         /// <param name="disposing"></param>
         protected abstract void Dispose(bool disposing);
 
+        /// <summary>
+        /// Pointer to the mapped memory.
+        /// </summary>
         public IntPtr Buffer;
 
+        /// <summary>
+        /// Size of the shared memory map.
+        /// </summary>
         public ulong MemSize;
 
         /// <summary>
@@ -116,6 +125,9 @@ namespace Mlos.Core
         /// </summary>
         public bool CleanupOnClose;
 
+        /// <summary>
+        /// Indicates whether the object has been disposed.
+        /// </summary>
         protected bool isDisposed;
     }
 }

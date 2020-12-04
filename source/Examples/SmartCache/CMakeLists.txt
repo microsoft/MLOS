@@ -18,11 +18,14 @@ add_dependencies(${PROJECT_NAME} Mlos.NetCore)
 
 add_subdirectory(SmartCache.SettingsRegistry)
 add_dependencies(${PROJECT_NAME} SmartCache.SettingsRegistry)
+add_subdirectory(SmartCache.ExperimentSession)
+add_dependencies(${PROJECT_NAME} SmartCache.ExperimentSession)
 
 # Use a custom function to help setup a test run.
 add_mlos_agent_server_exe_test_run(
     NAME MlosTestRun_Mlos.Agent.Server_${PROJECT_NAME}
     EXECUTABLE_TARGET ${PROJECT_NAME}
+    EXPERIMENT_SESSION_TARGET SmartCache.ExperimentSession
     TIMEOUT 240
     WITH_OPTIMIZER)
 
