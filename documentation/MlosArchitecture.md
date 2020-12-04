@@ -56,7 +56,7 @@ MLOS workflows take roughly two basic forms:
 
 1. Build-time optimization
 
-    *Microbenchmarks* develepers write for *smart components* can be used to explore component tunable parameter values either interactively or in the background (e.g. during continuous integration pipelines).
+    *Microbenchmarks* developers write for *smart components* can be used to explore component tunable parameter values either interactively or in the background (e.g. during continuous integration pipelines).
 
     The data collected from those "experiments" can be captured and explored in Notebook experiences that can then be checked back in with the resulting code change to help support reproducible tests to validate these parameters in the future.
 

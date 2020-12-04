@@ -29,7 +29,7 @@ We expect development to follow a typical "gitflow" style workflow:
 
 ### Caveats
 
-There are consumers of MLOS internal to Microsoft that use an internal copy of the Github repo targetting code that is not open-sourced.
+There are consumers of MLOS internal to Microsoft that use an internal copy of the Github repo targeting code that is not open-sourced.
 This arrangement sometimes means porting changes from the internal repo to Github (and vise-versa).
 When that happens, the changes are submitted as a PR as described above, with the slight modification of (once approved and passing tests) using a rebase based merge instead of a squash merge in order to allow detecting duplicate patches between the public and private repos.
 
