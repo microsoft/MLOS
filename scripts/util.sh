@@ -8,21 +8,6 @@ if [ -z "$BASH" ]; then
     return 1
 fi
 
-# Note: Currently MLOS only supports a single instance at a time, so there is
-# only one set of shared memory regions.
-Mlos_Shared_Memories=$(cat <<-'FILES'
-/dev/shm/sem.Global\ControlChannel_Event
-/dev/shm/sem.Global\FeedbackChannel_Event
-/dev/shm/Host_Mlos.Config.SharedMemory
-/dev/shm/Host_Mlos.ControlChannel
-/dev/shm/Host_Mlos.FeedbackChannel
-/dev/shm/Host_Mlos.GlobalMemory
-/dev/shm/Test_FeedbackChannelMemory
-/dev/shm/Test_Mlos.GlobalMemory
-/dev/shm/Test_SharedChannelMemory
-FILES
-)
-
 # Uses "sort -V" from recent coreutils to check if the installed version ($2)
 # is at least as large as the needed version ($1).
 hasVersInstalled() {

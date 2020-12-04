@@ -68,10 +68,7 @@ function(add_mlos_agent_server_exe_test_run)
     # Basically we want to run:
     # $ dotnet Mlos.Agent.Server.dll --executable /some/test/exe
     # However, we need to
-    # - Make sure there aren't other things using the shared mem regions in
-    #   /dev/shm/ that we're about to create (e.g. from a previous failed test
-    #   or something else that's running).
-    #   (and also clean them up after we're done)
+    # - Make sure there aren't other things using the shared mem exchange socket.
     # - Make sure that the Agent can find the SettingsRegistry DLLs that the
     #   /some/test/exe needs to use.
     add_test(NAME ${TEST_NAME}
@@ -88,7 +85,6 @@ function(add_mlos_agent_server_exe_test_run)
 
     if(${WITH_OPTIMIZER})
         # Add some test fixtures to use for setup/tear down of other Mlos unit tests.
-        #
         add_test(NAME LocalPipInstallMlos
             COMMAND ${PYTHON3} -m pip install -q -e ${MLOS_ROOT}/source/Mlos.Python)
         add_test(NAME StartMlosOptimizerService
