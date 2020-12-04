@@ -66,6 +66,8 @@ MLOS workflows take roughly two basic forms:
 
     *Smart components* can be hooked up to receive suggestions from the *external agent* during runtime for online instance specific optimizations as well.
 
+    This can also be useful for speeding up build-time optimization or replicating a more faithful end-to-end smart component test environment inside the larger system.
+
 ## Architecture Diagram
 
 ![Mlos Component Architecture Diagram](./images/MLOS_architecture.svg)
@@ -122,13 +124,13 @@ The exceptions are shared channel memory regions, where the channel uses all mem
 Control and Feedback Channels are circular buffers whose size must be a power of two (2<sup><em>N</em></sup>).
 Prepending a header would prevent proper alignment which is why all communication channel metadata and synchronization objects are located in the _Global Shared Memory_ region.
 
-See Also: [SharedChannel.md](../source/Mlos.Core/doc/SharedChannel.md) for more details about their implementation.
+See [below](#implementation-details) for links with more details about their implementation.
 
 ### Target Process
 
 #### Mlos.Core
 
-*Mlos.Core* is a (C++) library used inside the target process.
+[*Mlos.Core*](../source/Mlos.Core/doc/) is a (C++) library used inside the target process.
 It provides an API to handle shared configs and exchange messages with *Mlos.Agent* via a shared channel.
 
 *Mlos.Core* contains the following components:
@@ -160,4 +162,5 @@ It provides an API to handle shared configs and exchange messages with *Mlos.Age
 
 ## Implementation details
 
-[Shared Memory Channel](../source/Mlos.Core/doc/SharedChannel.md)
+- [Shared Memory Channel](../source/Mlos.Core/doc/SharedChannel.md)
+- [Shared Memory Management](../source/Mlos.Core/doc/SharedMemoryManagement.md)

@@ -25,7 +25,7 @@ It provides
 
 Since it is meant as a reusable agent for different components, it contains no specific message processing logic itself.
 
-Rather, it starts an [`Mlos.Agent`](../Mlos.Agent/#mlos-github-tree-view) message processing loop which loads each component's `SettingsRegistry` assembly dlls upon registration request (via the `RegisterComponentConfig` and `RegisterAssemblyRequestMessage` from [`Mlos.Core`](../Mlos.Core/#mlos-github-tree-view) and [`Mlos.NetCore`](../Mlos.NetCore/#mlos-github-tree-view)) and uses the specified `ExperimentSession` class to setup the message callbacks that handle compnent and experiment specific things like aggregating and summarizing telemetry messages, interfacing with the optimizer using different parameter and/or context search spaces, and relaying component reconfiguration requests, etc.
+Rather, it starts an [`Mlos.Agent`](../Mlos.Agent/#mlos-github-tree-view) message processing loop which loads each component's `SettingsRegistry` assembly dlls upon registration request (via the `RegisterComponentConfig` and `RegisterAssemblyRequestMessage` from [`Mlos.Core`](../Mlos.Core/#mlos-github-tree-view) and [`Mlos.NetCore`](../Mlos.NetCore/#mlos-github-tree-view)) and uses the specified `ExperimentSession` class to setup the message callbacks that handle component and experiment specific things like aggregating and summarizing telemetry messages, interfacing with the optimizer using different parameter and/or context search spaces, and relaying component reconfiguration requests, etc.
 
 See the [`SmartCache`](../Examples/SmartCache/#mlos-github-tree-view) code, especially its [`ExperimentSession` class](../Examples/SmartCache/SmartCache.ExperimentSession/SmartCacheExperimentSession.cs#mlos-github-tree-view) for a more detailed example.
 
@@ -63,3 +63,4 @@ dotnet target/bin/Release/Mlos.Agent.Server.dll --help
 - The system currently only supports a single tunable process at a time.
   Multiple agent/target-process pairs support (e.g. via configurable unix socket domain path for anonymous shared memory exchange) are planned for future development.
 
+  See Also: [Shared Memory Management](../Mlos.Core/doc/SharedMemoryManagement.md)

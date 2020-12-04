@@ -23,6 +23,7 @@ See [source/Mlos.Core](../#mlos-github-tree-view) to browse the code.
     - [Diagram](#diagram)
     - [Policies](#policies)
     - [Notes](#notes)
+  - [See Also:](#see-also)
 
 ## Shared Channel
 
@@ -161,3 +162,7 @@ The `SharedChannel` contains a single instance `TChannelPolicy` which contains a
 
 The implementation of shared channel is heavily influenced by C# metaprograming:\
 [Federico Lois — Metaprogramming for the masses](https://www.youtube.com/watch?v=UybGH0xL5ns)
+
+## See Also:
+
+- [Shared Memory Management](./SharedMemoryManagement.md)

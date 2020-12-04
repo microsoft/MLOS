@@ -9,3 +9,4 @@ actions for tuning them.
 ## See Also:
 
 - [Mlos Shared Memory Communication Channel](./SharedChannel.md)
+- [Mlos Shared Memory Management](./SharedMemoryManagement.md)
