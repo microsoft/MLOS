@@ -236,7 +236,6 @@ Task("Run-MSBuild-UnitTests")
 
 Task("Generate-CMake")
     .WithCriteria(() => IsRunningOnUnix())
-    .IsDependentOn("Build-NetCore")
     .Does(() =>
     {
         var cmakeSettings = new CMakeSettings
