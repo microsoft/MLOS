@@ -244,6 +244,10 @@ Task("Generate-CMake")
             Generator = "Unix Makefiles",
             OutputPath = $"{CMakeBuildDir}",
             SourcePath = ".",
+            Options = new[]
+            {
+                $"-DCMAKE_BUILD_TYPE={CMakeConfiguration}",
+            },
         };
 
         CMake(cmakeSettings);
