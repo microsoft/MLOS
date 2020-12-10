@@ -36,19 +36,29 @@ class TestSmartCacheWithRemoteOptimizer:
         self.logger = create_logger('TestSmartCacheWithRemoteOptimizer')
         self.logger.level = logging.DEBUG
 
-        # Start up the gRPC service.
+        # Start up the gRPC service. Try a bunch of times before giving up.
         #
-        self.server = OptimizerMicroserviceServer(port=50051, num_threads=10)
-        self.server.start()
+        max_num_tries = 100
+        num_tries = 0
+        for port in range(50051, 50051 + max_num_tries):
+            num_tries += 1
+            try:
+                self.server = OptimizerMicroserviceServer(port=port, num_threads=10)
+                self.server.start()
+                self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
+                break
+            except:
+                self.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}")
+                if num_tries == max_num_tries:
+                    raise
 
-        self.optimizer_service_grpc_channel = grpc.insecure_channel('localhost:50051')
-        self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_grpc_channel, logger=self.logger)
+        self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 
         self.mlos_agent = MlosAgent(
             logger=self.logger,
             communication_channel=mlos_globals.mlos_global_context.communication_channel,
             shared_config=mlos_globals.mlos_global_context.shared_config,
-            bayesian_optimizer_grpc_channel=self.optimizer_service_grpc_channel
+            bayesian_optimizer_grpc_channel=self.optimizer_service_channel
         )
 
         self.mlos_agent_thread = Thread(target=self.mlos_agent.run)

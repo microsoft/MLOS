@@ -35,12 +35,24 @@ class TestBayesianOptimizerGrpcClient:
 
     def setup_method(self, method):
         self.logger = create_logger(self.__class__.__name__)
-        # Start up the gRPC service.
-        #
-        self.server = OptimizerMicroserviceServer(port=50051, num_threads=10)
-        self.server.start()
 
-        self.optimizer_service_channel = grpc.insecure_channel('localhost:50051')
+        # Start up the gRPC service. Try a bunch of times before giving up.
+        #
+        max_num_tries = 100
+        num_tries = 0
+        for port in range(50051, 50051 + max_num_tries):
+            num_tries += 1
+            try:
+                self.server = OptimizerMicroserviceServer(port=port, num_threads=10)
+                self.server.start()
+                self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
+                break
+            except:
+                self.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}")
+                if num_tries == max_num_tries:
+                    raise
+
+
         self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
         self.optimizer_monitor = OptimizerMonitor(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 
