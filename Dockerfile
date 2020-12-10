@@ -174,7 +174,7 @@ RUN /bin/bash /tmp/MLOS/scripts/install.python.sh && \
 
 RUN python3.7 -m pip install pip && \
     python3.7 -m pip install --upgrade pip && \
-    python3.7 -m pip install setuptools wheel pytest pylint
+    python3.7 -m pip install setuptools wheel pytest pylint pytest-xdist
 
 COPY ./source/Mlos.Python/requirements.txt /tmp/
 RUN python3.7 -m pip install -r /tmp/requirements.txt
