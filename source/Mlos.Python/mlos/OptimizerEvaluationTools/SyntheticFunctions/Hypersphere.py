@@ -162,7 +162,6 @@ class Hypersphere(ObjectiveFunctionBase):
             ]
         )
 
-
     @property
     def parameter_space(self) -> Hypergrid:
         return self._parameter_space
@@ -170,7 +169,6 @@ class Hypersphere(ObjectiveFunctionBase):
     @property
     def output_space(self) -> Hypergrid:
         return self._objective_space
-
 
     def evaluate_dataframe(self, dataframe: pd.DataFrame):
         # We can compute our objectives more efficiently, by maintaining a prefix of r * sin(theta0) * ... * sin(theta{i-1})
