@@ -345,7 +345,7 @@ class TestBayesianOptimizer:
         )
 
         random_state = random.Random()
-        num_restarts = 10
+        num_restarts = 5
         for restart_num in range(num_restarts):
             # Let's set up random seeds so that we can easily repeat failed experiments
             #
