@@ -501,7 +501,6 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError):
             optimizer.register(input_df, only_invalid_outputs_df)
 
-    @pytest.mark.parametrize('run', [i for i in range(100)])
     def test_optimization_with_context(self, run):
         # Gaussian blob in x with position dependent on context variable y.
         def f(parameters, context):
