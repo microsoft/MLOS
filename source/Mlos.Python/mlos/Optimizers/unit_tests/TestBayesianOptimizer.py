@@ -47,7 +47,8 @@ class TestBayesianOptimizer:
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
         cls.logger = create_logger(logger_name=cls.__name__)
 
-        # Start up the gRPC service. Try a bunch of ports, before giving up.
+        # Start up the gRPC service. Try a bunch of ports, before giving up so we can do several in parallel.
+
         #
         max_num_tries = 100
         num_tries = 0
@@ -59,7 +60,8 @@ class TestBayesianOptimizer:
                 cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
                 break
             except:
-                cls.logger.info(f"Failded to create OptimizerMicroserviceServer on port {port}.")
+                cls.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}.")
+
                 if num_tries == max_num_tries:
                     raise
 
