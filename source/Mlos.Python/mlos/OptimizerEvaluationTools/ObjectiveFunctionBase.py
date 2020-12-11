@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
+from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Spaces import Hypergrid, Point
 
 
@@ -17,6 +18,7 @@ class ObjectiveFunctionBase(ABC):
     @abstractmethod
     def __init__(self, objective_function_config: Point, *args, **kwargs):
         self.objective_function_config = objective_function_config
+        self._default_optimization_problem = None
 
     @property
     @abstractmethod
@@ -35,6 +37,14 @@ class ObjectiveFunctionBase(ABC):
         :return:
         """
         raise NotImplementedError
+
+    @property
+    def default_optimization_problem(self):
+        return self._default_optimization_problem
+
+    @default_optimization_problem.setter
+    def default_optimization_problem(self, value: OptimizationProblem):
+        self._default_optimization_problem = value
 
     def evaluate_point(self, point: Point) -> Point:
         # If evaluate_point is not implemented in the subclass, we can make it work like so:
