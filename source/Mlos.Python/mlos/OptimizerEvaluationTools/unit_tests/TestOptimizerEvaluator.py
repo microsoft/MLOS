@@ -4,6 +4,7 @@
 #
 import concurrent.futures
 import json
+from multiprocessing import cpu_count
 import os
 import pickle
 
@@ -176,7 +177,7 @@ class TestOptimizerEvaluator:
 
         num_tests = max(num_optimizer_configs, num_objective_function_configs)
 
-        with traced(scope_name="parallel_tests"), concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+        with traced(scope_name="parallel_tests"), concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count()) as executor:
             outstanding_futures = set()
 
             for i in range(num_tests):
