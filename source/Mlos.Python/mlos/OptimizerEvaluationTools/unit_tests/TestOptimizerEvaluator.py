@@ -175,7 +175,7 @@ class TestOptimizerEvaluator:
         objective_function_named_configs = objective_function_config_store.list_named_configs()
         num_objective_function_configs = len(objective_function_named_configs)
 
-        num_tests = max(num_optimizer_configs, num_objective_function_configs)
+        num_tests = max(num_optimizer_configs, num_objective_function_configs, 10)
 
         with traced(scope_name="parallel_tests"), concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count()) as executor:
             outstanding_futures = set()
