@@ -343,6 +343,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
       with:
+        use-quiet-mode: yes
         use-verbose-mode: no
         folder-path: './documentation, ./build, ./source, ./test, ./scripts, ./external'
         file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md'
