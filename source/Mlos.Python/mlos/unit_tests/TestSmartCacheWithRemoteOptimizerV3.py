@@ -101,7 +101,9 @@ class TestSmartCacheWithRemoteOptimizer:
     def teardown_method(self, method):
         mlos_globals.mlos_global_context.stop_clock()
         self.mlos_agent.stop_all()
-        self.server.stop(grace=None)
+        self.server.stop(grace=None).wait(timeout=1)
+        self.server.wait_for_termination(timeout=1)
+        self.optimizer_service_channel.close()
 
 
     def test_smart_cache_with_remote_optimizer_on_a_timer(self):

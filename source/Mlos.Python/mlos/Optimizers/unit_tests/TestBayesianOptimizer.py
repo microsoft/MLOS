@@ -70,7 +70,9 @@ class TestBayesianOptimizer:
 
     @classmethod
     def teardown_class(cls) -> None:
-        cls.server.stop(grace=None)
+        cls.server.stop(grace=None).wait(timeout=1)
+        cls.server.wait_for_termination(timeout=1)
+        cls.optimizer_service_channel.close()
 
         cls.temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(cls.temp_dir):
@@ -499,8 +501,8 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError):
             optimizer.register(input_df, only_invalid_outputs_df)
 
-
-    def test_optimization_with_context(self):
+    @pytest.mark.parametrize('run', [i for i in range(100)])
+    def test_optimization_with_context(self, run):
         # Gaussian blob in x with position dependent on context variable y.
         def f(parameters, context):
             if isinstance(parameters, pd.DataFrame):
@@ -523,7 +525,7 @@ class TestBayesianOptimizer:
         )
 
         # create some data points to eval
-        n_samples = 100
+        n_samples = 5000
         parameter_df = input_space.random_dataframe(n_samples)
         context_df = context_space.random_dataframe(n_samples)
 
