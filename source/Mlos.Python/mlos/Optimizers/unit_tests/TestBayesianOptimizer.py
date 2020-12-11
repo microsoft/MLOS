@@ -60,7 +60,8 @@ class TestBayesianOptimizer:
                 cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
                 break
             except:
-                cls.logger.info(f"Failded to create OptimizerMicroserviceServer on port {port}.")
+                cls.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}.")
+
                 if num_tries == max_num_tries:
                     raise
 
