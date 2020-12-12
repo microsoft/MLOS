@@ -22,7 +22,6 @@ class RegressionModel(ABC):
     so that all models can be inspected in a homogeneous way.
     """
 
-    @abstractmethod
     def __init__(self, model_type, model_config, input_space: Hypergrid, output_space: Hypergrid, fit_state: RegressionModelFitState = None):
         self.model_type = model_type
         self.model_config = model_config

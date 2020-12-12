@@ -14,7 +14,6 @@ class MultiObjectiveRegressionModel(ABC):
     """An interface for all multi-objective regression models to implement."""
 
 
-    @abstractmethod
     def __init__(
         self,
         model_type: type,
@@ -26,6 +25,9 @@ class MultiObjectiveRegressionModel(ABC):
         self.model_config = model_config
         self.input_space = input_space
         self.output_space = output_space
+
+        self.input_dimension_names = [dimension.name for dimension in self.input_space]
+        self.output_dimension_names = [dimension.name for dimension in self.output_space]
 
     @abstractmethod
     def fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, iteration_number: int) -> None:
