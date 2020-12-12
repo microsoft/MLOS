@@ -15,9 +15,6 @@ from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 
-
-
-
 class MultiObjectiveHomogeneousRandomForest(MultiObjectiveRegressionModel):
     """Maintains multiple HomogeneousRandomForestRegressionModels each predicting a different objective.
 
