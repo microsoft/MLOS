@@ -5,10 +5,11 @@
 import pandas as pd
 
 from mlos.Logger import create_logger
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
+from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
-from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
@@ -68,9 +69,16 @@ class MultiObjectiveHomogeneousRandomForest(MultiObjectiveRegressionModel):
                 iteration_number=iteration_number
             )
 
-    def predict(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, include_only_valid_rows: bool=True) -> MultiObjectivePrediction:
+    def predict(self, features_df: pd.DataFrame, include_only_valid_rows: bool=True) -> MultiObjectivePrediction:
         multi_objective_predicitons = MultiObjectivePrediction(objective_names=self.output_dimension_names)
         for objective_name, random_forest in self._regressors_by_objective_name:
             prediction = random_forest.predict(features_df, include_only_valid_rows=include_only_valid_rows)
             multi_objective_predicitons[objective_name] = prediction
         return multi_objective_predicitons
+
+    def compute_goodness_of_fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, data_set_type: DataSetType) -> MultiObjectiveGoodnessOfFitMetrics:
+        multi_objective_goodness_of_fit_metrics = MultiObjectiveGoodnessOfFitMetrics(objective_names=self.output_dimension_names)
+        for objective_name, random_forest in self._regressors_by_objective_name:
+            gof_metrics = random_forest.compute_goodness_of_fit(features_df=features_df, target_df=targets_df[[objective_name]], data_set_type=data_set_type)
+            multi_objective_goodness_of_fit_metrics[objective_name] = gof_metrics
+        return multi_objective_goodness_of_fit_metrics

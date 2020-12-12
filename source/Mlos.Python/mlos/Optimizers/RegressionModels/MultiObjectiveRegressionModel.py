@@ -7,6 +7,8 @@ from abc import ABC, abstractmethod
 import pandas as pd
 
 from mlos.Spaces import Hypergrid, Point
+from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
+from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 
 
@@ -36,3 +38,8 @@ class MultiObjectiveRegressionModel(ABC):
     @abstractmethod
     def predict(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, include_only_valid_rows: bool=True) -> MultiObjectivePrediction:
         raise NotImplementedError
+
+    @abstractmethod
+    def compute_goodness_of_fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, data_set_type: DataSetType) -> MultiObjectiveGoodnessOfFitMetrics:
+        raise NotImplementedError
+
