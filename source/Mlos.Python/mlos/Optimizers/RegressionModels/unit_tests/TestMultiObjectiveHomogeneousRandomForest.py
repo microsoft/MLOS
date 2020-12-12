@@ -42,11 +42,6 @@ class TestMultiObjectiveHomogeneousRandomForest:
         multi_objective_rf.fit(features_df=train_params_df, targets_df=train_objectives_df, iteration_number=num_training_samples)
         multi_objective_predictions = multi_objective_rf.predict(features_df=train_params_df, include_only_valid_rows=True)
 
-        for objective_name in objective_function.output_space.dimension_names:
-            objective_predictions = multi_objective_predictions[objective_name]
-            assert len(objective_predictions.get_dataframe().index) == num_training_samples
-
-
         # TRAINING DATA
         #
         print("------------------------------------------------------------------------------------")
@@ -67,8 +62,3 @@ class TestMultiObjectiveHomogeneousRandomForest:
             print("------------------------------------------------------------------------------------")
             print(objective_name)
             print(testing_gof[objective_name].to_json(indent=2))
-
-
-
-
-
