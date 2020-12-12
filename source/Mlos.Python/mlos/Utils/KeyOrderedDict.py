@@ -26,11 +26,11 @@ class KeyOrderedDict:
             else:
                 self._dict[key] = None
 
-    def __getitem__(self, key_or_index) -> object:
+    def __getitem__(self, key_or_index: Union[str, int]) -> object:
         key = self._to_key(key_or_index)
         return self._dict[key]
 
-    def __setitem__(self, key_or_index, value) -> None:
+    def __setitem__(self, key_or_index: Union[str, int], value) -> None:
         assert isinstance(value, (self.value_type, None))
         key = self._to_key(key_or_index)
         self._dict[key] = value

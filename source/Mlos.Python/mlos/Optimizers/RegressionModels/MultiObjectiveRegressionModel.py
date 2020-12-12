@@ -26,18 +26,13 @@ class MultiObjectiveRegressionModel(ABC):
         self.input_space = input_space
         self.output_space = output_space
 
-        self.input_dimension_names = [dimension.name for dimension in self.input_space]
-        self.output_dimension_names = [dimension.name for dimension in self.output_space]
+        self.input_dimension_names = self.input_space.dimension_names
+        self.output_dimension_names = self.output_space.dimension_names
 
     @abstractmethod
     def fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, iteration_number: int) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def predict(
-        self,
-        features_df: pd.DataFrame,
-        targets_df: pd.DataFrame,
-        include_only_valid_rows: bool=True
-    ) -> MultiObjectivePrediction:
+    def predict(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, include_only_valid_rows: bool=True) -> MultiObjectivePrediction:
         raise NotImplementedError
