@@ -18,7 +18,7 @@ class TestMultiObjectiveHomogeneousRandomForest:
         mlos.global_values.declare_singletons()
         cls.logger = create_logger("TestMultiObjectiveHomogeneousRandomForest")
 
-    @pytest.mark.parametrize('objective_function_config_name', ["2d_hypersphere_minimize_some", "10d_hypersphere_minimize_some"])
+    @pytest.mark.parametrize('objective_function_config_name', ["2d_hypersphere_minimize_some", "10d_hypersphere_minimize_some", "5_mutually_exclusive_polynomials"])
     def test_default_config(self, objective_function_config_name):
         objective_function_config = objective_function_config_store.get_config_by_name(objective_function_config_name)
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
@@ -31,8 +31,8 @@ class TestMultiObjectiveHomogeneousRandomForest:
             logger=self.logger
         )
 
-        num_training_samples = 10000
-        num_testing_samples = 1000
+        num_training_samples = 1000
+        num_testing_samples = 100
         train_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_training_samples)
         train_objectives_df = objective_function.evaluate_dataframe(train_params_df)
 
