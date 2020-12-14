@@ -48,7 +48,7 @@ public:
             return false;
         }
 
-        // Construct value in memory of aligned storage using inplace operator new.
+        // Construct value in memory of aligned storage using placement operator new.
         //
         new(&data[m_size]) T(std::forward<TArgs>(args)...);
         ++m_size;

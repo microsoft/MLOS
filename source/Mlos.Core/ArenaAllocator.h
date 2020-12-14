@@ -36,7 +36,7 @@ _Must_inspect_result_
 HRESULT InitializeArenaAllocator(
     _Inout_ ArenaAllocator& allocator,
     _Inout_ MemoryRegion& memoryRegion,
-    _In_ int32_t firstAllocationOffset);
+    _In_ int32_t memoryRegionHeaderSize);
 
 //----------------------------------------------------------------------------
 // NAME: AllocateInMemoryRegion
