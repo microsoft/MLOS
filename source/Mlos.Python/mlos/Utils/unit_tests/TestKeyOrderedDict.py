@@ -19,4 +19,21 @@ class TestKeyOrderedDict:
             assert key == keys[i]
             assert value == values[i]
 
-        
+        key_ordered_dict['a'] = None
+        assert key_ordered_dict[0] is None
+        assert key_ordered_dict['a'] is None
+
+        with pytest.raises(TypeError):
+            key_ordered_dict['b'] = 1
+
+        assert key_ordered_dict[1] == "B"
+        assert key_ordered_dict['b'] == "B"
+        key_ordered_dict['b'] = "1"
+        assert key_ordered_dict[1] == "1"
+        assert key_ordered_dict['b'] == "1"
+
+        with pytest.raises(KeyError):
+            _ = key_ordered_dict['A']
+
+        with pytest.raises(IndexError):
+            _ = key_ordered_dict[100]

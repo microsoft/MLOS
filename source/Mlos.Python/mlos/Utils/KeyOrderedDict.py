@@ -21,7 +21,7 @@ class KeyOrderedDict:
         for key in self._ordered_keys:
             if key in dictionary:
                 value = dictionary[key]
-                assert isinstance(value, (self.value_type, None))
+                assert isinstance(value, self.value_type) or value is None
                 self._dict[key] = value
             else:
                 self._dict[key] = None
@@ -31,7 +31,8 @@ class KeyOrderedDict:
         return self._dict[key]
 
     def __setitem__(self, key_or_index: Union[str, int], value) -> None:
-        assert isinstance(value, (self.value_type, None))
+        if not (isinstance(value, self.value_type) or value is None):
+            raise TypeError(f'Value must be of type {str(self.value_type)} not {type(value)}')
         key = self._to_key(key_or_index)
         self._dict[key] = value
 
