@@ -13,7 +13,7 @@ from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjec
 
 
 class MultiObjectiveRegressionModel(ABC):
-    """An interface for all multi-objective regression models to implement."""
+    """A base class for all multi-objective regression models to implement."""
 
 
     def __init__(
