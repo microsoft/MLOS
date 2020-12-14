@@ -10,6 +10,8 @@ using System;
 
 using Mlos.Core;
 
+using MlosInternal = Mlos.Core.Internal;
+
 namespace Proxy.Mlos.Core.Internal
 {
     /// <summary>
@@ -22,22 +24,21 @@ namespace Proxy.Mlos.Core.Internal
         /// </summary>
         /// <param name="allocator"></param>
         /// <param name="memoryRegion"></param>
-        /// <param name="firstAllocationOffset"></param>
+        /// <param name="memoryRegionHeaderSize"></param>
         public static void InitializeArenaAllocator(
             this ArenaAllocator allocator,
             MemoryRegion memoryRegion,
-            int firstAllocationOffset)
+            int memoryRegionHeaderSize)
         {
             // Store offset to the allocator itself.
             //
             allocator.OffsetToAllocator = (int)allocator.Buffer.Offset(memoryRegion.Buffer);
 
-            allocator.FirstAllocationOffset = Utils.Align((uint)firstAllocationOffset, 256);
-            allocator.AllocationBlockSize = (uint)memoryRegion.MemoryRegionSize - allocator.FirstAllocationOffset;
+            allocator.EndOffset = (uint)memoryRegion.MemoryRegionSize;
 
-            allocator.FreeOffset = allocator.FirstAllocationOffset;
+            allocator.FreeOffset = Utils.Align((uint)memoryRegionHeaderSize, MlosInternal.ArenaAllocator.AllocationAlignment);
             allocator.AllocationCount = 0;
-            allocator.LastAllocatedOffset = 0;
+            allocator.LastOffset = 0;
         }
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace Proxy.Mlos.Core.Internal
         {
             size += default(AllocationEntry).CodegenTypeSize();
 
-            if (allocator.FreeOffset + size >= allocator.AllocationBlockSize + allocator.FirstAllocationOffset)
+            if (allocator.FreeOffset + size >= allocator.EndOffset)
             {
                 throw new OutOfMemoryException();
             }
@@ -61,21 +62,20 @@ namespace Proxy.Mlos.Core.Internal
 
             // Update memory region properties.
             //
-            allocator.FreeOffset += (uint)Utils.Align(size, 64);
+            allocator.FreeOffset += (uint)Utils.Align(size, MlosInternal.ArenaAllocator.AllocationAlignment);
             allocator.AllocationCount++;
 
             IntPtr memoryRegionPtr = allocator.Buffer - allocator.OffsetToAllocator;
 
             // Update last allocated entry.
             //
-            if (allocator.LastAllocatedOffset != 0)
+            if (allocator.LastOffset != 0)
             {
                 var lastAllocationEntry = new AllocationEntry
                 {
-                    Buffer = memoryRegionPtr + (int)allocator.LastAllocatedOffset,
+                    Buffer = memoryRegionPtr + (int)allocator.LastOffset,
+                    NextEntryOffset = offset,
                 };
-
-                lastAllocationEntry.NextEntryOffset = offset;
             }
 
             // Update current allocated entry.
@@ -83,11 +83,10 @@ namespace Proxy.Mlos.Core.Internal
             var allocationEntry = new AllocationEntry
             {
                 Buffer = memoryRegionPtr + (int)offset,
+                PrevEntryOffset = allocator.LastOffset,
             };
 
-            allocationEntry.PrevEntryOffset = allocator.LastAllocatedOffset;
-
-            allocator.LastAllocatedOffset = offset;
+            allocator.LastOffset = offset;
 
             return allocationEntry;
         }

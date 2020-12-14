@@ -40,7 +40,7 @@ public:
     template<typename... TArg>
     void Initialize(_In_ TArg&&... args)
     {
-        // Construct an object in the memory of aligned storage using inplace operator new.
+        // Construct an object in the memory of aligned storage using placement operator new.
         //
         new(&data) T(std::forward<TArg>(args)...);
     }

@@ -45,22 +45,19 @@ namespace Mlos.Core.Internal
     public partial struct ArenaAllocator
     {
         /// <summary>
+        /// Allocation alignment.
+        /// </summary>
+        public const int AllocationAlignment = 64;
+
+        /// <summary>
         /// Offset to the allocator from the beginning of the memory region.
         /// </summary>
         internal int OffsetToAllocator;
 
         /// <summary>
-        /// Offset to start of allocation block in the memory region.
+        /// Maximum allowed allocation offset, equals to the memory region size.
         /// </summary>
-        /// <remarks>
-        /// Allocator is using the memory located after the region header.
-        /// </remarks>
-        internal uint FirstAllocationOffset;
-
-        /// <summary>
-        /// Size of the memory we are allocating from.
-        /// </summary>
-        internal uint AllocationBlockSize;
+        internal uint EndOffset;
 
         /// <summary>
         /// Total number of Allocations.
@@ -70,7 +67,7 @@ namespace Mlos.Core.Internal
         /// <summary>
         /// Offset to recently allocated object.
         /// </summary>
-        internal uint LastAllocatedOffset;
+        internal uint LastOffset;
 
         /// <summary>
         /// Offset to available block of memory.
