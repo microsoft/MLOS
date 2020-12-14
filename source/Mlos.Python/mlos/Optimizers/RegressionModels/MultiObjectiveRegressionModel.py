@@ -36,10 +36,9 @@ class MultiObjectiveRegressionModel(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def predict(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, include_only_valid_rows: bool=True) -> MultiObjectivePrediction:
+    def predict(self, features_df: pd.DataFrame, include_only_valid_rows: bool = True) -> MultiObjectivePrediction:
         raise NotImplementedError
 
     @abstractmethod
     def compute_goodness_of_fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, data_set_type: DataSetType) -> MultiObjectiveGoodnessOfFitMetrics:
         raise NotImplementedError
-

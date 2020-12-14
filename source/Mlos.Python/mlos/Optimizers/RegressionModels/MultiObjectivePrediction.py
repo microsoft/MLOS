@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from typing import List, Union
+from typing import List
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 
