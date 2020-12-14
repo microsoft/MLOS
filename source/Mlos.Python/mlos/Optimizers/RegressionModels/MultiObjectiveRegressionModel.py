@@ -17,11 +17,11 @@ class MultiObjectiveRegressionModel(ABC):
 
 
     def __init__(
-        self,
-        model_type: type,
-        model_config: Point,
-        input_space: Hypergrid,
-        output_space: Hypergrid
+            self,
+            model_type: type,
+            model_config: Point,
+            input_space: Hypergrid,
+            output_space: Hypergrid
     ):
         self.model_type = model_type
         self.model_config = model_config

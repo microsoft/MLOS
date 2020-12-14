@@ -22,11 +22,11 @@ class MultiObjectiveHomogeneousRandomForest(MultiObjectiveRegressionModel):
 
     """
     def __init__(
-        self,
-        model_config: Point,
-        input_space: Hypergrid,
-        output_space: Hypergrid,
-        logger=None
+            self,
+            model_config: Point,
+            input_space: Hypergrid,
+            output_space: Hypergrid,
+            logger=None
     ):
         MultiObjectiveRegressionModel.__init__(
             self,
