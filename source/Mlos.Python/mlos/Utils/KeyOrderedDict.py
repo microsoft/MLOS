@@ -41,6 +41,9 @@ class KeyOrderedDict:
         for key in self._ordered_keys:
             yield key, self._dict[key]
 
+    def __len__(self):
+        return len(self._ordered_keys)
+
     def _to_key(self, key_or_index: Union[str, int]) -> str:
         if isinstance(key_or_index, str):
             return key_or_index
