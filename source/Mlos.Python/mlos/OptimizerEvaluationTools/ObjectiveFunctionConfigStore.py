@@ -2,12 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
-from mlos.Spaces.Configs import ComponentConfigStore
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Flower import Flower
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.HypersphereConfigStore import hypersphere_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces.Configs import ComponentConfigStore
 
 objective_function_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
@@ -18,6 +20,7 @@ objective_function_config_store = ComponentConfigStore(
                 NestedPolynomialObjective.__name__,
                 PolynomialObjective.__name__,
                 ThreeLevelQuadratic.__name__,
+                Hypersphere.__name__
             ])
         ]
     ).join(
@@ -35,6 +38,9 @@ objective_function_config_store = ComponentConfigStore(
             on_external_dimension=CategoricalDimension(name="nested_function_implementation", values=[PolynomialObjective.__name__])
         ),
         on_external_dimension=CategoricalDimension(name="implementation", values=[NestedPolynomialObjective.__name__])
+    ).join(
+        subgrid=hypersphere_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension(name="implementation", values=[Hypersphere.__name__])
     ),
     default=Point(
         implementation=PolynomialObjective.__name__,
@@ -156,3 +162,13 @@ objective_function_config_store.add_config_by_name(
         )
     )
 )
+
+for named_hypersphere_config in hypersphere_config_store.list_named_configs():
+    objective_function_config_store.add_config_by_name(
+        config_name=named_hypersphere_config.name,
+        config_point=Point(
+            implementation=Hypersphere.__name__,
+            hypersphere_config=named_hypersphere_config.config_point,
+            description=named_hypersphere_config.description
+        )
+    )

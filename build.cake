@@ -29,6 +29,11 @@ string ObjectDirectory
     }
 }
 
+bool IsRunningInGithub()
+{
+    return !string.IsNullOrEmpty(EnvironmentVariable<string>("GITHUB_WORKFLOW", ""));
+}
+
 var MsBuildSettings = new DotNetCoreMSBuildSettings { MaxCpuCount = 0 };
 
 //
@@ -231,7 +236,6 @@ Task("Run-MSBuild-UnitTests")
 
 Task("Generate-CMake")
     .WithCriteria(() => IsRunningOnUnix())
-    .IsDependentOn("Build-NetCore")
     .Does(() =>
     {
         var cmakeSettings = new CMakeSettings
@@ -239,6 +243,10 @@ Task("Generate-CMake")
             Generator = "Unix Makefiles",
             OutputPath = $"{CMakeBuildDir}",
             SourcePath = ".",
+            Options = new[]
+            {
+                $"-DCMAKE_BUILD_TYPE={CMakeConfiguration}",
+            },
         };
 
         CMake(cmakeSettings);
@@ -303,6 +311,7 @@ Task("Binplace-CMake")
 
 Task("Test-CMake")
     .WithCriteria(() => IsRunningOnUnix())
+    .WithCriteria(() => !IsRunningInGithub()) // github pipelines already test this via `make cmake-test`
     .IsDependentOn("Binplace-CMake")
     .Does(() =>
     {
@@ -327,6 +336,8 @@ Task("Test-CMake")
     });
 
 
+// This does *almost* the same thing as Test-CMake but using the Mlos.TestRun.proj to invoke the tests instead of ctest.
+//
 Task("Run-CMake-UnitTests")
     .IsDependentOn("Binplace-CMake")
     .WithCriteria(() => IsRunningOnUnix())
