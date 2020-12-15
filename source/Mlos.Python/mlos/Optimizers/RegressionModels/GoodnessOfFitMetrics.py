@@ -41,7 +41,7 @@ class GoodnessOfFitMetrics(NamedTuple):
     # sample_95_ci_hit_rate: float = None
     # sample_99_ci_hit_rate: float = None
 
-    def to_json(self):
+    def to_json(self, indent=None):
         return json.dumps({
             "last_refit_iteration_number": self.last_refit_iteration_number,
             "observation_count": self.observation_count,
@@ -54,7 +54,7 @@ class GoodnessOfFitMetrics(NamedTuple):
             "coefficient_of_determination": self.coefficient_of_determination,
             "prediction_90_ci_hit_rate": self.prediction_90_ci_hit_rate,
             "sample_90_ci_hit_rate": self.sample_90_ci_hit_rate
-        })
+        }, indent=indent)
 
     @classmethod
     def from_json(cls, json_string):
