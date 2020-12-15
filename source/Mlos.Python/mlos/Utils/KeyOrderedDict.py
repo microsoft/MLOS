@@ -49,5 +49,4 @@ class KeyOrderedDict:
         raise ValueError(f"{key_or_index} is neither an int nor a str.")
 
     def to_json(self):
-        return json.dumps(**{key: value for key, value in self})
-
+        return json.dumps({key: value.to_json() for key, value in self})

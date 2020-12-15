@@ -11,7 +11,7 @@ from mlos.global_values import deserialize_from_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
-from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitMetrics
+from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Spaces import Point
@@ -77,7 +77,7 @@ class BayesianOptimizerProxy(OptimizerBase):
     @trace()
     def compute_surrogate_model_goodness_of_fit(self):
         response = self._optimizer_stub.ComputeGoodnessOfFitMetrics(self.optimizer_handle)
-        return GoodnessOfFitMetrics.from_json(response.Value)
+        return MultiObjectiveGoodnessOfFitMetrics.from_json(response.Value, objective_names=self.optimization_problem.objective_space.dimension_names)
 
     @trace()
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
