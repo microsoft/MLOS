@@ -11,6 +11,7 @@ from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import 
 from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
 from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
@@ -54,6 +55,12 @@ class MultiObjectiveHomogeneousRandomForest(MultiObjectiveRegressionModel):
                 logger=self.logger
             )
             self._regressors_by_objective_name[output_dimension.name] = random_forest
+
+    @property
+    def fit_state(self) -> MultiObjectiveRegressionModelFitState:
+        multi_objective_fit_state = MultiObjectiveRegressionModelFitState(objective_names=self.output_dimension_names)
+        for objective_name, random_forest in self._regressors_by_objective_name:
+            multi_objective_fit_state[objective_name] = random_forest.fit_state
 
     def fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, iteration_number: int) -> None:
         for objective_name, random_forest in self._regressors_by_objective_name:

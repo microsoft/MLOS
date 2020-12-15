@@ -12,8 +12,10 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Tracer import trace
-from mlos.Spaces import Point, SimpleHypergrid
+from mlos.Spaces import Point
 
 
 
@@ -47,24 +49,16 @@ class BayesianOptimizer(OptimizerBase):
         assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
         OptimizerBase.__init__(self, optimization_problem)
 
-        # Since the optimization_problem.objective_space can now be multi-dimensional (as a milestone towards multi-objective
-        # optimization), we have to prepare a smaller objective space for the surrogate model.
-        # TODO: create multiple models each predicting a different objective. Also consider multi-objective models.
-        #
         assert not optimization_problem.objective_space.is_hierarchical(), "Not supported."
-        only_objective = optimization_problem.objectives[0]
-        self.surrogate_model_output_space = SimpleHypergrid(
-            name="surrogate_model_output_space",
-            dimensions=[optimization_problem.objective_space[only_objective.name]]
-        )
-
         assert optimizer_config in bayesian_optimizer_config_store.parameter_space, "Invalid config."
+
+        self.surrogate_model_output_space = optimization_problem.objective_space
         self.optimizer_config = optimizer_config
 
         # Now let's put together the surrogate model.
         #
         assert self.optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__, "TODO: implement more"
-        self.surrogate_model = HomogeneousRandomForestRegressionModel(
+        self.surrogate_model: MultiObjectiveRegressionModel= MultiObjectiveHomogeneousRandomForest(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.feature_space,
             output_space=self.surrogate_model_output_space,
@@ -188,8 +182,8 @@ class BayesianOptimizer(OptimizerBase):
             feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
                 parameter_values=self._parameter_values_df, context_values=self._context_values_df)
             self.surrogate_model.fit(
-                feature_values_pandas_frame=feature_values_pandas_frame,
-                target_values_pandas_frame=self._target_values_df,
+                features_df=feature_values_pandas_frame,
+                targets_df=self._target_values_df,
                 iteration_number=len(self._parameter_values_df.index)
             )
 
