@@ -22,7 +22,7 @@ class PredictedValueUtilityFunction(UtilityFunction):
     def __call__(self, feature_values_pandas_frame):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
-        predictions = self.surrogate_model.predict(feature_values_pandas_frame=feature_values_pandas_frame)
+        predictions = self.surrogate_model.predict(features_df=feature_values_pandas_frame)[0]
         predictions_df = predictions.get_dataframe()
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
 
