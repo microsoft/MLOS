@@ -169,7 +169,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 
         feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
-        target_values_pandas_frame = self._output_space_adapter.project_dataframe(target_values_pandas_frame)
+        target_values_pandas_frame = self._output_space_adapter.project_dataframe(target_values_pandas_frame, in_place=False)
 
         for i, tree in enumerate(self._decision_trees):
             # Let's filter out samples with missing values

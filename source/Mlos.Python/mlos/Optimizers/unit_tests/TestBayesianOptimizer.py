@@ -258,7 +258,7 @@ class TestBayesianOptimizer:
                     random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()[0]
                     print(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}, Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
 
-            random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
+            random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()[0]
             assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
             models_gof_metrics = [random_forest_gof_metrics]
 
@@ -456,9 +456,11 @@ class TestBayesianOptimizer:
             optimizer.register(input.to_dataframe(), output.to_dataframe())
 
         num_predictions = 100
-        prediction = optimizer.predict(parameter_values_pandas_frame=optimization_problem.parameter_space.random_dataframe(num_predictions))
-        prediction_df = prediction.get_dataframe()
-        assert len(prediction_df.index) == num_predictions
+        multi_objective_predictions = optimizer.predict(parameter_values_pandas_frame=optimization_problem.parameter_space.random_dataframe(num_predictions))
+
+        for objective_name, prediction in multi_objective_predictions:
+            prediction_df = prediction.get_dataframe()
+            assert len(prediction_df.index) == num_predictions
 
         # Let's test invalid observations.
         #
