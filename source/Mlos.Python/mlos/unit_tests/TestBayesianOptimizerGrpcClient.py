@@ -45,14 +45,14 @@ class TestBayesianOptimizerGrpcClient:
             try:
                 self.server = OptimizerMicroserviceServer(port=port, num_threads=10)
                 self.server.start()
-                self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
+                self.port = port
                 break
             except:
                 self.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}")
                 if num_tries == max_num_tries:
                     raise
 
-
+        self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{self.port}')
         self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
         self.optimizer_monitor = OptimizerMonitor(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 

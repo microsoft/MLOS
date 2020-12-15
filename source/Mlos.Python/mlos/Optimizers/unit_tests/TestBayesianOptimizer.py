@@ -46,6 +46,7 @@ class TestBayesianOptimizer:
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
         cls.logger = create_logger(logger_name=cls.__name__)
+        cls.port = None
 
         # Start up the gRPC service. Try a bunch of ports, before giving up so we can do several in parallel.
 
@@ -57,7 +58,7 @@ class TestBayesianOptimizer:
             try:
                 cls.server = OptimizerMicroserviceServer(port=port, num_threads=10)
                 cls.server.start()
-                cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
+                cls.port = port
                 break
             except:
                 cls.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}.")
@@ -65,6 +66,7 @@ class TestBayesianOptimizer:
                 if num_tries == max_num_tries:
                     raise
 
+        cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{cls.port}')
         cls.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=cls.optimizer_service_channel, logger=cls.logger)
 
 
@@ -170,7 +172,9 @@ class TestBayesianOptimizer:
 
         output_space = SimpleHypergrid(
             name="output",
-            dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)])
+            dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)]
+        )
+
         optimization_problem = OptimizationProblem(
             parameter_space=input_space,
             objective_space=output_space,
@@ -188,23 +192,16 @@ class TestBayesianOptimizer:
         bayesian_optimizer.optimum()
 
     @trace()
-    @pytest.mark.parametrize("restart_num", [i for i in range(2)])
-    @pytest.mark.parametrize("use_remote_optimizer", [True, False])
+    @pytest.mark.parametrize('restart_num', [i for i in range(2)])
+    @pytest.mark.parametrize('use_remote_optimizer', [True])
     def test_hierarchical_quadratic_cold_start(self, restart_num, use_remote_optimizer):
 
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
-        output_space = SimpleHypergrid(
-            name="output",
-            dimensions=[
-                ContinuousDimension(name='y', min=-math.inf, max=math.inf)
-            ]
-        )
-
         optimization_problem = OptimizationProblem(
             parameter_space=objective_function.parameter_space,
-            objective_space=output_space,
+            objective_space=objective_function.output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
 
