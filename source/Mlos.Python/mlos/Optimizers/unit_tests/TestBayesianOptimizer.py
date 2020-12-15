@@ -166,14 +166,10 @@ class TestBayesianOptimizer:
 
     @trace()
     def test_optimum_before_register_error(self):
-        input_space = SimpleHypergrid(
-            name="input",
-            dimensions=[ContinuousDimension(name='x', min=-10, max=10)])
 
-        output_space = SimpleHypergrid(
-            name="output",
-            dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)]
-        )
+        input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name='x', min=-10, max=10)])
+
+        output_space = SimpleHypergrid(name="output", dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)])
 
         optimization_problem = OptimizationProblem(
             parameter_space=input_space,
@@ -188,7 +184,7 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError):
             bayesian_optimizer.optimum()
 
-        bayesian_optimizer.register(parameter_values_pandas_frame=pd.DataFrame({'x': [0.]}), target_values_pandas_frame=pd.DataFrame({'y': [1.]}))
+        bayesian_optimizer.register(parameter_values_pandas_frame=pd.DataFrame({'x': [0.0]}), target_values_pandas_frame=pd.DataFrame({'y': [1.0]}))
         bayesian_optimizer.optimum()
 
     @trace()
@@ -213,13 +209,13 @@ class TestBayesianOptimizer:
         optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.min_samples_to_fit = 10
         optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 2
 
-        if not use_remote_optimizer:
-            bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+        if use_remote_optimizer:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
                 optimization_problem=optimization_problem,
                 optimizer_config=optimizer_config
             )
         else:
-            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
                 optimization_problem=optimization_problem,
                 optimizer_config=optimizer_config
             )
@@ -234,8 +230,10 @@ class TestBayesianOptimizer:
                 param_name: [param_value]
                 for param_name, param_value in suggested_params
             })
+
             target_values_df = y.to_dataframe()
             bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+
         best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
         print(f"[Restart:  {restart_num}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
         self.validate_optima(optimizer=bayesian_optimizer)
@@ -277,13 +275,13 @@ class TestBayesianOptimizer:
         print(optimizer_config.to_json(indent=2))
 
 
-        if not use_remote_optimizer:
-            bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+        if use_remote_optimizer:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
                 optimization_problem=optimization_problem,
                 optimizer_config=optimizer_config
             )
         else:
-            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
                 optimization_problem=optimization_problem,
                 optimizer_config=optimizer_config
             )
