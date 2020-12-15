@@ -9,7 +9,7 @@ pushd "%~dp0\.."
 
 rem Note: Windows filesystems are case insensitive so the -p "[Tt]est*.py"
 rem argument isn't strictly necessary, but we keep it for parity with Linux.
-pytest -svx source\Mlos.Python
+pytest -svx -n auto source\Mlos.Python
 
 popd
 @echo on
