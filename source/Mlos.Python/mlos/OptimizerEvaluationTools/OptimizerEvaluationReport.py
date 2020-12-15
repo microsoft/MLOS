@@ -7,7 +7,7 @@ import os
 import pickle
 from typing import Dict, List
 from mlos.OptimizerEvaluationTools.OptimumOverTime import OptimumOverTime
-from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
 from mlos.Spaces import Point
 from mlos.Tracer import Tracer
 
@@ -40,7 +40,7 @@ class OptimizerEvaluationReport:
             pickled_objective_function_final_state: str = None,
             num_optimization_iterations: int = None,
             evaluation_frequency: int = None,
-            regression_model_goodness_of_fit_state: RegressionModelFitState = None,
+            regression_model_goodness_of_fit_state: MultiObjectiveRegressionModelFitState = None,
             optima_over_time: Dict[str, OptimumOverTime] = None,
             execution_trace: List[Dict[str, object]] = None
     ):

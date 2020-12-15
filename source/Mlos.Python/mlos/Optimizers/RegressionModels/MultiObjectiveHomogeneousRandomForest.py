@@ -62,6 +62,12 @@ class MultiObjectiveHomogeneousRandomForest(MultiObjectiveRegressionModel):
         for objective_name, random_forest in self._regressors_by_objective_name:
             multi_objective_fit_state[objective_name] = random_forest.fit_state
 
+        return multi_objective_fit_state
+
+    @property
+    def trained(self) -> bool:
+        return all(random_forest.trained for _, random_forest in self._regressors_by_objective_name)
+
     def fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, iteration_number: int) -> None:
         for objective_name, random_forest in self._regressors_by_objective_name:
             if objective_name not in targets_df.columns:

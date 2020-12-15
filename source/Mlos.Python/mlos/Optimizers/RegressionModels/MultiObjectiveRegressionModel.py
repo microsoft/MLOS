@@ -37,6 +37,11 @@ class MultiObjectiveRegressionModel(ABC):
     def fit_state(self) -> MultiObjectiveRegressionModelFitState:
         raise NotImplementedError
 
+    @property
+    @abstractmethod
+    def trained(self) -> bool:
+        raise NotImplementedError
+
     @abstractmethod
     def fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, iteration_number: int) -> None:
         raise NotImplementedError

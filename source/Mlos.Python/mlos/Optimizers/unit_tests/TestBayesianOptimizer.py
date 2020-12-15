@@ -255,7 +255,7 @@ class TestBayesianOptimizer:
                     assert optimum.y <= old_optimum
                     old_optimum = optimum.y
                     self.validate_optima(optimizer=bayesian_optimizer)
-                    random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
+                    random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()[0]
                     print(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}, Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
 
             random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
@@ -625,7 +625,7 @@ class TestBayesianOptimizer:
             should_raise_for_confidence_bounds = True
         else:
             parameters_df, _, _ = optimizer.get_all_observations()
-            predictions = optimizer.predict(parameter_values_pandas_frame=parameters_df)
+            predictions = optimizer.predict(parameter_values_pandas_frame=parameters_df)[0]
             predictions_df = predictions.get_dataframe()
 
             if len(predictions_df.index) == 0:

@@ -110,7 +110,7 @@ class BayesianOptimizer(OptimizerBase):
                                                                                             context_values=self._context_values_df.copy())
         return self.surrogate_model.compute_goodness_of_fit(
             features_df=feature_values_pandas_frame,
-            target_df=self._target_values_df.copy(),
+            targets_df=self._target_values_df.copy(),
             data_set_type=DataSetType.TRAIN
         )
 

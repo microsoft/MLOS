@@ -128,7 +128,7 @@ class OptimizerBase(ABC):
     @trace()
     def _prediction_based_optimum(self, parameters_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
-        predictions = self.predict(parameter_values_pandas_frame=parameters_df)
+        predictions = self.predict(parameter_values_pandas_frame=parameters_df)[0]
         predictions_df = predictions.get_dataframe()
 
         if len(predictions_df.index) == 0:
