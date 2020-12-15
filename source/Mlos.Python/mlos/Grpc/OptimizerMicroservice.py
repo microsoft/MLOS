@@ -185,7 +185,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         features_dict = json.loads(request.Features.FeaturesJsonString)
         features_df = pd.DataFrame(features_dict)
         with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            prediction = optimizer.predict(features_df)
+            prediction = optimizer.predict(features_df)[0]
         assert isinstance(prediction, Prediction)
 
         response = OptimizerService_pb2.PredictResponse(

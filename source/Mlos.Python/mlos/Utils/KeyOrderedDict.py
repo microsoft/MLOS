@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import json
 from typing import Dict, Iterator, List, Tuple, Union
 
 class KeyOrderedDict:
@@ -46,3 +47,7 @@ class KeyOrderedDict:
         if isinstance(key_or_index, int):
             return self._ordered_keys[key_or_index]
         raise ValueError(f"{key_or_index} is neither an int nor a str.")
+
+    def to_json(self):
+        return json.dumps(**{key: value for key, value in self})
+

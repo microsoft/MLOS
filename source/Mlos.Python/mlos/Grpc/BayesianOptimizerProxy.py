@@ -13,6 +13,7 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Spaces import Point
 from mlos.Tracer import trace
 
@@ -140,7 +141,9 @@ class BayesianOptimizerProxy(OptimizerBase):
         objective_name = only_prediction_pb2.ObjectiveName
         valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
         prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
-        return prediction
+        multi_objective_prediction = MultiObjectivePrediction(objective_names=[objective_name])
+        multi_objective_prediction[objective_name] = prediction
+        return multi_objective_prediction
 
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
         pass
