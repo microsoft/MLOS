@@ -13,6 +13,7 @@ from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesi
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
+from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Tracer import trace
 from mlos.Spaces import Point
@@ -28,7 +29,7 @@ class BayesianOptimizer(OptimizerBase):
     ----------
     logger : Logger
     optimization_problem : OptimizationProblem
-    surrogate_model : HomogeneousRandomForestRegressionModel
+    surrogate_model : MultiObjectiveRegressionModel
     optimizer_config : Point
     experiment_designer: ExperimentDesigner
 
@@ -46,7 +47,6 @@ class BayesianOptimizer(OptimizerBase):
 
         # Let's initialize the optimizer.
         #
-        assert len(optimization_problem.objectives) == 1, "For now this is a single-objective optimizer."
         OptimizerBase.__init__(self, optimization_problem)
 
         assert not optimization_problem.objective_space.is_hierarchical(), "Not supported."
@@ -57,7 +57,11 @@ class BayesianOptimizer(OptimizerBase):
 
         # Now let's put together the surrogate model.
         #
-        assert self.optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__, "TODO: implement more"
+        assert self.optimizer_config.surrogate_model_implementation in (
+            HomogeneousRandomForestRegressionModel.__name__,
+            MultiObjectiveHomogeneousRandomForest.__name__
+        )
+
         self.surrogate_model: MultiObjectiveRegressionModel= MultiObjectiveHomogeneousRandomForest(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.feature_space,
@@ -188,11 +192,12 @@ class BayesianOptimizer(OptimizerBase):
             )
 
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument
-        # TODO: make this streaming and/or using arrow.
-        #
-        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=parameter_values_pandas_frame,
-                                                                                            context_values=context_values_pandas_frame)
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> MultiObjectivePrediction:  # pylint: disable=unused-argument
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(\
+            parameter_values=parameter_values_pandas_frame,
+            context_values=context_values_pandas_frame
+        )
+
         return self.surrogate_model.predict(feature_values_pandas_frame)
 
     def focus(self, subspace):

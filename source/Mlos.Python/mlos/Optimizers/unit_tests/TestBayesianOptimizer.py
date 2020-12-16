@@ -630,7 +630,8 @@ class TestBayesianOptimizer:
             should_raise_for_confidence_bounds = True
         else:
             parameters_df, _, _ = optimizer.get_all_observations()
-            predictions = optimizer.predict(parameter_values_pandas_frame=parameters_df)[0]
+            multi_objective_predictions = optimizer.predict(parameter_values_pandas_frame=parameters_df)
+            predictions = multi_objective_predictions[0]
             predictions_df = predictions.get_dataframe()
 
             if len(predictions_df.index) == 0:

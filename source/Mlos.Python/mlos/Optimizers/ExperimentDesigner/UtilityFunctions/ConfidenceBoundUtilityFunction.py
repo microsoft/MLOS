@@ -51,7 +51,8 @@ class ConfidenceBoundUtilityFunction(UtilityFunction):
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
-        predictions = self.surrogate_model.predict(features_df=feature_values_pandas_frame)[0]
+        multi_objective_predictions = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
+        predictions = multi_objective_predictions[0]
         predictions_df = predictions.get_dataframe()
 
         t_values = t.ppf(1 - self.config.alpha / 2.0, predictions_df[dof_col])
