@@ -6,8 +6,12 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using Mlos.Core.Internal;
+using System;
 
+using Mlos.Core.Internal;
+using Proxy.Mlos.Core.Internal;
+
+using MlosInternal = Mlos.Core.Internal;
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
 namespace Mlos.Core.Linux
@@ -18,42 +22,36 @@ namespace Mlos.Core.Linux
     /// </summary>
     public class AnonymousMemoryMlosContext : MlosContext
     {
-        // File exchange Unix domain socket name.
+        // Path to the folder where Unix domain socket name.
         //
-        private const string FdUnitDomainSocketName = "/tmp/mlos.sock";
-
-        // Synchronization semaphore names.
-        //
-        private const string FdExchangeSemaphoreName = "mlos_fd_exchange";
-        private const string ControlChannelSemaphoreName = "mlos_control_channel_event";
-        private const string FeedbackChannelSemaphoreName = "mlos_feedback_channel_event";
+        private const string DefaultSocketFolderPath = "/var/tmp/mlos/";
 
         /// <summary>
-        /// Creates InterProcessMlosContext.
+        /// Creates AnonymousMemoryMlosContext.
         /// </summary>
         /// <returns></returns>
         public static AnonymousMemoryMlosContext Create()
         {
-            var fdExchangeServer = new FileDescriptorExchangeServer(FdUnitDomainSocketName, FdExchangeSemaphoreName);
+            var fdExchangeServer = new FileDescriptorExchangeServer(DefaultSocketFolderPath);
             fdExchangeServer.HandleRequests();
 
-            MemoryRegionId memoryRegionId = new MemoryRegionId { Type = MemoryRegionType.Global };
+            var memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.Global, Index = 0 };
             SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView =
                 SharedMemoryRegionView.OpenAnonymousFromFileDescriptor<MlosProxyInternal.GlobalMemoryRegion>(
                     fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
                     fdExchangeServer.GetSharedMemorySize(memoryRegionId));
 
-            memoryRegionId = new MemoryRegionId { Type = MemoryRegionType.ControlChannel };
+            memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.ControlChannel, Index = 0 };
             SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.OpenAnonymousFromFileDescriptor(
                 fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
                 fdExchangeServer.GetSharedMemorySize(memoryRegionId));
 
-            memoryRegionId = new MemoryRegionId { Type = MemoryRegionType.FeedbackChannel };
+            memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.FeedbackChannel, Index = 0 };
             SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.OpenAnonymousFromFileDescriptor(
                 fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
                 fdExchangeServer.GetSharedMemorySize(memoryRegionId));
 
-            memoryRegionId = new MemoryRegionId { Type = MemoryRegionType.SharedConfig };
+            memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.SharedConfig, Index = 0 };
             SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryRegionView =
                 SharedMemoryRegionView.OpenAnonymousFromFileDescriptor<MlosProxyInternal.SharedConfigMemoryRegion>(
                 fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
@@ -61,8 +59,15 @@ namespace Mlos.Core.Linux
 
             // Create channel synchronization primitives.
             //
-            NamedEvent controlChannelNamedEvent = NamedEvent.CreateOrOpen(ControlChannelSemaphoreName);
-            NamedEvent feedbackChannelNamedEvent = NamedEvent.CreateOrOpen(FeedbackChannelSemaphoreName);
+            MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
+
+            globalMemoryRegion.TryOpenExisting(
+                new MlosInternal.MemoryRegionId { Type = MemoryRegionType.ControlChannel, Index = 0, },
+                out NamedEvent controlChannelNamedEvent);
+
+            globalMemoryRegion.TryOpenExisting(
+                new MlosInternal.MemoryRegionId { Type = MemoryRegionType.FeedbackChannel, Index = 0, },
+                out NamedEvent feedbackChannelNamedEvent);
 
             return new AnonymousMemoryMlosContext(
                 globalMemoryRegionView,
@@ -93,12 +98,12 @@ namespace Mlos.Core.Linux
             NamedEvent feedbackChannelNamedEvent,
             FileDescriptorExchangeServer fileDescriptorExchangeServer)
         {
-            this.globalMemoryRegionView = globalMemoryRegionView;
-            this.controlChannelMemoryMapView = controlChannelMemoryMapView;
-            this.feedbackChannelMemoryMapView = feedbackChannelMemoryMapView;
+            this.globalMemoryRegionView = globalMemoryRegionView ?? throw new ArgumentNullException(nameof(globalMemoryRegionView));
+            this.controlChannelMemoryMapView = controlChannelMemoryMapView ?? throw new ArgumentNullException(nameof(controlChannelMemoryMapView));
+            this.feedbackChannelMemoryMapView = feedbackChannelMemoryMapView ?? throw new ArgumentNullException(nameof(feedbackChannelMemoryMapView));
 
-            this.controlChannelNamedEvent = controlChannelNamedEvent;
-            this.feedbackChannelNamedEvent = feedbackChannelNamedEvent;
+            this.controlChannelNamedEvent = controlChannelNamedEvent ?? throw new ArgumentNullException(nameof(controlChannelNamedEvent));
+            this.feedbackChannelNamedEvent = feedbackChannelNamedEvent ?? throw new ArgumentNullException(nameof(feedbackChannelNamedEvent));
 
             this.fileDescriptorExchangeServer = fileDescriptorExchangeServer;
 

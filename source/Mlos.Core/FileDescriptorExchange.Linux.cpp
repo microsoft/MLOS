@@ -80,7 +80,7 @@ void FileDescriptorExchange::Close()
 // NOTES:
 //
 _Must_inspect_result_
-HRESULT FileDescriptorExchange::Connect(_In_z_ const char* socketName)
+HRESULT FileDescriptorExchange::Connect(_In_z_ char* socketName)
 {
     // Close established connection.
     //
@@ -114,6 +114,14 @@ HRESULT FileDescriptorExchange::Connect(_In_z_ const char* socketName)
     return hr;
 }
 
+// Structure used for storage of ancillary data object information of type int32_t.
+//
+union ControlMessage
+{
+    struct cmsghdr Header;
+    char message[CMSG_SPACE(sizeof(int32_t))];
+};
+
 //----------------------------------------------------------------------------
 // NAME: SendMessageAndFileDescriptor
 //
@@ -134,22 +142,19 @@ HRESULT SendMessageAndFileDescriptor(
     struct msghdr msg {};
     struct iovec iov[IoVecLength];
 
-    union
-    {
-        struct cmsghdr cm;
-        char control[CMSG_SPACE(sizeof(int))];
-    } control_un;
     struct cmsghdr* cmptr;
 
-    msg.msg_control = control_un.control;
-    msg.msg_controllen = sizeof(control_un.control);
+    ControlMessage controlMessage {};
+
+    msg.msg_control = controlMessage.message;
+    msg.msg_controllen = sizeof(controlMessage.message);
 
     cmptr = CMSG_FIRSTHDR(&msg);
     cmptr->cmsg_len = CMSG_LEN(sizeof(int));
     cmptr->cmsg_level = SOL_SOCKET;
     cmptr->cmsg_type = SCM_RIGHTS;
-    int* cm_data_ptr = reinterpret_cast<int*>(CMSG_DATA(cmptr));
-    *cm_data_ptr = exchangeFd;
+    int32_t* commandDataPtr = reinterpret_cast<int32_t*>(CMSG_DATA(cmptr));
+    *commandDataPtr = exchangeFd;
 
     msg.msg_name = nullptr;
     msg.msg_namelen = 0;
@@ -196,28 +201,25 @@ HRESULT ReceiveMessageAndFileDescriptor(
     HRESULT hr = S_OK;
     receivedFd = INVALID_FD_VALUE;
 
-    struct msghdr msg {};
+    struct msghdr message {};
     struct iovec iov[IoVecLength];
 
-    union
-    {
-        struct cmsghdr cm;
-        char control[CMSG_SPACE(sizeof(int))];
-    } control_un;
+    ControlMessage controlMessage {};
+
     struct cmsghdr* cmptr = nullptr;
 
-    msg.msg_control = control_un.control;
-    msg.msg_controllen = sizeof(control_un.control);
+    message.msg_control = controlMessage.message;
+    message.msg_controllen = sizeof(controlMessage.message);
 
-    msg.msg_name = nullptr;
-    msg.msg_namelen = 0;
+    message.msg_name = nullptr;
+    message.msg_namelen = 0;
 
     iov[0].iov_base = bufferPtr;
     iov[0].iov_len = bufferSize;
-    msg.msg_iov = iov;
-    msg.msg_iovlen = IoVecLength;
+    message.msg_iov = iov;
+    message.msg_iovlen = IoVecLength;
 
-    ssize_t receivedBytes = recvmsg(socketFd, &msg, 0);
+    ssize_t receivedBytes = recvmsg(socketFd, &message, 0);
     if (receivedBytes == -1)
     {
         hr = HRESULT_FROM_ERRNO(errno);
@@ -235,7 +237,7 @@ HRESULT ReceiveMessageAndFileDescriptor(
 
     if (SUCCEEDED(hr))
     {
-        cmptr = CMSG_FIRSTHDR(&msg);
+        cmptr = CMSG_FIRSTHDR(&message);
     }
 
     if (cmptr != nullptr)
@@ -243,8 +245,8 @@ HRESULT ReceiveMessageAndFileDescriptor(
         if (cmptr->cmsg_len == CMSG_LEN(sizeof(int)) &&
             cmptr->cmsg_type == SCM_RIGHTS)
         {
-            int* cm_data_ptr = reinterpret_cast<int*>(CMSG_DATA(cmptr));
-            receivedFd = *cm_data_ptr;
+            int32_t* commandDataPtr = reinterpret_cast<int32_t*>(CMSG_DATA(cmptr));
+            receivedFd = *commandDataPtr;
         }
         else
         {

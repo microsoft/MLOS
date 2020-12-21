@@ -16,35 +16,31 @@ using Mlos.Core.Internal;
 
 namespace Mlos.Core.Linux
 {
-    internal struct AnonymousSharedMemory
-    {
-        internal IntPtr SharedMemoryFd;
-
-        internal ulong SharedMemorySize;
-    }
-
     /// <summary>
     /// FileDescriptor exchange server.
     /// </summary>
-    public class FileDescriptorExchangeServer : IDisposable
+    public sealed class FileDescriptorExchangeServer : IDisposable
     {
+        internal struct AnonymousSharedMemory
+        {
+            internal IntPtr SharedMemoryFd;
+
+            internal ulong SharedMemorySize;
+        }
+
         private readonly Dictionary<MemoryRegionId, AnonymousSharedMemory> fileDescriptors = new Dictionary<MemoryRegionId, AnonymousSharedMemory>();
 
-        private readonly string socketName;
-
-        private readonly string semaphoreName;
+        private readonly string socketFolderPath;
 
         private Socket serverSocket;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileDescriptorExchangeServer"/> class.
         /// </summary>
-        /// <param name="socketName"></param>
-        /// <param name="semaphoreName"></param>
-        public FileDescriptorExchangeServer(string socketName, string semaphoreName)
+        /// <param name="socketFolderPath"></param>
+        public FileDescriptorExchangeServer(string socketFolderPath)
         {
-            this.socketName = socketName;
-            this.semaphoreName = semaphoreName;
+            this.socketFolderPath = socketFolderPath;
         }
 
         /// <summary>
@@ -52,19 +48,29 @@ namespace Mlos.Core.Linux
         /// </summary>
         public void HandleRequests()
         {
-            File.Delete(socketName);
+            // Ensure the folder containing the socket file is created.
+            //
+            Directory.CreateDirectory(socketFolderPath);
+
+            string socketName = Path.Combine(socketFolderPath, "mlos.sock");
+            string openFilePath = Path.Combine(socketFolderPath, "mlos.opened");
+
+            // Unix domain sockets (AF_UNIX) does not support SO_REUSEADDR, unlink the file.
+            //
+            _ = Native.FileSystemUnlink(socketName);
 
             serverSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
 
             // Start listening on the Unix socket.
             //
             serverSocket.Bind(new UnixDomainSocketEndPoint(socketName));
+
             serverSocket.Listen(backlog: 1);
 
-            // Signal the target process, the Agent is ready.
+            // Create or update the opened socket file,
+            // to signal the target process that the agent is ready to receive the file descriptors.
             //
-            using NamedEvent namedEvent = NamedEvent.CreateOrOpen(semaphoreName);
-            namedEvent.Signal();
+            File.WriteAllText(openFilePath, string.Empty);
             {
                 // Accept the connection and obtain the list of the shared memory regions.
                 //
@@ -167,7 +173,7 @@ namespace Mlos.Core.Linux
         /// </summary>
         /// <param name="memoryRegionId"></param>
         /// <returns></returns>
-        public IntPtr GetSharedMemoryFd(MemoryRegionId memoryRegionId)
+        internal IntPtr GetSharedMemoryFd(MemoryRegionId memoryRegionId)
         {
             return fileDescriptors[memoryRegionId].SharedMemoryFd;
         }
@@ -177,16 +183,16 @@ namespace Mlos.Core.Linux
         /// </summary>
         /// <param name="memoryRegionId"></param>
         /// <returns></returns>
-        public ulong GetSharedMemorySize(MemoryRegionId memoryRegionId)
+        internal ulong GetSharedMemorySize(MemoryRegionId memoryRegionId)
         {
             return fileDescriptors[memoryRegionId].SharedMemorySize;
         }
 
         /// <summary>
-        /// Protected implementation of Dispose pattern.
+        /// Implementation of Dispose pattern.
         /// </summary>
         /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
             {
@@ -209,10 +215,6 @@ namespace Mlos.Core.Linux
             // Dispose of unmanaged resources.
             //
             Dispose(true);
-
-            // Suppress finalization.
-            //
-            GC.SuppressFinalize(this);
         }
 
         private bool isDisposed;

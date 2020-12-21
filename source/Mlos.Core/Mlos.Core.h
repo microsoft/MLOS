@@ -74,9 +74,9 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 
 // Define macros.
 //
-#define MLOS_RETAIL_ASSERT(result) { if (!result) Mlos::Core::MlosPlatform::TerminateProcess(); }
-#define MLOS_UNUSED_ARG(x) (void)x
-#define MLOS_IGNORE_HR(x) (void)x
+#define MLOS_RETAIL_ASSERT(result) if (!(result)) { Mlos::Core::MlosPlatform::TerminateProcess(); }
+#define MLOS_UNUSED_ARG(x) (void)(x)
+#define MLOS_IGNORE_HR(x) (void)(x)
 
 #ifdef _MSC_VER
 #define MLOS_SELECTANY_ATTR __declspec(selectany)
@@ -147,12 +147,14 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "AlignedInstance.h"
 #include "AlignedVector.h"
 #include "MlosContext.h"
+#include "MlosInitializer.h"
 #include "InternalMlosContext.h"
 #include "InterProcessMlosContext.h"
 
 // Implementation.
 //
 #include "MlosContext.inl"
+#include "MlosInitializer.inl"
 #include "ComponentConfig.inl"
 #include "SharedChannel.inl"
 #include "SharedConfigDictionaryLookup.inl"
@@ -175,10 +177,10 @@ constexpr uint32_t DispatchTableBaseIndex() { return 0; }
 // Define a default Mlos context factory.
 //
 #ifdef _WIN64
-using DefaultMlosContextFactory = Mlos::Core::MlosContextFactory<Mlos::Core::InterProcessMlosContext>;
+using DefaultMlosInitializer = Mlos::Core::MlosInitializer<Mlos::Core::InterProcessMlosContext>;
 #else
 #include "AnonymousMemoryMlosContext.Linux.h"
-using DefaultMlosContextFactory = Mlos::Core::MlosContextFactory<Mlos::Core::AnonymousMemoryMlosContext>;
+using DefaultMlosInitializer = Mlos::Core::MlosInitializer<Mlos::Core::AnonymousMemoryMlosContext>;
 #endif
 
 // Restore min/max macros.

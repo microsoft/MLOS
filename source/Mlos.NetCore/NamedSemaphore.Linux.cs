@@ -26,7 +26,34 @@ namespace Mlos.Core.Linux
         {
             var namedSemaphore = new NamedSemaphore(name, Native.OpenFlags.O_CREAT);
 
+            if (namedSemaphore.semaphoreHandle.IsInvalid)
+            {
+                throw new IOException(
+                    $"Failed to create a NamedSemaphore {name}",
+                    innerException: new Win32Exception(Marshal.GetLastWin32Error()));
+            }
+
             return namedSemaphore;
+        }
+
+        /// <summary>
+        /// Tries to open an existing semaphore.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="namedEvent"></param>
+        /// <returns></returns>
+        public static new bool TryOpenExisting(string name, out NamedEvent namedEvent)
+        {
+            var semaphore = new NamedSemaphore(name, Native.OpenFlags.O_RDWR);
+
+            if (semaphore.semaphoreHandle.IsInvalid)
+            {
+                namedEvent = null;
+                return false;
+            }
+
+            namedEvent = semaphore;
+            return true;
         }
 
         private NamedSemaphore(string name, Native.OpenFlags openFlags)
@@ -36,13 +63,6 @@ namespace Mlos.Core.Linux
                 openFlags,
                 Native.ModeFlags.S_IRUSR | Native.ModeFlags.S_IWUSR,
                 0);
-
-            if (semaphoreHandle.IsInvalid)
-            {
-                throw new IOException(
-                    $"Failed to create a NamedSemaphore {name}",
-                    innerException: new Win32Exception(Marshal.GetLastWin32Error()));
-            }
 
             semaphoreName = name;
         }

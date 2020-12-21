@@ -15,8 +15,6 @@
 
 #pragma once
 
-using namespace Mlos::Core;
-
 namespace Mlos
 {
 namespace Core

@@ -42,7 +42,7 @@ namespace Mlos.Core
 
         private static MlosContext CreateUsingNamedMemoryMap()
         {
-            return InterProcessMlosContext.CreateOrOpen();
+            return InterProcessMlosContext.Create();
         }
     }
 

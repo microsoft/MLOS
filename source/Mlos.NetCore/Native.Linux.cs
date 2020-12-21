@@ -22,6 +22,8 @@ namespace Mlos.Core.Linux
     {
         private const string RtLib = "rt";
 
+        private const string SystemNative = "System.Native";
+
         /// <summary>
         /// Represents invalid pointer (void *) -1.
         /// </summary>
@@ -114,6 +116,18 @@ namespace Mlos.Core.Linux
 
         [DllImport(RtLib, EntryPoint = "shm_unlink", CharSet = CharSet.Ansi, SetLastError = true)]
         internal static extern int SharedMemoryUnlink(string name);
+
+        [DllImport(RtLib, EntryPoint = "unlink", CharSet = CharSet.Ansi, SetLastError = true)]
+        internal static extern int FileSystemUnlink(string name);
+
+        /// <summary>
+        /// Gets a file status.
+        /// </summary>
+        /// <param name="fd"></param>
+        /// <param name="output"></param>
+        /// <returns>Returns zero on success.</returns>
+        [DllImport(SystemNative, EntryPoint = "SystemNative_FStat", SetLastError = true)]
+        internal static extern int FileStats(IntPtr fd, out FileStatus output);
 
         /// <summary>
         /// Map files or devices into the memory.
@@ -312,6 +326,30 @@ namespace Mlos.Core.Linux
         {
             return Native.Close(handle) == 0;
         }
+    }
+
+    /// <summary>
+    /// File stats structure.
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct FileStatus
+    {
+        internal int Flags;
+        internal int Mode;
+        internal uint Uid;
+        internal uint Gid;
+        internal long Size;
+        internal long ATime;
+        internal long ATimeNsec;
+        internal long MTime;
+        internal long MTimeNsec;
+        internal long CTime;
+        internal long CTimeNsec;
+        internal long BirthTime;
+        internal long BirthTimeNsec;
+        internal long Dev;
+        internal long Ino;
+        internal uint UserFlags;
     }
 
     /// <summary>

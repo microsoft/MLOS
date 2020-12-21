@@ -50,11 +50,11 @@ public:
     // Waits until the named event object is in the signaled state.
     //
     _Must_inspect_result_
-    HRESULT Wait();
+    HRESULT Wait() const;
 
     // Gets a value that indicates whether the handle is invalid.
     //
-    bool IsInvalid();
+    bool IsInvalid() const;
 
     // Indicates if we should cleanup OS resources when closing the shared memory map view.
     // No-op on Windows.

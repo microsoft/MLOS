@@ -59,4 +59,63 @@ namespace Mlos.Core.Internal
         /// </remarks>
         internal SharedConfigDictionary SharedConfigDictionary;
     }
+
+    /// <summary>
+    /// Registered shared memory region.
+    /// </summary>
+    [CodegenType]
+    public partial struct RegisteredMemoryRegionConfig
+    {
+        [ScalarSetting(isPrimaryKey: true)]
+        internal MemoryRegionId MemoryRegionId;
+
+        /// <summary>
+        /// Name of the shared memory map.
+        /// </summary>
+        [ScalarSetting]
+        internal StringPtr SharedMemoryMapName;
+
+        /// <summary>
+        /// Size of the memory region.
+        /// </summary>
+        internal ulong MemoryRegionSize;
+    }
+
+    /// <summary>
+    /// Registered named event in given memory region.
+    /// </summary>
+    [CodegenType]
+    public partial struct RegisteredNamedEventConfig
+    {
+        [ScalarSetting(isPrimaryKey: true)]
+        internal MemoryRegionId MemoryRegionId;
+
+        /// <summary>
+        /// Name of the event.
+        /// </summary>
+        [ScalarSetting]
+        internal StringPtr Name;
+    }
+
+    /// <summary>
+    /// Message used to exchange file descriptor via Unix domain socket.
+    /// </summary>
+    [CodegenType]
+    public partial struct FileDescriptorExchangeMessage
+    {
+        /// <summary>
+        /// Memory region identifier.
+        /// </summary>
+        public MemoryRegionId MemoryRegionId;
+
+        /// <summary>
+        /// Indicates whether message contains a valid file descriptor.
+        /// </summary>
+        public bool ContainsFd;
+
+        /// <summary>
+        /// Size of the memory region.
+        /// </summary>
+        public ulong MemoryRegionSize;
+    }
 }

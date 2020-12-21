@@ -43,12 +43,16 @@ MlosContext::MlosContext(
     _In_ ISharedChannel& controlChannel,
     _In_ ISharedChannel& telemetryChannel,
     _In_ ISharedChannel& feedbackChannel) noexcept
-  : m_sharedConfigManager(*this),
+  : m_sharedConfigManager(),
     m_globalMemoryRegion(globalMemoryRegion),
     m_controlChannel(controlChannel),
     m_telemetryChannel(telemetryChannel),
     m_feedbackChannel(feedbackChannel)
 {
+    // Mlos.NetCore is always registered first.
+    // That indicates the mlos context is created.
+    //
+    globalMemoryRegion.RegisteredSettingsAssemblyCount.store(1);
 }
 
 #ifdef _MSC_VER
@@ -70,7 +74,7 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     _In_z_ const char* assemblyFileName,
     _In_ uint32_t assemblyDispatchTableBaseIndex)
 {
-    uint32_t assemblyIndex = m_globalMemoryRegion.RegisteredSettingsAssemblyCount;
+    const uint32_t assemblyIndex = m_globalMemoryRegion.RegisteredSettingsAssemblyCount;
 
     // Check if there is already a config for the given assembly index.
     //
@@ -112,6 +116,79 @@ HRESULT MlosContext::RegisterSettingsAssembly(
     }
 
     return hr;
+}
+
+//----------------------------------------------------------------------------
+// NAME: MlosContext::RegisterSharedMemory
+//
+// PURPOSE:
+//  Registers a shared memory map in the global memory region.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+_Must_inspect_result_
+HRESULT MlosContext::RegisterSharedMemory(
+    _In_ Internal::MemoryRegionId memoryRegionId,
+    _In_z_ const char* sharedMemoryName,
+    _In_ size_t memoryRegionSize)
+{
+    ComponentConfig<Internal::RegisteredMemoryRegionConfig> registeredMemoryRegion(*this);
+
+    registeredMemoryRegion.MemoryRegionId = memoryRegionId;
+    registeredMemoryRegion.SharedMemoryMapName = sharedMemoryName;
+    registeredMemoryRegion.MemoryRegionSize = memoryRegionSize;
+
+    HRESULT hr = SharedConfigManager::CreateOrUpdateFrom(
+        m_globalMemoryRegion.SharedConfigDictionary,
+        registeredMemoryRegion);
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------
+// NAME: MlosContext::RegisterNamedEvent
+//
+// PURPOSE:
+// Registers a named event in the global memory region.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+_Must_inspect_result_
+HRESULT MlosContext::RegisterNamedEvent(
+    _In_ Internal::MemoryRegionId memoryRegionId,
+    _In_z_ const char* name)
+{
+    ComponentConfig<Internal::RegisteredNamedEventConfig> registeredNamedEvent(*this);
+
+    registeredNamedEvent.MemoryRegionId = memoryRegionId;
+    registeredNamedEvent.Name = name;
+
+    HRESULT hr = SharedConfigManager::CreateOrUpdateFrom(
+        m_globalMemoryRegion.SharedConfigDictionary,
+        registeredNamedEvent);
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------
+// NAME: MlosContext::ControlChannel
+//
+// PURPOSE:
+//  Gets the shared config memory region.
+//
+// RETURNS:
+//
+// NOTES:
+//
+SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>& MlosContext::SharedConfigMemoryRegionView()
+{
+    return m_sharedConfigManager.m_sharedConfigMemoryRegionView;
 }
 
 //----------------------------------------------------------------------------
@@ -197,7 +274,7 @@ void MlosContext::TerminateFeedbackChannel()
 //
 // NOTES:
 //
-bool MlosContext::IsControlChannelActive()
+bool MlosContext::IsControlChannelActive() const
 {
     return !(m_controlChannel.Sync.TerminateChannel);
 }
@@ -212,7 +289,7 @@ bool MlosContext::IsControlChannelActive()
 //
 // NOTES:
 //
-bool MlosContext::IsFeedbackChannelActive()
+bool MlosContext::IsFeedbackChannelActive() const
 {
     return !(m_feedbackChannel.Sync.TerminateChannel);
 }

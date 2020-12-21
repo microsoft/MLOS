@@ -54,7 +54,7 @@ HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::CreateOrUpdateFromInShared
     {
         slotIndex = TProbingPolicy::CalculateIndex(static_cast<T>(componentConfig), probingCount, elementCount);
 
-        uint32_t offsetToSharedConfig = configsArray.Elements()[slotIndex];
+        const uint32_t offsetToSharedConfig = configsArray.Elements()[slotIndex];
         if (offsetToSharedConfig == 0)
         {
             // We found empty slot.
@@ -136,7 +136,8 @@ HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::LookupInSharedConfigDictio
     uint32_t slotIndex;
     uint32_t probingCount = 0;
 
-    BytePtr memoryRegionPtr(reinterpret_cast<byte*>(&sharedConfigDictionary) - sharedConfigDictionary.Allocator.OffsetToAllocator);
+    const BytePtr memoryRegionPtr(reinterpret_cast<byte*>(&sharedConfigDictionary) -
+        sharedConfigDictionary.Allocator.OffsetToAllocator);
 
     Proxy::Mlos::Core::Internal::UIntArray configsArray(
         BytePtr(&sharedConfigDictionary),
@@ -148,7 +149,7 @@ HRESULT SharedConfigDictionaryLookup<TProbingPolicy>::LookupInSharedConfigDictio
     {
         slotIndex = TProbingPolicy::CalculateIndex(static_cast<T>(componentConfig), probingCount, elementCount);
 
-        uint32_t offsetToSharedConfig = configsArray.Elements()[slotIndex];
+        const uint32_t offsetToSharedConfig = configsArray.Elements()[slotIndex];
         if (offsetToSharedConfig == 0)
         {
             // We found empty slot.

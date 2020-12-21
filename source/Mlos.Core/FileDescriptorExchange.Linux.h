@@ -45,7 +45,7 @@ public:
     // Connects to Unix domain socket.
     //
     _Must_inspect_result_
-    HRESULT Connect(_In_z_ const char* socketName);
+    HRESULT Connect(_In_z_ char* socketName);
 
     // Gets a file descriptor via Unix domain socket.
     //

@@ -39,6 +39,28 @@ namespace Mlos.Core
         }
 
         /// <summary>
+        /// Tries to open an exiting named event.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="namedEvent"></param>
+        /// <returns></returns>
+        public static bool TryOpenExisting(string name, out NamedEvent namedEvent)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return Windows.NamedEvent.TryOpenExisting(name, out namedEvent);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return Linux.NamedSemaphore.TryOpenExisting(name, out namedEvent);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported OS.");
+            }
+        }
+
+        /// <summary>
         /// Finalizes an instance of the <see cref="NamedEvent"/> class.
         /// </summary>
         ~NamedEvent()

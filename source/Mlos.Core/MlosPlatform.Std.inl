@@ -51,9 +51,30 @@ void MlosPlatformTerminateProcess()
 //
 // NOTES:
 //
-void MlosPlatformWait(uint32_t milliseconds)
+void MlosPlatformWait(_In_ uint32_t milliseconds)
 {
     std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
+
+//----------------------------------------------------------------------------
+// NAME: MlosPlatformCreateThread
+//
+// PURPOSE:
+//  Creates the thread.
+//
+// NOTES:
+//
+_Must_inspect_result_
+HRESULT MlosPlatformCreateThread(
+    _In_ void (*routine)(void*),
+    _In_ void* pParam)
+{
+    // #TODO use native
+    //
+    std::thread mlosThread(routine, pParam);
+    mlosThread.detach();
+
+    return S_OK;
 }
 }
 }

@@ -28,6 +28,9 @@ namespace Mlos.NetCore.UnitTest
         private const int SharedMemorySize = 65536 * 4;
         private const string SharedMemoryMapName = "Mlos.NetCore.SharedMemory.UnitTest";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SharedConfigManagerTests"/> class.
+        /// </summary>
         public SharedConfigManagerTests()
         {
             // Load the registry settings assemblies.
@@ -46,10 +49,8 @@ namespace Mlos.NetCore.UnitTest
             // Create a shared config manager, and register created test shared memory map.
             //
             using var sharedConfigManager = new SharedConfigManager();
-            sharedConfigManager.RegisterSharedConfigMemoryRegion(
-                sharedMemoryRegionIndex: 1,
-                sharedMemoryMapName: SharedMemoryMapName,
-                memoryRegionSize: SharedMemorySize);
+            sharedConfigManager.RegisterSharedConfigMemoryRegion(sharedMemoryRegionView);
+
             sharedConfigManager.CleanupOnClose = true;
 
             for (int i = 0; i < 500; i++)
