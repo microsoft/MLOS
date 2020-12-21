@@ -631,6 +631,7 @@ class TestBayesianOptimizer:
         else:
             parameters_df, _, _ = optimizer.get_all_observations()
             multi_objective_predictions = optimizer.predict(parameter_values_pandas_frame=parameters_df)
+            assert len(multi_objective_predictions) == len(optimizer.optimization_problem.objective_space.dimension_names)
             predictions = multi_objective_predictions[0]
             predictions_df = predictions.get_dataframe()
 
