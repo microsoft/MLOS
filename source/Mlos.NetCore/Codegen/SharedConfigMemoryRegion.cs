@@ -52,15 +52,4 @@ namespace Mlos.Core.Internal
         /// </remarks>
         internal uint OffsetToConfigsArray;
     }
-
-    /// <summary>
-    /// Message is used to register shared config memory with the agent.
-    /// When the target process creates a shared memory region, it sends the message
-    /// to the agent to register the memory region as a shared config memory.
-    /// </summary>
-    [CodegenMessage]
-    public partial struct RegisterSharedConfigMemoryRegionRequestMessage
-    {
-        internal ushort SharedMemoryRegionIndex;
-    }
 }

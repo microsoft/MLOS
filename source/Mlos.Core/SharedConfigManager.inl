@@ -40,11 +40,7 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(_Inout_ ComponentConfig<T>& comp
     //
     if (!m_sharedConfigMemoryRegionView.Buffer.Pointer)
     {
-        HRESULT hr = CreateSharedConfigMemoryRegion();
-        if (FAILED(hr))
-        {
-            return hr;
-        }
+        return E_NOT_SET;
     }
 
     Internal::SharedConfigDictionary& sharedConfigDictionary = m_sharedConfigMemoryRegionView.MemoryRegion().SharedConfigDictionary;

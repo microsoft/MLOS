@@ -58,6 +58,7 @@
     <ClInclude Include="Mlos.Core.inl" />
     <ClInclude Include="MlosContext.h" />
     <ClInclude Include="MlosContext.inl" />
+    <ClInclude Include="MlosInitializer.h" />
     <ClInclude Include="MlosPlatform.h" />
     <ClInclude Include="MlosPlatform.Std.inl" />
     <ClInclude Include="NamedEvent.Window.h" />
@@ -87,6 +88,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_base.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MlosInitializer.inl" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.Cpp.targets" />
 </Project>

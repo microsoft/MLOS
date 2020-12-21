@@ -28,11 +28,11 @@ TEST(BufferChannel, CreateMemory)
     // Create a default MlosContext.
     // Default implementation depends on the OS (Mlos.Core.h).
     //
-    DefaultMlosContextFactory mlosContextFactory;
-    HRESULT hr = mlosContextFactory.Create();
+    DefaultMlosInitializer mlosInitializer;
+    HRESULT hr = mlosInitializer.CreateContext();
     EXPECT_EQ(hr, S_OK);
 
-    MlosContext& mlosContext = mlosContextFactory.m_context;
+    MlosContext& mlosContext = mlosInitializer.MlosContext();
 
     // Register Mlos.UnitTest Settings assembly.
     //

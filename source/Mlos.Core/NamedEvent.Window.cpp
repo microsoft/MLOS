@@ -178,7 +178,7 @@ HRESULT NamedEvent::Signal()
 //  HRESULT.
 //
 _Must_inspect_result_
-HRESULT NamedEvent::Wait()
+HRESULT NamedEvent::Wait() const
 {
     DWORD result = WaitForSingleObject(m_hEvent, INFINITE);
 
@@ -191,7 +191,7 @@ HRESULT NamedEvent::Wait()
 // RETURNS:
 //  Gets a value that indicates whether the handle is invalid.
 //
-bool NamedEvent::IsInvalid()
+bool NamedEvent::IsInvalid() const
 {
     return m_hEvent == nullptr;
 }

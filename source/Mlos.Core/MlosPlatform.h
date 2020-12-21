@@ -29,7 +29,12 @@ namespace Internal
 // External implementation.
 //
 extern void MlosPlatformTerminateProcess();
-extern void MlosPlatformWait(uint32_t milliseconds);
+extern void MlosPlatformWait(_In_ uint32_t milliseconds);
+
+_Must_inspect_result_
+extern HRESULT MlosPlatformCreateThread(
+    _In_ void (*routine)(void*),
+    _In_ void* pParam);
 }
 
 //----------------------------------------------------------------------------
@@ -51,9 +56,17 @@ public:
 
     // Suspends the execution of the current thread for millisecond intervals.
     //
-    static inline void SleepMilliseconds(uint32_t milliseconds)
+    static inline void SleepMilliseconds(_In_ uint32_t milliseconds)
     {
         Mlos::Core::Internal::MlosPlatformWait(milliseconds);
+    }
+
+    // Creates the thread.
+    //
+    _Must_inspect_result_
+    static inline HRESULT CreateThread(_In_ void (*routine)(void*), _In_ void* pParam)
+    {
+        return Mlos::Core::Internal::MlosPlatformCreateThread(routine, pParam);
     }
 };
 }

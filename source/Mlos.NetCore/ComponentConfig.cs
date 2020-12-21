@@ -27,7 +27,7 @@ namespace Mlos.Core
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static ComponentConfig<TType, TProxy> Create<TType, TProxy>(ICodegenType<TType, TProxy> config)
-            where TType : ICodegenType<TType, TProxy>, new()
+            where TType : ICodegenType, new()
             where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
             return new ComponentConfig<TType, TProxy>((TType)config);

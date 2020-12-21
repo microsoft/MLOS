@@ -31,11 +31,11 @@ TEST(MessageVerification, VerifyVariableDataMessages)
 {
     // Create InternalProcessMlosContext.
     //
-    InternalMlosContextInitializer mlosContextInitializer;
-    HRESULT hr = mlosContextInitializer.Initialize();
+    MlosInitializer<InternalMlosContext> mlosInitializer;
+    HRESULT hr = mlosInitializer.CreateContext();
     EXPECT_EQ(hr, S_OK);
 
-    InternalMlosContext mlosContext(std::move(mlosContextInitializer));
+    InternalMlosContext& mlosContext = mlosInitializer.MlosContext();
 
     // Create a feedback channel receiver thread.
     //
@@ -90,11 +90,11 @@ TEST(MessageVerification, DetectInvalidDataMessages)
 {
     // Create InternalProcessMlosContext.
     //
-    InternalMlosContextInitializer mlosContextInitializer;
-    HRESULT hr = mlosContextInitializer.Initialize();
+    MlosInitializer<InternalMlosContext> mlosInitializer;
+    HRESULT hr = mlosInitializer.CreateContext();
     EXPECT_EQ(hr, S_OK);
 
-    InternalMlosContext mlosContext(std::move(mlosContextInitializer));
+    InternalMlosContext& mlosContext = mlosInitializer.MlosContext();
 
     int32_t frameLength;
     {

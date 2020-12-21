@@ -21,62 +21,63 @@ namespace Mlos
 namespace Core
 {
 //----------------------------------------------------------------------------
-// NAME: InternalMlosContextInitializer::Constructor.
+// NAME: InternalMlosContextInitializer::Create
 //
 // PURPOSE:
-//  Move constructor.
-//
-// NOTES:
-//
-InternalMlosContextInitializer::InternalMlosContextInitializer(_In_ InternalMlosContextInitializer&& initializer) noexcept
-  : m_globalMemoryRegionView(std::move(initializer.m_globalMemoryRegionView)),
-    m_controlChannelMemoryMapView(std::move(initializer.m_controlChannelMemoryMapView)),
-    m_feedbackChannelMemoryMapView(std::move(initializer.m_feedbackChannelMemoryMapView))
-{
-}
-
-//----------------------------------------------------------------------------
-// NAME: InternalMlosContextInitializer::Initialize
-//
-// PURPOSE:
-//  Opens the shared memory used for the communication channel.
+//  Creates the shared memory used for the communication channel.
 //
 // NOTES:
 //
 _Must_inspect_result_
-HRESULT InternalMlosContextInitializer::Initialize()
+HRESULT InternalMlosContext::Create(_Inout_ AlignedInstance<InternalMlosContext>& mlosContextInstance)
 {
     const size_t SharedMemorySize = 65536;
 
     HRESULT hr = S_OK;
 
+    // Global shared memory region.
+    //
+    SharedMemoryRegionView<Internal::GlobalMemoryRegion> globalMemoryRegionView;
+
+    // Named shared memory for Telemetry and Control Channel.
+    //
+    SharedMemoryMapView controlChannelMemoryMapView;
+    SharedMemoryMapView feedbackChannelMemoryMapView;
+
     if (SUCCEEDED(hr))
     {
-        hr = m_globalMemoryRegionView.CreateNew("Test_Mlos.GlobalMemory", SharedMemorySize);
+        hr = globalMemoryRegionView.CreateNew("Test_Mlos.GlobalMemory", SharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = m_controlChannelMemoryMapView.CreateNew("Test_SharedChannelMemory", SharedMemorySize);
+        hr = controlChannelMemoryMapView.CreateNew("Test_SharedChannelMemory", SharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = m_feedbackChannelMemoryMapView.CreateNew("Test_FeedbackChannelMemory", SharedMemorySize);
+        hr = feedbackChannelMemoryMapView.CreateNew("Test_FeedbackChannelMemory", SharedMemorySize);
     }
 
-    m_globalMemoryRegionView.CleanupOnClose = true;
-    m_controlChannelMemoryMapView.CleanupOnClose = true;
-    m_feedbackChannelMemoryMapView.CleanupOnClose = true;
+    globalMemoryRegionView.CleanupOnClose = true;
+    controlChannelMemoryMapView.CleanupOnClose = true;
+    feedbackChannelMemoryMapView.CleanupOnClose = true;
 
     if (FAILED(hr))
     {
         // Close all the shared maps if we fail to create one.
         //
-        m_globalMemoryRegionView.Close();
-        m_controlChannelMemoryMapView.Close();
-        m_feedbackChannelMemoryMapView.Close();
+        globalMemoryRegionView.Close();
+        controlChannelMemoryMapView.Close();
+        feedbackChannelMemoryMapView.Close();
     }
+
+    // Create MlosContext.
+    //
+    mlosContextInstance.Initialize(
+        std::move(globalMemoryRegionView),
+        std::move(controlChannelMemoryMapView),
+        std::move(feedbackChannelMemoryMapView));
 
     return hr;
 }
@@ -85,19 +86,24 @@ HRESULT InternalMlosContextInitializer::Initialize()
 // NAME: InternalMlosContext::Constructor
 //
 // PURPOSE:
-//  Creates InternalMlosContext.
+//  Creates InternalMlosContext instance.
 //
 // NOTES:
 //
-InternalMlosContext::InternalMlosContext(_In_ InternalMlosContextInitializer&& initializer) noexcept
-  : MlosContext(initializer.m_globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
-    m_contextInitializer(std::move(initializer)),
+InternalMlosContext::InternalMlosContext(
+    _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion> globalMemoryRegionView,
+    _In_ SharedMemoryMapView&& controlChannelMemoryMapView,
+    _In_ SharedMemoryMapView&& feedbackChannelMemoryMapView) noexcept
+  :  MlosContext(globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
+    m_globalMemoryRegionView(std::move(globalMemoryRegionView)),
+    m_controlChannelMemoryMapView(std::move(controlChannelMemoryMapView)),
+    m_feedbackChannelMemoryMapView(std::move(feedbackChannelMemoryMapView)),
     m_controlChannel(
-        m_contextInitializer.m_globalMemoryRegionView.MemoryRegion().ControlChannelSynchronization,
-        m_contextInitializer.m_controlChannelMemoryMapView),
+        m_globalMemoryRegionView.MemoryRegion().ControlChannelSynchronization,
+        m_controlChannelMemoryMapView),
     m_feedbackChannel(
-        m_contextInitializer.m_globalMemoryRegionView.MemoryRegion().FeedbackChannelSynchronization,
-        m_contextInitializer.m_feedbackChannelMemoryMapView)
+        m_globalMemoryRegionView.MemoryRegion().FeedbackChannelSynchronization,
+        m_feedbackChannelMemoryMapView)
 {
 }
 }
