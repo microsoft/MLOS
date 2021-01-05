@@ -22,7 +22,7 @@ $pythonCmd -m pip install -e $MLOS_ROOT/source/Mlos.Python/
 
 # Make sure we have up to date versions of the necessary packages (and their
 # dependencies) rather than falling back to any system provided ones.
-$pythonCmd -m pip install --upgrade sphinx sphinx_rtd_theme numpydoc matplotlib kiwisolver pillow
+$pythonCmd -m pip install --upgrade 'sphinx<3.4.0' sphinx_rtd_theme numpydoc matplotlib kiwisolver pillow
 
 # Make sure that the commands installed by pip are available on the PATH
 export PATH="$PATH:$HOME/.local/bin"
