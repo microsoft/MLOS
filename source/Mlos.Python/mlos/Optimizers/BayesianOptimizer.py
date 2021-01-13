@@ -65,7 +65,7 @@ class BayesianOptimizer(OptimizerBase):
         # Note that even if the user requested a HomogeneousRandomForestRegressionModel, we still create a MultiObjectiveRegressionModel
         # with just a single RandomForest inside it. This means we have to maintain only a single interface.
         #
-        self.surrogate_model: MultiObjectiveRegressionModel= MultiObjectiveHomogeneousRandomForest(
+        self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveHomogeneousRandomForest(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.feature_space,
             output_space=self.surrogate_model_output_space,
