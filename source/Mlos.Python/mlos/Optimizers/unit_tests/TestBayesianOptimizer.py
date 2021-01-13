@@ -456,11 +456,9 @@ class TestBayesianOptimizer:
             optimizer.register(input.to_dataframe(), output.to_dataframe())
 
         num_predictions = 100
-        multi_objective_predictions = optimizer.predict(parameter_values_pandas_frame=optimization_problem.parameter_space.random_dataframe(num_predictions))
-
-        for objective_name, prediction in multi_objective_predictions:
-            prediction_df = prediction.get_dataframe()
-            assert len(prediction_df.index) == num_predictions
+        prediction = optimizer.predict(parameter_values_pandas_frame=optimization_problem.parameter_space.random_dataframe(num_predictions))
+        prediction_df = prediction.get_dataframe()
+        assert len(prediction_df.index) == num_predictions
 
         # Let's test invalid observations.
         #
@@ -567,11 +565,9 @@ class TestBayesianOptimizer:
                 context_values_pandas_frame=context_df.iloc[:-1]
             )
 
-        multi_objective_predictions = local_optimizer.predict(parameter_values_pandas_frame=parameter_df, context_values_pandas_frame=context_df)
-
-        for objective_name, predictions in multi_objective_predictions:
-            predictions_df = predictions.get_dataframe()
-            assert len(predictions_df) == len(parameter_df)
+        predictions = local_optimizer.predict(parameter_values_pandas_frame=parameter_df, context_values_pandas_frame=context_df)
+        predictions_df = predictions.get_dataframe()
+        assert len(predictions_df) == len(parameter_df)
 
         remote_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=optimization_problem,
