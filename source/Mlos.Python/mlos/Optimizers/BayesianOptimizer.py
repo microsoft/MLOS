@@ -62,6 +62,9 @@ class BayesianOptimizer(OptimizerBase):
             MultiObjectiveHomogeneousRandomForest.__name__
         )
 
+        # Note that even if the user requested a HomogeneousRandomForestRegressionModel, we still create a MultiObjectiveRegressionModel
+        # with just a single RandomForest inside it. This means we have to maintain only a single interface.
+        #
         self.surrogate_model: MultiObjectiveRegressionModel= MultiObjectiveHomogeneousRandomForest(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.feature_space,
@@ -193,7 +196,7 @@ class BayesianOptimizer(OptimizerBase):
 
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> MultiObjectivePrediction:  # pylint: disable=unused-argument
-        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(\
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
             parameter_values=parameter_values_pandas_frame,
             context_values=context_values_pandas_frame
         )

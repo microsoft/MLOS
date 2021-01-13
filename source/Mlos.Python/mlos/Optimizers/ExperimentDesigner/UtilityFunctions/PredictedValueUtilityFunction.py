@@ -30,6 +30,12 @@ class PredictedValueUtilityFunction(UtilityFunction):
 
         multi_objective_predictions = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
 
+        # While the models can predict multiple objectives, here we just compute the utility for the first one. Next-steps include:
+        #   1. Select the objective by name
+        #   2. Write multi-objective utility functions
+        #
+        # But for now, the behavior below keeps the behavior of the optimizer unchanged.
+        #
         predictions = multi_objective_predictions[0]
         predictions_df = predictions.get_dataframe()
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value

@@ -11,5 +11,5 @@ class MultiObjectiveRegressionModelFitState(KeyOrderedDict):
 
     """
 
-    def __init__(self, objective_names=List[str]):
+    def __init__(self, objective_names: List[str]):
         KeyOrderedDict.__init__(self, ordered_keys=objective_names, value_type=RegressionModelFitState)
