@@ -119,7 +119,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         return features_df, objectives_df, context_df
 
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> MultiObjectivePrediction:  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
         if context_values_pandas_frame is not None:
@@ -141,9 +141,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         objective_name = only_prediction_pb2.ObjectiveName
         valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
         prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
-        multi_objective_prediction = MultiObjectivePrediction(objective_names=[objective_name])
-        multi_objective_prediction[objective_name] = prediction
-        return multi_objective_prediction
+        return prediction
 
     def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
         pass

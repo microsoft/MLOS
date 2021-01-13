@@ -13,8 +13,8 @@ from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesi
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
-from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
+from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Tracer import trace
 from mlos.Spaces import Point
 
@@ -195,13 +195,13 @@ class BayesianOptimizer(OptimizerBase):
             )
 
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> MultiObjectivePrediction:  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
             parameter_values=parameter_values_pandas_frame,
             context_values=context_values_pandas_frame
         )
 
-        return self.surrogate_model.predict(feature_values_pandas_frame)
+        return self.surrogate_model.predict(feature_values_pandas_frame)[0]
 
     def focus(self, subspace):
         ...

@@ -66,7 +66,7 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> MultiObjectivePrediction:
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:
         """Predict target value based on the parameters supplied.
 
         :param params:
@@ -129,8 +129,7 @@ class OptimizerBase(ABC):
     @trace()
     def _prediction_based_optimum(self, parameters_df: pd.DataFrame, optimum_definition: OptimumDefinition, alpha: float)-> Tuple[Point, Point]:
         objective = self.optimization_problem.objectives[0]
-        multi_objective_predictions = self.predict(parameter_values_pandas_frame=parameters_df)
-        predictions = multi_objective_predictions[0]
+        predictions = self.predict(parameter_values_pandas_frame=parameters_df)
         predictions_df = predictions.get_dataframe()
 
         if len(predictions_df.index) == 0:
