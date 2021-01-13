@@ -13,7 +13,6 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Spaces import Point
 from mlos.Tracer import trace
 

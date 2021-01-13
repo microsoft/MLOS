@@ -11,7 +11,6 @@ import scipy.stats
 
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
-from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.PredictedValueUtilityFunction import PredictedValueUtilityFunction
 
