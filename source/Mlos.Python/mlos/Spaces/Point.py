@@ -55,7 +55,10 @@ class Point:
         if dimension_name == "__isabstractmethod__":
             # A sad but necessary way to deal with ABC.
             return False
-        return self[dimension_name]
+        try:
+            return self[dimension_name]
+        except KeyError:
+            raise AttributeError(f"This Point does not have a {dimension_name} attribute.")
 
     def __setattr__(self, name, value):
         if name == "dimension_value_dict":
