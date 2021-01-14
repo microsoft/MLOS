@@ -13,7 +13,7 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmO
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid, Point
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.Tracer import Tracer, trace
@@ -55,7 +55,7 @@ class TestUtilityFunctionOptimizers:
 
         print(cls.model_config)
 
-        cls.model = HomogeneousRandomForestRegressionModel(
+        cls.model = MultiObjectiveHomogeneousRandomForest(
             model_config=cls.model_config,
             input_space=cls.input_space,
             output_space=cls.output_space
@@ -131,12 +131,12 @@ class TestUtilityFunctionOptimizers:
         random_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_warmup_samples)
         y = objective_function.evaluate_dataframe(random_params_df)
 
-        model = HomogeneousRandomForestRegressionModel(
+        model = MultiObjectiveHomogeneousRandomForest(
             model_config=self.model_config,
             input_space=objective_function.parameter_space,
             output_space=output_space
         )
-        model.fit(feature_values_pandas_frame=random_params_df, target_values_pandas_frame=y, iteration_number=num_warmup_samples)
+        model.fit(features_df=random_params_df, targets_df=y, iteration_number=num_warmup_samples)
 
         optimization_problem = OptimizationProblem(
             parameter_space=objective_function.parameter_space,

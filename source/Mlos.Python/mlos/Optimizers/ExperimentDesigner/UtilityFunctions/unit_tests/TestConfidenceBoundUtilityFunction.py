@@ -8,7 +8,7 @@ from scipy.stats import t
 import numpy as np
 import pandas as pd
 
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import \
@@ -44,7 +44,7 @@ class TestConfidenceBoundUtilityFunction:
         cls.output_pandas_dataframe = pd.DataFrame({"y": cls.output_values})
 
         cls.model_config = homogeneous_random_forest_config_store.default
-        cls.model = HomogeneousRandomForestRegressionModel(
+        cls.model = MultiObjectiveHomogeneousRandomForest(
             model_config=cls.model_config,
             input_space=cls.input_space,
             output_space=cls.output_space
@@ -53,7 +53,7 @@ class TestConfidenceBoundUtilityFunction:
 
         cls.sample_inputs = {'x': np.linspace(start=-10, stop=110, num=13, endpoint=True)}
         cls.sample_inputs_pandas_dataframe = pd.DataFrame(cls.sample_inputs)
-        cls.sample_predictions = cls.model.predict(cls.sample_inputs_pandas_dataframe)
+        cls.sample_predictions = cls.model.predict(cls.sample_inputs_pandas_dataframe)[0]
 
 
     def test_lower_confidence_bound(self):

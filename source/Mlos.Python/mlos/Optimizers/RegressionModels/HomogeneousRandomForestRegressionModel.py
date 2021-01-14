@@ -63,10 +63,8 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         )
 
         self._input_space_adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.input_space)
-        self._output_space_adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.output_space)
 
-
-        self.target_dimension_names = [dimension.name for dimension in self._output_space_adapter.dimensions]
+        self.target_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
         assert len(self.target_dimension_names) == 1, "Single target predictions for now."
 
         self._decision_trees = []
@@ -169,7 +167,6 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 
         feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
-        target_values_pandas_frame = self._output_space_adapter.project_dataframe(target_values_pandas_frame)
 
         for i, tree in enumerate(self._decision_trees):
             # Let's filter out samples with missing values

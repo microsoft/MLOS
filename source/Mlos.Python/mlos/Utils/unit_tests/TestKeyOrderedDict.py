@@ -37,3 +37,5 @@ class TestKeyOrderedDict:
 
         with pytest.raises(IndexError):
             _ = key_ordered_dict[100]
+
+        assert len(keys) == len(key_ordered_dict)

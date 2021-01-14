@@ -9,6 +9,7 @@ import os
 import pickle
 
 import pandas as pd
+import pytest
 
 import mlos.global_values
 from mlos.OptimizerEvaluationTools.OptimizerEvaluator import OptimizerEvaluator
@@ -164,7 +165,8 @@ class TestOptimizerEvaluator:
             assert final_optimizer_from_disk.suggest() == final_optimizer_from_report.suggest()
 
 
-    def test_named_configs(self):
+    @pytest.mark.parametrize('test_num', [i for i in range(10)])
+    def test_named_configs(self, test_num):
         """Tests named optimizer configurations against named objective functions.
 
         It is prohibitively expensive to test the entire cross product so we test only its subset, but in such a way that
@@ -175,43 +177,35 @@ class TestOptimizerEvaluator:
         objective_function_named_configs = objective_function_config_store.list_named_configs()
         num_objective_function_configs = len(objective_function_named_configs)
 
-        num_tests = max(num_optimizer_configs, num_objective_function_configs, 10)
 
-        with traced(scope_name="parallel_tests"), concurrent.futures.ProcessPoolExecutor(max_workers=cpu_count()) as executor:
-            outstanding_futures = set()
 
-            for i in range(num_tests):
-                named_optimizer_config = optimizer_named_configs[i % num_optimizer_configs]
-                named_objective_function_config = objective_function_named_configs[i % num_objective_function_configs]
+        named_optimizer_config = optimizer_named_configs[test_num % num_optimizer_configs]
+        named_objective_function_config = objective_function_named_configs[test_num % num_objective_function_configs]
 
+        print("#####################################################################################################")
+        print(named_optimizer_config)
+        print(named_objective_function_config)
+
+        optimizer_evaluator_config = optimizer_evaluator_config_store.get_config_by_name(name="parallel_unit_tests_config")
+        optimizer_config = named_optimizer_config.config_point
+        objective_function_config = named_objective_function_config.config_point
+
+        optimizer_evaluator = OptimizerEvaluator(
+            optimizer_evaluator_config=optimizer_evaluator_config,
+            objective_function_config=objective_function_config,
+            optimizer_config=optimizer_config
+        )
+
+        optimizer_evaluation_report = optimizer_evaluator.evaluate_optimizer()
+
+        mlos.global_values.tracer.trace_events.extend(optimizer_evaluation_report.execution_trace)
+        if not optimizer_evaluation_report.success:
+            raise optimizer_evaluation_report.exception
+
+        with pd.option_context('display.max_columns', 100):
+            print(optimizer_evaluation_report.regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+            for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
                 print("#####################################################################################################")
-                print(named_optimizer_config)
-                print(named_objective_function_config)
-
-                optimizer_evaluator_config = optimizer_evaluator_config_store.get_config_by_name(name="parallel_unit_tests_config")
-                optimizer_config = named_optimizer_config.config_point
-                objective_function_config = named_objective_function_config.config_point
-
-                optimizer_evaluator = OptimizerEvaluator(
-                    optimizer_evaluator_config=optimizer_evaluator_config,
-                    objective_function_config=objective_function_config,
-                    optimizer_config=optimizer_config
-                )
-
-                future = executor.submit(optimizer_evaluator.evaluate_optimizer)
-                outstanding_futures.add(future)
-
-            done_futures, outstanding_futures = concurrent.futures.wait(outstanding_futures, return_when=concurrent.futures.ALL_COMPLETED)
-
-            for future in done_futures:
-                optimizer_evaluation_report = future.result()
-                assert optimizer_evaluation_report.success
-                mlos.global_values.tracer.trace_events.extend(optimizer_evaluation_report.execution_trace)
-
-                with pd.option_context('display.max_columns', 100):
-                    print(optimizer_evaluation_report.regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
-                    for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
-                        print("#####################################################################################################")
-                        print(optimum_name)
-                        print(optimum_over_time.get_dataframe().tail(10))
-                        print("#####################################################################################################")
+                print(optimum_name)
+                print(optimum_over_time.get_dataframe().tail(10))
+                print("#####################################################################################################")

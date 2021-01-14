@@ -46,6 +46,7 @@ class TestBayesianOptimizer:
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
         cls.logger = create_logger(logger_name=cls.__name__)
+        cls.port = None
 
         # Start up the gRPC service. Try a bunch of ports, before giving up so we can do several in parallel.
 
@@ -57,7 +58,7 @@ class TestBayesianOptimizer:
             try:
                 cls.server = OptimizerMicroserviceServer(port=port, num_threads=10)
                 cls.server.start()
-                cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
+                cls.port = port
                 break
             except:
                 cls.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}.")
@@ -65,6 +66,7 @@ class TestBayesianOptimizer:
                 if num_tries == max_num_tries:
                     raise
 
+        cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{cls.port}')
         cls.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=cls.optimizer_service_channel, logger=cls.logger)
 
 
@@ -164,13 +166,11 @@ class TestBayesianOptimizer:
 
     @trace()
     def test_optimum_before_register_error(self):
-        input_space = SimpleHypergrid(
-            name="input",
-            dimensions=[ContinuousDimension(name='x', min=-10, max=10)])
 
-        output_space = SimpleHypergrid(
-            name="output",
-            dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)])
+        input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name='x', min=-10, max=10)])
+
+        output_space = SimpleHypergrid(name="output", dimensions=[ContinuousDimension(name='y', min=-math.inf, max=math.inf)])
+
         optimization_problem = OptimizationProblem(
             parameter_space=input_space,
             objective_space=output_space,
@@ -184,11 +184,63 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError):
             bayesian_optimizer.optimum()
 
-        bayesian_optimizer.register(parameter_values_pandas_frame=pd.DataFrame({'x': [0.]}), target_values_pandas_frame=pd.DataFrame({'y': [1.]}))
+        bayesian_optimizer.register(parameter_values_pandas_frame=pd.DataFrame({'x': [0.0]}), target_values_pandas_frame=pd.DataFrame({'y': [1.0]}))
         bayesian_optimizer.optimum()
 
     @trace()
-    def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self):
+    @pytest.mark.parametrize('restart_num', [i for i in range(2)])
+    @pytest.mark.parametrize('use_remote_optimizer', [True])
+    def test_hierarchical_quadratic_cold_start(self, restart_num, use_remote_optimizer):
+
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
+
+        optimization_problem = OptimizationProblem(
+            parameter_space=objective_function.parameter_space,
+            objective_space=objective_function.output_space,
+            objectives=[Objective(name='y', minimize=True)]
+        )
+
+
+        optimizer_config = bayesian_optimizer_config_store.default
+        optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
+        optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
+        optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
+        optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.min_samples_to_fit = 10
+        optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 2
+
+        if use_remote_optimizer:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+                optimization_problem=optimization_problem,
+                optimizer_config=optimizer_config
+            )
+        else:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+                optimization_problem=optimization_problem,
+                optimizer_config=optimizer_config
+            )
+
+        num_guided_samples = 50
+        for i in range(num_guided_samples):
+            suggested_params = bayesian_optimizer.suggest()
+            y = objective_function.evaluate_point(suggested_params)
+            print(f"[{i}/{num_guided_samples}] {suggested_params}, y: {y}")
+
+            input_values_df = pd.DataFrame({
+                param_name: [param_value]
+                for param_name, param_value in suggested_params
+            })
+
+            target_values_df = y.to_dataframe()
+            bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+
+        best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
+        print(f"[Restart:  {restart_num}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
+        self.validate_optima(optimizer=bayesian_optimizer)
+
+    @trace()
+    @pytest.mark.parametrize("use_remote_optimizer", [True, False])
+    def test_bayesian_optimizer_on_simple_2d_quadratic_function_cold_start(self, use_remote_optimizer):
         """Tests the bayesian optimizer on a simple quadratic function with no prior data.
 
         :return:
@@ -222,116 +274,62 @@ class TestBayesianOptimizer:
 
         print(optimizer_config.to_json(indent=2))
 
-        local_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
-            optimization_problem=optimization_problem,
-            optimizer_config=optimizer_config
-        )
 
-        remote_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
-            optimization_problem=optimization_problem,
-            optimizer_config=optimizer_config
-        )
-
-        for bayesian_optimizer in [local_optimizer, remote_optimizer]:
-            num_iterations = 62
-            old_optimum = np.inf
-            for i in range(num_iterations):
-                suggested_params = bayesian_optimizer.suggest()
-                suggested_params_dict = suggested_params.to_dict()
-                target_value = quadratic(**suggested_params_dict)
-                print(f"[{i+1}/{num_iterations}] Suggested params: {suggested_params_dict}, target_value: {target_value}")
-
-                input_values_df = pd.DataFrame({param_name: [param_value] for param_name, param_value in suggested_params_dict.items()})
-                target_values_df = pd.DataFrame({'y': [target_value]})
-
-                bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
-                if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
-                    _, all_targets, _ = bayesian_optimizer.get_all_observations()
-                    best_config, optimum = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
-                    print(f"[{i}/{num_iterations}] Optimum: {optimum}")
-                    assert optimum.y == all_targets.min()[0]
-                    assert input_space.contains_point(best_config)
-                    assert output_space.contains_point(optimum)
-                    assert optimum.y <= old_optimum
-                    old_optimum = optimum.y
-                    self.validate_optima(optimizer=bayesian_optimizer)
-                    random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
-                    print(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}, Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
-
-            random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
-            assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
-            models_gof_metrics = [random_forest_gof_metrics]
-
-            for model_gof_metrics in models_gof_metrics:
-                assert 0 <= model_gof_metrics.relative_absolute_error <= 1  # This could fail if the models are really wrong. Not expected in this unit test though.
-                assert 0 <= model_gof_metrics.relative_squared_error <= 1
-
-                # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
-                n = model_gof_metrics.last_refit_iteration_number
-                assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
-
-                # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
-                assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
-
-    @trace()
-    def test_hierarchical_quadratic_cold_start(self):
-
-        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
-        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
-
-        output_space = SimpleHypergrid(
-            name="output",
-            dimensions=[
-                ContinuousDimension(name='y', min=-math.inf, max=math.inf)
-            ]
-        )
-
-        optimization_problem = OptimizationProblem(
-            parameter_space=objective_function.parameter_space,
-            objective_space=output_space,
-            objectives=[Objective(name='y', minimize=True)]
-        )
-
-        num_restarts = 2
-        for restart_num in range(num_restarts):
-
-            optimizer_config = bayesian_optimizer_config_store.default
-            optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
-            optimizer_config.homogeneous_random_forest_regression_model_config.n_estimators = 10
-            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.splitter = "best"
-            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.min_samples_to_fit = 10
-            optimizer_config.homogeneous_random_forest_regression_model_config.decision_tree_regression_model_config.n_new_samples_before_refit = 2
-
-            local_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+        if use_remote_optimizer:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+                optimization_problem=optimization_problem,
+                optimizer_config=optimizer_config
+            )
+        else:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
                 optimization_problem=optimization_problem,
                 optimizer_config=optimizer_config
             )
 
-            remote_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
-                optimization_problem=optimization_problem,
-                optimizer_config=optimizer_config
-            )
+        num_iterations = 62
+        old_optimum = np.inf
+        for i in range(num_iterations):
+            suggested_params = bayesian_optimizer.suggest()
+            suggested_params_dict = suggested_params.to_dict()
+            target_value = quadratic(**suggested_params_dict)
+            print(f"[{i+1}/{num_iterations}] Suggested params: {suggested_params_dict}, target_value: {target_value}")
 
-            for bayesian_optimizer in [local_optimizer, remote_optimizer]:
-                num_guided_samples = 50
-                for i in range(num_guided_samples):
-                    suggested_params = bayesian_optimizer.suggest()
-                    y = objective_function.evaluate_point(suggested_params)
-                    print(f"[{i}/{num_guided_samples}] {suggested_params}, y: {y}")
+            input_values_df = pd.DataFrame({param_name: [param_value] for param_name, param_value in suggested_params_dict.items()})
+            target_values_df = pd.DataFrame({'y': [target_value]})
 
-                    input_values_df = pd.DataFrame({
-                        param_name: [param_value]
-                        for param_name, param_value in suggested_params
-                    })
-                    target_values_df = y.to_dataframe()
-                    bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
-                best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
-                print(f"[Restart:  {restart_num}/{num_restarts}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
+            bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
+            if i > optimizer_config.min_samples_required_for_guided_design_of_experiments and i % 10 == 1:
+                _, all_targets, _ = bayesian_optimizer.get_all_observations()
+                best_config, optimum = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
+                print(f"[{i}/{num_iterations}] Optimum: {optimum}")
+                assert optimum.y == all_targets.min()[0]
+                assert input_space.contains_point(best_config)
+                assert output_space.contains_point(optimum)
+                assert optimum.y <= old_optimum
+                old_optimum = optimum.y
                 self.validate_optima(optimizer=bayesian_optimizer)
+                random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()[0]
+                print(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}, Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
+
+        random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()[0]
+        assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
+        models_gof_metrics = [random_forest_gof_metrics]
+
+        for model_gof_metrics in models_gof_metrics:
+            assert 0 <= model_gof_metrics.relative_absolute_error <= 1  # This could fail if the models are really wrong. Not expected in this unit test though.
+            assert 0 <= model_gof_metrics.relative_squared_error <= 1
+
+            # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
+            n = model_gof_metrics.last_refit_iteration_number
+            assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
+
+            # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
+            assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
 
     @trace()
     @pytest.mark.parametrize("restart_num", [i for i in range(10)])
-    def test_hierarchical_quadratic_cold_start_random_configs(self, restart_num):
+    @pytest.mark.parametrize("use_remote_optimizer", [True, False])
+    def test_hierarchical_quadratic_cold_start_random_configs(self, restart_num, use_remote_optimizer):
 
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
@@ -374,40 +372,42 @@ class TestBayesianOptimizer:
         print(f"[Restart: {restart_num}] Creating a BayesianOptimimizer with the following config: ")
         print(optimizer_config.to_json(indent=2))
 
-        local_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
-            optimization_problem=optimization_problem,
-            optimizer_config=optimizer_config
-        )
 
-        remote_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
-            optimization_problem=optimization_problem,
-            optimizer_config=optimizer_config
-        )
+        if not use_remote_optimizer:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+                optimization_problem=optimization_problem,
+                optimizer_config=optimizer_config
+            )
+        else:
+            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+                optimization_problem=optimization_problem,
+                optimizer_config=optimizer_config
+            )
 
-        for bayesian_optimizer in [local_optimizer, remote_optimizer]:
-            num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 10
-            for i in range(num_guided_samples):
-                suggested_params = bayesian_optimizer.suggest()
-                y = objective_function.evaluate_point(suggested_params)
-                print(f"[Restart: {restart_num}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
+        num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 10
+        for i in range(num_guided_samples):
+            suggested_params = bayesian_optimizer.suggest()
+            y = objective_function.evaluate_point(suggested_params)
+            print(f"[Restart: {restart_num}][Sample: {i}/{num_guided_samples}] {suggested_params}, y: {y}")
 
-                input_values_df = pd.DataFrame({
-                    param_name: [param_value]
-                    for param_name, param_value in suggested_params
-                })
-                target_values_df = y.to_dataframe()
-                bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df,target_values_pandas_frame=target_values_df)
+            input_values_df = pd.DataFrame({
+                param_name: [param_value]
+                for param_name, param_value in suggested_params
+            })
+            target_values_df = y.to_dataframe()
+            bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df,target_values_pandas_frame=target_values_df)
 
-            best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
-            print(f"[Restart:  {restart_num}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
-            self.validate_optima(optimizer=bayesian_optimizer)
+        best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
+        print(f"[Restart:  {restart_num}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
+        self.validate_optima(optimizer=bayesian_optimizer)
 
-        # Test if pickling works
-        #
-        pickled_optimizer = pickle.dumps(local_optimizer)
-        unpickled_optimizer = pickle.loads(pickled_optimizer)
-        for _ in range(10):
-            assert unpickled_optimizer.suggest() == local_optimizer.suggest()
+        if not use_remote_optimizer:
+            # Test if pickling works
+            #
+            pickled_optimizer = pickle.dumps(bayesian_optimizer)
+            unpickled_optimizer = pickle.loads(pickled_optimizer)
+            for _ in range(10):
+                assert unpickled_optimizer.suggest() == bayesian_optimizer.suggest()
 
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
@@ -560,11 +560,12 @@ class TestBayesianOptimizer:
 
         with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
             # unaligned parameters and context
-            local_optimizer.predict(parameter_values_pandas_frame=parameter_df,
-                                    context_values_pandas_frame=context_df.iloc[:-1])
+            local_optimizer.predict(
+                parameter_values_pandas_frame=parameter_df,
+                context_values_pandas_frame=context_df.iloc[:-1]
+            )
 
-        predictions = local_optimizer.predict(parameter_values_pandas_frame=parameter_df,
-                                              context_values_pandas_frame=context_df)
+        predictions = local_optimizer.predict(parameter_values_pandas_frame=parameter_df, context_values_pandas_frame=context_df)
         predictions_df = predictions.get_dataframe()
         assert len(predictions_df) == len(parameter_df)
 
