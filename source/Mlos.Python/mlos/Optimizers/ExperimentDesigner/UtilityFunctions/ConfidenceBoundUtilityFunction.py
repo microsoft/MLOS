@@ -7,6 +7,7 @@ import pandas as pd
 from scipy.stats import t
 from mlos.Logger import create_logger
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point
@@ -44,7 +45,7 @@ class ConfidenceBoundUtilityFunction(UtilityFunction):
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
 
     @trace()
-    def __call__(self, feature_values_pandas_frame):
+    def __call__(self, feature_values_pandas_frame, pareto_frontier: ParetoFrontier = None):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value

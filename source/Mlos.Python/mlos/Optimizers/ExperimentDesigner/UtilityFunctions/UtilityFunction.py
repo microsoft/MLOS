@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 
 
 class UtilityFunction(ABC):
@@ -11,5 +12,5 @@ class UtilityFunction(ABC):
     """
 
     @abstractmethod
-    def __call__(self, feature_values_pandas_frame):
+    def __call__(self, feature_values_pandas_frame, pareto_frontier: ParetoFrontier = None):
         raise NotImplementedError("All subclasses must implement this.")
