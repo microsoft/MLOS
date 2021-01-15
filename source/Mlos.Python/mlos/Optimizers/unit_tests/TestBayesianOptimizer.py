@@ -535,18 +535,24 @@ class TestBayesianOptimizer:
         )
 
         with pytest.raises(ValueError, match="Context required"):
-             local_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                      target_values_pandas_frame=target_df)
+             local_optimizer.register(
+                 parameter_values_pandas_frame=parameter_df,
+                 target_values_pandas_frame=target_df
+             )
 
 
         with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
-            local_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                     target_values_pandas_frame=target_df,
-                                     context_values_pandas_frame=context_df.iloc[:-1])
+            local_optimizer.register(
+                parameter_values_pandas_frame=parameter_df,
+                target_values_pandas_frame=target_df,
+                context_values_pandas_frame=context_df.iloc[:-1]
+            )
 
-        local_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                 target_values_pandas_frame=target_df,
-                                 context_values_pandas_frame=context_df)
+        local_optimizer.register(
+            parameter_values_pandas_frame=parameter_df,
+            target_values_pandas_frame=target_df,
+            context_values_pandas_frame=context_df
+        )
 
         with pytest.raises(ValueError, match="Context required"):
             local_optimizer.suggest()
@@ -585,9 +591,11 @@ class TestBayesianOptimizer:
 
         # can't register, predict, suggest with context on remote optimizer
         with pytest.raises(NotImplementedError, match="Context not currently supported"):
-            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                      target_values_pandas_frame=target_df,
-                                      context_values_pandas_frame=context_df)
+            remote_optimizer.register(
+                parameter_values_pandas_frame=parameter_df,
+                target_values_pandas_frame=target_df,
+                context_values_pandas_frame=context_df
+            )
 
         with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.predict(parameter_values_pandas_frame=parameter_df,
@@ -598,8 +606,10 @@ class TestBayesianOptimizer:
 
         # context is missing but required by problem, should give error
         with pytest.raises(grpc.RpcError):
-            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                      target_values_pandas_frame=target_df)
+            remote_optimizer.register(
+                parameter_values_pandas_frame=parameter_df,
+                target_values_pandas_frame=target_df
+            )
 
         # run some iterations on local optimizer to see we do something sensible
         for _ in range(100):
@@ -607,9 +617,11 @@ class TestBayesianOptimizer:
             context = context_space.random()
             suggested_config = local_optimizer.suggest(context=context)
             target_values = f(suggested_config, context)
-            local_optimizer.register(parameter_values_pandas_frame=suggested_config.to_dataframe(),
-                                     target_values_pandas_frame=target_values,
-                                     context_values_pandas_frame=context.to_dataframe())
+            local_optimizer.register(
+                parameter_values_pandas_frame=suggested_config.to_dataframe(),
+                target_values_pandas_frame=target_values,
+                context_values_pandas_frame=context.to_dataframe()
+            )
 
         optimum_y_1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=-1).to_dataframe())
         optimum_y1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=1).to_dataframe())
