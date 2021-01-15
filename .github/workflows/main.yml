@@ -11,6 +11,10 @@ name: CI
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the main branch
 on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Manual CI run'
   push:
     branches: [ main ]
   pull_request:
@@ -50,7 +54,7 @@ jobs:
         scripts\package.windows.cmd
 
   # Docker build process overview:
-  # - We currently use the docker.pkg.github.com package registry as a staging
+  # - We started using the docker.pkg.github.com package registry as a staging
   # ground to cache the ":latest" version of the build image.
   # - For authentication we use the built-in GITHUB_TOKEN secret to avoid the
   # need to setup special secrets (see forked repo considerations below).
@@ -191,12 +195,6 @@ jobs:
         #  mlos-buildx-${{ matrix.UbuntuVersion }}-
         restore-keys: |
           mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ needs.prep-vars.outputs.main-sha }}
-    - name: Github Docker Package Registry Login
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
     - name: Github Docker Container Registry Login
       if: ${{ env.MLOS_GCR_USR != '' }}
       uses: docker/login-action@v1
@@ -213,9 +211,7 @@ jobs:
         # Even if the local cache doesn't have anything, allow using the latest published version.
         cache-from: |
           type=local,src=/tmp/.buildx-cache
-          docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
           ghcr.io/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-          docker.pkg.github.com/microsoft/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
           ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
         cache-to: type=local,dest=/tmp/.buildx-cache
         #load: true
@@ -684,24 +680,6 @@ jobs:
         cache-from: type=local,src=/tmp/.buildx-cache
         #cache-to: type=local,dest=/tmp/.buildx-cache
         load: true
-    # Now we can push the image to the local docker package repository.
-    # Note: Although this works well with the built in GITHUB_TOKEN secret,
-    # it requires a "docker login" to be able to pull (no anonymous pulls).
-    - name: Github Docker Package Registry Login
-      uses: docker/login-action@v1
-      with:
-        registry: docker.pkg.github.com
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Push the docker image to this repo's github docker package registry
-      timeout-minutes: 15
-      shell: bash
-      # We only push to the :latest tag, to avoid needing to cleanup the
-      # registry manually (there's currently no API for that).
-      run: |
-        docker tag mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:${{ github.sha }} \
-          docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
-        docker push docker.pkg.github.com/${{ needs.prep-vars.outputs.repository-name-tolower }}/mlos-build-ubuntu-${{ matrix.UbuntuVersion }}:latest
     # Optionally push to the new Github Container Registry service, if the
     # current repo has the appropriate personal access token secrets setup.
     # This service allows anonymous pulls.
