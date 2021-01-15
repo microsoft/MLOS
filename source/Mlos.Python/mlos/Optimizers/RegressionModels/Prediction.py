@@ -177,8 +177,8 @@ class Prediction:
             TODO: format return type properly
             new column name
         """
-        self._dataframe[self.LegalColumnNames.PREDICTED_VALUE_STANDARD_DEVIATION] = np.sqrt(self._dataframe[self.LegalColumnNames.PREDICTED_VALUE_VARIANCE])
-        return self.LegalColumnNames.PREDICTED_VALUE_STANDARD_DEVIATION
+        self._dataframe[self.LegalColumnNames.PREDICTED_VALUE_STANDARD_DEVIATION.name] = np.sqrt(self._dataframe[self.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value])
+        return self.LegalColumnNames.PREDICTED_VALUE_STANDARD_DEVIATION.name
 
 
     def add_t_values_column(self, alpha: float) -> str:

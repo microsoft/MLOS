@@ -26,8 +26,8 @@ multi_objective_probability_of_improvement_utility_function_config_store = Compo
         ]
     ),
     default=Point(
-        utility_function_name="upper_confidence_bound_on_improvement",
-        alpha=0.01
+        utility_function_name="multi_objective_probability_of_improvement",
+        num_monte_carlo_samples=100
     )
 )
 
@@ -98,10 +98,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         # we could sample more aggressively from their distributions until we reach a statistically significant difference between
         # their POI esitmates (and then sample a bit more, to fortify our conclusions).
 
-        predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
-        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
-
-        poi_df = pd.DataFrame(index=feature_values_pandas_frame.index, columns='utility')
+        poi_df = pd.DataFrame(index=feature_values_pandas_frame.index, columns=['utility'])
 
         # Let's make sure all predictions have a standard deviation available.
         #
@@ -109,19 +106,28 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
             std_dev_column_name = objective_prediction.add_standard_deviation_column()
 
         for config_idx in feature_values_pandas_frame.index:
-            monte_carlo_samples_df = pd.DataFrame()
 
-            for objective_name, prediction in multi_objective_predictions:
-                prediction_df = prediction.get_dataframe()
-                config_prediction = prediction_df.loc[config_idx]
-                monte_carlo_samples_df[objective_name] = np.random.standard_t(config_prediction[dof_col], self.config.num_monte_carlo_samples) \
-                                             * config_prediction[std_dev_column_name] \
-                                             + config_prediction[predicted_value_col]
-
+            monte_carlo_samples_df = self.create_monte_carlo_samples_df(multi_objective_predictions, config_idx, std_dev_column_name)
             # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
             # frontier if they are dominated or not
             num_dominated_points = ParetoFrontier.is_dominated(objectives_df=monte_carlo_samples_df, pareto_df=pareto_df).sum()
-            probability_of_improvement = num_dominated_points / self.config.num_monte_carlo_samples
+            num_non_dominated_points = len(monte_carlo_samples_df.index) - num_dominated_points
+            probability_of_improvement = num_non_dominated_points / self.config.num_monte_carlo_samples
             poi_df.loc[config_idx, 'utility'] = probability_of_improvement
 
         return poi_df
+
+    def create_monte_carlo_samples_df(self, multi_objective_predictions, config_idx, std_dev_column_name):
+
+        predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
+
+        monte_carlo_samples_df = pd.DataFrame()
+
+        for objective_name, prediction in multi_objective_predictions:
+            prediction_df = prediction.get_dataframe()
+            config_prediction = prediction_df.loc[config_idx]
+            monte_carlo_samples_df[objective_name] = np.random.standard_t(config_prediction[dof_col], self.config.num_monte_carlo_samples) \
+                                                     * config_prediction[std_dev_column_name] \
+                                                     + config_prediction[predicted_value_col]
+        return monte_carlo_samples_df
