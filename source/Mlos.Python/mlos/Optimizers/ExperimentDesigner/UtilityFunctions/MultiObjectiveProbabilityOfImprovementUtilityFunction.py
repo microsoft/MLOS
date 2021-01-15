@@ -19,7 +19,7 @@ from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 multi_objective_probability_of_improvement_utility_function_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
-        name="multi_objective_probability_of_improvement",
+        name="multi_objective_probability_of_improvement_config",
         dimensions=[
             CategoricalDimension(name="utility_function_name", values=["multi_objective_probability_of_improvement"]),
             DiscreteDimension(name="num_monte_carlo_samples", min=100, max=100000)
@@ -27,7 +27,7 @@ multi_objective_probability_of_improvement_utility_function_config_store = Compo
     ),
     default=Point(
         utility_function_name="multi_objective_probability_of_improvement",
-        num_monte_carlo_samples=100
+        num_monte_carlo_samples=1000
     )
 )
 
@@ -86,6 +86,11 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     ):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
+        if pareto_df is None or pareto_df.empty or not self.surrogate_model.trained:
+            # All of the configs are equally likely to improve upon a non-existing solution.
+            #
+            return pd.DataFrame(columns=['utility'], dtype='float')
+
         feature_values_pandas_frame = self.surrogate_model.input_space.filter_out_invalid_rows(feature_values_pandas_frame)
         multi_objective_predictions: MultiObjectivePrediction = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
 
@@ -98,7 +103,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         # we could sample more aggressively from their distributions until we reach a statistically significant difference between
         # their POI esitmates (and then sample a bit more, to fortify our conclusions).
 
-        poi_df = pd.DataFrame(index=feature_values_pandas_frame.index, columns=['utility'])
+        poi_df = pd.DataFrame(index=feature_values_pandas_frame.index, columns=['utility'], dtype='float')
 
         # Let's make sure all predictions have a standard deviation available.
         #
@@ -108,21 +113,33 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         for config_idx in feature_values_pandas_frame.index:
 
             monte_carlo_samples_df = self.create_monte_carlo_samples_df(multi_objective_predictions, config_idx, std_dev_column_name)
-            # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
-            # frontier if they are dominated or not
-            num_dominated_points = ParetoFrontier.is_dominated(objectives_df=monte_carlo_samples_df, pareto_df=pareto_df).sum()
-            num_non_dominated_points = len(monte_carlo_samples_df.index) - num_dominated_points
-            probability_of_improvement = num_non_dominated_points / self.config.num_monte_carlo_samples
-            poi_df.loc[config_idx, 'utility'] = probability_of_improvement
+            num_samples = len(monte_carlo_samples_df.index)
+            if num_samples == 0:
+                poi_df.loc[config_idx, 'utility'] = 0.0
+            else:
+                # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
+                # frontier if they are dominated or not.
+                num_dominated_points = ParetoFrontier.is_dominated(objectives_df=monte_carlo_samples_df, pareto_df=pareto_df).sum()
+                num_non_dominated_points = num_samples - num_dominated_points
+                probability_of_improvement = num_non_dominated_points / num_samples
+                poi_df.loc[config_idx, 'utility'] = probability_of_improvement
 
         return poi_df
 
+    @trace()
     def create_monte_carlo_samples_df(self, multi_objective_predictions, config_idx, std_dev_column_name):
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         monte_carlo_samples_df = pd.DataFrame()
+
+        for objective_name, prediction in multi_objective_predictions:
+            prediction_df = prediction.get_dataframe()
+            if config_idx not in prediction_df.index:
+                # We need a valid prediction for all objectives to produce sample.
+                #
+                return monte_carlo_samples_df
 
         for objective_name, prediction in multi_objective_predictions:
             prediction_df = prediction.get_dataframe()

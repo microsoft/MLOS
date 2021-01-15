@@ -12,19 +12,23 @@ from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
+from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction, multi_objective_probability_of_improvement_utility_function_config_store
 
 
 experiment_designer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name='experiment_designer_config',
         dimensions=[
-            CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__]),
+            CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__, MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__]),
             CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__, GlowWormSwarmOptimizer.__name__]),
             ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
         subgrid=confidence_bound_utility_function_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__])
+    ).join(
+        subgrid=multi_objective_probability_of_improvement_utility_function_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension('utility_function_implementation', values=[MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__])
     ).join(
         subgrid=random_search_optimizer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
@@ -33,9 +37,9 @@ experiment_designer_config_store = ComponentConfigStore(
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
     ),
     default=Point(
-        utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
+        utility_function_implementation=MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
-        confidence_bound_utility_function_config=confidence_bound_utility_function_config_store.default,
+        multi_objective_probability_of_improvement_config=multi_objective_probability_of_improvement_utility_function_config_store.default,
         random_search_optimizer_config=random_search_optimizer_config_store.default,
         fraction_random_suggestions=0.5
     )
@@ -89,12 +93,23 @@ class ExperimentDesigner:
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
         self.rng = np.random.Generator(np.random.PCG64())
 
-        self.utility_function = ConfidenceBoundUtilityFunction(
-            function_config=self.config.confidence_bound_utility_function_config,
-            surrogate_model=self.surrogate_model,
-            minimize=self.optimization_problem.objectives[0].minimize,
-            logger=self.logger
-        )
+        if designer_config.utility_function_implementation == ConfidenceBoundUtilityFunction.__name__:
+            self.utility_function = ConfidenceBoundUtilityFunction(
+                function_config=self.config.confidence_bound_utility_function_config,
+                surrogate_model=self.surrogate_model,
+                minimize=self.optimization_problem.objectives[0].minimize,
+                logger=self.logger
+            )
+
+        elif designer_config.utility_function_implementation == MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__:
+            self.utility_function = MultiObjectiveProbabilityOfImprovementUtilityFunction(
+                function_config=self.config.multi_objective_probability_of_improvement_config,
+                surrogate_model=self.surrogate_model,
+                logger=self.logger
+            )
+        else:
+            assert False
+
         self.numeric_optimizer = self.make_optimizer_for_utility(self.utility_function)
 
     def make_optimizer_for_utility(self, utility_function):
@@ -115,11 +130,11 @@ class ExperimentDesigner:
             )
         raise ValueError(f"Unknown numeric_optimizer_implementation: {self.config.numeric_optimizer_implementation}.")
 
-    def suggest(self, context_values_dataframe=None, random=False):
+    def suggest(self, context_values_dataframe=None, random=False, pareto_df=None):
         self.logger.debug(f"Suggest(random={random})")
         random_number = self.rng.random()
         override_random = random_number < self.config.fraction_random_suggestions
         random = random or override_random
         if random:
             return self.optimization_problem.parameter_space.random()
-        return self.numeric_optimizer.suggest(context_values_dataframe)
+        return self.numeric_optimizer.suggest(context_values_dataframe, pareto_df=pareto_df)

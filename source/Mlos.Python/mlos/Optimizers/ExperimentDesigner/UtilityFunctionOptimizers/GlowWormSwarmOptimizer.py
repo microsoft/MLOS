@@ -77,7 +77,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         self.dimension_names = [dimension.name for dimension in self.parameter_adapter.dimensions]
 
     @trace()
-    def suggest(self, context_values_dataframe=None):  # pylint: disable=unused-argument
+    def suggest(self, context_values_dataframe=None, pareto_df=None):  # pylint: disable=unused-argument
         """ Returns the next best configuration to try.
 
         The idea is pretty simple:
@@ -95,7 +95,11 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(
             num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
         )
-        utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
+        utility_function_values = self.utility_function(
+            feature_values_pandas_frame=feature_values_dataframe.copy(deep=False),
+            pareto_df=pareto_df
+        )
+
         num_utility_function_values = len(utility_function_values.index)
         if num_utility_function_values == 0:
             config_to_suggest = Point.from_dataframe(feature_values_dataframe.iloc[[0]])
@@ -121,7 +125,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         for _ in range(self.optimizer_config.num_iterations):
             worms = self.run_iteration(worms=worms)
             # TODO: keep track of the max configs over iterations
-            worms = self.compute_utility(worms)
+            worms = self.compute_utility(worms, pareto_df)
             worms['luciferin'] = (1 - self.optimizer_config.luciferin_decay_constant) * worms['luciferin'] + \
                                  self.optimizer_config.luciferin_enhancement_constant * worms['utility']
 
@@ -135,7 +139,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         return self.parameter_adapter.unproject_point(config_to_suggest)
 
     @trace()
-    def compute_utility(self, worms):
+    def compute_utility(self, worms, pareto_df):
         """ Computes utility function values for each worm.
 
         Since some worm positions will produce a NaN, we need to keep producing new utility values for those.
@@ -144,7 +148,10 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         :return:
         """
         unprojected_features = self.parameter_adapter.unproject_dataframe(worms[self.dimension_names], in_place=False)
-        utility_function_values = self.utility_function(unprojected_features.copy(deep=False))
+        utility_function_values = self.utility_function(
+            unprojected_features.copy(deep=False),
+            pareto_df=pareto_df
+        )
         worms['utility'] = utility_function_values
         index_of_nans = worms.index.difference(utility_function_values.index)
         # TODO: A better solution would be to give them random valid configs, and let them live.
