@@ -105,8 +105,8 @@ class ParetoFrontier:
         :param pareto_df:
         :return:
         """
-        is_not_dominated = pd.Series([True for i in range(len(objectives_df.index))])
+        is_dominated = pd.Series([False for i in range(len(objectives_df.index))], index=objectives_df.index)
         for idx, pareto_row in pareto_df.iterrows():
-            is_not_dominated = is_not_dominated & (objectives_df >= pareto_row).any(axis=1)
-        is_dominated = ~is_not_dominated
+            is_dominated_by_this_pareto_point = (objectives_df < pareto_row).all(axis=1)
+            is_dominated = is_dominated | is_dominated_by_this_pareto_point
         return is_dominated
