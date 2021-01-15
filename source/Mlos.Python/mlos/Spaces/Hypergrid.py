@@ -4,6 +4,7 @@
 #
 from abc import ABC, abstractmethod
 import random
+import numpy as np
 import pandas as pd
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
@@ -68,11 +69,13 @@ class Hypergrid(ABC):
         return pd.DataFrame(config_dicts)
 
     @trace()
-    def filter_out_invalid_rows(self, original_dataframe: pd.DataFrame, exclude_extra_columns=True) -> pd.DataFrame:
-        """Returns a dataframe containing only valid rows from the original_dataframe.
+    def get_valid_rows_index(self, original_dataframe) -> pd.Index:
+        """Returns an index of all rows in the dataframe that belong to this Hypergrid.
 
         Valid rows are rows with no NaNs and with values for all dimensions in the required ranges.
-        If there are additional columns, they will be dropped unless exclude_extra_columns == False.
+
+        :param df:
+        :return:
         """
         assert set(original_dataframe.columns.values).issuperset(set(self.dimension_names))
 
@@ -116,8 +119,19 @@ class Hypergrid(ABC):
                 axis=1
             )].index
 
+        return valid_rows_index
+
+    @trace()
+    def filter_out_invalid_rows(self, original_dataframe: pd.DataFrame, exclude_extra_columns=True) -> pd.DataFrame:
+        """Returns a dataframe containing only valid rows from the original_dataframe.
+
+        Valid rows are rows with no NaNs and with values for all dimensions in the required ranges.
+        If there are additional columns, they will be dropped unless exclude_extra_columns == False.
+        """
+        valid_rows_index = self.get_valid_rows_index(original_dataframe)
+
         if exclude_extra_columns:
-            return dataframe.loc[valid_rows_index]
+            return original_dataframe.loc[valid_rows_index][self.dimension_names]
         return original_dataframe.loc[valid_rows_index]
 
 

@@ -95,3 +95,18 @@ class ParetoFrontier:
                 pareto_df[objective.name] = -pareto_df[objective.name]
 
         return pareto_df
+
+
+    @staticmethod
+    def is_dominated(objectives_df, pareto_df) -> pd.Series:
+        """For each row in objectives_df checks if the row is dominated by any of the rows in pareto_df.
+
+        :param objectives_df:
+        :param pareto_df:
+        :return:
+        """
+        is_not_dominated = pd.Series([True for i in range(len(objectives_df.index))])
+        for idx, pareto_row in pareto_df.iterrows():
+            is_not_dominated = is_not_dominated & (objectives_df >= pareto_row).any(axis=1)
+        is_dominated = ~is_not_dominated
+        return is_dominated

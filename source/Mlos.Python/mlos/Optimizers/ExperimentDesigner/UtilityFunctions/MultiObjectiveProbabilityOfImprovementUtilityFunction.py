@@ -10,9 +10,11 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import 
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, DiscreteDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Tracer import trace
+from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 
 multi_objective_probability_of_improvement_utility_function_config_store = ComponentConfigStore(
@@ -42,10 +44,8 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     these that are dominated by the existing pareto frontier, and use that proportion as an estimator for the probability of
     improvement.
 
-    Assumptions
-    -----------
+    Assuming Prediction Error Independence:
 
-    Prediction Error Independence
         We assume that we can sample independently from the distributions described by the multi-objective prediction object. That
         is to say that if we assume:
 
@@ -77,6 +77,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
 
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
 
+
     @trace()
     def __call__(
         self,
@@ -85,8 +86,9 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     ):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
+        feature_values_pandas_frame = self.surrogate_model.input_space.filter_out_invalid_rows(feature_values_pandas_frame)
+        multi_objective_predictions: MultiObjectivePrediction = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
 
-        multi_objective_predictions = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
 
         # Now that we have predictions for all of the features_df rows, we need to sample random points from the distribution
         # described by each prediction and then we want to check how many of those random points are dominated by the existing
@@ -96,22 +98,23 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         # we could sample more aggressively from their distributions until we reach a statistically significant difference between
         # their POI esitmates (and then sample a bit more, to fortify our conclusions).
 
-        # While the models can predict multiple objectives, here we just compute the utility for the first one. Next-steps include:
-        #   1. Select the objective by name
-        #   2. Write multi-objective utility functions
-        #
-        # But for now, the behavior below keeps the behavior of the optimizer unchanged.
-        #
-        predictions = multi_objective_predictions[0]
-        predictions_df = predictions.get_dataframe()
+        predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
-        t_values = t.ppf(1 - self.config.alpha / 2.0, predictions_df[dof_col])
-        confidence_interval_radii = t_values * np.sqrt(predictions_df[predicted_value_var_col])
+        # Let's make sure all predictions have a standard deviation available.
+        #
+        for _, objective_prediction in multi_objective_predictions:
+            std_dev_column_name = objective_prediction.add_standard_deviation_column()
 
-        if self.config.utility_function_name == "lower_confidence_bound_on_improvement":
-            utility_function_values = predictions_df[predicted_value_col] * self._sign - confidence_interval_radii
-        elif self.config.utility_function_name == "upper_confidence_bound_on_improvement":
-            utility_function_values = predictions_df[predicted_value_col] * self._sign + confidence_interval_radii
-        else:
-            raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
-        return pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'])
+        for config_idx in feature_values_pandas_frame.index:
+            monte_carlo_samples_df = pd.DataFrame()
+
+            for objective_name, prediction in multi_objective_predictions:
+                prediction_df = prediction.get_dataframe()
+                config_prediction = prediction_df.loc[config_idx]
+                monte_carlo_samples_df[objective_name] = np.random.standard_t(config_prediction[dof_col], self.config.num_monte_carlo_samples) \
+                                             * config_prediction[std_dev_column_name] \
+                                             + config_prediction[predicted_value_col]
+
+            # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
+            # frontier if they are dominated or not
