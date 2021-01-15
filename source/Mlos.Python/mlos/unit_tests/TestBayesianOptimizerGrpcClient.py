@@ -45,14 +45,14 @@ class TestBayesianOptimizerGrpcClient:
             try:
                 self.server = OptimizerMicroserviceServer(port=port, num_threads=10)
                 self.server.start()
-                self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
+                self.port = port
                 break
             except:
                 self.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}")
                 if num_tries == max_num_tries:
                     raise
 
-
+        self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{self.port}')
         self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
         self.optimizer_monitor = OptimizerMonitor(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 
@@ -125,28 +125,30 @@ class TestBayesianOptimizerGrpcClient:
         assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
         assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
+
         # Let's look at the goodness of fit.
         #
-        random_forest_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
+        multi_objective_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
+        for objective_name, random_forest_gof_metrics in multi_objective_gof_metrics:
 
-        # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
-        # and should make this test not very flaky.
-        assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
+            # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
+            # and should make this test not very flaky.
+            assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
 
-        # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
-        models_gof_metrics = [random_forest_gof_metrics]
+            # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
+            models_gof_metrics = [random_forest_gof_metrics]
 
-        for model_gof_metrics in models_gof_metrics:
-            assert 0 <= model_gof_metrics.relative_absolute_error <= 1 # This could fail if the models are really wrong. Not expected in this unit test though.
-            assert 0 <= model_gof_metrics.relative_squared_error <= 1
+            for model_gof_metrics in models_gof_metrics:
+                assert 0 <= model_gof_metrics.relative_absolute_error <= 1 # This could fail if the models are really wrong. Not expected in this unit test though.
+                assert 0 <= model_gof_metrics.relative_squared_error <= 1
 
-            # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
-            n = model_gof_metrics.last_refit_iteration_number
-            assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
+                # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
+                n = model_gof_metrics.last_refit_iteration_number
+                assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
 
-            # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
-            assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
-            assert 0 <= model_gof_metrics.coefficient_of_determination <= 1
+                # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
+                assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
+                assert 0 <= model_gof_metrics.coefficient_of_determination <= 1
 
 
     def test_optimizer_with_random_config(self):

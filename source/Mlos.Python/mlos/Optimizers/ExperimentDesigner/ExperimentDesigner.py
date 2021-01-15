@@ -4,7 +4,7 @@
 #
 import numpy as np
 from mlos.Logger import create_logger
-from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
@@ -75,7 +75,7 @@ class ExperimentDesigner:
             self,
             designer_config: Point,
             optimization_problem: OptimizationProblem,
-            surrogate_model: RegressionModel,
+            surrogate_model: MultiObjectiveRegressionModel,
             logger=None
     ):
         assert designer_config in experiment_designer_config_store.parameter_space
@@ -84,9 +84,9 @@ class ExperimentDesigner:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
 
-        self.config = designer_config
-        self.optimization_problem = optimization_problem
-        self.surrogate_model = surrogate_model
+        self.config: Point = designer_config
+        self.optimization_problem: OptimizationProblem = optimization_problem
+        self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
         self.rng = np.random.Generator(np.random.PCG64())
 
         self.utility_function = ConfidenceBoundUtilityFunction(

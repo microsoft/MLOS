@@ -11,7 +11,7 @@ from mlos.global_values import deserialize_from_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
-from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import GoodnessOfFitMetrics
+from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point
 from mlos.Tracer import trace
@@ -76,7 +76,7 @@ class BayesianOptimizerProxy(OptimizerBase):
     @trace()
     def compute_surrogate_model_goodness_of_fit(self):
         response = self._optimizer_stub.ComputeGoodnessOfFitMetrics(self.optimizer_handle)
-        return GoodnessOfFitMetrics.from_json(response.Value)
+        return MultiObjectiveGoodnessOfFitMetrics.from_json(response.Value, objective_names=self.optimization_problem.objective_space.dimension_names)
 
     @trace()
     def suggest(self, random=False, context=None):  # pylint: disable=unused-argument
@@ -118,7 +118,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         return features_df, objectives_df, context_df
 
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None):  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
         if context_values_pandas_frame is not None:

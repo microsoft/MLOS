@@ -10,6 +10,7 @@ from mlos.Spaces import Hypergrid, Point
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
 
 
 class MultiObjectiveRegressionModel(ABC):
@@ -30,6 +31,16 @@ class MultiObjectiveRegressionModel(ABC):
 
         self.input_dimension_names = self.input_space.dimension_names
         self.output_dimension_names = self.output_space.dimension_names
+
+    @property
+    @abstractmethod
+    def fit_state(self) -> MultiObjectiveRegressionModelFitState:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def trained(self) -> bool:
+        raise NotImplementedError
 
     @abstractmethod
     def fit(self, features_df: pd.DataFrame, targets_df: pd.DataFrame, iteration_number: int) -> None:

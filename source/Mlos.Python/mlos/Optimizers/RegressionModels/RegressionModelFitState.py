@@ -57,7 +57,8 @@ class RegressionModelFitState:
 
         values = {col_name: [] for col_name in column_names}
 
-        for gof_record in gof_metrics_list:
+        for multi_objective_gof_record in gof_metrics_list:
+            gof_record = multi_objective_gof_record[0]
             for i, col_name in enumerate(column_names):
                 values[col_name].append(gof_record[i])
 
