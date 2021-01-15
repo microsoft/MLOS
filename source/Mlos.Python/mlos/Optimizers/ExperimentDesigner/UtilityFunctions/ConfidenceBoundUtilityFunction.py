@@ -45,7 +45,7 @@ class ConfidenceBoundUtilityFunction(UtilityFunction):
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
 
     @trace()
-    def __call__(self, feature_values_pandas_frame, pareto_frontier: ParetoFrontier = None):
+    def __call__(self, feature_values_pandas_frame, pareto_df: pd.DataFrame = None):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value

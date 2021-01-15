@@ -82,7 +82,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     def __call__(
         self,
         feature_values_pandas_frame: pd.DataFrame,
-        pareto_frontier: ParetoFrontier = None
+        pareto_df: pd.DataFrame
     ):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
@@ -101,6 +101,8 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
+        poi_df = pd.DataFrame(index=feature_values_pandas_frame.index, columns='utility')
+
         # Let's make sure all predictions have a standard deviation available.
         #
         for _, objective_prediction in multi_objective_predictions:
@@ -118,3 +120,8 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
 
             # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
             # frontier if they are dominated or not
+            num_dominated_points = ParetoFrontier.is_dominated(objectives_df=monte_carlo_samples_df, pareto_df=pareto_df).sum()
+            probability_of_improvement = num_dominated_points / self.config.num_monte_carlo_samples
+            poi_df.loc[config_idx, 'utility'] = probability_of_improvement
+
+        return poi_df
