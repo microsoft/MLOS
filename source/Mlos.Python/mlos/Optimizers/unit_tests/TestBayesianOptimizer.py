@@ -23,6 +23,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
@@ -328,7 +329,7 @@ class TestBayesianOptimizer:
 
     @trace()
     @pytest.mark.parametrize("restart_num", [i for i in range(10)])
-    @pytest.mark.parametrize("use_remote_optimizer", [True, False])
+    @pytest.mark.parametrize("use_remote_optimizer", [False])
     def test_hierarchical_quadratic_cold_start_random_configs(self, restart_num, use_remote_optimizer):
 
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
@@ -368,6 +369,12 @@ class TestBayesianOptimizer:
 
         if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
+
+        if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
+            optimizer_config.experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration = min(
+                optimizer_config.experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration,
+                10000
+            )
 
         print(f"[Restart: {restart_num}] Creating a BayesianOptimimizer with the following config: ")
         print(optimizer_config.to_json(indent=2))

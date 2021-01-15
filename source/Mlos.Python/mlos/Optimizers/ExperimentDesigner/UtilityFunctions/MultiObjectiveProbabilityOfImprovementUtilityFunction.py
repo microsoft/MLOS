@@ -27,7 +27,7 @@ multi_objective_probability_of_improvement_utility_function_config_store = Compo
     ),
     default=Point(
         utility_function_name="multi_objective_probability_of_improvement",
-        num_monte_carlo_samples=1000
+        num_monte_carlo_samples=100
     )
 )
 
