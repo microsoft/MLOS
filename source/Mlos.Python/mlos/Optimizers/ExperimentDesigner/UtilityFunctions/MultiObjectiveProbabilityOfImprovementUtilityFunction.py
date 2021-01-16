@@ -22,7 +22,7 @@ multi_objective_probability_of_improvement_utility_function_config_store = Compo
         name="multi_objective_probability_of_improvement_config",
         dimensions=[
             CategoricalDimension(name="utility_function_name", values=["multi_objective_probability_of_improvement"]),
-            DiscreteDimension(name="num_monte_carlo_samples", min=100, max=100000)
+            DiscreteDimension(name="num_monte_carlo_samples", min=100, max=1000)
         ]
     ),
     default=Point(
@@ -91,7 +91,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
             #
             return pd.DataFrame(columns=['utility'], dtype='float')
 
-        feature_values_pandas_frame = self.surrogate_model.input_space.filter_out_invalid_rows(feature_values_pandas_frame)
+        feature_values_pandas_frame = self.surrogate_model.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame)
         multi_objective_predictions: MultiObjectivePrediction = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
 
 
@@ -103,14 +103,19 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         # we could sample more aggressively from their distributions until we reach a statistically significant difference between
         # their POI esitmates (and then sample a bit more, to fortify our conclusions).
 
-        poi_df = pd.DataFrame(index=feature_values_pandas_frame.index, columns=['utility'], dtype='float')
+        valid_predictions_index = feature_values_pandas_frame.index
+        for objective_name, prediction in multi_objective_predictions:
+            prediction_df = prediction.get_dataframe()
+            valid_predictions_index = valid_predictions_index.intersection(prediction_df.index)
+
+        poi_df = pd.DataFrame(index=valid_predictions_index, columns=['utility'], dtype='float')
 
         # Let's make sure all predictions have a standard deviation available.
         #
         for _, objective_prediction in multi_objective_predictions:
             std_dev_column_name = objective_prediction.add_standard_deviation_column()
 
-        for config_idx in feature_values_pandas_frame.index:
+        for config_idx in valid_predictions_index:
 
             monte_carlo_samples_df = self.create_monte_carlo_samples_df(multi_objective_predictions, config_idx, std_dev_column_name)
             num_samples = len(monte_carlo_samples_df.index)
