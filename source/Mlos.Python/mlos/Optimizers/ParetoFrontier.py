@@ -2,8 +2,56 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import math
+import numpy as np
 import pandas as pd
+from scipy.stats import norm
+
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Utils.KeyOrderedDict import KeyOrderedDict
+
+class ParetoVolumeEsimator:
+    """Contains all information required to compute a confidence interval on the pareto volume.
+
+    Note that the dimensionality analysis for this volume is meaningless. Each objective carries
+    its own units, and multiplying them together is meaningless.
+
+    Pareto volume estimate can be used to monitor the growth of the pareto frontier over time.
+
+    """
+
+    def __init__(
+        self,
+        num_random_points: int,
+        num_dominated_points: int,
+        objectives_maxima: KeyOrderedDict
+    ):
+        assert 0 <= num_dominated_points <= num_random_points
+        assert len(objectives_maxima) > 0
+        self.num_random_points = num_random_points
+        self.num_dominated_points = num_dominated_points
+        self.objectives_maxima = objectives_maxima
+        self.sample_proportion_of_dominated_points = (1.0 * num_dominated_points) / num_random_points
+
+    def get_two_sided_confidence_interval_on_pareto_volume(self, alpha=0.01):
+        z_score = norm.ppf(1 - alpha / 2.0)
+        p_hat = self.sample_proportion_of_dominated_points
+        ci_radius = z_score * math.sqrt(p_hat * (1 - p_hat) / self.num_random_points)
+        lower_bound_on_proportion = p_hat - ci_radius
+        upper_bound_on_proportion = p_hat + ci_radius
+
+        total_volume_of_enclosing_parallelotope = 1.0
+        for objective, objective_maximum in self.objectives_maxima:
+            total_volume_of_enclosing_parallelotope *= objective_maximum
+
+        total_volume_of_enclosing_parallelotope = abs(total_volume_of_enclosing_parallelotope)
+
+        lower_bound_on_pareto_volume = lower_bound_on_proportion * total_volume_of_enclosing_parallelotope
+        upper_bound_on_pareto_volume = upper_bound_on_proportion * total_volume_of_enclosing_parallelotope
+        return lower_bound_on_pareto_volume, upper_bound_on_pareto_volume
+
+
+
 
 
 class ParetoFrontier:
@@ -110,3 +158,34 @@ class ParetoFrontier:
             is_dominated_by_this_pareto_point = (objectives_df < pareto_row).all(axis=1)
             is_dominated = is_dominated | is_dominated_by_this_pareto_point
         return is_dominated
+
+    @staticmethod
+    def approximate_pareto_volume(pareto_df: pd.DataFrame, num_samples=1000) -> ParetoVolumeEsimator:
+        """Approximates the volume of the pareto frontier.
+
+        The idea here is that we can randomly sample from the objective space and observe the proportion of
+        dominated points to all points. This proportion will allow us to compute a confidence interval on
+        the proportion of dominated points and we can use it to estimate the ration between the volume of
+        the frontier and the volume from which we sampled.
+
+        We can get arbitrarily precise simply by drawing more samples.
+        """
+
+        # First we need to find the maxima for each of the objective values.
+        objectives_maxima = KeyOrderedDict(ordered_keys=[column for column in pareto_df.columns], value_type=float)
+        for column in pareto_df.columns:
+            objectives_maxima[column] = pareto_df[column].max()
+
+        random_points_array = np.random.uniform(low=0.0, high=1.0, size=(len(objectives_maxima), num_samples))
+        random_objectives_df = pd.DataFrame({
+            objective_name: random_points_array[i] * objective_maximum
+            for i, (objective_name, objective_maximum)
+            in enumerate(objectives_maxima)
+        })
+
+        num_dominated_points = ParetoFrontier.is_dominated(objectives_df=random_objectives_df, pareto_df=pareto_df).sum()
+        return ParetoVolumeEsimator(
+            num_random_points=num_samples,
+            num_dominated_points=num_dominated_points,
+            objectives_maxima=objectives_maxima
+        )

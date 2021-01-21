@@ -203,3 +203,16 @@ class TestParetoFrontier:
         all_objectives_df = pd.concat([dominated_df, expected_pareto_df])
         computed_pareto_df = ParetoFrontier.compute_pareto(optimization_problem, all_objectives_df)
         assert computed_pareto_df.sort_values(by=['y1','y2']).equals(expected_pareto_df.sort_values(by=['y1', 'y2']))
+
+
+    def test_pareto_frontier_volume(self):
+        """A simple sanity test on the pareto frontier volume computations.
+        """
+
+        # Let's generate a pareto frontier in 2D. ALl points lay on a line y = 1 - x
+        x = np.linspace(start=0, stop=1, num=100)
+        y = 1 - x
+        pareto_df = pd.DataFrame({'x': x, 'y': y})
+        pareto_volume_estimator = ParetoFrontier.approximate_pareto_volume(pareto_df=pareto_df, num_samples=10000)
+        lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.01)
+        assert lower_bound < 0.5 < upper_bound
