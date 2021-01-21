@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+from contextlib import contextmanager
 import math
 import numpy as np
 import pandas as pd
@@ -73,25 +74,23 @@ class ParetoFrontier:
 
     """
 
-    def __init__(
-            self,
-            optimization_problem: OptimizationProblem,
-            features_df: pd.DataFrame,
-            objectives_df: pd.DataFrame
-    ):
-        assert len(features_df.index) == len(objectives_df.index)
-        if features_df is not None:
-            assert all(column in optimization_problem.feature_space.dimension_names for column in features_df.columns)
-
-        if objectives_df is not None:
-            assert all(column in optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
+    def __init__(self, optimization_problem: OptimizationProblem, objectives_df: pd.DataFrame):
 
         self.optimization_problem = optimization_problem
-        self.features_df = features_df
-        self.objectives_df = objectives_df
+        self._pareto_df = None
 
-    @staticmethod
-    def compute_pareto(optimization_problem: OptimizationProblem, objectives_df: pd.DataFrame) -> pd.DataFrame:
+        # Maintains a version of the pareto frontier, where all objectives are set to be maximized. So value for the objectives that were
+        # originally meant to be minimized, are multiplied by -1.
+        #
+        self._pareto_df_maximize_all = None
+
+        self._compute_pareto(objectives_df)
+
+    @property
+    def pareto_df(self) -> pd.DataFrame:
+        return self._pareto_df.copy(deep=True)
+
+    def _compute_pareto(self, objectives_df: pd.DataFrame) -> pd.DataFrame:
         """Computes a pareto frontier for the given objectives_df (including weak-pareto-optimal points).
 
         We do this by consecutively removing points on the interior of the pareto frontier from objectives_df until none are left.
@@ -108,22 +107,16 @@ class ParetoFrontier:
         :return:
         """
 
-        assert all(column in optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
-
-        # Let's copy it, since we are going to mess it up.
-        #
-        pareto_df = objectives_df.copy(deep=True)
+        assert all(column in self.optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
 
         # First, let's turn it into a maximization problem, by flipping the sign of all objectives that are to be minimized.
         #
-        for objective in optimization_problem.objectives:
-            if objective.minimize:
-                pareto_df[objective.name] = -pareto_df[objective.name]
+        pareto_df = self._flip_sign_for_minimized_objectives(objectives_df)
 
         # By presorting we guarantee, that all dominated points are below the currently considered point.
         #
         pareto_df.sort_values(
-            by=[objective.name for objective in optimization_problem.objectives],
+            by=[objective.name for objective in self.optimization_problem.objectives],
             ascending=False, # We want the maxima up top.
             inplace=True,
             na_position='last', # TODO: figure out what to do with NaNs.
@@ -136,31 +129,28 @@ class ParetoFrontier:
             pareto_df = pareto_df[non_dominated]
             current_row_index += 1
 
+        self._pareto_df_maximize_all = pareto_df
+
         # Let's unflip the signs
         #
-        for objective in optimization_problem.objectives:
-            if objective.minimize:
-                pareto_df[objective.name] = -pareto_df[objective.name]
+        pareto_df = self._flip_sign_for_minimized_objectives(pareto_df)
+        self._pareto_df = pareto_df
 
-        return pareto_df
-
-
-    @staticmethod
-    def is_dominated(objectives_df, pareto_df) -> pd.Series:
+    def is_dominated(self, objectives_df) -> pd.Series:
         """For each row in objectives_df checks if the row is dominated by any of the rows in pareto_df.
 
         :param objectives_df:
         :param pareto_df:
         :return:
         """
+        objectives_df = self._flip_sign_for_minimized_objectives(objectives_df)
         is_dominated = pd.Series([False for i in range(len(objectives_df.index))], index=objectives_df.index)
-        for idx, pareto_row in pareto_df.iterrows():
+        for idx, pareto_row in self._pareto_df_maximize_all.iterrows():
             is_dominated_by_this_pareto_point = (objectives_df < pareto_row).all(axis=1)
             is_dominated = is_dominated | is_dominated_by_this_pareto_point
         return is_dominated
 
-    @staticmethod
-    def approximate_pareto_volume(pareto_df: pd.DataFrame, num_samples=1000) -> ParetoVolumeEsimator:
+    def approximate_pareto_volume(self, num_samples=1000000) -> ParetoVolumeEsimator:
         """Approximates the volume of the pareto frontier.
 
         The idea here is that we can randomly sample from the objective space and observe the proportion of
@@ -172,20 +162,40 @@ class ParetoFrontier:
         """
 
         # First we need to find the maxima for each of the objective values.
-        objectives_maxima = KeyOrderedDict(ordered_keys=[column for column in pareto_df.columns], value_type=float)
-        for column in pareto_df.columns:
-            objectives_maxima[column] = pareto_df[column].max()
+        #
+        objectives_extremes = KeyOrderedDict(ordered_keys=[column for column in self._pareto_df.columns], value_type=float)
+        for objective in self.optimization_problem.objectives:
+            if objective.minimize:
+                objectives_extremes[objective.name] = self._pareto_df[objective.name].min()
+            else:
+                objectives_extremes[objective.name] = self._pareto_df[objective.name].max()
 
-        random_points_array = np.random.uniform(low=0.0, high=1.0, size=(len(objectives_maxima), num_samples))
+
+        random_points_array = np.random.uniform(low=0.0, high=1.0, size=(len(objectives_extremes), num_samples))
         random_objectives_df = pd.DataFrame({
-            objective_name: random_points_array[i] * objective_maximum
-            for i, (objective_name, objective_maximum)
-            in enumerate(objectives_maxima)
+            objective_name: random_points_array[i] * objective_extremum
+            for i, (objective_name, objective_extremum)
+            in enumerate(objectives_extremes)
         })
 
-        num_dominated_points = ParetoFrontier.is_dominated(objectives_df=random_objectives_df, pareto_df=pareto_df).sum()
+        num_dominated_points = self.is_dominated(objectives_df=random_objectives_df).sum()
         return ParetoVolumeEsimator(
             num_random_points=num_samples,
             num_dominated_points=num_dominated_points,
-            objectives_maxima=objectives_maxima
+            objectives_maxima=objectives_extremes
         )
+
+    def _flip_sign_for_minimized_objectives(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Takes a data frame in objective space and multiplies all minimized objectives by -1.
+
+        The point of this is to convert all problems (minimization and maximization) to maximization problems to simplify
+        implementation on everything else.
+
+        :param df:
+        :return:
+        """
+        output_df = df.copy(deep=True)
+        for objective in self.optimization_problem.objectives:
+            if objective.minimize:
+                output_df[objective.name] = -output_df[objective.name]
+        return output_df
