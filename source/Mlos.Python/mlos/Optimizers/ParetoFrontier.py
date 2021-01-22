@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from contextlib import contextmanager
 import math
 import numpy as np
 import pandas as pd
@@ -91,7 +90,7 @@ class ParetoFrontier:
     def pareto_df(self) -> pd.DataFrame:
         return self._pareto_df.copy(deep=True)
 
-    def update_pareto(self, objectives_df: pd.DataFrame) -> pd.DataFrame:
+    def update_pareto(self, objectives_df: pd.DataFrame):
         """Computes a pareto frontier for the given objectives_df (including weak-pareto-optimal points).
 
         We do this by consecutively removing points on the interior of the pareto frontier from objectives_df until none are left.

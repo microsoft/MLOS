@@ -7,7 +7,6 @@ import pandas as pd
 from scipy.stats import t
 from mlos.Logger import create_logger
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
-from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, Point

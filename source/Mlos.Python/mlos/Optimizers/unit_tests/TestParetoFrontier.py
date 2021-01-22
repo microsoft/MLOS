@@ -200,7 +200,7 @@ class TestParetoFrontier:
 
         all_objectives_df = pd.concat([dominated_df, expected_pareto_df])
         pareto_frontier = ParetoFrontier(optimization_problem, all_objectives_df)
-        computed_pareto_df = pareto_frontier._pareto_df.copy()
+        computed_pareto_df = pareto_frontier.pareto_df
         assert computed_pareto_df.sort_values(by=['y1','y2']).equals(expected_pareto_df.sort_values(by=['y1', 'y2']))
 
     def test_pareto_frontier_volume_simple(self):
