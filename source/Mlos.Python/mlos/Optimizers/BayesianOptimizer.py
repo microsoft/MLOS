@@ -55,6 +55,7 @@ class BayesianOptimizer(OptimizerBase):
 
         self.surrogate_model_output_space = optimization_problem.objective_space
         self.optimizer_config = optimizer_config
+        self.pareto_frontier = ParetoFrontier(optimization_problem=self.optimization_problem, objectives_df=None)
 
         # Now let's put together the surrogate model.
         #
@@ -79,6 +80,7 @@ class BayesianOptimizer(OptimizerBase):
         self.experiment_designer = ExperimentDesigner(
             designer_config=self.optimizer_config.experiment_designer_config,
             optimization_problem=self.optimization_problem,
+            pareto_frontier=self.pareto_frontier,
             surrogate_model=self.surrogate_model,
             logger=self.logger
         )
@@ -136,8 +138,8 @@ class BayesianOptimizer(OptimizerBase):
             assert context in self.optimization_problem.context_space
         random = random or self.num_observed_samples < self.optimizer_config.min_samples_required_for_guided_design_of_experiments
         context_values = context.to_dataframe() if context is not None else None
-        pareto_df = ParetoFrontier._compute_pareto(self.optimization_problem, self._target_values_df)
-        suggested_config = self.experiment_designer.suggest(random=random, context_values_dataframe=context_values, pareto_df=pareto_df)
+        pareto_frontier = ParetoFrontier(self.optimization_problem, self._target_values_df)
+        suggested_config = self.experiment_designer.suggest(random=random, context_values_dataframe=context_values, pareto_frontier=pareto_frontier)
         assert suggested_config in self.optimization_problem.parameter_space
         return suggested_config
 
@@ -195,6 +197,8 @@ class BayesianOptimizer(OptimizerBase):
                 targets_df=self._target_values_df,
                 iteration_number=len(self._parameter_values_df.index)
             )
+
+        self.pareto_frontier.update_pareto(objectives_df=self._target_values_df)
 
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument

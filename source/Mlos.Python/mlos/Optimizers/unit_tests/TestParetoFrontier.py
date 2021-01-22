@@ -54,7 +54,7 @@ class TestParetoFrontier:
         random_params_df = parameter_space.random_dataframe(num_rows)
         random_objectives_df = objective_space.random_dataframe(num_rows)
 
-        pareto_df = ParetoFrontier._compute_pareto(
+        pareto_df = ParetoFrontier.update_pareto(
             optimization_problem=optimization_problem,
             objectives_df=random_objectives_df
         )
@@ -234,7 +234,7 @@ class TestParetoFrontier:
 
 
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])
-    @pytest.mark.parametrize("num_dimensions", [_ for _ in range(2, 7)])
+    @pytest.mark.parametrize("num_dimensions", [2, 3, 4, 5])
     def test_pareto_frontier_volume_on_hyperspheres(self, minimize, num_dimensions):
         """Uses a known formula for the volume of the hyperspheres to validate the accuracy of the pareto frontier estimate.
 
@@ -297,6 +297,8 @@ class TestParetoFrontier:
         objectives_df = objective_function.evaluate_dataframe(params_df)
 
         pareto_frontier = ParetoFrontier(optimization_problem=objective_function.default_optimization_problem, objectives_df=objectives_df)
+        print("Num points in pareto frontier: ", len(objectives_df.index))
+        assert len(pareto_frontier.pareto_df.index) == len(objectives_df.index)
         pareto_volume_estimator = pareto_frontier.approximate_pareto_volume(num_samples=1000000)
         ci_lower_bound, ci_upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.05)
 

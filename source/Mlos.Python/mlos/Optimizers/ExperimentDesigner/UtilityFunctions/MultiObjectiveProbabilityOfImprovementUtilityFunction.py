@@ -64,6 +64,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     def __init__(
         self,
         function_config: Point,
+        pareto_frontier: ParetoFrontier,
         surrogate_model: MultiObjectiveRegressionModel,
         logger=None
     ):
@@ -75,6 +76,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         if self.config.utility_function_name not in ("multi_objective_probability_of_improvement"):
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
+        self.pareto_frontier = pareto_frontier
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
 
 
@@ -82,10 +84,10 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     def __call__(
         self,
         feature_values_pandas_frame: pd.DataFrame,
-        pareto_df: pd.DataFrame
     ):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
+        pareto_df = self.pareto_frontier.pareto_df
         if pareto_df is None or pareto_df.empty or not self.surrogate_model.trained:
             # All of the configs are equally likely to improve upon a non-existing solution.
             #
@@ -124,7 +126,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
             else:
                 # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
                 # frontier if they are dominated or not.
-                num_dominated_points = ParetoFrontier.is_dominated(objectives_df=monte_carlo_samples_df, pareto_df=pareto_df).sum()
+                num_dominated_points = self.pareto_frontier.is_dominated(objectives_df=monte_carlo_samples_df).sum()
                 num_non_dominated_points = num_samples - num_dominated_points
                 probability_of_improvement = num_non_dominated_points / num_samples
                 poi_df.loc[config_idx, 'utility'] = probability_of_improvement

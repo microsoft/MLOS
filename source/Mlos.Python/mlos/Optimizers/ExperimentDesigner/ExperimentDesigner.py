@@ -6,6 +6,7 @@ import numpy as np
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
@@ -80,6 +81,7 @@ class ExperimentDesigner:
             designer_config: Point,
             optimization_problem: OptimizationProblem,
             surrogate_model: MultiObjectiveRegressionModel,
+            pareto_frontier: ParetoFrontier,
             logger=None
     ):
         assert designer_config in experiment_designer_config_store.parameter_space
@@ -90,6 +92,7 @@ class ExperimentDesigner:
 
         self.config: Point = designer_config
         self.optimization_problem: OptimizationProblem = optimization_problem
+        self.pareto_frontier = pareto_frontier
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
         self.rng = np.random.Generator(np.random.PCG64())
 
@@ -104,6 +107,7 @@ class ExperimentDesigner:
         elif designer_config.utility_function_implementation == MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__:
             self.utility_function = MultiObjectiveProbabilityOfImprovementUtilityFunction(
                 function_config=self.config.multi_objective_probability_of_improvement_config,
+                pareto_frontier=pareto_frontier,
                 surrogate_model=self.surrogate_model,
                 logger=self.logger
             )
