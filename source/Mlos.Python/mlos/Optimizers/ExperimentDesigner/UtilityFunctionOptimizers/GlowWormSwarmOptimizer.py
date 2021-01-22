@@ -138,7 +138,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         return self.parameter_adapter.unproject_point(config_to_suggest)
 
     @trace()
-    def compute_utility(self, worms, pareto_df):
+    def compute_utility(self, worms):
         """ Computes utility function values for each worm.
 
         Since some worm positions will produce a NaN, we need to keep producing new utility values for those.
@@ -147,10 +147,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         :return:
         """
         unprojected_features = self.parameter_adapter.unproject_dataframe(worms[self.dimension_names], in_place=False)
-        utility_function_values = self.utility_function(
-            unprojected_features.copy(deep=False),
-            pareto_df=pareto_df
-        )
+        utility_function_values = self.utility_function(unprojected_features.copy(deep=False))
         worms['utility'] = utility_function_values
         index_of_nans = worms.index.difference(utility_function_values.index)
         # TODO: A better solution would be to give them random valid configs, and let them live.

@@ -51,13 +51,10 @@ class TestParetoFrontier:
         )
 
         num_rows = 100000
-        random_params_df = parameter_space.random_dataframe(num_rows)
         random_objectives_df = objective_space.random_dataframe(num_rows)
 
-        pareto_df = ParetoFrontier.update_pareto(
-            optimization_problem=optimization_problem,
-            objectives_df=random_objectives_df
-        )
+        pareto_frontier = ParetoFrontier(optimization_problem=optimization_problem, objectives_df=random_objectives_df)
+        pareto_df = pareto_frontier.pareto_df
 
         non_pareto_index = random_objectives_df.index.difference(pareto_df.index)
         for i, row in pareto_df.iterrows():
@@ -206,8 +203,7 @@ class TestParetoFrontier:
         computed_pareto_df = pareto_frontier._pareto_df.copy()
         assert computed_pareto_df.sort_values(by=['y1','y2']).equals(expected_pareto_df.sort_values(by=['y1', 'y2']))
 
-    @pytest.mark.parametrize("repeat", [i for i in range(10000)])
-    def test_pareto_frontier_volume_simple(self, repeat):
+    def test_pareto_frontier_volume_simple(self):
         """A simple sanity test on the pareto frontier volume computations.
         """
 
