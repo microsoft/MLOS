@@ -55,7 +55,7 @@ class BayesianOptimizer(OptimizerBase):
 
         self.surrogate_model_output_space = optimization_problem.objective_space
         self.optimizer_config = optimizer_config
-        self.pareto_frontier = ParetoFrontier(optimization_problem=self.optimization_problem, objectives_df=None)
+        self.pareto_frontier: ParetoFrontier = ParetoFrontier(optimization_problem=self.optimization_problem, objectives_df=None)
 
         # Now let's put together the surrogate model.
         #

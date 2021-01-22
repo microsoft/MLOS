@@ -26,11 +26,15 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmO
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
+
 
 
 class TestBayesianOptimizer:
@@ -427,6 +431,58 @@ class TestBayesianOptimizer:
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
+    @pytest.mark.parametrize("minimize", ["all", "none", "some"])
+    @pytest.mark.parametrize("num_output_dimensions", [2, 3])
+    @pytest.mark.parametrize("num_points", [100, 1000])
+    def test_multi_objective_optimization_on_hyperspheres(self, minimize, num_output_dimensions, num_points):
+        hypersphere_radius = 10
+        objective_function_config = Point(
+            implementation=Hypersphere.__name__,
+            hypersphere_config=Point(
+                num_objectives=num_output_dimensions,
+                minimize=minimize,
+                radius=hypersphere_radius
+            )
+        )
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
+        optimization_problem = objective_function.default_optimization_problem
+
+        optimizer_config = bayesian_optimizer_config_store.default
+        optimizer_config.surrogate_model_implementation = MultiObjectiveHomogeneousRandomForest.__name__
+        optimizer_config.
+
+        optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+            optimization_problem=optimization_problem
+        )
+
+        assert optimizer.optimizer_config.surrogate_model_implementation == MultiObjectiveHomogeneousRandomForest.__name__
+
+        # We can now go through the optimization loop, at each point validating that:
+        #   1) The suggested point is valid.
+        #   2) The volume of the pareto frontier is monotonically increasing.
+
+        lower_bounds_on_pareto_volume = []
+        upper_bounds_on_pareto_volume = []
+
+        for i in range(num_points):
+            suggestion = optimizer.suggest()
+            assert suggestion in optimization_problem.parameter_space
+            objectives = objective_function.evaluate_point(suggestion)
+            optimizer.register(parameter_values_pandas_frame=suggestion.to_dataframe(), target_values_pandas_frame=objectives.to_dataframe())
+
+            if i % 10 == 0:
+                pareto_volume_estimator = optimizer.pareto_frontier.approximate_pareto_volume()
+                lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.95)
+                lower_bounds_on_pareto_volume.append(lower_bound)
+                upper_bounds_on_pareto_volume.append(upper_bound)
+
+        pareto_volumes_over_time_df = pd.DataFrame({
+            'lower_bounds': lower_bounds_on_pareto_volume,
+            'upper_bounds': upper_bounds_on_pareto_volume
+        })
+
+        assert pareto_volumes_over_time_df['lower_bounds'].is_monotonic
+        assert pareto_volumes_over_time_df['upper_bounds'].is_monotonic
 
     def test_registering_multiple_objectives(self):
 
