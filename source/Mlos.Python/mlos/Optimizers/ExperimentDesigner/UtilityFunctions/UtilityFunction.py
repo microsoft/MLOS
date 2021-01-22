@@ -12,5 +12,5 @@ class UtilityFunction(ABC):
     """
 
     @abstractmethod
-    def __call__(self, feature_values_pandas_frame: pd.DataFrame, pareto_df: pd.DataFrame = None):
+    def __call__(self, feature_values_pandas_frame: pd.DataFrame):
         raise NotImplementedError("All subclasses must implement this.")

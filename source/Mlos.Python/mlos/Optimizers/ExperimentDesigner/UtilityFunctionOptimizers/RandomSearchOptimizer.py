@@ -43,7 +43,7 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         UtilityFunctionOptimizer.__init__(self, optimizer_config, optimization_problem, utility_function, logger)
 
     @trace()
-    def suggest(self, context_values_dataframe: pd.DataFrame = None, pareto_df=None):  # pylint: disable=unused-argument
+    def suggest(self, context_values_dataframe: pd.DataFrame = None):  # pylint: disable=unused-argument
         """ Returns the next best configuration to try.
 
         It does so by generating num_samples_per_iteration random configurations,
@@ -58,7 +58,7 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
             parameter_values=parameter_values_dataframe, context_values=context_values_dataframe,
             product=True
         )
-        utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False), pareto_df=pareto_df)
+        utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)
         index_of_max_value = utility_function_values[['utility']].idxmax()['utility'] if num_utility_function_values > 0 else 0
         argmax_point = Point.from_dataframe(feature_values_dataframe.loc[[index_of_max_value]])

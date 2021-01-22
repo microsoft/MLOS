@@ -77,7 +77,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         self.dimension_names = [dimension.name for dimension in self.parameter_adapter.dimensions]
 
     @trace()
-    def suggest(self, context_values_dataframe=None, pareto_df=None):  # pylint: disable=unused-argument
+    def suggest(self, context_values_dataframe=None):  # pylint: disable=unused-argument
         """ Returns the next best configuration to try.
 
         The idea is pretty simple:
@@ -96,8 +96,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
             num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
         )
         utility_function_values = self.utility_function(
-            feature_values_pandas_frame=feature_values_dataframe.copy(deep=False),
-            pareto_df=pareto_df
+            feature_values_pandas_frame=feature_values_dataframe.copy(deep=False)
         )
 
         num_utility_function_values = len(utility_function_values.index)
@@ -125,7 +124,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         for _ in range(self.optimizer_config.num_iterations):
             worms = self.run_iteration(worms=worms)
             # TODO: keep track of the max configs over iterations
-            worms = self.compute_utility(worms, pareto_df)
+            worms = self.compute_utility(worms)
             worms['luciferin'] = (1 - self.optimizer_config.luciferin_decay_constant) * worms['luciferin'] + \
                                  self.optimizer_config.luciferin_enhancement_constant * worms['utility']
 

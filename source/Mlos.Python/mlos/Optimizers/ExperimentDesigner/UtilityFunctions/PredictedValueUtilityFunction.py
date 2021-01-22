@@ -25,7 +25,7 @@ class PredictedValueUtilityFunction(UtilityFunction):
         self.surrogate_model = surrogate_model
 
     @trace()
-    def __call__(self, feature_values_pandas_frame, pareto_df=None):
+    def __call__(self, feature_values_pandas_frame):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
         multi_objective_predictions = self.surrogate_model.predict(features_df=feature_values_pandas_frame)

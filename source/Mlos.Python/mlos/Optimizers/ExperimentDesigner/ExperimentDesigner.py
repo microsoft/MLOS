@@ -134,11 +134,11 @@ class ExperimentDesigner:
             )
         raise ValueError(f"Unknown numeric_optimizer_implementation: {self.config.numeric_optimizer_implementation}.")
 
-    def suggest(self, context_values_dataframe=None, random=False, pareto_df=None):
+    def suggest(self, context_values_dataframe=None, random=False):
         self.logger.debug(f"Suggest(random={random})")
         random_number = self.rng.random()
         override_random = random_number < self.config.fraction_random_suggestions
         random = random or override_random
         if random:
             return self.optimization_problem.parameter_space.random()
-        return self.numeric_optimizer.suggest(context_values_dataframe, pareto_df=pareto_df)
+        return self.numeric_optimizer.suggest(context_values_dataframe)
