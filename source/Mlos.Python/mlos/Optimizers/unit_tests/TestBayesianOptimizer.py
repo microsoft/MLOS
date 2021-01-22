@@ -75,6 +75,17 @@ class TestBayesianOptimizer:
         cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{cls.port}')
         cls.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=cls.optimizer_service_channel, logger=cls.logger)
 
+        cls.temp_dir = os.path.join(os.getcwd(), "temp")
+        if not os.path.exists(cls.temp_dir):
+            os.mkdir(cls.temp_dir)
+        cls.trace_output_path = os.path.join(cls.temp_dir, "TestBayesianOptimizerTrace.json")
+
+        try:
+            os.remove(cls.trace_output_path)
+        except OSError:
+            pass
+
+
 
     @classmethod
     def teardown_class(cls) -> None:
@@ -82,12 +93,9 @@ class TestBayesianOptimizer:
         cls.server.wait_for_termination(timeout=1)
         cls.optimizer_service_channel.close()
 
-        cls.temp_dir = os.path.join(os.getcwd(), "temp")
-        if not os.path.exists(cls.temp_dir):
-            os.mkdir(cls.temp_dir)
-        trace_output_path = os.path.join(cls.temp_dir, "TestBayesianOptimizerTrace.json")
-        print(f"Dumping trace to {trace_output_path}")
-        global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
+
+        print(f"Dumping trace to {cls.trace_output_path}")
+        global_values.tracer.dump_trace_to_file(output_file_path=cls.trace_output_path)
 
     @trace()
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_pre_heated(self):
@@ -432,9 +440,9 @@ class TestBayesianOptimizer:
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
-    @pytest.mark.parametrize("minimize", ["all"])#, "none", "some"])
-    @pytest.mark.parametrize("num_output_dimensions", [2])
-    @pytest.mark.parametrize("num_points", [30])
+    @pytest.mark.parametrize("minimize", ["all", "none", "some"])
+    @pytest.mark.parametrize("num_output_dimensions", [2, 4])
+    @pytest.mark.parametrize("num_points", [30, 50])
     def test_multi_objective_optimization_on_hyperspheres(self, minimize, num_output_dimensions, num_points):
         hypersphere_radius = 10
         objective_function_config = Point(
@@ -466,6 +474,7 @@ class TestBayesianOptimizer:
 
         lower_bounds_on_pareto_volume = []
         upper_bounds_on_pareto_volume = []
+        confidence_interval_widths = []
 
         for i in range(num_points):
             suggestion = optimizer.suggest()
@@ -474,18 +483,26 @@ class TestBayesianOptimizer:
             optimizer.register(parameter_values_pandas_frame=suggestion.to_dataframe(), target_values_pandas_frame=objectives.to_dataframe())
 
             if i % 10 == 0:
-                pareto_volume_estimator = optimizer.pareto_frontier.approximate_pareto_volume()
-                lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.95)
+                pareto_volume_estimator = optimizer.pareto_frontier.approximate_pareto_volume(num_samples=1000000)
+                lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.99)
+                confidence_interval_width = upper_bound - lower_bound
                 lower_bounds_on_pareto_volume.append(lower_bound)
                 upper_bounds_on_pareto_volume.append(upper_bound)
+                confidence_interval_widths.append(confidence_interval_width)
+
 
         pareto_volumes_over_time_df = pd.DataFrame({
             'lower_bounds': lower_bounds_on_pareto_volume,
-            'upper_bounds': upper_bounds_on_pareto_volume
+            'upper_bounds': upper_bounds_on_pareto_volume,
+            'confidence_interval_width': confidence_interval_widths
         })
 
-        assert pareto_volumes_over_time_df['lower_bounds'].is_monotonic
-        assert pareto_volumes_over_time_df['upper_bounds'].is_monotonic
+        # If we had precise volume measurements, we would want to ascertain that the volume of the pareto frontier is monotonically increasing.
+        # However, we only have estimates so we cannot assert that they are monotonic. But we can assert that they are approximately monotonic:
+        # we can make sure that any dip between consecutive volumes is smaller than the width of the corresponding confidence interval.
+        #
+        assert (pareto_volumes_over_time_df['lower_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all()
+        assert (pareto_volumes_over_time_df['upper_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all()
 
     def test_registering_multiple_objectives(self):
 
