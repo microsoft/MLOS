@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import logging
 import math
-from math import e
 import os
 import pickle
 import random
@@ -51,6 +51,7 @@ class TestBayesianOptimizer:
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
         cls.logger = create_logger(logger_name=cls.__name__)
+        cls.logger.setLevel(logging.DEBUG)
         cls.port = None
 
         # Start up the gRPC service. Try a bunch of ports, before giving up so we can do several in parallel.
@@ -61,7 +62,7 @@ class TestBayesianOptimizer:
         for port in range(50051, 50051 + max_num_tries):
             num_tries += 1
             try:
-                cls.server = OptimizerMicroserviceServer(port=port, num_threads=10)
+                cls.server = OptimizerMicroserviceServer(port=port, num_threads=10, logger=cls.logger)
                 cls.server.start()
                 cls.port = port
                 break
@@ -431,9 +432,9 @@ class TestBayesianOptimizer:
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
-    @pytest.mark.parametrize("minimize", ["all", "none", "some"])
-    @pytest.mark.parametrize("num_output_dimensions", [2, 3])
-    @pytest.mark.parametrize("num_points", [100, 1000])
+    @pytest.mark.parametrize("minimize", ["all"])#, "none", "some"])
+    @pytest.mark.parametrize("num_output_dimensions", [2])
+    @pytest.mark.parametrize("num_points", [30])
     def test_multi_objective_optimization_on_hyperspheres(self, minimize, num_output_dimensions, num_points):
         hypersphere_radius = 10
         objective_function_config = Point(
@@ -449,10 +450,12 @@ class TestBayesianOptimizer:
 
         optimizer_config = bayesian_optimizer_config_store.default
         optimizer_config.surrogate_model_implementation = MultiObjectiveHomogeneousRandomForest.__name__
-        optimizer_config.
+        optimizer_config.homogeneous_random_forest_regression_model_config.features_fraction_per_estimator = 1
+        self.logger.info(optimizer_config)
 
         optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
-            optimization_problem=optimization_problem
+            optimization_problem=optimization_problem,
+            optimizer_config=optimizer_config
         )
 
         assert optimizer.optimizer_config.surrogate_model_implementation == MultiObjectiveHomogeneousRandomForest.__name__

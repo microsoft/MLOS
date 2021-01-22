@@ -4,17 +4,15 @@
 #
 import numpy as np
 import pandas as pd
-from scipy.stats import t
 from mlos.Logger import create_logger
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension, CategoricalDimension, DiscreteDimension, Point
+from mlos.Spaces import SimpleHypergrid, CategoricalDimension, DiscreteDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
-from mlos.Tracer import trace
-from mlos.Utils.KeyOrderedDict import KeyOrderedDict
+from mlos.Tracer import trace, traced
 
 
 multi_objective_probability_of_improvement_utility_function_config_store = ComponentConfigStore(
@@ -27,7 +25,7 @@ multi_objective_probability_of_improvement_utility_function_config_store = Compo
     ),
     default=Point(
         utility_function_name="multi_objective_probability_of_improvement",
-        num_monte_carlo_samples=100
+        num_monte_carlo_samples=1000
     )
 )
 
@@ -87,12 +85,14 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     ):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
-        pareto_df = self.pareto_frontier.pareto_df
-        if pareto_df is None or pareto_df.empty or not self.surrogate_model.trained:
+        if self.pareto_frontier.empty or not self.surrogate_model.trained:
             # All of the configs are equally likely to improve upon a non-existing solution.
             #
             return pd.DataFrame(columns=['utility'], dtype='float')
 
+        return self._naive_poi(feature_values_pandas_frame=feature_values_pandas_frame)
+
+    def _naive_poi(self, feature_values_pandas_frame: pd.DataFrame):
         feature_values_pandas_frame = self.surrogate_model.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame)
         multi_objective_predictions: MultiObjectivePrediction = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
 
@@ -117,19 +117,19 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         for _, objective_prediction in multi_objective_predictions:
             std_dev_column_name = objective_prediction.add_standard_deviation_column()
 
-        for config_idx in valid_predictions_index:
-
-            monte_carlo_samples_df = self.create_monte_carlo_samples_df(multi_objective_predictions, config_idx, std_dev_column_name)
-            num_samples = len(monte_carlo_samples_df.index)
-            if num_samples == 0:
-                poi_df.loc[config_idx, 'utility'] = 0.0
-            else:
-                # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
-                # frontier if they are dominated or not.
-                num_dominated_points = self.pareto_frontier.is_dominated(objectives_df=monte_carlo_samples_df).sum()
-                num_non_dominated_points = num_samples - num_dominated_points
-                probability_of_improvement = num_non_dominated_points / num_samples
-                poi_df.loc[config_idx, 'utility'] = probability_of_improvement
+        with traced(scope_name="poi_monte_carlo"):
+            for config_idx in valid_predictions_index:
+                monte_carlo_samples_df = self.create_monte_carlo_samples_df(multi_objective_predictions, config_idx, std_dev_column_name)
+                num_samples = len(monte_carlo_samples_df.index)
+                if num_samples == 0:
+                    poi_df.loc[config_idx, 'utility'] = 0.0
+                else:
+                    # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
+                    # frontier if they are dominated or not.
+                    num_dominated_points = self.pareto_frontier.is_dominated(objectives_df=monte_carlo_samples_df).sum()
+                    num_non_dominated_points = num_samples - num_dominated_points
+                    probability_of_improvement = num_non_dominated_points / num_samples
+                    poi_df.loc[config_idx, 'utility'] = probability_of_improvement
 
         return poi_df
 

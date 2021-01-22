@@ -22,8 +22,8 @@ homogeneous_random_forest_config_store = ComponentConfigStore(
     ),
     default=Point(
         n_estimators=10,
-        features_fraction_per_estimator=1,
-        samples_fraction_per_estimator=1,
+        features_fraction_per_estimator=0.7,
+        samples_fraction_per_estimator=0.7,
         regressor_implementation=DecisionTreeRegressionModel.__name__,
         decision_tree_regression_model_config=decision_tree_config_store.default,
         bootstrap=True

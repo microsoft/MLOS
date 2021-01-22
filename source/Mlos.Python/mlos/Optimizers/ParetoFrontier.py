@@ -8,6 +8,7 @@ import pandas as pd
 from scipy.stats import norm
 
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Tracer import trace
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 class ParetoVolumeEsimator:
@@ -75,16 +76,20 @@ class ParetoFrontier:
 
     def __init__(self, optimization_problem: OptimizationProblem, objectives_df: pd.DataFrame = None):
 
-        self.optimization_problem = optimization_problem
-        self._pareto_df = None
+        self.optimization_problem: OptimizationProblem = optimization_problem
+        self._pareto_df: pd.DataFrame = None
 
         # Maintains a version of the pareto frontier, where all objectives are set to be maximized. So value for the objectives that were
         # originally meant to be minimized, are multiplied by -1.
         #
-        self._pareto_df_maximize_all = None
+        self._pareto_df_maximize_all: pd.DataFrame = None
 
         if objectives_df is not None:
             self.update_pareto(objectives_df)
+
+    @property
+    def empty(self) -> bool:
+        return (self._pareto_df is None) or self._pareto_df.empty
 
     @property
     def pareto_df(self) -> pd.DataFrame:
@@ -136,6 +141,7 @@ class ParetoFrontier:
         pareto_df = self._flip_sign_for_minimized_objectives(pareto_df)
         self._pareto_df = pareto_df
 
+    @trace()
     def is_dominated(self, objectives_df) -> pd.Series:
         """For each row in objectives_df checks if the row is dominated by any of the rows in pareto_df.
 

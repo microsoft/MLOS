@@ -8,6 +8,7 @@ from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, experiment_designer_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 
 
 bayesian_optimizer_config_store = ComponentConfigStore(
@@ -16,13 +17,19 @@ bayesian_optimizer_config_store = ComponentConfigStore(
         dimensions=[
             CategoricalDimension(name="surrogate_model_implementation", values=[
                 HomogeneousRandomForestRegressionModel.__name__,
+                MultiObjectiveHomogeneousRandomForest.__name__
             ]),
             CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__]),
             DiscreteDimension(name="min_samples_required_for_guided_design_of_experiments", min=2, max=100)
         ]
     ).join(
         subgrid=homogeneous_random_forest_config_store.parameter_space,
-        on_external_dimension=CategoricalDimension(name="surrogate_model_implementation", values=[HomogeneousRandomForestRegressionModel.__name__])
+        on_external_dimension=CategoricalDimension(
+            name="surrogate_model_implementation",
+            values=[
+                HomogeneousRandomForestRegressionModel.__name__,
+                MultiObjectiveHomogeneousRandomForest.__name__
+            ])
     ).join(
         subgrid=experiment_designer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__])

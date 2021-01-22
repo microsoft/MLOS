@@ -103,7 +103,9 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         # Now we get to create all the estimators, each with a different feature subset and a different
         # observation filter
 
-        self.logger.debug(f"Creating {self.model_config.n_estimators} estimators. Request id: {random.random()}")
+        self.logger.info(f"Creating {self.model_config.n_estimators} estimators. "
+                         f"Tree config: {self.model_config.decision_tree_regression_model_config}. "
+                         f"Request id: {random.random()}")
 
         all_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
         total_num_dimensions = len(all_dimension_names)
@@ -115,6 +117,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 subspace_name=f"estimator_{i}_input_space",
                 max_num_dimensions=features_per_estimator
             )
+            self.logger.info(f"Creating DecissionTreeRegressionModel with the input_space: {estimator_input_space}")
 
             estimator = DecisionTreeRegressionModel(
                 model_config=self.model_config.decision_tree_regression_model_config,
