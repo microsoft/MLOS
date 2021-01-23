@@ -19,12 +19,10 @@ multi_objective_probability_of_improvement_utility_function_config_store = Compo
     parameter_space=SimpleHypergrid(
         name="multi_objective_probability_of_improvement_config",
         dimensions=[
-            CategoricalDimension(name="utility_function_name", values=["multi_objective_probability_of_improvement"]),
             DiscreteDimension(name="num_monte_carlo_samples", min=100, max=1000)
         ]
     ),
     default=Point(
-        utility_function_name="multi_objective_probability_of_improvement",
         num_monte_carlo_samples=100
     )
 )
@@ -71,8 +69,6 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         self.logger = logger
 
         self.config = function_config
-        if self.config.utility_function_name not in ("multi_objective_probability_of_improvement"):
-            raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
 
         self.pareto_frontier = pareto_frontier
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model

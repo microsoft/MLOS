@@ -18,16 +18,17 @@ from mlos.Logger import create_logger
 
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
-from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction,\
+    multi_objective_probability_of_improvement_utility_function_config_store as mo_poi_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory
-from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
@@ -441,7 +442,7 @@ class TestBayesianOptimizer:
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])
-    @pytest.mark.parametrize("num_output_dimensions", [2, 4])
+    @pytest.mark.parametrize("num_output_dimensions", [2, 3, 4, 5, 6, 7])
     @pytest.mark.parametrize("num_points", [30, 50])
     def test_multi_objective_optimization_on_hyperspheres(self, minimize, num_output_dimensions, num_points):
         hypersphere_radius = 10
@@ -456,9 +457,7 @@ class TestBayesianOptimizer:
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
         optimization_problem = objective_function.default_optimization_problem
 
-        optimizer_config = bayesian_optimizer_config_store.default
-        optimizer_config.surrogate_model_implementation = MultiObjectiveHomogeneousRandomForest.__name__
-        optimizer_config.homogeneous_random_forest_regression_model_config.features_fraction_per_estimator = 1
+        optimizer_config = bayesian_optimizer_config_store.get_config_by_name("default_multi_objective_optimizer_config")
         self.logger.info(optimizer_config)
 
         optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
@@ -474,7 +473,6 @@ class TestBayesianOptimizer:
 
         lower_bounds_on_pareto_volume = []
         upper_bounds_on_pareto_volume = []
-        confidence_interval_widths = []
 
         for i in range(num_points):
             suggestion = optimizer.suggest()
@@ -482,30 +480,35 @@ class TestBayesianOptimizer:
             objectives = objective_function.evaluate_point(suggestion)
             optimizer.register(parameter_values_pandas_frame=suggestion.to_dataframe(), target_values_pandas_frame=objectives.to_dataframe())
 
-            if i % 10 == 0:
+            if i > 10:
                 pareto_volume_estimator = optimizer.pareto_frontier.approximate_pareto_volume(num_samples=1000000)
-                lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.99)
-                confidence_interval_width = upper_bound - lower_bound
+                lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.95)
                 lower_bounds_on_pareto_volume.append(lower_bound)
                 upper_bounds_on_pareto_volume.append(upper_bound)
-                confidence_interval_widths.append(confidence_interval_width)
 
 
         pareto_volumes_over_time_df = pd.DataFrame({
             'lower_bounds': lower_bounds_on_pareto_volume,
-            'upper_bounds': upper_bounds_on_pareto_volume,
-            'confidence_interval_width': confidence_interval_widths
+            'upper_bounds': upper_bounds_on_pareto_volume
         })
 
         # If we had precise volume measurements, we would want to ascertain that the volume of the pareto frontier is monotonically increasing.
         # However, we only have estimates so we cannot assert that they are monotonic. But we can assert that they are approximately monotonic:
-        # we can make sure that any dip between consecutive volumes is smaller than the width of the corresponding confidence interval.
+        # we can make sure that any dip between consecutive volumes is smaller than some small number. Actually we can make sure that there
+        # is no drift, by looking over larger windows too.
         #
-        if not (pareto_volumes_over_time_df['lower_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all():
-            assert False
+        threshold = -0.1
+        for periods in [1, 10, 20]:
+            min_pct_increase_in_lower_bound = pareto_volumes_over_time_df['lower_bounds'].pct_change(periods=periods).fillna(0).min()
+            if not (min_pct_increase_in_lower_bound > threshold):
+                print(pareto_volumes_over_time_df)
+                assert min_pct_increase_in_lower_bound > threshold
 
-        if not (pareto_volumes_over_time_df['upper_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all():
-            assert False
+            min_pct_increase_in_upper_bound = pareto_volumes_over_time_df['upper_bounds'].pct_change(periods=periods).fillna(0).min()
+            if not (min_pct_increase_in_upper_bound > threshold):
+                print(pareto_volumes_over_time_df)
+                assert min_pct_increase_in_upper_bound > threshold
+
 
     def test_registering_multiple_objectives(self):
 

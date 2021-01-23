@@ -58,6 +58,20 @@ experiment_designer_config_store.add_config_by_name(
     description="Experiment designer config with glow worm swarm optimizer as a utility function optimizer."
 )
 
+
+experiment_designer_config_store.add_config_by_name(
+    config_name="default_multi_objective_config",
+    config_point=Point(
+        utility_function_implementation=MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__,
+        numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
+        multi_objective_probability_of_improvement_config=multi_objective_probability_of_improvement_utility_function_config_store.default,
+        random_search_optimizer_config=random_search_optimizer_config_store.default,
+        fraction_random_suggestions=0.5
+    ),
+    description="Experiment designer config with glow worm swarm optimizer as a utility function optimizer."
+)
+
+
 class ExperimentDesigner:
     """ Portion of a BayesianOptimizer concerned with Design of Experiments.
 
