@@ -7,6 +7,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctio
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionConfigStore import objective_function_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Flower import Flower
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveNestedPolynomialObjective import MultiObjectiveNestedPolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjectiveWrapper import PolynomialObjectiveWrapper
@@ -37,5 +38,8 @@ class ObjectiveFunctionFactory:
 
         if objective_function_config.implementation == Hypersphere.__name__:
             return Hypersphere(objective_function_config.hypersphere_config)
+
+        if objective_function_config.implementation == MultiObjectiveNestedPolynomialObjective.__name__:
+            return MultiObjectiveNestedPolynomialObjective(objective_function_config.multi_objective_nested_polynomial_config)
 
         raise ValueError(f"Can't instantiate an objective function with the following implementation: {objective_function_config.implementation}")
