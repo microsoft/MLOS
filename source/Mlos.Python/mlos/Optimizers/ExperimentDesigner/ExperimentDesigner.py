@@ -38,9 +38,9 @@ experiment_designer_config_store = ComponentConfigStore(
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
     ),
     default=Point(
-        utility_function_implementation=MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__,
+        utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
-        multi_objective_probability_of_improvement_config=multi_objective_probability_of_improvement_utility_function_config_store.default,
+        confidence_bound_utility_function_config=confidence_bound_utility_function_config_store.default,
         random_search_optimizer_config=random_search_optimizer_config_store.default,
         fraction_random_suggestions=0.5
     )

@@ -501,8 +501,11 @@ class TestBayesianOptimizer:
         # However, we only have estimates so we cannot assert that they are monotonic. But we can assert that they are approximately monotonic:
         # we can make sure that any dip between consecutive volumes is smaller than the width of the corresponding confidence interval.
         #
-        assert (pareto_volumes_over_time_df['lower_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all()
-        assert (pareto_volumes_over_time_df['upper_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all()
+        if not (pareto_volumes_over_time_df['lower_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all():
+            assert False
+
+        if not (pareto_volumes_over_time_df['upper_bounds'].diff().fillna(0) >= (-pareto_volumes_over_time_df['confidence_interval_width'])).all():
+            assert False
 
     def test_registering_multiple_objectives(self):
 

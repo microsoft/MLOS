@@ -131,9 +131,9 @@ class TestBayesianOptimizerGrpcClient:
         multi_objective_gof_metrics = bayesian_optimizer.compute_surrogate_model_goodness_of_fit()
         for objective_name, random_forest_gof_metrics in multi_objective_gof_metrics:
 
-            # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
+            # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 50% is a good sanity check
             # and should make this test not very flaky.
-            assert random_forest_gof_metrics.last_refit_iteration_number > 0.7 * num_iterations
+            assert random_forest_gof_metrics.last_refit_iteration_number > 0.5 * num_iterations
 
             # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
             models_gof_metrics = [random_forest_gof_metrics]
