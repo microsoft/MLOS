@@ -152,7 +152,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         samples_for_all_configs_df = pd.concat(monte_carlo_samples_dfs, ignore_index=True, axis=0)
         original_column_names = [column for column in samples_for_all_configs_df.columns if column != 'config_idx']
         samples_for_all_configs_df['is_dominated'] = self.pareto_frontier.is_dominated(objectives_df=samples_for_all_configs_df[original_column_names])
-        poi_series = samples_for_all_configs_df.groupby(by=["config_idx"])["is_dominated"].sum() / self.config.num_monte_carlo_samples
+        poi_series = 1 - (samples_for_all_configs_df.groupby(by=["config_idx"])["is_dominated"].sum() / self.config.num_monte_carlo_samples)
         poi_df = pd.DataFrame({'utility': poi_series}, index=poi_series.index)
         return poi_df
 
