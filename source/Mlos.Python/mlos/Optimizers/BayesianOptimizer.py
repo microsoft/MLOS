@@ -138,7 +138,6 @@ class BayesianOptimizer(OptimizerBase):
             assert context in self.optimization_problem.context_space
         random = random or self.num_observed_samples < self.optimizer_config.min_samples_required_for_guided_design_of_experiments
         context_values = context.to_dataframe() if context is not None else None
-        pareto_frontier = ParetoFrontier(self.optimization_problem, self._target_values_df)
         suggested_config = self.experiment_designer.suggest(random=random, context_values_dataframe=context_values)
         assert suggested_config in self.optimization_problem.parameter_space
         return suggested_config

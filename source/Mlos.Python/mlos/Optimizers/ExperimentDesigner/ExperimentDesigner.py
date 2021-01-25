@@ -13,14 +13,18 @@ from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
-from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction, multi_objective_probability_of_improvement_utility_function_config_store
+from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction,\
+    multi_objective_probability_of_improvement_utility_function_config_store
 
 
 experiment_designer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name='experiment_designer_config',
         dimensions=[
-            CategoricalDimension('utility_function_implementation', values=[ConfidenceBoundUtilityFunction.__name__, MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__]),
+            CategoricalDimension('utility_function_implementation', values=[
+                ConfidenceBoundUtilityFunction.__name__,
+                MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__
+            ]),
             CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__, GlowWormSwarmOptimizer.__name__]),
             ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]

@@ -75,10 +75,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
 
 
     @trace()
-    def __call__(
-        self,
-        feature_values_pandas_frame: pd.DataFrame,
-    ):
+    def __call__(self, feature_values_pandas_frame: pd.DataFrame):
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
         if self.pareto_frontier.empty or not self.surrogate_model.trained:
