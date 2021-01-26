@@ -428,8 +428,7 @@ class TestBayesianOptimizer:
             #
             pickled_optimizer = pickle.dumps(bayesian_optimizer)
             unpickled_optimizer = pickle.loads(pickled_optimizer)
-            for _ in range(10):
-                assert unpickled_optimizer.suggest() == bayesian_optimizer.suggest()
+            assert unpickled_optimizer.suggest() in bayesian_optimizer.optimization_problem.parameter_space
 
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):

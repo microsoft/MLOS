@@ -10,6 +10,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctio
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective, nested_polynomial_objective_config_space
 from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Hypergrid, Point, SimpleHypergrid
+from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 multi_objective_nested_polynomial_config_space = SimpleHypergrid(
     name="multi_objective_nested_polynomial_config",
@@ -32,18 +33,19 @@ class MultiObjectiveNestedPolynomialObjective(ObjectiveFunctionBase):
 
         nested_polynomial_objective_config = objective_function_config.nested_polynomial_objective_config
         self._nested_polynomial_objective_config = nested_polynomial_objective_config
-        self._individual_objective_functions = []
+        self._ordered_output_dimension_names = [f'y{i}' for i in range(objective_function_config.num_objectives)]
+        self._individual_objective_functions = KeyOrderedDict(ordered_keys=self._ordered_output_dimension_names, value_type=NestedPolynomialObjective)
 
         # Let's create the required number of objective functions.
         #
         for i in range(objective_function_config.num_objectives):
             nested_polynomial_objective_config.polynomial_objective_config.seed += i
             single_objective_function = NestedPolynomialObjective(objective_function_config=nested_polynomial_objective_config)
-            self._individual_objective_functions.append(single_objective_function)
+            self._individual_objective_functions[i] = single_objective_function
 
         self._parameter_space = self._individual_objective_functions[0].parameter_space
 
-        self._ordered_output_dimension_names = [f'y{i}' for i in range(objective_function_config.num_objectives)]
+
         self._output_space = SimpleHypergrid(
             name='output_space',
             dimensions=[
@@ -71,16 +73,16 @@ class MultiObjectiveNestedPolynomialObjective(ObjectiveFunctionBase):
 
     def evaluate_point(self, point: Point) -> Point:
         values = {
-            dim_name: self._individual_objective_functions[i].evaluate_point(point)['y']
-            for i, dim_name
-            in enumerate(self._ordered_output_dimension_names)
+            dim_name: individual_objective_function.evaluate_point(point)['y']
+            for dim_name, individual_objective_function
+            in self._individual_objective_functions
         }
         return Point(**values)
 
     def evaluate_dataframe(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         results_df = pd.DataFrame()
-        for i, dim_name in enumerate(self._ordered_output_dimension_names):
-            single_objective_df = self._individual_objective_functions[i].evaluate_dataframe(dataframe)
+        for dim_name, individual_objective_function in self._individual_objective_functions:
+            single_objective_df = individual_objective_function.evaluate_dataframe(dataframe)
             results_df[dim_name] = single_objective_df['y']
         return results_df
 
