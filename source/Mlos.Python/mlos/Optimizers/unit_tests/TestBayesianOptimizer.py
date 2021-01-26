@@ -20,13 +20,14 @@ import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveNestedPolynomialObjective import MultiObjectiveNestedPolynomialObjective
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction,\
-    multi_objective_probability_of_improvement_utility_function_config_store as mo_poi_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
@@ -441,21 +442,63 @@ class TestBayesianOptimizer:
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
+    @pytest.mark.parametrize("objective_function_implementation", [Hypersphere, MultiObjectiveNestedPolynomialObjective])
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])
-    @pytest.mark.parametrize("num_output_dimensions", [2, 3, 4, 5, 6, 7])
-    @pytest.mark.parametrize("num_points", [30, 50])
-    def test_multi_objective_optimization_on_hyperspheres(self, minimize, num_output_dimensions, num_points):
-        hypersphere_radius = 10
-        objective_function_config = Point(
-            implementation=Hypersphere.__name__,
-            hypersphere_config=Point(
-                num_objectives=num_output_dimensions,
-                minimize=minimize,
-                radius=hypersphere_radius
+    @pytest.mark.parametrize("num_output_dimensions", [2, 5])
+    @pytest.mark.parametrize("num_points", [30])
+    def test_multi_objective_optimization(self, objective_function_implementation, minimize, num_output_dimensions, num_points):
+        if objective_function_implementation == Hypersphere:
+            hypersphere_radius = 10
+            objective_function_config = Point(
+                implementation=Hypersphere.__name__,
+                hypersphere_config=Point(
+                    num_objectives=num_output_dimensions,
+                    minimize=minimize,
+                    radius=hypersphere_radius
+                )
             )
-        )
+        else:
+            objective_function_config = Point(
+                implementation=MultiObjectiveNestedPolynomialObjective.__name__,
+                multi_objective_nested_polynomial_config=Point(
+                    num_objectives=num_output_dimensions,
+                    objective_function_implementation=NestedPolynomialObjective.__name__,
+                    nested_polynomial_objective_config=Point(
+                        num_nested_polynomials=2,
+                        nested_function_implementation=PolynomialObjective.__name__,
+                        polynomial_objective_config=Point(
+                            seed=17,
+                            input_domain_dimension=2,
+                            input_domain_min=-2**10,
+                            input_domain_width=2**11,
+                            max_degree=2,
+                            include_mixed_coefficients=True,
+                            percent_coefficients_zeroed=0.0,
+                            coefficient_domain_min=-10.0,
+                            coefficient_domain_width=9.0,
+                            include_noise=False,
+                            noise_coefficient_of_variation=0.0
+                        )
+                    )
+                )
+            )
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
         optimization_problem = objective_function.default_optimization_problem
+
+        if objective_function_implementation == MultiObjectiveNestedPolynomialObjective:
+            # We need to modify the default optimization problem to respect the "minimize" argument.
+            #
+            objectives = []
+            for i, default_objective in enumerate(optimization_problem.objectives):
+                if minimize == "all":
+                    minimize = True
+                elif minimize == "some":
+                    minimize = ((i % 2) == 0)
+                else:
+                    minimize = False
+                new_objective = Objective(name=default_objective.name, minimize=minimize)
+                objectives.append(new_objective)
+            optimization_problem.objectives = objectives
 
         optimizer_config = bayesian_optimizer_config_store.get_config_by_name("default_multi_objective_optimizer_config")
         self.logger.info(optimizer_config)
