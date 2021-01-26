@@ -22,10 +22,10 @@ class ParetoVolumeEsimator:
     """
 
     def __init__(
-        self,
-        num_random_points: int,
-        num_dominated_points: int,
-        objectives_maxima: KeyOrderedDict
+            self,
+            num_random_points: int,
+            num_dominated_points: int,
+            objectives_maxima: KeyOrderedDict
     ):
         assert 0 <= num_dominated_points <= num_random_points
         assert len(objectives_maxima) > 0

@@ -58,11 +58,11 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
 
     """
     def __init__(
-        self,
-        function_config: Point,
-        pareto_frontier: ParetoFrontier,
-        surrogate_model: MultiObjectiveRegressionModel,
-        logger=None
+            self,
+            function_config: Point,
+            pareto_frontier: ParetoFrontier,
+            surrogate_model: MultiObjectiveRegressionModel,
+            logger=None
     ):
         if logger is None:
             logger = create_logger(self.__class__.__name__)
@@ -115,10 +115,10 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
 
     @trace()
     def _batched_probability_of_improvement(
-        self,
-        multi_objective_predictions: MultiObjectivePrediction,
-        valid_predictions_index: pd.Index,
-        std_dev_column_name: str
+            self,
+            multi_objective_predictions: MultiObjectivePrediction,
+            valid_predictions_index: pd.Index,
+            std_dev_column_name: str
     ):
         """Generates a single large dataframe of monte carlo samples to send to ParetoFrontier for evaluation.
 
@@ -154,10 +154,10 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
 
     @trace()
     def _naive_poi(
-        self,
-        multi_objective_predictions: MultiObjectivePrediction,
-        valid_predictions_index: pd.Index,
-        std_dev_column_name: str
+            self,
+            multi_objective_predictions: MultiObjectivePrediction,
+            valid_predictions_index: pd.Index,
+            std_dev_column_name: str
     ):
         """Naively generates a monte carlo data frame for each of the feature rows and sends them to ParetoFrontier individually.
 
