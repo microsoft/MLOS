@@ -204,7 +204,7 @@ class TestBayesianOptimizer:
 
     @trace()
     @pytest.mark.parametrize('restart_num', [i for i in range(2)])
-    @pytest.mark.parametrize('use_remote_optimizer', [False])
+    @pytest.mark.parametrize('use_remote_optimizer', [True])
     def test_hierarchical_quadratic_cold_start(self, restart_num, use_remote_optimizer):
 
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')

@@ -123,6 +123,7 @@ class ExperimentDesigner:
             )
 
         elif designer_config.utility_function_implementation == MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__:
+            assert self.pareto_frontier is not None
             self.utility_function = MultiObjectiveProbabilityOfImprovementUtilityFunction(
                 function_config=self.config.multi_objective_probability_of_improvement_config,
                 pareto_frontier=pareto_frontier,

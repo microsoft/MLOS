@@ -161,7 +161,7 @@ class ParetoFrontier:
 
         The idea here is that we can randomly sample from the objective space and observe the proportion of
         dominated points to all points. This proportion will allow us to compute a confidence interval on
-        the proportion of dominated points and we can use it to estimate the ration between the volume of
+        the proportion of dominated points and we can use it to estimate the ratio between the volume of
         the frontier and the volume from which we sampled.
 
         We can get arbitrarily precise simply by drawing more samples.

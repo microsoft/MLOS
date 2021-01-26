@@ -105,7 +105,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         for _, objective_prediction in multi_objective_predictions:
             std_dev_column_name = objective_prediction.add_standard_deviation_column()
 
-        batched_poi_df = self._batched_poi(
+        batched_poi_df = self._batched_probability_of_improvement(
             multi_objective_predictions=multi_objective_predictions,
             valid_predictions_index=valid_predictions_index,
             std_dev_column_name=std_dev_column_name
@@ -114,7 +114,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         return batched_poi_df
 
     @trace()
-    def _batched_poi(
+    def _batched_probability_of_improvement(
         self,
         multi_objective_predictions: MultiObjectivePrediction,
         valid_predictions_index: pd.Index,
@@ -122,14 +122,12 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     ):
         """Generates a single large dataframe of monte carlo samples to send to ParetoFrontier for evaluation.
 
-        The naive implementation generates:
-        1) num_monte_carlo_samples random samples from the predictive distribution. One way to speed that up would be to:
-            1) inline the function? maybe?
-            2) first generate only a few samples and reject configs that are strictly dominated on the basis of that low-resolution
-                evidence. Then repeat the process at higher resolutions for the surviving subset.
+        Profiling reveals that batching the query to the ParetoFrontier.is_dominated() function produces massive perf gains over the naive implementation.
 
-        2) num_valid_predictions requests to ParetoFrontier.is_dominated() - these can be easily batched and profiling suggests
-            that massive perf gains are to be had. Let's do that first.
+        A few additional optimizations are possible:
+            1) Maybe inline the self.create_monte_carlo_samples_df function. It decreases readability so should be justified.
+            2) First generate only a few samples and reject configs that are strictly dominated on the basis of that low-resolution
+               evidence. Then repeat the process at higher resolutions for the surviving subset.
 
         :param multi_objective_predictions:
         :param valid_predictions_index:
@@ -163,7 +161,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
     ):
         """Naively generates a monte carlo data frame for each of the feature rows and sends them to ParetoFrontier individually.
 
-        We should be able to substantially improve on this by batchin all those dataframes.
+        We should be able to substantially improve on this by batching all those dataframes.
 
         :return:
         """

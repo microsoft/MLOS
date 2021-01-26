@@ -96,7 +96,6 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
             num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
         )
         utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
-
         num_utility_function_values = len(utility_function_values.index)
         if num_utility_function_values == 0:
             config_to_suggest = Point.from_dataframe(feature_values_dataframe.iloc[[0]])
