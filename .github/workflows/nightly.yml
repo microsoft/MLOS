@@ -115,11 +115,12 @@ jobs:
       run: |
         docker exec -u root mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
           /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
-    - name: Run python long haul tests (Ubuntu ${{ matrix.UbuntuVersion}})
-      timeout-minutes: 700
-      run: |
-        docker exec --workdir /src/MLOS/source/Mlos.Python mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
-          /bin/bash -c "python3.7 -m pytest -sv mlos/Optimizers/long_haul_tests/*.py"
+    # Disabled for now.
+    #- name: Run python long haul tests (Ubuntu ${{ matrix.UbuntuVersion}})
+    #  timeout-minutes: 700
+    #  run: |
+    #    docker exec --workdir /src/MLOS/source/Mlos.Python mlos-build-ubuntu-${{ matrix.UbuntuVersion }} \
+    #      /bin/bash -c "python3.7 -m pytest -sv mlos/Optimizers/long_haul_tests/*.py"
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
       shell: bash
       run: |
