@@ -10,7 +10,7 @@ from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveNestedPolyno
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective, nested_polynomial_objective_config_space
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs import ComponentConfigStore
 
 objective_function_config_store = ComponentConfigStore(

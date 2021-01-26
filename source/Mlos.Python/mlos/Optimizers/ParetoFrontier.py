@@ -42,7 +42,7 @@ class ParetoVolumeEsimator:
         upper_bound_on_proportion = p_hat + ci_radius
 
         total_volume_of_enclosing_parallelotope = 1.0
-        for objective, objective_maximum in self.objectives_maxima:
+        for _, objective_maximum in self.objectives_maxima:
             total_volume_of_enclosing_parallelotope *= objective_maximum
 
         total_volume_of_enclosing_parallelotope = abs(total_volume_of_enclosing_parallelotope)
@@ -151,7 +151,7 @@ class ParetoFrontier:
         """
         objectives_df = self._flip_sign_for_minimized_objectives(objectives_df)
         is_dominated = pd.Series([False for i in range(len(objectives_df.index))], index=objectives_df.index)
-        for idx, pareto_row in self._pareto_df_maximize_all.iterrows():
+        for _, pareto_row in self._pareto_df_maximize_all.iterrows():
             is_dominated_by_this_pareto_point = (objectives_df < pareto_row).all(axis=1)
             is_dominated = is_dominated | is_dominated_by_this_pareto_point
         return is_dominated
@@ -169,7 +169,7 @@ class ParetoFrontier:
 
         # First we need to find the maxima for each of the objective values.
         #
-        objectives_extremes = KeyOrderedDict(ordered_keys=[column for column in self._pareto_df.columns], value_type=float)
+        objectives_extremes = KeyOrderedDict(ordered_keys=self._pareto_df.columns, value_type=float)
         for objective in self.optimization_problem.objectives:
             if objective.minimize:
                 objectives_extremes[objective.name] = self._pareto_df[objective.name].min()

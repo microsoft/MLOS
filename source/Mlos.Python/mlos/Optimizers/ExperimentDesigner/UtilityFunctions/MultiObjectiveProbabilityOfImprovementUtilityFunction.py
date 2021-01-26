@@ -10,7 +10,7 @@ from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
-from mlos.Spaces import SimpleHypergrid, CategoricalDimension, DiscreteDimension, Point
+from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Tracer import trace, traced
 
@@ -96,7 +96,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         # their POI esitmates (and then sample a bit more, to fortify our conclusions).
 
         valid_predictions_index = feature_values_pandas_frame.index
-        for objective_name, prediction in multi_objective_predictions:
+        for _, prediction in multi_objective_predictions:
             prediction_df = prediction.get_dataframe()
             valid_predictions_index = valid_predictions_index.intersection(prediction_df.index)
 

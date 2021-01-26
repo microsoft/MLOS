@@ -4,7 +4,6 @@
 #
 from abc import ABC, abstractmethod
 import random
-import numpy as np
 import pandas as pd
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 from mlos.Spaces.Dimensions.CategoricalDimension import CategoricalDimension
