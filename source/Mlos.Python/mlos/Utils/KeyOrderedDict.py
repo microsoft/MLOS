@@ -27,6 +27,10 @@ class KeyOrderedDict:
             else:
                 self._dict[key] = None
 
+    @property
+    def ordered_keys(self):
+        return [key for key in self._ordered_keys]
+
     def __getitem__(self, key_or_index: Union[str, int]) -> object:
         key = self._to_key(key_or_index)
         return self._dict[key]

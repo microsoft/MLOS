@@ -7,8 +7,9 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
-from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.OptimizerBase import OptimizerBase
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
@@ -54,6 +55,7 @@ class BayesianOptimizer(OptimizerBase):
 
         self.surrogate_model_output_space = optimization_problem.objective_space
         self.optimizer_config = optimizer_config
+        self.pareto_frontier: ParetoFrontier = ParetoFrontier(optimization_problem=self.optimization_problem, objectives_df=None)
 
         # Now let's put together the surrogate model.
         #
@@ -78,6 +80,7 @@ class BayesianOptimizer(OptimizerBase):
         self.experiment_designer = ExperimentDesigner(
             designer_config=self.optimizer_config.experiment_designer_config,
             optimization_problem=self.optimization_problem,
+            pareto_frontier=self.pareto_frontier,
             surrogate_model=self.surrogate_model,
             logger=self.logger
         )
@@ -193,6 +196,8 @@ class BayesianOptimizer(OptimizerBase):
                 targets_df=self._target_values_df,
                 iteration_number=len(self._parameter_values_df.index)
             )
+
+        self.pareto_frontier.update_pareto(objectives_df=self._target_values_df)
 
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
