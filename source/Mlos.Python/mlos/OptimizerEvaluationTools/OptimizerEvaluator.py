@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import copy
 import pickle
 import traceback
 
@@ -70,18 +71,10 @@ class OptimizerEvaluator:
             assert False, "A valid objective_function XOR a valid objective_function_config must be specified"
 
         # Let's get the optimizer and its config assigned to self's fields.
-
         #
         if (optimizer_config is not None) and (optimizer is None):
             assert optimizer_config in bayesian_optimizer_config_store.parameter_space
-
-            objective_name = self.objective_function.output_space.dimension_names[0]
-            optimization_problem = OptimizationProblem(
-                parameter_space=self.objective_function.parameter_space,
-                objective_space=self.objective_function.output_space,
-                objectives=[Objective(name=objective_name, minimize=True)]
-            )
-
+            optimization_problem = self.objective_function.default_optimization_problem
             self.optimizer_config = optimizer_config
             self.optimizer = BayesianOptimizerFactory().create_local_optimizer(
                 optimizer_config=optimizer_config,
@@ -180,6 +173,15 @@ class OptimizerEvaluator:
                                     )
                                 except ValueError as e:
                                     print(e)
+
+                            if self.optimizer_evaluator_config.report_pareto_over_time:
+                                evaluation_report.pareto_over_time[i] = copy.deepcopy(self.optimizer.optimization_problem)
+
+                            if self.optimizer_evaluator_config.report_pareto_volume_over_time:
+                                volume_estimator = self.optimizer.pareto_frontier.approximate_pareto_volume()
+                                ci99_on_volume = volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.01)
+                                evaluation_report.pareto_volume_over_time[i] = ci99_on_volume
+
                 evaluation_report.success = True
 
         except Exception as e:
@@ -188,7 +190,7 @@ class OptimizerEvaluator:
             evaluation_report.exception_traceback = traceback.format_exc()
 
         with traced(scope_name="evaluating_optimizer"):
-            """Once the optimization is done, we performa final evaluation of the optimizer."""
+            # Once the optimization is done, we perform a final evaluation of the optimizer.
 
             if self.optimizer.trained:
                 gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
@@ -204,6 +206,14 @@ class OptimizerEvaluator:
                     )
                 except Exception as e:
                     print(e)
+
+        if self.optimizer_evaluator_config.report_pareto_over_time:
+            evaluation_report.pareto_over_time[i] = copy.deepcopy(self.optimizer.optimization_problem)
+
+        if self.optimizer_evaluator_config.report_pareto_volume_over_time:
+            volume_estimator = self.optimizer.pareto_frontier.approximate_pareto_volume()
+            ci99_on_volume = volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.01)
+            evaluation_report.pareto_volume_over_time[i] = ci99_on_volume
 
         if self.optimizer_evaluator_config.include_execution_trace_in_report:
             evaluation_report.execution_trace = mlos.global_values.tracer.trace_events

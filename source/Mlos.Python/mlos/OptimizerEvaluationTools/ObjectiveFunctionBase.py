@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
-from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import Hypergrid, Point
 
 
@@ -40,6 +40,12 @@ class ObjectiveFunctionBase(ABC):
 
     @property
     def default_optimization_problem(self):
+        if self._default_optimization_problem is None:
+            return OptimizationProblem(
+                parameter_space=self.parameter_space,
+                objective_space=self.output_space,
+                objectives=[Objective(name=dim_name, minimize=True) for dim_name in self.output_space.dimension_names]
+            )
         return self._default_optimization_problem
 
     @default_optimization_problem.setter

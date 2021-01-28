@@ -5,8 +5,9 @@
 import json
 import os
 import pickle
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from mlos.OptimizerEvaluationTools.OptimumOverTime import OptimumOverTime
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
 from mlos.Spaces import Point
 from mlos.Tracer import Tracer
@@ -42,6 +43,8 @@ class OptimizerEvaluationReport:
             evaluation_frequency: int = None,
             regression_model_goodness_of_fit_state: MultiObjectiveRegressionModelFitState = None,
             optima_over_time: Dict[str, OptimumOverTime] = None,
+            pareto_over_time: Dict[int, ParetoFrontier] = None,
+            pareto_volume_over_time: Dict[int, Tuple[float, float]] = None,
             execution_trace: List[Dict[str, object]] = None
     ):
         self.success = False
@@ -61,6 +64,8 @@ class OptimizerEvaluationReport:
         self.regression_model_goodness_of_fit_state = regression_model_goodness_of_fit_state
         self.optima_over_time = optima_over_time
         self.execution_trace = execution_trace
+        self.pareto_over_time = pareto_over_time if pareto_over_time is not None else dict()
+        self.pareto_volume_over_time = pareto_volume_over_time if pareto_volume_over_time is not None else dict()
 
     def add_pickled_optimizer(self, iteration: int, pickled_optimizer: bytes):
         assert iteration >= 0
@@ -112,6 +117,14 @@ class OptimizerEvaluationReport:
         if self.optima_over_time is not None:
             with open(os.path.join(target_folder, "optima_over_time.pickle"), "wb") as out_file:
                 pickle.dump(self.optima_over_time, out_file)
+
+        if len(self.pareto_over_time) > 0:
+            with open(os.path.join(target_folder, "pareto_over_time.pickle"), "wb") as out_file:
+                pickle.dump(self.pareto_over_time, out_file)
+
+        if len(self.pareto_volume_over_time) > 0:
+            with open(os.path.join(target_folder, "pareto_volume_over_time.json"), "w") as out_file:
+                json.dump(self.pareto_volume_over_time, out_file, indent=2)
 
         if self.execution_trace is not None:
             tracer = Tracer()
