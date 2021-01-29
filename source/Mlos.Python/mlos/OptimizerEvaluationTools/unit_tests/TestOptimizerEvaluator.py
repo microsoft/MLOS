@@ -69,7 +69,7 @@ class TestOptimizerEvaluator:
         optimizer_evaluation_report = optimizer_evaluator.evaluate_optimizer()
         assert optimizer_evaluation_report.success
 
-        for objective_name, regression_model_fit_state in optimizer_evaluation_report.regression_model_goodness_of_fit_state:
+        for objective_name, regression_model_fit_state in optimizer_evaluation_report.regression_model_fit_state:
             with pd.option_context('display.max_columns', 100):
                 print(regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
                 for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
@@ -89,9 +89,9 @@ class TestOptimizerEvaluator:
         )
 
         optimizer_evaluation_report_2 = optimizer_evaluator_2.evaluate_optimizer()
-        for objective_name, single_objective_regression_model_goodness_of_fit_state in optimizer_evaluation_report_2.regression_model_goodness_of_fit_state:
+        for objective_name, single_objective_regression_model_fit_state in optimizer_evaluation_report_2.regression_model_fit_state:
             with pd.option_context('display.max_columns', 100):
-                print(single_objective_regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                print(single_objective_regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
                 for optimum_name, optimum_over_time in optimizer_evaluation_report_2.optima_over_time.items():
                     print("#####################################################################################################")
                     print(optimum_name)
@@ -114,7 +114,7 @@ class TestOptimizerEvaluator:
         assert len(trace) > 100
         assert all(key in trace[0] for key in ["ts", "name", "ph", "cat", "pid", "tid", "args"])
 
-        for objective_name, fit_state in restored_evaluation_report.regression_model_goodness_of_fit_state:
+        for objective_name, fit_state in restored_evaluation_report.regression_model_fit_state:
             gof_df = fit_state.get_goodness_of_fit_dataframe()
             assert len(gof_df.index) > 0
             assert all((col_name in gof_df.columns.values or col_name == "data_set_type") for col_name in GoodnessOfFitMetrics._fields)
@@ -184,7 +184,7 @@ class TestOptimizerEvaluator:
         if not optimizer_evaluation_report.success:
             raise optimizer_evaluation_report.exception
 
-        for objective_name, single_objective_fit_state in optimizer_evaluation_report.regression_model_goodness_of_fit_state:
+        for objective_name, single_objective_fit_state in optimizer_evaluation_report.regression_model_fit_state:
             with pd.option_context('display.max_columns', 100):
                 print(single_objective_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
                 for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():

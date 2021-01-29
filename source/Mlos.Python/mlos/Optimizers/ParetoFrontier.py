@@ -77,7 +77,7 @@ class ParetoFrontier:
     def __init__(self, optimization_problem: OptimizationProblem, objectives_df: pd.DataFrame = None):
 
         self.optimization_problem: OptimizationProblem = optimization_problem
-        self._objective_names = [objective.name for objective in optimization_problem.objectives]
+        self._objective_names = optimization_problem.objective_names
         self._pareto_df: pd.DataFrame = None
 
         # Maintains a version of the pareto frontier, where all objectives are set to be maximized. So value for the objectives that were

@@ -233,7 +233,7 @@ class OptimizerEvaluator:
             evaluation_report.pickled_objective_function_final_state = pickle.dumps(self.objective_function)
 
         if self.optimizer_evaluator_config.report_regression_model_goodness_of_fit:
-            evaluation_report.regression_model_goodness_of_fit_state = multi_objective_regression_model_fit_state
+            evaluation_report.regression_model_fit_state = multi_objective_regression_model_fit_state
 
         if self.optimizer_evaluator_config.report_optima_over_time:
             evaluation_report.optima_over_time = optima_over_time
