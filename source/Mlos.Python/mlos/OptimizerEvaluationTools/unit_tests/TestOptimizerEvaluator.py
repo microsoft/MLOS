@@ -200,10 +200,11 @@ class TestOptimizerEvaluator:
         if not optimizer_evaluation_report.success:
             raise optimizer_evaluation_report.exception
 
-        with pd.option_context('display.max_columns', 100):
-            print(optimizer_evaluation_report.regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
-            for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
-                print("#####################################################################################################")
-                print(optimum_name)
-                print(optimum_over_time.get_dataframe().tail(10))
-                print("#####################################################################################################")
+        for objective_name, single_objective_fit_state in optimizer_evaluation_report.regression_model_goodness_of_fit_state:
+            with pd.option_context('display.max_columns', 100):
+                print(single_objective_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
+                    print("#####################################################################################################")
+                    print(optimum_name)
+                    print(optimum_over_time.get_dataframe().tail(10))
+                    print("#####################################################################################################")
