@@ -120,43 +120,27 @@ class TestOptimizerEvaluator:
             assert all((col_name in gof_df.columns.values or col_name == "data_set_type") for col_name in GoodnessOfFitMetrics._fields)
             assert all(gof_df[col_name].is_monotonic for col_name in ["last_refit_iteration_number", "observation_count", "prediction_count"])
 
-        with open(os.path.join(self.temp_dir, "optima_over_time.pickle"), "rb") as in_file:
-            unpickled_optima_over_time = pickle.load(in_file)
-
-        for key, optimum_over_time in unpickled_optima_over_time.items():
+        for key, optimum_over_time in restored_evaluation_report.optima_over_time.items():
             assert optimizer_evaluation_report.optima_over_time[key].get_dataframe().equals(optimum_over_time.get_dataframe())
 
 
-        with open(os.path.join(self.temp_dir, "optimizer_config.json")) as in_file:
-            optimizer_config_json_str = in_file.read()
-        deserialized_optimizer_config = Point.from_json(optimizer_config_json_str)
-        assert deserialized_optimizer_config == optimizer_config
+        assert restored_evaluation_report.optimizer_configuration == optimizer_config
+        assert restored_evaluation_report.objective_function_configuration == objective_function_config
 
-        with open(os.path.join(self.temp_dir, "objective_function_config.json")) as in_file:
-            objective_function_json_str = in_file.read()
-        deserialized_objective_function_config = Point.from_json(objective_function_json_str)
-        assert deserialized_objective_function_config == objective_function_config
+        unpickled_objective_function = pickle.loads(restored_evaluation_report.pickled_objective_function_initial_state)
+        assert unpickled_objective_function.objective_function_config == objective_function_config.polynomial_objective_config
 
-        objective_function_pickle_file_names = ["objective_function_final_state.pickle", "objective_function_initial_state.pickle"]
-        for file_name in objective_function_pickle_file_names:
-            with open(os.path.join(self.temp_dir, file_name), "rb") as in_file:
-                unpickled_objective_function = pickle.load(in_file)
-                assert unpickled_objective_function.objective_function_config == objective_function_config.polynomial_objective_config
-
-                for _ in range(10):
-                    random_pt = unpickled_objective_function.parameter_space.random()
-                    assert unpickled_objective_function.evaluate_point(random_pt) in unpickled_objective_function.output_space
+        for _ in range(10):
+            random_pt = unpickled_objective_function.parameter_space.random()
+            assert unpickled_objective_function.evaluate_point(random_pt) in unpickled_objective_function.output_space
 
         # Lastly let's double check the pickled optimizers
         #
-        pickled_optimizers_dir = os.path.join(self.temp_dir, "pickled_optimizers")
-        num_pickled_optimizers = len([name for name in os.listdir(pickled_optimizers_dir) if os.path.isfile(os.path.join(pickled_optimizers_dir, name))])
-        assert num_pickled_optimizers == 11
+        assert len(restored_evaluation_report.pickled_optimizers_over_time) == 11
 
         # Finally, let's make sure that the optimizers serialized to disk are usable.
         #
-        with open(os.path.join(pickled_optimizers_dir, "99.pickle"), "rb") as in_file:
-            final_optimizer_from_disk = pickle.load(in_file)
+        final_optimizer_from_disk = pickle.loads(restored_evaluation_report.pickled_optimizers_over_time[99])
         final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
 
         for _ in range(100):
