@@ -77,6 +77,7 @@ class ParetoFrontier:
     def __init__(self, optimization_problem: OptimizationProblem, objectives_df: pd.DataFrame = None):
 
         self.optimization_problem: OptimizationProblem = optimization_problem
+        self._objective_names = optimization_problem.objective_names
         self._pareto_df: pd.DataFrame = None
 
         # Maintains a version of the pareto frontier, where all objectives are set to be maximized. So value for the objectives that were
@@ -114,9 +115,13 @@ class ParetoFrontier:
 
         assert all(column in self.optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
 
-        # First, let's turn it into a maximization problem, by flipping the sign of all objectives that are to be minimized.
+        # First let's discard any columns that we are not optimizing for.
         #
-        pareto_df = self._flip_sign_for_minimized_objectives(objectives_df)
+        pareto_df = objectives_df[self._objective_names]
+
+        # Next, let's turn it into a maximization problem, by flipping the sign of all objectives that are to be minimized.
+        #
+        pareto_df = self._flip_sign_for_minimized_objectives(pareto_df)
 
         # By presorting we guarantee, that all dominated points are below the currently considered point.
         #
@@ -149,6 +154,7 @@ class ParetoFrontier:
         :param pareto_df:
         :return:
         """
+        objectives_df = objectives_df[self._objective_names]
         objectives_df = self._flip_sign_for_minimized_objectives(objectives_df)
         is_dominated = pd.Series([False for i in range(len(objectives_df.index))], index=objectives_df.index)
         for _, pareto_row in self._pareto_df_maximize_all.iterrows():

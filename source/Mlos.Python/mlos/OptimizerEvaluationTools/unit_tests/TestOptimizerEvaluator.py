@@ -14,6 +14,7 @@ import pytest
 import mlos.global_values
 from mlos.OptimizerEvaluationTools.OptimizerEvaluator import OptimizerEvaluator
 from mlos.OptimizerEvaluationTools.OptimizerEvaluatorConfigStore import optimizer_evaluator_config_store
+from mlos.OptimizerEvaluationTools.OptimizerEvaluationReport import OptimizerEvaluationReport
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import objective_function_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import bayesian_optimizer_config_store
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType, GoodnessOfFitMetrics
@@ -68,13 +69,14 @@ class TestOptimizerEvaluator:
         optimizer_evaluation_report = optimizer_evaluator.evaluate_optimizer()
         assert optimizer_evaluation_report.success
 
-        with pd.option_context('display.max_columns', 100):
-            print(optimizer_evaluation_report.regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
-            for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
-                print("#####################################################################################################")
-                print(optimum_name)
-                print(optimum_over_time.get_dataframe().tail(10))
-                print("#####################################################################################################")
+        for objective_name, regression_model_fit_state in optimizer_evaluation_report.regression_model_fit_state:
+            with pd.option_context('display.max_columns', 100):
+                print(regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
+                    print("#####################################################################################################")
+                    print(optimum_name)
+                    print(optimum_over_time.get_dataframe().tail(10))
+                    print("#####################################################################################################")
 
         # Now let's do it again with the unpickled optimizer.
         #
@@ -87,78 +89,58 @@ class TestOptimizerEvaluator:
         )
 
         optimizer_evaluation_report_2 = optimizer_evaluator_2.evaluate_optimizer()
-        with pd.option_context('display.max_columns', 100):
-            print(optimizer_evaluation_report_2.regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
-            for optimum_name, optimum_over_time in optimizer_evaluation_report_2.optima_over_time.items():
-                print("#####################################################################################################")
-                print(optimum_name)
-                print(optimum_over_time.get_dataframe().tail(10))
-                print("#####################################################################################################")
+        for objective_name, single_objective_regression_model_fit_state in optimizer_evaluation_report_2.regression_model_fit_state:
+            with pd.option_context('display.max_columns', 100):
+                print(single_objective_regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                for optimum_name, optimum_over_time in optimizer_evaluation_report_2.optima_over_time.items():
+                    print("#####################################################################################################")
+                    print(optimum_name)
+                    print(optimum_over_time.get_dataframe().tail(10))
+                    print("#####################################################################################################")
 
 
 
         optimizer_evaluation_report.write_to_disk(target_folder=self.temp_dir)
+        restored_evaluation_report = OptimizerEvaluationReport.read_from_disk(target_folder=self.temp_dir)
 
-        # Validate that all files were created as expected.
-        #
-        with open(os.path.join(self.temp_dir, "execution_info.json")) as in_file:
-            execution_info = json.load(in_file)
-        assert execution_info["success"]
-        assert execution_info["num_optimization_iterations"] == optimizer_evaluator_config.num_iterations
-        assert execution_info["evaluation_frequency"] == optimizer_evaluator_config.evaluation_frequency
-        assert execution_info["exception"] is None
-        assert execution_info["exception_stack_trace"] is None
+        assert optimizer_evaluation_report.success == restored_evaluation_report.success
+        assert optimizer_evaluation_report.num_optimization_iterations == restored_evaluation_report.num_optimization_iterations
+        assert optimizer_evaluation_report.evaluation_frequency == restored_evaluation_report.evaluation_frequency
+        assert optimizer_evaluation_report.exception == restored_evaluation_report.exception
+        assert optimizer_evaluation_report.exception_traceback == restored_evaluation_report.exception_traceback
 
         with open(os.path.join(self.temp_dir, "execution_trace.json")) as in_file:
             trace = json.load(in_file)
         assert len(trace) > 100
         assert all(key in trace[0] for key in ["ts", "name", "ph", "cat", "pid", "tid", "args"])
 
-        with open(os.path.join(self.temp_dir, "goodness_of_fit.pickle"), "rb") as in_file:
-            unpickled_gof = pickle.load(in_file)
+        for objective_name, fit_state in restored_evaluation_report.regression_model_fit_state:
+            gof_df = fit_state.get_goodness_of_fit_dataframe()
+            assert len(gof_df.index) > 0
+            assert all((col_name in gof_df.columns.values or col_name == "data_set_type") for col_name in GoodnessOfFitMetrics._fields)
+            assert all(gof_df[col_name].is_monotonic for col_name in ["last_refit_iteration_number", "observation_count", "prediction_count"])
 
-        gof_df = unpickled_gof.get_goodness_of_fit_dataframe()
-        assert len(gof_df.index) > 0
-        assert all((col_name in gof_df.columns.values or col_name == "data_set_type") for col_name in GoodnessOfFitMetrics._fields)
-        assert all(gof_df[col_name].is_monotonic for col_name in ["last_refit_iteration_number", "observation_count", "prediction_count"])
-
-        with open(os.path.join(self.temp_dir, "optima_over_time.pickle"), "rb") as in_file:
-            unpickled_optima_over_time = pickle.load(in_file)
-
-        for key, optimum_over_time in unpickled_optima_over_time.items():
+        for key, optimum_over_time in restored_evaluation_report.optima_over_time.items():
             assert optimizer_evaluation_report.optima_over_time[key].get_dataframe().equals(optimum_over_time.get_dataframe())
 
 
-        with open(os.path.join(self.temp_dir, "optimizer_config.json")) as in_file:
-            optimizer_config_json_str = in_file.read()
-        deserialized_optimizer_config = Point.from_json(optimizer_config_json_str)
-        assert deserialized_optimizer_config == optimizer_config
+        assert restored_evaluation_report.optimizer_configuration == optimizer_config
+        assert restored_evaluation_report.objective_function_configuration == objective_function_config
 
-        with open(os.path.join(self.temp_dir, "objective_function_config.json")) as in_file:
-            objective_function_json_str = in_file.read()
-        deserialized_objective_function_config = Point.from_json(objective_function_json_str)
-        assert deserialized_objective_function_config == objective_function_config
+        unpickled_objective_function = pickle.loads(restored_evaluation_report.pickled_objective_function_initial_state)
+        assert unpickled_objective_function.objective_function_config == objective_function_config.polynomial_objective_config
 
-        objective_function_pickle_file_names = ["objective_function_final_state.pickle", "objective_function_initial_state.pickle"]
-        for file_name in objective_function_pickle_file_names:
-            with open(os.path.join(self.temp_dir, file_name), "rb") as in_file:
-                unpickled_objective_function = pickle.load(in_file)
-                assert unpickled_objective_function.objective_function_config == objective_function_config.polynomial_objective_config
-
-                for _ in range(10):
-                    random_pt = unpickled_objective_function.parameter_space.random()
-                    assert unpickled_objective_function.evaluate_point(random_pt) in unpickled_objective_function.output_space
+        for _ in range(10):
+            random_pt = unpickled_objective_function.parameter_space.random()
+            assert unpickled_objective_function.evaluate_point(random_pt) in unpickled_objective_function.output_space
 
         # Lastly let's double check the pickled optimizers
         #
-        pickled_optimizers_dir = os.path.join(self.temp_dir, "pickled_optimizers")
-        num_pickled_optimizers = len([name for name in os.listdir(pickled_optimizers_dir) if os.path.isfile(os.path.join(pickled_optimizers_dir, name))])
-        assert num_pickled_optimizers == 11
+        assert len(restored_evaluation_report.pickled_optimizers_over_time) == 11
 
         # Finally, let's make sure that the optimizers serialized to disk are usable.
         #
-        with open(os.path.join(pickled_optimizers_dir, "99.pickle"), "rb") as in_file:
-            final_optimizer_from_disk = pickle.load(in_file)
+        final_optimizer_from_disk = pickle.loads(restored_evaluation_report.pickled_optimizers_over_time[99])
         final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
 
         for _ in range(100):
@@ -202,10 +184,11 @@ class TestOptimizerEvaluator:
         if not optimizer_evaluation_report.success:
             raise optimizer_evaluation_report.exception
 
-        with pd.option_context('display.max_columns', 100):
-            print(optimizer_evaluation_report.regression_model_goodness_of_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
-            for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
-                print("#####################################################################################################")
-                print(optimum_name)
-                print(optimum_over_time.get_dataframe().tail(10))
-                print("#####################################################################################################")
+        for objective_name, single_objective_fit_state in optimizer_evaluation_report.regression_model_fit_state:
+            with pd.option_context('display.max_columns', 100):
+                print(single_objective_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
+                    print("#####################################################################################################")
+                    print(optimum_name)
+                    print(optimum_over_time.get_dataframe().tail(10))
+                    print("#####################################################################################################")
