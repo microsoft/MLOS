@@ -7,7 +7,6 @@ import math
 import pandas as pd
 
 from mlos.Spaces import ContinuousDimension, Hypergrid, Point, SimpleHypergrid
-from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctionBase
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 
