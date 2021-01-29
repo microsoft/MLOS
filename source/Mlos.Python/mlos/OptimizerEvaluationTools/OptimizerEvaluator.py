@@ -17,6 +17,7 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
 from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
 from mlos.Spaces import Point
 from mlos.Tracer import trace, traced, Tracer
@@ -116,7 +117,9 @@ class OptimizerEvaluator:
         if self.optimizer_evaluator_config.include_pickled_optimizer_in_report:
             evaluation_report.pickled_optimizer_initial_state = pickle.dumps(self.optimizer)
 
-        regression_model_fit_state = RegressionModelFitState()
+        multi_objective_regression_model_fit_state = MultiObjectiveRegressionModelFitState(objective_names=self.optimizer.optimization_problem.objective_names)
+        for objective_name in self.optimizer.optimization_problem.objective_names:
+            multi_objective_regression_model_fit_state[objective_name] = RegressionModelFitState()
 
         optima_over_time = {}
         optima_over_time[OptimumDefinition.BEST_OBSERVATION.value] = OptimumOverTime(
@@ -157,8 +160,9 @@ class OptimizerEvaluator:
                                 evaluation_report.add_pickled_optimizer(iteration=i, pickled_optimizer=pickle.dumps(self.optimizer))
 
                             if self.optimizer.trained:
-                                gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
-                                regression_model_fit_state.set_gof_metrics(data_set_type=DataSetType.TRAIN, gof_metrics=gof_metrics)
+                                multi_objective_gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
+                                for objective_name, gof_metrics in multi_objective_gof_metrics:
+                                    multi_objective_regression_model_fit_state[objective_name].set_gof_metrics(data_set_type=DataSetType.TRAIN, gof_metrics=gof_metrics)
 
                             for optimum_name, optimum_over_time in optima_over_time.items():
                                 try:
@@ -193,8 +197,9 @@ class OptimizerEvaluator:
             # Once the optimization is done, we perform a final evaluation of the optimizer.
 
             if self.optimizer.trained:
-                gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
-                regression_model_fit_state.set_gof_metrics(data_set_type=DataSetType.TRAIN, gof_metrics=gof_metrics)
+                multi_objective_gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
+                for objective_name, gof_metrics in multi_objective_gof_metrics:
+                    multi_objective_regression_model_fit_state[objective_name].set_gof_metrics(data_set_type=DataSetType.TRAIN, gof_metrics=gof_metrics)
 
             for optimum_name, optimum_over_time in optima_over_time.items():
                 try:
@@ -226,7 +231,7 @@ class OptimizerEvaluator:
             evaluation_report.pickled_objective_function_final_state = pickle.dumps(self.objective_function)
 
         if self.optimizer_evaluator_config.report_regression_model_goodness_of_fit:
-            evaluation_report.regression_model_goodness_of_fit_state = regression_model_fit_state
+            evaluation_report.regression_model_goodness_of_fit_state = multi_objective_regression_model_fit_state
 
         if self.optimizer_evaluator_config.report_optima_over_time:
             evaluation_report.optima_over_time = optima_over_time

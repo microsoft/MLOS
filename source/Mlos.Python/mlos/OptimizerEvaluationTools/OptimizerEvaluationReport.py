@@ -111,7 +111,7 @@ class OptimizerEvaluationReport:
                 out_file.write(self.pickled_objective_function_final_state)
 
         if self.regression_model_goodness_of_fit_state is not None:
-            with open(os.path.join(target_folder, "goodness_of_fit.pickle"), "wb") as out_file:
+            with open(os.path.join(target_folder, "regression_model_goodness_of_fit_state.pickle"), "wb") as out_file:
                 pickle.dump(self.regression_model_goodness_of_fit_state, out_file)
 
         if self.optima_over_time is not None:
@@ -152,8 +152,8 @@ class OptimizerEvaluationReport:
             optimizer_evaluation_report.optimizer_configuration = Point.from_json(in_file.read())
 
         objective_function_config_file = os.path.join(target_folder, "objective_function_config.json")
-        with open(objective_function_config_file, 'r') as out_file:
-            optimizer_evaluation_report.objective_function_configuration.from_json(in_file.read())
+        with open(objective_function_config_file, 'r') as in_file:
+            optimizer_evaluation_report.objective_function_configuration = Point.from_json(in_file.read())
 
         pickled_optimizers_dir = os.path.join(target_folder, "pickled_optimizers")
         if os.path.exists(pickled_optimizers_dir):
@@ -175,7 +175,7 @@ class OptimizerEvaluationReport:
             with open(objective_function_final_state_file_path, 'rb') as  in_file:
                 optimizer_evaluation_report.pickled_objective_function_final_state = in_file.read()
 
-        gof_file_path = os.path.join(target_folder, "goodness_of_fit.pickle")
+        gof_file_path = os.path.join(target_folder, "regression_model_goodness_of_fit_state.pickle")
         if os.path.exists(gof_file_path):
             with open(gof_file_path, 'rb') as in_file:
                 optimizer_evaluation_report.regression_model_goodness_of_fit_state = pickle.load(in_file)
@@ -183,7 +183,7 @@ class OptimizerEvaluationReport:
         optima_over_time_file_path = os.path.join(target_folder, "optima_over_time.pickle")
         if os.path.exists(optima_over_time_file_path):
             with open(optima_over_time_file_path, 'rb') as in_file:
-                optimizer_evaluation_report.optima_over_time = pickle.load(out_file)
+                optimizer_evaluation_report.optima_over_time = pickle.load(in_file)
 
         pareto_over_time_file_path = os.path.join(target_folder, "pareto_over_time.pickle")
         if os.path.exists(pareto_over_time_file_path):
@@ -204,3 +204,5 @@ class OptimizerEvaluationReport:
                 optimizer_evaluation_report.evaluation_frequency = execution_info_dict['evaluation_frequency']
                 optimizer_evaluation_report.exception = execution_info_dict['exception']
                 optimizer_evaluation_report.exception_traceback = execution_info_dict['exception_stack_trace']
+
+        return optimizer_evaluation_report
