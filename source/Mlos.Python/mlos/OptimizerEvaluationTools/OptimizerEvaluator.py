@@ -95,7 +95,7 @@ class OptimizerEvaluator:
 
 
     @trace()
-    def evaluate_optimizer(self) -> OptimizerEvaluationReport: # pylint: disable=too-many-statements
+    def evaluate_optimizer(self) -> OptimizerEvaluationReport: # pylint: disable=too-many-statements,too-many-branches
         evaluation_report = OptimizerEvaluationReport(
             optimizer_configuration=self.optimizer_config,
             objective_function_configuration=self.objective_function_config,
@@ -161,7 +161,10 @@ class OptimizerEvaluator:
                             if self.optimizer.trained:
                                 multi_objective_gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
                                 for objective_name, gof_metrics in multi_objective_gof_metrics:
-                                    multi_objective_regression_model_fit_state[objective_name].set_gof_metrics(data_set_type=DataSetType.TRAIN, gof_metrics=gof_metrics)
+                                    multi_objective_regression_model_fit_state[objective_name].set_gof_metrics(
+                                        data_set_type=DataSetType.TRAIN,
+                                        gof_metrics=gof_metrics
+                                    )
 
                             for optimum_name, optimum_over_time in optima_over_time.items():
                                 try:
