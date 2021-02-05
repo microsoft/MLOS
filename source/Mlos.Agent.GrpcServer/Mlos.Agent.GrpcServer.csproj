@@ -19,10 +19,10 @@
     <ProjectReference Include="$(SourceDir)\Mlos.NetCore\Mlos.NetCore.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Protobuf Include="..\Mlos.Agent.Proto\greet.proto" GrpcServices="Server" Link="ProtoBuffers\greet.proto" OutputDir="$(GrpcOutputDir)" />
+    <Protobuf Include="..\Mlos.Agent.Proto\ExperimentManagerService.proto" GrpcServices="Server" Link="ProtoBuffers\ExperimentManagerService.proto" OutputDir="$(GrpcOutputDir)" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GreeterService.cs" />
+    <Compile Include="ExperimentManagerService.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />

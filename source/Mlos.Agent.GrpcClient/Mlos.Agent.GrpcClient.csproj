@@ -15,7 +15,7 @@
   <Import Project="$(BaseDir)\build\Mlos.NetCore.props" />
   <Import Project="$(BaseDir)\build\Mlos.NetCore.Grpc.props" />
   <ItemGroup>
-    <Protobuf Include="..\Mlos.Agent.Proto\greet.proto" GrpcServices="Client" Link="ProtoBuffers\greet.proto" OutputDir="$(GrpcOutputDir)"/>
+    <Protobuf Include="..\Mlos.Agent.Proto\ExperimentManagerService.proto" GrpcServices="Client" Link="ProtoBuffers\ExperimentManagerService.proto" OutputDir="$(GrpcOutputDir)"/>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainApp.cs" />
