@@ -20,15 +20,6 @@ namespace Mlos
 {
 namespace Core
 {
-#ifdef _MSC_VER
-// Disable MSVC warning:
-//  The this pointer is valid only within nonstatic member functions.
-//  It cannot be used in the initializer list for a base class.
-//
-#pragma warning(push)
-#pragma warning(disable : 4355)
-#endif
-
 //----------------------------------------------------------------------------
 // NAME: MlosContext constructor.
 //
@@ -55,10 +46,6 @@ MlosContext::MlosContext(
     globalMemoryRegion.RegisteredSettingsAssemblyCount.store(1);
 }
 
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-
 //----------------------------------------------------------------------------
 // NAME: MlosContext::RegisterSettingsAssembly
 //
@@ -78,7 +65,7 @@ HRESULT MlosContext::RegisterSettingsAssembly(
 
     // Check if there is already a config for the given assembly index.
     //
-    ComponentConfig<Internal::RegisteredSettingsAssemblyConfig> registeredSettingAssembly(*this);
+    ComponentConfig<Internal::RegisteredSettingsAssemblyConfig> registeredSettingAssembly;
     registeredSettingAssembly.AssemblyIndex = assemblyIndex;
 
     HRESULT hr = m_sharedConfigManager.Lookup(registeredSettingAssembly);
@@ -135,7 +122,7 @@ HRESULT MlosContext::RegisterSharedMemory(
     _In_z_ const char* sharedMemoryName,
     _In_ size_t memoryRegionSize)
 {
-    ComponentConfig<Internal::RegisteredMemoryRegionConfig> registeredMemoryRegion(*this);
+    ComponentConfig<Internal::RegisteredMemoryRegionConfig> registeredMemoryRegion;
 
     registeredMemoryRegion.MemoryRegionId = memoryRegionId;
     registeredMemoryRegion.SharedMemoryMapName = sharedMemoryName;
@@ -164,7 +151,7 @@ HRESULT MlosContext::RegisterNamedEvent(
     _In_ Internal::MemoryRegionId memoryRegionId,
     _In_z_ const char* name)
 {
-    ComponentConfig<Internal::RegisteredNamedEventConfig> registeredNamedEvent(*this);
+    ComponentConfig<Internal::RegisteredNamedEventConfig> registeredNamedEvent;
 
     registeredNamedEvent.MemoryRegionId = memoryRegionId;
     registeredNamedEvent.Name = name;

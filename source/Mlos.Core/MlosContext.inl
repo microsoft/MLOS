@@ -34,6 +34,8 @@ template<typename T>
 _Must_inspect_result_
 HRESULT MlosContext::RegisterComponentConfig(_Inout_ ComponentConfig<T>& componentConfig)
 {
+    componentConfig.m_mlosContext = this;
+
     // Create or find existing shared configuration.
     //
     return m_sharedConfigManager.CreateOrUpdateFrom(componentConfig);

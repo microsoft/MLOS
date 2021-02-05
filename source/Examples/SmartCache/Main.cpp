@@ -127,7 +127,7 @@ main(
     // This will be stored in a shared memory region below for use by both the
     // component and the external agent.
     //
-    Mlos::Core::ComponentConfig<SmartCache::SmartCacheConfig> config(mlosContext);
+    Mlos::Core::ComponentConfig<SmartCache::SmartCacheConfig> config;
 
     // Initialize config with default values.
     //

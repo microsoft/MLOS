@@ -59,6 +59,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define _In_
 #define _Inout_
 #define _In_z_
+#define _In_opt_
 #define _In_reads_(x)
 #define _In_reads_bytes_(x)
 
