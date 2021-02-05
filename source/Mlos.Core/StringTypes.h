@@ -60,10 +60,10 @@ public:
         return *this;
     }
 
-    StringPtr& operator=(_In_z_ const char* string)
+    StringPtr& operator=(_In_opt_z_ const char* string)
     {
         Data = string;
-        Length = string != nullptr ? strlen(string) : 0;
+        Length = string != nullptr ? strlen(string) + 1 : 0;
 
         return *this;
     }
@@ -125,10 +125,10 @@ public:
         return *this;
     }
 
-    WideStringPtr& operator=(_In_z_ const wchar_t* string)
+    WideStringPtr& operator=(_In_opt_z_ const wchar_t* string)
     {
         Data = string;
-        Length = string != nullptr ? wcslen(string) : 0;
+        Length = string != nullptr ? wcslen(string) + 1 : 0;
 
         return *this;
     }

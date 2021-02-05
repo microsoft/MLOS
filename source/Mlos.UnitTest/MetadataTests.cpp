@@ -112,7 +112,7 @@ TEST(MetadataTests, VerifyStructAligment)
     std::vector<byte> byteBuffer;
     byteBuffer.resize(ObjectSerialization::GetSerializedSize(object));
 
-    BytePtr buffer(&byteBuffer.front());
+    const BytePtr buffer(&byteBuffer.front());
     ObjectSerialization::Serialize(buffer, object);
 
     // Create a proxy object.
@@ -120,5 +120,50 @@ TEST(MetadataTests, VerifyStructAligment)
     Proxy::Mlos::UnitTest::TestAlignedType proxy(buffer, 0);
     EXPECT_EQ(proxy.Configs()[2].ComponentType(), object.Configs[2].ComponentType);
     EXPECT_EQ(proxy.Configs()[4].ComponentType(), object.Configs[4].ComponentType);
+}
+
+TEST(MetadataTests, VerifyStringPtrSerialization)
+{
+    {
+        Mlos::UnitTest::StringsPair object = {};
+        object.String1 = "Test_string1";
+        object.String2 = "Test_string2";
+
+        // Serialize to the buffer.
+        //
+        std::vector<byte> byteBuffer;
+        byteBuffer.resize(ObjectSerialization::GetSerializedSize(object));
+
+        const BytePtr buffer(&byteBuffer.front());
+        ObjectSerialization::Serialize(buffer, object);
+
+        // Create a proxy object.
+        //
+        Proxy::Mlos::UnitTest::StringsPair proxy(buffer, 0);
+        EXPECT_EQ(proxy.String1(), object.String1);
+        EXPECT_EQ(proxy.String2(), object.String2);
+    }
+
+    // First is nullptr.
+    //
+    {
+        Mlos::UnitTest::StringsPair object = {};
+        object.String1 = nullptr;
+        object.String2 = "Test_string2";
+
+        // Serialize to the buffer.
+        //
+        std::vector<byte> byteBuffer;
+        byteBuffer.resize(ObjectSerialization::GetSerializedSize(object));
+
+        const BytePtr buffer(&byteBuffer.front());
+        ObjectSerialization::Serialize(buffer, object);
+
+        // Create a proxy object.
+        //
+        Proxy::Mlos::UnitTest::StringsPair proxy(buffer, 0);
+        EXPECT_EQ(proxy.String1(), object.String1);
+        EXPECT_EQ(proxy.String2(), object.String2);
+    }
 }
 }

@@ -141,4 +141,20 @@ namespace Mlos.UnitTest
 
         internal Graph Graph2;
     }
+
+    [CodegenType]
+    public partial class StringsPair
+    {
+        internal StringPtr String1;
+
+        internal StringPtr String2;
+    }
+
+    [CodegenType]
+    public partial class WideStringsPair
+    {
+        internal WideStringPtr String1;
+
+        internal WideStringPtr String2;
+    }
 }

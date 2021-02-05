@@ -73,7 +73,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
 
                     sbyte* dataPtr = (sbyte*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(sbyte));
+                    return new string(dataPtr, startIndex: 0, length: ((int)dataSize / sizeof(sbyte)) - 1);
                 }
             }
         }
@@ -203,7 +203,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
 
                     char* dataPtr = (char*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(char));
+                    return new string(dataPtr, startIndex: 0, length: ((int)dataSize / sizeof(char)) - 1);
                 }
             }
         }

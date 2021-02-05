@@ -58,8 +58,9 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define _Out_
 #define _In_
 #define _Inout_
-#define _In_z_
 #define _In_opt_
+#define _In_opt_z_
+#define _In_z_
 #define _In_reads_(x)
 #define _In_reads_bytes_(x)
 
@@ -99,6 +100,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "ObjectDeserializationCallback.h"
 #include "StringTypes.h"
 #include "ObjectSerialization.h"
+#include "ObjectSerializationStringPtr.h"
 #include "Utils.h"
 
 #include "PropertyProxyStringPtr.h"
