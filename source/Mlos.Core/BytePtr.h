@@ -31,8 +31,8 @@ namespace Core
 class BytePtr
 {
 public:
-    BytePtr(_In_ const void* buffer)
-      : Pointer(reinterpret_cast<byte*>(const_cast<void*>(buffer)))
+    BytePtr(_In_opt_ const void* buffer)
+      : Pointer(static_cast<byte*>(const_cast<void*>(buffer)))
     {}
 
 public:
@@ -40,7 +40,7 @@ public:
 
     // Gets a value that indicates whether the buffer is invalid.
     //
-    inline bool IsInvalid()
+    inline bool IsInvalid() const
     {
         return Pointer == nullptr;
     }
