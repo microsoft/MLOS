@@ -7,12 +7,10 @@
 // -----------------------------------------------------------------------
 
 using System;
-using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 using Grpc.Net.Client;
-using GrpcGreeter;
+using Mlos.ExperimentService;
 
 namespace Mlos.Agent.GrpcClient
 {
@@ -26,7 +24,7 @@ namespace Mlos.Agent.GrpcClient
             // The port number(5001) must match the port of the gRPC server.
             //
             using GrpcChannel channel = GrpcChannel.ForAddress("http://localhost:5000");
-            var client = new Greeter.GreeterClient(channel);
+            var client = new ExperimentManagerService.ExperimentManagerServiceClient(channel);
             EchoReply reply = await client.EchoAsync(
                 new EchoRequest
                 {

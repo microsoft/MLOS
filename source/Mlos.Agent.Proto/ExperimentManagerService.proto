@@ -1,0 +1,100 @@
+syntax = "proto3";
+
+option csharp_namespace = "Mlos.ExperimentService";
+
+package MlosAgent;
+
+// The experiment manager service definition.
+//
+service ExperimentManagerService
+{
+    // Sends a echo message.
+    //
+    rpc Echo (EchoRequest) returns (EchoReply);
+
+    // Gets the optimizers ids.
+    //
+    rpc GetOptimizerId (GetOptimizerIdRequest) returns (GetOptimizerIdReply);
+
+    // Enumerates available experiments.
+    //
+    rpc EnumerateAvailableExperiments (ExperimentAssemlyListRequest) returns (ExperimentAssemblyList);
+
+    // Loads an experiment.
+    //
+    rpc LoadExperiment (LoadExperimentRequest) returns (LoadExperimentReply);
+
+    // Returns the experiment parameter space
+    //
+    rpc GetParameterSpace(GetParameterSpaceRequest) returns (GetParameterSpaceReply);
+
+    // Starts the experiment.
+    //
+    rpc StartExperiment (StartExperimentRequest) returns (StartExperimentReply);
+
+    // Gets the experiment progress.
+    //
+    rpc GetExperimentProgress (GetExperimentProgressRequest) returns (GetExperimentProgressReply);
+}
+
+// The request message containing the user's name.
+//
+message EchoRequest
+{
+    string name = 1;
+}
+
+// The response message containing the greetings.
+//
+message EchoReply
+{
+    string message = 1;
+}
+
+message GetOptimizerIdRequest {}
+
+message GetOptimizerIdReply {
+    string optimizerId = 1;
+}
+
+message ExperimentAssemlyListRequest {}
+
+message ExperimentAssemblyList {
+    repeated string experimentAssemblyNames = 1;
+}
+
+message LoadExperimentRequest {
+    string experimentName = 1;
+}
+
+message LoadExperimentReply {
+    bool success = 1;
+    string errorMessage = 2;
+}
+
+message StartExperimentRequest {
+	int32 numRandomIterations = 1;
+	int32 numGuidedIterations = 2;
+}
+
+message StartExperimentReply {
+    bool success = 1;
+    string errorMessage = 2;
+}
+
+message GetParameterSpaceRequest{
+    string experimentName = 1;
+}
+
+message GetParameterSpaceReply {
+    string parameterSpaceJsonString = 1;
+}
+
+message GetExperimentProgressRequest {
+    string experimentName = 1;
+}
+
+message GetExperimentProgressReply {
+    uint32 remainingRandomIterations = 1;
+    uint32 remainingGuidedIterations = 2;
+}
