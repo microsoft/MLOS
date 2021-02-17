@@ -131,8 +131,9 @@ class EnvelopedWaves(ObjectiveFunctionBase):
     def evaluate_dataframe(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         objectives_df = pd.DataFrame(0, index=dataframe.index, columns=['y'], dtype='float')
         for param_name in self._parameter_space.dimension_names:
-            objectives_df['y'] += np.sin(dataframe[param_name] / self.objective_function_config.period * 2 * math.pi - self.objective_function_config.phase_shift) \
-                                  * self._envelope(dataframe[param_name])
+            objectives_df['y'] += np.sin(
+                dataframe[param_name] / self.objective_function_config.period * 2 * math.pi - self.objective_function_config.phase_shift
+            ) * self._envelope(dataframe[param_name])
         objectives_df['y'] += self.objective_function_config.vertical_shift
 
         return objectives_df
