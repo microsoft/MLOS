@@ -57,7 +57,8 @@ class TestEnvelopedWaves:
             assert objective_function.output_space.get_valid_rows_index(objectives_df).equals(objectives_df.index)
 
 
-    @pytest.mark.parametrize('function_config_name', ["no_phase_difference"])
+    #@pytest.mark.parametrize('function_config_name', ["pi_phase_difference", "no_phase_difference", "half_pi_phase_difference"])
+    @pytest.mark.parametrize('function_config_name', ["pi_phase_difference"])
     def test_pareto_shape(self, function_config_name):
         """Tests if the pareto frontier has the expected shape.
 
@@ -77,7 +78,9 @@ class TestEnvelopedWaves:
 
         # Let's create a meshgrid of all params.
         # TODO: add this as a function in Hypergrids
-        linspaces = [dimension.linspace(100) for dimension in objective_function.parameter_space.dimensions]
+
+        num_points = 100 if function_config_name != "pi_phase_difference" else 10
+        linspaces = [dimension.linspace(num_points) for dimension in objective_function.parameter_space.dimensions]
         meshgrids = np.meshgrid(*linspaces)
         flat_meshgrids = [meshgrid.flatten() for meshgrid in meshgrids]
         params_df = pd.DataFrame({
@@ -93,8 +96,19 @@ class TestEnvelopedWaves:
             # Let's assert that the optimum is close to 4 and that all selected params are close to half of pi.
             assert len(pareto_df.index) == 1
             for objective in optimization_problem.objectives:
-                assert abs(pareto_df[objective.name].iloc[0] - 4) < 0.001
+                assert abs(pareto_df[objective.name].iloc[0] - 3) < 0.001
 
             optimal_params_df = params_df.iloc[pareto_df.index]
             for param_name in objective_function.parameter_space.dimension_names:
                 assert abs(optimal_params_df[param_name].iloc[0] - math.pi / 2) < 0.02
+
+        if function_config_name == "half_pi_phase_difference":
+            expected_radius = 3
+            pareto_df['radius'] = np.sqrt(pareto_df['y0'] ** 2 + pareto_df['y1'] ** 2)
+            pareto_df['error'] = pareto_df['radius'] - expected_radius
+            assert (np.abs(pareto_df['error']) < 0.01).all()
+
+        if function_config_name == "pi_phase_difference":
+            # We expect that the absolute values of our objectives will be nearly identical.
+            #
+            assert (np.abs(pareto_df['y0'] + pareto_df['y1']) < 0.01).all()

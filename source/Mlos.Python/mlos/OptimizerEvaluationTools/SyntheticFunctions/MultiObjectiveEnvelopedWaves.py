@@ -49,6 +49,30 @@ multi_objective_enveloped_waves_config_store.add_config_by_name(
     description="This function should produce a pareto frontier consisting of a single point at all parameter values equal to (math.pi / 2)."
 )
 
+multi_objective_enveloped_waves_config_store.add_config_by_name(
+    config_name="half_pi_phase_difference",
+    config_point=Point(
+        num_objectives=2,
+        phase_difference=math.pi / 2,
+        period_change=1.0,
+        single_objective_function=EnvelopedWaves.__name__,
+        enveloped_waves_config=enveloped_waves_config_store.default
+    ),
+    description="This function should produce a pareto frontier consisting of points in a quarter cricle in a first quadrat with the radius equal to 3."
+)
+
+multi_objective_enveloped_waves_config_store.add_config_by_name(
+    config_name="pi_phase_difference",
+    config_point=Point(
+        num_objectives=2,
+        phase_difference=math.pi,
+        period_change=1.0,
+        single_objective_function=EnvelopedWaves.__name__,
+        enveloped_waves_config=enveloped_waves_config_store.default
+    ),
+    description="This function should produce a pareto frontier consisting of points on a diagonal of a square centered on the origin with side length equal to 18."
+)
+
 class MultiObjectiveEnvelopedWaves(ObjectiveFunctionBase):
     """Multi-objective function with many useful properties.
     The way it works is that we pass the same parameters through 1 or more single-objective enveloped waves functions.
