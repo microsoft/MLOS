@@ -30,11 +30,23 @@ multi_objective_enveloped_waves_config_store = ComponentConfigStore(
     default=Point(
         num_objectives=2,
         phase_difference=0.5 * math.pi,
-        period_change=1.1,
+        period_change=1.0,
         single_objective_function=EnvelopedWaves.__name__,
         enveloped_waves_config=enveloped_waves_config_store.default
     ),
     description="TODO"
+)
+
+multi_objective_enveloped_waves_config_store.add_config_by_name(
+    config_name="no_phase_difference",
+    config_point=Point(
+        num_objectives=2,
+        phase_difference=0,
+        period_change=1.0,
+        single_objective_function=EnvelopedWaves.__name__,
+        enveloped_waves_config=enveloped_waves_config_store.default
+    ),
+    description="This function should produce a pareto frontier consisting of a single point at all parameter values equal to (math.pi / 2)."
 )
 
 class MultiObjectiveEnvelopedWaves(ObjectiveFunctionBase):

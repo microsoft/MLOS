@@ -63,7 +63,7 @@ enveloped_waves_config_store = ComponentConfigStore(
 )
 
 class EnvelopedWaves(ObjectiveFunctionBase):
-    """Sine waves enveloped by another function, either linear, quadratic or another sine wave.
+    """Sum of sine waves enveloped by another function, either linear, quadratic or another sine wave.
     An enveloped sine wave produces complexity for the optimizer that allows us evaluate its behavior on non-trivial problems.
     Simultaneously, sine waves have the following advantages over polynomials:
         1. They have well known optima - even when we envelop the function with another sine wave, as long as we keep their frequencies
@@ -131,7 +131,7 @@ class EnvelopedWaves(ObjectiveFunctionBase):
     def evaluate_dataframe(self, dataframe: pd.DataFrame) -> pd.DataFrame:
         objectives_df = pd.DataFrame(0, index=dataframe.index, columns=['y'], dtype='float')
         for param_name in self._parameter_space.dimension_names:
-            objectives_df['y'] += np.sin(dataframe[param_name] / self.objective_function_config.period - self.objective_function_config.phase_shift) \
+            objectives_df['y'] += np.sin(dataframe[param_name] / self.objective_function_config.period * 2 * math.pi - self.objective_function_config.phase_shift) \
                                   * self._envelope(dataframe[param_name])
         objectives_df['y'] += self.objective_function_config.vertical_shift
 
