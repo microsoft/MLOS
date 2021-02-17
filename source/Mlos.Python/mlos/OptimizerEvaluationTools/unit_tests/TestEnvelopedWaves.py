@@ -37,7 +37,7 @@ class TestEnvelopedWaves:
             objective_function = EnvelopedWaves(function_config)
             random_params_df = objective_function.parameter_space.random_dataframe(100)
             objectives_df = objective_function.evaluate_dataframe(random_params_df)
-            assert ((objectives_df['y'] <= (num_params + vertical_shift)) & (objectives_df['y'] >= vertical_shift)).all()
+            assert ((objectives_df['y'] <= (num_params + vertical_shift)) & (objectives_df['y'] >= -num_params + vertical_shift)).all()
 
     def test_random_configs(self):
         for _ in range(100):
@@ -47,18 +47,17 @@ class TestEnvelopedWaves:
             objectives_df = objective_function.evaluate_dataframe(random_params_df)
             assert objective_function.output_space.get_valid_rows_index(objectives_df).equals(objectives_df.index)
 
-    def test_random_multi_objective_configs(self):
-        for i in range(100):
-            function_config = multi_objective_enveloped_waves_config_space.random()
-            print(f"[{i}] Function config: {function_config}")
-            objective_function = MultiObjectiveEnvelopedWaves(function_config)
-            random_params_df = objective_function.parameter_space.random_dataframe(100)
-            objectives_df = objective_function.evaluate_dataframe(random_params_df)
-            assert objective_function.output_space.get_valid_rows_index(objectives_df).equals(objectives_df.index)
+    @pytest.mark.parametrize('i', [i for i in range(100)])
+    def test_random_multi_objective_configs(self, i):
+        function_config = multi_objective_enveloped_waves_config_space.random()
+        print(f"[{i}] Function config: {function_config}")
+        objective_function = MultiObjectiveEnvelopedWaves(function_config)
+        random_params_df = objective_function.parameter_space.random_dataframe(100)
+        objectives_df = objective_function.evaluate_dataframe(random_params_df)
+        assert objective_function.output_space.get_valid_rows_index(objectives_df).equals(objectives_df.index)
 
 
-    #@pytest.mark.parametrize('function_config_name', ["pi_phase_difference", "no_phase_difference", "half_pi_phase_difference"])
-    @pytest.mark.parametrize('function_config_name', ["pi_phase_difference"])
+    @pytest.mark.parametrize('function_config_name', ["pi_phase_difference", "no_phase_difference", "half_pi_phase_difference"])
     def test_pareto_shape(self, function_config_name):
         """Tests if the pareto frontier has the expected shape.
 
