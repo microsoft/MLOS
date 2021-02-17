@@ -63,13 +63,13 @@ enveloped_waves_config_store = ComponentConfigStore(
 )
 
 class EnvelopedWaves(ObjectiveFunctionBase):
-    """Sum of sine waves enveloped by another function, either linear, quadratic or another sine wave.
+    """Sine waves enveloped by another function, either linear, quadratic or another sine wave.
     An enveloped sine wave produces complexity for the optimizer that allows us evaluate its behavior on non-trivial problems.
-    Simultaneously, sine waves have the advantage over normal polynomials that:
+    Simultaneously, sine waves have the following advantages over polynomials:
         1. They have well known optima - even when we envelop the function with another sine wave, as long as we keep their frequencies
             harmonic, we can know exactly where the optimum is.
-        2. The cannot be well approximated by a polynomial (Taylor expansion is accurate only locally).
-        3. For multi-objective problems, we can manipulate the phase shift of each objective to cotrol the shape of the pareto frontier.
+        2. They cannot be well approximated by a polynomial (Taylor expansion is accurate only locally).
+        3. For multi-objective problems, we can manipulate the phase shift of each objective to control the shape of the pareto frontier.
     How the function works?
     -----------------------
     When creating the function we specify:
@@ -117,8 +117,7 @@ class EnvelopedWaves(ObjectiveFunctionBase):
         elif self.objective_function_config.envelope_type == "sine":
             self._envelope = self._sine_envelope
         else:
-            pass # It's set to noop by default
-
+            self._envelope = lambda x: x * 0 + 1
 
     @property
     def parameter_space(self) -> Hypergrid:
@@ -137,9 +136,6 @@ class EnvelopedWaves(ObjectiveFunctionBase):
         objectives_df['y'] += self.objective_function_config.vertical_shift
 
         return objectives_df
-
-    def _envelope(self, x: pd.Series):
-        return x * 0 + 1
 
     def _linear_envelope(self, x: pd.Series):
         return x * self.objective_function_config.linear_envelope_config.slope

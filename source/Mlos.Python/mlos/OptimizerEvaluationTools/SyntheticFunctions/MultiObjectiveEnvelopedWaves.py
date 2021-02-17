@@ -3,16 +3,14 @@
 # Licensed under the MIT License.
 #
 import math
-import numpy as np
 import pandas as pd
-from typing import Dict
 
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctionBase
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.EnvelopedWaves import EnvelopedWaves, enveloped_waves_config_store
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid, Hypergrid
 from mlos.Spaces.Configs import ComponentConfigStore
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid, Hypergrid
 
 multi_objective_enveloped_waves_config_space = SimpleHypergrid(
     name="multi_objective_enveloped_waves_config",
