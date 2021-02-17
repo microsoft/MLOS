@@ -70,7 +70,8 @@ multi_objective_enveloped_waves_config_store.add_config_by_name(
         single_objective_function=EnvelopedWaves.__name__,
         enveloped_waves_config=enveloped_waves_config_store.default
     ),
-    description="This function should produce a pareto frontier consisting of points on a diagonal of a square centered on the origin with side length equal to 18."
+    description="This function should produce a pareto frontier consisting of points on a diagonal of a square centered on the origin"
+                " with side length equal to 18."
 )
 
 class MultiObjectiveEnvelopedWaves(ObjectiveFunctionBase):
