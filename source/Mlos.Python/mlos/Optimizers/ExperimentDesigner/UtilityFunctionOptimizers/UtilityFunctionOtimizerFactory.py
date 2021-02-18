@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from typing import Type
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
@@ -14,12 +13,12 @@ class UtilityFunctionOtimizerFactory:
 
     @classmethod
     def create_utility_function_optimizer(
-        cls,
-        utility_function: UtilityFunction,
-        optimizer_type_name: str,
-        optimizer_config: Point,
-        optimization_problem: OptimizationProblem,
-        logger=None
+            cls,
+            utility_function: UtilityFunction,
+            optimizer_type_name: str,
+            optimizer_config: Point,
+            optimization_problem: OptimizationProblem,
+            logger=None
     ):
         if optimizer_type_name == RandomSearchOptimizer.__name__:
             assert optimizer_config in random_search_optimizer_config_store.parameter_space

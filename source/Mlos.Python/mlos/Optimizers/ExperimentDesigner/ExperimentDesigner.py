@@ -14,7 +14,7 @@ from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
-from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction,\
+from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction, \
     multi_objective_probability_of_improvement_utility_function_config_store
 
 from .UtilityFunctionOptimizers.UtilityFunctionOtimizerFactory import UtilityFunctionOtimizerFactory
@@ -144,8 +144,8 @@ class ExperimentDesigner:
 
         self.numeric_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
             utility_function=self.utility_function,
-            optimizer_type_name = self.config.numeric_optimizer_implementation,
-            optimizer_config = numeric_optimizer_config,
+            optimizer_type_name=self.config.numeric_optimizer_implementation,
+            optimizer_config=numeric_optimizer_config,
             optimization_problem=self.optimization_problem,
             logger=self.logger
         )
