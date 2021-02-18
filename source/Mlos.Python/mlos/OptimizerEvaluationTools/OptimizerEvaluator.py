@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import copy
+from datetime import datetime
 import pickle
 import traceback
 
@@ -41,7 +42,8 @@ class OptimizerEvaluator:
             optimizer: OptimizerBase = None,
             optimizer_config: Point = None,
             objective_function: ObjectiveFunctionBase = None,
-            objective_function_config: Point = None
+            objective_function_config: Point = None,
+            suggestion: Point=None
     ):
         assert optimizer_evaluator_config in optimizer_evaluator_config_store.parameter_space
         assert (optimizer is None) != (optimizer_config is None), "A valid optimizer XOR a valid optimizer_config must be supplied."
@@ -53,6 +55,7 @@ class OptimizerEvaluator:
         self.objective_function = None
         self.optimizer_config = None
         self.optimizer = None
+        self.suggestion = suggestion
 
         # Let's get the objective function assigned to self's fields.
         #
@@ -101,6 +104,7 @@ class OptimizerEvaluator:
             objective_function_configuration=self.objective_function_config,
             num_optimization_iterations=self.optimizer_evaluator_config.num_iterations,
             evaluation_frequency=self.optimizer_evaluator_config.evaluation_frequency,
+            suggestion=self.suggestion
         )
 
         if self.optimizer_evaluator_config.include_execution_trace_in_report:
@@ -144,10 +148,12 @@ class OptimizerEvaluator:
         )
 
         #####################################################################################################
+        evaluation_report.start_time = datetime.utcnow()
         i = 0
         try:
             with traced(scope_name="optimization_loop"):
                 for i in range(self.optimizer_evaluator_config.num_iterations):
+                    print(f"[{i + 1}/{self.optimizer_evaluator_config.num_iterations}]")
                     parameters = self.optimizer.suggest()
                     objectives = self.objective_function.evaluate_point(parameters)
                     self.optimizer.register(parameters.to_dataframe(), objectives.to_dataframe())
@@ -194,6 +200,8 @@ class OptimizerEvaluator:
             evaluation_report.success = False
             evaluation_report.exception = e
             evaluation_report.exception_traceback = traceback.format_exc()
+
+        evaluation_report.end_time = datetime.utcnow()
 
         with traced(scope_name="evaluating_optimizer"):
             # Once the optimization is done, we perform a final evaluation of the optimizer.
