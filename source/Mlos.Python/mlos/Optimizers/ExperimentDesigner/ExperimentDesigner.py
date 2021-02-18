@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import numpy as np
+
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
@@ -16,6 +17,8 @@ from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtil
 from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction,\
     multi_objective_probability_of_improvement_utility_function_config_store
 
+from .UtilityFunctionOptimizers.UtilityFunctionOtimizerFactory import UtilityFunctionOtimizerFactory
+
 
 experiment_designer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
@@ -26,7 +29,7 @@ experiment_designer_config_store = ComponentConfigStore(
                 MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__
             ]),
             CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__, GlowWormSwarmOptimizer.__name__]),
-            ContinuousDimension('fraction_random_suggestions', min=0, max=1)
+            ContinuousDimension('fraction_random_suggestions', min=0, max=1),
         ]
     ).join(
         subgrid=confidence_bound_utility_function_config_store.parameter_space,
@@ -72,7 +75,7 @@ experiment_designer_config_store.add_config_by_name(
         random_search_optimizer_config=random_search_optimizer_config_store.default,
         fraction_random_suggestions=0.5
     ),
-    description="Experiment designer config with glow worm swarm optimizer as a utility function optimizer."
+    description="Default optimizer for multi-objective optimization."
 )
 
 
@@ -133,25 +136,19 @@ class ExperimentDesigner:
         else:
             assert False
 
-        self.numeric_optimizer = self.make_optimizer_for_utility(self.utility_function)
-
-    def make_optimizer_for_utility(self, utility_function):
-        """Return numeric optimizer instance for utility function according to config."""
+        numeric_optimizer_config = None
         if self.config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
-            return RandomSearchOptimizer(
-                optimizer_config=self.config.random_search_optimizer_config,
-                optimization_problem=self.optimization_problem,
-                utility_function=utility_function,
-                logger=self.logger
-            )
-        if self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
-            return GlowWormSwarmOptimizer(
-                optimizer_config=self.config.glow_worm_swarm_optimizer_config,
-                optimization_problem=self.optimization_problem,
-                utility_function=utility_function,
-                logger=self.logger
-            )
-        raise ValueError(f"Unknown numeric_optimizer_implementation: {self.config.numeric_optimizer_implementation}.")
+            numeric_optimizer_config = self.config.random_search_optimizer_config
+        elif self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+            numeric_optimizer_config = self.config.glow_worm_swarm_optimizer_config
+
+        self.numeric_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
+            utility_function=self.utility_function,
+            optimizer_type_name = self.config.numeric_optimizer_implementation,
+            optimizer_config = numeric_optimizer_config,
+            optimization_problem=self.optimization_problem,
+            logger=self.logger
+        )
 
     def suggest(self, context_values_dataframe=None, random=False):
         self.logger.debug(f"Suggest(random={random})")
