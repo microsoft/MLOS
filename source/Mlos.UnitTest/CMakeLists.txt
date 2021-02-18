@@ -7,10 +7,13 @@ include("${MLOS_ROOT}/build/Mlos.Cpp.UnitTest.cmake")
 
 add_executable(${PROJECT_NAME}
     BufferTests.cpp
+    FileWatchEventTests.Linux.cpp
     Main.cpp
     MessageVerificationTests.cpp
     MetadataTests.cpp
-    SharedChannelTests.cpp)
+    PlatformTests.cpp
+    SharedChannelTests.cpp
+    UniqueStringTests.cpp)
 
 target_link_libraries(${PROJECT_NAME} Mlos.Core)
 

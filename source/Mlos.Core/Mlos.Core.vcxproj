@@ -41,6 +41,7 @@
     <ClCompile Include="SharedConfigManager.cpp" />
     <ClCompile Include="SharedConfigMemoryRegion.cpp" />
     <ClCompile Include="SharedMemoryMapView.Windows.cpp" />
+    <ClCompile Include="UniqueString.Windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AlignedInstance.h" />
@@ -64,6 +65,7 @@
     <ClInclude Include="NamedEvent.Window.h" />
     <ClInclude Include="ObjectDeserializationCallback.h" />
     <ClInclude Include="ObjectSerialization.h" />
+    <ClInclude Include="ObjectSerializationStringPtr.h" />
     <ClInclude Include="ObjectSerializationStringView.h" />
     <ClInclude Include="ProbingPolicy.h" />
     <ClInclude Include="ProbingPolicy.inl" />
@@ -84,6 +86,7 @@
     <ClInclude Include="SharedMemoryRegionView.inl" />
     <ClInclude Include="SharedMemoryRegionView.h" />
     <ClInclude Include="StringTypes.h" />
+    <ClInclude Include="UniqueString.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MlosInitializer.inl" />
+    <None Include="MlosPlatform.Windows.inl" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.Cpp.targets" />
 </Project>

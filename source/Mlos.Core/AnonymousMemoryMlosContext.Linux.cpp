@@ -287,7 +287,8 @@ HRESULT AnonymousMemoryMlosContext::Create(
     {
         hr = Mlos::Core::MlosPlatform::CreateThread(
             AnonymousMemoryMlosContext::HandleFdRequestsThreadProc,
-            &mlosContext);
+            &mlosContext,
+            mlosContext.m_fdExchangeThread);
     }
 
     return hr;
@@ -331,13 +332,15 @@ HRESULT AnonymousMemoryMlosContext::CreateSocketWatchFile()
 //
 // NOTES:
 //
-void AnonymousMemoryMlosContext::HandleFdRequestsThreadProc(void* pParam)
+void* AnonymousMemoryMlosContext::HandleFdRequestsThreadProc(_In_ void* pParam)
 {
     AnonymousMemoryMlosContext* pAnonymousMemoryMlosContext = reinterpret_cast<AnonymousMemoryMlosContext*>(pParam);
     MLOS_RETAIL_ASSERT(pAnonymousMemoryMlosContext != nullptr);
 
     HRESULT hr = pAnonymousMemoryMlosContext->HandleFdRequests();
     MLOS_RETAIL_ASSERT(SUCCEEDED(hr));
+
+    return nullptr;
 }
 
 //----------------------------------------------------------------------------
@@ -528,6 +531,7 @@ AnonymousMemoryMlosContext::AnonymousMemoryMlosContext(
         m_globalMemoryRegionView.MemoryRegion().FeedbackChannelSynchronization,
         m_feedbackChannelMemoryMapView,
         std::move(feedbackChannelPolicy)),
+    m_fdExchangeThread(INVALID_THREAD_HANDLE),
     m_directoryPath(directoryPath),
     m_socketFilePath(socketFilePath),
     m_openedFilePath(openedFilePath)

@@ -65,7 +65,7 @@ private:
     _Must_inspect_result_
     HRESULT CreateSocketWatchFile();
 
-    static void HandleFdRequestsThreadProc(void* pParam);
+    static void* HandleFdRequestsThreadProc(_In_ void* pParam);
 
     _Must_inspect_result_
     HRESULT HandleFdRequests();
@@ -96,6 +96,8 @@ private:
     // Channel policy for feedback channel.
     //
     InterProcessSharedChannel m_feedbackChannel;
+
+    ThreadHandle m_fdExchangeThread;
 
     char* m_directoryPath;
     char* m_socketFilePath;
