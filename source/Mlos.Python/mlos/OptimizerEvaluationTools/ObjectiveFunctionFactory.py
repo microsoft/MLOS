@@ -2,16 +2,18 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from mlos.Spaces import Point
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctionBase
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionConfigStore import objective_function_config_store
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.EnvelopedWaves import EnvelopedWaves
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Flower import Flower
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveEnvelopedWaves import MultiObjectiveEnvelopedWaves
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveNestedPolynomialObjective import MultiObjectiveNestedPolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjectiveWrapper import PolynomialObjectiveWrapper
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
+from mlos.Spaces import Point
 
 
 class ObjectiveFunctionFactory:
@@ -41,5 +43,11 @@ class ObjectiveFunctionFactory:
 
         if objective_function_config.implementation == MultiObjectiveNestedPolynomialObjective.__name__:
             return MultiObjectiveNestedPolynomialObjective(objective_function_config.multi_objective_nested_polynomial_config)
+
+        if objective_function_config.implementation == EnvelopedWaves.__name__:
+            return EnvelopedWaves(objective_function_config.enveloped_waves_config)
+
+        if objective_function_config.implementation == MultiObjectiveEnvelopedWaves.__name__:
+            return MultiObjectiveEnvelopedWaves(objective_function_config.multi_objective_enveloped_waves_config)
 
         raise ValueError(f"Can't instantiate an objective function with the following implementation: {objective_function_config.implementation}")
