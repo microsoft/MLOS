@@ -29,7 +29,7 @@ experiment_designer_config_store = ComponentConfigStore(
                 MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__
             ]),
             CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__, GlowWormSwarmOptimizer.__name__]),
-            ContinuousDimension('fraction_random_suggestions', min=0, max=1),
+            ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
         subgrid=confidence_bound_utility_function_config_store.parameter_space,
