@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+from datetime import datetime
 import json
 import os
 import pickle
@@ -33,6 +34,8 @@ class OptimizerEvaluationReport:
         * execution trace as captured by the mlos.Tracer
     """
 
+    DATETIME_FORMAT = "%d.%m.%Y.%H:%M:%S:%f"
+
     def __init__(
             self,
             optimizer_configuration: Point = None,
@@ -45,7 +48,9 @@ class OptimizerEvaluationReport:
             optima_over_time: Dict[str, OptimumOverTime] = None,
             pareto_over_time: Dict[int, ParetoFrontier] = None,
             pareto_volume_over_time: Dict[int, Tuple[float, float]] = None,
-            execution_trace: List[Dict[str, object]] = None
+            execution_trace: List[Dict[str, object]] = None,
+            start_time: datetime = None,
+            end_time: datetime = None
     ):
         self.success = False
         self.exception = None
@@ -66,6 +71,8 @@ class OptimizerEvaluationReport:
         self.execution_trace = execution_trace
         self.pareto_over_time = pareto_over_time if pareto_over_time is not None else dict()
         self.pareto_volume_over_time = pareto_volume_over_time if pareto_volume_over_time is not None else dict()
+        self.start_time = start_time
+        self.end_time = end_time
 
     def add_pickled_optimizer(self, iteration: int, pickled_optimizer: bytes):
         assert iteration >= 0
@@ -137,7 +144,9 @@ class OptimizerEvaluationReport:
                 'num_optimization_iterations': self.num_optimization_iterations,
                 'evaluation_frequency': self.evaluation_frequency,
                 'exception': str(self.exception) if self.exception is not None else None,
-                'exception_stack_trace': self.exception_traceback
+                'exception_stack_trace': self.exception_traceback,
+                'start_time': self.start_time.strftime(self.DATETIME_FORMAT),
+                'end_time': self.end_time.strftime(self.DATETIME_FORMAT)
             }
             json.dump(execution_info_dict, out_file, indent=2)
 
@@ -204,5 +213,7 @@ class OptimizerEvaluationReport:
                 optimizer_evaluation_report.evaluation_frequency = execution_info_dict['evaluation_frequency']
                 optimizer_evaluation_report.exception = execution_info_dict['exception']
                 optimizer_evaluation_report.exception_traceback = execution_info_dict['exception_stack_trace']
+                optimizer_evaluation_report.start_time = datetime.strptime(execution_info_dict['start_time'], OptimizerEvaluationReport.DATETIME_FORMAT)
+                optimizer_evaluation_report.end_time = datetime.strptime(execution_info_dict['end_time'], OptimizerEvaluationReport.DATETIME_FORMAT)
 
         return optimizer_evaluation_report

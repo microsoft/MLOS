@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import copy
+from datetime import datetime
 import pickle
 import traceback
 
@@ -100,7 +101,7 @@ class OptimizerEvaluator:
             optimizer_configuration=self.optimizer_config,
             objective_function_configuration=self.objective_function_config,
             num_optimization_iterations=self.optimizer_evaluator_config.num_iterations,
-            evaluation_frequency=self.optimizer_evaluator_config.evaluation_frequency,
+            evaluation_frequency=self.optimizer_evaluator_config.evaluation_frequency
         )
 
         if self.optimizer_evaluator_config.include_execution_trace_in_report:
@@ -144,6 +145,7 @@ class OptimizerEvaluator:
         )
 
         #####################################################################################################
+        evaluation_report.start_time = datetime.utcnow()
         i = 0
         try:
             with traced(scope_name="optimization_loop"):
@@ -194,6 +196,8 @@ class OptimizerEvaluator:
             evaluation_report.success = False
             evaluation_report.exception = e
             evaluation_report.exception_traceback = traceback.format_exc()
+
+        evaluation_report.end_time = datetime.utcnow()
 
         with traced(scope_name="evaluating_optimizer"):
             # Once the optimization is done, we perform a final evaluation of the optimizer.
