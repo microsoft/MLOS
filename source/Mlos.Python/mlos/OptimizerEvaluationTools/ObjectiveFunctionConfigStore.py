@@ -2,11 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.EnvelopedWaves import EnvelopedWaves, enveloped_waves_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Flower import Flower
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.HypersphereConfigStore import hypersphere_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveNestedPolynomialObjective import MultiObjectiveNestedPolynomialObjective, \
     multi_objective_nested_polynomial_config_space
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveEnvelopedWaves import MultiObjectiveEnvelopedWaves, \
+    multi_objective_enveloped_waves_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective, nested_polynomial_objective_config_space
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
@@ -18,12 +21,14 @@ objective_function_config_store = ComponentConfigStore(
         name="objective_function",
         dimensions=[
             CategoricalDimension(name="implementation", values=[
+                EnvelopedWaves.__name__,
                 Flower.__name__,
                 NestedPolynomialObjective.__name__,
                 PolynomialObjective.__name__,
                 ThreeLevelQuadratic.__name__,
                 Hypersphere.__name__,
                 MultiObjectiveNestedPolynomialObjective.__name__,
+                MultiObjectiveEnvelopedWaves.__name__,
             ])
         ]
     ).join(
@@ -38,6 +43,12 @@ objective_function_config_store = ComponentConfigStore(
     ).join(
         subgrid=multi_objective_nested_polynomial_config_space,
         on_external_dimension=CategoricalDimension(name="implementation", values=[MultiObjectiveNestedPolynomialObjective.__name__])
+    ).join(
+        subgrid=enveloped_waves_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension(name="implementation", values=[EnvelopedWaves.__name__])
+    ).join(
+        subgrid=multi_objective_enveloped_waves_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension(name="implementation", values=[MultiObjectiveEnvelopedWaves.__name__])
     ),
     default=Point(
         implementation=PolynomialObjective.__name__,

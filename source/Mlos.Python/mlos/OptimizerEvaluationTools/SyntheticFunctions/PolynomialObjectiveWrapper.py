@@ -61,10 +61,12 @@ class PolynomialObjectiveWrapper(ObjectiveFunctionBase):
         return self._output_space
 
     def evaluate_point(self, point: Point) -> Point:
+        point = Point(**{dim_name: point[dim_name] for dim_name in self._parameter_space.dimension_names})
         y = self._polynomial_function.evaluate(point.to_dataframe().to_numpy())
         return Point(y=y[0])
 
     def evaluate_dataframe(self, dataframe: pd.DataFrame) -> pd.DataFrame:
+        dataframe = dataframe[self._parameter_space.dimension_names]
         y = self._polynomial_function.evaluate(dataframe.to_numpy())
         return pd.DataFrame({'y': y})
 
