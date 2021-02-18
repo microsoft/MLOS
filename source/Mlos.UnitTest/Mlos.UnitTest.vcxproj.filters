@@ -6,6 +6,7 @@
     <ClCompile Include="MessageVerificationTests.cpp" />
     <ClCompile Include="MetadataTests.cpp" />
     <ClCompile Include="SharedChannelTests.cpp" />
+    <ClCompile Include="PlatformTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(SettingsSystemCodeGenOutput)" />

@@ -13,69 +13,12 @@
 //      Mlos.Core.  It is simply provided there as a typical/common reference
 //      implementation.
 //
-// Notes:
-//      Since these functions need to be externally visible for Mlos.Core to
-//      link against, they should not be marked "inline".
-//
 //*********************************************************************
 
 #pragma once
 
-#include <chrono>
-#include <thread>
-
-namespace Mlos
-{
-namespace Core
-{
-namespace Internal
-{
-//----------------------------------------------------------------------------
-// NAME: MlosPlatformTerminateProcess
-//
-// PURPOSE:
-//  Terminates the current process.
-//
-// NOTES:
-//
-void MlosPlatformTerminateProcess()
-{
-    std::terminate();
-}
-
-//----------------------------------------------------------------------------
-// NAME: MlosPlatformWait
-//
-// PURPOSE:
-//  Suspends the execution of the current thread for millisecond intervals.
-//
-// NOTES:
-//
-void MlosPlatformWait(_In_ uint32_t milliseconds)
-{
-    std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
-}
-
-//----------------------------------------------------------------------------
-// NAME: MlosPlatformCreateThread
-//
-// PURPOSE:
-//  Creates the thread.
-//
-// NOTES:
-//
-_Must_inspect_result_
-HRESULT MlosPlatformCreateThread(
-    _In_ void (*routine)(void*),
-    _In_ void* pParam)
-{
-    // #TODO use native
-    //
-    std::thread mlosThread(routine, pParam);
-    mlosThread.detach();
-
-    return S_OK;
-}
-}
-}
-}
+#ifdef _WIN64
+#include "MlosPlatform.Windows.inl"
+#else
+#include "MlosPlatform.Linux.inl"
+#endif

@@ -8,6 +8,7 @@ add_library(${PROJECT_NAME} STATIC
     AnonymousMemoryMlosContext.Linux.cpp
     ArenaAllocator.cpp
     FileDescriptorExchange.Linux.cpp
+    FileWatchEvent.Linux.cpp
     GlobalMemoryRegion.cpp
     InternalMlosContext.cpp
     InterProcessMlosContext.cpp
@@ -18,10 +19,13 @@ add_library(${PROJECT_NAME} STATIC
     SharedConfigDictionary.cpp
     SharedConfigManager.cpp
     SharedConfigMemoryRegion.cpp
-    SharedMemoryMapView.Linux.cpp)
+    SharedMemoryMapView.Linux.cpp
+    UniqueString.Linux.cpp)
 
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} pthread)
+
+target_link_libraries(${PROJECT_NAME} uuid)
 
 target_link_libraries(${PROJECT_NAME} rt)
 

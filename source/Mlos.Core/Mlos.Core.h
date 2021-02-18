@@ -63,6 +63,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define _In_z_
 #define _In_reads_(x)
 #define _In_reads_bytes_(x)
+#define _In_reads_z_(x)
 
 #define SUCCEEDED(x) (x >= 0)
 #define FAILED(x) (x < 0)
@@ -70,7 +71,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define S_FALSE 1
 #define E_OUTOFMEMORY (-ENOMEM)
 #define E_NOT_SET (-ENOENT)
-#define HRESULT_FROM_ERRNO(errno) (-errno)
+#define HRESULT_FROM_ERRNO(x) (-x)
 
 #endif
 
@@ -91,6 +92,9 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #endif
 
 #include "MlosPlatform.h"
+
+namespace MlosCore = ::Mlos::Core;
+namespace MlosInternal = ::Mlos::Core::Internal;
 
 #include "BytePtr.h"
 
@@ -126,6 +130,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "FileDescriptorExchange.Linux.h"
 #endif
 
+#include "UniqueString.h"
 #include "SharedMemoryRegionView.h"
 #include "SharedMemoryRegionView.inl"
 
@@ -182,6 +187,7 @@ constexpr uint32_t DispatchTableBaseIndex() { return 0; }
 #ifdef _WIN64
 using DefaultMlosInitializer = Mlos::Core::MlosInitializer<Mlos::Core::InterProcessMlosContext>;
 #else
+#include "FileWatchEvent.Linux.h"
 #include "AnonymousMemoryMlosContext.Linux.h"
 using DefaultMlosInitializer = Mlos::Core::MlosInitializer<Mlos::Core::AnonymousMemoryMlosContext>;
 #endif
