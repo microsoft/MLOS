@@ -150,7 +150,6 @@ class OptimizerEvaluator:
         try:
             with traced(scope_name="optimization_loop"):
                 for i in range(self.optimizer_evaluator_config.num_iterations):
-                    print(f"[{i + 1}/{self.optimizer_evaluator_config.num_iterations}]")
                     parameters = self.optimizer.suggest()
                     objectives = self.objective_function.evaluate_point(parameters)
                     self.optimizer.register(parameters.to_dataframe(), objectives.to_dataframe())

@@ -34,6 +34,8 @@ class OptimizerEvaluationReport:
         * execution trace as captured by the mlos.Tracer
     """
 
+    DATETIME_FORMAT = "%d.%m.%Y.%H:%M:%S:%f"
+
     def __init__(
             self,
             optimizer_configuration: Point = None,
@@ -143,8 +145,8 @@ class OptimizerEvaluationReport:
                 'evaluation_frequency': self.evaluation_frequency,
                 'exception': str(self.exception) if self.exception is not None else None,
                 'exception_stack_trace': self.exception_traceback,
-                'start_time': self.start_time.strftime("%d.%m.%Y.%H:%M:%S:%f"),
-                'end_time': self.end_time.strftime("%d.%m.%Y.%H:%M:%S:%f")
+                'start_time': self.start_time.strftime(self.DATETIME_FORMAT),
+                'end_time': self.end_time.strftime(self.DATETIME_FORMAT)
             }
             json.dump(execution_info_dict, out_file, indent=2)
 
@@ -211,7 +213,7 @@ class OptimizerEvaluationReport:
                 optimizer_evaluation_report.evaluation_frequency = execution_info_dict['evaluation_frequency']
                 optimizer_evaluation_report.exception = execution_info_dict['exception']
                 optimizer_evaluation_report.exception_traceback = execution_info_dict['exception_stack_trace']
-                optimizer_evaluation_report.start_time = datetime.strptime(execution_info_dict['start_time'], "%d.%m.%Y.%H:%M:%S:%f")
-                optimizer_evaluation_report.end_time = datetime.strptime(execution_info_dict['end_time'], "%d.%m.%Y.%H:%M:%S:%f")
+                optimizer_evaluation_report.start_time = datetime.strptime(execution_info_dict['start_time'], OptimizerEvaluationReport.DATETIME_FORMAT)
+                optimizer_evaluation_report.end_time = datetime.strptime(execution_info_dict['end_time'], OptimizerEvaluationReport.DATETIME_FORMAT)
 
         return optimizer_evaluation_report
