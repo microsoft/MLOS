@@ -42,8 +42,7 @@ class OptimizerEvaluator:
             optimizer: OptimizerBase = None,
             optimizer_config: Point = None,
             objective_function: ObjectiveFunctionBase = None,
-            objective_function_config: Point = None,
-            suggestion: Point=None
+            objective_function_config: Point = None
     ):
         assert optimizer_evaluator_config in optimizer_evaluator_config_store.parameter_space
         assert (optimizer is None) != (optimizer_config is None), "A valid optimizer XOR a valid optimizer_config must be supplied."
@@ -55,7 +54,6 @@ class OptimizerEvaluator:
         self.objective_function = None
         self.optimizer_config = None
         self.optimizer = None
-        self.suggestion = suggestion
 
         # Let's get the objective function assigned to self's fields.
         #
@@ -103,8 +101,7 @@ class OptimizerEvaluator:
             optimizer_configuration=self.optimizer_config,
             objective_function_configuration=self.objective_function_config,
             num_optimization_iterations=self.optimizer_evaluator_config.num_iterations,
-            evaluation_frequency=self.optimizer_evaluator_config.evaluation_frequency,
-            suggestion=self.suggestion
+            evaluation_frequency=self.optimizer_evaluator_config.evaluation_frequency
         )
 
         if self.optimizer_evaluator_config.include_execution_trace_in_report:
