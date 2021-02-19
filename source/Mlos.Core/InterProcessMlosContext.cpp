@@ -23,17 +23,10 @@ namespace Core
 // Shared memory mapping name must start with "Host_" prefix, to be accessible from certain applications.
 //
 const char* const GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
-const char* const ControlChannelMemoryMapName = "Host_Mlos.ControlChannel";
-const char* const FeedbackChannelMemoryMapName = "Host_Mlos.FeedbackChannel";
 
 // Synchronization OS primitive names.
 //
-const char* const ControlChannelEventName = "Global\\ControlChannel_Event";
-const char* const FeedbackChannelEventName = "Global\\FeedbackChannel_Event";
 const char* const TargetProcessEventName = "Global\\Mlos_Global";
-// Shared memory mapping name for to store shared configs.
-//
-const char* const ApplicationConfigSharedMemoryName = "Host_Mlos.Config.SharedMemory";
 
 //----------------------------------------------------------------------------
 // NAME: InterProcessMlosContext::Create
@@ -46,7 +39,7 @@ const char* const ApplicationConfigSharedMemoryName = "Host_Mlos.Config.SharedMe
 _Must_inspect_result_
 HRESULT InterProcessMlosContext::Create(_Inout_ AlignedInstance<InterProcessMlosContext>& mlosContextInstance)
 {
-    return InterProcessMlosContext::Create(mlosContextInstance, Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
+    return InterProcessMlosContext::Create(mlosContextInstance, MlosInternal::GlobalMemoryRegion::GlobalSharedMemorySize);
 }
 
 //----------------------------------------------------------------------------
@@ -60,17 +53,15 @@ HRESULT InterProcessMlosContext::Create(_Inout_ AlignedInstance<InterProcessMlos
 _Must_inspect_result_
 HRESULT InterProcessMlosContext::Create(
     _Inout_ AlignedInstance<InterProcessMlosContext>& mlosContextInstance,
-    _In_ size_t sharedConfigMemorySize)
+    _In_ size_t configMemorySize)
 {
-    // Global shared memory region.
-    //
-    SharedMemoryRegionView<Internal::GlobalMemoryRegion> globalMemoryRegionView;
-
     // Shared channel shared memory and notification primitive.
     //
+    SharedMemoryMapView globalMemoryMapView;
     SharedMemoryMapView controlChannelMemoryMapView;
     SharedMemoryMapView feedbackChannelMemoryMapView;
-    SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> sharedConfigMemoryRegionView;
+    SharedMemoryMapView sharedConfigMemoryMapView;
+
     InterProcessSharedChannelPolicy controlChannelPolicy;
     InterProcessSharedChannelPolicy feedbackChannelPolicy;
 
@@ -78,94 +69,60 @@ HRESULT InterProcessMlosContext::Create(
     //
     NamedEvent targetProcessNamedEvent;
 
-    HRESULT hr = globalMemoryRegionView.CreateOrOpen(GlobalMemoryMapName, Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
-    if (SUCCEEDED(hr))
+    HRESULT hr = globalMemoryMapView.CreateOrOpen(GlobalMemoryMapName, Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
+    if (FAILED(hr))
     {
-        // Increase the usage counter. When closing global shared memory, we will decrease the counter.
-        // If there is no process using the shared memory, we will clean the OS resources. On Windows OS,
-        // this is no-op; on Linux, we unlink created files.
-        //
-        Internal::GlobalMemoryRegion& globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-        globalMemoryRegion.AttachedProcessesCount.fetch_add(1);
+        return hr;
     }
 
-    // Control channel.
+    // Global shared memory region.
     //
-    if (SUCCEEDED(hr))
-    {
-        hr = controlChannelMemoryMapView.CreateOrOpen(
-            ControlChannelMemoryMapName,
-            Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
-    }
+    SharedMemoryRegionView<Internal::GlobalMemoryRegion> globalMemoryRegionView(std::move(globalMemoryMapView));
 
-    if (SUCCEEDED(hr))
-    {
-        hr = controlChannelPolicy.m_notificationEvent.CreateOrOpen(ControlChannelEventName);
-    }
-
-    // Feedback channel.
+    // Increase the usage counter. When closing global shared memory, we will decrease the counter.
+    // If there is no process using the shared memory, we will clean the OS resources. On Windows OS,
+    // this is no-op; on Linux, we unlink created files.
     //
+    Internal::GlobalMemoryRegion& globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
+    globalMemoryRegion.AttachedProcessesCount.fetch_add(1);
+
     if (SUCCEEDED(hr))
     {
-        hr = feedbackChannelMemoryMapView.CreateOrOpen(
-            FeedbackChannelMemoryMapName,
-            Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
+        hr = MlosContext::CreateOrOpenSharedMemory(
+            globalMemoryRegionView.MemoryRegion(),
+            MlosInternal::MemoryRegionId{ MlosInternal::MemoryRegionType::ControlChannel, 0 },
+            controlChannelMemoryMapView,
+            MlosInternal::GlobalMemoryRegion::GlobalSharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = feedbackChannelPolicy.m_notificationEvent.CreateOrOpen(FeedbackChannelEventName);
+        hr = MlosContext::CreateOrOpenSharedMemory(
+            globalMemoryRegionView.MemoryRegion(),
+            MlosInternal::MemoryRegionId{ MlosInternal::MemoryRegionType::FeedbackChannel, 0 },
+            feedbackChannelMemoryMapView,
+            MlosInternal::GlobalMemoryRegion::GlobalSharedMemorySize);
     }
 
-    // Shared config memory.
-    //
     if (SUCCEEDED(hr))
     {
-        hr = sharedConfigMemoryRegionView.CreateOrOpen(
-            ApplicationConfigSharedMemoryName,
-            sharedConfigMemorySize);
+        hr = MlosContext::CreateOrOpenNamedEvent(
+            globalMemoryRegionView.MemoryRegion(),
+            MlosInternal::MemoryRegionId{ MlosInternal::MemoryRegionType::ControlChannel, 0 },
+            controlChannelPolicy.m_notificationEvent);
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        hr = MlosContext::CreateOrOpenNamedEvent(
+            globalMemoryRegionView.MemoryRegion(),
+            MlosInternal::MemoryRegionId{ MlosInternal::MemoryRegionType::FeedbackChannel, 0 },
+            feedbackChannelPolicy.m_notificationEvent);
     }
 
     if (SUCCEEDED(hr))
     {
         hr = targetProcessNamedEvent.CreateOrOpen(TargetProcessEventName);
-    }
-
-    // Cleanup if we failed to create all resources.
-    //
-    if (FAILED(hr))
-    {
-        bool cleanupOnClose = false;
-        if (!globalMemoryRegionView.Buffer.IsInvalid())
-        {
-            // Decrease the usage counter.
-            //
-            Internal::GlobalMemoryRegion& globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
-            const uint32_t usageCount = globalMemoryRegion.AttachedProcessesCount.fetch_sub(1);
-            if (usageCount == 1)
-            {
-                // This is the last process using shared memory map.
-                //
-                cleanupOnClose = true;
-            }
-        }
-
-        // Close all the shared maps if we fail to create one.
-        //
-        globalMemoryRegionView.CleanupOnClose |= cleanupOnClose;
-        globalMemoryRegionView.Close();
-
-        controlChannelMemoryMapView.CleanupOnClose |= cleanupOnClose;
-        controlChannelMemoryMapView.Close();
-
-        feedbackChannelMemoryMapView.CleanupOnClose |= cleanupOnClose;
-        feedbackChannelMemoryMapView.Close();
-
-        controlChannelPolicy.m_notificationEvent.CleanupOnClose |= cleanupOnClose;
-        controlChannelPolicy.m_notificationEvent.Close();
-
-        feedbackChannelPolicy.m_notificationEvent.CleanupOnClose |= cleanupOnClose;
-        feedbackChannelPolicy.m_notificationEvent.Close();
     }
 
     // Create MlosContext.
@@ -174,59 +131,47 @@ HRESULT InterProcessMlosContext::Create(
         std::move(globalMemoryRegionView),
         std::move(controlChannelMemoryMapView),
         std::move(feedbackChannelMemoryMapView),
-        std::move(sharedConfigMemoryRegionView),
         std::move(controlChannelPolicy),
         std::move(feedbackChannelPolicy),
         std::move(targetProcessNamedEvent));
 
     InterProcessMlosContext& mlosContext = mlosContextInstance;
 
-    // Post-create registrations.
+    // Cleanup if we failed to create all resources.
+    //
+    if (FAILED(hr))
+    {
+        if (!mlosContext.m_globalMemoryRegionView.IsInvalid())
+        {
+            // Decrease the usage counter.
+            //
+            const uint32_t usageCount = globalMemoryRegion.AttachedProcessesCount.fetch_sub(1);
+            if (usageCount == 1)
+            {
+                // This is the last process using shared memory map.
+                //
+                mlosContext.CleanupOnClose = true;
+            }
+        }
+    }
+
+    // Shared config memory.
     //
     if (SUCCEEDED(hr))
     {
-        // Control channel.
-        //
-        hr = mlosContext.RegisterSharedMemory(
-            Internal::MemoryRegionId{ Internal::MemoryRegionType::ControlChannel, 0 },
-            ControlChannelMemoryMapName,
-            Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
+        hr = MlosContext::CreateOrOpenSharedMemory(
+            mlosContext.m_globalMemoryRegion,
+            MlosInternal::MemoryRegionId { MlosInternal::MemoryRegionType::SharedConfig, 0 },
+            sharedConfigMemoryMapView,
+            configMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = mlosContext.RegisterNamedEvent(
-            Internal::MemoryRegionId{ Internal::MemoryRegionType::ControlChannel, 0 },
-            ControlChannelEventName);
-    }
+        MlosCore::SharedMemoryRegionView<MlosInternal::SharedConfigMemoryRegion> sharedConfigMemoryRegionView(std::move(
+            sharedConfigMemoryMapView));
 
-    // Feedback channel.
-    //
-    if (SUCCEEDED(hr))
-    {
-        hr = mlosContext.RegisterSharedMemory(
-            Internal::MemoryRegionId{ Internal::MemoryRegionType::FeedbackChannel, 0 },
-            FeedbackChannelMemoryMapName,
-            Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
-    }
-
-    if (SUCCEEDED(hr))
-    {
-        hr = mlosContext.RegisterNamedEvent(
-            Internal::MemoryRegionId{ Internal::MemoryRegionType::FeedbackChannel, 0 },
-            FeedbackChannelEventName);
-    }
-
-    // SharedConfig mapping.
-    //
-    if (SUCCEEDED(hr))
-    {
-        Internal::SharedConfigMemoryRegion& sharedConfigMemoryRegion = mlosContext.SharedConfigMemoryRegionView().MemoryRegion();
-
-        hr = mlosContext.RegisterSharedMemory(
-            sharedConfigMemoryRegion.MemoryHeader.MemoryRegionId,
-            ApplicationConfigSharedMemoryName,
-            sharedConfigMemoryRegion.MemoryHeader.MemoryRegionSize);
+        mlosContext.m_sharedConfigManager.AssignSharedConfigMemoryRegion(std::move(sharedConfigMemoryRegionView));
     }
 
     // The context is created, signal the notification event,
@@ -251,10 +196,9 @@ InterProcessMlosContext::InterProcessMlosContext(
     _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion>&& globalMemoryRegionView,
     _In_ SharedMemoryMapView&& controlChannelMemoryMapView,
     _In_ SharedMemoryMapView&& feedbackChannelMemoryMapView,
-    _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView,
     _In_ InterProcessSharedChannelPolicy&& controlChannelPolicy,
     _In_ InterProcessSharedChannelPolicy&& feedbackChannelPolicy,
-    _In_ NamedEvent targetProcessNamedEvent) noexcept
+    _In_ NamedEvent&& targetProcessNamedEvent) noexcept
   : MlosContext(globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
     m_globalMemoryRegionView(std::move(globalMemoryRegionView)),
     m_controlChannelMemoryMapView(std::move(controlChannelMemoryMapView)),
@@ -269,7 +213,6 @@ InterProcessMlosContext::InterProcessMlosContext(
         std::move(feedbackChannelPolicy)),
     m_targetProcessNamedEvent(std::move(targetProcessNamedEvent))
 {
-    m_sharedConfigManager.AssignSharedConfigMemoryRegion(std::move(sharedConfigMemoryRegionView));
 }
 
 //----------------------------------------------------------------------------
@@ -284,22 +227,22 @@ InterProcessMlosContext::~InterProcessMlosContext()
 {
     // Decrease the usage counter.
     //
-    const uint32_t usageCount = m_globalMemoryRegion.AttachedProcessesCount.fetch_sub(1);
-    if (usageCount == 1)
+    if (!m_globalMemoryRegionView.IsInvalid())
     {
-        // This is the last process using shared memory map.
-        //
-        m_globalMemoryRegionView.CleanupOnClose = true;
-        m_controlChannelMemoryMapView.CleanupOnClose = true;
-        m_feedbackChannelMemoryMapView.CleanupOnClose = true;
-        m_controlChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
-        m_feedbackChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
-        m_targetProcessNamedEvent.CleanupOnClose = true;
-
-        // Close all the shared config memory regions.
-        //
-        m_sharedConfigManager.CleanupOnClose = true;
+        const uint32_t usageCount = m_globalMemoryRegion.AttachedProcessesCount.fetch_sub(1);
+        CleanupOnClose |= usageCount == 1;
     }
+
+    m_sharedConfigManager.CleanupOnClose |= CleanupOnClose;
+
+    // This is the last process using shared memory map.
+    //
+    m_globalMemoryRegionView.Close(CleanupOnClose);
+    m_controlChannelMemoryMapView.Close(CleanupOnClose);
+    m_feedbackChannelMemoryMapView.Close(CleanupOnClose);
+    m_controlChannel.ChannelPolicy.m_notificationEvent.Close(CleanupOnClose);
+    m_feedbackChannel.ChannelPolicy.m_notificationEvent.Close(CleanupOnClose);
+    m_targetProcessNamedEvent.Close(CleanupOnClose);
 }
 }
 }

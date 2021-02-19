@@ -34,7 +34,7 @@ MlosContext::MlosContext(
     _In_ ISharedChannel& controlChannel,
     _In_ ISharedChannel& telemetryChannel,
     _In_ ISharedChannel& feedbackChannel) noexcept
-  : m_sharedConfigManager(),
+  : CleanupOnClose(false),
     m_globalMemoryRegion(globalMemoryRegion),
     m_controlChannel(controlChannel),
     m_telemetryChannel(telemetryChannel),
@@ -106,76 +106,18 @@ HRESULT MlosContext::RegisterSettingsAssembly(
 }
 
 //----------------------------------------------------------------------------
-// NAME: MlosContext::RegisterSharedMemory
+// NAME: MlosContext::SharedConfigMemoryMapView
 //
 // PURPOSE:
-//  Registers a shared memory map in the global memory region.
-//
-// RETURNS:
-//  HRESULT.
-//
-// NOTES:
-//
-_Must_inspect_result_
-HRESULT MlosContext::RegisterSharedMemory(
-    _In_ Internal::MemoryRegionId memoryRegionId,
-    _In_z_ const char* sharedMemoryName,
-    _In_ size_t memoryRegionSize)
-{
-    ComponentConfig<Internal::RegisteredMemoryRegionConfig> registeredMemoryRegion;
-
-    registeredMemoryRegion.MemoryRegionId = memoryRegionId;
-    registeredMemoryRegion.SharedMemoryMapName = sharedMemoryName;
-    registeredMemoryRegion.MemoryRegionSize = memoryRegionSize;
-
-    HRESULT hr = SharedConfigManager::CreateOrUpdateFrom(
-        m_globalMemoryRegion.SharedConfigDictionary,
-        registeredMemoryRegion);
-
-    return hr;
-}
-
-//----------------------------------------------------------------------------
-// NAME: MlosContext::RegisterNamedEvent
-//
-// PURPOSE:
-// Registers a named event in the global memory region.
-//
-// RETURNS:
-//  HRESULT.
-//
-// NOTES:
-//
-_Must_inspect_result_
-HRESULT MlosContext::RegisterNamedEvent(
-    _In_ Internal::MemoryRegionId memoryRegionId,
-    _In_z_ const char* name)
-{
-    ComponentConfig<Internal::RegisteredNamedEventConfig> registeredNamedEvent;
-
-    registeredNamedEvent.MemoryRegionId = memoryRegionId;
-    registeredNamedEvent.Name = name;
-
-    HRESULT hr = SharedConfigManager::CreateOrUpdateFrom(
-        m_globalMemoryRegion.SharedConfigDictionary,
-        registeredNamedEvent);
-
-    return hr;
-}
-
-//----------------------------------------------------------------------------
-// NAME: MlosContext::ControlChannel
-//
-// PURPOSE:
-//  Gets the shared config memory region.
+//  Gets the shared config memory map view.
 //
 // RETURNS:
 //
 // NOTES:
 //
-SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>& MlosContext::SharedConfigMemoryRegionView()
+const SharedMemoryMapView& MlosContext::SharedConfigMemoryMapView() const
 {
-    return m_sharedConfigManager.m_sharedConfigMemoryRegionView;
+    return m_sharedConfigManager.m_sharedConfigMemoryRegionView.MapView();
 }
 
 //----------------------------------------------------------------------------
@@ -279,6 +221,114 @@ bool MlosContext::IsControlChannelActive() const
 bool MlosContext::IsFeedbackChannelActive() const
 {
     return !(m_feedbackChannel.Sync.TerminateChannel);
+}
+
+//----------------------------------------------------------------------------
+// NAME: MlosContext::CreateOrOpenSharedMemory
+//
+// PURPOSE:
+//  Creates new or opens existing shared memory map.
+//
+// RETURNS:
+//
+// NOTES:
+//  Configurations for the created shared memory maps are stored in the global memory region dictionary.
+//
+_Must_inspect_result_
+HRESULT MlosContext::CreateOrOpenSharedMemory(
+    _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+    _In_ MlosInternal::MemoryRegionId memoryRegionId,
+    _Inout_ MlosCore::SharedMemoryMapView& sharedMemoryMapView,
+    _In_ const size_t memSize)
+{
+    // Locate existing config.
+    //
+    MlosCore::ComponentConfig<MlosInternal::RegisteredMemoryRegionConfig> registeredMemoryRegion;
+    registeredMemoryRegion.MemoryRegionId = memoryRegionId;
+
+    HRESULT hr = MlosCore::SharedConfigManager::Lookup(
+        globalMemoryRegion.SharedConfigDictionary,
+        registeredMemoryRegion);
+
+    if (SUCCEEDED(hr))
+    {
+        const MlosCore::StringPtr memoryMapName = registeredMemoryRegion.Proxy().MemoryMapName();
+
+        hr = sharedMemoryMapView.OpenExisting(memoryMapName.Data);
+    }
+    else
+    {
+        const MlosCore::UniqueString memoryMapName;
+
+        hr = sharedMemoryMapView.CreateNew(
+            memoryMapName.Str(),
+            memSize);
+
+        if (SUCCEEDED(hr))
+        {
+            registeredMemoryRegion.MemoryRegionId = memoryRegionId;
+            registeredMemoryRegion.MemoryMapName = memoryMapName.Str();
+            registeredMemoryRegion.MemoryRegionSize = memSize;
+
+            hr = MlosCore::SharedConfigManager::CreateOrUpdateFrom(
+                globalMemoryRegion.SharedConfigDictionary,
+                registeredMemoryRegion);
+        }
+    }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------
+// NAME: MlosContext::CreateOrOpenNamedEvent
+//
+// PURPOSE:
+//  Creates new or opens existing named event.
+//
+// RETURNS:
+//
+// NOTES:
+//  Configurations for the created events are stored in the global memory region dictionary.
+//
+_Must_inspect_result_
+HRESULT MlosContext::CreateOrOpenNamedEvent(
+    _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+    _In_ MlosInternal::MemoryRegionId memoryRegionId,
+    _Inout_ NamedEvent& event)
+{
+    // Locate existing config.
+    //
+    MlosCore::ComponentConfig<MlosInternal::RegisteredNamedEventConfig> registeredEvent;
+    registeredEvent.MemoryRegionId = memoryRegionId;
+
+    HRESULT hr = MlosCore::SharedConfigManager::Lookup(
+        globalMemoryRegion.SharedConfigDictionary,
+        registeredEvent);
+
+    if (SUCCEEDED(hr))
+    {
+        const MlosCore::StringPtr name = registeredEvent.Proxy().EventName();
+
+        hr = event.CreateOrOpen(name.Data);
+    }
+    else
+    {
+        const MlosCore::UniqueString name;
+
+        hr = event.CreateOrOpen(name.Str());
+
+        if (SUCCEEDED(hr))
+        {
+            registeredEvent.MemoryRegionId = memoryRegionId;
+            registeredEvent.EventName = name.Str();
+
+            hr = MlosCore::SharedConfigManager::CreateOrUpdateFrom(
+                globalMemoryRegion.SharedConfigDictionary,
+                registeredEvent);
+        }
+    }
+
+    return hr;
 }
 }
 }

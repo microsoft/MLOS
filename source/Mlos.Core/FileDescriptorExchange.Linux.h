@@ -51,17 +51,15 @@ public:
     //
     _Must_inspect_result_
     HRESULT GetFileDescriptor(
-        _In_ Internal::MemoryRegionId memoryRegionId,
-        _Out_ int32_t& exchangeFd,
-        _Out_ size_t& memoryRegionSize) const;
+        _In_z_ const char* sharedMemoryMapName,
+        _Out_ int32_t& exchangeFd) const;
 
     // Sends a file descriptor via Unix domain socket.
     //
     _Must_inspect_result_
     HRESULT SendFileDescriptor(
-        _In_ Internal::MemoryRegionId memoryRegionId,
-        _In_ int32_t exchangeFd,
-        _In_ size_t memoryRegionSize) const;
+        _In_z_ const char* sharedMemoryMapName,
+        _In_ int32_t exchangeFd) const;
 
     // Gets the information if we established connection to the agent.
     //

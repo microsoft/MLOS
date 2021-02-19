@@ -75,16 +75,15 @@ namespace Mlos.Core
         }
 
         /// <summary>
-        /// Opens an anonymous shared memory region from the file descriptor.
+        /// Opens a shared memory region from the file descriptor.
         /// </summary>
         /// <typeparam name="T">Memory region type.</typeparam>
         /// <param name="sharedMemoryFd"></param>
-        /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static SharedMemoryRegionView<T> OpenAnonymousFromFileDescriptor<T>(IntPtr sharedMemoryFd, ulong sharedMemorySize)
+        public static SharedMemoryRegionView<T> OpenFromFileDescriptor<T>(IntPtr sharedMemoryFd)
             where T : ICodegenProxy, new()
         {
-            return new SharedMemoryRegionView<T>(Linux.SharedMemoryMapView.OpenAnonymousFromFileDescriptor(sharedMemoryFd, sharedMemorySize));
+            return new SharedMemoryRegionView<T>(Linux.SharedMemoryMapView.OpenFromFileDescriptor(sharedMemoryFd));
         }
     }
 

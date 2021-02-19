@@ -72,8 +72,7 @@ namespace Mlos.Core.Internal
         /// <summary>
         /// Name of the shared memory map.
         /// </summary>
-        [ScalarSetting]
-        internal StringPtr SharedMemoryMapName;
+        internal StringPtr MemoryMapName;
 
         /// <summary>
         /// Size of the memory region.
@@ -93,8 +92,7 @@ namespace Mlos.Core.Internal
         /// <summary>
         /// Name of the event.
         /// </summary>
-        [ScalarSetting]
-        internal StringPtr Name;
+        internal StringPtr EventName;
     }
 
     /// <summary>
@@ -107,15 +105,5 @@ namespace Mlos.Core.Internal
         /// Memory region identifier.
         /// </summary>
         public MemoryRegionId MemoryRegionId;
-
-        /// <summary>
-        /// Indicates whether message contains a valid file descriptor.
-        /// </summary>
-        public bool ContainsFd;
-
-        /// <summary>
-        /// Size of the memory region.
-        /// </summary>
-        public ulong MemoryRegionSize;
     }
 }

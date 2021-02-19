@@ -42,14 +42,13 @@ public:
         _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion>&& globalMemoryRegionView,
         _In_ SharedMemoryMapView&& controlChannelMemoryMapView,
         _In_ SharedMemoryMapView&& feedbackChannelMemoryMapView,
-        _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView,
         _In_ InterProcessSharedChannelPolicy&& controlChannelPolicy,
         _In_ InterProcessSharedChannelPolicy&& feedbackChannelPolicy,
-        _In_ NamedEvent targetProcessNamedEvent) noexcept;
+        _In_ NamedEvent&& targetProcessNamedEvent) noexcept;
 
-    InterProcessMlosContext(const InterProcessMlosContext&) = delete;
+    InterProcessMlosContext(_In_ const InterProcessMlosContext&) = delete;
 
-    InterProcessMlosContext& operator=(const InterProcessMlosContext&) = delete;
+    InterProcessMlosContext& operator=(_In_ const InterProcessMlosContext&) = delete;
 
     ~InterProcessMlosContext();
 

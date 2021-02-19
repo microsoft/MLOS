@@ -48,8 +48,8 @@ public:
     {
         // Get the value_ref and update the data pointer.
         //
-        uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
-        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
+        const uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
+        const uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
         const byte* dataPtr = reinterpret_cast<const byte*>(buffer.Pointer) + offset;
 
@@ -68,7 +68,7 @@ public:
         _Inout_ uint64_t& expectedDataOffset) const
     {
         uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
-        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
+        const uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
         if (dataSize > totalDataSize)
         {
@@ -114,8 +114,8 @@ public:
     {
         // Get the value_ref and update the data pointer.
         //
-        uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
-        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
+        const uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
+        const uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
         const byte* dataPtr = reinterpret_cast<const byte*>(buffer.Pointer) + offset;
 
@@ -134,7 +134,7 @@ public:
         _Inout_ uint64_t& expectedDataOffset) const
     {
         uint64_t offset = *reinterpret_cast<uint64_t*>(buffer.Pointer);
-        uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
+        const uint64_t dataSize = *reinterpret_cast<uint64_t*>(buffer.Pointer + sizeof(uint64_t));
 
         if (dataSize > totalDataSize)
         {

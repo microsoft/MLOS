@@ -78,7 +78,6 @@ TEST(FileWatchEventTests, VerifyNotification)
     EXPECT_EQ(hr, S_OK);
     fileModifier.wait();
 
-    event.CleanupOnClose = true;
-    event.Close();
+    event.Close(true);
 }
 }

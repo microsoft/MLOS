@@ -14,14 +14,9 @@
 //*********************************************************************
 
 #include "Mlos.Core.h"
-#include <sys/inotify.h>
-#include <sys/stat.h>
-#include <cerrno>
-#include <climits>
+#include "Mlos.Core.inl"
+
 #include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-#include <unistd.h>
 
 namespace Mlos
 {
@@ -32,12 +27,9 @@ namespace Core
 const char* const MlosSocketFileName = "mlos.sock";
 const char* const MlosOpenedFileName = "mlos.opened";
 
-const char* const DefaultSocketFolderPath = "/var/tmp/mlos/";
+const char* const GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
 
-// #TODO remove it, use condition variables mapped to shared memory.
-//
-const char* const ControlChannelSemaphoreName = "mlos_control_channel_event";
-const char* const FeedbackChannelSemaphoreName = "mlos_feedback_channel_event";
+const char* const DefaultSocketFolderPath = "/var/tmp/mlos/";
 
 //----------------------------------------------------------------------------
 // NAME: AnonymousMemoryMlosContextInitializer::CreateAnonymousSharedMemory
@@ -51,16 +43,14 @@ const char* const FeedbackChannelSemaphoreName = "mlos_feedback_channel_event";
 //
 // #TODO move to FileDescriptorExchange
 //
-template<typename TSharedMemoryView>
 _Must_inspect_result_
-HRESULT CreateAnonymousSharedMemory(
+HRESULT CreateOrOpenAnonymousSharedMemory(
     _In_ FileDescriptorExchange& fileDescriptorExchange,
-    _Inout_ TSharedMemoryView& sharedMemory,
-    _In_ Internal::MemoryRegionId memoryRegionId,
+    _Inout_ SharedMemoryMapView& sharedMemoryMapView,
+    _In_z_ const char* sharedMemoryMapName,
     _In_ std::size_t sharedMemorySize)
 {
-    int anonymousSharedMapFd;
-    size_t anonymousSharedMapSize;
+    int32_t anonymousSharedMapFd;
 
     HRESULT hr = S_OK;
 
@@ -69,22 +59,25 @@ HRESULT CreateAnonymousSharedMemory(
         // Check if the agent has a given memory region.
         //
         hr = fileDescriptorExchange.GetFileDescriptor(
-            memoryRegionId,
-            anonymousSharedMapFd,
-            anonymousSharedMapSize);
+            sharedMemoryMapName,
+            anonymousSharedMapFd);
     }
 
     if (SUCCEEDED(hr) && fileDescriptorExchange.IsServerAvailable())
     {
         // The agent has the memory region, open a shared memory from the received file descriptor.
         //
-        hr = sharedMemory.OpenExistingFromFileDescriptor(anonymousSharedMapFd, anonymousSharedMapSize);
+        hr = sharedMemoryMapView.OpenExistingFromFileDescriptor(
+            sharedMemoryMapName,
+            anonymousSharedMapFd);
     }
     else
     {
         // Create a new anonymous shared memory.
         //
-        hr = sharedMemory.CreateAnonymous(sharedMemorySize);
+        hr = sharedMemoryMapView.CreateAnonymous(
+                sharedMemoryMapName,
+                sharedMemorySize);
         if (SUCCEEDED(hr))
         {
             // If connected try to send a file descriptor to the agent.
@@ -92,9 +85,8 @@ HRESULT CreateAnonymousSharedMemory(
             if (fileDescriptorExchange.IsServerAvailable())
             {
                 hr = fileDescriptorExchange.SendFileDescriptor(
-                    memoryRegionId,
-                    sharedMemory.GetFileDescriptor(),
-                    sharedMemorySize);
+                    sharedMemoryMapName,
+                    sharedMemoryMapView.GetFileDescriptor());
             }
         }
     }
@@ -137,38 +129,10 @@ HRESULT AnonymousMemoryMlosContext::Create(
 {
     HRESULT hr = S_OK;
 
-    char* directoryPath = nullptr;
     char* socketFilePath = nullptr;
-    char* openedFilePath = nullptr;
-
-    directoryPath = strdup(socketFolderPath);
-    if (directoryPath == nullptr)
+    if (asprintf(&socketFilePath, "%s/%s", socketFolderPath, MlosSocketFileName) == -1)
     {
         hr = E_OUTOFMEMORY;
-    }
-
-    if (SUCCEEDED(hr))
-    {
-        if (asprintf(&socketFilePath, "%s/%s", directoryPath, MlosSocketFileName) == -1)
-        {
-            hr = E_OUTOFMEMORY;
-        }
-    }
-
-    if (SUCCEEDED(hr))
-    {
-        if (asprintf(&openedFilePath, "%s/%s", directoryPath, MlosOpenedFileName) == -1)
-        {
-            hr = E_OUTOFMEMORY;
-        }
-    }
-
-    if (FAILED(hr))
-    {
-        free(directoryPath);
-        free(socketFilePath);
-        free(openedFilePath);
-        return hr;
     }
 
     // Try to connect to the Mlos.Agent Unix domain socket.
@@ -177,30 +141,42 @@ HRESULT AnonymousMemoryMlosContext::Create(
     // (AnonymousMemoryMlosContext::HandleFdRequests).
     //
     FileDescriptorExchange fileDescriptorExchange;
-    hr = fileDescriptorExchange.Connect(socketFilePath);
-    MLOS_IGNORE_HR(hr);
-
-    // Global shared memory region.
-    //
-    SharedMemoryRegionView<Internal::GlobalMemoryRegion> globalMemoryRegionView;
+    if (SUCCEEDED(hr))
+    {
+        (void)fileDescriptorExchange.Connect(socketFilePath);
+    }
 
     // Shared channel shared memory and notification primitive.
     //
+    SharedMemoryMapView globalMemoryMapView;
     SharedMemoryMapView controlChannelMemoryMapView;
     SharedMemoryMapView feedbackChannelMemoryMapView;
-    SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> sharedConfigMemoryRegionView;
+    SharedMemoryMapView sharedConfigMemoryMapView;
+
     InterProcessSharedChannelPolicy controlChannelPolicy;
     InterProcessSharedChannelPolicy feedbackChannelPolicy;
 
+    FileWatchEvent fileWatchEvent;
+
+    // Global shared memory region.
+    //
+    if (SUCCEEDED(hr))
     {
         // Create global shared memory.
         //
-        hr = CreateAnonymousSharedMemory(
-                fileDescriptorExchange,
-                globalMemoryRegionView,
-                Internal::MemoryRegionId { Internal::MemoryRegionType::Global, 0 },
-                Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
+        hr = CreateOrOpenAnonymousSharedMemory(
+            fileDescriptorExchange,
+            globalMemoryMapView,
+            GlobalMemoryMapName,
+            Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
+    }
 
+    // Global shared memory region.
+    //
+    SharedMemoryRegionView<Internal::GlobalMemoryRegion> globalMemoryRegionView(std::move(globalMemoryMapView));
+
+    if (SUCCEEDED(hr))
+    {
         // Increase the usage counter.
         //
         Internal::GlobalMemoryRegion& globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
@@ -211,19 +187,21 @@ HRESULT AnonymousMemoryMlosContext::Create(
     //
     if (SUCCEEDED(hr))
     {
-        hr = CreateAnonymousSharedMemory(
+        hr = AnonymousMemoryMlosContext::CreateOrOpenSharedMemory(
                 fileDescriptorExchange,
-                controlChannelMemoryMapView,
+                globalMemoryRegionView.MemoryRegion(),
                 Internal::MemoryRegionId { Internal::MemoryRegionType::ControlChannel, 0 },
+                controlChannelMemoryMapView,
                 Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = CreateAnonymousSharedMemory(
+        hr = AnonymousMemoryMlosContext::CreateOrOpenSharedMemory(
                 fileDescriptorExchange,
-                feedbackChannelMemoryMapView,
+                globalMemoryRegionView.MemoryRegion(),
                 Internal::MemoryRegionId { Internal::MemoryRegionType::FeedbackChannel, 0 },
+                feedbackChannelMemoryMapView,
                 Internal::GlobalMemoryRegion::GlobalSharedMemorySize);
     }
 
@@ -231,23 +209,35 @@ HRESULT AnonymousMemoryMlosContext::Create(
     //
     if (SUCCEEDED(hr))
     {
-        hr = CreateAnonymousSharedMemory(
+        hr = AnonymousMemoryMlosContext::CreateOrOpenSharedMemory(
                 fileDescriptorExchange,
-                sharedConfigMemoryRegionView,
+                globalMemoryRegionView.MemoryRegion(),
                 Internal::MemoryRegionId { Internal::MemoryRegionType::SharedConfig, 0 },
+                sharedConfigMemoryMapView,
                 sharedConfigMemorySize);
     }
 
-    // Create synchronization primitives for the shared channel.
+    // NotificationEvents.
     //
     if (SUCCEEDED(hr))
     {
-        hr = controlChannelPolicy.m_notificationEvent.CreateOrOpen(ControlChannelSemaphoreName);
+        hr = MlosContext::CreateOrOpenNamedEvent(
+            globalMemoryRegionView.MemoryRegion(),
+            MlosInternal::MemoryRegionId{ MlosInternal::MemoryRegionType::ControlChannel, 0 },
+            controlChannelPolicy.m_notificationEvent);
     }
 
     if (SUCCEEDED(hr))
     {
-        hr = feedbackChannelPolicy.m_notificationEvent.CreateOrOpen(FeedbackChannelSemaphoreName);
+        hr = MlosContext::CreateOrOpenNamedEvent(
+            globalMemoryRegionView.MemoryRegion(),
+            MlosInternal::MemoryRegionId{ MlosInternal::MemoryRegionType::FeedbackChannel, 0 },
+            feedbackChannelPolicy.m_notificationEvent);
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        hr = fileWatchEvent.Initialize(socketFolderPath, MlosOpenedFileName);
     }
 
     // Create MlosContext.
@@ -256,30 +246,13 @@ HRESULT AnonymousMemoryMlosContext::Create(
         std::move(globalMemoryRegionView),
         std::move(controlChannelMemoryMapView),
         std::move(feedbackChannelMemoryMapView),
-        std::move(sharedConfigMemoryRegionView),
+        std::move(sharedConfigMemoryMapView),
         std::move(controlChannelPolicy),
         std::move(feedbackChannelPolicy),
-        directoryPath,
-        socketFilePath,
-        openedFilePath);
+        std::move(fileWatchEvent),
+        socketFilePath);
 
     AnonymousMemoryMlosContext& mlosContext = mlosContextInstance;
-
-    // Register semaphores in the global memory.
-    //
-    if (SUCCEEDED(hr))
-    {
-        hr = mlosContext.RegisterNamedEvent(
-            Internal::MemoryRegionId{ Internal::MemoryRegionType::ControlChannel, 0 },
-            ControlChannelSemaphoreName);
-    }
-
-    if (SUCCEEDED(hr))
-    {
-        hr = mlosContext.RegisterNamedEvent(
-            Internal::MemoryRegionId{ Internal::MemoryRegionType::FeedbackChannel, 0 },
-            FeedbackChannelSemaphoreName);
-    }
 
     // Create a thread that will wait for the agent and will send the file descriptors.
     //
@@ -295,34 +268,66 @@ HRESULT AnonymousMemoryMlosContext::Create(
 }
 
 //----------------------------------------------------------------------------
-// NAME: AnonymousMemoryMlosContext::CreateSocketWatchFile
+// NAME: AnonymousMemoryMlosContext::CreateOrOpenSharedMemory
 //
 // PURPOSE:
+//  Creates new or opens existing shared memory map.
+//
+// RETURNS:
 //
 // NOTES:
+//  Configurations for the created shared memory maps are stored in the global memory region dictionary.
 //
 _Must_inspect_result_
-HRESULT AnonymousMemoryMlosContext::CreateSocketWatchFile()
+HRESULT AnonymousMemoryMlosContext::CreateOrOpenSharedMemory(
+    _In_ FileDescriptorExchange& fileDescriptorExchange,
+    _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+    _In_ MlosInternal::MemoryRegionId memoryRegionId,
+    _Inout_ MlosCore::SharedMemoryMapView& sharedMemoryMapView,
+    _In_ const size_t memSize)
 {
-    // Try to create a folder where the file is located, ignore the errors.
+    // Locate existing config.
     //
-    mkdir(m_directoryPath, S_IRWXU | S_IRWXG | S_IRGRP | S_IWGRP);
+    MlosCore::ComponentConfig<MlosInternal::RegisteredMemoryRegionConfig> registeredMemoryRegion;
+    registeredMemoryRegion.MemoryRegionId = memoryRegionId;
 
-    // Create the empty file.
-    //
-    int fdOpenedFile = creat(m_openedFilePath, S_IRWXU | S_IRWXG | S_IRGRP | S_IWGRP);
-    if (fdOpenedFile == INVALID_FD_VALUE)
+    HRESULT hr = MlosCore::SharedConfigManager::Lookup(
+        globalMemoryRegion.SharedConfigDictionary,
+        registeredMemoryRegion);
+
+    if (SUCCEEDED(hr))
     {
-        // Return the failure.
-        //
-        return HRESULT_FROM_ERRNO(errno);
+        const MlosCore::StringPtr memoryMapName = registeredMemoryRegion.Proxy().MemoryMapName();
+
+        hr = CreateOrOpenAnonymousSharedMemory(
+            fileDescriptorExchange,
+            sharedMemoryMapView,
+            memoryMapName.Data,
+            memSize);
+    }
+    else
+    {
+        const MlosCore::UniqueString memoryMapName;
+
+        hr = CreateOrOpenAnonymousSharedMemory(
+            fileDescriptorExchange,
+            sharedMemoryMapView,
+            memoryMapName.Str(),
+            memSize);
+
+        if (SUCCEEDED(hr))
+        {
+            registeredMemoryRegion.MemoryRegionId = memoryRegionId;
+            registeredMemoryRegion.MemoryMapName = memoryMapName.Str();
+            registeredMemoryRegion.MemoryRegionSize = memSize;
+
+            hr = MlosCore::SharedConfigManager::CreateOrUpdateFrom(
+                globalMemoryRegion.SharedConfigDictionary,
+                registeredMemoryRegion);
+        }
     }
 
-    // Close the descriptors before opening a watch to avoid close notification.
-    //
-    close(fdOpenedFile);
-
-    return S_OK;
+    return hr;
 }
 
 //----------------------------------------------------------------------------
@@ -361,98 +366,30 @@ HRESULT AnonymousMemoryMlosContext::HandleFdRequests()
 {
     HRESULT hr = S_OK;
 
-    // Create a watch file.
-    //
-    hr = CreateSocketWatchFile();
-    if (FAILED(hr))
-    {
-        return hr;
-    }
-
-    // Create notification.
-    //
-    int32_t fdNotify = inotify_init();
-    int32_t fdWatch = INVALID_FD_VALUE;
-
-    constexpr int NotifyEventSize = sizeof(struct inotify_event);
-    constexpr int NotifyEventBufferSize = 2 * (NotifyEventSize + NAME_MAX + 1);
-
-    char eventsBuffer[NotifyEventBufferSize];
-
-    bool waitForSocket = true;
-
     // Request loop.
     //
     while (SUCCEEDED(hr))
     {
-        // Wait for the agent when it is ready to get the file descriptors.
-        //
-        while (waitForSocket)
+        hr = m_fileWatchEvent.Wait();
+        if (FAILED(hr))
         {
-            if (fdWatch == INVALID_FD_VALUE)
+            if (hr == HRESULT_FROM_ERRNO(EBADF))
             {
-                // Create the file watch.
+                // The notification fd has been closed.
                 //
-                hr = CreateSocketWatchFile();
-                if (FAILED(hr))
-                {
-                    break;
-                }
-
-                fdWatch = inotify_add_watch(
-                    fdNotify,
-                    m_openedFilePath,
-                    IN_OPEN | IN_DELETE_SELF);
+                hr = S_OK;
             }
 
-            if (fdWatch == INVALID_FD_VALUE)
-            {
-                hr = HRESULT_FROM_ERRNO(errno);
-                break;
-            }
-
-            int32_t length = read(fdNotify, eventsBuffer, NotifyEventBufferSize);
-            if (length < 0)
-            {
-                // Wait for the notification failed.
-                //
-                hr = HRESULT_FROM_ERRNO(errno);
-                break;
-            }
-
-            int32_t i = 0;
-
-            // actually read return the list of change events happens. Here, read the change event one by one and process it accordingly.
-            while (waitForSocket && i < length)
-            {
-                struct inotify_event* pEvent = reinterpret_cast<struct inotify_event *>(&eventsBuffer[i]);
-
-                if (pEvent->mask & IN_OPEN)
-                {
-                    // The file was opened.
-                    //
-                    waitForSocket = false;
-                    break;
-                }
-                else if (pEvent->mask & IN_DELETE_SELF)
-                {
-                    // The file has been deleted, remove the watch and create a new one.
-                    //
-                    inotify_rm_watch(fdNotify, fdWatch);
-
-                    fdWatch = INVALID_FD_VALUE;
-                }
-
-                i += NotifyEventSize + pEvent->len;
-            }
+            // Terminate the process as it us unsafe to continue.
+            //
+            return hr;
         }
-
-        waitForSocket = true;
 
         // Send the shared memory file descriptors to the agent.
         //
         FileDescriptorExchange fileDescriptorExchange;
         hr = fileDescriptorExchange.Connect(m_socketFilePath);
+
         if (FAILED(hr))
         {
             // Failed to connect.
@@ -463,40 +400,31 @@ HRESULT AnonymousMemoryMlosContext::HandleFdRequests()
         if SUCCEEDED(hr)
         {
             hr = fileDescriptorExchange.SendFileDescriptor(
-                Internal::MemoryRegionId { Internal::MemoryRegionType::Global, 0 },
-                m_globalMemoryRegionView.GetFileDescriptor(),
-                m_globalMemoryRegionView.MemSize);
+                GlobalMemoryMapName,
+                m_globalMemoryRegionView.MapView().GetFileDescriptor());
         }
 
         if SUCCEEDED(hr)
         {
             hr = fileDescriptorExchange.SendFileDescriptor(
-                Internal::MemoryRegionId { Internal::MemoryRegionType::ControlChannel, 0 },
-                m_controlChannelMemoryMapView.GetFileDescriptor(),
-                m_controlChannelMemoryMapView.MemSize);
+                m_controlChannelMemoryMapView.GetSharedMemoryMapName(),
+                m_controlChannelMemoryMapView.GetFileDescriptor());
         }
 
         if SUCCEEDED(hr)
         {
             hr = fileDescriptorExchange.SendFileDescriptor(
-                Internal::MemoryRegionId { Internal::MemoryRegionType::FeedbackChannel, 0 },
-                m_feedbackChannelMemoryMapView.GetFileDescriptor(),
-                m_feedbackChannelMemoryMapView.MemSize);
+                m_feedbackChannelMemoryMapView.GetSharedMemoryMapName(),
+                m_feedbackChannelMemoryMapView.GetFileDescriptor());
         }
 
         if SUCCEEDED(hr)
         {
             hr = fileDescriptorExchange.SendFileDescriptor(
-                Internal::MemoryRegionId { Internal::MemoryRegionType::SharedConfig, 0 },
-                SharedConfigMemoryRegionView().GetFileDescriptor(),
-                SharedConfigMemoryRegionView().MemSize);
+                SharedConfigMemoryMapView().GetSharedMemoryMapName(),
+                SharedConfigMemoryMapView().GetFileDescriptor());
         }
     }
-
-    // Close
-    //
-    inotify_rm_watch(fdNotify, fdWatch);
-    close(fdNotify);
 
     return hr;
 }
@@ -516,9 +444,8 @@ AnonymousMemoryMlosContext::AnonymousMemoryMlosContext(
     _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView,
     _In_ InterProcessSharedChannelPolicy&& controlChannelPolicy,
     _In_ InterProcessSharedChannelPolicy&& feedbackChannelPolicy,
-    _In_z_ char* directoryPath,
-    _In_z_ char* socketFilePath,
-    _In_z_ char* openedFilePath) noexcept
+    _In_ FileWatchEvent&& fileWatchEvent,
+    _In_z_ char* socketFilePath) noexcept
  :  MlosContext(globalMemoryRegionView.MemoryRegion(), m_controlChannel, m_controlChannel, m_feedbackChannel),
     m_globalMemoryRegionView(std::move(globalMemoryRegionView)),
     m_controlChannelMemoryMapView(std::move(controlChannelMemoryMapView)),
@@ -531,10 +458,9 @@ AnonymousMemoryMlosContext::AnonymousMemoryMlosContext(
         m_globalMemoryRegionView.MemoryRegion().FeedbackChannelSynchronization,
         m_feedbackChannelMemoryMapView,
         std::move(feedbackChannelPolicy)),
+    m_fileWatchEvent(std::move(fileWatchEvent)),
     m_fdExchangeThread(INVALID_THREAD_HANDLE),
-    m_directoryPath(directoryPath),
-    m_socketFilePath(socketFilePath),
-    m_openedFilePath(openedFilePath)
+    m_socketFilePath(socketFilePath)
 {
     m_sharedConfigManager.AssignSharedConfigMemoryRegion(std::move(sharedConfigMemoryRegionView));
 }
@@ -549,9 +475,16 @@ AnonymousMemoryMlosContext::AnonymousMemoryMlosContext(
 //
 AnonymousMemoryMlosContext::~AnonymousMemoryMlosContext()
 {
-    free(m_directoryPath);
+    // Close the file watch event, that will stop the file descriptor exchange thread.
+    //
+    m_fileWatchEvent.Close();
+
+    // Wait for the file descriptor exchange thread to complete.
+    //
+    HRESULT hr = MlosCore::MlosPlatform::JoinThread(m_fdExchangeThread);
+    MLOS_RETAIL_ASSERT(SUCCEEDED(hr));
+
     free(m_socketFilePath);
-    free(m_openedFilePath);
 
     // Decrease the usage counter. Ignore the result.
     // Shared memory is anonymous and it is destroyed once the agent and the target process terminates.
@@ -561,8 +494,8 @@ AnonymousMemoryMlosContext::~AnonymousMemoryMlosContext()
     {
         // This is the last process using shared memory map.
         //
-        m_controlChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
-        m_feedbackChannel.ChannelPolicy.m_notificationEvent.CleanupOnClose = true;
+        m_controlChannel.ChannelPolicy.m_notificationEvent.Close(true);
+        m_feedbackChannel.ChannelPolicy.m_notificationEvent.Close(true);
 
         // Close all the shared config memory regions.
         //

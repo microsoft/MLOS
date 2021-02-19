@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 
 using Mlos.Core.Internal;
@@ -21,14 +22,7 @@ namespace Mlos.Core.Linux
     /// </summary>
     public sealed class FileDescriptorExchangeServer : IDisposable
     {
-        internal struct AnonymousSharedMemory
-        {
-            internal IntPtr SharedMemoryFd;
-
-            internal ulong SharedMemorySize;
-        }
-
-        private readonly Dictionary<MemoryRegionId, AnonymousSharedMemory> fileDescriptors = new Dictionary<MemoryRegionId, AnonymousSharedMemory>();
+        private readonly Dictionary<string, IntPtr> fileDescriptors = new Dictionary<string, IntPtr>();
 
         private readonly string socketFolderPath;
 
@@ -122,42 +116,43 @@ namespace Mlos.Core.Linux
             {
                 while (true)
                 {
-                    FileDescriptorExchangeMessage msg = default;
-                    acceptedSocket.ReceiveMessageAndFileDescriptor(ref msg, out IntPtr sharedMemoryFd);
+                    int receivedLength = acceptedSocket.ReceiveMessageAndFileDescriptor(
+                        out byte[] messageBuffer,
+                        out var sharedMemoryFd);
 
-                    if (msg.ContainsFd)
+                    if (receivedLength == 0)
+                    {
+                        // Disconnected.
+                        //
+                        return;
+                    }
+
+                    string sharedMemoryName = Encoding.ASCII.GetString(messageBuffer);
+
+                    if (sharedMemoryFd != Native.InvalidPointer)
                     {
                         // Store received file descriptor in the dictionary.
                         //
-                        fileDescriptors.Add(
-                            msg.MemoryRegionId,
-                            new AnonymousSharedMemory
-                            {
-                                SharedMemoryFd = sharedMemoryFd,
-                                SharedMemorySize = msg.MemoryRegionSize,
-                            });
+                        lock (fileDescriptors)
+                        {
+                            fileDescriptors.Add(sharedMemoryName, sharedMemoryFd);
+                        }
                     }
                     else
                     {
-                        if (fileDescriptors.ContainsKey(msg.MemoryRegionId))
+                        lock (fileDescriptors)
                         {
-                            AnonymousSharedMemory sharedMemory = fileDescriptors[msg.MemoryRegionId];
-                            msg.ContainsFd = true;
-                            msg.MemoryRegionSize = sharedMemory.SharedMemorySize;
+                            if (fileDescriptors.ContainsKey(sharedMemoryName))
+                            {
+                                sharedMemoryFd = fileDescriptors[sharedMemoryName];
+                            }
+                        }
 
-                            acceptedSocket.SendMessageAndFileDescriptor(
-                                ref msg,
-                                sharedMemory.SharedMemoryFd);
-                        }
-                        else
-                        {
-                            // Replay we do not have require memory region.
-                            //
-                            msg.ContainsFd = false;
-                            acceptedSocket.SendMessageAndFileDescriptor(
-                                ref msg,
-                                IntPtr.Zero);
-                        }
+                        FileDescriptorExchangeMessage msg = default;
+
+                        acceptedSocket.SendMessageAndFileDescriptor(
+                            ref msg,
+                            sharedMemoryFd);
                     }
                 }
             }
@@ -171,21 +166,14 @@ namespace Mlos.Core.Linux
         /// <summary>
         /// Returns file descriptor for given memory region id.
         /// </summary>
-        /// <param name="memoryRegionId"></param>
+        /// <param name="sharedMemoryName"></param>
         /// <returns></returns>
-        internal IntPtr GetSharedMemoryFd(MemoryRegionId memoryRegionId)
+        internal IntPtr GetSharedMemoryFd(string sharedMemoryName)
         {
-            return fileDescriptors[memoryRegionId].SharedMemoryFd;
-        }
-
-        /// <summary>
-        /// Returns memory region size for given memory region id.
-        /// </summary>
-        /// <param name="memoryRegionId"></param>
-        /// <returns></returns>
-        internal ulong GetSharedMemorySize(MemoryRegionId memoryRegionId)
-        {
-            return fileDescriptors[memoryRegionId].SharedMemorySize;
+            lock (fileDescriptors)
+            {
+                return fileDescriptors[sharedMemoryName];
+            }
         }
 
         /// <summary>
