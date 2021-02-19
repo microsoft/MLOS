@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Threading;
 
 using Mlos.Core.Internal;
 using Proxy.Mlos.Core.Internal;
@@ -22,6 +23,8 @@ namespace Mlos.Core.Linux
     /// </summary>
     public class AnonymousMemoryMlosContext : MlosContext
     {
+        private const string GlobalMemoryMapName = "Host_Mlos.GlobalMemory";
+
         // Path to the folder where Unix domain socket name.
         //
         private const string DefaultSocketFolderPath = "/var/tmp/mlos/";
@@ -33,33 +36,45 @@ namespace Mlos.Core.Linux
         public static AnonymousMemoryMlosContext Create()
         {
             var fdExchangeServer = new FileDescriptorExchangeServer(DefaultSocketFolderPath);
+
             fdExchangeServer.HandleRequests();
 
-            var memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.Global, Index = 0 };
             SharedMemoryRegionView<MlosProxyInternal.GlobalMemoryRegion> globalMemoryRegionView =
-                SharedMemoryRegionView.OpenAnonymousFromFileDescriptor<MlosProxyInternal.GlobalMemoryRegion>(
-                    fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
-                    fdExchangeServer.GetSharedMemorySize(memoryRegionId));
-
-            memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.ControlChannel, Index = 0 };
-            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.OpenAnonymousFromFileDescriptor(
-                fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
-                fdExchangeServer.GetSharedMemorySize(memoryRegionId));
-
-            memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.FeedbackChannel, Index = 0 };
-            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.OpenAnonymousFromFileDescriptor(
-                fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
-                fdExchangeServer.GetSharedMemorySize(memoryRegionId));
-
-            memoryRegionId = new MlosInternal.MemoryRegionId { Type = MemoryRegionType.SharedConfig, Index = 0 };
-            SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryRegionView =
-                SharedMemoryRegionView.OpenAnonymousFromFileDescriptor<MlosProxyInternal.SharedConfigMemoryRegion>(
-                fdExchangeServer.GetSharedMemoryFd(memoryRegionId),
-                fdExchangeServer.GetSharedMemorySize(memoryRegionId));
+                SharedMemoryRegionView.OpenFromFileDescriptor<MlosProxyInternal.GlobalMemoryRegion>(
+                    fdExchangeServer.GetSharedMemoryFd(GlobalMemoryMapName));
 
             // Create channel synchronization primitives.
             //
             MlosProxyInternal.GlobalMemoryRegion globalMemoryRegion = globalMemoryRegionView.MemoryRegion();
+
+            // Control channel.
+            //
+            globalMemoryRegion.TryGetSharedMemoryName(
+                    new MlosInternal.MemoryRegionId { Type = MemoryRegionType.ControlChannel, Index = 0 },
+                    out string sharedMemoryMapName);
+
+            SharedMemoryMapView controlChannelMemoryMapView = SharedMemoryMapView.OpenFromFileDescriptor(
+                fdExchangeServer.GetSharedMemoryFd(sharedMemoryMapName));
+
+            // Feedback channel.
+            //
+            globalMemoryRegion.TryGetSharedMemoryName(
+                new MlosInternal.MemoryRegionId { Type = MemoryRegionType.FeedbackChannel, Index = 0 },
+                out sharedMemoryMapName);
+
+            SharedMemoryMapView feedbackChannelMemoryMapView = SharedMemoryMapView.OpenFromFileDescriptor(
+                fdExchangeServer.GetSharedMemoryFd(sharedMemoryMapName));
+
+            // Shared config.
+            //
+            globalMemoryRegion.TryGetSharedMemoryName(
+                new MlosInternal.MemoryRegionId { Type = MemoryRegionType.SharedConfig, Index = 0 },
+                out sharedMemoryMapName);
+
+            SharedMemoryMapView sharedConfigMemoryMapView = SharedMemoryMapView.OpenFromFileDescriptor(
+                fdExchangeServer.GetSharedMemoryFd(sharedMemoryMapName));
+
+            var sharedConfigMemoryRegionView = new SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion>(sharedConfigMemoryMapView);
 
             globalMemoryRegion.TryOpenExisting(
                 new MlosInternal.MemoryRegionId { Type = MemoryRegionType.ControlChannel, Index = 0, },

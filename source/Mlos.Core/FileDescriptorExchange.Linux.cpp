@@ -146,15 +146,18 @@ HRESULT SendMessageAndFileDescriptor(
 
     ControlMessage controlMessage {};
 
-    msg.msg_control = controlMessage.message;
-    msg.msg_controllen = sizeof(controlMessage.message);
+    if (exchangeFd != INVALID_FD_VALUE)
+    {
+        msg.msg_control = controlMessage.message;
+        msg.msg_controllen = sizeof(controlMessage.message);
 
-    cmptr = CMSG_FIRSTHDR(&msg);
-    cmptr->cmsg_len = CMSG_LEN(sizeof(int));
-    cmptr->cmsg_level = SOL_SOCKET;
-    cmptr->cmsg_type = SCM_RIGHTS;
-    int32_t* commandDataPtr = reinterpret_cast<int32_t*>(CMSG_DATA(cmptr));
-    *commandDataPtr = exchangeFd;
+        cmptr = CMSG_FIRSTHDR(&msg);
+        cmptr->cmsg_len = CMSG_LEN(sizeof(int));
+        cmptr->cmsg_level = SOL_SOCKET;
+        cmptr->cmsg_type = SCM_RIGHTS;
+        int32_t* commandDataPtr = reinterpret_cast<int32_t*>(CMSG_DATA(cmptr));
+        *commandDataPtr = exchangeFd;
+    }
 
     msg.msg_name = nullptr;
     msg.msg_namelen = 0;
@@ -271,39 +274,40 @@ HRESULT ReceiveMessageAndFileDescriptor(
 //
 _Must_inspect_result_
 HRESULT FileDescriptorExchange::GetFileDescriptor(
-    _In_ Internal::MemoryRegionId memoryRegionId,
-    _Out_ int32_t& exchangeFd,
-    _Out_ size_t& memoryRegionSize) const
+    _In_z_ const char* sharedMemoryMapName,
+    _Out_ int32_t& exchangeFd) const
 {
     HRESULT hr = S_OK;
 
-    // Send the message.
+    // Ask for the shared memory using a name.
     //
-    Mlos::Core::Internal::FileDescriptorExchangeMessage msg = {};
-
-    msg.MemoryRegionId = memoryRegionId;
-    msg.ContainsFd = false;
-
-    hr = SendMessageAndFileDescriptor(m_socketFd, &msg, sizeof(msg), 0);
+    hr = SendMessageAndFileDescriptor(
+        m_socketFd,
+        const_cast<char*>(sharedMemoryMapName),
+        strlen(sharedMemoryMapName),
+        INVALID_FD_VALUE);
 
     if (SUCCEEDED(hr))
     {
-        hr = ReceiveMessageAndFileDescriptor(m_socketFd, &msg, sizeof(msg), exchangeFd);
+        //
+        //
+        Mlos::Core::Internal::FileDescriptorExchangeMessage msg = {};
+
+        hr = ReceiveMessageAndFileDescriptor(
+            m_socketFd,
+            &msg,
+            sizeof(msg),
+            exchangeFd);
     }
 
     if (SUCCEEDED(hr))
     {
         // Agent does not have memory region.
         //
-        if (!msg.ContainsFd)
+        if (exchangeFd == INVALID_FD_VALUE)
         {
             hr = E_NOT_SET;
         }
-    }
-
-    if (SUCCEEDED(hr))
-    {
-        memoryRegionSize = msg.MemoryRegionSize;
     }
 
     return hr;
@@ -321,21 +325,16 @@ HRESULT FileDescriptorExchange::GetFileDescriptor(
 //
 _Must_inspect_result_
 HRESULT FileDescriptorExchange::SendFileDescriptor(
-    _In_ Internal::MemoryRegionId memoryRegionId,
-    _In_ int32_t exchangeFd,
-    _In_ size_t memoryRegionSize) const
+    _In_z_ const char* sharedMemoryMapName,
+    _In_ int32_t exchangeFd) const
 {
     HRESULT hr = S_OK;
 
-    // Send the message.
-    //
-    Mlos::Core::Internal::FileDescriptorExchangeMessage msg = {};
-
-    msg.MemoryRegionId = memoryRegionId;
-    msg.MemoryRegionSize = memoryRegionSize;
-    msg.ContainsFd = true;
-
-    hr = SendMessageAndFileDescriptor(m_socketFd, &msg, sizeof(msg), exchangeFd);
+    hr = SendMessageAndFileDescriptor(
+        m_socketFd,
+        const_cast<char*>(sharedMemoryMapName),
+        strlen(sharedMemoryMapName),
+        exchangeFd);
 
     return hr;
 }

@@ -45,7 +45,7 @@ SharedConfigManager::SharedConfigManager() noexcept
 //
 SharedConfigManager::~SharedConfigManager()
 {
-    m_sharedConfigMemoryRegionView.CleanupOnClose |= CleanupOnClose;
+    m_sharedConfigMemoryRegionView.Close(CleanupOnClose);
 }
 
 //----------------------------------------------------------------------------

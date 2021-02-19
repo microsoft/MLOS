@@ -113,7 +113,7 @@ void ISharedChannel::InitializeChannel()
         freePosition += frameLength;
     }
 
-    // Set readPosition to freePostion to reprocess the frames.
+    // Set readPosition to freePosition to reprocess the frames.
     //
     freePosition = Sync.FreePosition.load(std::memory_order_acquire);
     uint32_t readPosition = Sync.ReadPosition.load(std::memory_order_acquire);

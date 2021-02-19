@@ -29,8 +29,7 @@ namespace Core
 // NAME: NamedEvent::Constructor.
 //
 NamedEvent::NamedEvent() noexcept
-  : CleanupOnClose(false),
-    m_semaphore(SEM_FAILED),
+  : m_semaphore(SEM_FAILED),
     m_namedEventName(nullptr)
 {
 }
@@ -41,9 +40,8 @@ NamedEvent::NamedEvent() noexcept
 // PURPOSE:
 //  Move constructor.
 //
-NamedEvent::NamedEvent(NamedEvent&& namedEvent) noexcept
-  : CleanupOnClose(std::exchange(namedEvent.CleanupOnClose, false)),
-    m_semaphore(std::exchange(namedEvent.m_semaphore, SEM_FAILED)),
+NamedEvent::NamedEvent(_In_ NamedEvent&& namedEvent) noexcept
+  : m_semaphore(std::exchange(namedEvent.m_semaphore, SEM_FAILED)),
     m_namedEventName(std::exchange(namedEvent.m_namedEventName, nullptr))
 {
 }
@@ -58,7 +56,7 @@ NamedEvent::NamedEvent(NamedEvent&& namedEvent) noexcept
 //  HRESULT.
 //
 _Must_inspect_result_
-HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
+HRESULT NamedEvent::CreateOrOpen(_In_z_ const char* namedEventName) noexcept
 {
     HRESULT hr = S_OK;
 
@@ -87,7 +85,7 @@ HRESULT NamedEvent::CreateOrOpen(const char* const namedEventName) noexcept
 //  HRESULT.
 //
 _Must_inspect_result_
-HRESULT NamedEvent::Open(const char* const namedEventName) noexcept
+HRESULT NamedEvent::Open(_In_z_ const char* namedEventName) noexcept
 {
     return CreateOrOpen(namedEventName);
 }
@@ -106,21 +104,19 @@ NamedEvent::~NamedEvent()
 // PURPOSE:
 //  Closes a named event object.
 //
-void NamedEvent::Close()
+void NamedEvent::Close(_In_ bool cleanupOnClose)
 {
     if (m_semaphore != SEM_FAILED)
     {
         sem_close(m_semaphore);
         m_semaphore = SEM_FAILED;
 
-        if (CleanupOnClose)
+        if (cleanupOnClose)
         {
             if (m_namedEventName != nullptr)
             {
                 sem_unlink(m_namedEventName);
             }
-
-            CleanupOnClose = false;
         }
     }
 

@@ -34,12 +34,14 @@ class InternalMlosContext : public MlosContext
 {
 public:
     _Must_inspect_result_
-    HRESULT static Create(_Inout_ AlignedInstance<InternalMlosContext>& mlosContext);
+    HRESULT static Create(_Inout_ AlignedInstance<InternalMlosContext>& mlosContextInstance);
 
     InternalMlosContext(
-        _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion> globalMemoryRegionView,
+        _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion>&& globalMemoryRegionView,
         _In_ SharedMemoryMapView&& controlChannelMemoryMapView,
         _In_ SharedMemoryMapView&& feedbackChannelMemoryMapView) noexcept;
+
+    ~InternalMlosContext();
 
 private:
     // Global shared memory region.

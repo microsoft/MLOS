@@ -39,7 +39,7 @@ namespace Mlos.Core.Linux
         /// <param name="msg"></param>
         /// <param name="flags"></param>
         [DllImport(RtLib, EntryPoint = "recvmsg", SetLastError = true)]
-        internal static extern ulong ReceiveMessage(IntPtr socketFd, ref MessageHeader msg, int flags);
+        internal static extern ulong ReceiveMessage(IntPtr socketFd, ref MessageHeader msg, MsgFlags flags);
 
         /// <summary>
         /// Sends a message on a socket.
@@ -49,7 +49,7 @@ namespace Mlos.Core.Linux
         /// <param name="msg"></param>
         /// <param name="flags"></param>
         [DllImport(RtLib, EntryPoint = "sendmsg", SetLastError = true)]
-        internal static extern ulong SendMessage(IntPtr socketFd, ref MessageHeader msg, int flags);
+        internal static extern ulong SendMessage(IntPtr socketFd, ref MessageHeader msg, MsgFlags flags);
 
         /// <summary>
         /// Creates a new POSIX semaphore or opens an existing semaphore.  The semaphore is identified by name.
@@ -276,6 +276,37 @@ namespace Mlos.Core.Linux
             /// in the shm_perm.uid, shm_perm.gid, and shm_perm.mode members of the shmid_ds data structure pointed to by *buf.
             /// </summary>
             IPC_SET = 0x1,
+        }
+
+        [Flags]
+        internal enum MsgFlags : int
+        {
+            /// <summary>
+            /// Process out-of-band data.
+            /// </summary>
+            MSG_OOB = 0x01,
+
+            /// <summary>
+            /// Peek at incoming messages.
+            /// </summary>
+            MSG_PEEK = 0x02,
+
+            /// <summary>
+            /// Don't use local routing.
+            /// </summary>
+            MSG_DONTROUTE = 0x04,
+
+            /// <summary>
+            /// Control data lost before delivery.
+            /// </summary>
+            MSG_CTRUNC = 0x08,
+
+            /// <summary>
+            /// Supply or ask second address.
+            /// </summary>
+            MSG_PROXY = 0x10,
+
+            MSG_TRUNC = 0x20,
         }
     }
 

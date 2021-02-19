@@ -51,13 +51,12 @@ public:
         _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView,
         _In_ InterProcessSharedChannelPolicy&& controlChannelPolicy,
         _In_ InterProcessSharedChannelPolicy&& feedbackChannelPolicy,
-        _In_z_ char* directoryPath,
-        _In_z_ char* socketFilePath,
-        _In_z_ char* openedFilePath) noexcept;
+        _In_ FileWatchEvent&& fileWatchEvent,
+        _In_z_ char* socketFilePath) noexcept;
 
-    AnonymousMemoryMlosContext(const AnonymousMemoryMlosContext&) = delete;
+    AnonymousMemoryMlosContext(_In_ const AnonymousMemoryMlosContext&) = delete;
 
-    AnonymousMemoryMlosContext& operator=(const AnonymousMemoryMlosContext&) = delete;
+    AnonymousMemoryMlosContext& operator=(_In_ const AnonymousMemoryMlosContext&) = delete;
 
     ~AnonymousMemoryMlosContext();
 
@@ -69,6 +68,14 @@ private:
 
     _Must_inspect_result_
     HRESULT HandleFdRequests();
+
+    _Must_inspect_result_
+    static HRESULT CreateOrOpenSharedMemory(
+        _In_ FileDescriptorExchange& fileDescriptorExchange,
+        _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+        _In_ MlosInternal::MemoryRegionId memRegionId,
+        _Inout_ MlosCore::SharedMemoryMapView& sharedMemoryMapView,
+        _In_ const size_t memSize);
 
 private:
     // Global shared memory region.
@@ -97,11 +104,11 @@ private:
     //
     InterProcessSharedChannel m_feedbackChannel;
 
+    FileWatchEvent m_fileWatchEvent;
+
     ThreadHandle m_fdExchangeThread;
 
-    char* m_directoryPath;
     char* m_socketFilePath;
-    char* m_openedFilePath;
 };
 }
 }

@@ -74,25 +74,29 @@ public:
 
     bool IsFeedbackChannelActive() const;
 
+    _Must_inspect_result_
+    static HRESULT CreateOrOpenSharedMemory(
+        _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+        _In_ MlosInternal::MemoryRegionId memRegionId,
+        _Inout_ MlosCore::SharedMemoryMapView& sharedMemoryMapView,
+        _In_ const size_t memSize);
+
+    _Must_inspect_result_
+    static HRESULT CreateOrOpenNamedEvent(
+        _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+        _In_ MlosInternal::MemoryRegionId memoryRegionId,
+        _Inout_ NamedEvent& event);
+
+public:
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    // No-op on Windows.
+    //
+    bool CleanupOnClose;
+
 protected:
-    // Registers a shared memory map in the global memory region.
+    // Gets the shared config memory map.
     //
-    _Must_inspect_result_
-    HRESULT RegisterSharedMemory(
-        _In_ Internal::MemoryRegionId memoryRegionId,
-        _In_z_ const char* sharedMemoryName,
-        _In_ size_t memoryRegionSize);
-
-    // Registers a named event in the global memory region.
-    //
-    _Must_inspect_result_
-    HRESULT RegisterNamedEvent(
-        _In_ Internal::MemoryRegionId memoryRegionId,
-        _In_z_ const char* name);
-
-    // Gets the shared config memory region.
-    //
-    SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>& SharedConfigMemoryRegionView();
+    const SharedMemoryMapView& SharedConfigMemoryMapView() const;
 
     // Shared config manager.
     //
@@ -102,6 +106,7 @@ protected:
     //
     Internal::GlobalMemoryRegion& m_globalMemoryRegion;
 
+private:
     // Channel used to send the control messages (register assembly, register shared config).
     //
     ISharedChannel& m_controlChannel;

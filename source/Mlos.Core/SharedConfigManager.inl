@@ -38,7 +38,7 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(_Inout_ ComponentConfig<T>& comp
 {
     // Ensure there is allocated and registered shared config memory region.
     //
-    if (!m_sharedConfigMemoryRegionView.Buffer.Pointer)
+    if (m_sharedConfigMemoryRegionView.IsInvalid())
     {
         return E_NOT_SET;
     }
@@ -84,7 +84,7 @@ HRESULT SharedConfigManager::CreateOrUpdateFrom(
 template<typename T>
 HRESULT SharedConfigManager::Lookup(_Inout_ ComponentConfig<T>& componentConfig)
 {
-    if (!m_sharedConfigMemoryRegionView.Buffer.Pointer)
+    if (m_sharedConfigMemoryRegionView.IsInvalid())
     {
         return E_NOT_SET;
     }
