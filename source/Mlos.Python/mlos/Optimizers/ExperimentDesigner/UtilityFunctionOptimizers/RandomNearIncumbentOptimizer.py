@@ -28,12 +28,26 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
     """ Searches the utility function for maxima the random near incumbent strategy.
 
     Starting from an incumbent configuration, this optimizer creates a 'cloud' of random points in the vicinity of the incumbent
-    and evaluates the utility function for each of these points. If any of the points becomes 
+    and evaluates the utility function for each of these points. If any of the new points have a higher utility value than the incumbent
+    then it gets promoted to the incumbent and we repeat the process.
+
+    Additionally:
+        1. The entire process can be batched and the above procedure can happen simultaneously for many "incumbents".
+        2. We can intelligently select the starting points by:
+            1. Starting with the points on the pareto frontier.
+            2. Starting with good points from previous calls to 'suggest' as the utility function evolves gradually.
 
     The main benefits are:
 
-        1. It doesn't require a gradient
-        2. It is well parallelizeable (batchable)
+        1. It doesn't require a gradient, but behaves like a gradient method.
+        2. It is well parallelizeable (batchable).
+
+    Possible extensions and options:
+        1. We can keep track of the 'velocity' - the assumption being that if we are moving in a given direction, we can try
+            accelerating in that direction until it's no longer profitable. Check out ADAM and similar gradient based methods
+            for inspiration.
+        2. We should have several distributions to work with.
+
 
     """
 
@@ -52,7 +66,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         self.dimension_names = [dimension.name for dimension in self.parameter_adapter.dimensions]
 
     @trace()
-    def suggest(self, context_values_dataframe=None):  # pylint: disable=unused-argument
+    def suggest(self, context_values_dataframe: pd.DataFrame = None):
         """ Returns the next best configuration to try.
 
         The idea is pretty simple:
