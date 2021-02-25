@@ -10,7 +10,7 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctio
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
-from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Spaces.HypergridAdapters import DiscreteToUnitContinuousHypergridAdapter
 from mlos.Tracer import trace, traced
@@ -21,6 +21,8 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         name="random_near_incumbent_optimizer_config",
         dimensions=[
             DiscreteDimension(name="num_starting_configs", min=1, max=2**16),
+            ContinuousDimension(name="neighborhood_radius", min=0.1, max=10),
+            DiscreteDimension(name="num_neighbors", min=1, max=1000),
             CategoricalDimension(name="cache_good_params", values=[True, False])
         ]
     ).join(
@@ -104,7 +106,56 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         """
 
-        initial_params_df = self._prepare_initial_params_df()
+        assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
+
+        incumbent_params_df = self._prepare_initial_params_df()
+
+        # Now that we have the initial incumbent parameters, we need to compute their utility.
+        #
+        incumbent_features_df = self.optimization_problem.construct_feature_dataframe(
+            parameter_values=incumbent_params_df,
+            context_values=context_values_dataframe,
+            product=False
+        )
+        incumbent_utility_df = self.utility_function(feature_values_pandas_frame=incumbent_features_df)
+
+        # Before we can create random neighbors, we need to normalize all parameter values by projecting them into unit hypercube.
+        #
+        projected_incumbent_params_df = self.parameter_adapter.project_dataframe(df=incumbent_params_df, in_place=False)
+
+        # Let's create random neighbors for each of the initial params
+        #
+        neighbors_dfs = []
+        for incumbent_config_idx, incumbent_config in projected_incumbent_params_df.iterrows():
+            # For now let's only do normal distribution but we can add options later.
+            #
+            neighbors_df = pd.DataFrame()
+            for column in incumbent_config.columns:
+                neighbors_df[column] = np.random.normal(
+                    loc=incumbent_config[column],
+                    scale=self.optimizer_config.neighborhood_radius,
+                    size=self.optimizer_config.num_neighbors
+                )
+
+            # Let's remember which config generated these neighbors too
+            #
+            neighbors_df['incumbent_config_idx'] = incumbent_config_idx
+            neighbors_df['incumbent_utility'] = incumbent_utility_df.iloc[incumbent_config_idx]
+            neighbors_dfs.append(neighbors_df)
+
+        all_neighbors_df = pd.concat(neighbors_dfs)
+
+        # Next, we compute utility for all of those random neighbors
+        #
+        unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=True)
+        neighbors_features_df = self.optimization_problem.construct_feature_dataframe(
+            parameter_values=unprojected_neighbors_df,
+            context_values=context_values_dataframe,
+            product=False
+        )
+        neighbors_utility_df = self.utility_function(feature_values_pandas_frame=neighbors_features_df)
+
+
 
 
 
