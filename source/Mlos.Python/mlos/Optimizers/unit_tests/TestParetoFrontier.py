@@ -208,10 +208,10 @@ class TestParetoFrontier:
         )
 
         all_objectives_df = pd.concat([dominated_df, expected_pareto_df])
-        random_params_df = optimization_problem.parameter_space.random_dataframe(num_samples=len(all_objectives_df.index))
         pareto_frontier = ParetoFrontier(
             optimization_problem,
-            all_objectives_df
+            objectives_df=all_objectives_df,
+            parameters_df=pd.DataFrame(index=all_objectives_df.index)
         )
         computed_pareto_df = pareto_frontier.pareto_df
         assert computed_pareto_df.sort_values(by=['y1','y2']).equals(expected_pareto_df.sort_values(by=['y1', 'y2']))
