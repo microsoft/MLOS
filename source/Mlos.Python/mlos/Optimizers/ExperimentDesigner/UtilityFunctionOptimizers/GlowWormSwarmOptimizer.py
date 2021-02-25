@@ -90,15 +90,23 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
 
 
         """
+        assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
 
         # TODO: consider remembering great features from previous invocations of the suggest() method.
-        feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(
+        parameters_df = self.optimization_problem.parameter_space.random_dataframe(
             num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
         )
-        utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
+
+        features_df = self.optimization_problem.construct_feature_dataframe(
+            parameter_values=parameters_df.copy(deep=False),
+            context_values=context_values_dataframe,
+            product=False
+        )
+
+        utility_function_values = self.utility_function(feature_values_pandas_frame=features_df.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)
         if num_utility_function_values == 0:
-            config_to_suggest = Point.from_dataframe(feature_values_dataframe.iloc[[0]])
+            config_to_suggest = Point.from_dataframe(parameters_df.iloc[[0]])
             self.logger.debug(f"Suggesting: {str(config_to_suggest)} at random.")
             return config_to_suggest
 
@@ -107,8 +115,8 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         top_utility_values = utility_function_values.nlargest(n=self.optimizer_config.num_worms, columns=['utility'])
 
         # TODO: could it be in place?
-        features_for_top_utility = self.parameter_adapter.project_dataframe(feature_values_dataframe.loc[top_utility_values.index], in_place=False)
-        worms = pd.concat([features_for_top_utility, top_utility_values], axis=1)
+        params_for_top_utility = self.parameter_adapter.project_dataframe(parameters_df.loc[top_utility_values.index], in_place=False)
+        worms = pd.concat([params_for_top_utility, top_utility_values], axis=1)
         # Let's reset the index to make keeping track down the road easier.
         #
         worms.index = pd.Index(range(len(worms.index)))
@@ -121,7 +129,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         for _ in range(self.optimizer_config.num_iterations):
             worms = self.run_iteration(worms=worms)
             # TODO: keep track of the max configs over iterations
-            worms = self.compute_utility(worms)
+            worms = self.compute_utility(worms, context_values_dataframe)
             worms['luciferin'] = (1 - self.optimizer_config.luciferin_decay_constant) * worms['luciferin'] + \
                                  self.optimizer_config.luciferin_enhancement_constant * worms['utility']
 
@@ -135,7 +143,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         return self.parameter_adapter.unproject_point(config_to_suggest)
 
     @trace()
-    def compute_utility(self, worms):
+    def compute_utility(self, worms, context_values_df):
         """ Computes utility function values for each worm.
 
         Since some worm positions will produce a NaN, we need to keep producing new utility values for those.
@@ -143,8 +151,9 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         :param worms:
         :return:
         """
-        unprojected_features = self.parameter_adapter.unproject_dataframe(worms[self.dimension_names], in_place=False)
-        utility_function_values = self.utility_function(unprojected_features.copy(deep=False))
+        unprojected_params_df = self.parameter_adapter.unproject_dataframe(worms[self.dimension_names], in_place=False)
+        features_df = self.optimization_problem.construct_feature_dataframe(unprojected_params_df, context_values_df, product=False)
+        utility_function_values = self.utility_function(features_df.copy(deep=False))
         worms['utility'] = utility_function_values
         index_of_nans = worms.index.difference(utility_function_values.index)
         # TODO: A better solution would be to give them random valid configs, and let them live.
