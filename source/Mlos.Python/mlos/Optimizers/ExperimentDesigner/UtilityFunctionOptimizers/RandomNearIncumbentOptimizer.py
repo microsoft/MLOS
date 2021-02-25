@@ -20,7 +20,7 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="random_near_incumbent_optimizer_config",
         dimensions=[
-            DiscreteDimension(name="number_starting_configs", min=1, max=2**16),
+            DiscreteDimension(name="num_starting_configs", min=1, max=2**16),
             CategoricalDimension(name="cache_good_params", values=[True, False])
         ]
     ).join(
@@ -34,7 +34,7 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         )
     ),
     default=Point(
-        number_starting_configs=2**10,
+        num_starting_configs=2**10,
         cache_good_params=True,
         good_params_cache_config=Point(
             num_cached_point=2**16,
@@ -89,7 +89,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         # We will cache good configs from past invocations here.
         #
-        self._good_configs_from_the_past_invocations = None
+        self._good_configs_from_the_past_invocations_df = None
 
     @trace()
     def suggest(self, context_values_dataframe: pd.DataFrame = None):
@@ -158,7 +158,28 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         the past, if there still isn't enough, then we generate random points.
         :return:
         """
-        initial_params_df = self.pareto_frontier.pareto_df
+        initial_params_df = self.pareto_frontier.params_for_pareto_df
+        if len(initial_params_df.index) < self.optimizer_config.num_starting_configs and self.optimizer_config.cache_good_params:
+            # We add some samples from the cached ones.
+            num_cached_points_to_use = min(
+                len(self._good_configs_from_the_past_invocations_df.index),
+                self.config.good_params_cache_config.num_used_points
+            )
+            cached_points_to_use_df = self._good_configs_from_the_past_invocations_df.sample(
+                num=num_cached_points_to_use,
+                replace=False,
+                axis='index'
+            )
+            initial_params_df = pd.concat([initial_params_df, cached_points_to_use_df])
+
+        if len(initial_params_df.index) < self.optimizer_config.num_starting_configs:
+            # If we are still short some points, we generate them at random.
+            num_random_points_to_create = self.optimizer_config.num_starting_configs - len(initial_params_df.index)
+            random_params_df = self.optimization_problem.parameter_space.random_dataframe(num_samples=num_random_points_to_create)
+            initial_params_df = pd.concat([initial_params_df, random_params_df])
+
+        initial_params_df.reset_index(inplace=True)
+        return initial_params_df
 
 
     @trace()

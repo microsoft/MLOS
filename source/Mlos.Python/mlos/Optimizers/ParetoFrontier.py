@@ -106,6 +106,10 @@ class ParetoFrontier:
     def pareto_df(self) -> pd.DataFrame:
         return self._pareto_df.copy(deep=True)
 
+    @property
+    def params_for_pareto_df(self):
+        return self._params_for_pareto_df.copy(deep=True)
+
     def update_pareto(self, objectives_df: pd.DataFrame, parameters_df: pd.DataFrame):
         """Computes a pareto frontier for the given objectives_df (including weak-pareto-optimal points).
 
