@@ -88,7 +88,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         self.parameter_adapter = DiscreteToUnitContinuousHypergridAdapter(
             adaptee=self.optimization_problem.parameter_space
         )
-        self.dimension_names = [dimension.name for dimension in self.parameter_adapter.dimensions]
+        self.parameter_dimension_names = [dimension.name for dimension in self.parameter_adapter.dimensions]
         self.pareto_frontier = pareto_frontier
 
         # We will cache good configs from past invocations here.
@@ -110,12 +110,12 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
 
-        incumbent_params_df = self._prepare_initial_params_df()
+        incumbents_df = self._prepare_initial_params_df()
 
         # Now that we have the initial incumbent parameters, we need to compute their utility.
         #
         incumbent_features_df = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=incumbent_params_df,
+            parameter_values=incumbents_df,
             context_values=context_values_dataframe,
             product=False
         )
@@ -123,7 +123,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         # Before we can create random neighbors, we need to normalize all parameter values by projecting them into unit hypercube.
         #
-        projected_incumbent_params_df = self.parameter_adapter.project_dataframe(df=incumbent_params_df, in_place=False)
+        projected_incumbent_params_df = self.parameter_adapter.project_dataframe(df=incumbents_df, in_place=False)
 
         # Let's create random neighbors for each of the initial params
         #
@@ -150,11 +150,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             neighbors_dfs.append(neighbors_df)
 
         all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
-        #all_neighbors_params_only_df = all_neighbors_df[self.dimension_names]
 
         # Next, we compute utility for all of those random neighbors
         #
-        unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=True)
+        unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=False)
 
         assert len(unprojected_neighbors_df.index) == len(self.optimization_problem.parameter_space.get_valid_rows_index(unprojected_neighbors_df))
 
@@ -166,8 +165,24 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         )
 
         neighbors_utility_df = self.utility_function(feature_values_pandas_frame=neighbors_features_df)
+        all_neighbors_df = all_neighbors_df.loc[neighbors_utility_df.index]
+        all_neighbors_df['utility'] = neighbors_utility_df['utility']
+        all_neighbors_df['utility_gain'] = all_neighbors_df['utility'] - all_neighbors_df['incumbent_utility']
 
+        # We can filter out all rows with negative utility gain.
+        #
+        all_neighbors_df = all_neighbors_df[all_neighbors_df['utility_gain'] >= 0]
 
+        # The series below has incumbent_config_idx as index, and best neighbor's index as value.
+        #
+        best_neighbors_indices = all_neighbors_df.groupby(by=["incumbent_config_idx"])['utility_gain'].idxmax()
+        best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices, self.parameter_dimension_names]
+        best_neighbors_df.set_index(keys=best_neighbors_indices.index, inplace=True, verify_integrity=True)
+
+        # Let's create a dataframe with the new incumbents. We do it by copying old incumbents in case none of their neighbors
+        # had higher utility.
+        new_incumbents_df = projected_incumbent_params_df
+        new_incumbents_df.loc[best_neighbors_indices.index] = best_neighbors_df
 
 
 
@@ -206,7 +221,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         # TODO: return the max of all seen configs - not just the configs that the glowworms occupied in this iteration.
         idx_of_max = worms['utility'].idxmax()
-        best_config = worms.loc[[idx_of_max], self.dimension_names]
+        best_config = worms.loc[[idx_of_max], self.parameter_dimension_names]
         config_to_suggest = Point.from_dataframe(best_config)
         self.logger.debug(f"Suggesting: {str(config_to_suggest)} at random.")
         # TODO: we might have to go for second or nth best if the projection won't work out. But then again if we were
@@ -257,7 +272,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         :param worms:
         :return:
         """
-        unprojected_features = self.parameter_adapter.unproject_dataframe(worms[self.dimension_names], in_place=False)
+        unprojected_features = self.parameter_adapter.unproject_dataframe(worms[self.parameter_dimension_names], in_place=False)
         utility_function_values = self.utility_function(unprojected_features.copy(deep=False))
         worms['utility'] = utility_function_values
         index_of_nans = worms.index.difference(utility_function_values.index)
@@ -271,7 +286,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
     def run_iteration(self, worms: pd.DataFrame):
 
         with traced(scope_name="numpy_matrix_operations"):
-            positions = worms[self.dimension_names].to_numpy()
+            positions = worms[self.parameter_dimension_names].to_numpy()
             # At this point many glowworms will have NaNs in their position vectors: for every column that's invalid.
             # Glowworms with the same set of valid columns, belong to the same subgrids in the hypergrid, but glowworms
             # with different set of valid columns belong to - essentially - different search spaces, and the idea of
@@ -335,9 +350,9 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             # This is undoing that trick to hide it from the caller.
             # TODO: this ends up being pretty slow. See if we can improve.
             #
-            is_nan = np.isnan(worms.loc[row, self.dimension_names].to_numpy())
+            is_nan = np.isnan(worms.loc[row, self.parameter_dimension_names].to_numpy())
             our_new_position[is_nan] = np.nan
-            worms.loc[row, self.dimension_names] = our_new_position
+            worms.loc[row, self.parameter_dimension_names] = our_new_position
 
             current_decision_radius = decision_radii[row]
             decision_radius_update = self.optimizer_config.decision_radius_adjustment_constant * \
