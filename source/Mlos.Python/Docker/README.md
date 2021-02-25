@@ -22,8 +22,8 @@ It is complete except for the `Password` field, which we don't want checked into
   ```json
   {
     "Host": ".",
-    "Username": "sa",
-    "Password": "*YouKnowWhatToPutHere*",
+    "Username": "",
+    "Password": "",
     "DatabaseName": "MlosModels",
     "TrustedConnection": false,
     "Driver": "ODBC Driver 17 for SQL Server"

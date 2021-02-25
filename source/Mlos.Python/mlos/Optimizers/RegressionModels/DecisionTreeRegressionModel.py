@@ -141,8 +141,6 @@ class DecisionTreeRegressionModel(RegressionModel):
             leaf_sample_variance = np.var(observations_at_leaf, ddof=1) # ddof = delta degrees of freedom. We want sample variance.
             leaf_mean_variance = leaf_sample_variance / len(observations_at_leaf)
 
-            # TODO: note that if we change the tree to fit a linear regression at each leaf, these predictions would have
-            # to be computed in the .predict() function, though the slope and y-intersect could be computed here.
             self._mean_per_leaf[node_index] = leaf_mean
             self._mean_variance_per_leaf[node_index] = leaf_mean_variance
             self._sample_variance_per_leaf[node_index] = leaf_sample_variance

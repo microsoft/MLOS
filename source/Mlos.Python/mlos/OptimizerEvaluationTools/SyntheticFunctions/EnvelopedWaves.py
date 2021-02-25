@@ -139,7 +139,7 @@ class EnvelopedWaves(ObjectiveFunctionBase):
         return objectives_df
 
     def _linear_envelope(self, x: pd.Series):
-        return x * self.objective_function_config.linear_envelope_config.slope
+        return x * self.objective_function_config.linear_envelope_config.gradient
 
     def _quadratic_envelope(self, x: pd.Series):
         a = self.objective_function_config.quadratic_envelope_config.a
