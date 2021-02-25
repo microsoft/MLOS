@@ -128,9 +128,10 @@ class Hypergrid(ABC):
         If there are additional columns, they will be dropped unless exclude_extra_columns == False.
         """
         valid_rows_index = self.get_valid_rows_index(original_dataframe)
+        assert len(valid_rows_index) <= len(original_dataframe.index)
 
         if exclude_extra_columns:
-            return original_dataframe.loc[valid_rows_index][self.dimension_names]
+            return original_dataframe.loc[valid_rows_index, self.dimension_names]
         return original_dataframe.loc[valid_rows_index]
 
 

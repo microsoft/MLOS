@@ -47,20 +47,18 @@ class TestUtilityFunctionOptimizers:
         objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
-        cls.input_space = objective_function.parameter_space
+        cls.parameter_space = objective_function.parameter_space
         cls.output_space = objective_function.output_space
 
         cls.optimization_problem = OptimizationProblem(
-            parameter_space=cls.input_space,
+            parameter_space=cls.parameter_space,
             objective_space=cls.output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
 
-
-
-        cls.parameter_values_df = cls.optimization_problem.parameter_space.random_dataframe(num_samples=2500)
-        cls.feature_values_df = cls.optimization_problem.construct_feature_dataframe(parameter_values=cls.parameter_values_df, context_values=None, product=False)
-        cls.output_values_df = objective_function.evaluate_dataframe(cls.parameter_values_df)
+        cls.parameters_df = objective_function.parameter_space.random_dataframe(num_samples=2500)
+        cls.features_df = cls.optimization_problem.construct_feature_dataframe(cls.parameters_df)
+        cls.objectives_df = objective_function.evaluate_dataframe(cls.parameters_df)
 
         cls.model_config = homogeneous_random_forest_config_store.default
 
@@ -71,7 +69,7 @@ class TestUtilityFunctionOptimizers:
             input_space=cls.optimization_problem.feature_space,
             output_space=cls.optimization_problem.objective_space
         )
-        cls.model.fit(cls.feature_values_df, cls.output_values_df, iteration_number=len(cls.feature_values_df.index))
+        cls.model.fit(cls.features_df, cls.objectives_df, iteration_number=len(cls.features_df.index))
 
         cls.utility_function_config = Point(
             utility_function_name="upper_confidence_bound_on_improvement",
@@ -86,8 +84,8 @@ class TestUtilityFunctionOptimizers:
 
         cls.pareto_frontier = ParetoFrontier(
             optimization_problem=cls.optimization_problem,
-            objectives_df=cls.output_values_dataframe,
-            parameters_df=cls.input_values_dataframe
+            objectives_df=cls.objectives_df,
+            parameters_df=cls.parameters_df
         )
 
     @classmethod
@@ -110,7 +108,7 @@ class TestUtilityFunctionOptimizers:
         for _ in range(5):
             suggested_params = random_search_optimizer.suggest()
             print(suggested_params.to_json())
-            assert suggested_params in self.input_space
+            assert suggested_params in self.parameter_space
 
     @trace()
     def test_glow_worm_swarm_optimizer(self):
@@ -123,7 +121,8 @@ class TestUtilityFunctionOptimizers:
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
             print(suggested_params.to_json())
-            assert suggested_params in self.input_space, f"{suggested_params.to_json(indent=2)} not in {self.input_space}"
+            assert suggested_params in self.parameter_space, f"{suggested_params.to_json(indent=2)} not in {self.parameter_space}"
+            assert suggested_params in self.parameter_space
 
     @trace()
     def test_random_near_incumbent_optimizer(self):
@@ -137,7 +136,7 @@ class TestUtilityFunctionOptimizers:
         for _ in range(5):
             suggested_params = random_near_incumbent_optimizer.suggest()
             print(suggested_params.to_json(indent=2))
-            assert suggested_params in self.input_space
+            assert suggested_params in self.parameter_space
 
     @trace()
     def test_glow_worm_on_three_level_quadratic(self):

@@ -21,7 +21,7 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         name="random_near_incumbent_optimizer_config",
         dimensions=[
             DiscreteDimension(name="num_starting_configs", min=1, max=2**16),
-            ContinuousDimension(name="neighborhood_radius", min=0.1, max=10),
+            ContinuousDimension(name="initial_neighborhood_radius", min=0, max=1, include_min=False),
             DiscreteDimension(name="num_neighbors", min=1, max=1000),
             CategoricalDimension(name="cache_good_params", values=[True, False])
         ]
@@ -36,7 +36,9 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         )
     ),
     default=Point(
-        num_starting_configs=2**10,
+        num_starting_configs=2**7,
+        initial_neighborhood_radius=0.1,
+        num_neighbors=100,
         cache_good_params=True,
         good_params_cache_config=Point(
             num_cached_points=2**16,
@@ -130,29 +132,39 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             # For now let's only do normal distribution but we can add options later.
             #
             neighbors_df = pd.DataFrame()
-            for column in incumbent_config.columns:
+            for column in incumbent_config.index:
                 neighbors_df[column] = np.random.normal(
                     loc=incumbent_config[column],
-                    scale=self.optimizer_config.neighborhood_radius,
+                    scale=self.optimizer_config.initial_neighborhood_radius,
                     size=self.optimizer_config.num_neighbors
                 )
+
+            # Let's remove all invalid configs. TODO: consider clipping them instead.
+            #
+            neighbors_df = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=neighbors_df, exclude_extra_columns=False)
 
             # Let's remember which config generated these neighbors too
             #
             neighbors_df['incumbent_config_idx'] = incumbent_config_idx
-            neighbors_df['incumbent_utility'] = incumbent_utility_df.iloc[incumbent_config_idx]
+            neighbors_df['incumbent_utility'] = incumbent_utility_df.loc[incumbent_config_idx, 'utility']
             neighbors_dfs.append(neighbors_df)
 
-        all_neighbors_df = pd.concat(neighbors_dfs)
+        all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
+        #all_neighbors_params_only_df = all_neighbors_df[self.dimension_names]
 
         # Next, we compute utility for all of those random neighbors
         #
         unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=True)
+
+        assert len(unprojected_neighbors_df.index) == len(self.optimization_problem.parameter_space.get_valid_rows_index(unprojected_neighbors_df))
+
+
         neighbors_features_df = self.optimization_problem.construct_feature_dataframe(
             parameter_values=unprojected_neighbors_df,
             context_values=context_values_dataframe,
             product=False
         )
+
         neighbors_utility_df = self.utility_function(feature_values_pandas_frame=neighbors_features_df)
 
 

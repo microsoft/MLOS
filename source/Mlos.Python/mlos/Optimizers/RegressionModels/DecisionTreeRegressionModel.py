@@ -166,8 +166,8 @@ class DecisionTreeRegressionModel(RegressionModel):
         valid_rows_index = None
         features_df = None
         if self.trained:
-            features_df = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
-            features_df = self._input_space_adapter.filter_out_invalid_rows(original_dataframe=features_df, exclude_extra_columns=True)
+            valid_features_df = self.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame, exclude_extra_columns=True)
+            features_df = self._input_space_adapter.project_dataframe(valid_features_df, in_place=False)
             valid_rows_index = features_df.index
 
         predictions = Prediction(
