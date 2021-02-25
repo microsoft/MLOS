@@ -55,7 +55,7 @@ class BayesianOptimizer(OptimizerBase):
 
         self.surrogate_model_output_space = optimization_problem.objective_space
         self.optimizer_config = optimizer_config
-        self.pareto_frontier: ParetoFrontier = ParetoFrontier(optimization_problem=self.optimization_problem, objectives_df=None)
+        self.pareto_frontier: ParetoFrontier = ParetoFrontier(optimization_problem=self.optimization_problem)
 
         # Now let's put together the surrogate model.
         #
@@ -116,8 +116,11 @@ class BayesianOptimizer(OptimizerBase):
     def compute_surrogate_model_goodness_of_fit(self):
         if not self.surrogate_model.trained:
             raise RuntimeError("Model has not been trained yet.")
-        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=self._parameter_values_df.copy(),
-                                                                                            context_values=self._context_values_df.copy())
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
+            parameter_values=self._parameter_values_df.copy(),
+            context_values=self._context_values_df.copy()
+        )
+
         return self.surrogate_model.compute_goodness_of_fit(
             features_df=feature_values_pandas_frame,
             targets_df=self._target_values_df.copy(),
@@ -197,7 +200,7 @@ class BayesianOptimizer(OptimizerBase):
                 iteration_number=len(self._parameter_values_df.index)
             )
 
-        self.pareto_frontier.update_pareto(objectives_df=self._target_values_df)
+        self.pareto_frontier.update_pareto(objectives_df=self._target_values_df, parameters_df=self._parameter_values_df)
 
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument

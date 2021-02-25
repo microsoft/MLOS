@@ -9,7 +9,8 @@ from sklearn.metrics.pairwise import euclidean_distances
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
-from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
+from mlos.Spaces import CategoricalDimension, DiscreteDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Spaces.HypergridAdapters import DiscreteToUnitContinuousHypergridAdapter
 from mlos.Tracer import trace, traced
@@ -18,9 +19,28 @@ from mlos.Tracer import trace, traced
 random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="random_near_incumbent_optimizer_config",
-        dimensions=[]
+        dimensions=[
+            DiscreteDimension(name="number_starting_configs", min=1, max=2**16),
+            CategoricalDimension(name="cache_good_params", values=[True, False])
+        ]
+    ).join(
+        on_external_dimension=CategoricalDimension(name="cache_good_params", values=[True]),
+        subgrid=SimpleHypergrid(
+            name="good_params_cache_config",
+            dimensions=[
+                DiscreteDimension(name="num_cached_points", min=10, max=2**16),
+                DiscreteDimension(name="num_used_points", min=0, max=2**16)
+            ]
+        )
     ),
-    default=Point()
+    default=Point(
+        number_starting_configs=2**10,
+        cache_good_params=True,
+        good_params_cache_config=Point(
+            num_cached_point=2**16,
+            num_used_points=2**7
+        )
+    )
 )
 
 
@@ -56,6 +76,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             optimizer_config: Point,
             optimization_problem: OptimizationProblem,
             utility_function: UtilityFunction,
+            pareto_frontier: ParetoFrontier,
             logger=None
     ):
         UtilityFunctionOptimizer.__init__(self, optimizer_config, optimization_problem, utility_function, logger)
@@ -64,23 +85,29 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             adaptee=self.optimization_problem.parameter_space
         )
         self.dimension_names = [dimension.name for dimension in self.parameter_adapter.dimensions]
+        self.pareto_frontier = pareto_frontier
+
+        # We will cache good configs from past invocations here.
+        #
+        self._good_configs_from_the_past_invocations = None
 
     @trace()
     def suggest(self, context_values_dataframe: pd.DataFrame = None):
         """ Returns the next best configuration to try.
 
         The idea is pretty simple:
-            1. We start with a random population of glowworms, whose luciferin levels are equal to their utility function value.
-            2. Each glowworm looks around for all other glowworms in its neighborhood and finds ones that are brighter.
-            3. Each glowworm randomly selects from its brighter neighbors the one to walk towards (with probability proportional to the diff in brightness).
-            4. Everybody takes a step.
-            5. Everybody updates step size to have the desired number of neighbors.
-            5. Update luciferin levels.
-
+            1. We start with all configs on the pareto frontier, plus some good points from previous calls to suggest plus some random configs.
+            2. For each point we generate random neighbors and optionally adjust them using our velocity.
+            3. We compute utility for all neighbors and select a new incumbent.
+            4. We update the velocity.
+            5. We repeat until we ran out of iterations or until velocity falls below some threshold.
 
         """
 
-        # TODO: consider remembering great features from previous invocations of the suggest() method.
+        initial_params_df = self._prepare_initial_params_df()
+
+
+
         feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(
             num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
         )
@@ -122,6 +149,17 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         # TODO: we might have to go for second or nth best if the projection won't work out. But then again if we were
         # TODO: able to compute the utility function then the projection has worked out once before...
         return self.parameter_adapter.unproject_point(config_to_suggest)
+
+    @trace()
+    def _prepare_initial_params_df(self):
+        """Prepares a dataframe with inital parameters to start the search with.
+
+        We simply take all points on the pareto frontier, if there is not enough points there, we also grab some good points from
+        the past, if there still isn't enough, then we generate random points.
+        :return:
+        """
+        initial_params_df = self.pareto_frontier.pareto_df
+
 
     @trace()
     def compute_utility(self, worms):
