@@ -8,7 +8,9 @@ import os
 import numpy as np
 import pandas as pd
 
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer, random_near_incumbent_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
@@ -79,6 +81,12 @@ class TestUtilityFunctionOptimizers:
             minimize=cls.optimization_problem.objectives[0].minimize
         )
 
+        cls.pareto_frontier = ParetoFrontier(
+            optimization_problem=cls.optimization_problem,
+            objectives_df=cls.output_values_dataframe,
+            parameters_df=cls.input_values_dataframe
+        )
+
     @classmethod
     def teardown_class(cls) -> None:
         temp_dir = os.path.join(os.getcwd(), "temp")
@@ -112,6 +120,20 @@ class TestUtilityFunctionOptimizers:
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
             print(suggested_params.to_json())
+            assert suggested_params in self.input_space
+
+    @trace()
+    def test_random_near_incumbent_optimizer(self):
+        random_near_incumbent_optimizer = RandomNearIncumbentOptimizer(
+            optimization_problem=self.optimization_problem,
+            utility_function=self.utility_function,
+            optimizer_config=random_near_incumbent_optimizer_config_store.default,
+            pareto_frontier=self.pareto_frontier
+        )
+
+        for _ in range(5):
+            suggested_params = random_near_incumbent_optimizer.suggest()
+            print(suggested_params.to_json(indent=2))
             assert suggested_params in self.input_space
 
     @trace()

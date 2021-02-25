@@ -37,7 +37,7 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         num_starting_configs=2**10,
         cache_good_params=True,
         good_params_cache_config=Point(
-            num_cached_point=2**16,
+            num_cached_points=2**16,
             num_used_points=2**7
         )
     )
@@ -159,18 +159,21 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         :return:
         """
         initial_params_df = self.pareto_frontier.params_for_pareto_df
-        if len(initial_params_df.index) < self.optimizer_config.num_starting_configs and self.optimizer_config.cache_good_params:
-            # We add some samples from the cached ones.
-            num_cached_points_to_use = min(
-                len(self._good_configs_from_the_past_invocations_df.index),
-                self.config.good_params_cache_config.num_used_points
-            )
-            cached_points_to_use_df = self._good_configs_from_the_past_invocations_df.sample(
-                num=num_cached_points_to_use,
-                replace=False,
-                axis='index'
-            )
-            initial_params_df = pd.concat([initial_params_df, cached_points_to_use_df])
+
+        if self._good_configs_from_the_past_invocations_df is not None and len(self._good_configs_from_the_past_invocations_df.index) > 0:
+            if len(initial_params_df.index) < self.optimizer_config.num_starting_configs and self.optimizer_config.cache_good_params:
+                # We add some samples from the cached ones.
+                num_cached_points_to_use = min(
+                    len(self._good_configs_from_the_past_invocations_df.index),
+                    self.optimizer_config.good_params_cache_config.num_used_points
+                )
+
+                cached_points_to_use_df = self._good_configs_from_the_past_invocations_df.sample(
+                    num=num_cached_points_to_use,
+                    replace=False,
+                    axis='index'
+                )
+                initial_params_df = pd.concat([initial_params_df, cached_points_to_use_df])
 
         if len(initial_params_df.index) < self.optimizer_config.num_starting_configs:
             # If we are still short some points, we generate them at random.
@@ -178,7 +181,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             random_params_df = self.optimization_problem.parameter_space.random_dataframe(num_samples=num_random_points_to_create)
             initial_params_df = pd.concat([initial_params_df, random_params_df])
 
-        initial_params_df.reset_index(inplace=True)
+        initial_params_df.reset_index(drop=True, inplace=True)
         return initial_params_df
 
 
