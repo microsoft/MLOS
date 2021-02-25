@@ -92,10 +92,16 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         """
         assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
 
+        # TODO: consider remembering great features from previous invocations of the suggest() method.
         parameters_df = self.optimization_problem.parameter_space.random_dataframe(
             num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
         )
-        features_df = self.optimization_problem.construct_feature_dataframe(parameter_values=parameters_df.copy(deep=False), context_values=context_values_dataframe, product=False)
+
+        features_df = self.optimization_problem.construct_feature_dataframe(
+            parameter_values=parameters_df.copy(deep=False),
+            context_values=context_values_dataframe,
+            product=False
+        )
 
         utility_function_values = self.utility_function(feature_values_pandas_frame=features_df.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)

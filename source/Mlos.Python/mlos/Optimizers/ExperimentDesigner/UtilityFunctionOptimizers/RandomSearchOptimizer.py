@@ -43,7 +43,7 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         UtilityFunctionOptimizer.__init__(self, optimizer_config, optimization_problem, utility_function, logger)
 
     @trace()
-    def suggest(self, context_values_dataframe: pd.DataFrame = None):  # pylint: disable=unused-argument
+    def suggest(self, context_values_dataframe: pd.DataFrame = None):
         """ Returns the next best configuration to try.
 
         It does so by generating num_samples_per_iteration random configurations,
