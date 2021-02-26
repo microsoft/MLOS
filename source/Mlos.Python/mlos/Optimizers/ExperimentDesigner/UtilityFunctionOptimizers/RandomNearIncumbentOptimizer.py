@@ -173,7 +173,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             #
             num_neighbors_per_incumbent = np.floor(self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
 
-            self.logger.info(f"[Iteration {num_iterations}/{self.optimizer_config.max_num_iterations}] Num active incumbents: {num_active_incumbents/len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}")
+            self.logger.info(f"[Iteration {num_iterations}/{self.optimizer_config.max_num_iterations}] Num active incumbents: {num_active_incumbents}/{len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}")
 
             # Let's create random neighbors for each of the initial params
             #
