@@ -137,7 +137,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         idx_of_max = worms['utility'].idxmax()
         best_config = worms.loc[[idx_of_max], self.dimension_names]
         config_to_suggest = Point.from_dataframe(best_config)
-        self.logger.debug(f"Suggesting: {str(config_to_suggest)} at random.")
+        self.logger.debug(f"Suggesting: {str(config_to_suggest)}.")
         # TODO: we might have to go for second or nth best if the projection won't work out. But then again if we were
         # TODO: able to compute the utility function then the projection has worked out once before...
         return self.parameter_adapter.unproject_point(config_to_suggest)

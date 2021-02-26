@@ -20,11 +20,11 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="random_near_incumbent_optimizer_config",
         dimensions=[
-            DiscreteDimension(name="num_starting_configs", min=1, max=2**16),
+            DiscreteDimension(name="num_starting_configs", min=1, max=1000),
             ContinuousDimension(name="initial_velocity", min=0.01, max=1),
             ContinuousDimension(name="velocity_update_constant", min=0, max=1),
             ContinuousDimension(name="velocity_convergence_threshold", min=0, max=1),
-            ContinuousDimension(name="max_num_iterations", min=1, max=1000),
+            DiscreteDimension(name="max_num_iterations", min=1, max=1000),
             DiscreteDimension(name="num_neighbors", min=1, max=1000),
             CategoricalDimension(name="cache_good_params", values=[True, False])
         ]
@@ -136,6 +136,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         # component along each dimension.
         incumbents_df = projected_incumbent_params_df
         incumbents_df['utility'] = incumbent_utility_df['utility']
+
         incumbents_df['speed'] = 0
         for dimension_name in self.parameter_dimension_names:
             incumbents_df[f'{dimension_name}_velocity'] = self.optimizer_config.initial_velocity
@@ -143,6 +144,11 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         incumbents_df['speed'] = np.sqrt(incumbents_df['speed'])
         incumbents_df['active'] = incumbents_df['speed'] > self.optimizer_config.velocity_convergence_threshold
+
+        # Let's disable all incumbents for which we couldn't compute utility.
+        #
+        null_utility_index = incumbents_df['utility'].isna().index
+        incumbents_df.loc[null_utility_index, 'active'] = False
 
         num_iterations = 0
 
@@ -226,7 +232,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
             # We can filter out all rows with negative utility gain.
             #
-            all_neighbors_df = all_neighbors_df[all_neighbors_df['utility_gain'] > 0]
+            all_neighbors_df = all_neighbors_df[all_neighbors_df['utility_gain'] >= 0]
 
             # The series below has best neighbor's index as value and the incumbent_config_idx as key.
             #
@@ -246,6 +252,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             displacement_df = pd.DataFrame()
             for dimension_name in self.parameter_dimension_names:
                 displacement_df[dimension_name] = new_incumbents_df[dimension_name] - incumbents_df[dimension_name]
+            displacement_df.fillna(0, inplace=True)
 
             # Finally we get to update the parameter values for incumbents, as well as updating their velocity.
             #
@@ -257,7 +264,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 incumbents_df['speed'] += incumbents_df[f'{dimension_name}_velocity'] ** 2
 
             incumbents_df['speed'] = np.sqrt(incumbents_df['speed'])
-            incumbents_df['active'] = incumbents_df['speed'] > self.optimizer_config.velocity_convergence_threshold
+            incumbents_df['active'] = incumbents_df['active'] & (incumbents_df['speed'] > self.optimizer_config.velocity_convergence_threshold)
 
             # Let's set the velocity of all inactive incumbents to 0.
             #
@@ -268,7 +275,8 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
             # We also get to update their utility.
             #
-            assert (incumbents_df['utility'] <= new_incumbents_df['utility']).all()
+            not_na_incumbent_index = incumbents_df[incumbents_df['utility'].notna()].index
+            assert (incumbents_df.loc[not_na_incumbent_index, 'utility'] <= new_incumbents_df.loc[not_na_incumbent_index, 'utility']).all()
             incumbents_df['utility'] = new_incumbents_df['utility']
 
 
@@ -285,6 +293,20 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             velocity_over_time_dfs[dimension_name] = pd.concat(velocities_over_time[dimension_name], axis=1).T
 
         print('breakpoint')
+
+        if incumbents_df['utility'].isna().all() or num_iterations <= 2:
+            # TODO: raise an exception so that the experiment designer can explicitly return a random config.
+            #
+            self.logger.info("Suggesting a random config!")
+            return self.optimization_problem.parameter_space.random()
+
+        assert False, "I hope this fires at least once."
+        idx_of_max = incumbents_df['utility'].idxmax()
+        best_config_df = incumbents_df.loc[[idx_of_max], self.parameter_dimension_names]
+        config_to_suggest = Point.from_dataframe(best_config_df)
+        unprojected_config_to_suggest = self.parameter_adapter.unproject_point(config_to_suggest)
+        self.logger.info(f"Suggesting: {unprojected_config_to_suggest.to_json(indent=2)}")
+        return unprojected_config_to_suggest
 
 
     @trace()

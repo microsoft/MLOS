@@ -344,7 +344,7 @@ class TestBayesianOptimizer:
 
     @trace()
     @pytest.mark.parametrize("restart_num", [i for i in range(10)])
-    @pytest.mark.parametrize("use_remote_optimizer", [True, False])
+    @pytest.mark.parametrize("use_remote_optimizer", [False])
     def test_hierarchical_quadratic_cold_start_random_configs(self, restart_num, use_remote_optimizer):
 
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
@@ -406,7 +406,7 @@ class TestBayesianOptimizer:
                 optimizer_config=optimizer_config
             )
 
-        num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 5
+        num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 25
         for i in range(num_guided_samples):
             suggested_params = bayesian_optimizer.suggest()
             y = objective_function.evaluate_point(suggested_params)

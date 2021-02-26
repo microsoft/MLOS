@@ -11,6 +11,7 @@ from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
+from .UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer, random_near_incumbent_optimizer_config_store
 from .UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
@@ -28,7 +29,11 @@ experiment_designer_config_store = ComponentConfigStore(
                 ConfidenceBoundUtilityFunction.__name__,
                 MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__
             ]),
-            CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__, GlowWormSwarmOptimizer.__name__]),
+            CategoricalDimension('numeric_optimizer_implementation', values=[
+                RandomSearchOptimizer.__name__,
+                GlowWormSwarmOptimizer.__name__,
+                RandomNearIncumbentOptimizer.__name__
+            ]),
             ContinuousDimension('fraction_random_suggestions', min=0, max=1)
         ]
     ).join(
@@ -43,12 +48,15 @@ experiment_designer_config_store = ComponentConfigStore(
     ).join(
         subgrid=glow_worm_swarm_optimizer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
+    ).join(
+        subgrid=random_near_incumbent_optimizer_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomNearIncumbentOptimizer.__name__])
     ),
     default=Point(
         utility_function_implementation=ConfidenceBoundUtilityFunction.__name__,
-        numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
+        numeric_optimizer_implementation=RandomNearIncumbentOptimizer.__name__,
         confidence_bound_utility_function_config=confidence_bound_utility_function_config_store.default,
-        random_search_optimizer_config=random_search_optimizer_config_store.default,
+        random_near_incumbent_optimizer_config=random_near_incumbent_optimizer_config_store.default,
         fraction_random_suggestions=0.5
     )
 )
@@ -141,12 +149,17 @@ class ExperimentDesigner:
             numeric_optimizer_config = self.config.random_search_optimizer_config
         elif self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             numeric_optimizer_config = self.config.glow_worm_swarm_optimizer_config
+        elif self.config.numeric_optimizer_implementation == RandomNearIncumbentOptimizer.__name__:
+            numeric_optimizer_config = self.config.random_near_incumbent_optimizer_config
+        else:
+            raise NotImplementedError(f"Unknown numeric optimizer implementation: {self.config.numeric_optimizer_config}")
 
         self.numeric_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
             utility_function=self.utility_function,
             optimizer_type_name=self.config.numeric_optimizer_implementation,
             optimizer_config=numeric_optimizer_config,
             optimization_problem=self.optimization_problem,
+            pareto_frontier=self.pareto_frontier,
             logger=self.logger
         )
 
