@@ -8,6 +8,7 @@ import os
 import numpy as np
 import pandas as pd
 
+from mlos.Logger import create_logger
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer, random_near_incumbent_optimizer_config_store
@@ -43,6 +44,7 @@ class TestUtilityFunctionOptimizers:
         """
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
+        cls.logger = create_logger("TestUtilityFunctionOptimizers")
 
         objective_function_config = objective_function_config_store.get_config_by_name('2d_quadratic_concave_up')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
@@ -67,7 +69,8 @@ class TestUtilityFunctionOptimizers:
         cls.model = MultiObjectiveHomogeneousRandomForest(
             model_config=cls.model_config,
             input_space=cls.optimization_problem.feature_space,
-            output_space=cls.optimization_problem.objective_space
+            output_space=cls.optimization_problem.objective_space,
+            logger=cls.logger
         )
         cls.model.fit(cls.features_df, cls.objectives_df, iteration_number=len(cls.features_df.index))
 
@@ -79,7 +82,8 @@ class TestUtilityFunctionOptimizers:
         cls.utility_function = ConfidenceBoundUtilityFunction(
             function_config=cls.utility_function_config,
             surrogate_model=cls.model,
-            minimize=cls.optimization_problem.objectives[0].minimize
+            minimize=cls.optimization_problem.objectives[0].minimize,
+            logger=cls.logger
         )
 
         cls.pareto_frontier = ParetoFrontier(
@@ -103,7 +107,8 @@ class TestUtilityFunctionOptimizers:
         random_search_optimizer = RandomSearchOptimizer(
             optimization_problem=self.optimization_problem,
             utility_function=self.utility_function,
-            optimizer_config=random_search_optimizer_config_store.default
+            optimizer_config=random_search_optimizer_config_store.default,
+            logger=self.logger
         )
         for _ in range(5):
             suggested_params = random_search_optimizer.suggest()
@@ -116,7 +121,8 @@ class TestUtilityFunctionOptimizers:
         glow_worm_swarm_optimizer = GlowWormSwarmOptimizer(
             optimization_problem=self.optimization_problem,
             utility_function=self.utility_function,
-            optimizer_config=glow_worm_swarm_optimizer_config_store.default
+            optimizer_config=glow_worm_swarm_optimizer_config_store.default,
+            logger=self.logger
         )
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
@@ -130,7 +136,8 @@ class TestUtilityFunctionOptimizers:
             optimization_problem=self.optimization_problem,
             utility_function=self.utility_function,
             optimizer_config=random_near_incumbent_optimizer_config_store.default,
-            pareto_frontier=self.pareto_frontier
+            pareto_frontier=self.pareto_frontier,
+            logger=self.logger
         )
 
         for _ in range(5):

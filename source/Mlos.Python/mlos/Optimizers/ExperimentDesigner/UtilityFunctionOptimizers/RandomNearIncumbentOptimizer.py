@@ -41,7 +41,7 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     default=Point(
         num_starting_configs=100,
         initial_velocity=0.2,
-        velocity_update_constant=0.1,
+        velocity_update_constant=0.3,
         velocity_convergence_threshold=0.01,
         max_num_iterations=50,
         num_neighbors=100,
@@ -113,6 +113,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             5. We repeat until we ran out of iterations or until velocity falls below some threshold.
 
         """
+        self.logger.info(f"Suggesting config for context: {context_values_dataframe}")
 
         assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
 
@@ -135,14 +136,20 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         # component along each dimension.
         incumbents_df = projected_incumbent_params_df
         incumbents_df['utility'] = incumbent_utility_df['utility']
+        incumbents_df['speed'] = 0
         for dimension_name in self.parameter_dimension_names:
             incumbents_df[f'{dimension_name}_velocity'] = self.optimizer_config.initial_velocity
+            incumbents_df['speed'] += self.optimizer_config.initial_velocity ** 2
+
+        incumbents_df['speed'] = np.sqrt(incumbents_df['speed'])
+        incumbents_df['active'] = incumbents_df['speed'] > self.optimizer_config.velocity_convergence_threshold
 
         num_iterations = 0
 
         # Just for development we can keep track of utility values and velocities over time.
         #
         utility_over_time = []
+        speed_over_time = []
         velocities_over_time = {
             dimension_name: []
             for dimension_name
@@ -150,12 +157,23 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         }
 
 
-        while num_iterations < self.optimizer_config.max_num_iterations:
+        while num_iterations < self.optimizer_config.max_num_iterations and incumbents_df['active'].any():
+
             utility_over_time.append(incumbents_df['utility'].copy())
+            speed_over_time.append(incumbents_df['speed'].copy())
             for dimension_name in self.parameter_dimension_names:
                 velocities_over_time[dimension_name].append(incumbents_df[f'{dimension_name}_velocity'].copy())
 
             num_iterations += 1
+
+            active_incumbents_df = incumbents_df[incumbents_df['active']]
+            num_active_incumbents = len(active_incumbents_df.index)
+
+            # Since we have fewer active incumbents, each can have a few more neighbors, hopefully speeding up convergence.
+            #
+            num_neighbors_per_incumbent = np.floor(self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
+
+            self.logger.info(f"[Iteration {num_iterations}/{self.optimizer_config.max_num_iterations}] Num active incumbents: {num_active_incumbents/len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}")
 
             # Let's create random neighbors for each of the initial params
             #
@@ -166,23 +184,22 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 #   1) populating neighbors_df with {dimension_name}_incumbent_value, {dimension_name}_incumbent_velocity
                 #   2) creating the all_neighbors_df from that and then doing a single large call to np.random.normal()
                 #
-                for incumbent_config_idx, incumbent in incumbents_df.iterrows():
-                    with traced(scope_name=f"creating_random_neighbors_for_single_incumbent"):
-                        # For now let's only do normal distribution but we can add options later.
-                        #
-                        neighbors_df = pd.DataFrame()
-                        for dimension_name in self.parameter_dimension_names:
-                            neighbors_df[dimension_name] = np.random.normal(
-                                loc=incumbent[dimension_name],
-                                scale=np.abs(incumbent[f'{dimension_name}_velocity']),
-                                size=self.optimizer_config.num_neighbors
-                            )
+                for incumbent_config_idx, incumbent in active_incumbents_df.iterrows():
+                    # For now let's only do normal distribution but we can add options later.
+                    #
+                    neighbors_df = pd.DataFrame()
+                    for dimension_name in self.parameter_dimension_names:
+                        neighbors_df[dimension_name] = np.random.normal(
+                            loc=incumbent[dimension_name],
+                            scale=np.abs(incumbent[f'{dimension_name}_velocity']),
+                            size=self.optimizer_config.num_neighbors
+                        )
 
-                        # Let's remember which config generated these neighbors too
-                        #
-                        neighbors_df['incumbent_config_idx'] = incumbent_config_idx
-                        neighbors_df['incumbent_utility'] = incumbent['utility']
-                        neighbors_dfs.append(neighbors_df)
+                    # Let's remember which config generated these neighbors too
+                    #
+                    neighbors_df['incumbent_config_idx'] = incumbent_config_idx
+                    neighbors_df['incumbent_utility'] = incumbent['utility']
+                    neighbors_dfs.append(neighbors_df)
 
                 all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
                 # Let's remove all invalid configs. TODO: consider clipping them instead.
@@ -232,23 +249,37 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
             # Finally we get to update the parameter values for incumbents, as well as updating their velocity.
             #
+            incumbents_df['speed'] = 0
             for dimension_name in self.parameter_dimension_names:
                 incumbents_df[dimension_name] = new_incumbents_df[dimension_name]
                 incumbents_df[f'{dimension_name}_velocity'] = incumbents_df[f'{dimension_name}_velocity'] * (1 - self.optimizer_config.velocity_update_constant) \
                                                               + displacement_df[dimension_name] * self.optimizer_config.velocity_update_constant
+                incumbents_df['speed'] += incumbents_df[f'{dimension_name}_velocity'] ** 2
+
+            incumbents_df['speed'] = np.sqrt(incumbents_df['speed'])
+            incumbents_df['active'] = incumbents_df['speed'] > self.optimizer_config.velocity_convergence_threshold
+
+            # Let's set the velocity of all inactive incumbents to 0.
+            #
+            inactive_incumbents_index = incumbents_df[~incumbents_df['active']].index
+            for dimension_name in self.parameter_dimension_names:
+                incumbents_df.loc[inactive_incumbents_index, f'{dimension_name}_velocity'] = 0
+            incumbents_df.loc[inactive_incumbents_index, 'speed'] = 0
+
             # We also get to update their utility.
             #
-            if not (incumbents_df['utility'] <= new_incumbents_df['utility']).all():
-                print("breakpoint")
+            assert (incumbents_df['utility'] <= new_incumbents_df['utility']).all()
             incumbents_df['utility'] = new_incumbents_df['utility']
 
 
 
         utility_over_time.append(incumbents_df['utility'])
+        speed_over_time.append(incumbents_df['speed'].copy())
         for dimension_name in self.parameter_dimension_names:
             velocities_over_time[dimension_name].append(incumbents_df[f'{dimension_name}_velocity'])
 
         utilitity_over_time_df = pd.concat(utility_over_time, axis=1).T
+        speed_over_time_df = pd.concat(speed_over_time, axis=1).T
         velocity_over_time_dfs = {}
         for dimension_name in self.parameter_dimension_names:
             velocity_over_time_dfs[dimension_name] = pd.concat(velocities_over_time[dimension_name], axis=1).T
@@ -264,7 +295,14 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         the past, if there still isn't enough, then we generate random points.
         :return:
         """
+        self.logger.info("Preparing initial params")
+
         initial_params_df = self.pareto_frontier.params_for_pareto_df
+
+        if len(initial_params_df.index) > self.optimizer_config.num_starting_configs:
+            # We have to get rid of some of those pareto points.
+            #
+            initial_params_df = initial_params_df.sample(num=self.optimizer_config.num_starting_configs, replace=False, axis='index')
 
         if self._good_configs_from_the_past_invocations_df is not None and len(self._good_configs_from_the_past_invocations_df.index) > 0:
             if len(initial_params_df.index) < self.optimizer_config.num_starting_configs and self.optimizer_config.cache_good_params:
