@@ -21,7 +21,10 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         name="random_near_incumbent_optimizer_config",
         dimensions=[
             DiscreteDimension(name="num_starting_configs", min=1, max=2**16),
-            ContinuousDimension(name="initial_neighborhood_radius", min=0, max=1, include_min=False),
+            ContinuousDimension(name="initial_velocity", min=0.01, max=1),
+            ContinuousDimension(name="velocity_update_constant", min=0, max=1),
+            ContinuousDimension(name="velocity_convergence_threshold", min=0, max=1),
+            ContinuousDimension(name="max_num_iterations", min=1, max=1000),
             DiscreteDimension(name="num_neighbors", min=1, max=1000),
             CategoricalDimension(name="cache_good_params", values=[True, False])
         ]
@@ -37,7 +40,10 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     ),
     default=Point(
         num_starting_configs=2**7,
-        initial_neighborhood_radius=0.1,
+        initial_velocity=0.1,
+        velocity_update_constant=0.2,
+        velocity_convergence_threshold=0.01,
+        max_num_iterations=100,
         num_neighbors=100,
         cache_good_params=True,
         good_params_cache_config=Point(
@@ -110,12 +116,12 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
 
-        incumbents_df = self._prepare_initial_params_df()
+        incumbent_params_df = self._prepare_initial_params_df()
 
         # Now that we have the initial incumbent parameters, we need to compute their utility.
         #
         incumbent_features_df = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=incumbents_df,
+            parameter_values=incumbent_params_df,
             context_values=context_values_dataframe,
             product=False
         )
@@ -123,19 +129,26 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         # Before we can create random neighbors, we need to normalize all parameter values by projecting them into unit hypercube.
         #
-        projected_incumbent_params_df = self.parameter_adapter.project_dataframe(df=incumbents_df, in_place=False)
+        projected_incumbent_params_df = self.parameter_adapter.project_dataframe(df=incumbent_params_df, in_place=False)
+
+        # Now, let's put together our incumbents_df which contains the projected params, the accompanying utiliy, as well as the velocity
+        # component along each dimension.
+        incumbents_df = projected_incumbent_params_df
+        incumbents_df['utility'] = incumbent_utility_df['utility']
+        for dimension_name in self.parameter_dimension_names:
+            incumbents_df[f'{dimension_name}_velocity'] = self.optimizer_config.initial_velocity
 
         # Let's create random neighbors for each of the initial params
         #
         neighbors_dfs = []
-        for incumbent_config_idx, incumbent_config in projected_incumbent_params_df.iterrows():
+        for incumbent_config_idx, incumbent in incumbents_df.iterrows():
             # For now let's only do normal distribution but we can add options later.
             #
             neighbors_df = pd.DataFrame()
-            for column in incumbent_config.index:
-                neighbors_df[column] = np.random.normal(
-                    loc=incumbent_config[column],
-                    scale=self.optimizer_config.initial_neighborhood_radius,
+            for dimension_name in self.parameter_dimension_names:
+                neighbors_df[dimension_name] = np.random.normal(
+                    loc=incumbent[dimension_name],
+                    scale=incumbent[f'{dimension_name}_velocity'],
                     size=self.optimizer_config.num_neighbors
                 )
 
@@ -176,13 +189,30 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         # The series below has incumbent_config_idx as index, and best neighbor's index as value.
         #
         best_neighbors_indices = all_neighbors_df.groupby(by=["incumbent_config_idx"])['utility_gain'].idxmax()
-        best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices, self.parameter_dimension_names]
+        best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices]
         best_neighbors_df.set_index(keys=best_neighbors_indices.index, inplace=True, verify_integrity=True)
 
         # Let's create a dataframe with the new incumbents. We do it by copying old incumbents in case none of their neighbors
         # had higher utility.
-        new_incumbents_df = projected_incumbent_params_df
-        new_incumbents_df.loc[best_neighbors_indices.index] = best_neighbors_df
+        new_incumbents_df = incumbents_df[self.parameter_dimension_names].copy()
+        new_incumbents_df['utility'] = incumbents_df['utility']
+        new_incumbents_df.loc[best_neighbors_indices.index, self.parameter_dimension_names] = best_neighbors_df[self.parameter_dimension_names]
+        new_incumbents_df.loc[best_neighbors_indices.index, 'utility'] = best_neighbors_df['utility']
+
+        # We need to compute the displacement for this iteration.
+        #
+        displacement_df = pd.DataFrame()
+        for dimension_name in self.parameter_dimension_names:
+            displacement_df[dimension_name] = new_incumbents_df[dimension_name] - incumbents_df[dimension_name]
+
+        # Finally we get to update the parameter values for incumbents, as well as updating their velocity.
+        #
+        for dimension_name in self.parameter_dimension_names:
+            incumbents_df[dimension_name] = new_incumbents_df[dimension_name]
+            incumbents_df[f'{dimension_name}_velocity'] = incumbents_df[f'{dimension_name}_velocity'] * (1 - self.optimizer_config.velocity_update_constant) \
+                                                          + displacement_df[dimension_name] * self.optimizer_config.velocity_update_constant
+
+
 
 
 
