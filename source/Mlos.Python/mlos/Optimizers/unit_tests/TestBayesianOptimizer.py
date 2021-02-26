@@ -841,3 +841,38 @@ class TestBayesianOptimizer:
                 else:
                     print(predicted_optimum.predicted_value, ucb_90_ci_optimum.upper_confidence_bound, ucb_95_ci_optimum.upper_confidence_bound, ucb_99_ci_optimum.upper_confidence_bound)
                     assert False
+
+
+    def test_bayesian_optimizer_with_random_near_incumbent(self):
+        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
+
+        optimization_problem = OptimizationProblem(
+            parameter_space=objective_function.parameter_space,
+            objective_space=objective_function.output_space,
+            objectives=[Objective(name='y', minimize=True)]
+        )
+
+        optimizer_config = bayesian_optimizer_config_store.default
+        assert optimizer_config.experiment_designer_config.numeric_optimizer_implementation == "RandomNearIncumbentOptimizer"
+        optimizer_config.experiment_designer_config.fraction_random_suggestions = 0
+
+        bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+            optimization_problem=optimization_problem,
+            optimizer_config=optimizer_config
+        )
+
+        random_params_df = objective_function.parameter_space.random_dataframe(num_samples=1000)
+        objectives_df = objective_function.evaluate_dataframe(random_params_df)
+        bayesian_optimizer.register(parameter_values_pandas_frame=random_params_df, target_values_pandas_frame=objectives_df)
+
+        num_suggestions = 10
+        for suggestion_number in range(num_suggestions):
+            parameters = bayesian_optimizer.suggest()
+            objectives = objective_function.evaluate_point(parameters)
+            self.logger.info(f"[{suggestion_number}/{num_suggestions}] parameters: {parameters}, objectives: {objectives}")
+            bayesian_optimizer.register(
+                parameter_values_pandas_frame=parameters.to_dataframe(),
+                target_values_pandas_frame=parameters.to_dataframe()
+            )
+
