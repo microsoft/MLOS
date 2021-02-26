@@ -161,22 +161,28 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             #
             with traced(scope_name="creating_random_neighbors"):
                 neighbors_dfs = []
-                for incumbent_config_idx, incumbent in incumbents_df.iterrows():
-                    # For now let's only do normal distribution but we can add options later.
-                    #
-                    neighbors_df = pd.DataFrame()
-                    for dimension_name in self.parameter_dimension_names:
-                        neighbors_df[dimension_name] = np.random.normal(
-                            loc=incumbent[dimension_name],
-                            scale=np.abs(incumbent[f'{dimension_name}_velocity']),
-                            size=self.optimizer_config.num_neighbors
-                        )
 
-                    # Let's remember which config generated these neighbors too
-                    #
-                    neighbors_df['incumbent_config_idx'] = incumbent_config_idx
-                    neighbors_df['incumbent_utility'] = incumbent['utility']
-                    neighbors_dfs.append(neighbors_df)
+                # Apparently batching the calls to np.random.normal() might be advantageous. So let's do it by:
+                #   1) populating neighbors_df with {dimension_name}_incumbent_value, {dimension_name}_incumbent_velocity
+                #   2) creating the all_neighbors_df from that and then doing a single large call to np.random.normal()
+                #
+                for incumbent_config_idx, incumbent in incumbents_df.iterrows():
+                    with traced(scope_name=f"creating_random_neighbors_for_single_incumbent"):
+                        # For now let's only do normal distribution but we can add options later.
+                        #
+                        neighbors_df = pd.DataFrame()
+                        for dimension_name in self.parameter_dimension_names:
+                            neighbors_df[dimension_name] = np.random.normal(
+                                loc=incumbent[dimension_name],
+                                scale=np.abs(incumbent[f'{dimension_name}_velocity']),
+                                size=self.optimizer_config.num_neighbors
+                            )
+
+                        # Let's remember which config generated these neighbors too
+                        #
+                        neighbors_df['incumbent_config_idx'] = incumbent_config_idx
+                        neighbors_df['incumbent_utility'] = incumbent['utility']
+                        neighbors_dfs.append(neighbors_df)
 
                 all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
                 # Let's remove all invalid configs. TODO: consider clipping them instead.
