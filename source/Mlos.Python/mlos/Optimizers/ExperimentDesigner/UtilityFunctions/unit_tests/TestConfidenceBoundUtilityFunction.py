@@ -25,10 +25,10 @@ class TestConfidenceBoundUtilityFunction:
     def setup_class(cls) -> None:
         global_values.declare_singletons()
 
-        cls.slope = 10
+        cls.gradient = 10
         cls.y_intercept = 10
         cls.input_values = np.linspace(start=0, stop=100, num=1000, endpoint=True)
-        cls.output_values = cls.input_values * cls.slope + cls.y_intercept
+        cls.output_values = cls.input_values * cls.gradient + cls.y_intercept
 
         cls.input_space = SimpleHypergrid(
             name="input",

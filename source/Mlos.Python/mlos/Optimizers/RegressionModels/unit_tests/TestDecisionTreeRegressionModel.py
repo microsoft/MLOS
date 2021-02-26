@@ -33,10 +33,10 @@ class TestDecisionTreeRegressionModel:
 
     def setup_method(self, method):
         # Let's create a simple linear mapping
-        self.slope = 10
+        self.gradient = 10
         self.y_intercept = 10
         self.input_values = np.linspace(start=0, stop=100, num=101, endpoint=True)
-        self.output_values = self.input_values * self.slope + self.y_intercept
+        self.output_values = self.input_values * self.gradient + self.y_intercept
 
         self.input_space = SimpleHypergrid(
             name="input",
