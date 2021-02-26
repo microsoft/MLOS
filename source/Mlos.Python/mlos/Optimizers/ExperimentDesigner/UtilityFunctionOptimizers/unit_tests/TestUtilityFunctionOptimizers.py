@@ -56,7 +56,7 @@ class TestUtilityFunctionOptimizers:
             objectives=[Objective(name='y', minimize=True)]
         )
 
-        cls.parameters_df = objective_function.parameter_space.random_dataframe(num_samples=2500)
+        cls.parameters_df = objective_function.parameter_space.random_dataframe(num_samples=25000)
         cls.features_df = cls.optimization_problem.construct_feature_dataframe(cls.parameters_df)
         cls.objectives_df = objective_function.evaluate_dataframe(cls.parameters_df)
 

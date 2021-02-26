@@ -39,11 +39,11 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         )
     ),
     default=Point(
-        num_starting_configs=2**7,
-        initial_velocity=0.1,
-        velocity_update_constant=0.2,
+        num_starting_configs=100,
+        initial_velocity=0.05,
+        velocity_update_constant=0.1,
         velocity_convergence_threshold=0.01,
-        max_num_iterations=100,
+        max_num_iterations=10,
         num_neighbors=100,
         cache_good_params=True,
         good_params_cache_config=Point(
@@ -138,125 +138,117 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         for dimension_name in self.parameter_dimension_names:
             incumbents_df[f'{dimension_name}_velocity'] = self.optimizer_config.initial_velocity
 
-        # Let's create random neighbors for each of the initial params
+        num_iterations = 0
+
+        # Just for development we can keep track of utility values and velocities over time.
         #
-        neighbors_dfs = []
-        for incumbent_config_idx, incumbent in incumbents_df.iterrows():
-            # For now let's only do normal distribution but we can add options later.
-            #
-            neighbors_df = pd.DataFrame()
+        utility_over_time = []
+        velocities_over_time = {
+            dimension_name: []
+            for dimension_name
+            in self.parameter_dimension_names
+        }
+
+
+        while num_iterations < self.optimizer_config.max_num_iterations:
+            utility_over_time.append(incumbents_df['utility'].copy())
             for dimension_name in self.parameter_dimension_names:
-                neighbors_df[dimension_name] = np.random.normal(
-                    loc=incumbent[dimension_name],
-                    scale=incumbent[f'{dimension_name}_velocity'],
-                    size=self.optimizer_config.num_neighbors
-                )
+                velocities_over_time[dimension_name].append(incumbents_df[f'{dimension_name}_velocity'].copy())
 
-            # Let's remove all invalid configs. TODO: consider clipping them instead.
+            num_iterations += 1
+
+            # Let's create random neighbors for each of the initial params
             #
-            neighbors_df = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=neighbors_df, exclude_extra_columns=False)
+            neighbors_dfs = []
+            for incumbent_config_idx, incumbent in incumbents_df.iterrows():
+                # For now let's only do normal distribution but we can add options later.
+                #
+                neighbors_df = pd.DataFrame()
+                for dimension_name in self.parameter_dimension_names:
+                    neighbors_df[dimension_name] = np.random.normal(
+                        loc=incumbent[dimension_name],
+                        scale=np.abs(incumbent[f'{dimension_name}_velocity']),
+                        size=self.optimizer_config.num_neighbors
+                    )
 
-            # Let's remember which config generated these neighbors too
+                # Let's remove all invalid configs. TODO: consider clipping them instead.
+                #
+                neighbors_df = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=neighbors_df, exclude_extra_columns=False)
+
+                # Let's remember which config generated these neighbors too
+                #
+                neighbors_df['incumbent_config_idx'] = incumbent_config_idx
+                neighbors_df['incumbent_utility'] = incumbent['utility']
+                neighbors_dfs.append(neighbors_df)
+
+            all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
+
+            # Next, we compute utility for all of those random neighbors
             #
-            neighbors_df['incumbent_config_idx'] = incumbent_config_idx
-            neighbors_df['incumbent_utility'] = incumbent_utility_df.loc[incumbent_config_idx, 'utility']
-            neighbors_dfs.append(neighbors_df)
+            unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=False)
 
-        all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
-
-        # Next, we compute utility for all of those random neighbors
-        #
-        unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=False)
-
-        assert len(unprojected_neighbors_df.index) == len(self.optimization_problem.parameter_space.get_valid_rows_index(unprojected_neighbors_df))
+            assert len(unprojected_neighbors_df.index) == len(self.optimization_problem.parameter_space.get_valid_rows_index(unprojected_neighbors_df))
 
 
-        neighbors_features_df = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=unprojected_neighbors_df,
-            context_values=context_values_dataframe,
-            product=False
-        )
+            neighbors_features_df = self.optimization_problem.construct_feature_dataframe(
+                parameter_values=unprojected_neighbors_df,
+                context_values=context_values_dataframe,
+                product=False
+            )
 
-        neighbors_utility_df = self.utility_function(feature_values_pandas_frame=neighbors_features_df)
-        all_neighbors_df = all_neighbors_df.loc[neighbors_utility_df.index]
-        all_neighbors_df['utility'] = neighbors_utility_df['utility']
-        all_neighbors_df['utility_gain'] = all_neighbors_df['utility'] - all_neighbors_df['incumbent_utility']
+            neighbors_utility_df = self.utility_function(feature_values_pandas_frame=neighbors_features_df)
+            all_neighbors_df = all_neighbors_df.loc[neighbors_utility_df.index]
+            all_neighbors_df['utility'] = neighbors_utility_df['utility']
+            all_neighbors_df['utility_gain'] = all_neighbors_df['utility'] - all_neighbors_df['incumbent_utility']
 
-        # We can filter out all rows with negative utility gain.
-        #
-        all_neighbors_df = all_neighbors_df[all_neighbors_df['utility_gain'] >= 0]
+            # We can filter out all rows with negative utility gain.
+            #
+            all_neighbors_df = all_neighbors_df[all_neighbors_df['utility_gain'] > 0]
 
-        # The series below has incumbent_config_idx as index, and best neighbor's index as value.
-        #
-        best_neighbors_indices = all_neighbors_df.groupby(by=["incumbent_config_idx"])['utility_gain'].idxmax()
-        best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices]
-        best_neighbors_df.set_index(keys=best_neighbors_indices.index, inplace=True, verify_integrity=True)
+            # The series below has best neighbor's index as value and the incumbent_config_idx as key.
+            #
+            best_neighbors_indices = all_neighbors_df.groupby(by=["incumbent_config_idx"])['utility_gain'].idxmax()
+            best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices]
+            best_neighbors_df.set_index(keys=best_neighbors_indices.index, inplace=True, verify_integrity=True)
 
-        # Let's create a dataframe with the new incumbents. We do it by copying old incumbents in case none of their neighbors
-        # had higher utility.
-        new_incumbents_df = incumbents_df[self.parameter_dimension_names].copy()
-        new_incumbents_df['utility'] = incumbents_df['utility']
-        new_incumbents_df.loc[best_neighbors_indices.index, self.parameter_dimension_names] = best_neighbors_df[self.parameter_dimension_names]
-        new_incumbents_df.loc[best_neighbors_indices.index, 'utility'] = best_neighbors_df['utility']
+            # Let's create a dataframe with the new incumbents. We do it by copying old incumbents in case none of their neighbors
+            # had higher utility.
+            new_incumbents_df = incumbents_df[self.parameter_dimension_names].copy()
+            new_incumbents_df['utility'] = incumbents_df['utility']
+            new_incumbents_df.loc[best_neighbors_df.index, self.parameter_dimension_names] = best_neighbors_df[self.parameter_dimension_names]
+            new_incumbents_df.loc[best_neighbors_df.index, 'utility'] = best_neighbors_df['utility']
 
-        # We need to compute the displacement for this iteration.
-        #
-        displacement_df = pd.DataFrame()
+            # We need to compute the displacement for this iteration.
+            #
+            displacement_df = pd.DataFrame()
+            for dimension_name in self.parameter_dimension_names:
+                displacement_df[dimension_name] = new_incumbents_df[dimension_name] - incumbents_df[dimension_name]
+
+            # Finally we get to update the parameter values for incumbents, as well as updating their velocity.
+            #
+            for dimension_name in self.parameter_dimension_names:
+                incumbents_df[dimension_name] = new_incumbents_df[dimension_name]
+                incumbents_df[f'{dimension_name}_velocity'] = incumbents_df[f'{dimension_name}_velocity'] * (1 - self.optimizer_config.velocity_update_constant) \
+                                                              + displacement_df[dimension_name] * self.optimizer_config.velocity_update_constant
+            # We also get to update their utility.
+            #
+            if not (incumbents_df['utility'] <= new_incumbents_df['utility']).all():
+                print("breakpoint")
+            incumbents_df['utility'] = new_incumbents_df['utility']
+
+
+
+        utility_over_time.append(incumbents_df['utility'])
         for dimension_name in self.parameter_dimension_names:
-            displacement_df[dimension_name] = new_incumbents_df[dimension_name] - incumbents_df[dimension_name]
+            velocities_over_time[dimension_name].append(incumbents_df[f'{dimension_name}_velocity'])
 
-        # Finally we get to update the parameter values for incumbents, as well as updating their velocity.
-        #
+        utilitity_over_time_df = pd.concat(utility_over_time, axis=1).T
+        velocity_over_time_dfs = {}
         for dimension_name in self.parameter_dimension_names:
-            incumbents_df[dimension_name] = new_incumbents_df[dimension_name]
-            incumbents_df[f'{dimension_name}_velocity'] = incumbents_df[f'{dimension_name}_velocity'] * (1 - self.optimizer_config.velocity_update_constant) \
-                                                          + displacement_df[dimension_name] * self.optimizer_config.velocity_update_constant
+            velocity_over_time_dfs[dimension_name] = pd.concat(velocities_over_time[dimension_name], axis=1).T
 
+        print('breakpoint')
 
-
-
-
-        feature_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(
-            num_samples=self.optimizer_config.num_worms * self.optimizer_config.num_initial_points_multiplier
-        )
-        utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
-        num_utility_function_values = len(utility_function_values.index)
-        if num_utility_function_values == 0:
-            config_to_suggest = Point.from_dataframe(feature_values_dataframe.iloc[[0]])
-            self.logger.debug(f"Suggesting: {str(config_to_suggest)} at random.")
-            return config_to_suggest
-
-        # TODO: keep getting configs until we have enough utility values to get started. Or assign 0 to missing ones,
-        #  and let them climb out of their infeasible holes.
-        top_utility_values = utility_function_values.nlargest(n=self.optimizer_config.num_worms, columns=['utility'])
-
-        # TODO: could it be in place?
-        features_for_top_utility = self.parameter_adapter.project_dataframe(feature_values_dataframe.loc[top_utility_values.index], in_place=False)
-        worms = pd.concat([features_for_top_utility, top_utility_values], axis=1)
-        # Let's reset the index to make keeping track down the road easier.
-        #
-        worms.index = pd.Index(range(len(worms.index)))
-
-        # Initialize luciferin to the value of the utility function
-        #
-        worms['decision_radius'] = self.optimizer_config.initial_decision_radius
-        worms['luciferin'] = worms['utility']
-
-        for _ in range(self.optimizer_config.num_iterations):
-            worms = self.run_iteration(worms=worms)
-            # TODO: keep track of the max configs over iterations
-            worms = self.compute_utility(worms)
-            worms['luciferin'] = (1 - self.optimizer_config.luciferin_decay_constant) * worms['luciferin'] + \
-                                 self.optimizer_config.luciferin_enhancement_constant * worms['utility']
-
-        # TODO: return the max of all seen configs - not just the configs that the glowworms occupied in this iteration.
-        idx_of_max = worms['utility'].idxmax()
-        best_config = worms.loc[[idx_of_max], self.parameter_dimension_names]
-        config_to_suggest = Point.from_dataframe(best_config)
-        self.logger.debug(f"Suggesting: {str(config_to_suggest)} at random.")
-        # TODO: we might have to go for second or nth best if the projection won't work out. But then again if we were
-        # TODO: able to compute the utility function then the projection has worked out once before...
-        return self.parameter_adapter.unproject_point(config_to_suggest)
 
     @trace()
     def _prepare_initial_params_df(self):
@@ -291,106 +283,3 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         initial_params_df.reset_index(drop=True, inplace=True)
         return initial_params_df
-
-
-    @trace()
-    def compute_utility(self, worms):
-        """ Computes utility function values for each worm.
-
-        Since some worm positions will produce a NaN, we need to keep producing new utility values for those.
-
-        :param worms:
-        :return:
-        """
-        unprojected_features = self.parameter_adapter.unproject_dataframe(worms[self.parameter_dimension_names], in_place=False)
-        utility_function_values = self.utility_function(unprojected_features.copy(deep=False))
-        worms['utility'] = utility_function_values
-        index_of_nans = worms.index.difference(utility_function_values.index)
-        # TODO: A better solution would be to give them random valid configs, and let them live.
-        # TODO: BUT avoid calling the utility function again for just a few samples - just let them hang on for an iteration.
-        worms.drop(index=index_of_nans, inplace=True)
-        worms.reset_index(drop=True, inplace=True)
-        return worms
-
-    @trace()
-    def run_iteration(self, worms: pd.DataFrame):
-
-        with traced(scope_name="numpy_matrix_operations"):
-            positions = worms[self.parameter_dimension_names].to_numpy()
-            # At this point many glowworms will have NaNs in their position vectors: for every column that's invalid.
-            # Glowworms with the same set of valid columns, belong to the same subgrids in the hypergrid, but glowworms
-            # with different set of valid columns belong to - essentially - different search spaces, and the idea of
-            # distance ceases to make sense. But their positions are all cast onto this really high dimensional space.
-            # How can we keep them apart?
-            #
-            # Here is the trick: glowworms should only see other glowworms in their own search space. One way to
-            # accomplish that is to fill in the NaNs with a value larger than the max_sensory_radius. Now, glowworms
-            # in different subgrids will never see each other (they can't see that far in this space), but glowworms in
-            # the same subgrids will have the same large placeholder in their invalid dimensions, so it will not contribute
-            # anything to the distance between them.
-            positions = np.nan_to_num(x=positions, copy=False, nan=2*self.optimizer_config.max_sensory_radius)
-
-            distances = euclidean_distances(positions, positions)
-            decision_radii = worms['decision_radius'].to_numpy().transpose()
-
-            # Subtract the sensory radius from each row. Everything in the row, that's negative is your neighbor (if they
-            # also have a higher luciferin level).
-            #
-            distances = (distances - decision_radii).transpose()
-
-            # Now let's compute the difference in luciferin. Numpy's broadcasting is hard to read, but fast and convenient.
-            # We are basically doing exactly the same thing with luciferin as with distances: whatever is left negative in
-            # your row is your neighbor (if they are also close enough).
-            #
-            luciferin = worms['luciferin'].to_numpy()
-            luciferin_diffs = luciferin[:, np.newaxis] - luciferin
-
-            # So worms are neighbors if both signs are negative.
-            #
-            distances_signs = np.sign(distances)
-            luciferin_signs = np.sign(luciferin_diffs)
-            summed_signs = distances_signs + luciferin_signs
-
-            # Now let's put together a matrix, such that in each row for each column we have either:
-            #  0 - if the worm in that column is not a neighbor (too far or too dim)
-            #  or luciferin difference between that neighbor and us.
-            #
-            unnormalized_probability = np.where(summed_signs == -2, -luciferin_diffs, 0)
-
-        # We will have to iterate over all rows anyway, to invoke the np.random.choice() since it operates on
-        # 1-D arrays so we might as well iterate over unnormalized probabilities, check if there is anything
-        # non-zero in there, select the target, compute, and take the step.
-        #
-        for row, unnormalized_probability_row in enumerate(unnormalized_probability):
-            row_sum = unnormalized_probability_row.sum()
-            num_neighbors = np.count_nonzero(unnormalized_probability_row)
-            if row_sum == 0:
-                # nobody is close enough and bright enough
-                continue
-            normalized_probability = unnormalized_probability_row / row_sum
-            col = np.random.choice(len(normalized_probability), size=1, p=normalized_probability)[0]
-            our_position = positions[row]
-            their_position = positions[col]
-            distance = distances[row][col]
-            step_unit_vector = (their_position - our_position) / distance
-            step = self.optimizer_config.step_size * step_unit_vector
-            our_new_position = our_position + step
-
-            # We only set the non-nan values in the worms dataframe. Remember the trick of setting nans to big values?
-            # This is undoing that trick to hide it from the caller.
-            # TODO: this ends up being pretty slow. See if we can improve.
-            #
-            is_nan = np.isnan(worms.loc[row, self.parameter_dimension_names].to_numpy())
-            our_new_position[is_nan] = np.nan
-            worms.loc[row, self.parameter_dimension_names] = our_new_position
-
-            current_decision_radius = decision_radii[row]
-            decision_radius_update = self.optimizer_config.decision_radius_adjustment_constant * \
-                                     (self.optimizer_config.desired_num_neighbors - num_neighbors)
-
-            new_decision_radius = min(
-                self.optimizer_config.max_sensory_radius,
-                max(0, current_decision_radius + decision_radius_update)
-            )
-            worms.loc[row, ['decision_radius']] = new_decision_radius
-        return worms
