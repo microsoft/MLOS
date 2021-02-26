@@ -40,10 +40,10 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     ),
     default=Point(
         num_starting_configs=100,
-        initial_velocity=0.05,
+        initial_velocity=0.2,
         velocity_update_constant=0.1,
         velocity_convergence_threshold=0.01,
-        max_num_iterations=10,
+        max_num_iterations=50,
         num_neighbors=100,
         cache_good_params=True,
         good_params_cache_config=Point(
