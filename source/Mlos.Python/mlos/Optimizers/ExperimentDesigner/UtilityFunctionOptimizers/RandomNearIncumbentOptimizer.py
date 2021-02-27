@@ -302,7 +302,6 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         print('breakpoint')
 
         if incumbents_df['utility'].isna().all() or num_iterations <= 2:
-            assert False, "We need this to work"
             # TODO: raise an exception so that the experiment designer can explicitly return a random config.
             #
             self.logger.info("Suggesting a random config!")
