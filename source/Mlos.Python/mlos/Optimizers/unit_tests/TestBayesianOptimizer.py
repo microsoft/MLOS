@@ -49,7 +49,7 @@ class TestBayesianOptimizer:
         """ Sets up all the singletons needed to test the BayesianOptimizer.
 
         """
-        warnings.simplefilter("error")
+        #warnings.simplefilter("error")
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
         cls.logger = create_logger(logger_name=cls.__name__)
@@ -844,16 +844,12 @@ class TestBayesianOptimizer:
 
 
     def test_bayesian_optimizer_with_random_near_incumbent(self):
-        objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
+        objective_function_config = objective_function_config_store.get_config_by_name('multi_objective_waves_3_params_2_objectives_half_pi_phase_difference')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
-        optimization_problem = OptimizationProblem(
-            parameter_space=objective_function.parameter_space,
-            objective_space=objective_function.output_space,
-            objectives=[Objective(name='y', minimize=True)]
-        )
+        optimization_problem = objective_function.default_optimization_problem
 
-        optimizer_config = bayesian_optimizer_config_store.default
+        optimizer_config = bayesian_optimizer_config_store.get_config_by_name('default_multi_objective_optimizer_config')
         assert optimizer_config.experiment_designer_config.numeric_optimizer_implementation == "RandomNearIncumbentOptimizer"
         optimizer_config.experiment_designer_config.fraction_random_suggestions = 0
 
@@ -873,6 +869,6 @@ class TestBayesianOptimizer:
             self.logger.info(f"[{suggestion_number}/{num_suggestions}] parameters: {parameters}, objectives: {objectives}")
             bayesian_optimizer.register(
                 parameter_values_pandas_frame=parameters.to_dataframe(),
-                target_values_pandas_frame=parameters.to_dataframe()
+                target_values_pandas_frame=objectives.to_dataframe()
             )
 

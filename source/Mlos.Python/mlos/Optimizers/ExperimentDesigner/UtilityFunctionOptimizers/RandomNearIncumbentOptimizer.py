@@ -39,12 +39,12 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         )
     ),
     default=Point(
-        num_starting_configs=100,
-        initial_velocity=0.2,
+        num_starting_configs=20,
+        initial_velocity=0.3,
         velocity_update_constant=0.3,
         velocity_convergence_threshold=0.01,
         max_num_iterations=50,
-        num_neighbors=100,
+        num_neighbors=50,
         cache_good_params=True,
         good_params_cache_config=Point(
             num_cached_points=2**16,
@@ -147,7 +147,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         # Let's disable all incumbents for which we couldn't compute utility.
         #
-        null_utility_index = incumbents_df['utility'].isna().index
+        null_utility_index = incumbents_df[incumbents_df['utility'].isna()].index
         incumbents_df.loc[null_utility_index, 'active'] = False
 
         num_iterations = 0
@@ -208,15 +208,22 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                     neighbors_dfs.append(neighbors_df)
 
                 all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
+
                 # Let's remove all invalid configs. TODO: consider clipping them instead.
                 #
+                all_neighbors_df.fillna(0, inplace=True)
                 all_neighbors_df = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=all_neighbors_df, exclude_extra_columns=False)
 
                 # Next, we compute utility for all of those random neighbors
                 #
                 unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=False)
 
-            assert len(unprojected_neighbors_df.index) == len(self.optimization_problem.parameter_space.get_valid_rows_index(unprojected_neighbors_df))
+                # Let's remove all invalid configs.
+                #
+                # TODO: make this more efficient and uncomment.
+                unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(original_dataframe=unprojected_neighbors_df, exclude_extra_columns=False)
+
+            # assert len(unprojected_neighbors_df.index) == len(self.optimization_problem.parameter_space.get_valid_rows_index(unprojected_neighbors_df))
 
 
             neighbors_features_df = self.optimization_problem.construct_feature_dataframe(
@@ -301,7 +308,6 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             self.logger.info("Suggesting a random config!")
             return self.optimization_problem.parameter_space.random()
 
-        assert False, "I hope this fires at least once."
         idx_of_max = incumbents_df['utility'].idxmax()
         best_config_df = incumbents_df.loc[[idx_of_max], self.parameter_dimension_names]
         config_to_suggest = Point.from_dataframe(best_config_df)
