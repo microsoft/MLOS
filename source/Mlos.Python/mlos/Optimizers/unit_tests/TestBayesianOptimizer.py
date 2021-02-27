@@ -853,6 +853,10 @@ class TestBayesianOptimizer:
         assert optimizer_config.experiment_designer_config.numeric_optimizer_implementation == "RandomNearIncumbentOptimizer"
         optimizer_config.experiment_designer_config.fraction_random_suggestions = 0
 
+        # Let's give it a little more resolution.
+        #
+        optimizer_config.experiment_designer_config.multi_objective_probability_of_improvement_config.num_monte_carlo_samples = 1000
+
         bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
             optimization_problem=optimization_problem,
             optimizer_config=optimizer_config
