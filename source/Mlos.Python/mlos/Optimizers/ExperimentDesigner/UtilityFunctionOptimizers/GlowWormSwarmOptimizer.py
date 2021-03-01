@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics.pairwise import euclidean_distances
 
+from mlos.Exceptions import UtilityValueUnavailableException
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
@@ -106,9 +107,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         utility_function_values = self.utility_function(feature_values_pandas_frame=features_df.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)
         if num_utility_function_values == 0:
-            config_to_suggest = Point.from_dataframe(parameters_df.iloc[[0]])
-            self.logger.debug(f"Suggesting: {str(config_to_suggest)} at random.")
-            return config_to_suggest
+            raise UtilityValueUnavailableException(f"Utility function {self.utility_function.__class__.__name__} produced no values.")
 
         # TODO: keep getting configs until we have enough utility values to get started. Or assign 0 to missing ones,
         #  and let them climb out of their infeasible holes.

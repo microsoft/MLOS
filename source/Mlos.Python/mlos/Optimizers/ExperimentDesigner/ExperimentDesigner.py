@@ -4,6 +4,7 @@
 #
 import numpy as np
 
+from mlos.Exceptions import UnableToProduceGuidedSuggestionException
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
@@ -170,4 +171,9 @@ class ExperimentDesigner:
         random = random or override_random
         if random:
             return self.optimization_problem.parameter_space.random()
-        return self.numeric_optimizer.suggest(context_values_dataframe)
+        try:
+            return self.numeric_optimizer.suggest(context_values_dataframe)
+        except UnableToProduceGuidedSuggestionException:
+            self.logger.info(f"Failed to produce guided suggestion. Producing random suggestion instead.", exc_info=True)
+            return self.optimization_problem.parameter_space.random()
+

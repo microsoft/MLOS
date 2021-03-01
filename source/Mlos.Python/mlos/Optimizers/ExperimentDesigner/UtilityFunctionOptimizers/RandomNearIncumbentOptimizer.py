@@ -4,13 +4,13 @@
 #
 import numpy as np
 import pandas as pd
-from sklearn.metrics.pairwise import euclidean_distances
 
+from mlos.Exceptions import UtilityValueUnavailableException
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
+from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Spaces.HypergridAdapters import DiscreteToUnitContinuousHypergridAdapter
 from mlos.Tracer import trace, traced
@@ -26,17 +26,11 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
             ContinuousDimension(name="velocity_convergence_threshold", min=0, max=1),
             DiscreteDimension(name="max_num_iterations", min=1, max=1000),
             DiscreteDimension(name="num_neighbors", min=1, max=1000),
-            CategoricalDimension(name="cache_good_params", values=[True, False])
+            DiscreteDimension(name="num_cached_good_params", min=0, max=2**16),
+            ContinuousDimension(name="initial_points_pareto_weight", min=0, max=1),
+            ContinuousDimension(name="initial_points_cached_good_params_weight", min=0, max=1),
+            ContinuousDimension(name="initial_points_random_params_weight", min=0, max=1),
         ]
-    ).join(
-        on_external_dimension=CategoricalDimension(name="cache_good_params", values=[True]),
-        subgrid=SimpleHypergrid(
-            name="good_params_cache_config",
-            dimensions=[
-                DiscreteDimension(name="num_cached_points", min=10, max=2**16),
-                DiscreteDimension(name="num_used_points", min=0, max=2**16)
-            ]
-        )
     ),
     default=Point(
         num_starting_configs=20,
@@ -44,39 +38,76 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
         velocity_update_constant=0.3,
         velocity_convergence_threshold=0.01,
         max_num_iterations=50,
-        num_neighbors=50,
-        cache_good_params=True,
-        good_params_cache_config=Point(
-            num_cached_points=2**16,
-            num_used_points=2**7
-        )
-    )
+        num_neighbors=100,
+        num_cached_good_params=2**10,
+        initial_points_pareto_weight=0.5,
+        initial_points_cached_good_params_weight=0.3,
+        initial_points_random_params_weight=0.2
+    ),
+    description="""
+    * num_starting_configs - how many points to start the search from?
+    * initial_velocity - how far from the incumbent should the random neighbors be generated?
+    * velocity_update_constant - how quickly to change the velocity (0 - don't change it at all, 1 - change it as fast as possible)?
+    * velocity_convergence_threshold - when an incumbent's velocity drops below this threshold, it is assumed to have converged.
+    * max_num_iterations - cap on the number of iterations. A failsafe - should be higher than what the algorithm needs to converge on average.
+    * num_neighbors - how many random neighbors to generate for each incumbent?
+    * num_cached_good_params - how many good configurations should this optimizer cache for future use?
+    * initial_points_pareto_weight - what proportion of initial points should come from the pareto frontier?
+    * initial_points_cached_good_params_weight - what proportion of initial points should come from the good params cache?
+    * initial_points_random_params_weight - what proportion of initial points should be randomly generated?
+    """
 )
 
 
 class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
-    """ Searches the utility function for maxima the random near incumbent strategy.
+    """ Searches the utility function for maxima using the random near incumbent strategy.
 
-    Starting from an incumbent configuration, this optimizer creates a 'cloud' of random points in the vicinity of the incumbent
-    and evaluates the utility function for each of these points. If any of the new points have a higher utility value than the incumbent
-    then it gets promoted to the incumbent and we repeat the process.
+        Starting from an incumbent configuration, this optimizer creates a 'cloud' of random points in the incumbent's vicinity
+    and evaluates the utility function for each of these points. If any of the new points has a higher utility value than the
+    incumbent then it gets promoted to the incumbent and we repeat the process.
 
-    Additionally:
-        1. The entire process can be batched and the above procedure can happen simultaneously for many "incumbents".
-        2. We can intelligently select the starting points by:
-            1. Starting with the points on the pareto frontier.
-            2. Starting with good points from previous calls to 'suggest' as the utility function evolves gradually.
+    **Velocity**
 
-    The main benefits are:
+        We keep track the size of the step that each incumbent takes in each iteration. We then adjust that incumbent's velocity
+    (i.e. the radius within which it generates random neighbors). If the new incumbent is really far from the current incumbent
+    we assume that we should move faster in that direction and we increase velocity accordingly. Conversely, if the displacement
+    between the old and new incumbent is small, we reduce the velocity to allow the optimizer to more thoroughly exploit what
+    appears to be a local maximum. If the displacement continues to be small, we continue to reduce the velocity, until eventually
+    it falls below the velocity_convergence_threshold. That's when we assume the optimizer has converged for that incumbent.
 
-        1. It doesn't require a gradient, but behaves like a gradient method.
-        2. It is well parallelizeable (batchable).
+    **Parallelism**
 
-    Possible extensions and options:
-        1. We can keep track of the 'velocity' - the assumption being that if we are moving in a given direction, we can try
-            accelerating in that direction until it's no longer profitable. Check out ADAM and similar gradient based methods
-            for inspiration.
-        2. We should have several distributions to work with.
+        The above algorithm is trivial to parallelize. We instantiate num_starting_configs incumbents as a mix of pareto points,
+    known good configs from previous iterations, and brand new random configs. On each iteration, we generate random neighbors
+    for each incumbent, then update their positions and velocities independently. Importantly, once a given incumbent converges,
+    it donates its neighbors budget to all remaining active incumbents. This is because the total number of iterations this
+    algorithm needs to converge equals the number of iterations the slowest incumbent needs. So we want all incumbents that finish
+    quickly, to help the laggards so that the whole process can finish in as few iterations as possible.
+
+    **Starting Points**
+
+        Utility function optimizers are invoked repeatedly to find maxima of utility functions that change only slightly between
+    subsequent iterations. So we should be able to utilize learnings from prior iterations to speed up search for utility function
+    maxima in subsequent calls. We do this by:
+        * using points on the pareto frontier as some of the starting points,
+        * using good points from past iterations as some of the starting points.
+
+        Additionally, we use some random points as starting points too to balance the exlpore-exploit tradeoff.
+
+
+    **Benefits**
+
+    The main benefits of this implementation are:
+
+        1. It doesn't require a gradient, but behaves similarly to a gradient method.
+        2. It can be easily parallelized.
+        3. We exploit prior experience by intelligently selecting starting points, thus making more efficient use of our compute resources.
+
+    **Extensions**
+
+        Some of the possible extensions include:
+         * implementing different distributions from which to draw neighbors.
+         * adding other momentum-like methods to change the incumbents' velocity.
 
 
     """
@@ -124,9 +155,12 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         incumbent_features_df = self.optimization_problem.construct_feature_dataframe(
             parameter_values=incumbent_params_df,
             context_values=context_values_dataframe,
-            product=False
+            product=True
         )
         incumbent_utility_df = self.utility_function(feature_values_pandas_frame=incumbent_features_df)
+
+        if len(incumbent_utility_df.index) == 0:
+            raise UtilityValueUnavailableException(f"Utility function {self.utility_function.__class__.__name__} produced no values.")
 
         # Before we can create random neighbors, we need to normalize all parameter values by projecting them into unit hypercube.
         #
@@ -317,41 +351,59 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
     @trace()
     def _prepare_initial_params_df(self):
-        """Prepares a dataframe with inital parameters to start the search with.
+        """Prepares a dataframe with initial parameters to start the search with.
 
-        We simply take all points on the pareto frontier, if there is not enough points there, we also grab some good points from
-        the past, if there still isn't enough, then we generate random points.
+            First, we look at how many points from the pareto frontier we want. We grab this many at random from the pareto_df, unless
+        the pareto has fewer points than that in which case we simply take all of them.
+
+            Secondly, we look at how many good points from previous iterations we want. We take as many at random from the cache, unless
+        the cache doesn't have that many in which case we take all cached points.
+
+            Lastly, generate the rest of the points at random.
+
         :return:
         """
         self.logger.info("Preparing initial params")
 
-        initial_params_df = self.pareto_frontier.params_for_pareto_df
+        # First we must normalize the weights.
+        #
+        total_weights = self.optimizer_config.initial_points_pareto_weight \
+                        + self.optimizer_config.initial_points_cached_good_params_weight \
+                        + self.optimizer_config.initial_points_random_params_weight
+        assert total_weights > 0
 
-        if len(initial_params_df.index) > self.optimizer_config.num_starting_configs:
-            # We have to get rid of some of those pareto points.
-            #
-            initial_params_df = initial_params_df.sample(num=self.optimizer_config.num_starting_configs, replace=False, axis='index')
+        initial_points_pareto_fraction = self.optimizer_config.initial_points_pareto_weight / total_weights
+        initial_points_cached_good_fraction = self.optimizer_config.initial_points_cached_good_params_weight / total_weights
 
-        if self._good_configs_from_the_past_invocations_df is not None and len(self._good_configs_from_the_past_invocations_df.index) > 0:
-            if len(initial_params_df.index) < self.optimizer_config.num_starting_configs and self.optimizer_config.cache_good_params:
-                # We add some samples from the cached ones.
-                num_cached_points_to_use = min(
-                    len(self._good_configs_from_the_past_invocations_df.index),
-                    self.optimizer_config.good_params_cache_config.num_used_points
-                )
+        num_initial_points = self.optimizer_config.num_starting_configs
 
-                cached_points_to_use_df = self._good_configs_from_the_past_invocations_df.sample(
-                    num=num_cached_points_to_use,
-                    replace=False,
-                    axis='index'
-                )
-                initial_params_df = pd.concat([initial_params_df, cached_points_to_use_df])
+        # Let's start with the pareto points.
+        #
+        num_desired_pareto_points = np.floor(num_initial_points * initial_points_pareto_fraction)
+        num_existing_pareto_points = len(self.pareto_frontier.params_for_pareto_df.index) if self.pareto_frontier.params_for_pareto_df is not None else 0
 
-        if len(initial_params_df.index) < self.optimizer_config.num_starting_configs:
-            # If we are still short some points, we generate them at random.
-            num_random_points_to_create = self.optimizer_config.num_starting_configs - len(initial_params_df.index)
-            random_params_df = self.optimization_problem.parameter_space.random_dataframe(num_samples=num_random_points_to_create)
-            initial_params_df = pd.concat([initial_params_df, random_params_df])
+        pareto_params_df = pd.DataFrame()
+        if num_existing_pareto_points > 0:
+            if num_desired_pareto_points > num_existing_pareto_points:
+                pareto_params_df = self.pareto_frontier.params_for_pareto_df.sample(n=num_desired_pareto_points, replace=False, axis='index')
+            else:
+                pareto_params_df = self.pareto_frontier.params_for_pareto_df
 
+        # Now let's take the cached good points.
+        #
+        num_desired_cached_good_points = np.floor(num_initial_points * initial_points_cached_good_fraction)
+        cached_params_df = pd.DataFrame()
+        if self._good_configs_from_the_past_invocations_df is not None:
+            if num_desired_cached_good_points < len(self._good_configs_from_the_past_invocations_df.index):
+                cached_params_df = self._good_configs_from_the_past_invocations_df.sample(n=num_desired_cached_good_points, replace=False, axis='index')
+            else:
+                cached_params_df = self._good_configs_from_the_past_invocations_df.copy(deep=True)
+
+        # Finally let's generate the random points.
+        #
+        num_desired_random_points = num_initial_points - len(pareto_params_df.index) - len(cached_params_df.index)
+        random_params_df = self.optimization_problem.parameter_space.random_dataframe(num_samples=num_desired_random_points)
+
+        initial_params_df = pd.concat([pareto_params_df, cached_params_df, random_params_df])
         initial_params_df.reset_index(drop=True, inplace=True)
         return initial_params_df
