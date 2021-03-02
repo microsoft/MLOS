@@ -143,7 +143,8 @@ HRESULT AnonymousMemoryMlosContext::Create(
     FileDescriptorExchange fileDescriptorExchange;
     if (SUCCEEDED(hr))
     {
-        (void)fileDescriptorExchange.Connect(socketFilePath);
+        HRESULT hrIgnored = fileDescriptorExchange.Connect(socketFilePath);
+        MLOS_UNUSED_ARG(hrIgnored);
     }
 
     // Shared channel shared memory and notification primitive.
