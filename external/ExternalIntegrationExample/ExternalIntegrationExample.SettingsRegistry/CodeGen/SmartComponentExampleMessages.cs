@@ -56,7 +56,7 @@ namespace ExternalIntegrationExample
     /// It's very existence on the channel is signal enough of its intent.
     /// </remarks>
     [CodegenMessage]
-    internal partial struct RequestConfigUpdateExampleMessage
+    public partial struct RequestConfigUpdateExampleMessage
     {
     }
 
@@ -67,7 +67,7 @@ namespace ExternalIntegrationExample
     /// Messages can be combined/aggregated by the agent in various ways before being passed to the optimizer.
     /// </remarks>
     [CodegenMessage]
-    internal partial struct SmartComponentExampleTelemetryMessage
+    public partial struct SmartComponentExampleTelemetryMessage
     {
         /// <summary>
         /// The key for the Request.
