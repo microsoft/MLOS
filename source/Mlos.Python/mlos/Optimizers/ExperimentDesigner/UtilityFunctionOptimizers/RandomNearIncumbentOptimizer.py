@@ -5,7 +5,7 @@
 import numpy as np
 import pandas as pd
 
-from mlos.Exceptions import UtilityValueUnavailableException
+from mlos.Exceptions import UnableToProduceGuidedSuggestionException, UtilityValueUnavailableException
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
@@ -149,15 +149,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
 
         incumbent_params_df = self._prepare_initial_params_df()
-
-        # Now that we have the initial incumbent parameters, we need to compute their utility.
-        #
-        incumbent_features_df = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=incumbent_params_df,
-            context_values=context_values_dataframe,
-            product=True
-        )
-        incumbent_utility_df = self.utility_function(feature_values_pandas_frame=incumbent_features_df)
+        incumbent_utility_df = self._compute_utility_for_params(params_df=incumbent_params_df, context_df=context_values_dataframe)
 
         if len(incumbent_utility_df.index) == 0:
             raise UtilityValueUnavailableException(f"Utility function {self.utility_function.__class__.__name__} produced no values.")
@@ -186,33 +178,14 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         num_iterations = 0
 
-        # Just for development we can keep track of utility values and velocities over time.
-        #
-        utility_over_time = []
-        speed_over_time = []
-        velocities_over_time = {
-            dimension_name: []
-            for dimension_name
-            in self.parameter_dimension_names
-        }
-
-
         while num_iterations < self.optimizer_config.max_num_iterations and incumbents_df['active'].any():
-
-            utility_over_time.append(incumbents_df['utility'].copy())
-            speed_over_time.append(incumbents_df['speed'].copy())
-            for dimension_name in self.parameter_dimension_names:
-                velocities_over_time[dimension_name].append(incumbents_df[f'{dimension_name}_velocity'].copy())
-
             num_iterations += 1
-
             active_incumbents_df = incumbents_df[incumbents_df['active']]
             num_active_incumbents = len(active_incumbents_df.index)
 
-            # Since we have fewer active incumbents, each can have a few more neighbors, hopefully speeding up convergence.
+            # Since we have fewer active incumbents, each can have a few more neighbors, which should speed up convergence.
             #
             num_neighbors_per_incumbent = np.floor(self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
-
             self.logger.info(f"[Iteration {num_iterations}/{self.optimizer_config.max_num_iterations}] Num active incumbents: {num_active_incumbents}/{len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}")
 
             # Let's create random neighbors for each of the initial params
@@ -220,10 +193,6 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             with traced(scope_name="creating_random_neighbors"):
                 neighbors_dfs = []
 
-                # Apparently batching the calls to np.random.normal() might be advantageous. So let's do it by:
-                #   1) populating neighbors_df with {dimension_name}_incumbent_value, {dimension_name}_incumbent_velocity
-                #   2) creating the all_neighbors_df from that and then doing a single large call to np.random.normal()
-                #
                 for incumbent_config_idx, incumbent in active_incumbents_df.iterrows():
                     # For now let's only do normal distribution but we can add options later.
                     #
@@ -238,35 +207,34 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                     # Let's remember which config generated these neighbors too
                     #
                     neighbors_df['incumbent_config_idx'] = incumbent_config_idx
+
+                    # It's much simpler to remember the incumbent utility now, then to try to find it later.
+                    #
                     neighbors_df['incumbent_utility'] = incumbent['utility']
                     neighbors_dfs.append(neighbors_df)
 
                 all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
 
-                # Let's remove all invalid configs. TODO: consider clipping them instead.
+                # Let's remove all obviously invalid configs. This call uses fast vectorized operations, but since filtering happens on a flattened
+                # grid, it doesn't check the ancestral dependencies. Thus, it will only filter out the points which fall outside the min-max range.
                 #
                 all_neighbors_df.fillna(0, inplace=True)
                 all_neighbors_df = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=all_neighbors_df, exclude_extra_columns=False)
 
-                # Next, we compute utility for all of those random neighbors
+                # The all_neighbors_df contains parameters in the unit-continuous hypergrid. So we need to unproject it back to the original
+                # hierarchical hypergrid with many parameter types.
                 #
                 unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=False)
 
-                # Let's remove all invalid configs.
+                # Now that we have the hierarchy back, we can once again filter out invalid rows, this time making sure that all ancestral dependencies
+                # are honored. For hierarchical spaces, filter_out_invalid_rows() function is not vectorized (yet) so it's slow. Thus it pays, to first
+                # remove all obviously wrong rows above, and only examine the smaller subset here. TODO: vectorize filter_out_invalid_rows() for hierachical
+                # spaces.
                 #
-                # TODO: make this more efficient and uncomment.
                 unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(original_dataframe=unprojected_neighbors_df, exclude_extra_columns=False)
 
-            # assert len(unprojected_neighbors_df.index) == len(self.optimization_problem.parameter_space.get_valid_rows_index(unprojected_neighbors_df))
+            neighbors_utility_df = self._compute_utility_for_params(params_df=unprojected_neighbors_df, context_df=context_values_dataframe)
 
-
-            neighbors_features_df = self.optimization_problem.construct_feature_dataframe(
-                parameter_values=unprojected_neighbors_df,
-                context_values=context_values_dataframe,
-                product=False
-            )
-
-            neighbors_utility_df = self.utility_function(feature_values_pandas_frame=neighbors_features_df)
             all_neighbors_df = all_neighbors_df.loc[neighbors_utility_df.index]
             all_neighbors_df['utility'] = neighbors_utility_df['utility']
             all_neighbors_df['utility_gain'] = all_neighbors_df['utility'] - all_neighbors_df['incumbent_utility']
@@ -281,14 +249,15 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices]
             best_neighbors_df.set_index(keys=best_neighbors_indices.index, inplace=True, verify_integrity=True)
 
-            # Let's create a dataframe with the new incumbents. We do it by copying old incumbents in case none of their neighbors
-            # had higher utility.
+            # Let's create a dataframe with the new incumbents. We do it by first copying old incumbents in case none of their neighbors had higher utility.
+            # Subsequently we copy over any neighbors, that had a positive utility gain.
+            #
             new_incumbents_df = incumbents_df[self.parameter_dimension_names].copy()
             new_incumbents_df['utility'] = incumbents_df['utility']
             new_incumbents_df.loc[best_neighbors_df.index, self.parameter_dimension_names] = best_neighbors_df[self.parameter_dimension_names]
             new_incumbents_df.loc[best_neighbors_df.index, 'utility'] = best_neighbors_df['utility']
 
-            # We need to compute the displacement for this iteration.
+            # We need to compute the displacement for this iteration. We will use it to alter the speed.
             #
             displacement_df = pd.DataFrame()
             for dimension_name in self.parameter_dimension_names:
@@ -320,26 +289,15 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             assert (incumbents_df.loc[not_na_incumbent_index, 'utility'] <= new_incumbents_df.loc[not_na_incumbent_index, 'utility']).all()
             incumbents_df['utility'] = new_incumbents_df['utility']
 
+        if incumbents_df['utility'].isna().all():
+            error_message = "Utility values were not available for the incumbent."
+            self.logger.info(error_message)
+            raise UtilityValueUnavailableException(error_message)
 
-
-        utility_over_time.append(incumbents_df['utility'])
-        speed_over_time.append(incumbents_df['speed'].copy())
-        for dimension_name in self.parameter_dimension_names:
-            velocities_over_time[dimension_name].append(incumbents_df[f'{dimension_name}_velocity'])
-
-        utilitity_over_time_df = pd.concat(utility_over_time, axis=1).T
-        speed_over_time_df = pd.concat(speed_over_time, axis=1).T
-        velocity_over_time_dfs = {}
-        for dimension_name in self.parameter_dimension_names:
-            velocity_over_time_dfs[dimension_name] = pd.concat(velocities_over_time[dimension_name], axis=1).T
-
-        print('breakpoint')
-
-        if incumbents_df['utility'].isna().all() or num_iterations <= 2:
-            # TODO: raise an exception so that the experiment designer can explicitly return a random config.
-            #
-            self.logger.info("Suggesting a random config!")
-            return self.optimization_problem.parameter_space.random()
+        if num_iterations == 0:
+            error_message = f"{self.__class__.__name__} performed 0 iterations."
+            self.logger.info(error_message)
+            raise UnableToProduceGuidedSuggestionException(error_message)
 
         idx_of_max = incumbents_df['utility'].idxmax()
         best_config_df = incumbents_df.loc[[idx_of_max], self.parameter_dimension_names]
@@ -407,3 +365,18 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         initial_params_df = pd.concat([pareto_params_df, cached_params_df, random_params_df])
         initial_params_df.reset_index(drop=True, inplace=True)
         return initial_params_df
+
+
+    @trace()
+    def _compute_utility_for_params(self, params_df, context_df):
+        """This functionality is repeated a couple times so let's make sure it is in one place.
+
+        Basically we only need to create a features_df from params_df and context_df, and invoke the utility function.
+        """
+        features_df = self.optimization_problem.construct_feature_dataframe(
+            parameter_values=params_df,
+            context_values=context_df,
+            product=True
+        )
+        utility_df = self.utility_function(feature_values_pandas_frame=features_df)
+        return utility_df
