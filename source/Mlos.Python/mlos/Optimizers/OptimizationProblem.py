@@ -122,31 +122,33 @@ class OptimizationProblem:
                 on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
             )
 
-    def construct_feature_dataframe(self, parameter_values, context_values=None, product=False):
+    def construct_feature_dataframe(self, parameters_df: pd.DataFrame, context_df: pd.DataFrame = None, product: bool = False):
         """Construct feature value dataframe from config value and context value dataframes.
 
         If product is True, creates a cartesian product, otherwise appends columns.
 
         """
-        if (self.context_space is not None) and (context_values is None):
+        if (self.context_space is not None) and (context_df is None):
             raise ValueError("Context required by optimization problem but not provided.")
 
         # prefix column names to adhere to dimensions in hierarchical hypergrid
-        feature_values = parameter_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
-        if context_values is not None and len(context_values) > 0:
-            renamed_context_values = context_values.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
-            feature_values['contains_context'] = True
+        #
+        features_df = parameters_df.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
+        if context_df is not None and len(context_df) > 0:
+            renamed_context_values = context_df.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
+            features_df['contains_context'] = True
             if product:
                 renamed_context_values['contains_context'] = True
-                feature_values = feature_values.merge(renamed_context_values, how='outer', on='contains_context')
+                features_df = features_df.merge(renamed_context_values, how='outer', on='contains_context')
+                features_df.index = parameters_df.index.copy()
             else:
-                if len(parameter_values) != len(context_values):
-                    raise ValueError(f"Incompatible shape of parameters and context: {parameter_values.shape} and {context_values.shape}.")
-                feature_values = pd.concat([feature_values, renamed_context_values], axis=1)
+                if len(parameters_df) != len(context_df):
+                    raise ValueError(f"Incompatible shape of parameters and context: {parameters_df.shape} and {context_df.shape}.")
+                features_df = pd.concat([features_df, renamed_context_values], axis=1)
 
         else:
-            feature_values['contains_context'] = False
-        return feature_values
+            features_df['contains_context'] = False
+        return features_df
 
     def to_dict(self):
         return {

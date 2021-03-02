@@ -117,8 +117,8 @@ class BayesianOptimizer(OptimizerBase):
         if not self.surrogate_model.trained:
             raise RuntimeError("Model has not been trained yet.")
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=self._parameter_values_df.copy(),
-            context_values=self._context_values_df.copy()
+            parameters_df=self._parameter_values_df.copy(),
+            context_df=self._context_values_df.copy()
         )
 
         return self.surrogate_model.compute_goodness_of_fit(
@@ -193,7 +193,7 @@ class BayesianOptimizer(OptimizerBase):
         # TODO: ascertain that min_samples_required ... is more than min_samples to fit the model
         if self.num_observed_samples >= self.optimizer_config.min_samples_required_for_guided_design_of_experiments:
             feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
-                parameter_values=self._parameter_values_df, context_values=self._context_values_df)
+                parameters_df=self._parameter_values_df, context_df=self._context_values_df)
             self.surrogate_model.fit(
                 features_df=feature_values_pandas_frame,
                 targets_df=self._target_values_df,
@@ -205,8 +205,8 @@ class BayesianOptimizer(OptimizerBase):
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=parameter_values_pandas_frame,
-            context_values=context_values_pandas_frame
+            parameters_df=parameter_values_pandas_frame,
+            context_df=context_values_pandas_frame
         )
 
         return self.surrogate_model.predict(feature_values_pandas_frame)[0]

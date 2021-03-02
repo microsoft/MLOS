@@ -99,9 +99,9 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         )
 
         features_df = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=parameters_df.copy(deep=False),
-            context_values=context_values_dataframe,
-            product=False
+            parameters_df=parameters_df.copy(deep=False),
+            context_df=context_values_dataframe,
+            product=True
         )
 
         utility_function_values = self.utility_function(feature_values_pandas_frame=features_df.copy(deep=False))

@@ -8,6 +8,7 @@ import os
 import numpy as np
 import pandas as pd
 
+from mlos.Exceptions import UnableToProduceGuidedSuggestionException
 from mlos.Logger import create_logger
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
@@ -156,24 +157,27 @@ class TestUtilityFunctionOptimizers:
 
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
-        # Let's warm up the model a bit
-        #
-        num_warmup_samples = 1000
-        random_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_warmup_samples)
-        y = objective_function.evaluate_dataframe(random_params_df)
-
-        model = MultiObjectiveHomogeneousRandomForest(
-            model_config=self.model_config,
-            input_space=objective_function.parameter_space,
-            output_space=output_space
-        )
-        model.fit(features_df=random_params_df, targets_df=y, iteration_number=num_warmup_samples)
 
         optimization_problem = OptimizationProblem(
             parameter_space=objective_function.parameter_space,
             objective_space=output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
+
+        # Let's warm up the model a bit
+        #
+        num_warmup_samples = 1000
+        random_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_warmup_samples)
+        features_df = optimization_problem.construct_feature_dataframe(parameters_df=random_params_df, context_df=None, product=True)
+
+        objectives_df = objective_function.evaluate_dataframe(random_params_df)
+
+        model = MultiObjectiveHomogeneousRandomForest(
+            model_config=self.model_config,
+            input_space=optimization_problem.feature_space,
+            output_space=output_space
+        )
+        model.fit(features_df=features_df, targets_df=objectives_df, iteration_number=num_warmup_samples)
 
         utility_function = ConfidenceBoundUtilityFunction(
             function_config=self.utility_function_config,
@@ -188,9 +192,17 @@ class TestUtilityFunctionOptimizers:
         )
 
         num_iterations = 5
+        num_guided_suggestions = 0
         for i in range(num_iterations):
-            suggested_params = glow_worm_swarm_optimizer.suggest()
-            print(f"[{i+1}/{num_iterations}] {suggested_params.to_json()}")
-            assert suggested_params in objective_function.parameter_space
+            try:
+                suggested_params = glow_worm_swarm_optimizer.suggest()
+                num_guided_suggestions += 1
+                print(f"[{i+1}/{num_iterations}] {suggested_params.to_json()}")
+                assert suggested_params in objective_function.parameter_space
+            except UnableToProduceGuidedSuggestionException:
+                self.logger.info("Failed to produce guided suggestion.", exc_info=True)
+
+        assert num_guided_suggestions > 0
+
 
 

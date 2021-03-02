@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import concurrent.futures
 import json
-from multiprocessing import cpu_count
+import math
 import os
 import pickle
 
@@ -144,7 +143,7 @@ class TestOptimizerEvaluator:
         final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
 
         for _ in range(100):
-            assert final_optimizer_from_disk.suggest() == final_optimizer_from_report.suggest()
+            assert math.abs(final_optimizer_from_disk.suggest()["x_0"] - final_optimizer_from_report.suggest()["x_0"]) < 0.00001
 
 
     @pytest.mark.parametrize('test_num', [i for i in range(10)])

@@ -205,7 +205,7 @@ class TestBayesianOptimizer:
 
     @trace()
     @pytest.mark.parametrize('restart_num', [i for i in range(2)])
-    @pytest.mark.parametrize('use_remote_optimizer', [True])
+    @pytest.mark.parametrize('use_remote_optimizer', [True, False])
     def test_hierarchical_quadratic_cold_start(self, restart_num, use_remote_optimizer):
 
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
@@ -639,12 +639,24 @@ class TestBayesianOptimizer:
                 index = parameters.index
             else:
                 index = [0]
-            return pd.DataFrame({'function_value': -np.exp(-50 * (parameters.x - 0.5 * context.y -0.5) ** 2)},
-                                 index=index)
+            return pd.DataFrame(
+                {'function_value': -np.exp(-50 * (parameters.x - 0.5 * context.y - 0.5) ** 2)},
+                index=index
+            )
         input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name="x", min=0, max=1)])
-        output_space = SimpleHypergrid(name="objective",
-                                       dimensions=[ContinuousDimension(name="function_value", min=-10, max=10)])
-        context_space = SimpleHypergrid(name="context", dimensions=[ContinuousDimension(name="y", min=-1, max=1)])
+        output_space = SimpleHypergrid(
+            name="objective",
+            dimensions=[
+                ContinuousDimension(name="function_value", min=-10, max=10)
+            ]
+        )
+
+        context_space = SimpleHypergrid(
+            name="context",
+            dimensions=[
+                ContinuousDimension(name="y", min=-1, max=1)
+            ]
+        )
 
         optimization_problem = OptimizationProblem(
             parameter_space=input_space,

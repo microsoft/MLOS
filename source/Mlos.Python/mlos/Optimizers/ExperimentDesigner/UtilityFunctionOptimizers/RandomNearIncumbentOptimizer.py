@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import math
 import numpy as np
 import pandas as pd
 
@@ -185,7 +186,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
             # Since we have fewer active incumbents, each can have a few more neighbors, which should speed up convergence.
             #
-            num_neighbors_per_incumbent = np.floor(self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
+            num_neighbors_per_incumbent = math.floor(self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
             self.logger.info(f"[Iteration {num_iterations}/{self.optimizer_config.max_num_iterations}] Num active incumbents: {num_active_incumbents}/{len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}")
 
             # Let's create random neighbors for each of the initial params
@@ -337,19 +338,19 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         # Let's start with the pareto points.
         #
-        num_desired_pareto_points = np.floor(num_initial_points * initial_points_pareto_fraction)
+        num_desired_pareto_points = math.floor(num_initial_points * initial_points_pareto_fraction)
         num_existing_pareto_points = len(self.pareto_frontier.params_for_pareto_df.index) if self.pareto_frontier.params_for_pareto_df is not None else 0
 
         pareto_params_df = pd.DataFrame()
         if num_existing_pareto_points > 0:
-            if num_desired_pareto_points > num_existing_pareto_points:
+            if num_desired_pareto_points < num_existing_pareto_points:
                 pareto_params_df = self.pareto_frontier.params_for_pareto_df.sample(n=num_desired_pareto_points, replace=False, axis='index')
             else:
                 pareto_params_df = self.pareto_frontier.params_for_pareto_df
 
         # Now let's take the cached good points.
         #
-        num_desired_cached_good_points = np.floor(num_initial_points * initial_points_cached_good_fraction)
+        num_desired_cached_good_points = math.floor(num_initial_points * initial_points_cached_good_fraction)
         cached_params_df = pd.DataFrame()
         if self._good_configs_from_the_past_invocations_df is not None:
             if num_desired_cached_good_points < len(self._good_configs_from_the_past_invocations_df.index):
@@ -374,8 +375,8 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         Basically we only need to create a features_df from params_df and context_df, and invoke the utility function.
         """
         features_df = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=params_df,
-            context_values=context_df,
+            parameters_df=params_df,
+            context_df=context_df,
             product=True
         )
         utility_df = self.utility_function(feature_values_pandas_frame=features_df)

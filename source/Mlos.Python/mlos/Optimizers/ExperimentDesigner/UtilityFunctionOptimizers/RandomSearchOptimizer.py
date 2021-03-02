@@ -56,8 +56,8 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         """
         parameter_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.optimizer_config.num_samples_per_iteration)
         feature_values_dataframe = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=parameter_values_dataframe,
-            context_values=context_values_dataframe,
+            parameters_df=parameter_values_dataframe,
+            context_df=context_values_dataframe,
             product=True
         )
         utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
