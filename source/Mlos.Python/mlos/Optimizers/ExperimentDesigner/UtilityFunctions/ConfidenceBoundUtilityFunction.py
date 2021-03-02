@@ -71,4 +71,4 @@ class ConfidenceBoundUtilityFunction(UtilityFunction):
             utility_function_values = predictions_df[predicted_value_col] * self._sign + confidence_interval_radii
         else:
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
-        return pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'])
+        return pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'], dtype='float')
