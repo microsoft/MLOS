@@ -111,6 +111,8 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
             std_dev_column_name=std_dev_column_name
         )
 
+        batched_poi_df['utility'] = pd.to_numeric(arg=batched_poi_df['utility'], errors='raise')
+        assert batched_poi_df.dtypes['utility'] == np.float
         return batched_poi_df
 
     @trace()
@@ -144,49 +146,13 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
             monte_carlo_samples_df['config_idx'] = config_idx
             monte_carlo_samples_dfs.append(monte_carlo_samples_df)
 
-        poi_df = pd.DataFrame(columns=['utility'])
+        poi_df = pd.DataFrame(columns=['utility'], dtype='float')
         if len(monte_carlo_samples_dfs) > 0:
             samples_for_all_configs_df = pd.concat(monte_carlo_samples_dfs, ignore_index=True, axis=0)
             original_column_names = [column for column in samples_for_all_configs_df.columns if column != 'config_idx']
             samples_for_all_configs_df['is_dominated'] = self.pareto_frontier.is_dominated(objectives_df=samples_for_all_configs_df[original_column_names])
             poi_series = 1 - (samples_for_all_configs_df.groupby(by=["config_idx"])["is_dominated"].sum() / self.config.num_monte_carlo_samples)
             poi_df = pd.DataFrame({'utility': poi_series}, index=poi_series.index)
-
-        return poi_df
-
-
-    @trace()
-    def _naive_poi(
-            self,
-            multi_objective_predictions: MultiObjectivePrediction,
-            valid_predictions_index: pd.Index,
-            std_dev_column_name: str
-    ):
-        """Naively generates a monte carlo data frame for each of the feature rows and sends them to ParetoFrontier individually.
-
-        We should be able to substantially improve on this by batching all those dataframes.
-
-        :return:
-        """
-        poi_df = pd.DataFrame(index=valid_predictions_index, columns=['utility'], dtype='float')
-
-
-        with traced(scope_name="poi_monte_carlo"):
-            for config_idx in valid_predictions_index:
-                monte_carlo_samples_df = self.create_monte_carlo_samples_df(
-                    multi_objective_predictions=multi_objective_predictions,
-                    config_idx=config_idx,
-                    std_dev_column_name=std_dev_column_name
-                )
-                num_samples = len(monte_carlo_samples_df.index)
-                assert num_samples == self.config.num_monte_carlo_samples
-
-                # At this point we have a dataframe with all the randomly generated points in the objective space. Let's query the pareto
-                # frontier if they are dominated or not.
-                num_dominated_points = self.pareto_frontier.is_dominated(objectives_df=monte_carlo_samples_df).sum()
-                num_non_dominated_points = num_samples - num_dominated_points
-                probability_of_improvement = num_non_dominated_points / num_samples
-                poi_df.loc[config_idx, 'utility'] = probability_of_improvement
 
         return poi_df
 

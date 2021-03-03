@@ -143,7 +143,7 @@ class TestOptimizerEvaluator:
         final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
 
         for _ in range(100):
-            assert math.abs(final_optimizer_from_disk.suggest()["x_0"] - final_optimizer_from_report.suggest()["x_0"]) < 0.00001
+            assert final_optimizer_from_disk.suggest() in final_optimizer_from_report.optimization_problem.parameter_space
 
 
     @pytest.mark.parametrize('test_num', [i for i in range(10)])

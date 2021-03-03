@@ -219,8 +219,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 # Let's remove all obviously invalid configs. This call uses fast vectorized operations, but since filtering happens on a flattened
                 # grid, it doesn't check the ancestral dependencies. Thus, it will only filter out the points which fall outside the min-max range.
                 #
+                num_neighbors_including_invalid = len(all_neighbors_df.index)
                 all_neighbors_df.fillna(0, inplace=True)
                 all_neighbors_df = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=all_neighbors_df, exclude_extra_columns=False)
+                num_neighbors_after_unfiltering_projected_points = len(all_neighbors_df.index)
 
                 # The all_neighbors_df contains parameters in the unit-continuous hypergrid. So we need to unproject it back to the original
                 # hierarchical hypergrid with many parameter types.
@@ -233,8 +235,15 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 # spaces.
                 #
                 unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(original_dataframe=unprojected_neighbors_df, exclude_extra_columns=False)
+                num_neighbors_after_unfiltering_unprojected_points = len(unprojected_neighbors_df.index)
+                self.logger.info(
+                    f"Started with {num_neighbors_including_invalid}. "
+                    f"adapter fitlered them down to {num_neighbors_after_unfiltering_projected_points}. "
+                    f"Parameter space filtered them down to {num_neighbors_after_unfiltering_unprojected_points}"
+                )
 
             neighbors_utility_df = self._compute_utility_for_params(params_df=unprojected_neighbors_df, context_df=context_values_dataframe)
+            self.logger.info(f"Computed utility for {len(neighbors_utility_df.index)} random neighbors.")
 
             all_neighbors_df = all_neighbors_df.loc[neighbors_utility_df.index]
             all_neighbors_df['utility'] = neighbors_utility_df['utility']
@@ -243,12 +252,14 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             # We can filter out all rows with negative utility gain.
             #
             all_neighbors_df = all_neighbors_df[all_neighbors_df['utility_gain'] >= 0]
+            self.logger.info(f"{len(all_neighbors_df.index)} have positive utility gain.")
 
             # The series below has best neighbor's index as value and the incumbent_config_idx as key.
             #
             best_neighbors_indices = all_neighbors_df.groupby(by=["incumbent_config_idx"])['utility_gain'].idxmax()
             best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices]
             best_neighbors_df.set_index(keys=best_neighbors_indices.index, inplace=True, verify_integrity=True)
+            self.logger.info(f"{len(best_neighbors_df.index)} neighbors improved upon their respective incumbents.")
 
             # Let's create a dataframe with the new incumbents. We do it by first copying old incumbents in case none of their neighbors had higher utility.
             # Subsequently we copy over any neighbors, that had a positive utility gain.
@@ -300,6 +311,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             self.logger.info(error_message)
             raise UnableToProduceGuidedSuggestionException(error_message)
 
+        if incumbents_df.dtypes['utility'] != np.float:
+            self.logger.info(f"The type of incumbents_df['utility'] is {incumbents_df.dtypes['utility']}. Utility function: {self.utility_function.__class__.__name__}, incumbents_df lendth: {len(incumbents_df.index)}")
+            incumbents_df['utility'] = pd.to_numeric(arg=incumbents_df['utility'], errors='raise')
+
         idx_of_max = incumbents_df['utility'].idxmax()
         best_config_df = incumbents_df.loc[[idx_of_max], self.parameter_dimension_names]
         config_to_suggest = Point.from_dataframe(best_config_df)
@@ -348,6 +363,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             else:
                 pareto_params_df = self.pareto_frontier.params_for_pareto_df
 
+            self.logger.info(f"Using {len(pareto_params_df.index)} of {num_existing_pareto_points} pareto points as starting configs.")
+        else:
+            self.logger.info("There are no existing pareto points.")
+
         # Now let's take the cached good points.
         #
         num_desired_cached_good_points = math.floor(num_initial_points * initial_points_cached_good_fraction)
@@ -357,11 +376,16 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 cached_params_df = self._good_configs_from_the_past_invocations_df.sample(n=num_desired_cached_good_points, replace=False, axis='index')
             else:
                 cached_params_df = self._good_configs_from_the_past_invocations_df.copy(deep=True)
+            self.logger.info(f"Using {len(cached_params_df.index)} out of {len(self._good_configs_from_the_past_invocations_df.index)} as starting configs")
+        else:
+            self.logger.info(f"No cached params are available.")
+
 
         # Finally let's generate the random points.
         #
         num_desired_random_points = num_initial_points - len(pareto_params_df.index) - len(cached_params_df.index)
         random_params_df = self.optimization_problem.parameter_space.random_dataframe(num_samples=num_desired_random_points)
+        self.logger.info(f"Using {len(random_params_df.index)} as starting configs.")
 
         initial_params_df = pd.concat([pareto_params_df, cached_params_df, random_params_df])
         initial_params_df.reset_index(drop=True, inplace=True)
@@ -380,4 +404,5 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             product=True
         )
         utility_df = self.utility_function(feature_values_pandas_frame=features_df)
+        assert utility_df.dtypes['utility'] == np.float, f"{utility_df} produced by {self.utility_function.__class__.__name__} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
         return utility_df
