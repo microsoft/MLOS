@@ -41,10 +41,10 @@ multi_objective_pass_through_model_config_store = ComponentConfigStore(
         subgrid=objective_function_config_store.parameter_space
     ),
     default=Point(
-        uncertainty_type="coefficient_of_variation",
+        uncertainty_type="constant",
         use_objective_function=True,
         predicted_value_degrees_of_freedom=10,
-        coefficient_of_variation_config=Point(value=0.1),
+        constant_uncertainty_config=Point(value=1),
         objective_function_config=objective_function_config_store.get_config_by_name("three_level_quadratic")
     ),
     description=""
@@ -53,10 +53,10 @@ multi_objective_pass_through_model_config_store = ComponentConfigStore(
 multi_objective_pass_through_model_config_store.add_config_by_name(
     config_name="three_level_quadratic",
     config_point=Point(
-        uncertainty_type="coefficient_of_variation",
+        uncertainty_type="constant",
         use_objective_function=True,
         predicted_value_degrees_of_freedom=10,
-        coefficient_of_variation_config=Point(value=0.1),
+        constant_uncertainty_config=Point(value=1),
         objective_function_config=objective_function_config_store.get_config_by_name("three_level_quadratic")
     )
 )

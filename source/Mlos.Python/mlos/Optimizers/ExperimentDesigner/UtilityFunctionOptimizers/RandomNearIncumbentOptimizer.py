@@ -66,7 +66,7 @@ random_near_incumbent_optimizer_config_store.add_config_by_name(
         initial_velocity=0.2,
         velocity_update_constant=0.3,
         velocity_convergence_threshold=0.01,
-        max_num_iterations=100,
+        max_num_iterations=50,
         num_neighbors=100,
         num_cached_good_params=2**10,
         initial_points_pareto_weight=0.5,
@@ -220,7 +220,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                         neighbors_df[dimension_name] = np.random.normal(
                             loc=incumbent[dimension_name],
                             scale=np.abs(incumbent[f'{dimension_name}_velocity']),
-                            size=self.optimizer_config.num_neighbors
+                            size=num_neighbors_per_incumbent
                         )
 
                     # Let's remember which config generated these neighbors too
