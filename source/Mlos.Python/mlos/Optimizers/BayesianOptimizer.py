@@ -150,6 +150,8 @@ class BayesianOptimizer(OptimizerBase):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
 
+        self.logger.info(f"Registering {len(parameter_values_pandas_frame.index)} parameters and {len(target_values_pandas_frame.index)} objectives.")
+
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
             raise ValueError("Context required by optimization problem but not provided.")
 

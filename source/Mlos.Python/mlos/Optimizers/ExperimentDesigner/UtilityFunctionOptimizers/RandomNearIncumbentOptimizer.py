@@ -36,10 +36,10 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     default=Point(
         num_starting_configs=10,
         initial_velocity=0.3,
-        velocity_update_constant=0.3,
+        velocity_update_constant=0.5,
         velocity_convergence_threshold=0.01,
         max_num_iterations=50,
-        num_neighbors=10,
+        num_neighbors=20,
         num_cached_good_params=2**10,
         initial_points_pareto_weight=0.5,
         initial_points_cached_good_params_weight=0.3,
@@ -153,7 +153,9 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         incumbent_utility_df = self._compute_utility_for_params(params_df=incumbent_params_df, context_df=context_values_dataframe)
 
         if len(incumbent_utility_df.index) == 0:
-            raise UtilityValueUnavailableException(f"Utility function {self.utility_function.__class__.__name__} produced no values.")
+            error_message = f"Utility function {self.utility_function.__class__.__name__} produced no values."
+            self.logger.info(error_message)
+            raise UtilityValueUnavailableException(error_message)
 
         # Before we can create random neighbors, we need to normalize all parameter values by projecting them into unit hypercube.
         #
@@ -238,7 +240,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 num_neighbors_after_unfiltering_unprojected_points = len(unprojected_neighbors_df.index)
                 self.logger.info(
                     f"Started with {num_neighbors_including_invalid}. "
-                    f"adapter fitlered them down to {num_neighbors_after_unfiltering_projected_points}. "
+                    f"Adapter filtered them down to {num_neighbors_after_unfiltering_projected_points}. "
                     f"Parameter space filtered them down to {num_neighbors_after_unfiltering_unprojected_points}"
                 )
 
@@ -319,7 +321,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         best_config_df = incumbents_df.loc[[idx_of_max], self.parameter_dimension_names]
         config_to_suggest = Point.from_dataframe(best_config_df)
         unprojected_config_to_suggest = self.parameter_adapter.unproject_point(config_to_suggest)
-        self.logger.info(f"Suggesting: {unprojected_config_to_suggest.to_json(indent=2)}")
+        self.logger.info(f"After {num_iterations} suggesting: {unprojected_config_to_suggest.to_json(indent=2)}")
         return unprojected_config_to_suggest
 
 
@@ -385,7 +387,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         #
         num_desired_random_points = num_initial_points - len(pareto_params_df.index) - len(cached_params_df.index)
         random_params_df = self.optimization_problem.parameter_space.random_dataframe(num_samples=num_desired_random_points)
-        self.logger.info(f"Using {len(random_params_df.index)} as starting configs.")
+        self.logger.info(f"Using {len(random_params_df.index)} random points as starting configs.")
 
         initial_params_df = pd.concat([pareto_params_df, cached_params_df, random_params_df])
         initial_params_df.reset_index(drop=True, inplace=True)

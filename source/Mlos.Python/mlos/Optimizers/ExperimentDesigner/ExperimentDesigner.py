@@ -181,10 +181,14 @@ class ExperimentDesigner:
         override_random = random_number < self.config.fraction_random_suggestions
         random = random or override_random
         if random:
-            return self.optimization_problem.parameter_space.random()
+            suggestion = self.optimization_problem.parameter_space.random()
+            self.logger.info(f"Producing random suggestion: {suggestion}")
+            return suggestion
         try:
-            return self.numeric_optimizer.suggest(context_values_dataframe)
+            suggestion = self.numeric_optimizer.suggest(context_values_dataframe)
+            self.logger.info(f"Produced a guided suggestion: {suggestion}")
+            return suggestion
         except UnableToProduceGuidedSuggestionException:
-            self.logger.info(f"Failed to produce guided suggestion. Producing random suggestion instead.", exc_info=True)
+            self.logger.info(f"Failed to produce guided suggestion. Producing random suggestion instead.")
             return self.optimization_problem.parameter_space.random()
 

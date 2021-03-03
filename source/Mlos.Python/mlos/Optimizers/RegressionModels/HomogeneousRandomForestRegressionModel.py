@@ -117,7 +117,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 subspace_name=f"estimator_{i}_input_space",
                 max_num_dimensions=features_per_estimator
             )
-            self.logger.info(f"Creating DecissionTreeRegressionModel with the input_space: {estimator_input_space}")
+            self.logger.info(f"Creating DecisionTreeRegressionModel with the input_space: {estimator_input_space}")
 
             estimator = DecisionTreeRegressionModel(
                 model_config=self.model_config.decision_tree_regression_model_config,
