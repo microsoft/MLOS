@@ -206,6 +206,8 @@ class Tracer:
                 else:
                     try:
                         value = str(value)
+                        if len(value) > 10000:
+                            raise ValueError("Value too long.")
                         args_json[key] = value
                     except:
                         args_json[key] = f"value of type {str(type(value))} but must be one of: str, int, bool, float."
