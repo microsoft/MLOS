@@ -59,7 +59,7 @@ class Point:
 
         # Raise the exception outside the 'except' block to not make it look like a nested error.
         #
-        raise AttributeError(f"This Point does not have a {dimension_name} attribute.")
+        raise AttributeError(f"This Point does not have a {dimension_name} attribute. Point: {self}")
 
     def __setattr__(self, name, value):
         if name == "dimension_value_dict":

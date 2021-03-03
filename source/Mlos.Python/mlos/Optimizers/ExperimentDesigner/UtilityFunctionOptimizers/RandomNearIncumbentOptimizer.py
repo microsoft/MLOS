@@ -59,6 +59,22 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
     """
 )
 
+random_near_incumbent_optimizer_config_store.add_config_by_name(
+    config_name="100_incumbents_100_neighbors",
+    config_point=Point(
+        num_starting_configs=100,
+        initial_velocity=0.2,
+        velocity_update_constant=0.3,
+        velocity_convergence_threshold=0.01,
+        max_num_iterations=100,
+        num_neighbors=100,
+        num_cached_good_params=2**10,
+        initial_points_pareto_weight=0.5,
+        initial_points_cached_good_params_weight=0.3,
+        initial_points_random_params_weight=0.2
+    ),
+    description="More thorough and more expensive than the default."
+)
 
 class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
     """ Searches the utility function for maxima using the random near incumbent strategy.
@@ -222,9 +238,11 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 # grid, it doesn't check the ancestral dependencies. Thus, it will only filter out the points which fall outside the min-max range.
                 #
                 num_neighbors_including_invalid = len(all_neighbors_df.index)
-                all_neighbors_df.fillna(0, inplace=True)
-                all_neighbors_df = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=all_neighbors_df, exclude_extra_columns=False)
-                num_neighbors_after_unfiltering_projected_points = len(all_neighbors_df.index)
+                all_neighbors_df_no_nulls = all_neighbors_df.fillna(0, inplace=False)
+                all_neighbors_df_no_nulls = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=all_neighbors_df_no_nulls, exclude_extra_columns=False)
+                all_neighbors_df = all_neighbors_df.loc[all_neighbors_df_no_nulls.index]
+                num_neighbors_after_filtering_out_projected_points = len(all_neighbors_df.index)
+
 
                 # The all_neighbors_df contains parameters in the unit-continuous hypergrid. So we need to unproject it back to the original
                 # hierarchical hypergrid with many parameter types.
@@ -237,11 +255,11 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 # spaces.
                 #
                 unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(original_dataframe=unprojected_neighbors_df, exclude_extra_columns=False)
-                num_neighbors_after_unfiltering_unprojected_points = len(unprojected_neighbors_df.index)
+                num_neighbors_after_filtering_out_unprojected_points = len(unprojected_neighbors_df.index)
                 self.logger.info(
                     f"Started with {num_neighbors_including_invalid}. "
-                    f"Adapter filtered them down to {num_neighbors_after_unfiltering_projected_points}. "
-                    f"Parameter space filtered them down to {num_neighbors_after_unfiltering_unprojected_points}"
+                    f"Adapter filtered them down to {num_neighbors_after_filtering_out_projected_points}. "
+                    f"Parameter space filtered them down to {num_neighbors_after_filtering_out_unprojected_points}"
                 )
 
             neighbors_utility_df = self._compute_utility_for_params(params_df=unprojected_neighbors_df, context_df=context_values_dataframe)
@@ -317,11 +335,13 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             self.logger.info(f"The type of incumbents_df['utility'] is {incumbents_df.dtypes['utility']}. Utility function: {self.utility_function.__class__.__name__}, incumbents_df lendth: {len(incumbents_df.index)}")
             incumbents_df['utility'] = pd.to_numeric(arg=incumbents_df['utility'], errors='raise')
 
+        self._cache_good_incumbents(incumbents_df)
+
         idx_of_max = incumbents_df['utility'].idxmax()
         best_config_df = incumbents_df.loc[[idx_of_max], self.parameter_dimension_names]
         config_to_suggest = Point.from_dataframe(best_config_df)
         unprojected_config_to_suggest = self.parameter_adapter.unproject_point(config_to_suggest)
-        self.logger.info(f"After {num_iterations} suggesting: {unprojected_config_to_suggest.to_json(indent=2)}")
+        self.logger.info(f"After {num_iterations} iterations suggesting: {unprojected_config_to_suggest.to_json(indent=2)}")
         return unprojected_config_to_suggest
 
 
@@ -378,7 +398,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 cached_params_df = self._good_configs_from_the_past_invocations_df.sample(n=num_desired_cached_good_points, replace=False, axis='index')
             else:
                 cached_params_df = self._good_configs_from_the_past_invocations_df.copy(deep=True)
-            self.logger.info(f"Using {len(cached_params_df.index)} out of {len(self._good_configs_from_the_past_invocations_df.index)} as starting configs")
+            self.logger.info(f"Using {len(cached_params_df.index)} out of {len(self._good_configs_from_the_past_invocations_df.index)} cached good configs as starting configs")
         else:
             self.logger.info(f"No cached params are available.")
 
@@ -395,7 +415,28 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
 
     @trace()
-    def _compute_utility_for_params(self, params_df, context_df):
+    def _cache_good_incumbents(self, incumbents_df: pd.DataFrame):
+        """Caches good incumbent values to use in subsequent iterations."""
+
+        if self.optimizer_config.num_cached_good_params == 0:
+            return
+
+        incumbents_df = incumbents_df[self.parameter_dimension_names]
+        unprojected_incumbents_df = self.parameter_adapter.unproject_dataframe(incumbents_df, in_place=False)
+
+        if self._good_configs_from_the_past_invocations_df is None:
+            self._good_configs_from_the_past_invocations_df = unprojected_incumbents_df
+        else:
+            self._good_configs_from_the_past_invocations_df = pd.concat([self._good_configs_from_the_past_invocations_df, unprojected_incumbents_df])
+
+        if len(self._good_configs_from_the_past_invocations_df.index) > self.optimizer_config.num_cached_good_params:
+            self._good_configs_from_the_past_invocations_df = self._good_configs_from_the_past_invocations_df.sample(
+                n=self.optimizer_config.num_cached_good_params,
+                replace=False
+            )
+
+    @trace()
+    def _compute_utility_for_params(self, params_df: pd.DataFrame, context_df: pd.DataFrame):
         """This functionality is repeated a couple times so let's make sure it is in one place.
 
         Basically we only need to create a features_df from params_df and context_df, and invoke the utility function.

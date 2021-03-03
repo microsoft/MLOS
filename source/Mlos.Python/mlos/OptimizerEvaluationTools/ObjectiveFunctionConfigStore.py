@@ -18,7 +18,7 @@ from mlos.Spaces.Configs import ComponentConfigStore
 
 objective_function_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
-        name="objective_function",
+        name="objective_function_config",
         dimensions=[
             CategoricalDimension(name="implementation", values=[
                 EnvelopedWaves.__name__,

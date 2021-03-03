@@ -4,7 +4,7 @@
 #
 from collections import namedtuple
 import json
-from typing import List
+from typing import List, Tuple
 
 import pandas as pd
 
@@ -149,6 +149,34 @@ class OptimizationProblem:
         else:
             features_df['contains_context'] = False
         return features_df
+
+    def deconstruct_feature_dataframe(self, features_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Splits the feature dataframe back into parameters and context dataframes.
+
+        This is a workaround. What we should really do is implement this functionality as a proper operator on Hypergrids.
+        """
+        parameter_column_names_mapping = {
+            f"{self.parameter_space.name}.{dimension_name}": dimension_name
+            for dimension_name
+            in self.parameter_space.dimension_names
+        }
+        existing_parameter_names = [parameter_name for parameter_name in parameter_column_names_mapping.keys() if parameter_name in features_df.columns]
+        parameters_df = features_df[existing_parameter_names]
+        parameters_df.rename(columns=parameter_column_names_mapping, inplace=True)
+
+        if self.context_space is not None:
+            context_column_names_mapping = {
+                f"{self.context_space.name}.{dimension_name}": dimension_name
+                for dimension_name
+                in self.context_space.dimension_names
+            }
+            existing_context_column_names = [column_name for column_name in context_column_names_mapping.keys() if column_name in features_df.columns]
+            context_df = features_df[existing_context_column_names]
+            context_df.rename(columns=context_column_names_mapping, inplace=True)
+        else:
+            context_df = None
+
+        return parameters_df, context_df
 
     def to_dict(self):
         return {
