@@ -861,7 +861,7 @@ class TestBayesianOptimizer:
 
         optimization_problem = objective_function.default_optimization_problem
 
-        optimizer_config = bayesian_optimizer_config_store.get_config_by_name('default_multi_objective_optimizer_config')
+        optimizer_config = bayesian_optimizer_config_store.get_config_by_name('default_with_random_near_incumbent_config')
         assert optimizer_config.experiment_designer_config.numeric_optimizer_implementation == "RandomNearIncumbentOptimizer"
         optimizer_config.experiment_designer_config.fraction_random_suggestions = 0
 
