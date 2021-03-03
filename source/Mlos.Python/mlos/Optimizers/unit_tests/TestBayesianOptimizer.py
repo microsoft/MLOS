@@ -27,6 +27,7 @@ from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import qu
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
@@ -384,6 +385,10 @@ class TestBayesianOptimizer:
 
         if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
+
+        if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == RandomNearIncumbentOptimizer.__name__:
+            optimizer_config.experiment_designer_config.random_near_incumbent_optimizer_config.num_starting_configs = 10
+            optimizer_config.experiment_designer_config.random_near_incumbent_optimizer_config.max_num_iterations = 10
 
         if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
             optimizer_config.experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration = min(
