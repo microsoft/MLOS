@@ -2,27 +2,28 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import math
 import os
 
-import numpy as np
-import pandas as pd
 import pytest
 
+import mlos.global_values as global_values
 from mlos.Exceptions import UnableToProduceGuidedSuggestionException
 from mlos.Logger import create_logger
-from mlos.Optimizers.ParetoFrontier import ParetoFrontier
+
+
+from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer, random_near_incumbent_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.unit_tests.MultiObjectivePassThroughModelForTesting import MultiObjectivePassThroughModelForTesting, multi_objective_pass_through_model_config_store
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOtimizerFactory import UtilityFunctionOtimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction, multi_objective_probability_of_improvement_utility_function_config_store
-from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
-from mlos.Spaces import ContinuousDimension, SimpleHypergrid, Point
-from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest, homogeneous_random_forest_config_store
+from mlos.Spaces import Point
 from mlos.Tracer import Tracer, trace
-import mlos.global_values as global_values
+
 
 class TestUtilityFunctionOptimizers:
     """ Tests if the utility function optimizers do anything useful at all.
@@ -166,7 +167,7 @@ class TestUtilityFunctionOptimizers:
         dummy_model_config = multi_objective_pass_through_model_config_store.get_config_by_name(dummy_model_config_name)
         optimizer_config = random_near_incumbent_optimizer_config_store.get_config_by_name(optimizer_config_name)
 
-        optimization_problem, model, utility_function, pareto_frontier = self._prepare_test_artifacts(dummy_model_config=dummy_model_config, logger=self.logger)
+        optimization_problem, model, utility_function, pareto_frontier = self._prepare_dummy_model_based_test_artifacts(dummy_model_config=dummy_model_config, logger=self.logger)
 
         optimizer = RandomNearIncumbentOptimizer(
             optimization_problem=optimization_problem,
@@ -183,7 +184,101 @@ class TestUtilityFunctionOptimizers:
             self.logger.info(objective_vaules)
             assert suggested_params in optimization_problem.parameter_space
 
-    def _prepare_test_artifacts(self, dummy_model_config, logger):
+    @pytest.mark.parametrize('objective_function_config_name', ["three_level_quadratic", "multi_objective_waves_3_params_2_objectives_half_pi_phase_difference"])
+    @pytest.mark.parametrize('utility_function_type_name', [ConfidenceBoundUtilityFunction.__name__, MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__])
+    @pytest.mark.parametrize('utility_function_optimizer_type_name', [GlowWormSwarmOptimizer.__name__, RandomSearchOptimizer.__name__, RandomNearIncumbentOptimizer.__name__])
+    @trace()
+    def test_optimizers_against_untrained_models(self, objective_function_config_name, utility_function_type_name, utility_function_optimizer_type_name):
+        """Tests that the utility function optimizers throw appropriate exceptions when the utility function cannot be evaluated.
+
+        :return:
+        """
+        self.logger.info(f"Creating test artifacts for objective function: {objective_function_config_name}, utility_function: {utility_function_optimizer_type_name}, optimizer: {utility_function_optimizer_type_name}.")
+        model_config = homogeneous_random_forest_config_store.default
+        objective_function_config = objective_function_config_store.get_config_by_name(objective_function_config_name)
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
+        optimization_problem = objective_function.default_optimization_problem
+
+        model = MultiObjectiveHomogeneousRandomForest(
+            model_config=model_config,
+            input_space=optimization_problem.feature_space,
+            output_space=optimization_problem.objective_space,
+            logger=self.logger
+        )
+        pareto_frontier = ParetoFrontier(optimization_problem=optimization_problem)
+
+        if utility_function_type_name == ConfidenceBoundUtilityFunction.__name__:
+            utility_function_config = Point(utility_function_name="upper_confidence_bound_on_improvement", alpha=0.05)
+            utility_function = ConfidenceBoundUtilityFunction(
+                function_config=utility_function_config,
+                surrogate_model=model,
+                minimize=optimization_problem.objectives[0].minimize,
+                logger=self.logger
+            )
+        elif utility_function_type_name == MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__:
+            utility_function_config = multi_objective_probability_of_improvement_utility_function_config_store.default
+            utility_function = MultiObjectiveProbabilityOfImprovementUtilityFunction(
+                function_config=utility_function_config,
+                pareto_frontier=pareto_frontier,
+                surrogate_model=model,
+                logger=self.logger
+            )
+        else:
+            assert False
+
+        if utility_function_optimizer_type_name == RandomSearchOptimizer.__name__:
+            utility_function_optimizer_config = random_search_optimizer_config_store.default
+        elif utility_function_optimizer_type_name == GlowWormSwarmOptimizer.__name__:
+            utility_function_optimizer_config = glow_worm_swarm_optimizer_config_store.default
+        elif utility_function_optimizer_type_name == RandomNearIncumbentOptimizer.__name__:
+            utility_function_optimizer_config = random_near_incumbent_optimizer_config_store.default
+        else:
+            assert False, f"Unknown utility_function_optimizer_type_name: {utility_function_optimizer_type_name}"
+
+        utility_function_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
+            utility_function=utility_function,
+            optimizer_type_name=utility_function_optimizer_type_name,
+            optimizer_config=utility_function_optimizer_config,
+            optimization_problem=optimization_problem,
+            pareto_frontier=pareto_frontier,
+            logger=self.logger
+        )
+
+        assert not model.trained
+
+        self.logger.info("Asserting the optimizer is throwing appropriate exceptions.")
+        num_failed_suggestions = 10
+        for i in range(num_failed_suggestions):
+            with pytest.raises(expected_exception=UnableToProduceGuidedSuggestionException):
+                utility_function_optimizer.suggest()
+            self.logger.info(f"[{i+1}/{num_failed_suggestions}] worked.")
+
+
+        # Now let's train the model a bit and make sure that we can produce the suggestions afterwards
+        #
+        random_params_df = optimization_problem.parameter_space.random_dataframe(1000)
+        objectives_df = objective_function.evaluate_dataframe(random_params_df)
+        features_df = optimization_problem.construct_feature_dataframe(parameters_df=random_params_df)
+
+        self.logger.info("Training the model")
+        model.fit(features_df=features_df, targets_df=objectives_df, iteration_number=1000)
+        assert model.trained
+        self.logger.info("Model trained.")
+
+        self.logger.info("Updating pareto.")
+        pareto_frontier.update_pareto(objectives_df=objectives_df, parameters_df=random_params_df)
+        self.logger.info("Pareto updated.")
+
+        self.logger.info("Asserting suggestions work.")
+        num_successful_suggestions = 10
+        for i in range(num_successful_suggestions):
+            suggestion = utility_function_optimizer.suggest()
+            assert suggestion in optimization_problem.parameter_space
+            self.logger.info(f"[{i+1}/{num_successful_suggestions}] successfully produced suggestion: {suggestion}")
+
+        self.logger.info(f"Done testing. Objective function: {objective_function_config_name}, utility_function: {utility_function_optimizer_type_name}, optimizer: {utility_function_optimizer_type_name}.")
+
+    def _prepare_dummy_model_based_test_artifacts(self, dummy_model_config, logger):
         """Prepares all the artifacts we need to create and run a utility function optimizer.
 
         I chose to create them here rather than in setup class, to avoid unnecessarily creating all possible combinations for all

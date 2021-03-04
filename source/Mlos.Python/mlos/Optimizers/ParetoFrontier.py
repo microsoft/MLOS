@@ -108,6 +108,8 @@ class ParetoFrontier:
 
     @property
     def params_for_pareto_df(self):
+        if self._params_for_pareto_df is None:
+            return None
         return self._params_for_pareto_df.copy(deep=True)
 
     def update_pareto(self, objectives_df: pd.DataFrame, parameters_df: pd.DataFrame):
