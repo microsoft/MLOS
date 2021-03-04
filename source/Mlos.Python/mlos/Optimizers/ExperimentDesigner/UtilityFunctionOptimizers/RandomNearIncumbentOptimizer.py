@@ -60,14 +60,14 @@ random_near_incumbent_optimizer_config_store = ComponentConfigStore(
 )
 
 random_near_incumbent_optimizer_config_store.add_config_by_name(
-    config_name="100_incumbents_100_neighbors",
+    config_name="20_incumbents_50_neighbors",
     config_point=Point(
-        num_starting_configs=100,
+        num_starting_configs=20,
         initial_velocity=0.2,
         velocity_update_constant=0.3,
         velocity_convergence_threshold=0.01,
-        max_num_iterations=50,
-        num_neighbors=100,
+        max_num_iterations=15,
+        num_neighbors=50,
         num_cached_good_params=2**10,
         initial_points_pareto_weight=0.5,
         initial_points_cached_good_params_weight=0.3,
@@ -239,9 +239,9 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 #
                 num_neighbors_including_invalid = len(all_neighbors_df.index)
                 all_neighbors_df_no_nulls = all_neighbors_df.fillna(0, inplace=False)
-                all_neighbors_df_no_nulls = self.parameter_adapter.filter_out_invalid_rows(original_dataframe=all_neighbors_df_no_nulls, exclude_extra_columns=False)
-                all_neighbors_df = all_neighbors_df.loc[all_neighbors_df_no_nulls.index]
-                num_neighbors_after_filtering_out_projected_points = len(all_neighbors_df.index)
+                probably_valid_neighbors_index = self.parameter_adapter.get_valid_rows_index(original_dataframe=all_neighbors_df_no_nulls)
+                all_neighbors_df = all_neighbors_df.loc[probably_valid_neighbors_index]
+                num_neighbors_after_filtering_out_projected_points = len(probably_valid_neighbors_index)
 
 
                 # The all_neighbors_df contains parameters in the unit-continuous hypergrid. So we need to unproject it back to the original

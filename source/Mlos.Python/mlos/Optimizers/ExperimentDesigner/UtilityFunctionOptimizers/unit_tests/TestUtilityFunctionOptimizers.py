@@ -54,8 +54,6 @@ class TestUtilityFunctionOptimizers:
 
         cls.model_config = multi_objective_pass_through_model_config_store.default
 
-        cls.logger.info(cls.model_config)
-
         cls.model = MultiObjectivePassThroughModelForTesting(
             model_config=cls.model_config,
             logger=cls.logger
@@ -160,10 +158,10 @@ class TestUtilityFunctionOptimizers:
 
         assert num_guided_suggestions > 0
 
-    @pytest.mark.parametrize('dummy_model_config_name', ['three_level_quadratic', 'multi_objective_waves_3_params_2_objectives_half_pi_phase_difference'])
-    @pytest.mark.parametrize('optimizer_config_name', ['default', '100_incumbents_100_neighbors'])
+    @pytest.mark.parametrize('dummy_model_config_name', ['multi_objective_waves_3_params_2_objectives_half_pi_phase_difference', 'three_level_quadratic'])
+    @pytest.mark.parametrize('optimizer_config_name', ['default', '20_incumbents_50_neighbors'])
     @trace()
-    def test_random_near_incumbent_optimizer_on_various_objective_functions(self, dummy_model_config_name, optimizer_config_name):
+    def test_random_near_incumbent_optimizer_against_dummy_surrogate_model(self, dummy_model_config_name, optimizer_config_name):
 
         dummy_model_config = multi_objective_pass_through_model_config_store.get_config_by_name(dummy_model_config_name)
         optimizer_config = random_near_incumbent_optimizer_config_store.get_config_by_name(optimizer_config_name)
