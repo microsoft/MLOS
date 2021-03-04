@@ -158,7 +158,7 @@ class TestUtilityFunctionOptimizers:
         assert num_guided_suggestions > 0
 
     @pytest.mark.parametrize('dummy_model_config_name', ['multi_objective_waves_3_params_2_objectives_half_pi_phase_difference', 'three_level_quadratic'])
-    @pytest.mark.parametrize('optimizer_config_name', ['default', '20_incumbents_50_neighbors'])
+    @pytest.mark.parametrize('optimizer_config_name', ['default'])
     @trace()
     def test_random_near_incumbent_optimizer_against_dummy_surrogate_model(self, dummy_model_config_name, optimizer_config_name):
 

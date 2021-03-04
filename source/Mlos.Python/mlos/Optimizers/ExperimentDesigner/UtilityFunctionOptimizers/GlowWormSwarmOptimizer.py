@@ -92,6 +92,7 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
 
         """
         assert context_values_dataframe is None or len(context_values_dataframe.index) == 1
+        self.logger.info(f"Suggesting config for context: {context_values_dataframe}")
 
         # TODO: consider remembering great features from previous invocations of the suggest() method.
         parameters_df = self.optimization_problem.parameter_space.random_dataframe(
@@ -104,15 +105,21 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
             product=True
         )
 
+        self.logger.info(f"Computing utility values for the initial {len(features_df.index)} configurations.")
         utility_function_values = self.utility_function(feature_values_pandas_frame=features_df.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)
+        self.logger.info(f"Obtained {num_utility_function_values} utility function values.")
         if num_utility_function_values == 0:
+            error_message = f"Utility function {self.utility_function.__class__.__name__} produced no values."
+            self.logger.info(error_message)
             raise UtilityValueUnavailableException(f"Utility function {self.utility_function.__class__.__name__} produced no values.")
 
         # TODO: keep getting configs until we have enough utility values to get started. Or assign 0 to missing ones,
         #  and let them climb out of their infeasible holes.
         top_utility_values = utility_function_values.nlargest(n=self.optimizer_config.num_worms, columns=['utility'])
+        self.logger.info(f"Selected {len(top_utility_values.index)} initial glow worm positions.")
 
+        self.logger.info("Initializing glow worm parameters.")
         # TODO: could it be in place?
         params_for_top_utility = self.parameter_adapter.project_dataframe(parameters_df.loc[top_utility_values.index], in_place=False)
         worms = pd.concat([params_for_top_utility, top_utility_values], axis=1)
@@ -125,18 +132,23 @@ class GlowWormSwarmOptimizer(UtilityFunctionOptimizer):
         worms['decision_radius'] = self.optimizer_config.initial_decision_radius
         worms['luciferin'] = worms['utility']
 
-        for _ in range(self.optimizer_config.num_iterations):
+        self.logger.info(f"Starting {self.optimizer_config.num_iterations} iterations.")
+        for i in range(self.optimizer_config.num_iterations):
+            self.logger.info(f"[{i+1}/{self.optimizer_config.num_iterations}] Updating glow-worm positions.")
             worms = self.run_iteration(worms=worms)
             # TODO: keep track of the max configs over iterations
+            self.logger.info(f"[{i+1}/{self.optimizer_config.num_iterations}] Computing utility.")
             worms = self.compute_utility(worms, context_values_dataframe)
+            self.logger.info(f"[{i+1}/{self.optimizer_config.num_iterations}] Updating luciferin levels.")
             worms['luciferin'] = (1 - self.optimizer_config.luciferin_decay_constant) * worms['luciferin'] + \
                                  self.optimizer_config.luciferin_enhancement_constant * worms['utility']
+
 
         # TODO: return the max of all seen configs - not just the configs that the glowworms occupied in this iteration.
         idx_of_max = worms['utility'].idxmax()
         best_config = worms.loc[[idx_of_max], self.dimension_names]
         config_to_suggest = Point.from_dataframe(best_config)
-        self.logger.debug(f"Suggesting: {str(config_to_suggest)}.")
+        self.logger.info(f"Suggesting: {str(config_to_suggest)}.")
         # TODO: we might have to go for second or nth best if the projection won't work out. But then again if we were
         # TODO: able to compute the utility function then the projection has worked out once before...
         return self.parameter_adapter.unproject_point(config_to_suggest)
