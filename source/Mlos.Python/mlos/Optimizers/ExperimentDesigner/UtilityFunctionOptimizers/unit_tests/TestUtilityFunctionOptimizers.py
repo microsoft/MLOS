@@ -3,13 +3,11 @@
 # Licensed under the MIT License.
 #
 import os
-
 import pytest
 
 import mlos.global_values as global_values
 from mlos.Exceptions import UnableToProduceGuidedSuggestionException
 from mlos.Logger import create_logger
-
 
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
