@@ -158,25 +158,33 @@ class TestUtilityFunctionOptimizers:
         assert num_guided_suggestions > 0
 
     @pytest.mark.parametrize('dummy_model_config_name', ['multi_objective_waves_3_params_2_objectives_half_pi_phase_difference', 'three_level_quadratic'])
-    @pytest.mark.parametrize('optimizer_config_name', ['default'])
+    @pytest.mark.parametrize('utility_function_optimizer_type_name', [GlowWormSwarmOptimizer.__name__, RandomSearchOptimizer.__name__, RandomNearIncumbentOptimizer.__name__])
     @trace()
-    def test_random_near_incumbent_optimizer_against_dummy_surrogate_model(self, dummy_model_config_name, optimizer_config_name):
+    def test_utility_function_optimizer_against_dummy_surrogate_model(self, dummy_model_config_name, utility_function_optimizer_type_name):
 
         dummy_model_config = multi_objective_pass_through_model_config_store.get_config_by_name(dummy_model_config_name)
-        optimizer_config = random_near_incumbent_optimizer_config_store.get_config_by_name(optimizer_config_name)
-
         optimization_problem, model, utility_function, pareto_frontier = self._prepare_dummy_model_based_test_artifacts(dummy_model_config=dummy_model_config, logger=self.logger)
 
-        optimizer = RandomNearIncumbentOptimizer(
-            optimization_problem=optimization_problem,
+        if utility_function_optimizer_type_name == RandomSearchOptimizer.__name__:
+            utility_function_optimizer_config = random_search_optimizer_config_store.default
+        elif utility_function_optimizer_type_name == GlowWormSwarmOptimizer.__name__:
+            utility_function_optimizer_config = glow_worm_swarm_optimizer_config_store.default
+        elif utility_function_optimizer_type_name == RandomNearIncumbentOptimizer.__name__:
+            utility_function_optimizer_config = random_near_incumbent_optimizer_config_store.default
+        else:
+            assert False, f"Unknown utility_function_optimizer_type_name: {utility_function_optimizer_type_name}"
+
+        utility_function_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
             utility_function=utility_function,
-            optimizer_config=optimizer_config,
+            optimizer_type_name=utility_function_optimizer_type_name,
+            optimizer_config=utility_function_optimizer_config,
+            optimization_problem=optimization_problem,
             pareto_frontier=pareto_frontier,
             logger=self.logger
         )
 
-        for _ in range(5):
-            suggested_params = optimizer.suggest()
+        for _ in range(3):
+            suggested_params = utility_function_optimizer.suggest()
             objective_vaules = model.objective_function.evaluate_point(suggested_params)
             self.logger.info(suggested_params)
             self.logger.info(objective_vaules)
@@ -245,7 +253,7 @@ class TestUtilityFunctionOptimizers:
         assert not model.trained
 
         self.logger.info("Asserting the optimizer is throwing appropriate exceptions.")
-        num_failed_suggestions = 10
+        num_failed_suggestions = 3
         for i in range(num_failed_suggestions):
             with pytest.raises(expected_exception=UnableToProduceGuidedSuggestionException):
                 utility_function_optimizer.suggest()
@@ -268,7 +276,7 @@ class TestUtilityFunctionOptimizers:
         self.logger.info("Pareto updated.")
 
         self.logger.info("Asserting suggestions work.")
-        num_successful_suggestions = 10
+        num_successful_suggestions = 3
         for i in range(num_successful_suggestions):
             suggestion = utility_function_optimizer.suggest()
             assert suggestion in optimization_problem.parameter_space

@@ -146,11 +146,7 @@ class Tracer:
     def dump_trace_to_file(self, output_file_path):
         reformatted_trace_events = self.reformat_events(self._trace_events)
         with open(output_file_path, 'w') as out_file:
-            out_file.write("[")
-            for event in reformatted_trace_events:
-                out_file.write(json.dumps(event))
-                out_file.write(",\n")
-            out_file.write("]")
+            json.dump(reformatted_trace_events, out_file)
 
     def clear_events(self):
         self._trace_events = []
