@@ -14,7 +14,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
-
+from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 class TestParetoFrontier:
     """Tests if the ParetoFrontier works."""
@@ -51,13 +51,10 @@ class TestParetoFrontier:
         )
 
         num_rows = 100000
-        random_params_df = parameter_space.random_dataframe(num_rows)
         random_objectives_df = objective_space.random_dataframe(num_rows)
 
-        pareto_df = ParetoFrontier.compute_pareto(
-            optimization_problem=optimization_problem,
-            objectives_df=random_objectives_df
-        )
+        pareto_frontier = ParetoFrontier(optimization_problem=optimization_problem, objectives_df=random_objectives_df)
+        pareto_df = pareto_frontier.pareto_df
 
         non_pareto_index = random_objectives_df.index.difference(pareto_df.index)
         for i, row in pareto_df.iterrows():
@@ -127,10 +124,11 @@ class TestParetoFrontier:
                     assert (objectives_df[column] >= 0).all()
 
 
-        pareto_df = ParetoFrontier.compute_pareto(
+        pareto_frontier = ParetoFrontier(
             optimization_problem=optimization_problem,
             objectives_df=objectives_df
         )
+        pareto_df = pareto_frontier.pareto_df
 
         # We know that all of the pareto efficient points must be on the frontier.
         #
@@ -201,5 +199,109 @@ class TestParetoFrontier:
         )
 
         all_objectives_df = pd.concat([dominated_df, expected_pareto_df])
-        computed_pareto_df = ParetoFrontier.compute_pareto(optimization_problem, all_objectives_df)
+        pareto_frontier = ParetoFrontier(optimization_problem, all_objectives_df)
+        computed_pareto_df = pareto_frontier.pareto_df
         assert computed_pareto_df.sort_values(by=['y1','y2']).equals(expected_pareto_df.sort_values(by=['y1', 'y2']))
+
+    def test_pareto_frontier_volume_simple(self):
+        """A simple sanity test on the pareto frontier volume computations.
+        """
+
+        # Let's generate a pareto frontier in 2D. ALl points lay on a line y = 1 - x
+        x = np.linspace(start=0, stop=1, num=100)
+        y = 1 - x
+        pareto_df = pd.DataFrame({'x': x, 'y': y})
+        optimization_problem = OptimizationProblem(
+            parameter_space=None,
+            objective_space=SimpleHypergrid(
+                name='objectives',
+                dimensions=[
+                    ContinuousDimension(name='x', min=0, max=1),
+                    ContinuousDimension(name='y', min=0, max=1)
+                ]
+            ),
+            objectives=[Objective(name='x', minimize=False), Objective(name='y', minimize=False)]
+        )
+        pareto_frontier = ParetoFrontier(optimization_problem, pareto_df)
+        pareto_volume_estimator = pareto_frontier.approximate_pareto_volume(num_samples=1000000)
+        lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.05)
+        print(lower_bound, upper_bound)
+        assert 0.49 < lower_bound < upper_bound < 0.51
+
+
+    @pytest.mark.parametrize("minimize", ["all", "none", "some"])
+    @pytest.mark.parametrize("num_dimensions", [2, 3, 4, 5])
+    def test_pareto_frontier_volume_on_hyperspheres(self, minimize, num_dimensions):
+        """Uses a known formula for the volume of the hyperspheres to validate the accuracy of the pareto frontier estimate.
+
+        :return:
+        """
+        hypersphere_radius = 10
+        inscribed_hypersphere_radius = 7  # For computing lower bound on volume
+
+        # In order to validate the estimates, we must know the allowable upper and lower bounds.
+        # We know that the estimate should not be higher than the volume of the n-ball (ball in n-dimensions).
+        # We can also come up with a lower bound, by computing a volume of a slightly smaller ball inscribed
+        # into the hypersphere. Note that the volume of an n-ball can be computed recursively, so we keep track
+        # of n-ball volumes in lower dimensions.
+
+        upper_bounds_on_sphere_volume_by_num_dimensions = {}
+        lower_bounds_on_sphere_volume_by_num_dimensions = {}
+
+        # Compute the base cases for the recursion.
+        #
+        upper_bounds_on_sphere_volume_by_num_dimensions[2] = np.pi * (hypersphere_radius ** 2)
+        upper_bounds_on_sphere_volume_by_num_dimensions[3] = (4 / 3) * np.pi * (hypersphere_radius ** 3)
+
+        lower_bounds_on_sphere_volume_by_num_dimensions[2] = np.pi * (inscribed_hypersphere_radius ** 2)
+        lower_bounds_on_sphere_volume_by_num_dimensions[3] = (4 / 3) * np.pi * (inscribed_hypersphere_radius ** 3)
+
+        # Compute the recursive values.
+        #
+        for n in range(4, num_dimensions + 1):
+            upper_bounds_on_sphere_volume_by_num_dimensions[n] = upper_bounds_on_sphere_volume_by_num_dimensions[n-2] * 2 * np.pi * (hypersphere_radius ** 2) / n
+            lower_bounds_on_sphere_volume_by_num_dimensions[n] = lower_bounds_on_sphere_volume_by_num_dimensions[n-2] * 2 * np.pi * (inscribed_hypersphere_radius ** 2) / n
+
+        objective_function_config = Point(
+            implementation=Hypersphere.__name__,
+            hypersphere_config=Point(
+                num_objectives=num_dimensions,
+                minimize=minimize,
+                radius=hypersphere_radius
+            )
+        )
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
+        parameter_space = objective_function.parameter_space
+
+        num_points = max(4, num_dimensions)
+        linspaces = []
+
+        for dimension in parameter_space.dimensions:
+            if dimension.name == 'radius':
+                linspaces.append(np.array([hypersphere_radius]))
+            else:
+                linspaces.append(dimension.linspace(num_points))
+        meshgrids = np.meshgrid(*linspaces)
+        reshaped_meshgrids = [meshgrid.reshape(-1) for meshgrid in meshgrids]
+
+        params_df = pd.DataFrame({
+            dim_name: reshaped_meshgrids[i]
+            for i, dim_name
+            in enumerate(parameter_space.dimension_names)
+        })
+
+        objectives_df = objective_function.evaluate_dataframe(params_df)
+
+        pareto_frontier = ParetoFrontier(optimization_problem=objective_function.default_optimization_problem, objectives_df=objectives_df)
+        print("Num points in pareto frontier: ", len(objectives_df.index))
+        assert len(pareto_frontier.pareto_df.index) == len(objectives_df.index)
+        pareto_volume_estimator = pareto_frontier.approximate_pareto_volume(num_samples=1000000)
+        ci_lower_bound, ci_upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.05)
+
+        lower_bound_on_pareto_volume = lower_bounds_on_sphere_volume_by_num_dimensions[num_dimensions] / (2**num_dimensions)
+        upper_bound_on_pareto_volume = upper_bounds_on_sphere_volume_by_num_dimensions[num_dimensions] / (2**num_dimensions)
+        print("True bounds:", lower_bound_on_pareto_volume, upper_bound_on_pareto_volume)
+        print("CI bounds: ", ci_lower_bound, ci_upper_bound)
+        assert lower_bound_on_pareto_volume <= ci_lower_bound <= ci_upper_bound <= upper_bound_on_pareto_volume
+
+

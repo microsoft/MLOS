@@ -2,12 +2,14 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+from datetime import datetime
 import json
 import os
 import pickle
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from mlos.OptimizerEvaluationTools.OptimumOverTime import OptimumOverTime
-from mlos.Optimizers.RegressionModels.RegressionModelFitState import RegressionModelFitState
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
 from mlos.Spaces import Point
 from mlos.Tracer import Tracer
 
@@ -32,6 +34,8 @@ class OptimizerEvaluationReport:
         * execution trace as captured by the mlos.Tracer
     """
 
+    DATETIME_FORMAT = "%d.%m.%Y.%H:%M:%S:%f"
+
     def __init__(
             self,
             optimizer_configuration: Point = None,
@@ -40,9 +44,13 @@ class OptimizerEvaluationReport:
             pickled_objective_function_final_state: str = None,
             num_optimization_iterations: int = None,
             evaluation_frequency: int = None,
-            regression_model_goodness_of_fit_state: RegressionModelFitState = None,
+            regression_model_goodness_of_fit_state: MultiObjectiveRegressionModelFitState = None,
             optima_over_time: Dict[str, OptimumOverTime] = None,
-            execution_trace: List[Dict[str, object]] = None
+            pareto_over_time: Dict[int, ParetoFrontier] = None,
+            pareto_volume_over_time: Dict[int, Tuple[float, float]] = None,
+            execution_trace: List[Dict[str, object]] = None,
+            start_time: datetime = None,
+            end_time: datetime = None
     ):
         self.success = False
         self.exception = None
@@ -58,9 +66,13 @@ class OptimizerEvaluationReport:
         self.pickled_objective_function_final_state = pickled_objective_function_final_state
         self.num_optimization_iterations = num_optimization_iterations
         self.evaluation_frequency = evaluation_frequency
-        self.regression_model_goodness_of_fit_state = regression_model_goodness_of_fit_state
+        self.regression_model_fit_state = regression_model_goodness_of_fit_state
         self.optima_over_time = optima_over_time
         self.execution_trace = execution_trace
+        self.pareto_over_time = pareto_over_time if pareto_over_time is not None else dict()
+        self.pareto_volume_over_time = pareto_volume_over_time if pareto_volume_over_time is not None else dict()
+        self.start_time = start_time
+        self.end_time = end_time
 
     def add_pickled_optimizer(self, iteration: int, pickled_optimizer: bytes):
         assert iteration >= 0
@@ -105,13 +117,21 @@ class OptimizerEvaluationReport:
             with open(os.path.join(target_folder, "objective_function_final_state.pickle"), "wb") as out_file:
                 out_file.write(self.pickled_objective_function_final_state)
 
-        if self.regression_model_goodness_of_fit_state is not None:
-            with open(os.path.join(target_folder, "goodness_of_fit.pickle"), "wb") as out_file:
-                pickle.dump(self.regression_model_goodness_of_fit_state, out_file)
+        if self.regression_model_fit_state is not None:
+            with open(os.path.join(target_folder, "regression_model_goodness_of_fit_state.pickle"), "wb") as out_file:
+                pickle.dump(self.regression_model_fit_state, out_file)
 
         if self.optima_over_time is not None:
             with open(os.path.join(target_folder, "optima_over_time.pickle"), "wb") as out_file:
                 pickle.dump(self.optima_over_time, out_file)
+
+        if len(self.pareto_over_time) > 0:
+            with open(os.path.join(target_folder, "pareto_over_time.pickle"), "wb") as out_file:
+                pickle.dump(self.pareto_over_time, out_file)
+
+        if len(self.pareto_volume_over_time) > 0:
+            with open(os.path.join(target_folder, "pareto_volume_over_time.json"), "w") as out_file:
+                json.dump(self.pareto_volume_over_time, out_file, indent=2)
 
         if self.execution_trace is not None:
             tracer = Tracer()
@@ -124,6 +144,76 @@ class OptimizerEvaluationReport:
                 'num_optimization_iterations': self.num_optimization_iterations,
                 'evaluation_frequency': self.evaluation_frequency,
                 'exception': str(self.exception) if self.exception is not None else None,
-                'exception_stack_trace': self.exception_traceback
+                'exception_stack_trace': self.exception_traceback,
+                'start_time': self.start_time.strftime(self.DATETIME_FORMAT),
+                'end_time': self.end_time.strftime(self.DATETIME_FORMAT)
             }
             json.dump(execution_info_dict, out_file, indent=2)
+
+    @staticmethod
+    def read_from_disk(target_folder):
+        """Mirrors write_to_disk by reading into memory the contents of an OptimizerEvaluationReport from disk."""
+
+        optimizer_evaluation_report = OptimizerEvaluationReport()
+
+        optimizer_config_file = os.path.join(target_folder, "optimizer_config.json")
+        with open(optimizer_config_file, 'r') as in_file:
+            optimizer_evaluation_report.optimizer_configuration = Point.from_json(in_file.read())
+
+        objective_function_config_file = os.path.join(target_folder, "objective_function_config.json")
+        with open(objective_function_config_file, 'r') as in_file:
+            optimizer_evaluation_report.objective_function_configuration = Point.from_json(in_file.read())
+
+        pickled_optimizers_dir = os.path.join(target_folder, "pickled_optimizers")
+        if os.path.exists(pickled_optimizers_dir):
+            for file_name in os.listdir(pickled_optimizers_dir):
+                iteration_number, file_extension = file_name.split(".")
+                assert file_extension == "pickle"
+                iteration_number = int(iteration_number)
+                with open(os.path.join(pickled_optimizers_dir, file_name), 'rb') as in_file:
+                    optimizer_evaluation_report.pickled_optimizers_over_time[iteration_number] = in_file.read()
+
+        objective_function_initial_state_file_path = os.path.join(target_folder, "objective_function_initial_state.pickle")
+        if os.path.exists(objective_function_initial_state_file_path):
+            with open(objective_function_initial_state_file_path, 'rb') as in_file:
+                optimizer_evaluation_report.pickled_objective_function_initial_state = in_file.read()
+
+
+        objective_function_final_state_file_path = os.path.join(target_folder, "objective_function_final_state.pickle")
+        if os.path.exists(objective_function_final_state_file_path):
+            with open(objective_function_final_state_file_path, 'rb') as  in_file:
+                optimizer_evaluation_report.pickled_objective_function_final_state = in_file.read()
+
+        gof_file_path = os.path.join(target_folder, "regression_model_goodness_of_fit_state.pickle")
+        if os.path.exists(gof_file_path):
+            with open(gof_file_path, 'rb') as in_file:
+                optimizer_evaluation_report.regression_model_fit_state = pickle.load(in_file)
+
+        optima_over_time_file_path = os.path.join(target_folder, "optima_over_time.pickle")
+        if os.path.exists(optima_over_time_file_path):
+            with open(optima_over_time_file_path, 'rb') as in_file:
+                optimizer_evaluation_report.optima_over_time = pickle.load(in_file)
+
+        pareto_over_time_file_path = os.path.join(target_folder, "pareto_over_time.pickle")
+        if os.path.exists(pareto_over_time_file_path):
+            with open(pareto_over_time_file_path, "rb") as in_file:
+                optimizer_evaluation_report.pareto_over_time = pickle.load(in_file)
+
+        pareto_volume_over_time_file_path = os.path.join(target_folder, "pareto_volume_over_time.json")
+        if os.path.exists(pareto_volume_over_time_file_path):
+            with open(pareto_volume_over_time_file_path, 'r') as in_file:
+                optimizer_evaluation_report.pareto_volume_over_time = json.load(in_file)
+
+        execution_info_file_path = os.path.join(target_folder, "execution_info.json")
+        if os.path.exists(execution_info_file_path):
+            with open(execution_info_file_path, 'r') as in_file:
+                execution_info_dict = json.load(in_file)
+                optimizer_evaluation_report.success = execution_info_dict['success']
+                optimizer_evaluation_report.num_optimization_iterations = execution_info_dict['num_optimization_iterations']
+                optimizer_evaluation_report.evaluation_frequency = execution_info_dict['evaluation_frequency']
+                optimizer_evaluation_report.exception = execution_info_dict['exception']
+                optimizer_evaluation_report.exception_traceback = execution_info_dict['exception_stack_trace']
+                optimizer_evaluation_report.start_time = datetime.strptime(execution_info_dict['start_time'], OptimizerEvaluationReport.DATETIME_FORMAT)
+                optimizer_evaluation_report.end_time = datetime.strptime(execution_info_dict['end_time'], OptimizerEvaluationReport.DATETIME_FORMAT)
+
+        return optimizer_evaluation_report

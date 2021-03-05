@@ -13,7 +13,7 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmO
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Spaces import ContinuousDimension, SimpleHypergrid, Point
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.Tracer import Tracer, trace
@@ -48,29 +48,32 @@ class TestUtilityFunctionOptimizers:
         cls.input_space = objective_function.parameter_space
         cls.output_space = objective_function.output_space
 
-        cls.input_values_dataframe = objective_function.parameter_space.random_dataframe(num_samples=2500)
-        cls.output_values_dataframe = objective_function.evaluate_dataframe(cls.input_values_dataframe)
+        cls.optimization_problem = OptimizationProblem(
+            parameter_space=cls.input_space,
+            objective_space=cls.output_space,
+            objectives=[Objective(name='y', minimize=True)]
+        )
+
+
+
+        cls.parameter_values_df = cls.optimization_problem.parameter_space.random_dataframe(num_samples=2500)
+        cls.feature_values_df = cls.optimization_problem.construct_feature_dataframe(parameter_values=cls.parameter_values_df, context_values=None, product=False)
+        cls.output_values_df = objective_function.evaluate_dataframe(cls.parameter_values_df)
 
         cls.model_config = homogeneous_random_forest_config_store.default
 
         print(cls.model_config)
 
-        cls.model = HomogeneousRandomForestRegressionModel(
+        cls.model = MultiObjectiveHomogeneousRandomForest(
             model_config=cls.model_config,
-            input_space=cls.input_space,
-            output_space=cls.output_space
+            input_space=cls.optimization_problem.feature_space,
+            output_space=cls.optimization_problem.objective_space
         )
-        cls.model.fit(cls.input_values_dataframe, cls.output_values_dataframe, iteration_number=len(cls.input_values_dataframe.index))
+        cls.model.fit(cls.feature_values_df, cls.output_values_df, iteration_number=len(cls.feature_values_df.index))
 
         cls.utility_function_config = Point(
             utility_function_name="upper_confidence_bound_on_improvement",
             alpha=0.05
-        )
-
-        cls.optimization_problem = OptimizationProblem(
-            parameter_space=cls.input_space,
-            objective_space=cls.output_space,
-            objectives=[Objective(name='y', minimize=True)]
         )
 
         cls.utility_function = ConfidenceBoundUtilityFunction(
@@ -112,7 +115,7 @@ class TestUtilityFunctionOptimizers:
         for _ in range(5):
             suggested_params = glow_worm_swarm_optimizer.suggest()
             print(suggested_params.to_json())
-            assert suggested_params in self.input_space
+            assert suggested_params in self.input_space, f"{suggested_params.to_json(indent=2)} not in {self.input_space}"
 
     @trace()
     def test_glow_worm_on_three_level_quadratic(self):
@@ -131,12 +134,12 @@ class TestUtilityFunctionOptimizers:
         random_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_warmup_samples)
         y = objective_function.evaluate_dataframe(random_params_df)
 
-        model = HomogeneousRandomForestRegressionModel(
+        model = MultiObjectiveHomogeneousRandomForest(
             model_config=self.model_config,
             input_space=objective_function.parameter_space,
             output_space=output_space
         )
-        model.fit(feature_values_pandas_frame=random_params_df, target_values_pandas_frame=y, iteration_number=num_warmup_samples)
+        model.fit(features_df=random_params_df, targets_df=y, iteration_number=num_warmup_samples)
 
         optimization_problem = OptimizationProblem(
             parameter_space=objective_function.parameter_space,

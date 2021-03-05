@@ -63,10 +63,8 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         )
 
         self._input_space_adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.input_space)
-        self._output_space_adapter = HierarchicalToFlatHypergridAdapter(adaptee=self.output_space)
 
-
-        self.target_dimension_names = [dimension.name for dimension in self._output_space_adapter.dimensions]
+        self.target_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
         assert len(self.target_dimension_names) == 1, "Single target predictions for now."
 
         self._decision_trees = []
@@ -105,7 +103,9 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         # Now we get to create all the estimators, each with a different feature subset and a different
         # observation filter
 
-        self.logger.debug(f"Creating {self.model_config.n_estimators} estimators. Request id: {random.random()}")
+        self.logger.info(f"Creating {self.model_config.n_estimators} estimators. "
+                         f"Tree config: {self.model_config.decision_tree_regression_model_config}. "
+                         f"Request id: {random.random()}")
 
         all_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
         total_num_dimensions = len(all_dimension_names)
@@ -117,6 +117,7 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
                 subspace_name=f"estimator_{i}_input_space",
                 max_num_dimensions=features_per_estimator
             )
+            self.logger.info(f"Creating DecissionTreeRegressionModel with the input_space: {estimator_input_space}")
 
             estimator = DecisionTreeRegressionModel(
                 model_config=self.model_config.decision_tree_regression_model_config,
@@ -169,7 +170,6 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 
         feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
-        target_values_pandas_frame = self._output_space_adapter.project_dataframe(target_values_pandas_frame)
 
         for i, tree in enumerate(self._decision_trees):
             # Let's filter out samples with missing values

@@ -45,13 +45,14 @@ class TestSmartCacheWithRemoteOptimizer:
             try:
                 self.server = OptimizerMicroserviceServer(port=port, num_threads=10)
                 self.server.start()
-                self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{port}')
+                self.port = port
                 break
             except:
                 self.logger.info(f"Failed to create OptimizerMicroserviceServer on port {port}")
                 if num_tries == max_num_tries:
                     raise
 
+        self.optimizer_service_channel = grpc.insecure_channel(f'localhost:{self.port}')
         self.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=self.optimizer_service_channel, logger=self.logger)
 
         self.mlos_agent = MlosAgent(
@@ -144,31 +145,28 @@ class TestSmartCacheWithRemoteOptimizer:
 
         # Let's look at the goodness of fit.
         #
-        random_forest_gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
+        multi_objective_gof_metrics = self.optimizer.compute_surrogate_model_goodness_of_fit()
+        for objective_name, random_forest_gof_metrics in multi_objective_gof_metrics:
 
-        # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
-        # and should make this test not very flaky.
-        assert random_forest_gof_metrics.last_refit_iteration_number > 0.5 * num_iterations
+            # The model might not have used all of the samples, but should have used a majority of them (I expect about 90%), but 70% is a good sanity check
+            # and should make this test not very flaky.
+            assert random_forest_gof_metrics.last_refit_iteration_number > 0.5 * num_iterations
 
-        # The invariants below should be true for all surrogate models: the random forest, and all constituent decision trees. So let's iterate over them all.
-        models_gof_metrics = [random_forest_gof_metrics]
-
-        for model_gof_metrics in models_gof_metrics:
             # Those relative errors should generally be between 0 and 1 unless the model's predictions are worse than predicting average...
             # This unit tests occasionally doesn't have enough data to get us down to 1 so we'll pass the test if its less than 2.
             # Note, the point of this test is to check sanity. We'll use a separate suite to evaluate models' performance from an ML standpoint.
-            self.logger.info(f"Relative absolute error: {model_gof_metrics.relative_absolute_error}")
-            self.logger.info(f"Relative squared error: {model_gof_metrics.relative_squared_error}")
-            assert model_gof_metrics.relative_absolute_error is None or (0 <= model_gof_metrics.relative_absolute_error <= 2)
-            assert model_gof_metrics.relative_squared_error is None or (0 <= model_gof_metrics.relative_squared_error <= 2)
+            self.logger.info(f"Relative absolute error: {random_forest_gof_metrics.relative_absolute_error}")
+            self.logger.info(f"Relative squared error: {random_forest_gof_metrics.relative_squared_error}")
+            assert random_forest_gof_metrics.relative_absolute_error is None or (0 <= random_forest_gof_metrics.relative_absolute_error <= 2)
+            assert random_forest_gof_metrics.relative_squared_error is None or (0 <= random_forest_gof_metrics.relative_squared_error <= 2)
 
             # There is an invariant linking mean absolute error (MAE), root mean squared error (RMSE) and number of observations (n) let's assert it.
-            n = model_gof_metrics.last_refit_iteration_number
+            n = random_forest_gof_metrics.last_refit_iteration_number
             self.logger.info(f"Last refit iteration number: {n}")
-            self.logger.info(f"Mean absolute error: {model_gof_metrics.mean_absolute_error}")
-            self.logger.info(f"Root mean squared error: {model_gof_metrics.root_mean_squared_error}")
-            assert model_gof_metrics.mean_absolute_error <= model_gof_metrics.root_mean_squared_error <= math.sqrt(n) * model_gof_metrics.mean_absolute_error
+            self.logger.info(f"Mean absolute error: {random_forest_gof_metrics.mean_absolute_error}")
+            self.logger.info(f"Root mean squared error: {random_forest_gof_metrics.root_mean_squared_error}")
+            assert random_forest_gof_metrics.mean_absolute_error <= random_forest_gof_metrics.root_mean_squared_error <= math.sqrt(n) * random_forest_gof_metrics.mean_absolute_error
 
             # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
-            assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
+            assert random_forest_gof_metrics.sample_90_ci_hit_rate >= random_forest_gof_metrics.prediction_90_ci_hit_rate
 
