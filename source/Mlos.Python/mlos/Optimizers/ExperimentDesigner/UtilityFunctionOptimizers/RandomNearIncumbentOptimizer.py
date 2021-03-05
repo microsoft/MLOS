@@ -109,7 +109,8 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         * using points on the pareto frontier as some of the starting points,
         * using good points from past iterations as some of the starting points.
 
-        Additionally, we use some random points as starting points too to balance the exlpore-exploit tradeoff.
+        Additionally, we use some random points as starting points too to balance the explore-exploit tradeoff.
+
 
 
     **Benefits**
