@@ -115,7 +115,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             self._optimizer_locks_by_optimizer_id[optimizer_id] = optimizer_lock
             self._optimizers_by_id[optimizer_id] = optimizer
             self._ordered_ids.append(optimizer_id)
-        self.logger.info(f"Created optimizer {optimizer_id}.")
+        self.logger.info(f"Created optimizer {optimizer_id} with config: {optimizer.optimizer_config.to_json(indent=2)}")
         return OptimizerService_pb2.OptimizerHandle(Id=optimizer_id)
 
     def IsTrained(self, request, context): # pylint: disable=unused-argument

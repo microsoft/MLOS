@@ -6,10 +6,21 @@ import math
 
 import pandas as pd
 
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Hypergrid, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Hypergrid, Point, SimpleHypergrid
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionBase import ObjectiveFunctionBase
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjectiveWrapper import PolynomialObjectiveWrapper
+
+nested_polynomial_objective_config_space = SimpleHypergrid(
+    name="nested_polynomial_objective_config",
+    dimensions=[
+        DiscreteDimension(name="num_nested_polynomials", min=1, max=128),
+        CategoricalDimension(name="nested_function_implementation", values=[PolynomialObjective.__name__])
+    ]
+).join(
+    subgrid=PolynomialObjective.CONFIG_SPACE,
+    on_external_dimension=CategoricalDimension(name="nested_function_implementation", values=[PolynomialObjective.__name__])
+)
 
 class NestedPolynomialObjective(ObjectiveFunctionBase):
     """A hierarchical function with multiple nested polynomials.

@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import logging
 import math
-from math import e
 import os
 import pickle
 import random
@@ -18,18 +18,25 @@ from mlos.Logger import create_logger
 
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
-from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveNestedPolynomialObjective import MultiObjectiveNestedPolynomialObjective
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.NestedPolynomialObjective import NestedPolynomialObjective
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import PolynomialObjective
+from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
+
 
 
 class TestBayesianOptimizer:
@@ -46,6 +53,7 @@ class TestBayesianOptimizer:
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
         cls.logger = create_logger(logger_name=cls.__name__)
+        cls.logger.setLevel(logging.DEBUG)
         cls.port = None
 
         # Start up the gRPC service. Try a bunch of ports, before giving up so we can do several in parallel.
@@ -56,7 +64,7 @@ class TestBayesianOptimizer:
         for port in range(50051, 50051 + max_num_tries):
             num_tries += 1
             try:
-                cls.server = OptimizerMicroserviceServer(port=port, num_threads=10)
+                cls.server = OptimizerMicroserviceServer(port=port, num_threads=10, logger=cls.logger)
                 cls.server.start()
                 cls.port = port
                 break
@@ -69,6 +77,17 @@ class TestBayesianOptimizer:
         cls.optimizer_service_channel = grpc.insecure_channel(f'localhost:{cls.port}')
         cls.bayesian_optimizer_factory = BayesianOptimizerFactory(grpc_channel=cls.optimizer_service_channel, logger=cls.logger)
 
+        cls.temp_dir = os.path.join(os.getcwd(), "temp")
+        if not os.path.exists(cls.temp_dir):
+            os.mkdir(cls.temp_dir)
+        cls.trace_output_path = os.path.join(cls.temp_dir, "TestBayesianOptimizerTrace.json")
+
+        try:
+            os.remove(cls.trace_output_path)
+        except OSError:
+            pass
+
+
 
     @classmethod
     def teardown_class(cls) -> None:
@@ -76,12 +95,9 @@ class TestBayesianOptimizer:
         cls.server.wait_for_termination(timeout=1)
         cls.optimizer_service_channel.close()
 
-        cls.temp_dir = os.path.join(os.getcwd(), "temp")
-        if not os.path.exists(cls.temp_dir):
-            os.mkdir(cls.temp_dir)
-        trace_output_path = os.path.join(cls.temp_dir, "TestBayesianOptimizerTrace.json")
-        print(f"Dumping trace to {trace_output_path}")
-        global_values.tracer.dump_trace_to_file(output_file_path=trace_output_path)
+
+        print(f"Dumping trace to {cls.trace_output_path}")
+        global_values.tracer.dump_trace_to_file(output_file_path=cls.trace_output_path)
 
     @trace()
     def test_bayesian_optimizer_on_simple_2d_quadratic_function_pre_heated(self):
@@ -369,6 +385,12 @@ class TestBayesianOptimizer:
         if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
 
+        if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
+            optimizer_config.experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration = min(
+                optimizer_config.experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration,
+                1000
+            )
+
         print(f"[Restart: {restart_num}] Creating a BayesianOptimimizer with the following config: ")
         print(optimizer_config.to_json(indent=2))
 
@@ -384,7 +406,7 @@ class TestBayesianOptimizer:
                 optimizer_config=optimizer_config
             )
 
-        num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 10
+        num_guided_samples = optimizer_config.min_samples_required_for_guided_design_of_experiments + 5
         for i in range(num_guided_samples):
             suggested_params = bayesian_optimizer.suggest()
             y = objective_function.evaluate_point(suggested_params)
@@ -406,8 +428,7 @@ class TestBayesianOptimizer:
             #
             pickled_optimizer = pickle.dumps(bayesian_optimizer)
             unpickled_optimizer = pickle.loads(pickled_optimizer)
-            for _ in range(10):
-                assert unpickled_optimizer.suggest() == bayesian_optimizer.suggest()
+            assert unpickled_optimizer.suggest() in bayesian_optimizer.optimization_problem.parameter_space
 
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
@@ -419,6 +440,116 @@ class TestBayesianOptimizer:
         assert original_config.min_samples_required_for_guided_design_of_experiments == 10
         print(original_config.experiment_designer_config.fraction_random_suggestions)
         assert original_config.experiment_designer_config.fraction_random_suggestions == .5
+
+    @pytest.mark.parametrize("objective_function_implementation", [Hypersphere, MultiObjectiveNestedPolynomialObjective])
+    @pytest.mark.parametrize("minimize", ["all", "none", "some"])
+    @pytest.mark.parametrize("num_output_dimensions", [2, 5])
+    @pytest.mark.parametrize("num_points", [30])
+    def test_multi_objective_optimization(self, objective_function_implementation, minimize, num_output_dimensions, num_points):
+        if objective_function_implementation == Hypersphere:
+            hypersphere_radius = 10
+            objective_function_config = Point(
+                implementation=Hypersphere.__name__,
+                hypersphere_config=Point(
+                    num_objectives=num_output_dimensions,
+                    minimize=minimize,
+                    radius=hypersphere_radius
+                )
+            )
+        else:
+            objective_function_config = Point(
+                implementation=MultiObjectiveNestedPolynomialObjective.__name__,
+                multi_objective_nested_polynomial_config=Point(
+                    num_objectives=num_output_dimensions,
+                    objective_function_implementation=NestedPolynomialObjective.__name__,
+                    nested_polynomial_objective_config=Point(
+                        num_nested_polynomials=2,
+                        nested_function_implementation=PolynomialObjective.__name__,
+                        polynomial_objective_config=Point(
+                            seed=17,
+                            input_domain_dimension=2,
+                            input_domain_min=-2**10,
+                            input_domain_width=2**11,
+                            max_degree=2,
+                            include_mixed_coefficients=True,
+                            percent_coefficients_zeroed=0.0,
+                            coefficient_domain_min=-10.0,
+                            coefficient_domain_width=9.0,
+                            include_noise=False,
+                            noise_coefficient_of_variation=0.0
+                        )
+                    )
+                )
+            )
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
+        optimization_problem = objective_function.default_optimization_problem
+
+        if objective_function_implementation == MultiObjectiveNestedPolynomialObjective:
+            # We need to modify the default optimization problem to respect the "minimize" argument.
+            #
+            objectives = []
+            for i, default_objective in enumerate(optimization_problem.objectives):
+                if minimize == "all":
+                    minimize = True
+                elif minimize == "some":
+                    minimize = ((i % 2) == 0)
+                else:
+                    minimize = False
+                new_objective = Objective(name=default_objective.name, minimize=minimize)
+                objectives.append(new_objective)
+            optimization_problem.objectives = objectives
+
+        optimizer_config = bayesian_optimizer_config_store.get_config_by_name("default_multi_objective_optimizer_config")
+        self.logger.info(optimizer_config)
+
+        optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
+            optimization_problem=optimization_problem,
+            optimizer_config=optimizer_config
+        )
+
+        assert optimizer.optimizer_config.surrogate_model_implementation == MultiObjectiveHomogeneousRandomForest.__name__
+
+        # We can now go through the optimization loop, at each point validating that:
+        #   1) The suggested point is valid.
+        #   2) The volume of the pareto frontier is monotonically increasing.
+
+        lower_bounds_on_pareto_volume = []
+        upper_bounds_on_pareto_volume = []
+
+        for i in range(num_points):
+            suggestion = optimizer.suggest()
+            assert suggestion in optimization_problem.parameter_space
+            objectives = objective_function.evaluate_point(suggestion)
+            optimizer.register(parameter_values_pandas_frame=suggestion.to_dataframe(), target_values_pandas_frame=objectives.to_dataframe())
+
+            if i > 10:
+                pareto_volume_estimator = optimizer.pareto_frontier.approximate_pareto_volume(num_samples=1000000)
+                lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.95)
+                lower_bounds_on_pareto_volume.append(lower_bound)
+                upper_bounds_on_pareto_volume.append(upper_bound)
+
+
+        pareto_volumes_over_time_df = pd.DataFrame({
+            'lower_bounds': lower_bounds_on_pareto_volume,
+            'upper_bounds': upper_bounds_on_pareto_volume
+        })
+
+        # If we had precise volume measurements, we would want to ascertain that the volume of the pareto frontier is monotonically increasing.
+        # However, we only have estimates so we cannot assert that they are monotonic. But we can assert that they are approximately monotonic:
+        # we can make sure that any dip between consecutive volumes is smaller than some small number. Actually we can make sure that there
+        # is no drift, by looking over larger windows too.
+        #
+        threshold = -0.1
+        for periods in [1, 10, 20]:
+            min_pct_increase_in_lower_bound = pareto_volumes_over_time_df['lower_bounds'].pct_change(periods=periods).fillna(0).min()
+            if not (min_pct_increase_in_lower_bound > threshold):
+                print(pareto_volumes_over_time_df)
+                assert min_pct_increase_in_lower_bound > threshold
+
+            min_pct_increase_in_upper_bound = pareto_volumes_over_time_df['upper_bounds'].pct_change(periods=periods).fillna(0).min()
+            if not (min_pct_increase_in_upper_bound > threshold):
+                print(pareto_volumes_over_time_df)
+                assert min_pct_increase_in_upper_bound > threshold
 
 
     def test_registering_multiple_objectives(self):
@@ -535,18 +666,24 @@ class TestBayesianOptimizer:
         )
 
         with pytest.raises(ValueError, match="Context required"):
-             local_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                      target_values_pandas_frame=target_df)
+             local_optimizer.register(
+                 parameter_values_pandas_frame=parameter_df,
+                 target_values_pandas_frame=target_df
+             )
 
 
         with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
-            local_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                     target_values_pandas_frame=target_df,
-                                     context_values_pandas_frame=context_df.iloc[:-1])
+            local_optimizer.register(
+                parameter_values_pandas_frame=parameter_df,
+                target_values_pandas_frame=target_df,
+                context_values_pandas_frame=context_df.iloc[:-1]
+            )
 
-        local_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                 target_values_pandas_frame=target_df,
-                                 context_values_pandas_frame=context_df)
+        local_optimizer.register(
+            parameter_values_pandas_frame=parameter_df,
+            target_values_pandas_frame=target_df,
+            context_values_pandas_frame=context_df
+        )
 
         with pytest.raises(ValueError, match="Context required"):
             local_optimizer.suggest()
@@ -585,9 +722,11 @@ class TestBayesianOptimizer:
 
         # can't register, predict, suggest with context on remote optimizer
         with pytest.raises(NotImplementedError, match="Context not currently supported"):
-            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                      target_values_pandas_frame=target_df,
-                                      context_values_pandas_frame=context_df)
+            remote_optimizer.register(
+                parameter_values_pandas_frame=parameter_df,
+                target_values_pandas_frame=target_df,
+                context_values_pandas_frame=context_df
+            )
 
         with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.predict(parameter_values_pandas_frame=parameter_df,
@@ -598,8 +737,10 @@ class TestBayesianOptimizer:
 
         # context is missing but required by problem, should give error
         with pytest.raises(grpc.RpcError):
-            remote_optimizer.register(parameter_values_pandas_frame=parameter_df,
-                                      target_values_pandas_frame=target_df)
+            remote_optimizer.register(
+                parameter_values_pandas_frame=parameter_df,
+                target_values_pandas_frame=target_df
+            )
 
         # run some iterations on local optimizer to see we do something sensible
         for _ in range(100):
@@ -607,9 +748,11 @@ class TestBayesianOptimizer:
             context = context_space.random()
             suggested_config = local_optimizer.suggest(context=context)
             target_values = f(suggested_config, context)
-            local_optimizer.register(parameter_values_pandas_frame=suggested_config.to_dataframe(),
-                                     target_values_pandas_frame=target_values,
-                                     context_values_pandas_frame=context.to_dataframe())
+            local_optimizer.register(
+                parameter_values_pandas_frame=suggested_config.to_dataframe(),
+                target_values_pandas_frame=target_values,
+                context_values_pandas_frame=context.to_dataframe()
+            )
 
         optimum_y_1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=-1).to_dataframe())
         optimum_y1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=1).to_dataframe())

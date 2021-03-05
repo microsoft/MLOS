@@ -101,6 +101,7 @@ class OptimizationProblem:
         self.objective_space = objective_space
         # We need to keep track of which objective to minimize, and which one to maximize.
         self.objectives = objectives
+        self.objective_names = [objective.name for objective in self.objectives]
 
 
         # Fit functions / surrogate models will be fed features consisting of both context and parameters.
