@@ -44,7 +44,7 @@ class OptimizerEvaluator:
             optimizer_config: Point = None,
             objective_function: ObjectiveFunctionBase = None,
             objective_function_config: Point = None,
-            logger = None
+            logger=None
     ):
         assert optimizer_evaluator_config in optimizer_evaluator_config_store.parameter_space
         assert (optimizer is None) != (optimizer_config is None), "A valid optimizer XOR a valid optimizer_config must be supplied."
