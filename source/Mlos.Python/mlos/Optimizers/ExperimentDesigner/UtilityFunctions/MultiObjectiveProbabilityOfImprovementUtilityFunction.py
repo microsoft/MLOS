@@ -12,7 +12,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Spaces import SimpleHypergrid, DiscreteDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
-from mlos.Tracer import trace, traced
+from mlos.Tracer import trace
 
 
 multi_objective_probability_of_improvement_utility_function_config_store = ComponentConfigStore(

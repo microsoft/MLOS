@@ -189,6 +189,5 @@ class ExperimentDesigner:
             self.logger.info(f"Produced a guided suggestion: {suggestion}")
             return suggestion
         except UnableToProduceGuidedSuggestionException:
-            self.logger.info(f"Failed to produce guided suggestion. Producing random suggestion instead.")
+            self.logger.info("Failed to produce guided suggestion. Producing random suggestion instead.")
             return self.optimization_problem.parameter_space.random()
-

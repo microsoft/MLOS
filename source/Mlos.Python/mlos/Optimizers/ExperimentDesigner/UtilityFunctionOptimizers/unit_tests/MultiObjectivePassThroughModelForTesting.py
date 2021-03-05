@@ -77,8 +77,8 @@ class MultiObjectivePassThroughModelForTesting(MultiObjectiveRegressionModel):
     """Used for testing. Exposes the MultiObjectiveRegressionModel interface, but is in fact not a model.
 
         This dummy wraps around any of the synthetic functions and when it's time to make a prediction it simply evaluates that function,
-    adds some preconfigured noise of its own and returns. For now register() is a noop, but we could conceivably make the observations
-    reduce noise in their vicinity to achieve more dynamic behavior in the future.
+    adds some preconfigured uncertainty of its own and returns. For now register() is a noop, but we could conceivably make the observations
+    reduce uncertainty in their vicinity to achieve more dynamic behavior in the future.
 
     """
 
@@ -92,8 +92,8 @@ class MultiObjectivePassThroughModelForTesting(MultiObjectiveRegressionModel):
     def __init__(
             self,
             model_config: Point,
-            input_space: Hypergrid=None,
-            output_space: Hypergrid=None,
+            input_space: Hypergrid = None,
+            output_space: Hypergrid = None,
             logger=None
     ):
         assert model_config in multi_objective_pass_through_model_config_store.parameter_space

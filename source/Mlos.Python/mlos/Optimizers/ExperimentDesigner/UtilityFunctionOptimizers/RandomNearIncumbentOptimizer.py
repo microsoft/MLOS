@@ -150,15 +150,15 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         self._good_configs_from_the_past_invocations_df = None
 
     @trace()
-    def suggest(self, context_values_dataframe: pd.DataFrame = None):
+    def suggest(self, context_values_dataframe: pd.DataFrame = None):  # pylint: disable=too-many-statements
         """ Returns the next best configuration to try.
 
         The idea is pretty simple:
-            1. We start with all configs on the pareto frontier, plus some good points from previous calls to suggest plus some random configs.
+            1. We start with some configs on the pareto frontier, plus some good points from previous calls to suggest plus some random configs.
             2. For each point we generate random neighbors and optionally adjust them using our velocity.
             3. We compute utility for all neighbors and select a new incumbent.
             4. We update the velocity.
-            5. We repeat until we ran out of iterations or until velocity falls below some threshold.
+            5. We repeat until we run out of iterations or until velocity falls below some threshold.
 
         """
         self.logger.info(f"Suggesting config for context: {context_values_dataframe}")
@@ -205,7 +205,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             # Since we have fewer active incumbents, each can have a few more neighbors, which should speed up convergence.
             #
             num_neighbors_per_incumbent = math.floor(self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
-            self.logger.info(f"[Iteration {num_iterations}/{self.optimizer_config.max_num_iterations}] Num active incumbents: {num_active_incumbents}/{len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}")
+            self.logger.info(
+                f"[Iteration {num_iterations}/{self.optimizer_config.max_num_iterations}] Num active incumbents: "
+                f"{num_active_incumbents}/{len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}"
+            )
 
             # Let's create random neighbors for each of the initial params
             #
@@ -254,7 +257,11 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 # remove all obviously wrong rows above, and only examine the smaller subset here. TODO: vectorize filter_out_invalid_rows() for hierachical
                 # spaces.
                 #
-                unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(original_dataframe=unprojected_neighbors_df, exclude_extra_columns=False)
+                unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(
+                    original_dataframe=unprojected_neighbors_df,
+                    exclude_extra_columns=False
+                )
+
                 num_neighbors_after_filtering_out_unprojected_points = len(unprojected_neighbors_df.index)
                 self.logger.info(
                     f"Started with {num_neighbors_including_invalid}. "
@@ -274,7 +281,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             all_neighbors_df = all_neighbors_df[all_neighbors_df['utility_gain'] >= 0]
             self.logger.info(f"{len(all_neighbors_df.index)} have positive utility gain.")
 
-            # The series below has best neighbor's index as value and the incumbent_config_idx as key.
+            # The series below has best neighbor's index as value and the incumbent_config_idx as index.
             #
             best_neighbors_indices = all_neighbors_df.groupby(by=["incumbent_config_idx"])['utility_gain'].idxmax()
             best_neighbors_df = all_neighbors_df.loc[best_neighbors_indices]
@@ -301,8 +308,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             incumbents_df['speed'] = 0
             for dimension_name in self.parameter_dimension_names:
                 incumbents_df[dimension_name] = new_incumbents_df[dimension_name]
-                incumbents_df[f'{dimension_name}_velocity'] = incumbents_df[f'{dimension_name}_velocity'] * (1 - self.optimizer_config.velocity_update_constant) \
-                                                              + displacement_df[dimension_name] * self.optimizer_config.velocity_update_constant
+                incumbents_df[f'{dimension_name}_velocity'] = \
+                    incumbents_df[f'{dimension_name}_velocity'] * (1 - self.optimizer_config.velocity_update_constant) \
+                    + displacement_df[dimension_name] * self.optimizer_config.velocity_update_constant
+
                 incumbents_df['speed'] += incumbents_df[f'{dimension_name}_velocity'] ** 2
 
             incumbents_df['speed'] = np.sqrt(incumbents_df['speed'])
@@ -332,7 +341,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             raise UnableToProduceGuidedSuggestionException(error_message)
 
         if incumbents_df.dtypes['utility'] != np.float:
-            self.logger.info(f"The type of incumbents_df['utility'] is {incumbents_df.dtypes['utility']}. Utility function: {self.utility_function.__class__.__name__}, incumbents_df lendth: {len(incumbents_df.index)}")
+            self.logger.info(
+                f"The type of incumbents_df['utility'] is {incumbents_df.dtypes['utility']}. Utility function: {self.utility_function.__class__.__name__}, "
+                f"incumbents_df length: {len(incumbents_df.index)}"
+            )
             incumbents_df['utility'] = pd.to_numeric(arg=incumbents_df['utility'], errors='raise')
 
         self._cache_good_incumbents(incumbents_df)
@@ -375,16 +387,13 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
         # Let's start with the pareto points.
         #
+        pareto_params_df = self.pareto_frontier.params_for_pareto_df
         num_desired_pareto_points = math.floor(num_initial_points * initial_points_pareto_fraction)
-        num_existing_pareto_points = len(self.pareto_frontier.params_for_pareto_df.index) if self.pareto_frontier.params_for_pareto_df is not None else 0
+        num_existing_pareto_points = len(pareto_params_df.index) if pareto_params_df is not None else 0
 
-        pareto_params_df = pd.DataFrame()
         if num_existing_pareto_points > 0:
             if num_desired_pareto_points < num_existing_pareto_points:
-                pareto_params_df = self.pareto_frontier.params_for_pareto_df.sample(n=num_desired_pareto_points, replace=False, axis='index')
-            else:
-                pareto_params_df = self.pareto_frontier.params_for_pareto_df
-
+                pareto_params_df = pareto_params_df.sample(n=num_desired_pareto_points, replace=False, axis='index')
             self.logger.info(f"Using {len(pareto_params_df.index)} of {num_existing_pareto_points} pareto points as starting configs.")
         else:
             self.logger.info("There are no existing pareto points.")
@@ -398,9 +407,12 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
                 cached_params_df = self._good_configs_from_the_past_invocations_df.sample(n=num_desired_cached_good_points, replace=False, axis='index')
             else:
                 cached_params_df = self._good_configs_from_the_past_invocations_df.copy(deep=True)
-            self.logger.info(f"Using {len(cached_params_df.index)} out of {len(self._good_configs_from_the_past_invocations_df.index)} cached good configs as starting configs")
+            self.logger.info(
+                f"Using {len(cached_params_df.index)} out of {len(self._good_configs_from_the_past_invocations_df.index)} "
+                f"cached good configs as starting configs"
+            )
         else:
-            self.logger.info(f"No cached params are available.")
+            self.logger.info("No cached params are available.")
 
 
         # Finally let's generate the random points.
@@ -447,5 +459,6 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             product=True
         )
         utility_df = self.utility_function(feature_values_pandas_frame=features_df)
-        assert utility_df.dtypes['utility'] == np.float, f"{utility_df} produced by {self.utility_function.__class__.__name__} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
+        assert utility_df.dtypes['utility'] == np.float,\
+            f"{utility_df} produced by {self.utility_function.__class__.__name__} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
         return utility_df

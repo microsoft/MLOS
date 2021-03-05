@@ -29,7 +29,7 @@ class UnableToProduceGuidedSuggestionException(MlosException):
 
 
 class UtilityValueUnavailableException(UnableToProduceGuidedSuggestionException):
-    """Thrown by utility function optimizer unable to produce a guided suggestion due to utility function productin no values.
+    """Thrown by utility function optimizer unable to produce a guided suggestion due to utility function producing no values.
 
     This is useful to ascertain that the model is producing at least some predictions. Models can fail to produce suggestion either if
     they have not been fitted, or because they don't recognize feature names or because feature values are outside their domains.
