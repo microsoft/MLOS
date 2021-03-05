@@ -2,9 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import concurrent.futures
 import json
-from multiprocessing import cpu_count
+import math
 import os
 import pickle
 
@@ -12,6 +11,7 @@ import pandas as pd
 import pytest
 
 import mlos.global_values
+from mlos.Logger import create_logger
 from mlos.OptimizerEvaluationTools.OptimizerEvaluator import OptimizerEvaluator
 from mlos.OptimizerEvaluationTools.OptimizerEvaluatorConfigStore import optimizer_evaluator_config_store
 from mlos.OptimizerEvaluationTools.OptimizerEvaluationReport import OptimizerEvaluationReport
@@ -33,6 +33,8 @@ class TestOptimizerEvaluator:
         cls.temp_dir = os.path.join(os.getcwd(), "temp")
         if not os.path.exists(cls.temp_dir):
             os.mkdir(cls.temp_dir)
+
+        cls.logger = create_logger("TestOptimizerEvaluator")
 
     @classmethod
     def teardown_class(cls) -> None:
@@ -56,9 +58,9 @@ class TestOptimizerEvaluator:
         optimizer_config = bayesian_optimizer_config_store.default
         objective_function_config = objective_function_config_store.default
 
-        print(optimizer_evaluator_config.to_json(indent=2))
-        print(optimizer_config.to_json(indent=2))
-        print(objective_function_config.to_json(indent=2))
+        self.logger.info(optimizer_evaluator_config.to_json(indent=2))
+        self.logger.info(optimizer_config.to_json(indent=2))
+        self.logger.info(objective_function_config.to_json(indent=2))
 
         optimizer_evaluator = OptimizerEvaluator(
             optimizer_evaluator_config=optimizer_evaluator_config,
@@ -71,12 +73,12 @@ class TestOptimizerEvaluator:
 
         for objective_name, regression_model_fit_state in optimizer_evaluation_report.regression_model_fit_state:
             with pd.option_context('display.max_columns', 100):
-                print(regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                self.logger.info(regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
                 for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
-                    print("#####################################################################################################")
-                    print(optimum_name)
-                    print(optimum_over_time.get_dataframe().tail(10))
-                    print("#####################################################################################################")
+                    self.logger.info("#####################################################################################################")
+                    self.logger.info(optimum_name)
+                    self.logger.info(optimum_over_time.get_dataframe().tail(10))
+                    self.logger.info("#####################################################################################################")
 
         # Now let's do it again with the unpickled optimizer.
         #
@@ -91,12 +93,12 @@ class TestOptimizerEvaluator:
         optimizer_evaluation_report_2 = optimizer_evaluator_2.evaluate_optimizer()
         for objective_name, single_objective_regression_model_fit_state in optimizer_evaluation_report_2.regression_model_fit_state:
             with pd.option_context('display.max_columns', 100):
-                print(single_objective_regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                self.logger.info(single_objective_regression_model_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
                 for optimum_name, optimum_over_time in optimizer_evaluation_report_2.optima_over_time.items():
-                    print("#####################################################################################################")
-                    print(optimum_name)
-                    print(optimum_over_time.get_dataframe().tail(10))
-                    print("#####################################################################################################")
+                    self.logger.info("#####################################################################################################")
+                    self.logger.info(optimum_name)
+                    self.logger.info(optimum_over_time.get_dataframe().tail(10))
+                    self.logger.info("#####################################################################################################")
 
 
 
@@ -144,7 +146,7 @@ class TestOptimizerEvaluator:
         final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
 
         for _ in range(100):
-            assert final_optimizer_from_disk.suggest() == final_optimizer_from_report.suggest()
+            assert final_optimizer_from_disk.suggest() in final_optimizer_from_report.optimization_problem.parameter_space
 
 
     @pytest.mark.parametrize('test_num', [i for i in range(10)])
@@ -164,9 +166,9 @@ class TestOptimizerEvaluator:
         named_optimizer_config = optimizer_named_configs[test_num % num_optimizer_configs]
         named_objective_function_config = objective_function_named_configs[test_num % num_objective_function_configs]
 
-        print("#####################################################################################################")
-        print(named_optimizer_config)
-        print(named_objective_function_config)
+        self.logger.info("#####################################################################################################")
+        self.logger.info(named_optimizer_config)
+        self.logger.info(named_objective_function_config)
 
         optimizer_evaluator_config = optimizer_evaluator_config_store.get_config_by_name(name="parallel_unit_tests_config")
         optimizer_config = named_optimizer_config.config_point
@@ -186,9 +188,9 @@ class TestOptimizerEvaluator:
 
         for objective_name, single_objective_fit_state in optimizer_evaluation_report.regression_model_fit_state:
             with pd.option_context('display.max_columns', 100):
-                print(single_objective_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
+                self.logger.info(single_objective_fit_state.get_goodness_of_fit_dataframe(DataSetType.TRAIN).tail())
                 for optimum_name, optimum_over_time in optimizer_evaluation_report.optima_over_time.items():
-                    print("#####################################################################################################")
-                    print(optimum_name)
-                    print(optimum_over_time.get_dataframe().tail(10))
-                    print("#####################################################################################################")
+                    self.logger.info("#####################################################################################################")
+                    self.logger.info(optimum_name)
+                    self.logger.info(optimum_over_time.get_dataframe().tail(10))
+                    self.logger.info("#####################################################################################################")

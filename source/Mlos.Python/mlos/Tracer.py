@@ -146,7 +146,7 @@ class Tracer:
     def dump_trace_to_file(self, output_file_path):
         reformatted_trace_events = self.reformat_events(self._trace_events)
         with open(output_file_path, 'w') as out_file:
-            out_file.write(json.dumps(reformatted_trace_events, indent=2))
+            json.dump(reformatted_trace_events, out_file)
 
     def clear_events(self):
         self._trace_events = []
@@ -206,6 +206,8 @@ class Tracer:
                 else:
                     try:
                         value = str(value)
+                        if len(value) > 10000:
+                            raise ValueError("Value too long.")
                         args_json[key] = value
                     except:
                         args_json[key] = f"value of type {str(type(value))} but must be one of: str, int, bool, float."

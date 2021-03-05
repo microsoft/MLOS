@@ -65,10 +65,11 @@ def create_logger(logger_name, create_console_handler=True, create_file_handler=
     formatter.datefmt = '%m/%d/%Y %H:%M:%S'
 
     if create_console_handler:
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging_level)
-        console_handler.setFormatter(formatter)
-        logger.addHandler(console_handler)
+        if not any([isinstance(handler, logging.StreamHandler) for handler in logger.handlers]):
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(logging_level)
+            console_handler.setFormatter(formatter)
+            logger.addHandler(console_handler)
 
     if create_file_handler:
         file_handler = logging.FileHandler(logger_name + ".log")

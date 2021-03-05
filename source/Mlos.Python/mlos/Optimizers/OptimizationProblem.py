@@ -4,7 +4,7 @@
 #
 from collections import namedtuple
 import json
-from typing import List
+from typing import List, Tuple
 
 import pandas as pd
 
@@ -122,31 +122,61 @@ class OptimizationProblem:
                 on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
             )
 
-    def construct_feature_dataframe(self, parameter_values, context_values=None, product=False):
+    def construct_feature_dataframe(self, parameters_df: pd.DataFrame, context_df: pd.DataFrame = None, product: bool = False):
         """Construct feature value dataframe from config value and context value dataframes.
 
         If product is True, creates a cartesian product, otherwise appends columns.
 
         """
-        if (self.context_space is not None) and (context_values is None):
+        if (self.context_space is not None) and (context_df is None):
             raise ValueError("Context required by optimization problem but not provided.")
 
         # prefix column names to adhere to dimensions in hierarchical hypergrid
-        feature_values = parameter_values.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
-        if context_values is not None and len(context_values) > 0:
-            renamed_context_values = context_values.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
-            feature_values['contains_context'] = True
+        #
+        features_df = parameters_df.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
+        if context_df is not None and len(context_df) > 0:
+            renamed_context_values = context_df.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
+            features_df['contains_context'] = True
             if product:
                 renamed_context_values['contains_context'] = True
-                feature_values = feature_values.merge(renamed_context_values, how='outer', on='contains_context')
+                features_df = features_df.merge(renamed_context_values, how='outer', on='contains_context')
+                features_df.index = parameters_df.index.copy()
             else:
-                if len(parameter_values) != len(context_values):
-                    raise ValueError(f"Incompatible shape of parameters and context: {parameter_values.shape} and {context_values.shape}.")
-                feature_values = pd.concat([feature_values, renamed_context_values], axis=1)
+                if len(parameters_df) != len(context_df):
+                    raise ValueError(f"Incompatible shape of parameters and context: {parameters_df.shape} and {context_df.shape}.")
+                features_df = pd.concat([features_df, renamed_context_values], axis=1)
 
         else:
-            feature_values['contains_context'] = False
-        return feature_values
+            features_df['contains_context'] = False
+        return features_df
+
+    def deconstruct_feature_dataframe(self, features_df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """Splits the feature dataframe back into parameters and context dataframes.
+
+        This is a workaround. What we should really do is implement this functionality as a proper operator on Hypergrids.
+        """
+        parameter_column_names_mapping = {
+            f"{self.parameter_space.name}.{dimension_name}": dimension_name
+            for dimension_name
+            in self.parameter_space.dimension_names
+        }
+        existing_parameter_names = [parameter_name for parameter_name in parameter_column_names_mapping.keys() if parameter_name in features_df.columns]
+        parameters_df = features_df[existing_parameter_names]
+        parameters_df.rename(columns=parameter_column_names_mapping, inplace=True)
+
+        if self.context_space is not None:
+            context_column_names_mapping = {
+                f"{self.context_space.name}.{dimension_name}": dimension_name
+                for dimension_name
+                in self.context_space.dimension_names
+            }
+            existing_context_column_names = [column_name for column_name in context_column_names_mapping.keys() if column_name in features_df.columns]
+            context_df = features_df[existing_context_column_names]
+            context_df.rename(columns=context_column_names_mapping, inplace=True)
+        else:
+            context_df = None
+
+        return parameters_df, context_df
 
     def to_dict(self):
         return {

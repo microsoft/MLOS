@@ -88,7 +88,7 @@ class TestEnvelopedWaves:
             in zip(objective_function.parameter_space.dimension_names, flat_meshgrids)
         })
         objectives_df = objective_function.evaluate_dataframe(params_df)
-        pareto_frontier = ParetoFrontier(optimization_problem=optimization_problem, objectives_df=objectives_df)
+        pareto_frontier = ParetoFrontier(optimization_problem=optimization_problem, objectives_df=objectives_df, parameters_df=params_df)
         pareto_df = pareto_frontier.pareto_df
 
         if function_config_name == "no_phase_difference":

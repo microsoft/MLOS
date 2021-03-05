@@ -82,7 +82,7 @@ class MultiObjectiveHomogeneousRandomForest(MultiObjectiveRegressionModel):
     def predict(self, features_df: pd.DataFrame, include_only_valid_rows: bool = True) -> MultiObjectivePrediction:
         multi_objective_predicitons = MultiObjectivePrediction(objective_names=self.output_dimension_names)
         for objective_name, random_forest in self._regressors_by_objective_name:
-            prediction = random_forest.predict(features_df, include_only_valid_rows=include_only_valid_rows)
+            prediction = random_forest.predict(feature_values_pandas_frame=features_df, include_only_valid_rows=include_only_valid_rows)
             multi_objective_predicitons[objective_name] = prediction
         return multi_objective_predicitons
 

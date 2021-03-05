@@ -20,7 +20,7 @@ class ComponentConfigStore:
     def __init__(self, parameter_space: Hypergrid, default: Point, description: str = None):
 
         assert isinstance(parameter_space, Hypergrid)
-        assert default in parameter_space
+        assert default in parameter_space, f"{default} not in \n{parameter_space}"
 
         self.parameter_space = parameter_space
         self._default = default

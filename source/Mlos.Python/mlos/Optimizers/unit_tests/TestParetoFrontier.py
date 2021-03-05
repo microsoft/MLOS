@@ -53,7 +53,15 @@ class TestParetoFrontier:
         num_rows = 100000
         random_objectives_df = objective_space.random_dataframe(num_rows)
 
-        pareto_frontier = ParetoFrontier(optimization_problem=optimization_problem, objectives_df=random_objectives_df)
+        # They don't match but they don't need to for this test.
+        #
+        random_params_df = parameter_space.random_dataframe(num_rows)
+
+        pareto_frontier = ParetoFrontier(
+            optimization_problem=optimization_problem,
+            objectives_df=random_objectives_df,
+            parameters_df=random_params_df
+        )
         pareto_df = pareto_frontier.pareto_df
 
         non_pareto_index = random_objectives_df.index.difference(pareto_df.index)
@@ -126,7 +134,8 @@ class TestParetoFrontier:
 
         pareto_frontier = ParetoFrontier(
             optimization_problem=optimization_problem,
-            objectives_df=objectives_df
+            objectives_df=objectives_df,
+            parameters_df=random_params_df
         )
         pareto_df = pareto_frontier.pareto_df
 
@@ -199,7 +208,11 @@ class TestParetoFrontier:
         )
 
         all_objectives_df = pd.concat([dominated_df, expected_pareto_df])
-        pareto_frontier = ParetoFrontier(optimization_problem, all_objectives_df)
+        pareto_frontier = ParetoFrontier(
+            optimization_problem,
+            objectives_df=all_objectives_df,
+            parameters_df=pd.DataFrame(index=all_objectives_df.index)
+        )
         computed_pareto_df = pareto_frontier.pareto_df
         assert computed_pareto_df.sort_values(by=['y1','y2']).equals(expected_pareto_df.sort_values(by=['y1', 'y2']))
 
@@ -222,7 +235,7 @@ class TestParetoFrontier:
             ),
             objectives=[Objective(name='x', minimize=False), Objective(name='y', minimize=False)]
         )
-        pareto_frontier = ParetoFrontier(optimization_problem, pareto_df)
+        pareto_frontier = ParetoFrontier(optimization_problem, objectives_df=pareto_df, parameters_df=pd.DataFrame(index=pareto_df.index))
         pareto_volume_estimator = pareto_frontier.approximate_pareto_volume(num_samples=1000000)
         lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.05)
         print(lower_bound, upper_bound)
@@ -292,7 +305,11 @@ class TestParetoFrontier:
 
         objectives_df = objective_function.evaluate_dataframe(params_df)
 
-        pareto_frontier = ParetoFrontier(optimization_problem=objective_function.default_optimization_problem, objectives_df=objectives_df)
+        pareto_frontier = ParetoFrontier(
+            optimization_problem=objective_function.default_optimization_problem,
+            objectives_df=objectives_df,
+            parameters_df=params_df
+        )
         print("Num points in pareto frontier: ", len(objectives_df.index))
         assert len(pareto_frontier.pareto_df.index) == len(objectives_df.index)
         pareto_volume_estimator = pareto_frontier.approximate_pareto_volume(num_samples=1000000)

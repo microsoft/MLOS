@@ -74,11 +74,20 @@ class ParetoFrontier:
 
     """
 
-    def __init__(self, optimization_problem: OptimizationProblem, objectives_df: pd.DataFrame = None):
+    def __init__(
+            self,
+            optimization_problem: OptimizationProblem,
+            objectives_df: pd.DataFrame = None,
+            parameters_df: pd.DataFrame = None
+    ):
 
         self.optimization_problem: OptimizationProblem = optimization_problem
         self._objective_names = optimization_problem.objective_names
         self._pareto_df: pd.DataFrame = None
+
+        # What parameters produced the pareto.
+        #
+        self._params_for_pareto_df: pd.DataFrame = None
 
         # Maintains a version of the pareto frontier, where all objectives are set to be maximized. So value for the objectives that were
         # originally meant to be minimized, are multiplied by -1.
@@ -86,7 +95,8 @@ class ParetoFrontier:
         self._pareto_df_maximize_all: pd.DataFrame = None
 
         if objectives_df is not None:
-            self.update_pareto(objectives_df)
+            assert parameters_df is not None and len(parameters_df.index) == len(objectives_df.index)
+            self.update_pareto(objectives_df, parameters_df)
 
     @property
     def empty(self) -> bool:
@@ -96,7 +106,13 @@ class ParetoFrontier:
     def pareto_df(self) -> pd.DataFrame:
         return self._pareto_df.copy(deep=True)
 
-    def update_pareto(self, objectives_df: pd.DataFrame):
+    @property
+    def params_for_pareto_df(self):
+        if self._params_for_pareto_df is None:
+            return None
+        return self._params_for_pareto_df.copy(deep=True)
+
+    def update_pareto(self, objectives_df: pd.DataFrame, parameters_df: pd.DataFrame):
         """Computes a pareto frontier for the given objectives_df (including weak-pareto-optimal points).
 
         We do this by consecutively removing points on the interior of the pareto frontier from objectives_df until none are left.
@@ -145,6 +161,7 @@ class ParetoFrontier:
         #
         pareto_df = self._flip_sign_for_minimized_objectives(pareto_df)
         self._pareto_df = pareto_df
+        self._params_for_pareto_df = parameters_df.iloc[self._pareto_df.index]
 
     @trace()
     def is_dominated(self, objectives_df) -> pd.Series:
