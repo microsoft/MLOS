@@ -23,32 +23,59 @@ namespace Core
 // NAME: AnonymousMemoryMlosContextInitializer
 //
 // PURPOSE:
-//  Helper class used to initialize AnonymousMemoryMlosContext.
+//  Implementation of an inter-process MlosContext based on anonymous shared memory.
+//  Shared memory file descriptors are exchanged using Unix domain socket.
 //
 // NOTES:
 //
-class AnonymousMemoryMlosContextInitializer
+class AnonymousMemoryMlosContext : public MlosContext
 {
 public:
-    AnonymousMemoryMlosContextInitializer() {}
-
+    // Create with default arguments.
+    //
     _Must_inspect_result_
-    HRESULT Initialize();
+    HRESULT static Create(_Inout_ AlignedInstance<AnonymousMemoryMlosContext>& mlosContextInstance);
 
-    AnonymousMemoryMlosContextInitializer(_In_ AnonymousMemoryMlosContextInitializer&& initializer) noexcept;
+    // Create.
+    //
+    _Must_inspect_result_
+    HRESULT static Create(
+        _Inout_ AlignedInstance<AnonymousMemoryMlosContext>& mlosContextInstance,
+        _In_z_ const char* socketFolderPath,
+        _In_ size_t sharedConfigMemorySize);
 
-    AnonymousMemoryMlosContextInitializer(const AnonymousMemoryMlosContextInitializer&) = delete;
+    AnonymousMemoryMlosContext(
+        _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion>&& globalMemoryRegionView,
+        _In_ SharedMemoryMapView&& controlChannelMemoryMapView,
+        _In_ SharedMemoryMapView&& feedbackChannelMemoryMapView,
+        _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView,
+        _In_ InterProcessSharedChannelPolicy&& controlChannelPolicy,
+        _In_ InterProcessSharedChannelPolicy&& feedbackChannelPolicy,
+        _In_ FileWatchEvent&& fileWatchEvent,
+        _In_z_ char* socketFilePath) noexcept;
 
-    AnonymousMemoryMlosContextInitializer& operator=(const AnonymousMemoryMlosContextInitializer&) = delete;
+    AnonymousMemoryMlosContext(_In_ const AnonymousMemoryMlosContext&) = delete;
+
+    AnonymousMemoryMlosContext& operator=(_In_ const AnonymousMemoryMlosContext&) = delete;
+
+    ~AnonymousMemoryMlosContext();
 
 private:
-    template<typename TSharedMemoryView>
     _Must_inspect_result_
-    HRESULT CreateAnonymousSharedMemory(
-            _In_ FileDescriptorExchange& fileDescriptorExchange,
-            _Inout_ TSharedMemoryView& sharedMemory,
-            _In_ Internal::MemoryRegionId memoryRegionId,
-            _In_ std::size_t sharedMemorySize);
+    HRESULT CreateSocketWatchFile();
+
+    static void* HandleFdRequestsThreadProc(_In_ void* pParam);
+
+    _Must_inspect_result_
+    HRESULT HandleFdRequests();
+
+    _Must_inspect_result_
+    static HRESULT CreateOrOpenSharedMemory(
+        _In_ FileDescriptorExchange& fileDescriptorExchange,
+        _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+        _In_ MlosInternal::MemoryRegionId memRegionId,
+        _Inout_ MlosCore::SharedMemoryMapView& sharedMemoryMapView,
+        _In_ const size_t memSize);
 
 private:
     // Global shared memory region.
@@ -71,56 +98,17 @@ private:
     //
     InterProcessSharedChannelPolicy m_controlChannelPolicy;
 
-    // Channel policy for feedback channel.
-    //
-    InterProcessSharedChannelPolicy m_feedbackChannelPolicy;
-
-    friend class AnonymousMemoryMlosContext;
-};
-
-//----------------------------------------------------------------------------
-// NAME: AnonymousMemoryMlosContextInitializer
-//
-// PURPOSE:
-//  Implementation of an inter-process MlosContext based on anonymous shared memory.
-//  Shared memory file descriptors are exchanged using Unix domain socket.
-//
-// NOTES:
-//
-class AnonymousMemoryMlosContext : public MlosContext
-{
-public:
-    typedef AnonymousMemoryMlosContextInitializer InitializerType;
-
-    AnonymousMemoryMlosContext(_In_ AnonymousMemoryMlosContextInitializer&&) noexcept;
-
-    ~AnonymousMemoryMlosContext();
-
-    _Must_inspect_result_
-    HRESULT HandleFdRequests();
-
-private:
-    AnonymousMemoryMlosContextInitializer m_contextInitializer;
-
     InterProcessSharedChannel m_controlChannel;
 
+    // Channel policy for feedback channel.
+    //
     InterProcessSharedChannel m_feedbackChannel;
 
-    NamedEvent m_controlChannelNamedEvent;
+    FileWatchEvent m_fileWatchEvent;
 
-    NamedEvent m_feedbackChannelNamedEvent;
+    ThreadHandle m_fdExchangeThread;
+
+    char* m_socketFilePath;
 };
-
-//----------------------------------------------------------------------------
-// NAME: MlosContextFactory<AnonymousMemoryMlosContext>
-//
-// PURPOSE:
-//  Template specialization of MlosContextFactory.
-//
-// NOTES:
-//
-template<>
-_Must_inspect_result_
-HRESULT MlosContextFactory<AnonymousMemoryMlosContext>::Create();
 }
 }

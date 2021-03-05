@@ -37,7 +37,7 @@ HRESULT RegisterSmartConfigs(MlosContext& mlosContext)
     // SharedChannel config.
     //
     {
-        ComponentConfig<SharedChannelConfig> sharedChannelConfig(mlosContext);
+        ComponentConfig<SharedChannelConfig> sharedChannelConfig;
 
         sharedChannelConfig.BufferSize = 1024;
         sharedChannelConfig.ReaderCount = 1;
@@ -54,7 +54,7 @@ HRESULT RegisterSmartConfigs(MlosContext& mlosContext)
     // Microbenchmark config.
     //
     {
-        ComponentConfig<MicrobenchmarkConfig> microbenchmarkConfig(mlosContext);
+        ComponentConfig<MicrobenchmarkConfig> microbenchmarkConfig;
 
         microbenchmarkConfig.WriterCount = 1;
         microbenchmarkConfig.DurationInSec = 10;

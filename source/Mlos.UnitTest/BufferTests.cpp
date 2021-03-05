@@ -28,11 +28,11 @@ TEST(BufferChannel, CreateMemory)
     // Create a default MlosContext.
     // Default implementation depends on the OS (Mlos.Core.h).
     //
-    DefaultMlosContextFactory mlosContextFactory;
-    HRESULT hr = mlosContextFactory.Create();
+    DefaultMlosInitializer mlosInitializer;
+    HRESULT hr = mlosInitializer.CreateContext();
     EXPECT_EQ(hr, S_OK);
 
-    MlosContext& mlosContext = mlosContextFactory.m_context;
+    MlosContext& mlosContext = mlosInitializer.MlosContext();
 
     // Register Mlos.UnitTest Settings assembly.
     //
@@ -44,7 +44,7 @@ TEST(BufferChannel, CreateMemory)
     // Create shared component configuration.
     // Initialize config with default values.
     //
-    ComponentConfig<ChannelReaderStats> localComponentConfig(mlosContext);
+    ComponentConfig<ChannelReaderStats> localComponentConfig;
     localComponentConfig.SpinCount = 1;
     hr = mlosContext.RegisterComponentConfig(localComponentConfig);
     EXPECT_EQ(hr, S_OK);

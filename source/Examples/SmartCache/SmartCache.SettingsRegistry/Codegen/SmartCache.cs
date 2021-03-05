@@ -58,7 +58,7 @@ namespace SmartCache
     /// component to use.
     /// </summary>
     [CodegenConfig]
-    internal partial struct SmartCacheConfig
+    public partial struct SmartCacheConfig
     {
         [ScalarSetting]
         internal long ConfigId;
@@ -74,7 +74,7 @@ namespace SmartCache
     /// A telemetry message for the component to inform the agent of its progress.
     /// </summary>
     [CodegenMessage]
-    internal partial struct CacheRequestEventMessage
+    public partial struct CacheRequestEventMessage
     {
         [ScalarSetting]
         internal long ConfigId;
@@ -93,10 +93,10 @@ namespace SmartCache
     /// </summary>
     /// <remarks>
     /// Note: This message contains no members to detail the request.
-    /// It's very existence on the channel is signal enough of its intent.
+    /// It is very existence on the channel is signal enough of its intent.
     /// </remarks>
     [CodegenMessage]
-    internal partial struct RequestNewConfigurationMessage
+    public partial struct RequestNewConfigurationMessage
     {
     }
 }

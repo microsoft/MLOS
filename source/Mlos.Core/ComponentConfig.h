@@ -36,8 +36,8 @@ public:
     using SharedConfigType = SharedConfig<T>;
     using TProxyObjectType = typename T::ProxyObjectType;
 
-    explicit ComponentConfig(_In_ MlosContext& mlosContext) noexcept
-      : m_mlosContext(mlosContext),
+    explicit ComponentConfig() noexcept
+      : m_mlosContext(nullptr),
         m_sharedConfig(nullptr)
     {}
 
@@ -66,9 +66,9 @@ public:
     void SendTelemetryMessage(_In_ const TMessage& message) const;
 
 private:
-    // MlosContext.
+    // Pointer to MlosContext, the pointer is set when the component is registered.
     //
-    MlosContext& m_mlosContext;
+    MlosContext* m_mlosContext;
 
     // Pointer to the shared config instance stored in the shared memory.
     //

@@ -36,19 +36,14 @@ namespace Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is StringPtr))
-            {
-                return false;
-            }
-
-            return Equals((StringPtr)obj);
+            return obj is StringPtr ptr && Equals(ptr);
         }
 
         /// <inheritdoc />
         public bool Equals(StringPtr other) => Value == other.Value;
 
         /// <inheritdoc />
-        public override int GetHashCode() => Value.GetHashCode();
+        public override int GetHashCode() => Value.GetHashCode(StringComparison.InvariantCulture);
 
         /// <summary>
         /// Gets or sets string value.
@@ -56,10 +51,10 @@ namespace Mlos.SettingsSystem.StdTypes
         public string Value { get; set; }
 
         /// <inheritdoc />
-        ulong ICodegenKey.CodegenTypeHash() => throw new System.NotImplementedException();
+        ulong ICodegenKey.CodegenTypeHash() => throw new NotImplementedException();
 
         /// <inheritdoc />
-        uint ICodegenKey.CodegenTypeIndex() => throw new System.NotImplementedException();
+        uint ICodegenKey.CodegenTypeIndex() => throw new NotImplementedException();
 
         /// <inheritdoc />
         ulong ICodegenType.CodegenTypeSize() => 16;
@@ -71,7 +66,7 @@ namespace Mlos.SettingsSystem.StdTypes
         bool ICodegenKey.CompareKey(ICodegenProxy proxy) => throw new NotImplementedException();
 
         /// <inheritdoc />
-        ulong ICodegenType.GetVariableDataSize() => Value != null ? (ulong)Value.Length : 0;
+        ulong ICodegenType.GetVariableDataSize() => Value != null ? (ulong)Value.Length + 1 : 0;
 
         /// <inheritdoc />
         ulong ICodegenType.SerializeVariableData(IntPtr buffer, ulong objectOffset, ulong dataOffset)
@@ -88,6 +83,12 @@ namespace Mlos.SettingsSystem.StdTypes
                 for (int i = 0; i < length; i++)
                 {
                     messageSpan[i] = (byte)valueSpan[i];
+                }
+
+                if (Value != null)
+                {
+                    *(byte*)(buffer + (int)dataOffset + length) = 0;
+                    length += 1;
                 }
 
                 // Update links.
@@ -134,12 +135,7 @@ namespace Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is WideStringPtr))
-            {
-                return false;
-            }
-
-            return Equals((WideStringPtr)obj);
+            return obj is WideStringPtr ptr && Equals(ptr);
         }
 
         /// <inheritdoc />
@@ -169,7 +165,7 @@ namespace Mlos.SettingsSystem.StdTypes
         bool ICodegenKey.CompareKey(ICodegenProxy proxy) => throw new NotImplementedException();
 
         /// <inheritdoc />
-        ulong ICodegenType.GetVariableDataSize() => Value != null ? (ulong)(Value.Length * 2) : 0;
+        ulong ICodegenType.GetVariableDataSize() => Value != null ? (ulong)((Value.Length + 1) * sizeof(char)) : 0;
 
         /// <inheritdoc />
         ulong ICodegenType.SerializeVariableData(IntPtr buffer, ulong objectOffset, ulong dataOffset)
@@ -185,11 +181,18 @@ namespace Mlos.SettingsSystem.StdTypes
 
                 // Update links.
                 //
-                ulong length = (ulong)valueSpan.Length * 2;
-                *(ulong*)(buffer + (int)objectOffset) = dataOffset - objectOffset;
-                *(ulong*)(buffer + (int)objectOffset + sizeof(ulong)) = length;
+                int length = valueSpan.Length * sizeof(char);
 
-                return length;
+                if (Value != null)
+                {
+                    *(char*)(buffer + (int)dataOffset + length) = (char)0;
+                    length += sizeof(char);
+                }
+
+                *(ulong*)(buffer + (int)objectOffset) = dataOffset - objectOffset;
+                *(ulong*)(buffer + (int)objectOffset + sizeof(ulong)) = (ulong)length;
+
+                return (ulong)length;
             }
         }
 
@@ -228,12 +231,7 @@ namespace Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is StringView))
-            {
-                return false;
-            }
-
-            return Equals((StringView)obj);
+            return obj is StringView view && Equals(view);
         }
 
         /// <inheritdoc />
@@ -326,12 +324,7 @@ namespace Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is WideStringView))
-            {
-                return false;
-            }
-
-            return Equals((WideStringView)obj);
+            return obj is WideStringView view && Equals(view);
         }
 
         /// <inheritdoc />
@@ -361,7 +354,7 @@ namespace Mlos.SettingsSystem.StdTypes
         bool ICodegenKey.CompareKey(ICodegenProxy proxy) => throw new NotImplementedException();
 
         /// <inheritdoc/>
-        ulong ICodegenType.GetVariableDataSize() => Value != null ? (ulong)(Value.Length * 2) : 0;
+        ulong ICodegenType.GetVariableDataSize() => Value != null ? (ulong)(Value.Length * sizeof(char)) : 0;
 
         /// <inheritdoc/>
         ulong ICodegenType.SerializeVariableData(IntPtr buffer, ulong objectOffset, ulong dataOffset)
@@ -377,7 +370,7 @@ namespace Mlos.SettingsSystem.StdTypes
 
                 // Update links.
                 //
-                ulong length = (ulong)valueSpan.Length * 2;
+                ulong length = (ulong)valueSpan.Length * sizeof(char);
                 *(ulong*)(buffer + (int)objectOffset) = dataOffset - objectOffset;
                 *(ulong*)(buffer + (int)objectOffset + sizeof(ulong)) = length;
 

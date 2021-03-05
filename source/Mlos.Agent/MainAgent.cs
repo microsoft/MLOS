@@ -14,7 +14,6 @@ using System.Runtime.InteropServices;
 
 using Mlos.Core;
 
-using MlosInternal = Mlos.Core.Internal;
 using MlosProxy = Proxy.Mlos.Core;
 using MlosProxyInternal = Proxy.Mlos.Core.Internal;
 
@@ -56,21 +55,11 @@ namespace Mlos.Agent
             // Initialize callbacks.
             //
             MlosProxyInternal.RegisterSettingsAssemblyRequestMessage.Callback = RegisterSettingsAssemblyCallback;
-            MlosProxyInternal.RegisterSharedConfigMemoryRegionRequestMessage.Callback = RegisterSharedConfigMemoryRegionRequestMessageCallback;
             MlosProxy.TerminateReaderThreadRequestMessage.Callback = TerminateReaderThreadRequestMessageCallback;
 
             // Register Mlos.Core assembly.
             //
             RegisterAssembly(typeof(MlosContext).Assembly, dispatchTableBaseIndex: 0);
-
-            // Register shared config memory regions.
-            //
-            for (ushort index = 1; index < mlosContext.GlobalMemoryRegion.GlobalMemoryRegionIndex; index++)
-            {
-                // Skip first one as this is global memory region, and it does not require registration.
-                //
-                RegisterSharedConfigMemoryRegion(sharedMemoryRegionIndex: (ushort)(index + 1));
-            }
 
             // Register assemblies from the shared config.
             // Assembly Mlos.NetCore does not have a config, as it is always registered first.
@@ -93,34 +82,6 @@ namespace Mlos.Agent
         }
 
         /// <summary>
-        /// Registers the shared config memory region.
-        /// </summary>
-        /// <param name="sharedMemoryRegionIndex">Index of the shared config region.</param>
-        private void RegisterSharedConfigMemoryRegion(ushort sharedMemoryRegionIndex)
-        {
-            MlosInternal.RegisteredMemoryRegionConfig.CodegenKey codegenKey = default;
-            codegenKey.MemoryRegionType = MlosInternal.MemoryRegionType.SharedConfig;
-            codegenKey.MemoryRegionIndex = sharedMemoryRegionIndex;
-
-            // Locate shared memory region config.
-            //
-            SharedConfig<MlosProxyInternal.RegisteredMemoryRegionConfig> registeredMemoryRegionSharedConfig =
-                SharedConfigManager.Lookup(mlosContext.GlobalMemoryRegion.SharedConfigDictionary, codegenKey);
-
-            if (registeredMemoryRegionSharedConfig.HasSharedConfig)
-            {
-                // Config exists, register memory region with the shared config manager.
-                //
-                MlosProxyInternal.RegisteredMemoryRegionConfig registeredMemoryRegionConfig = registeredMemoryRegionSharedConfig.Config;
-
-                mlosContext.SharedConfigManager.RegisterSharedConfigMemoryRegion(
-                    sharedMemoryRegionIndex: sharedMemoryRegionIndex,
-                    sharedMemoryMapName: registeredMemoryRegionConfig.SharedMemoryMapName.Value,
-                    memoryRegionSize: registeredMemoryRegionConfig.MemoryRegionSize);
-            }
-        }
-
-        /// <summary>
         /// Registers the settings assembly.
         /// </summary>
         /// <param name="assembly"></param>
@@ -136,7 +97,7 @@ namespace Mlos.Agent
         /// Registers next settings assembly.
         /// </summary>
         /// <param name="assemblyIndex"></param>
-        public void RegisterSettingsAssembly(uint assemblyIndex)
+        private void RegisterSettingsAssembly(uint assemblyIndex)
         {
             // Locate the settings assembly config.
             //
@@ -195,14 +156,14 @@ namespace Mlos.Agent
                     if (File.Exists(tmpAssemblyFilePath))
                     {
                         assemblyFilePath = tmpAssemblyFilePath;
-                        Console.WriteLine(string.Format("Found settings registry assembly at {0}", assemblyFilePath));
+                        Console.WriteLine($"Found settings registry assembly at {assemblyFilePath}");
                         break;
                     }
                 }
 
                 if (assemblyFilePath == null)
                 {
-                    throw new FileNotFoundException(string.Format("Failed to find settings registry assembly '{0}'", assemblyFileName));
+                    throw new FileNotFoundException($"Failed to find settings registry assembly '{assemblyFileName}'");
                 }
 
                 Assembly assembly = Assembly.LoadFrom(assemblyFilePath);
@@ -231,15 +192,6 @@ namespace Mlos.Agent
         private void RegisterSettingsAssemblyCallback(MlosProxyInternal.RegisterSettingsAssemblyRequestMessage msg)
         {
             RegisterSettingsAssembly(msg.AssemblyIndex);
-        }
-
-        /// <summary>
-        /// Register shared config memory region.
-        /// </summary>
-        /// <param name="msg"></param>
-        private void RegisterSharedConfigMemoryRegionRequestMessageCallback(MlosProxyInternal.RegisterSharedConfigMemoryRegionRequestMessage msg)
-        {
-            RegisterSharedConfigMemoryRegion(msg.SharedMemoryRegionIndex);
         }
 
         /// <summary>

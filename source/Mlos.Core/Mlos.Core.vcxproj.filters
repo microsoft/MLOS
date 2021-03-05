@@ -20,6 +20,7 @@
     <ClCompile Include="ArenaAllocator.cpp">
       <Filter>MemoryRegions</Filter>
     </ClCompile>
+    <ClCompile Include="UniqueString.Windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MlosCodeGenOutputPathRoot)\Mlos.Core\SettingsProvider_gen_base.h">
@@ -78,6 +79,9 @@
     <ClInclude Include="SharedConfigManager.inl" />
     <ClInclude Include="AlignedInstance.h" />
     <ClInclude Include="AlignedVector.h" />
+    <ClInclude Include="MlosInitializer.h" />
+    <ClInclude Include="UniqueString.h" />
+    <ClInclude Include="ObjectSerializationStringPtr.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Codegen">
@@ -89,5 +93,9 @@
     <Filter Include="MemoryRegions">
       <UniqueIdentifier>{9fc7c27a-be53-48f3-b356-d240db1e1cc8}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MlosInitializer.inl" />
+    <None Include="MlosPlatform.Windows.inl" />
   </ItemGroup>
 </Project>

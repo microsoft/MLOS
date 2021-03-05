@@ -18,7 +18,7 @@ namespace Mlos.UnitTest
     /// We are using structures defined later in the code.
     /// </remarks>
     [CodegenMessage]
-    internal partial class CompositeStructure
+    public partial class CompositeStructure
     {
         internal WideStringPtr Name;
         internal Point Point2d;
@@ -32,7 +32,7 @@ namespace Mlos.UnitTest
     // Fixed struct holding a variable length struct.
     //
     [CodegenMessage]
-    internal partial class CompositeStructure2
+    public partial class CompositeStructure2
     {
         internal char Letter;
         internal short ShortInteger;
@@ -45,7 +45,7 @@ namespace Mlos.UnitTest
     /// Point struct.
     /// </summary>
     [CodegenType]
-    internal partial struct Point
+    public partial struct Point
     {
         /// <summary>
         /// Field X.
@@ -64,7 +64,7 @@ namespace Mlos.UnitTest
     /// Line struct.
     /// </summary>
     [CodegenMessage]
-    internal partial class Line
+    public partial class Line
     {
         internal int Id;
 
@@ -79,7 +79,7 @@ namespace Mlos.UnitTest
     }
 
     [CodegenMessage]
-    internal partial class StringViewElement
+    public partial class StringViewElement
     {
         internal int Id;
 
@@ -87,7 +87,7 @@ namespace Mlos.UnitTest
     }
 
     [CodegenMessage]
-    internal partial class StringViewElements
+    public partial class StringViewElements
     {
         internal int Id;
 
@@ -99,7 +99,7 @@ namespace Mlos.UnitTest
     }
 
     [CodegenMessage]
-    internal partial class StringViewArray
+    public partial class StringViewArray
     {
         internal int Id;
 
@@ -108,7 +108,7 @@ namespace Mlos.UnitTest
     }
 
     [CodegenMessage]
-    internal partial class WideStringViewArray
+    public partial class WideStringViewArray
     {
         internal int Id;
 
@@ -117,7 +117,7 @@ namespace Mlos.UnitTest
     }
 
     [CodegenMessage]
-    internal partial class WideStringMultiMessage
+    public partial class WideStringMultiMessage
     {
         internal int Id;
 
@@ -126,19 +126,35 @@ namespace Mlos.UnitTest
     }
 
     [CodegenMessage]
-    internal partial class Graph
+    public partial class Graph
     {
         [FixedSizeArray(length: 16)]
         internal readonly Point[] Points;
     }
 
     [CodegenMessage]
-    internal partial class OuterGraphs
+    public partial class OuterGraphs
     {
         internal char Id;
 
         internal Graph Graph1;
 
         internal Graph Graph2;
+    }
+
+    [CodegenType]
+    public partial class StringsPair
+    {
+        internal StringPtr String1;
+
+        internal StringPtr String2;
+    }
+
+    [CodegenType]
+    public partial class WideStringsPair
+    {
+        internal WideStringPtr String1;
+
+        internal WideStringPtr String2;
     }
 }

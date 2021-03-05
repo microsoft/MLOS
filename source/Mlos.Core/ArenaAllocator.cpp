@@ -36,16 +36,15 @@ _Must_inspect_result_
 HRESULT InitializeArenaAllocator(
     _Inout_ ArenaAllocator& allocator,
     _Inout_ MemoryRegion& memoryRegion,
-    _In_ int32_t firstAllocationOffset)
+    _In_ int32_t memoryRegionHeaderSize)
 {
     allocator.OffsetToAllocator = static_cast<int32_t>(BytePtr(&allocator).Pointer - BytePtr(&memoryRegion).Pointer);
 
-    allocator.FirstAllocationOffset = static_cast<uint32_t>(align<256>(firstAllocationOffset));
-    allocator.AllocationBlockSize = static_cast<uint32_t>(memoryRegion.MemoryRegionSize - allocator.FirstAllocationOffset);
+    allocator.EndOffset = static_cast<uint32_t>(memoryRegion.MemoryRegionSize);
 
-    allocator.FreeOffset = allocator.FirstAllocationOffset;
+    allocator.FreeOffset = static_cast<uint32_t>(align<ArenaAllocator::AllocationAlignment>(memoryRegionHeaderSize));
     allocator.AllocationCount = 0;
-    allocator.LastAllocatedOffset = 0;
+    allocator.LastOffset = 0;
 
     return S_OK;
 }
@@ -72,12 +71,12 @@ HRESULT AllocateInMemoryRegion(
 {
     size += sizeof(Internal::AllocationEntry);
 
-    if (allocator.FreeOffset + size >= allocator.AllocationBlockSize + allocator.FirstAllocationOffset)
+    if (allocator.FreeOffset + size >= allocator.EndOffset)
     {
         return E_OUTOFMEMORY;
     }
 
-    BytePtr memoryRegionPtr(reinterpret_cast<byte*>(&allocator) - allocator.OffsetToAllocator);
+    const BytePtr memoryRegionPtr(reinterpret_cast<byte*>(&allocator) - allocator.OffsetToAllocator);
 
     // Update the address.
     //
@@ -85,15 +84,15 @@ HRESULT AllocateInMemoryRegion(
 
     // Update memory region properties.
     //
-    allocator.FreeOffset += static_cast<uint32_t>(align<64>(size));
+    allocator.FreeOffset += static_cast<uint32_t>(align<ArenaAllocator::AllocationAlignment>(size));
     allocator.AllocationCount++;
 
     // Update last allocated entry.
     //
-    if (allocator.LastAllocatedOffset != 0)
+    if (allocator.LastOffset != 0)
     {
         AllocationEntry* lastAllocationEntry =
-            reinterpret_cast<AllocationEntry*>(memoryRegionPtr.Pointer + allocator.LastAllocatedOffset);
+            reinterpret_cast<AllocationEntry*>(memoryRegionPtr.Pointer + allocator.LastOffset);
 
         lastAllocationEntry->NextEntryOffset = offset;
     }
@@ -101,9 +100,9 @@ HRESULT AllocateInMemoryRegion(
     // Update current allocated entry.
     //
     AllocationEntry* allocationEntry = reinterpret_cast<AllocationEntry*>(memoryRegionPtr.Pointer + offset);
-    allocationEntry->PrevEntryoffset = allocator.LastAllocatedOffset;
+    allocationEntry->PrevEntryOffset = allocator.LastOffset;
 
-    allocator.LastAllocatedOffset = offset;
+    allocator.LastOffset = offset;
 
     // Skip the allocation entry.
     //

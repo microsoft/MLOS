@@ -31,7 +31,7 @@
       <Optimize>true</Optimize>
     </ProjectConfiguration>
   </ItemGroup>
-  <Import Project="$(BaseDir)/build/Mlos.NetCore.Package.props" />
+  <Import Project="$(BaseDir)\build\Mlos.NetCore.Package.props" />
   <ItemGroup>
     <None Remove="Makefile" />
     <None Remove="CMakeLists.txt" />

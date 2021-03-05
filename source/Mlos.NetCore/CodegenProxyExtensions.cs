@@ -18,7 +18,8 @@ namespace Mlos.Core
         /// <summary>
         /// Verifies serialized variable data.
         /// </summary>
-        /// <typeparam name="T">Instance type.</typeparam>
+        /// <typeparam name="TType">Codegen type.</typeparam>
+        /// <typeparam name="TProxy">Codegen proxy type.</typeparam>
         /// <param name="array"></param>
         /// <param name="elementCount"></param>
         /// <param name="objectOffset"></param>
@@ -26,10 +27,11 @@ namespace Mlos.Core
         /// <param name="expectedDataOffset"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool VerifyVariableData<T>(this PropertyProxyArray<T> array, uint elementCount, ulong objectOffset, ulong totalDataSize, ref ulong expectedDataOffset)
-            where T : ICodegenProxy, new()
+        public static bool VerifyVariableData<TType, TProxy>(this PropertyProxyArray<TType, TProxy> array, uint elementCount, ulong objectOffset, ulong totalDataSize, ref ulong expectedDataOffset)
+            where TType : ICodegenType, new()
+            where TProxy : ICodegenProxy<TType, TProxy>, new()
         {
-            ulong codegenTypeSize = default(T).CodegenTypeSize();
+            ulong codegenTypeSize = default(TProxy).CodegenTypeSize();
 
             for (uint i = 0; i < elementCount; i++)
             {

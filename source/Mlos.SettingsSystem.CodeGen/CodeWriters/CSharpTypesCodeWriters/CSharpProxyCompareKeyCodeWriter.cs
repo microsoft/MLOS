@@ -77,14 +77,14 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
         {
             if (!cppField.FieldInfo.IsPrimaryKey())
             {
-                // The field is not a primary key, ignore it.
+                // The field is not of the primary key, ignore it.
                 //
                 return;
             }
 
             string fieldName = cppField.FieldInfo.Name;
 
-            WriteLine($"result &= this.{fieldName} == instance.{fieldName};");
+            WriteLine($"result &= instance.{fieldName} == this.{fieldName};");
         }
     }
 }

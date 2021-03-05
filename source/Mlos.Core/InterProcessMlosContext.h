@@ -20,26 +20,37 @@ namespace Mlos
 namespace Core
 {
 //----------------------------------------------------------------------------
-// NAME: InterProcessMlosContextInitializer
+// NAME: InterProcessMlosContext
 //
 // PURPOSE:
-//  Helper class used to initialize shared memory for inter-process MlosContexts.
+//  Implementation of an inter-process MlosContext.
 //
 // NOTES:
 //
-class InterProcessMlosContextInitializer
+class InterProcessMlosContext : public MlosContext
 {
 public:
-    InterProcessMlosContextInitializer() {}
+    _Must_inspect_result_
+    HRESULT static Create(_Inout_ AlignedInstance<InterProcessMlosContext>& mlosContextInstance);
 
     _Must_inspect_result_
-    HRESULT Initialize();
+    HRESULT static Create(
+        _Inout_ AlignedInstance<InterProcessMlosContext>& mlosContextInstance,
+        _In_ size_t configMemorySize);
 
-    InterProcessMlosContextInitializer(_In_ InterProcessMlosContextInitializer&& initializer) noexcept;
+    InterProcessMlosContext(
+        _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion>&& globalMemoryRegionView,
+        _In_ SharedMemoryMapView&& controlChannelMemoryMapView,
+        _In_ SharedMemoryMapView&& feedbackChannelMemoryMapView,
+        _In_ InterProcessSharedChannelPolicy&& controlChannelPolicy,
+        _In_ InterProcessSharedChannelPolicy&& feedbackChannelPolicy,
+        _In_ NamedEvent&& targetProcessNamedEvent) noexcept;
 
-    InterProcessMlosContextInitializer(const InterProcessMlosContextInitializer&) = delete;
+    InterProcessMlosContext(_In_ const InterProcessMlosContext&) = delete;
 
-    InterProcessMlosContextInitializer& operator=(const InterProcessMlosContextInitializer&) = delete;
+    InterProcessMlosContext& operator=(_In_ const InterProcessMlosContext&) = delete;
+
+    ~InterProcessMlosContext();
 
 private:
     // Global shared memory region.
@@ -54,48 +65,19 @@ private:
     //
     SharedMemoryMapView m_feedbackChannelMemoryMapView;
 
-    // Channel policy for control channel.
+    // Named shared memory for Telemetry and Control Channel.
     //
-    InterProcessSharedChannelPolicy m_controlChannelPolicy;
+    InterProcessSharedChannel m_controlChannel;
 
-    // Channel policy for feedback channel.
+    // Named shared memory for Feedback Channel.
     //
-    InterProcessSharedChannelPolicy m_feedbackChannelPolicy;
+    InterProcessSharedChannel m_feedbackChannel;
 
-    // Notification event signalled after the target process initialized Mlos context.
+    // Notification event signaled after the target process initialized Mlos context.
     //
     NamedEvent m_targetProcessNamedEvent;
 
-    friend class InterProcessMlosContext;
-};
-
-//----------------------------------------------------------------------------
-// NAME: InterProcessMlosContext
-//
-// PURPOSE:
-//  Implementation of an inter-process MlosContext.
-//
-// NOTES:
-//
-class InterProcessMlosContext : public MlosContext
-{
-public:
-    typedef InterProcessMlosContextInitializer InitializerType;
-
-    InterProcessMlosContext(_In_ InterProcessMlosContextInitializer&&) noexcept;
-
-    ~InterProcessMlosContext();
-
-private:
-    InterProcessMlosContextInitializer m_contextInitializer;
-
-    InterProcessSharedChannel m_controlChannel;
-
-    InterProcessSharedChannel m_feedbackChannel;
-
-    NamedEvent m_controlChannelNamedEvent;
-
-    NamedEvent m_feedbackChannelNamedEvent;
+    friend class MlosInitializer<InterProcessMlosContext>;
 };
 }
 }

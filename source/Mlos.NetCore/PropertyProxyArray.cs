@@ -13,9 +13,11 @@ namespace Mlos.Core
     /// <summary>
     /// Property proxy array accessor class.
     /// </summary>
-    /// <typeparam name="T">Proxy type.</typeparam>
-    public struct PropertyProxyArray<T> : IEquatable<PropertyProxyArray<T>>
-        where T : ICodegenProxy, new()
+    /// <typeparam name="TType">Codegen type.</typeparam>
+    /// <typeparam name="TProxy">Proxy type.</typeparam>
+    public readonly struct PropertyProxyArray<TType, TProxy> : IEquatable<PropertyProxyArray<TType, TProxy>>, IEquatable<TType[]>
+        where TType : ICodegenType, new()
+        where TProxy : ICodegenProxy<TType, TProxy>, new()
     {
         /// <summary>
         /// Operator ==.
@@ -23,7 +25,7 @@ namespace Mlos.Core
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public static bool operator ==(PropertyProxyArray<T> left, PropertyProxyArray<T> right) => left.Equals(right);
+        public static bool operator ==(PropertyProxyArray<TType, TProxy> left, PropertyProxyArray<TType, TProxy> right) => left.Equals(right);
 
         /// <summary>
         /// Operator !=.
@@ -31,13 +33,13 @@ namespace Mlos.Core
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public static bool operator !=(PropertyProxyArray<T> left, PropertyProxyArray<T> right) => !(left == right);
+        public static bool operator !=(PropertyProxyArray<TType, TProxy> left, PropertyProxyArray<TType, TProxy> right) => !(left == right);
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PropertyProxyArray{T}"/> struct.
+        /// Initializes a new instance of the <see cref="PropertyProxyArray{TType, TProxy}"/> struct.
         /// </summary>
         /// <param name="buffer"></param>
-        /// <param name="typeSize">Size of the underlaying proxy type.</param>
+        /// <param name="typeSize">Size of the underlying proxy type.</param>
         public PropertyProxyArray(IntPtr buffer, int typeSize)
         {
             this.buffer = buffer;
@@ -49,13 +51,13 @@ namespace Mlos.Core
         /// </summary>
         /// <param name="i"></param>
         /// <returns></returns>
-        public T this[int i]
+        public TProxy this[int i]
         {
             get
             {
                 unsafe
                 {
-                    return new T() { Buffer = buffer + (i * typeSize) };
+                    return new TProxy() { Buffer = buffer + (i * typeSize) };
                 }
             }
         }
@@ -63,18 +65,36 @@ namespace Mlos.Core
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is PropertyProxyArray<T>))
+            if (obj is PropertyProxyArray<TType, TProxy> proxyArray)
             {
-                return false;
+                return Equals(proxyArray);
+            }
+            else if (obj is TType[] array)
+            {
+                return Equals(array);
             }
 
-            return Equals((PropertyProxyArray<T>)obj);
+            return false;
         }
 
         /// <inheritdoc />
-        public bool Equals(PropertyProxyArray<T> other) =>
+        public bool Equals(PropertyProxyArray<TType, TProxy> other) =>
             buffer == other.buffer &&
             typeSize == other.typeSize;
+
+        /// <inheritdoc />
+        public bool Equals(TType[] other)
+        {
+            for (int i = 0; i < other.Length; i++)
+            {
+                if (!this[i].Equals(other[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         /// <inheritdoc />
         public override int GetHashCode() => buffer.GetHashCode();

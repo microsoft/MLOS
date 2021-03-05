@@ -23,7 +23,7 @@ namespace Core
 // NAME: MlosContext
 //
 // PURPOSE:
-//  Provides the main entrypoint for an application component to interact with an
+//  Provides the main entry point for an application component to interact with an
 //  (external) agent over shared memory channels.
 //
 //  Application components use this class to
@@ -70,18 +70,33 @@ public:
 
     void TerminateFeedbackChannel();
 
-    bool IsControlChannelActive();
+    bool IsControlChannelActive() const;
 
-    bool IsFeedbackChannelActive();
+    bool IsFeedbackChannelActive() const;
+
+    _Must_inspect_result_
+    static HRESULT CreateOrOpenSharedMemory(
+        _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+        _In_ MlosInternal::MemoryRegionId memRegionId,
+        _Inout_ MlosCore::SharedMemoryMapView& sharedMemoryMapView,
+        _In_ const size_t memSize);
+
+    _Must_inspect_result_
+    static HRESULT CreateOrOpenNamedEvent(
+        _In_ MlosInternal::GlobalMemoryRegion& globalMemoryRegion,
+        _In_ MlosInternal::MemoryRegionId memoryRegionId,
+        _Inout_ NamedEvent& event);
+
+public:
+    // Indicates if we should cleanup OS resources when closing the shared memory map view.
+    // No-op on Windows.
+    //
+    bool CleanupOnClose;
 
 protected:
-    // Creates a shared memory view and registers it with Mlos Agent.
+    // Gets the shared config memory map.
     //
-    template<typename T>
-    HRESULT CreateMemoryRegion(
-        _In_z_ const char* const sharedMemoryName,
-        _In_ size_t memoryRegionSize,
-        _Out_ SharedMemoryRegionView<T>& sharedMemoryRegionView);
+    const SharedMemoryMapView& SharedConfigMemoryMapView() const;
 
     // Shared config manager.
     //
@@ -91,6 +106,7 @@ protected:
     //
     Internal::GlobalMemoryRegion& m_globalMemoryRegion;
 
+private:
     // Channel used to send the control messages (register assembly, register shared config).
     //
     ISharedChannel& m_controlChannel;
@@ -109,24 +125,6 @@ protected:
 
     template<typename T>
     friend class ComponentConfig;
-};
-
-//----------------------------------------------------------------------------
-// NAME: MlosContextFactory
-//
-// PURPOSE:
-//  Creates a Mlos context instance.
-//
-// NOTES:
-//
-template<typename TMlosContext>
-class MlosContextFactory
-{
-public:
-    _Must_inspect_result_
-    HRESULT Create();
-
-    AlignedInstance<TMlosContext> m_context;
 };
 }
 }

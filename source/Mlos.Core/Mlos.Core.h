@@ -58,9 +58,12 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define _Out_
 #define _In_
 #define _Inout_
+#define _In_opt_
+#define _In_opt_z_
 #define _In_z_
 #define _In_reads_(x)
 #define _In_reads_bytes_(x)
+#define _In_reads_z_(x)
 
 #define SUCCEEDED(x) (x >= 0)
 #define FAILED(x) (x < 0)
@@ -68,15 +71,15 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #define S_FALSE 1
 #define E_OUTOFMEMORY (-ENOMEM)
 #define E_NOT_SET (-ENOENT)
-#define HRESULT_FROM_ERRNO(errno) (-errno)
+#define HRESULT_FROM_ERRNO(x) (-x)
 
 #endif
 
 // Define macros.
 //
-#define MLOS_RETAIL_ASSERT(result) { if (!result) Mlos::Core::MlosPlatform::TerminateProcess(); }
-#define MLOS_UNUSED_ARG(x) (void)x
-#define MLOS_IGNORE_HR(x) (void)x
+#define MLOS_RETAIL_ASSERT(result) if (!(result)) { Mlos::Core::MlosPlatform::TerminateProcess(); }
+#define MLOS_UNUSED_ARG(x) (void)(x)
+#define MLOS_IGNORE_HR(x) (void)(x)
 
 #ifdef _MSC_VER
 #define MLOS_SELECTANY_ATTR __declspec(selectany)
@@ -90,6 +93,9 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 
 #include "MlosPlatform.h"
 
+namespace MlosCore = ::Mlos::Core;
+namespace MlosInternal = ::Mlos::Core::Internal;
+
 #include "BytePtr.h"
 
 #include "Hash.h"
@@ -98,6 +104,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "ObjectDeserializationCallback.h"
 #include "StringTypes.h"
 #include "ObjectSerialization.h"
+#include "ObjectSerializationStringPtr.h"
 #include "Utils.h"
 
 #include "PropertyProxyStringPtr.h"
@@ -123,6 +130,7 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "FileDescriptorExchange.Linux.h"
 #endif
 
+#include "UniqueString.h"
 #include "SharedMemoryRegionView.h"
 #include "SharedMemoryRegionView.inl"
 
@@ -147,12 +155,14 @@ constexpr int32_t INVALID_FD_VALUE = -1;
 #include "AlignedInstance.h"
 #include "AlignedVector.h"
 #include "MlosContext.h"
+#include "MlosInitializer.h"
 #include "InternalMlosContext.h"
 #include "InterProcessMlosContext.h"
 
 // Implementation.
 //
 #include "MlosContext.inl"
+#include "MlosInitializer.inl"
 #include "ComponentConfig.inl"
 #include "SharedChannel.inl"
 #include "SharedConfigDictionaryLookup.inl"
@@ -175,10 +185,11 @@ constexpr uint32_t DispatchTableBaseIndex() { return 0; }
 // Define a default Mlos context factory.
 //
 #ifdef _WIN64
-using DefaultMlosContextFactory = Mlos::Core::MlosContextFactory<Mlos::Core::InterProcessMlosContext>;
+using DefaultMlosInitializer = Mlos::Core::MlosInitializer<Mlos::Core::InterProcessMlosContext>;
 #else
+#include "FileWatchEvent.Linux.h"
 #include "AnonymousMemoryMlosContext.Linux.h"
-using DefaultMlosContextFactory = Mlos::Core::MlosContextFactory<Mlos::Core::AnonymousMemoryMlosContext>;
+using DefaultMlosInitializer = Mlos::Core::MlosInitializer<Mlos::Core::AnonymousMemoryMlosContext>;
 #endif
 
 // Restore min/max macros.

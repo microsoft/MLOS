@@ -46,9 +46,7 @@ namespace Mlos.Core.Windows
                     SecurityDescriptor = securityDescriptor.DangerousGetHandle(),
                 };
 
-                uint sharedMemorySizeHigh;
-                uint sharedMemorySizeLow;
-                Utils.SplitULong(sharedMemorySize, out sharedMemorySizeHigh, out sharedMemorySizeLow);
+                Utils.SplitULong(sharedMemorySize, out uint sharedMemorySizeHigh, out uint sharedMemorySizeLow);
 
                 sharedMemoryHandle = Native.CreateFileMapping(
                     Native.InvalidPointer,

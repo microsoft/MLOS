@@ -14,7 +14,7 @@ namespace Mlos.Core.Internal
     /// Memory region where the target process creates the components' shared configuration.
     /// </summary>
     [CodegenType]
-    internal partial struct SharedConfigMemoryRegion
+    public partial struct SharedConfigMemoryRegion
     {
         /// <summary>
         /// Memory region header.
@@ -37,7 +37,7 @@ namespace Mlos.Core.Internal
     /// Because we are allocating in the shared memory region, we are using offsets (not pointers).
     /// </remarks>
     [CodegenType]
-    internal partial struct SharedConfigDictionary
+    public partial struct SharedConfigDictionary
     {
         /// <summary>
         /// Memory allocator.
@@ -51,16 +51,5 @@ namespace Mlos.Core.Internal
         /// The offset is calculated from the beginning of the dictionary structure.
         /// </remarks>
         internal uint OffsetToConfigsArray;
-    }
-
-    /// <summary>
-    /// Message is used to register shared config memory with the agent.
-    /// When the target process creates a shared memory region, it sends the message
-    /// to the agent to register the memory region as a shared config memory.
-    /// </summary>
-    [CodegenMessage]
-    internal partial struct RegisterSharedConfigMemoryRegionRequestMessage
-    {
-        internal ushort SharedMemoryRegionIndex;
     }
 }

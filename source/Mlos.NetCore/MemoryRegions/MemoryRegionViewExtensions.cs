@@ -11,6 +11,9 @@ using System;
 using Mlos.Core;
 using Mlos.Core.Internal;
 
+using MlosInternal = Mlos.Core.Internal;
+using MlosProxyInternal = Proxy.Mlos.Core.Internal;
+
 namespace Proxy.Mlos.Core.Internal
 {
     /// <summary>
@@ -18,6 +21,110 @@ namespace Proxy.Mlos.Core.Internal
     /// </summary>
     public static class MemoryRegionViewExtensions
     {
+        /// <summary>
+        /// Tries to get a shared memory map name.
+        /// </summary>
+        /// <param name="globalMemoryRegion"></param>
+        /// <param name="memoryRegionId"></param>
+        /// <param name="sharedMemoryMapName"></param>
+        /// <returns></returns>
+        public static bool TryGetSharedMemoryName(
+            this GlobalMemoryRegion globalMemoryRegion,
+            MlosInternal.MemoryRegionId memoryRegionId,
+            out string sharedMemoryMapName)
+        {
+            MlosInternal.RegisteredMemoryRegionConfig.CodegenKey registeredMemoryLookupKey = default;
+            registeredMemoryLookupKey.MemoryRegionId = memoryRegionId;
+
+            // Locate shared memory region config.
+            //
+            SharedConfig<MlosProxyInternal.RegisteredMemoryRegionConfig> registeredMemoryRegionSharedConfig =
+                SharedConfigManager.Lookup(globalMemoryRegion.SharedConfigDictionary, registeredMemoryLookupKey);
+
+            if (!registeredMemoryRegionSharedConfig.HasSharedConfig)
+            {
+                sharedMemoryMapName = null;
+                return false;
+            }
+
+            // Config exists, create a shared config memory region.
+            //
+            sharedMemoryMapName = registeredMemoryRegionSharedConfig.Config.MemoryMapName.Value;
+            return true;
+        }
+
+        /// <summary>
+        /// Tries to open a shared memory map.
+        /// </summary>
+        /// <param name="globalMemoryRegion"></param>
+        /// <param name="memoryRegionId"></param>
+        /// <param name="sharedMemoryMapView"></param>
+        /// <returns></returns>
+        public static bool TryOpenExisting(
+            this GlobalMemoryRegion globalMemoryRegion,
+            MlosInternal.MemoryRegionId memoryRegionId,
+            out SharedMemoryMapView sharedMemoryMapView)
+        {
+            MlosInternal.RegisteredMemoryRegionConfig.CodegenKey registeredMemoryLookupKey = default;
+            registeredMemoryLookupKey.MemoryRegionId = memoryRegionId;
+
+            // Locate shared memory region config.
+            //
+            SharedConfig<MlosProxyInternal.RegisteredMemoryRegionConfig> registeredMemoryRegionSharedConfig =
+                SharedConfigManager.Lookup(globalMemoryRegion.SharedConfigDictionary, registeredMemoryLookupKey);
+
+            if (!registeredMemoryRegionSharedConfig.HasSharedConfig)
+            {
+                sharedMemoryMapView = null;
+                return false;
+            }
+
+            // Config exists, create a shared config memory region.
+            //
+            MlosProxyInternal.RegisteredMemoryRegionConfig registeredMemoryRegionConfig = registeredMemoryRegionSharedConfig.Config;
+
+            sharedMemoryMapView = SharedMemoryMapView.OpenExisting(
+                registeredMemoryRegionConfig.MemoryMapName.Value,
+                registeredMemoryRegionConfig.MemoryRegionSize);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Tries to open a named event.
+        /// </summary>
+        /// <param name="globalMemoryRegion"></param>
+        /// <param name="memoryRegionId"></param>
+        /// <param name="namedEvent"></param>
+        /// <returns></returns>
+        public static bool TryOpenExisting(
+            this GlobalMemoryRegion globalMemoryRegion,
+            MlosInternal.MemoryRegionId memoryRegionId,
+            out NamedEvent namedEvent)
+        {
+            MlosInternal.RegisteredNamedEventConfig.CodegenKey namedEventLookupKey = default;
+            namedEventLookupKey.MemoryRegionId = memoryRegionId;
+
+            // Locate named event config.
+            //
+            SharedConfig<MlosProxyInternal.RegisteredNamedEventConfig> registeredNamedEventSharedConfig =
+                SharedConfigManager.Lookup(globalMemoryRegion.SharedConfigDictionary, namedEventLookupKey);
+
+            if (!registeredNamedEventSharedConfig.HasSharedConfig)
+            {
+                namedEvent = null;
+                return false;
+            }
+
+            // Config exists, create a named event.
+            //
+            MlosProxyInternal.RegisteredNamedEventConfig registeredNamedEventConfig = registeredNamedEventSharedConfig.Config;
+
+            namedEvent = NamedEvent.CreateOrOpen(registeredNamedEventConfig.EventName.Value);
+
+            return true;
+        }
+
         /// <summary>
         /// Initialize GlobalMemoryRegion.
         /// </summary>
@@ -35,8 +142,8 @@ namespace Proxy.Mlos.Core.Internal
             MemoryRegionId memoryRegionId = memoryHeader.MemoryRegionId;
             memoryRegionId.Type = MemoryRegionType.Global;
 
-            var sharedConfigDictionary = globalMemoryRegion.SharedConfigDictionary;
-            var allocator = sharedConfigDictionary.Allocator;
+            SharedConfigDictionary sharedConfigDictionary = globalMemoryRegion.SharedConfigDictionary;
+            ArenaAllocator allocator = sharedConfigDictionary.Allocator;
 
             // Initialize memory allocator.
             //
@@ -56,8 +163,8 @@ namespace Proxy.Mlos.Core.Internal
         /// <returns></returns>
         public static SharedConfigMemoryRegion InitializeMemoryRegion(this SharedConfigMemoryRegion sharedConfigMemoryRegion)
         {
-            var sharedConfigDictionary = sharedConfigMemoryRegion.SharedConfigDictionary;
-            var allocator = sharedConfigDictionary.Allocator;
+            SharedConfigDictionary sharedConfigDictionary = sharedConfigMemoryRegion.SharedConfigDictionary;
+            ArenaAllocator allocator = sharedConfigDictionary.Allocator;
 
             MemoryRegion memoryHeader = sharedConfigMemoryRegion.MemoryHeader;
             MemoryRegionId memoryRegionId = memoryHeader.MemoryRegionId;
@@ -86,12 +193,12 @@ namespace Proxy.Mlos.Core.Internal
         {
             if (typeof(T) == typeof(GlobalMemoryRegion))
             {
-                GlobalMemoryRegion globalMemoryRegion = (GlobalMemoryRegion)(object)sharedMemory.MemoryRegion();
+                var globalMemoryRegion = (GlobalMemoryRegion)(object)sharedMemory.MemoryRegion();
                 globalMemoryRegion.InitializeMemoryRegion();
             }
             else if (typeof(T) == typeof(SharedConfigMemoryRegion))
             {
-                SharedConfigMemoryRegion sharedMemoryRegionView = (SharedConfigMemoryRegion)(object)sharedMemory.MemoryRegion();
+                var sharedMemoryRegionView = (SharedConfigMemoryRegion)(object)sharedMemory.MemoryRegion();
                 sharedMemoryRegionView.InitializeMemoryRegion();
             }
             else

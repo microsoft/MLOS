@@ -38,12 +38,9 @@ public:
     using TProbingPolicy = Collections::TLinearProbing<Collections::FNVHash<uint32_t>>;
 
 public:
-    SharedConfigManager(_In_ MlosContext& mlosContext) noexcept;
+    SharedConfigManager() noexcept;
 
     ~SharedConfigManager();
-
-    _Must_inspect_result_
-    HRESULT CreateSharedConfigMemoryRegion();
 
     void AssignSharedConfigMemoryRegion(
         _In_ SharedMemoryRegionView<Internal::SharedConfigMemoryRegion>&& sharedConfigMemoryRegionView);
@@ -77,11 +74,7 @@ public:
         _Inout_ ComponentConfig<T>& componentConfig);
 
 private:
-    MlosContext& m_mlosContext;
-
-public:
     // Shared memory region used to keep all the shared component configurations.
-    // #TODO we might need more than one memory region for the configuration objects.
     //
     SharedMemoryRegionView<Internal::SharedConfigMemoryRegion> m_sharedConfigMemoryRegionView;
 
@@ -90,6 +83,8 @@ public:
     // No-op on Windows.
     //
     bool CleanupOnClose;
+
+    friend class MlosContext;
 };
 }
 }

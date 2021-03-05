@@ -40,10 +40,10 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
         /// <inheritdoc />
         public override void WriteEndFile()
         {
-            WriteLine("#ifdef _MSC_VER");
-            WriteLine("#pragma warning(default:4324) // restore alignas operator warning");
-            WriteLine("#endif");
-            WriteLine();
+            WriteBlock(@"
+                #ifdef _MSC_VER
+                #pragma warning(default:4324) // restore alignas operator warning
+                #endif");
         }
 
         /// <inheritdoc />
@@ -58,9 +58,9 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
                 : $"alignas({alignmentAttribute.Size})";
 
             WriteBlock($@"
-                    struct {structAlignAsCodeString}{cppClassName}
-                    {{
-                        typedef {cppProxyTypeFullName} ProxyObjectType;");
+                struct {structAlignAsCodeString}{cppClassName}
+                {{
+                    typedef {cppProxyTypeFullName} ProxyObjectType;");
 
             IndentationLevel++;
         }
@@ -105,6 +105,16 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CppTypesCodeWriters
             }
 
             WriteLine(fieldCodeString);
+            WriteLine();
+        }
+
+        /// <inheritdoc />
+        public override void VisitConstField(CppConstField cppConstField)
+        {
+            string cppTypeFullName = CppTypeMapper.GetCppFullTypeName(cppConstField.FieldInfo.FieldType);
+            string constValueAsString = cppConstField.ConstValue.ToString();
+
+            WriteLine($"static const {cppTypeFullName} {cppConstField.FieldInfo.Name} = {constValueAsString};");
             WriteLine();
         }
     }

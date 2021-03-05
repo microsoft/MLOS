@@ -30,10 +30,12 @@ public:
 
     void Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept;
 
-    // Creates an anonymous shared memory view.
+    // Creates an anonymous shared memory view (no file backing).
     //
     _Must_inspect_result_
-    HRESULT CreateAnonymous(_In_ size_t memSize) noexcept;
+    HRESULT CreateAnonymous(
+        _In_z_ const char* sharedMemoryMapName,
+        _In_ size_t memSize) noexcept;
 
     // Creates a shared memory view.
     //
@@ -49,23 +51,29 @@ public:
         _In_z_ const char* sharedMemoryMapName,
         _In_ size_t memSize) noexcept;
 
+    // Opens a shared memory map from the file descriptor.
+    //
     _Must_inspect_result_
     HRESULT OpenExistingFromFileDescriptor(
-        _In_z_ int sharedMemoryFd,
-        _In_ size_t memSize) noexcept;
+        _In_z_ const char* sharedMemoryMapName,
+        _In_ int32_t sharedMemoryFd) noexcept;
 
     // Opens already created shared memory view.
     //
     _Must_inspect_result_
-    HRESULT OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept;
+    HRESULT OpenExisting(_In_z_ const char* sharedMemoryMapName) noexcept;
 
     // Closes a shared memory view.
     //
-    void Close();
+    void Close(_In_ bool cleanupOnClose = false);
+
+    const char* GetSharedMemoryMapName() const;
 
     // Gets a shared memory file descriptor.
     //
-    int GetFileDescriptor() const;
+    int32_t GetFileDescriptor() const;
+
+    bool IsCreated() const;
 
 private:
     _Must_inspect_result_
@@ -75,14 +83,10 @@ public:
     size_t MemSize;
     BytePtr Buffer;
 
-    // Indicates if we should cleanup OS resources when closing the shared memory map view.
-    //
-    bool CleanupOnClose;
-
 private:
-    int m_fdSharedMemory;
-
+    int32_t m_fdSharedMemory;
     char* m_sharedMemoryMapName;
+    bool m_isCreated;
 };
 }
 }

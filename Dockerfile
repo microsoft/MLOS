@@ -205,6 +205,7 @@ RUN apt-get update && \
     if dpkg --compare-versions `lsb_release -r -s` ge-nl 20.04; then \
         apt-get --no-install-recommends -y install libstdc++-10-dev; \
     fi && \
+    apt-get --no-install-recommends -y install uuid-dev && \
     apt-get -y clean && rm -rf /var/lib/apt/lists/*
 
 # Install some dependencies necessary for dotnet.

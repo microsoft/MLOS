@@ -20,44 +20,6 @@ namespace Mlos
 namespace Core
 {
 //----------------------------------------------------------------------------
-// NAME: InternalMlosContextInitializer
-//
-// PURPOSE:
-//  Helper class used to initialize shared memory for TestMlosContext.
-//
-// NOTES:
-//
-class InternalMlosContextInitializer
-{
-public:
-    InternalMlosContextInitializer() {}
-
-    _Must_inspect_result_
-    HRESULT Initialize();
-
-    InternalMlosContextInitializer(_In_ InternalMlosContextInitializer&& initializer) noexcept;
-
-    InternalMlosContextInitializer(const InternalMlosContextInitializer&) = delete;
-
-    InternalMlosContextInitializer& operator=(const InternalMlosContextInitializer&) = delete;
-
-private:
-    // Global shared memory region.
-    //
-    SharedMemoryRegionView<Internal::GlobalMemoryRegion> m_globalMemoryRegionView;
-
-    // Named shared memory for Telemetry and Control Channel.
-    //
-    SharedMemoryMapView m_controlChannelMemoryMapView;
-
-    // Named shared memory for Feedback Channel.
-    //
-    SharedMemoryMapView m_feedbackChannelMemoryMapView;
-
-    friend class InternalMlosContext;
-};
-
-//----------------------------------------------------------------------------
 // NAME: InternalMlosContext
 //
 // PURPOSE:
@@ -71,12 +33,28 @@ private:
 class InternalMlosContext : public MlosContext
 {
 public:
-    typedef InternalMlosContextInitializer InitializerType;
+    _Must_inspect_result_
+    HRESULT static Create(_Inout_ AlignedInstance<InternalMlosContext>& mlosContextInstance);
 
-    InternalMlosContext(_In_ InternalMlosContextInitializer&&) noexcept;
+    InternalMlosContext(
+        _In_ SharedMemoryRegionView<Internal::GlobalMemoryRegion>&& globalMemoryRegionView,
+        _In_ SharedMemoryMapView&& controlChannelMemoryMapView,
+        _In_ SharedMemoryMapView&& feedbackChannelMemoryMapView) noexcept;
+
+    ~InternalMlosContext();
 
 private:
-    InternalMlosContextInitializer m_contextInitializer;
+    // Global shared memory region.
+    //
+    SharedMemoryRegionView<Internal::GlobalMemoryRegion> m_globalMemoryRegionView;
+
+    // Named shared memory for Telemetry and Control Channel.
+    //
+    SharedMemoryMapView m_controlChannelMemoryMapView;
+
+    // Named shared memory for Feedback Channel.
+    //
+    SharedMemoryMapView m_feedbackChannelMemoryMapView;
 
     TestSharedChannel m_controlChannel;
 

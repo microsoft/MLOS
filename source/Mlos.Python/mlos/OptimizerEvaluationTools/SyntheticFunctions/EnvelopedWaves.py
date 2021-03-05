@@ -24,7 +24,7 @@ enveloped_waves_config_space = SimpleHypergrid(
     subgrid=SimpleHypergrid(
         name="linear_envelope_config",
         dimensions=[
-            ContinuousDimension(name="slope", min=-100, max=100)
+            ContinuousDimension(name="gradient", min=-100, max=100)
         ]
     ),
     on_external_dimension=CategoricalDimension(name="envelope_type", values=["linear"])
@@ -75,7 +75,7 @@ class EnvelopedWaves(ObjectiveFunctionBase):
     When creating the function we specify:
     1. Amplitute, vertical_shift, phase-shift and period of the sine wave.
     2. Envelope:
-        1. Linear: slope (no need y_intercept as it's included in the vertical_shift)
+        1. Linear: gradient (no need y_intercept as it's included in the vertical_shift)
         2. Quadratic: a, p, q
         3. Sine: again amplitude, phase shift, and period (no need to specify the vertical shift again.
     The function takes the form:
@@ -85,7 +85,7 @@ class EnvelopedWaves(ObjectiveFunctionBase):
             in x
         )
         WHERE:
-            envelope(x_i) = envelope.slope * x_i + envelope.y_intercept
+            envelope(x_i) = envelope.gradient * x_i + envelope.y_intercept
             OR
             envelope(x_i) = a * (x_i - p) ** 2 + q
             OR
@@ -139,7 +139,7 @@ class EnvelopedWaves(ObjectiveFunctionBase):
         return objectives_df
 
     def _linear_envelope(self, x: pd.Series):
-        return x * self.objective_function_config.linear_envelope_config.slope
+        return x * self.objective_function_config.linear_envelope_config.gradient
 
     def _quadratic_envelope(self, x: pd.Series):
         a = self.objective_function_config.quadratic_envelope_config.a

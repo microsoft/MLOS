@@ -24,8 +24,7 @@ namespace Mlos.SettingsSystem.Attributes
         /// <returns></returns>
         public static bool IsCodegenType(this Type type)
         {
-            return type != null
-                && type.GetCustomAttributes(typeof(CodegenTypeAttribute), true).Any();
+            return type.GetCustomAttributes(typeof(CodegenTypeAttribute), true).Any();
         }
 
         /// <summary>
@@ -35,30 +34,51 @@ namespace Mlos.SettingsSystem.Attributes
         /// <returns></returns>
         public static bool IsCodegenConfigType(this Type type)
         {
-            return type != null
-                && type.GetCustomAttributes(typeof(CodegenConfigAttribute), true).Any();
+            return type.GetCustomAttributes(typeof(CodegenConfigAttribute), true).Any();
         }
 
         /// <summary>
-        /// Get all public (non static) instance files.
+        /// Get all instance (non static) fields.
         /// </summary>
         /// <param name="type"></param>
-        /// <returns></returns>
+        /// <returns>Returns an array of fields.</returns>
         public static FieldInfo[] GetPublicInstanceFields(this Type type)
         {
             BindingFlags fieldBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
 
-            return (type == null) ? Array.Empty<FieldInfo>() : type.GetFields(fieldBindingFlags);
+            return type.GetFields(fieldBindingFlags);
+        }
+
+        /// <summary>
+        /// Get all const (static) fields.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>Returns an array of fields.</returns>
+        public static FieldInfo[] GetStaticFields(this Type type)
+        {
+            BindingFlags fieldBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+
+            return type.IsStruct() ? type.GetFields(fieldBindingFlags) : Array.Empty<FieldInfo>();
         }
 
         /// <summary>
         /// Returns true if type has PrimaryKey attribute defined on any of its fields.
         /// </summary>
         /// <param name="type"></param>
-        /// <returns></returns>
+        /// <returns>Returns an array of fields.</returns>
         public static bool HasPrimaryKey(this Type type)
         {
             return GetPublicInstanceFields(type).Any(r => r.IsPrimaryKey());
+        }
+
+        /// <summary>
+        /// Returns true if given type is struct.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool IsStruct(this Type type)
+        {
+            return type.IsValueType && !type.IsEnum;
         }
 
         /// <summary>

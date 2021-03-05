@@ -24,12 +24,24 @@ namespace Mlos
 {
 namespace Core
 {
+typedef void* ThreadHandle;
+constexpr ThreadHandle INVALID_THREAD_HANDLE = nullptr;
+
 namespace Internal
 {
 // External implementation.
 //
 extern void MlosPlatformTerminateProcess();
-extern void MlosPlatformWait(uint32_t milliseconds);
+extern void MlosPlatformWait(_In_ uint32_t milliseconds);
+
+_Must_inspect_result_
+extern HRESULT MlosPlatformCreateThread(
+    _In_ void* (*routine)(void*),
+    _In_ void* pParam,
+    _Inout_ ThreadHandle & handle);
+
+_Must_inspect_result_
+extern HRESULT MlosPlatformJoinThread(_In_ ThreadHandle handle);
 }
 
 //----------------------------------------------------------------------------
@@ -44,16 +56,35 @@ class MlosPlatform
 public:
     // Terminate the current process.
     //
-    static inline void TerminateProcess()
+    static void TerminateProcess()
     {
         Mlos::Core::Internal::MlosPlatformTerminateProcess();
     }
 
     // Suspends the execution of the current thread for millisecond intervals.
     //
-    static inline void SleepMilliseconds(uint32_t milliseconds)
+    static void SleepMilliseconds(_In_ uint32_t milliseconds)
     {
         Mlos::Core::Internal::MlosPlatformWait(milliseconds);
+    }
+
+    // Creates the thread.
+    //
+    _Must_inspect_result_
+    static HRESULT CreateThread(
+        _In_ void* (*routine)(void*),
+        _In_ void* pParam,
+        _Inout_ ThreadHandle& handle)
+    {
+        return Mlos::Core::Internal::MlosPlatformCreateThread(routine, pParam, handle);
+    }
+
+    // Joins the thread.
+    //
+    _Must_inspect_result_
+    static HRESULT JoinThread(_In_ ThreadHandle handle)
+    {
+        return Mlos::Core::Internal::MlosPlatformJoinThread(handle);
     }
 };
 }
