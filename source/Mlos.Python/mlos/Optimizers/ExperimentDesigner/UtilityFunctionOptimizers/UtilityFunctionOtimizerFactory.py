@@ -21,7 +21,7 @@ class UtilityFunctionOtimizerFactory:
             optimizer_type_name: str,
             optimizer_config: Point,
             optimization_problem: OptimizationProblem,
-            pareto_frontier: ParetoFrontier=None,
+            pareto_frontier: ParetoFrontier = None,
             logger=None
     ):
         if optimizer_type_name == RandomSearchOptimizer.__name__:
