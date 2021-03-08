@@ -86,7 +86,7 @@ class ModelTomograph:
         self._figure = None
         self._axes = None
 
-    def plot(self, point=None, time=None):
+    def plot(self, point=None, time=None, objective_name=None):
         """ Plots a grid of 2D cross sections of the models' view of the search space.
 
         :param point: The point contained by all 2D cross sections.
@@ -98,7 +98,7 @@ class ModelTomograph:
             print(point)
 
         self._create_figure_and_axes()
-        self._update_heatmaps(point, time)
+        self._update_heatmaps(point, time, objective_name)
         for axes_row, heatmap_row in zip(self._axes, self._heatmaps_grid):
             for axes, heatmap in zip(axes_row, heatmap_row):
                 axes.clear()
@@ -140,7 +140,7 @@ class ModelTomograph:
 
 
 
-    def _update_heatmaps(self, point: Point, time: int):
+    def _update_heatmaps(self, point: Point, time: int, objective_name: str):
 
         # We need to construct a meshgrid for every heatmap. We do this by getting the linspaces for the
         # x_dimension and y_dimension. For the other dimensions, we create a linspace containing a single value
@@ -181,7 +181,7 @@ class ModelTomograph:
                 current_y_resolution = len(y_dim_linspace)
 
                 features_df = self._create_features_dataframe(x_dim, y_dim, point)
-                predictions = self.optimizer.predict(parameter_values_pandas_frame=features_df, t=time)
+                predictions = self.optimizer.predict(parameter_values_pandas_frame=features_df, t=time, objective_name=objective_name)
                 predictions.add_invalid_rows_at_missing_indices(desired_index=features_df.index)
                 predictions_df = predictions.get_dataframe()
                 if not predictions_df.empty and predictions_df[Prediction.LegalColumnNames.IS_VALID_INPUT.value].any():
