@@ -40,6 +40,8 @@ public:
 
     void Close();
 
+    void Abort();
+
     _Must_inspect_result_
     HRESULT Initialize(
         _In_z_ const char* directoryPath,

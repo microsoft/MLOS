@@ -476,7 +476,7 @@ AnonymousMemoryMlosContext::AnonymousMemoryMlosContext(
 //
 AnonymousMemoryMlosContext::~AnonymousMemoryMlosContext()
 {
-    // Close the file watch event, that will stop the file descriptor exchange thread.
+    // Abort the file watch event wait, that will stop the file descriptor exchange thread.
     //
     m_fileWatchEvent.Close();
 
@@ -484,6 +484,10 @@ AnonymousMemoryMlosContext::~AnonymousMemoryMlosContext()
     //
     HRESULT hr = MlosCore::MlosPlatform::JoinThread(m_fdExchangeThread);
     MLOS_RETAIL_ASSERT(SUCCEEDED(hr));
+
+    // Close the file watch event.
+    //
+    m_fileWatchEvent.Close();
 
     free(m_socketFilePath);
 

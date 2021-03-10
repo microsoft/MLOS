@@ -96,6 +96,21 @@ void FileWatchEvent::Close()
 }
 
 //----------------------------------------------------------------------------
+// NAME: FileWatchEvent::Abort
+//
+// PURPOSE:
+//  Aborts the wait.
+//
+// NOTES:
+//  Thread safe method.
+//
+void FileWatchEvent::Abort()
+{
+    int fdNotify = std::exchange(m_fdNotify, INVALID_FD_VALUE);
+    close(fdNotify);
+}
+
+//----------------------------------------------------------------------------
 // NAME: FileWatchEvent::Initialize
 //
 // PURPOSE:
