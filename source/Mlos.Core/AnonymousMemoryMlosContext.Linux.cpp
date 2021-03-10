@@ -372,11 +372,17 @@ HRESULT AnonymousMemoryMlosContext::HandleFdRequests()
     while (SUCCEEDED(hr))
     {
         hr = m_fileWatchEvent.Wait();
-        if (m_fileWatchEvent.IsInvalid())
+        if (FAILED(hr))
         {
-            // The notification fd has been closed.
+            if (m_fileWatchEvent.IsInvalid())
+            {
+                // The notification fd has been closed.
+                //
+                hr = S_OK;
+            }
+
+            // Terminate the process as it us unsafe to continue.
             //
-            hr = S_OK;
             return hr;
         }
 
