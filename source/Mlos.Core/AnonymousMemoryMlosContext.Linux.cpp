@@ -344,6 +344,7 @@ void* AnonymousMemoryMlosContext::HandleFdRequestsThreadProc(_In_ void* pParam)
     MLOS_RETAIL_ASSERT(pAnonymousMemoryMlosContext != nullptr);
 
     HRESULT hr = pAnonymousMemoryMlosContext->HandleFdRequests();
+    fprintf(stderr, "HandleFqRequestsThreadProc: HRESULT: %d\n", hr);
     MLOS_RETAIL_ASSERT(SUCCEEDED(hr));
 
     return nullptr;
@@ -372,6 +373,7 @@ HRESULT AnonymousMemoryMlosContext::HandleFdRequests()
     while (SUCCEEDED(hr))
     {
         hr = m_fileWatchEvent.Wait();
+        fprintf(stderr, "HandleFdRequests: HRESULT: %d\n", hr);
         if (FAILED(hr))
         {
             if (m_fileWatchEvent.IsInvalid())
