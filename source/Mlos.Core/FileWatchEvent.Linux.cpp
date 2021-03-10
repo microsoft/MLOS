@@ -102,12 +102,22 @@ void FileWatchEvent::Close()
 //  Aborts the wait.
 //
 // NOTES:
-//  Thread safe method.
+//  Method is thread safe.
 //
 void FileWatchEvent::Abort()
 {
     int fdNotify = std::exchange(m_fdNotify, INVALID_FD_VALUE);
     close(fdNotify);
+
+    if (m_watchFilePath != nullptr)
+    {
+        remove(m_watchFilePath);
+    }
+
+    if (m_directoryPath != nullptr)
+    {
+        rmdir(m_directoryPath);
+    }
 }
 
 //----------------------------------------------------------------------------
