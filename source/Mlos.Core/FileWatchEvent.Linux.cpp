@@ -183,7 +183,6 @@ HRESULT FileWatchEvent::Wait()
     hr = CreateWatchFile();
     if (FAILED(hr))
     {
-        fprintf(stderr, "FileWatchEvent::Wait():CreateWatchFile: HRESULT: %d\n", hr);
         return hr;
     }
 
@@ -209,7 +208,6 @@ HRESULT FileWatchEvent::Wait()
             hr = CreateWatchFile();
             if (FAILED(hr))
             {
-                fprintf(stderr, "FileWatchEvent::Wait():CreateWatchFile: HRESULT: %d\n", hr);
                 break;
             }
 
@@ -222,7 +220,6 @@ HRESULT FileWatchEvent::Wait()
         if (fdWatch == INVALID_FD_VALUE)
         {
             hr = HRESULT_FROM_ERRNO(errno);
-            fprintf(stderr, "FileWatchEvent::Wait():inotify_add_watch: HRESULT: %d\n", hr);
             break;
         }
 
@@ -232,7 +229,6 @@ HRESULT FileWatchEvent::Wait()
             // Wait for the notification failed.
             //
             hr = HRESULT_FROM_ERRNO(errno);
-            fprintf(stderr, "FileWatchEvent::Wait():read: HRESULT: %d\n", hr);
             break;
         }
 
@@ -297,15 +293,12 @@ HRESULT FileWatchEvent::CreateWatchFile()
 
     // Create the empty file.
     //
-    fprintf(stderr, "m_watchFilePath addr: %p\n", (void*)m_watchFilePath);
     int32_t fdWatchFile = creat(m_watchFilePath, S_IRWXU | S_IRWXG | S_IRGRP | S_IWGRP);
     if (fdWatchFile == INVALID_FD_VALUE)
     {
         // Return the failure.
         //
-        HRESULT hr = HRESULT_FROM_ERRNO(errno);
-        fprintf(stderr, "FileWatchEvent::CreateWatchFile():creat: HRESULT: %d\n", hr);
-        return hr;
+        return HRESULT_FROM_ERRNO(errno);
     }
 
     // Close the descriptors before opening a watch to avoid close notification.
