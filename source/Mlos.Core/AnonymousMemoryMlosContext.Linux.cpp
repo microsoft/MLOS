@@ -374,7 +374,7 @@ HRESULT AnonymousMemoryMlosContext::HandleFdRequests()
         hr = m_fileWatchEvent.Wait();
         if (FAILED(hr))
         {
-            if (hr == HRESULT_FROM_ERRNO(EBADF))
+            if (m_fileWatchEvent.IsInvalid())
             {
                 // The notification fd has been closed.
                 //
@@ -476,14 +476,18 @@ AnonymousMemoryMlosContext::AnonymousMemoryMlosContext(
 //
 AnonymousMemoryMlosContext::~AnonymousMemoryMlosContext()
 {
-    // Close the file watch event, that will stop the file descriptor exchange thread.
+    // Abort the file watch event wait, that will stop the file descriptor exchange thread.
     //
-    m_fileWatchEvent.Close();
+    m_fileWatchEvent.Abort();
 
     // Wait for the file descriptor exchange thread to complete.
     //
     HRESULT hr = MlosCore::MlosPlatform::JoinThread(m_fdExchangeThread);
     MLOS_RETAIL_ASSERT(SUCCEEDED(hr));
+
+    // Close the file watch event.
+    //
+    m_fileWatchEvent.Close();
 
     free(m_socketFilePath);
 
