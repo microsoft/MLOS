@@ -478,7 +478,7 @@ AnonymousMemoryMlosContext::~AnonymousMemoryMlosContext()
 {
     // Abort the file watch event wait, that will stop the file descriptor exchange thread.
     //
-    m_fileWatchEvent.Close();
+    m_fileWatchEvent.Abort();
 
     // Wait for the file descriptor exchange thread to complete.
     //
