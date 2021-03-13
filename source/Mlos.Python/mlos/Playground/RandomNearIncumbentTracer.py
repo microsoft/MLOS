@@ -16,8 +16,13 @@ class RandomNearIncumbentTracer:
     """
 
     def __init__(self):
-        ...
+        self._ordered_events = []
 
     def add_trace_event(self, name, phase, timestamp_ns, category, actor_id, thread_id, arguments):
         if name.startswith("RandomNearIncumbentOptimizer"):
             print(name, phase)
+            self._ordered_events.append(dict(
+                name=name,
+                phase=phase,
+                arguments=arguments
+            ))
