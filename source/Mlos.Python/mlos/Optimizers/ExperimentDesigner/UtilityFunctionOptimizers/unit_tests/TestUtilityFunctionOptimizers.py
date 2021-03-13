@@ -22,6 +22,8 @@ from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest impo
 from mlos.Spaces import Point
 from mlos.Tracer import Tracer, trace
 
+from mlos.Playground.RandomNearIncumbentTracer import RandomNearIncumbentTracer
+
 
 class TestUtilityFunctionOptimizers:
     """ Tests if the utility function optimizers do anything useful at all.
@@ -49,6 +51,9 @@ class TestUtilityFunctionOptimizers:
         """
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
+        cls.random_near_incumbent_tracer = RandomNearIncumbentTracer()
+        global_values.tracer.add_subscriber(event_callback=cls.random_near_incumbent_tracer.add_trace_event)
+
         cls.logger = create_logger("TestUtilityFunctionOptimizers")
 
         cls.model_config = multi_objective_pass_through_model_config_store.default
