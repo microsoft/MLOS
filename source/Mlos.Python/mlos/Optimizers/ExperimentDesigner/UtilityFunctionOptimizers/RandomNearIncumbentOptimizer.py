@@ -230,76 +230,10 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
 
 
     @trace()
-    def _run_iteration(self, incumbents_df: pd.DataFrame, context_df: pd.DataFrame, iteration_number: int) -> pd.DataFrame:  # pylint: disable=too-many-statements
-        active_incumbents_df = incumbents_df[incumbents_df['active']]
-        num_active_incumbents = len(active_incumbents_df.index)
-
-        # Since we have fewer active incumbents, each can have a few more neighbors, which should speed up convergence.
-        #
-        num_neighbors_per_incumbent = math.floor(self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
-        self.logger.info(
-            f"[Iteration {iteration_number}/{self.optimizer_config.max_num_iterations}] Num active incumbents: "
-            f"{num_active_incumbents}/{len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}"
-        )
-
+    def _run_iteration(self, incumbents_df: pd.DataFrame, context_df: pd.DataFrame, iteration_number: int) -> pd.DataFrame:
         # Let's create random neighbors for each of the initial params
         #
-        with traced(scope_name="creating_random_neighbors"):
-            neighbors_dfs = []
-
-            for incumbent_config_idx, incumbent in active_incumbents_df.iterrows():
-                # For now let's only do normal distribution but we can add options later.
-                #
-                neighbors_df = pd.DataFrame()
-                for dimension_name in self.parameter_dimension_names:
-                    neighbors_df[dimension_name] = np.random.normal(
-                        loc=incumbent[dimension_name],
-                        scale=np.abs(incumbent[f'{dimension_name}_velocity']),
-                        size=num_neighbors_per_incumbent
-                    )
-
-                # Let's remember which config generated these neighbors too
-                #
-                neighbors_df['incumbent_config_idx'] = incumbent_config_idx
-
-                # It's much simpler to remember the incumbent utility now, then to try to find it later.
-                #
-                neighbors_df['incumbent_utility'] = incumbent['utility']
-                neighbors_dfs.append(neighbors_df)
-
-            all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
-
-            # Let's remove all obviously invalid configs. This call uses fast vectorized operations, but since filtering happens on a flattened
-            # grid, it doesn't check the ancestral dependencies. Thus, it will only filter out the points which fall outside the min-max range.
-            #
-            num_neighbors_including_invalid = len(all_neighbors_df.index)
-            all_neighbors_df_no_nulls = all_neighbors_df.fillna(0, inplace=False)
-            probably_valid_neighbors_index = self.parameter_adapter.get_valid_rows_index(original_dataframe=all_neighbors_df_no_nulls)
-            all_neighbors_df = all_neighbors_df.loc[probably_valid_neighbors_index]
-            num_neighbors_after_filtering_out_projected_points = len(probably_valid_neighbors_index)
-
-
-            # The all_neighbors_df contains parameters in the unit-continuous hypergrid. So we need to unproject it back to the original
-            # hierarchical hypergrid with many parameter types.
-            #
-            unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=False)
-
-            # Now that we have the hierarchy back, we can once again filter out invalid rows, this time making sure that all ancestral dependencies
-            # are honored. For hierarchical spaces, filter_out_invalid_rows() function is not vectorized (yet) so it's slow. Thus it pays, to first
-            # remove all obviously wrong rows above, and only examine the smaller subset here. TODO: vectorize filter_out_invalid_rows() for hierachical
-            # spaces.
-            #
-            unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(
-                original_dataframe=unprojected_neighbors_df,
-                exclude_extra_columns=False
-            )
-
-            num_neighbors_after_filtering_out_unprojected_points = len(unprojected_neighbors_df.index)
-            self.logger.info(
-                f"Started with {num_neighbors_including_invalid}. "
-                f"Adapter filtered them down to {num_neighbors_after_filtering_out_projected_points}. "
-                f"Parameter space filtered them down to {num_neighbors_after_filtering_out_unprojected_points}"
-            )
+        all_neighbors_df, unprojected_neighbors_df = self._prepare_random_neighbors(incumbents_df=incumbents_df)
 
         neighbors_utility_df = self._compute_utility_for_params(params_df=unprojected_neighbors_df, context_df=context_df)
         self.logger.info(f"Computed utility for {len(neighbors_utility_df.index)} random neighbors.")
@@ -471,3 +405,73 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         assert utility_df.dtypes['utility'] == np.float,\
             f"{utility_df} produced by {self.utility_function.__class__.__name__} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
         return utility_df
+
+    @trace()
+    def _prepare_random_neighbors(self, incumbents_df: pd.DataFrame):
+        active_incumbents_df = incumbents_df[incumbents_df['active']]
+        num_active_incumbents = len(active_incumbents_df.index)
+
+        # Since we have fewer active incumbents, each can have a few more neighbors, which should speed up convergence.
+        #
+        num_neighbors_per_incumbent = math.floor(
+            self.optimizer_config.num_neighbors * len(incumbents_df.index) / num_active_incumbents)
+        self.logger.info(
+            f"Num active incumbents: {num_active_incumbents}/{len(incumbents_df.index)}, num neighbors per incumbent: {num_neighbors_per_incumbent}"
+        )
+
+        neighbors_dfs = []
+
+        for incumbent_config_idx, incumbent in active_incumbents_df.iterrows():
+            # For now let's only do normal distribution but we can add options later.
+            #
+            neighbors_df = pd.DataFrame()
+            for dimension_name in self.parameter_dimension_names:
+                neighbors_df[dimension_name] = np.random.normal(
+                    loc=incumbent[dimension_name],
+                    scale=np.abs(incumbent[f'{dimension_name}_velocity']),
+                    size=num_neighbors_per_incumbent
+                )
+
+            # Let's remember which config generated these neighbors too
+            #
+            neighbors_df['incumbent_config_idx'] = incumbent_config_idx
+
+            # It's much simpler to remember the incumbent utility now, then to try to find it later.
+            #
+            neighbors_df['incumbent_utility'] = incumbent['utility']
+            neighbors_dfs.append(neighbors_df)
+
+        all_neighbors_df = pd.concat(neighbors_dfs, ignore_index=True)
+
+        # Let's remove all obviously invalid configs. This call uses fast vectorized operations, but since filtering happens on a flattened
+        # grid, it doesn't check the ancestral dependencies. Thus, it will only filter out the points which fall outside the min-max range.
+        #
+        num_neighbors_including_invalid = len(all_neighbors_df.index)
+        all_neighbors_df_no_nulls = all_neighbors_df.fillna(0, inplace=False)
+        probably_valid_neighbors_index = self.parameter_adapter.get_valid_rows_index(original_dataframe=all_neighbors_df_no_nulls)
+        all_neighbors_df = all_neighbors_df.loc[probably_valid_neighbors_index]
+        num_neighbors_after_filtering_out_projected_points = len(probably_valid_neighbors_index)
+
+        # The all_neighbors_df contains parameters in the unit-continuous hypergrid. So we need to unproject it back to the original
+        # hierarchical hypergrid with many parameter types.
+        #
+        unprojected_neighbors_df = self.parameter_adapter.unproject_dataframe(df=all_neighbors_df, in_place=False)
+
+        # Now that we have the hierarchy back, we can once again filter out invalid rows, this time making sure that all ancestral dependencies
+        # are honored. For hierarchical spaces, filter_out_invalid_rows() function is not vectorized (yet) so it's slow. Thus it pays, to first
+        # remove all obviously wrong rows above, and only examine the smaller subset here. TODO: vectorize filter_out_invalid_rows() for hierachical
+        # spaces.
+        #
+        unprojected_neighbors_df = self.optimization_problem.parameter_space.filter_out_invalid_rows(
+            original_dataframe=unprojected_neighbors_df,
+            exclude_extra_columns=False
+        )
+
+        num_neighbors_after_filtering_out_unprojected_points = len(unprojected_neighbors_df.index)
+        self.logger.info(
+            f"Started with {num_neighbors_including_invalid}. "
+            f"Adapter filtered them down to {num_neighbors_after_filtering_out_projected_points}. "
+            f"Parameter space filtered them down to {num_neighbors_after_filtering_out_unprojected_points}"
+        )
+
+        return all_neighbors_df, unprojected_neighbors_df
