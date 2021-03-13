@@ -26,3 +26,6 @@ class RandomNearIncumbentTracer:
                 phase=phase,
                 arguments=arguments
             ))
+
+    def clear_events(self):
+        self._ordered_events = []
