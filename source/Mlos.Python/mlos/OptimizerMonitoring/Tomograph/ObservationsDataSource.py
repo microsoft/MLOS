@@ -48,7 +48,8 @@ class ObservationsDataSource:
         self.pareto_df = pareto_df
         self.observations_df = self._construct_observations()
 
-        # In order to preserve the identity of the data sources, we create temporary ones, and then copy their data over to the data sources in use by the grid plot.
+        # In order to preserve the identity of the data sources, we create temporary ones, and then copy their data over to the data
+        # sources in use by the grid plots.
         #
         temp_data_source = ColumnDataSource(data=self.observations_df)
         temp_pareto_data_source = ColumnDataSource(data=self.observations_df[self.observations_df['is_pareto']])

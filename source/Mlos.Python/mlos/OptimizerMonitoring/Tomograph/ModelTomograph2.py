@@ -4,9 +4,7 @@
 #
 from typing import List
 
-from bokeh.io import output_notebook, show
 from bokeh.layouts import column
-from bokeh.models.widgets import DataTable, TableColumn
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
@@ -16,9 +14,9 @@ from mlos.OptimizerMonitoring.Tomograph.ObservationsDataSource import Observatio
 class ModelTomograph2:
     """Upgraded version of the Tomograph.
 
-    The goal is to make the Tomograph more interactive than the first version.
+    The goal is to make the Tomograph present more data in a more interactive way than the first version.
 
-    The Tomograph2 class is capable of producing a grid-plot of scatter-plots for all of the observations.
+    So far the ModelTomograph2 class is capable of producing a grid-plot of scatter-plots for all of the observations.
 
     TODO
     In the future it will be built up to also show the heatmaps (at which point we can retire the original Tomograph), 3D visualizations

@@ -27,11 +27,11 @@ class GridPlot:
     configure the range of values to be plotted.
 
     Each figure in the grid plot contains:
-    * Either a scatter plot of feature vs. feature where the color of each point corresponds to the value of the objective value
+    * Either a scatter plot of feature vs. feature where the color of each point corresponds to the objective value
     * Or a scatter plot of feature vs. objective (if we are on a diagonal).
 
-    Additionally, as an extension, we could also plot the predicted values as a background heatmap for the feature vs. feature
-    plots, and a predicted value with confident intervals plot for feature vs. objective plots. This of course introduces a complication
+    Additionally, we could also plot the predicted values as a background heatmap for the feature vs. feature
+    plots, and a predicted value with confidence intervals plot for feature vs. objective plots. This of course introduces a complication
     of needing to query the optimizer for each pixel and so we will add it later.
     """
 
@@ -45,7 +45,6 @@ class GridPlot:
         if logger is None:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
-
 
         # The data source is maintained by the tomograph.
         #
@@ -82,9 +81,10 @@ class GridPlot:
             for row in range(self.num_features)
         ]
 
+        self._title = Div(text=f"<h1>{self.objective_name}</h1>")
+
         # Stores the bokeh gridplot object.
         #
-        self._title = Div(text=f"<h1>{self.objective_name}</h1>")
         self._grid_plot = None
 
     @property
@@ -92,7 +92,7 @@ class GridPlot:
         return column([self._title, self._grid_plot])
 
     def update_plots(self):
-        """Updates the plot with new observations.
+        """Updates the plot with observations from data source.
         """
 
         self._x_ranges_by_name = {}
@@ -115,7 +115,11 @@ class GridPlot:
             tools=['box_select', 'lasso_select', 'box_zoom', 'wheel_zoom', 'reset', hover]
         )
 
-        color_mapper = LinearColorMapper(palette='Turbo256', low=self._observations_data_source.observations_df[self.objective_name].min(), high=self._observations_data_source.observations_df[self.objective_name].max())
+        color_mapper = LinearColorMapper(
+            palette='Turbo256',
+            low=self._observations_data_source.observations_df[self.objective_name].min(),
+            high=self._observations_data_source.observations_df[self.objective_name].max()
+        )
 
         for row, row_dimension_name in enumerate(self.feature_dimension_names):
             for col, col_dimension_name in enumerate(self.feature_dimension_names):
@@ -127,11 +131,13 @@ class GridPlot:
                     # For plots on the diagonals, we want to plot the row dimension vs. objective
                     #
                     y_axis_name = self.objective_name
+
+                    # Since objectives are always continuous, the default ticks and tick-labels provided by bokeh work well.
+                    #
                     y_ticks, y_tick_label_mapping = None, None
                 else:
                     y_axis_name = row_dimension_name
                     y_ticks, y_tick_label_mapping = self._get_feature_ticks_and_tick_label_mapping(y_axis_name)
-
 
                 if col == (self.num_features - 1):
                     fig = figure(**final_column_plot_options)
@@ -180,7 +186,19 @@ class GridPlot:
 
         self._grid_plot = gridplot(self._figures)
 
+
     def _get_feature_ticks_and_tick_label_mapping(self, axis_name):
+        """Returns tick positions as well as labels for each tick.
+
+        The complication is that tick labels can be categorical, but ticks must be plotted at locations specified by integers.
+
+        Once again adapters come to the rescue: we simply use an adapter to construct a (persistent) mapping between the categorical
+        values (needed to label the ticks) and integer values (needed to position the ticks). This mapping is persisted in the
+        adapter and here we dole it out to each plot on an as-needed basis.
+
+        :param axis_name:
+        :return:
+        """
         projected_ticks = self._feature_space_adapter[axis_name].linspace(5)
         projected_ticks_df = pd.DataFrame({axis_name: projected_ticks})
         unprojected_ticks_df = self._feature_space_adapter.unproject_dataframe(projected_ticks_df)
@@ -192,10 +210,14 @@ class GridPlot:
         }
         return projected_ticks, tick_mapping
 
+
     def _set_ranges(self, fig, x_axis_name, y_axis_name):
         """Sets the ranges on each axis to enable synchronized panning and zooming.
+
+        Basically, when we see a given range name for the first time we cache the range and set that cached range for all figures
+        in the future. This way all plots that share the same range name (so the same dimension) are synchronized for panning and
+        zooming.
         """
-        x_range = self._x_ranges_by_name.get(x_axis_name, None)
         if x_axis_name in self._x_ranges_by_name:
             fig.x_range = self._x_ranges_by_name[x_axis_name]
         else:
@@ -205,5 +227,3 @@ class GridPlot:
             fig.y_range = self._y_ranges_by_name[y_axis_name]
         else:
             self._y_ranges_by_name[y_axis_name] = fig.y_range
-
-
