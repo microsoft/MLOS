@@ -67,7 +67,7 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None, objective_name=None) -> Prediction:
         """Predict target value based on the parameters supplied.
 
         :param params:

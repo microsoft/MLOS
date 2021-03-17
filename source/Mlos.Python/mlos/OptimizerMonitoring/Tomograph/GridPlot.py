@@ -36,11 +36,11 @@ class GridPlot:
     """
 
     def __init__(
-        self,
-        optimization_problem: OptimizationProblem,
-        objective_name: str,
-        observations_data_source: ObservationsDataSource,
-        logger=None
+            self,
+            optimization_problem: OptimizationProblem,
+            objective_name: str,
+            observations_data_source: ObservationsDataSource,
+            logger=None
     ):
         if logger is None:
             logger = create_logger(self.__class__.__name__)
@@ -164,7 +164,7 @@ class GridPlot:
                     muted_alpha=0.02 # TODO: figure out how to have clicking on the legend mute unselected points.
                 )
 
-                fig.legend.click_policy="hide"
+                fig.legend.click_policy = "hide"
                 fig.xaxis.axis_label = x_axis_name
                 fig.yaxis.axis_label = y_axis_name
 
@@ -181,7 +181,7 @@ class GridPlot:
                 self.logger.debug(f"Assigning figure to [{row}][{col}]. {self.objective_name}, {row_dimension_name}, {col_dimension_name}")
                 self._figures[row][col] = fig
 
-            color_bar = ColorBar(color_mapper=color_mapper, label_standoff=12, location=(0,0), title=self.objective_name)
+            color_bar = ColorBar(color_mapper=color_mapper, label_standoff=12, location=(0, 0), title=self.objective_name)
             self._figures[row][-1].add_layout(color_bar, 'right')
 
         self._grid_plot = gridplot(self._figures)

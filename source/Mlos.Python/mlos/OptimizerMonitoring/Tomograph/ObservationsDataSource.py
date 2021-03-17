@@ -14,12 +14,12 @@ class ObservationsDataSource:
     """Maintains data source that the individual GridPlots can use.
     """
     def __init__(
-        self,
-        optimization_problem: OptimizationProblem,
-        parameters_df: pd.DataFrame,
-        context_df: pd.DataFrame,
-        objectives_df: pd.DataFrame,
-        pareto_df: pd.DataFrame
+            self,
+            optimization_problem: OptimizationProblem,
+            parameters_df: pd.DataFrame,
+            context_df: pd.DataFrame,
+            objectives_df: pd.DataFrame,
+            pareto_df: pd.DataFrame
     ):
         self.optimization_problem = optimization_problem
         self._feature_space_adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.optimization_problem.feature_space)
