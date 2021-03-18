@@ -40,6 +40,8 @@ public:
 
     void Close();
 
+    void Abort();
+
     _Must_inspect_result_
     HRESULT Initialize(
         _In_z_ const char* directoryPath,
@@ -49,6 +51,13 @@ public:
     HRESULT Wait();
 
     const char* WatchFilePath() const;
+
+    // Gets a value that indicates whether the file watcher is invalid.
+    //
+    bool IsInvalid() const
+    {
+        return m_fdNotify == INVALID_FD_VALUE;
+    }
 
 private:
     _Must_inspect_result_

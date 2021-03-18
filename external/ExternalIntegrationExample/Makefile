@@ -6,7 +6,7 @@ all: cmake-build
 
 cmake-build:
 	mkdir -p ./build
-	cd ./build/ && cmake ..
+	cd ./build/ && cmake -D CMAKE_BUILD_TYPE=$(CONFIGURATION) -D MLOS_CMAKE_BUILD_TYPE=$(CONFIGURATION) ..
 	cd ./build/ && make -j
 
 test: cmake-build
