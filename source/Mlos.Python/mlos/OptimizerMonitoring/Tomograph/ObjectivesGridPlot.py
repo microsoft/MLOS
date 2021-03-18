@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 from bokeh.layouts import gridplot, column
-from bokeh.models import ColorBar, Div, HoverTool
+from bokeh.models import Div, HoverTool
 from bokeh.plotting import figure
 
 from mlos.Logger import create_logger
@@ -13,14 +13,14 @@ from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
 
 
 class ObjectivesGridPlot:
-    """
+    """Maintains all data and metadata to produce the grid plot in the objective space.
     """
 
     def __init__(
-        self,
-        optimization_problem: OptimizationProblem,
-        observations_data_source: ObservationsDataSource,
-        logger=None
+            self,
+            optimization_problem: OptimizationProblem,
+            observations_data_source: ObservationsDataSource,
+            logger=None
     ):
         if logger is None:
             logger = create_logger(self.__class__.__name__)
@@ -52,7 +52,7 @@ class ObjectivesGridPlot:
             for row in range(self.num_objectives)
         ]
 
-        self._title = Div(text=f"<h1>Objectives</h1>")
+        self._title = Div(text="<h1>Objectives</h1>")
 
         # Stores the bokeh gridplot object.
         #
@@ -84,7 +84,6 @@ class ObjectivesGridPlot:
             for col, col_dimension_name in enumerate(self.objective_names):
 
                 x_axis_name = col_dimension_name
-                x_ticks, x_tick_label_mapping = None, None
                 y_axis_name = row_dimension_name
 
                 if row == col:
