@@ -9,6 +9,7 @@ from bokeh.plotting import figure
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.OptimizerMonitoring.Tomograph.ObservationsDataSource import ObservationsDataSource
+from mlos.Spaces.HypergridAdapters import CategoricalToDiscreteHypergridAdapter
 
 
 class ObjectivesGridPlot:
@@ -35,6 +36,7 @@ class ObjectivesGridPlot:
         self.optimization_problem = optimization_problem
         self.num_objectives = len(optimization_problem.objective_space.dimension_names)
         self.objective_names = optimization_problem.objective_space.dimension_names
+        self._feature_space_adapter = CategoricalToDiscreteHypergridAdapter(adaptee=self.optimization_problem.feature_space)
 
 
         # Stores figure ranges by name so that we can synchronize zooming and panning
@@ -68,7 +70,7 @@ class ObjectivesGridPlot:
         self._y_ranges_by_name = {}
         self._grid_plot = None
 
-        tooltips = [(f"{objective_name}", f"@{objective_name}") for objective_name in self.optimization_problem.feature_space.dimension_names]
+        tooltips = [(f"{feature_name}", f"@{feature_name}") for feature_name in self._feature_space_adapter.dimension_names]
         tooltips.extend([(f"{objective_name}", f"@{objective_name}") for objective_name in self.optimization_problem.objective_names])
         hover = HoverTool(tooltips=tooltips)
 

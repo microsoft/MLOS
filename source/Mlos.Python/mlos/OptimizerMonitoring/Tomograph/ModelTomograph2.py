@@ -5,6 +5,7 @@
 from typing import List
 
 from bokeh.layouts import column
+from bokeh.models.widgets import Tabs, Panel
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
@@ -44,6 +45,27 @@ class ModelTomograph2:
             objectives_df=objectives_df,
             pareto_df=pareto_df
         )
+
+    def get_report(self):
+        """Produces an entire report.
+
+        This is meant to be extended.
+
+        :return:
+        """
+        panels = []
+
+        objectives_plot = self.get_objectives_plot()
+        objectives_panel = Panel(child=objectives_plot, title="Objectives")
+        panels.append(objectives_panel)
+
+        for objective_name in self.optimization_problem.objective_space.dimension_names:
+            observations_plot = self.get_observations_plot(objective_names=[objective_name], refresh_data=False)
+            observations_panel = Panel(child=observations_plot, title=objective_name)
+            panels.append(observations_panel)
+
+        tabs = Tabs(tabs=panels)
+        return tabs
 
     def get_observations_plot(self, objective_names: List[str] = None, refresh_data: bool = True):
         """Plot all observations.
