@@ -9,6 +9,7 @@ from bokeh.layouts import column
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.OptimizerMonitoring.Tomograph.GridPlot import GridPlot
+from mlos.OptimizerMonitoring.Tomograph.ObjectivesGridPlot import ObjectivesGridPlot
 from mlos.OptimizerMonitoring.Tomograph.ObservationsDataSource import ObservationsDataSource
 
 class ModelTomograph2:
@@ -70,3 +71,23 @@ class ModelTomograph2:
             plots.append(grid_plot.formatted_plots)
 
         return column(plots)
+
+
+    def get_objectives_plot(self, refresh_data: bool = True):
+        """Plot all observations.
+        """
+
+        if refresh_data:
+            params_df, objectives_df, context_df = self.optimizer.get_all_observations()
+            pareto_df = self.optimizer.pareto_frontier.pareto_df
+            self.bokeh_observations_data_source.update_data(parameters_df=params_df, context_df=context_df, objectives_df=objectives_df, pareto_df=pareto_df)
+
+
+        objectives_grid_plot = ObjectivesGridPlot(
+            optimization_problem=self.optimization_problem,
+            observations_data_source=self.bokeh_observations_data_source,
+            logger=self.logger
+        )
+        objectives_grid_plot.update_plots()
+
+        return objectives_grid_plot.formatted_plots
