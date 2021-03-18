@@ -113,11 +113,12 @@ class Prediction:
 
         if mean_variance_col in self.expected_column_names:
             if dataframe[mean_variance_col].notnull().any():
-                assert (dataframe[mean_variance_col].notnull() >= 0).all()
+                assert (dataframe[dataframe[mean_variance_col].notnull()][mean_variance_col] >= 0).all()
 
         if sample_variance_col in self.expected_column_names:
             if dataframe[sample_variance_col].notnull().any():
-                assert (dataframe[sample_variance_col].notnull() >= 0).all()
+                assert (dataframe[dataframe[sample_variance_col].notnull()][sample_variance_col] >= 0).all()
+
 
     @classmethod
     def get_enum_by_column_name(cls, column_name):

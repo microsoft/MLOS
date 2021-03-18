@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import numpy as np
 import pandas as pd
 
 from mlos.Logger import create_logger
@@ -134,7 +135,7 @@ class MultiObjectivePassThroughModelForTesting(MultiObjectiveRegressionModel):
             prediction_df[Prediction.LegalColumnNames.IS_VALID_INPUT.value] = True
             prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE.value] = target_values_df[objective_name]
             if self.model_config.uncertainty_type == "coefficient_of_variation":
-                prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value] = target_values_df[objective_name] * self.model_config.coefficient_of_variation_config.value
+                prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value] = np.abs(target_values_df[objective_name] * self.model_config.coefficient_of_variation_config.value)
             elif self.model_config.uncertainty_type == "constant":
                 prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value] = self.model_config.constant_uncertainty_config.value
             else:

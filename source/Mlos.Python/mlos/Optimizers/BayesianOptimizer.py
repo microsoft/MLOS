@@ -208,13 +208,16 @@ class BayesianOptimizer(OptimizerBase):
         self.pareto_frontier.update_pareto(objectives_df=self._target_values_df, parameters_df=self._parameter_values_df)
 
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None, objective_name=None) -> Prediction:  # pylint: disable=unused-argument
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
             parameters_df=parameter_values_pandas_frame,
             context_df=context_values_pandas_frame
         )
 
-        return self.surrogate_model.predict(feature_values_pandas_frame)[0]
+        if objective_name is None:
+            objective_name = self.optimization_problem.objective_names[0]
+
+        return self.surrogate_model.predict(feature_values_pandas_frame)[objective_name]
 
     def focus(self, subspace):
         ...

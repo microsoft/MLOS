@@ -214,7 +214,8 @@ objective_function_config_store.add_config_by_name(
     config_point=Point(
         implementation=MultiObjectiveEnvelopedWaves.__name__,
         multi_objective_enveloped_waves_config=multi_objective_enveloped_waves_config_store.get_config_by_name("no_phase_difference")
-    )
+    ),
+    description="The pareto frontier is formed by a single point, as all objectives are the same."
 )
 
 objective_function_config_store.add_config_by_name(
@@ -222,7 +223,8 @@ objective_function_config_store.add_config_by_name(
     config_point=Point(
         implementation=MultiObjectiveEnvelopedWaves.__name__,
         multi_objective_enveloped_waves_config=multi_objective_enveloped_waves_config_store.get_config_by_name("half_pi_phase_difference")
-    )
+    ),
+    description="The pareto frontier forms a quarter circle."
 )
 
 objective_function_config_store.add_config_by_name(
@@ -230,5 +232,6 @@ objective_function_config_store.add_config_by_name(
     config_point=Point(
         implementation=MultiObjectiveEnvelopedWaves.__name__,
         multi_objective_enveloped_waves_config=multi_objective_enveloped_waves_config_store.get_config_by_name("pi_phase_difference")
-    )
+    ),
+    description="The pareto frontier is a diagonal of a square."
 )
