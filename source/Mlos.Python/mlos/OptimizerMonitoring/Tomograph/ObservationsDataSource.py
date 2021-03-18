@@ -30,15 +30,7 @@ class ObservationsDataSource:
         self.pareto_df: pd.DataFrame = None
         self.observations_df: pd.DataFrame = None
 
-        self.data_source: ColumnDataSource = None
-        self.pareto_data_source: ColumnDataSource = None
-        self.dominated_data_source: ColumnDataSource = None
-
-
-        self.data_source = ColumnDataSource()
-        self.pareto_data_source = ColumnDataSource()
-        self.dominated_data_source = ColumnDataSource()
-
+        self.data_source: ColumnDataSource = ColumnDataSource()
         self.update_data(parameters_df=parameters_df, context_df=context_df, objectives_df=objectives_df, pareto_df=pareto_df)
 
     def update_data(self, parameters_df: pd.DataFrame, context_df: pd.DataFrame, objectives_df: pd.DataFrame, pareto_df: pd.DataFrame):
@@ -48,16 +40,11 @@ class ObservationsDataSource:
         self.pareto_df = pareto_df
         self.observations_df = self._construct_observations()
 
-        # In order to preserve the identity of the data sources, we create temporary ones, and then copy their data over to the data
+        # In order to preserve the identity of the data source, we create temporary ones, and then copy their data over to the data
         # sources in use by the grid plots.
         #
         temp_data_source = ColumnDataSource(data=self.observations_df)
-        temp_pareto_data_source = ColumnDataSource(data=self.observations_df[self.observations_df['is_pareto']])
-        temp_dominated_data_source = ColumnDataSource(data=self.observations_df[~self.observations_df['is_pareto']])
-
         self.data_source.data = dict(temp_data_source.data)
-        self.pareto_data_source.data = dict(temp_pareto_data_source.data)
-        self.dominated_data_source.data = dict(temp_dominated_data_source.data)
 
     def _construct_observations(self):
         features_df = self.optimization_problem.construct_feature_dataframe(parameters_df=self.parameters_df, context_df=self.context_df, product=False)
