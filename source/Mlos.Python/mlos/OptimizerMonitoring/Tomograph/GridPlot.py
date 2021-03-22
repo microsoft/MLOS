@@ -50,7 +50,7 @@ class GridPlot:
         #
         self._observations_data_source = observations_data_source
 
-        #  Metatdata - what dimensions are we going to be plotting here?
+        # Metatdata - what dimensions are we going to be plotting here?
         #
         self.optimization_problem = optimization_problem
         assert objective_name in self.optimization_problem.objective_names
@@ -149,25 +149,11 @@ class GridPlot:
                     y_axis_name,
                     color={'field': self.objective_name, 'transform': color_mapper},
                     marker='circle',
-                    source=self._observations_data_source.dominated_data_source,
-                    legend_label="dominated",
-                    muted_alpha=0.02 # TODO: figure out how to have clicking on the legend mute unselected points.
+                    source=self._observations_data_source.data_source,
                 )
 
-                fig.scatter(
-                    x_axis_name,
-                    y_axis_name,
-                    color={'field': self.objective_name, 'transform': color_mapper},
-                    marker='triangle',
-                    source=self._observations_data_source.pareto_data_source,
-                    legend_label="pareto optimal",
-                    muted_alpha=0.02 # TODO: figure out how to have clicking on the legend mute unselected points.
-                )
-
-                fig.legend.click_policy = "hide"
                 fig.xaxis.axis_label = x_axis_name
                 fig.yaxis.axis_label = y_axis_name
-
 
                 fig.xaxis.ticker = x_ticks
                 fig.axis.major_label_overrides = x_tick_label_mapping
