@@ -182,7 +182,15 @@ class Tracer:
 
         for event_callback in self._event_subscribers:
             try:
-                event_callback(name=name, phase=phase, timestamp_ns=timestamp_ns, category=category, actor_id=actor_id, thread_id=thread_id, arguments=arguments)
+                event_callback(
+                    name=name,
+                    phase=phase,
+                    timestamp_ns=timestamp_ns,
+                    category=category,
+                    actor_id=actor_id,
+                    thread_id=thread_id,
+                    arguments=arguments
+                )
             except:
                 pass
 
@@ -215,7 +223,7 @@ class Tracer:
                     args_json[key] = value
                 elif isinstance(value, pd.DataFrame):
                     args_json[key] = {
-                        "columns": [name for name in value.columns.values],
+                        "columns": value.columns.values,
                         "num_rows": len(value.index)
                     }
                 else:

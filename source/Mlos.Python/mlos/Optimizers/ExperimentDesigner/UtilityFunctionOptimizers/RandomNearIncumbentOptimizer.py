@@ -14,7 +14,7 @@ from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Spaces import ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Spaces.HypergridAdapters import DiscreteToUnitContinuousHypergridAdapter
-from mlos.Tracer import trace, traced
+from mlos.Tracer import trace
 
 
 random_near_incumbent_optimizer_config_store = ComponentConfigStore(
@@ -236,7 +236,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         all_neighbors_df, unprojected_neighbors_df = self._prepare_random_neighbors(incumbents_df=incumbents_df)
 
         neighbors_utility_df = self._compute_utility_for_params(params_df=unprojected_neighbors_df, context_df=context_df)
-        self.logger.info(f"Computed utility for {len(neighbors_utility_df.index)} random neighbors.")
+        self.logger.info(f"[{iteration_number}]Computed utility for {len(neighbors_utility_df.index)} random neighbors.")
 
         all_neighbors_df = all_neighbors_df.loc[neighbors_utility_df.index]
         all_neighbors_df['utility'] = neighbors_utility_df['utility']
