@@ -223,7 +223,7 @@ class Tracer:
                     args_json[key] = value
                 elif isinstance(value, pd.DataFrame):
                     args_json[key] = {
-                        "columns": value.columns.values,
+                        "columns": [name for name in value.columns.values], # pylint: disable=unnecessary-comprehension
                         "num_rows": len(value.index)
                     }
                 else:
