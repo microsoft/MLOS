@@ -117,5 +117,8 @@ int main()
     //
     mlosContext.TerminateControlChannel();
 
+    // Make sure to reap our reader thread.
+    feedbackChannelReader.wait();
+
     return 0;
 }

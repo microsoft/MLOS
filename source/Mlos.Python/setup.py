@@ -9,6 +9,7 @@ setup(
     version="0.0.1",
     packages=find_packages(),
     install_requires=[
+        'bokeh==2.2.3',
         'scikit-learn>=0.22.1',
         'scipy>=1.3.2',
         'numpy>=1.18.1',
@@ -20,7 +21,7 @@ setup(
     ],
     author="Microsoft",
     author_email="mlos-maintainers@service.microsoft.com",
-    description=("MLOS Python service and client for optimizing code constants"),
+    description=("MLOS Python service and client for optimizing parameters."),
     license="MIT",
     keywords="",
     url="https://github.com/microsoft/mlos",
