@@ -40,8 +40,6 @@ def trace():
                 except Exception as e:
                     arguments = {'exception': str(e)}
                     end_timestamp_ns = max(int(time.time() * 1000000), start_timestamp_ns + 50)
-                    while end_timestamp_ns <= start_timestamp_ns:
-                        end_timestamp_ns += 100
                     tracer.add_trace_event(
                         name=wrapped_function.__qualname__,
                         phase='E',
