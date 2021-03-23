@@ -122,17 +122,6 @@ class OptimizationProblem:
                 on_external_dimension=CategoricalDimension(name="contains_context", values=[True])
             )
 
-    def __str__(self):
-        return f"Parameter Space:\n{str(self.parameter_space)}\n" \
-               f"------------------------------------------------------------\n" \
-               f"Context Space:\n{str(self.context_space)}\n" \
-               f"------------------------------------------------------------\n" \
-               f"Feature Space:\n{str(self.feature_space)}\n" \
-               f"------------------------------------------------------------\n" \
-               f"Objective Space:\n{str(self.objective_space)}\n" \
-               f"------------------------------------------------------------\n" \
-               f"Objectives:\n{[objective_to_dict(objective) for objective in self.objectives]}"
-
     def construct_feature_dataframe(self, parameters_df: pd.DataFrame, context_df: pd.DataFrame = None, product: bool = False):
         """Construct feature value dataframe from config value and context value dataframes.
 
