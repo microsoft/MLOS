@@ -49,6 +49,7 @@ class TestUtilityFunctionOptimizers:
         """
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
+
         cls.logger = create_logger("TestUtilityFunctionOptimizers")
 
         cls.model_config = multi_objective_pass_through_model_config_store.default
