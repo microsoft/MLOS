@@ -53,7 +53,7 @@ class GridPlot:
         # Metatdata - what dimensions are we going to be plotting here?
         #
         self.optimization_problem = optimization_problem
-        assert objective_name in self.optimization_problem.objective_names
+        assert objective_name in self.optimization_problem.objective_space.dimension_names
         self.objective_name = objective_name
 
         # The adapter is needed if we want to create plots of categorical dimensions. It maps categorical values to integers so
