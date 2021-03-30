@@ -20,32 +20,13 @@ namespace Mlos.Core.Linux
         /// <summary>
         /// Receives the message and passed file descriptor.
         /// </summary>
-        /// <typeparam name="T">Type of the message.</typeparam>
         /// <param name="socket"></param>
-        /// <param name="message"></param>
+        /// <param name="buffer"></param>
         /// <param name="fileDescriptor"></param>
-        public static void ReceiveMessageAndFileDescriptor<T>(
+        /// <returns></returns>
+        internal static int ReceiveMessageAndFileDescriptor(
             this Socket socket,
-            ref T message,
-            out IntPtr fileDescriptor)
-        where T : struct
-        {
-            Span<T> messageSpan = MemoryMarshal.CreateSpan(ref message, 1);
-
-            int receivedBytes = ReceiveMessageAndFileDescriptor(
-                socket,
-                MemoryMarshal.Cast<T, byte>(messageSpan),
-                out fileDescriptor);
-
-            if (receivedBytes != Marshal.SizeOf<T>())
-            {
-                throw new InvalidOperationException();
-            }
-        }
-
-        private static int ReceiveMessageAndFileDescriptor(
-            this Socket socket,
-            Span<byte> buffer,
+            out byte[] buffer,
             out IntPtr fileDescriptor)
         {
             if (socket == null)
@@ -53,15 +34,20 @@ namespace Mlos.Core.Linux
                 throw new ArgumentNullException(nameof(socket));
             }
 
+            fileDescriptor = Native.InvalidPointer;
+            buffer = null;
+
             unsafe
             {
-                fixed (byte* pinnedData = &buffer.GetPinnableReference())
+                Span<byte> messageSpan = stackalloc byte[256];
+
+                fixed (byte* pinnedData = &messageSpan.GetPinnableReference())
                 {
                     // Message data.
                     //
                     IoVec ioVec = default;
                     ioVec.IovBase = new IntPtr(pinnedData);
-                    ioVec.IovLength = (ulong)buffer.Length;
+                    ioVec.IovLength = (ulong)messageSpan.Length;
 
                     // #define SOL_SOCKET 1
                     ControlMessage<int> controlMessage = default;
@@ -83,8 +69,6 @@ namespace Mlos.Core.Linux
                     message.MessageControl = &controlMessage.Header;
                     message.MessageControlLength = controlMessage.Header.ControlMessageLength;
 
-                    // Receive the message.
-                    //
                     ulong bytesRead = Native.ReceiveMessage(socket.Handle, ref message, 0);
 
                     if ((long)bytesRead == -1)
@@ -92,10 +76,19 @@ namespace Mlos.Core.Linux
                         throw new SocketException(Marshal.GetLastWin32Error());
                     }
 
-                    fileDescriptor = new IntPtr(controlMessage.Value);
+                    int messageSize = checked((int)bytesRead);
 
-                    int received = checked((int)bytesRead);
-                    return received;
+                    if (messageSize != 0)
+                    {
+                        if (message.MessageControlLength != 0)
+                        {
+                            fileDescriptor = new IntPtr(controlMessage.Value);
+                        }
+
+                        buffer = messageSpan.Slice(0, messageSize).ToArray();
+                    }
+
+                    return messageSize;
                 }
             }
         }
@@ -151,13 +144,6 @@ namespace Mlos.Core.Linux
                     ioVec.IovBase = new IntPtr(pinnedData);
                     ioVec.IovLength = (ulong)messageData.Length;
 
-                    // #define SOL_SOCKET 1
-                    ControlMessage<int> controlMessage = default;
-                    controlMessage.Header.ControlMessageLength = (ulong)sizeof(ControlMessage<int>);
-                    controlMessage.Header.ControlMessageLevel = 1;
-                    controlMessage.Header.ControlMessageType = SocketLevelMessageType.ScmRights;
-                    controlMessage.Value = fileDescriptor.ToInt32();
-
                     // Construct the message.
                     //
                     MessageHeader message = default;
@@ -168,8 +154,20 @@ namespace Mlos.Core.Linux
                     message.MessageIoVec = &ioVec;
                     message.MessageIoVecLength = 1;
 
-                    message.MessageControl = &controlMessage.Header;
-                    message.MessageControlLength = controlMessage.Header.ControlMessageLength;
+                    // Control message.
+                    //
+                    ControlMessage<int> controlMessage = default;
+                    if (fileDescriptor != Native.InvalidPointer)
+                    {
+                        // #define SOL_SOCKET 1
+                        controlMessage.Header.ControlMessageLength = (ulong)sizeof(ControlMessage<int>);
+                        controlMessage.Header.ControlMessageLevel = 1;
+                        controlMessage.Header.ControlMessageType = SocketLevelMessageType.ScmRights;
+                        controlMessage.Value = fileDescriptor.ToInt32();
+
+                        message.MessageControl = &controlMessage.Header;
+                        message.MessageControlLength = controlMessage.Header.ControlMessageLength;
+                    }
 
                     // Send the message.
                     //

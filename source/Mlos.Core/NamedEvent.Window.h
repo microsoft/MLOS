@@ -24,23 +24,23 @@ class NamedEvent
 public:
     NamedEvent() noexcept;
 
-    NamedEvent(NamedEvent&& namedEvent) noexcept;
+    NamedEvent(_In_ NamedEvent&& namedEvent) noexcept;
 
     ~NamedEvent();
 
     // Creates or opens a named event object.
     //
     _Must_inspect_result_
-    HRESULT CreateOrOpen(_In_z_ const char* const namedEventName) noexcept;
+    HRESULT CreateOrOpen(_In_z_ const char* namedEventName) noexcept;
 
     // Opens an existing named event object.
     //
     _Must_inspect_result_
-    HRESULT Open(_In_z_ const char* const namedEventName) noexcept;
+    HRESULT Open(_In_z_ const char* namedEventName) noexcept;
 
     // Closes a named event object.
     //
-    void Close();
+    void Close(_In_ bool cleanupOnClose = false);
 
     // Sets the named event object to the signaled state.
     //
@@ -50,16 +50,11 @@ public:
     // Waits until the named event object is in the signaled state.
     //
     _Must_inspect_result_
-    HRESULT Wait();
+    HRESULT Wait() const;
 
     // Gets a value that indicates whether the handle is invalid.
     //
-    bool IsInvalid();
-
-    // Indicates if we should cleanup OS resources when closing the shared memory map view.
-    // No-op on Windows.
-    //
-    bool CleanupOnClose;
+    bool IsInvalid() const;
 
 private:
     HANDLE m_hEvent;

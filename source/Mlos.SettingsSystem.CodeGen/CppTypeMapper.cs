@@ -207,17 +207,17 @@ namespace Mlos.SettingsSystem.CodeGen
     }
 
     /// <summary>
-    /// Describes the Cpp structure.
+    /// Describes the C++ structure.
     /// </summary>
     internal struct CppType
     {
         /// <summary>
-        /// The name of the Cpp type.
+        /// The name of the C++ type.
         /// </summary>
         internal string Name;
 
         /// <summary>
-        /// The size in bytes of the Cpp type.
+        /// The size in bytes of the C++ type.
         /// </summary>
         /// <remarks>
         /// The size does not include length of the variable fields data (strings).
@@ -226,7 +226,7 @@ namespace Mlos.SettingsSystem.CodeGen
         internal uint TypeSize;
 
         /// <summary>
-        /// Aligment.
+        /// Type alignment.
         /// </summary>
         internal uint Alignment;
 
@@ -257,7 +257,7 @@ namespace Mlos.SettingsSystem.CodeGen
     }
 
     /// <summary>
-    /// Structure describing a field of Cpp structure.
+    /// Structure describing a field in the C++ structure.
     /// </summary>
     internal struct CppField
     {
@@ -275,5 +275,26 @@ namespace Mlos.SettingsSystem.CodeGen
         /// The Cpp type info for the field.
         /// </summary>
         internal CppType CppType;
+    }
+
+    /// <summary>
+    /// Structure describing a const field in the C++ structure.
+    /// </summary>
+    internal struct CppConstField
+    {
+        /// <summary>
+        /// CSharp field info.
+        /// </summary>
+        internal FieldInfo FieldInfo;
+
+        /// <summary>
+        /// The Cpp type info for the field.
+        /// </summary>
+        internal CppType CppType;
+
+        /// <summary>
+        /// Const field value.
+        /// </summary>
+        internal object ConstValue;
     }
 }

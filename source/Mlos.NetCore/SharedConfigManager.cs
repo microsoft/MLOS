@@ -46,37 +46,6 @@ namespace Mlos.Core
         /// <summary>
         /// Registers a shared config memory region created by the target process.
         /// </summary>
-        /// <param name="sharedMemoryRegionIndex"></param>
-        /// <param name="sharedMemoryMapName"></param>
-        /// <param name="memoryRegionSize"></param>
-        public void RegisterSharedConfigMemoryRegion(uint sharedMemoryRegionIndex, string sharedMemoryMapName, ulong memoryRegionSize)
-        {
-            if (sharedConfigMemoryRegionView != null)
-            {
-                if (sharedConfigMemoryRegionView.MemoryRegion().MemoryHeader.MemoryRegionId.Index == sharedMemoryRegionIndex)
-                {
-                    // Shared memory region has been already registered.
-                    //
-                    return;
-                }
-                else
-                {
-                    throw new NotImplementedException("Only a single shared config memory region is currently supported.");
-                }
-            }
-
-            // Create a shared config memory region.
-            //
-            SharedMemoryMapView sharedConfigMemoryMapView = SharedMemoryMapView.OpenExisting(
-                sharedMemoryMapName,
-                memoryRegionSize);
-
-            sharedConfigMemoryRegionView = new SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion>(sharedConfigMemoryMapView);
-        }
-
-        /// <summary>
-        /// Registers a shared config memory region created by the target process.
-        /// </summary>
         /// <param name="sharedConfigMemoryRegionView"></param>
         public void RegisterSharedConfigMemoryRegion(SharedMemoryRegionView<MlosProxyInternal.SharedConfigMemoryRegion> sharedConfigMemoryRegionView)
         {
@@ -168,7 +137,6 @@ namespace Mlos.Core
         public void Dispose()
         {
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>

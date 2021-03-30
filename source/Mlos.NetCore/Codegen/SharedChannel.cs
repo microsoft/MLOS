@@ -30,14 +30,23 @@ namespace Mlos.Core
     /// Offset = Position % Buffer.Size.
     /// </remarks>
     [CodegenType]
-    internal partial struct ChannelSynchronization
+    public partial struct ChannelSynchronization
     {
+        /// <summary>
+        /// Read position.
+        /// </summary>
         [Align(32)]
         internal AtomicUInt32 ReadPosition;
 
+        /// <summary>
+        /// Write position.
+        /// </summary>
         [Align(32)]
         internal AtomicUInt32 WritePosition;
 
+        /// <summary>
+        /// Free position.
+        /// </summary>
         [Align(32)]
         internal AtomicUInt32 FreePosition;
 
@@ -65,28 +74,12 @@ namespace Mlos.Core
     /// </summary>
     [CodegenType]
     [StructLayout(LayoutKind.Sequential, Size = FrameHeader.TypeSize)]
-    public partial struct FrameHeader : IEquatable<FrameHeader>
+    public partial struct FrameHeader
     {
         /// <summary>
         /// Size of the frame header structure.
         /// </summary>
         public const int TypeSize = 16;
-
-        /// <summary>
-        /// Operator ==.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator ==(FrameHeader left, FrameHeader right) => left.Equals(right);
-
-        /// <summary>
-        /// Operator !=.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator !=(FrameHeader left, FrameHeader right) => !(left == right);
 
         /// #TODO size, not length
         ///
@@ -104,43 +97,13 @@ namespace Mlos.Core
         /// Hash of the type.
         /// </summary>
         internal ulong CodegenTypeHash;
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            if (!(obj is FrameHeader))
-            {
-                return false;
-            }
-
-            return Equals((FrameHeader)obj);
-        }
-
-        /// <inheritdoc />
-        public bool Equals(FrameHeader other) =>
-            Length == other.Length &&
-            CodegenTypeIndex == other.CodegenTypeIndex &&
-            CodegenTypeHash == other.CodegenTypeHash;
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 17;
-                hash = (31 * hash) + Length.GetHashCode();
-                hash = (31 * hash) + (int)CodegenTypeIndex;
-                hash = (31 * hash) + (int)CodegenTypeHash;
-                return hash;
-            }
-        }
     }
 
     /// <summary>
     /// Shared circular buffer channel settings.
     /// </summary>
     [CodegenConfig]
-    internal partial struct ChannelSettings
+    public partial struct ChannelSettings
     {
         /// <summary>
         /// Size of the buffer. To avoid arithmetic overflow, buffer size must be power of two.
@@ -156,31 +119,26 @@ namespace Mlos.Core
     }
 
     [CodegenConfig]
-    internal partial class ChannelStats
+    public partial struct ChannelReaderStats
     {
-        [FixedSizeArray(length: 16)]
-        internal readonly ChannelReaderStats[] ReaderStats;
-    }
-
-    [CodegenConfig]
-    internal partial struct ChannelReaderStats
-    {
+        /// <summary>
+        /// Number of read messages.
+        /// </summary>
         [ScalarSetting]
         internal ulong MessagesRead;
 
+        /// <summary>
+        /// Total spin count.
+        /// </summary>
         [ScalarSetting]
         internal ulong SpinCount;
     }
-
-    #region Control Messages
 
     /// <summary>
     /// Represents the message request to signal termination of the circular buffer reader thread.
     /// </summary>
     [CodegenMessage]
-    internal partial struct TerminateReaderThreadRequestMessage
+    public partial struct TerminateReaderThreadRequestMessage
     {
     }
-
-    #endregion
 }

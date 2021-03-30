@@ -65,12 +65,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
             WriteOpenTypeDeclaration(sourceType.DeclaringType);
 
             string typeName = sourceType.Name;
-            string typeFullType = $"global::{sourceType.GetTypeFullName()}";
-            string proxyFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
+            string typeFullName = $"global::{sourceType.GetTypeFullName()}";
+            string proxyTypeFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
 
             WriteBlock($@"
                 [System.CodeDom.Compiler.GeneratedCodeAttribute(""Mlos.SettingsSystem.CodeGen"", """")]
-                public partial struct {typeName} : ICodegenProxy<{typeFullType}, {proxyFullName}>
+                public partial struct {typeName} : ICodegenProxy<{typeFullName}, {proxyTypeFullName}>, IEquatable<{proxyTypeFullName}>, IEquatable<{typeFullName}>
                 {{
                     public static Action<{typeName}> Callback;");
 
@@ -145,32 +145,40 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
             //
             CppType cppType = CppTypeMapper.GetCppType(fieldType);
 
-            // Get the proxy type name.
-            //
-            string fieldTypeName = $"global::{fieldType.FullName}";
-
             // Write the property, for arrays, use PropertyArrayProxy.
             //
             if (cppField.FieldInfo.IsFixedSizedArray() ||
                 cppField.CppType.IsCodegenType)
             {
-                string csharpProxyTypeFullName = cppType.IsCodegenType ? $"global::Proxy.{fieldType.FullName}" : $"global::{fieldType.FullName}";
+                string codegenTypeFullName = $"global::{fieldType.FullName}";
+                string codegenProxyTypeFullName = $"global::{Constants.ProxyNamespace}.{fieldType.FullName}";
 
                 if (cppField.FieldInfo.IsFixedSizedArray())
                 {
-                    string csharpArrayProxyTypeName = cppType.IsCodegenType ? "global::Mlos.Core.PropertyProxyArray" : "global::Mlos.Core.ProxyArray";
-
-                    // Declare the property.
-                    //
-                    WriteLine($@"public {csharpArrayProxyTypeName}<{csharpProxyTypeFullName}> {fieldName} => new {csharpArrayProxyTypeName}<{csharpProxyTypeFullName}>(buffer + {fieldOffset}, {cppType.TypeSize});");
+                    if (cppType.IsCodegenType)
+                    {
+                        // Declare the property.
+                        //
+                        WriteLine(
+                            $@"public global::Mlos.Core.PropertyProxyArray<{codegenTypeFullName}, {codegenProxyTypeFullName}> {fieldName} => new global::Mlos.Core.PropertyProxyArray<{codegenTypeFullName}, {codegenProxyTypeFullName}>(buffer + {fieldOffset}, {cppType.TypeSize});");
+                    }
+                    else
+                    {
+                        // Declare the property.
+                        //
+                        WriteLine(
+                            $@"public global::Mlos.Core.ProxyArray<{codegenTypeFullName}> {fieldName} => new global::Mlos.Core.ProxyArray<{codegenTypeFullName}>(buffer + {fieldOffset}, {cppType.TypeSize});");
+                    }
                 }
                 else
                 {
-                    WriteLine($@"public {csharpProxyTypeFullName} {fieldName} => new {csharpProxyTypeFullName}() {{ Buffer = buffer + {fieldOffset} }};");
+                    WriteLine($@"public {codegenProxyTypeFullName} {fieldName} => new {codegenProxyTypeFullName}() {{ Buffer = buffer + {fieldOffset} }};");
                 }
             }
             else
             {
+                string fieldTypeName = $"global::{fieldType.FullName}";
+
                 WriteBlock($@"
                     public {fieldTypeName} {fieldName}
                     {{

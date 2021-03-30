@@ -13,6 +13,8 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.PredictedValueUtilityFunction import PredictedValueUtilityFunction
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOtimizerFactory import UtilityFunctionOtimizerFactory
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 
 from mlos.Spaces import Point
 from mlos.Tracer import trace
@@ -65,7 +67,7 @@ class OptimizerBase(ABC):
         raise NotImplementedError("All subclasses must implement this method.")
 
     @abstractmethod
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None, objective_name=None) -> Prediction:
         """Predict target value based on the parameters supplied.
 
         :param params:
@@ -109,9 +111,16 @@ class OptimizerBase(ABC):
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):
-        greedy_utility = PredictedValueUtilityFunction(
-            self.surrogate_model, minimize=self.optimization_problem.objectives[0].minimize)
-        utility_optimizer = self.experiment_designer.make_optimizer_for_utility(greedy_utility)
+        predicted_value_utility = PredictedValueUtilityFunction(
+            self.surrogate_model,
+            minimize=self.optimization_problem.objectives[0].minimize
+        )
+        utility_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
+            utility_function=predicted_value_utility,
+            optimizer_type_name=RandomSearchOptimizer.__name__,
+            optimizer_config=random_search_optimizer_config_store.default,
+            optimization_problem=self.optimization_problem
+        )
         return utility_optimizer.suggest(context_values_dataframe=context)
 
     @trace()

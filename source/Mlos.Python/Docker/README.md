@@ -22,8 +22,8 @@ It is complete except for the `Password` field, which we don't want checked into
   ```json
   {
     "Host": ".",
-    "Username": "sa",
-    "Password": "*YouKnowWhatToPutHere*",
+    "Username": "",
+    "Password": "",
     "DatabaseName": "MlosModels",
     "TrustedConnection": false,
     "Driver": "ODBC Driver 17 for SQL Server"
@@ -63,7 +63,7 @@ docker build -f Docker/Dockerfile -t mssql-server-linux-with-mlos-python --build
   ```
 
 - Stop the container named `MlosOptimizerService`:
-  
+
   ```shell
   docker stop MlosOptimizerService
   ```
@@ -97,4 +97,3 @@ An alternative is to use persistent volumes.  For instance:
   ```shell
   docker run -p1433:1433 --name MlosOptimizerService --volume MlosOptimizerService:/var/opt/mssql mssql-server-linux-with-mlos-python
   ```
-

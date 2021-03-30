@@ -21,12 +21,14 @@ class OptimizerMicroserviceServer:
     should instantiate an object of this class to achieve that.
     """
 
-    def __init__(self, port, num_threads=10):
+    def __init__(self, port, num_threads=10, logger=None):
         self.port = port
         self.num_threads = num_threads
         self.started = False
         self._server = None
-        self.logger = create_logger("OptimizerMicroserviceServer init")
+        if logger is None:
+            logger = create_logger("OptimizerMicroserviceServer init")
+        self.logger = logger
 
 
     def start(self):

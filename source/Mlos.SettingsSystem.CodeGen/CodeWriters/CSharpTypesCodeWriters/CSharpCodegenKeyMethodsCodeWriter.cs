@@ -64,12 +64,11 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
         {
             WriteOpenTypeDeclaration(sourceType);
 
-            string typeName = sourceType.Name;
-            string typeFullType = $"global::{sourceType.GetTypeFullName()}";
+            string typeFullName = $"global::{sourceType.GetTypeFullName()}";
             string proxyTypeFullName = $"{Constants.ProxyNamespace}.{sourceType.GetTypeFullName()}";
 
             WriteBlock($@"
-                public partial struct CodegenKey : ICodegenKey<{typeFullType}, {typeFullType}.CodegenKey, {proxyTypeFullName}>
+                public partial struct CodegenKey : ICodegenKey<{typeFullName}, {typeFullName}.CodegenKey, {proxyTypeFullName}>
                 {{
                     /// <inheritdoc/>
                     public uint GetKeyHashValue<THash>()

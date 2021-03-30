@@ -61,18 +61,18 @@ main(
 
     // Create the MlosContext.
     // It encapsulates all of the shared memory regions for this component.
-    // In this case we use an interprocess implementation to communicate with an
+    // In this case we use an inter-process implementation to communicate with an
     // external agent.
     // There are 3 (unidirectional) channels setup:
     // 1. Control: for registering components and memory for their configs in the global region
     // 2. Telemetry: for sending messages from/about the application component to the agent (e.g. performance metrics)
     // 3. Feedback: for receiving messages from the agent (e.g. configuration updates)
     //
-    DefaultMlosContextFactory mlosContextFactory;
-    HRESULT hr = mlosContextFactory.Create();
+    DefaultMlosInitializer mlosInitializer;
+    HRESULT hr = mlosInitializer.CreateContext();
     ThrowIfFail(hr);
 
-    MlosContext& mlosContext = mlosContextFactory.m_context;
+    MlosContext& mlosContext = mlosInitializer.MlosContext();
 
     // Create a feedback channel receiver thread.
     //
@@ -127,7 +127,7 @@ main(
     // This will be stored in a shared memory region below for use by both the
     // component and the external agent.
     //
-    Mlos::Core::ComponentConfig<SmartCache::SmartCacheConfig> config(mlosContext);
+    Mlos::Core::ComponentConfig<SmartCache::SmartCacheConfig> config;
 
     // Initialize config with default values.
     //

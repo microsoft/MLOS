@@ -20,55 +20,63 @@ namespace Mlos
 namespace Core
 {
 template<typename T>
-class SharedMemoryRegionView : public SharedMemoryMapView
+class SharedMemoryRegionView
 {
 public:
-    SharedMemoryRegionView() noexcept
-    {}
+    SharedMemoryRegionView() noexcept = default;
 
     SharedMemoryRegionView(_In_ SharedMemoryRegionView<T>&& sharedMemoryRegionView) noexcept
-      : SharedMemoryMapView(std::move(sharedMemoryRegionView))
+      : m_sharedMemoryMapView(std::move(sharedMemoryRegionView.m_sharedMemoryMapView))
     {}
 
-    // Creates an anonymous shared memory region.
-    //
-    _Must_inspect_result_
-    HRESULT CreateAnonymous(_In_ size_t memSize) noexcept;
+    SharedMemoryRegionView(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept
+      : m_sharedMemoryMapView(std::move(sharedMemoryMapView))
+    {
+        if (m_sharedMemoryMapView.IsCreated())
+        {
+            InitializeMemoryRegionView();
+        }
+    }
 
-    // Opens already created shared memory region.
-    //
-    _Must_inspect_result_
-    HRESULT CreateNew(
-        _In_z_ const char* const sharedMemoryMapName,
-        _In_ size_t memSize) noexcept;
-
-    // Creates or opens a shared memory region.
-    //
-    _Must_inspect_result_
-    HRESULT CreateOrOpen(
-        _In_z_ const char* const sharedMemoryMapName,
-        _In_ size_t memSize) noexcept;
-
-    // Opens already created shared memory region.
-    //
-    _Must_inspect_result_
-    HRESULT OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept;
+    void Assign(_In_ SharedMemoryRegionView<T>&& sharedMemoryRegionView) noexcept
+    {
+        m_sharedMemoryMapView.Assign(std::move(sharedMemoryRegionView.m_sharedMemoryMapView));
+    }
 
     T& MemoryRegion()
     {
-        return *(reinterpret_cast<T*>(Buffer.Pointer));
+        return *(reinterpret_cast<T*>(m_sharedMemoryMapView.Buffer.Pointer));
     }
 
     template<typename TCodegenType>
     TCodegenType& GetCodegenObject(_In_ uint64_t offset)
     {
-        return *reinterpret_cast<TCodegenType*>(Buffer.Pointer + offset);
+        return *reinterpret_cast<TCodegenType*>(m_sharedMemoryMapView.Buffer.Pointer + offset);
+    }
+
+    // Gets a value that indicates whether the buffer is invalid.
+    //
+    bool IsInvalid() const
+    {
+        return m_sharedMemoryMapView.Buffer.Pointer == nullptr;
+    }
+
+    const SharedMemoryMapView& MapView() const
+    {
+        return m_sharedMemoryMapView;
+    }
+
+    void Close(bool cleanupOnClose = false)
+    {
+        m_sharedMemoryMapView.Close(cleanupOnClose);
     }
 
 private:
     void InitializeMemoryRegionView();
 
     T& InitializeMemoryRegion();
+
+    SharedMemoryMapView m_sharedMemoryMapView;
 };
 }
 }

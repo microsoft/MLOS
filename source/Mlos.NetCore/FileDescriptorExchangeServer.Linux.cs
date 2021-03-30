@@ -10,41 +10,31 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 
 using Mlos.Core.Internal;
 
 namespace Mlos.Core.Linux
 {
-    internal struct AnonymousSharedMemory
-    {
-        internal IntPtr SharedMemoryFd;
-
-        internal ulong SharedMemorySize;
-    }
-
     /// <summary>
     /// FileDescriptor exchange server.
     /// </summary>
-    public class FileDescriptorExchangeServer : IDisposable
+    public sealed class FileDescriptorExchangeServer : IDisposable
     {
-        private readonly Dictionary<MemoryRegionId, AnonymousSharedMemory> fileDescriptors = new Dictionary<MemoryRegionId, AnonymousSharedMemory>();
+        private readonly Dictionary<string, IntPtr> fileDescriptors = new Dictionary<string, IntPtr>();
 
-        private readonly string socketName;
-
-        private readonly string semaphoreName;
+        private readonly string socketFolderPath;
 
         private Socket serverSocket;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FileDescriptorExchangeServer"/> class.
         /// </summary>
-        /// <param name="socketName"></param>
-        /// <param name="semaphoreName"></param>
-        public FileDescriptorExchangeServer(string socketName, string semaphoreName)
+        /// <param name="socketFolderPath"></param>
+        public FileDescriptorExchangeServer(string socketFolderPath)
         {
-            this.socketName = socketName;
-            this.semaphoreName = semaphoreName;
+            this.socketFolderPath = socketFolderPath;
         }
 
         /// <summary>
@@ -52,19 +42,29 @@ namespace Mlos.Core.Linux
         /// </summary>
         public void HandleRequests()
         {
-            File.Delete(socketName);
+            // Ensure the folder containing the socket file is created.
+            //
+            Directory.CreateDirectory(socketFolderPath);
+
+            string socketName = Path.Combine(socketFolderPath, "mlos.sock");
+            string openFilePath = Path.Combine(socketFolderPath, "mlos.opened");
+
+            // Unix domain sockets (AF_UNIX) does not support SO_REUSEADDR, unlink the file.
+            //
+            _ = Native.FileSystemUnlink(socketName);
 
             serverSocket = new Socket(AddressFamily.Unix, SocketType.Stream, ProtocolType.Unspecified);
 
             // Start listening on the Unix socket.
             //
             serverSocket.Bind(new UnixDomainSocketEndPoint(socketName));
+
             serverSocket.Listen(backlog: 1);
 
-            // Signal the target process, the Agent is ready.
+            // Create or update the opened socket file,
+            // to signal the target process that the agent is ready to receive the file descriptors.
             //
-            using NamedEvent namedEvent = NamedEvent.CreateOrOpen(semaphoreName);
-            namedEvent.Signal();
+            File.WriteAllText(openFilePath, string.Empty);
             {
                 // Accept the connection and obtain the list of the shared memory regions.
                 //
@@ -116,42 +116,43 @@ namespace Mlos.Core.Linux
             {
                 while (true)
                 {
-                    FileDescriptorExchangeMessage msg = default;
-                    acceptedSocket.ReceiveMessageAndFileDescriptor(ref msg, out IntPtr sharedMemoryFd);
+                    int receivedLength = acceptedSocket.ReceiveMessageAndFileDescriptor(
+                        out byte[] messageBuffer,
+                        out var sharedMemoryFd);
 
-                    if (msg.ContainsFd)
+                    if (receivedLength == 0)
+                    {
+                        // Disconnected.
+                        //
+                        return;
+                    }
+
+                    string sharedMemoryName = Encoding.ASCII.GetString(messageBuffer);
+
+                    if (sharedMemoryFd != Native.InvalidPointer)
                     {
                         // Store received file descriptor in the dictionary.
                         //
-                        fileDescriptors.Add(
-                            msg.MemoryRegionId,
-                            new AnonymousSharedMemory
-                            {
-                                SharedMemoryFd = sharedMemoryFd,
-                                SharedMemorySize = msg.MemoryRegionSize,
-                            });
+                        lock (fileDescriptors)
+                        {
+                            fileDescriptors.Add(sharedMemoryName, sharedMemoryFd);
+                        }
                     }
                     else
                     {
-                        if (fileDescriptors.ContainsKey(msg.MemoryRegionId))
+                        lock (fileDescriptors)
                         {
-                            AnonymousSharedMemory sharedMemory = fileDescriptors[msg.MemoryRegionId];
-                            msg.ContainsFd = true;
-                            msg.MemoryRegionSize = sharedMemory.SharedMemorySize;
+                            if (fileDescriptors.ContainsKey(sharedMemoryName))
+                            {
+                                sharedMemoryFd = fileDescriptors[sharedMemoryName];
+                            }
+                        }
 
-                            acceptedSocket.SendMessageAndFileDescriptor(
-                                ref msg,
-                                sharedMemory.SharedMemoryFd);
-                        }
-                        else
-                        {
-                            // Replay we do not have require memory region.
-                            //
-                            msg.ContainsFd = false;
-                            acceptedSocket.SendMessageAndFileDescriptor(
-                                ref msg,
-                                IntPtr.Zero);
-                        }
+                        FileDescriptorExchangeMessage msg = default;
+
+                        acceptedSocket.SendMessageAndFileDescriptor(
+                            ref msg,
+                            sharedMemoryFd);
                     }
                 }
             }
@@ -165,28 +166,21 @@ namespace Mlos.Core.Linux
         /// <summary>
         /// Returns file descriptor for given memory region id.
         /// </summary>
-        /// <param name="memoryRegionId"></param>
+        /// <param name="sharedMemoryName"></param>
         /// <returns></returns>
-        public IntPtr GetSharedMemoryFd(MemoryRegionId memoryRegionId)
+        internal IntPtr GetSharedMemoryFd(string sharedMemoryName)
         {
-            return fileDescriptors[memoryRegionId].SharedMemoryFd;
+            lock (fileDescriptors)
+            {
+                return fileDescriptors[sharedMemoryName];
+            }
         }
 
         /// <summary>
-        /// Returns memory region size for given memory region id.
-        /// </summary>
-        /// <param name="memoryRegionId"></param>
-        /// <returns></returns>
-        public ulong GetSharedMemorySize(MemoryRegionId memoryRegionId)
-        {
-            return fileDescriptors[memoryRegionId].SharedMemorySize;
-        }
-
-        /// <summary>
-        /// Protected implementation of Dispose pattern.
+        /// Implementation of Dispose pattern.
         /// </summary>
         /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (isDisposed || !disposing)
             {
@@ -209,10 +203,6 @@ namespace Mlos.Core.Linux
             // Dispose of unmanaged resources.
             //
             Dispose(true);
-
-            // Suppress finalization.
-            //
-            GC.SuppressFinalize(this);
         }
 
         private bool isDisposed;

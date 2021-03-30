@@ -85,7 +85,7 @@ void ComponentConfig<T>::SendTelemetryMessage(_In_ const TMessage& message) cons
     // - add object as parameter
     // - update current configuration id.
     //
-    m_mlosContext.m_telemetryChannel.SendMessage(message);
+    m_mlosContext->m_telemetryChannel.SendMessage(message);
 }
 }
 }

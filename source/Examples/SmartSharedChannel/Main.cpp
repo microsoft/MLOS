@@ -81,11 +81,11 @@ main(
 
     // Create MlosContext.
     //
-    Mlos::Core::InterProcessMlosContextInitializer mlosContextInitializer;
-    HRESULT hr = mlosContextInitializer.Initialize();
+    Mlos::Core::MlosInitializer<Mlos::Core::InterProcessMlosContext> mlosInitializer;
+    HRESULT hr = mlosInitializer.CreateContext();
     CheckHR(hr);
 
-    Mlos::Core::InterProcessMlosContext mlosContext(std::move(mlosContextInitializer));
+    Mlos::Core::InterProcessMlosContext& mlosContext = mlosInitializer.MlosContext();
 
     // Configure feedback channel.
     //

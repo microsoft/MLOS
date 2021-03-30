@@ -32,15 +32,15 @@ int main()
 {
     // Create the MlosContext.
     //
-    DefaultMlosContextFactory mlosContextFactory;
-    HRESULT hr = mlosContextFactory.Create();
+    DefaultMlosInitializer mlosInitializer;
+    HRESULT hr = mlosInitializer.CreateContext();
     ThrowIfFail(hr);
 
-    Mlos::Core::MlosContext& mlosContext = mlosContextFactory.m_context;
+    Mlos::Core::MlosContext& mlosContext = mlosInitializer.MlosContext();
 
     // Create a feedback channel receiver thread.
     //
-    ISharedChannel& feedbackChannel = mlosContext.FeedbackChannel();
+    Mlos::Core::ISharedChannel& feedbackChannel = mlosContext.FeedbackChannel();
 
     // This background thread uses a lambda to monitor the feedback channel for
     // new messages and process them using the callbacks registered for each
@@ -76,7 +76,7 @@ int main()
     // This will be stored in a shared memory region below for use by both the
     // component and the external agent.
     //
-    Mlos::Core::ComponentConfig<ExternalIntegrationExample::SmartComponentExampleConfig> config(mlosContext);
+    Mlos::Core::ComponentConfig<ExternalIntegrationExample::SmartComponentExampleConfig> config;
 
     // Initialize the config with default values.
     //
@@ -116,6 +116,9 @@ int main()
     // Now, terminate the control channel.
     //
     mlosContext.TerminateControlChannel();
+
+    // Make sure to reap our reader thread.
+    feedbackChannelReader.wait();
 
     return 0;
 }

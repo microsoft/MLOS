@@ -6,10 +6,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-
 using Mlos.SettingsSystem.Attributes;
-using Mlos.SettingsSystem.StdTypes;
 
 namespace Mlos.Core.Internal
 {
@@ -43,24 +40,8 @@ namespace Mlos.Core.Internal
     /// Memory region identifier.
     /// </summary>
     [CodegenType]
-    public partial struct MemoryRegionId : IEquatable<MemoryRegionId>
+    public partial struct MemoryRegionId
     {
-        /// <summary>
-        /// Operator ==.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator ==(MemoryRegionId left, MemoryRegionId right) => left.Equals(right);
-
-        /// <summary>
-        /// Operator !=.
-        /// </summary>
-        /// <param name="left"></param>
-        /// <param name="right"></param>
-        /// <returns></returns>
-        public static bool operator !=(MemoryRegionId left, MemoryRegionId right) => !(left == right);
-
         /// <summary>
         /// Memory region type.
         /// </summary>
@@ -73,30 +54,13 @@ namespace Mlos.Core.Internal
         /// Default 0.
         /// </remarks>
         public ushort Index;
-
-        /// <inheritdoc />
-        public override bool Equals(object obj)
-        {
-            if (!(obj is MemoryRegionId))
-            {
-                return false;
-            }
-
-            return Equals((MemoryRegionId)obj);
-        }
-
-        /// <inheritdoc />
-        public bool Equals(MemoryRegionId other) => Type == other.Type && Index == other.Index;
-
-        /// <inheritdoc />
-        public override int GetHashCode() => (((ulong)Type << 16) + Index).GetHashCode();
     }
 
     /// <summary>
     /// Definition of memory region.
     /// </summary>
     [CodegenType]
-    internal partial struct MemoryRegion
+    public partial struct MemoryRegion
     {
         /// <summary>
         /// Size of the memory region.
@@ -120,51 +84,5 @@ namespace Mlos.Core.Internal
         /// Memory region identifier.
         /// </summary>
         internal MemoryRegionId MemoryRegionId;
-    }
-
-    /// <summary>
-    /// Registered shared memory region.
-    /// </summary>
-    [CodegenType]
-    public partial struct RegisteredMemoryRegionConfig
-    {
-        [ScalarSetting(isPrimaryKey: true)]
-        internal MemoryRegionType MemoryRegionType;
-
-        [ScalarSetting(isPrimaryKey: true)]
-        internal ushort MemoryRegionIndex;
-
-        /// <summary>
-        /// Name of the shared memory map.
-        /// </summary>
-        [ScalarSetting]
-        internal StringPtr SharedMemoryMapName;
-
-        /// <summary>
-        /// Size of the memory region.
-        /// </summary>
-        internal ulong MemoryRegionSize;
-    }
-
-    /// <summary>
-    /// Message used to exchange file descriptor via Unix domain socket.
-    /// </summary>
-    [CodegenType]
-    public partial struct FileDescriptorExchangeMessage
-    {
-        /// <summary>
-        /// Memory region identifier.
-        /// </summary>
-        public MemoryRegionId MemoryRegionId;
-
-        /// <summary>
-        /// Indicates whether message contains a valid file descriptor.
-        /// </summary>
-        public bool ContainsFd;
-
-        /// <summary>
-        /// Size of the memory region.
-        /// </summary>
-        public ulong MemoryRegionSize;
     }
 }

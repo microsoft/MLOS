@@ -25,8 +25,7 @@ namespace Core
 // NAME: NamedEvent::Constructor.
 //
 NamedEvent::NamedEvent() noexcept
-  : m_hEvent(nullptr),
-    CleanupOnClose(false)
+  : m_hEvent(nullptr)
 {
 }
 
@@ -36,9 +35,8 @@ NamedEvent::NamedEvent() noexcept
 // PURPOSE:
 //  Move constructor.
 //
-NamedEvent::NamedEvent(NamedEvent&& namedEvent) noexcept
-  : m_hEvent(std::exchange(namedEvent.m_hEvent, nullptr)),
-    CleanupOnClose(std::exchange(namedEvent.CleanupOnClose, false))
+NamedEvent::NamedEvent(_In_ NamedEvent&& namedEvent) noexcept
+  : m_hEvent(std::exchange(namedEvent.m_hEvent, nullptr))
 {
 }
 
@@ -60,7 +58,7 @@ NamedEvent::~NamedEvent()
 //  HRESULT.
 //
 _Must_inspect_result_
-HRESULT NamedEvent::CreateOrOpen(const _In_z_ char* const namedEventName) noexcept
+HRESULT NamedEvent::CreateOrOpen(_In_z_ const char* namedEventName) noexcept
 {
     PSECURITY_DESCRIPTOR securityDescriptor = nullptr;
 
@@ -109,7 +107,7 @@ HRESULT NamedEvent::CreateOrOpen(const _In_z_ char* const namedEventName) noexce
 //  HRESULT.
 //
 _Must_inspect_result_
-HRESULT NamedEvent::Open(const _In_z_ char* const namedEventName) noexcept
+HRESULT NamedEvent::Open(_In_z_ const char* namedEventName) noexcept
 {
     HRESULT hr = S_OK;
 
@@ -141,11 +139,9 @@ HRESULT NamedEvent::Open(const _In_z_ char* const namedEventName) noexcept
 // PURPOSE:
 //  Closes a named event object.
 //
-void NamedEvent::Close()
+void NamedEvent::Close(bool cleanupOnClose)
 {
-    // Windows OS will remove the named event once the last process using it will terminate, just reset the flag.
-    //
-    CleanupOnClose = false;
+    MLOS_UNUSED_ARG(cleanupOnClose);
 
     CloseHandle(m_hEvent);
     m_hEvent = nullptr;
@@ -178,7 +174,7 @@ HRESULT NamedEvent::Signal()
 //  HRESULT.
 //
 _Must_inspect_result_
-HRESULT NamedEvent::Wait()
+HRESULT NamedEvent::Wait() const
 {
     DWORD result = WaitForSingleObject(m_hEvent, INFINITE);
 
@@ -191,7 +187,7 @@ HRESULT NamedEvent::Wait()
 // RETURNS:
 //  Gets a value that indicates whether the handle is invalid.
 //
-bool NamedEvent::IsInvalid()
+bool NamedEvent::IsInvalid() const
 {
     return m_hEvent == nullptr;
 }

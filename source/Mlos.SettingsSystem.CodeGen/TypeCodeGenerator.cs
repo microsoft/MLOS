@@ -96,6 +96,16 @@ namespace Mlos.SettingsSystem.CodeGen
                     FileLinePosition = SourceCompilation.GetFileLinePosition(fieldInfo),
                 });
 
+        private void AddIncorrectStructAccessModifier(Type sourceType) =>
+            CodeGenErrors.Add(
+                new CodegenError
+                {
+                    ErrorNumber = "Incorrect struct access modifier",
+                    ErrorText = $"Codegen type struct must be declared as public '{sourceType}'",
+                    IsWarning = false,
+                    FileLinePosition = SourceCompilation.GetFileLinePosition(sourceType),
+                });
+
         /// <summary>
         /// Generate the necessary code for a given type.
         /// </summary>
@@ -121,7 +131,11 @@ namespace Mlos.SettingsSystem.CodeGen
                 return false;
             }
 
-            DefineCppType(sourceType, hasVariableSerializableLength, out List<CppField> cppFields);
+            DefineCppType(
+                sourceType,
+                hasVariableSerializableLength,
+                out List<CppField> cppFields,
+                out List<CppConstField> cppConstFields);
 
             // We are unable to generate code, return early.
             //
@@ -132,15 +146,57 @@ namespace Mlos.SettingsSystem.CodeGen
 
             if (CodeWriter.Accept(sourceType))
             {
-                WriteCode(sourceType, cppFields);
+                WriteCode(sourceType, cppFields, cppConstFields);
             }
 
             return true;
         }
 
-        private void DefineCppType(Type sourceType, bool hasVariableSerializableLength, out List<CppField> cppFields)
+        /// <summary>
+        /// Creates C++ type definition for a given C# type.
+        /// </summary>
+        /// <param name="sourceType"></param>
+        /// <param name="hasVariableSerializableLength"></param>
+        /// <param name="cppFields"></param>
+        /// <param name="cppConstFields"></param>
+        private void DefineCppType(
+            Type sourceType,
+            bool hasVariableSerializableLength,
+            out List<CppField> cppFields,
+            out List<CppConstField> cppConstFields)
         {
+            if (!sourceType.IsPublic)
+            {
+                AddIncorrectStructAccessModifier(sourceType);
+            }
+
             cppFields = new List<CppField>();
+            cppConstFields = new List<CppConstField>();
+
+            // Export static/const fields.
+            //
+            foreach (FieldInfo fieldInfo in sourceType.GetStaticFields())
+            {
+                // Get the field type.
+                //
+                if (!IsSupportedFieldType(fieldInfo, out CppType cppFieldType))
+                {
+                    AddUnsupportedFieldTypeError(sourceType, fieldInfo);
+                    continue;
+                }
+
+                // Get the const value.
+                //
+                object constValue = fieldInfo.GetValue(obj: null);
+
+                cppConstFields.Add(
+                    new CppConstField
+                    {
+                        FieldInfo = fieldInfo,
+                        CppType = cppFieldType,
+                        ConstValue = constValue,
+                    });
+            }
 
             // Build list of structure properties.
             // Calculate fields offsets for flatten structure.
@@ -307,7 +363,10 @@ namespace Mlos.SettingsSystem.CodeGen
             }
         }
 
-        private void WriteCode(Type sourceType, List<CppField> cppFields)
+        private void WriteCode(
+            Type sourceType,
+            IEnumerable<CppField> cppFields,
+            IEnumerable<CppConstField> cppConstFields)
         {
             // Open Namespace.
             //
@@ -324,6 +383,26 @@ namespace Mlos.SettingsSystem.CodeGen
             // Class definition.
             //
             CodeWriter.BeginVisitType(sourceType);
+
+            // Const fields definition.
+            //
+            foreach (CppConstField cppConstField in cppConstFields)
+            {
+                // Write a field comment.
+                //
+                if (codeComment.HasValue)
+                {
+                    codeComment = SourceCodeComments.GetCodeComment(cppConstField.FieldInfo);
+                    if (codeComment.HasValue)
+                    {
+                        CodeWriter.WriteComments(codeComment.Value);
+                    }
+                }
+
+                // Write a field definition.
+                //
+                CodeWriter.VisitConstField(cppConstField);
+            }
 
             // Fields definition.
             //

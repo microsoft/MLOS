@@ -62,7 +62,7 @@ struct InterProcessSharedChannelPolicy
 {
     InterProcessSharedChannelPolicy() noexcept = default;
 
-    InterProcessSharedChannelPolicy(InterProcessSharedChannelPolicy&& channelPolicy) noexcept
+    InterProcessSharedChannelPolicy(_In_ InterProcessSharedChannelPolicy&& channelPolicy) noexcept
       : m_notificationEvent(std::move(channelPolicy.m_notificationEvent))
     {
     }

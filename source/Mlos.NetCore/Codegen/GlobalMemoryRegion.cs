@@ -12,8 +12,13 @@ using Mlos.SettingsSystem.StdTypes;
 namespace Mlos.Core.Internal
 {
     [CodegenType]
-    internal partial struct GlobalMemoryRegion
+    public partial struct GlobalMemoryRegion
     {
+        /// <summary>
+        /// Default memory size.
+        /// </summary>
+        public const int GlobalSharedMemorySize = 65536;
+
         /// <summary>
         /// Memory region header.
         /// </summary>
@@ -53,5 +58,52 @@ namespace Mlos.Core.Internal
         /// - registered shared config memory regions.
         /// </remarks>
         internal SharedConfigDictionary SharedConfigDictionary;
+    }
+
+    /// <summary>
+    /// Registered shared memory region.
+    /// </summary>
+    [CodegenType]
+    public partial struct RegisteredMemoryRegionConfig
+    {
+        [ScalarSetting(isPrimaryKey: true)]
+        internal MemoryRegionId MemoryRegionId;
+
+        /// <summary>
+        /// Name of the shared memory map.
+        /// </summary>
+        internal StringPtr MemoryMapName;
+
+        /// <summary>
+        /// Size of the memory region.
+        /// </summary>
+        internal ulong MemoryRegionSize;
+    }
+
+    /// <summary>
+    /// Registered named event in given memory region.
+    /// </summary>
+    [CodegenType]
+    public partial struct RegisteredNamedEventConfig
+    {
+        [ScalarSetting(isPrimaryKey: true)]
+        internal MemoryRegionId MemoryRegionId;
+
+        /// <summary>
+        /// Name of the event.
+        /// </summary>
+        internal StringPtr EventName;
+    }
+
+    /// <summary>
+    /// Message used to exchange file descriptor via Unix domain socket.
+    /// </summary>
+    [CodegenType]
+    public partial struct FileDescriptorExchangeMessage
+    {
+        /// <summary>
+        /// Memory region identifier.
+        /// </summary>
+        public MemoryRegionId MemoryRegionId;
     }
 }

@@ -19,17 +19,15 @@ namespace Mlos
 {
 namespace Core
 {
-// #TODO FILE_MAP_LARGE_PAGES
-//
-
 //----------------------------------------------------------------------------
 // NAME: SharedMemoryMapView::Constructor
 //
 SharedMemoryMapView::SharedMemoryMapView() noexcept
-  : MemSize(0),
-    Buffer(nullptr),
+  : Buffer(nullptr),
+    MemSize(0),
+    m_hFile(INVALID_HANDLE_VALUE),
     m_hMapFile(nullptr),
-    CleanupOnClose(false)
+    m_isCreated(false)
 {
 }
 
@@ -40,10 +38,11 @@ SharedMemoryMapView::SharedMemoryMapView() noexcept
 //  Move constructor.
 //
 SharedMemoryMapView::SharedMemoryMapView(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept
-  : MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
+  : Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
+    MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
+    m_hFile(std::exchange(sharedMemoryMapView.m_hFile, INVALID_HANDLE_VALUE)),
     m_hMapFile(std::exchange(sharedMemoryMapView.m_hMapFile, nullptr)),
-    Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
-    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0))
+    m_isCreated(std::exchange(sharedMemoryMapView.m_isCreated, false))
 {
 }
 
@@ -63,10 +62,11 @@ SharedMemoryMapView::~SharedMemoryMapView()
 //
 void SharedMemoryMapView::Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept
 {
-    MemSize = std::exchange(sharedMemoryMapView.MemSize, 0);
-    m_hMapFile = std::exchange(sharedMemoryMapView.m_hMapFile, nullptr);
     Buffer = std::exchange(sharedMemoryMapView.Buffer, nullptr);
-    CleanupOnClose = std::exchange(sharedMemoryMapView.CleanupOnClose, 0);
+    MemSize = std::exchange(sharedMemoryMapView.MemSize, 0);
+    m_hFile = std::exchange(sharedMemoryMapView.m_hFile, INVALID_HANDLE_VALUE);
+    m_hMapFile = std::exchange(sharedMemoryMapView.m_hMapFile, nullptr);
+    m_isCreated = std::exchange(sharedMemoryMapView.m_isCreated, false);
 }
 
 //----------------------------------------------------------------------------
@@ -82,7 +82,7 @@ void SharedMemoryMapView::Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView)
 //
 _Must_inspect_result_
 HRESULT SharedMemoryMapView::CreateNew(
-    _In_z_ const char* const sharedMemoryMapName,
+    _In_z_ const char* sharedMemoryMapName,
     _In_ size_t memSize) noexcept
 {
     Close();
@@ -105,7 +105,7 @@ HRESULT SharedMemoryMapView::CreateNew(
             higher_uint32(memSize), // maximum object size (high-order DWORD)
             lower_uint32(memSize),  // maximum object size (low-order DWORD)
             sharedMemoryMapName);   // name of mapping object
-        if (m_hMapFile == NULL)
+        if (m_hMapFile == nullptr)
         {
             hr = HRESULT_FROM_WIN32(GetLastError());
         }
@@ -123,7 +123,11 @@ HRESULT SharedMemoryMapView::CreateNew(
         hr = MapMemoryView(memSize);
     }
 
-    if (FAILED(hr))
+    if (SUCCEEDED(hr))
+    {
+        m_isCreated = true;
+    }
+    else
     {
         // If we fail, close all opened handles.
         //
@@ -147,7 +151,7 @@ HRESULT SharedMemoryMapView::CreateNew(
 //
 _Must_inspect_result_
 HRESULT SharedMemoryMapView::CreateOrOpen(
-    _In_z_ const char* const sharedMemoryMapName,
+    _In_z_ const char* sharedMemoryMapName,
     _In_ size_t memSize) noexcept
 {
     Close();
@@ -188,7 +192,7 @@ HRESULT SharedMemoryMapView::OpenExisting(_In_z_ const char* const sharedMemoryM
         FILE_MAP_READ | FILE_MAP_WRITE, // read/write access
         FALSE,                          // inherit handle
         sharedMemoryMapName);           // name of mapping object
-    if (m_hMapFile == NULL)
+    if (m_hMapFile == nullptr)
     {
         hr = HRESULT_FROM_WIN32(GetLastError());
     }
@@ -201,6 +205,78 @@ HRESULT SharedMemoryMapView::OpenExisting(_In_z_ const char* const sharedMemoryM
     if (SUCCEEDED(hr))
     {
         hr = MapMemoryView(0 /* memSize */);
+    }
+
+    if (FAILED(hr))
+    {
+        // If we fail, close all opened handles.
+        //
+        Close();
+    }
+
+    return hr;
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::OpenFromHandle
+//
+// PURPOSE:
+//  Opens shared mapping from the file handle.
+//
+// RETURNS:
+//  HRESULT.
+//
+// NOTES:
+//
+_Must_inspect_result_
+HRESULT SharedMemoryMapView::OpenFromHandle(
+    _In_ HANDLE hFile,
+    _In_ size_t memSize)
+{
+    Close();
+
+    HRESULT hr = S_OK;
+
+    m_hFile = hFile;
+    m_isCreated = memSize != 0;
+
+    if (memSize == 0)
+    {
+        // Get the map size from the file size.
+        //
+        LARGE_INTEGER queryMemSize = {};
+        if (SUCCEEDED(hr))
+        {
+            if (!GetFileSizeEx(m_hFile, &queryMemSize))
+            {
+                hr = HRESULT_FROM_WIN32(GetLastError());
+            }
+        }
+
+        if (SUCCEEDED(hr))
+        {
+            memSize = queryMemSize.QuadPart;
+        }
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        m_hMapFile = CreateFileMappingA(
+            m_hFile,                // use paging file
+            nullptr,                // security attributes
+            PAGE_READWRITE,         // read/write access
+            higher_uint32(memSize), // maximum object size (high-order DWORD)
+            lower_uint32(memSize),  // maximum object size (low-order DWORD)
+            nullptr);               // name of mapping object
+        if (m_hMapFile == nullptr)
+        {
+            hr = HRESULT_FROM_WIN32(GetLastError());
+        }
+    }
+
+    if (SUCCEEDED(hr))
+    {
+        hr = MapMemoryView(memSize);
     }
 
     if (FAILED(hr))
@@ -243,9 +319,9 @@ HRESULT SharedMemoryMapView::MapMemoryView(_In_ size_t memSize) noexcept
 
     if (SUCCEEDED(hr) && memSize == 0)
     {
-        MEMORY_BASIC_INFORMATION memInfo = { 0 };
+        MEMORY_BASIC_INFORMATION memInfo = {};
 
-        SIZE_T memInfoResult = VirtualQueryEx(
+        const SIZE_T memInfoResult = VirtualQueryEx(
             ::GetCurrentProcess(),
             bufferPtr,
             &memInfo,
@@ -273,17 +349,31 @@ HRESULT SharedMemoryMapView::MapMemoryView(_In_ size_t memSize) noexcept
 // PURPOSE:
 //  Closes a shared memory handle.
 //
-void SharedMemoryMapView::Close()
+void SharedMemoryMapView::Close(_In_ bool cleanupOnClose)
 {
-    // Windows OS will remove the shared memory map once the last process detaches from it, just reset the flag.
-    //
-    CleanupOnClose = false;
+    MLOS_UNUSED_ARG(cleanupOnClose);
+
+    m_isCreated = false;
 
     UnmapViewOfFile(Buffer.Pointer);
     Buffer.Pointer = nullptr;
 
     CloseHandle(m_hMapFile);
     m_hMapFile = nullptr;
+
+    CloseHandle(m_hFile);
+    m_hFile = INVALID_HANDLE_VALUE;
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::IsCreated
+//
+// PURPOSE:
+//  Returns true if shared memory was created.
+//
+bool SharedMemoryMapView::IsCreated() const
+{
+    return m_isCreated;
 }
 }
 }

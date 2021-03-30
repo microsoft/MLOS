@@ -38,6 +38,7 @@
     </ClCompile>
     <ClCompile Include="MessageVerificationTests.cpp" />
     <ClCompile Include="MetadataTests.cpp" />
+    <ClCompile Include="PlatformTests.cpp" />
     <ClCompile Include="SharedChannelTests.cpp" />
   </ItemGroup>
   <ItemGroup>

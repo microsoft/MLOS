@@ -72,6 +72,8 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
         if not in_place:
             df = df.copy(deep=True)
         for dim_name, forward_mapping in self._adaptee_to_target_dimension_mappings.items():
+            if dim_name not in df.columns:
+                continue
             df[dim_name] = df[dim_name].apply(lambda original_value: forward_mapping.get(original_value, original_value))  # pylint: disable=cell-var-from-loop
         return df
 
@@ -79,6 +81,8 @@ class CategoricalToDiscreteHypergridAdapter(HypergridAdapter):
         if not in_place:
             df = df.copy(deep=True)
         for dim_name, backward_mapping in self._target_to_adaptee_dimension_mappings.items():
+            if dim_name not in df.columns:
+                continue
             df[dim_name] = df[dim_name].apply(lambda original_value: backward_mapping.get(original_value, original_value))  # pylint: disable=cell-var-from-loop
         return df
 

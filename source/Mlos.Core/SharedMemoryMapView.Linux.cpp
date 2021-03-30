@@ -49,9 +49,9 @@ int memfd_create(const char* name, unsigned int flags)
 SharedMemoryMapView::SharedMemoryMapView() noexcept
  :  MemSize(0),
     Buffer(nullptr),
-    CleanupOnClose(false),
     m_fdSharedMemory(INVALID_FD_VALUE),
-    m_sharedMemoryMapName(nullptr)
+    m_sharedMemoryMapName(nullptr),
+    m_isCreated(false)
 {
 }
 
@@ -72,9 +72,9 @@ SharedMemoryMapView::~SharedMemoryMapView()
 SharedMemoryMapView::SharedMemoryMapView(_In_ SharedMemoryMapView&& sharedMemoryMapView) noexcept :
     MemSize(std::exchange(sharedMemoryMapView.MemSize, 0)),
     Buffer(std::exchange(sharedMemoryMapView.Buffer, nullptr)),
-    CleanupOnClose(std::exchange(sharedMemoryMapView.CleanupOnClose, 0)),
     m_fdSharedMemory(std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE)),
-    m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr))
+    m_sharedMemoryMapName(std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr)),
+    m_isCreated(std::exchange(sharedMemoryMapView.m_isCreated, false))
 {
 }
 
@@ -92,29 +92,45 @@ void SharedMemoryMapView::Assign(_In_ SharedMemoryMapView&& sharedMemoryMapView)
 {
     MemSize = std::exchange(sharedMemoryMapView.MemSize, 0);
     Buffer = std::exchange(sharedMemoryMapView.Buffer, nullptr);
-    CleanupOnClose = std::exchange(sharedMemoryMapView.CleanupOnClose, 0);
     m_fdSharedMemory = std::exchange(sharedMemoryMapView.m_fdSharedMemory, INVALID_FD_VALUE);
     m_sharedMemoryMapName = std::exchange(sharedMemoryMapView.m_sharedMemoryMapName, nullptr);
+    m_isCreated = std::exchange(sharedMemoryMapView.m_isCreated, false);
 }
 
 //----------------------------------------------------------------------------
 // NAME: SharedMemoryMapView::CreateAnonymous
 //
 // PURPOSE:
-//  Creates an anonymous shared memory view.
+//  Creates an anonymous shared memory view (no file backing).
 //
 // RETURNS:
 //  HRESULT.
 //
 // NOTES:
+//  SharedMemoryMapName is used as an identifier.
 //
 _Must_inspect_result_
-HRESULT SharedMemoryMapView::CreateAnonymous(_In_ size_t memSize) noexcept
+HRESULT SharedMemoryMapView::CreateAnonymous(
+    _In_z_ const char* sharedMemoryMapName,
+    _In_ size_t memSize) noexcept
 {
     Close();
 
+    m_sharedMemoryMapName = strdup(sharedMemoryMapName);
+    if (m_sharedMemoryMapName == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
+
     m_fdSharedMemory = memfd_create("mlos", MFD_CLOEXEC);
-    return MapMemoryView(memSize);
+    HRESULT hr = MapMemoryView(memSize);
+
+    if (SUCCEEDED(hr))
+    {
+        m_isCreated = true;
+    }
+
+    return hr;
 }
 
 //----------------------------------------------------------------------------
@@ -145,7 +161,14 @@ HRESULT SharedMemoryMapView::CreateNew(
 
     m_fdSharedMemory = shm_open(sharedMemoryMapName, O_EXCL | O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 
-    return MapMemoryView(memSize);
+    HRESULT hr = MapMemoryView(memSize);
+
+    if (SUCCEEDED(hr))
+    {
+        m_isCreated = true;
+    }
+
+    return hr;
 }
 
 //----------------------------------------------------------------------------
@@ -161,7 +184,7 @@ HRESULT SharedMemoryMapView::CreateNew(
 //
 _Must_inspect_result_
 HRESULT SharedMemoryMapView::CreateOrOpen(
-    _In_z_ const char* const sharedMemoryMapName,
+    _In_z_ const char* sharedMemoryMapName,
     _In_ size_t memSize) noexcept
 {
     Close();
@@ -189,7 +212,7 @@ HRESULT SharedMemoryMapView::CreateOrOpen(
 // NOTES:
 //
 _Must_inspect_result_
-HRESULT SharedMemoryMapView::OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept
+HRESULT SharedMemoryMapView::OpenExisting(_In_z_ const char* sharedMemoryMapName) noexcept
 {
     Close();
 
@@ -217,12 +240,20 @@ HRESULT SharedMemoryMapView::OpenExisting(_In_z_ const char* const sharedMemoryM
 //
 _Must_inspect_result_
 HRESULT SharedMemoryMapView::OpenExistingFromFileDescriptor(
-    _In_ int sharedMemoryFd,
-    _In_ size_t memSize) noexcept
+    _In_z_ const char* sharedMemoryMapName,
+    _In_ int32_t sharedMemoryFd) noexcept
 {
+    Close();
+
+    m_sharedMemoryMapName = strdup(sharedMemoryMapName);
+    if (m_sharedMemoryMapName == nullptr)
+    {
+        return E_OUTOFMEMORY;
+    }
+
     m_fdSharedMemory = sharedMemoryFd;
 
-    return MapMemoryView(memSize);
+    return MapMemoryView(0 /* memSize */);
 }
 
 //----------------------------------------------------------------------------
@@ -300,7 +331,7 @@ HRESULT SharedMemoryMapView::MapMemoryView(_In_ size_t memSize) noexcept
 // PURPOSE:
 //  Closes a shared memory view.
 //
-void SharedMemoryMapView::Close()
+void SharedMemoryMapView::Close(_In_ bool cleanupOnClose)
 {
     if (Buffer.Pointer != nullptr)
     {
@@ -315,7 +346,7 @@ void SharedMemoryMapView::Close()
         close(m_fdSharedMemory);
         m_fdSharedMemory = INVALID_FD_VALUE;
 
-        if (CleanupOnClose)
+        if (cleanupOnClose)
         {
             if (m_sharedMemoryMapName != nullptr)
             {
@@ -329,8 +360,17 @@ void SharedMemoryMapView::Close()
         free(m_sharedMemoryMapName);
         m_sharedMemoryMapName = nullptr;
     }
+}
 
-    CleanupOnClose = false;
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::GetSharedMemoryMapName
+//
+// PURPOSE:
+//  Gets a shared memory map name.
+//
+const char* SharedMemoryMapView::GetSharedMemoryMapName() const
+{
+    return m_sharedMemoryMapName;
 }
 
 //----------------------------------------------------------------------------
@@ -339,9 +379,20 @@ void SharedMemoryMapView::Close()
 // PURPOSE:
 //  Gets a shared memory file descriptor.
 //
-int SharedMemoryMapView::GetFileDescriptor() const
+int32_t SharedMemoryMapView::GetFileDescriptor() const
 {
     return m_fdSharedMemory;
+}
+
+//----------------------------------------------------------------------------
+// NAME: SharedMemoryMapView::IsCreated
+//
+// PURPOSE:
+//  Returns true if shared memory was created.
+//
+bool SharedMemoryMapView::IsCreated() const
+{
+    return m_isCreated;
 }
 }
 }

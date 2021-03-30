@@ -20,9 +20,9 @@ string ObjectDirectory
     {
         string objectDirectory =  Configuration switch
         {
-                "Release" => objectDirectory = "obj",
-                "Debug" => objectDirectory = "objd",
-                _ => throw new InvalidOperationException("Unsupported configuration")
+            "Release" => objectDirectory = "obj",
+            "Debug" => objectDirectory = "objd",
+            _ => throw new InvalidOperationException("Unsupported configuration")
         };
 
         return objectDirectory;

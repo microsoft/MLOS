@@ -118,7 +118,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         return features_df, objectives_df, context_df
 
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None, objective_name=None) -> Prediction:  # pylint: disable=unused-argument
         # TODO: make this streaming and/or using arrow.
         #
         if context_values_pandas_frame is not None:

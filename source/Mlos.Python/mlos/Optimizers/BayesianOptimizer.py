@@ -7,8 +7,9 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
-from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.OptimizerBase import OptimizerBase
+from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
@@ -54,6 +55,7 @@ class BayesianOptimizer(OptimizerBase):
 
         self.surrogate_model_output_space = optimization_problem.objective_space
         self.optimizer_config = optimizer_config
+        self.pareto_frontier: ParetoFrontier = ParetoFrontier(optimization_problem=self.optimization_problem)
 
         # Now let's put together the surrogate model.
         #
@@ -78,6 +80,7 @@ class BayesianOptimizer(OptimizerBase):
         self.experiment_designer = ExperimentDesigner(
             designer_config=self.optimizer_config.experiment_designer_config,
             optimization_problem=self.optimization_problem,
+            pareto_frontier=self.pareto_frontier,
             surrogate_model=self.surrogate_model,
             logger=self.logger
         )
@@ -113,8 +116,11 @@ class BayesianOptimizer(OptimizerBase):
     def compute_surrogate_model_goodness_of_fit(self):
         if not self.surrogate_model.trained:
             raise RuntimeError("Model has not been trained yet.")
-        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(parameter_values=self._parameter_values_df.copy(),
-                                                                                            context_values=self._context_values_df.copy())
+        feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
+            parameters_df=self._parameter_values_df.copy(),
+            context_df=self._context_values_df.copy()
+        )
+
         return self.surrogate_model.compute_goodness_of_fit(
             features_df=feature_values_pandas_frame,
             targets_df=self._target_values_df.copy(),
@@ -143,6 +149,8 @@ class BayesianOptimizer(OptimizerBase):
     def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
+
+        self.logger.info(f"Registering {len(parameter_values_pandas_frame.index)} parameters and {len(target_values_pandas_frame.index)} objectives.")
 
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
             raise ValueError("Context required by optimization problem but not provided.")
@@ -187,21 +195,29 @@ class BayesianOptimizer(OptimizerBase):
         # TODO: ascertain that min_samples_required ... is more than min_samples to fit the model
         if self.num_observed_samples >= self.optimizer_config.min_samples_required_for_guided_design_of_experiments:
             feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
-                parameter_values=self._parameter_values_df, context_values=self._context_values_df)
+                parameters_df=self._parameter_values_df,
+                context_df=self._context_values_df
+            )
+
             self.surrogate_model.fit(
                 features_df=feature_values_pandas_frame,
                 targets_df=self._target_values_df,
                 iteration_number=len(self._parameter_values_df.index)
             )
 
+        self.pareto_frontier.update_pareto(objectives_df=self._target_values_df, parameters_df=self._parameter_values_df)
+
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None) -> Prediction:  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None, objective_name=None) -> Prediction:  # pylint: disable=unused-argument
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=parameter_values_pandas_frame,
-            context_values=context_values_pandas_frame
+            parameters_df=parameter_values_pandas_frame,
+            context_df=context_values_pandas_frame
         )
 
-        return self.surrogate_model.predict(feature_values_pandas_frame)[0]
+        if objective_name is None:
+            objective_name = self.optimization_problem.objective_names[0]
+
+        return self.surrogate_model.predict(feature_values_pandas_frame)[objective_name]
 
     def focus(self, subspace):
         ...

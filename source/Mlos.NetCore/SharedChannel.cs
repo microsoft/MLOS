@@ -534,7 +534,7 @@ namespace Mlos.Core
             bool result = true;
             while (result)
             {
-              result = WaitAndDispatchFrame(dispatchTable);
+                result = WaitAndDispatchFrame(dispatchTable);
             }
 
             Sync.ActiveReaderCount.FetchSub(1);

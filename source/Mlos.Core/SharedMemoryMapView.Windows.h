@@ -43,40 +43,46 @@ public:
     //
     _Must_inspect_result_
     HRESULT CreateNew(
-        _In_z_ const char* const sharedMemoryMapName,
+        _In_z_ const char* sharedMemoryMapName,
         _In_ size_t memSize) noexcept;
 
     // Creates or opens a shared memory view.
     //
     _Must_inspect_result_
     HRESULT CreateOrOpen(
-        _In_z_ const char* const sharedMemoryMapName,
+        _In_z_ const char* sharedMemoryMapName,
         _In_ size_t memSize) noexcept;
 
     // Opens already created shared memory view.
     //
     _Must_inspect_result_
-    HRESULT OpenExisting(_In_z_ const char* const sharedMemoryMapName) noexcept;
+    HRESULT OpenExisting(_In_z_ const char* sharedMemoryMapName) noexcept;
+
+    // Opens already created shared memory view.
+    //
+    _Must_inspect_result_
+    HRESULT OpenFromHandle(
+        _In_ HANDLE hFile,
+        _In_ size_t memSize);
 
     // Closes a shared memory handle.
     //
-    void Close();
+    void Close(_In_ bool cleanupOnClose = false);
+
+    bool IsCreated() const;
 
 private:
     _Must_inspect_result_
     HRESULT MapMemoryView(_In_ size_t memSize) noexcept;
 
 public:
-    size_t MemSize;
     BytePtr Buffer;
+    size_t MemSize;
 
-    // Indicates if we should cleanup OS resources when closing the shared memory map view.
-    // No-op on Windows.
-    //
-    bool CleanupOnClose;
-
-private:
+public:
+    HANDLE m_hFile;
     HANDLE m_hMapFile;
+    bool m_isCreated;
 };
 }
 }

@@ -4,6 +4,7 @@
 #
 import pandas as pd
 
+from mlos.Exceptions import UtilityValueUnavailableException
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizer import UtilityFunctionOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.UtilityFunction import UtilityFunction
@@ -43,7 +44,7 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         UtilityFunctionOptimizer.__init__(self, optimizer_config, optimization_problem, utility_function, logger)
 
     @trace()
-    def suggest(self, context_values_dataframe: pd.DataFrame = None):  # pylint: disable=unused-argument
+    def suggest(self, context_values_dataframe: pd.DataFrame = None):
         """ Returns the next best configuration to try.
 
         It does so by generating num_samples_per_iteration random configurations,
@@ -55,10 +56,17 @@ class RandomSearchOptimizer(UtilityFunctionOptimizer):
         """
         parameter_values_dataframe = self.optimization_problem.parameter_space.random_dataframe(num_samples=self.optimizer_config.num_samples_per_iteration)
         feature_values_dataframe = self.optimization_problem.construct_feature_dataframe(
-            parameter_values=parameter_values_dataframe, context_values=context_values_dataframe, product=True)
-        utility_function_values = self.utility_function(feature_values_dataframe.copy(deep=False))
+            parameters_df=parameter_values_dataframe,
+            context_df=context_values_dataframe,
+            product=True
+        )
+        utility_function_values = self.utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
         num_utility_function_values = len(utility_function_values.index)
-        index_of_max_value = utility_function_values[['utility']].idxmax()['utility'] if num_utility_function_values > 0 else 0
+
+        if num_utility_function_values == 0:
+            raise UtilityValueUnavailableException(f"Utility function {self.utility_function.__class__.__name__} produced no values.")
+
+        index_of_max_value = utility_function_values[['utility']].idxmax()['utility']
         argmax_point = Point.from_dataframe(feature_values_dataframe.loc[[index_of_max_value]])
         config_to_suggest = argmax_point[self.optimization_problem.parameter_space.name]
         self.logger.debug(f"Suggesting: {str(config_to_suggest)}")

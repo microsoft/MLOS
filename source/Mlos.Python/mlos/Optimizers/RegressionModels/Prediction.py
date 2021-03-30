@@ -4,7 +4,10 @@
 #
 from enum import Enum
 from typing import List
+
+import numpy as np
 import pandas as pd
+from scipy.stats import t
 
 class Prediction:
     """ General Prediction class used to capture output from surrogate model .predict() methods
@@ -34,6 +37,7 @@ class Prediction:
         """
         PREDICTED_VALUE_VARIANCE = 'predicted_value_variance'
         PREDICTED_VALUE_DEGREES_OF_FREEDOM = 'predicted_value_degrees_of_freedom'
+        PREDICTED_VALUE_STANDARD_DEVIATION = 'predicted_value_standard_deviation'
 
         # https://en.wikipedia.org/wiki/Sample_mean_and_covariance#Sample_mean
         SAMPLE_MEAN = 'sample_mean'
@@ -109,11 +113,12 @@ class Prediction:
 
         if mean_variance_col in self.expected_column_names:
             if dataframe[mean_variance_col].notnull().any():
-                assert (dataframe[mean_variance_col].notnull() >= 0).all()
+                assert (dataframe[dataframe[mean_variance_col].notnull()][mean_variance_col] >= 0).all()
 
         if sample_variance_col in self.expected_column_names:
             if dataframe[sample_variance_col].notnull().any():
-                assert (dataframe[sample_variance_col].notnull() >= 0).all()
+                assert (dataframe[dataframe[sample_variance_col].notnull()][sample_variance_col] >= 0).all()
+
 
     @classmethod
     def get_enum_by_column_name(cls, column_name):
@@ -162,3 +167,30 @@ class Prediction:
             all_predictions_df.sort_index(inplace=True)
             self.validate_dataframe(all_predictions_df)
             self._dataframe = all_predictions_df
+
+    def add_standard_deviation_column(self) -> str:
+        """Appends a standard deviation column to the prediction dataframe and returns the new column's name.
+
+        This is a convenience function - many users of the Prediction object need to know the standard deviation rather than
+        variance so it makes sense to add it as a feature here.
+
+        :return:
+            TODO: format return type properly
+            new column name
+        """
+        std_dev_col_name = self.LegalColumnNames.PREDICTED_VALUE_STANDARD_DEVIATION.name
+        variance_col_name = self.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        self._dataframe[std_dev_col_name] = np.sqrt(self._dataframe[variance_col_name])
+        return std_dev_col_name
+
+
+    def add_t_values_column(self, alpha: float) -> str:
+        """Appends a t-values column for a given alpha to the prediction dataframe and returns the new column's name.
+
+        :param alpha:
+        :return:
+        """
+        assert 0.0 < alpha < 1.0
+        t_values_column_name = f"t_value_{(1-alpha)*100:.1f}".replace(".", "_point_")
+        self._dataframe[t_values_column_name] = t.ppf(1 - alpha / 2.0, self._dataframe[self.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM])
+        return t_values_column_name

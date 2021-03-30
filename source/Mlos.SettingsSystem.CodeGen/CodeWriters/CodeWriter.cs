@@ -71,6 +71,12 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters
         public abstract void VisitField(CppField cppField);
 
         /// <summary>
+        /// Write a struct const field definition.
+        /// </summary>
+        /// <param name="cppConstField"></param>
+        public abstract void VisitConstField(CppConstField cppConstField);
+
+        /// <summary>
         /// Writes a blank line.
         /// </summary>
         protected void WriteLine() => stringBuilder.AppendLine();

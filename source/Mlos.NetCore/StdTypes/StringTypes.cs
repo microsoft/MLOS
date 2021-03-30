@@ -7,17 +7,20 @@
 // -----------------------------------------------------------------------
 
 using System;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 using Mlos.Core;
 using Mlos.Core.Collections;
 
+using MlosStdTypes = global::Mlos.SettingsSystem.StdTypes;
+
 namespace Proxy.Mlos.SettingsSystem.StdTypes
 {
     /// <summary>
-    /// Maps to StringPtr.
+    /// Codegen proxy for StringPtr.
     /// </summary>
-    public struct StringPtr : IEquatable<StringPtr>, ICodegenProxy
+    public struct StringPtr : ICodegenProxy<MlosStdTypes.StringPtr, StringPtr>, IEquatable<StringPtr>, IEquatable<MlosStdTypes.StringPtr>
     {
         /// <summary>
         /// Operator ==.
@@ -34,6 +37,22 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <param name="right"></param>
         /// <returns></returns>
         public static bool operator !=(StringPtr left, StringPtr right) => !(left == right);
+
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(StringPtr left, MlosStdTypes.StringPtr right) => left.Equals(right);
+
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(StringPtr left, MlosStdTypes.StringPtr right) => !(left == right);
 
         /// <summary>
         /// Gets value stored in the buffer as a string.
@@ -54,7 +73,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
 
                     sbyte* dataPtr = (sbyte*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(sbyte));
+                    return new string(dataPtr, startIndex: 0, length: ((int)dataSize / sizeof(sbyte)) - 1);
                 }
             }
         }
@@ -62,16 +81,23 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is StringPtr))
+            if (obj is StringPtr stringPtr)
             {
-                return false;
+                return Equals(stringPtr);
+            }
+            else if (obj is MlosStdTypes.StringPtr stdStringPtr)
+            {
+                return Equals(stdStringPtr);
             }
 
-            return Equals((StringPtr)obj);
+            return false;
         }
 
         /// <inheritdoc />
         public bool Equals(StringPtr other) => Buffer == other.Buffer;
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.StringPtr other) => string.Compare(Value, other.Value, ignoreCase: false, culture: CultureInfo.InvariantCulture) == 0;
 
         /// <inheritdoc />
         public override int GetHashCode() => Buffer.GetHashCode();
@@ -122,9 +148,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
     }
 
     /// <summary>
-    /// Maps to WideStringPtr.
+    /// Codegen proxy for WideStringPtr.
     /// </summary>
-    public struct WideStringPtr : IEquatable<WideStringPtr>, ICodegenProxy
+    public struct WideStringPtr : ICodegenProxy<MlosStdTypes.WideStringPtr, WideStringPtr>, IEquatable<WideStringPtr>, IEquatable<MlosStdTypes.WideStringPtr>
     {
         /// <summary>
         /// Operator ==.
@@ -141,6 +167,22 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <param name="right"></param>
         /// <returns></returns>
         public static bool operator !=(WideStringPtr left, WideStringPtr right) => !(left == right);
+
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(WideStringPtr left, MlosStdTypes.WideStringPtr right) => left.Equals(right);
+
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(WideStringPtr left, MlosStdTypes.WideStringPtr right) => !(left == right);
 
         /// <summary>
         /// Gets a string stored in the buffer.
@@ -161,7 +203,7 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
 
                     char* dataPtr = (char*)(Buffer + (int)offset);
 
-                    return new string(dataPtr, startIndex: 0, length: (int)dataSize / sizeof(char));
+                    return new string(dataPtr, startIndex: 0, length: ((int)dataSize / sizeof(char)) - 1);
                 }
             }
         }
@@ -169,16 +211,23 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is WideStringPtr))
+            if (obj is WideStringPtr wideStringPtr)
             {
-                return false;
+                return Equals(wideStringPtr);
+            }
+            else if (obj is MlosStdTypes.WideStringPtr stdWideStringPtr)
+            {
+                return Equals(stdWideStringPtr);
             }
 
-            return Equals((WideStringPtr)obj);
+            return false;
         }
 
         /// <inheritdoc />
         public bool Equals(WideStringPtr other) => Buffer == other.Buffer;
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.WideStringPtr other) => string.Compare(Value, other.Value, ignoreCase: false, culture: CultureInfo.InvariantCulture) == 0;
 
         /// <inheritdoc />
         public override int GetHashCode() => Buffer.GetHashCode();
@@ -229,9 +278,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
     }
 
     /// <summary>
-    /// Maps to std::string_view.
+    /// Codegen proxy for std::string_view.
     /// </summary>
-    public struct StringView : IEquatable<StringView>, ICodegenProxy
+    public struct StringView : ICodegenProxy<MlosStdTypes.StringView, StringView>, IEquatable<StringView>, IEquatable<MlosStdTypes.StringView>
     {
         /// <summary>
         /// Operator ==.
@@ -248,6 +297,22 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <param name="right"></param>
         /// <returns></returns>
         public static bool operator !=(StringView left, StringView right) => !(left == right);
+
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(StringView left, MlosStdTypes.StringView right) => left.Equals(right);
+
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(StringView left, MlosStdTypes.StringView right) => !(left == right);
 
         /// <summary>
         /// Gets a string stored in the buffer.
@@ -276,16 +341,23 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is StringView))
+            if (obj is StringView stringView)
             {
-                return false;
+                return Equals(stringView);
+            }
+            else if (obj is MlosStdTypes.StringView stdStringView)
+            {
+                return Equals(stdStringView);
             }
 
-            return Equals((StringView)obj);
+            return false;
         }
 
         /// <inheritdoc />
         public bool Equals(StringView other) => Buffer == other.Buffer;
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.StringView other) => string.Compare(Value, other.Value, ignoreCase: false, culture: CultureInfo.InvariantCulture) == 0;
 
         /// <inheritdoc />
         public override int GetHashCode() => Buffer.GetHashCode();
@@ -336,9 +408,9 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
     }
 
     /// <summary>
-    /// Maps to std::wstring_view.
+    /// Codegen proxy for std::wstring_view.
     /// </summary>
-    public struct WideStringView : IEquatable<WideStringView>, ICodegenProxy
+    public struct WideStringView : ICodegenProxy<MlosStdTypes.WideStringView, WideStringView>, IEquatable<WideStringView>, IEquatable<MlosStdTypes.WideStringView>
     {
         /// <summary>
         /// Operator ==.
@@ -355,6 +427,22 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <param name="right"></param>
         /// <returns></returns>
         public static bool operator !=(WideStringView left, WideStringView right) => !(left == right);
+
+        /// <summary>
+        /// Operator ==.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator ==(WideStringView left, MlosStdTypes.WideStringView right) => left.Equals(right);
+
+        /// <summary>
+        /// Operator !=.
+        /// </summary>
+        /// <param name="left"></param>
+        /// <param name="right"></param>
+        /// <returns></returns>
+        public static bool operator !=(WideStringView left, MlosStdTypes.WideStringView right) => !(left == right);
 
         /// <summary>
         /// Gets a string stored in the buffer.
@@ -402,16 +490,23 @@ namespace Proxy.Mlos.SettingsSystem.StdTypes
         /// <inheritdoc />
         public override bool Equals(object obj)
         {
-            if (!(obj is WideStringView))
+            if (obj is WideStringView wideStringView)
             {
-                return false;
+                return Equals(wideStringView);
+            }
+            else if (obj is MlosStdTypes.WideStringView stdWideStringView)
+            {
+                return Equals(stdWideStringView);
             }
 
-            return Equals((WideStringView)obj);
+            return false;
         }
 
         /// <inheritdoc />
         public bool Equals(WideStringView other) => Buffer == other.Buffer;
+
+        /// <inheritdoc />
+        public bool Equals(MlosStdTypes.WideStringView other) => string.Compare(Value, other.Value, ignoreCase: false, culture: CultureInfo.InvariantCulture) == 0;
 
         /// <inheritdoc />
         public override int GetHashCode() => Buffer.GetHashCode();

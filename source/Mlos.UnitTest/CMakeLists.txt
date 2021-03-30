@@ -7,10 +7,13 @@ include("${MLOS_ROOT}/build/Mlos.Cpp.UnitTest.cmake")
 
 add_executable(${PROJECT_NAME}
     BufferTests.cpp
+    FileWatchEventTests.Linux.cpp
     Main.cpp
     MessageVerificationTests.cpp
     MetadataTests.cpp
-    SharedChannelTests.cpp)
+    PlatformTests.cpp
+    SharedChannelTests.cpp
+    UniqueStringTests.cpp)
 
 target_link_libraries(${PROJECT_NAME} Mlos.Core)
 
@@ -29,7 +32,7 @@ add_dependencies(${PROJECT_NAME} Mlos.UnitTest.SettingsRegistry)
 add_mlos_agent_server_exe_test_run(
     NAME MlosTestRun_Mlos.Agent.Server_${PROJECT_NAME}
     EXECUTABLE_TARGET ${PROJECT_NAME}
-    TIMEOUT 240)
+    TIMEOUT 300)
 
 # Binplace the outputs for more convenient testing.
 install(TARGETS ${PROJECT_NAME}

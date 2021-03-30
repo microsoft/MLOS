@@ -21,7 +21,6 @@
     <ProjectReference Include="$(SourceDir)\Mlos.UnitTest\Mlos.UnitTest.SettingsRegistry\Mlos.UnitTest.SettingsRegistry.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodegenTests.cs" />
     <Compile Include="CodegenTypeTests.cs" />
     <Compile Include="DummyTests.cs" />
     <Compile Include="SharedConfigManagerTests.cs" />

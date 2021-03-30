@@ -45,11 +45,11 @@ class TestOptimizationProblem:
         parameter_df = input_space.random_dataframe(n_samples)
         context_df = context_space.random_dataframe(n_samples)
         with pytest.raises(ValueError, match="Context required"):
-            optimization_problem.construct_feature_dataframe(parameter_values=parameter_df)
+            optimization_problem.construct_feature_dataframe(parameters_df=parameter_df)
 
         feature_df = optimization_problem.construct_feature_dataframe(
-            parameter_values=parameter_df,
-            context_values=context_df)
+            parameters_df=parameter_df,
+            context_df=context_df)
 
         assert isinstance(feature_df, pd.DataFrame)
         assert feature_df.shape == (n_samples, 3)
@@ -73,7 +73,7 @@ class TestOptimizationProblem:
         )
         n_samples = 100
         parameter_df = optimization_problem.parameter_space.random_dataframe(n_samples)
-        feature_df = optimization_problem.construct_feature_dataframe(parameter_values=parameter_df)
+        feature_df = optimization_problem.construct_feature_dataframe(parameters_df=parameter_df)
         assert feature_df.shape == (n_samples, len(optimization_problem.parameter_space.dimension_names) + 1)
         expected_columns = sorted([f"three_level_quadratic_config.{n}" for n in optimization_problem.parameter_space.dimension_names])
         assert (feature_df.columns[:-1].sort_values() == expected_columns).all()

@@ -5,3 +5,4 @@ mlos/Optimizers/unit_tests/temp/*
 !Secrets/sample_docker_connection_string.json
 !Secrets/sample_local_connection_string.json
 mlos.egg-info/*
+htmlcov/

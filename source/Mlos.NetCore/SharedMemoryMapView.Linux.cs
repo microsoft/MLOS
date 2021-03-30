@@ -76,13 +76,20 @@ namespace Mlos.Core.Linux
         /// Opens an anonymous shared memory map from the file descriptor.
         /// </summary>
         /// <param name="sharedMemoryFd"></param>
-        /// <param name="sharedMemorySize"></param>
         /// <returns></returns>
-        public static SharedMemoryMapView OpenAnonymousFromFileDescriptor(IntPtr sharedMemoryFd, ulong sharedMemorySize)
+        public static SharedMemoryMapView OpenFromFileDescriptor(IntPtr sharedMemoryFd)
         {
+            int result = Native.FileStats(sharedMemoryFd, out FileStatus fileStatus);
+            if (result != 0)
+            {
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
+
+            Console.WriteLine($"SharedMemoryMapView OpenFromFileDescriptor {sharedMemoryFd}, {fileStatus.Size}, {fileStatus.Uid}");
+
             return new SharedMemoryMapView(
                 sharedMemoryFd,
-                sharedMemorySize);
+                (ulong)fileStatus.Size);
         }
 
         private SharedMemoryMapView(IntPtr sharedMemoryFd, ulong sharedMemorySize)

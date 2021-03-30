@@ -31,7 +31,7 @@ namespace Mlos.Agent.GrpcServer
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<ExperimentManagerService>();
             });
         }
     }

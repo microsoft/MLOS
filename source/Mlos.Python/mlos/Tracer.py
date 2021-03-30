@@ -8,7 +8,7 @@ import json
 import os
 import time
 from threading import current_thread
-from typing import Dict
+from typing import Callable, Dict
 
 import pandas as pd
 
@@ -28,12 +28,8 @@ def trace():
                 tracer.add_trace_event(name=wrapped_function.__qualname__, phase='B', timestamp_ns=start_timestamp_ns, thread_id=thread_id, arguments=kwargs)
                 try:
                     result = wrapped_function(*args, **kwargs)
-                    end_timestamp_ns = int(time.time() * 1000000)
-                    while end_timestamp_ns <= start_timestamp_ns:
-                        end_timestamp_ns += 100
-                    arguments = None
-                    if result is not None and isinstance(result, (str, int, float, bool)):
-                        arguments = {'result': result}
+                    end_timestamp_ns = max(int(time.time() * 1000000), start_timestamp_ns + 50)
+                    arguments = {'result': result}
                     tracer.add_trace_event(
                         name=wrapped_function.__qualname__,
                         phase='E',
@@ -43,9 +39,7 @@ def trace():
                     )
                 except Exception as e:
                     arguments = {'exception': str(e)}
-                    end_timestamp_ns = int(time.time() * 1000000)
-                    while end_timestamp_ns <= start_timestamp_ns:
-                        end_timestamp_ns += 100
+                    end_timestamp_ns = max(int(time.time() * 1000000), start_timestamp_ns + 50)
                     tracer.add_trace_event(
                         name=wrapped_function.__qualname__,
                         phase='E',
@@ -111,6 +105,10 @@ class Tracer:
         self.thread_id = thread_id
         self._trace_events = []
 
+        # Other components can subscribe to events, perhaps to selectively capture some data in more detail
+        #
+        self._event_subscribers = []
+
     @property
     def trace_events(self):
         return self._trace_events
@@ -118,6 +116,9 @@ class Tracer:
     @trace_events.setter
     def trace_events(self, value):
         self._trace_events = value
+
+    def add_subscriber(self, event_callback: Callable):
+        self._event_subscribers.append(event_callback)
 
     @staticmethod
     def reformat_events(events):
@@ -146,7 +147,7 @@ class Tracer:
     def dump_trace_to_file(self, output_file_path):
         reformatted_trace_events = self.reformat_events(self._trace_events)
         with open(output_file_path, 'w') as out_file:
-            out_file.write(json.dumps(reformatted_trace_events, indent=2))
+            json.dump(reformatted_trace_events, out_file)
 
     def clear_events(self):
         self._trace_events = []
@@ -155,6 +156,13 @@ class Tracer:
         assert phase in {'B', 'E'}, f"Unrecognized category name: {category}."
         if timestamp_ns is None:
             timestamp_ns = int(time.time() * 1000000)
+
+        if actor_id is None:
+            actor_id = self.actor_id
+
+        if thread_id is None:
+            thread_id = self.thread_id
+
         trace_event = dict()
 
         # The +/- 1 should help with proper nesting.
@@ -166,11 +174,26 @@ class Tracer:
         trace_event["name"] = name
         trace_event["phase"] = phase
         trace_event["category"] = category
-        trace_event["actor_id"] = self.actor_id if actor_id is None else actor_id
-        trace_event["thread_id"] = self.thread_id if thread_id is None else thread_id
+        trace_event["actor_id"] = actor_id
+        trace_event["thread_id"] = thread_id
         trace_event["args"] = self._validate_arguments_and_convert_to_json_string(arguments)
 
         self._trace_events.append(trace_event)
+
+        for event_callback in self._event_subscribers:
+            try:
+                event_callback(
+                    name=name,
+                    phase=phase,
+                    timestamp_ns=timestamp_ns,
+                    category=category,
+                    actor_id=actor_id,
+                    thread_id=thread_id,
+                    arguments=arguments
+                )
+            except:
+                pass
+
 
     @classmethod
     def _validate_arguments_and_convert_to_json_string(cls, arguments: Dict) -> str:
@@ -200,12 +223,14 @@ class Tracer:
                     args_json[key] = value
                 elif isinstance(value, pd.DataFrame):
                     args_json[key] = {
-                        "columns": [name for name in value.columns.values],
+                        "columns": value.columns.values.tolist(),
                         "num_rows": len(value.index)
                     }
                 else:
                     try:
                         value = str(value)
+                        if len(value) > 10000:
+                            raise ValueError("Value too long.")
                         args_json[key] = value
                     except:
                         args_json[key] = f"value of type {str(type(value))} but must be one of: str, int, bool, float."

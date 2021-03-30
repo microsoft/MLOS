@@ -61,5 +61,81 @@ namespace Mlos.NetCore.UnitTest
             VerifyPrimaryKeyHashFunctions<FNVHash<uint>> test;
             test.ComparePrimaryKey();
         }
+
+        [Fact]
+        public void VerifyMetadataHash()
+        {
+            TestComponentConfig config = default;
+            ulong hashCode = ((ICodegenKey)config).CodegenTypeHash();
+            Assert.Equal<ulong>(expected: 0x92ab3b94501efa6c, actual: hashCode);
+
+            Point point = default;
+            ulong pointHashCode = ((ICodegenKey)point).CodegenTypeHash();
+            Assert.Equal<ulong>(expected: 0x80D34F1D0805C19D, actual: pointHashCode);
+        }
+
+        [Fact]
+        public void VerifyStringPtrSerialization()
+        {
+            var obj = new StringsPair
+            {
+                String1 = { Value = "Test123" },
+                String2 = { Value = "Test234" },
+            };
+
+            int size = (int)CodegenTypeExtensions.GetSerializedSize(obj);
+            Span<byte> byteBuffer = stackalloc byte[size + 1];
+            byteBuffer[size] = (byte)'#';
+
+            unsafe
+            {
+                fixed (byte* pinnedBuffer = &byteBuffer.GetPinnableReference())
+                {
+                    IntPtr buffer = new IntPtr(pinnedBuffer);
+
+                    CodegenTypeExtensions.Serialize(obj, buffer);
+
+                    MlosUnitTestProxy.StringsPair proxy = default;
+                    proxy.Buffer = buffer;
+
+                    Assert.Equal(obj.String1.Value, proxy.String1.Value);
+                    Assert.Equal(obj.String2.Value, proxy.String2.Value);
+                }
+            }
+
+            Assert.Equal((byte)'#', byteBuffer[size]);
+        }
+
+        [Fact]
+        public void VerifyWideStringPtrSerialization()
+        {
+            var obj = new WideStringsPair
+            {
+                String1 = { Value = "Test123" },
+                String2 = { Value = "Test234" },
+            };
+
+            int size = (int)CodegenTypeExtensions.GetSerializedSize(obj);
+            Span<byte> byteBuffer = stackalloc byte[size + 1];
+            byteBuffer[size] = (byte)'#';
+
+            unsafe
+            {
+                fixed (byte* pinnedBuffer = &byteBuffer.GetPinnableReference())
+                {
+                    IntPtr buffer = new IntPtr(pinnedBuffer);
+
+                    CodegenTypeExtensions.Serialize(obj, buffer);
+
+                    MlosUnitTestProxy.WideStringsPair proxy = default;
+                    proxy.Buffer = buffer;
+
+                    Assert.Equal(obj.String1.Value, proxy.String1.Value);
+                    Assert.Equal(obj.String2.Value, proxy.String2.Value);
+                }
+            }
+
+            Assert.Equal((byte)'#', byteBuffer[size]);
+        }
     }
 }

@@ -71,4 +71,8 @@ class ConfidenceBoundUtilityFunction(UtilityFunction):
             utility_function_values = predictions_df[predicted_value_col] * self._sign + confidence_interval_radii
         else:
             raise RuntimeError(f"Invalid utility function name: {self.config.utility_function_name}.")
-        return pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'])
+
+        utility_function_values = pd.to_numeric(arg=utility_function_values, errors='raise')
+        utility_df = pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'], dtype='float')
+        assert utility_df.dtypes['utility'] == np.float, f"{utility_df} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
+        return utility_df

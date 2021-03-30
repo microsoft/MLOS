@@ -53,7 +53,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
         public override void WriteCloseTypeNamespace(string @namespace)
         {
             --IndentationLevel;
-            WriteLine($"}} // end namespace {Constants.ProxyNamespace}.{@namespace}");
+            WriteLine($"}} // end namespace {@namespace}");
 
             WriteLine();
         }

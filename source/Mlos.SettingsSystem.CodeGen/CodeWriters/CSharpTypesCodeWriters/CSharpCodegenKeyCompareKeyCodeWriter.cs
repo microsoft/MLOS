@@ -42,7 +42,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 
             if (sourceType.HasPrimaryKey())
             {
-                WriteLine($"var instance = ({proxyTypeFullName})proxy;");
+                WriteLine($"var other = ({proxyTypeFullName})proxy;");
             }
         }
 
@@ -74,7 +74,7 @@ namespace Mlos.SettingsSystem.CodeGen.CodeWriters.CSharpTypesCodeWriters
 
             string fieldName = cppField.FieldInfo.Name;
 
-            WriteLine($"result &= this.{fieldName} == instance.{fieldName};");
+            WriteLine($"result &= other.{fieldName} == this.{fieldName};");
         }
     }
 }

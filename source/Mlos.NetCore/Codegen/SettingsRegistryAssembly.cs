@@ -40,7 +40,7 @@ namespace Mlos.Core.Internal
     /// Request message to register settings assembly.
     /// </summary>
     [CodegenMessage]
-    internal partial struct RegisterSettingsAssemblyRequestMessage
+    public partial struct RegisterSettingsAssemblyRequestMessage
     {
         /// <summary>
         /// Assembly index.

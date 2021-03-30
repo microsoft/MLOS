@@ -14,7 +14,7 @@ namespace ExternalIntegrationExample
     /// An example settings config structure for a smart component in the external project.
     /// </summary>
     [CodegenConfig]
-    internal partial struct SmartComponentExampleConfig
+    public partial struct SmartComponentExampleConfig
     {
         /// <summary>
         /// Set by the agent upon suggesting new config.
