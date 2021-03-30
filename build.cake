@@ -341,6 +341,7 @@ Task("Test-CMake")
 Task("Run-CMake-UnitTests")
     .IsDependentOn("Binplace-CMake")
     .WithCriteria(() => IsRunningOnUnix())
+    .WithCriteria(() => !IsRunningInGithub()) // github pipelines already test this via `make dotnet-test cmake-test`
     .Does(() =>
     {
         var dotNetCoreMSBuildSettings = new DotNetCoreMSBuildSettings { MaxCpuCount = 0 };
