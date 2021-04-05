@@ -190,7 +190,7 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
             drop='first'
         )
         self.polynomial_features_adapter = ContinuousToPolynomialBasisHypergridAdapter(
-            adaptee=self.one_hot_encoder_adapter.target,
+            adaptee=self.one_hot_encoder_adapter,  # .target,
             degree=2,
             include_bias=True,
             interaction_only=False
