@@ -8,7 +8,7 @@ import pytest
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimension, DiscreteDimension, OrdinalDimension
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
 from mlos.Spaces.HypergridAdapters import ContinuousToPolynomialBasisHypergridAdapter
-
+from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
 
 class TestContinuousToPolynomialBasisHypergridAdapter:
 
@@ -178,3 +178,31 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
                 print('expected: ', expected_values)
                 print('observed: ', observed_values)
             assert sum_diffs < epsilon
+
+    def test_stacking_polynomial_feature_on_one_hot_encoding(self):
+        # The RegressionEnhancedRandomForestRegressionModel stacks polynomial feature adapter on one hot encoding adapter.
+        # When the RERF code was changed to use these adapters, there was some concern about how the stacking was done.
+        # This test tries to replicate the result of using the expected stacking pattern.
+
+        self.one_hot_encoder_adapter = CategoricalToOneHotEncodedHypergridAdapter(
+            adaptee=self.balanced_hierarchical_hypergrid,
+            merge_all_categorical_dimensions=True,
+            drop='first'
+        )
+        self.polynomial_features_adapter = ContinuousToPolynomialBasisHypergridAdapter(
+            adaptee=self.one_hot_encoder_adapter.target,
+            degree=2,
+            include_bias=True,
+            interaction_only=False
+        )
+
+        original_df = self.balanced_hierarchical_hypergrid.random_dataframe(num_samples=10)
+        print(original_df.columns.values, len(original_df.columns.values))
+
+        ohe_projected_df = self.one_hot_encoder_adapter.project_dataframe(df=original_df, in_place=False)
+        print(ohe_projected_df.columns.values, len(ohe_projected_df.columns.values))
+        assert len(ohe_projected_df.columns.values) == 9
+
+        both_projected_df = self.polynomial_features_adapter.project_dataframe(df=ohe_projected_df, in_place=True)
+        print(both_projected_df.columns.values, len(both_projected_df.columns.values))
+        assert len(both_projected_df.columns.values) == 31
