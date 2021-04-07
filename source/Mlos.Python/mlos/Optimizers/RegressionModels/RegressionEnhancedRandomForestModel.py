@@ -147,7 +147,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
         self.polynomial_features_adapter = ContinuousToPolynomialBasisHypergridAdapter(
-            adaptee=self.one_hot_encoder_adapter.target,
+            adaptee=self.one_hot_encoder_adapter, #.target,
             degree=self.model_config.max_basis_function_degree,
             include_bias=True,
             interaction_only=False
@@ -483,8 +483,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         for missing_column_name in missing_column_names:
             x[missing_column_name] = np.NaN
 
-        x_df = self.one_hot_encoder_adapter.project_dataframe(df=x, in_place=False)
-        x_df = self.polynomial_features_adapter.project_dataframe(df=x_df, in_place=True)
+        x_df = self.polynomial_features_adapter.project_dataframe(df=x, in_place=True)
 
         # impute 0s for NaNs (NaNs can come from hierarchical hypergrids)
         x_df.fillna(value=0, inplace=True)
@@ -493,7 +492,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         else:
             fit_x = x_df.to_numpy()
             self.polynomial_features_powers_ = self.polynomial_features_adapter.get_polynomial_feature_powers_table()
-        #fit_x = self.scaler_.fit_transform(fit_x)
         self.fit_X_ = fit_x
 
         if what_to_return.upper() == 'fit_x'.upper():

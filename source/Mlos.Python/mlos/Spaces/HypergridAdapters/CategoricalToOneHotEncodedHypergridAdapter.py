@@ -94,6 +94,7 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
             self._adaptee_expected_dimension_name_ordering.append(adaptee_dimension.name)
         self._adaptee_contains_categorical_dimensions = len(self._adaptee_dimension_names_to_transform) > 0
 
+        # since sklearn OneHotEncoder doesn't accept strings, convert any categorical dimensions to discrete
         if any(isinstance(dimension, CategoricalDimension) for dimension in self._adaptee.dimensions) or self.has_adaptee_been_flattened:
             self._adaptee = CategoricalToDiscreteHypergridAdapter(adaptee=self._adaptee)
 
