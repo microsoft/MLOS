@@ -49,13 +49,15 @@ class TestCategoricalToOneHotEncodedHypergridAdapter:
     @pytest.mark.parametrize("drop", ['first', None])
     @pytest.mark.parametrize("merge_all_categorical_dimensions", [True, False])
     def test_projecting_point_from_categorical_to_one_hot_encoding_simple_hypergrid_parameterized(self, drop, merge_all_categorical_dimensions):
-        for adaptee in [self.simple_hypergrid,
-                        self.hierarchical_hypergrid]:
+        for adaptee in [self.simple_hypergrid, self.hierarchical_hypergrid]:
             adapter = CategoricalToOneHotEncodedHypergridAdapter(
                 adaptee=adaptee,
                 drop=drop,
                 merge_all_categorical_dimensions=merge_all_categorical_dimensions
             )
+            test_types_are_not_categorical = [dimension.__class__ != CategoricalDimension for dimension in adapter.dimensions]
+            assert all(test_types_are_not_categorical)
+
             self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(
                 adaptee=adaptee,
                 adapter=adapter,
@@ -66,13 +68,15 @@ class TestCategoricalToOneHotEncodedHypergridAdapter:
     @pytest.mark.parametrize("drop", ['first', None])
     @pytest.mark.parametrize("merge_all_categorical_dimensions", [True, False])
     def test_projecting_dataframe_from_flat_to_one_hot_encoded_hypergrid_parameterized(self, drop, merge_all_categorical_dimensions):
-        for adaptee in [self.simple_hypergrid,
-                        self.hierarchical_hypergrid]:
+        for adaptee in [self.simple_hypergrid, self.hierarchical_hypergrid]:
             adapter = CategoricalToOneHotEncodedHypergridAdapter(
                 adaptee=adaptee,
                 drop=drop,
                 merge_all_categorical_dimensions=merge_all_categorical_dimensions
             )
+            test_types_are_not_categorical = [dimension.__class__ != CategoricalDimension for dimension in adapter.dimensions]
+            assert all(test_types_are_not_categorical)
+
             self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(
                 adapter=adapter,
                 adaptee=adaptee,
@@ -89,11 +93,16 @@ class TestCategoricalToOneHotEncodedHypergridAdapter:
             assert projected_df[column].isin([0, 1]).all()
         unprojected_df = adapter.unproject_dataframe(df=projected_df, in_place=False)
         assert original_df.equals(unprojected_df)
+        assert all([expected_column_name in projected_df.columns.values
+                    for expected_column_name in adapter.get_one_hot_encoded_column_names()])
 
         # Let's make sure that projecting in place works as expected.
         projected_in_place_df = adapter.project_dataframe(original_df, in_place=True)
         assert id(original_df) == id(projected_in_place_df)
         assert projected_in_place_df.equals(projected_df)
+        assert all([expected_column_name in projected_in_place_df.columns.values
+                    for expected_column_name in adapter.get_one_hot_encoded_column_names()])
+
         unprojected_in_place_df = adapter.unproject_dataframe(projected_in_place_df, in_place=True)
         assert id(original_df) == id(unprojected_in_place_df)
         assert unprojected_in_place_df.equals(unprojected_df[unprojected_in_place_df.columns.values])

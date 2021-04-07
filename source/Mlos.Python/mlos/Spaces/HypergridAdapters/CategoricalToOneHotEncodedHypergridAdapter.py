@@ -108,6 +108,10 @@ class CategoricalToOneHotEncodedHypergridAdapter(HypergridAdapter):
     def target(self) -> Hypergrid:
         return self._target
 
+    @property
+    def was_encoding_merge_all_categoricals_requested(self):
+        return self._merge_all_categorical_dimensions
+
     def get_original_categorical_column_names(self):
         return self._adaptee_to_target_data_dict.keys()
 

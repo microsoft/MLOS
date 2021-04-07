@@ -184,13 +184,14 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
     @pytest.mark.parametrize("interaction_only", [True, False])
     @pytest.mark.parametrize("drop", ['first', None])
     @pytest.mark.parametrize("merge_all_categorical_dimensions", [True, False])
-    def test_stacking_polynomial_feature_on_one_hot_encoding_parameterized(self,
-                                                                           degree,
-                                                                           include_bias,
-                                                                           interaction_only,
-                                                                           drop,
-                                                                           merge_all_categorical_dimensions
-                                                                           ):
+    def test_stacking_polynomial_feature_on_one_hot_encoding_parameterized(
+        self,
+        degree,
+        include_bias,
+        interaction_only,
+        drop,
+        merge_all_categorical_dimensions
+    ):
         # The RegressionEnhancedRandomForestRegressionModel stacks polynomial feature adapter on one hot encoding adapter.
         # When the RERF code was changed to use these adapters, there was some concern about how the stacking was done.
         # This test tries to replicate the result of using the expected stacking pattern.
