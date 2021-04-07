@@ -147,7 +147,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
         self.polynomial_features_adapter = ContinuousToPolynomialBasisHypergridAdapter(
-            adaptee=self.one_hot_encoder_adapter, #.target,
+            adaptee=self.one_hot_encoder_adapter,
             degree=self.model_config.max_basis_function_degree,
             include_bias=True,
             interaction_only=False
