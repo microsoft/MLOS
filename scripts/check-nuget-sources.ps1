@@ -5,3 +5,6 @@ if (!(dotnet nuget list source --format Short | Select-String ' https://api.nuge
     Write-Warning "Adding missing nuget.org sources."
     dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org --configfile $env:APPDATA\NuGet\NuGet.Config
 }
+else {
+    Write-Host "OK: nuget.org sources already available."
+}
