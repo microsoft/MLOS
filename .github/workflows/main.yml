@@ -40,7 +40,7 @@ jobs:
       with:
         fetch-depth: 0
     - name: Dump nuget source info
-      shell: commands
+      shell: cmd
       run: scripts\nuget-info.cmd
     # Runs multiple commands using the runners shell
     - name: Msbuild/test ${{ matrix.configuration }}
