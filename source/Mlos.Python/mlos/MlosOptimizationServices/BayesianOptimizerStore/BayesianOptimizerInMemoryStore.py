@@ -4,8 +4,7 @@
 #
 from contextlib import contextmanager
 import multiprocessing
-from typing import Iterable, Iterator
-from uuid import UUID
+from typing import Iterable, Iterator, Tuple
 
 from mlos.Logger import create_logger
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
@@ -34,6 +33,7 @@ class BayesianOptimizerInMemoryStore(BayesianOptimizerStoreBase):
         self._optimizers_by_id = dict()
         self._ordered_optimizer_ids = []
         self._lock_manager = multiprocessing.Manager()
+        self._lock = self._lock_manager.RLock()
         self._optimizer_locks_by_optimizer_id = dict()
         if logger is None:
             logger = create_logger(self.__class__.__name__)
@@ -42,7 +42,7 @@ class BayesianOptimizerInMemoryStore(BayesianOptimizerStoreBase):
 
 
     @contextmanager
-    def exclusive_optimizer(self, optimizer_id: UUID, optimizer_version: int = None) -> Iterator[BayesianOptimizer]:
+    def exclusive_optimizer(self, optimizer_id: str, optimizer_version: int = None) -> Iterator[BayesianOptimizer]:
         """ Context manager to acquire the optimizer lock and yield the corresponding optimizer.
 
         This makes sure that:
@@ -58,8 +58,23 @@ class BayesianOptimizerInMemoryStore(BayesianOptimizerStoreBase):
         with self._optimizer_locks_by_optimizer_id[optimizer_id]:
             yield self._optimizers_by_id[optimizer_id]
 
-    def list_optimizers(self) -> Iterable[BayesianOptimizer]:
+    def list_optimizers(self) -> Iterable[Tuple[str, BayesianOptimizer]]:
         # TODO: should we be locking them here?
         for optimizer_id in self._ordered_optimizer_ids:
-            yield self._optimizers_by_id[optimizer_id]
+            yield optimizer_id, self._optimizers_by_id[optimizer_id]
 
+    def get_optimizer(self, optimizer_id: str) -> BayesianOptimizer:
+        with self._lock:
+            optimizer = self._optimizers_by_id[optimizer_id]
+        return optimizer
+
+    def add_optimizer(self, optimizer_id: str, optimizer: BayesianOptimizer) -> None:
+        # To avoid a race condition we acquire the lock before inserting the lock and the optimizer into their respective
+        # dictionaries. Otherwise we could end up with a situation where a lock is in the dictionary, but the optimizer
+        # is not.
+        self.logger.info(f"Adding optimizer {optimizer_id}.")
+        optimizer_lock = self._lock_manager.RLock()
+        with optimizer_lock, self._lock:
+            self._optimizer_locks_by_optimizer_id[optimizer_id] = optimizer_lock
+            self._optimizers_by_id[optimizer_id] = optimizer
+            self._ordered_optimizer_ids.append(optimizer_id)

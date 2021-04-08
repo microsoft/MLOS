@@ -5,7 +5,7 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from typing import Iterable, Iterator
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer
 
@@ -31,12 +31,11 @@ class BayesianOptimizerStoreBase(ABC):
 
     @staticmethod
     def get_next_optimizer_id():
-        return uuid4()
-
+        return str(uuid4())
 
     @abstractmethod
     @contextmanager
-    def exclusive_optimizer(self, optimizer_id: UUID, optimizer_version: int = None) -> Iterator[BayesianOptimizer]:
+    def exclusive_optimizer(self, optimizer_id: str, optimizer_version: int = None) -> Iterator[BayesianOptimizer]:
         # Some day we may wish to build this out to use reader writer locks.
         #
         raise NotImplementedError
@@ -44,3 +43,12 @@ class BayesianOptimizerStoreBase(ABC):
     @abstractmethod
     def list_optimizers(self) -> Iterable[BayesianOptimizer]:
         raise NotImplementedError
+
+    @abstractmethod
+    def get_optimizer(self, optimizer_id: str) -> BayesianOptimizer:
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_optimizer(self, optimizer_id: str, optimizer: BayesianOptimizer) -> None:
+        raise NotImplementedError
+
