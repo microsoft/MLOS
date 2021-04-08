@@ -41,7 +41,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         optimizers_info = []
         for optimizer_id, optimizer in self._bayesian_optimizer_store.list_optimizers():
             optimizers_info.append(OptimizerInfo(
-                OptimizerHandle=OptimizerHandle(Id=optimizer.optimizer_id),
+                OptimizerHandle=OptimizerHandle(Id=optimizer_id),
                 OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
                 OptimizationProblem=optimizer.optimization_problem.to_protobuf()
             ))
