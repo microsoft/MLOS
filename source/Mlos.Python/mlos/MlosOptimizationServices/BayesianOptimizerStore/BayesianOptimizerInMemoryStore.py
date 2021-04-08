@@ -30,11 +30,17 @@ class BayesianOptimizerInMemoryStore(BayesianOptimizerStoreBase):
     """
 
     def __init__(self, logger=None):
+        self._lock_manager = multiprocessing.Manager()
+
         self._optimizers_by_id = dict()
         self._ordered_optimizer_ids = []
-        self._lock_manager = multiprocessing.Manager()
-        self._lock = self._lock_manager.RLock()
         self._optimizer_locks_by_optimizer_id = dict()
+
+        # This lock is to protect the data structures above mostly making sure that we don't insert another optimizer while enumerating
+        # exisitng ones or don't try to retrieve from the dictionary while another thread is inserting into it.
+        #
+        self._lock = self._lock_manager.RLock()
+
         if logger is None:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
@@ -56,12 +62,14 @@ class BayesianOptimizerInMemoryStore(BayesianOptimizerStoreBase):
         :raises: KeyError if the optimizer_id was not found.
         """
         with self._optimizer_locks_by_optimizer_id[optimizer_id]:
-            yield self._optimizers_by_id[optimizer_id]
+            with self._lock:
+                optimizer = self._optimizers_by_id[optimizer_id]
+            yield optimizer
 
     def list_optimizers(self) -> Iterable[Tuple[str, BayesianOptimizer]]:
-        # TODO: should we be locking them here?
-        for optimizer_id in self._ordered_optimizer_ids:
-            yield optimizer_id, self._optimizers_by_id[optimizer_id]
+        with self._lock:
+            for optimizer_id in self._ordered_optimizer_ids:
+                yield optimizer_id, self._optimizers_by_id[optimizer_id]
 
     def get_optimizer(self, optimizer_id: str) -> BayesianOptimizer:
         with self._lock:

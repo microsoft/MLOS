@@ -31,7 +31,6 @@ def parse_command_line_arguments():
 
 def main():
     args = parse_command_line_arguments()
-
     server = OptimizerMicroserviceServer(port=args.port, num_threads=args.num_threads)
 
     def ctrl_c_handler(_, __):
