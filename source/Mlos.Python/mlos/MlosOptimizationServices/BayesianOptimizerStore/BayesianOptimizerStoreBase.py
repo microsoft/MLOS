@@ -3,9 +3,12 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
-from typing import Iterator
+from contextlib import contextmanager
+from typing import Iterable, Iterator
+from uuid import UUID, uuid4
 
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer
+
 
 class BayesianOptimizerStoreBase(ABC):
     """Defines the interface to all BayesianOptimizerStores.
@@ -26,6 +29,18 @@ class BayesianOptimizerStoreBase(ABC):
 
     """
 
+    @staticmethod
+    def get_next_optimizer_id():
+        return uuid4()
+
+
     @abstractmethod
-    def exclusive_optimizer(self, optimizer_id) -> Iterator[BayesianOptimizer]:
+    @contextmanager
+    def exclusive_optimizer(self, optimizer_id: UUID, optimizer_version: int = None) -> Iterator[BayesianOptimizer]:
+        # Some day we may wish to build this out to use reader writer locks.
+        #
+        raise NotImplementedError
+
+    @abstractmethod
+    def list_optimizers(self) -> Iterable[BayesianOptimizer]:
         raise NotImplementedError
