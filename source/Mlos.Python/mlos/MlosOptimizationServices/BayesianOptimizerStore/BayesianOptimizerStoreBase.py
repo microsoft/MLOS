@@ -51,4 +51,3 @@ class BayesianOptimizerStoreBase(ABC):
     @abstractmethod
     def add_optimizer(self, optimizer_id: str, optimizer: BayesianOptimizer) -> None:
         raise NotImplementedError
-
