@@ -3,11 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import uuid
-from contextlib import contextmanager
 import json
-import multiprocessing
-from typing import Iterator
 
 import pandas as pd
 
