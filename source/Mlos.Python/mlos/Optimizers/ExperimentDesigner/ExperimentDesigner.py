@@ -19,7 +19,7 @@ from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtil
 from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction, \
     multi_objective_probability_of_improvement_utility_function_config_store
 
-from .UtilityFunctionOptimizers.UtilityFunctionOtimizerFactory import UtilityFunctionOtimizerFactory
+from .UtilityFunctionOptimizers.UtilityFunctionOptimizerFactory import UtilityFunctionOptimizerFactory
 
 
 experiment_designer_config_store = ComponentConfigStore(
@@ -166,7 +166,7 @@ class ExperimentDesigner:
         else:
             raise NotImplementedError(f"Unknown numeric optimizer implementation: {self.config.numeric_optimizer_config}")
 
-        self.numeric_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
+        self.numeric_optimizer = UtilityFunctionOptimizerFactory.create_utility_function_optimizer(
             utility_function=self.utility_function,
             optimizer_type_name=self.config.numeric_optimizer_implementation,
             optimizer_config=numeric_optimizer_config,
