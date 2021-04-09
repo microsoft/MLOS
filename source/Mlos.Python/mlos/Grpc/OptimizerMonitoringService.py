@@ -8,8 +8,8 @@ import json
 import pandas as pd
 
 from mlos.global_values import serialize_to_bytes_string
-from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
-from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList, Observations, Features,\
+from mlos.Grpc import OptimizerMonitoringService_pb2, OptimizerMonitoringService_pb2_grpc
+from mlos.Grpc.OptimizerMonitoringService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList, Observations, Features,\
     ObjectiveValues, SimpleBoolean, SimpleString
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
@@ -20,7 +20,7 @@ from mlos.Logger import create_logger
 
 
 
-class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
+class OptimizerMonitoringService(OptimizerMonitoringService_pb2_grpc.OptimizerMonitoringServiceServicer):
     """ Defines the Optimizer Microservice.
 
     The state of the microservice will be persisted in a DB. Until then we use local variables.
@@ -63,7 +63,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             SerializedOptimizerConvergenceState=serialized_convergence_state
         )
 
-    def CreateOptimizer(self, request: OptimizerService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
+    def CreateOptimizer(self, request: OptimizerMonitoringService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
         self.logger.info("Creating Optimizer")
         optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
         optimizer_config_json = request.OptimizerConfig
@@ -81,7 +81,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         self._bayesian_optimizer_store.add_optimizer(optimizer_id=optimizer_id, optimizer=optimizer)
 
         self.logger.info(f"Created optimizer {optimizer_id} with config: {optimizer.optimizer_config.to_json(indent=2)}")
-        return OptimizerService_pb2.OptimizerHandle(Id=optimizer_id)
+        return OptimizerMonitoringService_pb2.OptimizerHandle(Id=optimizer_id)
 
     def IsTrained(self, request, context): # pylint: disable=unused-argument
         with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
@@ -104,7 +104,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             # TODO handle context here
             suggested_params = optimizer.suggest(random=request.Random)
 
-        return OptimizerService_pb2.ConfigurationParameters(
+        return OptimizerMonitoringService_pb2.ConfigurationParameters(
             ParametersJsonString=json.dumps(suggested_params.to_dict())
         )
 
@@ -153,9 +153,9 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             prediction = optimizer.predict(features_df)
         assert isinstance(prediction, Prediction)
 
-        response = OptimizerService_pb2.PredictResponse(
+        response = OptimizerMonitoringService_pb2.PredictResponse(
             ObjectivePredictions=[
-                OptimizerService_pb2.SingleObjectivePrediction(
+                OptimizerMonitoringService_pb2.SingleObjectivePrediction(
                     ObjectiveName=prediction.objective_name,
                     PredictionDataFrameJsonString=prediction.dataframe_to_json()
                 )
