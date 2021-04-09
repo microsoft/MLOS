@@ -11,6 +11,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+import MlosCommonMessageTypes_pb2 as MlosCommonMessageTypes__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -19,8 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\025Mlos.OptimizerService',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\x12\x16mlos.optimizer_service\"\x98\x01\n\x16\x43reateOptimizerRequest\x12H\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32+.mlos.optimizer_service.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"\x94\x01\n\x0eSuggestRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x30\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\x1f.mlos.optimizer_service.Context\"\x98\x01\n\x1aRegisterObservationRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12\x38\n\x0bObservation\x18\x02 \x01(\x0b\x32#.mlos.optimizer_service.Observation\"\x9b\x01\n\x1bRegisterObservationsRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12:\n\x0cObservations\x18\x02 \x01(\x0b\x32$.mlos.optimizer_service.Observations\"\xfb\x01\n\x13OptimizationProblem\x12\x39\n\x0eParameterSpace\x18\x01 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x37\n\x0c\x43ontextSpace\x18\x02 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x39\n\x0eObjectiveSpace\x18\x03 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x35\n\nObjectives\x18\x04 \x03(\x0b\x32!.mlos.optimizer_service.Objective\"\x1d\n\x0fOptimizerHandle\x12\n\n\x02Id\x18\x01 \x01(\t\"\xbe\x01\n\rOptimizerInfo\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12!\n\x19OptimizerConfigJsonString\x18\x02 \x01(\t\x12H\n\x13OptimizationProblem\x18\x03 \x01(\x0b\x32+.mlos.optimizer_service.OptimizationProblem\"\x8a\x01\n\x19OptimizerConvergenceState\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12+\n#SerializedOptimizerConvergenceState\x18\x02 \x01(\t\"J\n\rOptimizerList\x12\x39\n\nOptimizers\x18\x01 \x03(\x0b\x32%.mlos.optimizer_service.OptimizerInfo\"\x83\x01\n\x0bObservation\x12\x32\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32 .mlos.optimizer_service.Features\x12@\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\'.mlos.optimizer_service.ObjectiveValues\"\x84\x01\n\x0cObservations\x12\x32\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32 .mlos.optimizer_service.Features\x12@\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\'.mlos.optimizer_service.ObjectiveValues\"&\n\x08\x46\x65\x61tures\x12\x1a\n\x12\x46\x65\x61turesJsonString\x18\x01 \x01(\t\"7\n\x17\x43onfigurationParameters\x12\x1c\n\x14ParametersJsonString\x18\x01 \x01(\t\"$\n\x07\x43ontext\x12\x19\n\x11\x43ontextJsonString\x18\x01 \x01(\t\"\x86\x01\n\x0ePredictRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12\x32\n\x08\x46\x65\x61tures\x18\x02 \x01(\x0b\x32 .mlos.optimizer_service.Features\"4\n\x0fObjectiveValues\x12!\n\x19ObjectiveValuesJsonString\x18\x01 \x01(\t\"(\n\tHypergrid\x12\x1b\n\x13HypergridJsonString\x18\x01 \x01(\t\"+\n\tObjective\x12\x0c\n\x04Name\x18\x01 \x01(\t\x12\x10\n\x08Minimize\x18\x02 \x01(\x08\"Y\n\x19SingleObjectivePrediction\x12\x15\n\rObjectiveName\x18\x01 \x01(\t\x12%\n\x1dPredictionDataFrameJsonString\x18\x02 \x01(\t\"b\n\x0fPredictResponse\x12O\n\x14ObjectivePredictions\x18\x01 \x03(\x0b\x32\x31.mlos.optimizer_service.SingleObjectivePrediction\"\x1e\n\rSimpleBoolean\x12\r\n\x05Value\x18\x01 \x01(\x08\"\x1d\n\x0cSimpleString\x12\r\n\x05Value\x18\x01 \x01(\t\"\x07\n\x05\x45mpty2\xca\t\n\x10OptimizerService\x12^\n\x16ListExistingOptimizers\x12\x1d.mlos.optimizer_service.Empty\x1a%.mlos.optimizer_service.OptimizerList\x12\x62\n\x10GetOptimizerInfo\x12\'.mlos.optimizer_service.OptimizerHandle\x1a%.mlos.optimizer_service.OptimizerInfo\x12z\n\x1cGetOptimizerConvergenceState\x12\'.mlos.optimizer_service.OptimizerHandle\x1a\x31.mlos.optimizer_service.OptimizerConvergenceState\x12l\n\x1b\x43omputeGoodnessOfFitMetrics\x12\'.mlos.optimizer_service.OptimizerHandle\x1a$.mlos.optimizer_service.SimpleString\x12j\n\x0f\x43reateOptimizer\x12..mlos.optimizer_service.CreateOptimizerRequest\x1a\'.mlos.optimizer_service.OptimizerHandle\x12[\n\tIsTrained\x12\'.mlos.optimizer_service.OptimizerHandle\x1a%.mlos.optimizer_service.SimpleBoolean\x12\x62\n\x07Suggest\x12&.mlos.optimizer_service.SuggestRequest\x1a/.mlos.optimizer_service.ConfigurationParameters\x12Z\n\x07Predict\x12&.mlos.optimizer_service.PredictRequest\x1a\'.mlos.optimizer_service.PredictResponse\x12h\n\x13RegisterObservation\x12\x32.mlos.optimizer_service.RegisterObservationRequest\x1a\x1d.mlos.optimizer_service.Empty\x12j\n\x14RegisterObservations\x12\x33.mlos.optimizer_service.RegisterObservationsRequest\x1a\x1d.mlos.optimizer_service.Empty\x12\x63\n\x12GetAllObservations\x12\'.mlos.optimizer_service.OptimizerHandle\x1a$.mlos.optimizer_service.Observations\x12\x44\n\x04\x45\x63ho\x12\x1d.mlos.optimizer_service.Empty\x1a\x1d.mlos.optimizer_service.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceb\x06proto3'
-)
+  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\x12\x16mlos.optimizer_service\x1a\x1cMlosCommonMessageTypes.proto\"\x9b\x01\n\x16\x43reateOptimizerRequest\x12K\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32..mlos_common_message_types.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"\x9a\x01\n\x0eSuggestRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x33\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\".mlos_common_message_types.Context\"\x9e\x01\n\x1aRegisterObservationRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12;\n\x0bObservation\x18\x02 \x01(\x0b\x32&.mlos_common_message_types.Observation\"\xa1\x01\n\x1bRegisterObservationsRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12=\n\x0cObservations\x18\x02 \x01(\x0b\x32\'.mlos_common_message_types.Observations2\x90\x04\n\x10OptimizerService\x12m\n\x0f\x43reateOptimizer\x12..mlos.optimizer_service.CreateOptimizerRequest\x1a*.mlos_common_message_types.OptimizerHandle\x12\x65\n\x07Suggest\x12&.mlos.optimizer_service.SuggestRequest\x1a\x32.mlos_common_message_types.ConfigurationParameters\x12k\n\x13RegisterObservation\x12\x32.mlos.optimizer_service.RegisterObservationRequest\x1a .mlos_common_message_types.Empty\x12m\n\x14RegisterObservations\x12\x33.mlos.optimizer_service.RegisterObservationsRequest\x1a .mlos_common_message_types.Empty\x12J\n\x04\x45\x63ho\x12 .mlos_common_message_types.Empty\x1a .mlos_common_message_types.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceb\x06proto3'
+  ,
+  dependencies=[MlosCommonMessageTypes__pb2.DESCRIPTOR,])
 
 
 
@@ -66,8 +68,8 @@ _CREATEOPTIMIZERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=61,
-  serialized_end=213,
+  serialized_start=91,
+  serialized_end=246,
 )
 
 
@@ -112,8 +114,8 @@ _SUGGESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=216,
-  serialized_end=364,
+  serialized_start=249,
+  serialized_end=403,
 )
 
 
@@ -151,8 +153,8 @@ _REGISTEROBSERVATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=367,
-  serialized_end=519,
+  serialized_start=406,
+  serialized_end=564,
 )
 
 
@@ -190,733 +192,21 @@ _REGISTEROBSERVATIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=522,
-  serialized_end=677,
+  serialized_start=567,
+  serialized_end=728,
 )
 
-
-_OPTIMIZATIONPROBLEM = _descriptor.Descriptor(
-  name='OptimizationProblem',
-  full_name='mlos.optimizer_service.OptimizationProblem',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ParameterSpace', full_name='mlos.optimizer_service.OptimizationProblem.ParameterSpace', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ContextSpace', full_name='mlos.optimizer_service.OptimizationProblem.ContextSpace', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ObjectiveSpace', full_name='mlos.optimizer_service.OptimizationProblem.ObjectiveSpace', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='Objectives', full_name='mlos.optimizer_service.OptimizationProblem.Objectives', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=680,
-  serialized_end=931,
-)
-
-
-_OPTIMIZERHANDLE = _descriptor.Descriptor(
-  name='OptimizerHandle',
-  full_name='mlos.optimizer_service.OptimizerHandle',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Id', full_name='mlos.optimizer_service.OptimizerHandle.Id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=933,
-  serialized_end=962,
-)
-
-
-_OPTIMIZERINFO = _descriptor.Descriptor(
-  name='OptimizerInfo',
-  full_name='mlos.optimizer_service.OptimizerInfo',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='OptimizerHandle', full_name='mlos.optimizer_service.OptimizerInfo.OptimizerHandle', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='OptimizerConfigJsonString', full_name='mlos.optimizer_service.OptimizerInfo.OptimizerConfigJsonString', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='OptimizationProblem', full_name='mlos.optimizer_service.OptimizerInfo.OptimizationProblem', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=965,
-  serialized_end=1155,
-)
-
-
-_OPTIMIZERCONVERGENCESTATE = _descriptor.Descriptor(
-  name='OptimizerConvergenceState',
-  full_name='mlos.optimizer_service.OptimizerConvergenceState',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='OptimizerHandle', full_name='mlos.optimizer_service.OptimizerConvergenceState.OptimizerHandle', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='SerializedOptimizerConvergenceState', full_name='mlos.optimizer_service.OptimizerConvergenceState.SerializedOptimizerConvergenceState', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1158,
-  serialized_end=1296,
-)
-
-
-_OPTIMIZERLIST = _descriptor.Descriptor(
-  name='OptimizerList',
-  full_name='mlos.optimizer_service.OptimizerList',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Optimizers', full_name='mlos.optimizer_service.OptimizerList.Optimizers', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1298,
-  serialized_end=1372,
-)
-
-
-_OBSERVATION = _descriptor.Descriptor(
-  name='Observation',
-  full_name='mlos.optimizer_service.Observation',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Features', full_name='mlos.optimizer_service.Observation.Features', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ObjectiveValues', full_name='mlos.optimizer_service.Observation.ObjectiveValues', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1375,
-  serialized_end=1506,
-)
-
-
-_OBSERVATIONS = _descriptor.Descriptor(
-  name='Observations',
-  full_name='mlos.optimizer_service.Observations',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Features', full_name='mlos.optimizer_service.Observations.Features', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ObjectiveValues', full_name='mlos.optimizer_service.Observations.ObjectiveValues', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1509,
-  serialized_end=1641,
-)
-
-
-_FEATURES = _descriptor.Descriptor(
-  name='Features',
-  full_name='mlos.optimizer_service.Features',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='FeaturesJsonString', full_name='mlos.optimizer_service.Features.FeaturesJsonString', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1643,
-  serialized_end=1681,
-)
-
-
-_CONFIGURATIONPARAMETERS = _descriptor.Descriptor(
-  name='ConfigurationParameters',
-  full_name='mlos.optimizer_service.ConfigurationParameters',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ParametersJsonString', full_name='mlos.optimizer_service.ConfigurationParameters.ParametersJsonString', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1683,
-  serialized_end=1738,
-)
-
-
-_CONTEXT = _descriptor.Descriptor(
-  name='Context',
-  full_name='mlos.optimizer_service.Context',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ContextJsonString', full_name='mlos.optimizer_service.Context.ContextJsonString', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1740,
-  serialized_end=1776,
-)
-
-
-_PREDICTREQUEST = _descriptor.Descriptor(
-  name='PredictRequest',
-  full_name='mlos.optimizer_service.PredictRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='OptimizerHandle', full_name='mlos.optimizer_service.PredictRequest.OptimizerHandle', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='Features', full_name='mlos.optimizer_service.PredictRequest.Features', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1779,
-  serialized_end=1913,
-)
-
-
-_OBJECTIVEVALUES = _descriptor.Descriptor(
-  name='ObjectiveValues',
-  full_name='mlos.optimizer_service.ObjectiveValues',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ObjectiveValuesJsonString', full_name='mlos.optimizer_service.ObjectiveValues.ObjectiveValuesJsonString', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1915,
-  serialized_end=1967,
-)
-
-
-_HYPERGRID = _descriptor.Descriptor(
-  name='Hypergrid',
-  full_name='mlos.optimizer_service.Hypergrid',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='HypergridJsonString', full_name='mlos.optimizer_service.Hypergrid.HypergridJsonString', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1969,
-  serialized_end=2009,
-)
-
-
-_OBJECTIVE = _descriptor.Descriptor(
-  name='Objective',
-  full_name='mlos.optimizer_service.Objective',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Name', full_name='mlos.optimizer_service.Objective.Name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='Minimize', full_name='mlos.optimizer_service.Objective.Minimize', index=1,
-      number=2, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2011,
-  serialized_end=2054,
-)
-
-
-_SINGLEOBJECTIVEPREDICTION = _descriptor.Descriptor(
-  name='SingleObjectivePrediction',
-  full_name='mlos.optimizer_service.SingleObjectivePrediction',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ObjectiveName', full_name='mlos.optimizer_service.SingleObjectivePrediction.ObjectiveName', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='PredictionDataFrameJsonString', full_name='mlos.optimizer_service.SingleObjectivePrediction.PredictionDataFrameJsonString', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2056,
-  serialized_end=2145,
-)
-
-
-_PREDICTRESPONSE = _descriptor.Descriptor(
-  name='PredictResponse',
-  full_name='mlos.optimizer_service.PredictResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='ObjectivePredictions', full_name='mlos.optimizer_service.PredictResponse.ObjectivePredictions', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2147,
-  serialized_end=2245,
-)
-
-
-_SIMPLEBOOLEAN = _descriptor.Descriptor(
-  name='SimpleBoolean',
-  full_name='mlos.optimizer_service.SimpleBoolean',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Value', full_name='mlos.optimizer_service.SimpleBoolean.Value', index=0,
-      number=1, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2247,
-  serialized_end=2277,
-)
-
-
-_SIMPLESTRING = _descriptor.Descriptor(
-  name='SimpleString',
-  full_name='mlos.optimizer_service.SimpleString',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Value', full_name='mlos.optimizer_service.SimpleString.Value', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2279,
-  serialized_end=2308,
-)
-
-
-_EMPTY = _descriptor.Descriptor(
-  name='Empty',
-  full_name='mlos.optimizer_service.Empty',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2310,
-  serialized_end=2317,
-)
-
-_CREATEOPTIMIZERREQUEST.fields_by_name['OptimizationProblem'].message_type = _OPTIMIZATIONPROBLEM
-_SUGGESTREQUEST.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
-_SUGGESTREQUEST.fields_by_name['Context'].message_type = _CONTEXT
-_REGISTEROBSERVATIONREQUEST.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
-_REGISTEROBSERVATIONREQUEST.fields_by_name['Observation'].message_type = _OBSERVATION
-_REGISTEROBSERVATIONSREQUEST.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
-_REGISTEROBSERVATIONSREQUEST.fields_by_name['Observations'].message_type = _OBSERVATIONS
-_OPTIMIZATIONPROBLEM.fields_by_name['ParameterSpace'].message_type = _HYPERGRID
-_OPTIMIZATIONPROBLEM.fields_by_name['ContextSpace'].message_type = _HYPERGRID
-_OPTIMIZATIONPROBLEM.fields_by_name['ObjectiveSpace'].message_type = _HYPERGRID
-_OPTIMIZATIONPROBLEM.fields_by_name['Objectives'].message_type = _OBJECTIVE
-_OPTIMIZERINFO.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
-_OPTIMIZERINFO.fields_by_name['OptimizationProblem'].message_type = _OPTIMIZATIONPROBLEM
-_OPTIMIZERCONVERGENCESTATE.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
-_OPTIMIZERLIST.fields_by_name['Optimizers'].message_type = _OPTIMIZERINFO
-_OBSERVATION.fields_by_name['Features'].message_type = _FEATURES
-_OBSERVATION.fields_by_name['ObjectiveValues'].message_type = _OBJECTIVEVALUES
-_OBSERVATIONS.fields_by_name['Features'].message_type = _FEATURES
-_OBSERVATIONS.fields_by_name['ObjectiveValues'].message_type = _OBJECTIVEVALUES
-_PREDICTREQUEST.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
-_PREDICTREQUEST.fields_by_name['Features'].message_type = _FEATURES
-_PREDICTRESPONSE.fields_by_name['ObjectivePredictions'].message_type = _SINGLEOBJECTIVEPREDICTION
+_CREATEOPTIMIZERREQUEST.fields_by_name['OptimizationProblem'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZATIONPROBLEM
+_SUGGESTREQUEST.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_SUGGESTREQUEST.fields_by_name['Context'].message_type = MlosCommonMessageTypes__pb2._CONTEXT
+_REGISTEROBSERVATIONREQUEST.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_REGISTEROBSERVATIONREQUEST.fields_by_name['Observation'].message_type = MlosCommonMessageTypes__pb2._OBSERVATION
+_REGISTEROBSERVATIONSREQUEST.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_REGISTEROBSERVATIONSREQUEST.fields_by_name['Observations'].message_type = MlosCommonMessageTypes__pb2._OBSERVATIONS
 DESCRIPTOR.message_types_by_name['CreateOptimizerRequest'] = _CREATEOPTIMIZERREQUEST
 DESCRIPTOR.message_types_by_name['SuggestRequest'] = _SUGGESTREQUEST
 DESCRIPTOR.message_types_by_name['RegisterObservationRequest'] = _REGISTEROBSERVATIONREQUEST
 DESCRIPTOR.message_types_by_name['RegisterObservationsRequest'] = _REGISTEROBSERVATIONSREQUEST
-DESCRIPTOR.message_types_by_name['OptimizationProblem'] = _OPTIMIZATIONPROBLEM
-DESCRIPTOR.message_types_by_name['OptimizerHandle'] = _OPTIMIZERHANDLE
-DESCRIPTOR.message_types_by_name['OptimizerInfo'] = _OPTIMIZERINFO
-DESCRIPTOR.message_types_by_name['OptimizerConvergenceState'] = _OPTIMIZERCONVERGENCESTATE
-DESCRIPTOR.message_types_by_name['OptimizerList'] = _OPTIMIZERLIST
-DESCRIPTOR.message_types_by_name['Observation'] = _OBSERVATION
-DESCRIPTOR.message_types_by_name['Observations'] = _OBSERVATIONS
-DESCRIPTOR.message_types_by_name['Features'] = _FEATURES
-DESCRIPTOR.message_types_by_name['ConfigurationParameters'] = _CONFIGURATIONPARAMETERS
-DESCRIPTOR.message_types_by_name['Context'] = _CONTEXT
-DESCRIPTOR.message_types_by_name['PredictRequest'] = _PREDICTREQUEST
-DESCRIPTOR.message_types_by_name['ObjectiveValues'] = _OBJECTIVEVALUES
-DESCRIPTOR.message_types_by_name['Hypergrid'] = _HYPERGRID
-DESCRIPTOR.message_types_by_name['Objective'] = _OBJECTIVE
-DESCRIPTOR.message_types_by_name['SingleObjectivePrediction'] = _SINGLEOBJECTIVEPREDICTION
-DESCRIPTOR.message_types_by_name['PredictResponse'] = _PREDICTRESPONSE
-DESCRIPTOR.message_types_by_name['SimpleBoolean'] = _SIMPLEBOOLEAN
-DESCRIPTOR.message_types_by_name['SimpleString'] = _SIMPLESTRING
-DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 CreateOptimizerRequest = _reflection.GeneratedProtocolMessageType('CreateOptimizerRequest', (_message.Message,), {
@@ -947,139 +237,6 @@ RegisterObservationsRequest = _reflection.GeneratedProtocolMessageType('Register
   })
 _sym_db.RegisterMessage(RegisterObservationsRequest)
 
-OptimizationProblem = _reflection.GeneratedProtocolMessageType('OptimizationProblem', (_message.Message,), {
-  'DESCRIPTOR' : _OPTIMIZATIONPROBLEM,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.OptimizationProblem)
-  })
-_sym_db.RegisterMessage(OptimizationProblem)
-
-OptimizerHandle = _reflection.GeneratedProtocolMessageType('OptimizerHandle', (_message.Message,), {
-  'DESCRIPTOR' : _OPTIMIZERHANDLE,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.OptimizerHandle)
-  })
-_sym_db.RegisterMessage(OptimizerHandle)
-
-OptimizerInfo = _reflection.GeneratedProtocolMessageType('OptimizerInfo', (_message.Message,), {
-  'DESCRIPTOR' : _OPTIMIZERINFO,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.OptimizerInfo)
-  })
-_sym_db.RegisterMessage(OptimizerInfo)
-
-OptimizerConvergenceState = _reflection.GeneratedProtocolMessageType('OptimizerConvergenceState', (_message.Message,), {
-  'DESCRIPTOR' : _OPTIMIZERCONVERGENCESTATE,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.OptimizerConvergenceState)
-  })
-_sym_db.RegisterMessage(OptimizerConvergenceState)
-
-OptimizerList = _reflection.GeneratedProtocolMessageType('OptimizerList', (_message.Message,), {
-  'DESCRIPTOR' : _OPTIMIZERLIST,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.OptimizerList)
-  })
-_sym_db.RegisterMessage(OptimizerList)
-
-Observation = _reflection.GeneratedProtocolMessageType('Observation', (_message.Message,), {
-  'DESCRIPTOR' : _OBSERVATION,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Observation)
-  })
-_sym_db.RegisterMessage(Observation)
-
-Observations = _reflection.GeneratedProtocolMessageType('Observations', (_message.Message,), {
-  'DESCRIPTOR' : _OBSERVATIONS,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Observations)
-  })
-_sym_db.RegisterMessage(Observations)
-
-Features = _reflection.GeneratedProtocolMessageType('Features', (_message.Message,), {
-  'DESCRIPTOR' : _FEATURES,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Features)
-  })
-_sym_db.RegisterMessage(Features)
-
-ConfigurationParameters = _reflection.GeneratedProtocolMessageType('ConfigurationParameters', (_message.Message,), {
-  'DESCRIPTOR' : _CONFIGURATIONPARAMETERS,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.ConfigurationParameters)
-  })
-_sym_db.RegisterMessage(ConfigurationParameters)
-
-Context = _reflection.GeneratedProtocolMessageType('Context', (_message.Message,), {
-  'DESCRIPTOR' : _CONTEXT,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Context)
-  })
-_sym_db.RegisterMessage(Context)
-
-PredictRequest = _reflection.GeneratedProtocolMessageType('PredictRequest', (_message.Message,), {
-  'DESCRIPTOR' : _PREDICTREQUEST,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.PredictRequest)
-  })
-_sym_db.RegisterMessage(PredictRequest)
-
-ObjectiveValues = _reflection.GeneratedProtocolMessageType('ObjectiveValues', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTIVEVALUES,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.ObjectiveValues)
-  })
-_sym_db.RegisterMessage(ObjectiveValues)
-
-Hypergrid = _reflection.GeneratedProtocolMessageType('Hypergrid', (_message.Message,), {
-  'DESCRIPTOR' : _HYPERGRID,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Hypergrid)
-  })
-_sym_db.RegisterMessage(Hypergrid)
-
-Objective = _reflection.GeneratedProtocolMessageType('Objective', (_message.Message,), {
-  'DESCRIPTOR' : _OBJECTIVE,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Objective)
-  })
-_sym_db.RegisterMessage(Objective)
-
-SingleObjectivePrediction = _reflection.GeneratedProtocolMessageType('SingleObjectivePrediction', (_message.Message,), {
-  'DESCRIPTOR' : _SINGLEOBJECTIVEPREDICTION,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.SingleObjectivePrediction)
-  })
-_sym_db.RegisterMessage(SingleObjectivePrediction)
-
-PredictResponse = _reflection.GeneratedProtocolMessageType('PredictResponse', (_message.Message,), {
-  'DESCRIPTOR' : _PREDICTRESPONSE,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.PredictResponse)
-  })
-_sym_db.RegisterMessage(PredictResponse)
-
-SimpleBoolean = _reflection.GeneratedProtocolMessageType('SimpleBoolean', (_message.Message,), {
-  'DESCRIPTOR' : _SIMPLEBOOLEAN,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.SimpleBoolean)
-  })
-_sym_db.RegisterMessage(SimpleBoolean)
-
-SimpleString = _reflection.GeneratedProtocolMessageType('SimpleString', (_message.Message,), {
-  'DESCRIPTOR' : _SIMPLESTRING,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.SimpleString)
-  })
-_sym_db.RegisterMessage(SimpleString)
-
-Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), {
-  'DESCRIPTOR' : _EMPTY,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Empty)
-  })
-_sym_db.RegisterMessage(Empty)
-
 
 DESCRIPTOR._options = None
 
@@ -1090,126 +247,56 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=2320,
-  serialized_end=3546,
+  serialized_start=731,
+  serialized_end=1259,
   methods=[
-  _descriptor.MethodDescriptor(
-    name='ListExistingOptimizers',
-    full_name='mlos.optimizer_service.OptimizerService.ListExistingOptimizers',
-    index=0,
-    containing_service=None,
-    input_type=_EMPTY,
-    output_type=_OPTIMIZERLIST,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetOptimizerInfo',
-    full_name='mlos.optimizer_service.OptimizerService.GetOptimizerInfo',
-    index=1,
-    containing_service=None,
-    input_type=_OPTIMIZERHANDLE,
-    output_type=_OPTIMIZERINFO,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetOptimizerConvergenceState',
-    full_name='mlos.optimizer_service.OptimizerService.GetOptimizerConvergenceState',
-    index=2,
-    containing_service=None,
-    input_type=_OPTIMIZERHANDLE,
-    output_type=_OPTIMIZERCONVERGENCESTATE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ComputeGoodnessOfFitMetrics',
-    full_name='mlos.optimizer_service.OptimizerService.ComputeGoodnessOfFitMetrics',
-    index=3,
-    containing_service=None,
-    input_type=_OPTIMIZERHANDLE,
-    output_type=_SIMPLESTRING,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
   _descriptor.MethodDescriptor(
     name='CreateOptimizer',
     full_name='mlos.optimizer_service.OptimizerService.CreateOptimizer',
-    index=4,
+    index=0,
     containing_service=None,
     input_type=_CREATEOPTIMIZERREQUEST,
-    output_type=_OPTIMIZERHANDLE,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='IsTrained',
-    full_name='mlos.optimizer_service.OptimizerService.IsTrained',
-    index=5,
-    containing_service=None,
-    input_type=_OPTIMIZERHANDLE,
-    output_type=_SIMPLEBOOLEAN,
+    output_type=MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
     name='Suggest',
     full_name='mlos.optimizer_service.OptimizerService.Suggest',
-    index=6,
+    index=1,
     containing_service=None,
     input_type=_SUGGESTREQUEST,
-    output_type=_CONFIGURATIONPARAMETERS,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Predict',
-    full_name='mlos.optimizer_service.OptimizerService.Predict',
-    index=7,
-    containing_service=None,
-    input_type=_PREDICTREQUEST,
-    output_type=_PREDICTRESPONSE,
+    output_type=MlosCommonMessageTypes__pb2._CONFIGURATIONPARAMETERS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
     name='RegisterObservation',
     full_name='mlos.optimizer_service.OptimizerService.RegisterObservation',
-    index=8,
+    index=2,
     containing_service=None,
     input_type=_REGISTEROBSERVATIONREQUEST,
-    output_type=_EMPTY,
+    output_type=MlosCommonMessageTypes__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
     name='RegisterObservations',
     full_name='mlos.optimizer_service.OptimizerService.RegisterObservations',
-    index=9,
+    index=3,
     containing_service=None,
     input_type=_REGISTEROBSERVATIONSREQUEST,
-    output_type=_EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='GetAllObservations',
-    full_name='mlos.optimizer_service.OptimizerService.GetAllObservations',
-    index=10,
-    containing_service=None,
-    input_type=_OPTIMIZERHANDLE,
-    output_type=_OBSERVATIONS,
+    output_type=MlosCommonMessageTypes__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
     name='Echo',
     full_name='mlos.optimizer_service.OptimizerService.Echo',
-    index=11,
+    index=4,
     containing_service=None,
-    input_type=_EMPTY,
-    output_type=_EMPTY,
+    input_type=MlosCommonMessageTypes__pb2._EMPTY,
+    output_type=MlosCommonMessageTypes__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

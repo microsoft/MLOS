@@ -14,7 +14,7 @@ import pandas as pd
 import mlos.global_values as global_values
 from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
-from mlos.Grpc.OptimizerService_pb2 import Empty
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import Empty
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Logger import create_logger
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store

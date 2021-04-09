@@ -2,8 +2,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-from mlos.Grpc.OptimizerMonitoringService_pb2 import Empty, OptimizerHandle
 from mlos.Grpc.OptimizerMonitoringService_pb2_grpc import OptimizerMonitoringServiceStub
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import Empty, OptimizerHandle
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Logger import create_logger
 

@@ -8,7 +8,7 @@ from typing import List, Tuple
 
 import pandas as pd
 
-from mlos.Grpc import OptimizerService_pb2
+from mlos.Grpc import MlosCommonMessageTypes_pb2
 from mlos.Spaces import Hypergrid, SimpleHypergrid, CategoricalDimension
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, HypergridJsonEncoder
 
@@ -191,16 +191,16 @@ class OptimizationProblem:
 
         :return:
         """
-        return OptimizerService_pb2.OptimizationProblem(
-            ParameterSpace=OptimizerService_pb2.Hypergrid(HypergridJsonString=json.dumps(self.parameter_space, cls=HypergridJsonEncoder)),
-            ObjectiveSpace=OptimizerService_pb2.Hypergrid(HypergridJsonString=json.dumps(self.objective_space, cls=HypergridJsonEncoder)),
-            Objectives=[OptimizerService_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in self.objectives],
+        return MlosCommonMessageTypes_pb2.OptimizationProblem(
+            ParameterSpace=MlosCommonMessageTypes_pb2.Hypergrid(HypergridJsonString=json.dumps(self.parameter_space, cls=HypergridJsonEncoder)),
+            ObjectiveSpace=MlosCommonMessageTypes_pb2.Hypergrid(HypergridJsonString=json.dumps(self.objective_space, cls=HypergridJsonEncoder)),
+            Objectives=[MlosCommonMessageTypes_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in self.objectives],
             ContextSpace=None if self.context_space is None
-            else OptimizerService_pb2.Hypergrid(HypergridJsonString=json.dumps(self.context_space, cls=HypergridJsonEncoder))
+            else MlosCommonMessageTypes_pb2.Hypergrid(HypergridJsonString=json.dumps(self.context_space, cls=HypergridJsonEncoder))
         )
 
     @classmethod
-    def from_protobuf(cls, optimization_problem_pb2: OptimizerService_pb2.OptimizationProblem):
+    def from_protobuf(cls, optimization_problem_pb2: MlosCommonMessageTypes_pb2.OptimizationProblem):
         """ Builds an optimization problem from protobufs.
 
         :param optimization_problem_pb2:

@@ -1,5 +1,6 @@
 syntax = "proto3";
 package mlos.optimizer_service;
+import "MlosCommonMessageTypes.proto";
 
 option csharp_namespace = "Mlos.OptimizerService";
 
@@ -7,60 +8,32 @@ option csharp_namespace = "Mlos.OptimizerService";
 //
 service OptimizerService
 {
-    // Returns a list of existing optimizer instances.
-    //
-    rpc ListExistingOptimizers(Empty) returns (OptimizerList);
-
-    // Returns information about optimizers configuration and optimization problem.
-    //
-    rpc GetOptimizerInfo(OptimizerHandle) returns (OptimizerInfo);
-
-    // Returns the current optimizer convergence state.
-    //
-    rpc GetOptimizerConvergenceState(OptimizerHandle) returns (OptimizerConvergenceState);
-
-    // Returns the computed goodness of fit metrics.
-    //
-    rpc ComputeGoodnessOfFitMetrics(OptimizerHandle) returns (SimpleString);
-
     // Creates an optimizer with the specified configuration.
     //
-    rpc CreateOptimizer(CreateOptimizerRequest) returns (OptimizerHandle);
-    
-    // Check if optimizer has been trained.
-    //
-    rpc IsTrained(OptimizerHandle) returns (SimpleBoolean);
+    rpc CreateOptimizer(CreateOptimizerRequest) returns (mlos_common_message_types.OptimizerHandle);
     
     // Request a suggestion.
     //
-    rpc Suggest(SuggestRequest) returns (ConfigurationParameters);
-
-    // Produces a prediction for specified features.
-    //
-    rpc Predict(PredictRequest) returns (PredictResponse);
+    rpc Suggest(SuggestRequest) returns (mlos_common_message_types.ConfigurationParameters);
 
     // Adds an observation to the optimizer's data set.
     //
-    rpc RegisterObservation(RegisterObservationRequest) returns (Empty);
+    rpc RegisterObservation(RegisterObservationRequest) returns (mlos_common_message_types.Empty);
 
     // Adds observations to the optimizer's data set.
     //
-    rpc RegisterObservations(RegisterObservationsRequest) returns (Empty);
-
-    // Returns all observations registered for a given optimizer.
-    //
-    rpc GetAllObservations(OptimizerHandle) returns (Observations);
+    rpc RegisterObservations(RegisterObservationsRequest) returns (mlos_common_message_types.Empty);
 
     // Like ping.
     //
-    rpc Echo(Empty) returns (Empty);
+    rpc Echo(mlos_common_message_types.Empty) returns (mlos_common_message_types.Empty);
 };
 
 // A request to create an optimizer.
 //
 message CreateOptimizerRequest
 {
-    OptimizationProblem OptimizationProblem = 1;
+    mlos_common_message_types.OptimizationProblem OptimizationProblem = 1;
     string OptimizerConfigName = 2;
     string OptimizerConfig = 3;
 };
@@ -70,9 +43,9 @@ message CreateOptimizerRequest
 //
 message SuggestRequest
 {
-    OptimizerHandle OptimizerHandle = 1;
+    mlos_common_message_types.OptimizerHandle OptimizerHandle = 1;
     bool Random = 2;
-    Context Context = 3;
+    mlos_common_message_types.Context Context = 3;
 };
 
 
@@ -80,160 +53,14 @@ message SuggestRequest
 //
 message RegisterObservationRequest
 {
-    OptimizerHandle OptimizerHandle = 1;
-    Observation Observation = 2;
+    mlos_common_message_types.OptimizerHandle OptimizerHandle = 1;
+    mlos_common_message_types.Observation Observation = 2;
 };
 
 // A request to add a observations to the optimizer's data set.
 //
 message RegisterObservationsRequest
 {
-    OptimizerHandle OptimizerHandle = 1;
-    Observations Observations = 2;
+    mlos_common_message_types.OptimizerHandle OptimizerHandle = 1;
+    mlos_common_message_types.Observations Observations = 2;
 };
-
-// A representation of an optimization problem.
-//
-message OptimizationProblem
-{
-    Hypergrid ParameterSpace = 1;
-    Hypergrid ContextSpace = 2;
-    Hypergrid ObjectiveSpace = 3;
-    repeated Objective Objectives = 4;
-};
-
-// An opaque handle to the optimizer that the client passes along with each request.
-//
-message OptimizerHandle
-{
-    string Id = 1;
-};
-
-// Represents information about an optimizer instance, including its configuration, optimization problem, and handle
-//
-message OptimizerInfo
-{
-    OptimizerHandle OptimizerHandle = 1;
-    string OptimizerConfigJsonString = 2;
-    OptimizationProblem OptimizationProblem = 3;
-};
-
-// Represents information about optimizer convergence state.
-//
-message OptimizerConvergenceState
-{
-    OptimizerHandle OptimizerHandle = 1;
-    string SerializedOptimizerConvergenceState = 2;
-};
-
-// A list of OptimizerInfo messages.
-//
-message OptimizerList
-{
-    repeated OptimizerInfo Optimizers = 1;
-}
-
-// A representation of a single observation to be added to the optimizer's data set.
-//
-message Observation
-{
-    Features Features = 1;
-    ObjectiveValues ObjectiveValues = 2;
-};
-
-// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
-// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
-// break Greg's PR. 
-// 
-message Observations
-{
-    Features Features = 1;
-    ObjectiveValues ObjectiveValues = 2;
-};
-
-// A representation of features for the optimizer's surrogate models to operate on.
-//
-message Features
-{
-    string FeaturesJsonString = 1;
-};
-
-// Serialized configuration parameters.
-//
-message ConfigurationParameters
-{
-    string ParametersJsonString = 1;
-};
-
-// Serialized context values.
-//
-message Context
-{
-    string ContextJsonString = 1;
-};
-
-// A request to predict objective values given specified features (parameters and context).
-//
-message PredictRequest
-{
-    OptimizerHandle OptimizerHandle = 1;
-    Features Features = 2;
-};
-
-// Representation of the ObjectiveValues.
-//
-message ObjectiveValues
-{
-    string ObjectiveValuesJsonString = 1;
-};
-
-// Serialized representation of a Hypergrid.
-//
-message Hypergrid
-{
-    string HypergridJsonString = 1;
-};
-
-// Representation of a single objective.
-//
-message Objective
-{
-    string Name = 1;
-    bool Minimize = 2;
-};
-
-// Representation of an objective value prediction
-//
-message SingleObjectivePrediction
-{
-    string ObjectiveName = 1;
-    string PredictionDataFrameJsonString = 2;
-};
-
-message PredictResponse
-{
-    // repeated for every objective (in a multi-objective case)
-    //
-    repeated SingleObjectivePrediction ObjectivePredictions = 1;
-};
-
-// A message containing a single boolean value.
-//
-message SimpleBoolean
-{
-    bool Value = 1;
-};
-
-// A message containing a single string value.
-//
-message SimpleString
-{
-    string Value = 1;
-}
-
-// A convenience message for optimizer functions that return nothing.
-//
-message Empty
-{
-};
-

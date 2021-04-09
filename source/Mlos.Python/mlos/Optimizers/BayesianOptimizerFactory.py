@@ -4,8 +4,9 @@
 #
 from mlos.Logger import create_logger
 
-from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, OptimizerInfo
+from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import OptimizerInfo
 from mlos.Grpc.BayesianOptimizerProxy import BayesianOptimizerProxy
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem

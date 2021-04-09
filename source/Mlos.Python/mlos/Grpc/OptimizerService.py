@@ -8,7 +8,7 @@ import json
 import pandas as pd
 
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
-from mlos.Grpc.OptimizerService_pb2 import Empty
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import Empty
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
