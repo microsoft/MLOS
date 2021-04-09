@@ -8,7 +8,7 @@ from typing import Tuple
 import pandas as pd
 
 from mlos.global_values import deserialize_from_bytes_string
-from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
+from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc, OptimizerMonitoringService_pb2, OptimizerMonitoringService_pb2_grpc
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
@@ -56,26 +56,31 @@ class BayesianOptimizerProxy(OptimizerBase):
 
         self._grpc_channel = grpc_channel
         self._optimizer_stub = OptimizerService_pb2_grpc.OptimizerServiceStub(self._grpc_channel)
+        self._optimizer_monitoring_stub = OptimizerMonitoringService_pb2_grpc.OptimizerMonitoringServiceStub(self._grpc_channel)
         self.optimizer_config = optimizer_config
         self.id = id
 
     @property
-    def optimizer_handle(self):
+    def optimizer_handle_for_optimizer_service(self):
         return OptimizerService_pb2.OptimizerHandle(Id=self.id)
 
     @property
+    def optimizer_handle_for_monitoring_service(self):
+        return OptimizerMonitoringService_pb2.OptimizerHandle(Id=self.id)
+
+    @property
     def trained(self):
-        response = self._optimizer_stub.IsTrained(self.optimizer_handle)
+        response = self._optimizer_monitoring_stub.IsTrained(self.optimizer_handle_for_monitoring_service)
         return response.Value
 
     @trace()
     def get_optimizer_convergence_state(self):
-        optimizer_convergence_state_response = self._optimizer_stub.GetOptimizerConvergenceState(self.optimizer_handle)
+        optimizer_convergence_state_response = self._optimizer_monitoring_stub.GetOptimizerConvergenceState(self.optimizer_handle_for_monitoring_service)
         return deserialize_from_bytes_string(optimizer_convergence_state_response.SerializedOptimizerConvergenceState)
 
     @trace()
     def compute_surrogate_model_goodness_of_fit(self):
-        response = self._optimizer_stub.ComputeGoodnessOfFitMetrics(self.optimizer_handle)
+        response = self._optimizer_monitoring_stub.ComputeGoodnessOfFitMetrics(self.optimizer_handle_for_monitoring_service)
         return MultiObjectiveGoodnessOfFitMetrics.from_json(response.Value, objective_names=self.optimization_problem.objective_space.dimension_names)
 
     @trace()
@@ -84,7 +89,7 @@ class BayesianOptimizerProxy(OptimizerBase):
             raise NotImplementedError("Context not currently supported on remote optimizers")
 
         suggestion_request = OptimizerService_pb2.SuggestRequest(
-            OptimizerHandle=self.optimizer_handle,
+            OptimizerHandle=self.optimizer_handle_for_optimizer_service,
             Random=random,
             Context=context
         )
@@ -99,7 +104,7 @@ class BayesianOptimizerProxy(OptimizerBase):
 
         feature_values_pandas_frame = parameter_values_pandas_frame
         register_request = OptimizerService_pb2.RegisterObservationsRequest(
-            OptimizerHandle=self.optimizer_handle,
+            OptimizerHandle=self.optimizer_handle_for_optimizer_service,
             Observations=OptimizerService_pb2.Observations(
                 Features=OptimizerService_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
                 ObjectiveValues=OptimizerService_pb2.ObjectiveValues(
@@ -111,7 +116,7 @@ class BayesianOptimizerProxy(OptimizerBase):
 
     @trace()
     def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-        response = self._optimizer_stub.GetAllObservations(self.optimizer_handle)
+        response = self._optimizer_monitoring_stub.GetAllObservations(self.optimizer_handle_for_monitoring_service)
         features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
         objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
         context_df = None
@@ -124,13 +129,13 @@ class BayesianOptimizerProxy(OptimizerBase):
         if context_values_pandas_frame is not None:
             raise NotImplementedError("Context not currently supported on remote optimizers")
         feature_values_dict = parameter_values_pandas_frame.to_dict(orient='list')
-        prediction_request = OptimizerService_pb2.PredictRequest(
-            OptimizerHandle=self.optimizer_handle,
+        prediction_request = OptimizerMonitoringService_pb2.PredictRequest(
+            OptimizerHandle=self.optimizer_handle_for_monitoring_service,
             Features=OptimizerService_pb2.Features(
                 FeaturesJsonString=json.dumps(feature_values_dict)
             )
         )
-        prediction_response = self._optimizer_stub.Predict(prediction_request)
+        prediction_response = self._optimizer_monitoring_stub.Predict(prediction_request)
 
         # To be compliant with the OptimizerBase, we need to recover a single Prediction object and return it.
         #
