@@ -131,7 +131,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         feature_values_dict = parameter_values_pandas_frame.to_dict(orient='list')
         prediction_request = OptimizerMonitoringService_pb2.PredictRequest(
             OptimizerHandle=self.optimizer_handle_for_monitoring_service,
-            Features=OptimizerService_pb2.Features(
+            Features=OptimizerMonitoringService_pb2.Features(
                 FeaturesJsonString=json.dumps(feature_values_dict)
             )
         )
