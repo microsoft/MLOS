@@ -82,12 +82,16 @@ class TestBayesianOptimizerGrpcClient:
 
 
     def test_optimizer_with_default_config(self):
+        self.logger.info("testing optimizer")
         pre_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
+        self.logger.info(f"Got {len(pre_existing_optimizers)} pre existing optimizers.")
         print(bayesian_optimizer_config_store.default)
+        self.logger.info("Creating a remote optimizer with default config.")
         bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
             optimization_problem=self.optimization_problem,
             optimizer_config=bayesian_optimizer_config_store.default
         )
+        self.logger.info(f"Created a remote optimizer {bayesian_optimizer.id} with default config.")
         post_existing_optimizers = {optimizer.id: optimizer for optimizer in self.optimizer_monitor.get_existing_optimizers()}
 
         new_optimizers = {

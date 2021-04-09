@@ -1,5 +1,6 @@
 syntax = "proto3";
 package mlos.optimizer_monitoring_service;
+import "MlosCommonMessageTypes.proto";
 
 option csharp_namespace = "Mlos.OptimizerMonitoringService";
 
