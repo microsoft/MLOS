@@ -15,12 +15,15 @@ sys.path.insert(0, grpc_dir)
 from . import OptimizerService_pb2
 from . import OptimizerService_pb2_grpc
 from . import MlosCommonMessageTypes_pb2, MlosCommonMessageTypes_pb2_grpc
+from . import OptimizerMonitoringService_pb2, OptimizerMonitoringService_pb2_grpc
 
 __all__ = [
     "OptimizerService_pb2",
     "OptimizerService_pb2_grpc",
     "MlosCommonMessageTypes_pb2",
-    "MlosCommonMessageTypes_pb2_grpc"
+    "MlosCommonMessageTypes_pb2_grpc",
+    "OptimizerMonitoringService_pb2",
+    "OptimizerMonitoringService_pb2_grpc"
 ]
 
 # Make sure there are no http_proxy environment variables set.

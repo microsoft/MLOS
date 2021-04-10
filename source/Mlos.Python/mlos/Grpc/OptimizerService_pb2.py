@@ -11,8 +11,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import MlosCommonMessageTypes_pb2 as MlosCommonMessageTypes__pb2
+from mlos.Grpc import MlosCommonMessageTypes_pb2 as mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2
 
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import *
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='mlos/Grpc/OptimizerService.proto',
@@ -20,9 +21,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\025Mlos.OptimizerService',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\x12\x16mlos.optimizer_service\x1a\x1cMlosCommonMessageTypes.proto\"\x9b\x01\n\x16\x43reateOptimizerRequest\x12K\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32..mlos_common_message_types.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"\x9a\x01\n\x0eSuggestRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x33\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\".mlos_common_message_types.Context\"\x9e\x01\n\x1aRegisterObservationRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12;\n\x0bObservation\x18\x02 \x01(\x0b\x32&.mlos_common_message_types.Observation\"\xa1\x01\n\x1bRegisterObservationsRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12=\n\x0cObservations\x18\x02 \x01(\x0b\x32\'.mlos_common_message_types.Observations2\x90\x04\n\x10OptimizerService\x12m\n\x0f\x43reateOptimizer\x12..mlos.optimizer_service.CreateOptimizerRequest\x1a*.mlos_common_message_types.OptimizerHandle\x12\x65\n\x07Suggest\x12&.mlos.optimizer_service.SuggestRequest\x1a\x32.mlos_common_message_types.ConfigurationParameters\x12k\n\x13RegisterObservation\x12\x32.mlos.optimizer_service.RegisterObservationRequest\x1a .mlos_common_message_types.Empty\x12m\n\x14RegisterObservations\x12\x33.mlos.optimizer_service.RegisterObservationsRequest\x1a .mlos_common_message_types.Empty\x12J\n\x04\x45\x63ho\x12 .mlos_common_message_types.Empty\x1a .mlos_common_message_types.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceb\x06proto3'
+  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\x12\x16mlos.optimizer_service\x1a&mlos/Grpc/MlosCommonMessageTypes.proto\"\x9b\x01\n\x16\x43reateOptimizerRequest\x12K\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32..mlos_common_message_types.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"\x9a\x01\n\x0eSuggestRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x33\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\".mlos_common_message_types.Context\"\x9e\x01\n\x1aRegisterObservationRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12;\n\x0bObservation\x18\x02 \x01(\x0b\x32&.mlos_common_message_types.Observation\"\xa1\x01\n\x1bRegisterObservationsRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12=\n\x0cObservations\x18\x02 \x01(\x0b\x32\'.mlos_common_message_types.Observations2\x90\x04\n\x10OptimizerService\x12m\n\x0f\x43reateOptimizer\x12..mlos.optimizer_service.CreateOptimizerRequest\x1a*.mlos_common_message_types.OptimizerHandle\x12\x65\n\x07Suggest\x12&.mlos.optimizer_service.SuggestRequest\x1a\x32.mlos_common_message_types.ConfigurationParameters\x12k\n\x13RegisterObservation\x12\x32.mlos.optimizer_service.RegisterObservationRequest\x1a .mlos_common_message_types.Empty\x12m\n\x14RegisterObservations\x12\x33.mlos.optimizer_service.RegisterObservationsRequest\x1a .mlos_common_message_types.Empty\x12J\n\x04\x45\x63ho\x12 .mlos_common_message_types.Empty\x1a .mlos_common_message_types.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceP\x00\x62\x06proto3'
   ,
-  dependencies=[MlosCommonMessageTypes__pb2.DESCRIPTOR,])
+  dependencies=[mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.DESCRIPTOR,],
+  public_dependencies=[mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.DESCRIPTOR,])
 
 
 
@@ -68,8 +70,8 @@ _CREATEOPTIMIZERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=91,
-  serialized_end=246,
+  serialized_start=101,
+  serialized_end=256,
 )
 
 
@@ -114,8 +116,8 @@ _SUGGESTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=249,
-  serialized_end=403,
+  serialized_start=259,
+  serialized_end=413,
 )
 
 
@@ -153,8 +155,8 @@ _REGISTEROBSERVATIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=406,
-  serialized_end=564,
+  serialized_start=416,
+  serialized_end=574,
 )
 
 
@@ -192,17 +194,17 @@ _REGISTEROBSERVATIONSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=567,
-  serialized_end=728,
+  serialized_start=577,
+  serialized_end=738,
 )
 
-_CREATEOPTIMIZERREQUEST.fields_by_name['OptimizationProblem'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZATIONPROBLEM
-_SUGGESTREQUEST.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
-_SUGGESTREQUEST.fields_by_name['Context'].message_type = MlosCommonMessageTypes__pb2._CONTEXT
-_REGISTEROBSERVATIONREQUEST.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
-_REGISTEROBSERVATIONREQUEST.fields_by_name['Observation'].message_type = MlosCommonMessageTypes__pb2._OBSERVATION
-_REGISTEROBSERVATIONSREQUEST.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
-_REGISTEROBSERVATIONSREQUEST.fields_by_name['Observations'].message_type = MlosCommonMessageTypes__pb2._OBSERVATIONS
+_CREATEOPTIMIZERREQUEST.fields_by_name['OptimizationProblem'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZATIONPROBLEM
+_SUGGESTREQUEST.fields_by_name['OptimizerHandle'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_SUGGESTREQUEST.fields_by_name['Context'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._CONTEXT
+_REGISTEROBSERVATIONREQUEST.fields_by_name['OptimizerHandle'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_REGISTEROBSERVATIONREQUEST.fields_by_name['Observation'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OBSERVATION
+_REGISTEROBSERVATIONSREQUEST.fields_by_name['OptimizerHandle'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_REGISTEROBSERVATIONSREQUEST.fields_by_name['Observations'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OBSERVATIONS
 DESCRIPTOR.message_types_by_name['CreateOptimizerRequest'] = _CREATEOPTIMIZERREQUEST
 DESCRIPTOR.message_types_by_name['SuggestRequest'] = _SUGGESTREQUEST
 DESCRIPTOR.message_types_by_name['RegisterObservationRequest'] = _REGISTEROBSERVATIONREQUEST
@@ -247,8 +249,8 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=731,
-  serialized_end=1259,
+  serialized_start=741,
+  serialized_end=1269,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateOptimizer',
@@ -256,7 +258,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     index=0,
     containing_service=None,
     input_type=_CREATEOPTIMIZERREQUEST,
-    output_type=MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -266,7 +268,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     index=1,
     containing_service=None,
     input_type=_SUGGESTREQUEST,
-    output_type=MlosCommonMessageTypes__pb2._CONFIGURATIONPARAMETERS,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._CONFIGURATIONPARAMETERS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -276,7 +278,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     index=2,
     containing_service=None,
     input_type=_REGISTEROBSERVATIONREQUEST,
-    output_type=MlosCommonMessageTypes__pb2._EMPTY,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -286,7 +288,7 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     index=3,
     containing_service=None,
     input_type=_REGISTEROBSERVATIONSREQUEST,
-    output_type=MlosCommonMessageTypes__pb2._EMPTY,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -295,8 +297,8 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     full_name='mlos.optimizer_service.OptimizerService.Echo',
     index=4,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._EMPTY,
-    output_type=MlosCommonMessageTypes__pb2._EMPTY,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._EMPTY,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),

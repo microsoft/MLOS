@@ -11,8 +11,9 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import MlosCommonMessageTypes_pb2 as MlosCommonMessageTypes__pb2
+from mlos.Grpc import MlosCommonMessageTypes_pb2 as mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2
 
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import *
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='mlos/Grpc/OptimizerMonitoringService.proto',
@@ -20,9 +21,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\037Mlos.OptimizerMonitoringService',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n*mlos/Grpc/OptimizerMonitoringService.proto\x12!mlos.optimizer_monitoring_service\x1a\x1cMlosCommonMessageTypes.proto\"\x8d\x01\n\x19OptimizerConvergenceState\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12+\n#SerializedOptimizerConvergenceState\x18\x02 \x01(\t\"M\n\rOptimizerList\x12<\n\nOptimizers\x18\x01 \x03(\x0b\x32(.mlos_common_message_types.OptimizerInfo\"\x8c\x01\n\x0ePredictRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12\x35\n\x08\x46\x65\x61tures\x18\x02 \x01(\x0b\x32#.mlos_common_message_types.Features\"Y\n\x19SingleObjectivePrediction\x12\x15\n\rObjectiveName\x18\x01 \x01(\t\x12%\n\x1dPredictionDataFrameJsonString\x18\x02 \x01(\t\"m\n\x0fPredictResponse\x12Z\n\x14ObjectivePredictions\x18\x01 \x03(\x0b\x32<.mlos.optimizer_monitoring_service.SingleObjectivePrediction2\xff\x06\n\x1aOptimizerMonitoringService\x12l\n\x16ListExistingOptimizers\x12 .mlos_common_message_types.Empty\x1a\x30.mlos.optimizer_monitoring_service.OptimizerList\x12h\n\x10GetOptimizerInfo\x12*.mlos_common_message_types.OptimizerHandle\x1a(.mlos_common_message_types.OptimizerInfo\x12\x88\x01\n\x1cGetOptimizerConvergenceState\x12*.mlos_common_message_types.OptimizerHandle\x1a<.mlos.optimizer_monitoring_service.OptimizerConvergenceState\x12r\n\x1b\x43omputeGoodnessOfFitMetrics\x12*.mlos_common_message_types.OptimizerHandle\x1a\'.mlos_common_message_types.SimpleString\x12\x61\n\tIsTrained\x12*.mlos_common_message_types.OptimizerHandle\x1a(.mlos_common_message_types.SimpleBoolean\x12p\n\x07Predict\x12\x31.mlos.optimizer_monitoring_service.PredictRequest\x1a\x32.mlos.optimizer_monitoring_service.PredictResponse\x12i\n\x12GetAllObservations\x12*.mlos_common_message_types.OptimizerHandle\x1a\'.mlos_common_message_types.Observations\x12J\n\x04\x45\x63ho\x12 .mlos_common_message_types.Empty\x1a .mlos_common_message_types.EmptyB\"\xaa\x02\x1fMlos.OptimizerMonitoringServiceb\x06proto3'
+  serialized_pb=b'\n*mlos/Grpc/OptimizerMonitoringService.proto\x12!mlos.optimizer_monitoring_service\x1a&mlos/Grpc/MlosCommonMessageTypes.proto\"\x8d\x01\n\x19OptimizerConvergenceState\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12+\n#SerializedOptimizerConvergenceState\x18\x02 \x01(\t\"M\n\rOptimizerList\x12<\n\nOptimizers\x18\x01 \x03(\x0b\x32(.mlos_common_message_types.OptimizerInfo\"\x8c\x01\n\x0ePredictRequest\x12\x43\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32*.mlos_common_message_types.OptimizerHandle\x12\x35\n\x08\x46\x65\x61tures\x18\x02 \x01(\x0b\x32#.mlos_common_message_types.Features\"Y\n\x19SingleObjectivePrediction\x12\x15\n\rObjectiveName\x18\x01 \x01(\t\x12%\n\x1dPredictionDataFrameJsonString\x18\x02 \x01(\t\"m\n\x0fPredictResponse\x12Z\n\x14ObjectivePredictions\x18\x01 \x03(\x0b\x32<.mlos.optimizer_monitoring_service.SingleObjectivePrediction2\xff\x06\n\x1aOptimizerMonitoringService\x12l\n\x16ListExistingOptimizers\x12 .mlos_common_message_types.Empty\x1a\x30.mlos.optimizer_monitoring_service.OptimizerList\x12h\n\x10GetOptimizerInfo\x12*.mlos_common_message_types.OptimizerHandle\x1a(.mlos_common_message_types.OptimizerInfo\x12\x88\x01\n\x1cGetOptimizerConvergenceState\x12*.mlos_common_message_types.OptimizerHandle\x1a<.mlos.optimizer_monitoring_service.OptimizerConvergenceState\x12r\n\x1b\x43omputeGoodnessOfFitMetrics\x12*.mlos_common_message_types.OptimizerHandle\x1a\'.mlos_common_message_types.SimpleString\x12\x61\n\tIsTrained\x12*.mlos_common_message_types.OptimizerHandle\x1a(.mlos_common_message_types.SimpleBoolean\x12p\n\x07Predict\x12\x31.mlos.optimizer_monitoring_service.PredictRequest\x1a\x32.mlos.optimizer_monitoring_service.PredictResponse\x12i\n\x12GetAllObservations\x12*.mlos_common_message_types.OptimizerHandle\x1a\'.mlos_common_message_types.Observations\x12J\n\x04\x45\x63ho\x12 .mlos_common_message_types.Empty\x1a .mlos_common_message_types.EmptyB\"\xaa\x02\x1fMlos.OptimizerMonitoringServiceP\x00\x62\x06proto3'
   ,
-  dependencies=[MlosCommonMessageTypes__pb2.DESCRIPTOR,])
+  dependencies=[mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.DESCRIPTOR,],
+  public_dependencies=[mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.DESCRIPTOR,])
 
 
 
@@ -61,8 +63,8 @@ _OPTIMIZERCONVERGENCESTATE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=112,
-  serialized_end=253,
+  serialized_start=122,
+  serialized_end=263,
 )
 
 
@@ -93,8 +95,8 @@ _OPTIMIZERLIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=255,
-  serialized_end=332,
+  serialized_start=265,
+  serialized_end=342,
 )
 
 
@@ -132,8 +134,8 @@ _PREDICTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=335,
-  serialized_end=475,
+  serialized_start=345,
+  serialized_end=485,
 )
 
 
@@ -171,8 +173,8 @@ _SINGLEOBJECTIVEPREDICTION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=477,
-  serialized_end=566,
+  serialized_start=487,
+  serialized_end=576,
 )
 
 
@@ -203,14 +205,14 @@ _PREDICTRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=568,
-  serialized_end=677,
+  serialized_start=578,
+  serialized_end=687,
 )
 
-_OPTIMIZERCONVERGENCESTATE.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
-_OPTIMIZERLIST.fields_by_name['Optimizers'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERINFO
-_PREDICTREQUEST.fields_by_name['OptimizerHandle'].message_type = MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
-_PREDICTREQUEST.fields_by_name['Features'].message_type = MlosCommonMessageTypes__pb2._FEATURES
+_OPTIMIZERCONVERGENCESTATE.fields_by_name['OptimizerHandle'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_OPTIMIZERLIST.fields_by_name['Optimizers'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERINFO
+_PREDICTREQUEST.fields_by_name['OptimizerHandle'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE
+_PREDICTREQUEST.fields_by_name['Features'].message_type = mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._FEATURES
 _PREDICTRESPONSE.fields_by_name['ObjectivePredictions'].message_type = _SINGLEOBJECTIVEPREDICTION
 DESCRIPTOR.message_types_by_name['OptimizerConvergenceState'] = _OPTIMIZERCONVERGENCESTATE
 DESCRIPTOR.message_types_by_name['OptimizerList'] = _OPTIMIZERLIST
@@ -264,15 +266,15 @@ _OPTIMIZERMONITORINGSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=680,
-  serialized_end=1575,
+  serialized_start=690,
+  serialized_end=1585,
   methods=[
   _descriptor.MethodDescriptor(
     name='ListExistingOptimizers',
     full_name='mlos.optimizer_monitoring_service.OptimizerMonitoringService.ListExistingOptimizers',
     index=0,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._EMPTY,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._EMPTY,
     output_type=_OPTIMIZERLIST,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -282,8 +284,8 @@ _OPTIMIZERMONITORINGSERVICE = _descriptor.ServiceDescriptor(
     full_name='mlos.optimizer_monitoring_service.OptimizerMonitoringService.GetOptimizerInfo',
     index=1,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
-    output_type=MlosCommonMessageTypes__pb2._OPTIMIZERINFO,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERINFO,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -292,7 +294,7 @@ _OPTIMIZERMONITORINGSERVICE = _descriptor.ServiceDescriptor(
     full_name='mlos.optimizer_monitoring_service.OptimizerMonitoringService.GetOptimizerConvergenceState',
     index=2,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
     output_type=_OPTIMIZERCONVERGENCESTATE,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
@@ -302,8 +304,8 @@ _OPTIMIZERMONITORINGSERVICE = _descriptor.ServiceDescriptor(
     full_name='mlos.optimizer_monitoring_service.OptimizerMonitoringService.ComputeGoodnessOfFitMetrics',
     index=3,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
-    output_type=MlosCommonMessageTypes__pb2._SIMPLESTRING,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._SIMPLESTRING,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -312,8 +314,8 @@ _OPTIMIZERMONITORINGSERVICE = _descriptor.ServiceDescriptor(
     full_name='mlos.optimizer_monitoring_service.OptimizerMonitoringService.IsTrained',
     index=4,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
-    output_type=MlosCommonMessageTypes__pb2._SIMPLEBOOLEAN,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._SIMPLEBOOLEAN,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -332,8 +334,8 @@ _OPTIMIZERMONITORINGSERVICE = _descriptor.ServiceDescriptor(
     full_name='mlos.optimizer_monitoring_service.OptimizerMonitoringService.GetAllObservations',
     index=6,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
-    output_type=MlosCommonMessageTypes__pb2._OBSERVATIONS,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OPTIMIZERHANDLE,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._OBSERVATIONS,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
@@ -342,8 +344,8 @@ _OPTIMIZERMONITORINGSERVICE = _descriptor.ServiceDescriptor(
     full_name='mlos.optimizer_monitoring_service.OptimizerMonitoringService.Echo',
     index=7,
     containing_service=None,
-    input_type=MlosCommonMessageTypes__pb2._EMPTY,
-    output_type=MlosCommonMessageTypes__pb2._EMPTY,
+    input_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._EMPTY,
+    output_type=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
   ),
