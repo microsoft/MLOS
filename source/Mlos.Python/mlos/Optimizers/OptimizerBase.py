@@ -13,7 +13,7 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.PredictedValueUtilityFunction import PredictedValueUtilityFunction
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOtimizerFactory import UtilityFunctionOtimizerFactory
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizerFactory import UtilityFunctionOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 
 from mlos.Spaces import Point
@@ -115,7 +115,7 @@ class OptimizerBase(ABC):
             self.surrogate_model,
             minimize=self.optimization_problem.objectives[0].minimize
         )
-        utility_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
+        utility_optimizer = UtilityFunctionOptimizerFactory.create_utility_function_optimizer(
             utility_function=predicted_value_utility,
             optimizer_type_name=RandomSearchOptimizer.__name__,
             optimizer_config=random_search_optimizer_config_store.default,

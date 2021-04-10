@@ -14,7 +14,7 @@ from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOp
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer, random_near_incumbent_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer, glow_worm_swarm_optimizer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.unit_tests.MultiObjectivePassThroughModelForTesting import MultiObjectivePassThroughModelForTesting, multi_objective_pass_through_model_config_store
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOtimizerFactory import UtilityFunctionOtimizerFactory
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.UtilityFunctionOptimizerFactory import UtilityFunctionOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction, multi_objective_probability_of_improvement_utility_function_config_store
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
@@ -175,7 +175,7 @@ class TestUtilityFunctionOptimizers:
         else:
             assert False, f"Unknown utility_function_optimizer_type_name: {utility_function_optimizer_type_name}"
 
-        utility_function_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
+        utility_function_optimizer = UtilityFunctionOptimizerFactory.create_utility_function_optimizer(
             utility_function=utility_function,
             optimizer_type_name=utility_function_optimizer_type_name,
             optimizer_config=utility_function_optimizer_config,
@@ -242,7 +242,7 @@ class TestUtilityFunctionOptimizers:
         else:
             assert False, f"Unknown utility_function_optimizer_type_name: {utility_function_optimizer_type_name}"
 
-        utility_function_optimizer = UtilityFunctionOtimizerFactory.create_utility_function_optimizer(
+        utility_function_optimizer = UtilityFunctionOptimizerFactory.create_utility_function_optimizer(
             utility_function=utility_function,
             optimizer_type_name=utility_function_optimizer_type_name,
             optimizer_config=utility_function_optimizer_config,
