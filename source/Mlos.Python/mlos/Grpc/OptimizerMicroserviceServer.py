@@ -9,6 +9,7 @@ import grpc
 
 from mlos.Grpc import OptimizerService_pb2_grpc
 from mlos.Grpc.OptimizerMicroservice import OptimizerMicroservice
+from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerInMemoryStore import BayesianOptimizerInMemoryStore
 from mlos.Logger import create_logger
 
 
@@ -29,13 +30,14 @@ class OptimizerMicroserviceServer:
         if logger is None:
             logger = create_logger("OptimizerMicroserviceServer init")
         self.logger = logger
+        self._optimizer_store = BayesianOptimizerInMemoryStore(logger=logger)
 
 
     def start(self):
         assert self._server is None, "Server already started"
         self._server = grpc.server(ThreadPoolExecutor(max_workers=self.num_threads))
         OptimizerService_pb2_grpc.add_OptimizerServiceServicer_to_server(
-            OptimizerMicroservice(),
+            OptimizerMicroservice(bayesian_optimizer_store=self._optimizer_store, logger=self.logger),
             self._server
         )
         self._server.add_insecure_port(f'[::]:{self.port}')

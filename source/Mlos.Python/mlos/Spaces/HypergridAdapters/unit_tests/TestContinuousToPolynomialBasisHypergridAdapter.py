@@ -8,7 +8,7 @@ import pytest
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimension, DiscreteDimension, OrdinalDimension
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.ThreeLevelQuadratic import ThreeLevelQuadratic
 from mlos.Spaces.HypergridAdapters import ContinuousToPolynomialBasisHypergridAdapter
-
+from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
 
 class TestContinuousToPolynomialBasisHypergridAdapter:
 
@@ -178,3 +178,43 @@ class TestContinuousToPolynomialBasisHypergridAdapter:
                 print('expected: ', expected_values)
                 print('observed: ', observed_values)
             assert sum_diffs < epsilon
+
+    @pytest.mark.parametrize("degree", [2, 3, 5])
+    @pytest.mark.parametrize("include_bias", [True, False])
+    @pytest.mark.parametrize("interaction_only", [True, False])
+    @pytest.mark.parametrize("drop", ['first', None])
+    @pytest.mark.parametrize("merge_all_categorical_dimensions", [True, False])
+    def test_stacking_polynomial_feature_on_one_hot_encoding_parameterized(
+        self,
+        degree,
+        include_bias,
+        interaction_only,
+        drop,
+        merge_all_categorical_dimensions
+    ):
+        # The RegressionEnhancedRandomForestRegressionModel stacks polynomial feature adapter on one hot encoding adapter.
+        # When the RERF code was changed to use these adapters, there was some concern about how the stacking was done.
+        # This test tries to replicate the result of using the expected stacking pattern.
+        for adaptee in [self.simple_hypergrid,
+                        self.unbalanced_hierarchical_hypergrid,
+                        self.balanced_hierarchical_hypergrid]:
+            print(f'running test for adaptee: {adaptee.name}')
+
+            one_hot_encoder_adapter = CategoricalToOneHotEncodedHypergridAdapter(
+                adaptee=adaptee,
+                merge_all_categorical_dimensions=merge_all_categorical_dimensions,
+                drop=drop
+            )
+
+            polynomial_features_adapter = ContinuousToPolynomialBasisHypergridAdapter(
+                adaptee=one_hot_encoder_adapter,
+                degree=degree,
+                include_bias=include_bias,
+                interaction_only=interaction_only
+            )
+
+        original_df = adaptee.random_dataframe(num_samples=10)
+        projected_df = polynomial_features_adapter.project_dataframe(df=original_df, in_place=True)
+
+        # test values are as expected
+        self._test_polynomial_feature_values_are_as_expected(polynomial_features_adapter, projected_df)

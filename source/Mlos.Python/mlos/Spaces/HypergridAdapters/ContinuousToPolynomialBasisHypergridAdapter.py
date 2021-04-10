@@ -94,10 +94,9 @@ class ContinuousToPolynomialBasisHypergridAdapter(HypergridAdapter):
             random_state=self._adaptee.random_state
         )
 
-        # Add all adaptee dimensions to the target
-        # This aligns with this adapter's goal since the linear terms will always be included in the polynomial basis functions
+        # Add non-transformed adaptee dimensions to the target
         for adaptee_dimension in self._adaptee.dimensions:
-            if not adaptee_dimension.name in self._adaptee_dimension_names_to_transform:
+            if adaptee_dimension.name not in self._adaptee_dimension_names_to_transform:
                 self._target.add_dimension(adaptee_dimension.copy())
 
         if not self._adaptee_contains_dimensions_to_transform:
