@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 from numbers import Number
-
+import pytest
 
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension, ContinuousDimension, DiscreteDimension, OrdinalDimension
 from mlos.Spaces.HypergridAdapters import CategoricalToOneHotEncodedHypergridAdapter
@@ -45,96 +45,47 @@ class TestCategoricalToOneHotEncodedHypergridAdapter:
             on_external_dimension=CategoricalDimension("categorical_mixed_types", values=[True])
         )
 
-    ## Point project/unproject
-    # Simple Hypergrid tests
-    def test_projecting_point_from_categorical_to_one_hot_encoding_simple_hypergrid(self):
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.simple_hypergrid)
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.simple_hypergrid, adapter=adapter, num_random_points=500)
+    # Point project/unproject
+    @pytest.mark.parametrize("drop", ['first', None])
+    @pytest.mark.parametrize("merge_all_categorical_dimensions", [True, False])
+    def test_projecting_point_from_categorical_to_one_hot_encoding_simple_hypergrid_parameterized(self, drop, merge_all_categorical_dimensions):
+        for adaptee in [self.simple_hypergrid, self.hierarchical_hypergrid]:
+            adapter = CategoricalToOneHotEncodedHypergridAdapter(
+                adaptee=adaptee,
+                drop=drop,
+                merge_all_categorical_dimensions=merge_all_categorical_dimensions
+            )
+            test_types_are_not_categorical = [dimension.__class__ != CategoricalDimension for dimension in adapter.dimensions]
+            assert all(test_types_are_not_categorical)
 
-    def test_projecting_point_from_categorical_to_one_hot_encoding_drop_first_simple_hypergrid(self):
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.simple_hypergrid, drop='first')
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.simple_hypergrid, adapter=adapter, num_random_points=500)
+            self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(
+                adaptee=adaptee,
+                adapter=adapter,
+                num_random_points=100
+            )
 
-    def test_projecting_point_from_categorical_to_one_hot_encoding_cross_product_simple_hypergrid(self):
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.simple_hypergrid, merge_all_categorical_dimensions=True)
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.simple_hypergrid, adapter=adapter, num_random_points=500)
+    # DataFrame project/unproject tests
+    @pytest.mark.parametrize("drop", ['first', None])
+    @pytest.mark.parametrize("merge_all_categorical_dimensions", [True, False])
+    def test_projecting_dataframe_from_flat_to_one_hot_encoded_hypergrid_parameterized(self, drop, merge_all_categorical_dimensions):
+        for adaptee in [self.simple_hypergrid, self.hierarchical_hypergrid]:
+            adapter = CategoricalToOneHotEncodedHypergridAdapter(
+                adaptee=adaptee,
+                drop=drop,
+                merge_all_categorical_dimensions=merge_all_categorical_dimensions
+            )
+            test_types_are_not_categorical = [dimension.__class__ != CategoricalDimension for dimension in adapter.dimensions]
+            assert all(test_types_are_not_categorical)
 
-    def test_projecting_point_from_categorical_to_one_hot_encoding_cross_product_drop_first_simple_hypergrid(self):
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.simple_hypergrid, merge_all_categorical_dimensions=True, drop='first')
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.simple_hypergrid, adapter=adapter, num_random_points=500)
-
-    # Hierarchical Hypergrid tests
-    def test_projecting_point_from_hierarchical_categorical_to_one_hot_encoding_hypergrid(self):
-        hierarchical_adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.hierarchical_hypergrid)
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.hierarchical_hypergrid,
-                                                                                 adapter=hierarchical_adapter,
-                                                                                 num_random_points=500)
-
-    def test_projecting_point_from_hierarchical_categorical_to_one_hot_encoding_drop_first_hypergrid(self):
-        hierarchical_adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.hierarchical_hypergrid, drop='first')
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.hierarchical_hypergrid,
-                                                                                 adapter=hierarchical_adapter,
-                                                                                 num_random_points=500)
-
-    def test_projecting_point_from_hierarchical_categorical_to_one_hot_encoding_cross_product_hypergrid(self):
-        hierarchical_adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.hierarchical_hypergrid, merge_all_categorical_dimensions=True)
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.hierarchical_hypergrid,
-                                                                                 adapter=hierarchical_adapter,
-                                                                                 num_random_points=100)
-
-    def test_projecting_point_from_hierarchical_categorical_to_one_hot_encoding_cross_product_drop_first_hypergrid(self):
-        hierarchical_adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=self.hierarchical_hypergrid,
-                                                                          merge_all_categorical_dimensions=True,
-                                                                          drop='first')
-        self._test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee=self.hierarchical_hypergrid,
-                                                                                 adapter=hierarchical_adapter,
-                                                                                 num_random_points=100)
-
-    ## DataFrame project/unproject tests
-    # Simple Hypergrid tests
-    def test_projecting_dataframe_from_flat_to_one_hot_encoded_hypergrid(self):
-        adaptee = self.simple_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee)
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
-
-    def test_projecting_dataframe_from_flat_to_one_hot_encoded_drop_first_hypergrid(self):
-        adaptee = self.simple_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee, drop='first')
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
-
-    def test_projecting_dataframe_from_flat_to_one_hot_encoded_cross_product_hypergrid(self):
-        adaptee = self.simple_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee, merge_all_categorical_dimensions=True)
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
-
-    def test_projecting_dataframe_from_flat_to_one_hot_encoded_cross_product_drop_first_hypergrid(self):
-        adaptee = self.simple_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee, merge_all_categorical_dimensions=True, drop='first')
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
-
-    # Hierarchical Hypergrid tests
-    def test_projecting_dataframe_from_hierarchical_to_one_hot_encoding_hypergrid(self):
-        adaptee = self.hierarchical_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee)
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
-
-    def test_projecting_dataframe_from_hierarchical_to_one_hot_encoding_drop_first_hypergrid(self):
-        adaptee = self.hierarchical_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee, drop='first')
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
-
-    def test_projecting_dataframe_from_hierarchical_to_one_hot_encoding_cross_product_hypergrid(self):
-        adaptee = self.hierarchical_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee, merge_all_categorical_dimensions=True)
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
-
-    def test_projecting_dataframe_from_hierarchical_to_one_hot_encoding_cross_product_drop_first_hypergrid(self):
-        adaptee = self.hierarchical_hypergrid
-        adapter = CategoricalToOneHotEncodedHypergridAdapter(adaptee=adaptee, merge_all_categorical_dimensions=True, drop='first')
-        self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adapter=adapter, adaptee=adaptee, num_random_points=1000)
+            self._test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(
+                adapter=adapter,
+                adaptee=adaptee,
+                num_random_points=1000
+            )
 
     # Helper functions
-    def _test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(self, adaptee, adapter, num_random_points: int):
+    @staticmethod
+    def _test_projecting_dataframe_categorical_to_one_hot_encoding_point_from_adaptee(adaptee, adapter, num_random_points: int):
         original_df = adaptee.random_dataframe(num_samples=num_random_points)
         projected_df = adapter.project_dataframe(df=original_df, in_place=False)
         assert id(original_df) != id(projected_df)
@@ -142,16 +93,22 @@ class TestCategoricalToOneHotEncodedHypergridAdapter:
             assert projected_df[column].isin([0, 1]).all()
         unprojected_df = adapter.unproject_dataframe(df=projected_df, in_place=False)
         assert original_df.equals(unprojected_df)
+        assert all([expected_column_name in projected_df.columns.values
+                    for expected_column_name in adapter.get_one_hot_encoded_column_names()])
 
         # Let's make sure that projecting in place works as expected.
         projected_in_place_df = adapter.project_dataframe(original_df, in_place=True)
         assert id(original_df) == id(projected_in_place_df)
         assert projected_in_place_df.equals(projected_df)
+        assert all([expected_column_name in projected_in_place_df.columns.values
+                    for expected_column_name in adapter.get_one_hot_encoded_column_names()])
+
         unprojected_in_place_df = adapter.unproject_dataframe(projected_in_place_df, in_place=True)
         assert id(original_df) == id(unprojected_in_place_df)
         assert unprojected_in_place_df.equals(unprojected_df[unprojected_in_place_df.columns.values])
 
-    def _test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(self, adaptee, adapter, num_random_points: int):
+    @staticmethod
+    def _test_projecting_categorical_to_one_hot_encoding_point_from_adaptee(adaptee, adapter, num_random_points: int):
         # First make sure that none of the resulting dimensions are categorical.
         #
         assert not any(isinstance(dimension, CategoricalDimension) for dimension in adapter.dimensions)

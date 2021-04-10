@@ -302,10 +302,12 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         num_test_x = 50
         x_test_df = objective_function.parameter_space.random_dataframe(num_samples=num_test_x)
+        y_test = objective_function.evaluate_dataframe(x_test_df).to_numpy().reshape(-1)
+
         predictions = rerf.predict(x_test_df)
         pred_df = predictions.get_dataframe()
         predicted_y = pred_df[predicted_value_col].to_numpy()
-        y_test = objective_function.evaluate_dataframe(x_test_df).to_numpy().reshape(-1)
+
         residual_sum_of_squares = ((y_test - predicted_y) ** 2).sum()
         total_sum_of_squares = ((y_test - y_test.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
