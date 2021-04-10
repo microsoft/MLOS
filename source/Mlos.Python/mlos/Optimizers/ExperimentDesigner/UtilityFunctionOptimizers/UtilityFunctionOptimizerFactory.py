@@ -12,7 +12,8 @@ from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Spaces import Point
 
 class UtilityFunctionOptimizerFactory:
-    """Creates specialized instances of the abstract base calss UtilityFunctionOptimzier."""
+    """Creates specialized instances of the abstract base class UtilityFunctionOptimzier."""
+
 
     @classmethod
     def create_utility_function_optimizer(
