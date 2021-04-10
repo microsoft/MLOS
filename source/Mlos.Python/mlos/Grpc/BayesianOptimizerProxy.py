@@ -8,7 +8,7 @@ from typing import Tuple
 import pandas as pd
 
 from mlos.global_values import deserialize_from_bytes_string
-from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc, OptimizerMonitoringService_pb2, OptimizerMonitoringService_pb2_grpc
+from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc, OptimizerMonitoringService_pb2, OptimizerMonitoringService_pb2_grpc, MlosCommonMessageTypes_pb2
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
@@ -62,11 +62,11 @@ class BayesianOptimizerProxy(OptimizerBase):
 
     @property
     def optimizer_handle_for_optimizer_service(self):
-        return OptimizerService_pb2.OptimizerHandle(Id=self.id)
+        return MlosCommonMessageTypes_pb2.OptimizerHandle(Id=self.id)
 
     @property
     def optimizer_handle_for_monitoring_service(self):
-        return OptimizerMonitoringService_pb2.OptimizerHandle(Id=self.id)
+        return MlosCommonMessageTypes_pb2.OptimizerHandle(Id=self.id)
 
     @property
     def trained(self):
@@ -105,9 +105,9 @@ class BayesianOptimizerProxy(OptimizerBase):
         feature_values_pandas_frame = parameter_values_pandas_frame
         register_request = OptimizerService_pb2.RegisterObservationsRequest(
             OptimizerHandle=self.optimizer_handle_for_optimizer_service,
-            Observations=OptimizerService_pb2.Observations(
-                Features=OptimizerService_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
-                ObjectiveValues=OptimizerService_pb2.ObjectiveValues(
+            Observations=MlosCommonMessageTypes_pb2.Observations(
+                Features=MlosCommonMessageTypes_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
+                ObjectiveValues=MlosCommonMessageTypes_pb2.ObjectiveValues(
                     ObjectiveValuesJsonString=target_values_pandas_frame.to_json(orient='index', double_precision=15)
                 )
             )
