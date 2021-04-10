@@ -3,11 +3,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import uuid
-from contextlib import contextmanager
 import json
-import multiprocessing
-from typing import Iterator
 
 import pandas as pd
 
@@ -15,6 +11,7 @@ from mlos.global_values import serialize_to_bytes_string
 from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc
 from mlos.Grpc.OptimizerService_pb2 import Empty, OptimizerConvergenceState, OptimizerInfo, OptimizerHandle, OptimizerList, Observations, Features,\
     ObjectiveValues, SimpleBoolean, SimpleString
+from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
@@ -30,39 +27,15 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
     """
 
-    def __init__(self):
-        self._optimizers_by_id = dict()
-        self._ordered_ids = []
-
-        self._lock_manager = multiprocessing.Manager()
-        self._optimizer_locks_by_optimizer_id = dict()
-        self.logger = create_logger("OptimizerMicroservice")
-        self.logger.info("OptimizerMicroservice init")
-
-    @staticmethod
-    def get_next_optimizer_id():
-        return str(uuid.uuid4())
-
-    @contextmanager
-    def exclusive_optimizer(self, optimizer_id) -> Iterator[BayesianOptimizer]:
-        """ Context manager to acquire the optimizer lock and yield the corresponding optimizer.
-
-        This makes sure that:
-            1. The lock is acquired before any operation on the optimizer commences.
-            2. The lock is released even if exceptions are flying.
-
-
-        :param optimizer_id:
-        :return:
-        :raises: KeyError if the optimizer_id was not found.
-        """
-        with self._optimizer_locks_by_optimizer_id[optimizer_id]:
-            yield self._optimizers_by_id[optimizer_id]
+    def __init__(self, bayesian_optimizer_store: BayesianOptimizerStoreBase, logger=None):
+        self._bayesian_optimizer_store = bayesian_optimizer_store
+        if logger is None:
+            logger = create_logger(self.__class__.__name__)
+        self.logger = logger
 
     def ListExistingOptimizers(self, request: Empty, context):
         optimizers_info = []
-        for optimizer_id in self._ordered_ids:
-            optimizer = self._optimizers_by_id[optimizer_id]
+        for optimizer_id, optimizer in self._bayesian_optimizer_store.list_optimizers():
             optimizers_info.append(OptimizerInfo(
                 OptimizerHandle=OptimizerHandle(Id=optimizer_id),
                 OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
@@ -73,7 +46,8 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
     def GetOptimizerInfo(self, request: OptimizerHandle, context):
         # TODO: Learn about and leverage gRPC's error handling model for a case
         # TODO: when the handle is invalid.
-        optimizer = self._optimizers_by_id[request.Id]
+        optimizer_id = request.Id
+        optimizer = self._bayesian_optimizer_store.get_optimizer(optimizer_id)
         return OptimizerInfo(
             OptimizerHandle=OptimizerHandle(Id=request.Id),
             OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
@@ -81,7 +55,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         )
 
     def GetOptimizerConvergenceState(self, request, context):
-        with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
             serialized_convergence_state = serialize_to_bytes_string(optimizer.get_optimizer_convergence_state())
 
         return OptimizerConvergenceState(
@@ -91,7 +65,6 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
     def CreateOptimizer(self, request: OptimizerService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
         self.logger.info("Creating Optimizer")
-        print("CREATING OPTIMIZER")
         optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
         optimizer_config_json = request.OptimizerConfig
         if optimizer_config_json is not None and len(optimizer_config_json) > 0:
@@ -99,32 +72,24 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         else:
             optimizer_config = bayesian_optimizer_config_store.default
 
-
         optimizer = BayesianOptimizer(
             optimization_problem=optimization_problem,
             optimizer_config=optimizer_config
         )
 
-        optimizer_id = self.get_next_optimizer_id()
+        optimizer_id = self._bayesian_optimizer_store.get_next_optimizer_id()
+        self._bayesian_optimizer_store.add_optimizer(optimizer_id=optimizer_id, optimizer=optimizer)
 
-        # To avoid a race condition we acquire the lock before inserting the lock and the optimizer into their respective
-        # dictionaries. Otherwise we could end up with a situation where a lock is in the dictionary, but the optimizer
-        # is not.
-        optimizer_lock = self._lock_manager.RLock()
-        with optimizer_lock:
-            self._optimizer_locks_by_optimizer_id[optimizer_id] = optimizer_lock
-            self._optimizers_by_id[optimizer_id] = optimizer
-            self._ordered_ids.append(optimizer_id)
         self.logger.info(f"Created optimizer {optimizer_id} with config: {optimizer.optimizer_config.to_json(indent=2)}")
         return OptimizerService_pb2.OptimizerHandle(Id=optimizer_id)
 
     def IsTrained(self, request, context): # pylint: disable=unused-argument
-        with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
             is_trained = optimizer.trained
         return SimpleBoolean(Value=is_trained)
 
     def ComputeGoodnessOfFitMetrics(self, request, context):
-        with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
             gof_metrics = optimizer.compute_surrogate_model_goodness_of_fit()
         return SimpleString(Value=gof_metrics.to_json())
 
@@ -135,7 +100,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         #
         if request.Context.ContextJsonString != "":
             raise NotImplementedError("Context not currently supported in remote optimizers")
-        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             # TODO handle context here
             suggested_params = optimizer.suggest(random=request.Random)
 
@@ -153,7 +118,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         objective_values = json.loads(request.Observation.ObjectiveValues.ObjectiveValuesJsonString)
         objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
 
-        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             optimizer.register(parameter_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
 
         return Empty()
@@ -165,13 +130,13 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         features_df = pd.read_json(observations.Features.FeaturesJsonString, orient='index')
         objectives_df = pd.read_json(observations.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
 
-        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             optimizer.register(parameter_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
 
         return Empty()
 
     def GetAllObservations(self, request, context): # pylint: disable=unused-argument
-        with self.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.Id) as optimizer:
             features_df, objectives_df, _ = optimizer.get_all_observations()
 
         return Observations(
@@ -184,7 +149,7 @@ class OptimizerMicroservice(OptimizerService_pb2_grpc.OptimizerServiceServicer):
 
         features_dict = json.loads(request.Features.FeaturesJsonString)
         features_df = pd.DataFrame(features_dict)
-        with self.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
+        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             prediction = optimizer.predict(features_df)
         assert isinstance(prediction, Prediction)
 
