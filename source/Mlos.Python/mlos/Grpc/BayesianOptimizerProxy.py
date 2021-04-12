@@ -8,7 +8,11 @@ from typing import Tuple
 import pandas as pd
 
 from mlos.global_values import deserialize_from_bytes_string
-from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc, OptimizerMonitoringService_pb2, OptimizerMonitoringService_pb2_grpc, MlosCommonMessageTypes_pb2
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import Features, ObjectiveValues, Observations, OptimizerHandle
+from mlos.Grpc.OptimizerMonitoringService_pb2 import PredictRequest
+from mlos.Grpc.OptimizerMonitoringService_pb2_grpc import OptimizerMonitoringServiceStub
+from mlos.Grpc.OptimizerService_pb2 import SuggestRequest, RegisterObservationsRequest
+from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
@@ -55,14 +59,14 @@ class BayesianOptimizerProxy(OptimizerBase):
         assert optimizer_config is not None
 
         self._grpc_channel = grpc_channel
-        self._optimizer_stub = OptimizerService_pb2_grpc.OptimizerServiceStub(self._grpc_channel)
-        self._optimizer_monitoring_stub = OptimizerMonitoringService_pb2_grpc.OptimizerMonitoringServiceStub(self._grpc_channel)
+        self._optimizer_stub = OptimizerServiceStub(self._grpc_channel)
+        self._optimizer_monitoring_stub = OptimizerMonitoringServiceStub(self._grpc_channel)
         self.optimizer_config = optimizer_config
         self.id = id
 
     @property
     def optimizer_handle(self):
-        return MlosCommonMessageTypes_pb2.OptimizerHandle(Id=self.id)
+        return OptimizerHandle(Id=self.id)
 
     @property
     def trained(self):
@@ -84,7 +88,7 @@ class BayesianOptimizerProxy(OptimizerBase):
         if context is not None:
             raise NotImplementedError("Context not currently supported on remote optimizers")
 
-        suggestion_request = OptimizerService_pb2.SuggestRequest(
+        suggestion_request = SuggestRequest(
             OptimizerHandle=self.optimizer_handle,
             Random=random,
             Context=context
@@ -99,11 +103,11 @@ class BayesianOptimizerProxy(OptimizerBase):
             raise NotImplementedError("Context not currently supported on remote optimizers")
 
         feature_values_pandas_frame = parameter_values_pandas_frame
-        register_request = OptimizerService_pb2.RegisterObservationsRequest(
+        register_request = RegisterObservationsRequest(
             OptimizerHandle=self.optimizer_handle,
-            Observations=MlosCommonMessageTypes_pb2.Observations(
-                Features=MlosCommonMessageTypes_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
-                ObjectiveValues=MlosCommonMessageTypes_pb2.ObjectiveValues(
+            Observations=Observations(
+                Features=Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
+                ObjectiveValues=ObjectiveValues(
                     ObjectiveValuesJsonString=target_values_pandas_frame.to_json(orient='index', double_precision=15)
                 )
             )
@@ -125,9 +129,9 @@ class BayesianOptimizerProxy(OptimizerBase):
         if context_values_pandas_frame is not None:
             raise NotImplementedError("Context not currently supported on remote optimizers")
         feature_values_dict = parameter_values_pandas_frame.to_dict(orient='list')
-        prediction_request = OptimizerMonitoringService_pb2.PredictRequest(
+        prediction_request = PredictRequest(
             OptimizerHandle=self.optimizer_handle,
-            Features=OptimizerMonitoringService_pb2.Features(
+            Features=Features(
                 FeaturesJsonString=json.dumps(feature_values_dict)
             )
         )

@@ -1,5 +1,5 @@
 syntax = "proto3";
-import public "mlos/Grpc/MlosCommonMessageTypes.proto";
+import "mlos/Grpc/MlosCommonMessageTypes.proto";
 
 package mlos.optimizer_service;
 option csharp_namespace = "Mlos.OptimizerService";

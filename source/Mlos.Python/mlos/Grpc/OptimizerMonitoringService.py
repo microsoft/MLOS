@@ -8,8 +8,8 @@ import json
 import pandas as pd
 
 from mlos.global_values import serialize_to_bytes_string
-from mlos.Grpc import OptimizerMonitoringService_pb2, OptimizerMonitoringService_pb2_grpc
-from mlos.Grpc.OptimizerMonitoringService_pb2 import OptimizerConvergenceState, OptimizerList
+from mlos.Grpc.OptimizerMonitoringService_pb2_grpc import OptimizerMonitoringServiceServicer
+from mlos.Grpc.OptimizerMonitoringService_pb2 import OptimizerConvergenceState, OptimizerList, PredictResponse, SingleObjectivePrediction
 from mlos.Grpc.MlosCommonMessageTypes_pb2 import Empty, OptimizerInfo, OptimizerHandle, Observations, Features, ObjectiveValues, SimpleBoolean, SimpleString
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
@@ -17,7 +17,7 @@ from mlos.Logger import create_logger
 
 
 
-class OptimizerMonitoringService(OptimizerMonitoringService_pb2_grpc.OptimizerMonitoringServiceServicer):
+class OptimizerMonitoringService(OptimizerMonitoringServiceServicer):
     """ Defines the Optimizer Microservice.
 
     The state of the microservice will be persisted in a DB. Until then we use local variables.
@@ -87,9 +87,9 @@ class OptimizerMonitoringService(OptimizerMonitoringService_pb2_grpc.OptimizerMo
             prediction = optimizer.predict(features_df)
         assert isinstance(prediction, Prediction)
 
-        response = OptimizerMonitoringService_pb2.PredictResponse(
+        response = PredictResponse(
             ObjectivePredictions=[
-                OptimizerMonitoringService_pb2.SingleObjectivePrediction(
+                SingleObjectivePrediction(
                     ObjectiveName=prediction.objective_name,
                     PredictionDataFrameJsonString=prediction.dataframe_to_json()
                 )

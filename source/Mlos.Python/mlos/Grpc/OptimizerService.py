@@ -7,7 +7,9 @@ import json
 
 import pandas as pd
 
-from mlos.Grpc import OptimizerService_pb2, OptimizerService_pb2_grpc, MlosCommonMessageTypes_pb2
+from mlos.Grpc.MlosCommonMessageTypes_pb2 import ConfigurationParameters, Empty, OptimizerHandle
+from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest
+from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceServicer
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
@@ -16,7 +18,7 @@ from mlos.Logger import create_logger
 
 
 
-class OptimizerService(OptimizerService_pb2_grpc.OptimizerServiceServicer):
+class OptimizerService(OptimizerServiceServicer):
     """ Defines the Optimizer Microservice.
 
     The state of the microservice will be persisted in a DB. Until then we use local variables.
@@ -29,7 +31,7 @@ class OptimizerService(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
 
-    def CreateOptimizer(self, request: OptimizerService_pb2.CreateOptimizerRequest, context): # pylint: disable=unused-argument
+    def CreateOptimizer(self, request: CreateOptimizerRequest, context): # pylint: disable=unused-argument
         self.logger.info("Creating Optimizer")
         optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
         optimizer_config_json = request.OptimizerConfig
@@ -47,7 +49,7 @@ class OptimizerService(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         self._bayesian_optimizer_store.add_optimizer(optimizer_id=optimizer_id, optimizer=optimizer)
 
         self.logger.info(f"Created optimizer {optimizer_id} with config: {optimizer.optimizer_config.to_json(indent=2)}")
-        return MlosCommonMessageTypes_pb2.OptimizerHandle(Id=optimizer_id)
+        return OptimizerHandle(Id=optimizer_id)
 
     def Suggest(self, request, context): # pylint: disable=unused-argument
         self.logger.info("Suggesting")
@@ -60,7 +62,7 @@ class OptimizerService(OptimizerService_pb2_grpc.OptimizerServiceServicer):
             # TODO handle context here
             suggested_params = optimizer.suggest(random=request.Random)
 
-        return MlosCommonMessageTypes_pb2.ConfigurationParameters(
+        return ConfigurationParameters(
             ParametersJsonString=json.dumps(suggested_params.to_dict())
         )
 
@@ -77,7 +79,7 @@ class OptimizerService(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             optimizer.register(parameter_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
 
-        return MlosCommonMessageTypes_pb2.Empty()
+        return Empty()
 
     def RegisterObservations(self, request, context): # pylint: disable=unused-argument
         # TODO: stop ignoring context
@@ -89,7 +91,7 @@ class OptimizerService(OptimizerService_pb2_grpc.OptimizerServiceServicer):
         with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             optimizer.register(parameter_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
 
-        return MlosCommonMessageTypes_pb2.Empty()
+        return Empty()
 
-    def Echo(self, request: MlosCommonMessageTypes_pb2.Empty, context): # pylint: disable=unused-argument
-        return MlosCommonMessageTypes_pb2.Empty()
+    def Echo(self, request: Empty, context): # pylint: disable=unused-argument
+        return Empty()
