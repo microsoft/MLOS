@@ -69,21 +69,14 @@ class BayesianOptimizerFactory:
         if optimizer_config is None:
             optimizer_config = bayesian_optimizer_config_store.default
 
-        optimization_problem_pb2 = optimization_problem.to_protobuf()
-        self.logger.info(f"optimization_problem_pb2 type: {optimization_problem_pb2.__class__.__module__}.{optimization_problem_pb2.__class__.__name__}")
-
-
         create_optimizer_request = CreateOptimizerRequest(
-            OptimizationProblem=optimization_problem_pb2,
+            OptimizationProblem=optimization_problem.to_protobuf(),
             OptimizerConfigName='', # TODO: add this functionality
             OptimizerConfig=optimizer_config.to_json()
         )
 
-        self.logger.info(f"Creating a remote bayesian optimizer with config: {optimizer_config.to_json(indent=2)}.")
-
         optimizer_handle = self._optimizer_service_stub.CreateOptimizer(create_optimizer_request)
-
-        self.logger.info(f"Created bayesian optimizer with id: {optimizer_handle.Id}")
+        self.logger.info(f"Created bayesian optimizer with id: {optimizer_handle.Id} with config: {optimizer_config.to_json(indent=2)}.")
 
         return BayesianOptimizerProxy(
             grpc_channel=self._grpc_channel,
