@@ -151,7 +151,7 @@ class TestBayesianOptimizerGrpcClient:
                 assert 0 <= model_gof_metrics.coefficient_of_determination <= 1
 
 
-    @pytest.mark.parametrize("i", [i for i in range(10)])
+    @pytest.mark.parametrize("i", [i for i in range(1000)])
     def test_optimizer_with_random_config(self, i):
         optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
