@@ -19,7 +19,7 @@ cd "$scriptdir"
 mkdir -p mlos/Grpc
 
 cp MlosCommonMessageTypes.proto mlos/Grpc/
-$pythonCmd -m grpc_tools.protoc -I . --python_out=../Mlos.Python --grpc_python_out=../Mlos.Python  mlos/Grpc/MlosCommonMessageTypes.proto
+$pythonCmd -m grpc_tools.protoc -I . --python_out=../Mlos.Python mlos/Grpc/MlosCommonMessageTypes.proto
 
 cp OptimizerService.proto mlos/Grpc/
 $pythonCmd -m grpc_tools.protoc -I . --python_out=../Mlos.Python --grpc_python_out=../Mlos.Python  mlos/Grpc/OptimizerService.proto

@@ -108,4 +108,3 @@ message SimpleString
 message Empty
 {
 };
-
