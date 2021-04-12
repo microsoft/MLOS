@@ -151,7 +151,7 @@ class TestBayesianOptimizerGrpcClient:
                 assert 0 <= model_gof_metrics.coefficient_of_determination <= 1
 
 
-    @pytest.mark.parametrize("i", [i for i in range(1000)])
+    @pytest.mark.parametrize("i", [i for i in range(10)])
     def test_optimizer_with_random_config(self, i):
         optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
@@ -186,10 +186,6 @@ class TestBayesianOptimizerGrpcClient:
         assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
         assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
-
-    @pytest.mark.skip(reason="Not implemented yet.")
-    def test_optimizer_with_named_config(self):
-        ...
 
     def optimize_quadratic(self, optimizer, num_iterations):
         registered_features_df = None
