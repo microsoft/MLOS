@@ -112,7 +112,7 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         )
 
         batched_poi_df['utility'] = pd.to_numeric(arg=batched_poi_df['utility'], errors='raise')
-        assert batched_poi_df.dtypes['utility'] == np.float
+        assert batched_poi_df.dtypes['utility'] == float
         return batched_poi_df
 
     @trace()
