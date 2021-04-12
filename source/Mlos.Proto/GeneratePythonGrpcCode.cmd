@@ -19,7 +19,7 @@ python -m grpc_tools.protoc -I . --python_out=..\Mlos.Python --grpc_python_out=.
 copy OptimizerMonitoringService.proto mlos\Grpc\
 python -m grpc_tools.protoc -I . --python_out=..\Mlos.Python --grpc_python_out=..\Mlos.Python  mlos/Grpc/OptimizerMonitoringService.proto
 
-rd /s /q mlos
+rem rd /s /q mlos
 
 popd
 @echo on

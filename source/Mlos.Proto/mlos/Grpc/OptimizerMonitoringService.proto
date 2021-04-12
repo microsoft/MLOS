@@ -1,0 +1,80 @@
+syntax = "proto3";
+import "mlos/Grpc/MlosCommonMessageTypes.proto";
+package mlos.optimizer_monitoring_service;
+
+option csharp_namespace = "Mlos.OptimizerMonitoringService";
+
+// Exposes Bayesian Optimizer's functionality over gRPC.
+//
+service OptimizerMonitoringService
+{
+    // Returns a list of existing optimizer instances.
+    //
+    rpc ListExistingOptimizers(mlos_common_message_types.Empty) returns (OptimizerList);
+
+    // Returns information about optimizers configuration and optimization problem.
+    //
+    rpc GetOptimizerInfo(mlos_common_message_types.OptimizerHandle) returns (mlos_common_message_types.OptimizerInfo);
+
+    // Returns the current optimizer convergence state.
+    //
+    rpc GetOptimizerConvergenceState(mlos_common_message_types.OptimizerHandle) returns (OptimizerConvergenceState);
+
+    // Returns the computed goodness of fit metrics.
+    //
+    rpc ComputeGoodnessOfFitMetrics(mlos_common_message_types.OptimizerHandle) returns (mlos_common_message_types.SimpleString);
+
+    // Check if optimizer has been trained.
+    //
+    rpc IsTrained(mlos_common_message_types.OptimizerHandle) returns (mlos_common_message_types.SimpleBoolean);
+
+    // Produces a prediction for specified features.
+    //
+    rpc Predict(PredictRequest) returns (PredictResponse);
+
+    // Returns all observations registered for a given optimizer.
+    //
+    rpc GetAllObservations(mlos_common_message_types.OptimizerHandle) returns (mlos_common_message_types.Observations);
+
+    // Like ping.
+    //
+    rpc Echo(mlos_common_message_types.Empty) returns (mlos_common_message_types.Empty);
+};
+
+// Represents information about optimizer convergence state.
+//
+message OptimizerConvergenceState
+{
+    mlos_common_message_types.OptimizerHandle OptimizerHandle = 1;
+    string SerializedOptimizerConvergenceState = 2;
+};
+
+// A list of OptimizerInfo messages.
+//
+message OptimizerList
+{
+    repeated mlos_common_message_types.OptimizerInfo Optimizers = 1;
+}
+
+// A request to predict objective values given specified features (parameters and context).
+//
+message PredictRequest
+{
+    mlos_common_message_types.OptimizerHandle OptimizerHandle = 1;
+    mlos_common_message_types.Features Features = 2;
+};
+
+// Representation of an objective value prediction
+//
+message SingleObjectivePrediction
+{
+    string ObjectiveName = 1;
+    string PredictionDataFrameJsonString = 2;
+};
+
+message PredictResponse
+{
+    // repeated for every objective (in a multi-objective case)
+    //
+    repeated SingleObjectivePrediction ObjectivePredictions = 1;
+};

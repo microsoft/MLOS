@@ -1,0 +1,110 @@
+syntax = "proto3";
+package mlos_common_message_types;
+
+
+// A representation of an optimization problem.
+//
+message OptimizationProblem
+{
+    Hypergrid ParameterSpace = 1;
+    Hypergrid ContextSpace = 2;
+    Hypergrid ObjectiveSpace = 3;
+    repeated Objective Objectives = 4;
+};
+
+// An opaque handle to the optimizer that the client passes along with each request.
+//
+message OptimizerHandle
+{
+    string Id = 1;
+};
+
+// Represents information about an optimizer instance, including its configuration, optimization problem, and handle
+//
+message OptimizerInfo
+{
+    OptimizerHandle OptimizerHandle = 1;
+    string OptimizerConfigJsonString = 2;
+    OptimizationProblem OptimizationProblem = 3;
+};
+
+// A representation of a single observation to be added to the optimizer's data set.
+//
+message Observation
+{
+    Features Features = 1;
+    ObjectiveValues ObjectiveValues = 2;
+};
+
+// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
+// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
+// break Greg's PR. 
+// 
+message Observations
+{
+    Features Features = 1;
+    ObjectiveValues ObjectiveValues = 2;
+};
+
+// A representation of features for the optimizer's surrogate models to operate on.
+//
+message Features
+{
+    string FeaturesJsonString = 1;
+};
+
+// Serialized configuration parameters.
+//
+message ConfigurationParameters
+{
+    string ParametersJsonString = 1;
+};
+
+// Serialized context values.
+//
+message Context
+{
+    string ContextJsonString = 1;
+};
+
+// Representation of the ObjectiveValues.
+//
+message ObjectiveValues
+{
+    string ObjectiveValuesJsonString = 1;
+};
+
+// Serialized representation of a Hypergrid.
+//
+message Hypergrid
+{
+    string HypergridJsonString = 1;
+};
+
+// Representation of a single objective.
+//
+message Objective
+{
+    string Name = 1;
+    bool Minimize = 2;
+};
+
+// A message containing a single boolean value.
+//
+message SimpleBoolean
+{
+    bool Value = 1;
+};
+
+// A message containing a single string value.
+//
+message SimpleString
+{
+    string Value = 1;
+}
+
+// A convenience message for optimizer functions that return nothing.
+//
+message Empty
+{
+};
