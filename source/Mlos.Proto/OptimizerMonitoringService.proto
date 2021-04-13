@@ -1,8 +1,6 @@
 syntax = "proto3";
 package mlos.optimizer_monitoring_service;
 
-option csharp_namespace = "Mlos.OptimizerMonitoringService";
-
 // Exposes Bayesian Optimizer's functionality over gRPC.
 //
 service OptimizerMonitoringService
