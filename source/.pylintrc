@@ -9,7 +9,6 @@ extension-pkg-whitelist=
 # paths.
 ignore=Secrets,
         long_haul_tests,
-        MlosCommonMessageTypes_pb2.py,
         OptimizerMonitoringService_pb2.py,
         OptimizerMonitoringService_pb2_grpc.py,
         OptimizerService_pb2.py,

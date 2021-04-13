@@ -9,7 +9,7 @@ from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, HypergridJsonEncoder
 
 
-class OptimizerServiceEncoder:
+class OptimizerMonitoringServiceEncoder:
     """Encodes objects to the format expected by the OptimizerService.
     """
     @staticmethod
@@ -23,7 +23,7 @@ class OptimizerServiceEncoder:
         )
 
 
-class OptimizerServiceDecoder:
+class OptimizerMonitoringServiceDecoder:
     """Decodes OptimizerService messages to objects.
     """
 

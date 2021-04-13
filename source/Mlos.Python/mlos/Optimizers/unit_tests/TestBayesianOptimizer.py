@@ -17,7 +17,7 @@ import pandas as pd
 from mlos.Logger import create_logger
 
 import mlos.global_values as global_values
-from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
+from mlos.Grpc.OptimizerServicesServer import OptimizerServicesServer
 from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunctionFactory, objective_function_config_store
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.Hypersphere import Hypersphere
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.MultiObjectiveNestedPolynomialObjective import MultiObjectiveNestedPolynomialObjective
@@ -65,7 +65,7 @@ class TestBayesianOptimizer:
         for port in range(50051, 50051 + max_num_tries):
             num_tries += 1
             try:
-                cls.server = OptimizerMicroserviceServer(port=port, num_threads=10, logger=cls.logger)
+                cls.server = OptimizerServicesServer(port=port, num_threads=10, logger=cls.logger)
                 cls.server.start()
                 cls.port = port
                 break

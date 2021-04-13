@@ -15,7 +15,7 @@ from mlos.Logger import create_logger
 
 
 
-class OptimizerMicroserviceServer:
+class OptimizerServicesServer:
     """ Hosts the OptimizerMicroservice.
 
     The functionality to stand up the gRPC server is needed in unit tests (in process)

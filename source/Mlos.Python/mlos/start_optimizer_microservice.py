@@ -7,7 +7,7 @@
 import argparse
 import signal
 
-from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
+from mlos.Grpc.OptimizerServicesServer import OptimizerServicesServer
 import mlos.global_values as global_values
 
 
@@ -31,7 +31,7 @@ def parse_command_line_arguments():
 
 def main():
     args = parse_command_line_arguments()
-    server = OptimizerMicroserviceServer(port=args.port, num_threads=args.num_threads)
+    server = OptimizerServicesServer(port=args.port, num_threads=args.num_threads)
 
     def ctrl_c_handler(_, __):
         print("Received CTRL-C: shutting down.")

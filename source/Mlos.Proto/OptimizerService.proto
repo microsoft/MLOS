@@ -10,6 +10,10 @@ service OptimizerService
     // Creates an optimizer with the specified configuration.
     //
     rpc CreateOptimizer(CreateOptimizerRequest) returns (OptimizerHandle);
+
+    // Returns information about optimizers configuration and optimization problem.
+    //
+    rpc GetOptimizerInfo(OptimizerHandle) returns (OptimizerInfo);
     
     // Request a suggestion.
     //

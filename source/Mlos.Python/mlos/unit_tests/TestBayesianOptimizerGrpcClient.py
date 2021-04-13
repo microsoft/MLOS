@@ -12,7 +12,7 @@ import pandas as pd
 
 
 import mlos.global_values as global_values
-from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
+from mlos.Grpc.OptimizerServicesServer import OptimizerServicesServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
 from mlos.Grpc.OptimizerService_pb2 import Empty
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
@@ -43,7 +43,7 @@ class TestBayesianOptimizerGrpcClient:
         for port in range(50051, 50051 + max_num_tries):
             num_tries += 1
             try:
-                self.server = OptimizerMicroserviceServer(port=port, num_threads=10)
+                self.server = OptimizerServicesServer(port=port, num_threads=10)
                 self.server.start()
                 self.port = port
                 break

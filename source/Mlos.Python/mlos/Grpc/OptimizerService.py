@@ -7,9 +7,9 @@ import json
 
 import pandas as pd
 
-from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, ConfigurationParameters, Empty, OptimizerHandle
+from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, ConfigurationParameters, Empty, OptimizerHandle, OptimizerInfo
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceServicer
-from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceDecoder
+from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceDecoder, OptimizerServiceEncoder
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Spaces import Point
@@ -49,6 +49,17 @@ class OptimizerService(OptimizerServiceServicer):
 
         self.logger.info(f"Created optimizer {optimizer_id} with config: {optimizer.optimizer_config.to_json(indent=2)}")
         return OptimizerHandle(Id=optimizer_id)
+
+    def GetOptimizerInfo(self, request: OptimizerHandle, context):
+        # TODO: Learn about and leverage gRPC's error handling model for a case
+        # TODO: when the handle is invalid.
+        optimizer_id = request.Id
+        optimizer = self._bayesian_optimizer_store.get_optimizer(optimizer_id)
+        return OptimizerInfo(
+            OptimizerHandle=OptimizerHandle(Id=request.Id),
+            OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
+            OptimizationProblem=OptimizerServiceEncoder.encode_optimization_problem(optimizer.optimization_problem)
+        )
 
     def Suggest(self, request, context): # pylint: disable=unused-argument
         self.logger.info("Suggesting")
