@@ -9,9 +9,9 @@ import pandas as pd
 
 from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, ConfigurationParameters, Empty, OptimizerHandle
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceServicer
+from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceDecoder
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
-from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Spaces import Point
 from mlos.Logger import create_logger
 
@@ -32,7 +32,7 @@ class OptimizerService(OptimizerServiceServicer):
 
     def CreateOptimizer(self, request: CreateOptimizerRequest, context): # pylint: disable=unused-argument
         self.logger.info("Creating Optimizer")
-        optimization_problem = OptimizationProblem.from_protobuf(optimization_problem_pb2=request.OptimizationProblem)
+        optimization_problem = OptimizerServiceDecoder.decode_optimization_problem(optimization_problem_pb2=request.OptimizationProblem)
         optimizer_config_json = request.OptimizerConfig
         if optimizer_config_json is not None and len(optimizer_config_json) > 0:
             optimizer_config = Point.from_json(optimizer_config_json)
