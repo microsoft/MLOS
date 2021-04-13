@@ -36,7 +36,7 @@ class OptimizerMonitoringService(OptimizerMonitoringServiceServicer):
             optimizers_info.append(OptimizerInfo(
                 OptimizerHandle=OptimizerHandle(Id=optimizer_id),
                 OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
-                OptimizationProblem=OptimizerServiceEncoder.encode_optimization_problem(optimizer)
+                OptimizationProblem=OptimizerServiceEncoder.encode_optimization_problem(optimizer.optimization_problem)
             ))
         return OptimizerList(Optimizers=optimizers_info)
 

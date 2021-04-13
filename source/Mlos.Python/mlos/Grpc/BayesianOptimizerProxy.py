@@ -106,16 +106,16 @@ class BayesianOptimizerProxy(OptimizerBase):
             raise NotImplementedError("Context not currently supported on remote optimizers")
 
         feature_values_pandas_frame = parameter_values_pandas_frame
-        register_request = OptimizerMonitoringService_pb2.RegisterObservationsRequest(
-            OptimizerHandle=self.optimizer_handle_for_optimizer_monitoring_service,
-            Observations=OptimizerMonitoringService_pb2.Observations(
-                Features=OptimizerMonitoringService_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
-                ObjectiveValues=OptimizerMonitoringService_pb2.ObjectiveValues(
+        register_request = OptimizerService_pb2.RegisterObservationsRequest(
+            OptimizerHandle=self.optimizer_handle_for_optimizer_service,
+            Observations=OptimizerService_pb2.Observations(
+                Features=OptimizerService_pb2.Features(FeaturesJsonString=feature_values_pandas_frame.to_json(orient='index', double_precision=15)),
+                ObjectiveValues=OptimizerService_pb2.ObjectiveValues(
                     ObjectiveValuesJsonString=target_values_pandas_frame.to_json(orient='index', double_precision=15)
                 )
             )
         )
-        self._optimizer_monitoring_stub.RegisterObservations(register_request) # TODO: we should be using the optimizer_stub for this.
+        self._optimizer_stub.RegisterObservations(register_request) # TODO: we should be using the optimizer_stub for this.
 
     @trace()
     def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
