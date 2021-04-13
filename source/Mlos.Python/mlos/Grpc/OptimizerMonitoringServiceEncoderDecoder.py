@@ -4,7 +4,7 @@
 #
 import json
 
-from mlos.Grpc import OptimizerMonitoringService_pb2
+from mlos.Grpc.OptimizerMonitoringService_pb2 import Hypergrid, OptimizationProblem as OptimizationProblem_pb2, Objective as Objective_pb2
 from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, HypergridJsonEncoder
 
@@ -12,14 +12,15 @@ from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, Hyper
 class OptimizerMonitoringServiceEncoder:
     """Encodes objects to the format expected by the OptimizerService.
     """
+
     @staticmethod
-    def encode_optimization_problem(optimization_problem: OptimizationProblem) -> OptimizerMonitoringService_pb2.OptimizationProblem:
-        return OptimizerMonitoringService_pb2.OptimizationProblem(
-            ParameterSpace=OptimizerMonitoringService_pb2.Hypergrid(HypergridJsonString=json.dumps(optimization_problem.parameter_space, cls=HypergridJsonEncoder)),
-            ObjectiveSpace=OptimizerMonitoringService_pb2.Hypergrid(HypergridJsonString=json.dumps(optimization_problem.objective_space, cls=HypergridJsonEncoder)),
-            Objectives=[OptimizerMonitoringService_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in optimization_problem.objectives],
+    def encode_optimization_problem(optimization_problem: OptimizationProblem) -> OptimizationProblem_pb2:
+        return OptimizationProblem_pb2(
+            ParameterSpace=Hypergrid(HypergridJsonString=json.dumps(optimization_problem.parameter_space, cls=HypergridJsonEncoder)),
+            ObjectiveSpace=Hypergrid(HypergridJsonString=json.dumps(optimization_problem.objective_space, cls=HypergridJsonEncoder)),
+            Objectives=[Objective_pb2(Name=objective.name, Minimize=objective.minimize) for objective in optimization_problem.objectives],
             ContextSpace=None if optimization_problem.context_space is None
-            else OptimizerMonitoringService_pb2.Hypergrid(HypergridJsonString=json.dumps(optimization_problem.context_space, cls=HypergridJsonEncoder))
+            else Hypergrid(HypergridJsonString=json.dumps(optimization_problem.context_space, cls=HypergridJsonEncoder))
         )
 
 
@@ -28,7 +29,7 @@ class OptimizerMonitoringServiceDecoder:
     """
 
     @staticmethod
-    def decode_optimization_problem(optimization_problem_pb2: OptimizerMonitoringService_pb2.OptimizationProblem) -> OptimizationProblem:
+    def decode_optimization_problem(optimization_problem_pb2: OptimizationProblem_pb2) -> OptimizationProblem:
         return OptimizationProblem(
             parameter_space=json.loads(optimization_problem_pb2.ParameterSpace.HypergridJsonString, cls=HypergridJsonDecoder),
             objective_space=json.loads(optimization_problem_pb2.ObjectiveSpace.HypergridJsonString, cls=HypergridJsonDecoder),

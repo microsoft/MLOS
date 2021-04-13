@@ -78,7 +78,9 @@ class BayesianOptimizerProxy(OptimizerBase):
 
     @trace()
     def get_optimizer_convergence_state(self):
-        optimizer_convergence_state_response = self._optimizer_monitoring_stub.GetOptimizerConvergenceState(self.optimizer_handle_for_optimizer_monitoring_service)
+        optimizer_convergence_state_response = self._optimizer_monitoring_stub.GetOptimizerConvergenceState(
+            self.optimizer_handle_for_optimizer_monitoring_service
+        )
         return deserialize_from_bytes_string(optimizer_convergence_state_response.SerializedOptimizerConvergenceState)
 
     @trace()
