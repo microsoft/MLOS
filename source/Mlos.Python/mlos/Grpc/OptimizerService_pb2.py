@@ -19,7 +19,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=b'\252\002\025Mlos.OptimizerService',
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\x12\x16mlos.optimizer_service\"\x98\x01\n\x16\x43reateOptimizerRequest\x12H\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32+.mlos.optimizer_service.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"\x94\x01\n\x0eSuggestRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x30\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\x1f.mlos.optimizer_service.Context\"\x98\x01\n\x1aRegisterObservationRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12\x38\n\x0bObservation\x18\x02 \x01(\x0b\x32#.mlos.optimizer_service.Observation\"\x9b\x01\n\x1bRegisterObservationsRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12:\n\x0cObservations\x18\x02 \x01(\x0b\x32$.mlos.optimizer_service.Observations\"\xfb\x01\n\x13OptimizationProblem\x12\x39\n\x0eParameterSpace\x18\x01 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x37\n\x0c\x43ontextSpace\x18\x02 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x39\n\x0eObjectiveSpace\x18\x03 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x35\n\nObjectives\x18\x04 \x03(\x0b\x32!.mlos.optimizer_service.Objective\"\x1d\n\x0fOptimizerHandle\x12\n\n\x02Id\x18\x01 \x01(\t\"\xbe\x01\n\rOptimizerInfo\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12!\n\x19OptimizerConfigJsonString\x18\x02 \x01(\t\x12H\n\x13OptimizationProblem\x18\x03 \x01(\x0b\x32+.mlos.optimizer_service.OptimizationProblem\"\x83\x01\n\x0bObservation\x12\x32\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32 .mlos.optimizer_service.Features\x12@\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\'.mlos.optimizer_service.ObjectiveValues\"\x84\x01\n\x0cObservations\x12\x32\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32 .mlos.optimizer_service.Features\x12@\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\'.mlos.optimizer_service.ObjectiveValues\"&\n\x08\x46\x65\x61tures\x12\x1a\n\x12\x46\x65\x61turesJsonString\x18\x01 \x01(\t\"7\n\x17\x43onfigurationParameters\x12\x1c\n\x14ParametersJsonString\x18\x01 \x01(\t\"$\n\x07\x43ontext\x12\x19\n\x11\x43ontextJsonString\x18\x01 \x01(\t\"4\n\x0fObjectiveValues\x12!\n\x19ObjectiveValuesJsonString\x18\x01 \x01(\t\"(\n\tHypergrid\x12\x1b\n\x13HypergridJsonString\x18\x01 \x01(\t\"+\n\tObjective\x12\x0c\n\x04Name\x18\x01 \x01(\t\x12\x10\n\x08Minimize\x18\x02 \x01(\x08\"\x1e\n\rSimpleBoolean\x12\r\n\x05Value\x18\x01 \x01(\x08\"\x1d\n\x0cSimpleString\x12\r\n\x05Value\x18\x01 \x01(\t\"\x07\n\x05\x45mpty2\xe2\x04\n\x10OptimizerService\x12j\n\x0f\x43reateOptimizer\x12..mlos.optimizer_service.CreateOptimizerRequest\x1a\'.mlos.optimizer_service.OptimizerHandle\x12\x62\n\x10GetOptimizerInfo\x12\'.mlos.optimizer_service.OptimizerHandle\x1a%.mlos.optimizer_service.OptimizerInfo\x12\x62\n\x07Suggest\x12&.mlos.optimizer_service.SuggestRequest\x1a/.mlos.optimizer_service.ConfigurationParameters\x12h\n\x13RegisterObservation\x12\x32.mlos.optimizer_service.RegisterObservationRequest\x1a\x1d.mlos.optimizer_service.Empty\x12j\n\x14RegisterObservations\x12\x33.mlos.optimizer_service.RegisterObservationsRequest\x1a\x1d.mlos.optimizer_service.Empty\x12\x44\n\x04\x45\x63ho\x12\x1d.mlos.optimizer_service.Empty\x1a\x1d.mlos.optimizer_service.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceb\x06proto3'
+  serialized_pb=b'\n mlos/Grpc/OptimizerService.proto\x12\x16mlos.optimizer_service\"\x98\x01\n\x16\x43reateOptimizerRequest\x12H\n\x13OptimizationProblem\x18\x01 \x01(\x0b\x32+.mlos.optimizer_service.OptimizationProblem\x12\x1b\n\x13OptimizerConfigName\x18\x02 \x01(\t\x12\x17\n\x0fOptimizerConfig\x18\x03 \x01(\t\"\x94\x01\n\x0eSuggestRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12\x0e\n\x06Random\x18\x02 \x01(\x08\x12\x30\n\x07\x43ontext\x18\x03 \x01(\x0b\x32\x1f.mlos.optimizer_service.Context\"\x98\x01\n\x1aRegisterObservationRequest\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12\x38\n\x0bObservation\x18\x02 \x01(\x0b\x32#.mlos.optimizer_service.Observation\"\xfb\x01\n\x13OptimizationProblem\x12\x39\n\x0eParameterSpace\x18\x01 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x37\n\x0c\x43ontextSpace\x18\x02 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x39\n\x0eObjectiveSpace\x18\x03 \x01(\x0b\x32!.mlos.optimizer_service.Hypergrid\x12\x35\n\nObjectives\x18\x04 \x03(\x0b\x32!.mlos.optimizer_service.Objective\"\x1d\n\x0fOptimizerHandle\x12\n\n\x02Id\x18\x01 \x01(\t\"\xbe\x01\n\rOptimizerInfo\x12@\n\x0fOptimizerHandle\x18\x01 \x01(\x0b\x32\'.mlos.optimizer_service.OptimizerHandle\x12!\n\x19OptimizerConfigJsonString\x18\x02 \x01(\t\x12H\n\x13OptimizationProblem\x18\x03 \x01(\x0b\x32+.mlos.optimizer_service.OptimizationProblem\"\x83\x01\n\x0bObservation\x12\x32\n\x08\x46\x65\x61tures\x18\x01 \x01(\x0b\x32 .mlos.optimizer_service.Features\x12@\n\x0fObjectiveValues\x18\x02 \x01(\x0b\x32\'.mlos.optimizer_service.ObjectiveValues\"&\n\x08\x46\x65\x61tures\x12\x1a\n\x12\x46\x65\x61turesJsonString\x18\x01 \x01(\t\"7\n\x17\x43onfigurationParameters\x12\x1c\n\x14ParametersJsonString\x18\x01 \x01(\t\"$\n\x07\x43ontext\x12\x19\n\x11\x43ontextJsonString\x18\x01 \x01(\t\"4\n\x0fObjectiveValues\x12!\n\x19ObjectiveValuesJsonString\x18\x01 \x01(\t\"(\n\tHypergrid\x12\x1b\n\x13HypergridJsonString\x18\x01 \x01(\t\"+\n\tObjective\x12\x0c\n\x04Name\x18\x01 \x01(\t\x12\x10\n\x08Minimize\x18\x02 \x01(\x08\"\x1e\n\rSimpleBoolean\x12\r\n\x05Value\x18\x01 \x01(\x08\"\x1d\n\x0cSimpleString\x12\r\n\x05Value\x18\x01 \x01(\t\"\x07\n\x05\x45mpty2\xf6\x03\n\x10OptimizerService\x12j\n\x0f\x43reateOptimizer\x12..mlos.optimizer_service.CreateOptimizerRequest\x1a\'.mlos.optimizer_service.OptimizerHandle\x12\x62\n\x10GetOptimizerInfo\x12\'.mlos.optimizer_service.OptimizerHandle\x1a%.mlos.optimizer_service.OptimizerInfo\x12\x62\n\x07Suggest\x12&.mlos.optimizer_service.SuggestRequest\x1a/.mlos.optimizer_service.ConfigurationParameters\x12h\n\x13RegisterObservation\x12\x32.mlos.optimizer_service.RegisterObservationRequest\x1a\x1d.mlos.optimizer_service.Empty\x12\x44\n\x04\x45\x63ho\x12\x1d.mlos.optimizer_service.Empty\x1a\x1d.mlos.optimizer_service.EmptyB\x18\xaa\x02\x15Mlos.OptimizerServiceb\x06proto3'
 )
 
 
@@ -156,45 +156,6 @@ _REGISTEROBSERVATIONREQUEST = _descriptor.Descriptor(
 )
 
 
-_REGISTEROBSERVATIONSREQUEST = _descriptor.Descriptor(
-  name='RegisterObservationsRequest',
-  full_name='mlos.optimizer_service.RegisterObservationsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='OptimizerHandle', full_name='mlos.optimizer_service.RegisterObservationsRequest.OptimizerHandle', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='Observations', full_name='mlos.optimizer_service.RegisterObservationsRequest.Observations', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=522,
-  serialized_end=677,
-)
-
-
 _OPTIMIZATIONPROBLEM = _descriptor.Descriptor(
   name='OptimizationProblem',
   full_name='mlos.optimizer_service.OptimizationProblem',
@@ -243,8 +204,8 @@ _OPTIMIZATIONPROBLEM = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=680,
-  serialized_end=931,
+  serialized_start=522,
+  serialized_end=773,
 )
 
 
@@ -275,8 +236,8 @@ _OPTIMIZERHANDLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=933,
-  serialized_end=962,
+  serialized_start=775,
+  serialized_end=804,
 )
 
 
@@ -321,8 +282,8 @@ _OPTIMIZERINFO = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=965,
-  serialized_end=1155,
+  serialized_start=807,
+  serialized_end=997,
 )
 
 
@@ -360,47 +321,8 @@ _OBSERVATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1158,
-  serialized_end=1289,
-)
-
-
-_OBSERVATIONS = _descriptor.Descriptor(
-  name='Observations',
-  full_name='mlos.optimizer_service.Observations',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='Features', full_name='mlos.optimizer_service.Observations.Features', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='ObjectiveValues', full_name='mlos.optimizer_service.Observations.ObjectiveValues', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1292,
-  serialized_end=1424,
+  serialized_start=1000,
+  serialized_end=1131,
 )
 
 
@@ -431,8 +353,8 @@ _FEATURES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1426,
-  serialized_end=1464,
+  serialized_start=1133,
+  serialized_end=1171,
 )
 
 
@@ -463,8 +385,8 @@ _CONFIGURATIONPARAMETERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1466,
-  serialized_end=1521,
+  serialized_start=1173,
+  serialized_end=1228,
 )
 
 
@@ -495,8 +417,8 @@ _CONTEXT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1523,
-  serialized_end=1559,
+  serialized_start=1230,
+  serialized_end=1266,
 )
 
 
@@ -527,8 +449,8 @@ _OBJECTIVEVALUES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1561,
-  serialized_end=1613,
+  serialized_start=1268,
+  serialized_end=1320,
 )
 
 
@@ -559,8 +481,8 @@ _HYPERGRID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1615,
-  serialized_end=1655,
+  serialized_start=1322,
+  serialized_end=1362,
 )
 
 
@@ -598,8 +520,8 @@ _OBJECTIVE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1657,
-  serialized_end=1700,
+  serialized_start=1364,
+  serialized_end=1407,
 )
 
 
@@ -630,8 +552,8 @@ _SIMPLEBOOLEAN = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1702,
-  serialized_end=1732,
+  serialized_start=1409,
+  serialized_end=1439,
 )
 
 
@@ -662,8 +584,8 @@ _SIMPLESTRING = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1734,
-  serialized_end=1763,
+  serialized_start=1441,
+  serialized_end=1470,
 )
 
 
@@ -687,8 +609,8 @@ _EMPTY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1765,
-  serialized_end=1772,
+  serialized_start=1472,
+  serialized_end=1479,
 )
 
 _CREATEOPTIMIZERREQUEST.fields_by_name['OptimizationProblem'].message_type = _OPTIMIZATIONPROBLEM
@@ -696,8 +618,6 @@ _SUGGESTREQUEST.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDL
 _SUGGESTREQUEST.fields_by_name['Context'].message_type = _CONTEXT
 _REGISTEROBSERVATIONREQUEST.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
 _REGISTEROBSERVATIONREQUEST.fields_by_name['Observation'].message_type = _OBSERVATION
-_REGISTEROBSERVATIONSREQUEST.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
-_REGISTEROBSERVATIONSREQUEST.fields_by_name['Observations'].message_type = _OBSERVATIONS
 _OPTIMIZATIONPROBLEM.fields_by_name['ParameterSpace'].message_type = _HYPERGRID
 _OPTIMIZATIONPROBLEM.fields_by_name['ContextSpace'].message_type = _HYPERGRID
 _OPTIMIZATIONPROBLEM.fields_by_name['ObjectiveSpace'].message_type = _HYPERGRID
@@ -706,17 +626,13 @@ _OPTIMIZERINFO.fields_by_name['OptimizerHandle'].message_type = _OPTIMIZERHANDLE
 _OPTIMIZERINFO.fields_by_name['OptimizationProblem'].message_type = _OPTIMIZATIONPROBLEM
 _OBSERVATION.fields_by_name['Features'].message_type = _FEATURES
 _OBSERVATION.fields_by_name['ObjectiveValues'].message_type = _OBJECTIVEVALUES
-_OBSERVATIONS.fields_by_name['Features'].message_type = _FEATURES
-_OBSERVATIONS.fields_by_name['ObjectiveValues'].message_type = _OBJECTIVEVALUES
 DESCRIPTOR.message_types_by_name['CreateOptimizerRequest'] = _CREATEOPTIMIZERREQUEST
 DESCRIPTOR.message_types_by_name['SuggestRequest'] = _SUGGESTREQUEST
 DESCRIPTOR.message_types_by_name['RegisterObservationRequest'] = _REGISTEROBSERVATIONREQUEST
-DESCRIPTOR.message_types_by_name['RegisterObservationsRequest'] = _REGISTEROBSERVATIONSREQUEST
 DESCRIPTOR.message_types_by_name['OptimizationProblem'] = _OPTIMIZATIONPROBLEM
 DESCRIPTOR.message_types_by_name['OptimizerHandle'] = _OPTIMIZERHANDLE
 DESCRIPTOR.message_types_by_name['OptimizerInfo'] = _OPTIMIZERINFO
 DESCRIPTOR.message_types_by_name['Observation'] = _OBSERVATION
-DESCRIPTOR.message_types_by_name['Observations'] = _OBSERVATIONS
 DESCRIPTOR.message_types_by_name['Features'] = _FEATURES
 DESCRIPTOR.message_types_by_name['ConfigurationParameters'] = _CONFIGURATIONPARAMETERS
 DESCRIPTOR.message_types_by_name['Context'] = _CONTEXT
@@ -749,13 +665,6 @@ RegisterObservationRequest = _reflection.GeneratedProtocolMessageType('RegisterO
   })
 _sym_db.RegisterMessage(RegisterObservationRequest)
 
-RegisterObservationsRequest = _reflection.GeneratedProtocolMessageType('RegisterObservationsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _REGISTEROBSERVATIONSREQUEST,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.RegisterObservationsRequest)
-  })
-_sym_db.RegisterMessage(RegisterObservationsRequest)
-
 OptimizationProblem = _reflection.GeneratedProtocolMessageType('OptimizationProblem', (_message.Message,), {
   'DESCRIPTOR' : _OPTIMIZATIONPROBLEM,
   '__module__' : 'mlos.Grpc.OptimizerService_pb2'
@@ -783,13 +692,6 @@ Observation = _reflection.GeneratedProtocolMessageType('Observation', (_message.
   # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Observation)
   })
 _sym_db.RegisterMessage(Observation)
-
-Observations = _reflection.GeneratedProtocolMessageType('Observations', (_message.Message,), {
-  'DESCRIPTOR' : _OBSERVATIONS,
-  '__module__' : 'mlos.Grpc.OptimizerService_pb2'
-  # @@protoc_insertion_point(class_scope:mlos.optimizer_service.Observations)
-  })
-_sym_db.RegisterMessage(Observations)
 
 Features = _reflection.GeneratedProtocolMessageType('Features', (_message.Message,), {
   'DESCRIPTOR' : _FEATURES,
@@ -864,8 +766,8 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=1775,
-  serialized_end=2385,
+  serialized_start=1482,
+  serialized_end=1984,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateOptimizer',
@@ -908,19 +810,9 @@ _OPTIMIZERSERVICE = _descriptor.ServiceDescriptor(
     create_key=_descriptor._internal_create_key,
   ),
   _descriptor.MethodDescriptor(
-    name='RegisterObservations',
-    full_name='mlos.optimizer_service.OptimizerService.RegisterObservations',
-    index=4,
-    containing_service=None,
-    input_type=_REGISTEROBSERVATIONSREQUEST,
-    output_type=_EMPTY,
-    serialized_options=None,
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
     name='Echo',
     full_name='mlos.optimizer_service.OptimizerService.Echo',
-    index=5,
+    index=4,
     containing_service=None,
     input_type=_EMPTY,
     output_type=_EMPTY,

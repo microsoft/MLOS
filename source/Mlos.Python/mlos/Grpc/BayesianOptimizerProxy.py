@@ -8,10 +8,9 @@ from typing import Tuple
 import pandas as pd
 
 from mlos.global_values import deserialize_from_bytes_string
-from mlos.Grpc.MlosCommonMessageTypes_pb2 import Features, ObjectiveValues, Observations, OptimizerHandle
 from mlos.Grpc.OptimizerMonitoringService_pb2 import PredictRequest
 from mlos.Grpc.OptimizerMonitoringService_pb2_grpc import OptimizerMonitoringServiceStub
-from mlos.Grpc.OptimizerService_pb2 import SuggestRequest, RegisterObservationsRequest
+from mlos.Grpc.OptimizerService_pb2 import SuggestRequest, RegisterObservationRequest
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizerBase import OptimizerBase

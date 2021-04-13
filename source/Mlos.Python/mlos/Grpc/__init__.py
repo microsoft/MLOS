@@ -12,14 +12,12 @@ import warnings
 grpc_dir = os.path.abspath(os.path.join(os.getcwd(), "Grpc"))
 sys.path.insert(0, grpc_dir)
 
-from . import MlosCommonMessageTypes_pb2
 from . import OptimizerService_pb2
 from . import OptimizerService_pb2_grpc
 from . import OptimizerMonitoringService_pb2
 from . import OptimizerMonitoringService_pb2_grpc
 
 __all__ = [
-    "MlosCommonMessageTypes_pb2",
     "OptimizerMonitoringService_pb2",
     "OptimizerMonitoringService_pb2_grpc",
     "OptimizerService_pb2",

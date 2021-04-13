@@ -2,7 +2,6 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from mlos.Grpc import MlosCommonMessageTypes_pb2 as mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2
 from mlos.Grpc import OptimizerMonitoringService_pb2 as mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2
 
 
@@ -19,28 +18,33 @@ class OptimizerMonitoringServiceStub(object):
         """
         self.ListExistingOptimizers = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/ListExistingOptimizers',
-                request_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.SerializeToString,
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerList.FromString,
                 )
         self.GetOptimizerInfo = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/GetOptimizerInfo',
-                request_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-                response_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerInfo.FromString,
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerInfo.FromString,
                 )
         self.GetOptimizerConvergenceState = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/GetOptimizerConvergenceState',
-                request_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
                 response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerConvergenceState.FromString,
                 )
         self.ComputeGoodnessOfFitMetrics = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/ComputeGoodnessOfFitMetrics',
-                request_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-                response_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.SimpleString.FromString,
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.SimpleString.FromString,
                 )
         self.IsTrained = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/IsTrained',
-                request_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-                response_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.SimpleBoolean.FromString,
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.SimpleBoolean.FromString,
+                )
+        self.RegisterObservations = channel.unary_unary(
+                '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/RegisterObservations',
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.RegisterObservationsRequest.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.FromString,
                 )
         self.Predict = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/Predict',
@@ -49,13 +53,13 @@ class OptimizerMonitoringServiceStub(object):
                 )
         self.GetAllObservations = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/GetAllObservations',
-                request_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-                response_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Observations.FromString,
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Observations.FromString,
                 )
         self.Echo = channel.unary_unary(
                 '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/Echo',
-                request_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.SerializeToString,
-                response_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.FromString,
+                request_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.SerializeToString,
+                response_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.FromString,
                 )
 
 
@@ -104,6 +108,14 @@ class OptimizerMonitoringServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RegisterObservations(self, request, context):
+        """Adds observations to the optimizer's data set.
+
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def Predict(self, request, context):
         """Produces a prediction for specified features.
 
@@ -133,28 +145,33 @@ def add_OptimizerMonitoringServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'ListExistingOptimizers': grpc.unary_unary_rpc_method_handler(
                     servicer.ListExistingOptimizers,
-                    request_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.FromString,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerList.SerializeToString,
             ),
             'GetOptimizerInfo': grpc.unary_unary_rpc_method_handler(
                     servicer.GetOptimizerInfo,
-                    request_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.FromString,
-                    response_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerInfo.SerializeToString,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerInfo.SerializeToString,
             ),
             'GetOptimizerConvergenceState': grpc.unary_unary_rpc_method_handler(
                     servicer.GetOptimizerConvergenceState,
-                    request_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.FromString,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.FromString,
                     response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerConvergenceState.SerializeToString,
             ),
             'ComputeGoodnessOfFitMetrics': grpc.unary_unary_rpc_method_handler(
                     servicer.ComputeGoodnessOfFitMetrics,
-                    request_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.FromString,
-                    response_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.SimpleString.SerializeToString,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.SimpleString.SerializeToString,
             ),
             'IsTrained': grpc.unary_unary_rpc_method_handler(
                     servicer.IsTrained,
-                    request_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.FromString,
-                    response_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.SimpleBoolean.SerializeToString,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.SimpleBoolean.SerializeToString,
+            ),
+            'RegisterObservations': grpc.unary_unary_rpc_method_handler(
+                    servicer.RegisterObservations,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.RegisterObservationsRequest.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.SerializeToString,
             ),
             'Predict': grpc.unary_unary_rpc_method_handler(
                     servicer.Predict,
@@ -163,13 +180,13 @@ def add_OptimizerMonitoringServiceServicer_to_server(servicer, server):
             ),
             'GetAllObservations': grpc.unary_unary_rpc_method_handler(
                     servicer.GetAllObservations,
-                    request_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.FromString,
-                    response_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Observations.SerializeToString,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Observations.SerializeToString,
             ),
             'Echo': grpc.unary_unary_rpc_method_handler(
                     servicer.Echo,
-                    request_deserializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.FromString,
-                    response_serializer=mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.SerializeToString,
+                    request_deserializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.FromString,
+                    response_serializer=mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -195,7 +212,7 @@ class OptimizerMonitoringService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/ListExistingOptimizers',
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.SerializeToString,
             mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerList.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -212,8 +229,8 @@ class OptimizerMonitoringService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/GetOptimizerInfo',
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerInfo.FromString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerInfo.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -229,7 +246,7 @@ class OptimizerMonitoringService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/GetOptimizerConvergenceState',
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
             mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerConvergenceState.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
@@ -246,8 +263,8 @@ class OptimizerMonitoringService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/ComputeGoodnessOfFitMetrics',
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.SimpleString.FromString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.SimpleString.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -263,8 +280,25 @@ class OptimizerMonitoringService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/IsTrained',
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.SimpleBoolean.FromString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.SimpleBoolean.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def RegisterObservations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/RegisterObservations',
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.RegisterObservationsRequest.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -297,8 +331,8 @@ class OptimizerMonitoringService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/GetAllObservations',
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.OptimizerHandle.SerializeToString,
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Observations.FromString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.OptimizerHandle.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Observations.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
@@ -314,7 +348,7 @@ class OptimizerMonitoringService(object):
             timeout=None,
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/mlos.optimizer_monitoring_service.OptimizerMonitoringService/Echo',
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.SerializeToString,
-            mlos_dot_Grpc_dot_MlosCommonMessageTypes__pb2.Empty.FromString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.SerializeToString,
+            mlos_dot_Grpc_dot_OptimizerMonitoringService__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

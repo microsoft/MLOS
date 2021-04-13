@@ -9,8 +9,7 @@ import pandas as pd
 
 from mlos.global_values import serialize_to_bytes_string
 from mlos.Grpc.OptimizerMonitoringService_pb2_grpc import OptimizerMonitoringServiceServicer
-from mlos.Grpc.OptimizerMonitoringService_pb2 import OptimizerConvergenceState, OptimizerList, PredictResponse, SingleObjectivePrediction
-from mlos.Grpc.MlosCommonMessageTypes_pb2 import Empty, OptimizerInfo, OptimizerHandle, Observations, Features, ObjectiveValues, SimpleBoolean, SimpleString
+from mlos.Grpc.OptimizerMonitoringService_pb2 import OptimizerConvergenceState, OptimizerList, PredictResponse, SingleObjectivePrediction,  Empty, OptimizerInfo, OptimizerHandle, Observations, Features, ObjectiveValues, SimpleBoolean, SimpleString
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Logger import create_logger
