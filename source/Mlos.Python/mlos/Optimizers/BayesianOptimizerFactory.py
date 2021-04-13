@@ -6,6 +6,7 @@ from mlos.Logger import create_logger
 
 from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, OptimizerInfo
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
+from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceEncoder, OptimizerServiceDecoder
 from mlos.Grpc.BayesianOptimizerProxy import BayesianOptimizerProxy
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
@@ -69,7 +70,7 @@ class BayesianOptimizerFactory:
             optimizer_config = bayesian_optimizer_config_store.default
 
         create_optimizer_request = CreateOptimizerRequest(
-            OptimizationProblem=optimization_problem.to_protobuf(),
+            OptimizationProblem=OptimizerServiceEncoder.encode_optimization_problem(optimization_problem),
             OptimizerConfigName='', # TODO: add this functionality
             OptimizerConfig=optimizer_config.to_json()
         )
@@ -98,7 +99,7 @@ class BayesianOptimizerFactory:
         """
         return BayesianOptimizerProxy(
             grpc_channel=self._grpc_channel,
-            optimization_problem=OptimizationProblem.from_protobuf(optimizer_info.OptimizationProblem),
+            optimization_problem=OptimizerServiceDecoder.decode_optimization_problem(optimizer_info.OptimizationProblem),
             optimizer_config=Point.from_json(optimizer_info.OptimizerConfigJsonString),
             id=optimizer_info.OptimizerHandle.Id,
             logger=self.logger

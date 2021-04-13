@@ -10,6 +10,7 @@ import pandas as pd
 from mlos.global_values import serialize_to_bytes_string
 from mlos.Grpc.OptimizerMonitoringService_pb2_grpc import OptimizerMonitoringServiceServicer
 from mlos.Grpc.OptimizerMonitoringService_pb2 import OptimizerConvergenceState, OptimizerList, PredictResponse, SingleObjectivePrediction,  Empty, OptimizerInfo, OptimizerHandle, Observations, Features, ObjectiveValues, SimpleBoolean, SimpleString
+from mlos.Grpc.OptimizerMonitoringServiceEncoderDecoder import OptimizerServiceDecoder, OptimizerServiceEncoder
 from mlos.MlosOptimizationServices.BayesianOptimizerStore.BayesianOptimizerStoreBase import BayesianOptimizerStoreBase
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Logger import create_logger
@@ -35,7 +36,7 @@ class OptimizerMonitoringService(OptimizerMonitoringServiceServicer):
             optimizers_info.append(OptimizerInfo(
                 OptimizerHandle=OptimizerHandle(Id=optimizer_id),
                 OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
-                OptimizationProblem=optimizer.optimization_problem.to_protobuf()
+                OptimizationProblem=OptimizerServiceEncoder.encode_optimization_problem(optimizer)
             ))
         return OptimizerList(Optimizers=optimizers_info)
 
@@ -47,7 +48,7 @@ class OptimizerMonitoringService(OptimizerMonitoringServiceServicer):
         return OptimizerInfo(
             OptimizerHandle=OptimizerHandle(Id=request.Id),
             OptimizerConfigJsonString=optimizer.optimizer_config.to_json(),
-            OptimizationProblem=optimizer.optimization_problem.to_protobuf()
+            OptimizationProblem=OptimizerServiceEncoder.encode_optimization_problem(optimizer.optimization_problem)
         )
 
     def GetOptimizerConvergenceState(self, request, context):
