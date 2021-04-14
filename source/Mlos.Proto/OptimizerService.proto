@@ -173,3 +173,103 @@ message SimpleString
 message Empty
 {
 };
+
+////// All Hypergrid Types
+
+message EmptyDimension
+{
+    string Name = 1;
+    string Type = 2;
+};
+
+message ContinuousDimension
+{
+    string Name = 1;
+    double Min = 2;
+    double Max = 3;
+    bool IncludeMin = 4;
+    bool IncludeMax = 5;
+};
+
+message DiscreteDimension
+{
+    string Name = 1;
+    int64 Min = 2;
+    int64 Max = 3;
+};
+
+message OrdinalDimension
+{
+    string Name = 1;
+    bool Ascending = 2;
+    repeated PrimitiveValue OrderedValues = 3;
+};
+
+message CategoricalDimension
+{
+    string Name = 1;
+    repeated PrimitiveValue Values = 2;
+};
+
+message CompositeDimension
+{
+    string Name = 1;
+    string ChunkType = 2;
+    repeated SimpleDimensionUnion Chunks = 3;
+};
+
+message PrimitiveValue
+{
+    int64 IntValue = 1;
+    double DoubleValue = 2;
+    bool BoolValue = 3;
+    string StringValue = 4;
+};
+
+message SimpleDimensionUnion
+{
+    ContinuousDimension ContinuousDimension = 1;
+    DiscreteDimension DiscreteDimension = 2;
+    OrdinalDimension OrdinalDimension = 3;
+    CategoricalDimension CategoricalDimension = 4;
+};
+
+message AllDimensionUnion
+{
+    ContinuousDimension ContinuousDimension = 1;
+    DiscreteDimension DiscreteDimension = 2;
+    OrdinalDimension OrdinalDimension = 3;
+    CategoricalDimension CategoricalDimension = 4;
+    EmptyDimension EmptyDimension = 5;
+    CompositeDimension CompositeDimension = 6;
+};
+
+message SimpleHypergrid
+{
+    string Name = 1;
+    repeated AllDimensionUnion Dimensions = 2;
+    repeated GuestSubgrid GuestSubgrids = 3;
+};
+
+message GuestSubgrid
+{
+    SimpleHypergrid Subgrid = 1;
+    AllDimensionUnion ExternalPivotDimension = 2;
+};
+
+message Point
+{
+    repeated KeyValuePair KeyValuePair = 1;
+};
+
+message KeyValuePair
+{
+    string Key = 1;
+    DimensionValue Value = 2;
+};
+
+message DimensionValue
+{
+    PrimitiveValue Value = 1;
+    Point Point = 2;
+};
