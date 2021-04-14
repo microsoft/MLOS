@@ -1,63 +1,61 @@
 syntax = "proto3";
-
-package mlos.optimizer_service;
+package mlos.optimizer_monitoring_service;
 
 // Exposes Bayesian Optimizer's functionality over gRPC.
 //
-service OptimizerService
+service OptimizerMonitoringService
 {
-    // Creates an optimizer with the specified configuration.
+    // Returns a list of existing optimizer instances.
     //
-    rpc CreateOptimizer(CreateOptimizerRequest) returns (OptimizerHandle);
+    rpc ListExistingOptimizers(Empty) returns (OptimizerList);
 
     // Returns information about optimizers configuration and optimization problem.
     //
     rpc GetOptimizerInfo(OptimizerHandle) returns (OptimizerInfo);
-    
-    // Request a suggestion.
-    //
-    rpc Suggest(SuggestRequest) returns (ConfigurationParameters);
 
-    // Adds an observation to the optimizer's data set.
+    // Returns the current optimizer convergence state.
     //
-    rpc RegisterObservation(RegisterObservationRequest) returns (Empty);
+    rpc GetOptimizerConvergenceState(OptimizerHandle) returns (OptimizerConvergenceState);
+
+    // Returns the computed goodness of fit metrics.
+    //
+    rpc ComputeGoodnessOfFitMetrics(OptimizerHandle) returns (SimpleString);
+
+    // Check if optimizer has been trained.
+    //
+    rpc IsTrained(OptimizerHandle) returns (SimpleBoolean);
 
     // Adds observations to the optimizer's data set.
     //
     rpc RegisterObservations(RegisterObservationsRequest) returns (Empty);
+
+    // Produces a prediction for specified features.
+    //
+    rpc Predict(PredictRequest) returns (PredictResponse);
+
+    // Returns all observations registered for a given optimizer.
+    //
+    rpc GetAllObservations(OptimizerHandle) returns (Observations);
 
     // Like ping.
     //
     rpc Echo(Empty) returns (Empty);
 };
 
-// A request to create an optimizer.
+// Represents information about optimizer convergence state.
 //
-message CreateOptimizerRequest
-{
-    OptimizationProblem OptimizationProblem = 1;
-    string OptimizerConfigName = 2;
-    string OptimizerConfig = 3;
-};
-
-
-// A request to create a suggestion given specified context.
-//
-message SuggestRequest
+message OptimizerConvergenceState
 {
     OptimizerHandle OptimizerHandle = 1;
-    bool Random = 2;
-    Context Context = 3;
+    string SerializedOptimizerConvergenceState = 2;
 };
 
-
-// A request to add an observation to the optimizer's data set.
+// A list of OptimizerInfo messages.
 //
-message RegisterObservationRequest
+message OptimizerList
 {
-    OptimizerHandle OptimizerHandle = 1;
-    Observation Observation = 2;
-};
+    repeated OptimizerInfo Optimizers = 1;
+}
 
 // A request to add a observations to the optimizer's data set.
 //
@@ -67,14 +65,27 @@ message RegisterObservationsRequest
     Observations Observations = 2;
 };
 
-// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
-// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
-// break Greg's PR. 
-// 
-message Observations
+// A request to predict objective values given specified features (parameters and context).
+//
+message PredictRequest
 {
-    Features Features = 1;
-    ObjectiveValues ObjectiveValues = 2;
+    OptimizerHandle OptimizerHandle = 1;
+    Features Features = 2;
+};
+
+// Representation of an objective value prediction
+//
+message SingleObjectivePrediction
+{
+    string ObjectiveName = 1;
+    string PredictionDataFrameJsonString = 2;
+};
+
+message PredictResponse
+{
+    // repeated for every objective (in a multi-objective case)
+    //
+    repeated SingleObjectivePrediction ObjectivePredictions = 1;
 };
 
 // A representation of an optimization problem.
@@ -103,6 +114,13 @@ message OptimizerInfo
     OptimizationProblem OptimizationProblem = 3;
 };
 
+// A representation of features for the optimizer's surrogate models to operate on.
+//
+message Features
+{
+    string FeaturesJsonString = 1;
+};
+
 // A representation of a single observation to be added to the optimizer's data set.
 //
 message Observation
@@ -111,11 +129,14 @@ message Observation
     ObjectiveValues ObjectiveValues = 2;
 };
 
-// A representation of features for the optimizer's surrogate models to operate on.
-//
-message Features
+// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
+// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
+// break Greg's PR. 
+// 
+message Observations
 {
-    string FeaturesJsonString = 1;
+    Features Features = 1;
+    ObjectiveValues ObjectiveValues = 2;
 };
 
 // Serialized configuration parameters.
@@ -173,3 +194,4 @@ message SimpleString
 message Empty
 {
 };
+

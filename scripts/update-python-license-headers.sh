@@ -11,4 +11,4 @@ scriptdir=$(readlink -f "$(dirname "$0")")
 cd "$scriptdir/.."
 
 cd source/Mlos.Python
-licenseheaders -t mit-license.tmpl -E .py -x mlos/Grpc/OptimizerService_pb2_grpc.py mlos/Grpc/OptimizerService_pb2.py
+licenseheaders -t mit-license.tmpl -E .py -x mlos/Grpc/*_pb2_grpc.py mlos/Grpc/*_pb2.py

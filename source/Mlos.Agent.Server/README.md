@@ -21,7 +21,7 @@ It provides
 
 2. A [`Mlos.Agent.GrpcServer`](../Mlos.Agent.GrpcClient/#mlos-github-tree-view) GRPC channel to allow driving the experimentation process from a Jupyter notebook (work in progress).
 
-3. A GRPC client to allow connecting to the (Python) [`mlos.Grpc.OptimizerMicroserviceServer`](../Mlos.Python/mlos/Grpc/OptimizerMicroserviceServer.py#mlos-github-tree-view) to store and track those experiments.
+3. A GRPC client to allow connecting to the (Python) [`mlos.Grpc.OptimizerServicesServer`](../Mlos.Python/mlos/Grpc/OptimizerServicesServer.py#mlos-github-tree-view) to store and track those experiments.
 
 Since it is meant as a reusable agent for different components, it contains no specific message processing logic itself.
 

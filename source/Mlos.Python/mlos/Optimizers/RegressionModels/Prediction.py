@@ -113,7 +113,14 @@ class Prediction:
 
         if mean_variance_col in self.expected_column_names:
             if dataframe[mean_variance_col].notnull().any():
-                assert (dataframe[dataframe[mean_variance_col].notnull()][mean_variance_col] >= 0).all()
+                if not (dataframe[dataframe[mean_variance_col].notnull()][mean_variance_col] >= 0).all():
+                    violated_rows_df = dataframe[dataframe[dataframe[mean_variance_col].notnull()][mean_variance_col] < 0]
+                    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
+                        print(violated_rows_df)
+                    print(f"Num invalid rows: {len(violated_rows_df.index)}")
+                    print(f"Index: {violated_rows_df.index}")
+                    print(f"{mean_variance_col}: {violated_rows_df[mean_variance_col]}")
+                    assert False
 
         if sample_variance_col in self.expected_column_names:
             if dataframe[sample_variance_col].notnull().any():

@@ -212,7 +212,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             self.logger.info(error_message)
             raise UnableToProduceGuidedSuggestionException(error_message)
 
-        if incumbents_df.dtypes['utility'] != np.float:
+        if incumbents_df.dtypes['utility'] != float:
             self.logger.info(
                 f"The type of incumbents_df['utility'] is {incumbents_df.dtypes['utility']}. Utility function: {self.utility_function.__class__.__name__}, "
                 f"incumbents_df length: {len(incumbents_df.index)}"
@@ -402,7 +402,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
             product=True
         )
         utility_df = self.utility_function(feature_values_pandas_frame=features_df)
-        assert utility_df.dtypes['utility'] == np.float,\
+        assert utility_df.dtypes['utility'] == float,\
             f"{utility_df} produced by {self.utility_function.__class__.__name__} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
         return utility_df
 
