@@ -62,19 +62,19 @@ class TestOptimizerServiceEncoderDecoderForDimensions:
         original_E = original_B - original_C
         original_F = original_A.union(original_E)
 
-        serialized_A = OptimizerServiceEncoder.serialize_composite_dimension(original_A)
-        serialized_B = OptimizerServiceEncoder.serialize_composite_dimension(original_B)
-        serialized_C = OptimizerServiceEncoder.serialize_composite_dimension(original_C)
-        serialized_D = OptimizerServiceEncoder.serialize_composite_dimension(original_D)
-        serialized_E = OptimizerServiceEncoder.serialize_composite_dimension(original_E)
-        serialized_F = OptimizerServiceEncoder.serialize_composite_dimension(original_F)
+        serialized_A = OptimizerServiceEncoder.encode_continuous_dimension(original_A)
+        serialized_B = OptimizerServiceEncoder.encode_continuous_dimension(original_B)
+        serialized_C = OptimizerServiceEncoder.encode_continuous_dimension(original_C)
+        serialized_D = OptimizerServiceEncoder.encode_composite_dimension(original_D)
+        serialized_E = OptimizerServiceEncoder.encode_continuous_dimension(original_E)
+        serialized_F = OptimizerServiceEncoder.encode_composite_dimension(original_F)
 
-        A = OptimizerServiceDecoder.deserialize_composite_dimension(serialized_A)
-        B = OptimizerServiceDecoder.deserialize_composite_dimension(serialized_B)
-        C = OptimizerServiceDecoder.deserialize_composite_dimension(serialized_C)
-        D = OptimizerServiceDecoder.deserialize_composite_dimension(serialized_D)
-        E = OptimizerServiceDecoder.deserialize_composite_dimension(serialized_E)
-        F = OptimizerServiceDecoder.deserialize_composite_dimension(serialized_F)
+        A = OptimizerServiceDecoder.decode_continuous_dimension(serialized_A)
+        B = OptimizerServiceDecoder.decode_continuous_dimension(serialized_B)
+        C = OptimizerServiceDecoder.decode_continuous_dimension(serialized_C)
+        D = OptimizerServiceDecoder.decode_composite_dimension(serialized_D)
+        E = OptimizerServiceDecoder.decode_continuous_dimension(serialized_E)
+        F = OptimizerServiceDecoder.decode_composite_dimension(serialized_F)
 
         assert A in original_A
         assert B in original_B

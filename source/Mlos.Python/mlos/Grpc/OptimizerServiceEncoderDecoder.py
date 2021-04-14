@@ -63,6 +63,29 @@ class OptimizerServiceEncoder:
         )
 
     @staticmethod
+    def encode_composite_dimension(dimension: CompositeDimension) -> OptimizerService_pb2.CompositeDimension:
+        assert isinstance(dimension, CompositeDimension)
+
+        encoded_chunks = []
+        for chunk in dimension.enumerate_chunks():
+            if dimension.chunks_type is ContinuousDimension:
+                encoded_chunks.append(OptimizerService_pb2.SimpleDimensionUnion(ContinuousDimension=OptimizerServiceEncoder.encode_continuous_dimension(chunk)))
+            elif dimension.chunks_type is DiscreteDimension:
+                encoded_chunks.append(OptimizerService_pb2.SimpleDimensionUnion(DiscreteDimension=OptimizerServiceEncoder.encode_discrete_dimension(chunk)))
+            elif dimension.chunks_type is OrdinalDimension:
+                encoded_chunks.append(OptimizerService_pb2.SimpleDimensionUnion(OrdinalDimension=OptimizerServiceEncoder.encode_ordinal_dimension(chunk)))
+            elif dimension.chunks_type is CategoricalDimension:
+                encoded_chunks.append(OptimizerService_pb2.SimpleDimensionUnion(CategoricalDimension=OptimizerServiceEncoder.encode_categorical_dimension(chunk)))
+            else:
+                raise TypeError(f"Unsupported chunk type: {dimension.chunks_type.__name__}")
+
+        return OptimizerService_pb2.CompositeDimension(
+            Name=dimension.name,
+            ChunkType=dimension.chunks_type.__name__,
+            Chunks=encoded_chunks
+        )
+
+    @staticmethod
     def encode_primitive_value(value: Union[int, float, bool, str]) -> OptimizerService_pb2.PrimitiveValue:
         assert isinstance(value, (int, float, bool, str))
         if isinstance(value, bool):
@@ -75,6 +98,7 @@ class OptimizerServiceEncoder:
             return OptimizerService_pb2.PrimitiveValue(StringValue=value)
 
         raise TypeError(f"{value} is of type: {type(value)} but must be one of (int, float, bool, str)")
+
 
 class OptimizerServiceDecoder:
     """Decodes OptimizerService messages to objects.
@@ -138,6 +162,27 @@ class OptimizerServiceDecoder:
             name=serialized.Name,
             ascending=serialized.Ascending,
             ordered_values=[OptimizerServiceDecoder.decode_primitive_value(value) for value in serialized.OrderedValues]
+        )
+
+    @staticmethod
+    def decode_composite_dimension(serialized: OptimizerService_pb2.CompositeDimension) -> CompositeDimension:
+        assert isinstance(serialized, OptimizerService_pb2.CompositeDimension)
+
+        if serialized.ChunkType == ContinuousDimension.__name__:
+            decoded_chunks = [OptimizerServiceDecoder.decode_continuous_dimension(chunk.ContinuousDimension) for chunk in serialized.Chunks]
+        elif serialized.ChunkType == DiscreteDimension.__name__:
+            decoded_chunks = [OptimizerServiceDecoder.decode_discrete_dimension(chunk.DiscreteDimension) for chunk in serialized.Chunks]
+        elif serialized.ChunkType == OrdinalDimension.__name__:
+            decoded_chunks = [OptimizerServiceDecoder.decode_ordinal_dimension(chunk.OrdinalDimension) for chunk in serialized.Chunks]
+        elif serialized.ChunkType == CategoricalDimension.__name__:
+            decoded_chunks = [OptimizerServiceDecoder.decode_categorical_dimension(chunk.CategoricalDimension) for chunk in serialized.Chunks]
+        else:
+            raise TypeError(f"Unsupported chunk type: {serialized.ChunkType}")
+
+        return CompositeDimension(
+            name=serialized.Name,
+            chunks_type=OptimizerServiceDecoder.type_names_to_types[serialized.ChunkType],
+            chunks=decoded_chunks
         )
 
     @staticmethod
