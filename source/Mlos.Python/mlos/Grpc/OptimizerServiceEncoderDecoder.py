@@ -38,6 +38,15 @@ class OptimizerServiceEncoder:
         )
 
     @staticmethod
+    def encode_ordinal_dimension(dimension: OrdinalDimension) -> OptimizerService_pb2.OrdinalDimension:
+        assert isinstance(dimension, OrdinalDimension)
+        return OptimizerService_pb2.OrdinalDimension(
+            Name=dimension.name,
+            Ascending=dimension.ascending,
+            OrderedValues=[OptimizerServiceEncoder.encode_primitive_value(value) for value in dimension.values]
+        )
+
+    @staticmethod
     def encode_primitive_value(value: Union[int, float, bool, str]) -> OptimizerService_pb2.PrimitiveValue:
         assert isinstance(value, (int, float, bool, str))
         if isinstance(value, bool):
@@ -94,6 +103,15 @@ class OptimizerServiceDecoder:
         return CategoricalDimension(
             name=serialized.Name,
             values=[OptimizerServiceDecoder.decode_primitive_value(value) for value in serialized.Values]
+        )
+
+    @staticmethod
+    def decode_ordinal_dimension(serialized: OptimizerService_pb2.OrdinalDimension) -> OrdinalDimension:
+        assert isinstance(serialized, OptimizerService_pb2.OrdinalDimension)
+        return OrdinalDimension(
+            name=serialized.Name,
+            ascending=serialized.Ascending,
+            ordered_values=[OptimizerServiceDecoder.decode_primitive_value(value) for value in serialized.OrderedValues]
         )
 
     @staticmethod
