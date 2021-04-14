@@ -11,7 +11,7 @@ from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDime
 
 
 class TestOptimizerServiceEncoderDecoderForDimensions:
-    """ Tests JSON encoding and decoding for hypergrids and dimensions.
+    """Tests encoding and decoding for dimensions.
 
     """
 
