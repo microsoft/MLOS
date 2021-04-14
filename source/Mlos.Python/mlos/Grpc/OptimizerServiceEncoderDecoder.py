@@ -25,6 +25,17 @@ class OptimizerServiceEncoder:
         )
 
     @staticmethod
+    def encode_continuous_dimension(dimension: ContinuousDimension) -> OptimizerService_pb2.ContinuousDimension:
+        assert isinstance(dimension, ContinuousDimension)
+        return OptimizerService_pb2.ContinuousDimension(
+            Name=dimension.name,
+            Min=dimension.min,
+            Max=dimension.max,
+            IncludeMin=dimension.include_min,
+            IncludeMax=dimension.include_max
+        )
+
+    @staticmethod
     def encode_empty_dimension(dimension: EmptyDimension) -> OptimizerService_pb2.EmptyDimension:
         assert isinstance(dimension, EmptyDimension)
         return OptimizerService_pb2.EmptyDimension(Name=dimension.name, Type=dimension.type.__name__)
@@ -88,6 +99,11 @@ class OptimizerServiceDecoder:
             context_space=None if not optimization_problem_pb2.ContextSpace.HypergridJsonString
             else json.loads(optimization_problem_pb2.ContextSpace.HypergridJsonString, cls=HypergridJsonDecoder)
         )
+
+    @staticmethod
+    def decode_continuous_dimension(serialized: OptimizerService_pb2.ContinuousDimension) -> ContinuousDimension:
+        assert isinstance(serialized, OptimizerService_pb2.ContinuousDimension)
+        return ContinuousDimension(name=serialized.Name, min=serialized.Min, max=serialized.Max, include_min=serialized.IncludeMin, include_max=serialized.IncludeMax)
 
     @staticmethod
     def decode_empty_dimension(serialized: OptimizerService_pb2.EmptyDimension) -> EmptyDimension:
