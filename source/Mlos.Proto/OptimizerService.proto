@@ -220,10 +220,12 @@ message CompositeDimension
 
 message PrimitiveValue
 {
-    int64 IntValue = 1;
-    double DoubleValue = 2;
-    bool BoolValue = 3;
-    string StringValue = 4;
+    oneof Value {
+        int64 IntValue = 1;
+        double DoubleValue = 2;
+        bool BoolValue = 3;
+        string StringValue = 4;
+    }
 };
 
 message SimpleDimensionUnion

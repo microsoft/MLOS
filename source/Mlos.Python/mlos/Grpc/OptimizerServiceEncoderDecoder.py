@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import json
+from typing import Union
 
 from mlos.Grpc import OptimizerService_pb2
 from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
@@ -24,12 +25,31 @@ class OptimizerServiceEncoder:
         )
 
     @staticmethod
-    def encode_empty_dimension(empty_dimension: EmptyDimension):
-        assert isinstance(empty_dimension, EmptyDimension)
-        return OptimizerService_pb2.EmptyDimension(
-            Name=empty_dimension.name,
-            Type=empty_dimension.type.__name__
+    def encode_empty_dimension(dimension: EmptyDimension) -> OptimizerService_pb2.EmptyDimension:
+        assert isinstance(dimension, EmptyDimension)
+        return OptimizerService_pb2.EmptyDimension(Name=dimension.name, Type=dimension.type.__name__)
+
+    @staticmethod
+    def encode_categorical_dimension(dimension: CategoricalDimension) -> OptimizerService_pb2.CategoricalDimension:
+        assert isinstance(dimension, CategoricalDimension)
+        return OptimizerService_pb2.CategoricalDimension(
+            Name=dimension.name,
+            Values=[OptimizerServiceEncoder.encode_primitive_value(value) for value in dimension.values]
         )
+
+    @staticmethod
+    def encode_primitive_value(value: Union[int, float, bool, str]) -> OptimizerService_pb2.PrimitiveValue:
+        assert isinstance(value, (int, float, bool, str))
+        if isinstance(value, bool):
+            return OptimizerService_pb2.PrimitiveValue(BoolValue=value)
+        if isinstance(value, int):
+            return OptimizerService_pb2.PrimitiveValue(IntValue=value)
+        if isinstance(value, float):
+            return OptimizerService_pb2.PrimitiveValue(DoubleValue=value)
+        if isinstance(value, str):
+            return OptimizerService_pb2.PrimitiveValue(StringValue=value)
+
+        raise TypeError(f"{value} is of type: {type(value)} but must be one of (int, float, bool, str)")
 
 class OptimizerServiceDecoder:
     """Decodes OptimizerService messages to objects.
@@ -61,9 +81,30 @@ class OptimizerServiceDecoder:
         )
 
     @staticmethod
-    def decode_empty_dimension(serialized: OptimizerService_pb2.EmptyDimension):
+    def decode_empty_dimension(serialized: OptimizerService_pb2.EmptyDimension) -> EmptyDimension:
         assert isinstance(serialized, OptimizerService_pb2.EmptyDimension)
         return EmptyDimension(
             name=serialized.Name,
             type=OptimizerServiceDecoder.type_names_to_types[serialized.Type]
         )
+
+    @staticmethod
+    def decode_categorical_dimension(serialized: OptimizerService_pb2.CategoricalDimension) -> CategoricalDimension:
+        assert isinstance(serialized, OptimizerService_pb2.CategoricalDimension)
+        return CategoricalDimension(
+            name=serialized.Name,
+            values=[OptimizerServiceDecoder.decode_primitive_value(value) for value in serialized.Values]
+        )
+
+    @staticmethod
+    def decode_primitive_value(value: OptimizerService_pb2.PrimitiveValue) -> Union[int, float, bool, str]:
+        field_set = value.WhichOneof('Value')
+        assert field_set in ('IntValue', 'DoubleValue', 'BoolValue', 'StringValue')
+        if field_set == 'IntValue':
+            return value.IntValue
+        if field_set == 'DoubleValue':
+            return value.DoubleValue
+        if field_set == "BoolValue":
+            return value.BoolValue
+        if field_set == "StringValue":
+            return value.StringValue
