@@ -36,6 +36,11 @@ class OptimizerServiceEncoder:
         )
 
     @staticmethod
+    def encode_discrete_dimension(dimension: DiscreteDimension) -> OptimizerService_pb2.DiscreteDimension:
+        assert isinstance(dimension, DiscreteDimension)
+        return OptimizerService_pb2.DiscreteDimension(Name=dimension.name, Min=dimension.min, Max=dimension.max)
+
+    @staticmethod
     def encode_empty_dimension(dimension: EmptyDimension) -> OptimizerService_pb2.EmptyDimension:
         assert isinstance(dimension, EmptyDimension)
         return OptimizerService_pb2.EmptyDimension(Name=dimension.name, Type=dimension.type.__name__)
@@ -104,6 +109,11 @@ class OptimizerServiceDecoder:
     def decode_continuous_dimension(serialized: OptimizerService_pb2.ContinuousDimension) -> ContinuousDimension:
         assert isinstance(serialized, OptimizerService_pb2.ContinuousDimension)
         return ContinuousDimension(name=serialized.Name, min=serialized.Min, max=serialized.Max, include_min=serialized.IncludeMin, include_max=serialized.IncludeMax)
+
+    @staticmethod
+    def decode_discrete_dimension(serialized: OptimizerService_pb2.DiscreteDimension) -> DiscreteDimension:
+        assert isinstance(serialized, OptimizerService_pb2.DiscreteDimension)
+        return DiscreteDimension(name=serialized.Name, min=serialized.Min, max=serialized.Max)
 
     @staticmethod
     def decode_empty_dimension(serialized: OptimizerService_pb2.EmptyDimension) -> EmptyDimension:
