@@ -176,10 +176,17 @@ message Empty
 
 ////// All Hypergrid Types
 
+enum DimensionType {
+    CATEGORICAL = 0;
+    CONTINUOUS = 1;
+    DISCRETE = 2;
+    ORDINAL = 3;
+};
+
 message EmptyDimension
 {
     string Name = 1;
-    string Type = 2;
+    DimensionType DimensionType = 2;
 };
 
 message ContinuousDimension
@@ -214,8 +221,8 @@ message CategoricalDimension
 message CompositeDimension
 {
     string Name = 1;
-    string ChunkType = 2;
-    repeated SimpleDimensionUnion Chunks = 3;
+    DimensionType ChunkType = 2;
+    repeated Dimension Chunks = 3;
 };
 
 message PrimitiveValue
@@ -228,17 +235,7 @@ message PrimitiveValue
     }
 };
 
-message SimpleDimensionUnion
-{
-    oneof Dimension {
-        ContinuousDimension ContinuousDimension = 1;
-        DiscreteDimension DiscreteDimension = 2;
-        OrdinalDimension OrdinalDimension = 3;
-        CategoricalDimension CategoricalDimension = 4;
-    }
-};
-
-message AllDimensionUnion
+message Dimension
 {
     oneof Dimension {
         ContinuousDimension ContinuousDimension = 1;
@@ -253,14 +250,14 @@ message AllDimensionUnion
 message SimpleHypergrid
 {
     string Name = 1;
-    repeated AllDimensionUnion Dimensions = 2;
+    repeated Dimension Dimensions = 2;
     repeated GuestSubgrid GuestSubgrids = 3;
 };
 
 message GuestSubgrid
 {
     SimpleHypergrid Subgrid = 1;
-    AllDimensionUnion ExternalPivotDimension = 2;
+    Dimension ExternalPivotDimension = 2;
 };
 
 message Point
