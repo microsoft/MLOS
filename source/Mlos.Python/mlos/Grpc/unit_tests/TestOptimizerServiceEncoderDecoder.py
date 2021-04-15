@@ -106,5 +106,7 @@ class TestOptimizerServiceEncoderDecoder:
         serialized = OptimizerServiceEncoder.encode_simple_hypergrid(parameter_space)
         deserialized = OptimizerServiceDecoder.decode_simple_hypergrid(serialized)
 
+        print(deserialized)
+
         for _ in range(1000):
             assert deserialized.random() in parameter_space

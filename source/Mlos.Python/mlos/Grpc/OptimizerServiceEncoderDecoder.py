@@ -76,7 +76,9 @@ class OptimizerServiceEncoder:
             elif dimension.chunks_type is OrdinalDimension:
                 encoded_chunks.append(OptimizerService_pb2.SimpleDimensionUnion(OrdinalDimension=OptimizerServiceEncoder.encode_ordinal_dimension(chunk)))
             elif dimension.chunks_type is CategoricalDimension:
-                encoded_chunks.append(OptimizerService_pb2.SimpleDimensionUnion(CategoricalDimension=OptimizerServiceEncoder.encode_categorical_dimension(chunk)))
+                encoded_chunks.append(
+                    OptimizerService_pb2.SimpleDimensionUnion(CategoricalDimension=OptimizerServiceEncoder.encode_categorical_dimension(chunk))
+                )
             else:
                 raise TypeError(f"Unsupported chunk type: {dimension.chunks_type.__name__}")
 
@@ -178,7 +180,13 @@ class OptimizerServiceDecoder:
     @staticmethod
     def decode_continuous_dimension(serialized: OptimizerService_pb2.ContinuousDimension) -> ContinuousDimension:
         assert isinstance(serialized, OptimizerService_pb2.ContinuousDimension)
-        return ContinuousDimension(name=serialized.Name, min=serialized.Min, max=serialized.Max, include_min=serialized.IncludeMin, include_max=serialized.IncludeMax)
+        return ContinuousDimension(
+            name=serialized.Name,
+            min=serialized.Min,
+            max=serialized.Max,
+            include_min=serialized.IncludeMin,
+            include_max=serialized.IncludeMax
+        )
 
     @staticmethod
     def decode_discrete_dimension(serialized: OptimizerService_pb2.DiscreteDimension) -> DiscreteDimension:
@@ -296,3 +304,5 @@ class OptimizerServiceDecoder:
             return value.BoolValue
         if field_set == "StringValue":
             return value.StringValue
+
+        raise TypeError(f"Unsupported field was set: {field_set}")
