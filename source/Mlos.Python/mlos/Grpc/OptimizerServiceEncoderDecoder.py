@@ -7,7 +7,8 @@ from typing import Union
 
 from mlos.Grpc import OptimizerService_pb2
 from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
-from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension
+from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, Dimension, DiscreteDimension, \
+    EmptyDimension, OrdinalDimension, SimpleHypergrid
 from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, HypergridJsonEncoder
 
 
@@ -83,6 +84,51 @@ class OptimizerServiceEncoder:
             Name=dimension.name,
             ChunkType=dimension.chunks_type.__name__,
             Chunks=encoded_chunks
+        )
+
+    @staticmethod
+    def encode_simple_hypergrid(hypergrid: SimpleHypergrid) -> OptimizerService_pb2.SimpleHypergrid:
+        assert isinstance(hypergrid, SimpleHypergrid)
+        encoded_subgrids = []
+        for _, subgrids in hypergrid.joined_subgrids_by_pivot_dimension.items():
+            for subgrid in subgrids:
+                encoded_subgrid = OptimizerServiceEncoder.encode_subgrid(subgrid)
+                encoded_subgrids.append(encoded_subgrid)
+
+        return OptimizerService_pb2.SimpleHypergrid(
+            Name=hypergrid.name,
+            Dimensions=[OptimizerServiceEncoder.encode_dimension(dimension) for dimension in hypergrid.root_dimensions],
+            GuestSubgrids=encoded_subgrids
+        )
+
+    @staticmethod
+    def encode_dimension(dimension: Dimension) -> OptimizerService_pb2.AllDimensionUnion:
+        if isinstance(dimension, EmptyDimension):
+            return OptimizerService_pb2.AllDimensionUnion(EmptyDimension=OptimizerServiceEncoder.encode_empty_dimension(dimension))
+
+        if isinstance(dimension, ContinuousDimension):
+            return OptimizerService_pb2.AllDimensionUnion(ContinuousDimension=OptimizerServiceEncoder.encode_continuous_dimension(dimension))
+
+        if isinstance(dimension, DiscreteDimension):
+            return OptimizerService_pb2.AllDimensionUnion(DiscreteDimension=OptimizerServiceEncoder.encode_discrete_dimension(dimension))
+
+        if isinstance(dimension, OrdinalDimension):
+            return OptimizerService_pb2.AllDimensionUnion(OrdinalDimension=OptimizerServiceEncoder.encode_ordinal_dimension(dimension))
+
+        if isinstance(dimension, CategoricalDimension):
+            return OptimizerService_pb2.AllDimensionUnion(CategoricalDimension=OptimizerServiceEncoder.encode_categorical_dimension(dimension))
+
+        if isinstance(dimension, CompositeDimension):
+            return OptimizerService_pb2.AllDimensionUnion(CompositeDimension=OptimizerServiceEncoder.encode_composite_dimension(dimension))
+
+        raise TypeError(f"Unsupported dimension type: {type(dimension)}")
+
+    @staticmethod
+    def encode_subgrid(subgrid: SimpleHypergrid.JoinedSubgrid) -> OptimizerService_pb2.GuestSubgrid:
+        assert isinstance(subgrid, SimpleHypergrid.JoinedSubgrid)
+        return OptimizerService_pb2.GuestSubgrid(
+            Subgrid=OptimizerServiceEncoder.encode_simple_hypergrid(subgrid.subgrid),
+            ExternalPivotDimension=OptimizerServiceEncoder.encode_dimension(subgrid.join_dimension)
         )
 
     @staticmethod
@@ -183,6 +229,59 @@ class OptimizerServiceDecoder:
             name=serialized.Name,
             chunks_type=OptimizerServiceDecoder.type_names_to_types[serialized.ChunkType],
             chunks=decoded_chunks
+        )
+
+    @staticmethod
+    def decode_simple_hypergrid(hypergrid: OptimizerService_pb2.SimpleHypergrid) -> SimpleHypergrid:
+        assert isinstance(hypergrid, OptimizerService_pb2.SimpleHypergrid)
+        decoded_hypergrid = SimpleHypergrid(
+            name=hypergrid.Name,
+            dimensions=[OptimizerServiceDecoder.decode_dimension(dimension) for dimension in hypergrid.Dimensions]
+        )
+
+        for subgrid in hypergrid.GuestSubgrids:
+            decoded_subgrid = OptimizerServiceDecoder.decode_subgrid(subgrid)
+            decoded_hypergrid.join(
+                subgrid=decoded_subgrid.subgrid,
+                on_external_dimension=decoded_subgrid.join_dimension
+            )
+
+        return decoded_hypergrid
+
+    @staticmethod
+    def decode_dimension(dimension: OptimizerService_pb2.AllDimensionUnion) -> Dimension:
+        assert isinstance(dimension, OptimizerService_pb2.AllDimensionUnion)
+        dimension_type_set = dimension.WhichOneof('Dimension')
+        supported_dimension_types = [CategoricalDimension, CompositeDimension, ContinuousDimension, EmptyDimension, DiscreteDimension, OrdinalDimension]
+        supported_dimension_type_names = [type.__name__ for type in supported_dimension_types]
+        assert dimension_type_set in supported_dimension_type_names
+
+        if dimension_type_set == CategoricalDimension.__name__:
+            return OptimizerServiceDecoder.decode_categorical_dimension(dimension.CategoricalDimension)
+
+        if dimension_type_set == CompositeDimension.__name__:
+            return OptimizerServiceDecoder.decode_composite_dimension(dimension.CompositeDimension)
+
+        if dimension_type_set == ContinuousDimension.__name__:
+            return OptimizerServiceDecoder.decode_continuous_dimension(dimension.ContinuousDimension)
+
+        if dimension_type_set == EmptyDimension.__name__:
+            return OptimizerServiceDecoder.decode_empty_dimension(dimension.EmptyDimension)
+
+        if dimension_type_set == DiscreteDimension.__name__:
+            return OptimizerServiceDecoder.decode_discrete_dimension(dimension.DiscreteDimension)
+
+        if dimension_type_set == OrdinalDimension.__name__:
+            return OptimizerServiceDecoder.decode_ordinal_dimension(dimension.OrdinalDimension)
+
+        raise TypeError(f"Unsupported dimension type: {dimension_type_set}")
+
+    @staticmethod
+    def decode_subgrid(subgrid: OptimizerService_pb2.GuestSubgrid) -> SimpleHypergrid.JoinedSubgrid:
+        assert isinstance(subgrid, OptimizerService_pb2.GuestSubgrid)
+        return SimpleHypergrid.JoinedSubgrid(
+            subgrid=OptimizerServiceDecoder.decode_simple_hypergrid(subgrid.Subgrid),
+            join_dimension=OptimizerServiceDecoder.decode_dimension(subgrid.ExternalPivotDimension)
         )
 
     @staticmethod

@@ -230,20 +230,24 @@ message PrimitiveValue
 
 message SimpleDimensionUnion
 {
-    ContinuousDimension ContinuousDimension = 1;
-    DiscreteDimension DiscreteDimension = 2;
-    OrdinalDimension OrdinalDimension = 3;
-    CategoricalDimension CategoricalDimension = 4;
+    oneof Dimension {
+        ContinuousDimension ContinuousDimension = 1;
+        DiscreteDimension DiscreteDimension = 2;
+        OrdinalDimension OrdinalDimension = 3;
+        CategoricalDimension CategoricalDimension = 4;
+    }
 };
 
 message AllDimensionUnion
 {
-    ContinuousDimension ContinuousDimension = 1;
-    DiscreteDimension DiscreteDimension = 2;
-    OrdinalDimension OrdinalDimension = 3;
-    CategoricalDimension CategoricalDimension = 4;
-    EmptyDimension EmptyDimension = 5;
-    CompositeDimension CompositeDimension = 6;
+    oneof Dimension {
+        ContinuousDimension ContinuousDimension = 1;
+        DiscreteDimension DiscreteDimension = 2;
+        OrdinalDimension OrdinalDimension = 3;
+        CategoricalDimension CategoricalDimension = 4;
+        EmptyDimension EmptyDimension = 5;
+        CompositeDimension CompositeDimension = 6;
+    }
 };
 
 message SimpleHypergrid

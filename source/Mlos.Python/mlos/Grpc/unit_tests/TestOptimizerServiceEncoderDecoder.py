@@ -7,10 +7,11 @@ import pytest
 from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceDecoder, OptimizerServiceEncoder
 from mlos.Grpc import OptimizerService_pb2
 from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension
+from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 
 
 
-class TestOptimizerServiceEncoderDecoderForDimensions:
+class TestOptimizerServiceEncoderDecoder:
     """Tests encoding and decoding for dimensions.
 
     """
@@ -98,3 +99,12 @@ class TestOptimizerServiceEncoderDecoderForDimensions:
         assert 2 in E
         assert 2.5 not in E
         assert 0 in F and 1 in F and 1.5 not in F and 2 in F and 2.5 not in F
+
+
+    def test_hypergrid(self):
+        parameter_space = bayesian_optimizer_config_store.parameter_space
+        serialized = OptimizerServiceEncoder.encode_simple_hypergrid(parameter_space)
+        deserialized = OptimizerServiceDecoder.decode_simple_hypergrid(serialized)
+
+        for _ in range(1000):
+            assert deserialized.random() in parameter_space
