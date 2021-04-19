@@ -150,13 +150,7 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         # Let's get the numpy arrays out of the panda frames
         x_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
         y = target_values_pandas_frame[self.target_dimension_names].to_numpy()
-
         design_matrix = self._transform_x(x_df)
-        # if len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()) > 0:
-        #     design_matrix = self._create_one_hot_encoded_design_matrix(x_df)
-        # else:
-        #     design_matrix = x_df.to_numpy()
-
         self._regressor.fit(design_matrix, y)
         self._trained = True
         self.last_refit_iteration_number = iteration_number
