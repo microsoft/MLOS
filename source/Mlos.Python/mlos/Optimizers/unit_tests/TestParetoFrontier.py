@@ -243,7 +243,7 @@ class TestParetoFrontier:
 
 
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])
-    @pytest.mark.parametrize("num_dimensions", [2, 3, 4, 5])
+    @pytest.mark.parametrize("num_dimensions", [2, 3, 4])
     def test_pareto_frontier_volume_on_hyperspheres(self, minimize, num_dimensions):
         """Uses a known formula for the volume of the hyperspheres to validate the accuracy of the pareto frontier estimate.
 
