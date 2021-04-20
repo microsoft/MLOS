@@ -872,7 +872,7 @@ class TestBayesianOptimizer:
 
         # Let's give it a little more resolution.
         #
-        optimizer_config.experiment_designer_config.multi_objective_probability_of_improvement_config.num_monte_carlo_samples = 1000
+        optimizer_config.experiment_designer_config.multi_objective_probability_of_improvement_config.num_monte_carlo_samples = 200
 
         bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
             optimization_problem=optimization_problem,

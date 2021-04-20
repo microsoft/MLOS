@@ -28,7 +28,7 @@ class TestObjectiveFunctionFactory:
             value = objective_function.evaluate_point(random_point)
             assert value in objective_function.output_space
 
-        for i in range(1, 100):
+        for i in range(1, 50):
             random_dataframe = objective_function.parameter_space.random_dataframe(num_samples=i)
             values_df = objective_function.evaluate_dataframe(random_dataframe)
             assert values_df.index.equals(random_dataframe.index)

@@ -45,7 +45,7 @@ class TestOptimizerEvaluator:
     def test_defaults(self):
         """Tests default optimizer configurations against default objective functions."""
         optimizer_evaluator_config = optimizer_evaluator_config_store.default
-        optimizer_evaluator_config.num_iterations = 100
+        optimizer_evaluator_config.num_iterations = 50
 
         # We want to test this functionality so let's make sure that nobody accidentally disables it in the default config.
         #
@@ -145,11 +145,11 @@ class TestOptimizerEvaluator:
         final_optimizer_from_disk = pickle.loads(restored_evaluation_report.pickled_optimizers_over_time[99])
         final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
 
-        for _ in range(100):
+        for _ in range(20):
             assert final_optimizer_from_disk.suggest() in final_optimizer_from_report.optimization_problem.parameter_space
 
 
-    @pytest.mark.parametrize('test_num', [i for i in range(10)])
+    @pytest.mark.parametrize('test_num', [i for i in range(8)])
     def test_named_configs(self, test_num):
         """Tests named optimizer configurations against named objective functions.
 
