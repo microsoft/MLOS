@@ -14,10 +14,14 @@ sys.path.insert(0, grpc_dir)
 
 from . import OptimizerService_pb2
 from . import OptimizerService_pb2_grpc
+from . import OptimizerMonitoringService_pb2
+from . import OptimizerMonitoringService_pb2_grpc
 
 __all__ = [
+    "OptimizerMonitoringService_pb2",
+    "OptimizerMonitoringService_pb2_grpc",
     "OptimizerService_pb2",
-    "OptimizerService_pb2_grpc"
+    "OptimizerService_pb2_grpc",
 ]
 
 # Make sure there are no http_proxy environment variables set.

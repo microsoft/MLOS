@@ -17,6 +17,11 @@ pythonCmd=$(getPythonCmd)
 
 cd "$scriptdir"
 mkdir -p mlos/Grpc
+
 cp OptimizerService.proto mlos/Grpc/
 $pythonCmd -m grpc_tools.protoc -I . --python_out=../Mlos.Python --grpc_python_out=../Mlos.Python  mlos/Grpc/OptimizerService.proto
+
+cp OptimizerMonitoringService.proto mlos/Grpc/
+$pythonCmd -m grpc_tools.protoc -I . --python_out=../Mlos.Python --grpc_python_out=../Mlos.Python  mlos/Grpc/OptimizerMonitoringService.proto
+
 rm -rf mlos

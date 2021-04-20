@@ -9,8 +9,13 @@ rem Start in the script directory.
 pushd "%~dp0"
 
 mkdir mlos\Grpc
+
 copy OptimizerService.proto mlos\Grpc\
-python -m grpc_tools.protoc -I . --python_out=..\Mlos.Python --grpc_python_out=..\Mlos.Python  mlos\Grpc\OptimizerService.proto
+python -m grpc_tools.protoc -I . --python_out=..\Mlos.Python --grpc_python_out=..\Mlos.Python  mlos/Grpc/OptimizerService.proto
+
+copy OptimizerMonitoringService.proto mlos\Grpc\
+python -m grpc_tools.protoc -I . --python_out=..\Mlos.Python --grpc_python_out=..\Mlos.Python  mlos/Grpc/OptimizerMonitoringService.proto
+
 rd /s /q mlos
 
 popd

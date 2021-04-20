@@ -7,7 +7,13 @@ extension-pkg-whitelist=
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=Secrets,unit_tests,OptimizerService_pb2.py,OptimizerService_pb2_grpc.py,long_haul_tests
+ignore=Secrets,
+        long_haul_tests,
+        OptimizerMonitoringService_pb2.py,
+        OptimizerMonitoringService_pb2_grpc.py,
+        OptimizerService_pb2.py,
+        OptimizerService_pb2_grpc.py,
+        unit_tests
 
 # Add files or directories matching the regex patterns to the blacklist. The
 # regex matches against base names, not paths.

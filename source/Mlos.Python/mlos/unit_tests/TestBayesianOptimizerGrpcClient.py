@@ -12,7 +12,7 @@ import pandas as pd
 
 
 import mlos.global_values as global_values
-from mlos.Grpc.OptimizerMicroserviceServer import OptimizerMicroserviceServer
+from mlos.Grpc.OptimizerServicesServer import OptimizerServicesServer
 from mlos.Grpc.OptimizerMonitor import OptimizerMonitor
 from mlos.Grpc.OptimizerService_pb2 import Empty
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
@@ -43,7 +43,7 @@ class TestBayesianOptimizerGrpcClient:
         for port in range(50051, 50051 + max_num_tries):
             num_tries += 1
             try:
-                self.server = OptimizerMicroserviceServer(port=port, num_threads=10)
+                self.server = OptimizerServicesServer(port=port, num_threads=10)
                 self.server.start()
                 self.port = port
                 break
@@ -151,46 +151,41 @@ class TestBayesianOptimizerGrpcClient:
                 assert 0 <= model_gof_metrics.coefficient_of_determination <= 1
 
 
-    def test_optimizer_with_random_config(self):
-        num_random_restarts = 10
-        for i in range(num_random_restarts):
-            optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
+    @pytest.mark.parametrize("i", [i for i in range(10)])
+    def test_optimizer_with_random_config(self, i):
+        optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
-            optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
-            if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
-                rf_config = optimizer_config.homogeneous_random_forest_regression_model_config
-                rf_config.n_estimators = min(rf_config.n_estimators, 20)
+        optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
+        if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
+            rf_config = optimizer_config.homogeneous_random_forest_regression_model_config
+            rf_config.n_estimators = min(rf_config.n_estimators, 20)
 
-            print(f"[{i+1}/{num_random_restarts}] Creating a bayesian optimizer with config: {optimizer_config}")
+        print(f"[{i+1}] Creating a bayesian optimizer with config: {optimizer_config}")
 
-            bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
-                optimization_problem=self.optimization_problem,
-                optimizer_config=optimizer_config
-            )
-            registered_features_df, registered_objectives_df = self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=12)
+        bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+            optimization_problem=self.optimization_problem,
+            optimizer_config=optimizer_config
+        )
+        registered_features_df, registered_objectives_df = self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=12)
 
-            # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
-            #
-            registered_features_json = registered_features_df.to_json(orient='index', double_precision=15)
-            registered_objectives_json = registered_objectives_df.to_json(orient='index', double_precision=15)
+        # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
+        #
+        registered_features_json = registered_features_df.to_json(orient='index', double_precision=15)
+        registered_objectives_json = registered_objectives_df.to_json(orient='index', double_precision=15)
 
-            # Apparently the jitter is too good and we actually have to use the json strings or they will be optimized away.
-            #
-            assert len(registered_features_json) > 0
-            assert len(registered_objectives_json) > 0
+        # Apparently the jitter is too good and we actually have to use the json strings or they will be optimized away.
+        #
+        assert len(registered_features_json) > 0
+        assert len(registered_objectives_json) > 0
 
-            registered_features_df = pd.read_json(registered_features_json, orient='index')
-            registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
+        registered_features_df = pd.read_json(registered_features_json, orient='index')
+        registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
 
-            observed_features_df, observed_objectives_df, _ = bayesian_optimizer.get_all_observations()
+        observed_features_df, observed_objectives_df, _ = bayesian_optimizer.get_all_observations()
 
-            assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
-            assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
+        assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
+        assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
-
-    @pytest.mark.skip(reason="Not implemented yet.")
-    def test_optimizer_with_named_config(self):
-        ...
 
     def optimize_quadratic(self, optimizer, num_iterations):
         registered_features_df = None

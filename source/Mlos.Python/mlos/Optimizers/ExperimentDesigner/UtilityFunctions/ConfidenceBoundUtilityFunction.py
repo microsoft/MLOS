@@ -74,5 +74,5 @@ class ConfidenceBoundUtilityFunction(UtilityFunction):
 
         utility_function_values = pd.to_numeric(arg=utility_function_values, errors='raise')
         utility_df = pd.DataFrame(data=utility_function_values, index=predictions_df.index, columns=['utility'], dtype='float')
-        assert utility_df.dtypes['utility'] == np.float, f"{utility_df} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
+        assert utility_df.dtypes['utility'] == float, f"{utility_df} has the wrong type for the 'utility' column: {utility_df.dtypes['utility']}"
         return utility_df
