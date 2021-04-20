@@ -138,12 +138,12 @@ class TestOptimizerEvaluator:
 
         # Lastly let's double check the pickled optimizers
         #
-        assert len(restored_evaluation_report.pickled_optimizers_over_time) == 11
+        assert len(restored_evaluation_report.pickled_optimizers_over_time) == 12
 
         # Finally, let's make sure that the optimizers serialized to disk are usable.
         #
-        final_optimizer_from_disk = pickle.loads(restored_evaluation_report.pickled_optimizers_over_time[99])
-        final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[99])
+        final_optimizer_from_disk = pickle.loads(restored_evaluation_report.pickled_optimizers_over_time[49])
+        final_optimizer_from_report = pickle.loads(optimizer_evaluation_report.pickled_optimizers_over_time[49])
 
         for _ in range(20):
             assert final_optimizer_from_disk.suggest() in final_optimizer_from_report.optimization_problem.parameter_space
