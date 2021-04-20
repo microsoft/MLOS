@@ -138,7 +138,7 @@ class TestOptimizerEvaluator:
 
         # Lastly let's double check the pickled optimizers
         #
-        assert len(restored_evaluation_report.pickled_optimizers_over_time) == 12
+        assert len(restored_evaluation_report.pickled_optimizers_over_time) == 6
 
         # Finally, let's make sure that the optimizers serialized to disk are usable.
         #
