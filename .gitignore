@@ -434,5 +434,4 @@ coverage
 .coverage.*
 
 # Rust compilation
-*.lock
 **/*.rs.bk
