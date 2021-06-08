@@ -89,11 +89,11 @@ jobs:
       # for easier retries rather than with matrix rules (no longer using fromJson and arrays).
       run: |
         if [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == 'schedule' ]; then
-          echo "::set-output name=UbuntuVersionMatrix::['16.04']"
+          echo '::set-output name=UbuntuVersionMatrix::["16.04"]'
         elif ! echo '16.04' | egrep -q '^18.04$'; then
-          echo "::set-output name=UbuntuVersionMatrix::['16.04']"
+          echo '::set-output name=UbuntuVersionMatrix::["16.04"]'
         else
-          echo "::set-output name=UbuntuVersionMatrix::['SKIP_ME']"
+          echo '::set-output name=UbuntuVersionMatrix::["SKIP_ME"]'
         fi
 
   docker-image-fresh-build:
@@ -101,7 +101,7 @@ jobs:
     needs: prep-vars
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -147,7 +147,7 @@ jobs:
     # This let's us keep the rest of the workflow for publishing fresh images the same.
     needs: [prep-vars, docker-image-fresh-build]
     timeout-minutes: 20
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -201,7 +201,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 40
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -316,7 +316,7 @@ jobs:
   # Check in-repo markdown links
   markdown-link-check:
     runs-on: ubuntu-latest
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         # We only need to run this on one UbuntuVersion (latest), but reusing
@@ -336,7 +336,7 @@ jobs:
     name: Build and publish website
     needs: [prep-vars, docker-image-cached-build]
     runs-on: ubuntu-latest
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         # We only need to run this on one UbuntuVersion (latest), but reusing
@@ -414,7 +414,7 @@ jobs:
   python-licenseheaders-checks:
     name: Check for license header comments on python files
     needs: [prep-vars]
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         # We only need to run this on one UbuntuVersion (latest), but reusing
@@ -447,7 +447,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 15
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -518,7 +518,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
     timeout-minutes: 45
-    if: needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -598,7 +598,7 @@ jobs:
     needs: [prep-vars, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.ref == 'refs/heads/main' && needs.prep-vars.outputs.UbuntuVersionMatrix != "['SKIP_ME']"
+    if: github.ref == 'refs/heads/main' && needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
