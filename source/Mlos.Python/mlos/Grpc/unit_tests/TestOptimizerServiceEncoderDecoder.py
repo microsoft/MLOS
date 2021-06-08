@@ -114,6 +114,9 @@ class TestOptimizerServiceEncoderDecoder:
         for _ in range(1000):
             assert deserialized.random() in parameter_space
 
+        for _ in range(1000):
+            assert parameter_space.random() in deserialized
+
     def test_optimization_problem(self):
         parameter_space = SimpleHypergrid(
             name="test",
@@ -138,7 +141,25 @@ class TestOptimizerServiceEncoderDecoder:
         encoded_problem = OptimizerServiceEncoder.encode_optimization_problem(optimization_problem)
         decoded_problem = OptimizerServiceDecoder.decode_optimization_problem(encoded_problem)
         
+        # A = B iff A >= B && B <= A
+        # Could be condensed to single loop but easier to read this way. 
         for _ in range(1000):
             assert decoded_problem.parameter_space.random() in parameter_space
+        
+        for _ in range(1000):
+            assert parameter_space.random() in decoded_problem.parameter_space
+
+        for _ in range(1000):
+            assert decoded_problem.objective_space.random() in objective_space
+        
+        for _ in range(1000):
+            assert objective_space.random() in decoded_problem.objective_space
+        
+        print(decoded_problem.objectives)
+        assert len(decoded_problem.objectives) == 1
+        assert decoded_problem.objectives[0].name=="z"
+        assert decoded_problem.objectives[0].minimize
+
+
 
 
