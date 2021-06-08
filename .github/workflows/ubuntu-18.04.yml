@@ -57,7 +57,7 @@ jobs:
       utc-date: ${{ steps.utc-date.outputs.utc-date }}
       utc-ts: ${{ steps.utc-ts.outputs.utc-ts }}
       main-sha: ${{ steps.main-sha.outputs.main-sha }}
-      UbuntuVersionMatrix: ${{ steps.UbuntuVersionMatrix.outputs.UbuntuVersionMatrix }}
+      UbuntuVersionMatrix: ${{ steps.UbuntuVersion.outputs.UbuntuVersionMatrix }}
     steps:
     - id: repository-name-tolower
       name: Compute the lowercase github docker package registry name
@@ -80,19 +80,20 @@ jobs:
       name: Lookup the current git sha for the main branch
       shell: bash
       run: echo ::set-output name=main-sha::$(git rev-parse refs/heads/main)
-    - id: UbuntuVersionMatrix
-      name: Setup UbuntuVersion matrix
+    - id: UbuntuVersion
+      name: Setup UbuntuVersionMatrix
       shell: bash
       # For PRs, we only check a subset of the UbuntuVersions.
       # For everything else (nightly, Merge, etc.) we run all of them.
-      # Extended to support templating of this file so we can run each version in a separate workflow for easier retries.
+      # Adapted to support templating of this file so we can run each version in a separate workflow
+      # for easier retries rather than with matrix rules (no longer using fromJson and arrays).
       run: |
-        if ( [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == 'schedule' ] ) && echo '18.04' | egrep -q '^(16|18|20).04$'; then
-          echo "::set-output name=UbuntuVersionMatrix::['18.04']"
+        if [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == 'schedule' ]; then
+          echo "::set-output name=UbuntuVersionMatrix::18.04"
         elif echo '18.04' | egrep -q '^(16|20).04$'; then
-          echo "::set-output name=UbuntuVersionMatrix::['18.04']"
+          echo "::set-output name=UbuntuVersionMatrix::18.04"
         else
-          echo "::set-output name=UbuntuVersionMatrix::[]"
+          echo "::set-output name=UbuntuVersionMatrix::SKIP_ME"
         fi
 
   docker-image-fresh-build:
@@ -102,8 +103,8 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-    if: matrix.UbuntuVersion == '18.04'
+        UbuntuVersion: ${{ needs.prep-vars.outputs.UbuntuVersionMatrix }}
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     steps:
     - name: Check event type
       if: github.event_name != 'schedule'
@@ -148,8 +149,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-    if: matrix.UbuntuVersion == '18.04'
+        UbuntuVersion: ${{ needs.prep-vars.outputs.UbuntuVersionMatrix }}
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
@@ -202,7 +203,7 @@ jobs:
     timeout-minutes: 40
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: ${{ needs.prep-vars.outputs.UbuntuVersionMatrix }}
         configuration: [Debug, Release]
         cxx: [clang++-10, g++]
         include:
@@ -210,7 +211,7 @@ jobs:
             cc: clang-10
           - cxx: g++
             cc: gcc
-    if: matrix.UbuntuVersion == '18.04'
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -321,7 +322,7 @@ jobs:
         # the matrix like this allows for easier copy/paste of the build-setup
         # steps.
         UbuntuVersion: ['20.04']
-    if: matrix.UbuntuVersion == '18.04'
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     steps:
     - uses: actions/checkout@v2
     - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
@@ -341,7 +342,7 @@ jobs:
         # the matrix like this allows for easier copy/paste of the build-setup
         # steps.
         UbuntuVersion: ['20.04']
-    if: matrix.UbuntuVersion == '18.04'
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -412,14 +413,15 @@ jobs:
 
   python-licenseheaders-checks:
     name: Check for license header comments on python files
+    needs: [prep-vars]
     strategy:
       matrix:
         # We only need to run this on one UbuntuVersion (latest), but reusing
         # the matrix like this allows for easier copy/paste of the build-setup
         # steps.
         UbuntuVersion: ['20.04']
-    if: matrix.UbuntuVersion == '18.04'
     runs-on: ubuntu-${{ matrix.UbuntuVersion }}
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     timeout-minutes: 3
     steps:
     - uses: actions/checkout@v2
@@ -447,12 +449,12 @@ jobs:
     timeout-minutes: 15
     strategy:
       matrix:
-        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+        #UbuntuVersion: ${{ needs.prep-vars.outputs.UbuntuVersionMatrix }}
         UbuntuVersion: ['20.04']
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
-    if: matrix.UbuntuVersion == '18.04'
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -518,12 +520,12 @@ jobs:
     timeout-minutes: 45
     strategy:
       matrix:
-        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+        #UbuntuVersion: ${{ needs.prep-vars.outputs.UbuntuVersionMatrix }}
         UbuntuVersion: ['20.04']
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
-    if: matrix.UbuntuVersion == '18.04'
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -598,8 +600,8 @@ jobs:
     timeout-minutes: 20
     strategy:
       matrix:
-        UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-    if: github.ref == 'refs/heads/main' && matrix.UbuntuVersion == '18.04'
+        UbuntuVersion: ${{ needs.prep-vars.outputs.UbuntuVersionMatrix }}
+    if: github.ref == 'refs/heads/main' && needs.prep-vars.outputs.UbuntuVersionMatrix != 'SKIP_ME'
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
