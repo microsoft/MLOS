@@ -199,7 +199,7 @@ jobs:
     name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} ${{ matrix.cxx }} build/test C++/C#
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
-    timeout-minutes: 30
+    timeout-minutes: 40
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -288,13 +288,13 @@ jobs:
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           test -e target/bin/${{ matrix.configuration }}/x86_64/Mlos.UnitTest
     - name: Run ${{ matrix.configuration }} cmake test
-      timeout-minutes: 10
+      timeout-minutes: 15
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make cmake-test
     - name: Run cake build
-      timeout-minutes: 10
+      timeout-minutes: 15
       shell: bash
       run: |
         docker exec --env GITHUB_WORKFLOW=$GITHUB_WORKFLOW \

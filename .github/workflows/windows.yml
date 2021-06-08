@@ -77,5 +77,5 @@ jobs:
       timeout-minutes: 2
       run: scripts\run-python-checks.cmd
     - name: Run Python unit tests (Windows)
-      timeout-minutes: 40
+      timeout-minutes: 45
       run: scripts\run-python-tests.cmd
