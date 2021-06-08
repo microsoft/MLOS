@@ -320,7 +320,7 @@ jobs:
         # We only need to run this on one UbuntuVersion (latest), but reusing
         # the matrix like this allows for easier copy/paste of the build-setup
         # steps.
-        UbuntuVersion: [20.04]
+        UbuntuVersion: ['20.04']
     if: matrix.UbuntuVersion == '%UBUNTU_VERSION%'
     steps:
     - uses: actions/checkout@v2
@@ -340,7 +340,7 @@ jobs:
         # We only need to run this on one UbuntuVersion (latest), but reusing
         # the matrix like this allows for easier copy/paste of the build-setup
         # steps.
-        UbuntuVersion: [20.04]
+        UbuntuVersion: ['20.04']
     if: matrix.UbuntuVersion == '%UBUNTU_VERSION%'
     steps:
     - name: Checkout
@@ -417,7 +417,7 @@ jobs:
         # We only need to run this on one UbuntuVersion (latest), but reusing
         # the matrix like this allows for easier copy/paste of the build-setup
         # steps.
-        UbuntuVersion: [20.04]
+        UbuntuVersion: ['20.04']
     if: matrix.UbuntuVersion == '%UBUNTU_VERSION%'
     runs-on: ubuntu-${{ matrix.UbuntuVersion }}
     timeout-minutes: 3
@@ -448,7 +448,7 @@ jobs:
     strategy:
       matrix:
         #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-        UbuntuVersion: [20.04]
+        UbuntuVersion: ['20.04']
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
@@ -519,7 +519,7 @@ jobs:
     strategy:
       matrix:
         #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-        UbuntuVersion: [20.04]
+        UbuntuVersion: ['20.04']
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
@@ -592,7 +592,6 @@ jobs:
   docker-image-publish:
     name: Publish Ubuntu ${{ matrix.UbuntuVersion }} image
     # Only do this if this was a successful merge to the main branch.
-    if: ${{ github.ref == 'refs/heads/main' }}
     # And make sure that all of the other tests have passed first.
     needs: [prep-vars, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]
     runs-on: ubuntu-latest
@@ -600,7 +599,7 @@ jobs:
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-    if: matrix.UbuntuVersion == '%UBUNTU_VERSION%'
+    if: github.ref == 'refs/heads/main' && matrix.UbuntuVersion == '%UBUNTU_VERSION%'
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
