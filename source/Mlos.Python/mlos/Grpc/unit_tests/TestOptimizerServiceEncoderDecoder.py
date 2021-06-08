@@ -5,8 +5,11 @@
 import pytest
 
 from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceDecoder, OptimizerServiceEncoder
+from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer
 from mlos.Grpc import OptimizerService_pb2
-from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension
+from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension, SimpleHypergrid
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 
 
@@ -54,7 +57,7 @@ class TestOptimizerServiceEncoderDecoder:
         deserialized = OptimizerServiceDecoder.decode_ordinal_dimension(serialized)
         assert deserialized == ordinal_dimension
         assert isinstance(serialized, OptimizerService_pb2.OrdinalDimension)
-
+    
     def test_composite_dimension(self):
         original_A = ContinuousDimension(name='x', min=0, max=1)
         original_B = ContinuousDimension(name='x', min=2, max=3)
@@ -103,10 +106,39 @@ class TestOptimizerServiceEncoderDecoder:
 
     def test_hypergrid(self):
         parameter_space = bayesian_optimizer_config_store.parameter_space
-        serialized = OptimizerServiceEncoder.encode_simple_hypergrid(parameter_space)
-        deserialized = OptimizerServiceDecoder.decode_simple_hypergrid(serialized)
+        serialized = OptimizerServiceEncoder.encode_hypergrid(parameter_space)
+        deserialized = OptimizerServiceDecoder.decode_hypergrid(serialized)
 
         print(deserialized)
 
         for _ in range(1000):
             assert deserialized.random() in parameter_space
+
+    def test_optimization_problem(self):
+        parameter_space = SimpleHypergrid(
+            name="test",
+            dimensions=[
+                ContinuousDimension(name="x",min=0,max=1),
+                CategoricalDimension(name="y",values=[1,2,3])
+            ]
+        )
+        objective_space = SimpleHypergrid(
+            name="z",
+            dimensions=[
+                ContinuousDimension(name="z",min=0,max=1)
+            ]
+        )
+        optimization_problem = OptimizationProblem(
+            parameter_space=parameter_space,
+            objective_space=objective_space,
+            objectives=[
+                Objective(name="z",minimize=True)   
+            ]
+        )
+        encoded_problem = OptimizerServiceEncoder.encode_optimization_problem(optimization_problem)
+        decoded_problem = OptimizerServiceDecoder.decode_optimization_problem(encoded_problem)
+        
+        for _ in range(1000):
+            assert decoded_problem.parameter_space.random() in parameter_space
+
+

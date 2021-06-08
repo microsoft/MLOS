@@ -139,13 +139,6 @@ message ObjectiveValues
     string ObjectiveValuesJsonString = 1;
 };
 
-// Serialized representation of a Hypergrid.
-//
-message Hypergrid
-{
-    string HypergridJsonString = 1;
-};
-
 // Representation of a single objective.
 //
 message Objective
@@ -256,7 +249,7 @@ message PrimitiveValue
     }
 };
 
-// All Hypergids are built from the dimensions listed below. So we define this 'union' of types to be used by the SimpleHypergrid message type.
+// All Hypergids are built from the dimensions listed below. So we define this 'union' of types to be used by the Hypergrid message type.
 //
 message Dimension
 {
@@ -270,10 +263,8 @@ message Dimension
     }
 };
 
-// Representation of a SimpleHypergrid. When we switch the gRPC service to use these new message types, we will rename this message type to 'Hypergrid'.
-// Right now this would collide with a message type already used by the service.
-//
-message SimpleHypergrid
+// Representation of a Hypergrid. 
+message Hypergrid
 {
     string Name = 1;
     repeated Dimension Dimensions = 2;
@@ -290,7 +281,7 @@ message SimpleHypergrid
 //
 message GuestSubgrid
 {
-    SimpleHypergrid Subgrid = 1;
+    Hypergrid Subgrid = 1;
     Dimension ExternalPivotDimension = 2;
 };
 
