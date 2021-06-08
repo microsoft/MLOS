@@ -1,12 +1,15 @@
 # MLOS continuous integration pipelines:
+# vim: set ft=yaml:
 #
-# - Build/Test on Windows
+# - Build/Test on Windows (split to windows.yml)
 # - Build/Test Ubuntu 16.04, 18.04, 20.04
 #   (using docker images which also get published on success)
 # - Check for license headers
 # - Generate a static website (and link check it)
+#
+# Note: to allow separate retries, we split these into different workflows using the gen-workflows.sh script.
 
-name: CI
+name: CI-Ubuntu-18.04
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the main branch
@@ -14,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: 'Manual CI run'
+        description: 'Manual CI-Ubuntu-18.04 run'
   push:
     branches: [ main ]
   pull_request:
@@ -24,35 +27,6 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Run the debug/retail msbuild jobs separately so they can be executed in parallel.
-
-  windows-msbuild:
-    name: Run ${{ matrix.configuration }} msbuild on Windows
-    runs-on: windows-2019
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    # Runs multiple commands using the runners shell
-    - name: Msbuild/test ${{ matrix.configuration }}
-      timeout-minutes: 15
-      shell: cmd
-      run: |
-        set Configuration=${{ matrix.configuration }}
-        scripts\build.windows.cmd
-    - name: Pack/test ${{ matrix.configuration }}
-      timeout-minutes: 15
-      shell: cmd
-      run: |
-        set Configuration=${{ matrix.configuration }}
-        scripts\package.windows.cmd
-
   # Docker build process overview:
   # - We started using the docker.pkg.github.com package registry as a staging
   # ground to cache the ":latest" version of the build image.
@@ -111,11 +85,14 @@ jobs:
       shell: bash
       # For PRs, we only check a subset of the UbuntuVersions.
       # For everything else (nightly, Merge, etc.) we run all of them.
+      # Extended to support templating of this file so we can run each version in a separate workflow for easier retries.
       run: |
-        if [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == "schedule" ]; then
-          echo '::set-output name=UbuntuVersionMatrix::[16.04, 18.04, 20.04]'
+        if ( [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == "schedule" ] ) && echo "18.04" | egrep -q '^(16|18|20).04$'; then
+          echo '::set-output name=UbuntuVersionMatrix::[18.04]'
+        elif echo "18.04" | egrep -q '^(16|20).04$'; then
+          echo '::set-output name=UbuntuVersionMatrix::[18.04]'
         else
-          echo '::set-output name=UbuntuVersionMatrix::[16.04, 20.04]'
+          echo '::set-output name=UbuntuVersionMatrix::[]'
         fi
 
   docker-image-fresh-build:
@@ -126,6 +103,7 @@ jobs:
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     steps:
     - name: Check event type
       if: github.event_name != 'schedule'
@@ -171,6 +149,7 @@ jobs:
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
@@ -231,6 +210,7 @@ jobs:
             cc: clang-10
           - cxx: g++
             cc: gcc
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -335,6 +315,13 @@ jobs:
   # Check in-repo markdown links
   markdown-link-check:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # We only need to run this on one UbuntuVersion (latest), but reusing
+        # the matrix like this allows for easier copy/paste of the build-setup
+        # steps.
+        UbuntuVersion: [20.04]
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     steps:
     - uses: actions/checkout@v2
     - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
@@ -354,6 +341,7 @@ jobs:
         # the matrix like this allows for easier copy/paste of the build-setup
         # steps.
         UbuntuVersion: [20.04]
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -424,7 +412,14 @@ jobs:
 
   python-licenseheaders-checks:
     name: Check for license header comments on python files
-    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        # We only need to run this on one UbuntuVersion (latest), but reusing
+        # the matrix like this allows for easier copy/paste of the build-setup
+        # steps.
+        UbuntuVersion: [20.04]
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
+    runs-on: ubuntu-${{ matrix.UbuntuVersion }}
     timeout-minutes: 3
     steps:
     - uses: actions/checkout@v2
@@ -444,36 +439,6 @@ jobs:
         # so we instruct git-diff to ignore those when considering changes.
         git --no-pager diff --ignore-cr-at-eol --exit-code
 
-  # FIXME: These timeouts are egregiously long right now.
-  # See Also: https://github.com/microsoft/MLOS/pull/66#issuecomment-690760863
-  windows-python-checks:
-    name: Run Python checks on Windows
-    runs-on: windows-2019
-    timeout-minutes: 45
-    strategy:
-      matrix:
-        # FIXME: MLOS currently fails pylint checks for 3.8
-        # See Also: https://github.com/microsoft/MLOS/issues/54
-        python-version: [3.7] #, 3.8]
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install pip dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint pytest pytest-xdist
-        pip install -r source/Mlos.Python/requirements.txt
-    - name: Run pylint checks (Windows)
-      timeout-minutes: 2
-      run: scripts\run-python-checks.cmd
-    - name: Run Python unit tests (Windows)
-      timeout-minutes: 40
-      run: scripts\run-python-tests.cmd
-
   # Run pylint only in this test and make the container image publish task depend on this.
   linux-python-checks:
     name: Run Python checks on Ubuntu ${{ matrix.UbuntuVersion }}
@@ -487,6 +452,7 @@ jobs:
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -557,6 +523,7 @@ jobs:
         # TODO: add support for checking different versions of Python
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -633,6 +600,7 @@ jobs:
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+    if: ${{ matrix.UbuntuVersion == '18.04' }}
     env:
       MLOS_GCR_USR: ${{ secrets.MLOS_GCR_USR }}
     steps:
