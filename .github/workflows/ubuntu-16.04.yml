@@ -1,12 +1,15 @@
 # MLOS continuous integration pipelines:
+# vim: set ft=yaml:
 #
-# - Build/Test on Windows
+# - Build/Test on Windows (split to windows.yml)
 # - Build/Test Ubuntu 16.04, 18.04, 20.04
 #   (using docker images which also get published on success)
 # - Check for license headers
 # - Generate a static website (and link check it)
+#
+# Note: to allow separate retries, we split these into different workflows using the gen-workflows.sh script.
 
-name: CI
+name: CI-Ubuntu-16.04
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the main branch
@@ -14,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: 'Manual CI run'
+        description: 'Manual CI-Ubuntu-16.04 run'
   push:
     branches: [ main ]
   pull_request:
@@ -24,35 +27,6 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Run the debug/retail msbuild jobs separately so they can be executed in parallel.
-
-  windows-msbuild:
-    name: Run ${{ matrix.configuration }} msbuild on Windows
-    runs-on: windows-2019
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-    # Runs multiple commands using the runners shell
-    - name: Msbuild/test ${{ matrix.configuration }}
-      timeout-minutes: 15
-      shell: cmd
-      run: |
-        set Configuration=${{ matrix.configuration }}
-        scripts\build.windows.cmd
-    - name: Pack/test ${{ matrix.configuration }}
-      timeout-minutes: 15
-      shell: cmd
-      run: |
-        set Configuration=${{ matrix.configuration }}
-        scripts\package.windows.cmd
-
   # Docker build process overview:
   # - We started using the docker.pkg.github.com package registry as a staging
   # ground to cache the ":latest" version of the build image.
@@ -107,15 +81,20 @@ jobs:
       shell: bash
       run: echo ::set-output name=main-sha::$(git rev-parse refs/heads/main)
     - id: UbuntuVersionMatrix
-      name: Setup UbuntuVersion matrix
+      name: Setup UbuntuVersionMatrix
       shell: bash
       # For PRs, we only check a subset of the UbuntuVersions.
       # For everything else (nightly, Merge, etc.) we run all of them.
+      # Adapted to support templating of this file so we can run each version in a separate workflow
+      # for easier retries rather than with matrix rules that require retrying the entire set
+      # (though we retain the matrix rules for convenience for now).
       run: |
-        if [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == "schedule" ]; then
-          echo '::set-output name=UbuntuVersionMatrix::[16.04, 18.04, 20.04]'
+        if [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == 'schedule' ]; then
+          echo '::set-output name=UbuntuVersionMatrix::["16.04"]'
+        elif ! echo '16.04' | egrep -q '^18.04$'; then
+          echo '::set-output name=UbuntuVersionMatrix::["16.04"]'
         else
-          echo '::set-output name=UbuntuVersionMatrix::[16.04, 20.04]'
+          echo '::set-output name=UbuntuVersionMatrix::["SKIP_ME"]'
         fi
 
   docker-image-fresh-build:
@@ -123,6 +102,7 @@ jobs:
     needs: prep-vars
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -168,6 +148,7 @@ jobs:
     # This let's us keep the rest of the workflow for publishing fresh images the same.
     needs: [prep-vars, docker-image-fresh-build]
     timeout-minutes: 20
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -220,7 +201,8 @@ jobs:
     name: Ubuntu ${{ matrix.UbuntuVersion }} ${{ matrix.configuration }} ${{ matrix.cxx }} build/test C++/C#
     runs-on: ubuntu-latest
     needs: [prep-vars, docker-image-cached-build]
-    timeout-minutes: 30
+    timeout-minutes: 40
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
@@ -308,13 +290,13 @@ jobs:
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           test -e target/bin/${{ matrix.configuration }}/x86_64/Mlos.UnitTest
     - name: Run ${{ matrix.configuration }} cmake test
-      timeout-minutes: 10
+      timeout-minutes: 15
       shell: bash
       run: |
         docker exec mlos-${{ matrix.configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }} \
           make cmake-test
     - name: Run cake build
-      timeout-minutes: 10
+      timeout-minutes: 15
       shell: bash
       run: |
         docker exec --env GITHUB_WORKFLOW=$GITHUB_WORKFLOW \
@@ -332,304 +314,18 @@ jobs:
         docker stop mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
         docker rm mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
 
-  # Check in-repo markdown links
-  markdown-link-check:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
-      with:
-        use-quiet-mode: yes
-        use-verbose-mode: no
-        folder-path: './documentation, ./build, ./source, ./test, ./scripts, ./external'
-        file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md'
-
-  build-publish-website:
-    name: Build and publish website
-    needs: [prep-vars, docker-image-cached-build]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        # We only need to run this on one UbuntuVersion (latest), but reusing
-        # the matrix like this allows for easier copy/paste of the build-setup
-        # steps.
-        UbuntuVersion: [20.04]
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
-    # we depend on by re-executing (roughly) its same steps.
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-    - name: Cache Docker layers
-      id: load-docker-cache
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        # Load the output cache from the docker-image-cached-build job.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
-        #restore-keys: (no fallback)
-    # To prevent race issues, abort if that fails.
-    - name: Check for docker cache hit
-      if: steps.load-docker-cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
-        exit 1
-    - name: Import cached image
-      uses: docker/build-push-action@v2
-      with:
-        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
-        # For this target we can shave a small amount of time and only rebuild
-        # up to the python stage - no need for dotnet, cmake, clang, etc. yet.
-        target: mlos-build-base-with-python
-        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-        cache-from: |
-          type=local,src=/tmp/.buildx-cache
-        #cache-to: type=local,dest=/tmp/.buildx-cache
-        load: true
-    # Now start an instance of that container image.
-    - name: Start docker instance
-      shell: bash
-      run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $UID \
-          --name mlos-build-python \
-          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-    - name: Setup local user in docker Container
-      shell: bash
-      run: |
-        docker exec -u root mlos-build-python \
-          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
-    - name: Generate Python API docs using sphinx
-      run: docker exec mlos-build-python make -C website sphinx-site
-    - name: Generate main site from markdown using hugo
-      run: docker exec mlos-build-python make -C website hugo-site
-    - name: Test the links in the output site
-      run: docker exec mlos-build-python make -C website link-check
-    - name: Deploy to GitHub pages
-      if: ${{ github.ref == 'refs/heads/main' }}
-      uses: JamesIves/github-pages-deploy-action@3.6.2
-      with:
-        BRANCH: gh-pages
-        FOLDER: website/public
-    - name: Cleanup docker instance
-      shell: bash
-      run: |
-        docker stop mlos-build-python
-        docker rm mlos-build-python
-
-  # The licenseheaders check depends on comparing the source tree, so we keep it in a
-  # separate pipeline to ensure it starts from a clean state.
-  # For simplicity, we only run this one on ubuntu.
-
-  python-licenseheaders-checks:
-    name: Check for license header comments on python files
-    runs-on: ubuntu-20.04
-    timeout-minutes: 3
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install 'licenseheaders!=0.8.6'
-    - name: Run licenseheaders tool and check to see if it caused any changes
-      shell: bash
-      run: |
-        scripts/update-python-license-headers.sh
-        # Note: licenseheaders currently rewrites the line-endings from crlf to lf,
-        # so we instruct git-diff to ignore those when considering changes.
-        git --no-pager diff --ignore-cr-at-eol --exit-code
-
-  # FIXME: These timeouts are egregiously long right now.
-  # See Also: https://github.com/microsoft/MLOS/pull/66#issuecomment-690760863
-  windows-python-checks:
-    name: Run Python checks on Windows
-    runs-on: windows-2019
-    timeout-minutes: 45
-    strategy:
-      matrix:
-        # FIXME: MLOS currently fails pylint checks for 3.8
-        # See Also: https://github.com/microsoft/MLOS/issues/54
-        python-version: [3.7] #, 3.8]
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install pip dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint pytest pytest-xdist
-        pip install -r source/Mlos.Python/requirements.txt
-    - name: Run pylint checks (Windows)
-      timeout-minutes: 2
-      run: scripts\run-python-checks.cmd
-    - name: Run Python unit tests (Windows)
-      timeout-minutes: 40
-      run: scripts\run-python-tests.cmd
-
-  # Run pylint only in this test and make the container image publish task depend on this.
-  linux-python-checks:
-    name: Run Python checks on Ubuntu ${{ matrix.UbuntuVersion }}
-    runs-on: ubuntu-latest
-    needs: [prep-vars, docker-image-cached-build]
-    timeout-minutes: 15
-    strategy:
-      matrix:
-        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-        UbuntuVersion: [20.04]
-        # TODO: add support for checking different versions of Python
-        # Right now, we install Python 3.7 in the container and default to
-        # using it if available, else fallback to the system python3.
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
-    # we depend on by re-executing (roughly) its same steps.
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-    - name: Cache Docker layers
-      id: load-docker-cache
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        # Load the output cache from the docker-image-cached-build job.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
-        #restore-keys: (no fallback)
-    # To prevent race issues, abort if that fails.
-    - name: Check for docker cache hit
-      if: steps.load-docker-cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
-        exit 1
-    - name: Import cached image
-      timeout-minutes: 10
-      uses: docker/build-push-action@v2
-      with:
-        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
-        # For this task we can get a slight speed up by skipping the dotnet,
-        # clang, cmake layers.
-        target: mlos-build-base-with-python
-        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-        cache-from: |
-          type=local,src=/tmp/.buildx-cache
-        #cache-to: type=local,dest=/tmp/.buildx-cache
-        load: true
-    # Now, start the image as a new container instance.
-    - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      # These images are expected to have installed all the pip dependencies already.
-      shell: bash
-      run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $UID \
-          --name mlos-build-python-${{ matrix.UbuntuVersion }} \
-          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-    - name: Setup local user in docker Container
-      shell: bash
-      run: |
-        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
-          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
-    - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion }})
-      timeout-minutes: 2
-      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-checks
-    - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      shell: bash
-      run: |
-        docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
-        docker rm mlos-build-python-${{ matrix.UbuntuVersion }}
-
-  # Run the python unit tests separately from the pylint checks so that flakiness here doesn't block docker image publish step.
-  linux-python-tests:
-    name: Run Python unit tests on Ubuntu ${{ matrix.UbuntuVersion }}
-    runs-on: ubuntu-latest
-    needs: [prep-vars, docker-image-cached-build]
-    timeout-minutes: 45
-    strategy:
-      matrix:
-        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
-        UbuntuVersion: [20.04]
-        # TODO: add support for checking different versions of Python
-        # Right now, we install Python 3.7 in the container and default to
-        # using it if available, else fallback to the system python3.
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
-    # we depend on by re-executing (roughly) its same steps.
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-    - name: Cache Docker layers
-      id: load-docker-cache
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        # Load the output cache from the docker-image-cached-build job.
-        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
-        #restore-keys: (no fallback)
-    # To prevent race issues, abort if that fails.
-    - name: Check for docker cache hit
-      if: steps.load-docker-cache.outputs.cache-hit != 'true'
-      shell: bash
-      run: |
-        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
-        exit 1
-    - name: Import cached image
-      timeout-minutes: 10
-      uses: docker/build-push-action@v2
-      with:
-        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
-        # For this task we can get a slight speed up by skipping the dotnet,
-        # clang, cmake layers.
-        target: mlos-build-base-with-python
-        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-        cache-from: |
-          type=local,src=/tmp/.buildx-cache
-        #cache-to: type=local,dest=/tmp/.buildx-cache
-        load: true
-    # Now, start the image as a new container instance.
-    - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      # These images are expected to have installed all the pip dependencies already.
-      shell: bash
-      run: |
-        docker run -it -d -v $PWD:/src/MLOS -u $UID \
-          --name mlos-build-python-${{ matrix.UbuntuVersion }} \
-          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
-    - name: Setup local user in docker Container
-      shell: bash
-      run: |
-        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
-          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
-    - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion }})
-      timeout-minutes: 45
-      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
-    - name: Upload coverage to codecov
-      if: ${{ github.repository == 'microsoft/mlos' }}
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
-        fail_ci_if_error: true
-    - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      shell: bash
-      run: |
-        docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
-        docker rm mlos-build-python-${{ matrix.UbuntuVersion }}
+  # Extra rules that only need to be run on a single Ubuntu version are injected here by gen-workflows.sh:
+  #%EXTRA_RULES%#
 
   docker-image-publish:
     name: Publish Ubuntu ${{ matrix.UbuntuVersion }} image
     # Only do this if this was a successful merge to the main branch.
-    if: ${{ github.ref == 'refs/heads/main' }}
     # And make sure that all of the other tests have passed first.
-    needs: [prep-vars, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]
+    # Note: this is templated now.  See: gen-workflows.sh
+    needs: [prep-vars, docker-image-fresh-build, docker-image-cached-build, linux-build-test]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: github.ref == 'refs/heads/main' && needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     strategy:
       matrix:
         UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}

@@ -1,0 +1,284 @@
+# vim: set ft=yaml:
+#
+# NOTE: These rules are appended to the ubuntu-20.04.yml workflow by gen-workflows.sh
+# so that they only get applied once without a bunch of extra if clauses to maintain.
+# See Also: ubuntu.yml.tmpl for more details on how the docker usage works.
+
+  gen-workflows-check:
+    runs-on: ubuntu-latest
+    needs: [prep-vars]
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run the gen-workflows.sh script and check for changes that are not checked in
+      shell: bash
+      run: |
+        ./.github/workflows/gen-workflows.sh
+        git --no-pager diff --exit-code
+
+  # Check in-repo markdown links
+  markdown-link-check:
+    runs-on: ubuntu-latest
+    needs: [prep-vars]
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
+    steps:
+    - uses: actions/checkout@v2
+    - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
+      with:
+        use-quiet-mode: yes
+        use-verbose-mode: no
+        folder-path: './documentation, ./build, ./source, ./test, ./scripts, ./external'
+        file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md'
+
+  build-publish-website:
+    name: Build and publish website
+    needs: [prep-vars, docker-image-cached-build]
+    runs-on: ubuntu-latest
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
+    strategy:
+      matrix:
+        # We only need to run this on one UbuntuVersion (latest), but reusing
+        # the matrix like this allows for easier copy/paste of the build-setup
+        # steps.
+        UbuntuVersion: ['20.04']
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
+    # we depend on by re-executing (roughly) its same steps.
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Cache Docker layers
+      id: load-docker-cache
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
+      uses: docker/build-push-action@v2
+      with:
+        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
+        # For this target we can shave a small amount of time and only rebuild
+        # up to the python stage - no need for dotnet, cmake, clang, etc. yet.
+        target: mlos-build-base-with-python
+        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+        #cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
+    # Now start an instance of that container image.
+    - name: Start docker instance
+      shell: bash
+      run: |
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
+          --name mlos-build-python \
+          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-python \
+          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
+    - name: Generate Python API docs using sphinx
+      run: docker exec mlos-build-python make -C website sphinx-site
+    - name: Generate main site from markdown using hugo
+      run: docker exec mlos-build-python make -C website hugo-site
+    - name: Test the links in the output site
+      run: docker exec mlos-build-python make -C website link-check
+    - name: Deploy to GitHub pages
+      if: github.ref == 'refs/heads/main'
+      uses: JamesIves/github-pages-deploy-action@3.6.2
+      with:
+        BRANCH: gh-pages
+        FOLDER: website/public
+    - name: Cleanup docker instance
+      shell: bash
+      run: |
+        docker stop mlos-build-python
+        docker rm mlos-build-python
+
+  # The licenseheaders check depends on comparing the source tree, so we keep it in a
+  # separate pipeline to ensure it starts from a clean state.
+  # For simplicity, we only run this one on ubuntu.
+
+  python-licenseheaders-checks:
+    name: Check for license header comments on python files
+    needs: [prep-vars]
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
+    runs-on: ubuntu-20.04
+    timeout-minutes: 3
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install 'licenseheaders!=0.8.6'
+    - name: Run licenseheaders tool and check to see if it caused any changes
+      shell: bash
+      run: |
+        scripts/update-python-license-headers.sh
+        # Note: licenseheaders currently rewrites the line-endings from crlf to lf,
+        # so we instruct git-diff to ignore those when considering changes.
+        git --no-pager diff --ignore-cr-at-eol --exit-code
+
+  # Run pylint only in this test and make the container image publish task depend on this.
+  linux-python-checks:
+    name: Run Python checks on Ubuntu ${{ matrix.UbuntuVersion }}
+    runs-on: ubuntu-latest
+    needs: [prep-vars, docker-image-cached-build]
+    timeout-minutes: 15
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
+    strategy:
+      matrix:
+        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: ['20.04']
+        # TODO: add support for checking different versions of Python
+        # Right now, we install Python 3.7 in the container and default to
+        # using it if available, else fallback to the system python3.
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
+    # we depend on by re-executing (roughly) its same steps.
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Cache Docker layers
+      id: load-docker-cache
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
+      timeout-minutes: 10
+      uses: docker/build-push-action@v2
+      with:
+        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
+        # For this task we can get a slight speed up by skipping the dotnet,
+        # clang, cmake layers.
+        target: mlos-build-base-with-python
+        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+        #cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
+    # Now, start the image as a new container instance.
+    - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      # These images are expected to have installed all the pip dependencies already.
+      shell: bash
+      run: |
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
+          --name mlos-build-python-${{ matrix.UbuntuVersion }} \
+          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
+          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
+    - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion }})
+      timeout-minutes: 2
+      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-checks
+    - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      shell: bash
+      run: |
+        docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
+        docker rm mlos-build-python-${{ matrix.UbuntuVersion }}
+
+  # Run the python unit tests separately from the pylint checks so that flakiness here doesn't block docker image publish step.
+  linux-python-tests:
+    name: Run Python unit tests on Ubuntu ${{ matrix.UbuntuVersion }}
+    runs-on: ubuntu-latest
+    needs: [prep-vars, docker-image-cached-build]
+    timeout-minutes: 45
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
+    strategy:
+      matrix:
+        #UbuntuVersion: ${{ fromJson(needs.prep-vars.outputs.UbuntuVersionMatrix) }}
+        UbuntuVersion: ['20.04']
+        # TODO: add support for checking different versions of Python
+        # Right now, we install Python 3.7 in the container and default to
+        # using it if available, else fallback to the system python3.
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    # "Fetch" the docker image precached by the "docker-image-cached-build" job that
+    # we depend on by re-executing (roughly) its same steps.
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+    - name: Cache Docker layers
+      id: load-docker-cache
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        # Load the output cache from the docker-image-cached-build job.
+        key: mlos-buildx-${{ matrix.UbuntuVersion }}-${{ needs.prep-vars.outputs.utc-date }}-${{ github.sha }}
+        #restore-keys: (no fallback)
+    # To prevent race issues, abort if that fails.
+    - name: Check for docker cache hit
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
+        exit 1
+    - name: Import cached image
+      timeout-minutes: 10
+      uses: docker/build-push-action@v2
+      with:
+        build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
+        # For this task we can get a slight speed up by skipping the dotnet,
+        # clang, cmake layers.
+        target: mlos-build-base-with-python
+        tags: mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+        cache-from: |
+          type=local,src=/tmp/.buildx-cache
+        #cache-to: type=local,dest=/tmp/.buildx-cache
+        load: true
+    # Now, start the image as a new container instance.
+    - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      # These images are expected to have installed all the pip dependencies already.
+      shell: bash
+      run: |
+        docker run -it -d -v $PWD:/src/MLOS -u $UID \
+          --name mlos-build-python-${{ matrix.UbuntuVersion }} \
+          mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
+    - name: Setup local user in docker Container
+      shell: bash
+      run: |
+        docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
+          /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
+    - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion }})
+      timeout-minutes: 45
+      run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
+    - name: Upload coverage to codecov
+      if: github.repository == 'microsoft/mlos'
+      uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
+        flags: unittests
+        fail_ci_if_error: true
+    - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
+      shell: bash
+      run: |
+        docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
+        docker rm mlos-build-python-${{ matrix.UbuntuVersion }}
