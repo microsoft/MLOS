@@ -605,6 +605,7 @@ jobs:
     name: Publish Ubuntu ${{ matrix.UbuntuVersion }} image
     # Only do this if this was a successful merge to the main branch.
     # And make sure that all of the other tests have passed first.
+    # Note: this is templated now.  See: gen-workflows.sh
     needs: [prep-vars, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]
     runs-on: ubuntu-latest
     timeout-minutes: 20
