@@ -1,4 +1,10 @@
 #!/bin/bash
+# gen-workflows.sh
+# 2021-06-08
+# bpkroth
+#
+# A simple script to template out separate github action workflow configs for
+# each version of ubuntu we support so that they can be retried independently.
 
 set -eux
 
@@ -7,6 +13,7 @@ cd "$scriptdir"
 
 # Prepare the common rules for each version using the template.
 for UbuntuVersion in {16,18,20}.04; do
+    # Only one of the Ubuntu versions runs some of the extra checks (see below).
     if [ "$UbuntuVersion" == '20.04' ]; then
         DockerPublishJobNeeds='[prep-vars, docker-image-fresh-build, docker-image-cached-build, linux-build-test, linux-python-checks, build-publish-website]'
     else
@@ -19,7 +26,7 @@ for UbuntuVersion in {16,18,20}.04; do
         -e "s/%DockerPublishJobNeeds%/$DockerPublishJobNeeds/g" \
         ./ubuntu-$UbuntuVersion.yml
 done
-# Append the extra rules to that file.
+# Insert the extra rules to just one of the Ubuntu version workflow files.
 grep -q '^[ ]*#%EXTRA_RULES%#$' ./ubuntu-20.04.yml
 sed -i -e '/^[ ]*#%EXTRA_RULES%#$/{
     s/^[ ]*#%EXTRA_RULES%#$//
@@ -31,3 +38,4 @@ if grep -q '^[ ]*#%EXTRA_RULES%#$' ./ubuntu-20.04.yml; then
 fi
 
 echo "OK"
+exit 0

@@ -86,7 +86,8 @@ jobs:
       # For PRs, we only check a subset of the UbuntuVersions.
       # For everything else (nightly, Merge, etc.) we run all of them.
       # Adapted to support templating of this file so we can run each version in a separate workflow
-      # for easier retries rather than with matrix rules (no longer using fromJson and arrays).
+      # for easier retries rather than with matrix rules that require retrying the entire set
+      # (though we retain the matrix rules for convenience for now).
       run: |
         if [ "$GITHUB_REF" == 'refs/heads/main' ] || [ "$GITHUB_EVENT_NAME" == 'schedule' ]; then
           echo '::set-output name=UbuntuVersionMatrix::["%UBUNTU_VERSION%"]'
@@ -313,6 +314,7 @@ jobs:
         docker stop mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
         docker rm mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
 
+  # Extra rules that only need to be run on a single Ubuntu version are injected here by gen-workflows.sh:
   #%EXTRA_RULES%#
 
   docker-image-publish:
