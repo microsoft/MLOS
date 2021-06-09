@@ -8,6 +8,7 @@ from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceDecoder, Op
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer
 from mlos.Grpc import OptimizerService_pb2
+from mlos.Grpc import OptimizerShared_pb2
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension, SimpleHypergrid
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
@@ -128,38 +129,64 @@ class TestOptimizerServiceEncoderDecoder:
         objective_space = SimpleHypergrid(
             name="z",
             dimensions=[
-                ContinuousDimension(name="z",min=0,max=1)
+                ContinuousDimension(name="z",min=0,max=1),
+                ContinuousDimension(name="z1",min=-1,max=1)
+            ]
+        )
+        context_space = SimpleHypergrid(
+            name="context_space",
+            dimensions=[
+                ContinuousDimension(name="x_c",min=0,max=1),
+                CategoricalDimension(name="y_c",values=[1,2,3,4,6])
             ]
         )
         optimization_problem = OptimizationProblem(
             parameter_space=parameter_space,
             objective_space=objective_space,
             objectives=[
-                Objective(name="z",minimize=True)   
-            ]
+                Objective(name="z",minimize=True),   
+                Objective(name="z1",minimize=False)   
+            ],
+            context_space=context_space
         )
         encoded_problem = OptimizerServiceEncoder.encode_optimization_problem(optimization_problem)
         decoded_problem = OptimizerServiceDecoder.decode_optimization_problem(encoded_problem)
         
         # A = B iff A >= B && B <= A
         # Could be condensed to single loop but easier to read this way. 
+        # Parameter Space
         for _ in range(1000):
             assert decoded_problem.parameter_space.random() in parameter_space
-        
-        for _ in range(1000):
             assert parameter_space.random() in decoded_problem.parameter_space
-
+        
+        # Output Space
         for _ in range(1000):
             assert decoded_problem.objective_space.random() in objective_space
-        
-        for _ in range(1000):
             assert objective_space.random() in decoded_problem.objective_space
         
+        # Context Space
+        for _ in range(1000):
+            assert decoded_problem.context_space.random() in context_space
+            assert context_space.random() in decoded_problem.context_space
+        
         print(decoded_problem.objectives)
-        assert len(decoded_problem.objectives) == 1
+        assert len(decoded_problem.objectives) == 2
         assert decoded_problem.objectives[0].name=="z"
+        assert decoded_problem.objectives[1].name=="z1"
         assert decoded_problem.objectives[0].minimize
+        assert decoded_problem.objectives[1].minimize == False
+    
+    def test_optimization_problem_none_context(self):
+        optimization_problem = OptimizationProblem(
+            parameter_space=SimpleHypergrid(name="p_s", dimensions=[]),
+            objective_space=SimpleHypergrid(name="o_s", dimensions=[]),
+            objectives=[]
+        )
 
+        encoded_problem=OptimizerServiceEncoder.encode_optimization_problem(optimization_problem)
+        decoded_problem=OptimizerServiceDecoder.decode_optimization_problem(encoded_problem)
 
+        print(f"Context space is: {decoded_problem.context_space}")
+        assert decoded_problem.context_space == None
 
 

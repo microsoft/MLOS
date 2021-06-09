@@ -1,4 +1,5 @@
 syntax = "proto3";
+
 // A request to add an observation to the optimizer's data set.
 //
 message RegisterObservationRequest
@@ -21,9 +22,12 @@ message RegisterObservationsRequest
 message OptimizationProblem
 {
     SimpleHypergrid ParameterSpace = 1;
-    SimpleHypergrid ContextSpace = 2;
-    SimpleHypergrid ObjectiveSpace = 3;
-    repeated Objective Objectives = 4;
+    oneof ContextOptions {
+        SimpleHypergrid ContextSpace = 2;
+        Empty EmptyContext = 3;
+    }
+    SimpleHypergrid ObjectiveSpace = 4;
+    repeated Objective Objectives = 5;
 };
 
 

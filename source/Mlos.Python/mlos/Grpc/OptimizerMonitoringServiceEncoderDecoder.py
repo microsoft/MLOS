@@ -9,7 +9,6 @@ from mlos.Grpc import OptimizerShared_pb2
 from mlos.Grpc import OptimizerMonitoringService_pb2
 
 from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
-#from mlos.Spaces.HypergridsJsonEncoderDecoder import HypergridJsonDecoder, HypergridJsonEncoder
 from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceEncoder, OptimizerServiceDecoder
 
 class OptimizerMonitoringServiceEncoder:
