@@ -313,6 +313,13 @@ jobs:
         docker stop mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
         docker rm mlos-${{ matrix.Configuration }}-build-ubuntu-${{ matrix.UbuntuVersion }}
 
+
+# vim: set ft=yaml:
+#
+# NOTE: These rules are appended to the ubuntu-20.04.yml workflow by gen-workflows.sh
+# so that they only get applied once without a bunch of extra if clauses to maintain.
+# See Also: ubuntu.yml.tmpl for more details on how the docker usage works.
+
   # Check in-repo markdown links
   markdown-link-check:
     runs-on: ubuntu-latest
@@ -325,13 +332,8 @@ jobs:
         # steps.
         UbuntuVersion: ['20.04']
     steps:
-    - name: Check event type
-      if: matrix.UbuntuVersion != '20.04'
-      run: echo "Skipping execution for UbuntuVersion != 20.04"
     - uses: actions/checkout@v2
-      if: matrix.UbuntuVersion == '20.04'
     - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
-      if: matrix.UbuntuVersion == '20.04'
       with:
         use-quiet-mode: yes
         use-verbose-mode: no
@@ -350,19 +352,13 @@ jobs:
         # steps.
         UbuntuVersion: ['20.04']
     steps:
-    - name: Check event type
-      if: matrix.UbuntuVersion != '20.04'
-      run: echo "Skipping execution for UbuntuVersion != 20.04"
     - name: Checkout
-      if: matrix.UbuntuVersion == '20.04'
       uses: actions/checkout@v2
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
-      if: matrix.UbuntuVersion == '20.04'
       uses: docker/setup-buildx-action@v1
     - name: Cache Docker layers
-      if: matrix.UbuntuVersion == '20.04'
       id: load-docker-cache
       uses: actions/cache@v2
       with:
@@ -372,13 +368,12 @@ jobs:
         #restore-keys: (no fallback)
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
-      if: steps.load-docker-cache.outputs.cache-hit != 'true' && matrix.UbuntuVersion == '20.04'
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
         echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
         exit 1
     - name: Import cached image
-      if: matrix.UbuntuVersion == '20.04'
       uses: docker/build-push-action@v2
       with:
         build-args: UbuntuVersion=${{ matrix.UbuntuVersion }}
@@ -392,35 +387,29 @@ jobs:
         load: true
     # Now start an instance of that container image.
     - name: Start docker instance
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         docker run -it -d -v $PWD:/src/MLOS -u $UID \
           --name mlos-build-python \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         docker exec -u root mlos-build-python \
           /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
     - name: Generate Python API docs using sphinx
-      if: matrix.UbuntuVersion == '20.04'
       run: docker exec mlos-build-python make -C website sphinx-site
     - name: Generate main site from markdown using hugo
-      if: matrix.UbuntuVersion == '20.04'
       run: docker exec mlos-build-python make -C website hugo-site
     - name: Test the links in the output site
-      if: matrix.UbuntuVersion == '20.04'
       run: docker exec mlos-build-python make -C website link-check
     - name: Deploy to GitHub pages
-      if: github.ref == 'refs/heads/main' && matrix.UbuntuVersion == '20.04'
+      if: github.ref == 'refs/heads/main'
       uses: JamesIves/github-pages-deploy-action@3.6.2
       with:
         BRANCH: gh-pages
         FOLDER: website/public
     - name: Cleanup docker instance
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         docker stop mlos-build-python
@@ -443,23 +432,16 @@ jobs:
     runs-on: ubuntu-${{ matrix.UbuntuVersion }}
     timeout-minutes: 3
     steps:
-    - name: Check event type
-      if: matrix.UbuntuVersion != '20.04'
-      run: echo "Skipping execution for UbuntuVersion != 20.04"
     - uses: actions/checkout@v2
-      if: matrix.UbuntuVersion == '20.04'
     - name: Set up Python
-      if: matrix.UbuntuVersion == '20.04'
       uses: actions/setup-python@v2
       with:
         python-version: '3.x'
     - name: Install dependencies
-      if: matrix.UbuntuVersion == '20.04'
       run: |
         python -m pip install --upgrade pip
         pip install 'licenseheaders!=0.8.6'
     - name: Run licenseheaders tool and check to see if it caused any changes
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         scripts/update-python-license-headers.sh
@@ -482,19 +464,13 @@ jobs:
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
     steps:
-    - name: Check event type
-      if: matrix.UbuntuVersion != '20.04'
-      run: echo "Skipping execution for UbuntuVersion != 20.04"
     - name: Checkout
-      if: matrix.UbuntuVersion == '20.04'
       uses: actions/checkout@v2
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
-      if: matrix.UbuntuVersion == '20.04'
       uses: docker/setup-buildx-action@v1
     - name: Cache Docker layers
-      if: matrix.UbuntuVersion == '20.04'
       id: load-docker-cache
       uses: actions/cache@v2
       with:
@@ -504,13 +480,12 @@ jobs:
         #restore-keys: (no fallback)
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
-      if: steps.load-docker-cache.outputs.cache-hit != 'true' && matrix.UbuntuVersion == '20.04'
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
         echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
         exit 1
     - name: Import cached image
-      if: matrix.UbuntuVersion == '20.04'
       timeout-minutes: 10
       uses: docker/build-push-action@v2
       with:
@@ -525,7 +500,6 @@ jobs:
         load: true
     # Now, start the image as a new container instance.
     - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      if: matrix.UbuntuVersion == '20.04'
       # These images are expected to have installed all the pip dependencies already.
       shell: bash
       run: |
@@ -533,17 +507,14 @@ jobs:
           --name mlos-build-python-${{ matrix.UbuntuVersion }} \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
           /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
     - name: Run pylint checks (Ubuntu ${{ matrix.UbuntuVersion }})
-      if: matrix.UbuntuVersion == '20.04'
       timeout-minutes: 2
       run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-checks
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
@@ -564,19 +535,13 @@ jobs:
         # Right now, we install Python 3.7 in the container and default to
         # using it if available, else fallback to the system python3.
     steps:
-    - name: Check event type
-      if: matrix.UbuntuVersion != '20.04'
-      run: echo "Skipping execution for UbuntuVersion != 20.04"
     - name: Checkout
-      if: matrix.UbuntuVersion == '20.04'
       uses: actions/checkout@v2
     # "Fetch" the docker image precached by the "docker-image-cached-build" job that
     # we depend on by re-executing (roughly) its same steps.
     - name: Set up Docker Buildx
-      if: matrix.UbuntuVersion == '20.04'
       uses: docker/setup-buildx-action@v1
     - name: Cache Docker layers
-      if: matrix.UbuntuVersion == '20.04'
       id: load-docker-cache
       uses: actions/cache@v2
       with:
@@ -586,13 +551,12 @@ jobs:
         #restore-keys: (no fallback)
     # To prevent race issues, abort if that fails.
     - name: Check for docker cache hit
-      if: steps.load-docker-cache.outputs.cache-hit != 'true' && matrix.UbuntuVersion == '20.04'
+      if: steps.load-docker-cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
         echo "Failed to load docker image cache from previous job.  Perhaps another workflow forced it out.  Please try again."
         exit 1
     - name: Import cached image
-      if: matrix.UbuntuVersion == '20.04'
       timeout-minutes: 10
       uses: docker/build-push-action@v2
       with:
@@ -607,7 +571,6 @@ jobs:
         load: true
     # Now, start the image as a new container instance.
     - name: Start docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      if: matrix.UbuntuVersion == '20.04'
       # These images are expected to have installed all the pip dependencies already.
       shell: bash
       run: |
@@ -615,17 +578,15 @@ jobs:
           --name mlos-build-python-${{ matrix.UbuntuVersion }} \
           mlos-build-python-${{ matrix.UbuntuVersion }}:${{ github.sha }}
     - name: Setup local user in docker Container
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         docker exec -u root mlos-build-python-${{ matrix.UbuntuVersion }} \
           /src/MLOS/scripts/setup-container-user.sh github-action-runner $(id -u) $(id -g)
     - name: Run Python unit tests (Ubuntu ${{ matrix.UbuntuVersion }})
-      if: matrix.UbuntuVersion == '20.04'
       timeout-minutes: 45
       run: docker exec mlos-build-python-${{ matrix.UbuntuVersion }} make python-test
     - name: Upload coverage to codecov
-      if: github.repository == 'microsoft/mlos' && matrix.UbuntuVersion == '20.04'
+      if: github.repository == 'microsoft/mlos'
       uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
@@ -633,11 +594,12 @@ jobs:
         flags: unittests
         fail_ci_if_error: true
     - name: Cleanup docker instance for Ubuntu ${{ matrix.UbuntuVersion }}
-      if: matrix.UbuntuVersion == '20.04'
       shell: bash
       run: |
         docker stop mlos-build-python-${{ matrix.UbuntuVersion }}
         docker rm mlos-build-python-${{ matrix.UbuntuVersion }}
+
+
 
   docker-image-publish:
     name: Publish Ubuntu ${{ matrix.UbuntuVersion }} image

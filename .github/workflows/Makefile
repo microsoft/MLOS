@@ -1,0 +1,2 @@
+all:
+	./gen-workflows.sh
