@@ -4,6 +4,18 @@
 # so that they only get applied once without a bunch of extra if clauses to maintain.
 # See Also: ubuntu.yml.tmpl for more details on how the docker usage works.
 
+  gen-workflows-check:
+    runs-on: ubuntu-latest
+    needs: [prep-vars]
+    if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run the gen-workflows.sh script and check for changes that are not checked in
+      shell: bash
+      run: |
+        ./.github/workflows/gen-workflows.sh
+        git --no-pager diff --exit-code
+
   # Check in-repo markdown links
   markdown-link-check:
     runs-on: ubuntu-latest
