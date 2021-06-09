@@ -1,0 +1,81 @@
+# MLOS continuous integration pipelines:
+#
+# - Build/Test on Windows
+# - Linux tests moved to ubuntu.yml.tmpl
+
+name: CI-Windows
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the main branch
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Manual CI-Windows Run'
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "1 0 * * *"
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Run the debug/retail msbuild jobs separately so they can be executed in parallel.
+
+  windows-msbuild:
+    name: Run ${{ matrix.configuration }} msbuild on Windows
+    runs-on: windows-2019
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    # Runs multiple commands using the runners shell
+    - name: Msbuild/test ${{ matrix.configuration }}
+      timeout-minutes: 15
+      shell: cmd
+      run: |
+        set Configuration=${{ matrix.configuration }}
+        scripts\build.windows.cmd
+    - name: Pack/test ${{ matrix.configuration }}
+      timeout-minutes: 15
+      shell: cmd
+      run: |
+        set Configuration=${{ matrix.configuration }}
+        scripts\package.windows.cmd
+
+  # FIXME: These timeouts are egregiously long right now.
+  # See Also: https://github.com/microsoft/MLOS/pull/66#issuecomment-690760863
+  windows-python-checks:
+    name: Run Python checks on Windows
+    runs-on: windows-2019
+    timeout-minutes: 45
+    strategy:
+      matrix:
+        # FIXME: MLOS currently fails pylint checks for 3.8
+        # See Also: https://github.com/microsoft/MLOS/issues/54
+        python-version: [3.7] #, 3.8]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install pip dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pylint pytest pytest-xdist
+        pip install -r source/Mlos.Python/requirements.txt
+    - name: Run pylint checks (Windows)
+      timeout-minutes: 2
+      run: scripts\run-python-checks.cmd
+    - name: Run Python unit tests (Windows)
+      timeout-minutes: 45
+      run: scripts\run-python-tests.cmd
