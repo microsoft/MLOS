@@ -40,5 +40,22 @@ namespace Mlos.Model.Services
         {
             Objectives = new List<OptimizationObjective>();
         }
+
+        public OptimizationProblem(Hypergrid parameterSpace, Hypergrid objectiveSpace, OptimizationObjective[] objectives)
+        {
+            ParameterSpace = parameterSpace;
+            ObjectiveSpace = objectiveSpace;
+            Objectives = new List<OptimizationObjective>(objectives);
+        }
+
+        public OptimizationProblem(Hypergrid parameterSpace, Hypergrid contextSpace, Hypergrid objectiveSpace, OptimizationObjective[] objectives)
+        {
+            ParameterSpace = parameterSpace;
+            ContextSpace = contextSpace;
+            ObjectiveSpace = objectiveSpace;
+            Objectives = new List<OptimizationObjective>(objectives);
+        }
+
+
     }
 }

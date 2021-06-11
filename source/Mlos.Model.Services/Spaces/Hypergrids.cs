@@ -23,6 +23,16 @@ namespace Mlos.Model.Services.Spaces
         public abstract string ToJson();
     }
 
+    /// <summary>
+    /// Structure describing subgrid joins.
+    /// </summary>
+    public struct SubgridJoin
+    {
+        public IDimension OnExternalJoin { get; set; }
+
+        public Hypergrid Subgrid;
+    }
+
     public class Hypergrid : IHypergrid
     {
         private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions
@@ -51,15 +61,6 @@ namespace Mlos.Model.Services.Spaces
             return hypergrid;
         }
 
-        /// <summary>
-        /// Internal structure describing subgrid joins.
-        /// </summary>
-        internal struct SubgridJoin
-        {
-            internal IDimension OnExternalJoin { get; set; }
-
-            internal Hypergrid Subgrid;
-        }
 
         // This is for the benefit of the JsonSerializer.
         public enum HypergridType
@@ -78,7 +79,7 @@ namespace Mlos.Model.Services.Spaces
 
         public Hypergrid RootGrid { get; private set; }
 
-        internal Dictionary<string, HashSet<SubgridJoin>> Subgrids { get; }
+        public Dictionary<string, HashSet<SubgridJoin>> Subgrids { get; }
 
         public Hypergrid(string name, IDimension dimension)
         {

@@ -27,5 +27,11 @@ namespace Mlos.Model.Services
         /// </summary>
         [JsonPropertyName("minimize")]
         public bool Minimize { get; set; }
+
+        public OptimizationObjective(string name, bool minimize)
+        {
+            Name = name;
+            Minimize = minimize;
+        }
     }
 }

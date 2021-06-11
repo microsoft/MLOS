@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package mlos.optimizer_monitoring_service;
 
-import public "mlos/Grpc/OptimizerShared.proto";
+import public "OptimizerShared.proto";
 
 // Exposes Bayesian Optimizer's functionality over gRPC.
 //
