@@ -432,3 +432,6 @@ website/python_api
 # python code coverage
 coverage
 .coverage.*
+
+# Rust compilation
+**/*.rs.bk
