@@ -1,3 +1,11 @@
+// -----------------------------------------------------------------------
+// <copyright file="OptimizationProblemExtension.cs" company="Microsoft Corporation">
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root
+// for license information.
+// </copyright>
+// -----------------------------------------------------------------------
+
 using Mlos.Model.Services.Spaces;
 
 namespace Mlos.Model.Services.Client
@@ -80,7 +88,7 @@ namespace Mlos.Model.Services.Client
                 case DimensionTypeName.OrdinalDimension:
                     return OptimizerService.DimensionType.Ordinal;
                 default:
-                    // TODO C# error handling
+                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Encoder.DimensionToGrpcType(..). Type: " + typeName);
                     return OptimizerService.DimensionType.Continuous;
             }
         }
@@ -131,7 +139,7 @@ namespace Mlos.Model.Services.Client
             }
             else
             {
-                // TODO C# error handling
+                System.Console.Error.WriteLine("Invalid dimension type provided to OptimizerServiceEncoderDecoder.Encoder.EncodeDimension(..). Type: " + dimension.GetType());
                 return new OptimizerService.Dimension
                 {
                     EmptyDimension = new OptimizerService.EmptyDimension(),
@@ -233,7 +241,7 @@ namespace Mlos.Model.Services.Client
             }
             else
             {
-                // TODO C# error handling;
+                System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Encoder.EncodePrimitiveValue(..). Type: " + value.GetType());
                 data.IntValue = 0;
             }
 
@@ -256,7 +264,8 @@ namespace Mlos.Model.Services.Client
                 case OptimizerService.DimensionType.Discrete:
                     return DimensionTypeName.DiscreteDimension;
                 default:
-                    // TODO C# error handling
+                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.GrpcTypeToDimension(..). Type: " + typeName);
+
                     return DimensionTypeName.ContinuousDimension;
             }
         }
@@ -327,7 +336,8 @@ namespace Mlos.Model.Services.Client
                 case OptimizerService.Dimension.DimensionOneofCase.EmptyDimension:
                     return DecodeEmptyDimension(dimension.EmptyDimension);
                 default:
-                    // TODO: C# error handling
+                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.DecodeDimension(..). Type: " + dimension.GetType());
+
                     return null;
             }
         }
@@ -401,6 +411,7 @@ namespace Mlos.Model.Services.Client
                 case OptimizerService.PrimitiveValue.ValueOneofCase.StringValue:
                     return (string)value.StringValue;
                 default:
+                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.DecodePrimitiveValue(..). Type: " + value.GetType());
                     return null;
             }
         }
