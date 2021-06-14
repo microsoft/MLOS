@@ -1,11 +1,3 @@
-// -----------------------------------------------------------------------
-// <copyright file="OptimizerServiceEncoderDecoder.cs" company="Microsoft Corporation">
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License. See LICENSE in the project root
-// for license information.
-// </copyright>
-// -----------------------------------------------------------------------
-
 using Mlos.Model.Services.Spaces;
 
 namespace Mlos.Model.Services.Client
@@ -401,13 +393,13 @@ namespace Mlos.Model.Services.Client
             switch (value.ValueCase)
             {
                 case OptimizerService.PrimitiveValue.ValueOneofCase.IntValue:
-                    return value.IntValue;
+                    return (int)value.IntValue;
                 case OptimizerService.PrimitiveValue.ValueOneofCase.DoubleValue:
-                    return value.DoubleValue;
+                    return (double)value.DoubleValue;
                 case OptimizerService.PrimitiveValue.ValueOneofCase.BoolValue:
-                    return value.BoolValue;
+                    return (bool)value.BoolValue;
                 case OptimizerService.PrimitiveValue.ValueOneofCase.StringValue:
-                    return value.StringValue;
+                    return (string)value.StringValue;
                 default:
                     return null;
             }

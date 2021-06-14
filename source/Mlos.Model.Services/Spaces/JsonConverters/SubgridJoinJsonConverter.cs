@@ -12,10 +12,10 @@ using System.Text.Json.Serialization;
 
 namespace Mlos.Model.Services.Spaces.JsonConverters
 {
-    internal class SubgridJoinJsonConverter : JsonConverterWithExpectations<Hypergrid.SubgridJoin>
+    internal class SubgridJoinJsonConverter : JsonConverterWithExpectations<SubgridJoin>
     {
         /// <inheritdoc/>
-        public override Hypergrid.SubgridJoin Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        public override SubgridJoin Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
             Expect(ref reader, JsonTokenType.StartObject);
 
@@ -39,7 +39,7 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
 
             Expect(ref reader, JsonTokenType.EndObject);
 
-            return new Hypergrid.SubgridJoin
+            return new SubgridJoin
             {
                 OnExternalJoin = dimension,
                 Subgrid = hypergrid,
@@ -47,7 +47,7 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
         }
 
         /// <inheritdoc/>
-        public override void Write(Utf8JsonWriter writer, Hypergrid.SubgridJoin value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, SubgridJoin value, JsonSerializerOptions options)
         {
             writer.WriteStartObject();
 

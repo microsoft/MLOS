@@ -48,15 +48,15 @@ namespace Mlos.Model.Services.Spaces.JsonConverters
 
             // Optionally deserialize the subgrids.
             //
-            Dictionary<string, HashSet<Hypergrid.SubgridJoin>> subgrids = null;
+            Dictionary<string, HashSet<SubgridJoin>> subgrids = null;
 
             if (PeekNextTokenType(reader) == JsonTokenType.PropertyName)
             {
                 Expect(ref reader, expectedTokenType: JsonTokenType.PropertyName, expectedTokenValue: "GuestSubgrids");
 
-                var converter = new JsonDictionaryConverter<string, HashSet<Hypergrid.SubgridJoin>>();
+                var converter = new JsonDictionaryConverter<string, HashSet<SubgridJoin>>();
 
-                subgrids = converter.Read(ref reader, typeof(Dictionary<string, HashSet<Hypergrid.SubgridJoin>>), options);
+                subgrids = converter.Read(ref reader, typeof(Dictionary<string, HashSet<SubgridJoin>>), options);
             }
 
             Expect(ref reader, expectedTokenType: JsonTokenType.EndObject);

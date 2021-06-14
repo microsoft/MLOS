@@ -20,7 +20,7 @@ namespace Mlos.Model.Services.Spaces
     /// </summary>
     public abstract class IHypergrid
     {
-        public abstract string ToJson();
+        // public abstract string ToJson();
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ namespace Mlos.Model.Services.Spaces
                 new JsonDictionaryConverter<string, HashSet<SubgridJoin>>(),
             },
         };
-
+/*
         /// <summary>
         /// Create Hypergrid from json string.
         /// </summary>
@@ -60,7 +60,7 @@ namespace Mlos.Model.Services.Spaces
 
             return hypergrid;
         }
-
+*/
 
         // This is for the benefit of the JsonSerializer.
         public enum HypergridType
@@ -130,10 +130,11 @@ namespace Mlos.Model.Services.Spaces
             return this;
         }
 
-        /// <inheritdoc/>
+        /*
+         * /// <inheritdoc/>
         public override string ToJson()
         {
             return JsonSerializer.Serialize(this, JsonSerializerOptions);
-        }
+        }*/
     }
 }
