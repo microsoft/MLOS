@@ -1,7 +1,7 @@
-#
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+
 #
 # Note:
 # As of 2021-06-15, the OptimizerService and OptimizerMonitoringService have identical encoders and decoders. As such, I have
