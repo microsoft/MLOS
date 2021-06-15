@@ -318,7 +318,8 @@ message SimpleHypergrid
 // We use the join mechanism to represent hierarchical parameter spaces, where a subspace is only meaningful, if its switch/flag
 
 // parameter has been turned on in the parent SimpleHypergrid. For example: a switch parameter could decide which of the data structures
-// to use, and thus activate all of the parameters for that datastructure.
+// to use, and thus activate all of the parameters for that data structure.
+
 //
 message GuestSubgrid
 {
