@@ -16,7 +16,6 @@ namespace Mlos.Model.Services.Client
         {
             OptimizerService.SimpleHypergrid instance = new OptimizerService.SimpleHypergrid();
 
-            // TODO: I have no idea if this is the right way to handle subgrids.
             foreach (var subgridSet in hypergrid.Subgrids.Values)
             {
                 foreach (var subgrid in subgridSet)
@@ -88,8 +87,7 @@ namespace Mlos.Model.Services.Client
                 case DimensionTypeName.OrdinalDimension:
                     return OptimizerService.DimensionType.Ordinal;
                 default:
-                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Encoder.DimensionToGrpcType(..). Type: " + typeName);
-                    return OptimizerService.DimensionType.Continuous;
+                    throw new System.ArgumentException("Invalid type provided to OptimizerServiceEncoderDecoder.Encoder.DimensionToGrpcType(..). Type: " + typeName);
             }
         }
 
@@ -139,11 +137,7 @@ namespace Mlos.Model.Services.Client
             }
             else
             {
-                System.Console.Error.WriteLine("Invalid dimension type provided to OptimizerServiceEncoderDecoder.Encoder.EncodeDimension(..). Type: " + dimension.GetType());
-                return new OptimizerService.Dimension
-                {
-                    EmptyDimension = new OptimizerService.EmptyDimension(),
-                };
+                throw new System.ArgumentException("Invalid dimension type provided to OptimizerServiceEncoderDecoder.Encoder.EncodeDimension(..). Type: " + dimension.GetType());
             }
         }
 
@@ -241,8 +235,7 @@ namespace Mlos.Model.Services.Client
             }
             else
             {
-                System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Encoder.EncodePrimitiveValue(..). Type: " + value.GetType());
-                data.IntValue = 0;
+                throw new System.ArgumentException("Invalid type provided to OptimizerServiceEncoderDecoder.Encoder.EncodePrimitiveValue(..). Type: " + value.GetType());
             }
 
             return data;
@@ -264,9 +257,7 @@ namespace Mlos.Model.Services.Client
                 case OptimizerService.DimensionType.Discrete:
                     return DimensionTypeName.DiscreteDimension;
                 default:
-                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.GrpcTypeToDimension(..). Type: " + typeName);
-
-                    return DimensionTypeName.ContinuousDimension;
+                    throw new System.ArgumentException("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.GrpcTypeToDimension(..). Type: " + typeName);
             }
         }
 
@@ -336,9 +327,7 @@ namespace Mlos.Model.Services.Client
                 case OptimizerService.Dimension.DimensionOneofCase.EmptyDimension:
                     return DecodeEmptyDimension(dimension.EmptyDimension);
                 default:
-                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.DecodeDimension(..). Type: " + dimension.GetType());
-
-                    return null;
+                    throw new System.ArgumentException("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.DecodeDimension(..). Type: " + dimension.GetType());
             }
         }
 
@@ -411,8 +400,7 @@ namespace Mlos.Model.Services.Client
                 case OptimizerService.PrimitiveValue.ValueOneofCase.StringValue:
                     return (string)value.StringValue;
                 default:
-                    System.Console.Error.WriteLine("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.DecodePrimitiveValue(..). Type: " + value.GetType());
-                    return null;
+                    throw new System.ArgumentException("Invalid type provided to OptimizerServiceEncoderDecoder.Decoder.DecodePrimitiveValue(..). Type: " + value.GetType());
             }
         }
     }
