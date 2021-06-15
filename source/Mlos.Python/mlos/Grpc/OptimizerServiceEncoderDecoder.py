@@ -1,8 +1,7 @@
-
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-import json
+
 from typing import Union
 
 from mlos.Grpc import OptimizerService_pb2
@@ -10,7 +9,6 @@ from mlos.Grpc import OptimizerService_pb2
 from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
 from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, Dimension, DiscreteDimension, \
     EmptyDimension, OrdinalDimension, SimpleHypergrid
-#from mlos.Spaces.SimpleHypergridsJsonEncoderDecoder import SimpleHypergridJsonDecoder, SimpleHypergridJsonEncoder
 
 
 class OptimizerServiceEncoder:
@@ -47,15 +45,12 @@ class OptimizerServiceEncoder:
                 Objectives=[OptimizerService_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in optimization_problem.objectives],
                 ContextSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.context_space)
             )
-        
-        else:
-            return OptimizerService_pb2.OptimizationProblem(
-                ParameterSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.parameter_space),
-                ObjectiveSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.objective_space),
-                Objectives=[OptimizerService_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in optimization_problem.objectives],
-                EmptyContext=OptimizerService_pb2.Empty() 
-            )
-
+        return OptimizerService_pb2.OptimizationProblem(
+            ParameterSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.parameter_space),
+            ObjectiveSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.objective_space),
+            Objectives=[OptimizerService_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in optimization_problem.objectives],
+            EmptyContext=OptimizerService_pb2.Empty() 
+        )
 
     @staticmethod
     def encode_continuous_dimension(dimension: ContinuousDimension) -> OptimizerService_pb2.ContinuousDimension:
@@ -76,7 +71,10 @@ class OptimizerServiceEncoder:
     @staticmethod
     def encode_empty_dimension(dimension: EmptyDimension) -> OptimizerService_pb2.EmptyDimension:
         assert isinstance(dimension, EmptyDimension)
-        return OptimizerService_pb2.EmptyDimension(Name=dimension.name, DimensionType=OptimizerServiceEncoder.dimension_types_to_pb2_types[dimension.type])
+        return OptimizerService_pb2.EmptyDimension(
+                Name=dimension.name,
+                DimensionType=OptimizerServiceEncoder.dimension_types_to_pb2_types[dimension.type]
+        )
 
     @staticmethod
     def encode_categorical_dimension(dimension: CategoricalDimension) -> OptimizerService_pb2.CategoricalDimension:
@@ -191,7 +189,7 @@ class OptimizerServiceDecoder:
 
     @staticmethod
     def decode_optimization_problem(optimization_problem_pb2: OptimizerService_pb2.OptimizationProblem) -> OptimizationProblem:
-        if optimization_problem_pb2.WhichOneof('ContextOptions')=="EmptyContext":
+        if optimization_problem_pb2.WhichOneof('ContextOptions') == "EmptyContext":
             return OptimizationProblem(
                 parameter_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ParameterSpace),
                 objective_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ObjectiveSpace),
@@ -201,16 +199,14 @@ class OptimizerServiceDecoder:
                 ],
                 context_space=None
             )
-
-        else:
-            return OptimizationProblem(
-                parameter_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ParameterSpace),
-                objective_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ObjectiveSpace),
-                objectives=[
-                    Objective(name=objective_pb2.Name, minimize=objective_pb2.Minimize)
-                    for objective_pb2 in optimization_problem_pb2.Objectives
-                ],
-                context_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
+        return OptimizationProblem(
+            parameter_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ParameterSpace),
+            objective_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ObjectiveSpace),
+            objectives=[
+                Objective(name=objective_pb2.Name, minimize=objective_pb2.Minimize)
+                for objective_pb2 in optimization_problem_pb2.Objectives
+            ],
+            context_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
         )
 
     @staticmethod
