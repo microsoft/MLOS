@@ -119,7 +119,8 @@ namespace SmartCache
             // Name is HitRate, false implies we want to maximize the objective rather than minimizing.
             //
             optimizationProblem.Objectives.Add(
-                new OptimizationObjective("HitRate", false));
+                new OptimizationObjective(Name: "HitRate", Minimize: false));
+
 
             // Get a local reference to the optimizer to reuse when processing messages later on.
             //
