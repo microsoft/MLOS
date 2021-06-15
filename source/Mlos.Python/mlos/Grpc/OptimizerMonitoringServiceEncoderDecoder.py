@@ -1,10 +1,8 @@
+#
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
-#
-# Note: As of 2021-06-15 this is an identical duplicate of OptimizerService.
-# This was done in order to allow the two APIs to depart from each other at different speeds in the future.
-#
+
 from typing import Union
 
 from mlos.Grpc import OptimizerMonitoringService_pb2
@@ -12,7 +10,9 @@ from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
 from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, Dimension, DiscreteDimension, \
     EmptyDimension, OrdinalDimension, SimpleHypergrid
 
-
+# Note: As of 2021-06-15 this is an identical duplicate of OptimizerService.
+# This was done in order to allow the two APIs to depart from each other at different speeds in the future.
+#
 class OptimizerMonitoringServiceEncoder:
     """Encodes objects to the format expected by the OptimizerMonitoringService.
     """

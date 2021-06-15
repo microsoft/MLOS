@@ -1,13 +1,8 @@
+#
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
 
-#
-# Note:
-# As of 2021-06-15, the OptimizerService and OptimizerMonitoringService have identical encoders and decoders. As such, I have
-# duplicated the unit tests. The fact that they are currently identical is simply a response to the current design state and does
-# not reflect the future design of the API.
-#
 import pytest
 
 from mlos.Grpc.OptimizerMonitoringServiceEncoderDecoder import OptimizerMonitoringServiceDecoder, OptimizerMonitoringServiceEncoder
@@ -18,7 +13,11 @@ from mlos.Spaces import CategoricalDimension,\
     ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension, SimpleHypergrid
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 
-
+# Note:
+# As of 2021-06-15, the OptimizerService and OptimizerMonitoringService have identical encoders and decoders. As such, I have
+# duplicated the unit tests. The fact that they are currently identical is simply a response to the current design state and does
+# not reflect the future design of the API.
+#
 class TestOptimizerMonitoringServiceEncoderDecoder:
     """Tests encoding and decoding for dimensions.
 
