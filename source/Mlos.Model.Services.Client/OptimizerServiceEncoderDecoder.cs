@@ -10,9 +10,9 @@ using Mlos.Model.Services.Spaces;
 
 namespace Mlos.Model.Services.Client
 {
-    public class OptimizerServiceEncoder
+    public static class OptimizerServiceEncoder
     {
-        public OptimizerService.SimpleHypergrid EncodeHypergrid(Hypergrid hypergrid)
+        public static OptimizerService.SimpleHypergrid EncodeHypergrid(Hypergrid hypergrid)
         {
             OptimizerService.SimpleHypergrid instance = new OptimizerService.SimpleHypergrid();
 
@@ -35,7 +35,7 @@ namespace Mlos.Model.Services.Client
             return instance;
         }
 
-        public OptimizerService.OptimizationProblem EncodeOptimizationProblem(OptimizationProblem problem)
+        public static OptimizerService.OptimizationProblem EncodeOptimizationProblem(OptimizationProblem problem)
         {
             OptimizerService.OptimizationProblem instance = new OptimizerService.OptimizationProblem();
             instance.ParameterSpace = EncodeHypergrid(problem.ParameterSpace);
@@ -57,7 +57,7 @@ namespace Mlos.Model.Services.Client
             return instance;
         }
 
-        public OptimizerService.Objective EncodeObjective(OptimizationObjective objective)
+        public static OptimizerService.Objective EncodeObjective(OptimizationObjective objective)
         {
             return new OptimizerService.Objective
             {
@@ -66,7 +66,7 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        public OptimizerService.GuestSubgrid EncodeSubgridJoin(SubgridJoin subgridJoin)
+        public static OptimizerService.GuestSubgrid EncodeSubgridJoin(SubgridJoin subgridJoin)
         {
             return new OptimizerService.GuestSubgrid
             {
@@ -75,7 +75,7 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        private OptimizerService.DimensionType DimensionToGrpcType(DimensionTypeName typeName)
+        private static OptimizerService.DimensionType DimensionToGrpcType(DimensionTypeName typeName)
         {
             switch (typeName)
             {
@@ -93,7 +93,7 @@ namespace Mlos.Model.Services.Client
             }
         }
 
-        public OptimizerService.Dimension EncodeDimension(IDimension dimension)
+        public static OptimizerService.Dimension EncodeDimension(IDimension dimension)
         {
             if (dimension is EmptyDimension dimension1)
             {
@@ -147,7 +147,7 @@ namespace Mlos.Model.Services.Client
             }
         }
 
-        public OptimizerService.CompositeDimension EncodeCompositeDimension(CompositeDimension dimension)
+        public static OptimizerService.CompositeDimension EncodeCompositeDimension(CompositeDimension dimension)
         {
             OptimizerService.Dimension[] chunks = new OptimizerService.Dimension[dimension.Values.Count];
             var i = 0;
@@ -164,7 +164,7 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        public OptimizerService.DiscreteDimension EncodeDiscreteDimension(DiscreteDimension dimension)
+        public static OptimizerService.DiscreteDimension EncodeDiscreteDimension(DiscreteDimension dimension)
         {
             return new OptimizerService.DiscreteDimension
             {
@@ -174,7 +174,7 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        public OptimizerService.EmptyDimension EncodeEmptyDimension(EmptyDimension dimension)
+        public static OptimizerService.EmptyDimension EncodeEmptyDimension(EmptyDimension dimension)
         {
             return new OptimizerService.EmptyDimension
             {
@@ -183,7 +183,7 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        public OptimizerService.ContinuousDimension EncodeContinuousDimension(ContinuousDimension dimension)
+        public static OptimizerService.ContinuousDimension EncodeContinuousDimension(ContinuousDimension dimension)
         {
             return new OptimizerService.ContinuousDimension
             {
@@ -195,7 +195,7 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        public OptimizerService.OrdinalDimension EncodeOrdinalDimension(OrdinalDimension dimension)
+        public static OptimizerService.OrdinalDimension EncodeOrdinalDimension(OrdinalDimension dimension)
         {
             var instance = new OptimizerService.OrdinalDimension();
             instance.Name = dimension.Name;
@@ -208,7 +208,7 @@ namespace Mlos.Model.Services.Client
             return instance;
         }
 
-        public OptimizerService.CategoricalDimension EncodeCategoricalDimension(CategoricalDimension dimension)
+        public static OptimizerService.CategoricalDimension EncodeCategoricalDimension(CategoricalDimension dimension)
         {
             var instance = new OptimizerService.CategoricalDimension();
             instance.Name = dimension.Name;
@@ -220,7 +220,7 @@ namespace Mlos.Model.Services.Client
             return instance;
         }
 
-        public OptimizerService.PrimitiveValue EncodePrimitiveValue(object value)
+        public static OptimizerService.PrimitiveValue EncodePrimitiveValue(object value)
         {
             var data = new OptimizerService.PrimitiveValue();
             if (value is int)
@@ -249,9 +249,9 @@ namespace Mlos.Model.Services.Client
         }
     }
 
-    public class OptimizerServiceDecoder
+    public static class OptimizerServiceDecoder
     {
-        private DimensionTypeName GrpcTypeToDimension(OptimizerService.DimensionType typeName)
+        private static DimensionTypeName GrpcTypeToDimension(OptimizerService.DimensionType typeName)
         {
             switch (typeName)
             {
@@ -270,7 +270,7 @@ namespace Mlos.Model.Services.Client
             }
         }
 
-        public OptimizationProblem DecodeOptimizationProblem(OptimizerService.OptimizationProblem problem)
+        public static OptimizationProblem DecodeOptimizationProblem(OptimizerService.OptimizationProblem problem)
         {
             var objectives = new OptimizationObjective[problem.Objectives.Count];
             var i = 0;
@@ -292,22 +292,22 @@ namespace Mlos.Model.Services.Client
             return instance;
         }
 
-        public OptimizationObjective DecodeOptimizationObjective(OptimizerService.Objective objective)
+        public static OptimizationObjective DecodeOptimizationObjective(OptimizerService.Objective objective)
         {
             return new OptimizationObjective(objective.Name, objective.Minimize);
         }
 
-        public EmptyDimension DecodeEmptyDimension(OptimizerService.EmptyDimension dimension)
+        public static EmptyDimension DecodeEmptyDimension(OptimizerService.EmptyDimension dimension)
         {
             return new EmptyDimension(dimension.Name, GrpcTypeToDimension(dimension.DimensionType));
         }
 
-        public DiscreteDimension DecodeDiscreteDimension(OptimizerService.DiscreteDimension dimension)
+        public static DiscreteDimension DecodeDiscreteDimension(OptimizerService.DiscreteDimension dimension)
         {
             return new DiscreteDimension(dimension.Name, dimension.Min, dimension.Max);
         }
 
-        public CategoricalDimension DecodeCategoricalDimension(OptimizerService.CategoricalDimension dimension)
+        public static CategoricalDimension DecodeCategoricalDimension(OptimizerService.CategoricalDimension dimension)
         {
             var values = new object[dimension.Values.Count];
             var i = 0;
@@ -319,7 +319,7 @@ namespace Mlos.Model.Services.Client
             return new CategoricalDimension(dimension.Name, values);
         }
 
-        public IDimension DecodeDimension(OptimizerService.Dimension dimension)
+        public static IDimension DecodeDimension(OptimizerService.Dimension dimension)
         {
             switch (dimension.DimensionCase)
             {
@@ -342,7 +342,7 @@ namespace Mlos.Model.Services.Client
             }
         }
 
-        public CompositeDimension DecodeCompositeDimension(OptimizerService.CompositeDimension dimension)
+        public static CompositeDimension DecodeCompositeDimension(OptimizerService.CompositeDimension dimension)
         {
             var chunks = new IDimension[dimension.Chunks.Count];
             var i = 0;
@@ -354,7 +354,7 @@ namespace Mlos.Model.Services.Client
             return new CompositeDimension(dimension.Name, GrpcTypeToDimension(dimension.ChunkType), chunks);
         }
 
-        public Hypergrid DecodeHypergrid(OptimizerService.SimpleHypergrid hypergrid)
+        public static Hypergrid DecodeHypergrid(OptimizerService.SimpleHypergrid hypergrid)
         {
             var dimensions = new IDimension[hypergrid.Dimensions.Count];
             var i = 0;
@@ -372,7 +372,7 @@ namespace Mlos.Model.Services.Client
             return instance;
         }
 
-        public SubgridJoin DecodeSubgridJoin(OptimizerService.GuestSubgrid subgrid)
+        public static SubgridJoin DecodeSubgridJoin(OptimizerService.GuestSubgrid subgrid)
         {
             return new SubgridJoin
             {
@@ -381,12 +381,12 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        public ContinuousDimension DecodeContinuousDimension(OptimizerService.ContinuousDimension dimension)
+        public static ContinuousDimension DecodeContinuousDimension(OptimizerService.ContinuousDimension dimension)
         {
             return new ContinuousDimension(dimension.Name, dimension.Min, dimension.Max, dimension.IncludeMin, dimension.IncludeMax);
         }
 
-        public OrdinalDimension DecodeOrdinalDimension(OptimizerService.OrdinalDimension dimension)
+        public static OrdinalDimension DecodeOrdinalDimension(OptimizerService.OrdinalDimension dimension)
         {
             var values = new object[dimension.OrderedValues.Count];
             var i = 0;
@@ -398,7 +398,7 @@ namespace Mlos.Model.Services.Client
             return new OrdinalDimension(dimension.Name, dimension.Ascending, values);
         }
 
-        public object DecodePrimitiveValue(OptimizerService.PrimitiveValue value)
+        public static object DecodePrimitiveValue(OptimizerService.PrimitiveValue value)
         {
             switch (value.ValueCase)
             {

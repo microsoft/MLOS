@@ -14,6 +14,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Mlos.Model.Services.Client;
 using Mlos.Model.Services.Spaces;
 using Mlos.Model.Services.Spaces.JsonConverters;
 
@@ -24,9 +25,6 @@ namespace Mlos.Model.Services.UnitTests
 {
     public class TestOptimizerServiceEncoderDecoder
     {
-        private Client.OptimizerServiceEncoder encoder = new Client.OptimizerServiceEncoder();
-        private Client.OptimizerServiceDecoder decoder = new Client.OptimizerServiceDecoder();
-
         // This function is required because Assert.Contains uses the == equivalence relation rather than .Equals()
         private void AssertCollectionSubset(ReadOnlyCollection<object> list1, ReadOnlyCollection<object> list2)
         {
@@ -56,14 +54,14 @@ namespace Mlos.Model.Services.UnitTests
         public void TestEmptyDimension()
         {
             var emptyDimension = new EmptyDimension("Empty", DimensionTypeName.OrdinalDimension);
-            var serialized0 = encoder.EncodeEmptyDimension(emptyDimension);
-            var deserialized0 = decoder.DecodeEmptyDimension(serialized0);
+            var serialized0 = OptimizerServiceEncoder.EncodeEmptyDimension(emptyDimension);
+            var deserialized0 = OptimizerServiceDecoder.DecodeEmptyDimension(serialized0);
 
             Assert.Equal(deserialized0.Name, emptyDimension.Name);
             Assert.True(deserialized0.ObjectType.Equals(emptyDimension.ObjectType));
 
-            var serialized = encoder.EncodeDimension(emptyDimension);
-            var deserialized = decoder.DecodeDimension(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeDimension(emptyDimension);
+            var deserialized = OptimizerServiceDecoder.DecodeDimension(serialized);
 
             Assert.True(deserialized is EmptyDimension);
             if (deserialized is EmptyDimension deserializedEmpty)
@@ -78,8 +76,8 @@ namespace Mlos.Model.Services.UnitTests
         {
             object[] data = { "str", string.Empty, "cat", false, 9.12 };
             var dimension = new CategoricalDimension("Dimension test", "str", string.Empty, "cat", false, 9.12);
-            var serialized = encoder.EncodeCategoricalDimension(dimension);
-            var deserialized = decoder.DecodeCategoricalDimension(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeCategoricalDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeCategoricalDimension(serialized);
 
             Assert.Equal(deserialized.Name, dimension.Name);
             AssertCollectionEquality(new ReadOnlyCollection<object>(data), deserialized.Values);
@@ -89,8 +87,8 @@ namespace Mlos.Model.Services.UnitTests
         public void TestContinuousDimension()
         {
             var dimension = new ContinuousDimension("Test_Continuous \0", -150, 12.24, false, true);
-            var serialized = encoder.EncodeContinuousDimension(dimension);
-            var deserialized = decoder.DecodeContinuousDimension(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeContinuousDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeContinuousDimension(serialized);
             Assert.Equal(deserialized.Name, dimension.Name);
             Assert.Equal(deserialized.IncludeMax, dimension.IncludeMax);
             Assert.Equal(deserialized.IncludeMin, dimension.IncludeMin);
@@ -103,8 +101,8 @@ namespace Mlos.Model.Services.UnitTests
         public void TestDiscreteDimension()
         {
             var dimension = new DiscreteDimension("_%% \n \t \\//", long.MinValue, long.MaxValue);
-            var serialized = encoder.EncodeDiscreteDimension(dimension);
-            var deserialized = decoder.DecodeDiscreteDimension(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeDiscreteDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeDiscreteDimension(serialized);
 
             Assert.Equal(deserialized.Name, dimension.Name);
             Assert.Equal(deserialized.Min, dimension.Min);
@@ -116,8 +114,8 @@ namespace Mlos.Model.Services.UnitTests
         {
             var data = new object[] { "the", false, "brown", "fox", 8, "the", "lazy", "dog" };
             var dimension = new OrdinalDimension("ordinal test", false, data);
-            var serialized = encoder.EncodeOrdinalDimension(dimension);
-            var deserialized = decoder.DecodeOrdinalDimension(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeOrdinalDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeOrdinalDimension(serialized);
 
             Assert.Equal(dimension.Name, deserialized.Name);
             AssertCollectionEquality(deserialized.OrderedValues, new ReadOnlyCollection<object>(data));
@@ -130,8 +128,8 @@ namespace Mlos.Model.Services.UnitTests
             var dim0 = new CategoricalDimension("dim0", false, "a", "b", false, 2, 5.8, "c ");
             var dim1 = new ContinuousDimension("dim1", 0, 10.2, false, true);
             var hypergrid = new Hypergrid("hypergrid", dim0, dim1);
-            var serialized = encoder.EncodeHypergrid(hypergrid);
-            var deserialized = decoder.DecodeHypergrid(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeHypergrid(hypergrid);
+            var deserialized = OptimizerServiceDecoder.DecodeHypergrid(serialized);
             Assert.Equal(deserialized.Name, hypergrid.Name);
             Assert.True(deserialized.Dimensions[0] is CategoricalDimension);
             Assert.True(deserialized.Dimensions[1] is ContinuousDimension);
@@ -172,8 +170,8 @@ namespace Mlos.Model.Services.UnitTests
                 new OptimizationObjective("nonExistent", false),
             };
             var optimizationProblem = new OptimizationProblem(inputHypergrid, contextHypergrid, objectiveHypergrid, objectives);
-            var serialized = encoder.EncodeOptimizationProblem(optimizationProblem);
-            var deserialized = decoder.DecodeOptimizationProblem(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
+            var deserialized = OptimizerServiceDecoder.DecodeOptimizationProblem(serialized);
 
             Assert.Equal(optimizationProblem.ParameterSpace.Name, deserialized.ParameterSpace.Name);
             Assert.Equal(optimizationProblem.ObjectiveSpace.Name, deserialized.ObjectiveSpace.Name);
@@ -205,8 +203,8 @@ namespace Mlos.Model.Services.UnitTests
                 new OptimizationObjective("nonExistent", false),
             };
             var optimizationProblem = new OptimizationProblem(inputHypergrid, objectiveHypergrid, objectives);
-            var serialized = encoder.EncodeOptimizationProblem(optimizationProblem);
-            var deserialized = decoder.DecodeOptimizationProblem(serialized);
+            var serialized = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
+            var deserialized = OptimizerServiceDecoder.DecodeOptimizationProblem(serialized);
             Assert.Null(deserialized.ContextSpace);
         }
     }

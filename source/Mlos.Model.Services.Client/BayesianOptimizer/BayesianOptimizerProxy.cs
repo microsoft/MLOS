@@ -34,8 +34,7 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
         {
             OptimizerService.OptimizerInfo optimizerInfo = client.GetOptimizerInfo(optimizerHandle);
 
-            var decoder = new OptimizerServiceDecoder();
-            OptimizationProblem optimizationProblem = decoder.DecodeOptimizationProblem(optimizerInfo.OptimizationProblem);
+            OptimizationProblem optimizationProblem = OptimizerServiceDecoder.DecodeOptimizationProblem(optimizerInfo.OptimizationProblem);
 
             // Add optimization objectives.
             //

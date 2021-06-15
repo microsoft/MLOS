@@ -22,8 +22,7 @@ namespace Mlos.Model.Services.Client
         /// <returns></returns>
         internal static OptimizerService.OptimizationProblem ToOptimizerServiceOptimizationProblem(this OptimizationProblem optimizationProblem)
         {
-            var encoder = new OptimizerServiceEncoder();
-            var optimizerOptimizationProblem = encoder.EncodeOptimizationProblem(optimizationProblem);
+            var optimizerOptimizationProblem = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
 
             optimizerOptimizationProblem.Objectives.AddRange(optimizationProblem.Objectives.Select(r => r.ToOptimizerServiceObjective()));
 
