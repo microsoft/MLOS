@@ -85,7 +85,7 @@ set(MLOS_CODEGEN_OUTPUT_ROOT "${MLOS_ROOT}/out/Mlos.CodeGen.out/${CMAKE_BUILD_TY
 
 # By default only let any ctest processes last for limited number of seconds.
 # To override on a per test basis, use add_test_properties()
-set(DEFAULT_CTEST_TIMEOUT 120)
+set(DEFAULT_CTEST_TIMEOUT 300)
 
 # See Also: Mlos.NetCore.cmake, Mlos.Common.targets.cmake
 find_program(DOTNET NAMES dotnet)
