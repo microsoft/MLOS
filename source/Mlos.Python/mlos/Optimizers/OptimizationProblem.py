@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import pandas as pd
 
-from mlos.Spaces import Hypergrid, SimpleHypergrid, CategoricalDimension
+from mlos.Spaces import SimpleHypergrid, CategoricalDimension
 
 Objective = namedtuple("Objective", ["name", "minimize"])
 
