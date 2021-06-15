@@ -280,7 +280,9 @@ namespace Mlos.Model.Services.Client
                         objectives);
             if (problem.ContextOptionsCase == OptimizerService.OptimizationProblem.ContextOptionsOneofCase.ContextSpace)
             {
-                // A context space was provided
+                // A context space was provided.
+                //
+
                 instance.ContextSpace = DecodeHypergrid(problem.ContextSpace);
             }
 
