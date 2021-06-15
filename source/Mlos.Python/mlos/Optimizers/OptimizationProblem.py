@@ -86,10 +86,10 @@ class OptimizationProblem:
 
     def __init__(
             self,
-            parameter_space: Hypergrid,
-            objective_space: Hypergrid,
+            parameter_space: SimpleHypergrid,
+            objective_space: SimpleHypergrid,
             objectives: List[Objective],
-            context_space: Hypergrid = None,
+            context_space: SimpleHypergrid = None,
     ):
         self.parameter_space = parameter_space
         self.context_space = context_space

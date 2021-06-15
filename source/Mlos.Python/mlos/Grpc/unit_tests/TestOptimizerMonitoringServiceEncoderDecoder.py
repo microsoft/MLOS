@@ -3,17 +3,19 @@
 # Licensed under the MIT License.
 #
 #
-# Note: 
-# As of 2021-06-15, the OptimizerService and OptimizerMonitoringService have identical encoders and decoders. As such, I have duplicated the unit tests. The fact that they are currently identical is simply a response to the current design state and does not reflect the future design of the API. 
+# Note:
+# As of 2021-06-15, the OptimizerService and OptimizerMonitoringService have identical encoders and decoders. As such, I have
+# duplicated the unit tests. The fact that they are currently identical is simply a response to the current design state and does
+# not reflect the future design of the API.
 #
 import pytest
 
 from mlos.Grpc.OptimizerMonitoringServiceEncoderDecoder import OptimizerMonitoringServiceDecoder, OptimizerMonitoringServiceEncoder
-from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
-from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer
+
 from mlos.Grpc import OptimizerMonitoringService_pb2
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
-from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension,\
+    ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension, SimpleHypergrid
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 
 
@@ -60,7 +62,7 @@ class TestOptimizerMonitoringServiceEncoderDecoder:
         deserialized = OptimizerMonitoringServiceDecoder.decode_ordinal_dimension(serialized)
         assert deserialized == ordinal_dimension
         assert isinstance(serialized, OptimizerMonitoringService_pb2.OrdinalDimension)
-    
+
     def test_composite_dimension(self):
         original_A = ContinuousDimension(name='x', min=0, max=1)
         original_B = ContinuousDimension(name='x', min=2, max=3)
@@ -146,38 +148,38 @@ class TestOptimizerMonitoringServiceEncoderDecoder:
             parameter_space=parameter_space,
             objective_space=objective_space,
             objectives=[
-                Objective(name="z",minimize=True),   
-                Objective(name="z1",minimize=False)   
+                Objective(name="z",minimize=True),
+                Objective(name="z1",minimize=False)
             ],
             context_space=context_space
         )
         encoded_problem = OptimizerMonitoringServiceEncoder.encode_optimization_problem(optimization_problem)
         decoded_problem = OptimizerMonitoringServiceDecoder.decode_optimization_problem(encoded_problem)
-        
+
         # A = B iff A >= B && B <= A
-        # Could be condensed to single loop but easier to read this way. 
+        # Could be condensed to single loop but easier to read this way.
         # Parameter Space
         for _ in range(1000):
             assert decoded_problem.parameter_space.random() in parameter_space
             assert parameter_space.random() in decoded_problem.parameter_space
-        
+
         # Output Space
         for _ in range(1000):
             assert decoded_problem.objective_space.random() in objective_space
             assert objective_space.random() in decoded_problem.objective_space
-        
+
         # Context Space
         for _ in range(1000):
             assert decoded_problem.context_space.random() in context_space
             assert context_space.random() in decoded_problem.context_space
-        
+
         print(decoded_problem.objectives)
         assert len(decoded_problem.objectives) == 2
         assert decoded_problem.objectives[0].name=="z"
         assert decoded_problem.objectives[1].name=="z1"
         assert decoded_problem.objectives[0].minimize
         assert decoded_problem.objectives[1].minimize == False
-    
+
     def test_optimization_problem_none_context(self):
         optimization_problem = OptimizationProblem(
             parameter_space=SimpleHypergrid(name="p_s", dimensions=[]),
@@ -189,6 +191,6 @@ class TestOptimizerMonitoringServiceEncoderDecoder:
         decoded_problem=OptimizerMonitoringServiceDecoder.decode_optimization_problem(encoded_problem)
 
         print(f"Context space is: {decoded_problem.context_space}")
-        assert decoded_problem.context_space == None
+        assert decoded_problem.context_space is None
 
 

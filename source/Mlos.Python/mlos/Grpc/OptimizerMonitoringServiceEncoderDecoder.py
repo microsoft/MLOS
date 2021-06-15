@@ -2,12 +2,11 @@
 # Licensed under the MIT License.
 #
 #
-# Note: As of 2021-06-15 this is an identical duplicate of OptimizerService. 
+# Note: As of 2021-06-15 this is an identical duplicate of OptimizerService.
 # This was done in order to allow the two APIs to depart from each other at different speeds in the future.
 #
 from typing import Union
 
-from mlos.Grpc import OptimizerMonitoringService_pb2
 from mlos.Grpc import OptimizerMonitoringService_pb2
 from mlos.Optimizers.OptimizationProblem import Objective, OptimizationProblem
 from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, Dimension, DiscreteDimension, \
@@ -40,18 +39,21 @@ class OptimizerMonitoringServiceEncoder:
         )
 
     @staticmethod
-    def encode_optimization_problem(optimization_problem: OptimizationProblem) -> OptimizerMonitoringService_pb2.OptimizationProblem:
+    def encode_optimization_problem(optimization_problem: OptimizationProblem)\
+            -> OptimizerMonitoringService_pb2.OptimizationProblem:
         if optimization_problem.context_space is not None:
             return OptimizerMonitoringService_pb2.OptimizationProblem(
                 ParameterSpace=OptimizerMonitoringServiceEncoder.encode_hypergrid(optimization_problem.parameter_space),
                 ObjectiveSpace=OptimizerMonitoringServiceEncoder.encode_hypergrid(optimization_problem.objective_space),
-                Objectives=[OptimizerMonitoringService_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in optimization_problem.objectives],
+                Objectives=[OptimizerMonitoringService_pb2.Objective(Name=objective.name, Minimize=objective.minimize)
+                            for objective in optimization_problem.objectives],
                 ContextSpace=OptimizerMonitoringServiceEncoder.encode_hypergrid(optimization_problem.context_space)
             )
         return OptimizerMonitoringService_pb2.OptimizationProblem(
             ParameterSpace=OptimizerMonitoringServiceEncoder.encode_hypergrid(optimization_problem.parameter_space),
             ObjectiveSpace=OptimizerMonitoringServiceEncoder.encode_hypergrid(optimization_problem.objective_space),
-            Objectives=[OptimizerMonitoringService_pb2.Objective(Name=objective.name, Minimize=objective.minimize) for objective in optimization_problem.objectives],
+            Objectives=[OptimizerMonitoringService_pb2.Objective(Name=objective.name, Minimize=objective.minimize)
+                        for objective in optimization_problem.objectives],
             EmptyContext=OptimizerMonitoringService_pb2.Empty()
         )
 
@@ -103,14 +105,18 @@ class OptimizerMonitoringServiceEncoder:
         encoded_chunks = []
         for chunk in dimension.enumerate_chunks():
             if dimension.chunks_type is ContinuousDimension:
-                encoded_chunks.append(OptimizerMonitoringService_pb2.Dimension(ContinuousDimension=OptimizerMonitoringServiceEncoder.encode_continuous_dimension(chunk)))
+                encoded_chunks.append(OptimizerMonitoringService_pb2.Dimension(
+                    ContinuousDimension=OptimizerMonitoringServiceEncoder.encode_continuous_dimension(chunk)))
             elif dimension.chunks_type is DiscreteDimension:
-                encoded_chunks.append(OptimizerMonitoringService_pb2.Dimension(DiscreteDimension=OptimizerMonitoringServiceEncoder.encode_discrete_dimension(chunk)))
+                encoded_chunks.append(OptimizerMonitoringService_pb2.Dimension(
+                    DiscreteDimension=OptimizerMonitoringServiceEncoder.encode_discrete_dimension(chunk)))
             elif dimension.chunks_type is OrdinalDimension:
-                encoded_chunks.append(OptimizerMonitoringService_pb2.Dimension(OrdinalDimension=OptimizerMonitoringServiceEncoder.encode_ordinal_dimension(chunk)))
+                encoded_chunks.append(OptimizerMonitoringService_pb2.Dimension(
+                    OrdinalDimension=OptimizerMonitoringServiceEncoder.encode_ordinal_dimension(chunk)))
             elif dimension.chunks_type is CategoricalDimension:
                 encoded_chunks.append(
-                    OptimizerMonitoringService_pb2.Dimension(CategoricalDimension=OptimizerMonitoringServiceEncoder.encode_categorical_dimension(chunk))
+                    OptimizerMonitoringService_pb2.Dimension(
+                        CategoricalDimension=OptimizerMonitoringServiceEncoder.encode_categorical_dimension(chunk))
                 )
             else:
                 raise TypeError(f"Unsupported chunk type: {dimension.chunks_type.__name__}")
@@ -121,26 +127,31 @@ class OptimizerMonitoringServiceEncoder:
             Chunks=encoded_chunks
         )
 
-
     @staticmethod
     def encode_dimension(dimension: Dimension) -> OptimizerMonitoringService_pb2.Dimension:
         if isinstance(dimension, EmptyDimension):
-            return OptimizerMonitoringService_pb2.Dimension(EmptyDimension=OptimizerMonitoringServiceEncoder.encode_empty_dimension(dimension))
+            return OptimizerMonitoringService_pb2.Dimension(
+                EmptyDimension=OptimizerMonitoringServiceEncoder.encode_empty_dimension(dimension))
 
         if isinstance(dimension, ContinuousDimension):
-            return OptimizerMonitoringService_pb2.Dimension(ContinuousDimension=OptimizerMonitoringServiceEncoder.encode_continuous_dimension(dimension))
+            return OptimizerMonitoringService_pb2.Dimension(
+                ContinuousDimension=OptimizerMonitoringServiceEncoder.encode_continuous_dimension(dimension))
 
         if isinstance(dimension, DiscreteDimension):
-            return OptimizerMonitoringService_pb2.Dimension(DiscreteDimension=OptimizerMonitoringServiceEncoder.encode_discrete_dimension(dimension))
+            return OptimizerMonitoringService_pb2.Dimension(
+                DiscreteDimension=OptimizerMonitoringServiceEncoder.encode_discrete_dimension(dimension))
 
         if isinstance(dimension, OrdinalDimension):
-            return OptimizerMonitoringService_pb2.Dimension(OrdinalDimension=OptimizerMonitoringServiceEncoder.encode_ordinal_dimension(dimension))
+            return OptimizerMonitoringService_pb2.Dimension(
+                OrdinalDimension=OptimizerMonitoringServiceEncoder.encode_ordinal_dimension(dimension))
 
         if isinstance(dimension, CategoricalDimension):
-            return OptimizerMonitoringService_pb2.Dimension(CategoricalDimension=OptimizerMonitoringServiceEncoder.encode_categorical_dimension(dimension))
+            return OptimizerMonitoringService_pb2.Dimension(
+                CategoricalDimension=OptimizerMonitoringServiceEncoder.encode_categorical_dimension(dimension))
 
         if isinstance(dimension, CompositeDimension):
-            return OptimizerMonitoringService_pb2.Dimension(CompositeDimension=OptimizerMonitoringServiceEncoder.encode_composite_dimension(dimension))
+            return OptimizerMonitoringService_pb2.Dimension(
+                CompositeDimension=OptimizerMonitoringServiceEncoder.encode_composite_dimension(dimension))
 
         raise TypeError(f"Unsupported dimension type: {type(dimension)}")
 
@@ -191,8 +202,9 @@ class OptimizerMonitoringServiceDecoder:
     }
 
     @staticmethod
-    def decode_optimization_problem(optimization_problem_pb2: OptimizerMonitoringService_pb2.OptimizationProblem) -> OptimizationProblem:
-        if optimization_problem_pb2.WhichOneof('ContextOptions')=="EmptyContext":
+    def decode_optimization_problem(optimization_problem_pb2: OptimizerMonitoringService_pb2.OptimizationProblem)\
+            -> OptimizationProblem:
+        if optimization_problem_pb2.WhichOneof('ContextOptions') == "EmptyContext":
             return OptimizationProblem(
                 parameter_space=OptimizerMonitoringServiceDecoder.decode_hypergrid(optimization_problem_pb2.ParameterSpace),
                 objective_space=OptimizerMonitoringServiceDecoder.decode_hypergrid(optimization_problem_pb2.ObjectiveSpace),
@@ -258,13 +270,17 @@ class OptimizerMonitoringServiceDecoder:
         assert isinstance(serialized, OptimizerMonitoringService_pb2.CompositeDimension)
 
         if serialized.ChunkType == OptimizerMonitoringService_pb2.DimensionType.CONTINUOUS:
-            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_continuous_dimension(chunk.ContinuousDimension) for chunk in serialized.Chunks]
+            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_continuous_dimension(chunk.ContinuousDimension)
+                              for chunk in serialized.Chunks]
         elif serialized.ChunkType == OptimizerMonitoringService_pb2.DimensionType.DISCRETE:
-            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_discrete_dimension(chunk.DiscreteDimension) for chunk in serialized.Chunks]
+            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_discrete_dimension(chunk.DiscreteDimension)
+                              for chunk in serialized.Chunks]
         elif serialized.ChunkType == OptimizerMonitoringService_pb2.DimensionType.ORDINAL:
-            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_ordinal_dimension(chunk.OrdinalDimension) for chunk in serialized.Chunks]
+            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_ordinal_dimension(chunk.OrdinalDimension)
+                              for chunk in serialized.Chunks]
         elif serialized.ChunkType == OptimizerMonitoringService_pb2.DimensionType.CATEGORICAL:
-            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_categorical_dimension(chunk.CategoricalDimension) for chunk in serialized.Chunks]
+            decoded_chunks = [OptimizerMonitoringServiceDecoder.decode_categorical_dimension(chunk.CategoricalDimension)
+                              for chunk in serialized.Chunks]
         else:
             raise TypeError(f"Unsupported chunk type: {serialized.ChunkType}")
 
@@ -295,8 +311,9 @@ class OptimizerMonitoringServiceDecoder:
     def decode_dimension(dimension: OptimizerMonitoringService_pb2.Dimension) -> Dimension:
         assert isinstance(dimension, OptimizerMonitoringService_pb2.Dimension)
         dimension_type_set = dimension.WhichOneof('Dimension')
-        supported_dimension_types = [CategoricalDimension, CompositeDimension, ContinuousDimension, EmptyDimension, DiscreteDimension, OrdinalDimension]
-        supported_dimension_type_names = [type.__name__ for type in supported_dimension_types]
+        supported_dimension_types = [CategoricalDimension, CompositeDimension, ContinuousDimension, EmptyDimension,
+                                     DiscreteDimension, OrdinalDimension]
+        supported_dimension_type_names = [type_.__name__ for type_ in supported_dimension_types]
         assert dimension_type_set in supported_dimension_type_names
 
         if dimension_type_set == CategoricalDimension.__name__:
