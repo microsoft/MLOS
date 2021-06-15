@@ -74,8 +74,8 @@ class OptimizerServiceEncoder:
     def encode_empty_dimension(dimension: EmptyDimension) -> OptimizerService_pb2.EmptyDimension:
         assert isinstance(dimension, EmptyDimension)
         return OptimizerService_pb2.EmptyDimension(
-                Name=dimension.name,
-                DimensionType=OptimizerServiceEncoder.dimension_types_to_pb2_types[dimension.type]
+            Name=dimension.name,
+            DimensionType=OptimizerServiceEncoder.dimension_types_to_pb2_types[dimension.type]
         )
 
     @staticmethod
