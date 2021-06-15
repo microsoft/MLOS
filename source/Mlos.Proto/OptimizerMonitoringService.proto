@@ -303,6 +303,7 @@ message Dimension
 };
 
 // Representation of a SimpleHypergrid. 
+//
 message SimpleHypergrid
 {
     string Name = 1;
