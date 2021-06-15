@@ -93,46 +93,50 @@ namespace Mlos.Model.Services.Client
 
         public static OptimizerService.Dimension EncodeDimension(IDimension dimension)
         {
-            if (dimension is EmptyDimension dimension1)
+            // C# Syntax equivalent to
+            // if(dimension is EmptyDimension) {
+            //      var emptyDimension = (EmptyDimension) dimension; ..
+            // }
+            if (dimension is EmptyDimension emptyDimension)
             {
                 return new OptimizerService.Dimension
                 {
-                    EmptyDimension = EncodeEmptyDimension(dimension1),
+                    EmptyDimension = EncodeEmptyDimension(emptyDimension),
                 };
             }
-            else if (dimension is ContinuousDimension dimension2)
+            else if (dimension is ContinuousDimension continuousDimension)
             {
                 return new OptimizerService.Dimension
                 {
-                    ContinuousDimension = EncodeContinuousDimension(dimension2),
+                    ContinuousDimension = EncodeContinuousDimension(continuousDimension),
                 };
             }
-            else if (dimension is DiscreteDimension dimension3)
+            else if (dimension is DiscreteDimension discreteDimension)
             {
                 return new OptimizerService.Dimension
                 {
-                    DiscreteDimension = EncodeDiscreteDimension(dimension3),
+                    DiscreteDimension = EncodeDiscreteDimension(discreteDimension),
                 };
             }
-            else if (dimension is OrdinalDimension dimension4)
+            else if (dimension is OrdinalDimension ordinalDimension)
             {
                 return new OptimizerService.Dimension
                 {
-                    OrdinalDimension = EncodeOrdinalDimension(dimension4),
+                    OrdinalDimension = EncodeOrdinalDimension(ordinalDimension),
                 };
             }
-            else if (dimension is CategoricalDimension dimension5)
+            else if (dimension is CategoricalDimension categoricalDimension)
             {
                 return new OptimizerService.Dimension
                 {
-                    CategoricalDimension = EncodeCategoricalDimension(dimension5),
+                    CategoricalDimension = EncodeCategoricalDimension(categoricalDimension),
                 };
             }
-            else if (dimension is CompositeDimension dimension6)
+            else if (dimension is CompositeDimension compositeDimension)
             {
                 return new OptimizerService.Dimension
                 {
-                    CompositeDimension = EncodeCompositeDimension(dimension6),
+                    CompositeDimension = EncodeCompositeDimension(compositeDimension),
                 };
             }
             else

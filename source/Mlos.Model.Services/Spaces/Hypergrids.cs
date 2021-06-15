@@ -61,7 +61,6 @@ namespace Mlos.Model.Services.Spaces
             return hypergrid;
         }
 
-        // This is for the benefit of the JsonSerializer.
         public enum HypergridType
         {
             /// <summary>
