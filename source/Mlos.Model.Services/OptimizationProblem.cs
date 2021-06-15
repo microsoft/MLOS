@@ -55,7 +55,5 @@ namespace Mlos.Model.Services
             ObjectiveSpace = objectiveSpace;
             Objectives = new List<OptimizationObjective>(objectives);
         }
-
-
     }
 }
