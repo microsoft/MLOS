@@ -8,7 +8,6 @@ from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceDecoder, Op
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer
 from mlos.Grpc import OptimizerService_pb2
-from mlos.Grpc import OptimizerShared_pb2
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import CategoricalDimension, CompositeDimension, ContinuousDimension, DiscreteDimension, EmptyDimension, OrdinalDimension, SimpleHypergrid
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
