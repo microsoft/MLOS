@@ -7,6 +7,7 @@
 // -----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 using Mlos.Core;
@@ -41,19 +42,19 @@ namespace Mlos.Model.Services
             Objectives = new List<OptimizationObjective>();
         }
 
-        public OptimizationProblem(Hypergrid parameterSpace, Hypergrid objectiveSpace, OptimizationObjective[] objectives)
+        public OptimizationProblem(Hypergrid parameterSpace, Hypergrid objectiveSpace, IEnumerable<OptimizationObjective> objectives)
         {
             ParameterSpace = parameterSpace;
             ObjectiveSpace = objectiveSpace;
-            Objectives = new List<OptimizationObjective>(objectives);
+            Objectives = objectives.ToList();
         }
 
-        public OptimizationProblem(Hypergrid parameterSpace, Hypergrid contextSpace, Hypergrid objectiveSpace, OptimizationObjective[] objectives)
+        public OptimizationProblem(Hypergrid parameterSpace, Hypergrid contextSpace, Hypergrid objectiveSpace, IEnumerable<OptimizationObjective> objectives)
         {
             ParameterSpace = parameterSpace;
             ContextSpace = contextSpace;
             ObjectiveSpace = objectiveSpace;
-            Objectives = new List<OptimizationObjective>(objectives);
+            Objectives = objectives.ToList();
         }
     }
 }
