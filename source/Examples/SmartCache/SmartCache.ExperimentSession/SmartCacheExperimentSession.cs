@@ -120,7 +120,6 @@ namespace SmartCache
             optimizationProblem.Objectives.Add(
                 new OptimizationObjective(name: "HitRate", minimize: false));
 
-
             // Get a local reference to the optimizer to reuse when processing messages later on.
             //
             // Note: we read this from a global variable that should have been

@@ -6,6 +6,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System.Linq;
+
 using Mlos.Model.Services.Spaces;
 
 namespace Mlos.Model.Services.Client
@@ -275,14 +277,13 @@ namespace Mlos.Model.Services.Client
             }
 
             var instance = new OptimizationProblem(
-                        DecodeHypergrid(problem.ParameterSpace),
-                        DecodeHypergrid(problem.ObjectiveSpace),
-                        objectives);
+                DecodeHypergrid(problem.ParameterSpace),
+                DecodeHypergrid(problem.ObjectiveSpace),
+                objectives);
             if (problem.ContextOptionsCase == OptimizerService.OptimizationProblem.ContextOptionsOneofCase.ContextSpace)
             {
                 // A context space was provided.
                 //
-
                 instance.ContextSpace = DecodeHypergrid(problem.ContextSpace);
             }
 
