@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------
-// <copyright file="OptimizationProblemExtension.cs" company="Microsoft Corporation">
+// <copyright file="OptimizerServiceEncoderDecoder.cs" company="Microsoft Corporation">
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See LICENSE in the project root
 // for license information.
