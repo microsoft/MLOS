@@ -18,18 +18,9 @@ namespace Mlos.Model.Services.Client
         {
             OptimizerService.SimpleHypergrid instance = new OptimizerService.SimpleHypergrid();
 
-            foreach (var subgridSet in hypergrid.Subgrids.Values)
-            {
-                foreach (var subgrid in subgridSet)
-                {
-                    instance.GuestSubgrids.Add(EncodeSubgridJoin(subgrid));
-                }
-            }
+            instance.GuestSubgrids.AddRange(hypergrid.Subgrids.SelectMany(subgridSet => subgridSet.Value.Select(subgrid => EncodeSubgridJoin(subgrid))));
 
-            foreach (var dimension in hypergrid.Dimensions)
-            {
-                instance.Dimensions.Add(EncodeDimension(dimension));
-            }
+            instance.Dimensions.AddRange(hypergrid.Dimensions.Select(dimension => EncodeDimension(dimension)));
 
             instance.Name = hypergrid.Name;
 
@@ -41,10 +32,8 @@ namespace Mlos.Model.Services.Client
             OptimizerService.OptimizationProblem instance = new OptimizerService.OptimizationProblem();
             instance.ParameterSpace = EncodeHypergrid(problem.ParameterSpace);
             instance.ObjectiveSpace = EncodeHypergrid(problem.ObjectiveSpace);
-            foreach (var objective in problem.Objectives)
-            {
-                instance.Objectives.Add(EncodeObjective(objective));
-            }
+            instance.Objectives.AddRange(
+                problem.Objectives.Select(objective => EncodeObjective(objective)));
 
             if (problem.ContextSpace == null)
             {
@@ -149,19 +138,14 @@ namespace Mlos.Model.Services.Client
 
         public static OptimizerService.CompositeDimension EncodeCompositeDimension(CompositeDimension dimension)
         {
-            OptimizerService.Dimension[] chunks = new OptimizerService.Dimension[dimension.Values.Count];
-            var i = 0;
-            foreach (var chunk in dimension.Values)
-            {
-                chunks[i++] = EncodeDimension(chunk);
-            }
-
-            return new OptimizerService.CompositeDimension
+            var instance = new OptimizerService.CompositeDimension
             {
                 Name = dimension.Name,
                 ChunkType = DimensionToGrpcType(dimension.ChunkType),
-                Chunks = { chunks },
             };
+
+            instance.Chunks.AddRange(dimension.Values.Select(chunk => EncodeDimension(chunk)));
+            return instance;
         }
 
         public static OptimizerService.DiscreteDimension EncodeDiscreteDimension(DiscreteDimension dimension)
@@ -200,10 +184,8 @@ namespace Mlos.Model.Services.Client
             var instance = new OptimizerService.OrdinalDimension();
             instance.Name = dimension.Name;
             instance.Ascending = dimension.Ascending;
-            foreach (var value in dimension.OrderedValues)
-            {
-                instance.OrderedValues.Add(EncodePrimitiveValue(value));
-            }
+            instance.OrderedValues.AddRange(
+                dimension.OrderedValues.Select(value => EncodePrimitiveValue(value)));
 
             return instance;
         }
@@ -212,10 +194,7 @@ namespace Mlos.Model.Services.Client
         {
             var instance = new OptimizerService.CategoricalDimension();
             instance.Name = dimension.Name;
-            foreach (var value in dimension.Values)
-            {
-                instance.Values.Add(EncodePrimitiveValue(value));
-            }
+            instance.Values.AddRange(dimension.Values.Select(value => EncodePrimitiveValue(value)));
 
             return instance;
         }
@@ -223,21 +202,21 @@ namespace Mlos.Model.Services.Client
         public static OptimizerService.PrimitiveValue EncodePrimitiveValue(object value)
         {
             var data = new OptimizerService.PrimitiveValue();
-            if (value is int)
+            if (value is int intValue)
             {
-                data.IntValue = (int)value;
+                data.IntValue = intValue;
             }
-            else if (value is bool)
+            else if (value is bool boolValue)
             {
-                data.BoolValue = (bool)value;
+                data.BoolValue = boolValue;
             }
-            else if (value is string)
+            else if (value is string stringValue)
             {
-                data.StringValue = (string)value;
+                data.StringValue = stringValue;
             }
-            else if (value is double)
+            else if (value is double doubleValue)
             {
-                data.DoubleValue = (double)value;
+                data.DoubleValue = doubleValue;
             }
             else
             {
@@ -269,12 +248,7 @@ namespace Mlos.Model.Services.Client
 
         public static OptimizationProblem DecodeOptimizationProblem(OptimizerService.OptimizationProblem problem)
         {
-            var objectives = new OptimizationObjective[problem.Objectives.Count];
-            var i = 0;
-            foreach (var objective in problem.Objectives)
-            {
-                objectives[i++] = DecodeOptimizationObjective(objective);
-            }
+            var objectives = problem.Objectives.Select(objective => DecodeOptimizationObjective(objective)).ToList();
 
             var instance = new OptimizationProblem(
                 DecodeHypergrid(problem.ParameterSpace),
@@ -307,13 +281,7 @@ namespace Mlos.Model.Services.Client
 
         public static CategoricalDimension DecodeCategoricalDimension(OptimizerService.CategoricalDimension dimension)
         {
-            var values = new object[dimension.Values.Count];
-            var i = 0;
-            foreach (var value in dimension.Values)
-            {
-                values[i++] = DecodePrimitiveValue(value);
-            }
-
+            object[] values = dimension.Values.Select(value => DecodePrimitiveValue(value)).ToArray();
             return new CategoricalDimension(dimension.Name, values);
         }
 
@@ -340,24 +308,13 @@ namespace Mlos.Model.Services.Client
 
         public static CompositeDimension DecodeCompositeDimension(OptimizerService.CompositeDimension dimension)
         {
-            var chunks = new IDimension[dimension.Chunks.Count];
-            var i = 0;
-            foreach (var serialized_chunk in dimension.Chunks)
-            {
-                chunks[i++] = DecodeDimension(serialized_chunk);
-            }
-
+            IDimension[] chunks = dimension.Chunks.Select(serialized_chunk => DecodeDimension(serialized_chunk)).ToArray();
             return new CompositeDimension(dimension.Name, GrpcTypeToDimension(dimension.ChunkType), chunks);
         }
 
         public static Hypergrid DecodeHypergrid(OptimizerService.SimpleHypergrid hypergrid)
         {
-            var dimensions = new IDimension[hypergrid.Dimensions.Count];
-            var i = 0;
-            foreach (var dimension in hypergrid.Dimensions)
-            {
-                dimensions[i++] = DecodeDimension(dimension);
-            }
+            IDimension[] dimensions = hypergrid.Dimensions.Select(dimension => DecodeDimension(dimension)).ToArray();
 
             var instance = new Hypergrid(hypergrid.Name, dimensions);
             foreach (var subgrid in hypergrid.GuestSubgrids)
@@ -384,12 +341,7 @@ namespace Mlos.Model.Services.Client
 
         public static OrdinalDimension DecodeOrdinalDimension(OptimizerService.OrdinalDimension dimension)
         {
-            var values = new object[dimension.OrderedValues.Count];
-            var i = 0;
-            foreach (var value in dimension.OrderedValues)
-            {
-                values[i++] = DecodePrimitiveValue(value);
-            }
+            object[] values = dimension.OrderedValues.Select(value => DecodePrimitiveValue(value)).ToArray();
 
             return new OrdinalDimension(dimension.Name, dimension.Ascending, values);
         }

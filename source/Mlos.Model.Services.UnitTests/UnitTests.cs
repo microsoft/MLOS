@@ -50,7 +50,7 @@ namespace Mlos.Model.Services.UnitTests
         public void TestCategoricalDimension()
         {
             object[] data = { "str", string.Empty, "cat", false, 9.12 };
-            var dimension = new CategoricalDimension("Dimension test", "str", string.Empty, "cat", false, 9.12);
+            var dimension = new CategoricalDimension("Dimension test", data);
             var serialized = OptimizerServiceEncoder.EncodeCategoricalDimension(dimension);
             var deserialized = OptimizerServiceDecoder.DecodeCategoricalDimension(serialized);
 
