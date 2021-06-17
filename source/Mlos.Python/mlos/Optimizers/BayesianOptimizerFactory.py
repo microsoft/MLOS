@@ -8,7 +8,7 @@ from mlos.Grpc import OptimizerService_pb2
 from mlos.Grpc.OptimizerService_pb2 import CreateOptimizerRequest, OptimizerInfo
 from mlos.Grpc.OptimizerService_pb2_grpc import OptimizerServiceStub
 from mlos.Grpc.OptimizerServiceEncoderDecoder import OptimizerServiceEncoder, OptimizerServiceDecoder
-from mlos.Grpc.OptimizerMonitoringServiceEncoderDecoder import OptimizerMonitoringServiceEncoder, OptimizerMonitoringServiceDecoder
+from mlos.Grpc.OptimizerMonitoringServiceEncoderDecoder import OptimizerMonitoringServiceDecoder
 from mlos.Grpc.BayesianOptimizerProxy import BayesianOptimizerProxy
 from mlos.Optimizers.BayesianOptimizer import BayesianOptimizer, bayesian_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
