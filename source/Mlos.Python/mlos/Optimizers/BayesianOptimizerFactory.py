@@ -101,9 +101,9 @@ class BayesianOptimizerFactory:
         """
         return BayesianOptimizerProxy(
             grpc_channel=self._grpc_channel,
-            optimization_problem=OptimizerServiceDecoder.decode_optimization_problem(optimizer_info.OptimizationProblem) \
-                    if isinstance(optimizer_info.OptimizationProblem, OptimizerService_pb2.OptimizationProblem) else \
-                    OptimizerMonitoringServiceDecoder.decode_optimization_problem(optimizer_info.OptimizationProblem),
+            optimization_problem=OptimizerServiceDecoder.decode_optimization_problem(optimizer_info.OptimizationProblem)
+            if isinstance(optimizer_info.OptimizationProblem, OptimizerService_pb2.OptimizationProblem) else
+            OptimizerMonitoringServiceDecoder.decode_optimization_problem(optimizer_info.OptimizationProblem),
             optimizer_config=Point.from_json(optimizer_info.OptimizerConfigJsonString),
             id=optimizer_info.OptimizerHandle.Id,
             logger=self.logger
