@@ -200,8 +200,7 @@ class OptimizerServiceDecoder:
                 Objective(name=objective_pb2.Name, minimize=objective_pb2.Minimize)
                 for objective_pb2 in optimization_problem_pb2.Objectives
             ],
-            context_space=None if not optimization_problem_pb2.WhichOneof('Context') == "ContextSpace" else
-            OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
+            context_space=None if not optimization_problem_pb2.HasField("ContextSpace") else OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
         )
 
     @staticmethod
