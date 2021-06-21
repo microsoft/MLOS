@@ -243,9 +243,9 @@ namespace Mlos.Model.Services.Client
             var objectives = problem.Objectives.Select(objective => DecodeOptimizationObjective(objective)).ToList();
 
             var instance = new OptimizationProblem(
-                DecodeHypergrid(problem.ParameterSpace),
-                DecodeHypergrid(problem.ObjectiveSpace),
-                objectives);
+                parameterSpace: DecodeHypergrid(problem.ParameterSpace),
+                objectiveSpace: DecodeHypergrid(problem.ObjectiveSpace),
+                objectives: objectives);
             if (problem.ContextCase == OptimizerService.OptimizationProblem.ContextOneofCase.ContextSpace)
             {
                 // A context space was provided.
@@ -258,23 +258,23 @@ namespace Mlos.Model.Services.Client
 
         public static OptimizationObjective DecodeOptimizationObjective(OptimizerService.Objective objective)
         {
-            return new OptimizationObjective(objective.Name, objective.Minimize);
+            return new OptimizationObjective(name: objective.Name, minimize: objective.Minimize);
         }
 
         public static EmptyDimension DecodeEmptyDimension(OptimizerService.EmptyDimension dimension)
         {
-            return new EmptyDimension(dimension.Name, GrpcTypeToDimension(dimension.DimensionType));
+            return new EmptyDimension(name: dimension.Name, dataType: GrpcTypeToDimension(dimension.DimensionType));
         }
 
         public static DiscreteDimension DecodeDiscreteDimension(OptimizerService.DiscreteDimension dimension)
         {
-            return new DiscreteDimension(dimension.Name, dimension.Min, dimension.Max);
+            return new DiscreteDimension(name: dimension.Name, min: dimension.Min, max: dimension.Max);
         }
 
         public static CategoricalDimension DecodeCategoricalDimension(OptimizerService.CategoricalDimension dimension)
         {
             object[] values = dimension.Values.Select(value => DecodePrimitiveValue(value)).ToArray();
-            return new CategoricalDimension(dimension.Name, values);
+            return new CategoricalDimension(name: dimension.Name, values: values);
         }
 
         public static IDimension DecodeDimension(OptimizerService.Dimension dimension)
@@ -301,14 +301,14 @@ namespace Mlos.Model.Services.Client
         public static CompositeDimension DecodeCompositeDimension(OptimizerService.CompositeDimension dimension)
         {
             IDimension[] chunks = dimension.Chunks.Select(serialized_chunk => DecodeDimension(serialized_chunk)).ToArray();
-            return new CompositeDimension(dimension.Name, GrpcTypeToDimension(dimension.ChunkType), chunks);
+            return new CompositeDimension(name: dimension.Name, chunkType: GrpcTypeToDimension(dimension.ChunkType), chunks);
         }
 
         public static Hypergrid DecodeHypergrid(OptimizerService.SimpleHypergrid hypergrid)
         {
             IDimension[] dimensions = hypergrid.Dimensions.Select(dimension => DecodeDimension(dimension)).ToArray();
 
-            var instance = new Hypergrid(hypergrid.Name, dimensions);
+            var instance = new Hypergrid(name: hypergrid.Name, dimensions: dimensions);
             foreach (var subgrid in hypergrid.GuestSubgrids)
             {
                 instance.Join(DecodeHypergrid(subgrid.Subgrid), DecodeDimension(subgrid.ExternalPivotDimension));
@@ -328,14 +328,19 @@ namespace Mlos.Model.Services.Client
 
         public static ContinuousDimension DecodeContinuousDimension(OptimizerService.ContinuousDimension dimension)
         {
-            return new ContinuousDimension(dimension.Name, dimension.Min, dimension.Max, dimension.IncludeMin, dimension.IncludeMax);
+            return new ContinuousDimension(
+                name: dimension.Name,
+                min: dimension.Min,
+                max: dimension.Max,
+                includeMin: dimension.IncludeMin,
+                includeMax: dimension.IncludeMax);
         }
 
         public static OrdinalDimension DecodeOrdinalDimension(OptimizerService.OrdinalDimension dimension)
         {
             object[] values = dimension.OrderedValues.Select(value => DecodePrimitiveValue(value)).ToArray();
 
-            return new OrdinalDimension(dimension.Name, dimension.Ascending, values);
+            return new OrdinalDimension(name: dimension.Name, ascending: dimension.Ascending, orderedValues: values);
         }
 
         public static object DecodePrimitiveValue(OptimizerService.PrimitiveValue value)
