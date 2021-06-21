@@ -183,6 +183,43 @@ namespace Mlos.Model.Services.UnitTests
             var deserialized = OptimizerServiceDecoder.DecodeOptimizationProblem(serialized);
             Assert.Null(deserialized.ContextSpace);
         }
+
+        [Fact]
+        public void TestOptimizationProblemSubgridObjectives()
+        {
+            Hypergrid cacheSearchSpace = new Hypergrid(
+                name: "smart_cache_config",
+                dimension: new CategoricalDimension("cache_implementation", 0, 1))
+            .Join(
+                subgrid: new Hypergrid(
+                    name: "lru_cache_config",
+                    dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
+                onExternalDimension: new CategoricalDimension("cache_implementation", 0))
+            .Join(
+                subgrid: new Hypergrid(
+                    name: "mru_cache_config",
+                    dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
+                onExternalDimension: new CategoricalDimension("cache_implementation", 1));
+
+            var optimizationProblem = new OptimizationProblem
+            {
+                ParameterSpace = cacheSearchSpace,
+                ContextSpace = null,
+                ObjectiveSpace = new Hypergrid(
+                    name: "objectives",
+                    dimensions: new ContinuousDimension(name: "HitRate", min: 0.0, max: 1.0)),
+            };
+
+            optimizationProblem.Objectives.Add(
+                new OptimizationObjective(name: "HitRate", minimize: false));
+
+            var serialized = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
+            var deserialized = OptimizerServiceDecoder.DecodeOptimizationProblem(serialized);
+
+            Assert.True(deserialized.Objectives.Count == 1);
+            Assert.Equal(deserialized.Objectives[0].Name, optimizationProblem.Objectives[0].Name);
+            Assert.True(deserialized.ObjectiveSpace.RootGrid.Dimensions.Count == 1);
+        }
     }
 
     public class DummyTest
