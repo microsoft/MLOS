@@ -39,20 +39,12 @@ class OptimizerServiceEncoder:
 
     @staticmethod
     def encode_optimization_problem(optimization_problem: OptimizationProblem) -> OptimizerService_pb2.OptimizationProblem:
-        if optimization_problem.context_space is not None:
-            return OptimizerService_pb2.OptimizationProblem(
-                ParameterSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.parameter_space),
-                ObjectiveSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.objective_space),
-                Objectives=[OptimizerService_pb2.Objective(Name=objective.name, Minimize=objective.minimize)
-                            for objective in optimization_problem.objectives],
-                ContextSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.context_space)
-            )
         return OptimizerService_pb2.OptimizationProblem(
             ParameterSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.parameter_space),
             ObjectiveSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.objective_space),
             Objectives=[OptimizerService_pb2.Objective(Name=objective.name, Minimize=objective.minimize)
                         for objective in optimization_problem.objectives],
-            ContextSpace=None
+            ContextSpace=None if optimization_problem.context_space == None else OptimizerServiceEncoder.encode_hypergrid(optimization_problem.context_space)
         )
 
     @staticmethod
@@ -200,16 +192,6 @@ class OptimizerServiceDecoder:
 
     @staticmethod
     def decode_optimization_problem(optimization_problem_pb2: OptimizerService_pb2.OptimizationProblem) -> OptimizationProblem:
-        if optimization_problem_pb2.WhichOneof('Context') == "ContextSpace":
-            return OptimizationProblem(
-                parameter_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ParameterSpace),
-                objective_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ObjectiveSpace),
-                objectives=[
-                    Objective(name=objective_pb2.Name, minimize=objective_pb2.Minimize)
-                    for objective_pb2 in optimization_problem_pb2.Objectives
-                ],
-                context_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
-            )
         return OptimizationProblem(
             parameter_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ParameterSpace),
             objective_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ObjectiveSpace),
@@ -217,7 +199,8 @@ class OptimizerServiceDecoder:
                 Objective(name=objective_pb2.Name, minimize=objective_pb2.Minimize)
                 for objective_pb2 in optimization_problem_pb2.Objectives
             ],
-            context_space=None
+            context_space=None if not optimization_problem_pb2.WhichOneof('Context') == "ContextSpace" else\
+                    OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
         )
 
     @staticmethod
