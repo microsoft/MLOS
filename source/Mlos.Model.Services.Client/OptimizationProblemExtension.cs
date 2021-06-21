@@ -24,8 +24,6 @@ namespace Mlos.Model.Services.Client
         {
             OptimizerService.OptimizationProblem optimizerOptimizationProblem = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
 
-            optimizerOptimizationProblem.Objectives.AddRange(optimizationProblem.Objectives.Select(r => r.ToOptimizerServiceObjective()));
-
             return optimizerOptimizationProblem;
         }
     }

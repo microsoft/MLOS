@@ -192,7 +192,7 @@ namespace SmartCache
                     // the config and the resulting performance.
                     //
                     var currentConfigDictionary = new Dictionary<string, object>();
-                    currentConfigDictionary["cache_implementation"] = smartCacheConfig.EvictionPolicy;
+                    currentConfigDictionary["cache_implementation"] = (int)smartCacheConfig.EvictionPolicy;
 
                     _ = smartCacheConfig.EvictionPolicy switch
                     {
@@ -220,7 +220,7 @@ namespace SmartCache
                 // Update smart cache's config in shared memory with the
                 // optimizer's new settings recommendation.
                 //
-                smartCacheConfig.EvictionPolicy = Enum.Parse<CacheEvictionPolicy>(newConfigDictionary["cache_implementation"].GetString());
+                smartCacheConfig.EvictionPolicy = Enum.Parse<CacheEvictionPolicy>(newConfigDictionary["cache_implementation"].GetRawText());
 
                 smartCacheConfig.CacheSize = smartCacheConfig.EvictionPolicy switch
                 {
