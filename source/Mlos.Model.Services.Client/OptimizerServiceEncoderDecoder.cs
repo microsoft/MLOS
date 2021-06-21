@@ -34,15 +34,7 @@ namespace Mlos.Model.Services.Client
             instance.ObjectiveSpace = EncodeHypergrid(problem.ObjectiveSpace);
             instance.Objectives.AddRange(
                 problem.Objectives.Select(objective => EncodeObjective(objective)));
-
-            if (problem.ContextSpace == null)
-            {
-                instance.EmptyContext = new OptimizerService.Empty();
-            }
-            else
-            {
-                instance.ContextSpace = EncodeHypergrid(problem.ContextSpace);
-            }
+            instance.ContextSpace = problem.ContextSpace == null ? null : EncodeHypergrid(problem.ContextSpace);
 
             return instance;
         }
@@ -254,7 +246,7 @@ namespace Mlos.Model.Services.Client
                 DecodeHypergrid(problem.ParameterSpace),
                 DecodeHypergrid(problem.ObjectiveSpace),
                 objectives);
-            if (problem.ContextOptionsCase == OptimizerService.OptimizationProblem.ContextOptionsOneofCase.ContextSpace)
+            if (problem.ContextCase == OptimizerService.OptimizationProblem.ContextOneofCase.ContextSpace)
             {
                 // A context space was provided.
                 //

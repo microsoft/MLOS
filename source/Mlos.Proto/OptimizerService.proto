@@ -74,12 +74,11 @@ message RegisterObservationsRequest
 message OptimizationProblem
 {
     SimpleHypergrid ParameterSpace = 1;
-    oneof ContextOptions {
+    oneof Context {
         SimpleHypergrid ContextSpace = 2;
-        Empty EmptyContext = 3;
     }
-    SimpleHypergrid ObjectiveSpace = 4;
-    repeated Objective Objectives = 5;
+    SimpleHypergrid ObjectiveSpace = 3;
+    repeated Objective Objectives = 4;
 };
 
 
