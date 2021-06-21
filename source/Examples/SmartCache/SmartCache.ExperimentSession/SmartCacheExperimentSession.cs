@@ -86,17 +86,17 @@ namespace SmartCache
             //
             Hypergrid cacheSearchSpace = new Hypergrid(
                 name: "smart_cache_config",
-                dimension: new CategoricalDimension("cache_implementation", (int)CacheEvictionPolicy.LeastRecentlyUsed, (int)CacheEvictionPolicy.MostRecentlyUsed))
+                dimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.LeastRecentlyUsed.ToString(), CacheEvictionPolicy.MostRecentlyUsed.ToString()))
             .Join(
                 subgrid: new Hypergrid(
                     name: "lru_cache_config",
                     dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
-                onExternalDimension: new CategoricalDimension("cache_implementation", (int)CacheEvictionPolicy.LeastRecentlyUsed))
+                onExternalDimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.LeastRecentlyUsed.ToString()))
             .Join(
                 subgrid: new Hypergrid(
                     name: "mru_cache_config",
                     dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
-                onExternalDimension: new CategoricalDimension("cache_implementation", (int)CacheEvictionPolicy.MostRecentlyUsed));
+                onExternalDimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.MostRecentlyUsed.ToString()));
 
             // Create optimization problem.
             //
@@ -192,7 +192,7 @@ namespace SmartCache
                     // the config and the resulting performance.
                     //
                     var currentConfigDictionary = new Dictionary<string, object>();
-                    currentConfigDictionary["cache_implementation"] = (int)smartCacheConfig.EvictionPolicy;
+                    currentConfigDictionary["cache_implementation"] = smartCacheConfig.EvictionPolicy.ToString();
 
                     _ = smartCacheConfig.EvictionPolicy switch
                     {
@@ -220,7 +220,7 @@ namespace SmartCache
                 // Update smart cache's config in shared memory with the
                 // optimizer's new settings recommendation.
                 //
-                smartCacheConfig.EvictionPolicy = Enum.Parse<CacheEvictionPolicy>(newConfigDictionary["cache_implementation"].GetRawText());
+                smartCacheConfig.EvictionPolicy = Enum.Parse<CacheEvictionPolicy>(newConfigDictionary["cache_implementation"].GetString());
 
                 smartCacheConfig.CacheSize = smartCacheConfig.EvictionPolicy switch
                 {
