@@ -218,7 +218,7 @@ namespace Mlos.Model.Services.UnitTests
 
             Assert.True(deserialized.Objectives.Count == 1);
             Assert.Equal(deserialized.Objectives[0].Name, optimizationProblem.Objectives[0].Name);
-            Assert.True(deserialized.ObjectiveSpace.RootGrid.Dimensions.Count == 1);
+            Assert.True(deserialized.ObjectiveSpace.Dimensions.Count == 1);
         }
     }
 

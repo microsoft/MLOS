@@ -21,16 +21,12 @@ namespace Mlos.Model.Services
     /// </summary>
     public class OptimizationProblem : IOptimizationProblem
     {
-        [JsonPropertyName("parameter_space")]
         public Hypergrid ParameterSpace { get; set; }
 
-        [JsonPropertyName("context_space")]
         public Hypergrid ContextSpace { get; set; }
 
-        [JsonPropertyName("objective_space")]
         public Hypergrid ObjectiveSpace { get; set; }
 
-        [JsonPropertyName("objectives")]
         public List<OptimizationObjective> Objectives { get; }
 
         /// <summary>

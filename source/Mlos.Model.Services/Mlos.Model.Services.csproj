@@ -20,12 +20,9 @@
     <Compile Include="OptimizationProblem.cs" />
     <Compile Include="Spaces\Dimensions.cs" />
     <Compile Include="Spaces\Hypergrids.cs" />
-    <Compile Include="Spaces\JsonConverters\DimensionJsonConverter.cs" />
     <Compile Include="Spaces\JsonConverters\JsonConverterWithExpectations.cs" />
     <Compile Include="Spaces\JsonConverters\JsonDictionaryConverter.cs" />
     <Compile Include="Spaces\JsonConverters\HashSetJsonConverter.cs" />
-    <Compile Include="Spaces\JsonConverters\HypergridJsonConverter.cs" />
-    <Compile Include="Spaces\JsonConverters\SubgridJoinJsonConverter.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
 </Project>
