@@ -21,6 +21,7 @@ from mlos.OptimizerEvaluationTools.ObjectiveFunctionFactory import ObjectiveFunc
 from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension
 
 
 class TestBayesianOptimizerGrpcClient:
@@ -105,7 +106,7 @@ class TestBayesianOptimizerGrpcClient:
         assert new_optimizer.optimizer_config == bayesian_optimizer.optimizer_config
 
         num_iterations = 100
-        registered_features_df, registered_objectives_df = self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=num_iterations)
+        registered_features_df, registered_objectives_df = self.optimize_objective_function(optimizer=bayesian_optimizer, objective_function=self.objective_function, num_iterations=num_iterations)
 
         # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
         #
@@ -166,7 +167,7 @@ class TestBayesianOptimizerGrpcClient:
             optimization_problem=self.optimization_problem,
             optimizer_config=optimizer_config
         )
-        registered_features_df, registered_objectives_df = self.optimize_quadratic(optimizer=bayesian_optimizer, num_iterations=12)
+        registered_features_df, registered_objectives_df = self.optimize_objective_function(optimizer=bayesian_optimizer, objective_function=self.objective_function, num_iterations=12)
 
         # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
         #
@@ -186,29 +187,97 @@ class TestBayesianOptimizerGrpcClient:
         assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
         assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
+    @pytest.mark.parametrize("i", [i for i in range(10)])
+    def test_optimizer_with_random_config_random_objective(self, i):
+        objective_function_config = objective_function_config_store.parameter_space.random()
+        objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config)
+        optimization_problem = objective_function.default_optimization_problem
 
-    def optimize_quadratic(self, optimizer, num_iterations):
+
+        optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
+
+        optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
+        if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
+            rf_config = optimizer_config.homogeneous_random_forest_regression_model_config
+            rf_config.n_estimators = min(rf_config.n_estimators, 20)
+
+        print(f"[{i+1}] Creating a bayesian optimizer with config: {optimizer_config} \n\n\nObjective function config: {objective_function_config}")
+
+        bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
+            optimization_problem=optimization_problem,
+            optimizer_config=optimizer_config
+        )
+        registered_params_df, registered_objectives_df = self.optimize_objective_function(optimizer=bayesian_optimizer, objective_function=objective_function, num_iterations=20)
+
+        # Apparently the to_json/from_json loses precision so we explicitly lose it here so that we can do the comparison.
+        #
+        registered_features_json = registered_params_df.to_json(orient='index', double_precision=15)
+        registered_objectives_json = registered_objectives_df.to_json(orient='index', double_precision=15)
+
+        # Apparently the jitter is too good and we actually have to use the json strings or they will be optimized away.
+        #
+        assert len(registered_features_json) > 0
+        assert len(registered_objectives_json) > 0
+
+        registered_params_df = pd.read_json(registered_features_json, orient='index')
+        registered_objectives_df = pd.read_json(registered_objectives_json, orient='index')
+
+        observed_params_df, observed_objectives_df, _ = bayesian_optimizer.get_all_observations()
+
+        numeric_params_names = [
+            dimension.name
+            for dimension
+            in optimization_problem.parameter_space.dimensions
+            if
+                (isinstance(dimension, (ContinuousDimension, DiscreteDimension)) or (isinstance(dimension, CategoricalDimension) and dimension.is_numeric))
+                and
+                (dimension.name in registered_params_df.columns)
+                and
+                (dimension.name in observed_params_df.columns)
+        ]
+        numeric_params_df = registered_params_df[numeric_params_names]
+        observed_numeric_params_df = observed_params_df[numeric_params_names]
+
+        assert (np.abs(numeric_params_df.fillna(0) - observed_numeric_params_df.fillna(0)) < 0.00000001).all().all()
+        assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
+
+
+    @staticmethod
+    def optimize_objective_function(optimizer, objective_function, num_iterations):
         registered_features_df = None
         registered_objectives_df = None
-        old_optimum = np.inf
+
+        # Let's make sure that the optimum for the first objective doesn't get worse throughout the optimization loop.
+        #
+        first_objective = optimizer.optimization_problem.objectives[0]
+        if first_objective.minimize:
+            old_optimum = np.inf
+        else:
+            old_optimum = -np.inf
+
         for i in range(num_iterations):
             suggested_params = optimizer.suggest()
             suggested_params_df = suggested_params.to_dataframe()
-            y = self.objective_function.evaluate_point(suggested_params)
-            optimizer.register(suggested_params_df, y.to_dataframe())
+            objective_values = objective_function.evaluate_point(suggested_params)
+            optimizer.register(suggested_params_df, objective_values.to_dataframe())
             if registered_features_df is None:
                 registered_features_df = suggested_params_df
             else:
                 registered_features_df = registered_features_df.append(suggested_params_df, ignore_index=True)
 
             if registered_objectives_df is None:
-                registered_objectives_df = y.to_dataframe()
+                registered_objectives_df = objective_values.to_dataframe()
             else:
-                registered_objectives_df = registered_objectives_df.append(y.to_dataframe(), ignore_index=True)
+                registered_objectives_df = registered_objectives_df.append(objective_values.to_dataframe(), ignore_index=True)
 
             best_params, optimum = optimizer.optimum()
             # ensure current optimum doesn't go up
-            assert optimum.y <= old_optimum
-            old_optimum = optimum.y
-            print(f"[{i+1}/{num_iterations}]Best Params: {best_params}, Best Value: {optimum.y}")
+            #
+            if first_objective.minimize:
+                assert optimum[first_objective.name] <= old_optimum
+            else:
+                assert optimum[first_objective.name] >= old_optimum
+
+            old_optimum = optimum[first_objective.name]
+            print(f"[{i+1}/{num_iterations}]Best Params: {best_params}, Best Value: {optimum[first_objective.name]}")
         return registered_features_df, registered_objectives_df
