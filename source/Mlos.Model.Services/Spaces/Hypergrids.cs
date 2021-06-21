@@ -23,7 +23,7 @@ namespace Mlos.Model.Services.Spaces
     }
 
     /// <summary>
-    /// Structure describing joined subgrids
+    /// Structure describing joined subgrids.
     /// </summary>
     public struct JoinedSubgrid
     {
