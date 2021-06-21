@@ -44,7 +44,8 @@ class OptimizerServiceEncoder:
             ObjectiveSpace=OptimizerServiceEncoder.encode_hypergrid(optimization_problem.objective_space),
             Objectives=[OptimizerService_pb2.Objective(Name=objective.name, Minimize=objective.minimize)
                         for objective in optimization_problem.objectives],
-            ContextSpace=None if optimization_problem.context_space == None else OptimizerServiceEncoder.encode_hypergrid(optimization_problem.context_space)
+            ContextSpace=None if optimization_problem.context_space is None else
+            OptimizerServiceEncoder.encode_hypergrid(optimization_problem.context_space)
         )
 
     @staticmethod
@@ -199,8 +200,8 @@ class OptimizerServiceDecoder:
                 Objective(name=objective_pb2.Name, minimize=objective_pb2.Minimize)
                 for objective_pb2 in optimization_problem_pb2.Objectives
             ],
-            context_space=None if not optimization_problem_pb2.WhichOneof('Context') == "ContextSpace" else\
-                    OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
+            context_space=None if not optimization_problem_pb2.WhichOneof('Context') == "ContextSpace" else
+            OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ContextSpace)
         )
 
     @staticmethod
