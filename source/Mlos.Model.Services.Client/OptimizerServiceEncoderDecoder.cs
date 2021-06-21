@@ -246,11 +246,15 @@ namespace Mlos.Model.Services.Client
                 parameterSpace: DecodeHypergrid(problem.ParameterSpace),
                 objectiveSpace: DecodeHypergrid(problem.ObjectiveSpace),
                 objectives: objectives);
-            if (problem.ContextCase == OptimizerService.OptimizationProblem.ContextOneofCase.ContextSpace)
+            if (problem.ContextSpace != null)
             {
                 // A context space was provided.
                 //
                 instance.ContextSpace = DecodeHypergrid(problem.ContextSpace);
+            }
+            else
+            {
+                instance.ContextSpace = null;
             }
 
             return instance;
