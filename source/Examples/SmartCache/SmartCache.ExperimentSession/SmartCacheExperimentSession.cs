@@ -106,10 +106,7 @@ namespace SmartCache
             // In this case we declare "hit rate", which will be calculated as a
             // percentage, is the thing we want the optimizer to improve.
             //
-            var objectives = new List<OptimizationObjective>();
-            objectives.Add(new OptimizationObjective("HitRate", false));
-            var optimizationProblem = new OptimizationProblem(cacheSearchSpace, new Hypergrid("objectives", new ContinuousDimension("HitRate", 0.0, 1.0)), objectives);
-            /*var optimizationProblem = new OptimizationProblem
+            var optimizationProblem = new OptimizationProblem
             {
                 ParameterSpace = cacheSearchSpace,
                 ContextSpace = null,
@@ -121,7 +118,7 @@ namespace SmartCache
             // Define optimization objective.
             //
             optimizationProblem.Objectives.Add(
-                new OptimizationObjective(name: "HitRate", minimize: false));*/
+                new OptimizationObjective(name: "HitRate", minimize: false));
 
             // Get a local reference to the optimizer to reuse when processing messages later on.
             //
