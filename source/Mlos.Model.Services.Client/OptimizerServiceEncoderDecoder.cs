@@ -18,7 +18,7 @@ namespace Mlos.Model.Services.Client
         {
             OptimizerService.SimpleHypergrid instance = new OptimizerService.SimpleHypergrid();
 
-            instance.GuestSubgrids.AddRange(hypergrid.Subgrids.SelectMany(subgridSet => subgridSet.Value.Select(subgrid => EncodeSubgridJoin(subgrid))));
+            instance.GuestSubgrids.AddRange(hypergrid.Subgrids.SelectMany(subgridSet => subgridSet.Value.Select(subgrid => EncodeJoinedSubgrid(subgrid))));
 
             instance.Dimensions.AddRange(hypergrid.Dimensions.Select(dimension => EncodeDimension(dimension)));
 
@@ -48,7 +48,7 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-        public static OptimizerService.GuestSubgrid EncodeSubgridJoin(SubgridJoin subgridJoin)
+        public static OptimizerService.GuestSubgrid EncodeJoinedSubgrid(JoinedSubgrid subgridJoin)
         {
             return new OptimizerService.GuestSubgrid
             {
@@ -317,9 +317,9 @@ namespace Mlos.Model.Services.Client
             return instance;
         }
 
-        public static SubgridJoin DecodeSubgridJoin(OptimizerService.GuestSubgrid subgrid)
+        public static JoinedSubgrid DecodeJoinedSubgrid(OptimizerService.GuestSubgrid subgrid)
         {
-            return new SubgridJoin
+            return new JoinedSubgrid
             {
                 Subgrid = DecodeHypergrid(subgrid.Subgrid),
                 OnExternalJoin = DecodeDimension(subgrid.ExternalPivotDimension),

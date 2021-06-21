@@ -48,6 +48,7 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
         /// <inheritdoc/>
         public void Register(string paramsJsonString, string objectiveName, double objectiveValue)
         {
+            Console.WriteLine("test");
             client.RegisterObservation(
                 new OptimizerService.RegisterObservationRequest
                 {

@@ -61,7 +61,7 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
             OptimizerHandle optimizerHandle = client.CreateOptimizer(
                 new CreateOptimizerRequest
                 {
-                    OptimizationProblem = optimizationProblem.ToOptimizerServiceOptimizationProblem(),
+                    OptimizationProblem = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem),
                     OptimizerConfig = string.Empty,
                 });
 
