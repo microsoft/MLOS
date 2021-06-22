@@ -8,7 +8,7 @@
 #
 # Note: We currently do not use imports in order to keep OptimizerMonitoringService
 # and OptimizerService seperate for future iterations (one may lead the other)
-#
+
 
 
 set -eu
