@@ -174,7 +174,8 @@ message Empty
 
 // Enum listing all simple dimension types.
 //
-enum DimensionType {
+enum DimensionType 
+{
     CATEGORICAL = 0;
     CONTINUOUS = 1;
     DISCRETE = 2;
@@ -233,7 +234,8 @@ message CompositeDimension
 //
 message PrimitiveValue
 {
-    oneof Value {
+    oneof Value 
+    {
         int64 IntValue = 1;
         double DoubleValue = 2;
         bool BoolValue = 3;
@@ -245,7 +247,8 @@ message PrimitiveValue
 //
 message Dimension
 {
-    oneof Dimension {
+    oneof Dimension
+    {
         ContinuousDimension ContinuousDimension = 1;
         DiscreteDimension DiscreteDimension = 2;
         OrdinalDimension OrdinalDimension = 3;
