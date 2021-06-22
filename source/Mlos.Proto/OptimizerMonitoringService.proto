@@ -58,7 +58,6 @@ message OptimizerList
     repeated OptimizerInfo Optimizers = 1;
 }
 
-
 // A request to predict objective values given specified features (parameters and context).
 //
 message PredictRequest
@@ -90,7 +89,6 @@ message RegisterObservationsRequest
     Observations Observations = 2;
 };
 
-
 // A representation of an optimization problem.
 //
 message OptimizationProblem
@@ -100,7 +98,6 @@ message OptimizationProblem
     SimpleHypergrid ObjectiveSpace = 3;
     repeated Objective Objectives = 4;
 };
-
 
 // An opaque handle to the optimizer that the client passes along with each request.
 //
@@ -118,9 +115,7 @@ message OptimizerInfo
     OptimizationProblem OptimizationProblem = 3;
 };
 
-// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
-// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
-// break Greg's PR. 
+// A list of observations. 
 // 
 message Observations
 {
