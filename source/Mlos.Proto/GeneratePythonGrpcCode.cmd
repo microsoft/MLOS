@@ -4,6 +4,8 @@
 @echo off
 rem We need to recreate the structure of the python module in the input to grpc
 rem to have the imports be generated correctly. See https://github.com/grpc/grpc/issues/9575#issuecomment-293934506
+rem Note: We currently do not use imports in order to keep OptimizerMonitoringService
+rem and OptimizerService seperate for future iterations (one may lead the other)
 
 rem Start in the script directory.
 pushd "%~dp0"
