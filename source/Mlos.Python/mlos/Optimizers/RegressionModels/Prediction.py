@@ -136,7 +136,7 @@ class Prediction:
 
     @classmethod
     def dataframe_from_json(cls, json_string):
-        return pd.read_json(json_string, orient='index')
+        return pd.read_json(json_string, orient='index').sort_index()
 
     def dataframe_to_json(self):
         return self.get_dataframe().to_json(orient='index', double_precision=15)
