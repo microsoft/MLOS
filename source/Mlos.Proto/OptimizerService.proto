@@ -18,10 +18,6 @@ service OptimizerService
     //
     rpc Suggest(SuggestRequest) returns (ConfigurationParameters);
 
-    // Adds an observation to the optimizer's data set.
-    //
-    rpc RegisterObservation(RegisterObservationRequest) returns (Empty);
-
     // Adds observations to the optimizer's data set.
     //
     rpc RegisterObservations(RegisterObservationsRequest) returns (Empty);
@@ -48,16 +44,6 @@ message SuggestRequest
     OptimizerHandle OptimizerHandle = 1;
     bool Random = 2;
     Context Context = 3;
-};
-
-
-
-// A request to add an observation to the optimizer's data set.
-//
-message RegisterObservationRequest
-{
-    OptimizerHandle OptimizerHandle = 1;
-    Observation Observation = 2;
 };
 
 // A request to add a observations to the optimizer's data set.
@@ -95,16 +81,6 @@ message OptimizerInfo
     string OptimizerConfigJsonString = 2;
     OptimizationProblem OptimizationProblem = 3;
 };
-
-
-// A representation of a single observation to be added to the optimizer's data set.
-//
-message Observation
-{
-    Features Features = 1;
-    ObjectiveValues ObjectiveValues = 2;
-};
-
 
 // A list of observations. TODO: make more sensible the difference between Observation and Observations. 
 // Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
