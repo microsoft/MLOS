@@ -56,11 +56,11 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
                     {
                         Features = new OptimizerService.Features
                         {
-                            FeaturesJsonString = paramsJsonString,
+                            FeaturesJsonString = "{\"0\":" + paramsJsonString + "}",
                         },
                         ObjectiveValues = new OptimizerService.ObjectiveValues
                         {
-                            ObjectiveValuesJsonString = @$"{{""{objectiveName}"": {objectiveValue} }}",
+                            ObjectiveValuesJsonString = "{\"0\":" + @$"{{""{objectiveName}"": {objectiveValue} }}" + "}",
                         },
                     },
                 });
