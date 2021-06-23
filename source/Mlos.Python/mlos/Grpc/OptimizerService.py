@@ -76,21 +76,6 @@ class OptimizerService(OptimizerServiceServicer):
             ParametersJsonString=json.dumps(suggested_params.to_dict())
         )
 
-    def RegisterObservation(self, request, context): # pylint: disable=unused-argument
-        # TODO: add an API to register observations in bulk.
-        # TODO: stop ignoring context
-        #
-        feature_values = json.loads(request.Observation.Features.FeaturesJsonString)
-        feature_values_dataframe = pd.DataFrame(feature_values, index=[0])
-
-        objective_values = json.loads(request.Observation.ObjectiveValues.ObjectiveValuesJsonString)
-        objective_values_dataframe = pd.DataFrame(objective_values, index=[0])
-
-        with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
-            optimizer.register(parameter_values_pandas_frame=feature_values_dataframe, target_values_pandas_frame=objective_values_dataframe)
-
-        return Empty()
-
     def RegisterObservations(self, request, context): # pylint: disable=unused-argument
         # TODO: stop ignoring context
         #
