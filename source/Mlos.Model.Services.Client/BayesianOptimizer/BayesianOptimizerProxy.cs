@@ -48,11 +48,11 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
         /// <inheritdoc/>
         public void Register(string paramsJsonString, string objectiveName, double objectiveValue)
         {
-            client.RegisterObservation(
-                new OptimizerService.RegisterObservationRequest
+            client.RegisterObservations(
+                new OptimizerService.RegisterObservationsRequest
                 {
                     OptimizerHandle = optimizerHandle,
-                    Observation = new OptimizerService.Observation
+                    Observations = new OptimizerService.Observations
                     {
                         Features = new OptimizerService.Features
                         {
