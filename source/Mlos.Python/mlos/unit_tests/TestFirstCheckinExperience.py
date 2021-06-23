@@ -25,7 +25,7 @@ class TestFirstCheckinExperience:
         mlos_team = SimpleHypergrid(
             name="mlos_team",
             dimensions=[
-                CategoricalDimension(name="member", values=["Ed", "Greg", "Sergiy", "Yaser", "Adam"])
+                CategoricalDimension(name="member", values=["Ed", "Greg", "Sergiy", "Yaser", "Adam", "Zack"])
             ]
         )
 

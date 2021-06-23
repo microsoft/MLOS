@@ -7,7 +7,7 @@ from mlos.Grpc import OptimizerService_pb2 as mlos_dot_Grpc_dot_OptimizerService
 
 class OptimizerServiceStub(object):
     """Exposes Bayesian Optimizer's functionality over gRPC.
-
+    
     """
 
     def __init__(self, channel):
@@ -50,12 +50,12 @@ class OptimizerServiceStub(object):
 
 class OptimizerServiceServicer(object):
     """Exposes Bayesian Optimizer's functionality over gRPC.
-
+    
     """
 
     def CreateOptimizer(self, request, context):
         """Creates an optimizer with the specified configuration.
-
+        
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -63,7 +63,7 @@ class OptimizerServiceServicer(object):
 
     def GetOptimizerInfo(self, request, context):
         """Returns information about optimizers configuration and optimization problem.
-
+        
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -71,7 +71,7 @@ class OptimizerServiceServicer(object):
 
     def Suggest(self, request, context):
         """Request a suggestion.
-
+        
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -79,7 +79,7 @@ class OptimizerServiceServicer(object):
 
     def RegisterObservation(self, request, context):
         """Adds an observation to the optimizer's data set.
-
+        
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -87,7 +87,7 @@ class OptimizerServiceServicer(object):
 
     def RegisterObservations(self, request, context):
         """Adds observations to the optimizer's data set.
-
+        
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -95,7 +95,7 @@ class OptimizerServiceServicer(object):
 
     def Echo(self, request, context):
         """Like ping.
-
+        
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -143,7 +143,7 @@ def add_OptimizerServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class OptimizerService(object):
     """Exposes Bayesian Optimizer's functionality over gRPC.
-
+    
     """
 
     @staticmethod

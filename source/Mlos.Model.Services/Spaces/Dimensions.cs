@@ -31,6 +31,16 @@ namespace Mlos.Model.Services.Spaces
         /// A dimension whose values have a total ordering but the distance between consecutive values is unspecified.
         /// </summary>
         CategoricalDimension,
+
+        /// <summary>
+        /// An empty dimension
+        /// </summary>
+        EmptyDimension,
+
+        /// <summary>
+        /// A dimension composed of smaller chunks of a dimension
+        /// </summary>
+        CompositeDimension,
     }
 
     public interface IDimension
@@ -114,6 +124,35 @@ namespace Mlos.Model.Services.Spaces
             ObjectType = DimensionTypeName.CategoricalDimension;
             Name = name;
             Values = new ReadOnlyCollection<object>(values);
+        }
+    }
+
+    public class EmptyDimension : IDimension
+    {
+        public DimensionTypeName ObjectType { get; set; }
+
+        public string Name { get; set; }
+
+        public EmptyDimension(string name, DimensionTypeName dataType)
+        {
+            ObjectType = dataType;
+            Name = name;
+        }
+    }
+
+    public class CompositeDimension : IDimension
+    {
+        public DimensionTypeName ChunkType { get; set; }
+
+        public string Name { get; set; }
+
+        public ReadOnlyCollection<IDimension> Values { get; }
+
+        public CompositeDimension(string name, DimensionTypeName chunkType, params IDimension[] values)
+        {
+            Name = name;
+            ChunkType = chunkType;
+            Values = new ReadOnlyCollection<IDimension>(values);
         }
     }
 }

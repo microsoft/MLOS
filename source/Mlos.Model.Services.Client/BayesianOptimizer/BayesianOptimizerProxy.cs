@@ -34,26 +34,13 @@ namespace Mlos.Model.Services.Client.BayesianOptimizer
         {
             OptimizerService.OptimizerInfo optimizerInfo = client.GetOptimizerInfo(optimizerHandle);
 
-            Hypergrid contextSpace = Hypergrid.FromJson(optimizerInfo.OptimizationProblem.ContextSpace?.HypergridJsonString);
-            Hypergrid objectiveSpace = Hypergrid.FromJson(optimizerInfo.OptimizationProblem.ObjectiveSpace?.HypergridJsonString);
-            Hypergrid parameterSpace = Hypergrid.FromJson(optimizerInfo.OptimizationProblem.ParameterSpace?.HypergridJsonString);
-
-            var optimizationProblem = new OptimizationProblem
-            {
-                ContextSpace = contextSpace,
-                ObjectiveSpace = objectiveSpace,
-                ParameterSpace = parameterSpace,
-            };
+            OptimizationProblem optimizationProblem = OptimizerServiceDecoder.DecodeOptimizationProblem(optimizerInfo.OptimizationProblem);
 
             // Add optimization objectives.
             //
             optimizationProblem.Objectives.AddRange(
                 optimizerInfo.OptimizationProblem.Objectives.Select(r =>
-                    new OptimizationObjective
-                    {
-                        Minimize = r.Minimize,
-                        Name = r.Name,
-                    }));
+                    new OptimizationObjective(r.Name, r.Minimize)));
 
             return optimizationProblem;
         }
