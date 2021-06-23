@@ -185,13 +185,14 @@ class TestOptimizerServiceEncoderDecoder:
             name="test",
             dimensions=[
                 ContinuousDimension(name="x", min=0, max=1),
-                OrdinalDimension(name="y", ordered_values=[1, 2, 3, 5, 10])
+                OrdinalDimension(name="y", ordered_values=[1, 2, 3, 5, 10]),
+                CategoricalDimension(name="y2", values=[True,False])
             ]
         )
         objective_space = SimpleHypergrid(
             name="z",
             dimensions=[
-                ContinuousDimension(name="z", min=-50, max=-49),
+                ContinuousDimension(name="z\n special", min=-50, max=-49),
                 ContinuousDimension(name="z1", min=-1, max=1)
             ]
         )
@@ -199,7 +200,7 @@ class TestOptimizerServiceEncoderDecoder:
             parameter_space=parameter_space,
             objective_space=objective_space,
             objectives=[
-                Objective(name="z", minimize=True),
+                Objective(name="z\n special", minimize=True),
                 Objective(name="z1", minimize=False)
             ]
         )
