@@ -172,18 +172,40 @@ class TestOptimizerMonitoringServiceEncoderDecoder:
             assert decoded_problem.context_space.random() in context_space
             assert context_space.random() in decoded_problem.context_space
 
+        # Feature Space
+        for _ in range(1000):
+            assert decoded_problem.feature_space.random() in optimization_problem.feature_space
+            assert optimization_problem.feature_space.random() in decoded_problem.feature_space
+
         print(decoded_problem.objectives)
         assert len(decoded_problem.objectives) == 2
-        assert decoded_problem.objectives[0].name=="z"
-        assert decoded_problem.objectives[1].name=="z1"
+        assert decoded_problem.objectives[0].name == "z"
+        assert decoded_problem.objectives[1].name == "z1"
         assert decoded_problem.objectives[0].minimize
-        assert decoded_problem.objectives[1].minimize == False
+        assert not decoded_problem.objectives[1].minimize
 
     def test_optimization_problem_none_context(self):
+        parameter_space = SimpleHypergrid(
+            name="test",
+            dimensions=[
+                ContinuousDimension(name="x", min=0, max=1),
+                OrdinalDimension(name="y", ordered_values=[1, 2, 3, 5, 10])
+            ]
+        )
+        objective_space = SimpleHypergrid(
+            name="z",
+            dimensions=[
+                ContinuousDimension(name="z", min=-50, max=-49),
+                ContinuousDimension(name="z1", min=-1, max=1)
+            ]
+        )
         optimization_problem = OptimizationProblem(
-            parameter_space=SimpleHypergrid(name="p_s", dimensions=[]),
-            objective_space=SimpleHypergrid(name="o_s", dimensions=[]),
-            objectives=[]
+            parameter_space=parameter_space,
+            objective_space=objective_space,
+            objectives=[
+                Objective(name="z", minimize=True),
+                Objective(name="z1", minimize=False)
+            ]
         )
 
         encoded_problem=OptimizerMonitoringServiceEncoder.encode_optimization_problem(optimization_problem)
@@ -192,4 +214,18 @@ class TestOptimizerMonitoringServiceEncoderDecoder:
         print(f"Context space is: {decoded_problem.context_space}")
         assert decoded_problem.context_space is None
 
+        # Ensure that the parameter space is still valid
+        # Parameter Space
+        for _ in range(1000):
+            assert decoded_problem.parameter_space.random() in parameter_space
+            assert parameter_space.random() in decoded_problem.parameter_space
 
+        # Output Space
+        for _ in range(1000):
+            assert decoded_problem.objective_space.random() in objective_space
+            assert objective_space.random() in decoded_problem.objective_space
+
+        # Feature Space
+        for _ in range(1000):
+            assert decoded_problem.feature_space.random() in optimization_problem.feature_space
+            assert optimization_problem.feature_space.random() in decoded_problem.feature_space
