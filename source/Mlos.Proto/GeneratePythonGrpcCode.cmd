@@ -5,6 +5,8 @@
 rem We need to recreate the structure of the python module in the input to grpc
 rem to have the imports be generated correctly. See https://github.com/grpc/grpc/issues/9575#issuecomment-293934506
 
+rem Note: We currently do not use proto imports although this would allow us to import proto files in the future
+
 rem Start in the script directory.
 pushd "%~dp0"
 

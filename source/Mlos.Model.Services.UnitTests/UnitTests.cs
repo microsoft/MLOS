@@ -8,278 +8,217 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+using Mlos.Model.Services.Client;
 using Mlos.Model.Services.Spaces;
 using Mlos.Model.Services.Spaces.JsonConverters;
-
 using Python.Runtime;
 using Xunit;
 
 namespace Mlos.Model.Services.UnitTests
 {
-    internal class PythonScriptsAndJsons
+    public class TestOptimizerServiceEncoderDecoder
     {
-        private const string RelativePathToCreateDimensionScript = @"PythonScripts\create_dimensions_and_spaces.py";
-        private const string RelativePathToDeserializeDimensionsScript = @"PythonScripts\deserialize_dimensions.py";
-        private const string RelativePathToDeserializeSimpleHypergridScript = @"PythonScripts\deserialize_simple_hypergrid.py";
-        private const string RelativePathToValidateReserializedHypergridScript = @"PythonScripts\validate_reserialized_hypergrid.py";
-
-        // FIXME: These json files are currently missing in the repo:
-        private const string RelativePathToSpinlockSearchSpaceJson = @"JSONs\SpinlockSearchSpace.json";
-
-        private static string createDimensionsScript = null;
-        private static string deserializeDimensionsScript = null;
-        private static string deserializeSimpleHypergridScript = null;
-        private static string validateReserializedHypergridScript = null;
-        private static string spinlockSearchSpaceJson = null;
-
-        public static string CreateDimensionsAndSpacesScript
+        [Fact]
+        public void TestEmptyDimension()
         {
-            get
+            var emptyDimension = new EmptyDimension("Empty", DimensionTypeName.OrdinalDimension);
+            var serialized0 = OptimizerServiceEncoder.EncodeEmptyDimension(emptyDimension);
+            var deserialized0 = OptimizerServiceDecoder.DecodeEmptyDimension(serialized0);
+
+            Assert.Equal(deserialized0.Name, emptyDimension.Name);
+            Assert.True(deserialized0.ObjectType.Equals(emptyDimension.ObjectType));
+
+            var serialized = OptimizerServiceEncoder.EncodeDimension(emptyDimension);
+            var deserialized = OptimizerServiceDecoder.DecodeDimension(serialized);
+
+            Assert.True(deserialized is EmptyDimension);
+            if (deserialized is EmptyDimension deserializedEmpty)
             {
-                if (createDimensionsScript is null)
-                {
-                    createDimensionsScript = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), RelativePathToCreateDimensionScript));
-                }
-
-                return createDimensionsScript;
+                Assert.Equal(deserializedEmpty.Name, emptyDimension.Name);
+                Assert.True(deserializedEmpty.ObjectType.Equals(emptyDimension.ObjectType));
             }
-        }
-
-        public static string DeserializeDimensionsScript
-        {
-            get
-            {
-                if (deserializeDimensionsScript is null)
-                {
-                    deserializeDimensionsScript = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), RelativePathToDeserializeDimensionsScript));
-                }
-
-                return deserializeDimensionsScript;
-            }
-        }
-
-        public static string DeserializeSimpleHypergridScript
-        {
-            get
-            {
-                if (deserializeSimpleHypergridScript is null)
-                {
-                    deserializeSimpleHypergridScript = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), RelativePathToDeserializeSimpleHypergridScript));
-                }
-
-                return deserializeSimpleHypergridScript;
-            }
-        }
-
-        public static string ValidateReserializedHypergridScript
-        {
-            get
-            {
-                if (validateReserializedHypergridScript is null)
-                {
-                    validateReserializedHypergridScript = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), RelativePathToValidateReserializedHypergridScript));
-                }
-
-                return validateReserializedHypergridScript;
-            }
-        }
-
-        public static string SpinlockSearchSpaceJson
-        {
-            get
-            {
-                if (spinlockSearchSpaceJson is null)
-                {
-                    spinlockSearchSpaceJson = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), RelativePathToSpinlockSearchSpaceJson));
-                }
-
-                return spinlockSearchSpaceJson;
-            }
-        }
-    }
-
-    public class TestSerializingAndDeserializing
-    {
-        private readonly ContinuousDimension continuous;
-        private DiscreteDimension discrete;
-        private OrdinalDimension ordinal;
-        private CategoricalDimension categorical;
-        private Hypergrid allKindsOfDimensions;
-
-        public TestSerializingAndDeserializing()
-        {
-            /* FIXME: This needs better cross-plat support and error handling.
-             * - We should include C:\Python37 as another PYTHONHOME location to look for by default
-             * - Currently this doesn't handle Linux very well
-             * - On Ubuntu Python 3.7 needs to be installed from a separate
-             *   repo, which installs as libpython3.7m.so which fails tobe
-             *   found due to the trailing "m".
-             */
-
-            string pathToVirtualEnv = Environment.GetEnvironmentVariable("PYTHONHOME");
-
-            if (string.IsNullOrEmpty(pathToVirtualEnv))
-            {
-                pathToVirtualEnv = @"c:\ProgramData\Anaconda3";
-            }
-            else
-            {
-                Environment.SetEnvironmentVariable("PYTHONHOME", pathToVirtualEnv, EnvironmentVariableTarget.Process);
-            }
-
-            string pathToPythonPkg = $"{pathToVirtualEnv}\\pkgs\\python-3.7.4-h5263a28_0";
-
-            Environment.SetEnvironmentVariable("PATH", $"{pathToVirtualEnv};{pathToPythonPkg}", EnvironmentVariableTarget.Process);
-            Environment.SetEnvironmentVariable("PYTHONPATH", $"{pathToVirtualEnv}\\Lib\\site-packages;{pathToVirtualEnv}\\Lib", EnvironmentVariableTarget.Process);
-
-            continuous = new ContinuousDimension(name: "continuous", min: 1, max: 10);
-            discrete = new DiscreteDimension(name: "discrete", min: 1, max: 10);
-            ordinal = new OrdinalDimension(name: "ordinal", orderedValues: new List<object>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, ascending: true);
-            categorical = new CategoricalDimension(name: "categorical", values: new List<object>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 });
-            allKindsOfDimensions = new Hypergrid(
-                name: "all_kinds_of_dimensions",
-                dimensions: new IDimension[]
-                {
-                    continuous,
-                    discrete,
-                    ordinal,
-                    categorical,
-                });
         }
 
         [Fact]
-        [Trait("Category", "SkipForCI")]
-        public void TestSerializingSimpleHypergrid()
+        public void TestCategoricalDimension()
         {
-            string originalValidSimpleHypergridJsonString = PythonScriptsAndJsons.SpinlockSearchSpaceJson;
+            object[] data = { "str", string.Empty, "cat", false, 9.12 };
+            var dimension = new CategoricalDimension("Dimension test", data);
+            var serialized = OptimizerServiceEncoder.EncodeCategoricalDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeCategoricalDimension(serialized);
 
-            Hypergrid spinlockSearchSpace = new Hypergrid(
-                "SpinlockSearchSpace",
-                new DiscreteDimension(name: "shortBackOffMilliSeconds", min: 1, max: 1 << 20),
-                new DiscreteDimension(name: "longBackOffMilliSeconds", min: 1, max: 1 << 20),
-                new DiscreteDimension(name: "longBackOffWaitMilliSeconds", min: 1, max: 1 << 20),
-                new DiscreteDimension(name: "minSpinCount", min: 1, max: 1 << 20),
-                new DiscreteDimension(name: "maxSpinCount", min: 1, max: 1 << 20),
-                new DiscreteDimension(name: "maxbackOffAttempts", min: 1, max: 1 << 20),
-                new DiscreteDimension(name: "acquireSpinCount", min: 1, max: 1 << 20),
-                new CategoricalDimension(name: "algorithm", values: new[] { "Optimistic", "ExponentialBackoff" }));
-            var jsonSerializerOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Converters =
-                {
-                    new JsonStringEnumConverter(),
-                    new HypergridJsonConverter(),
-                    new DimensionJsonConverter(),
-                },
-            };
-
-            string serializedJsonString = JsonSerializer.Serialize(spinlockSearchSpace, jsonSerializerOptions);
-            Assert.Equal(originalValidSimpleHypergridJsonString, serializedJsonString);
-
-            string yetAnotherSerializedJsonString = spinlockSearchSpace.ToJson();
-            Assert.Equal(originalValidSimpleHypergridJsonString, yetAnotherSerializedJsonString);
+            Assert.Equal(deserialized.Name, dimension.Name);
+            Assert.True(deserialized.Values.SequenceEqual(data));
         }
 
         [Fact]
-        [Trait("Category", "SkipForCI")]
-        public void TestPythonInterop()
+        public void TestContinuousDimension()
         {
-            var jsonSerializerOptions = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Converters =
-                {
-                    new JsonStringEnumConverter(),
-                    new HypergridJsonConverter(),
-                    new DimensionJsonConverter(),
-                },
-            };
-
-            string csContinuousJsonString = JsonSerializer.Serialize(continuous, jsonSerializerOptions);
-            string csDiscreteJsonString = JsonSerializer.Serialize(discrete, jsonSerializerOptions);
-            string csOrdinalJsonString = JsonSerializer.Serialize(ordinal, jsonSerializerOptions);
-            string csCategoricalJsonString = JsonSerializer.Serialize(categorical, jsonSerializerOptions);
-            string csSimpleHypergridJsonString = JsonSerializer.Serialize(allKindsOfDimensions, jsonSerializerOptions);
-
-            using (Py.GIL())
-            {
-                using PyScope pythonScope = Py.CreateScope();
-
-                pythonScope.Set("cs_continuous_dimension_json_string", csContinuousJsonString);
-                pythonScope.Set("cs_discrete_dimension_json_string", csDiscreteJsonString);
-                pythonScope.Set("cs_ordinal_dimension_json_string", csOrdinalJsonString);
-                pythonScope.Set("cs_categorical_dimension_json_string", csCategoricalJsonString);
-                pythonScope.Set("cs_simple_hypergrid_json_string", csSimpleHypergridJsonString);
-
-                pythonScope.Exec(PythonScriptsAndJsons.CreateDimensionsAndSpacesScript);
-                pythonScope.Exec(PythonScriptsAndJsons.DeserializeDimensionsScript);
-
-                bool successfullyDeserializedDimensions = pythonScope.Get("success").As<bool>();
-                string exceptionMessage = string.Empty;
-                if (!successfullyDeserializedDimensions)
-                {
-                    exceptionMessage = pythonScope.Get("exception_message").As<string>();
-                }
-
-                Assert.True(successfullyDeserializedDimensions, exceptionMessage);
-
-                pythonScope.Exec(PythonScriptsAndJsons.DeserializeSimpleHypergridScript);
-
-                bool successfullyDeserializedSimpleHypergrid = pythonScope.Get("success").As<bool>();
-                if (!successfullyDeserializedSimpleHypergrid)
-                {
-                    exceptionMessage = pythonScope.Get("exception_message").As<string>();
-                }
-
-                Assert.True(successfullyDeserializedSimpleHypergrid, exceptionMessage);
-
-                string pySimpleHypergridJsonString = pythonScope.Get("py_simple_hypergrid_json_string").As<string>();
-                Hypergrid simpleHypergridDeserializedFromPython = JsonSerializer.Deserialize<Hypergrid>(pySimpleHypergridJsonString, jsonSerializerOptions);
-
-                Assert.True(simpleHypergridDeserializedFromPython.Name == "all_kinds_of_dimensions");
-                Assert.True(simpleHypergridDeserializedFromPython.Dimensions.Count == 4);
-
-                string reserializedHypergrid = JsonSerializer.Serialize(simpleHypergridDeserializedFromPython, jsonSerializerOptions);
-
-                pythonScope.Set("cs_reserialized_hypergrid_json_string", reserializedHypergrid);
-                pythonScope.Exec(PythonScriptsAndJsons.ValidateReserializedHypergridScript);
-
-                bool successfullyValidatedReserializedHypergrid = pythonScope.Get("success").As<bool>();
-                if (!successfullyValidatedReserializedHypergrid)
-                {
-                    exceptionMessage = pythonScope.Get("exception_message").As<string>();
-                }
-
-                Assert.True(successfullyValidatedReserializedHypergrid, exceptionMessage);
-            }
-
-            string currentDirectory = Directory.GetCurrentDirectory();
-            Console.WriteLine($"Current directory {currentDirectory}");
+            var dimension = new ContinuousDimension("Test_Continuous \0", -150, 12.24, false, true);
+            var serialized = OptimizerServiceEncoder.EncodeContinuousDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeContinuousDimension(serialized);
+            Assert.Equal(deserialized.Name, dimension.Name);
+            Assert.Equal(deserialized.IncludeMax, dimension.IncludeMax);
+            Assert.Equal(deserialized.IncludeMin, dimension.IncludeMin);
+            Assert.Equal(deserialized.Max, dimension.Max);
+            Assert.Equal(deserialized.Min, dimension.Min);
+            Assert.True(deserialized.ObjectType == dimension.ObjectType);
         }
 
         [Fact]
-        [Trait("Category", "SkipForCI")]
-        public void TestNewConverter()
+        public void TestDiscreteDimension()
         {
-            JsonSerializerOptions options = new JsonSerializerOptions
+            var dimension = new DiscreteDimension("_%% \n \t \\//", long.MinValue, long.MaxValue);
+            var serialized = OptimizerServiceEncoder.EncodeDiscreteDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeDiscreteDimension(serialized);
+
+            Assert.Equal(deserialized.Name, dimension.Name);
+            Assert.Equal(deserialized.Min, dimension.Min);
+            Assert.Equal(deserialized.Max, dimension.Max);
+        }
+
+        [Fact]
+        public void TestOrdinalDimension()
+        {
+            object[] data = new object[] { "the", false, "brown", "fox", 8, "the", "lazy", "dog" };
+            var dimension = new OrdinalDimension("ordinal test", false, data);
+            var serialized = OptimizerServiceEncoder.EncodeOrdinalDimension(dimension);
+            var deserialized = OptimizerServiceDecoder.DecodeOrdinalDimension(serialized);
+
+            Assert.Equal(dimension.Name, deserialized.Name);
+            Assert.True(deserialized.OrderedValues.SequenceEqual(data));
+            Assert.False(deserialized.OrderedValues.SequenceEqual(new object[] { "ensure failure" }));
+        }
+
+        [Fact]
+        public void TestHypergrid()
+        {
+            var dataDim1 = new object[] { "a", "b", false, 2, 5.8, "c " };
+            var dim0 = new CategoricalDimension("dim0", false, "a", "b", false, 2, 5.8, "c ");
+            var dim1 = new ContinuousDimension("dim1", 0, 10.2, false, true);
+            var hypergrid = new Hypergrid("hypergrid", dim0, dim1);
+            var serialized = OptimizerServiceEncoder.EncodeHypergrid(hypergrid);
+            var deserialized = OptimizerServiceDecoder.DecodeHypergrid(serialized);
+            Assert.Equal(deserialized.Name, hypergrid.Name);
+            Assert.True(deserialized.Dimensions[0] is CategoricalDimension);
+            Assert.True(deserialized.Dimensions[1] is ContinuousDimension);
+
+            Assert.True(
+                ((CategoricalDimension)deserialized.Dimensions[0]).Values.SequenceEqual(
+                ((CategoricalDimension)hypergrid.Dimensions[0]).Values));
+            Assert.Equal(
+                ((ContinuousDimension)deserialized.Dimensions[1]).Name,
+                dim1.Name);
+            Assert.Equal(
+                ((ContinuousDimension)deserialized.Dimensions[1]).Min,
+                dim1.Min);
+            Assert.Equal(
+               ((ContinuousDimension)deserialized.Dimensions[1]).Max,
+               dim1.Max);
+            Assert.Equal(
+               ((ContinuousDimension)deserialized.Dimensions[1]).IncludeMin,
+               dim1.IncludeMin);
+            Assert.Equal(
+               ((ContinuousDimension)deserialized.Dimensions[1]).IncludeMax,
+               dim1.IncludeMax);
+        }
+
+        [Fact]
+        public void TestOptimizationProblemContext()
+        {
+            var in1 = new ContinuousDimension("in_1", 0, 10);
+            var in2 = new DiscreteDimension("in_2", 1, 20);
+            var inputHypergrid = new Hypergrid("input", in1, in2);
+            var out1 = new ContinuousDimension("out_1", -5, 7);
+            var objectiveHypergrid = new Hypergrid("output", out1);
+            var context1 = new DiscreteDimension("ctx_1", -100, -0);
+            var contextHypergrid = new Hypergrid("context", context1);
+            var objectives = new OptimizationObjective[]
             {
-                WriteIndented = true,
-                Converters =
-                {
-                    new HypergridJsonConverter(),
-                    new DimensionJsonConverter(),
-                },
+                new OptimizationObjective("out_1", true),
+                new OptimizationObjective("nonExistent", false),
+            };
+            var optimizationProblem = new OptimizationProblem(inputHypergrid, contextHypergrid, objectiveHypergrid, objectives);
+            var serialized = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
+            var deserialized = OptimizerServiceDecoder.DecodeOptimizationProblem(serialized);
+
+            Assert.Equal(optimizationProblem.ParameterSpace.Name, deserialized.ParameterSpace.Name);
+            Assert.Equal(optimizationProblem.ObjectiveSpace.Name, deserialized.ObjectiveSpace.Name);
+            Assert.Equal(optimizationProblem.ContextSpace.Name, deserialized.ContextSpace.Name);
+
+            Assert.Equal(optimizationProblem.Objectives[0].Name, objectives[0].Name);
+            Assert.Equal(optimizationProblem.Objectives[0].Minimize, objectives[0].Minimize);
+            Assert.Equal(optimizationProblem.Objectives[1].Name, objectives[1].Name);
+            Assert.Equal(optimizationProblem.Objectives[1].Minimize, objectives[1].Minimize);
+
+            // This is not a rigorous test but it should be sufficient given the other tests in this set.
+            Assert.Equal(optimizationProblem.ParameterSpace.Dimensions[0].Name, deserialized.ParameterSpace.Dimensions[0].Name);
+            Assert.Equal(optimizationProblem.ParameterSpace.Dimensions[1].Name, deserialized.ParameterSpace.Dimensions[1].Name);
+            Assert.Equal(optimizationProblem.ObjectiveSpace.Dimensions[0].Name, deserialized.ObjectiveSpace.Dimensions[0].Name);
+            Assert.Equal(optimizationProblem.ContextSpace.Dimensions[0].Name, deserialized.ContextSpace.Dimensions[0].Name);
+        }
+
+        [Fact]
+        public void TestOptimizationProblemNoContext()
+        {
+            var in1 = new ContinuousDimension("in_1", 0, 10);
+            var in2 = new DiscreteDimension("in_2", 1, 20);
+            var inputHypergrid = new Hypergrid("input", in1, in2);
+            var out1 = new ContinuousDimension("out_1", -5, 7);
+            var objectiveHypergrid = new Hypergrid("output", out1);
+            var objectives = new OptimizationObjective[]
+            {
+                new OptimizationObjective("out_1", true),
+                new OptimizationObjective("nonExistent", false),
+            };
+            var optimizationProblem = new OptimizationProblem(inputHypergrid, objectiveHypergrid, objectives);
+            var serialized = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
+            var deserialized = OptimizerServiceDecoder.DecodeOptimizationProblem(serialized);
+            Assert.Null(deserialized.ContextSpace);
+        }
+
+        [Fact]
+        public void TestOptimizationProblemSubgridObjectives()
+        {
+            Hypergrid cacheSearchSpace = new Hypergrid(
+                name: "smart_cache_config",
+                dimension: new CategoricalDimension("cache_implementation", 0, 1))
+            .Join(
+                subgrid: new Hypergrid(
+                    name: "lru_cache_config",
+                    dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
+                onExternalDimension: new CategoricalDimension("cache_implementation", 0))
+            .Join(
+                subgrid: new Hypergrid(
+                    name: "mru_cache_config",
+                    dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
+                onExternalDimension: new CategoricalDimension("cache_implementation", 1));
+
+            var optimizationProblem = new OptimizationProblem
+            {
+                ParameterSpace = cacheSearchSpace,
+                ContextSpace = null,
+                ObjectiveSpace = new Hypergrid(
+                    name: "objectives",
+                    dimensions: new ContinuousDimension(name: "HitRate", min: 0.0, max: 1.0)),
             };
 
-            var json = JsonSerializer.Serialize<Hypergrid>(allKindsOfDimensions, options);
-            string serializedHypergrid = allKindsOfDimensions.ToJson();
+            optimizationProblem.Objectives.Add(
+                new OptimizationObjective(name: "HitRate", minimize: false));
 
-            var deserializedSimpleHypergrid = JsonSerializer.Deserialize<Hypergrid>(serializedHypergrid, options);
+            var serialized = OptimizerServiceEncoder.EncodeOptimizationProblem(optimizationProblem);
+            var deserialized = OptimizerServiceDecoder.DecodeOptimizationProblem(serialized);
+
+            Assert.True(deserialized.Objectives.Count == 1);
+            Assert.Equal(deserialized.Objectives[0].Name, optimizationProblem.Objectives[0].Name);
+            Assert.True(deserialized.ObjectiveSpace.Dimensions.Count == 1);
         }
     }
 

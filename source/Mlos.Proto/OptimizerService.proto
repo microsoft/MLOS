@@ -50,7 +50,6 @@ message SuggestRequest
     Context Context = 3;
 };
 
-
 // A request to add an observation to the optimizer's data set.
 //
 message RegisterObservationRequest
@@ -67,23 +66,13 @@ message RegisterObservationsRequest
     Observations Observations = 2;
 };
 
-// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
-// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
-// break Greg's PR. 
-// 
-message Observations
-{
-    Features Features = 1;
-    ObjectiveValues ObjectiveValues = 2;
-};
-
 // A representation of an optimization problem.
 //
 message OptimizationProblem
 {
-    Hypergrid ParameterSpace = 1;
-    Hypergrid ContextSpace = 2;
-    Hypergrid ObjectiveSpace = 3;
+    SimpleHypergrid ParameterSpace = 1;
+    optional SimpleHypergrid ContextSpace = 2;
+    SimpleHypergrid ObjectiveSpace = 3;
     repeated Objective Objectives = 4;
 };
 
@@ -106,6 +95,16 @@ message OptimizerInfo
 // A representation of a single observation to be added to the optimizer's data set.
 //
 message Observation
+{
+    Features Features = 1;
+    ObjectiveValues ObjectiveValues = 2;
+};
+
+// A list of observations. TODO: make more sensible the difference between Observation and Observations. 
+// Specifically - they can probably be the same thing, but changing the name of Observation to Observations would
+// break Greg's PR. 
+// 
+message Observations
 {
     Features Features = 1;
     ObjectiveValues ObjectiveValues = 2;
@@ -139,13 +138,6 @@ message ObjectiveValues
     string ObjectiveValuesJsonString = 1;
 };
 
-// Serialized representation of a Hypergrid.
-//
-message Hypergrid
-{
-    string HypergridJsonString = 1;
-};
-
 // Representation of a single objective.
 //
 message Objective
@@ -174,22 +166,10 @@ message Empty
 {
 };
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                                                                                                      //
-//                                                  Hypergrids                                                          //
-//                                                                                                                      //
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// The code below defines all types required to serialize a Hypergrid. For now these types are not used by any of the 
-// gRPC service APIs. We will make that switch in a subsequent PR along with the changes to the clients.
-//
-// The reason for using proto3 message types in our service instead of JSON strings is better control the API surface
-// and explicitly specify the schema for the clients to follow. It also helps with versioning.
-
-
 // Enum listing all simple dimension types.
 //
-enum DimensionType {
+enum DimensionType 
+{
     CATEGORICAL = 0;
     CONTINUOUS = 1;
     DISCRETE = 2;
@@ -248,7 +228,8 @@ message CompositeDimension
 //
 message PrimitiveValue
 {
-    oneof Value {
+    oneof Value 
+    {
         int64 IntValue = 1;
         double DoubleValue = 2;
         bool BoolValue = 3;
@@ -260,7 +241,8 @@ message PrimitiveValue
 //
 message Dimension
 {
-    oneof Dimension {
+    oneof Dimension
+    {
         ContinuousDimension ContinuousDimension = 1;
         DiscreteDimension DiscreteDimension = 2;
         OrdinalDimension OrdinalDimension = 3;
@@ -270,9 +252,7 @@ message Dimension
     }
 };
 
-// Representation of a SimpleHypergrid. When we switch the gRPC service to use these new message types, we will rename this message type to 'Hypergrid'.
-// Right now this would collide with a message type already used by the service.
-//
+// Representation of a SimpleHypergrid. 
 message SimpleHypergrid
 {
     string Name = 1;
@@ -280,12 +260,12 @@ message SimpleHypergrid
     repeated GuestSubgrid GuestSubgrids = 3;
 };
 
-// When one Hypergrid is joined to another along a pivot dimension, we represent it as a GuestSubgrid where:
-// * the Subgrid is the joined Hypergrid,
+// When one SimpleHypergrid is joined to another along a pivot dimension, we represent it as a GuestSubgrid where:
+// * the Subgrid is the joined SimpleHypergrid,
 // * the ExternalPivotDimension is the dimension used in the join.
 //
 // We use the join mechanism to represent hierarchical parameter spaces, where a subspace is only meaningful, if it's switch/flag
-// parameter has been turned on in the parent Hypergrid. For example: a switch parameter could decide which of the data structures
+// parameter has been turned on in the parent SimpleHypergrid. For example: a switch parameter could decide which of the data structures
 // to use, and thus activate all of the parameters for that datastructure.
 //
 message GuestSubgrid

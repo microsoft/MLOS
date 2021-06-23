@@ -86,17 +86,17 @@ namespace SmartCache
             //
             Hypergrid cacheSearchSpace = new Hypergrid(
                 name: "smart_cache_config",
-                dimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.LeastRecentlyUsed, CacheEvictionPolicy.MostRecentlyUsed))
+                dimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.LeastRecentlyUsed.ToString(), CacheEvictionPolicy.MostRecentlyUsed.ToString()))
             .Join(
                 subgrid: new Hypergrid(
                     name: "lru_cache_config",
                     dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
-                onExternalDimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.LeastRecentlyUsed))
+                onExternalDimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.LeastRecentlyUsed.ToString()))
             .Join(
                 subgrid: new Hypergrid(
                     name: "mru_cache_config",
                     dimension: new DiscreteDimension("cache_size", min: 1, max: 1 << 12)),
-                onExternalDimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.MostRecentlyUsed));
+                onExternalDimension: new CategoricalDimension("cache_implementation", CacheEvictionPolicy.MostRecentlyUsed.ToString()));
 
             // Create optimization problem.
             //
@@ -118,13 +118,7 @@ namespace SmartCache
             // Define optimization objective.
             //
             optimizationProblem.Objectives.Add(
-                new OptimizationObjective
-                {
-                    // Tell the optimizer that we want to maximize hit rate.
-                    //
-                    Name = "HitRate",
-                    Minimize = false,
-                });
+                new OptimizationObjective(name: "HitRate", minimize: false));
 
             // Get a local reference to the optimizer to reuse when processing messages later on.
             //
@@ -198,7 +192,7 @@ namespace SmartCache
                     // the config and the resulting performance.
                     //
                     var currentConfigDictionary = new Dictionary<string, object>();
-                    currentConfigDictionary["cache_implementation"] = smartCacheConfig.EvictionPolicy;
+                    currentConfigDictionary["cache_implementation"] = smartCacheConfig.EvictionPolicy.ToString();
 
                     _ = smartCacheConfig.EvictionPolicy switch
                     {

@@ -21,8 +21,7 @@
   <ItemGroup>
     <Compile Include="BayesianOptimizer\BayesianOptimizerFactory.cs" />
     <Compile Include="BayesianOptimizer\BayesianOptimizerProxy.cs" />
-    <Compile Include="OptimizationObjectiveExtension.cs" />
-    <Compile Include="OptimizationProblemExtension.cs" />
+    <Compile Include="OptimizerServiceEncoderDecoder.cs" />
   </ItemGroup>
   <Import Project="$(BaseDir)\build\Mlos.NetCore.targets" />
 </Project>

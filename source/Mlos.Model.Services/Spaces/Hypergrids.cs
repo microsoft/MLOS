@@ -20,48 +20,20 @@ namespace Mlos.Model.Services.Spaces
     /// </summary>
     public abstract class IHypergrid
     {
-        public abstract string ToJson();
+    }
+
+    /// <summary>
+    /// Structure describing joined subgrids.
+    /// </summary>
+    public struct JoinedSubgrid
+    {
+        public IDimension OnExternalJoin { get; set; }
+
+        public Hypergrid Subgrid;
     }
 
     public class Hypergrid : IHypergrid
     {
-        private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            Converters =
-            {
-                new JsonStringEnumConverter(),
-                new HypergridJsonConverter(),
-                new DimensionJsonConverter(),
-                new SubgridJoinJsonConverter(),
-                new HashSetJsonConverter<SubgridJoin>(),
-                new JsonDictionaryConverter<string, HashSet<SubgridJoin>>(),
-            },
-        };
-
-        /// <summary>
-        /// Create Hypergrid from json string.
-        /// </summary>
-        /// <param name="jsonString"></param>
-        /// <returns></returns>
-        public static Hypergrid FromJson(string jsonString)
-        {
-            Hypergrid hypergrid = (jsonString != null) ? JsonSerializer.Deserialize<Hypergrid>(jsonString, JsonSerializerOptions) : null;
-
-            return hypergrid;
-        }
-
-        /// <summary>
-        /// Internal structure describing subgrid joins.
-        /// </summary>
-        internal struct SubgridJoin
-        {
-            internal IDimension OnExternalJoin { get; set; }
-
-            internal Hypergrid Subgrid;
-        }
-
-        // This is for the benefit of the JsonSerializer.
         public enum HypergridType
         {
             /// <summary>
@@ -78,14 +50,14 @@ namespace Mlos.Model.Services.Spaces
 
         public Hypergrid RootGrid { get; private set; }
 
-        internal Dictionary<string, HashSet<SubgridJoin>> Subgrids { get; }
+        public Dictionary<string, HashSet<JoinedSubgrid>> Subgrids { get; }
 
         public Hypergrid(string name, IDimension dimension)
         {
             ObjectType = HypergridType.SimpleHypergrid;
             Name = name;
             Dimensions = new ReadOnlyCollection<IDimension>(new[] { dimension });
-            Subgrids = new Dictionary<string, HashSet<SubgridJoin>>();
+            Subgrids = new Dictionary<string, HashSet<JoinedSubgrid>>();
         }
 
         public Hypergrid(string name, params IDimension[] dimensions)
@@ -93,10 +65,10 @@ namespace Mlos.Model.Services.Spaces
             ObjectType = HypergridType.SimpleHypergrid;
             Name = name;
             Dimensions = new ReadOnlyCollection<IDimension>(dimensions);
-            Subgrids = new Dictionary<string, HashSet<SubgridJoin>>();
+            Subgrids = new Dictionary<string, HashSet<JoinedSubgrid>>();
         }
 
-        internal Hypergrid(string name, IDimension[] dimensions, Dictionary<string, HashSet<SubgridJoin>> subgrids)
+        internal Hypergrid(string name, IDimension[] dimensions, Dictionary<string, HashSet<JoinedSubgrid>> subgrids)
         {
             ObjectType = HypergridType.SimpleHypergrid;
             Name = name;
@@ -114,11 +86,11 @@ namespace Mlos.Model.Services.Spaces
         {
             if (!Subgrids.ContainsKey(onExternalDimension.Name))
             {
-                Subgrids.Add(onExternalDimension.Name, new HashSet<SubgridJoin>());
+                Subgrids.Add(onExternalDimension.Name, new HashSet<JoinedSubgrid>());
             }
 
             Subgrids[onExternalDimension.Name].Add(
-                new SubgridJoin
+                new JoinedSubgrid
                 {
                     Subgrid = subgrid,
                     OnExternalJoin = onExternalDimension,
@@ -127,12 +99,6 @@ namespace Mlos.Model.Services.Spaces
             subgrid.RootGrid = this;
 
             return this;
-        }
-
-        /// <inheritdoc/>
-        public override string ToJson()
-        {
-            return JsonSerializer.Serialize(this, JsonSerializerOptions);
         }
     }
 }

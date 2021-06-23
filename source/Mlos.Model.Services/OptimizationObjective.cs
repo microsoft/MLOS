@@ -19,13 +19,17 @@ namespace Mlos.Model.Services
         /// <summary>
         /// Gets or sets optimization objective name.
         /// </summary>
-        [JsonPropertyName("name")]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the objective is meant to be either maximized or minimized.
         /// </summary>
-        [JsonPropertyName("minimize")]
         public bool Minimize { get; set; }
+
+        public OptimizationObjective(string name, bool minimize)
+        {
+            Name = name;
+            Minimize = minimize;
+        }
     }
 }
