@@ -4,6 +4,7 @@
 #
 from abc import ABC, abstractmethod
 
+import numpy as np
 import pandas as pd
 
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
@@ -56,6 +57,11 @@ class ObjectiveFunctionBase(ABC):
         # If evaluate_point is not implemented in the subclass, we can make it work like so:
         #
         point_df = point.to_dataframe()
+
+        # TODO remove non numeric numbers
+        #
+        point_df = point_df.select_dtypes(include=np.number)
+
         values_df = self.evaluate_dataframe(point_df)
         values_point = Point.from_dataframe(values_df)
         return values_point

@@ -3,6 +3,8 @@
 # Licensed under the MIT License.
 #
 import numpy as np
+import pandas as pd
+import pandas as pd
 
 from mlos.Exceptions import UnableToProduceGuidedSuggestionException
 from mlos.Logger import create_logger
@@ -191,3 +193,12 @@ class ExperimentDesigner:
         except UnableToProduceGuidedSuggestionException:
             self.logger.info("Failed to produce guided suggestion. Producing random suggestion instead.")
             return self.optimization_problem.parameter_space.random()
+
+    def add_pending_suggestion(self, suggestion: Point):
+        ...
+
+    def remove_pending_suggestion(self, suggestion: Point, update_tentative_pareto=True):
+        ...
+
+    def remove_pending_suggestions(self, suggestions_df: pd.DataFrame):
+        ...
