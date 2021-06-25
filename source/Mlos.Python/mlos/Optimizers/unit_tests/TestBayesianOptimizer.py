@@ -26,6 +26,8 @@ from mlos.OptimizerEvaluationTools.SyntheticFunctions.PolynomialObjective import
 from mlos.OptimizerEvaluationTools.SyntheticFunctions.sample_functions import quadratic
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
+from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, experiment_designer_config_store
+from mlos.Optimizers.ExperimentDesigner.ParallelExperimentDesigner import ParallelExperimentDesigner, parallel_experiment_designer_config_store
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
@@ -39,7 +41,6 @@ from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
 
 
-
 class TestBayesianOptimizer:
     """ Tests if the random search optimizer does anything useful at all.
 
@@ -50,7 +51,7 @@ class TestBayesianOptimizer:
         """ Sets up all the singletons needed to test the BayesianOptimizer.
 
         """
-        #warnings.simplefilter("error")
+        # warnings.simplefilter("error")
         global_values.declare_singletons()
         global_values.tracer = Tracer(actor_id=cls.__name__, thread_id=0)
         cls.logger = create_logger(logger_name=cls.__name__)
@@ -88,14 +89,11 @@ class TestBayesianOptimizer:
         except OSError:
             pass
 
-
-
     @classmethod
     def teardown_class(cls) -> None:
         cls.server.stop(grace=None).wait(timeout=1)
         cls.server.wait_for_termination(timeout=1)
         cls.optimizer_service_channel.close()
-
 
         print(f"Dumping trace to {cls.trace_output_path}")
         global_values.tracer.dump_trace_to_file(output_file_path=cls.trace_output_path)
@@ -201,7 +199,9 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError):
             bayesian_optimizer.optimum()
 
-        bayesian_optimizer.register(parameter_values_pandas_frame=pd.DataFrame({'x': [0.0]}), target_values_pandas_frame=pd.DataFrame({'y': [1.0]}))
+        bayesian_optimizer.register(
+            parameter_values_pandas_frame=pd.DataFrame({'x': [0.0]}),
+            target_values_pandas_frame=pd.DataFrame({'y': [1.0]}))
         bayesian_optimizer.optimum()
 
     @trace()
@@ -217,7 +217,6 @@ class TestBayesianOptimizer:
             objective_space=objective_function.output_space,
             objectives=[Objective(name='y', minimize=True)]
         )
-
 
         optimizer_config = bayesian_optimizer_config_store.default
         optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
@@ -291,7 +290,6 @@ class TestBayesianOptimizer:
 
         print(optimizer_config.to_json(indent=2))
 
-
         if use_remote_optimizer:
             bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
                 optimization_problem=optimization_problem,
@@ -309,7 +307,7 @@ class TestBayesianOptimizer:
             suggested_params = bayesian_optimizer.suggest()
             suggested_params_dict = suggested_params.to_dict()
             target_value = quadratic(**suggested_params_dict)
-            print(f"[{i+1}/{num_iterations}] Suggested params: {suggested_params_dict}, target_value: {target_value}")
+            print(f"[{i + 1}/{num_iterations}] Suggested params: {suggested_params_dict}, target_value: {target_value}")
 
             input_values_df = pd.DataFrame({param_name: [param_value] for param_name, param_value in suggested_params_dict.items()})
             target_values_df = pd.DataFrame({'y': [target_value]})
@@ -373,7 +371,7 @@ class TestBayesianOptimizer:
 
         optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
-        # We can make this test more useful as a Unit Test by restricting its duration.
+        # Restrict UnitTest execution time.
         #
         optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
         if optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__:
@@ -383,22 +381,27 @@ class TestBayesianOptimizer:
             decision_tree_config.min_samples_to_fit = 10
             decision_tree_config.n_new_samples_before_refit = 10
 
-        if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
-            optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
+        if optimizer_config.experiment_designer_implementation == ExperimentDesigner.__name__:
+            experiment_designer_config = optimizer_config.experiment_designer_config
+        elif optimizer_config.experiment_designer_implementation == ParallelExperimentDesigner.__name__:
+            experiment_designer_config = optimizer_config.parallel_experiment_designer_config
+        else:
+            assert False
 
-        if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == RandomNearIncumbentOptimizer.__name__:
-            optimizer_config.experiment_designer_config.random_near_incumbent_optimizer_config.num_starting_configs = 10
-            optimizer_config.experiment_designer_config.random_near_incumbent_optimizer_config.max_num_iterations = 10
+        if experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
+            experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
 
-        if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
-            optimizer_config.experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration = min(
-                optimizer_config.experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration,
-                1000
-            )
+        if experiment_designer_config.numeric_optimizer_implementation == RandomNearIncumbentOptimizer.__name__:
+            experiment_designer_config.random_near_incumbent_optimizer_config.num_starting_configs = 10
+            experiment_designer_config.random_near_incumbent_optimizer_config.max_num_iterations = 10
+
+        if experiment_designer_config.numeric_optimizer_implementation == RandomSearchOptimizer.__name__:
+            experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration = min(
+                experiment_designer_config.random_search_optimizer_config.num_samples_per_iteration,
+                1000)
 
         print(f"[Restart: {restart_num}] Creating a BayesianOptimimizer with the following config: ")
         print(optimizer_config.to_json(indent=2))
-
 
         if not use_remote_optimizer:
             bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
@@ -422,7 +425,7 @@ class TestBayesianOptimizer:
                 for param_name, param_value in suggested_params
             })
             target_values_df = y.to_dataframe()
-            bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df,target_values_pandas_frame=target_values_df)
+            bayesian_optimizer.register(parameter_values_pandas_frame=input_values_df, target_values_pandas_frame=target_values_df)
 
         best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
         print(f"[Restart:  {restart_num}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
@@ -473,8 +476,8 @@ class TestBayesianOptimizer:
                         polynomial_objective_config=Point(
                             seed=17,
                             input_domain_dimension=2,
-                            input_domain_min=-2**10,
-                            input_domain_width=2**11,
+                            input_domain_min=-2 ** 10,
+                            input_domain_width=2 ** 11,
                             max_degree=2,
                             include_mixed_coefficients=True,
                             percent_coefficients_zeroed=0.0,
@@ -533,7 +536,6 @@ class TestBayesianOptimizer:
                 lower_bounds_on_pareto_volume.append(lower_bound)
                 upper_bounds_on_pareto_volume.append(upper_bound)
 
-
         pareto_volumes_over_time_df = pd.DataFrame({
             'lower_bounds': lower_bounds_on_pareto_volume,
             'upper_bounds': upper_bounds_on_pareto_volume
@@ -555,7 +557,6 @@ class TestBayesianOptimizer:
             if not (min_pct_increase_in_upper_bound > threshold):
                 print(pareto_volumes_over_time_df)
                 assert min_pct_increase_in_upper_bound > threshold
-
 
     def test_registering_multiple_objectives(self):
 
@@ -648,6 +649,7 @@ class TestBayesianOptimizer:
                 {'function_value': -np.exp(-50 * (parameters.x - 0.5 * context.y - 0.5) ** 2)},
                 index=index
             )
+
         input_space = SimpleHypergrid(name="input", dimensions=[ContinuousDimension(name="x", min=0, max=1)])
         output_space = SimpleHypergrid(
             name="objective",
@@ -683,11 +685,10 @@ class TestBayesianOptimizer:
         )
 
         with pytest.raises(ValueError, match="Context required"):
-             local_optimizer.register(
-                 parameter_values_pandas_frame=parameter_df,
-                 target_values_pandas_frame=target_df
-             )
-
+            local_optimizer.register(
+                parameter_values_pandas_frame=parameter_df,
+                target_values_pandas_frame=target_df
+            )
 
         with pytest.raises(ValueError, match="Incompatible shape of parameters and context"):
             local_optimizer.register(
@@ -736,7 +737,6 @@ class TestBayesianOptimizer:
         with pytest.raises(ValueError, match="requires context to be not None"):
             local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT)
 
-
         # can't register, predict, suggest with context on remote optimizer
         with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.register(
@@ -747,7 +747,7 @@ class TestBayesianOptimizer:
 
         with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.predict(parameter_values_pandas_frame=parameter_df,
-                                    context_values_pandas_frame=context_df)
+                                     context_values_pandas_frame=context_df)
 
         with pytest.raises(NotImplementedError, match="Context not currently supported"):
             remote_optimizer.suggest(context=context_df)
@@ -771,12 +771,10 @@ class TestBayesianOptimizer:
                 context_values_pandas_frame=context.to_dataframe()
             )
 
-        optimum_y_1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=-1).to_dataframe())
-        optimum_y1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT , context=Point(y=1).to_dataframe())
+        optimum_y_1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT, context=Point(y=-1).to_dataframe())
+        optimum_y1 = local_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT, context=Point(y=1).to_dataframe())
         assert optimum_y1.x > .6
         assert optimum_y_1.x < .4
-
-
 
     def validate_optima(self, optimizer: OptimizerBase):
         should_raise_for_predicted_value = False
@@ -798,11 +796,10 @@ class TestBayesianOptimizer:
             predictions_df = predictions_df[
                 predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value].notna() &
                 (predictions_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value] != 0)
-            ]
+                ]
 
             if len(predictions_df.index) == 0:
                 should_raise_for_confidence_bounds = True
-
 
         if should_raise_for_predicted_value:
 
@@ -832,9 +829,8 @@ class TestBayesianOptimizer:
             lcb_95_ci_config, lcb_95_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.05)
             lcb_99_ci_config, lcb_99_ci_optimum = optimizer.optimum(OptimumDefinition.LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG, alpha=0.01)
 
-
             # At the very least we can assert the ordering. Note that the configs corresponding to each of the below confidence bounds can be different, as confidence intervals
-            # change width non-linearily both with degrees of freedom, and with prediction variance.
+            # change width non-linearly both with degrees of freedom, and with prediction variance.
             #
             if not (lcb_99_ci_optimum.lower_confidence_bound <= lcb_95_ci_optimum.lower_confidence_bound <= lcb_90_ci_optimum.lower_confidence_bound <= predicted_optimum.predicted_value):
                 # If the the prediction for predicted_value has too few degrees of freedom, it's impossible to construct a confidence interval for it.
@@ -858,7 +854,6 @@ class TestBayesianOptimizer:
                 else:
                     print(predicted_optimum.predicted_value, ucb_90_ci_optimum.upper_confidence_bound, ucb_95_ci_optimum.upper_confidence_bound, ucb_99_ci_optimum.upper_confidence_bound)
                     assert False
-
 
     def test_bayesian_optimizer_with_random_near_incumbent(self):
         objective_function_config = objective_function_config_store.get_config_by_name('multi_objective_waves_3_params_2_objectives_half_pi_phase_difference')
@@ -892,4 +887,3 @@ class TestBayesianOptimizer:
                 parameter_values_pandas_frame=parameters.to_dataframe(),
                 target_values_pandas_frame=objectives.to_dataframe()
             )
-
