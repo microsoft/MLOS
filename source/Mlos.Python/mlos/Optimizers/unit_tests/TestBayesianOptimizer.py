@@ -163,6 +163,12 @@ class TestBayesianOptimizer:
             for _ in range(num_guided_samples):
                 # Suggest the parameters
                 suggested_params = bayesian_optimizer.suggest()
+
+                #suggestion_metadata = suggested_params.pop("__mlos_metadata.suggestion_id")
+
+                suggestion_metadata = suggested_params.pop("__mlos_metadata")
+
+
                 suggested_params_dict = suggested_params.to_dict()
 
                 # Reformat them to feed the parameters to the target
@@ -305,6 +311,7 @@ class TestBayesianOptimizer:
         old_optimum = np.inf
         for i in range(num_iterations):
             suggested_params = bayesian_optimizer.suggest()
+            suggestion_metadata = suggested_params.pop("__mlos_metadata")
             suggested_params_dict = suggested_params.to_dict()
             target_value = quadratic(**suggested_params_dict)
             print(f"[{i + 1}/{num_iterations}] Suggested params: {suggested_params_dict}, target_value: {target_value}")
@@ -440,14 +447,22 @@ class TestBayesianOptimizer:
 
     @trace()
     def test_bayesian_optimizer_default_copies_parameters(self):
-        config = bayesian_optimizer_config_store.default
-        config.min_samples_required_for_guided_design_of_experiments = 1
-        config.experiment_designer_config.fraction_random_suggestions = .1
+        optimizer_config = bayesian_optimizer_config_store.default
 
-        original_config = bayesian_optimizer_config_store.default
-        assert original_config.min_samples_required_for_guided_design_of_experiments == 10
-        print(original_config.experiment_designer_config.fraction_random_suggestions)
-        assert original_config.experiment_designer_config.fraction_random_suggestions == .5
+        assert optimizer_config.min_samples_required_for_guided_design_of_experiments == 10
+        optimizer_config.min_samples_required_for_guided_design_of_experiments = 1
+
+        if optimizer_config.experiment_designer_implementation == ExperimentDesigner.__name__:
+            experiment_designer_config = optimizer_config.experiment_designer_config
+        elif optimizer_config.experiment_designer_implementation == ParallelExperimentDesigner.__name__:
+            experiment_designer_config = optimizer_config.parallel_experiment_designer_config
+        else:
+            assert False
+
+        print(experiment_designer_config.fraction_random_suggestions)
+
+        assert experiment_designer_config.fraction_random_suggestions == .5
+        experiment_designer_config.fraction_random_suggestions = .1
 
     @pytest.mark.parametrize("objective_function_implementation", [Hypersphere, MultiObjectiveNestedPolynomialObjective])
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])

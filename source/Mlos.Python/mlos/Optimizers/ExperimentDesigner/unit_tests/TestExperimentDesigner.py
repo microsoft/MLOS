@@ -139,6 +139,7 @@ class TestExperimentDesigner:
         for _ in range(num_guided_samples):
             # Suggest the parameters
             suggested_params = bayesian_optimizer.suggest()
+            suggestion_metadata = suggested_params.pop("__mlos_metadata")
             suggested_params_dict = suggested_params.to_dict()
 
             # Reformat them to feed the parameters to the target
@@ -271,6 +272,9 @@ class TestExperimentDesigner:
         old_optimum = np.inf
         for i in range(num_iterations):
             suggested_params = bayesian_optimizer.suggest()
+            #TODO
+            suggestion_metadata = suggested_params.pop("__mlos_metadata")
+
             suggested_params_dict = suggested_params.to_dict()
             target_value = quadratic(**suggested_params_dict)
             print(f"[{i + 1}/{num_iterations}] Suggested params: {suggested_params_dict}, target_value: {target_value}")
@@ -393,17 +397,6 @@ class TestExperimentDesigner:
         best_config_point, best_objective = bayesian_optimizer.optimum(optimum_definition=OptimumDefinition.BEST_OBSERVATION)
         print(f"[Restart:  {restart_num}] Optimum config: {best_config_point}, optimum objective: {best_objective}")
         self.validate_optima(optimizer=bayesian_optimizer)
-
-    @trace()
-    def test_bayesian_optimizer_default_copies_parameters(self):
-        config = bayesian_optimizer_config_store.default
-        config.min_samples_required_for_guided_design_of_experiments = 1
-        config.experiment_designer_config.fraction_random_suggestions = .1
-
-        original_config = bayesian_optimizer_config_store.default
-        assert original_config.min_samples_required_for_guided_design_of_experiments == 10
-        print(original_config.experiment_designer_config.fraction_random_suggestions)
-        assert original_config.experiment_designer_config.fraction_random_suggestions == .5
 
     @pytest.mark.parametrize("objective_function_implementation", [Hypersphere, MultiObjectiveNestedPolynomialObjective])
     @pytest.mark.parametrize("minimize", ["all", "none", "some"])
