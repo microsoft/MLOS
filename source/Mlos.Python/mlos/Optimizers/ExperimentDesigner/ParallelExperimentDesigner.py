@@ -4,6 +4,7 @@
 #
 from typing import Dict
 from uuid import uuid4
+import collections
 
 import numpy as np
 import pandas as pd
@@ -12,7 +13,7 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
-from mlos.Spaces import CategoricalDimension, ContinuousDimension, Point, SimpleHypergrid
+from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension, Point, SimpleHypergrid
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Tracer import trace
 
@@ -37,11 +38,13 @@ parallel_experiment_designer_config_store = ComponentConfigStore(
                 RandomSearchOptimizer.__name__,
                 GlowWormSwarmOptimizer.__name__
             ]),
-            ContinuousDimension('fraction_random_suggestions', min=0, max=1)
+            ContinuousDimension('fraction_random_suggestions', min=0, max=1),
+            DiscreteDimension(name="max_pending_suggestions", min=0, max=10 ** 3),
         ]
     ).join(
         subgrid=multi_objective_probability_of_improvement_utility_function_config_store.parameter_space,
-        on_external_dimension=CategoricalDimension('utility_function_implementation', values=[MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__])
+        on_external_dimension=CategoricalDimension('utility_function_implementation',
+                                                   values=[MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__])
     ).join(
         subgrid=random_search_optimizer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
@@ -50,14 +53,16 @@ parallel_experiment_designer_config_store = ComponentConfigStore(
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[GlowWormSwarmOptimizer.__name__])
     ).join(
         subgrid=random_near_incumbent_optimizer_config_store.parameter_space,
-        on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomNearIncumbentOptimizer.__name__])
+        on_external_dimension=CategoricalDimension('numeric_optimizer_implementation',
+                                                   values=[RandomNearIncumbentOptimizer.__name__])
     ),
     default=Point(
         utility_function_implementation=MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__,
         numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
         multi_objective_probability_of_improvement_config=multi_objective_probability_of_improvement_utility_function_config_store.default,
         random_search_optimizer_config=random_search_optimizer_config_store.default,
-        fraction_random_suggestions=0.5
+        fraction_random_suggestions=0.5,
+        max_pending_suggestions=20,
     )
 )
 
@@ -131,7 +136,7 @@ class ParallelExperimentDesigner:
 
         # We need to keep track of all pending suggestions.
         #
-        self._pending_suggestions: Dict[str, Point] = dict()
+        self._pending_suggestions: collections.OrderedDict[str, Point] = collections.OrderedDict()
 
     @trace()
     def suggest(
@@ -185,16 +190,17 @@ class ParallelExperimentDesigner:
         :param suggestion:
         :return:
         """
-        suggestion_id = suggestion["__mlos_metadata"]["suggestion_id"]
+        suggestion_id = suggestion["__mlos_metadata.suggestion_id"]
 
-        # TODO we need retention policy to deal with forgotten.
+        # Keep number pending suggestions in limits.
         #
-        # Remove
         num_pending_suggestions = len(self._pending_suggestions)
+        max_pending_suggestions = self.config.max_pending_suggestions
 
-        # TODO pending
-        if num_pending_suggestions > 0:
-            b = 1
+        if num_pending_suggestions > max_pending_suggestions:
+            # Remove pending suggestions in the order they were created.
+            #
+            self._pending_suggestions.popitem(last=False)
 
         self._pending_suggestions[suggestion_id] = suggestion
         self._update_tentative_pareto()
@@ -205,7 +211,7 @@ class ParallelExperimentDesigner:
         update_tentative_pareto: bool = True
     ):
         if "__mlos_metadata.suggestion_id" in suggestion:
-            suggestion_id = suggestion["__mlos_metadata"]["suggestion_id"]
+            suggestion_id = suggestion["__mlos_metadata.suggestion_id"]
             if suggestion_id in self._pending_suggestions:
                 del self._pending_suggestions[suggestion_id]
 
