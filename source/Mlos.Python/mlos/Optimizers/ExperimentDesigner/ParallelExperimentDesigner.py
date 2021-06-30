@@ -7,6 +7,7 @@ from uuid import uuid4
 import collections
 
 import numpy as np
+import pandas
 import pandas as pd
 from mlos.Exceptions import UnableToProduceGuidedSuggestionException
 from mlos.Logger import create_logger
@@ -136,7 +137,7 @@ class ParallelExperimentDesigner:
 
         # We need to keep track of all pending suggestions.
         #
-        self._pending_suggestions: collections.OrderedDict[str, Point] = collections.OrderedDict()
+        self._pending_suggestions: collections.OrderedDict[str, (Point, DataFrame)] = collections.OrderedDict()
 
     @trace()
     def suggest(
@@ -171,14 +172,15 @@ class ParallelExperimentDesigner:
             random=random
         )
 
-        self.add_pending_suggestion(suggestion)
+        self.add_pending_suggestion(suggestion, context_values_dataframe)
 
         return suggestion
 
     @trace()
     def add_pending_suggestion(
         self,
-        suggestion: Point
+        suggestion: Point,
+        context_df: pandas.DataFrame
     ):
         """Adds a pending suggestion to our internal data structures.
 
@@ -202,7 +204,7 @@ class ParallelExperimentDesigner:
             #
             self._pending_suggestions.popitem(last=False)
 
-        self._pending_suggestions[suggestion_id] = suggestion
+        self._pending_suggestions[suggestion_id] = (suggestion, context_df)
         self._update_tentative_pareto()
 
     def remove_pending_suggestion(
@@ -238,8 +240,9 @@ class ParallelExperimentDesigner:
         if num_pending_suggestions > 0:
             features_dfs = []
             for _, suggestion in self._pending_suggestions.items():
-                parameters_df = suggestion.to_dataframe()
-                features_df = self.optimization_problem.construct_feature_dataframe(parameters_df=parameters_df)
+                parameters_df = suggestion[0].to_dataframe()
+                context_df = suggestion[1]
+                features_df = self.optimization_problem.construct_feature_dataframe(parameters_df=parameters_df, context_df=context_df)
                 features_dfs.append(features_df)
 
             features_for_all_pending_suggestions_df = pd.concat(features_dfs, ignore_index=True)
