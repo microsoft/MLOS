@@ -82,6 +82,7 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         }
         self._regressor = LassoCV(**self.lasso_model_kwargs)
         self._trained: bool = False
+        self.last_refit_iteration_number = None
 
         self.categorical_zero_cols_idx_to_delete_ = None
         self.dof_ = 0
@@ -126,23 +127,6 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         num_new_samples = num_samples - self.num_observations_used_to_fit
         return num_new_samples >= model_config.num_new_samples_per_input_dimension_before_refit * num_input_dims
 
-    def _transform_x(self, x_df: DataFrame):
-        # confirm feature_values_pandas_frame contains all expected columns
-        #  if any are missing, impute NaN values
-        missing_column_names = set.difference(set(self.input_dimension_names), set(x_df.columns.values))
-        for missing_column_name in missing_column_names:
-            x_df[missing_column_name] = np.NaN
-
-        # impute 0s for NaNs (NaNs can come from hierarchical hypergrids)
-        x_df.fillna(value=0, inplace=True)
-
-        # construct traditional design matrix when fitting with one hot encoded categorical dimensions
-        if len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()) > 0:
-            design_matrix = self._create_one_hot_encoded_design_matrix(x_df)
-        else:
-            design_matrix = x_df.to_numpy()
-        return design_matrix
-
     @trace()
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number):
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
@@ -182,7 +166,7 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
-        # dataframe column shortcuts
+        # Prediction dataframe column shortcuts
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
@@ -209,7 +193,6 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
             # else:
             #     design_matrix = features_df.to_numpy()
             design_matrix = self._transform_x(features_df)
-            print(f'design_matrix.shape: {design_matrix.shape}')
             prediction_dataframe[predicted_value_col] = self._regressor.predict(design_matrix)
 
             # compute variance needed for prediction interval
@@ -226,13 +209,29 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
             predictions.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
         return predictions
 
+    def _transform_x(self, x_df: DataFrame):
+        # confirm feature_values_pandas_frame contains all expected columns
+        #  if any are missing, impute NaN values
+        missing_column_names = set.difference(set(self.input_dimension_names), set(x_df.columns.values))
+        for missing_column_name in missing_column_names:
+            x_df[missing_column_name] = np.NaN
+
+        # impute 0s for NaNs (NaNs can come from hierarchical hypergrids)
+        x_df.fillna(value=0, inplace=True)
+
+        # construct traditional design matrix when fitting with one hot encoded categorical dimensions
+        if len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()) > 0:
+            design_matrix = self._create_one_hot_encoded_design_matrix(x_df)
+        else:
+            design_matrix = x_df.to_numpy()
+        return design_matrix
+
     def _create_one_hot_encoded_design_matrix(self, x: DataFrame) -> np.ndarray:
         assert len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()) > 0
 
         # use the following to create one hot encoding columns prior to constructing fit_x and powers_ table
         num_continuous_features = len(self.continuous_dimension_names)
         continuous_features_x = x[self.continuous_dimension_names]
-        print(f'continuous dim names: {self.continuous_dimension_names}')
 
         dummy_var_cols = self.one_hot_encoder_adapter.get_one_hot_encoded_column_names()
         num_dummy_vars = len(dummy_var_cols)
