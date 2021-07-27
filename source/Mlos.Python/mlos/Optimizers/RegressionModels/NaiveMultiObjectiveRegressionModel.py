@@ -7,13 +7,11 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
-from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import MultiObjectiveGoodnessOfFitMetrics
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
-from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
+from mlos.Spaces import Hypergrid, Point
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 class NaiveMultiObjectiveRegressionModel(MultiObjectiveRegressionModel):
@@ -56,10 +54,10 @@ class NaiveMultiObjectiveRegressionModel(MultiObjectiveRegressionModel):
         return all(regressor.trained for _, regressor in self._regressors_by_objective_name)
 
     def fit(
-        self,
-        features_df: pd.DataFrame,
-        targets_df: pd.DataFrame,
-        iteration_number: int
+            self,
+            features_df: pd.DataFrame,
+            targets_df: pd.DataFrame,
+            iteration_number: int
     ) -> None:
         for objective_name, regressor in self._regressors_by_objective_name:
             if objective_name not in targets_df.columns:
@@ -72,9 +70,9 @@ class NaiveMultiObjectiveRegressionModel(MultiObjectiveRegressionModel):
             )
 
     def predict(
-        self,
-        features_df: pd.DataFrame,
-        include_only_valid_rows: bool = True
+            self,
+            features_df: pd.DataFrame,
+            include_only_valid_rows: bool = True
     ) -> MultiObjectivePrediction:
         multi_objective_predicitons = MultiObjectivePrediction(objective_names=self.output_dimension_names)
         for objective_name, regressor in self._regressors_by_objective_name:
@@ -83,10 +81,10 @@ class NaiveMultiObjectiveRegressionModel(MultiObjectiveRegressionModel):
         return multi_objective_predicitons
 
     def compute_goodness_of_fit(
-        self,
-        features_df: pd.DataFrame,
-        targets_df: pd.DataFrame,
-        data_set_type: DataSetType
+            self,
+            features_df: pd.DataFrame,
+            targets_df: pd.DataFrame,
+            data_set_type: DataSetType
     ) -> MultiObjectiveGoodnessOfFitMetrics:
         multi_objective_goodness_of_fit_metrics = MultiObjectiveGoodnessOfFitMetrics(objective_names=self.output_dimension_names)
         for objective_name, regressor in self._regressors_by_objective_name:

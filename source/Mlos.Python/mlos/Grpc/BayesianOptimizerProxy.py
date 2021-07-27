@@ -151,9 +151,3 @@ class BayesianOptimizerProxy(OptimizerBase):
         valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
         prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
         return prediction
-
-    def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
-        pass
-
-    def reset_focus(self):# pylint: disable=no-self-use
-        pass
