@@ -218,9 +218,3 @@ class BayesianOptimizer(OptimizerBase):
             objective_name = self.optimization_problem.objective_names[0]
 
         return self.surrogate_model.predict(feature_values_pandas_frame)[objective_name]
-
-    def focus(self, subspace):
-        ...
-
-    def reset_focus(self):
-        ...
