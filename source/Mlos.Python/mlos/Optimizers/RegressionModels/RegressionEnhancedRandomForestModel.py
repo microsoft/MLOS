@@ -299,7 +299,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             'n_estimators': [10, 50, 100],
             'max_features': max_feature_param
         }
-        print(f'RERF::performing random forest grid search CV')
+        self.logger.info(f"Performing Random Forest Grid Search CV")
         rf_gscv = GridSearchCV(self.random_forest_regressor_, rf_params)
         rf_gscv.fit(x_filtered_to_detected_features, y_residuals)
 
