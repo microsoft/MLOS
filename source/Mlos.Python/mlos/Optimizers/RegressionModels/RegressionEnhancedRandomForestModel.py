@@ -356,6 +356,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             for _, xi in model_design_matrix_dataframe.iterrows():
                 leverage_x = np.matmul(np.matmul(xi.T, self.partial_hat_matrix_), xi)
                 prediction_var = self.base_regressor_standard_error_ * (1.0 + leverage_x)
+                if prediction_var < 0:
+                    prediction_var = 0
                 var_list.append(prediction_var)
 
             prediction_dataframe[predicted_value_var_col] = var_list
