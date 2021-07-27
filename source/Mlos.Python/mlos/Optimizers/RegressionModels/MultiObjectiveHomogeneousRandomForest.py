@@ -32,7 +32,7 @@ class MultiObjectiveHomogeneousRandomForest(NaiveMultiObjectiveRegressionModel):
     ):
         NaiveMultiObjectiveRegressionModel.__init__(
             self,
-            model_type=type(self),
+            model_type=HomogeneousRandomForestRegressionModel,
             model_config=model_config,
             input_space=input_space,
             output_space=output_space,
