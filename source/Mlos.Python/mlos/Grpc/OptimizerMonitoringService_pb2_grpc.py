@@ -7,7 +7,7 @@ from mlos.Grpc import OptimizerMonitoringService_pb2 as mlos_dot_Grpc_dot_Optimi
 
 class OptimizerMonitoringServiceStub(object):
     """Exposes Bayesian Optimizer's functionality over gRPC.
-    
+
     """
 
     def __init__(self, channel):
@@ -65,12 +65,12 @@ class OptimizerMonitoringServiceStub(object):
 
 class OptimizerMonitoringServiceServicer(object):
     """Exposes Bayesian Optimizer's functionality over gRPC.
-    
+
     """
 
     def ListExistingOptimizers(self, request, context):
         """Returns a list of existing optimizer instances.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -78,7 +78,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def GetOptimizerInfo(self, request, context):
         """Returns information about optimizers configuration and optimization problem.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -86,7 +86,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def GetOptimizerConvergenceState(self, request, context):
         """Returns the current optimizer convergence state.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -94,7 +94,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def ComputeGoodnessOfFitMetrics(self, request, context):
         """Returns the computed goodness of fit metrics.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -102,7 +102,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def IsTrained(self, request, context):
         """Check if optimizer has been trained.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -110,7 +110,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def RegisterObservations(self, request, context):
         """Adds observations to the optimizer's data set.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -118,7 +118,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def Predict(self, request, context):
         """Produces a prediction for specified features.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -126,7 +126,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def GetAllObservations(self, request, context):
         """Returns all observations registered for a given optimizer.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -134,7 +134,7 @@ class OptimizerMonitoringServiceServicer(object):
 
     def Echo(self, request, context):
         """Like ping.
-        
+
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -197,7 +197,7 @@ def add_OptimizerMonitoringServiceServicer_to_server(servicer, server):
  # This class is part of an EXPERIMENTAL API.
 class OptimizerMonitoringService(object):
     """Exposes Bayesian Optimizer's functionality over gRPC.
-    
+
     """
 
     @staticmethod

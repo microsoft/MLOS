@@ -7,6 +7,8 @@ rem to have the imports be generated correctly. See https://github.com/grpc/grpc
 rem Note: We currently do not use imports in order to keep OptimizerMonitoringService
 rem and OptimizerService seperate for future iterations (one may lead the other)
 
+rem Note: We currently do not use proto imports although this would allow us to import proto files in the future
+
 rem Start in the script directory.
 pushd "%~dp0"
 

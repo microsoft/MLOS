@@ -7,8 +7,8 @@
 # to have the imports be generated correctly.
 # See https://github.com/grpc/grpc/issues/9575#issuecomment-293934506
 #
-# Note: We currently do not use imports in order to keep OptimizerMonitoringService
-# and OptimizerService seperate for future iterations (one may lead the other)
+
+# Note: We currently do not use proto imports although this would allow us to import proto files in the future
 #
 
 

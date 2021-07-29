@@ -192,6 +192,23 @@ class OptimizerServiceDecoder:
     }
 
     @staticmethod
+    def decode_hypergrid(hypergrid: OptimizerService_pb2.SimpleHypergrid) -> SimpleHypergrid:
+        assert isinstance(hypergrid, OptimizerService_pb2.SimpleHypergrid)
+        decoded_hypergrid = SimpleHypergrid(
+            name=hypergrid.Name,
+            dimensions=[OptimizerServiceDecoder.decode_dimension(dimension) for dimension in hypergrid.Dimensions]
+        )
+
+        for subgrid in hypergrid.GuestSubgrids:
+            decoded_subgrid = OptimizerServiceDecoder.decode_subgrid(subgrid)
+            decoded_hypergrid.join(
+                subgrid=decoded_subgrid.subgrid,
+                on_external_dimension=decoded_subgrid.join_dimension
+            )
+
+        return decoded_hypergrid
+
+    @staticmethod
     def decode_optimization_problem(optimization_problem_pb2: OptimizerService_pb2.OptimizationProblem) -> OptimizationProblem:
         return OptimizationProblem(
             parameter_space=OptimizerServiceDecoder.decode_hypergrid(optimization_problem_pb2.ParameterSpace),
@@ -269,23 +286,6 @@ class OptimizerServiceDecoder:
             chunks_type=OptimizerServiceDecoder.pb2_dimension_types_to_dimension_types[serialized.ChunkType],
             chunks=decoded_chunks
         )
-
-    @staticmethod
-    def decode_hypergrid(hypergrid: OptimizerService_pb2.SimpleHypergrid) -> SimpleHypergrid:
-        assert isinstance(hypergrid, OptimizerService_pb2.SimpleHypergrid)
-        decoded_hypergrid = SimpleHypergrid(
-            name=hypergrid.Name,
-            dimensions=[OptimizerServiceDecoder.decode_dimension(dimension) for dimension in hypergrid.Dimensions]
-        )
-
-        for subgrid in hypergrid.GuestSubgrids:
-            decoded_subgrid = OptimizerServiceDecoder.decode_subgrid(subgrid)
-            decoded_hypergrid.join(
-                subgrid=decoded_subgrid.subgrid,
-                on_external_dimension=decoded_subgrid.join_dimension
-            )
-
-        return decoded_hypergrid
 
     @staticmethod
     def decode_dimension(dimension: OptimizerService_pb2.Dimension) -> Dimension:
