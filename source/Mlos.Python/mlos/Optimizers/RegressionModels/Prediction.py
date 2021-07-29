@@ -117,6 +117,7 @@ class Prediction:
                     violated_rows_df = dataframe[dataframe[dataframe[mean_variance_col].notnull()][mean_variance_col] < 0]
                     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
                         print(violated_rows_df)
+                        print(violated_rows_df[mean_variance_col])
                     print(f"Num invalid rows: {len(violated_rows_df.index)}")
                     print(f"Index: {violated_rows_df.index}")
                     print(f"{mean_variance_col}: {violated_rows_df[mean_variance_col]}")

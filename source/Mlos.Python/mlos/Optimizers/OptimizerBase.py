@@ -194,22 +194,3 @@ class OptimizerBase(ABC):
 
         config_at_optimum = Point.from_dataframe(parameters_df.loc[[index_of_best]])
         return config_at_optimum, optimum_value
-
-    @abstractmethod
-    def focus(self, subspace):
-        """Force the optimizer to focus on a specific subspace.
-
-        This could be a great way to pass priors to the optimizer, as well as play with the component for the developers.
-
-        :param subspace:
-        :return:
-        """
-        raise NotImplementedError("All subclasses must implement this method.")
-
-    @abstractmethod
-    def reset_focus(self):
-        """Changes focus back to the full search space.
-
-        :return:
-        """
-        raise NotImplementedError("All subclasses must implement this method.")

@@ -8,10 +8,6 @@ class CacheInterface(ABC):
     """ An interface implemented by all cache implementations."""
 
     @abstractmethod
-    def __init__(self):
-        ...
-
-    @abstractmethod
     def __iter__(self):
         raise NotImplementedError()
 
