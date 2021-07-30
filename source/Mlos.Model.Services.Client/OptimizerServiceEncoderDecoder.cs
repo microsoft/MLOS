@@ -48,21 +48,12 @@ namespace Mlos.Model.Services.Client
             };
         }
 
-<<<<<<< HEAD
         public static OptimizerService.GuestSubgrid EncodeJoinedSubgrid(JoinedSubgrid subgridJoin)
         {
             return new OptimizerService.GuestSubgrid
             {
                 ExternalPivotDimension = EncodeDimension(subgridJoin.OnExternalJoin),
                 Subgrid = EncodeHypergrid(subgridJoin.Subgrid),
-=======
-        public static OptimizerService.GuestSubgrid EncodeJoinedSubgrid(JoinedSubgrid joinedSubgrid)
-        {
-            return new OptimizerService.GuestSubgrid
-            {
-                ExternalPivotDimension = EncodeDimension(joinedSubgrid.OnExternalJoin),
-                Subgrid = EncodeHypergrid(joinedSubgrid.Subgrid),
->>>>>>> origin/main
             };
         }
 
