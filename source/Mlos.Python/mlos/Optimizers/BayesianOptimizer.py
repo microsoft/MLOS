@@ -14,6 +14,8 @@ from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesi
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
+from mlos.Optimizers.RegressionModels.LassoCrossValidatedRegressionModel import LassoCrossValidatedRegressionModel
+from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import RegressionEnhancedRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Tracer import trace
@@ -61,14 +63,20 @@ class BayesianOptimizer(OptimizerBase):
         #
         assert self.optimizer_config.surrogate_model_implementation in (
             HomogeneousRandomForestRegressionModel.__name__,
-            MultiObjectiveHomogeneousRandomForest.__name__
+            MultiObjectiveHomogeneousRandomForest.__name__,
+            LassoCrossValidatedRegressionModel.__name__,
+            RegressionEnhancedRandomForestRegressionModel.__name__
         )
 
         # Note that even if the user requested a HomogeneousRandomForestRegressionModel, we still create a MultiObjectiveRegressionModel
         # with just a single RandomForest inside it. This means we have to maintain only a single interface.
         #
+        # TODO : Ask Adam why model_config assignment is .homogeneous_random_forest_regression_model_config
+        #        Expected the passed optimizer_config would specify the model_config to be used as the value for surrogate_model_implementation
+        print(f'self.optimizer_config: {self.optimizer_config}')
         self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveHomogeneousRandomForest(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
+            # model_config=self.optimizer_config.surrogate_model_implementation,
             input_space=self.optimization_problem.feature_space,
             output_space=self.surrogate_model_output_space,
             logger=self.logger
