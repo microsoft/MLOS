@@ -128,7 +128,10 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     def num_observations_used_to_fit(self):
         return self.last_refit_iteration_number
 
-    def should_fit(self, num_samples: int) -> bool:
+    def should_fit(
+            self,
+            num_samples: int
+    ) -> bool:
         root_base_model_should_fit = self.base_regressor_.should_fit(num_samples=num_samples)
         # TODO : determine min sample needed to fit based on model configs
         random_forest_should_fit = True
@@ -254,7 +257,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         return self
 
-    def _fit_random_forest_regression(self, x_star, y_residuals):
+    def _fit_random_forest_regression(
+            self,
+            x_star,
+            y_residuals
+    ):
         # Assumes x has already been transformed and the reduced feature space and residuals relative to base model
         #  are passed to the random forest regression
         if self.model_config.perform_initial_random_forest_hyper_parameter_search:
@@ -268,7 +275,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         return self
 
-    def _execute_grid_search_for_random_forest_regressor_model(self, x_filtered_to_detected_features, y_residuals):
+    def _execute_grid_search_for_random_forest_regressor_model(
+            self,
+            x_filtered_to_detected_features,
+            y_residuals
+    ):
         model_config = self.model_config.sklearn_random_forest_regression_model_config
         self.random_forest_regressor_ = RandomForestRegressor(
             n_estimators=model_config.n_estimators,
@@ -356,13 +367,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             for _, xi in model_design_matrix_dataframe.iterrows():
                 leverage_x = np.matmul(np.matmul(xi.T, self.partial_hat_matrix_), xi)
                 prediction_var = self.base_regressor_standard_error_ * (1.0 + leverage_x)
-                if prediction_var < 0:
-                    prediction_var = 0
-                var_list.append(prediction_var)
+                var_list.append(prediction_var if prediction_var > 0 else 0)
 
             prediction_dataframe[predicted_value_var_col] = var_list
-
         predictions.validate_dataframe(prediction_dataframe)
+
         if not include_only_valid_rows:
             predictions.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
 

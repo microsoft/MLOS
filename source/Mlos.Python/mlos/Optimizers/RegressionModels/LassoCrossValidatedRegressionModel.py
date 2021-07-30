@@ -199,7 +199,8 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
             prediction_variances = []
             for xi in design_matrix:
                 leverage_x = np.matmul(np.matmul(xi.T, self.partial_hat_matrix_), xi)
-                prediction_variances.append(self.regressor_standard_error_ * (1.0 + leverage_x))
+                prediction_var = self.regressor_standard_error_ * (1.0 + leverage_x)
+                prediction_variances.append(prediction_var if prediction_var > 0 else 0)
 
             prediction_dataframe[predicted_value_var_col] = prediction_variances
             prediction_dataframe[dof_col] = self.dof_
