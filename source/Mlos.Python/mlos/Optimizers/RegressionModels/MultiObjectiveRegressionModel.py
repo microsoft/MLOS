@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 from abc import ABC, abstractmethod
+from typing import List
 
 import pandas as pd
 
@@ -24,13 +25,13 @@ class MultiObjectiveRegressionModel(ABC):
             input_space: Hypergrid,
             output_space: Hypergrid
     ):
-        self.model_type = model_type
-        self.model_config = model_config
-        self.input_space = input_space
-        self.output_space = output_space
+        self.model_type: type = model_type
+        self.model_config: Point = model_config
+        self.input_space: Hypergrid = input_space
+        self.output_space: Hypergrid = output_space
 
-        self.input_dimension_names = self.input_space.dimension_names
-        self.output_dimension_names = self.output_space.dimension_names
+        self.input_dimension_names: List[str] = self.input_space.dimension_names
+        self.output_dimension_names: List[str] = self.output_space.dimension_names
 
     @property
     @abstractmethod
