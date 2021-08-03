@@ -7,19 +7,51 @@ from typing import List, Tuple
 
 import pandas as pd
 
-from mlos.Spaces import SimpleHypergrid, CategoricalDimension
-
-Objective = namedtuple("Objective", ["name", "minimize"])
-
-def objective_to_dict(objective):
-    return {
-        "name": objective.name,
-        "minimize": objective.minimize
-    }
+from mlos.Spaces import SimpleHypergrid, CategoricalDimension, Dimension
 
 
-def objective_from_dict(objective_dict):
-    return Objective(**objective_dict)
+class Objective:
+    def __init__(self, name: str, minimize: bool):
+        self.name = name
+        self.minimize = minimize
+
+
+class SeriesObjective(Objective):
+    def __init__(self, name: str, minimize: bool, series_valuation_function, series_modulation_dimension: Dimension):
+        self.name = name
+        self.minimize = minimize
+        self.series_valuation_function = series_valuation_function
+        self.series_modulation_dimension = series_modulation_dimension
+
+
+def objective_to_dict(objective: Objective):
+    if type(objective) is SeriesObjective:
+        return {
+            "name": objective.name,
+            "minimize": objective.minimize,
+            "series_valuation_function": objective.series_valuation_function,
+            "series_modulation_dimension": objective.series_modulation_dimension
+        }
+    else:
+        return {
+            "name": objective.name,
+            "minimize": objective.minimize
+        }
+
+
+def objective_from_dict(objective_dict: dict):
+    if "series_value_function" in objective_dict:  # Test if objective_dict is of type SeriesObjective
+        return SeriesObjective(
+            name=objective_dict["name"],
+            minimize=objective_dict["minimize"],
+            series_valuation_function=objective_dict["series_valuation_function"],
+            series_modulation_dimension=objective_dict["series_modulation_dimension"]
+        )
+    else:
+        return Objective(
+            name=objective_dict["name"],
+            minimize=objective_dict["minimize"]
+        )
 
 
 class OptimizationProblem:
