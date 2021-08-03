@@ -107,10 +107,14 @@ class OptimizerBase(ABC):
             if context is None:
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
             return self._optimum_within_context(context=context)
+        if optimum_definition == OptimumDefinition.BEST_SERIES_ERROR_FUNCTION_MINIMIZATION:
+            pass
+            # TODO ZACK: Some trickery.... Not sure yet
         return self._prediction_based_optimum(parameters_df=parameters_df, optimum_definition=optimum_definition, alpha=alpha)
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):
+        # TODO ZACK: Discuss the minimize=... line. Why only objectives[0]?
         predicted_value_utility = PredictedValueUtilityFunction(
             self.surrogate_model,
             minimize=self.optimization_problem.objectives[0].minimize
