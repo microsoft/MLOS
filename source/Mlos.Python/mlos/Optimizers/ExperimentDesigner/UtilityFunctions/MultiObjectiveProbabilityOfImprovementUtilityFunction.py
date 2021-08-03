@@ -86,7 +86,6 @@ class MultiObjectiveProbabilityOfImprovementUtilityFunction(UtilityFunction):
         feature_values_pandas_frame = self.surrogate_model.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame)
         multi_objective_predictions: MultiObjectivePrediction = self.surrogate_model.predict(features_df=feature_values_pandas_frame)
 
-
         # Now that we have predictions for all of the features_df rows, we need to sample random points from the distribution
         # described by each prediction and then we want to check how many of those random points are dominated by the existing
         # pareto frontier. The proportion of non-dominated to all points is our estimator for the probability of improvement.

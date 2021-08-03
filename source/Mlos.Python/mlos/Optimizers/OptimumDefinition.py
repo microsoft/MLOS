@@ -45,6 +45,11 @@ class OptimumDefinition(Enum):
 
     BEST_SPECULATIVE_WITHIN_CONTEXT = 'best_speculative_within_context'
 
+    # This mode works to select the points that given a function f(series) is able to output a utility value for that series. This will often be related to
+    # time series approximation however it shouldn't be limited to that.
+    #
+    BEST_SERIES_ERROR_FUNCTION_MINIMIZATION = 'best_series_error_function_minimization'
+
     # These three definitions will be similar to the values above, except they are speculative. They could potentially return a configuration that
     # has not been observed. Exercise caution.
     #
