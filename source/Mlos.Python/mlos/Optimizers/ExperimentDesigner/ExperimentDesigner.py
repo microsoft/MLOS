@@ -161,7 +161,7 @@ class ExperimentDesigner:
             )
         elif designer_config.utility_function_implementation == SeriesDifferenceUtilityFunction.__name__:
             self.utility_function = SeriesDifferenceUtilityFunction(
-                function_config=self.config.confidence_bound_utility_function_config,
+                function_config=self.config.series_difference_utility_function_config,
                 surrogate_model=self.surrogate_model,
                 objective=self.optimization_problem.objectives[0], # TODO ZACK: I copied this style from ConfidenceBoundUtilityFunction. Not sure about it.
                 logger=self.logger

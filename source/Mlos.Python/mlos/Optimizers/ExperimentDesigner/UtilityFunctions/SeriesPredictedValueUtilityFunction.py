@@ -15,29 +15,12 @@ from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 from mlos.Tracer import trace
 
 
-series_difference_utility_function_config_store = ComponentConfigStore(
-    parameter_space=SimpleHypergrid(
-        name="series_difference_utility_function_config",
-        dimensions=[
-            # I might use some of these from ConfidenceBoundUtilityFunction... They seem pretty reasonable.
-            CategoricalDimension(name="utility_function_name", values=["lower_confidence_bound_on_improvement", "upper_confidence_bound_on_improvement"]),
-            ContinuousDimension(name="alpha", min=0.01, max=0.5)
-        ]
-    ),
-    default=Point(
-        utility_function_name="upper_confidence_bound_on_improvement",
-        alpha=0.01
-    )
-)
-
-
-class SeriesDifferenceUtilityFunction(UtilityFunction):
-    def __init__(self, function_config: Point, surrogate_model: MultiObjectiveRegressionModel, objective: SeriesObjective, logger=None):
+class SeriesPredictedValueUtilityFunction(UtilityFunction):
+    def __init__(self, surrogate_model: MultiObjectiveRegressionModel, objective: SeriesObjective, logger=None):
         if logger is None:
             logger = create_logger(self.__class__.__name__)
         self.logger = logger
 
-        self.config = function_config
         self.series_objective = objective
         self._sign = 1 if not self.series_objective.minimize else -1
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
@@ -74,19 +57,6 @@ class SeriesDifferenceUtilityFunction(UtilityFunction):
         for series in resulting_series_arry:
             utility_function_values.append(self._sign * self.series_objective.series_valuation_function(series))
 
-        # TODO ZACK : Something like this with some squared sum of variance term might work...
-        # NOTE:
-        # E[(x-y)^2] = E[X]^2 + 2E[X]E[Y] - E[Y]^2
-        # Var[(x-y)^2] = (E[(X-Y)^2] - E[X-Y]^2)^2 (... I think)
-        # and obviously, variance sum law means that calculating variance from sum of differences is easy
-        # This means that we might be able to avoid bootstrapping and just do the math directly
-
-        # Pros of math: much faster calculation
-        # Cons of math: less elegant and less freedom to change algorithm later.
-        # Worth thinking about
-
-        # Benefits of having the difference function here means that I can do penalties for high-variance across the series...
-        #
 
         utility_function_values = pd.to_numeric(arg=utility_function_values, errors='raise')
         utility_df = pd.DataFrame(data=utility_function_values, index=feature_values_pandas_frame.index, columns=['utility'], dtype='float')
