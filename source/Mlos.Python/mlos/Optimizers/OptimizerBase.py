@@ -9,6 +9,9 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.SeriesDifferenceUtilityFunction import SeriesDifferenceUtilityFunction
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.SeriesPredictedValueUtilityFunction import \
+    SeriesPredictedValueUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
@@ -97,7 +100,10 @@ class OptimizerBase(ABC):
         if not len(parameters_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
         have_context = (context is not None) or (self.optimization_problem.context_space is not None)
-        if have_context and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
+        if have_context and ( #TODO ZACK : @Adam indentation thoughts?
+            optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT
+            and optimum_definition != OptimumDefinition.BEST_SERIES_ERROR_FUNCTION_MINIMIZATION
+        ):
             raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
@@ -108,9 +114,25 @@ class OptimizerBase(ABC):
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
             return self._optimum_within_context(context=context)
         if optimum_definition == OptimumDefinition.BEST_SERIES_ERROR_FUNCTION_MINIMIZATION:
-            pass
-            # TODO ZACK: Some trickery.... Not sure yet
+            if context is None:
+                raise ValueError(f"{optimum_definition} requires context to be not None.")
+            return self._optimum_with_series_difference(context=context)
         return self._prediction_based_optimum(parameters_df=parameters_df, optimum_definition=optimum_definition, alpha=alpha)
+
+    @trace()
+    def _optimum_with_series_difference(self, context: pd.DataFrame):
+        predicted_value_utility_function = SeriesPredictedValueUtilityFunction(
+            surrogate_model=self.surrogate_model,
+            objective=self.optimization_problem.objectives[0],
+            logger=self.logger
+        )
+        utility_optimizer = UtilityFunctionOptimizerFactory.create_utility_function_optimizer(
+            utility_function=predicted_value_utility_function,
+            optimizer_type_name=RandomSearchOptimizer.__name__,
+            optimizer_config=random_search_optimizer_config_store.default,
+            optimization_problem=self.optimization_problem
+        )
+        return utility_optimizer.suggest(context_values_dataframe=context)
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):
