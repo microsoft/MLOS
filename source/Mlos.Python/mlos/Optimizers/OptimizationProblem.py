@@ -6,6 +6,7 @@ from collections import namedtuple
 from typing import List, Tuple
 
 import pandas as pd
+import numpy as np
 
 from mlos.Spaces import SimpleHypergrid, CategoricalDimension, Dimension
 
@@ -17,10 +18,10 @@ class Objective:
 
 
 class SeriesObjective(Objective):
-    def __init__(self, name: str, minimize: bool, series_valuation_function, series_modulation_dimension: Dimension):
+    def __init__(self, name: str, minimize: bool, target_series: np.array, series_modulation_dimension: Dimension):
         self.name = name
         self.minimize = minimize
-        self.series_valuation_function = series_valuation_function
+        self.target_series = target_series
         self.series_modulation_dimension = series_modulation_dimension
 
 
@@ -29,7 +30,7 @@ def objective_to_dict(objective: Objective):
         return {
             "name": objective.name,
             "minimize": objective.minimize,
-            "series_valuation_function": objective.series_valuation_function,
+            "target_series": objective.target_series,
             "series_modulation_dimension": objective.series_modulation_dimension
         }
     else:
@@ -44,7 +45,7 @@ def objective_from_dict(objective_dict: dict):
         return SeriesObjective(
             name=objective_dict["name"],
             minimize=objective_dict["minimize"],
-            series_valuation_function=objective_dict["series_valuation_function"],
+            target_series=objective_dict["target_series"],
             series_modulation_dimension=objective_dict["series_modulation_dimension"]
         )
     else:

@@ -66,13 +66,13 @@ class SeriesDifferenceUtilityFunction(UtilityFunction):
         for index, prediction in predictions_df.iterrows():
             current_arry.append(prediction[predicted_value_col])
             if ((index + 1) % len(self.series_objective.series_modulation_dimension)) == 0:
-                resulting_series_arry.append(current_arry)
+                resulting_series_arry.append(np.array(current_arry))
                 current_arry=[]
 
         # Didn't do bootstrapping yet because I think math would be computationally faster
         utility_function_values = []
         for series in resulting_series_arry:
-            utility_function_values.append(self._sign * self.series_objective.series_valuation_function(series))
+            utility_function_values.append(self._sign * sum((self.series_objective.target_series-series)**2))
 
         # TODO ZACK : Something like this with some squared sum of variance term might work...
         # NOTE:
