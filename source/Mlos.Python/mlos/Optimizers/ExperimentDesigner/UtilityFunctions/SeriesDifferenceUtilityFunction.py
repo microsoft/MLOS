@@ -44,6 +44,10 @@ class SeriesDifferenceUtilityFunction(UtilityFunction):
 
     @trace()
     def __call__(self, feature_values_pandas_frame):
+        # NOTE: THIS LOGIC IS DUPLICATED INTO SeriesPredictedValueUtilityFunction and SeriesDifferenceUtilityFunction.
+        # Later they will diverge as SeriesDifferenceUtilityFunction should require additional logic surrounding probability
+        # of improvement. Perhaps this part should be refactored to be shared though.
+        #
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
