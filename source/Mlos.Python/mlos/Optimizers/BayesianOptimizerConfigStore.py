@@ -92,10 +92,10 @@ bayesian_optimizer_config_store.add_config_by_name(
 #
 default_multi_objective_optimizer_config = Point(
     surrogate_model_implementation=MultiObjectiveHomogeneousRandomForest.__name__,
-    experiment_designer_implementation=ExperimentDesigner.__name__,
+    experiment_designer_implementation=ParallelExperimentDesigner.__name__,
     min_samples_required_for_guided_design_of_experiments=10,
     homogeneous_random_forest_regression_model_config=homogeneous_random_forest_config_store.default,
-    experiment_designer_config=experiment_designer_config_store.get_config_by_name("default_multi_objective_config")
+    parallel_experiment_designer_config=parallel_experiment_designer_config_store.default
 )
 
 bayesian_optimizer_config_store.add_config_by_name(

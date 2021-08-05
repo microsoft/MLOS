@@ -240,7 +240,7 @@ class BayesianOptimizer(OptimizerBase):
                 iteration_number=len(self._parameter_values_df.index)
             )
 
-        self._update_pareto()
+        self.pareto_frontier.update_pareto(objectives_df=self._target_values_df, parameters_df=self._parameter_values_df)
 
         # TODO: make all experiment designers implement this.
         #
@@ -258,31 +258,3 @@ class BayesianOptimizer(OptimizerBase):
             objective_name = self.optimization_problem.objective_names[0]
 
         return self.surrogate_model.predict(feature_values_pandas_frame)[objective_name]
-
-    @trace()
-    def _update_pareto(self):
-        """Updates the pareto frontier.
-        
-        We have learned from experience that building a pareto frontier from raw observations is problematic. Raw observations contain
-        outliers. If a severe outlier makes its way onto the pareto frontier it discourages the optimizer from ever trying to optimize
-        along that dimension (as the probability of improvement over an outlier is low). By building a pareto frontier from predicted
-        values we somewhat guard against outliers.
-        :return:
-        """
-        feature_values_df = self.optimization_problem.construct_feature_dataframe(
-            parameters_df=self._parameter_values_df,
-            context_df=self._context_values_df
-        )
-
-        model_predictions = self.surrogate_model.predict(features_df=feature_values_df)
-
-        predictions_for_pareto_df = pd.DataFrame()
-        valid_index = model_predictions[0].get_dataframe().index
-
-        for objective_name, prediction in model_predictions:
-            prediction_df = prediction.get_dataframe()
-            predictions_for_pareto_df[objective_name] = prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE.value]
-            valid_index = valid_index.intersection(prediction_df.index)
-
-        predictions_for_pareto_df = predictions_for_pareto_df.loc[valid_index]
-        self.pareto_frontier.update_pareto(objectives_df=predictions_for_pareto_df, parameters_df=self._parameter_values_df)

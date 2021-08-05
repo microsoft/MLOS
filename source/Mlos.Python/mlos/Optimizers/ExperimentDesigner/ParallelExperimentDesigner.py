@@ -36,8 +36,9 @@ parallel_experiment_designer_config_store = ComponentConfigStore(
                 MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__
             ]),
             CategoricalDimension('numeric_optimizer_implementation', values=[
-                RandomSearchOptimizer.__name__,
-                GlowWormSwarmOptimizer.__name__
+                GlowWormSwarmOptimizer.__name__,
+                RandomNearIncumbentOptimizer.__name__,
+                RandomSearchOptimizer.__name__
             ]),
             ContinuousDimension('fraction_random_suggestions', min=0, max=1),
             DiscreteDimension(name="max_pending_suggestions", min=0, max=10 ** 3),
@@ -59,9 +60,9 @@ parallel_experiment_designer_config_store = ComponentConfigStore(
     ),
     default=Point(
         utility_function_implementation=MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__,
-        numeric_optimizer_implementation=RandomSearchOptimizer.__name__,
+        numeric_optimizer_implementation=RandomNearIncumbentOptimizer.__name__,
         multi_objective_probability_of_improvement_config=multi_objective_probability_of_improvement_utility_function_config_store.default,
-        random_search_optimizer_config=random_search_optimizer_config_store.default,
+        random_near_incumbent_optimizer_config=random_near_incumbent_optimizer_config_store.default,
         fraction_random_suggestions=0.5,
         max_pending_suggestions=20,
     )
@@ -126,18 +127,23 @@ class ParallelExperimentDesigner:
             numeric_optimizer_config = self.config.random_search_optimizer_config
         elif self.config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             numeric_optimizer_config = self.config.glow_worm_swarm_optimizer_config
+        elif self.config.numeric_optimizer_implementation == RandomNearIncumbentOptimizer.__name__:
+            numeric_optimizer_config = self.config.random_near_incumbent_optimizer_config
+        else:
+            raise RuntimeError(f"Numeric optimizer implementation '{self.config.numeric_optimizer_implementation}' not supported.")
 
         self.numeric_optimizer = UtilityFunctionOptimizerFactory.create_utility_function_optimizer(
             utility_function=self.utility_function,
             optimizer_type_name=self.config.numeric_optimizer_implementation,
             optimizer_config=numeric_optimizer_config,
             optimization_problem=self.optimization_problem,
+            pareto_frontier=self._tentative_pareto_frontier,
             logger=self.logger
         )
 
         # We need to keep track of all pending suggestions.
         #
-        self._pending_suggestions: collections.OrderedDict[str, (Point, DataFrame)] = collections.OrderedDict()
+        self._pending_suggestions: collections.OrderedDict[str, (Point, pd.DataFrame)] = collections.OrderedDict()
 
     @trace()
     def suggest(
@@ -158,7 +164,6 @@ class ParallelExperimentDesigner:
             try:
                 suggestion = self.numeric_optimizer.suggest(context_values_dataframe)
                 self.logger.info(f"Produced a guided suggestion: {suggestion}")
-                return suggestion
             except UnableToProduceGuidedSuggestionException:
                 self.logger.info("Failed to produce guided suggestion. Producing random suggestion instead.")
                 suggestion = self.optimization_problem.parameter_space.random()
@@ -204,6 +209,8 @@ class ParallelExperimentDesigner:
             #
             self._pending_suggestions.popitem(last=False)
 
+        # TODO: context should also be a point, I think
+        #
         self._pending_suggestions[suggestion_id] = (suggestion, context_df)
         self._update_tentative_pareto()
 
@@ -246,7 +253,7 @@ class ParallelExperimentDesigner:
                 features_dfs.append(features_df)
 
             features_for_all_pending_suggestions_df = pd.concat(features_dfs, ignore_index=True)
-            all_predictions = self.surrogate_model.predict(features_df=features_for_all_pending_suggestions_df, )
+            all_predictions = self.surrogate_model.predict(features_df=features_for_all_pending_suggestions_df)
 
             for i in range(num_pending_suggestions):
                 monte_carlo_objectives_df = all_predictions.create_monte_carlo_samples_df(row_idx=i, num_samples=100, max_t_statistic=1)
