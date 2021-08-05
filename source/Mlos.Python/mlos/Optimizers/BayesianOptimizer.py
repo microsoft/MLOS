@@ -3,6 +3,7 @@
 # Licensed under the MIT License.
 #
 import pandas as pd
+from typing import Tuple
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
@@ -144,7 +145,7 @@ class BayesianOptimizer(OptimizerBase):
     def get_optimizer_convergence_state(self):
         return self._optimizer_convergence_state
 
-    def get_all_observations(self) -> [pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         return self._parameter_values_df.copy(), self._target_values_df.copy(), self._context_values_df.copy()
 
     @trace()
