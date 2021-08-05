@@ -261,6 +261,7 @@ class BayesianOptimizer(OptimizerBase):
     @trace()
     def _update_pareto(self):
         """Updates the pareto frontier.
+        
         We have learned from experience that building a pareto frontier from raw observations is problematic. Raw observations contain
         outliers. If a severe outlier makes its way onto the pareto frontier it discourages the optimizer from ever trying to optimize
         along that dimension (as the probability of improvement over an outlier is low). By building a pareto frontier from predicted
@@ -284,9 +285,3 @@ class BayesianOptimizer(OptimizerBase):
 
         predictions_for_pareto_df = predictions_for_pareto_df.loc[valid_index]
         self.pareto_frontier.update_pareto(objectives_df=predictions_for_pareto_df, parameters_df=self._parameter_values_df)
-
-    def focus(self, subspace):
-        ...
-
-    def reset_focus(self):
-        ...

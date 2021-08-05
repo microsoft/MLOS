@@ -122,8 +122,8 @@ class BayesianOptimizerProxy(OptimizerBase):
     @trace()
     def get_all_observations(self) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         response = self._optimizer_monitoring_stub.GetAllObservations(self.optimizer_handle_for_optimizer_monitoring_service)
-        features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index')
-        objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
+        features_df = pd.read_json(response.Features.FeaturesJsonString, orient='index').sort_index()
+        objectives_df = pd.read_json(response.ObjectiveValues.ObjectiveValuesJsonString, orient='index').sort_index()
         context_df = None
         return features_df, objectives_df, context_df
 
@@ -151,9 +151,3 @@ class BayesianOptimizerProxy(OptimizerBase):
         valid_predictions_df = Prediction.dataframe_from_json(only_prediction_pb2.PredictionDataFrameJsonString)
         prediction = Prediction.create_prediction_from_dataframe(objective_name=objective_name, dataframe=valid_predictions_df)
         return prediction
-
-    def focus(self, subspace):  # pylint: disable=unused-argument,no-self-use
-        pass
-
-    def reset_focus(self):# pylint: disable=no-self-use
-        pass

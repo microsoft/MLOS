@@ -126,6 +126,11 @@ class TestBayesianOptimizerGrpcClient:
         assert (np.abs(registered_features_df - observed_features_df) < 0.00000001).all().all()
         assert (np.abs(registered_objectives_df - observed_objectives_df) < 0.00000001).all().all()
 
+        # Assert that the observations and predictions are returned in the right order from the remote optimizer
+        #
+        parameters_df, objectives_df, _ = bayesian_optimizer.get_all_observations()
+        predictions_df = bayesian_optimizer.predict(parameter_values_pandas_frame=parameters_df).get_dataframe()
+        assert parameters_df.index.intersection(predictions_df.index).equals(predictions_df.index)
 
         # Let's look at the goodness of fit.
         #
