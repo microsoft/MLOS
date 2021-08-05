@@ -117,7 +117,6 @@ class Prediction:
                     violated_rows_df = dataframe[dataframe[dataframe[mean_variance_col].notnull()][mean_variance_col] < 0]
                     with pd.option_context('display.max_rows', None, 'display.max_columns', None):
                         print(violated_rows_df)
-                        print(violated_rows_df[mean_variance_col])
                     print(f"Num invalid rows: {len(violated_rows_df.index)}")
                     print(f"Index: {violated_rows_df.index}")
                     print(f"{mean_variance_col}: {violated_rows_df[mean_variance_col]}")
@@ -137,7 +136,7 @@ class Prediction:
 
     @classmethod
     def dataframe_from_json(cls, json_string):
-        return pd.read_json(json_string, orient='index').sort_index()
+        return pd.read_json(json_string, orient='index')
 
     def dataframe_to_json(self):
         return self.get_dataframe().to_json(orient='index', double_precision=15)

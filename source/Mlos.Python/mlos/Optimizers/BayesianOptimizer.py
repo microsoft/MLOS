@@ -11,6 +11,7 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
+from mlos.Optimizers.ExperimentDesigner.ParallelExperimentDesigner import ParallelExperimentDesigner
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
@@ -18,7 +19,6 @@ from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import Multi
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Tracer import trace
 from mlos.Spaces import Point
-
 
 
 class BayesianOptimizer(OptimizerBase):
@@ -35,12 +35,13 @@ class BayesianOptimizer(OptimizerBase):
     experiment_designer: ExperimentDesigner
 
     """
+
     @trace()
     def __init__(
-            self,
-            optimization_problem: OptimizationProblem,
-            optimizer_config: Point,
-            logger=None
+        self,
+        optimization_problem: OptimizationProblem,
+        optimizer_config: Point,
+        logger=None
     ):
         if logger is None:
             logger = create_logger("BayesianOptimizer")
@@ -76,14 +77,27 @@ class BayesianOptimizer(OptimizerBase):
 
         # Now let's put together the experiment designer that will suggest parameters for each experiment.
         #
-        assert self.optimizer_config.experiment_designer_implementation == ExperimentDesigner.__name__
-        self.experiment_designer = ExperimentDesigner(
-            designer_config=self.optimizer_config.experiment_designer_config,
-            optimization_problem=self.optimization_problem,
-            pareto_frontier=self.pareto_frontier,
-            surrogate_model=self.surrogate_model,
-            logger=self.logger
-        )
+
+        # #TODO, great example of Python reflection
+        #
+        if self.optimizer_config.experiment_designer_implementation == ExperimentDesigner.__name__:
+            self.experiment_designer = ExperimentDesigner(
+                designer_config=self.optimizer_config.experiment_designer_config,
+                optimization_problem=self.optimization_problem,
+                pareto_frontier=self.pareto_frontier,
+                surrogate_model=self.surrogate_model,
+                logger=self.logger
+            )
+        elif self.optimizer_config.experiment_designer_implementation == ParallelExperimentDesigner.__name__:
+            self.experiment_designer = ParallelExperimentDesigner(
+                designer_config=self.optimizer_config.parallel_experiment_designer_config,
+                optimization_problem=self.optimization_problem,
+                pareto_frontier=self.pareto_frontier,
+                surrogate_model=self.surrogate_model,
+                logger=self.logger
+            )
+        else:
+            assert False
 
         self._optimizer_convergence_state = BayesianOptimizerConvergenceState(
             surrogate_model_fit_state=self.surrogate_model.fit_state
@@ -130,11 +144,11 @@ class BayesianOptimizer(OptimizerBase):
     def get_optimizer_convergence_state(self):
         return self._optimizer_convergence_state
 
-    def get_all_observations(self):
+    def get_all_observations(self) -> [pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         return self._parameter_values_df.copy(), self._target_values_df.copy(), self._context_values_df.copy()
 
     @trace()
-    def suggest(self, random=False, context: Point = None):
+    def suggest(self, random: bool = False, context: Point = None):
         if self.optimization_problem.context_space is not None:
             if context is None:
                 raise ValueError("Context required by optimization problem but not provided.")
@@ -146,16 +160,35 @@ class BayesianOptimizer(OptimizerBase):
         return suggested_config
 
     @trace()
-    def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
+    def add_pending_suggestion(self, suggestion: Point):
+        """This function is used to notify the optimizer that the specified suggestion is being evaluated.
+        The point is to allow the optimizer to issue multiple suggestions in parallel, while also making sure that the concurrent
+        suggestions are not redundant.
+        :param suggestion:
+        :return:
+        """
+        # TODO: make sure to only do this when the experiment designer supports it. You can also make all experiment designers
+        # support it.
+        self.experiment_designer.add_pending_suggestion(suggestion)
+
+    @trace()
+    def register(
+        self,
+        parameter_values_pandas_frame: pd.DataFrame,
+        target_values_pandas_frame: pd.DataFrame,
+        context_values_pandas_frame: pd.DataFrame = None
+    ):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
 
-        self.logger.info(f"Registering {len(parameter_values_pandas_frame.index)} parameters and {len(target_values_pandas_frame.index)} objectives.")
+        self.logger.info(
+            f"Registering {len(parameter_values_pandas_frame.index)} parameters and {len(target_values_pandas_frame.index)} objectives.")
 
         if self.optimization_problem.context_space is not None and context_values_pandas_frame is None:
             raise ValueError("Context required by optimization problem but not provided.")
 
         parameter_columns_to_retain = [column for column in parameter_values_pandas_frame.columns if column in self._parameter_names_set]
+        metadata_columns = [column for column in parameter_values_pandas_frame.columns if str(column).startswith("__mlos_metadata")]
         target_columns_to_retain = [column for column in target_values_pandas_frame.columns if column in self._target_names_set]
 
         if len(parameter_columns_to_retain) == 0:
@@ -164,6 +197,7 @@ class BayesianOptimizer(OptimizerBase):
         if len(target_columns_to_retain) == 0:
             raise ValueError(f"None of {target_values_pandas_frame.columns} is a target recognized by this optimizer.")
 
+        metadata_df = parameter_values_pandas_frame[metadata_columns]
         parameter_values_pandas_frame = parameter_values_pandas_frame[parameter_columns_to_retain]
         target_values_pandas_frame = target_values_pandas_frame[target_columns_to_retain]
 
@@ -205,10 +239,15 @@ class BayesianOptimizer(OptimizerBase):
                 iteration_number=len(self._parameter_values_df.index)
             )
 
-        self.pareto_frontier.update_pareto(objectives_df=self._target_values_df, parameters_df=self._parameter_values_df)
+        self._update_pareto()
+
+        # TODO: make all experiment designers implement this.
+        #
+        self.experiment_designer.remove_pending_suggestions(metadata_df)
 
     @trace()
-    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None, objective_name=None) -> Prediction:  # pylint: disable=unused-argument
+    def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None,
+                objective_name=None) -> Prediction:  # pylint: disable=unused-argument
         feature_values_pandas_frame = self.optimization_problem.construct_feature_dataframe(
             parameters_df=parameter_values_pandas_frame,
             context_df=context_values_pandas_frame
@@ -218,3 +257,36 @@ class BayesianOptimizer(OptimizerBase):
             objective_name = self.optimization_problem.objective_names[0]
 
         return self.surrogate_model.predict(feature_values_pandas_frame)[objective_name]
+
+    @trace()
+    def _update_pareto(self):
+        """Updates the pareto frontier.
+        We have learned from experience that building a pareto frontier from raw observations is problematic. Raw observations contain
+        outliers. If a severe outlier makes its way onto the pareto frontier it discourages the optimizer from ever trying to optimize
+        along that dimension (as the probability of improvement over an outlier is low). By building a pareto frontier from predicted
+        values we somewhat guard against outliers.
+        :return:
+        """
+        feature_values_df = self.optimization_problem.construct_feature_dataframe(
+            parameters_df=self._parameter_values_df,
+            context_df=self._context_values_df
+        )
+
+        model_predictions = self.surrogate_model.predict(features_df=feature_values_df)
+
+        predictions_for_pareto_df = pd.DataFrame()
+        valid_index = model_predictions[0].get_dataframe().index
+
+        for objective_name, prediction in model_predictions:
+            prediction_df = prediction.get_dataframe()
+            predictions_for_pareto_df[objective_name] = prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE.value]
+            valid_index = valid_index.intersection(prediction_df.index)
+
+        predictions_for_pareto_df = predictions_for_pareto_df.loc[valid_index]
+        self.pareto_frontier.update_pareto(objectives_df=predictions_for_pareto_df, parameters_df=self._parameter_values_df)
+
+    def focus(self, subspace):
+        ...
+
+    def reset_focus(self):
+        ...

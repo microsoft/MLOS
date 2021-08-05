@@ -118,6 +118,38 @@ class Point:
         temp_point = self.from_json(state)
         self.dimension_value_dict = temp_point.dimension_value_dict
 
+    def __delitem__(self, dimension_name):
+        subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(dimension_name)
+
+        if subgrid_name is None:
+            if dimension_name_without_subgrid_name in self.dimension_value_dict:
+                result = self.dimension_value_dict[dimension_name_without_subgrid_name]
+                del self.dimension_value_dict[dimension_name_without_subgrid_name]
+                return result
+            else:
+                raise KeyError(f"This Point does not have a value along dimension: {dimension_name}")
+        else:
+            if subgrid_name in self.dimension_value_dict:
+                return self.dimension_value_dict[subgrid_name].pop(dimension_name_without_subgrid_name)
+            else:
+                raise KeyError(f"This Point does not have a value along dimension: {dimension_name}")
+
+    def pop(self, dimension_name):
+        subgrid_name, dimension_name_without_subgrid_name = Dimension.split_dimension_name(dimension_name)
+
+        if subgrid_name is None:
+            if dimension_name_without_subgrid_name in self.dimension_value_dict:
+                result = self.dimension_value_dict[dimension_name_without_subgrid_name]
+                del self.dimension_value_dict[dimension_name_without_subgrid_name]
+                return result
+            else:
+                return None
+        else:
+            if subgrid_name in self.dimension_value_dict:
+                return self.dimension_value_dict[subgrid_name].pop(dimension_name_without_subgrid_name)
+            else:
+                return None
+
     def to_json(self, indent=None):
         if indent is not None:
             return json.dumps(self.to_dict(), indent=indent)

@@ -95,8 +95,8 @@ class OptimizerService(OptimizerServiceServicer):
         # TODO: stop ignoring context
         #
         observations = request.Observations
-        features_df = pd.read_json(observations.Features.FeaturesJsonString, orient='index').sort_index()
-        objectives_df = pd.read_json(observations.ObjectiveValues.ObjectiveValuesJsonString, orient='index').sort_index()
+        features_df = pd.read_json(observations.Features.FeaturesJsonString, orient='index')
+        objectives_df = pd.read_json(observations.ObjectiveValues.ObjectiveValuesJsonString, orient='index')
 
         with self._bayesian_optimizer_store.exclusive_optimizer(optimizer_id=request.OptimizerHandle.Id) as optimizer:
             optimizer.register(parameter_values_pandas_frame=features_df, target_values_pandas_frame=objectives_df)
