@@ -194,7 +194,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # retain standard error from base model (used for prediction confidence intervals)
         residual_sum_of_squares = np.sum(y_residuals ** 2)
         total_sum_of_squares = ((y - y.mean()) ** 2).sum()
-        unexplained_variance = residual_sum_of_squares / total_sum_of_squares
         dof = model_design_matrix.shape[0] - (len(self.base_regressor_.coef_) + 1)  # +1 for intercept
         self.base_regressor_standard_error_ = residual_sum_of_squares / float(dof)
 
@@ -231,7 +230,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # Hence the code below creates a (temporary) hypergrid reflecting the design_matrix.
         design_matrix_hypergrid = SimpleHypergrid(
             name='RegressionEnhanceRandomForest_design_matrix',
-            dimensions=List[Dimension]
+            dimensions=None
         )
         for design_matrix_column_name in x.columns.values:
             design_matrix_dimension = ContinuousDimension(

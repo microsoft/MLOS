@@ -105,8 +105,6 @@ class BayesianOptimizer(OptimizerBase):
                 logger=self.logger
             )
         elif self.optimizer_config.surrogate_model_implementation == RegressionEnhancedRandomForestRegressionModel.__name__:
-            print(f'self.optimizer_config.regression_enhanced_random_forest_regression_model_config: {self.optimizer_config.regression_enhanced_random_forest_regression_model_config}')
-
             self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveRegressionEnhancedRandomForest(
                 model_config=self.optimizer_config.regression_enhanced_random_forest_regression_model_config,
                 input_space=self.optimization_problem.feature_space,
@@ -114,9 +112,6 @@ class BayesianOptimizer(OptimizerBase):
                 logger=self.logger
             )
         elif self.optimizer_config.surrogate_model_implementation == MultiObjectiveRegressionEnhancedRandomForest.__name__:
-            print(
-                f'self.optimizer_config.regression_enhanced_random_forest_regression_model_config: {self.optimizer_config.regression_enhanced_random_forest_regression_model_config}')
-
             self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveRegressionEnhancedRandomForest(
                 model_config=self.optimizer_config.regression_enhanced_random_forest_regression_model_config,
                 input_space=self.optimization_problem.feature_space,
