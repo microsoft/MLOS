@@ -16,6 +16,7 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.LassoCrossValidatedRegressionModel import LassoCrossValidatedRegressionModel
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestConfigStore import regression_enhanced_random_forest_config_store
 from mlos.Spaces import SimpleHypergrid, Hypergrid, Point
+from mlos.Spaces.Dimensions import Dimension
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 
 from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
@@ -102,6 +103,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.random_forest_regressor_ = None
         self.x_is_design_matrix = False
 
+        self.model_config.perform_initial_random_forest_hyper_parameter_search = True
         self.random_forest_kwargs = None
         self.root_model_kwargs = None
         self.detected_feature_indices_ = None
@@ -193,7 +195,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         residual_sum_of_squares = np.sum(y_residuals ** 2)
         total_sum_of_squares = ((y - y.mean()) ** 2).sum()
         unexplained_variance = residual_sum_of_squares / total_sum_of_squares
-        print(f'RERF::LassoOnly R2: {1.0 - unexplained_variance}')
         dof = model_design_matrix.shape[0] - (len(self.base_regressor_.coef_) + 1)  # +1 for intercept
         self.base_regressor_standard_error_ = residual_sum_of_squares / float(dof)
 
@@ -230,7 +231,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # Hence the code below creates a (temporary) hypergrid reflecting the design_matrix.
         design_matrix_hypergrid = SimpleHypergrid(
             name='RegressionEnhanceRandomForest_design_matrix',
-            dimensions=None
+            dimensions=List[Dimension]
         )
         for design_matrix_column_name in x.columns.values:
             design_matrix_dimension = ContinuousDimension(
@@ -316,6 +317,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         # retrieve best random forest model and hyper parameters
         self.random_forest_regressor_ = rf_gscv.best_estimator_
+        self.random_forest_kwargs = rf_gscv.best_params_
 
         # only perform hyper-parameter search on first fit
         self.model_config.perform_initial_random_forest_hyper_parameter_search = False
@@ -334,8 +336,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         valid_rows_index = None
-        model_design_matrix: np.ndarray = None
-        model_design_matrix_dataframe: pd.DataFrame = None
+        model_design_matrix: np.ndarray = np.array([])
+        model_design_matrix_dataframe: pd.DataFrame = pd.DataFrame()
         if self.trained:
             if self.x_is_design_matrix:
                 model_design_matrix = feature_values_pandas_frame.to_numpy()
