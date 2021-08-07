@@ -16,7 +16,6 @@ from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.LassoCrossValidatedRegressionModel import LassoCrossValidatedRegressionModel
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestConfigStore import regression_enhanced_random_forest_config_store
 from mlos.Spaces import SimpleHypergrid, Hypergrid, Point
-from mlos.Spaces.Dimensions import Dimension
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 
 from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
@@ -193,7 +192,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         # retain standard error from base model (used for prediction confidence intervals)
         residual_sum_of_squares = np.sum(y_residuals ** 2)
-        total_sum_of_squares = ((y - y.mean()) ** 2).sum()
         dof = model_design_matrix.shape[0] - (len(self.base_regressor_.coef_) + 1)  # +1 for intercept
         self.base_regressor_standard_error_ = residual_sum_of_squares / float(dof)
 

@@ -34,6 +34,7 @@ from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
+from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import RegressionEnhancedRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
@@ -381,6 +382,14 @@ class TestBayesianOptimizer:
             decision_tree_config = random_forest_config.decision_tree_regression_model_config
             decision_tree_config.min_samples_to_fit = 10
             decision_tree_config.n_new_samples_before_refit = 10
+
+        optimizer_config.min_samples_required_for_guided_design_of_experiments = 20
+        if optimizer_config.surrogate_model_implementation == RegressionEnhancedRandomForestRegressionModel.__name__:
+            model_config = optimizer_config.regression_enhanced_random_forest_model_config
+            #random_forest_config.n_estimators = min(random_forest_config.n_estimators, 5)
+            #decision_tree_config = random_forest_config.decision_tree_regression_model_config
+            model_config.min_samples_to_fit = 1000
+            model_config.n_new_samples_before_refit = 100
 
         if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
