@@ -4,7 +4,7 @@
 #
 from mlos.Optimizers.RegressionModels.LassoCrossValidatedRegressionModel import LassoCrossValidatedRegressionModel, lasso_cross_validated_config_store
 from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
-from mlos.Spaces import SimpleHypergrid, ContinuousDimension, DiscreteDimension, CategoricalDimension, Point
+from mlos.Spaces import SimpleHypergrid, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
 
 # TODO : Add back the RidgeRegressionModel boosting_root_model option after adding new RidgeCrossValidatedRegressionModel

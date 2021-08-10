@@ -5,7 +5,6 @@
 from typing import List
 import numpy as np
 import pandas as pd
-import math
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
@@ -77,8 +76,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         )
 
         self.model_config = model_config
-        self.model_config.perform_initial_root_model_hyper_parameter_search=True,
-        self.model_config.perform_initial_random_forest_hyper_parameter_search=True
+        self.model_config.perform_initial_root_model_hyper_parameter_search = True
+        self.model_config.perform_initial_random_forest_hyper_parameter_search = True
 
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
