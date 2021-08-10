@@ -5,6 +5,7 @@
 from typing import List
 import numpy as np
 import pandas as pd
+import math
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
@@ -76,6 +77,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         )
 
         self.model_config = model_config
+        self.model_config.perform_initial_root_model_hyper_parameter_search=True,
+        self.model_config.perform_initial_random_forest_hyper_parameter_search=True
 
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
@@ -102,7 +105,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.random_forest_regressor_ = None
         self.x_is_design_matrix = False
 
-        self.model_config.perform_initial_random_forest_hyper_parameter_search = True
         self.random_forest_kwargs = None
         self.root_model_kwargs = None
         self.detected_feature_indices_ = None
@@ -129,14 +131,23 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     def num_observations_used_to_fit(self):
         return self.last_refit_iteration_number
 
+    @property
+    def num_model_coefficients(self):
+        num_continuous_features = len(self.continuous_dimension_names)
+        num_dummy_vars = len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
+
+        return num_continuous_features * (num_dummy_vars + 1)
+
     def should_fit(
             self,
             num_samples: int
     ) -> bool:
-        root_base_model_should_fit = self.base_regressor_.should_fit(num_samples=num_samples)
-        # TODO : determine min sample needed to fit based on model configs
-        random_forest_should_fit = True
-        return root_base_model_should_fit and random_forest_should_fit
+        # since polynomial basis functions decrease the degrees of freedom (TODO: add reference),
+        #  and prediction degrees of freedom = sample size - num coef - 1
+        #  need sufficiently many samples to exceed the number of coefficients
+        dof = num_samples - self.num_model_coefficients - 1
+
+        return dof > 0
 
     @trace()
     def fit(

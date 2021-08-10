@@ -60,10 +60,6 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         }
 
     @staticmethod
-    def n_choose_k(n, k):
-        return math.factorial(n) / math.factorial(k) / math.factorial(n - k)
-
-    @staticmethod
     def get_simple_quadratic_coefficients():
         return np.array([1, -3, -4, -0.5, 0.0, -2.0])
 
