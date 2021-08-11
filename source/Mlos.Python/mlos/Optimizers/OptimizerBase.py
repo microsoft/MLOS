@@ -116,23 +116,29 @@ class OptimizerBase(ABC):
         if optimum_definition == OptimumDefinition.BEST_SERIES_ERROR_FUNCTION_MINIMIZATION:
             if context is None:
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
-            return self._optimum_with_series_difference(context=context)
+            return self._optimum_with_series_difference(context=context, parameters_df=parameters_df)
         return self._prediction_based_optimum(parameters_df=parameters_df, optimum_definition=optimum_definition, alpha=alpha)
 
     @trace()
-    def _optimum_with_series_difference(self, context: pd.DataFrame):
+    def _optimum_with_series_difference(self, context: pd.DataFrame, parameters_df: pd.DataFrame):
         predicted_value_utility_function = SeriesPredictedValueUtilityFunction(
             surrogate_model=self.surrogate_model,
             objective=self.optimization_problem.objectives[0],
             logger=self.logger
         )
-        utility_optimizer = UtilityFunctionOptimizerFactory.create_utility_function_optimizer(
-            utility_function=predicted_value_utility_function,
-            optimizer_type_name=RandomSearchOptimizer.__name__,
-            optimizer_config=random_search_optimizer_config_store.default,
-            optimization_problem=self.optimization_problem
+        feature_values_dataframe = self.optimization_problem.construct_feature_dataframe(
+            parameters_df=parameters_df,
+            context_df=context,
+            product=True
         )
-        return utility_optimizer.suggest(context_values_dataframe=context)
+        utility_function_values = predicted_value_utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
+
+        index_of_max_value = utility_function_values[['utility']].idxmax()['utility']
+        argmax_point = Point.from_dataframe(feature_values_dataframe.loc[[index_of_max_value]])
+        config_to_suggest = argmax_point[self.optimization_problem.parameter_space.name]
+        self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
+
+        return config_to_suggest
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):

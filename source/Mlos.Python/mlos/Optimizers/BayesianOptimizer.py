@@ -7,7 +7,7 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
-from mlos.Optimizers.OptimizationProblem import OptimizationProblem
+from mlos.Optimizers.OptimizationProblem import OptimizationProblem, SeriesObjective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
@@ -16,6 +16,8 @@ from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel imp
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
+from mlos.Optimizers.RegressionModels.SeriesAwareMultiObjectiveHomogeneousRandomForest import \
+    SeriesAwareMultiObjectiveHomogeneousRandomForest
 from mlos.Tracer import trace
 from mlos.Spaces import Point
 
@@ -67,10 +69,11 @@ class BayesianOptimizer(OptimizerBase):
         # Note that even if the user requested a HomogeneousRandomForestRegressionModel, we still create a MultiObjectiveRegressionModel
         # with just a single RandomForest inside it. This means we have to maintain only a single interface.
         #
-        self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveHomogeneousRandomForest(
+        self.surrogate_model: MultiObjectiveRegressionModel = SeriesAwareMultiObjectiveHomogeneousRandomForest(
             model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
             input_space=self.optimization_problem.feature_space,
             output_space=self.surrogate_model_output_space,
+            objectives=self.optimization_problem.objectives,
             logger=self.logger
         )
 
@@ -100,6 +103,12 @@ class BayesianOptimizer(OptimizerBase):
 
         self._target_names = [dimension.name for dimension in self.optimization_problem.objective_space.dimensions]
         self._target_names_set = set(self._target_names)
+
+        # This allows for the series-objectives to pass through the optimizer without being trimmed
+        #
+        for objective in self.optimization_problem.objectives:
+            if isinstance(objective, SeriesObjective):
+                self._target_names_set.add(objective.series_output_dimension.name)
 
         self._parameter_values_df = pd.DataFrame(columns=self._parameter_names)
         self._context_values_df = pd.DataFrame(columns=self._context_names)
@@ -161,6 +170,7 @@ class BayesianOptimizer(OptimizerBase):
         if len(parameter_columns_to_retain) == 0:
             raise ValueError(f"None of the {parameter_values_pandas_frame.columns} is a parameter recognized by this optimizer.")
 
+        # TODO ZACK: SAME AS BELOW
         if len(target_columns_to_retain) == 0:
             raise ValueError(f"None of {target_values_pandas_frame.columns} is a target recognized by this optimizer.")
 
@@ -183,10 +193,12 @@ class BayesianOptimizer(OptimizerBase):
             if len(parameter_values_pandas_frame) != len(context_values_pandas_frame):
                 raise ValueError(f"Incompatible shape of parameters and context: "
                                  f"{parameter_values_pandas_frame.shape} and {context_values_pandas_frame.shape}.")
+
             context_columns_to_retain = [column for column in context_values_pandas_frame.columns if column in self._context_names_set]
             if len(context_columns_to_retain) == 0:
                 raise ValueError(f"None of the {context_values_pandas_frame.columns} is a context recognized by this optimizer.")
             context_values_pandas_frame = context_values_pandas_frame[context_columns_to_retain]
+            context_values_pandas_frame = context_values_pandas_frame
             self._context_values_df = self._context_values_df.append(context_values_pandas_frame, ignore_index=True)
 
         self._parameter_values_df = self._parameter_values_df.append(parameter_values_pandas_frame, ignore_index=True)

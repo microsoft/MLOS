@@ -44,6 +44,7 @@ class SeriesDifferenceUtilityFunction(UtilityFunction):
 
     @trace()
     def __call__(self, feature_values_pandas_frame):
+
         # NOTE: THIS LOGIC IS DUPLICATED INTO SeriesPredictedValueUtilityFunction and SeriesDifferenceUtilityFunction.
         # Later they will diverge as SeriesDifferenceUtilityFunction should require additional logic surrounding probability
         # of improvement. Perhaps this part should be refactored to be shared though.
@@ -59,38 +60,33 @@ class SeriesDifferenceUtilityFunction(UtilityFunction):
             f"context_space.{self.series_objective.series_modulation_dimension.name}": self.series_objective.series_modulation_dimension.linspace()
         })
         feature_values_pandas_frame_merged = feature_values_pandas_frame.merge(series_vals_df, how="cross")
+        print("INPUT")
+        print(feature_values_pandas_frame_merged)
         multi_objective_predictions = self.surrogate_model.predict(features_df=feature_values_pandas_frame_merged)
 
         predictions = multi_objective_predictions[0]
         predictions_df = predictions.get_dataframe()
+        print("OUTPUT")
+        print(predictions_df)
 
         # TODO ZACK: Vectorize this. I'm sure pandas/numpy can do this faster. @Adam, any suggestions
-        resulting_series_arry = []
-        current_arry = []
-        for index, prediction in predictions_df.iterrows():
-            current_arry.append(prediction[predicted_value_col])
-            if ((index + 1) % len(self.series_objective.series_modulation_dimension)) == 0:
-                resulting_series_arry.append(np.array(current_arry))
-                current_arry=[]
-
-        # Didn't do bootstrapping yet because I think math would be computationally faster
         utility_function_values = []
-        for series in resulting_series_arry:
-            utility_function_values.append(self._sign * sum((self.series_objective.target_series-series)**2))
-
-        # TODO ZACK : Something like this with some squared sum of variance term might work...
-        # NOTE:
-        # E[(x-y)^2] = E[X]^2 + 2E[X]E[Y] - E[Y]^2
-        # Var[(x-y)^2] = (E[(X-Y)^2] - E[X-Y]^2)^2 (... I think)
-        # and obviously, variance sum law means that calculating variance from sum of differences is easy
-        # This means that we might be able to avoid bootstrapping and just do the math directly
-
-        # Pros of math: much faster calculation
-        # Cons of math: less elegant and less freedom to change algorithm later.
-        # Worth thinking about
-
-        # Benefits of having the difference function here means that I can do penalties for high-variance across the series...
-        #
+        current_e = []
+        current_v = []
+        for index, prediction in predictions_df.iterrows():
+            current_e.append(prediction[predicted_value_col])
+            current_v.append(prediction[predicted_value_var_col])
+            if ((index + 1) % len(self.series_objective.series_modulation_dimension)) == 0:
+                current_expected = np.array(current_e)
+                current_variance = np.array(current_v)
+                current_expected_minus_target = current_expected-self.series_objective.target_series
+                calculated_utility_expectation = sum((current_expected_minus_target)**2+current_variance)
+                calculated_utility_variance = \
+                    sum((current_expected_minus_target)**4 + 6*((current_expected_minus_target)**2)*current_variance
+                        + 3*(current_variance)**2 - ((current_expected_minus_target)**2+current_variance)**2)
+                utility_function_values.append(self._sign * calculated_utility_expectation)
+                current_e = []
+                current_v = []
 
         utility_function_values = pd.to_numeric(arg=utility_function_values, errors='raise')
         utility_df = pd.DataFrame(data=utility_function_values, index=feature_values_pandas_frame.index, columns=['utility'], dtype='float')

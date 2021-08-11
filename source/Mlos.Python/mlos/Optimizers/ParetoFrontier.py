@@ -128,8 +128,11 @@ class ParetoFrontier:
         :param objectives_df:
         :return:
         """
-
-        assert all(column in self.optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
+        print("ZACK")
+        print(objectives_df)
+        print(self.optimization_problem.objective_space)
+        print("---")
+        #assert all(column in self.optimization_problem.objective_space.dimension_names for column in objectives_df.columns)
 
         # First let's discard any columns that we are not optimizing for.
         #

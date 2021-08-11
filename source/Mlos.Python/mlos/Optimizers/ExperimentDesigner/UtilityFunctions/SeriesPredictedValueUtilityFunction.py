@@ -37,7 +37,10 @@ class SeriesPredictedValueUtilityFunction(UtilityFunction):
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
+
+
         del feature_values_pandas_frame[f"context_space.{self.series_objective.series_modulation_dimension.name}"]
+
         series_vals_df = pd.DataFrame({
             f"context_space.{self.series_objective.series_modulation_dimension.name}": self.series_objective.series_modulation_dimension.linspace()
         })
