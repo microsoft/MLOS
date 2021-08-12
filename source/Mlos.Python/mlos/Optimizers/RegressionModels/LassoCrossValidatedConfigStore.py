@@ -36,9 +36,7 @@ lasso_cross_validated_config_store = ComponentConfigStore(
             CategoricalDimension(name="verbose", values=[False, True]),
             DiscreteDimension(name="num_jobs", min=1, max=2),
             CategoricalDimension(name="positive", values=[False, True]),
-            CategoricalDimension(name="selection", values=[selection.value for selection in Selection]),
-            # DiscreteDimension(name="min_num_samples_per_input_dimension_to_fit", min=1, max=32),
-            # DiscreteDimension(name="num_new_samples_per_input_dimension_before_refit", min=1, max=32)
+            CategoricalDimension(name="selection", values=[selection.value for selection in Selection])
         ]
     ),
     default=Point(
@@ -55,9 +53,7 @@ lasso_cross_validated_config_store = ComponentConfigStore(
         verbose=False,
         num_jobs=1,
         positive=False,
-        selection=Selection.CYCLIC.value,
-        # min_num_samples_per_input_dimension_to_fit=10,
-        # num_new_samples_per_input_dimension_before_refit=5
+        selection=Selection.CYCLIC.value
     ),
     description="Wrapper for sklearn.linear_model.Lasso model."
                 "This wrapper includes optional CV grid search to tune Lasso hyper parameters within each fit."

@@ -47,7 +47,7 @@ class SklearnRandomForestRegressionModelConfig(metaclass=DefaultConfigMeta):
             DiscreteDimension(name="n_jobs", min=1, max=10),
             CategoricalDimension(name="warm_start", values=[False, True]),
             ContinuousDimension(name="ccp_alpha", min=0, max=2 ** 10),
-            ContinuousDimension(name="max_samples", min=0, max=1)
+            ContinuousDimension(name="max_samples", min=0.01, max=0.99)
         ]
     )
 
