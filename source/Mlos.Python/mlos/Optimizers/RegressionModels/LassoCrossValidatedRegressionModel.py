@@ -135,6 +135,12 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         x_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
         y = target_values_pandas_frame[self.target_dimension_names].to_numpy()
         design_matrix = self._transform_x(x_df)
+
+        # ensure num_cross_validations < num_samples; and reinstantiate LassoCV regressor
+        if design_matrix.shape[0] < self.model_config.num_cross_validations:
+            self.lasso_model_kwargs['cv'] = design_matrix.shape[0] - 1
+            self._regressor = LassoCV(**self.lasso_model_kwargs)
+
         self._regressor.fit(design_matrix, y)
         self._trained = True
         self.last_refit_iteration_number = iteration_number
