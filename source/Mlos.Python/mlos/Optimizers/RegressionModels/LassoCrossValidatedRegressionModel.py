@@ -141,13 +141,16 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
 
         # retain inverse(x.T * x) to use for confidence intervals on predicted values
         condition_number = np.linalg.cond(design_matrix)
-        if condition_number > 10.0 ** 10:
+        self.logger.info(
+            f'LassoCV: design_matrix condition number: {condition_number}'
+        )
+        if condition_number > 10.0 ** 4:
             # add small noise to x to remove singularity,
             #  expect prediction confidence to be reduced (wider intervals) by doing this
             self.logger.info(
-                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^10."
+                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^4."
             )
-            design_matrix += np.random.normal(0, 10.0**-4, size=design_matrix.shape)
+            design_matrix += np.random.normal(0, 10.0**-2, size=design_matrix.shape)
             condition_number = np.linalg.cond(design_matrix)
             self.logger.info(
                 f"Resulting condition number {condition_number}."

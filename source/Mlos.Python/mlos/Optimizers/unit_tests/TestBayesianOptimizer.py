@@ -35,6 +35,7 @@ from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import RegressionEnhancedRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionEnhancedRandomForest import MultiObjectiveRegressionEnhancedRandomForest
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
@@ -344,6 +345,10 @@ class TestBayesianOptimizer:
             # We know that the sample confidence interval is wider (or equal to) prediction interval. So hit rates should be ordered accordingly.
             assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
 
+    # TODOs related to regression enhance random forest regression model random config tests
+    # TODO : when restart_num in [68, 73], the suggested_config from GW is outside the feature hypergrid.
+    # TODO : when restart_num in [12, 76] optimizer is GW, and a requested value is outside the one hot encoded map ; think this might be same as 68 and 73.
+    # TODO : when restart_num in [29, 62], sometimes results in a confidence interval ordering assertion fails at line 875 below
     @trace()
     @pytest.mark.parametrize("restart_num", [i for i in range(10)])
     @pytest.mark.parametrize("use_remote_optimizer", [False])
@@ -383,9 +388,10 @@ class TestBayesianOptimizer:
             decision_tree_config.min_samples_to_fit = 10
             decision_tree_config.n_new_samples_before_refit = 10
 
-        if optimizer_config.surrogate_model_implementation == RegressionEnhancedRandomForestRegressionModel.__name__:
+        if (optimizer_config.surrogate_model_implementation == RegressionEnhancedRandomForestRegressionModel.__name__) or \
+           (optimizer_config.surrogate_model_implementation == MultiObjectiveRegressionEnhancedRandomForest.__name__):
             # the min_samples_required... isn't the true min needed, but sufficient to have non-negative degrees of freedom
-            optimizer_config.min_samples_required_for_guided_design_of_experiments = 75
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 100
             rerf_model_config = optimizer_config.regression_enhanced_random_forest_regression_model_config
             rerf_model_config.max_basis_function_degree = min(rerf_model_config.max_basis_function_degree, 3)
             rf_model_config = rerf_model_config.sklearn_random_forest_regression_model_config
@@ -864,7 +870,9 @@ class TestBayesianOptimizer:
                 if degrees_of_freedom == 0:
                     assert ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
                 else:
-                    print(predicted_optimum.predicted_value, ucb_90_ci_optimum.upper_confidence_bound, ucb_95_ci_optimum.upper_confidence_bound, ucb_99_ci_optimum.upper_confidence_bound)
+                    print(f'upper confidence intervals not nested as expected: \n\tpredicted_value: {predicted_optimum.predicted_value}\n'
+                          f'\t 90th, 95th, and 99th upper confidence bounds: {ucb_90_ci_optimum.upper_confidence_bound}, {ucb_95_ci_optimum.upper_confidence_bound}, {ucb_99_ci_optimum.upper_confidence_bound}')
+                    print(f'degrees of freedom: {optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value]}')
                     assert False
 
 

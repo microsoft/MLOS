@@ -8,7 +8,6 @@ import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
@@ -25,13 +24,9 @@ from mlos.Tracer import trace
 
 class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     """ Regression-Enhanced RandomForest Regression model
-
     See https://arxiv.org/pdf/1904.10416.pdf for inspiration.
     See following PRs for exploration notes/observations:
-
     1. https://msdata.visualstudio.com/Database%20Systems/_git/MLOS/pullrequest/377907
-
-
     Goals/Motivations:
     1. RandomForest models are not well suited for extrapolation. As shown in the publication referenced above
         the RERF Lasso model tries to correct this by using the polynomial basis Lasso regression as the
@@ -44,7 +39,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     4. The RandomForest model in RERF fits the Lasso model's residuals, hence any overall regression pattern
         (polynomial includes linear) within a decision tree's leaf data may have been eliminated
         by the Lasso fit.
-
     """
 
     _PREDICTOR_OUTPUT_COLUMNS = [
@@ -78,6 +72,16 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.model_config = model_config
         self.model_config.perform_initial_root_model_hyper_parameter_search = True
         self.model_config.perform_initial_random_forest_hyper_parameter_search = True
+
+        # enforce model_config constraints (needed by sklearn regression model classes)
+        #  For .lasso_regression_model_config.fit_intercept, the intercept term in added in the design_matrix construction
+        #  For .lasso_regression_model_config.normalize, since the random forest would also need the scaled features,
+        #     scaling would have to be managed by ReRF directly
+        model_config.lasso_regression_model_config.fit_intercept = False
+        model_config.lasso_regression_model_config.normalize = False
+        if model_config.sklearn_random_forest_regression_model_config.oob_score:
+            model_config.sklearn_random_forest_regression_model_config.bootstrap = True
+        print(self.model_config)
 
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
@@ -117,7 +121,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.polynomial_features_powers_ = None
 
         self.categorical_zero_cols_idx_to_delete_ = None
-        self.scaler_ = StandardScaler()
 
         self._trained = False
         self.last_refit_iteration_number = None
@@ -156,7 +159,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             iteration_number: int = 0
     ):
         """ Fits the RegressionEnhancedRandomForest
-
         :param feature_values_pandas_frame:
         :param target_values_pandas_frame:
         :param iteration_number:
