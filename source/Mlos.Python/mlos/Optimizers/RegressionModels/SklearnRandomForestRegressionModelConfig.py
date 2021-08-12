@@ -66,7 +66,7 @@ class SklearnRandomForestRegressionModelConfig(metaclass=DefaultConfigMeta):
         n_jobs=1,
         warm_start=False,
         ccp_alpha=0,
-        max_samples=0
+        max_samples=0.01
     )
 
     @classmethod
