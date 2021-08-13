@@ -167,6 +167,18 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         :param target_values:
         :return:
         """
+        print("ZACK fiT FOREST ZACK FIT FOREST")
+        # This ensures that context doesn't get passed to the fit function of a random forest without it being done intentionally
+        # This primarily is done for series where "hidden" non-global contexts exist
+        # Perhaps it might make sense to sanitize all input to the forest but not right now.
+        #
+        #feature_names = [dimension.name for dimension in self.input_space.dimensions]
+        #feature_columns_to_retain = [column for column in feature_values_pandas_frame.columns if
+        #                               column in set(feature_names)]
+        #feature_values_pandas_frame = feature_values_pandas_frame[feature_columns_to_retain]
+
+        print(feature_values_pandas_frame)
+        print(target_values_pandas_frame)
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 
         feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
@@ -216,6 +228,10 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
         :param feature_values_pandas_frame:
         :return: Prediction
         """
+        print("NORMAL TREE PREDICT")
+        print(self.input_space)
+        print(feature_values_pandas_frame)
+        print("---")
         self.logger.debug(f"Creating predictions for {len(feature_values_pandas_frame.index)} samples.")
 
         feature_values_pandas_frame = self._input_space_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)

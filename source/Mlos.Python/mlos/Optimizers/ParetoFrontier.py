@@ -147,9 +147,9 @@ class ParetoFrontier:
         #
         pareto_df.sort_values(
             by=[objective.name for objective in self.optimization_problem.objectives],
-            ascending=False, # We want the maxima up top.
+            ascending=False,  # We want the maxima up top.
             inplace=True,
-            na_position='last', # TODO: figure out what to do with NaNs.
+            na_position='last',  # TODO: figure out what to do with NaNs.
             ignore_index=False
         )
 

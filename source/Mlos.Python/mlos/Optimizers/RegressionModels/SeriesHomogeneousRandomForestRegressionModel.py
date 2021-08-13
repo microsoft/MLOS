@@ -51,7 +51,7 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
             dimensions=input_space.dimensions
         )
         series_modulation_dimension_copy = self.objective.series_modulation_dimension.copy()
-        series_modulation_dimension_copy.name = f"context_space.{series_modulation_dimension_copy.name}"
+        series_modulation_dimension_copy.name = f"series_context_space.{series_modulation_dimension_copy.name}"
         input_space_shallow_copy.add_dimension(series_modulation_dimension_copy)
 
         output_space_shallow_copy = SimpleHypergrid(
@@ -66,15 +66,11 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
             output_space=output_space_shallow_copy,
             logger=self.logger
         )
-        print("CREATED RANDOM FOREST")
-        print(self.input_space)
-        print(self.output_space)
 
     @trace()
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number):
-        print("FITTING RANDOM FOREST")
-        modulated_column_name = f"context_space.time"
-        output_column_name = f"f_output"
+        modulated_column_name = f"series_context_space.{self.objective.series_modulation_dimension.name}"
+        output_column_name = self.objective.series_output_dimension.name
         lens_of_lists = feature_values_pandas_frame[modulated_column_name].apply(len)
         origin_rows = range(feature_values_pandas_frame.shape[0])
         destination_rows = np.repeat(origin_rows, lens_of_lists)
@@ -88,10 +84,6 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
         )
         expanded_feature_values_df.reset_index(inplace=True, drop=True)
         expanded_target_values_df = pd.DataFrame({output_column_name: [item for items in target_values_pandas_frame[output_column_name] for item in items]})
-        print("INPUT")
-        print(expanded_feature_values_df)
-        print("TARGET VALUES")
-        print(expanded_target_values_df)
 
         HomogeneousRandomForestRegressionModel.fit(self, expanded_feature_values_df, expanded_target_values_df, iteration_number)
 
@@ -116,20 +108,40 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         series_vals_df = pd.DataFrame({
-            f"context_space.{self.objective.series_modulation_dimension.name}": self.objective.series_modulation_dimension.linspace()
+            f"series_context_space.{self.objective.series_modulation_dimension.name}": self.objective.series_modulation_dimension.linspace()
         })
         feature_values_pandas_frame_merged = feature_values_pandas_frame.merge(series_vals_df, how="cross")
-        print("INPUT")
-        print(feature_values_pandas_frame_merged)
-
         raw_predictions = HomogeneousRandomForestRegressionModel.predict(self, feature_values_pandas_frame=feature_values_pandas_frame_merged)
 
-        print(raw_predictions)
         predictions_df = raw_predictions.get_dataframe()
-        print("OUTPUT")
-        print(predictions_df)
 
         # TODO ZACK: After fighting DataFrames for a few hours I have given up. Maybe I should spend a weekend truly learning them.
+        # This math comes from the following theory:
+        # Given series X. X1 is the first element of that series. X2 is the second...
+        # Given series Y. Y1 is the first ....
+        #
+        # Y in this case represents the true value, so each of its values in its series has zero variance
+        #
+        # Define
+        # Z = X-Y
+        # E[Z1] = E[X1]-Y1
+        # Var[Z1] = Var[X1]   <- because variance of Y1 in this case is zero
+        # Z1 ~ Norm(E[X1]-Y1, Var[X1])
+        #
+        # E[(Z)^2] := E[(X1-Y1)^2 + (X2-Y2)^2 + (X3-Y3)^2 ....]
+        # E[(X1-Y1)^2] = Second raw moment of Z1.
+        #              = E[Z1]^2 + Var[Z1] (https://en.wikipedia.org/wiki/Normal_distribution)
+        #              = (E[X1]-Y1)^2 + Var[X1]
+
+        # Var[(X-Y)^2] := Var[(X1-Y1)^2 + (X2-Y2)^2 + (X3-Y3)^2 ... ]
+        # Var[(X1-Y1)^2] = E[(X1-Y1)^4] - E[(X1-Y1)^2]^2 <- this is already calculated.
+        #                = /\- This is the fourth raw moment of Z1.
+        # E[Z^4] = E[Z]^4 + 6(E[Z]^2)Var[Z] + 3Var[Z]^2
+        # Var[(X1-Y1)^2] =
+        #         = (E[X1]-Y1)^4 + 6(E[X1]-Y1)^2Var[X1] + 3Var[X1]^2 - E[(X1-Y1)^2]^2
+        # It is plug and play from here.
+        # E[Z^2] = E[Z1^2] + E[Z2^2] + E[Z3^2] ...
+        # Var[Z^2] = Var[Z1^2] + Var[Z2^2] + Var[Z3^2] ...
         series_error_values = []
         variances = []
         sample_sizes = []
@@ -152,7 +164,7 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
                 variances.append(calculated_utility_variance)
                 sample_sizes.append(current_sample_size)
                 dofs.append(current_dof)
-                sample_variances.append(np.std(current_expected)**2)
+                sample_variances.append(np.std(current_expected)**2)  # TODO ZACK: I am not sure if this is what you meant @Adam
                 current_predictions = []
 
         predictions_df = pd.DataFrame({

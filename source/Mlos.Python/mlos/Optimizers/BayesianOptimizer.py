@@ -218,8 +218,20 @@ class BayesianOptimizer(OptimizerBase):
                 targets_df=self._target_values_df,
                 iteration_number=len(self._parameter_values_df.index)
             )
-
+        self._update_series_fit_performance_with_models()
         self.pareto_frontier.update_pareto(objectives_df=self._target_values_df, parameters_df=self._parameter_values_df)
+
+    # This function performs the very important task of updating the values in _target_values_df that are part of the objective
+    # space that correspond to the fit of the series. This value cannot be updated without the random forest as instances at
+    # which samples are collected may vary over multiple runs and thus we need the random forest to be able to interpolate
+    #
+    @trace()
+    def _update_series_fit_performance_with_models(self):
+        for objective in self.optimization_problem.objectives:
+            if isinstance(objective, SeriesObjective):
+                self._target_values_df[objective.name] = \
+                    self.predict(self._parameter_values_df, objective_name=objective.name).get_dataframe()[
+                    Prediction.LegalColumnNames.PREDICTED_VALUE.value]
 
     @trace()
     def predict(self, parameter_values_pandas_frame, t=None, context_values_pandas_frame=None, objective_name=None) -> Prediction:  # pylint: disable=unused-argument
