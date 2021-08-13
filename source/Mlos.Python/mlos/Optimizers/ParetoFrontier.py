@@ -129,6 +129,7 @@ class ParetoFrontier:
         :return:
         """
         print("ZACK")
+        print("PARETO FRONTIER")
         print(objectives_df)
         print(self.optimization_problem.objective_space)
         print("---")

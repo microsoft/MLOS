@@ -9,9 +9,6 @@ import numpy as np
 import pandas as pd
 import scipy.stats
 
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.SeriesDifferenceUtilityFunction import SeriesDifferenceUtilityFunction
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctions.SeriesPredictedValueUtilityFunction import \
-    SeriesPredictedValueUtilityFunction
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
@@ -100,10 +97,7 @@ class OptimizerBase(ABC):
         if not len(parameters_df.index):
             raise ValueError("Can't compute optimum before registering any observations.")
         have_context = (context is not None) or (self.optimization_problem.context_space is not None)
-        if have_context and ( #TODO ZACK : @Adam indentation thoughts?
-            optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT
-            and optimum_definition != OptimumDefinition.BEST_SERIES_ERROR_FUNCTION_MINIMIZATION
-        ):
+        if have_context and optimum_definition != OptimumDefinition.BEST_SPECULATIVE_WITHIN_CONTEXT:
             raise ValueError(f"{optimum_definition} not supported if context is provided.")
 
         if optimum_definition == OptimumDefinition.BEST_OBSERVATION:
@@ -113,32 +107,7 @@ class OptimizerBase(ABC):
             if context is None:
                 raise ValueError(f"{optimum_definition} requires context to be not None.")
             return self._optimum_within_context(context=context)
-        if optimum_definition == OptimumDefinition.BEST_SERIES_ERROR_FUNCTION_MINIMIZATION:
-            if context is None:
-                raise ValueError(f"{optimum_definition} requires context to be not None.")
-            return self._optimum_with_series_difference(context=context, parameters_df=parameters_df)
         return self._prediction_based_optimum(parameters_df=parameters_df, optimum_definition=optimum_definition, alpha=alpha)
-
-    @trace()
-    def _optimum_with_series_difference(self, context: pd.DataFrame, parameters_df: pd.DataFrame):
-        predicted_value_utility_function = SeriesPredictedValueUtilityFunction(
-            surrogate_model=self.surrogate_model,
-            objective=self.optimization_problem.objectives[0],
-            logger=self.logger
-        )
-        feature_values_dataframe = self.optimization_problem.construct_feature_dataframe(
-            parameters_df=parameters_df,
-            context_df=context,
-            product=True
-        )
-        utility_function_values = predicted_value_utility_function(feature_values_pandas_frame=feature_values_dataframe.copy(deep=False))
-
-        index_of_max_value = utility_function_values[['utility']].idxmax()['utility']
-        argmax_point = Point.from_dataframe(feature_values_dataframe.loc[[index_of_max_value]])
-        config_to_suggest = argmax_point[self.optimization_problem.parameter_space.name]
-        self.logger.debug(f"Suggesting: {str(config_to_suggest)}")
-
-        return config_to_suggest
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):

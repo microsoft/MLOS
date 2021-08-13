@@ -18,7 +18,6 @@ from .UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptim
 from .UtilityFunctions.ConfidenceBoundUtilityFunction import ConfidenceBoundUtilityFunction, confidence_bound_utility_function_config_store
 from .UtilityFunctions.MultiObjectiveProbabilityOfImprovementUtilityFunction import MultiObjectiveProbabilityOfImprovementUtilityFunction, \
     multi_objective_probability_of_improvement_utility_function_config_store
-from .UtilityFunctions.SeriesDifferenceUtilityFunction import SeriesDifferenceUtilityFunction, series_difference_utility_function_config_store
 
 from .UtilityFunctionOptimizers.UtilityFunctionOptimizerFactory import UtilityFunctionOptimizerFactory
 
@@ -29,8 +28,7 @@ experiment_designer_config_store = ComponentConfigStore(
         dimensions=[
             CategoricalDimension('utility_function_implementation', values=[
                 ConfidenceBoundUtilityFunction.__name__,
-                MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__,
-                SeriesDifferenceUtilityFunction.__name__
+                MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__
             ]),
             CategoricalDimension('numeric_optimizer_implementation', values=[
                 RandomSearchOptimizer.__name__,
@@ -45,9 +43,6 @@ experiment_designer_config_store = ComponentConfigStore(
     ).join(
         subgrid=multi_objective_probability_of_improvement_utility_function_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('utility_function_implementation', values=[MultiObjectiveProbabilityOfImprovementUtilityFunction.__name__])
-    ).join(
-        subgrid=series_difference_utility_function_config_store.parameter_space,
-        on_external_dimension=CategoricalDimension('utility_function_implementation', values=[SeriesDifferenceUtilityFunction.__name__])
     ).join(
         subgrid=random_search_optimizer_config_store.parameter_space,
         on_external_dimension=CategoricalDimension('numeric_optimizer_implementation', values=[RandomSearchOptimizer.__name__])
@@ -157,13 +152,6 @@ class ExperimentDesigner:
                 function_config=self.config.multi_objective_probability_of_improvement_config,
                 pareto_frontier=pareto_frontier,
                 surrogate_model=self.surrogate_model,
-                logger=self.logger
-            )
-        elif designer_config.utility_function_implementation == SeriesDifferenceUtilityFunction.__name__:
-            self.utility_function = SeriesDifferenceUtilityFunction(
-                function_config=self.config.series_difference_utility_function_config,
-                surrogate_model=self.surrogate_model,
-                objective=self.optimization_problem.objectives[0], # TODO ZACK: I copied this style from ConfidenceBoundUtilityFunction. Not sure about it.
                 logger=self.logger
             )
         else:

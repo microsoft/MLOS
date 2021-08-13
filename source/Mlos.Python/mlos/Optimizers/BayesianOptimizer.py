@@ -109,6 +109,7 @@ class BayesianOptimizer(OptimizerBase):
         for objective in self.optimization_problem.objectives:
             if isinstance(objective, SeriesObjective):
                 self._target_names_set.add(objective.series_output_dimension.name)
+                self._context_names_set.add(objective.series_modulation_dimension.name)
 
         self._parameter_values_df = pd.DataFrame(columns=self._parameter_names)
         self._context_values_df = pd.DataFrame(columns=self._context_names)
@@ -158,6 +159,7 @@ class BayesianOptimizer(OptimizerBase):
     def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
+        print("ZACK _ BAYESIAN OPTIMIZER REGISTER")
 
         self.logger.info(f"Registering {len(parameter_values_pandas_frame.index)} parameters and {len(target_values_pandas_frame.index)} objectives.")
 

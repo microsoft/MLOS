@@ -43,8 +43,6 @@ class OptimumDefinition(Enum):
     #
     LOWER_CONFIDENCE_BOUND_FOR_OBSERVED_CONFIG = 'prediction_lower_confidence_bound_for_observed_config'
 
-    BEST_SPECULATIVE_WITHIN_CONTEXT = 'best_speculative_within_context'
-
     # This mode works to select the points that given a function f(series) is able to output a utility value for that series. This will often be related to
     # time series approximation however it shouldn't be limited to that.
     #

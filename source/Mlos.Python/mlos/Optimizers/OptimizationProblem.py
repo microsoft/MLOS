@@ -170,7 +170,12 @@ class OptimizationProblem:
         #
         features_df = parameters_df.rename(lambda x: f"{self.parameter_space.name}.{x}", axis=1)
         if context_df is not None and len(context_df) > 0:
-            renamed_context_values = context_df.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
+            # Context_space can be none for time-series-only fitting
+            #
+            if self.context_space is None:
+                renamed_context_values = context_df.rename(lambda x: f"context_space.{x}", axis=1)
+            else:
+                renamed_context_values = context_df.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
             features_df['contains_context'] = True
             if product:
                 renamed_context_values['contains_context'] = True
