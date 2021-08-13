@@ -159,7 +159,6 @@ class BayesianOptimizer(OptimizerBase):
     def register(self, parameter_values_pandas_frame, target_values_pandas_frame, context_values_pandas_frame=None):
         # TODO: add to a Dataset and move on. The surrogate model should have a reference to the same dataset
         # TODO: and should be able to refit automatically.
-        print("ZACK _ BAYESIAN OPTIMIZER REGISTER")
 
         self.logger.info(f"Registering {len(parameter_values_pandas_frame.index)} parameters and {len(target_values_pandas_frame.index)} objectives.")
 
@@ -218,12 +217,15 @@ class BayesianOptimizer(OptimizerBase):
                 targets_df=self._target_values_df,
                 iteration_number=len(self._parameter_values_df.index)
             )
-        self._update_series_fit_performance_with_models()
+            self._update_series_fit_performance_with_models()
+
         self.pareto_frontier.update_pareto(objectives_df=self._target_values_df, parameters_df=self._parameter_values_df)
 
     # This function performs the very important task of updating the values in _target_values_df that are part of the objective
     # space that correspond to the fit of the series. This value cannot be updated without the random forest as instances at
     # which samples are collected may vary over multiple runs and thus we need the random forest to be able to interpolate
+    #
+    # This must be done after every observation because it is only an approximation that gets better with more samples
     #
     @trace()
     def _update_series_fit_performance_with_models(self):

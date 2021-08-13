@@ -18,10 +18,10 @@ class Objective:
 
 
 class SeriesObjective(Objective):
-    def __init__(self, name: str, minimize: bool, target_series: np.array, series_modulation_dimension: Dimension, series_output_dimension: Dimension):
+    def __init__(self, name: str, minimize: bool, target_series_df: pd.DataFrame, series_modulation_dimension: Dimension, series_output_dimension: Dimension):
         self.name = name
         self.minimize = minimize
-        self.target_series = target_series
+        self.target_series_df = target_series_df
         self.series_modulation_dimension = series_modulation_dimension
         self.series_output_dimension = series_output_dimension
 
@@ -31,7 +31,7 @@ def objective_to_dict(objective: Objective):
         return {
             "name": objective.name,
             "minimize": objective.minimize,
-            "target_series": objective.target_series,
+            "target_series_df": objective.target_series_df,
             "series_modulation_dimension": objective.series_modulation_dimension,
             "series_output_dimension": objective.series_output_dimension
         }
@@ -43,11 +43,11 @@ def objective_to_dict(objective: Objective):
 
 
 def objective_from_dict(objective_dict: dict):
-    if "target_series" in objective_dict:  # Test if objective_dict is of type SeriesObjective
+    if "target_series_df" in objective_dict:  # Test if objective_dict is of type SeriesObjective
         return SeriesObjective(
             name=objective_dict["name"],
             minimize=objective_dict["minimize"],
-            target_series=objective_dict["target_series"],
+            target_series_df=objective_dict["target_series_df"],
             series_modulation_dimension=objective_dict["series_modulation_dimension"],
             series_output_dimension=objective_dict["series_output_dimension"]
         )
@@ -173,7 +173,7 @@ class OptimizationProblem:
             # Context_space can be none for time-series-only fitting
             #
             if self.context_space is None:
-                renamed_context_values = context_df.rename(lambda x: f"context_space.{x}", axis=1)
+                renamed_context_values = context_df.rename(lambda x: f"series_context_space.{x}", axis=1)
             else:
                 renamed_context_values = context_df.rename(lambda x: f"{self.context_space.name}.{x}", axis=1)
             features_df['contains_context'] = True

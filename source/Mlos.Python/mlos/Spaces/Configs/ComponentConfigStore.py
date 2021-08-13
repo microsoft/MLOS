@@ -33,6 +33,9 @@ class ComponentConfigStore:
         #   value: config description
         self._named_configs_descriptions: Dict[str, str] = {'default': 'default'}
 
+    def __getitem__(self, config_name: str) -> str:
+        return self.get_config_by_name(config_name)
+
     @property
     def default(self):
         return self._default.copy()
@@ -58,3 +61,5 @@ class ComponentConfigStore:
         # Throws a Key error if config not found, which is exactly what we want to throw.
         #
         return self._named_configs[name].copy()
+
+

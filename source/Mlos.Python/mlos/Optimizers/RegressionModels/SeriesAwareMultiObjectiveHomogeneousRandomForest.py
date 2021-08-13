@@ -15,8 +15,8 @@ from mlos.Optimizers.RegressionModels.MultiObjectiveGoodnessOfFitMetrics import 
 from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModelFitState import MultiObjectiveRegressionModelFitState
-from mlos.Optimizers.RegressionModels.SeriesAwareHomogeneousRandomForestRegressionModel import \
-    SeriesAwareHomogeneousRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.SeriesHomogeneousRandomForestRegressionModel import \
+    SeriesHomogeneousRandomForestRegressionModel
 from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
@@ -57,19 +57,17 @@ class SeriesAwareMultiObjectiveHomogeneousRandomForest(NaiveMultiObjectiveRegres
             assert output_dimension.name in self._name_to_objective_dict, "Output dimension not listed in objectives"
             output_objective = self._name_to_objective_dict[output_dimension.name]
             if isinstance(output_objective, SeriesObjective):
-                print("ZACK KAPPA")
-                random_forest = SeriesAwareHomogeneousRandomForestRegressionModel(
+                random_forest = SeriesHomogeneousRandomForestRegressionModel(
                     model_config=model_config,
                     input_space=input_space,
                     objective=output_objective,
                     # series-objective rather than series_objective is used in this case to prevent future naming confusion if
-                    # output_dimension.name = xxx_series
+                    # output_dimension.name = xxx_series. However this should be entirely internal so it wont matter...
                     #
                     output_space=SimpleHypergrid(name=f"{output_dimension.name}_series-objective", dimensions=[output_dimension]),
                     logger=self.logger
                 )
             else:
-                print("ZACK GAMMA")
                 random_forest = HomogeneousRandomForestRegressionModel(
                     model_config=model_config,
                     input_space=input_space,
@@ -78,20 +76,13 @@ class SeriesAwareMultiObjectiveHomogeneousRandomForest(NaiveMultiObjectiveRegres
                 )
             self._regressors_by_objective_name[output_dimension.name] = random_forest
 
-
     def fit(
             self,
             features_df: pd.DataFrame,
             targets_df: pd.DataFrame,
             iteration_number: int
     ) -> None:
-        print("ZACK FIT ZACK FIT")
         for objective_name, regressor in self._regressors_by_objective_name:
-            #if objective_name not in targets_df.columns:
-            #    continue
-            #ZACK
-            print(objective_name)
-            print(regressor.output_space.dimensions[0].name)
             regressor.fit(
                 feature_values_pandas_frame=features_df,
                 target_values_pandas_frame=targets_df[[regressor.output_space.dimensions[0].name]],
@@ -103,21 +94,8 @@ class SeriesAwareMultiObjectiveHomogeneousRandomForest(NaiveMultiObjectiveRegres
             features_df: pd.DataFrame,
             include_only_valid_rows: bool = True
     ) -> MultiObjectivePrediction:
-        print("ZACK PREDICT ZACK PREDICT")
         multi_objective_predicitons = MultiObjectivePrediction(objective_names=self.output_dimension_names)
         for objective_name, regressor in self._regressors_by_objective_name:
             prediction = regressor.predict(feature_values_pandas_frame=features_df, include_only_valid_rows=include_only_valid_rows)
             multi_objective_predicitons[objective_name] = prediction
         return multi_objective_predicitons
-
-    def compute_goodness_of_fit(
-            self,
-            features_df: pd.DataFrame,
-            targets_df: pd.DataFrame,
-            data_set_type: DataSetType
-    ) -> MultiObjectiveGoodnessOfFitMetrics:
-        multi_objective_goodness_of_fit_metrics = MultiObjectiveGoodnessOfFitMetrics(objective_names=self.output_dimension_names)
-        for objective_name, regressor in self._regressors_by_objective_name:
-            gof_metrics = regressor.compute_goodness_of_fit(features_df=features_df, target_df=targets_df[[objective_name]], data_set_type=data_set_type)
-            multi_objective_goodness_of_fit_metrics[objective_name] = gof_metrics
-        return multi_objective_goodness_of_fit_metrics

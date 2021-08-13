@@ -21,7 +21,7 @@ from mlos.Optimizers.RegressionModels.HomogeneousRandomForestFitState import Hom
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 
 
-class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegressionModel):
+class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegressionModel):
     """TODO ZACK COMMENT
     """
 
@@ -71,6 +71,20 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number):
         modulated_column_name = f"series_context_space.{self.objective.series_modulation_dimension.name}"
         output_column_name = self.objective.series_output_dimension.name
+        # The chunk of code highlighted by the "--"s transform a dataframe that looks like
+        # a | b | c
+        # 1 | 2 | [3, 4]
+        # 4 | 8 | [5, 6, 9]
+        # into
+        # a | b | c
+        # 1 | 2 | 3
+        # 1 | 2 | 4
+        # 4 | 8 | 5
+        # 4 | 8 | 6
+        # 4 | 8 | 9
+        #
+        # In this case, c is the "time" or modulated dimension / domain
+        # --
         lens_of_lists = feature_values_pandas_frame[modulated_column_name].apply(len)
         origin_rows = range(feature_values_pandas_frame.shape[0])
         destination_rows = np.repeat(origin_rows, lens_of_lists)
@@ -83,20 +97,24 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
             [item for items in feature_values_pandas_frame[modulated_column_name] for item in items]
         )
         expanded_feature_values_df.reset_index(inplace=True, drop=True)
+        # --
+        #
+        # This expands the target values along its axis. Turning
+        # B
+        # [1,2]
+        # [3,4]
+        # into
+        # B
+        # 1
+        # 2
+        # ..
+        #
         expanded_target_values_df = pd.DataFrame({output_column_name: [item for items in target_values_pandas_frame[output_column_name] for item in items]})
 
         HomogeneousRandomForestRegressionModel.fit(self, expanded_feature_values_df, expanded_target_values_df, iteration_number)
 
     @trace()
     def predict(self, feature_values_pandas_frame, include_only_valid_rows=True):
-        """ Aggregate predictions from all estimators
-
-        see: https://arxiv.org/pdf/1211.0906.pdf
-        section: 4.3.2 for details
-
-        :param feature_values_pandas_frame:
-        :return: Prediction
-"""
 
         self.logger.debug(f"Predicting {len(feature_values_pandas_frame.index)} points.")
 
@@ -108,14 +126,15 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         series_vals_df = pd.DataFrame({
-            f"series_context_space.{self.objective.series_modulation_dimension.name}": self.objective.series_modulation_dimension.linspace()
+            f"series_context_space.{self.objective.series_modulation_dimension.name}":
+                self.objective.target_series_df[self.objective.series_modulation_dimension.name]
         })
         feature_values_pandas_frame_merged = feature_values_pandas_frame.merge(series_vals_df, how="cross")
         raw_predictions = HomogeneousRandomForestRegressionModel.predict(self, feature_values_pandas_frame=feature_values_pandas_frame_merged)
 
         predictions_df = raw_predictions.get_dataframe()
 
-        # TODO ZACK: After fighting DataFrames for a few hours I have given up. Maybe I should spend a weekend truly learning them.
+
         # This math comes from the following theory:
         # Given series X. X1 is the first element of that series. X2 is the second...
         # Given series Y. Y1 is the first ....
@@ -142,6 +161,14 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
         # It is plug and play from here.
         # E[Z^2] = E[Z1^2] + E[Z2^2] + E[Z3^2] ...
         # Var[Z^2] = Var[Z1^2] + Var[Z2^2] + Var[Z3^2] ...
+        #
+        # However this math only works if you decide to do sum of squared errors as a measurement of series proximity
+        # And that might not be the ideal method of measuring series proximity.
+        # Bootstrapping is more general and will work with methods like DTW, cosine similarity, and more complicated measurements
+        #
+        # TODO ZACK: After fighting DataFrames for a few hours I have given up. Maybe I should spend a weekend truly learning them.
+        # Please forgive me
+        #
         series_error_values = []
         variances = []
         sample_sizes = []
@@ -150,12 +177,12 @@ class SeriesAwareHomogeneousRandomForestRegressionModel(HomogeneousRandomForestR
         current_predictions = []
         for index, prediction in predictions_df.iterrows():
             current_predictions.append(prediction)
-            if ((index + 1) % len(self.objective.series_modulation_dimension)) == 0:
+            if ((index + 1) % len(self.objective.target_series_df[self.objective.series_modulation_dimension.name])) == 0:
                 current_expected = np.array([prediction[predicted_value_col] for prediction in current_predictions])
                 current_variance = np.array([prediction[predicted_value_var_col] for prediction in current_predictions])
                 current_sample_size = np.min([prediction[sample_size_col] for prediction in current_predictions])
                 current_dof = np.min([prediction[dof_col] for prediction in current_predictions])
-                current_expected_minus_target = current_expected - self.objective.target_series
+                current_expected_minus_target = current_expected - self.objective.target_series_df[self.objective.series_output_dimension.name]
                 calculated_utility_expectation = sum(current_expected_minus_target ** 2 + current_variance)
                 calculated_utility_variance = \
                     sum(current_expected_minus_target ** 4 + 6 * (current_expected_minus_target ** 2) * current_variance

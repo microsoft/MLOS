@@ -235,6 +235,7 @@ class RandomNearIncumbentOptimizer(UtilityFunctionOptimizer):
         #
         all_neighbors_df, unprojected_neighbors_df = self._prepare_random_neighbors(incumbents_df=incumbents_df)
 
+        all_neighbors_df = all_neighbors_df.reset_index(drop=True)
         neighbors_utility_df = self._compute_utility_for_params(params_df=unprojected_neighbors_df, context_df=context_df)
         self.logger.info(f"[{iteration_number}]Computed utility for {len(neighbors_utility_df.index)} random neighbors.")
 
