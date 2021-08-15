@@ -8,7 +8,7 @@ import random
 import pandas as pd
 import numpy as np
 
-from mlos.Optimizers.OptimizationProblem import SeriesObjective
+from mlos.Optimizers.OptimizationProblem import SeriesMatchingObjective
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Spaces import Dimension, Hypergrid, Point, SimpleHypergrid
 from mlos.Spaces.HypergridAdapters import HierarchicalToFlatHypergridAdapter
@@ -22,7 +22,7 @@ from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 
 
 class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegressionModel):
-    """TODO ZACK COMMENT
+    """ This regression is
     """
 
 
@@ -32,7 +32,7 @@ class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegres
             model_config: Point,
             input_space: Hypergrid,
             output_space: Hypergrid,
-            objective: SeriesObjective,
+            objective: SeriesMatchingObjective,
             logger=None
     ):
         if logger is None:
@@ -42,21 +42,19 @@ class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegres
         assert model_config in homogeneous_random_forest_config_store.parameter_space
 
         self.objective = objective
-
-        print("ZACK KAPPA")
         # If this is a series objective, create a fake set of forests
         #
         input_space_shallow_copy = SimpleHypergrid(
             name=input_space.name,
             dimensions=input_space.dimensions
         )
-        series_modulation_dimension_copy = self.objective.series_modulation_dimension.copy()
-        series_modulation_dimension_copy.name = f"series_context_space.{series_modulation_dimension_copy.name}"
-        input_space_shallow_copy.add_dimension(series_modulation_dimension_copy)
+        series_domain_dimension_copy = self.objective.series_domain_dimension.copy()
+        series_domain_dimension_copy.name = f"series_context_space.{series_domain_dimension_copy.name}"
+        input_space_shallow_copy.add_dimension(series_domain_dimension_copy)
 
         output_space_shallow_copy = SimpleHypergrid(
             name=output_space.name,
-            dimensions=[self.objective.series_output_dimension]
+            dimensions=[self.objective.series_codomain_dimension]
         )
 
         HomogeneousRandomForestRegressionModel.__init__(
@@ -69,8 +67,8 @@ class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegres
 
     @trace()
     def fit(self, feature_values_pandas_frame, target_values_pandas_frame, iteration_number):
-        modulated_column_name = f"series_context_space.{self.objective.series_modulation_dimension.name}"
-        output_column_name = self.objective.series_output_dimension.name
+        modulated_column_name = f"series_context_space.{self.objective.series_domain_dimension.name}"
+        output_column_name = self.objective.series_codomain_dimension.name
         # The chunk of code highlighted by the "--"s transform a dataframe that looks like
         # a | b | c
         # 1 | 2 | [3, 4]
@@ -126,8 +124,8 @@ class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegres
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         series_vals_df = pd.DataFrame({
-            f"series_context_space.{self.objective.series_modulation_dimension.name}":
-                self.objective.target_series_df[self.objective.series_modulation_dimension.name]
+            f"series_context_space.{self.objective.series_domain_dimension.name}":
+                self.objective.target_series_df[self.objective.series_domain_dimension.name]
         })
         feature_values_pandas_frame_merged = feature_values_pandas_frame.merge(series_vals_df, how="cross")
         raw_predictions = HomogeneousRandomForestRegressionModel.predict(self, feature_values_pandas_frame=feature_values_pandas_frame_merged)
@@ -166,8 +164,7 @@ class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegres
         # And that might not be the ideal method of measuring series proximity.
         # Bootstrapping is more general and will work with methods like DTW, cosine similarity, and more complicated measurements
         #
-        # TODO ZACK: After fighting DataFrames for a few hours I have given up. Maybe I should spend a weekend truly learning them.
-        # Please forgive me
+        # TODO ZACK: After fighting DataFrames for a few hours I have given up. Please forgive me
         #
         series_error_values = []
         variances = []
@@ -175,25 +172,39 @@ class SeriesHomogeneousRandomForestRegressionModel(HomogeneousRandomForestRegres
         dofs = []
         sample_variances = []
         current_predictions = []
-        for index, prediction in predictions_df.iterrows():
-            current_predictions.append(prediction)
-            if ((index + 1) % len(self.objective.target_series_df[self.objective.series_modulation_dimension.name])) == 0:
-                current_expected = np.array([prediction[predicted_value_col] for prediction in current_predictions])
-                current_variance = np.array([prediction[predicted_value_var_col] for prediction in current_predictions])
-                current_sample_size = np.min([prediction[sample_size_col] for prediction in current_predictions])
-                current_dof = np.min([prediction[dof_col] for prediction in current_predictions])
-                current_expected_minus_target = current_expected - self.objective.target_series_df[self.objective.series_output_dimension.name]
-                calculated_utility_expectation = sum(current_expected_minus_target ** 2 + current_variance)
-                calculated_utility_variance = \
-                    sum(current_expected_minus_target ** 4 + 6 * (current_expected_minus_target ** 2) * current_variance
-                        + 3 * current_variance ** 2 - (current_expected_minus_target ** 2 + current_variance) ** 2)
-                series_error_values.append(calculated_utility_expectation)
-                variances.append(calculated_utility_variance)
-                sample_sizes.append(current_sample_size)
-                dofs.append(current_dof)
-                sample_variances.append(np.std(current_expected)**2)  # TODO ZACK: I am not sure if this is what you meant @Adam
-                current_predictions = []
+        if self.objective.series_difference_metric == "sum_of_squared_errors":
+            for index, prediction in predictions_df.iterrows():
+                current_predictions.append(prediction)
+                if ((index + 1) % len(self.objective.target_series_df[self.objective.series_domain_dimension.name])) == 0:
 
+                    current_expected = np.array([prediction[predicted_value_col] for prediction in current_predictions])
+
+                    current_variance = np.array([prediction[predicted_value_var_col] for prediction in current_predictions])
+
+                    current_sample_size = np.min([prediction[sample_size_col] for prediction in current_predictions])
+
+                    current_dof = np.min([prediction[dof_col] for prediction in current_predictions])
+
+                    current_expected_minus_target = current_expected - self.objective.target_series_df[
+                        self.objective.series_codomain_dimension.name]
+
+                    calculated_utility_expectation = sum(current_expected_minus_target ** 2 + current_variance)
+                    calculated_utility_variance = \
+                        sum(current_expected_minus_target ** 4 + 6 * (current_expected_minus_target ** 2) * current_variance
+                            + 3 * current_variance ** 2 - (current_expected_minus_target ** 2 + current_variance) ** 2)
+
+                    series_error_values.append(calculated_utility_expectation)
+                    variances.append(calculated_utility_variance)
+                    sample_sizes.append(current_sample_size)
+                    dofs.append(current_dof)
+                    sample_variances.append(np.std(current_expected)**2)  # TODO ZACK: I am not sure if this is what you meant @Adam
+                    current_predictions = []
+        elif self.objective.series_difference_metric == "dynamic_time_warping":
+            raise Exception("dynamic time warping difference metric not implemented")
+        elif self.objective.series_difference_metric == "cosine_similarity":
+            raise Exception("cosine similarity difference metric not implemented")
+        else:
+            raise Exception(f"Invalid series_difference_metric ({self.objective.series_difference_metric})in the SeriesMatchingObjective {self.objective.name}")
         predictions_df = pd.DataFrame({
             predicted_value_col: series_error_values,
             predicted_value_var_col: variances,

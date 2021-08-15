@@ -5,7 +5,7 @@
 import pandas as pd
 
 from mlos.Logger import create_logger
-from mlos.Optimizers.OptimizationProblem import Objective, SeriesObjective
+from mlos.Optimizers.OptimizationProblem import Objective, SeriesMatchingObjective
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.NaiveMultiObjectiveRegressionModel import NaiveMultiObjectiveRegressionModel
@@ -22,8 +22,18 @@ from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
 
 class SeriesAwareMultiObjectiveHomogeneousRandomForest(NaiveMultiObjectiveRegressionModel):
-    """TODO ZACK: do comment. /\\ - This is a comically long name.
+    """A SeriesAwareMultiObjectiveHomogeneousRandomForest has two main differences with respect to a
+     MultiObjectiveHomogeneousRandomForest.
 
+     Firstly, it performs a check to see if an objective is a SeriesMatchingObjective. If it is, create a
+    SeriesHomogeneousRandomForestRegressionModel, otherwise create HomogeneousRandomForestRegressionModel.
+
+    Secondly, the fit() function does not make the assumption that the output / predicted dimension of its random forests is the same
+    as what it is trained on. Instead, it uses the output_space of the random forest. This is important to a series as
+    those are two similar but separate things.
+
+    This logic is not complicated and it might be a good idea to delete this object and just move the logic into the already-good
+    MultiObjectiveHomogeneousRandomForest.
     """
     def __init__(
             self,
@@ -42,7 +52,6 @@ class SeriesAwareMultiObjectiveHomogeneousRandomForest(NaiveMultiObjectiveRegres
             logger=logger
         )
 
-        print("ZACK CREATING SERIES AWARE MULTI OBJECTIVE BLAH")
         # TODO ZACK: Adam, is there python syntax sugar to build this dict?
         self._name_to_objective_dict = {}
         for objective in objectives:
@@ -56,7 +65,7 @@ class SeriesAwareMultiObjectiveHomogeneousRandomForest(NaiveMultiObjectiveRegres
         for output_dimension in output_space.dimensions:
             assert output_dimension.name in self._name_to_objective_dict, "Output dimension not listed in objectives"
             output_objective = self._name_to_objective_dict[output_dimension.name]
-            if isinstance(output_objective, SeriesObjective):
+            if isinstance(output_objective, SeriesMatchingObjective):
                 random_forest = SeriesHomogeneousRandomForestRegressionModel(
                     model_config=model_config,
                     input_space=input_space,

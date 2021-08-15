@@ -137,7 +137,7 @@ class ExperimentDesigner:
         self.surrogate_model: MultiObjectiveRegressionModel = surrogate_model
         self.rng = np.random.Generator(np.random.PCG64())
 
-        # TODO ZACK: Why objectives[0].minimize?
+        # TODO: context-sensitive pareto frontier
         if designer_config.utility_function_implementation == ConfidenceBoundUtilityFunction.__name__:
             self.utility_function = ConfidenceBoundUtilityFunction(
                 function_config=self.config.confidence_bound_utility_function_config,

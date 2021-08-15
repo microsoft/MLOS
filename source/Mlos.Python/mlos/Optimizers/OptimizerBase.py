@@ -111,7 +111,7 @@ class OptimizerBase(ABC):
 
     @trace()
     def _optimum_within_context(self, context: pd.DataFrame):
-        # TODO ZACK: Discuss the minimize=... line. Why only objectives[0]?
+        # TODO context-sensitive pareto frontier
         predicted_value_utility = PredictedValueUtilityFunction(
             self.surrogate_model,
             minimize=self.optimization_problem.objectives[0].minimize

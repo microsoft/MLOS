@@ -7,7 +7,7 @@ import pandas as pd
 from mlos.Logger import create_logger
 from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerConvergenceState import BayesianOptimizerConvergenceState
-from mlos.Optimizers.OptimizationProblem import OptimizationProblem, SeriesObjective
+from mlos.Optimizers.OptimizationProblem import OptimizationProblem, SeriesMatchingObjective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.ParetoFrontier import ParetoFrontier
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner
@@ -107,9 +107,9 @@ class BayesianOptimizer(OptimizerBase):
         # This allows for the series-objectives to pass through the optimizer without being trimmed
         #
         for objective in self.optimization_problem.objectives:
-            if isinstance(objective, SeriesObjective):
-                self._target_names_set.add(objective.series_output_dimension.name)
-                self._context_names_set.add(objective.series_modulation_dimension.name)
+            if isinstance(objective, SeriesMatchingObjective):
+                self._target_names_set.add(objective.series_codomain_dimension.name)
+                self._context_names_set.add(objective.series_domain_dimension.name)
 
         self._parameter_values_df = pd.DataFrame(columns=self._parameter_names)
         self._context_values_df = pd.DataFrame(columns=self._context_names)
@@ -171,7 +171,6 @@ class BayesianOptimizer(OptimizerBase):
         if len(parameter_columns_to_retain) == 0:
             raise ValueError(f"None of the {parameter_values_pandas_frame.columns} is a parameter recognized by this optimizer.")
 
-        # TODO ZACK: SAME AS BELOW
         if len(target_columns_to_retain) == 0:
             raise ValueError(f"None of {target_values_pandas_frame.columns} is a target recognized by this optimizer.")
 
@@ -230,7 +229,7 @@ class BayesianOptimizer(OptimizerBase):
     @trace()
     def _update_series_fit_performance_with_models(self):
         for objective in self.optimization_problem.objectives:
-            if isinstance(objective, SeriesObjective):
+            if isinstance(objective, SeriesMatchingObjective):
                 self._target_values_df[objective.name] = \
                     self.predict(self._parameter_values_df, objective_name=objective.name).get_dataframe()[
                     Prediction.LegalColumnNames.PREDICTED_VALUE.value]

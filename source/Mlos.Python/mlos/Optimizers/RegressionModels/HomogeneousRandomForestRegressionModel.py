@@ -170,13 +170,19 @@ class HomogeneousRandomForestRegressionModel(RegressionModel):
 
         # TODO ZACK:
         # I wrote this to sanitize away the context from the non-series objectives that dont have the series specific context
-        # but I actually dont think it is required. This comes into play when there is a non-series objective with a SeriesObjective
-        # the non-series objective is passed the context that the seriesobjective uses which is useless and confusing for this...
+        # but I actually dont think it is required. This comes into play when there is a non-series objective with a SeriesMatchingObjective
+        # the non-series objective is passed the context that the seriesmatchingobjective uses which is useless and confusing for this...
         #
         #feature_names = [dimension.name for dimension in self.input_space.dimensions]
         #feature_columns_to_retain = [column for column in feature_values_pandas_frame.columns if
         #                               column in set(feature_names)]
         #feature_values_pandas_frame = feature_values_pandas_frame[feature_columns_to_retain]
+        #
+        # TODO ZACK:
+        # Another fun or not so fun feature is that unless pruned somewhere near this part of the pipeline: contains_context:true
+        # is passed to this function even if this is an Objective in an OptimizationProblem that doesn't have context if
+        # there is also a series observation being registered. Might be worth examining as it could have unintended side effects
+        #
 
         self.logger.debug(f"Fitting a {self.__class__.__name__} with {len(feature_values_pandas_frame.index)} observations.")
 

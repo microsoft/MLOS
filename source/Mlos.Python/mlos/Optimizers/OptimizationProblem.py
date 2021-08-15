@@ -17,23 +17,32 @@ class Objective:
         self.minimize = minimize
 
 
-class SeriesObjective(Objective):
-    def __init__(self, name: str, minimize: bool, target_series_df: pd.DataFrame, series_modulation_dimension: Dimension, series_output_dimension: Dimension):
+class SeriesMatchingObjective(Objective):
+    def __init__(
+        self, name: str,
+        target_series_df: pd.DataFrame,
+        series_domain_dimension: Dimension,
+        series_codomain_dimension: Dimension,
+        series_difference_metric: str
+    ):
         self.name = name
-        self.minimize = minimize
+        self.minimize = True  # This will always want to minimize error in order to match the function
         self.target_series_df = target_series_df
-        self.series_modulation_dimension = series_modulation_dimension
-        self.series_output_dimension = series_output_dimension
+        self.series_domain_dimension = series_domain_dimension
+        self.series_codomain_dimension = series_codomain_dimension
+        self.series_difference_metric = series_difference_metric
+        assert self.series_difference_metric in ["sum_of_squared_errors", "dynamic_time_warping", "cosine_similarity"]
 
 
 def objective_to_dict(objective: Objective):
-    if type(objective) is SeriesObjective:
+    if type(objective) is SeriesMatchingObjective:
         return {
             "name": objective.name,
             "minimize": objective.minimize,
             "target_series_df": objective.target_series_df,
-            "series_modulation_dimension": objective.series_modulation_dimension,
-            "series_output_dimension": objective.series_output_dimension
+            "series_domain_dimension": objective.series_domain_dimension,
+            "series_codomain_dimension": objective.series_codomain_dimension,
+            "series_difference_metric": objective.series_difference_metric
         }
     else:
         return {
@@ -43,13 +52,14 @@ def objective_to_dict(objective: Objective):
 
 
 def objective_from_dict(objective_dict: dict):
-    if "target_series_df" in objective_dict:  # Test if objective_dict is of type SeriesObjective
-        return SeriesObjective(
+    if "target_series_df" in objective_dict:  # Test if objective_dict is of type SeriesMatchingObjective
+        return SeriesMatchingObjective(
             name=objective_dict["name"],
             minimize=objective_dict["minimize"],
             target_series_df=objective_dict["target_series_df"],
-            series_modulation_dimension=objective_dict["series_modulation_dimension"],
-            series_output_dimension=objective_dict["series_output_dimension"]
+            series_domain_dimension=objective_dict["series_domain_dimension"],
+            series_codomain_dimension=objective_dict["series_codomain_dimension"],
+            series_difference_metric=objective_dict["series_difference_metric"]
         )
     else:
         return Objective(
