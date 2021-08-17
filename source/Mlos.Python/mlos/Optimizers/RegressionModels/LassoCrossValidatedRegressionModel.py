@@ -191,7 +191,10 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         features_df = None
         if self.trained:
             if not self.skip_input_filtering_on_predict:
-                feature_values_pandas_frame = self.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame, exclude_extra_columns=False)
+                feature_values_pandas_frame = self.input_space.filter_out_invalid_rows(
+                    original_dataframe=feature_values_pandas_frame,
+                    exclude_extra_columns=False
+                )
             features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
             valid_rows_index = features_df.index
 
