@@ -4,16 +4,13 @@
 #
 from mlos.Spaces import SimpleHypergrid, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
-
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, experiment_designer_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
 from mlos.Optimizers.RegressionModels.LassoCrossValidatedConfigStore import lasso_cross_validated_config_store
-from mlos.Optimizers.RegressionModels.LassoCrossValidatedRegressionModel import LassoCrossValidatedRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveLassoCrossValidated import MultiObjectiveLassoCrossValidated
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestConfigStore import regression_enhanced_random_forest_config_store
-from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import RegressionEnhancedRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionEnhancedRandomForest import MultiObjectiveRegressionEnhancedRandomForest
 
 bayesian_optimizer_config_store = ComponentConfigStore(
@@ -23,9 +20,7 @@ bayesian_optimizer_config_store = ComponentConfigStore(
             CategoricalDimension(name="surrogate_model_implementation", values=[
                 HomogeneousRandomForestRegressionModel.__name__,
                 MultiObjectiveHomogeneousRandomForest.__name__,
-                LassoCrossValidatedRegressionModel.__name__,
                 MultiObjectiveLassoCrossValidated.__name__,
-                RegressionEnhancedRandomForestRegressionModel.__name__,
                 MultiObjectiveRegressionEnhancedRandomForest.__name__
             ]),
             CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__]),
@@ -44,7 +39,6 @@ bayesian_optimizer_config_store = ComponentConfigStore(
         on_external_dimension=CategoricalDimension(
             name="surrogate_model_implementation",
             values=[
-                LassoCrossValidatedRegressionModel.__name__,
                 MultiObjectiveLassoCrossValidated.__name__
             ])
     ).join(
@@ -52,7 +46,6 @@ bayesian_optimizer_config_store = ComponentConfigStore(
         on_external_dimension=CategoricalDimension(
             name="surrogate_model_implementation",
             values=[
-                RegressionEnhancedRandomForestRegressionModel.__name__,
                 MultiObjectiveRegressionEnhancedRandomForest.__name__
             ])
     ).join(

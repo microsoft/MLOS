@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import logging
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestConfigStore import regression_enhanced_random_forest_config_store
 from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import RegressionEnhancedRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.NaiveMultiObjectiveRegressionModel import NaiveMultiObjectiveRegressionModel
@@ -19,7 +20,7 @@ class MultiObjectiveRegressionEnhancedRandomForest(NaiveMultiObjectiveRegression
             model_config: Point,
             input_space: Hypergrid,
             output_space: Hypergrid,
-            logger=None
+            logger: logging.Logger = None
     ):
         NaiveMultiObjectiveRegressionModel.__init__(
             self,

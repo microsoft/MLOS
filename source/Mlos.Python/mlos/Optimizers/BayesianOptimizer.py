@@ -67,9 +67,7 @@ class BayesianOptimizer(OptimizerBase):
         assert self.optimizer_config.surrogate_model_implementation in (
             HomogeneousRandomForestRegressionModel.__name__,
             MultiObjectiveHomogeneousRandomForest.__name__,
-            LassoCrossValidatedRegressionModel.__name__,
             MultiObjectiveLassoCrossValidated.__name__,
-            RegressionEnhancedRandomForestRegressionModel.__name__,
             MultiObjectiveRegressionEnhancedRandomForest.__name__
         )
 
@@ -90,23 +88,9 @@ class BayesianOptimizer(OptimizerBase):
                 output_space=self.surrogate_model_output_space,
                 logger=self.logger
             )
-        elif self.optimizer_config.surrogate_model_implementation == LassoCrossValidatedRegressionModel.__name__:
-            self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveLassoCrossValidated(
-                model_config=self.optimizer_config.lasso_regression_model_config,
-                input_space=self.optimization_problem.feature_space,
-                output_space=self.surrogate_model_output_space,
-                logger=self.logger
-            )
         elif self.optimizer_config.surrogate_model_implementation == MultiObjectiveLassoCrossValidated.__name__:
             self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveLassoCrossValidated(
                 model_config=self.optimizer_config.lasso_regression_model_config,
-                input_space=self.optimization_problem.feature_space,
-                output_space=self.surrogate_model_output_space,
-                logger=self.logger
-            )
-        elif self.optimizer_config.surrogate_model_implementation == RegressionEnhancedRandomForestRegressionModel.__name__:
-            self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveRegressionEnhancedRandomForest(
-                model_config=self.optimizer_config.regression_enhanced_random_forest_regression_model_config,
                 input_space=self.optimization_problem.feature_space,
                 output_space=self.surrogate_model_output_space,
                 logger=self.logger
