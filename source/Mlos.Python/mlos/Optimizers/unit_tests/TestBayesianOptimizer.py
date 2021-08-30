@@ -346,7 +346,7 @@ class TestBayesianOptimizer:
             assert model_gof_metrics.sample_90_ci_hit_rate >= model_gof_metrics.prediction_90_ci_hit_rate
 
     @trace()
-    @pytest.mark.parametrize("restart_num", [i for i in range(10)])
+    @pytest.mark.parametrize("restart_num", [i+22 for i in range(100)])
     @pytest.mark.parametrize("use_remote_optimizer", [False])
     def test_hierarchical_quadratic_cold_start_random_configs(self, restart_num, use_remote_optimizer):
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
@@ -385,12 +385,13 @@ class TestBayesianOptimizer:
             decision_tree_config.n_new_samples_before_refit = 10
 
         if optimizer_config.surrogate_model_implementation == MultiObjectiveRegressionEnhancedRandomForest.__name__:
-            optimizer_config.min_samples_required_for_guided_design_of_experiments = 50
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 25
             rerf_model_config = optimizer_config.regression_enhanced_random_forest_regression_model_config
-            rerf_model_config.max_basis_function_degree = min(rerf_model_config.max_basis_function_degree, 3)
+            rerf_model_config.max_basis_function_degree = min(rerf_model_config.max_basis_function_degree, 2)
             # increased polynomial degree requires more data to estimate model parameters (poly term coefficients)
             optimizer_config.min_samples_required_for_guided_design_of_experiments += 25 * (rerf_model_config.max_basis_function_degree - 1)
             rf_model_config = rerf_model_config.sklearn_random_forest_regression_model_config
+            rf_model_config.perform_initial_random_forest_hyper_parameter_search = False
             rf_model_config.max_depth = min(rf_model_config.max_depth, 10)
             rf_model_config.n_jobs = min(rf_model_config.n_jobs, 4)
 

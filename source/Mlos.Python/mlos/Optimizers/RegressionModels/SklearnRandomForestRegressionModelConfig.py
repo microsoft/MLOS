@@ -37,7 +37,7 @@ class SklearnRandomForestRegressionModelConfig(metaclass=DefaultConfigMeta):
             CategoricalDimension(name="criterion", values=[criterion.value for criterion in Criterion]),
             DiscreteDimension(name="max_depth", min=0, max=2 ** 10),
             ContinuousDimension(name="min_samples_split", min=0, max=1),
-            ContinuousDimension(name="min_samples_leaf", min=0, max=1),
+            ContinuousDimension(name="min_samples_leaf", min=0, max=0.5),
             ContinuousDimension(name="min_weight_fraction_leaf", min=0, max=0.5),
             CategoricalDimension(name="max_features", values=[max_feature.value for max_feature in MaxFeatures]),
             DiscreteDimension(name="max_leaf_nodes", min=0, max=2 ** 10),

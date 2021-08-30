@@ -116,7 +116,7 @@ class TestRegressionEnhancedRandomForestRegressionModel:
             output_space=self.test_case_globals['output_space']
         )
 
-        num_train_points = 75
+        num_train_points = 51
         x_train_df, y_train_df = self.generate_points_simple_quadratic(num_train_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
         rerf.fit(x_train_df, y_train_df)
 

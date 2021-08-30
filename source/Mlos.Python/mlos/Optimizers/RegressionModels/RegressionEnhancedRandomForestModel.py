@@ -72,7 +72,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         self.model_config = model_config
         self.model_config.perform_initial_root_model_hyper_parameter_search = True
-        self.model_config.perform_initial_random_forest_hyper_parameter_search = True
 
         # enforce model_config constraints (needed by sklearn regression model classes)
         #  For .lasso_regression_model_config.fit_intercept, the intercept term in added in the design_matrix construction
@@ -277,13 +276,29 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         # Assumes x has already been transformed and the reduced feature space and residuals relative to base model
         #  are passed to the random forest regression
         if self.model_config.perform_initial_random_forest_hyper_parameter_search:
-
-            print(f'isinf(X).any(): {np.isinf(x).any()}')
-            print(f'isfinite(X).all(): {np.isfinite(x).all()}')
             self._execute_grid_search_for_random_forest_regressor_model(x, y_residuals)
 
         else:
-            self.random_forest_regressor_ = RandomForestRegressor(**self.random_forest_kwargs)
+            #self.random_forest_regressor_ = RandomForestRegressor(**self.random_forest_kwargs)
+            model_config = self.model_config.sklearn_random_forest_regression_model_config
+
+            self.random_forest_regressor_ = RandomForestRegressor(
+                n_estimators=model_config.n_estimators,
+                criterion=model_config.criterion,
+                max_depth=model_config.max_depth if model_config.max_depth > 0 else None,
+                min_samples_split=model_config.min_samples_split,
+                min_samples_leaf=model_config.min_samples_leaf,
+                min_weight_fraction_leaf=model_config.min_weight_fraction_leaf,
+                max_features=model_config.max_features,
+                max_leaf_nodes=model_config.max_leaf_nodes if model_config.max_leaf_nodes > 0 else None,
+                min_impurity_decrease=model_config.min_impurity_decrease,
+                bootstrap=model_config.bootstrap,
+                oob_score=model_config.oob_score,
+                n_jobs=model_config.n_jobs,
+                warm_start=model_config.warm_start,
+                ccp_alpha=model_config.ccp_alpha,
+                max_samples=model_config.max_samples if model_config.max_samples > 0 else None
+            )
             self.random_forest_regressor_.fit(x, y_residuals)
 
         self.random_forest_kwargs = self.random_forest_regressor_.get_params()
