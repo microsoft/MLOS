@@ -22,6 +22,7 @@ from mlos.Optimizers.BayesianOptimizer import bayesian_optimizer_config_store
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Spaces import CategoricalDimension, ContinuousDimension, DiscreteDimension
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionEnhancedRandomForest import MultiObjectiveRegressionEnhancedRandomForest
 
 
 class TestBayesianOptimizerGrpcClient:
@@ -161,11 +162,21 @@ class TestBayesianOptimizerGrpcClient:
     def test_optimizer_with_random_config(self, i):
         optimizer_config = bayesian_optimizer_config_store.parameter_space.random()
 
-        optimizer_config.min_samples_required_for_guided_design_of_experiments = min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100)
+        optimizer_config.min_samples_required_for_guided_design_of_experiments = max(min(optimizer_config.min_samples_required_for_guided_design_of_experiments, 100), 20)
         if optimizer_config.surrogate_model_implementation == "HomogeneousRandomForestRegressionModel":
             rf_config = optimizer_config.homogeneous_random_forest_regression_model_config
             rf_config.n_estimators = min(rf_config.n_estimators, 20)
 
+        if optimizer_config.surrogate_model_implementation == MultiObjectiveRegressionEnhancedRandomForest.__name__:
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 25
+            rerf_model_config = optimizer_config.regression_enhanced_random_forest_regression_model_config
+            rerf_model_config.max_basis_function_degree = min(rerf_model_config.max_basis_function_degree, 2)
+            # increased polynomial degree requires more data to estimate model parameters (poly term coefficients)
+            optimizer_config.min_samples_required_for_guided_design_of_experiments += 25 * (rerf_model_config.max_basis_function_degree - 1)
+            rf_model_config = rerf_model_config.sklearn_random_forest_regression_model_config
+            rf_model_config.perform_initial_random_forest_hyper_parameter_search = False
+            rf_model_config.max_depth = min(rf_model_config.max_depth, 10)
+            rf_model_config.n_jobs = min(rf_model_config.n_jobs, 4)
         print(f"[{i+1}] Creating a bayesian optimizer with config: {optimizer_config}")
 
         bayesian_optimizer = self.bayesian_optimizer_factory.create_remote_optimizer(
