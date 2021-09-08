@@ -32,8 +32,15 @@ class TestMultiObjectiveLassoCrossValidated:
             logger=self.logger
         )
 
-        num_training_samples = 1000
-        num_testing_samples = 100
+        if objective_function_config_name == '2d_hypersphere_minimize_some':
+            num_training_samples = 25
+            num_testing_samples = 10
+        elif objective_function_config_name == '10d_hypersphere_minimize_some':
+            num_training_samples = 50
+            num_testing_samples = 10
+        elif objective_function_config_name == '5_mutually_exclusive_polynomials':
+            num_training_samples = 100
+            num_testing_samples = 50
         train_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_training_samples)
         train_objectives_df = objective_function.evaluate_dataframe(train_params_df)
 
