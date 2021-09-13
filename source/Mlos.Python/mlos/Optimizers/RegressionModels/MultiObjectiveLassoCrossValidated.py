@@ -10,7 +10,7 @@ from mlos.Spaces import Hypergrid, Point, SimpleHypergrid
 
 
 class MultiObjectiveLassoCrossValidated(NaiveMultiObjectiveRegressionModel):
-    """Maintains multiple HomogeneousRandomForestRegressionModels each predicting a different objective.
+    """Maintains multiple LassoCrossValidatedRegressionModels each predicting a different objective.
 
     All single-objective models are configured according to model_config.
 
@@ -32,7 +32,7 @@ class MultiObjectiveLassoCrossValidated(NaiveMultiObjectiveRegressionModel):
         )
 
 
-        # We just need to assert that the model config belongs in homogeneous_random_forest_config_store.parameter_space.
+        # We just need to assert that the model config belongs in lasso_cross_validated_config_store.parameter_space.
         # A more elaborate solution might be needed down the road, but for now this simple solution should suffice.
         #
         assert model_config in lasso_cross_validated_config_store.parameter_space

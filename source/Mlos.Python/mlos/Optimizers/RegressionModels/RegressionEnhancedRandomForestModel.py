@@ -81,7 +81,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         model_config.lasso_regression_model_config.normalize = False
         if model_config.sklearn_random_forest_regression_model_config.oob_score:
             model_config.sklearn_random_forest_regression_model_config.bootstrap = True
-        print(self.model_config)
 
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
@@ -192,7 +191,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             # add small noise to fit_x to remove singularity,
             #  expect prediction confidence to be reduced (wider intervals) by doing this
             self.logger.info(
-                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^10."
+                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10 ** 10."
             )
             model_design_matrix += np.random.normal(0, 10.0 ** -4, size=model_design_matrix.shape)
             condition_number = np.linalg.cond(model_design_matrix)

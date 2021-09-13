@@ -29,7 +29,7 @@ lasso_cross_validated_config_store = ComponentConfigStore(
             CategoricalDimension(name="fit_intercept", values=[False, True]),
             CategoricalDimension(name="normalize", values=[False, True]),
             CategoricalDimension(name="precompute", values=[False, True]),
-            DiscreteDimension(name="max_iter", min=100, max=5 * 10 **3),
+            DiscreteDimension(name="max_iter", min=100, max=5 * 10 ** 3),
             ContinuousDimension(name="tol", min=0, max=1.0),
             CategoricalDimension(name="copy_x", values=[False, True]),
             DiscreteDimension(name="num_cross_validations", min=2, max=10),

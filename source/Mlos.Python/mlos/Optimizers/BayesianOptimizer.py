@@ -61,7 +61,7 @@ class BayesianOptimizer(OptimizerBase):
 
         # Now let's put together the surrogate model.
         #
-        print(f'self.optimizer_config.surrogate_model_implementation: {self.optimizer_config.surrogate_model_implementation}')
+        self.logger.info(f'self.optimizer_config.surrogate_model_implementation: {self.optimizer_config.surrogate_model_implementation}')
         assert self.optimizer_config.surrogate_model_implementation in (
             HomogeneousRandomForestRegressionModel.__name__,
             MultiObjectiveHomogeneousRandomForest.__name__,

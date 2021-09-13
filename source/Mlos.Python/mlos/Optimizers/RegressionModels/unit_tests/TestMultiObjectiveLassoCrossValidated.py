@@ -41,6 +41,8 @@ class TestMultiObjectiveLassoCrossValidated:
         elif objective_function_config_name == '5_mutually_exclusive_polynomials':
             num_training_samples = 100
             num_testing_samples = 50
+        else:
+            assert False
         train_params_df = objective_function.parameter_space.random_dataframe(num_samples=num_training_samples)
         train_objectives_df = objective_function.evaluate_dataframe(train_params_df)
 

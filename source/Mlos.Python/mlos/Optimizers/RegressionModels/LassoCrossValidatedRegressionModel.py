@@ -91,7 +91,12 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         self.partial_hat_matrix_ = 0
         self.regressor_standard_error_ = 0
 
-        # THE HACK
+        # When LassoCV is used as part of RERF, it cannot reasonably compute the upper and lower bounds on its input space dimensions,
+        # as they are a polynomial combination of inputs to RERF. Thus, it approximates them with the empirical min and max.
+        # These approximations are biased: the lower bound is too large, the upper bound is too small.
+        # Consequently, during scoring, LassoCV is likely to see input outside of these bounds, but we still want
+        # LassoCV to produce predictions for those points. So we introduce a little hack: whenever LassoCV is instantiated as part of RERF,
+        # it should skip input filtering on predict. This field, controls this behavior.
         self.skip_input_filtering_on_predict = False
 
 
@@ -160,7 +165,7 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
             # add small noise to x to remove singularity,
             #  expect prediction confidence to be reduced (wider intervals) by doing this
             self.logger.info(
-                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^4."
+                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10**4."
             )
             design_matrix += np.random.normal(0, 10.0**-2, size=design_matrix.shape)
             condition_number = np.linalg.cond(design_matrix)
