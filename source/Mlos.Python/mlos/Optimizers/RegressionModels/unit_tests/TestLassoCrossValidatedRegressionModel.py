@@ -25,7 +25,6 @@ class TestLassoCrossValidatedRegressionModel:
 
     def setup_method(self, method):
         self.model_config = lasso_cross_validated_config_store.default
-        self.max_basis_function_degree = 2
 
         self.test_case_globals = {
             '2d_X_deg2_poly_input_space': SimpleHypergrid(
@@ -192,11 +191,14 @@ class TestLassoCrossValidatedRegressionModel:
             include_bias=True,
             interaction_only=False
         )
+
         lasso_cross_validated_model = LassoCrossValidatedRegressionModel(
             model_config=self.model_config,
             input_space=polynomial_features_adapter,
             output_space=objective_function.output_space
         )
+        # since the model input_space stacked the polynomial basis function on in the original input space, we can skip validating input features
+        lasso_cross_validated_model.skip_input_filtering_on_predict = True
 
         # fit model with same degree as true y
         # The input space consists of 3 2-d domains 200 x 200 units.  Hence random samples smaller than a certain size will produce too few points to
@@ -212,6 +214,7 @@ class TestLassoCrossValidatedRegressionModel:
         x_test_df = objective_function.parameter_space.random_dataframe(num_samples=num_test_x)
         y_test = objective_function.evaluate_dataframe(x_test_df).to_numpy().reshape(-1)
         predictions = lasso_cross_validated_model.predict(x_test_df)
+
         pred_df = predictions.get_dataframe()
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_y = pred_df[predicted_value_col].to_numpy()

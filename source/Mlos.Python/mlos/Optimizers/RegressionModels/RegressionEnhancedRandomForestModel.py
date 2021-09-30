@@ -2,13 +2,13 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import logging
 from typing import List
 import numpy as np
 import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import StandardScaler
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
@@ -25,13 +25,9 @@ from mlos.Tracer import trace
 
 class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     """ Regression-Enhanced RandomForest Regression model
-
     See https://arxiv.org/pdf/1904.10416.pdf for inspiration.
     See following PRs for exploration notes/observations:
-
     1. https://msdata.visualstudio.com/Database%20Systems/_git/MLOS/pullrequest/377907
-
-
     Goals/Motivations:
     1. RandomForest models are not well suited for extrapolation. As shown in the publication referenced above
         the RERF Lasso model tries to correct this by using the polynomial basis Lasso regression as the
@@ -44,7 +40,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     4. The RandomForest model in RERF fits the Lasso model's residuals, hence any overall regression pattern
         (polynomial includes linear) within a decision tree's leaf data may have been eliminated
         by the Lasso fit.
-
     """
 
     _PREDICTOR_OUTPUT_COLUMNS = [
@@ -60,7 +55,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             model_config: Point,
             input_space: Hypergrid,
             output_space: Hypergrid,
-            logger=None
+            logger: logging.Logger = None
     ):
         if logger is None:
             logger = create_logger("RegressionEnhancedRandomForestRegressionModel")
@@ -76,6 +71,16 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         )
 
         self.model_config = model_config
+        self.model_config.perform_initial_root_model_hyper_parameter_search = True
+
+        # enforce model_config constraints (needed by sklearn regression model classes)
+        #  For .lasso_regression_model_config.fit_intercept, the intercept term in added in the design_matrix construction
+        #  For .lasso_regression_model_config.normalize, since the random forest would also need the scaled features,
+        #     scaling would have to be managed by ReRF directly
+        model_config.lasso_regression_model_config.fit_intercept = False
+        model_config.lasso_regression_model_config.normalize = False
+        if model_config.sklearn_random_forest_regression_model_config.oob_score:
+            model_config.sklearn_random_forest_regression_model_config.bootstrap = True
 
         # Explode continuous dimensions to polynomial features up to model config specified monomial degree
         # am using include_bias to produce constant term (all 1s) column to simplify one hot encoding logic
@@ -91,9 +96,9 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             merge_all_categorical_dimensions=True,
             drop='first'
         )
-        self.input_space = self.one_hot_encoder_adapter
 
         self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
+        self._projected_input_dimension_names = [dimension.name for dimension in self.one_hot_encoder_adapter.dimensions]
         self.continuous_dimension_names = [dimension.name for dimension in self.one_hot_encoder_adapter.target.dimensions
                                            if isinstance(dimension, ContinuousDimension)]
         self.output_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
@@ -115,7 +120,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         self.polynomial_features_powers_ = None
 
         self.categorical_zero_cols_idx_to_delete_ = None
-        self.scaler_ = StandardScaler()
 
         self._trained = False
         self.last_refit_iteration_number = None
@@ -128,14 +132,23 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     def num_observations_used_to_fit(self):
         return self.last_refit_iteration_number
 
+    @property
+    def num_model_coefficients(self):
+        num_continuous_features = len(self.continuous_dimension_names)
+        num_dummy_vars = len(self.one_hot_encoder_adapter.get_one_hot_encoded_column_names())
+
+        return num_continuous_features * (num_dummy_vars + 1)
+
     def should_fit(
             self,
             num_samples: int
     ) -> bool:
-        root_base_model_should_fit = self.base_regressor_.should_fit(num_samples=num_samples)
-        # TODO : determine min sample needed to fit based on model configs
-        random_forest_should_fit = True
-        return root_base_model_should_fit and random_forest_should_fit
+        # since polynomial basis functions decrease the degrees of freedom (TODO: add reference),
+        #  and prediction degrees of freedom = sample size - num coef - 1
+        #  need sufficiently many samples to exceed the number of coefficients
+        dof = num_samples - self.num_model_coefficients - 1
+
+        return dof > 0
 
     @trace()
     def fit(
@@ -145,13 +158,12 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             iteration_number: int = 0
     ):
         """ Fits the RegressionEnhancedRandomForest
-
         :param feature_values_pandas_frame:
         :param target_values_pandas_frame:
         :param iteration_number:
         :return:
         """
-        features_df = self.input_space.project_dataframe(feature_values_pandas_frame, in_place=False)
+        features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
 
         # produce design_matrix (incorporating polynomial basis function expansion + one hot encoding)
         (model_design_matrix, new_column_names) = self._transform_x(features_df)
@@ -179,7 +191,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             # add small noise to fit_x to remove singularity,
             #  expect prediction confidence to be reduced (wider intervals) by doing this
             self.logger.info(
-                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^10."
+                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10 ** 10."
             )
             model_design_matrix += np.random.normal(0, 10.0 ** -4, size=model_design_matrix.shape)
             condition_number = np.linalg.cond(model_design_matrix)
@@ -191,9 +203,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         # retain standard error from base model (used for prediction confidence intervals)
         residual_sum_of_squares = np.sum(y_residuals ** 2)
-        total_sum_of_squares = ((y - y.mean()) ** 2).sum()
-        unexplained_variance = residual_sum_of_squares / total_sum_of_squares
-        print(f'RERF::LassoOnly R2: {1.0 - unexplained_variance}')
         dof = model_design_matrix.shape[0] - (len(self.base_regressor_.coef_) + 1)  # +1 for intercept
         self.base_regressor_standard_error_ = residual_sum_of_squares / float(dof)
 
@@ -217,9 +226,6 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             y: pd.DataFrame,
             iteration_number: int
     ):
-        # Assumes x has already been transformed
-        self.detected_feature_indices_ = []
-
         # TODO : Add back RidgeCV option after creating RidgeCrossValidatedRegressionModel
         assert \
             self.model_config.boosting_root_model_name in [
@@ -228,6 +234,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
         # Since the RERF transform_x created the proper design_matrix, this serves as the input space for the root regression model.
         # Hence the code below creates a (temporary) hypergrid reflecting the design_matrix.
+        # This is less than ideal solution, but deriving min and max of polynomial terms (given feature column degrees) is non-trivial
+        # TODO: set bounds on the polynomial terms correctly and eliminate the hack forcing the base_regressor to skip filtering invalid features
         design_matrix_hypergrid = SimpleHypergrid(
             name='RegressionEnhanceRandomForest_design_matrix',
             dimensions=None
@@ -248,6 +256,8 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
                 input_space=design_matrix_hypergrid,
                 output_space=self.output_space
             )
+            # skips filtering to valid features in the base_regressor since the valid range of design_matrix column values is incorrect above
+            self.base_regressor_.skip_input_filtering_on_predict = True
 
         self.base_regressor_.fit(
             x,
@@ -259,17 +269,36 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
     def _fit_random_forest_regression(
             self,
-            x_star,
+            x,
             y_residuals
     ):
         # Assumes x has already been transformed and the reduced feature space and residuals relative to base model
         #  are passed to the random forest regression
         if self.model_config.perform_initial_random_forest_hyper_parameter_search:
-            self._execute_grid_search_for_random_forest_regressor_model(x_star, y_residuals)
+            self._execute_grid_search_for_random_forest_regressor_model(x, y_residuals)
 
         else:
-            self.random_forest_regressor_ = RandomForestRegressor(**self.random_forest_kwargs)
-            self.random_forest_regressor_.fit(x_star, y_residuals)
+            #self.random_forest_regressor_ = RandomForestRegressor(**self.random_forest_kwargs)
+            model_config = self.model_config.sklearn_random_forest_regression_model_config
+
+            self.random_forest_regressor_ = RandomForestRegressor(
+                n_estimators=model_config.n_estimators,
+                criterion=model_config.criterion,
+                max_depth=model_config.max_depth if model_config.max_depth > 0 else None,
+                min_samples_split=model_config.min_samples_split,
+                min_samples_leaf=model_config.min_samples_leaf,
+                min_weight_fraction_leaf=model_config.min_weight_fraction_leaf,
+                max_features=model_config.max_features,
+                max_leaf_nodes=model_config.max_leaf_nodes if model_config.max_leaf_nodes > 0 else None,
+                min_impurity_decrease=model_config.min_impurity_decrease,
+                bootstrap=model_config.bootstrap,
+                oob_score=model_config.oob_score,
+                n_jobs=model_config.n_jobs,
+                warm_start=model_config.warm_start,
+                ccp_alpha=model_config.ccp_alpha,
+                max_samples=model_config.max_samples if model_config.max_samples > 0 else None
+            )
+            self.random_forest_regressor_.fit(x, y_residuals)
 
         self.random_forest_kwargs = self.random_forest_regressor_.get_params()
 
@@ -277,7 +306,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
 
     def _execute_grid_search_for_random_forest_regressor_model(
             self,
-            x_filtered_to_detected_features,
+            x,
             y_residuals
     ):
         model_config = self.model_config.sklearn_random_forest_regression_model_config
@@ -299,7 +328,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
             max_samples=model_config.max_samples if model_config.max_samples > 0 else None
         )
 
-        num_features = x_filtered_to_detected_features.shape[1]
+        num_features = x.shape[1]
         max_feature_param = [1]
         p_floor_3 = round(num_features / 3)
         if p_floor_3 > 0:
@@ -312,10 +341,11 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         }
         self.logger.info(f"Performing Random Forest Grid Search CV")
         rf_gscv = GridSearchCV(self.random_forest_regressor_, rf_params)
-        rf_gscv.fit(x_filtered_to_detected_features, y_residuals)
+        rf_gscv.fit(x, y_residuals)
 
         # retrieve best random forest model and hyper parameters
         self.random_forest_regressor_ = rf_gscv.best_estimator_
+        self.random_forest_kwargs = rf_gscv.best_params_
 
         # only perform hyper-parameter search on first fit
         self.model_config.perform_initial_random_forest_hyper_parameter_search = False
@@ -334,14 +364,16 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         valid_rows_index = None
-        model_design_matrix: np.ndarray = None
-        model_design_matrix_dataframe: pd.DataFrame = None
+        model_design_matrix: np.ndarray = np.array([])
+        model_design_matrix_dataframe: pd.DataFrame = pd.DataFrame()
         if self.trained:
+            feature_values_pandas_frame = self.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame, exclude_extra_columns=False)
+
             if self.x_is_design_matrix:
                 model_design_matrix = feature_values_pandas_frame.to_numpy()
                 model_design_matrix_dataframe = feature_values_pandas_frame
             else:
-                features_df = self.input_space.project_dataframe(feature_values_pandas_frame, in_place=False)
+                features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
                 (model_design_matrix, new_column_names) = self._transform_x(features_df)
                 model_design_matrix_dataframe = pd.DataFrame(model_design_matrix, columns=new_column_names)
             valid_rows_index = feature_values_pandas_frame.index
@@ -384,7 +416,7 @@ class RegressionEnhancedRandomForestRegressionModel(RegressionModel):
     ) -> (np.ndarray, List[str]):
         # confirm feature_values_pandas_frame contains all expected columns
         #  if any are missing, impute NaN values
-        missing_column_names = set.difference(set(self.input_dimension_names), set(x_df.columns.values))
+        missing_column_names = set.difference(set(self._projected_input_dimension_names), set(x_df.columns.values))
         for missing_column_name in missing_column_names:
             x_df[missing_column_name] = np.NaN
 

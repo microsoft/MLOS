@@ -4,12 +4,14 @@
 #
 from mlos.Spaces import SimpleHypergrid, DiscreteDimension, CategoricalDimension, Point
 from mlos.Spaces.Configs.ComponentConfigStore import ComponentConfigStore
-
 from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesigner, experiment_designer_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestConfigStore import homogeneous_random_forest_config_store
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
-
+from mlos.Optimizers.RegressionModels.LassoCrossValidatedConfigStore import lasso_cross_validated_config_store
+from mlos.Optimizers.RegressionModels.MultiObjectiveLassoCrossValidated import MultiObjectiveLassoCrossValidated
+from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestConfigStore import regression_enhanced_random_forest_config_store
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionEnhancedRandomForest import MultiObjectiveRegressionEnhancedRandomForest
 
 bayesian_optimizer_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
@@ -17,7 +19,9 @@ bayesian_optimizer_config_store = ComponentConfigStore(
         dimensions=[
             CategoricalDimension(name="surrogate_model_implementation", values=[
                 HomogeneousRandomForestRegressionModel.__name__,
-                MultiObjectiveHomogeneousRandomForest.__name__
+                MultiObjectiveHomogeneousRandomForest.__name__,
+                MultiObjectiveLassoCrossValidated.__name__,
+                MultiObjectiveRegressionEnhancedRandomForest.__name__
             ]),
             CategoricalDimension(name="experiment_designer_implementation", values=[ExperimentDesigner.__name__]),
             DiscreteDimension(name="min_samples_required_for_guided_design_of_experiments", min=2, max=100)
@@ -29,6 +33,20 @@ bayesian_optimizer_config_store = ComponentConfigStore(
             values=[
                 HomogeneousRandomForestRegressionModel.__name__,
                 MultiObjectiveHomogeneousRandomForest.__name__
+            ])
+    ).join(
+        subgrid=lasso_cross_validated_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension(
+            name="surrogate_model_implementation",
+            values=[
+                MultiObjectiveLassoCrossValidated.__name__
+            ])
+    ).join(
+        subgrid=regression_enhanced_random_forest_config_store.parameter_space,
+        on_external_dimension=CategoricalDimension(
+            name="surrogate_model_implementation",
+            values=[
+                MultiObjectiveRegressionEnhancedRandomForest.__name__
             ])
     ).join(
         subgrid=experiment_designer_config_store.parameter_space,

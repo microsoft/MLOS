@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 #
+import logging
 import numpy as np
 from pandas import DataFrame
 from sklearn.linear_model import LassoCV
@@ -32,7 +33,7 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
             model_config: Point,
             input_space: Hypergrid,
             output_space: Hypergrid,
-            logger=None
+            logger: logging.Logger = None
     ):
         if logger is None:
             logger = create_logger("LassoRegressionModel")
@@ -54,12 +55,13 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
             merge_all_categorical_dimensions=True,
             drop='first'
         )
+        self.input_dimension_names = self.input_space.dimension_names
 
-        self.input_dimension_names = [dimension.name for dimension in self.one_hot_encoder_adapter.dimensions]
+        self._projected_input_dimension_names = [dimension.name for dimension in self.one_hot_encoder_adapter.dimensions]
         self.continuous_dimension_names = [dimension.name for dimension in self.one_hot_encoder_adapter.target.dimensions
                                            if isinstance(dimension, ContinuousDimension)]
         self.target_dimension_names = [dimension.name for dimension in self.output_space.dimensions]
-        self.logger.debug(f"Input dimensions: {str(self.input_dimension_names)}; Target dimensions: {str(self.target_dimension_names)}.")
+        self.logger.debug(f"Input dimensions: {str(self._projected_input_dimension_names)}; Target dimensions: {str(self.target_dimension_names)}.")
 
         assert len(self.target_dimension_names) == 1, "For now (and perhaps forever) we only support single target per Lasso model."
 
@@ -88,6 +90,15 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         self.dof_ = 0
         self.partial_hat_matrix_ = 0
         self.regressor_standard_error_ = 0
+
+        # When LassoCV is used as part of RERF, it cannot reasonably compute the upper and lower bounds on its input space dimensions,
+        # as they are a polynomial combination of inputs to RERF. Thus, it approximates them with the empirical min and max.
+        # These approximations are biased: the lower bound is too large, the upper bound is too small.
+        # Consequently, during scoring, LassoCV is likely to see input outside of these bounds, but we still want
+        # LassoCV to produce predictions for those points. So we introduce a little hack: whenever LassoCV is instantiated as part of RERF,
+        # it should skip input filtering on predict. This field, controls this behavior.
+        self.skip_input_filtering_on_predict = False
+
 
     @property
     def trained(self):
@@ -120,7 +131,7 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         :param num_samples:
         :return:
         """
-        num_input_dims = len(self.input_dimension_names)
+        num_input_dims = len(self._projected_input_dimension_names)
         model_config = self.model_config
         if not self.trained:
             return num_samples > model_config.min_num_samples_per_input_dimension_to_fit * num_input_dims
@@ -135,19 +146,28 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         x_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
         y = target_values_pandas_frame[self.target_dimension_names].to_numpy()
         design_matrix = self._transform_x(x_df)
+
+        # ensure num_cross_validations < num_samples; and reinstantiate LassoCV regressor
+        if design_matrix.shape[0] < self.model_config.num_cross_validations:
+            self.lasso_model_kwargs['cv'] = design_matrix.shape[0] - 1
+            self._regressor = LassoCV(**self.lasso_model_kwargs)
+
         self._regressor.fit(design_matrix, y)
         self._trained = True
         self.last_refit_iteration_number = iteration_number
 
         # retain inverse(x.T * x) to use for confidence intervals on predicted values
         condition_number = np.linalg.cond(design_matrix)
-        if condition_number > 10.0 ** 10:
+        self.logger.info(
+            f'LassoCV: design_matrix condition number: {condition_number}'
+        )
+        if condition_number > 10.0 ** 4:
             # add small noise to x to remove singularity,
             #  expect prediction confidence to be reduced (wider intervals) by doing this
             self.logger.info(
-                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10^10."
+                f"Adding noise to design matrix used for prediction confidence due to condition number {condition_number} > 10**4."
             )
-            design_matrix += np.random.normal(0, 10.0**-4, size=design_matrix.shape)
+            design_matrix += np.random.normal(0, 10.0**-2, size=design_matrix.shape)
             condition_number = np.linalg.cond(design_matrix)
             self.logger.info(
                 f"Resulting condition number {condition_number}."
@@ -175,6 +195,11 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
         valid_rows_index = None
         features_df = None
         if self.trained:
+            if not self.skip_input_filtering_on_predict:
+                feature_values_pandas_frame = self.input_space.filter_out_invalid_rows(
+                    original_dataframe=feature_values_pandas_frame,
+                    exclude_extra_columns=False
+                )
             features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
             valid_rows_index = features_df.index
 
@@ -213,7 +238,7 @@ class LassoCrossValidatedRegressionModel(RegressionModel):
     def _transform_x(self, x_df: DataFrame):
         # confirm feature_values_pandas_frame contains all expected columns
         #  if any are missing, impute NaN values
-        missing_column_names = set.difference(set(self.input_dimension_names), set(x_df.columns.values))
+        missing_column_names = set.difference(set(self._projected_input_dimension_names), set(x_df.columns.values))
         for missing_column_name in missing_column_names:
             x_df[missing_column_name] = np.NaN
 

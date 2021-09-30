@@ -14,6 +14,8 @@ from mlos.Optimizers.ExperimentDesigner.ExperimentDesigner import ExperimentDesi
 from mlos.Optimizers.RegressionModels.GoodnessOfFitMetrics import DataSetType
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
+from mlos.Optimizers.RegressionModels.MultiObjectiveLassoCrossValidated import MultiObjectiveLassoCrossValidated
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionEnhancedRandomForest import MultiObjectiveRegressionEnhancedRandomForest
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Tracer import trace
@@ -59,20 +61,47 @@ class BayesianOptimizer(OptimizerBase):
 
         # Now let's put together the surrogate model.
         #
+        self.logger.info(f'self.optimizer_config.surrogate_model_implementation: {self.optimizer_config.surrogate_model_implementation}')
         assert self.optimizer_config.surrogate_model_implementation in (
             HomogeneousRandomForestRegressionModel.__name__,
-            MultiObjectiveHomogeneousRandomForest.__name__
+            MultiObjectiveHomogeneousRandomForest.__name__,
+            MultiObjectiveLassoCrossValidated.__name__,
+            MultiObjectiveRegressionEnhancedRandomForest.__name__
         )
 
         # Note that even if the user requested a HomogeneousRandomForestRegressionModel, we still create a MultiObjectiveRegressionModel
         # with just a single RandomForest inside it. This means we have to maintain only a single interface.
         #
-        self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveHomogeneousRandomForest(
-            model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
-            input_space=self.optimization_problem.feature_space,
-            output_space=self.surrogate_model_output_space,
-            logger=self.logger
-        )
+        if self.optimizer_config.surrogate_model_implementation == HomogeneousRandomForestRegressionModel.__name__:
+            self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveHomogeneousRandomForest(
+                model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
+                input_space=self.optimization_problem.feature_space,
+                output_space=self.surrogate_model_output_space,
+                logger=self.logger
+            )
+        elif self.optimizer_config.surrogate_model_implementation == MultiObjectiveHomogeneousRandomForest.__name__:
+            self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveHomogeneousRandomForest(
+                model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
+                input_space=self.optimization_problem.feature_space,
+                output_space=self.surrogate_model_output_space,
+                logger=self.logger
+            )
+        elif self.optimizer_config.surrogate_model_implementation == MultiObjectiveLassoCrossValidated.__name__:
+            self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveLassoCrossValidated(
+                model_config=self.optimizer_config.lasso_regression_model_config,
+                input_space=self.optimization_problem.feature_space,
+                output_space=self.surrogate_model_output_space,
+                logger=self.logger
+            )
+        elif self.optimizer_config.surrogate_model_implementation == MultiObjectiveRegressionEnhancedRandomForest.__name__:
+            self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveRegressionEnhancedRandomForest(
+                model_config=self.optimizer_config.regression_enhanced_random_forest_regression_model_config,
+                input_space=self.optimization_problem.feature_space,
+                output_space=self.surrogate_model_output_space,
+                logger=self.logger
+            )
+        else:
+            raise RuntimeError(f"Unrecognized surrogate_model_implementation {self.optimizer_config.surrogate_model_implementation}")
 
         # Now let's put together the experiment designer that will suggest parameters for each experiment.
         #

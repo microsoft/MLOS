@@ -60,20 +60,15 @@ class TestRegressionEnhancedRandomForestRegressionModel:
         }
 
     @staticmethod
-    def n_choose_k(n, k):
-        return math.factorial(n) / math.factorial(k) / math.factorial(n - k)
-
-    @staticmethod
     def get_simple_quadratic_coefficients():
         return np.array([1, -3, -4, -0.5, 0.0, -2.0])
 
-    @staticmethod
-    def generate_points_simple_quadratic(num_points, num_features):
-        x = np.random.uniform(0, 5, [num_points, num_features])
-        x_df = pd.DataFrame(x, columns=['x1', 'x2'])
+    def generate_points_simple_quadratic(self, num_points, num_features):
+        x_df = self.test_case_globals['2d_X_input_space'].random_dataframe(num_samples=num_points)
+        x = x_df.to_numpy()
 
         # y = 1 -3*X_1 -4*X_2 -0.5*X_1**2 -2*X_2**2
-        y_coef_true = TestRegressionEnhancedRandomForestRegressionModel.get_simple_quadratic_coefficients()
+        y_coef_true = self.get_simple_quadratic_coefficients()
         poly_reg = PolynomialFeatures(degree=2)
         poly_terms_x = poly_reg.fit_transform(x)
         y = np.matmul(poly_terms_x, y_coef_true)
@@ -121,7 +116,7 @@ class TestRegressionEnhancedRandomForestRegressionModel:
             output_space=self.test_case_globals['output_space']
         )
 
-        num_train_points = 50
+        num_train_points = 51
         x_train_df, y_train_df = self.generate_points_simple_quadratic(num_train_points, len(self.test_case_globals['2d_X_input_space'].dimensions))
         rerf.fit(x_train_df, y_train_df)
 

@@ -24,21 +24,19 @@ lasso_cross_validated_config_store = ComponentConfigStore(
     parameter_space=SimpleHypergrid(
         name="lasso_regression_model_config",
         dimensions=[
-            ContinuousDimension(name="eps", min=0, max=2 ** 16),
-            DiscreteDimension(name="num_alphas", min=0, max=10 ** 5),
+            ContinuousDimension(name="eps", min=0, max=10.0 ** -3),
+            DiscreteDimension(name="num_alphas", min=0, max=200),
             CategoricalDimension(name="fit_intercept", values=[False, True]),
             CategoricalDimension(name="normalize", values=[False, True]),
             CategoricalDimension(name="precompute", values=[False, True]),
-            DiscreteDimension(name="max_iter", min=0, max=10 ** 5),
-            ContinuousDimension(name="tol", min=0, max=2 ** 10),
+            DiscreteDimension(name="max_iter", min=100, max=5 * 10 ** 3),
+            ContinuousDimension(name="tol", min=0, max=1.0),
             CategoricalDimension(name="copy_x", values=[False, True]),
-            ContinuousDimension(name="num_cross_validations", min=1, max=10),
+            DiscreteDimension(name="num_cross_validations", min=2, max=10),
             CategoricalDimension(name="verbose", values=[False, True]),
-            DiscreteDimension(name="num_jobs", min=1, max=4),
+            DiscreteDimension(name="num_jobs", min=1, max=2),
             CategoricalDimension(name="positive", values=[False, True]),
-            CategoricalDimension(name="selection", values=[selection.value for selection in Selection]),
-            DiscreteDimension(name="min_num_samples_per_input_dimension_to_fit", min=1, max=32),
-            DiscreteDimension(name="num_new_samples_per_input_dimension_before_refit", min=1, max=32)
+            CategoricalDimension(name="selection", values=[selection.value for selection in Selection])
         ]
     ),
     default=Point(
@@ -55,9 +53,7 @@ lasso_cross_validated_config_store = ComponentConfigStore(
         verbose=False,
         num_jobs=1,
         positive=False,
-        selection=Selection.CYCLIC.value,
-        min_num_samples_per_input_dimension_to_fit=10,
-        num_new_samples_per_input_dimension_before_refit=5
+        selection=Selection.CYCLIC.value
     ),
     description="Wrapper for sklearn.linear_model.Lasso model."
                 "This wrapper includes optional CV grid search to tune Lasso hyper parameters within each fit."

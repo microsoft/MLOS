@@ -36,18 +36,18 @@ class SklearnRandomForestRegressionModelConfig(metaclass=DefaultConfigMeta):
             DiscreteDimension(name="n_estimators", min=1, max=2 ** 10),
             CategoricalDimension(name="criterion", values=[criterion.value for criterion in Criterion]),
             DiscreteDimension(name="max_depth", min=0, max=2 ** 10),
-            ContinuousDimension(name="min_samples_split", min=2, max=2 ** 10),
-            ContinuousDimension(name="min_samples_leaf", min=1, max=2 ** 10),
+            ContinuousDimension(name="min_samples_split", min=0, max=1),
+            ContinuousDimension(name="min_samples_leaf", min=0, max=0.5),
             ContinuousDimension(name="min_weight_fraction_leaf", min=0, max=0.5),
             CategoricalDimension(name="max_features", values=[max_feature.value for max_feature in MaxFeatures]),
             DiscreteDimension(name="max_leaf_nodes", min=0, max=2 ** 10),
             ContinuousDimension(name="min_impurity_decrease", min=0, max=2 ** 10),
             CategoricalDimension(name="bootstrap", values=[False, True]),
             CategoricalDimension(name="oob_score", values=[False, True]),
-            DiscreteDimension(name="n_jobs", min=1, max=2 ** 10),
+            DiscreteDimension(name="n_jobs", min=1, max=10),
             CategoricalDimension(name="warm_start", values=[False, True]),
             ContinuousDimension(name="ccp_alpha", min=0, max=2 ** 10),
-            ContinuousDimension(name="max_samples", min=0, max=2 ** 10)
+            ContinuousDimension(name="max_samples", min=0.01, max=0.99)
         ]
     )
 
@@ -55,8 +55,8 @@ class SklearnRandomForestRegressionModelConfig(metaclass=DefaultConfigMeta):
         n_estimators=100,
         criterion=Criterion.MSE.value,
         max_depth=0,  # overloading 0 as None to deal with sklearn param type interpretation
-        min_samples_split=2,
-        min_samples_leaf=1,
+        min_samples_split=0.2,
+        min_samples_leaf=0.1,
         min_weight_fraction_leaf=0.0,
         max_features=MaxFeatures.AUTO.value,
         max_leaf_nodes=0,  # overloading 0 as None to deal with sklearn param type interpretation
@@ -66,7 +66,7 @@ class SklearnRandomForestRegressionModelConfig(metaclass=DefaultConfigMeta):
         n_jobs=1,
         warm_start=False,
         ccp_alpha=0,
-        max_samples=0
+        max_samples=0.01
     )
 
     @classmethod

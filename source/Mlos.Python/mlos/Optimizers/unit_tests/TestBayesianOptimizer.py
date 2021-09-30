@@ -28,12 +28,14 @@ from mlos.Optimizers.BayesianOptimizerConfigStore import bayesian_optimizer_conf
 from mlos.Optimizers.BayesianOptimizerFactory import BayesianOptimizerFactory
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.GlowWormSwarmOptimizer import GlowWormSwarmOptimizer
 from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomNearIncumbentOptimizer import RandomNearIncumbentOptimizer
-from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer
+from mlos.Optimizers.ExperimentDesigner.UtilityFunctionOptimizers.RandomSearchOptimizer import RandomSearchOptimizer, random_search_optimizer_config_store
 from mlos.Optimizers.OptimizationProblem import OptimizationProblem, Objective
 from mlos.Optimizers.OptimizerBase import OptimizerBase
 from mlos.Optimizers.OptimumDefinition import OptimumDefinition
 from mlos.Optimizers.RegressionModels.HomogeneousRandomForestRegressionModel import HomogeneousRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest import MultiObjectiveHomogeneousRandomForest
+from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestModel import RegressionEnhancedRandomForestRegressionModel
+from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionEnhancedRandomForest import MultiObjectiveRegressionEnhancedRandomForest
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Spaces import Point, SimpleHypergrid, ContinuousDimension
 from mlos.Tracer import Tracer, trace, traced
@@ -347,7 +349,6 @@ class TestBayesianOptimizer:
     @pytest.mark.parametrize("restart_num", [i for i in range(10)])
     @pytest.mark.parametrize("use_remote_optimizer", [False])
     def test_hierarchical_quadratic_cold_start_random_configs(self, restart_num, use_remote_optimizer):
-
         objective_function_config = objective_function_config_store.get_config_by_name('three_level_quadratic')
         objective_function = ObjectiveFunctionFactory.create_objective_function(objective_function_config=objective_function_config)
 
@@ -383,6 +384,17 @@ class TestBayesianOptimizer:
             decision_tree_config.min_samples_to_fit = 10
             decision_tree_config.n_new_samples_before_refit = 10
 
+        if optimizer_config.surrogate_model_implementation == MultiObjectiveRegressionEnhancedRandomForest.__name__:
+            optimizer_config.min_samples_required_for_guided_design_of_experiments = 25
+            rerf_model_config = optimizer_config.regression_enhanced_random_forest_regression_model_config
+            rerf_model_config.max_basis_function_degree = min(rerf_model_config.max_basis_function_degree, 2)
+            # increased polynomial degree requires more data to estimate model parameters (poly term coefficients)
+            optimizer_config.min_samples_required_for_guided_design_of_experiments += 25 * (rerf_model_config.max_basis_function_degree - 1)
+            rf_model_config = rerf_model_config.sklearn_random_forest_regression_model_config
+            rf_model_config.perform_initial_random_forest_hyper_parameter_search = False
+            rf_model_config.max_depth = min(rf_model_config.max_depth, 10)
+            rf_model_config.n_jobs = min(rf_model_config.n_jobs, 4)
+
         if optimizer_config.experiment_designer_config.numeric_optimizer_implementation == GlowWormSwarmOptimizer.__name__:
             optimizer_config.experiment_designer_config.glow_worm_swarm_optimizer_config.num_iterations = 5
 
@@ -398,7 +410,6 @@ class TestBayesianOptimizer:
 
         print(f"[Restart: {restart_num}] Creating a BayesianOptimimizer with the following config: ")
         print(optimizer_config.to_json(indent=2))
-
 
         if not use_remote_optimizer:
             bayesian_optimizer = self.bayesian_optimizer_factory.create_local_optimizer(
@@ -856,7 +867,9 @@ class TestBayesianOptimizer:
                 if degrees_of_freedom == 0:
                     assert ucb_90_ci_optimum.upper_confidence_bound <= ucb_95_ci_optimum.upper_confidence_bound <= ucb_99_ci_optimum.upper_confidence_bound
                 else:
-                    print(predicted_optimum.predicted_value, ucb_90_ci_optimum.upper_confidence_bound, ucb_95_ci_optimum.upper_confidence_bound, ucb_99_ci_optimum.upper_confidence_bound)
+                    print(f'upper confidence intervals not nested as expected: \n\tpredicted_value: {predicted_optimum.predicted_value}\n'
+                          f'\t 90th, 95th, and 99th upper confidence bounds: {ucb_90_ci_optimum.upper_confidence_bound}, {ucb_95_ci_optimum.upper_confidence_bound}, {ucb_99_ci_optimum.upper_confidence_bound}')
+                    print(f'degrees of freedom: {optimum_predicted_value_prediction_df[Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value]}')
                     assert False
 
 
