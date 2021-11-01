@@ -127,7 +127,7 @@ class ParetoFrontier:
         sorted_corners = pd.DataFrame(np.sort(pareto.values, axis=0), columns=pareto.columns)
 
         # Then, generate all permutations of indices to get all the points on the partition grid
-        # The shape of this array is (n_points, n_axes) where n_points is the number of cels in the partition,
+        # The shape of this array is (n_points, n_axes) where n_points is the number of cells in the partition,
         # So if there's three objectives, and 10 points on the pareto frontier,
         # there will be 10 ** 3 cells, and this array will have shape (10 ** 3, 3)
         all_permutations = np.array(np.meshgrid(*[range(len(pareto))]*n_axes)).reshape(n_axes, -1).T
@@ -135,6 +135,8 @@ class ParetoFrontier:
         edge_length = pd.DataFrame()
         for col in sorted_corners.columns:
             steps = sorted_corners[col].diff()
+            # The first length is the difference to zero, which is just the original value.
+            # Alternatively one could add [0, 0] to the pareto curve.
             steps.iloc[0] = sorted_corners[col].iloc[0]
             edge_length[col] = steps
         # we need numpy arrays for fancy indexing
