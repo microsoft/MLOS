@@ -114,7 +114,7 @@ class ParetoFrontier:
 
     def get_analytical_volume(self):
         n_axes = len(self.optimization_problem.objectives)
-        if len(n_axes) == 2:
+        if n_axes == 2:
             # The 2D case is simple and faster to compute, so we special case it.
             diffs = self.pareto_df.y1.diff()
             diffs.iloc[0] = self.pareto_df.y1.iloc[0]

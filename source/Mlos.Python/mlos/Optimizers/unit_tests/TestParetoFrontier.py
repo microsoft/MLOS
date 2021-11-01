@@ -239,6 +239,7 @@ class TestParetoFrontier:
         pareto_volume_estimator = pareto_frontier.approximate_pareto_volume(num_samples=1000000)
         lower_bound, upper_bound = pareto_volume_estimator.get_two_sided_confidence_interval_on_pareto_volume(alpha=0.05)
         print(lower_bound, upper_bound)
+        assert lower_bound <= pareto_frontier.get_analytical_volume() <= upper_bound
         assert 0.49 < lower_bound < upper_bound < 0.51
 
 
@@ -319,6 +320,7 @@ class TestParetoFrontier:
         upper_bound_on_pareto_volume = upper_bounds_on_sphere_volume_by_num_dimensions[num_dimensions] / (2**num_dimensions)
         print("True bounds:", lower_bound_on_pareto_volume, upper_bound_on_pareto_volume)
         print("CI bounds: ", ci_lower_bound, ci_upper_bound)
+        assert ci_lower_bound <= pareto_frontier.get_analytical_volume() <= ci_upper_bound
         assert lower_bound_on_pareto_volume <= ci_lower_bound <= ci_upper_bound <= upper_bound_on_pareto_volume
 
 
