@@ -11,7 +11,7 @@ from mlos.Optimizers.OptimizationProblem import OptimizationProblem
 from mlos.Tracer import trace
 from mlos.Utils.KeyOrderedDict import KeyOrderedDict
 
-class ParetoVolumeEsimator:
+class ParetoVolumeEstimator:
     """Contains all information required to compute a confidence interval on the pareto volume.
 
     Note that the dimensionality analysis for this volume is meaningless. Each objective carries
@@ -112,6 +112,43 @@ class ParetoFrontier:
             return None
         return self._params_for_pareto_df.copy(deep=True)
 
+    def get_analytical_volume(self):
+        n_axes = len(self.optimization_problem.objectives)
+        if len(n_axes) == 2:
+            # The 2D case is simple and faster to compute, so we special case it.
+            diffs = self.pareto_df.y1.diff()
+            diffs.iloc[0] = self.pareto_df.y1.iloc[0]
+            area = (diffs*self.pareto_df.y0).sum()
+            return area
+
+        # partition the n-d space by all occuring values for each axes
+        # first, sort all the axes separately
+        pareto = self.pareto_df
+        sorted_corners = pd.DataFrame(np.sort(pareto.values, axis=0), columns=pareto.columns)
+
+        # Then, generate all permutations of indices to get all the points on the partition grid
+        # The shape of this array is (n_points, n_axes) where n_points is the number of cels in the partition,
+        # So if there's three objectives, and 10 points on the pareto frontier,
+        # there will be 10 ** 3 cells, and this array will have shape (10 ** 3, 3)
+        all_permutations = np.array(np.meshgrid(*[range(len(pareto))]*n_axes)).reshape(n_axes, -1).T
+        # Compute the length of the edges in the partition
+        edge_length = pd.DataFrame()
+        for col in sorted_corners.columns:
+            steps = sorted_corners[col].diff()
+            steps.iloc[0] = sorted_corners[col].iloc[0]
+            edge_length[col] = steps
+        # we need numpy arrays for fancy indexing
+        edge_length_array = np.array(edge_length)
+        corners_array = np.array(sorted_corners)
+        # now we materialze the corners of all the cells
+        all_points = np.c_[[corners_array[all_permutations[:, i], i] for i in range(n_axes)]].T
+        # we also compute the volume for each cell
+        all_areas = np.c_[[edge_length_array[all_permutations[:, i], i] for i in range(n_axes)]].prod(axis=0)
+        # Then we check whether for each cell whether it is on the inside of the Pareto frontier
+        is_inside = self.is_dominated(pd.DataFrame(all_points, columns=pareto.columns), reject_equal=True)
+        # And finally we sum up all the cells using the result as a boolean mask.
+        return all_areas[is_inside].sum()
+
     def update_pareto(self, objectives_df: pd.DataFrame, parameters_df: pd.DataFrame):
         """Computes a pareto frontier for the given objectives_df (including weak-pareto-optimal points).
 
@@ -164,7 +201,7 @@ class ParetoFrontier:
         self._params_for_pareto_df = parameters_df.iloc[self._pareto_df.index]
 
     @trace()
-    def is_dominated(self, objectives_df) -> pd.Series:
+    def is_dominated(self, objectives_df, reject_equal=False) -> pd.Series:
         """For each row in objectives_df checks if the row is dominated by any of the rows in pareto_df.
 
         :param objectives_df:
@@ -175,11 +212,14 @@ class ParetoFrontier:
         objectives_df = self._flip_sign_for_minimized_objectives(objectives_df)
         is_dominated = pd.Series([False for i in range(len(objectives_df.index))], index=objectives_df.index)
         for _, pareto_row in self._pareto_df_maximize_all.iterrows():
-            is_dominated_by_this_pareto_point = (objectives_df < pareto_row).all(axis=1)
+            if reject_equal:
+                is_dominated_by_this_pareto_point = (objectives_df <= pareto_row).all(axis=1)
+            else:
+                is_dominated_by_this_pareto_point = (objectives_df < pareto_row).all(axis=1)
             is_dominated = is_dominated | is_dominated_by_this_pareto_point
         return is_dominated
 
-    def approximate_pareto_volume(self, num_samples=1000000) -> ParetoVolumeEsimator:
+    def approximate_pareto_volume(self, num_samples=1000000) -> ParetoVolumeEstimator:
         """Approximates the volume of the pareto frontier.
 
         The idea here is that we can randomly sample from the objective space and observe the proportion of
@@ -208,7 +248,7 @@ class ParetoFrontier:
         })
 
         num_dominated_points = self.is_dominated(objectives_df=random_objectives_df).sum()
-        return ParetoVolumeEsimator(
+        return ParetoVolumeEstimator(
             num_random_points=num_samples,
             num_dominated_points=num_dominated_points,
             objectives_maxima=objectives_extremes
