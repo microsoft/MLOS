@@ -17,6 +17,7 @@ from mlos.Optimizers.RegressionModels.MultiObjectiveHomogeneousRandomForest impo
 from mlos.Optimizers.RegressionModels.MultiObjectiveLassoCrossValidated import MultiObjectiveLassoCrossValidated
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionEnhancedRandomForest import MultiObjectiveRegressionEnhancedRandomForest
 from mlos.Optimizers.RegressionModels.MultiObjectiveRegressionModel import MultiObjectiveRegressionModel
+from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModel import SklearnRandomForestRegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Tracer import trace
 from mlos.Spaces import Point
@@ -66,7 +67,8 @@ class BayesianOptimizer(OptimizerBase):
             HomogeneousRandomForestRegressionModel.__name__,
             MultiObjectiveHomogeneousRandomForest.__name__,
             MultiObjectiveLassoCrossValidated.__name__,
-            MultiObjectiveRegressionEnhancedRandomForest.__name__
+            MultiObjectiveRegressionEnhancedRandomForest.__name__,
+            SklearnRandomForestRegressionModel.__name__
         )
 
         # Note that even if the user requested a HomogeneousRandomForestRegressionModel, we still create a MultiObjectiveRegressionModel
@@ -82,6 +84,13 @@ class BayesianOptimizer(OptimizerBase):
         elif self.optimizer_config.surrogate_model_implementation == MultiObjectiveHomogeneousRandomForest.__name__:
             self.surrogate_model: MultiObjectiveRegressionModel = MultiObjectiveHomogeneousRandomForest(
                 model_config=self.optimizer_config.homogeneous_random_forest_regression_model_config,
+                input_space=self.optimization_problem.feature_space,
+                output_space=self.surrogate_model_output_space,
+                logger=self.logger
+            )
+        elif self.optimizer_config.surrogate_model_implementation == SklearnRandomForestRegressionModel.__name__:
+            self.surrogate_model: MultiObjectiveRegressionModel = SklearnRandomForestRegressionModel(
+                model_config=self.optimizer_config.sklearn_random_forest_regression_model_config,
                 input_space=self.optimization_problem.feature_space,
                 output_space=self.surrogate_model_output_space,
                 logger=self.logger

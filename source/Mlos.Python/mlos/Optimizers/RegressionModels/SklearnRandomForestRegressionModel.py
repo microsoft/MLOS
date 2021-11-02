@@ -91,6 +91,9 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         if model_config.oob_score:
             model_config.bootstrap = True
 
+        if len(output_space.dimensions) > 1:
+            ValueError("Multi-output regression is not yet supported. ")
+
         RegressionModel.__init__(
             self,
             model_type=type(self),
@@ -127,8 +130,8 @@ class SklearnRandomForestRegressionModel(RegressionModel):
 
     def fit(
             self,
-            feature_values_pandas_frame: pd.DataFrame,
-            target_values_pandas_frame: pd.DataFrame,
+            features_df: pd.DataFrame,
+            targets_df: pd.DataFrame,
             iteration_number: int
     ):
         """ Fits the RegressionEnhancedRandomForest
@@ -136,7 +139,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         :param target_values_pandas_frame:
         :return:
         """
-        features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
+        features_df_ohe = self.one_hot_encoder_adapter.project_dataframe(features_df, in_place=False)
 
         model_config = self.model_config
 
@@ -159,8 +162,8 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         )
 
         self.random_forest_regressor_.fit(
-            features_df,
-            target_values_pandas_frame)
+            features_df_ohe,
+            targets_df)
 
         self._trained = True
         return self
@@ -168,7 +171,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
 
     def predict(
             self,
-            feature_values_pandas_frame: pd.DataFrame,
+            features_df: pd.DataFrame,
             include_only_valid_rows: bool = True
     ) -> Prediction:
 
@@ -179,7 +182,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
 
         valid_rows_index = None
         if self.trained:
-            feature_values_pandas_frame = self.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame, exclude_extra_columns=False)
+            feature_values_pandas_frame = self.input_space.filter_out_invalid_rows(original_dataframe=features_df, exclude_extra_columns=False)
 
             features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
             valid_rows_index = feature_values_pandas_frame.index
@@ -206,4 +209,4 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         if not include_only_valid_rows:
             predictions.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
 
-        return predictions
+        return [predictions]
