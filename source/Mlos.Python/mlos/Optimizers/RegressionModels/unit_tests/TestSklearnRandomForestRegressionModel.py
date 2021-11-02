@@ -44,7 +44,7 @@ class TestSklearnRandomForestRegressionModel:
         self.input_pandas_dataframe = pd.DataFrame({"x": self.input_values})
         self.output_pandas_dataframe = pd.DataFrame({"y": self.output_values})
 
-    def test_default_homogeneous_random_forest_model(self):
+    def test_default_sklearn_random_forest_model(self):
 
         model_config = SklearnRandomForestRegressionModelConfig._DEFAULT
         model = SklearnRandomForestRegressionModel(
@@ -78,10 +78,10 @@ class TestSklearnRandomForestRegressionModel:
             if i % 10 == 0:
                 print(f"{datetime.datetime.utcnow()} {i}/{num_iterations}")
 
-            model_config = homogeneous_random_forest_config_store.parameter_space.random()
+            model_config = SklearnRandomForestRegressionModelConfig.CONFIG_SPACE.random()
             model_config.n_estimators = min(model_config.n_estimators, 20)
             print(model_config)
-            model = HomogeneousRandomForestRegressionModel(
+            model = SklearnRandomForestRegressionModel(
                 model_config=model_config,
                 input_space=self.input_space,
                 output_space=self.output_space

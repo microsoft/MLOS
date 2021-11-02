@@ -44,6 +44,10 @@ class SklearnRandomForestRegressionModel(RegressionModel):
             logger = create_logger("SklearnRandomForestRegressionModel")
         self.logger = logger
         assert model_config in SklearnRandomForestRegressionModelConfig.CONFIG_SPACE
+
+        if model_config.oob_score:
+            model_config.bootstrap = True
+
         RegressionModel.__init__(
             self,
             model_type=type(self),
@@ -56,10 +60,8 @@ class SklearnRandomForestRegressionModel(RegressionModel):
 
         # one hot encode categorical input dimensions
         self.one_hot_encoder_adapter = CategoricalToOneHotEncodedHypergridAdapter(
-            adaptee=self.polynomial_features_adapter,
-            merge_all_categorical_dimensions=True,
-            drop='first'
-        )
+            adaptee=self.input_space,
+            merge_all_categorical_dimensions=False)
 
         self.input_dimension_names = [dimension.name for dimension in self.input_space.dimensions]
         self._projected_input_dimension_names = [dimension.name for dimension in self.one_hot_encoder_adapter.dimensions]
@@ -71,13 +73,20 @@ class SklearnRandomForestRegressionModel(RegressionModel):
 
         self.fit_X_ = None
 
-        self.trained = False
+        self._trained = False
         self.last_refit_iteration_number = None
+
+
+    @property
+    def trained(self):
+        return self._trained
+
 
     def fit(
             self,
             feature_values_pandas_frame: pd.DataFrame,
             target_values_pandas_frame: pd.DataFrame,
+            iteration_number: int
     ):
         """ Fits the RegressionEnhancedRandomForest
         :param feature_values_pandas_frame:
@@ -86,7 +95,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         """
         features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
 
-        model_config = self.model_config.sklearn_random_forest_regression_model_config
+        model_config = self.model_config
 
         self.random_forest_regressor_ = RandomForestRegressor(
             n_estimators=model_config.n_estimators,
@@ -110,6 +119,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
             features_df,
             target_values_pandas_frame)
 
+        self._trained = True
         return self
 
 
@@ -143,8 +153,8 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         if valid_rows_index is not None and not valid_rows_index.empty:
             prediction_dataframe[is_valid_input_col] = True
 
-            predictions = self.random_forest_regressor_.predict(features_df)
-            prediction_dataframe[predicted_value_col] = predictions
+            predictions_array = self.random_forest_regressor_.predict(features_df)
+            prediction_dataframe[predicted_value_col] = predictions_array
             # FIXME
             # prediction_dataframe[dof_col] = self.dof_
 
