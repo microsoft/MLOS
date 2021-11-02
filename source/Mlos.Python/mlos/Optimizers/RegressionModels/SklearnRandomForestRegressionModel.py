@@ -13,14 +13,11 @@ from sklearn.model_selection import GridSearchCV
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
-from mlos.Optimizers.RegressionModels.LassoCrossValidatedRegressionModel import LassoCrossValidatedRegressionModel
-from mlos.Optimizers.RegressionModels.RegressionEnhancedRandomForestConfigStore import regression_enhanced_random_forest_config_store
+from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
 from mlos.Spaces import SimpleHypergrid, Hypergrid, Point
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 
 from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
-from mlos.Spaces.HypergridAdapters.ContinuousToPolynomialBasisHypergridAdapter import ContinuousToPolynomialBasisHypergridAdapter
-from mlos.Tracer import trace
 
 
 class SklearnRandomForestRegressionModel(RegressionModel):
@@ -36,7 +33,6 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM
     ]
 
-    @trace()
     def __init__(
             self,
             model_config: Point,
@@ -47,8 +43,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         if logger is None:
             logger = create_logger("SklearnRandomForestRegressionModel")
         self.logger = logger
-        # FIXME
-        # assert model_config in regression_enhanced_random_forest_config_store.parameter_space
+        assert model_config in SklearnRandomForestRegressionModelConfig.CONFIG_SPACE
         RegressionModel.__init__(
             self,
             model_type=type(self),
@@ -79,28 +74,14 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         self.trained = False
         self.last_refit_iteration_number = None
 
-    def should_fit(
-            self,
-            num_samples: int
-    ) -> bool:
-        # since polynomial basis functions decrease the degrees of freedom (TODO: add reference),
-        #  and prediction degrees of freedom = sample size - num coef - 1
-        #  need sufficiently many samples to exceed the number of coefficients
-        dof = num_samples - self.num_model_coefficients - 1
-
-        return dof > 0
-
-    @trace()
     def fit(
             self,
             feature_values_pandas_frame: pd.DataFrame,
             target_values_pandas_frame: pd.DataFrame,
-            iteration_number: int = 0
     ):
         """ Fits the RegressionEnhancedRandomForest
         :param feature_values_pandas_frame:
         :param target_values_pandas_frame:
-        :param iteration_number:
         :return:
         """
         features_df = self.one_hot_encoder_adapter.project_dataframe(feature_values_pandas_frame, in_place=False)
@@ -131,25 +112,6 @@ class SklearnRandomForestRegressionModel(RegressionModel):
 
         return self
 
-    def _fit_random_forest_regression(
-            self,
-            x,
-            y_residuals
-    ):
-        # Assumes x has already been transformed and the reduced feature space and residuals relative to base model
-        #  are passed to the random forest regression
-        if self.model_config.perform_initial_random_forest_hyper_parameter_search:
-            self._execute_grid_search_for_random_forest_regressor_model(x, y_residuals)
-
-        else:
-            #self.random_forest_regressor_ = RandomForestRegressor(**self.random_forest_kwargs)
-
-            self.random_forest_regressor_.fit(x, y_residuals)
-
-        self.random_forest_kwargs = self.random_forest_regressor_.get_params()
-
-        return self
-
 
     def predict(
             self,
@@ -164,8 +126,6 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         valid_rows_index = None
-        model_design_matrix: np.ndarray = np.array([])
-        model_design_matrix_dataframe: pd.DataFrame = pd.DataFrame()
         if self.trained:
             feature_values_pandas_frame = self.input_space.filter_out_invalid_rows(original_dataframe=feature_values_pandas_frame, exclude_extra_columns=False)
 
