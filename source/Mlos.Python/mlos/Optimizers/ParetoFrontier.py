@@ -116,9 +116,9 @@ class ParetoFrontier:
         n_axes = len(self.optimization_problem.objectives)
         if n_axes == 2:
             # The 2D case is simple and faster to compute, so we special case it.
-            diffs = self.pareto_df.y1.diff()
-            diffs.iloc[0] = self.pareto_df.y1.iloc[0]
-            area = (diffs*self.pareto_df.y0).sum()
+            diffs = self.pareto_df.iloc[:, 1].diff()
+            diffs.iloc[0] = self.pareto_df.iloc[0, 1]
+            area = (diffs*self.pareto_df.iloc[:, 0]).sum()
             return area
 
         # partition the n-d space by all occuring values for each axes
