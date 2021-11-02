@@ -197,7 +197,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
 
             predictions_array = self.random_forest_regressor_.predict(features_df)
 
-            predicted_std = _return_std(features_df, self.random_forest_regressor_.estimators_, predictions_array, prediction_dataframe, min_variance=0.01)
+            predicted_std = _return_std(features_df, self.random_forest_regressor_.estimators_, predictions_array, min_variance=0.01)
             prediction_dataframe[predicted_value_col] = predictions_array
 
             prediction_dataframe[predicted_value_var_col] = predicted_std ** 2
