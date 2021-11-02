@@ -3,22 +3,65 @@
 # Licensed under the MIT License.
 #
 import logging
-from typing import List
 import numpy as np
 import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import GridSearchCV
 
 from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
-from mlos.Spaces import SimpleHypergrid, Hypergrid, Point
+from mlos.Spaces import Hypergrid, Point
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 
 from mlos.Spaces.HypergridAdapters.CategoricalToOneHotEncodedHypergridAdapter import CategoricalToOneHotEncodedHypergridAdapter
 
+
+# taken form scikit-optimize. BSD licensed by the scikit-optimize developers
+# https://github.com/scikit-optimize/scikit-optimize/blob/master/skopt/learning/forest.py
+
+def _return_std(X, trees, predictions, min_variance):
+    """
+    Returns `std(Y | X)`.
+    Can be calculated by E[Var(Y | Tree)] + Var(E[Y | Tree]) where
+    P(Tree) is `1 / len(trees)`.
+    Parameters
+    ----------
+    X : array-like, shape=(n_samples, n_features)
+        Input data.
+    trees : list, shape=(n_estimators,)
+        List of fit sklearn trees as obtained from the ``estimators_``
+        attribute of a fit RandomForestRegressor or ExtraTreesRegressor.
+    predictions : array-like, shape=(n_samples,)
+        Prediction of each data point as returned by RandomForestRegressor
+        or ExtraTreesRegressor.
+    Returns
+    -------
+    std : array-like, shape=(n_samples,)
+        Standard deviation of `y` at `X`. If criterion
+        is set to "mse", then `std[i] ~= std(y | X[i])`.
+    """
+    # This derives std(y | x) as described in 4.3.2 of arXiv:1211.0906
+    std = np.zeros(len(X))
+
+    for tree in trees:
+        var_tree = tree.tree_.impurity[tree.apply(X)]
+
+        # This rounding off is done in accordance with the
+        # adjustment done in section 4.3.3
+        # of http://arxiv.org/pdf/1211.0906v2.pdf to account
+        # for cases such as leaves with 1 sample in which there
+        # is zero variance.
+        var_tree[var_tree < min_variance] = min_variance
+        mean_tree = tree.predict(X)
+        std += var_tree + mean_tree ** 2
+
+    std /= len(trees)
+    std -= predictions ** 2.0
+    std[std < 0.0] = 0.0
+    std = std ** 0.5
+    return std
 
 class SklearnRandomForestRegressionModel(RegressionModel):
     """Thin wrapper for the scikit-learn RandomForestRegressor.
@@ -133,7 +176,6 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
-        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
 
         valid_rows_index = None
         if self.trained:
@@ -154,14 +196,11 @@ class SklearnRandomForestRegressionModel(RegressionModel):
             prediction_dataframe[is_valid_input_col] = True
 
             predictions_array = self.random_forest_regressor_.predict(features_df)
-            prediction_dataframe[predicted_value_col] = predictions_array
-            # FIXME
-            # prediction_dataframe[dof_col] = self.dof_
 
-            # compute variance needed for prediction interval
-            # FIXME
-            # var_list = []
-            # prediction_dataframe[predicted_value_var_col] = var_list
+            predicted_std = _return_std(features_df, self.random_forest_regressor_.estimators_, predictions_array, prediction_dataframe, min_variance=0.01)
+            prediction_dataframe[predicted_value_col] = predictions_array
+
+            prediction_dataframe[predicted_value_var_col] = predicted_std ** 2
         predictions.validate_dataframe(prediction_dataframe)
 
         if not include_only_valid_rows:
