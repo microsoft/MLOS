@@ -12,6 +12,8 @@ from mlos.Logger import create_logger
 from mlos.Optimizers.RegressionModels.RegressionModel import RegressionModel
 from mlos.Optimizers.RegressionModels.Prediction import Prediction
 from mlos.Optimizers.RegressionModels.SklearnRandomForestRegressionModelConfig import SklearnRandomForestRegressionModelConfig
+from mlos.Optimizers.RegressionModels.MultiObjectivePrediction import MultiObjectivePrediction
+
 from mlos.Spaces import Hypergrid, Point
 from mlos.Spaces.Dimensions.ContinuousDimension import ContinuousDimension
 
@@ -147,8 +149,8 @@ class SklearnRandomForestRegressionModel(RegressionModel):
             n_estimators=model_config.n_estimators,
             criterion=model_config.criterion,
             max_depth=model_config.max_depth if model_config.max_depth > 0 else None,
-            min_samples_split=model_config.min_samples_split,
-            min_samples_leaf=model_config.min_samples_leaf,
+            min_samples_split=model_config.min_samples_split if model_config.min_samples_split > 0 else 2,
+            min_samples_leaf=model_config.min_samples_leaf if model_config.min_samples_leaf > 0 else 2,
             min_weight_fraction_leaf=model_config.min_weight_fraction_leaf,
             max_features=model_config.max_features,
             max_leaf_nodes=model_config.max_leaf_nodes if model_config.max_leaf_nodes > 0 else None,
@@ -179,6 +181,8 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         is_valid_input_col = Prediction.LegalColumnNames.IS_VALID_INPUT.value
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
         predicted_value_var_col = Prediction.LegalColumnNames.PREDICTED_VALUE_VARIANCE.value
+        dof_col = Prediction.LegalColumnNames.PREDICTED_VALUE_DEGREES_OF_FREEDOM.value
+
 
         valid_rows_index = None
         if self.trained:
@@ -201,6 +205,16 @@ class SklearnRandomForestRegressionModel(RegressionModel):
             predictions_array = self.random_forest_regressor_.predict(features_df)
 
             predicted_std = _return_std(features_df, self.random_forest_regressor_.estimators_, predictions_array, min_variance=0.01)
+
+            # leaf indices is n_samples x n_estimators
+            leaf_indices = self.random_forest_regressor_.apply(features_df)
+            # for each column in the leaf_indices, get node samples from corresponding tree
+            # samples_in_leaf is n_estimators x n_samples
+            samples_in_leaf = np.array([tree.tree_.n_node_samples[leaf_inds]
+                                        for tree, leaf_inds in zip(self.random_forest_regressor_.estimators_, leaf_indices.T)])
+
+            prediction_dataframe[dof_col] = samples_in_leaf.sum(axis=0) - self.random_forest_regressor_.n_estimators
+
             prediction_dataframe[predicted_value_col] = predictions_array
 
             prediction_dataframe[predicted_value_var_col] = predicted_std ** 2
@@ -209,4 +223,7 @@ class SklearnRandomForestRegressionModel(RegressionModel):
         if not include_only_valid_rows:
             predictions.add_invalid_rows_at_missing_indices(desired_index=feature_values_pandas_frame.index)
 
-        return [predictions]
+        multi_objective_predictions = MultiObjectivePrediction(objective_names=self.output_dimension_names)
+        multi_objective_predictions[self.output_dimension_names[0]] = predictions
+
+        return multi_objective_predictions

@@ -74,11 +74,11 @@ class NaiveMultiObjectiveRegressionModel(MultiObjectiveRegressionModel):
             features_df: pd.DataFrame,
             include_only_valid_rows: bool = True
     ) -> MultiObjectivePrediction:
-        multi_objective_predicitons = MultiObjectivePrediction(objective_names=self.output_dimension_names)
+        multi_objective_predictions = MultiObjectivePrediction(objective_names=self.output_dimension_names)
         for objective_name, regressor in self._regressors_by_objective_name:
             prediction = regressor.predict(feature_values_pandas_frame=features_df, include_only_valid_rows=include_only_valid_rows)
-            multi_objective_predicitons[objective_name] = prediction
-        return multi_objective_predicitons
+            multi_objective_predictions[objective_name] = prediction
+        return multi_objective_predictions
 
     def compute_goodness_of_fit(
             self,

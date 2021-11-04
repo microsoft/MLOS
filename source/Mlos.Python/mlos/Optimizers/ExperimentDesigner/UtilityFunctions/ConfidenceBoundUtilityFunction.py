@@ -45,7 +45,6 @@ class ConfidenceBoundUtilityFunction(UtilityFunction):
 
     @trace()
     def __call__(self, feature_values_pandas_frame):
-        import pdb; pdb.set_trace()
         self.logger.debug(f"Computing utility values for {len(feature_values_pandas_frame.index)} points.")
 
         predicted_value_col = Prediction.LegalColumnNames.PREDICTED_VALUE.value
