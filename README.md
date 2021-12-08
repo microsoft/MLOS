@@ -1,20 +1,14 @@
-# Introduction 
-TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
+# MlosCore
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original [MLOS](https://github.com/microsoft/MLOS).
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+It is intended to provide a simplified, easier to consume (e.g. via `pip`), with lower dependencies abstraction to
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+- describe a space of context, parameters, their ranges, constraints, etc. and result objectives
+- an "optimizer" service abstraction (e.g. `register()` and `suggest()`) so we can easily swap out different implementations methods of searching (e.g. random, BO, etc.)
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+For both design requires intend to reuse as much OSS libraries as possible.
+
+## See Also
+
+[MlosCoreApiDesign.docx](https://microsoft.sharepoint.com/:w:/t/CISLGSL/ESAS3G9q4P5Hoult9uqTfB4B3xh2v6yUfp3YNgIvoyR_IA?e=B6klWZ)
