@@ -139,3 +139,7 @@ cython_debug/
 
 # vim swap files
 .*.swp
+
+.conda-env.build-stamp
+.pylint.build-stamp
+.pytest.build-stamp

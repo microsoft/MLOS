@@ -1,0 +1,29 @@
+name: mlos_core
+channels:
+  - defaults
+dependencies:
+  - scikit-learn
+  - scipy
+  - numpy
+  - pandas
+  - configspace
+  - pip
+  - pylint
+  - pytest
+  - setuptools
+  - jupyterlab
+  - jupyter
+  - ipykernel
+  - nb_conda_kernels
+  - matplotlib
+  - seaborn
+  - python
+  - gcc_linux-64
+  - pip:
+    - scikit-optimize
+    - emukit
+    - "--editable ."
+    - pytest-cov
+    - pytest-forked
+    - pytest-xdist
+    - pytest-timeout

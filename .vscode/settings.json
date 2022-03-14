@@ -1,0 +1,30 @@
+{
+    "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos_core/bin/python",
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.testing.pytestEnabled": true,
+    "cSpell.ignoreWords": [
+        "Skopt",
+        "conda",
+        "configspace",
+        "emukit",
+        "gpbo",
+        "ipykernel",
+        "iterrows",
+        "jupyterlab",
+        "matplotlib",
+        "mlos",
+        "nsmallest",
+        "numpy",
+        "pylint",
+        "pyplot",
+        "pytest",
+        "scikit",
+        "scipy",
+        "seaborn",
+        "setuptools",
+        "tolist",
+        "xlabel",
+        "ylabel"
+    ]
+}

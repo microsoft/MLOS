@@ -1,0 +1,36 @@
+trigger:
+#- main
+  branches:
+    include:
+    - '*'
+
+pr:
+  branches:
+    include:
+    - '*'
+
+pool:
+  vmImage: ubuntu-latest
+# TODO: test multiple versions of python.
+#strategy:
+#  matrix:
+#    Python39:
+#      python.version: '3.9'
+
+steps:
+- bash: echo "##vso[task.prependpath]$CONDA/bin"
+  displayName: 'Add conda to PATH'
+#- task: UsePythonVersion@0
+#  inputs:
+#    versionSpec: '$(python.version)'
+#  displayName: 'Use Python $(python.version)'
+- bash: make conda-env
+  displayName: 'Create mlos_core conda environment'
+- bash: conda run -n mlos_core pip install pytest-azurepipelines
+  displayName: 'Install pytest-azurepipelines'
+- bash: make check
+  displayName: 'Run lint checks'
+- bash: make test
+  displayName: 'Run tests'
+- bash: make dist
+  displayName: 'Generate binary distribution files'
