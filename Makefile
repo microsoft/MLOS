@@ -28,11 +28,8 @@ test: pytest
 .PHONY: pytest
 pytest: conda-env .pytest.build-stamp
 
-# FIXME: There's an issue with pytest-xdist not reaping children when
-# pytest-timeout fails which we're currently using because somehow pytest is
-# causing module imports to hang.
-#	pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/
 .pytest.build-stamp: $(PYTHON_FILES) pytest.ini
+	#conda run -n ${CONDA_DEFAULT_ENV} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/
 	conda run -n ${CONDA_DEFAULT_ENV} pytest --cov=mlos_core --cov-report=xml mlos_core/
 	touch .pytest.build-stamp
 
