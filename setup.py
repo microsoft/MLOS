@@ -6,13 +6,14 @@ from setuptools import setup, find_packages
 
 setup(
     name="mlos-core",
-    version="0.0.1",
+    version="0.0.2",
     packages=find_packages(),
     install_requires=[
         'scikit-learn>=0.22.1',
         'scipy>=1.3.2',
         'numpy>=1.18.1',
         'pandas>=1.0.3',
+        'ConfigSpace>=0.4.21',
     ],
     extras_require={
         'emukit': 'emukit',
