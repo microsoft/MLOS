@@ -7,6 +7,7 @@ from abc import ABCMeta, abstractmethod
 import ConfigSpace
 import pandas as pd
 
+
 class BaseOptimizer(metaclass=ABCMeta):
     """Optimizer abstract base class defining the basic interface.
 
@@ -38,7 +39,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass
+        pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def suggest(self, context: pd.DataFrame = None):
@@ -54,7 +55,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        pass    # pylint: disable=unnecessary-pass
+        pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
@@ -70,7 +71,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass
+        pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     def get_observations(self):
         """Returns the observations as a dataframe.
@@ -80,6 +81,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         observations : pd.DataFrame
             Dataframe of observations. The columns are parameter names and "score" for the score, each row is an observation.
         """
+        if len(self._observations) == 0:
+            raise ValueError("No observations registered yet.")
         configs = pd.concat([config for config, _, _ in self._observations])
         scores = pd.concat([score for _, score, _ in self._observations])
         try:
@@ -88,7 +91,9 @@ class BaseOptimizer(metaclass=ABCMeta):
             contexts = None
         configs["score"] = scores
         if contexts is not None:
-            configs = pd.concat([configs, contexts], axis=1)
+            # configs = pd.concat([configs, contexts], axis=1)
+            # Not reachable for now
+            raise NotImplementedError  # pragma: no cover
         return configs
 
     def get_best_observation(self):

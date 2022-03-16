@@ -13,6 +13,7 @@ from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_s
 
 # TODO: provide a default optimizer.
 
+
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
     """Abstract base class defining the interface for Bayesian optimization. """
     @abstractmethod
@@ -27,7 +28,7 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass
+        pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
     def acquisition_function(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
@@ -41,7 +42,8 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass
+        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+
 
 class EmukitOptimizer(BaseBayesianOptimizer):
     """Wrapper class for Emukit based Bayesian optimization.
@@ -120,9 +122,13 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         raise NotImplementedError()
 
     def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
-        # TODO: return variance in some way
-        mean_predictions, variance_predictions = self.gpbo.model.predict(configurations)
-        return mean_predictions
+        if context is not None:
+            raise NotImplementedError
+        # TODO return variance in some way
+        # TODO check columns in configurations
+        mean_predictions, variance_predictions = self.gpbo.model.predict(np.array(configurations))
+        # make 2ndim array into column vector
+        return mean_predictions.reshape(-1,)
 
     def acquisition_function(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         raise NotImplementedError()
@@ -136,7 +142,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
     parameter_space : ConfigSpace.ConfigurationSpace
         The parameter space to optimize.
     """
-    def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, base_estimator = 'gp'):
+    def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, base_estimator='gp'):
         from skopt import Optimizer as Optimizer_Skopt  # pylint: disable=import-outside-toplevel
         self.base_optimizer = Optimizer_Skopt(configspace_to_skopt_space(parameter_space), base_estimator=base_estimator)
         super().__init__(parameter_space)
@@ -184,7 +190,8 @@ class SkoptOptimizer(BaseBayesianOptimizer):
     def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         if context is not None:
             raise NotImplementedError
-        return self.base_optimizer.models[-1].predict(configurations)
+        # TODO check configuration columns
+        return self.base_optimizer.models[-1].predict(np.array(configurations))
 
     def acquisition_function(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         # This seems actually non-trivial to get out of skopt, so maybe we actually shouldn't implement this.

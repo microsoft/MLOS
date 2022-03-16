@@ -49,7 +49,8 @@ class RandomOptimizer(BaseOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        return self.parameter_space.sample_configuration().get_dictionary()
+        return pd.DataFrame(self.parameter_space.sample_configuration().get_dictionary(), index=[0])
 
     def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
-        self._pending_observations.append((configurations, context))
+        raise NotImplementedError()
+        # self._pending_observations.append((configurations, context))
