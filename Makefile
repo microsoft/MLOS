@@ -1,16 +1,19 @@
 CONDA_DEFAULT_ENV := mlos_core
+
+ENV_YML := conda-envs/${CONDA_DEFAULT_ENV}.yml
 PYTHON_FILES := $(shell find mlos_core/ -type f -name '*.py' 2>/dev/null)
 
 .PHONY: all
 all: check test dist doc
 
 .PHONY: conda-env
-conda-env: .conda-env.build-stamp
+conda-env: .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
 
-.conda-env.build-stamp: environment.yml setup.py
-	conda env list -q | grep -q "^${CONDA_DEFAULT_ENV} " || conda env create -q -f environment.yml
-	conda env update -q -n ${CONDA_DEFAULT_ENV} --prune -f environment.yml
-	touch .conda-env.build-stamp
+.conda-env.${CONDA_DEFAULT_ENV}.build-stamp: ${ENV_YML} setup.py
+	conda env list -q | grep -q "^${CONDA_DEFAULT_ENV} " || conda env create -q -n ${CONDA_DEFAULT_ENV} -f ${ENV_YML}
+	conda env update -q -n ${CONDA_DEFAULT_ENV} --prune -f ${ENV_YML}
+	$(MAKE) clean-check clean-test
+	touch .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
 
 .PHONY: check
 check: pylint
@@ -61,5 +64,5 @@ dist-clean:
 
 .PHONY: clean
 clean: clean-check clean-test dist-clean
-	rm -f .conda-dev.build-stamp
-	#rm -rf mlos_core.egg-info
+	rm -f .conda-env.build-stamp .conda-env.*.build-stamp
+	rm -rf mlos_core.egg-info

@@ -14,13 +14,13 @@ For both design requires intend to reuse as much OSS libraries as possible.
 0. Create the `mlos_core` Conda environment.
 
     ```sh
-    conda env create -f environment.yml
+    conda env create -f conda-envs/mlos_core.yml
     ```
 
     or
 
     ```sh
-    # This will also ensure the environment is update to date using "conda env update -f environment.yml"
+    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos_core.yml"
     make conda-env
     ```
 
@@ -44,10 +44,10 @@ For both design requires intend to reuse as much OSS libraries as possible.
 
     ```sh
     # this will install it with emukit support:
-    pip install dist/mlos_core-0.0.1-py3-none-any.whl[emukit]
+    pip install dist/mlos_core-0.0.2-py3-none-any.whl[emukit]
 
     # this will install it with skopt support:
-    pip install dist/mlos_core-0.0.1-py3-none-any.whl[skopt]
+    pip install dist/mlos_core-0.0.2-py3-none-any.whl[skopt]
     ```
 
 ## See Also

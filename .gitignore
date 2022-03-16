@@ -141,5 +141,6 @@ cython_debug/
 .*.swp
 
 .conda-env.build-stamp
+.conda-env.*.build-stamp
 .pylint.build-stamp
 .pytest.build-stamp

@@ -22,7 +22,7 @@ dependencies:
   - pip:
     - scikit-optimize
     - emukit
-    - "--editable ."
+    - "--editable .."
     - pytest-cov
     - pytest-forked
     - pytest-xdist

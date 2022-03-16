@@ -1,8 +1,5 @@
 trigger:
-#- main
-  branches:
-    include:
-    - '*'
+- main
 
 pr:
   branches:
@@ -11,26 +8,63 @@ pr:
 
 pool:
   vmImage: ubuntu-latest
-# TODO: test multiple versions of python.
-#strategy:
-#  matrix:
-#    Python39:
-#      python.version: '3.9'
+
+# Test multiple versions of python.
+strategy:
+  matrix:
+    DefaultPython:
+      # Currently 3.9
+      conda_env: 'mlos_core'
+# Python 3.6 is currently incompatible.
+#   Python36:
+#     conda_env: 'mlos_core-3.6'
+    Python38:
+      conda_env: 'mlos_core-3.8'
+    Python39:
+      conda_env: 'mlos_core-3.9'
+
+variables:
+  - name: CONDA_CACHE_DIR
+    value: "/usr/share/miniconda/envs/$(conda_env)"
+  - name: cache_cur_date
+    value: "0000-00-00"
+  - name: cache_cur_hour
+    value: "00"
+  - name: cache_prev_hour
+    value: "23"
 
 steps:
 - bash: echo "##vso[task.prependpath]$CONDA/bin"
   displayName: 'Add conda to PATH'
-#- task: UsePythonVersion@0
-#  inputs:
-#    versionSpec: '$(python.version)'
-#  displayName: 'Use Python $(python.version)'
-- bash: make conda-env
-  displayName: 'Create mlos_core conda environment'
-- bash: conda run -n mlos_core pip install pytest-azurepipelines
+- bash: |
+    echo "##vso[task.setvariable variable=cache_cur_date;]`date +%Y-%m-%d`"
+    echo "##vso[task.setvariable variable=cache_cur_hour;]`date +%H`"
+    echo "##vso[task.setvariable variable=cache_prev_hour;]`date -d'1 hour ago' +%H`"
+  displayName: 'Set cache timestamp variables'
+- bash: |
+    echo "cache_cur_date: $(cache_cur_date)"
+    echo "cache_cur_hour: $(cache_cur_hour)"
+    echo "cache_prev_hour: $(cache_prev_hour)"
+    echo "CONDA_CACHE_DIR: $(CONDA_CACHE_DIR)"
+  displayName: 'Print some pipeline variables'
+- task: Cache@2
+  displayName: Restore cached conda environment
+  inputs:
+    key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | azure-pipelines.yml'
+    path: $(CONDA_CACHE_DIR)
+    # Prefer cached environments from the last hour or day.
+    restoreKeys: |
+      conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)"
+      conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)" | "$(cache_prev_hour)"
+#     conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)"
+    cacheHitVar: CONDA_CACHE_RESTORED
+- bash: make CONDA_DEFAULT_ENV=$(conda_env) conda-env
+  displayName: 'Create/update mlos_core conda environment'
+- bash: conda run -n $(conda_env) pip install pytest-azurepipelines
   displayName: 'Install pytest-azurepipelines'
-- bash: make check
+- bash: make CONDA_DEFAULT_ENV=$(conda_env) check
   displayName: 'Run lint checks'
-- bash: make test
+- bash: make CONDA_DEFAULT_ENV=$(conda_env) test
   displayName: 'Run tests'
-- bash: make dist
+- bash: make CONDA_DEFAULT_ENV=$(conda_env) dist
   displayName: 'Generate binary distribution files'
