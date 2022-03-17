@@ -33,7 +33,7 @@ pytest: conda-env .pytest.build-stamp
 
 .pytest.build-stamp: $(PYTHON_FILES) pytest.ini
 	#conda run -n ${CONDA_DEFAULT_ENV} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/
-	conda run -n ${CONDA_DEFAULT_ENV} pytest --cov=mlos_core --cov-report=xml mlos_core/
+	conda run -n ${CONDA_DEFAULT_ENV} pytest --cov=mlos_core --cov-report=xml mlos_core/ --junitxml=junit/test-results.xml
 	touch .pytest.build-stamp
 
 .PHONY: dist
