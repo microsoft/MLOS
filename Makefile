@@ -12,14 +12,14 @@ conda-env: .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
 .conda-env.${CONDA_DEFAULT_ENV}.build-stamp: ${ENV_YML} setup.py
 	conda env list -q | grep -q "^${CONDA_DEFAULT_ENV} " || conda env create -q -n ${CONDA_DEFAULT_ENV} -f ${ENV_YML}
 	conda env update -q -n ${CONDA_DEFAULT_ENV} --prune -f ${ENV_YML}
-	$(MAKE) clean-check clean-test
+	$(MAKE) clean-check clean-test clean-doc
 	touch .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
 
 .PHONY: check
 check: pylint
 
 .PHONY: pylint
-pylint:	conda-env .pylint.build-stamp
+pylint: conda-env .pylint.build-stamp
 
 .pylint.build-stamp: $(PYTHON_FILES) .pylintrc
 	conda run -n ${CONDA_DEFAULT_ENV} pylint -j0 mlos_core
@@ -45,10 +45,23 @@ bdist_wheel: conda-env dist/mlos_core-*-py3-none-any.whl
 dist/mlos_core-*-py3-none-any.whl: setup.py $(PYTHON_FILES)
 	conda run -n ${CONDA_DEFAULT_ENV} python3 setup.py bdist_wheel
 
+.doc-prereqs.build-stamp: doc/requirements.txt
+	conda run -n ${CONDA_DEFAULT_ENV} pip install -r doc/requirements.txt
+	touch .doc-prereqs.build-stamp
+
+.PHONY: doc-prereqs
+doc-prereqs: .doc-prereqs.build-stamp
+
 .PHONY: doc
-doc:
-	# TODO
-	@false
+doc: conda-env doc-prereqs
+	cd doc/ && conda run -n ${CONDA_DEFAULT_ENV} sphinx-apidoc -f -e -o source/api ../mlos_core
+	conda run -n ${CONDA_DEFAULT_ENV} make -C doc/ html
+	test -s doc/build/html/index.html
+
+.PHONY: clean-doc
+clean-doc:
+	rm -f .doc-prereqs.build-stamp
+	rm -rf doc/build/ doc/global/
 
 .PHONY: clean-check
 clean-check:
@@ -63,6 +76,6 @@ dist-clean:
 	rm -rf build dist
 
 .PHONY: clean
-clean: clean-check clean-test dist-clean
+clean: clean-check clean-test dist-clean clean-doc
 	rm -f .conda-env.build-stamp .conda-env.*.build-stamp
 	rm -rf mlos_core.egg-info
