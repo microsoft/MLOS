@@ -52,4 +52,6 @@ For both design requires intend to reuse as much OSS libraries as possible.
 
 ## See Also
 
-[MlosCoreApiDesign.docx](https://microsoft.sharepoint.com/:w:/t/CISLGSL/ESAS3G9q4P5Hoult9uqTfB4B3xh2v6yUfp3YNgIvoyR_IA?e=B6klWZ)
+- <https://aka.ms/mlos-core/docs>
+- <https://aka.ms/mlos-core/src>
+- [MlosCoreApiDesign.docx](https://microsoft.sharepoint.com/:w:/t/CISLGSL/ESAS3G9q4P5Hoult9uqTfB4B3xh2v6yUfp3YNgIvoyR_IA?e=B6klWZ)

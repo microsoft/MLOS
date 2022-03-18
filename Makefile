@@ -57,6 +57,7 @@ doc: conda-env doc-prereqs
 	cd doc/ && conda run -n ${CONDA_DEFAULT_ENV} sphinx-apidoc -f -e -o source/api ../mlos_core
 	conda run -n ${CONDA_DEFAULT_ENV} make -C doc/ html
 	test -s doc/build/html/index.html
+	cp doc/staticwebapp.config.json doc/build/html/
 
 .PHONY: clean-doc
 clean-doc:
