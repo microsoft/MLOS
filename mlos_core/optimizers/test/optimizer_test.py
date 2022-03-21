@@ -53,6 +53,9 @@ def test_create_optimizer_and_suggest(optimizer_class: Type[BaseOptimizer], kwar
 def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwargs):
     def objective(x):
         return (6*x-2)**2*np.sin(12*x-4)
+    # Emukit doesn't allow specifing a random state, so we set the global seed.
+    np.random.seed(42)
+
     # Start defining a ConfigurationSpace for the Optimizer to search.
     input_space = CS.ConfigurationSpace(seed=1234)
 
@@ -82,7 +85,7 @@ def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwarg
     best_observation = optimizer.get_best_observation()
     assert isinstance(best_observation, pd.DataFrame)
     assert (best_observation.columns == ['x', 'score']).all()
-    assert best_observation['score'].iloc[0] < -1
+    assert best_observation['score'].iloc[0] < -5
 
     all_observations = optimizer.get_observations()
     assert isinstance(all_observations, pd.DataFrame)
