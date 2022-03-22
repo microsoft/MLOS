@@ -1,20 +1,26 @@
-.. mlos-core documentation master file, created by
-   sphinx-quickstart on Tue Mar 15 16:02:19 2022.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Welcome to mlos-core's documentation!
 =====================================
 
+This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original `MLOS <https://github.com/microsoft/MLOS>`_.
+
+It is intended to provide a simplified, easier to consume (e.g. via ``pip``), with lower dependencies abstraction to
+
+- describe a space of context, parameters, their ranges, constraints, etc. and result objectives
+- an "optimizer" service abstraction (e.g. ``register()`` and ``suggest()``) so we can easily swap out different implementations methods of searching (e.g. random, BO, etc.)
+
+For both design requires intend to reuse as much OSS libraries as possible.
+
+.. toctree::
+   :hidden:
+   :maxdepth: 3
+   :caption: Documentation
+
+   installation
+   api
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :hidden:
+   :caption: Examples
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   auto_examples/index

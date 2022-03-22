@@ -49,6 +49,10 @@ templates_path = ['_templates']
 # generate autosummary even if no references
 autosummary_generate = True
 
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+}
 
 # Generate the plots for the gallery
 # plot_gallery = True
@@ -56,7 +60,7 @@ autosummary_generate = True
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = ['_build', '_templates']
 
 
 # -- Options for HTML output -------------------------------------------------
