@@ -26,7 +26,7 @@ copyright = '2022, GSL'
 author = 'GSL'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.2'
+release = '0.0.3'
 
 
 # -- General configuration ---------------------------------------------------

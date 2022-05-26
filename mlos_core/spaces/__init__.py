@@ -55,12 +55,15 @@ def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace):
     import emukit.core  # pylint: disable=import-outside-toplevel
 
     def _one_parameter_convert(parameter):
-        if getattr(parameter, 'log', False):
+        log = getattr(parameter, 'log', False)
+        if log and not isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
             raise ValueError("Emukit doesn't support log parameters.")
         if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
             return emukit.core.ContinuousParameter(name=parameter.name, min_value=parameter.lower, max_value=parameter.upper)
         elif isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
-            return emukit.core.DiscreteParameter(name=parameter.name, domain=np.arange(parameter.lower, parameter.upper+1))
+            if log:
+                return emukit.core.DiscreteParameter(name=parameter.name, domain=np.exp(np.arange(np.ceil(np.log(parameter.lower)), np.floor(np.log(parameter.upper+1)))))
+            return emukit.core.DiscreteParameter(name=parameter.name, domain=np.arange(parameter.lower, parameter.upper + 1))
         elif isinstance(parameter, ConfigSpace.CategoricalHyperparameter):
             if len(np.unique(parameter.probabilities)) > 1:
                 raise ValueError("Emukit doesn't support categorical parameters with non-uniform probabilities.")

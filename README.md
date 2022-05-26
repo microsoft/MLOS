@@ -44,10 +44,10 @@ For both design requires intend to reuse as much OSS libraries as possible.
 
     ```sh
     # this will install it with emukit support:
-    pip install dist/mlos_core-0.0.2-py3-none-any.whl[emukit]
+    pip install dist/mlos_core-0.0.3-py3-none-any.whl[emukit]
 
     # this will install it with skopt support:
-    pip install dist/mlos_core-0.0.2-py3-none-any.whl[skopt]
+    pip install dist/mlos_core-0.0.3-py3-none-any.whl[skopt]
     ```
 
 ## See Also

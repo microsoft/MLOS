@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="mlos-core",
-    version="0.0.2",
+    version="0.0.3",
     packages=find_packages(),
     install_requires=[
         'scikit-learn>=0.22.1',

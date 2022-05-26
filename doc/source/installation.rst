@@ -40,7 +40,7 @@ Distributing
 .. code-block:: shell
 
     # this will install it with emukit support:
-    pip install dist/mlos_core-0.0.2-py3-none-any.whl[emukit]
+    pip install dist/mlos_core-0.0.3-py3-none-any.whl[emukit]
 
     # this will install it with skopt support:
-    pip install dist/mlos_core-0.0.2-py3-none-any.whl[skopt]
+    pip install dist/mlos_core-0.0.3-py3-none-any.whl[skopt]

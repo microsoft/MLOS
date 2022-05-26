@@ -136,7 +136,21 @@ class TestEmukitConversion(BaseConversion):
             configspace_to_emukit_space(input_space)
 
     def test_log_spaces(self):
+        # continuous not supported
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformFloatHyperparameter("b", lower=1, upper=5, log=True))
         with pytest.raises(ValueError, match="log"):
             configspace_to_emukit_space(input_space)
+        # integer is supported
+        input_space = CS.ConfigurationSpace()
+        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
+        converted_space = configspace_to_skopt_space(input_space)
+
+        random_state = np.random.RandomState(42)
+        integer_log_uniform = converted_space.rvs(n_samples=1000, random_state=random_state)
+
+        # log integer
+        integer_log_uniform = np.array(integer_log_uniform).ravel()
+        integer_log_uniform = integer_log_uniform - integer_log_uniform.min()
+        # TODO double check the math on this
+        assert_uniform_counts(np.log(np.bincount(integer_log_uniform)))
