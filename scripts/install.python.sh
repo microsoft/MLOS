@@ -32,7 +32,7 @@ if [ "$(type $PYTHON_BIN 2>/dev/null)" == "" ]; then
     echo "Installing $PYTHON_PKG via apt ..."
     # Try to install it via the existing package manager:
     set -x
-    sudo apt-get --no-install-recommends -y install $PYTHON_PKG ${PYTHON_PKG}-dev
+    sudo apt-get --no-install-recommends -y install $PYTHON_PKG ${PYTHON_PKG}-dev ${PYTHON_PKG}-distutils
     set +x
 else
     echo "$PYTHON_BIN is already available."
