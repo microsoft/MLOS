@@ -24,6 +24,7 @@ $pythonCmd -m pip install \
     $($pythonCmd "$MLOS_ROOT/scripts/parse-pip-requirements-from-environment-yaml.py" "$MLOS_ROOT/source/Mlos.Notebooks/environment.yml")
 # FIXME: nbconvert 6.0.1 had an error.
 $pythonCmd -m pip install jupyter nbconvert==5.6.1
+$pythonCmd -m pip install jinja2==3.0.1
 
 function RenderNotebook()
 {
