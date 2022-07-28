@@ -179,13 +179,16 @@ ValidMlosBuildImageTargets := mlos-build-base-with-source mlos-build-base-with-e
 ifneq ($(filter-out $(ValidMlosBuildImageTargets),$(MlosBuildImageTarget)),)
     $(error Unhandled MlosBuildImageTarget: $(MlosBuildImageTarget))
 endif
+# export DOCKER_BUILDKIT=0
 .PHONY: docker-image
 docker-image:
 	docker pull ghcr.io/microsoft-cisl/mlos/mlos-build-ubuntu-$(UbuntuVersion):latest
 	docker build . $(DOCKER_BUILD_ARGS) --target $(MlosBuildImageTarget) \
+	    --progress=plain \
 	    --build-arg=MlosBuildBaseArg=$(MlosBuildBaseArg) \
 	    --build-arg=UbuntuVersion=$(UbuntuVersion) \
 	    --build-arg=http_proxy=${http_proxy} \
+	    --build-arg=https_proxy=${https_proxy} \
 	    -t mlos-build-ubuntu-$(UbuntuVersion)
 	@ echo Finished building mlos-build-ubuntu-$(UbuntuVersion) image.
 	@ echo "Run 'docker run -v $$PWD:/src/MLOS --name mlos-build mlos-build-ubuntu-$(UbuntuVersion)' to start an instance."

@@ -1,3 +1,12 @@
+# DEPRECATION NOTICE
+
+> **NOTE**: this repository is no longer maintained upstream.
+>
+> In the future it may be replaced with a streamlined *MlosCore* python library.
+
+---
+___
+
 [![codecov](https://codecov.io/gh/microsoft/MLOS/branch/main/graph/badge.svg?token=14T6RFL2KR)](https://codecov.io/gh/microsoft/MLOS)
 
 # MLOS: Machine Learning Optimized Systems

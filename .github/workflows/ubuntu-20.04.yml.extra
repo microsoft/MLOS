@@ -23,7 +23,7 @@
     if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     steps:
     - uses: actions/checkout@v2
-    - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
+    - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         use-quiet-mode: yes
         use-verbose-mode: no

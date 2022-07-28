@@ -9,9 +9,15 @@ name: Nightly
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the main branch
 on:
-  schedule:
-    # Let's run after the fresh docker rebuild job (main.yml).
-    - cron: "0 2 * * *"
+#  schedule:
+#    # Let's run after the fresh docker rebuild job (main.yml).
+#    - cron: "0 2 * * *"
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Manual Nightly Run Tag'
+        required: false
+        type: string
 
 jobs:
   # See main.yml for comments on the docker build/cache patterns.

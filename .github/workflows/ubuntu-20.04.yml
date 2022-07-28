@@ -22,8 +22,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  schedule:
-    - cron: "1 0 * * *"
+#  schedule:
+#    - cron: "1 0 * * *"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -341,7 +341,7 @@ jobs:
     if: needs.prep-vars.outputs.UbuntuVersionMatrix != '["SKIP_ME"]'
     steps:
     - uses: actions/checkout@v2
-    - uses: gaurav-nelson/github-action-markdown-link-check@1.0.8
+    - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         use-quiet-mode: yes
         use-verbose-mode: no
