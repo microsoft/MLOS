@@ -7,8 +7,9 @@ It is intended to provide a simplified, easier to consume (e.g. via ``pip``), wi
 
 - describe a space of context, parameters, their ranges, constraints, etc. and result objectives
 - an "optimizer" service abstraction (e.g. ``register()`` and ``suggest()``) so we can easily swap out different implementations methods of searching (e.g. random, BO, etc.)
+- provide some helpers for automating optimization experiment runner loops and data collection
 
-For both design requires intend to reuse as much OSS libraries as possible.
+For these design requirements we intend to reuse as much from existing OSS libraries as possible.
 
 .. toctree::
    :hidden:

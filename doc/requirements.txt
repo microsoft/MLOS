@@ -2,3 +2,6 @@ sphinx
 nbsphinx
 numpydoc
 sphinx-rtd-theme
+
+doc8
+rstcheck

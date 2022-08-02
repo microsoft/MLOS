@@ -6,8 +6,9 @@ It is intended to provide a simplified, easier to consume (e.g. via `pip`), with
 
 - describe a space of context, parameters, their ranges, constraints, etc. and result objectives
 - an "optimizer" service abstraction (e.g. `register()` and `suggest()`) so we can easily swap out different implementations methods of searching (e.g. random, BO, etc.)
+- provide some helpers for automating optimization experiment runner loops and data collection
 
-For both design requires intend to reuse as much OSS libraries as possible.
+For these design requirements we intend to reuse as much from existing OSS libraries as possible.
 
 ## Getting Started
 
@@ -52,6 +53,6 @@ For both design requires intend to reuse as much OSS libraries as possible.
 
 ## See Also
 
-- <https://aka.ms/mlos-core/docs>
-- <https://aka.ms/mlos-core/src>
-- [MlosCoreApiDesign.docx](https://microsoft.sharepoint.com/:w:/t/CISLGSL/ESAS3G9q4P5Hoult9uqTfB4B3xh2v6yUfp3YNgIvoyR_IA?e=B6klWZ)
+- API and Examples Documentation: <https://aka.ms/mlos-core/docs>
+- Source Code Repository: <https://aka.ms/mlos-core/src>
+- Initial Design Discussion Doc: [MlosCoreApiDesign.docx](https://microsoft.sharepoint.com/:w:/t/CISLGSL/ESAS3G9q4P5Hoult9uqTfB4B3xh2v6yUfp3YNgIvoyR_IA?e=B6klWZ)

@@ -140,6 +140,8 @@ cython_debug/
 # vim swap files
 .*.swp
 
+junit/test-results.xml
+
 .conda-env.build-stamp
 .conda-env.*.build-stamp
 .doc-prereqs.build-stamp

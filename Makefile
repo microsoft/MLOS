@@ -4,7 +4,7 @@ ENV_YML := conda-envs/${CONDA_DEFAULT_ENV}.yml
 PYTHON_FILES := $(shell find mlos_core/ -type f -name '*.py' 2>/dev/null)
 
 .PHONY: all
-all: check test dist doc
+all: check test dist # doc
 
 .PHONY: conda-env
 conda-env: .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
