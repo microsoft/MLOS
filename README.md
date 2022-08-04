@@ -1,6 +1,6 @@
 # MlosCore
 
-This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original [MLOS](https://github.com/microsoft/MLOS).
+This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original [MLOS](https://github.com/microsoft/MLOS) as well as the `mlos-bench` module intended to help automate and manage running experiments for autotuning systems with `mlos-core`.
 
 It is intended to provide a simplified, easier to consume (e.g. via `pip`), with lower dependencies abstraction to
 
@@ -8,7 +8,7 @@ It is intended to provide a simplified, easier to consume (e.g. via `pip`), with
 - an "optimizer" service abstraction (e.g. `register()` and `suggest()`) so we can easily swap out different implementations methods of searching (e.g. random, BO, etc.)
 - provide some helpers for automating optimization experiment runner loops and data collection
 
-For these design requirements we intend to reuse as much from existing OSS libraries as possible.
+For these design requirements we intend to reuse as much from existing OSS libraries as possible and layer policies and optimizations specifically geared towards autotuning over top.
 
 ## Getting Started
 
@@ -35,7 +35,7 @@ For these design requirements we intend to reuse as much from existing OSS libra
 
 ## Distributing
 
-1. Build the *wheel* file.
+1. Build the *wheel* file(s)
 
     ```sh
     make dist
@@ -44,11 +44,16 @@ For these design requirements we intend to reuse as much from existing OSS libra
 2. Install it (e.g. after copying it somewhere else).
 
     ```sh
-    # this will install it with emukit support:
-    pip install dist/mlos_core-0.0.3-py3-none-any.whl[emukit]
+    # this will install just the optimizer component with emukit support:
+    pip install dist/mlos_core-0.0.4-py3-none-any.whl[emukit]
 
-    # this will install it with skopt support:
-    pip install dist/mlos_core-0.0.3-py3-none-any.whl[skopt]
+    # this will install just the optimizer component with skopt support:
+    pip install dist/mlos_core-0.0.4-py3-none-any.whl[skopt]
+    ```
+
+    ```sh
+    # this will install both the optimizer and the experiment runner:
+    pip install dist/mlos_bench-0.0.4-py3-none-any.whl
     ```
 
 ## See Also

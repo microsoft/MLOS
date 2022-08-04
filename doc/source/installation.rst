@@ -29,7 +29,7 @@ Development
 Distributing
 ------------
 
-1. Build the *wheel* file.
+1. Build the *wheel* file(s).
 
   .. code-block:: shell
 
@@ -39,8 +39,14 @@ Distributing
 
   .. code-block:: shell
 
-    # this will install it with emukit support:
-    pip install dist/mlos_core-0.0.3-py3-none-any.whl[emukit]
+    # this will install just the optimizer component with emukit support:
+    pip install dist/mlos_core-0.0.4-py3-none-any.whl[emukit]
 
-    # this will install it with skopt support:
-    pip install dist/mlos_core-0.0.3-py3-none-any.whl[skopt]
+    # this will install just the optimizer component with skopt support:
+    pip install dist/mlos_core-0.0.4-py3-none-any.whl[skopt]
+
+  .. code-block:: shell
+
+    # this will install both the optimizer and the experiment runner:
+    pip install dist/mlos_bench-0.0.4-py3-none-any.whl
+
