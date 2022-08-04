@@ -16,7 +16,9 @@ import sys
 
 import sphinx_rtd_theme
 
-sys.path.insert(0, os.path.abspath('../..'))
+#sys.path.insert(0, os.path.abspath('../..'))
+sys.path.insert(0, os.path.abspath('../../mlos_core/mlos_core'))
+sys.path.insert(1, os.path.abspath('../../mlos_bench/mlos_bench'))
 
 
 # -- Project information -----------------------------------------------------

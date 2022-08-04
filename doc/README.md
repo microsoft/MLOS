@@ -12,4 +12,4 @@ make -C .. doc
 ./nginx-docker.sh restart
 ```
 
-> Now browse to `http://localhost`
+> Now browse to `http://localhost:8080`

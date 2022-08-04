@@ -50,13 +50,13 @@ steps:
 - task: Cache@2
   displayName: Restore cached conda environment
   inputs:
-    key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | azure-pipelines.yml'
+    key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | azure-pipelines.yml'
     path: $(CONDA_CACHE_DIR)
     # Prefer cached environments from the last hour or day.
     restoreKeys: |
-      conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)"
-      conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)" | "$(cache_prev_hour)"
-#     conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | setup.py | "$(cache_cur_date)"
+      conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)"
+      conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_prev_hour)"
+#     conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)"
     cacheHitVar: CONDA_CACHE_RESTORED
 
 - bash: make CONDA_DEFAULT_ENV=$(conda_env) conda-env

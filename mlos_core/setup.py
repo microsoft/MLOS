@@ -1,12 +1,11 @@
 """
-Setup instructions for the mlos_core and mlos_bench packages.
+Setup instructions for the mlos_core package.
 """
 
 from setuptools import setup, find_packages
 
 version='0.0.4'
 
-# TODO: Create separate whl packages for mlos-core and mlos-bench?
 setup(
     name='mlos-core',
     version=version,

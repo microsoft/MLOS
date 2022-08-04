@@ -24,7 +24,8 @@ For these design requirements we intend to reuse as much from existing OSS libra
    :maxdepth: 4
    :caption: API Reference
 
-   api/modules
+   api/mlos_core/modules
+   api/mlos_bench/modules
 
 .. toctree::
    :maxdepth: 2

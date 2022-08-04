@@ -22,7 +22,8 @@ dependencies:
   - pip:
     - scikit-optimize
     - emukit
-    - "--editable .."
+    - "--editable ../mlos_core"
+    - "--editable ../mlos_bench"
     - pytest-cov
     - pytest-forked
     - pytest-xdist
