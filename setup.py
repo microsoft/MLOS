@@ -1,12 +1,15 @@
 """
-Setup instructions for the mlos_core package.
+Setup instructions for the mlos_core and mlos_bench packages.
 """
 
 from setuptools import setup, find_packages
 
+version='0.0.4'
+
+# TODO: Create separate whl packages for mlos-core and mlos-bench?
 setup(
-    name="mlos-core",
-    version="0.0.3",
+    name='mlos-core',
+    version=version,
     packages=find_packages(),
     install_requires=[
         'scikit-learn>=0.22.1',
@@ -19,10 +22,10 @@ setup(
         'emukit': 'emukit',
         'skopt': 'scikit-optimize',
     },
-    author="Microsoft",
-    author_email="amueller@microsoft.com",
-    description=("MLOS Core Python interface for parameter optimization."),
-    license="",
-    keywords="",
-    #python_requires='>=3.7',
+    author='Microsoft',
+    author_email='mlos-maintainers@service.microsoft.com',
+    description=('MLOS Core Python interface for parameter optimization.'),
+    license='MIT',
+    keywords='',
+    # python_requires='>=3.7',
 )

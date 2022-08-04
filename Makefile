@@ -22,7 +22,7 @@ check: pylint
 pylint: conda-env .pylint.build-stamp
 
 .pylint.build-stamp: $(PYTHON_FILES) .pylintrc
-	conda run -n ${CONDA_DEFAULT_ENV} pylint -j0 mlos_core
+	conda run -n ${CONDA_DEFAULT_ENV} pylint -j0 mlos_core mlos_bench
 	touch .pylint.build-stamp
 
 .PHONY: test
@@ -32,17 +32,17 @@ test: pytest
 pytest: conda-env .pytest.build-stamp
 
 .pytest.build-stamp: $(PYTHON_FILES) pytest.ini
-	#conda run -n ${CONDA_DEFAULT_ENV} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/
-	conda run -n ${CONDA_DEFAULT_ENV} pytest --cov=mlos_core --cov-report=xml mlos_core/ --junitxml=junit/test-results.xml
+	#conda run -n ${CONDA_DEFAULT_ENV} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/ mlos_bench/
+	conda run -n ${CONDA_DEFAULT_ENV} pytest --cov --cov-report=xml mlos_core/ mlos_bench/ --junitxml=junit/test-results.xml
 	touch .pytest.build-stamp
 
 .PHONY: dist
 dist: bdist_wheel
 
 .PHONY: bdist_wheel
-bdist_wheel: conda-env dist/mlos_core-*-py3-none-any.whl
+bdist_wheel: conda-env dist/mlos_core-*-py3-none-any.whl dist/mlos_bench-*-py3-none-any.whl
 
-dist/mlos_core-*-py3-none-any.whl: setup.py $(PYTHON_FILES)
+dist/mlos_bench-*-py3-none-any.whl dist/mlos_core-*-py3-none-any.whl: setup.py $(PYTHON_FILES)
 	conda run -n ${CONDA_DEFAULT_ENV} python3 setup.py bdist_wheel
 
 .doc-prereqs.build-stamp: doc/requirements.txt
@@ -54,8 +54,9 @@ doc-prereqs: .doc-prereqs.build-stamp
 
 .PHONY: doc
 doc: conda-env doc-prereqs
-	cd doc/ && conda run -n ${CONDA_DEFAULT_ENV} sphinx-apidoc -f -e -o source/api ../mlos_core
-	conda run -n ${CONDA_DEFAULT_ENV} make -C doc/ html
+	rm -f doc/build/html/index.html
+	cd doc/ && conda run -n ${CONDA_DEFAULT_ENV} sphinx-apidoc -f -e -M -o source/api .. ../setup.py ../pytest_configure.py
+	conda run -n ${CONDA_DEFAULT_ENV} make -j -C doc/ html
 	test -s doc/build/html/index.html
 	cp doc/staticwebapp.config.json doc/build/html/
 
@@ -80,3 +81,4 @@ dist-clean:
 clean: clean-check clean-test dist-clean clean-doc
 	rm -f .conda-env.build-stamp .conda-env.*.build-stamp
 	rm -rf mlos_core.egg-info
+	rm -rf mlos_bench.egg-info

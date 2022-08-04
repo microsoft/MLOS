@@ -1,5 +1,6 @@
 {
-    "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos_core/bin/python",
+    "makefile.extensionOutputFolder": "./.vscode",
+    "python.defaultInterpreterPath": "${env:HOME}${env:USERPROFILE}/.conda/envs/mlos_core/bin/python",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
     "python.testing.pytestEnabled": true,
@@ -7,6 +8,7 @@
         "Skopt",
         "conda",
         "configspace",
+        "dataframe",
         "emukit",
         "gpbo",
         "ipykernel",
@@ -26,5 +28,10 @@
         "tolist",
         "xlabel",
         "ylabel"
-    ]
+    ],
+    "restructuredtext.linter.doc8.extraArgs": [
+        "--ignore D001"
+    ],
+    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
+    "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/"
 }

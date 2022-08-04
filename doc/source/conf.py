@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'mlos-core'
+project = 'MlosCore'
 copyright = '2022, GSL'
 author = 'GSL'
 

@@ -139,6 +139,9 @@ cython_debug/
 
 # vim swap files
 .*.swp
+.*.swo
+
+junit/test-results.xml
 
 junit/test-results.xml
 
@@ -147,3 +150,12 @@ junit/test-results.xml
 .doc-prereqs.build-stamp
 .pylint.build-stamp
 .pytest.build-stamp
+
+.vs/
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Test config. May contain sensitive information
+# like Azure credentials etc.
+/config.json

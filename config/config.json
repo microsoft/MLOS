@@ -1,0 +1,104 @@
+{
+    "name": "Azure VM Ubuntu Redis",
+    "class": "mlos_bench.environment.CompositeEnv",
+
+    "config": {
+
+        "services": [
+            {
+                "class": "mlos_bench.environment.azure.AzureVMService",
+
+                "config": {
+                    "template_path": "./config/azure/azuredeploy.json",
+
+                    "subscription": "...",
+                    "resource_group": "sergiym-os-autotune",
+                    "deployment_name": "sergiym-os-autotune-001",
+                    "vmName": "osat-linux-vm",
+
+                    "accessToken": "AZURE ACCESS TOKEN (e.g., from `az account get-access-token`)"
+                }
+            }
+        ],
+
+        "children": [
+            {
+                "name": "Deploy Ubuntu VM on Azure",
+                "class": "mlos_bench.environment.azure.VMEnv",
+
+                "config": {
+
+                    "cost": 1000,
+
+                    "tunable_params": {
+                        "vmSize": {
+                            "type": "categorical",
+                            "default": "Standard_B4ms",
+                            "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
+                        }
+                    },
+
+                    "const_args": {
+
+                        "adminUsername": "sergiym",
+                        "authenticationType": "sshPublicKey",
+                        "adminPasswordOrKey": "SSH PUBLIC KEY (e.g., from id_rsa.pub)",
+
+                        "virtualNetworkName": "sergiym-osat-vnet",
+                        "subnetName": "sergiym-osat-subnet",
+                        "networkSecurityGroupName": "sergiym-osat-sg",
+
+                        "ubuntuOSVersion": "18.04-LTS"
+                    }
+                }
+            },
+            {
+                "name": "Boot Ubuntu VM on Azure",
+                "class": "mlos_bench.environment.azure.OSEnv",
+
+                "config": {
+
+                    "cost": 300,
+
+                    "tunable_params": {
+                        "rootfs": {
+                            "type": "categorical",
+                            "default": "xfs",
+                            "values": ["xfs", "ext4", "ext2"]
+                        }
+                    },
+
+                    "const_args": {
+                    }
+                }
+            },
+            {
+                "name": "Redis on Linux",
+                "class": "mlos_bench.environment.AppEnv",
+
+                "config": {
+
+                    "cost": 1,
+
+                    "tunable_params": {
+                        "kernel.sched_migration_cost_ns": {
+                            "type": "int",
+                            "default": -1,
+                            "range": [0, 500000],
+                            "special": [-1]
+                        }
+                    },
+
+                    "const_args": {
+                        "commandId": "RunBenchmark",
+                        "script": [
+                            "ls -l /",
+                            "uname -a",
+                            "sysctl kernel.sched_migration_cost_ns=${kernel.sched_migration_cost_ns}"
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}
