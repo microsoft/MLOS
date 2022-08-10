@@ -4,14 +4,14 @@ Setup instructions for the mlos_bench package.
 
 from setuptools import setup, find_packages
 
-version='0.0.4'
+_VERSION = '0.0.4'
 
 setup(
     name='mlos-bench',
-    version=version,
+    version=_VERSION,
     packages=find_packages(),
     install_requires=[
-        'mlos-core=='+version,
+        'mlos-core==' + _VERSION,
     ],
     # Transitive extra_requires from mlos-core.
     extras_require={

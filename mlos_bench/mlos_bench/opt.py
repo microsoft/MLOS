@@ -1,5 +1,5 @@
 """
-OS Autotune main optimization loop.
+Mock optimizer for OS Autotune.
 """
 
 import logging
@@ -8,7 +8,9 @@ _LOG = logging.getLogger(__name__)
 
 
 class Optimizer:
-    "Toy random optimizer to test out the Environment API."
+    """
+    Mock optimizer to test the Environment API.
+    """
 
     _MAX_ITER = 1
 

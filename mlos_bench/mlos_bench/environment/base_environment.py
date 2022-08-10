@@ -1,17 +1,21 @@
-"A hierarchy of benchmark environments."
+"""
+A hierarchy of benchmark environments.
+"""
 
 import abc
 import json
 import logging
 import importlib
 
-from mlos_bench.environment import Status
+from mlos_bench.environment.status import Status
 
 _LOG = logging.getLogger(__name__)
 
 
 class Environment(metaclass=abc.ABCMeta):
-    "An abstract base of all benchmark environments."
+    """
+    An abstract base of all benchmark environments.
+    """
 
     @staticmethod
     def from_config(config, service=None):
@@ -117,7 +121,10 @@ class Environment(metaclass=abc.ABCMeta):
         return self.name
 
     def __repr__(self):
-        return "Env: %s :: '%s'" % (self.__class__, self.name)
+        return "Env: {class_name} :: '{env_name}'".format(
+            class_name=self.__class__,
+            env_name=self.name
+        )
 
     def _parse_tunables(self, tunables, cost=0):
         "Augment tunables with the cost."

@@ -9,7 +9,7 @@
                 "class": "mlos_bench.environment.azure.AzureVMService",
 
                 "config": {
-                    "template_path": "./config/azure/azuredeploy.json",
+                    "deploy_template_path": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
 
                     "subscription": "...",
                     "resource_group": "sergiym-os-autotune",
@@ -78,6 +78,8 @@
 
                 "config": {
 
+                    "pollDelay": 10,
+
                     "cost": 1,
 
                     "tunable_params": {
@@ -90,11 +92,19 @@
                     },
 
                     "const_args": {
-                        "commandId": "RunBenchmark",
+                        "commandId": "RunShellScript",
                         "script": [
-                            "ls -l /",
-                            "uname -a",
-                            "sysctl kernel.sched_migration_cost_ns=${kernel.sched_migration_cost_ns}"
+                            "ls -l /"
+                        ],
+                        "parameters": [
+                            {
+                                "name": "param1",
+                                "value": "111"
+                            },
+                            {
+                                "name": "param2",
+                                "value": "222"
+                            }
                         ]
                     }
                 }

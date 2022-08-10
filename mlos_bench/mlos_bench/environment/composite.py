@@ -1,14 +1,19 @@
-"Composite benchmark environment."
+"""
+Composite benchmark environment.
+"""
 
 import logging
 
-from mlos_bench.environment import Environment, Service
+from mlos_bench.environment.base_service import Service
+from mlos_bench.environment.base_environment import Environment
 
 _LOG = logging.getLogger(__name__)
 
 
 class CompositeEnv(Environment):
-    "Composite benchmark environment."
+    """
+    Composite benchmark environment.
+    """
 
     def __init__(self, name, config, service=None):
         """

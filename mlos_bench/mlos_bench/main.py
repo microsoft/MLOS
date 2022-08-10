@@ -11,8 +11,9 @@ from mlos_bench.environment import Environment
 
 
 def optimize(config):
-    "Main optimization loop."
-
+    """
+    Main optimization loop.
+    """
     env = Environment.from_config(config)
 
     opt = Optimizer(env.tunable_params())

@@ -1,4 +1,6 @@
-"Base class for the service mix-ins."
+"""
+Base class for the service mix-ins.
+"""
 
 import json
 import logging
@@ -8,7 +10,9 @@ _LOG = logging.getLogger(__name__)
 
 
 class Service:
-    "An abstract base of all environment services."
+    """
+    An abstract base of all environment services.
+    """
 
     @staticmethod
     def from_config(config):

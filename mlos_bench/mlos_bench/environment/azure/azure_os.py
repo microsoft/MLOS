@@ -1,4 +1,6 @@
-"OS-level benchmark environment on Azure."
+"""
+OS-level benchmark environment on Azure.
+"""
 
 import json
 import logging
@@ -9,18 +11,20 @@ _LOG = logging.getLogger(__name__)
 
 
 class OSEnv(Environment):
-    "Boot-time environment for Azure VM."
+    """
+    Boot-time environment for Azure VM.
+    """
 
     def setup(self):
         """
-        Check if the Azure VM is provisioned and can be booted.
+        Check if the Azure VM is up and running; boot it, if necessary.
 
         Returns
         -------
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        _LOG.info("Set up")
+        _LOG.info("OS set up")
         return True
 
     def teardown(self):
@@ -32,7 +36,7 @@ class OSEnv(Environment):
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        _LOG.info("Tear down")
+        _LOG.info("OS tear down")
         return True
 
     def run(self, tunables):

@@ -1,4 +1,6 @@
-"VM-level benchmark environment on Azure."
+"""
+VM-level benchmark environment on Azure.
+"""
 
 import json
 import logging
@@ -9,7 +11,9 @@ _LOG = logging.getLogger(__name__)
 
 
 class VMEnv(Environment):
-    "Azure VM environment."
+    """
+    Azure VM environment.
+    """
 
     def setup(self):
         """
@@ -20,7 +24,7 @@ class VMEnv(Environment):
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        _LOG.info("Set up")
+        _LOG.info("VM set up")
         return True
 
     def teardown(self):
@@ -32,7 +36,7 @@ class VMEnv(Environment):
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        _LOG.info("Tear down")
+        _LOG.info("VM tear down")
         return True
 
     def run(self, tunables):
@@ -57,5 +61,5 @@ class VMEnv(Environment):
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Deploy VM:\n%s", json.dumps(params, indent=2))
 
-        (status, _output) = self._service.vm_deploy(params)
+        (status, _output) = self._service.vm_provision(params)
         return status in {Status.PENDING, Status.READY}
