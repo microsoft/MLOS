@@ -16,6 +16,11 @@ conda-env: .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
 	$(MAKE) clean-check clean-test clean-doc
 	touch .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
 
+.PHONY: clean-conda-env
+clean-conda-env:
+	@conda env remove -n ${CONDA_DEFAULT_ENV}
+	rm -f .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
+
 .PHONY: check
 check: pylint
 

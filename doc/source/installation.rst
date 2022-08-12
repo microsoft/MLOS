@@ -4,6 +4,11 @@ Installation
 Development
 -----------
 
+The development environment for MlosCore uses ``conda`` to ease dependency management.
+
+  .. note::
+    See Also: `conda install instructions <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`_
+
 0. Create the `mlos_core` Conda environment.
 
   .. code-block:: shell

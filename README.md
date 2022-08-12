@@ -12,18 +12,24 @@ For these design requirements we intend to reuse as much from existing OSS libra
 
 ## Getting Started
 
+The development environment for MlosCore uses `conda` to ease dependency management.
+
+> See Also: [`conda` install instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
+
 0. Create the `mlos_core` Conda environment.
 
-    ```sh
+     ```sh
     conda env create -f conda-envs/mlos_core.yml
     ```
 
-    or
+   or
 
     ```sh
     # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos_core.yml"
     make conda-env
     ```
+
+    > Note: the latter expects a *nix environment.
 
 1. Initialize the shell environment.
 
