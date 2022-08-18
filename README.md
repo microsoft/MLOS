@@ -15,6 +15,12 @@ For these design requirements we intend to reuse as much from existing OSS libra
 The development environment for MlosCore uses `conda` to ease dependency management.
 
 > See Also: [`conda` install instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
+>
+> Note: to support Windows we rely on some pre-compiled packages from `conda-forge` channels, which increases the `conda` solver time during environment create/update.
+>
+> To work around this the (currently) experimental `libmamba` solver can be used.
+>
+> See <https://github.com/conda-incubator/conda-libmamba-solver#getting-started> for more details.
 
 0. Create the `mlos_core` Conda environment.
 

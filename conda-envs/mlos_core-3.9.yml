@@ -19,7 +19,7 @@ dependencies:
   - matplotlib
   - seaborn
   - python=3.9
-  - conda-forge::c-compiler
+  #- conda-forge::c-compiler
   #- conda-forge::cxx-compiler
   # Install gpy via conda (not pip) for emukit so we can side step some compiler issues on Windows platforms.
   - conda-forge::gpy

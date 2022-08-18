@@ -1,0 +1,95 @@
+parameters:
+  name: 'Windows'
+
+jobs:
+- job: ${{ parameters.name }}
+
+  pool:
+    vmImage: windows-latest
+
+  # Test multiple versions of python.
+  strategy:
+    matrix:
+      DefaultPython:
+        # Currently 3.9
+        conda_env: 'mlos_core'
+  # Python 3.6 is currently incompatible.
+  #   Python36:
+  #     conda_env: 'mlos_core-3.6'
+  # Skipping testing of additional versions on Windows for now.
+  #    Python38:
+  #      conda_env: 'mlos_core-3.8'
+  #    Python39:
+  #      conda_env: 'mlos_core-3.9'
+
+  variables:
+    - name: CONDA_CACHE_DIR
+      value: $(CONDA)/envs/$(conda_env)
+      #value: $(CONDA)/envs
+    - name: cache_cur_date
+      value: "0000-00-00"
+    - name: cache_cur_hour
+      value: "00"
+    - name: cache_prev_hour
+      value: "23"
+
+  steps:
+  - pwsh: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+    displayName: Add conda to PATH
+
+  - pwsh: |
+      Write-Host "##vso[task.setvariable variable=cache_cur_date;]" (Get-Date -Format yyyy-MM-dd)
+      Write-Host "##vso[task.setvariable variable=cache_cur_hour;]" (Get-Date -Format HH)
+      Write-Host "##vso[task.setvariable variable=cache_prev_hour;]" (Get-Date).AddHours(-1).ToString('HH')
+    displayName: 'Set cache timestamp variables'
+  - pwsh: |
+      echo "cache_cur_date: $(cache_cur_date)"
+      echo "cache_cur_hour: $(cache_cur_hour)"
+      echo "cache_prev_hour: $(cache_prev_hour)"
+      echo "CONDA_CACHE_DIR: $(CONDA_CACHE_DIR)"
+    displayName: 'Print some pipeline variables'
+  - task: Cache@2
+    displayName: Restore cached conda environment
+    inputs:
+      key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | azure-pipelines.yml | .azure-pipelines/windows.yml'
+      path: $(CONDA_CACHE_DIR)
+      # Prefer cached environments from the last hour or day.
+      restoreKeys: |
+        conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)"
+        conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_prev_hour)"
+  #     conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)"
+      cacheHitVar: CONDA_CACHE_RESTORED
+
+  # NOTE: these steps are handled by the Makefile in Linux environments for reusability.
+
+  - pwsh: |
+      conda config --set channel_priority strict
+      #conda update -v -y -n base conda
+    displayName: Update and configure conda
+
+  # Try and speed up the pipeline by using a faster solver:
+  # Nevermind, seems to be broken in ADO Windows runners atm :'(
+  #- pwsh: |
+  #    conda install -v -y -n base conda-libmamba-solver
+  #    conda config --set experimental_solver libmamba
+  #  displayName: Install and default to experimental mamba solver
+
+  - pwsh: |
+      if (! (conda env list | Select-String -Pattern "^$(conda_env) ") ) { conda env create -v -n $(conda_env) -f conda-envs/$(conda_env).yml }
+      conda env update -v -n $(conda_env) -f conda-envs/$(conda_env).yml --prune
+    displayName: 'Create/update mlos_core conda environment'
+
+  - pwsh: conda run -n $(conda_env) pip install pytest-azurepipelines
+    displayName: 'Install pytest-azurepipelines'
+
+  - pwsh: conda run -n $(conda_env) pylint -j0 mlos_core/mlos_core mlos_bench/mlos_bench
+    displayName: 'Run lint checks'
+  - pwsh: |
+      $env:PYTHONPATH="${PWD};${env:PYTHONPATH}"
+      conda run -n $(conda_env) pytest mlos_core/ mlos_bench/
+    displayName: 'Run tests'
+
+  - pwsh: |
+      conda run -n $(conda_env) python mlos_core/setup.py bdist_wheel
+      conda run -n $(conda_env) python mlos_bench/setup.py bdist_wheel
+    displayName: 'Generate binary distribution files'
