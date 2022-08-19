@@ -45,8 +45,9 @@ class OSEnv(Environment):
 
         Parameters
         ----------
-        tunables : dict
-            Flat dictionary of (key, value) of the OS boot-time parameters.
+        tunables : TunableGroups
+            A collection of groups of tunable parameters
+            along with the parameters' values.
 
         Returns
         -------

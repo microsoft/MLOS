@@ -1,0 +1,78 @@
+{
+    "name": "Azure VM Ubuntu Redis",
+    "class": "mlos_bench.environment.CompositeEnv",
+
+    "include_tunables": [
+        "./mlos_bench/config/tunables.json"
+    ],
+
+    "include_services": [
+        "./mlos_bench/config/azure/services.json"
+    ],
+
+    "config": {
+
+        "children": [
+            {
+                "name": "Deploy Ubuntu VM on Azure",
+                "class": "mlos_bench.environment.azure.VMEnv",
+
+                "config": {
+
+                    "tunable_params": ["provision"],
+
+                    "const_args": {
+
+                        "adminUsername": "sergiym",
+                        "authenticationType": "sshPublicKey",
+                        "adminPasswordOrKey": "NOT USED",
+
+                        "virtualNetworkName": "sergiym-osat-vnet",
+                        "subnetName": "sergiym-osat-subnet",
+                        "networkSecurityGroupName": "sergiym-osat-sg",
+
+                        "ubuntuOSVersion": "18.04-LTS"
+                    }
+                }
+            },
+            {
+                "name": "Boot Ubuntu VM on Azure",
+                "class": "mlos_bench.environment.azure.OSEnv",
+
+                "config": {
+                    "tunable_params": ["boot"],
+                    "const_args": {}
+                }
+            },
+            {
+                "name": "Redis on Linux",
+                "class": "mlos_bench.environment.AppEnv",
+
+                "config": {
+
+                    "pollDelay": 10,
+
+                    "tunable_params": ["kernel", "redis"],
+
+                    "const_args": {
+                        "commandId": "RunShellScript",
+                        "script": [
+                            "echo $param1 $param2",
+                            "sudo ls -l /"
+                        ],
+                        "parameters": [
+                            {
+                                "name": "param1",
+                                "value": "111"
+                            },
+                            {
+                                "name": "param2",
+                                "value": "222"
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}

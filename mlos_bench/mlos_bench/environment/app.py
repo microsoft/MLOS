@@ -19,7 +19,7 @@ class AppEnv(Environment):
 
     _POLL_DELAY = 5  # Default polling interval in seconds.
 
-    def __init__(self, name, config, service=None):
+    def __init__(self, name, config, tunables, service=None):
         """
         Create a new application environment with a given config.
 
@@ -32,11 +32,13 @@ class AppEnv(Environment):
             configuration. Each config must have at least the "tunable_params"
             and the "const_args" sections; the "cost" field can be omitted
             and is 0 by default.
+        tunables : TunableGroups
+            A collection of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name, config, service)
+        super().__init__(name, config, tunables, service)
         self._poll_delay = self.config.get("pollDelay", AppEnv._POLL_DELAY)
 
     def setup(self):
@@ -59,10 +61,9 @@ class AppEnv(Environment):
 
         Parameters
         ----------
-        tunables : dict
-            Flat dictionary of (key, value) of the OS and application
-            parameters. Setting these parameters should not require an
-            OS reboot.
+        tunables : TunableGroups
+            A collection of tunable OS and application parameters along with their
+            values. Setting these parameters should not require an OS reboot.
 
         Returns
         -------

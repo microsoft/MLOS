@@ -24,9 +24,8 @@ class Optimizer:
         "Generate the next suggestion."
         # For now, get just the default values.
         # FIXME: Need to iterate over the actual values.
-        tunables = {
-            key: val.get("default") for (key, val) in self._tunables.items()
-        }
+        # TODO: Use self._tunables.copy() here when implemented.
+        tunables = self._tunables
         # TODO: Populate the tunables with some random values
         _LOG.info("Suggest: %s", tunables)
         return tunables

@@ -14,58 +14,6 @@ class Service:
     An abstract base of all environment services.
     """
 
-    @staticmethod
-    def from_config(config):
-        """
-        Factory method for a new service with a given config.
-
-        Parameters
-        ----------
-        config : dict
-            A dictionary with two mandatory fields:
-                "class": FQN of a Python class to instantiate;
-                "config": Free-format dictionary to pass to the constructor.
-
-        Returns
-        -------
-        svc : Service
-            An instance of the `Service` class initialized with `config`.
-        """
-        svc_class = config["class"]
-        svc_config = config["config"]
-        _LOG.debug("Creating service: %s", svc_class)
-        service = Service.new(svc_class, svc_config)
-        _LOG.info("Created service: %s", service)
-        return service
-
-    @staticmethod
-    def from_config_list(config_list, parent=None):
-        """
-        Factory method for a new service with a given config.
-
-        Parameters
-        ----------
-        config_list : a list of dict
-            A list where each element is a dictionary with 2 mandatory fields:
-                "class": FQN of a Python class to instantiate;
-                "config": Free-format dictionary to pass to the constructor.
-        parent: Service
-            An optional reference of the parent service to mix in.
-
-        Returns
-        -------
-        svc : Service
-            An instance of the `Service` class that is a combination of all
-            services from the list plus the parent mix-in.
-        """
-        service = Service()
-        if parent:
-            service.register(parent.export())
-        for config in config_list:
-            service.register(Service.from_config(config).export())
-        _LOG.info("Created mix-in service: %s", service.export())
-        return service
-
     @classmethod
     def new(cls, class_name, config):
         """
@@ -115,7 +63,7 @@ class Service:
         self._services = {}
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Config:\n%s", json.dumps(self.config, indent=2))
+            _LOG.debug("Service config:\n%s", json.dumps(self.config, indent=2))
 
     def register(self, services):
         """

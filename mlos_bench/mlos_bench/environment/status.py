@@ -21,6 +21,11 @@ class Status(enum.Enum):
     @staticmethod
     def is_good(status):
         """
-        Check if the status is not failed or canceled.
+        Check if the status of the environment is good.
         """
-        return status not in {Status.CANCELED, Status.FAILED, Status.TIMED_OUT}
+        return status in {
+            Status.PENDING,
+            Status.READY,
+            Status.RUNNING,
+            Status.SUCCEEDED,
+        }

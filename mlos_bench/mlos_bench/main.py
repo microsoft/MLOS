@@ -1,20 +1,21 @@
+#!/usr/bin/env python3
+
 """
 OS Autotune main optimization loop.
 """
 
-import sys
-import json
 import logging
+import argparse
 
 from mlos_bench.opt import Optimizer
-from mlos_bench.environment import Environment
+from mlos_bench.environment.persistence import load_environment
 
 
-def optimize(config):
+def optimize(env_config_file):
     """
     Main optimization loop.
     """
-    env = Environment.from_config(config)
+    env = load_environment(env_config_file)
 
     opt = Optimizer(env.tunable_params())
     _LOG.info("Env: %s Optimizer: %s", env, opt)
@@ -38,14 +39,20 @@ def optimize(config):
 
 def _main():
 
-    with open(sys.argv[1]) as fh_json:
-        config = json.load(fh_json)
+    parser = argparse.ArgumentParser(
+        description='OS Autotune optimizer')
 
-    if _LOG.isEnabledFor(logging.DEBUG):
-        _LOG.debug("Config:\n%s", json.dumps(config, indent=2))
+    parser.add_argument(
+        '--config', required=True,
+        help='Path to JSON file with the configuration'
+             ' of the benchmarking environment')
 
-    result = optimize(config)
+    args = parser.parse_args()
+
+    result = optimize(args.config)
     _LOG.info("Final result: %s", result)
+
+###############################################################
 
 
 logging.basicConfig(

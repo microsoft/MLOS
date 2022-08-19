@@ -8,6 +8,7 @@ import logging
 import importlib
 
 from mlos_bench.environment.status import Status
+from mlos_bench.environment.tunable import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
@@ -17,37 +18,8 @@ class Environment(metaclass=abc.ABCMeta):
     An abstract base of all benchmark environments.
     """
 
-    @staticmethod
-    def from_config(config, service=None):
-        """
-        Factory method for a new environment with a given config.
-
-        Parameters
-        ----------
-        config : dict
-            A dictionary with three mandatory fields:
-                "name": Human-readable string describing the environment;
-                "class": FQN of a Python class to instantiate;
-                "config": Free-format dictionary to pass to the constructor.
-        service: Service
-            An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
-
-        Returns
-        -------
-        env : Environment
-            An instance of the `Environment` class initialized with `config`.
-        """
-        env_name = config["name"]
-        env_class = config["class"]
-        env_config = config["config"]
-        _LOG.debug("Creating env: %s :: %s", env_name, env_class)
-        env = Environment.new(env_name, env_class, env_config, service)
-        _LOG.info("Created env: %s :: %s", env_name, env)
-        return env
-
     @classmethod
-    def new(cls, env_name, class_name, config, service=None):
+    def new(cls, env_name, class_name, config, tunables=None, service=None):
         """
         Factory method for a new environment with a given config.
 
@@ -63,6 +35,8 @@ class Environment(metaclass=abc.ABCMeta):
             Free-format dictionary that contains the benchmark environment
             configuration. It will be passed as a constructor parameter of
             the class specified by `name`.
+        tunables : TunableGroups
+            A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
@@ -85,9 +59,9 @@ class Environment(metaclass=abc.ABCMeta):
                   env_name, class_name, env_class)
 
         assert issubclass(env_class, cls)
-        return env_class(env_name, config, service)
+        return env_class(env_name, config, tunables, service)
 
-    def __init__(self, name, config, service=None):
+    def __init__(self, name, config, tunables=None, service=None):
         """
         Create a new environment with a given config.
 
@@ -100,6 +74,8 @@ class Environment(metaclass=abc.ABCMeta):
             configuration. Each config must have at least the "tunable_params"
             and the "const_args" sections; the "cost" field can be omitted
             and is 0 by default.
+        tunables : TunableGroups
+            A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
@@ -110,8 +86,14 @@ class Environment(metaclass=abc.ABCMeta):
         self._result = (Status.PENDING, None)
 
         self._const_args = config.get("const_args", {})
-        self._tunable_params = self._parse_tunables(
-            config.get("tunable_params", {}), config.get("cost", 0))
+
+        if tunables is None:
+            tunables = TunableGroups()
+
+        tunable_groups = config.get("tunable_params")
+        self._tunable_params = (
+            tunables.subgroup(tunable_groups) if tunable_groups else tunables
+        )
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Config for: %s\n%s",
@@ -126,36 +108,26 @@ class Environment(metaclass=abc.ABCMeta):
             env_name=self.name
         )
 
-    def _parse_tunables(self, tunables, cost=0):
-        "Augment tunables with the cost."
-        tunables_cost = {}
-        for (key, val) in tunables.items():
-            tunables_cost[key] = val.copy()
-            tunables_cost[key]["cost"] = cost
-        return tunables_cost
-
     def _combine_tunables(self, tunables):
         """
-        Plug tunable values into the base config. If the tunable is unknown,
+        Plug tunable values into the base config. If the tunable group is unknown,
         ignore it (it might belong to another environment). This method should
         never mutate the original config or the tunables.
 
         Parameters
         ----------
-        tunables : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
+        tunables : TunableGroups
+            A collection of groups of tunable parameters
+            along with the parameters' values.
 
         Returns
         -------
         config : dict
-            Free-format dictionary that contains the new environment
-            configuration.
+            Free-format dictionary that contains the new environment configuration.
         """
-        new_config = self._const_args.copy()
-        for (key, val) in tunables.items():
-            if key in self._tunable_params:
-                new_config[key] = val
-        return new_config
+        return tunables.get_param_values(
+            group_names=self._tunable_params.get_names(),
+            into_params=self._const_args.copy())
 
     def tunable_params(self):
         """
@@ -163,8 +135,8 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        tunables : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
+        tunables : TunableGroups
+            A collection of covariant groups of tunable parameters.
         """
         return self._tunable_params
 
@@ -201,8 +173,8 @@ class Environment(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        tunables : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
+        tunables : TunableGroups
+            A collection of tunable parameters along with their values.
 
         Returns
         -------
@@ -217,8 +189,8 @@ class Environment(metaclass=abc.ABCMeta):
 
         Parameters
         ----------
-        tunables : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
+        tunables : TunableGroups
+            A collection of tunable parameters along with their values.
 
         Returns
         -------

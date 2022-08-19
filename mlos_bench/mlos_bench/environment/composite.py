@@ -4,8 +4,8 @@ Composite benchmark environment.
 
 import logging
 
-from mlos_bench.environment.base_service import Service
 from mlos_bench.environment.base_environment import Environment
+from mlos_bench.environment.persistence import build_environment
 
 _LOG = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class CompositeEnv(Environment):
     Composite benchmark environment.
     """
 
-    def __init__(self, name, config, service=None):
+    def __init__(self, name, config, tunables, service=None):
         """
         Create a new environment with a given config.
 
@@ -26,25 +26,26 @@ class CompositeEnv(Environment):
         config : dict
             Free-format dictionary that contains the environment
             configuration. Must have a "children" section.
+        tunables : TunableGroups
+            A collection of groups of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name, config, service)
+        super().__init__(name, config, tunables, service)
 
-        # Propagate all config parameters except "children" and "services"
-        # to every child config.
+        # Propagate all config parameters except "children" to every child config.
         shared_config = config.copy()
         del shared_config["children"]
-        del shared_config["services"]
-
-        self._service = Service.from_config_list(
-            config.get("services", []), parent=service)
 
         self._children = []
         for child_config in config["children"]:
-            child_config["config"].update(shared_config)
-            env = Environment.from_config(child_config, self._service)
+
+            local_config = shared_config.copy()
+            local_config.update(child_config.get("config", {}))
+            child_config["config"] = local_config
+
+            env = build_environment(child_config, shared_config, tunables, self._service)
             self._children.append(env)
             self._tunable_params.update(env.tunable_params())
 
@@ -80,9 +81,9 @@ class CompositeEnv(Environment):
 
         Parameters
         ----------
-        tunables : dict
-            Flat dictionary of (key, value) of the parameters from all
-            children environments.
+        tunables : TunableGroups
+            A collection of groups of tunable parameters and their values
+            from all children environments.
 
         Returns
         -------

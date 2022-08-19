@@ -45,10 +45,11 @@ class VMEnv(Environment):
 
         Parameters
         ----------
-        tunables : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-            VMEnv tunables are variable parameters that, together with the
-            VMEnv configuration, are sufficient to provision and start a VM.
+        tunables : TunableGroups
+            A collection of groups of tunable parameters along with the
+            parameters' values. VMEnv tunables are variable parameters that,
+            together with the VMEnv configuration, are sufficient to provision
+            and start a VM.
 
         Returns
         -------
