@@ -5,12 +5,9 @@
         "config": {
             "deploy_template_path": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
 
-            "subscription": "...",
             "resource_group": "sergiym-os-autotune",
             "deployment_name": "sergiym-os-autotune-001",
-            "vmName": "osat-linux-vm",
-
-            "accessToken": "AZURE ACCESS TOKEN (e.g., from `az account get-access-token`)"
+            "vmName": "osat-linux-vm"
         }
     }
 ]

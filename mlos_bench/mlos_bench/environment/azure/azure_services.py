@@ -6,7 +6,7 @@ import json
 import logging
 import requests
 
-from mlos_bench.environment import Service, Status
+from mlos_bench.environment import Service, Status, _check_required_params
 
 _LOG = logging.getLogger(__name__)
 
@@ -62,6 +62,17 @@ class AzureVMService(Service):
             configuration.
         """
         super().__init__(config)
+
+        _check_required_params(
+            config, {
+                "deploy_template_path",
+                "subscription",
+                "accessToken",
+                "resource_group",
+                "deployment_name",
+                "vmName"
+            }
+        )
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
