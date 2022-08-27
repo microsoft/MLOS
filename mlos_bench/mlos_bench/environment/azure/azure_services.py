@@ -65,11 +65,11 @@ class AzureVMService(Service):
 
         _check_required_params(
             config, {
-                "deploy_template_path",
+                "deployTemplatePath",
                 "subscription",
                 "accessToken",
-                "resource_group",
-                "deployment_name",
+                "resourceGroup",
+                "deploymentName",
                 "vmName"
             }
         )
@@ -82,24 +82,24 @@ class AzureVMService(Service):
             self.get_remote_exec_results
         ])
 
-        with open(config['deploy_template_path']) as fh_json:
+        with open(config['deployTemplatePath']) as fh_json:
             self._deploy_template = json.load(fh_json)
 
         self._url_deploy = AzureVMService._URL_DEPLOY.format(
             subscription=config["subscription"],
-            resource_group=config["resource_group"],
-            deployment_name=config["deployment_name"]
+            resource_group=config["resourceGroup"],
+            deployment_name=config["deploymentName"]
         )
 
         self._url_start = AzureVMService._URL_START.format(
             subscription=config["subscription"],
-            resource_group=config["resource_group"],
+            resource_group=config["resourceGroup"],
             vm_name=config["vmName"]
         )
 
         self._url_rexec_run = AzureVMService._URL_REXEC_RUN.format(
             subscription=config["subscription"],
-            resource_group=config["resource_group"],
+            resource_group=config["resourceGroup"],
             vm_name=config["vmName"]
         )
 

@@ -3,10 +3,10 @@
         "class": "mlos_bench.environment.azure.AzureVMService",
 
         "config": {
-            "deploy_template_path": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
+            "deployTemplatePath": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
 
-            "resource_group": "sergiym-os-autotune",
-            "deployment_name": "sergiym-os-autotune-001",
+            "resourceGroup": "sergiym-os-autotune",
+            "deploymentName": "sergiym-os-autotune-001",
             "vmName": "osat-linux-vm"
         }
     }

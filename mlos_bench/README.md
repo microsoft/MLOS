@@ -52,11 +52,11 @@ For example,
             "class": "mlos_bench.environment.azure.AzureVMService",
 
             "config": {
-                "deploy_template_path": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
+                "deployTemplatePath": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
 
                 "subscription": "{{ ID of subscription to use }}",
-                "resource_group": "{{ Name of resource group to use }}",
-                "deployment_name": "{{ A deployment name to group all deployments under, e.g. redis-os-autotune-001 }}",
+                "resourceGroup": "{{ Name of resource group to use }}",
+                "deploymentName": "{{ A deployment name to group all deployments under, e.g. redis-os-autotune-001 }}",
                 "vmName": "{{ A VM name, e.g. redis-osat-vm }}",
             }
         }
