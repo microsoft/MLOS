@@ -40,6 +40,7 @@ class OSEnv(Environment):
         return True
 
     def run(self, tunables):
+        # pylint: disable=duplicate-code
         """
         Check if Azure VM is up and running. (Re)boot it, if necessary.
 

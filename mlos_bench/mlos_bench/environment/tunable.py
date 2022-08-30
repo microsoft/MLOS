@@ -4,7 +4,7 @@ Tunable parameter definition.
 import collections
 
 
-class Tunable:
+class Tunable:  # pylint: disable=too-many-instance-attributes
     """
     A tunable parameter definition and its current value.
     """
@@ -42,7 +42,7 @@ class Tunable:
             raise ValueError("Invalid parameter type: " + self._type)
 
     def __repr__(self):
-        return "{name}={value}".format(name=self._name, value=self._current_value)
+        return f"{self._name}={self._current_value}"
 
     @property
     def value(self):
@@ -117,7 +117,7 @@ class CovariantTunableGroup:
         return {name: tunable.value for (name, tunable) in self._tunables.items()}
 
     def __repr__(self):
-        return "{name}: {value}".format(name=self._name, value=self._tunables)
+        return f"{self._name}: {self._tunables}"
 
     def __getitem__(self, name):
         return self._tunables[name].value
@@ -174,7 +174,7 @@ class TunableGroups:
 
     def __repr__(self):
         return "{ " + ", ".join(
-            "{}::{}".format(group_name, tunable)
+            f"{group_name}::{tunable}"
             for (group_name, group) in self._tunable_groups.items()
             for tunable in group._tunables.values()) + " }"
 

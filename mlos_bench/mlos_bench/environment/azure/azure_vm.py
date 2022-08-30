@@ -40,6 +40,7 @@ class VMEnv(Environment):
         return True
 
     def run(self, tunables):
+        # pylint: disable=duplicate-code
         """
         Check if Azure VM is ready. (Re)provision and start it, if necessary.
 

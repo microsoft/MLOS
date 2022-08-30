@@ -207,7 +207,7 @@ def load_environment(json_file_name, global_config=None,
         An optional reference of the parent service to mix in.
     """
     _LOG.info("Load environment: %s", json_file_name)
-    with open(json_file_name) as fh_json:
+    with open(json_file_name, encoding='utf-8') as fh_json:
         config = json.load(fh_json)
         return build_environment(config, global_config, tunables, service)
 
@@ -236,7 +236,7 @@ def load_services(json_file_names, global_config=None, parent=None):
         service.register(parent.export())
     for fname in json_file_names:
         _LOG.debug("Load services: %s", fname)
-        with open(fname) as fh_json:
+        with open(fname, encoding='utf-8') as fh_json:
             config = json.load(fh_json)
             service.register(build_service(config, global_config).export())
     return service
@@ -259,7 +259,7 @@ def load_tunables(json_file_names, parent=None):
         groups.update(parent)
     for fname in json_file_names:
         _LOG.debug("Load tunables: %s", fname)
-        with open(fname) as fh_json:
+        with open(fname, encoding='utf-8') as fh_json:
             config = json.load(fh_json)
             groups.update(TunableGroups(config))
     return groups

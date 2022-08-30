@@ -82,7 +82,7 @@ class AzureVMService(Service):
             self.get_remote_exec_results
         ])
 
-        with open(config['deployTemplatePath']) as fh_json:
+        with open(config['deployTemplatePath'], encoding='utf-8') as fh_json:
             self._deploy_template = json.load(fh_json)
 
         self._url_deploy = AzureVMService._URL_DEPLOY.format(

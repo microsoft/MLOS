@@ -6,6 +6,7 @@ from setuptools import setup, find_packages
 
 _VERSION = '0.0.4'
 
+# pylint: disable=duplicate-code
 setup(
     name='mlos-bench',
     version=_VERSION,

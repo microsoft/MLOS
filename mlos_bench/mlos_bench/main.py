@@ -87,7 +87,7 @@ def _main():
 
     global_config = {}
     if args.global_config is not None:
-        with open(args.global_config) as fh_json:
+        with open(args.global_config, encoding='utf-8') as fh_json:
             global_config = json.load(fh_json)
 
     global_config.update(_try_parse_extra_args(args_rest))

@@ -1,26 +1,46 @@
+"""
+Tests for mlos_core.spaces
+"""
+
+# pylint: disable=missing-function-docstring
+
+from typing import Any, Callable
 import numpy as np
+from numpy.random import RandomState as NpRandomState
 import pandas as pd
 import pytest
 import scipy
+import skopt.space
 
 import ConfigSpace as CS
-from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
+from ConfigSpace.hyperparameters import NormalIntegerHyperparameter # pylint: disable=no-name-in-module
 from mlos_core.spaces import configspace_to_emukit_space, configspace_to_skopt_space
 
 
 def assert_uniform_counts(counts):
-    _, p = scipy.stats.chisquare(counts)
+    _, p = scipy.stats.chisquare(counts)    # pylint: disable=invalid-name
     assert p > .3
 
+def invalid_conversion_function(*args):
+    """
+    A quick dummy function for the base class to make pylint happy.
+    """
+    raise NotImplementedError('subclass must override conversion_function')
 
 class BaseConversion:
-    conversion_function = None
+    """
+    Base class for testing optimizer space conversions.
+    """
+    conversion_function: Callable[..., Any] = invalid_conversion_function
 
     def sample(self, config_space, n_samples=1):
-        raise NotImplementedError
+        raise NotImplementedError('subclass must override')
 
     def get_parameter_names(self, config_space):
-        raise NotImplementedError
+        raise NotImplementedError('subclass must override')
+
+    def categorical_counts(self, points):
+        raise NotImplementedError('subclass must override')
 
     def test_unsupported_hyperparameter(self):
         input_space = CS.ConfigurationSpace()
@@ -35,7 +55,7 @@ class BaseConversion:
 
         converted_space = self.conversion_function(input_space)
         assert self.get_parameter_names(converted_space) == ["a", "b"]
-        point, = self.sample(converted_space)
+        point, *_ = self.sample(converted_space)
         assert 100 <= point[0] <= 200
         assert -10 <= point[1] <= -5
 
@@ -48,7 +68,7 @@ class BaseConversion:
         np.random.seed(42)
         uniform, integer_uniform = self.sample(converted_space, n_samples=1000).T
 
-        # uniform flaot
+        # uniform float
         counts, _ = np.histogram(uniform, bins='auto')
         assert_uniform_counts(counts)
         # integer uniform
@@ -67,13 +87,17 @@ class BaseConversion:
         assert 35 < counts[1] < 65
 
     def test_weighted_categorical(self):
-        raise NotImplementedError
+        raise NotImplementedError('subclass must override')
 
     def test_log_spaces(self):
-        raise NotImplementedError
+        raise NotImplementedError('subclass must override')
 
 
 class TestSkoptConversion(BaseConversion):
+    """
+    Tests for ConfigSpace to Skopt parameter conversion.
+    """
+
     conversion_function = staticmethod(configspace_to_skopt_space)
 
     def sample(self, config_space, n_samples=1):
@@ -89,9 +113,10 @@ class TestSkoptConversion(BaseConversion):
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"], weights=[0.9, 0.1]))
         # unpack the space to only get a parameter so we can count more easily later
-        converted_space, = configspace_to_skopt_space(input_space)
-        random_state = np.random.RandomState(42)
-        sample = converted_space.rvs(n_samples=100, random_state=random_state)
+        converted_space: skopt.space.Categorical
+        converted_space, *_ = configspace_to_skopt_space(input_space)
+        random_state = NpRandomState(42)
+        sample = converted_space.rvs(n_samples=100, random_state=random_state)  # pylint: disable=no-member
         counts = pd.value_counts(sample)
         assert counts["foo"] > 80
         assert counts["bar"] > 5
@@ -102,7 +127,7 @@ class TestSkoptConversion(BaseConversion):
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
         converted_space = configspace_to_skopt_space(input_space)
 
-        random_state = np.random.RandomState(42)
+        random_state = NpRandomState(42)
         log_uniform, integer_log_uniform = zip(
             *converted_space.rvs(n_samples=1000, random_state=random_state))
 
@@ -117,6 +142,10 @@ class TestSkoptConversion(BaseConversion):
 
 
 class TestEmukitConversion(BaseConversion):
+    """
+    Tests for ConfigSpace to Emukit parameter conversions.
+    """
+
     conversion_function = staticmethod(configspace_to_emukit_space)
 
     def sample(self, config_space, n_samples=1):
@@ -146,7 +175,7 @@ class TestEmukitConversion(BaseConversion):
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
         converted_space = configspace_to_skopt_space(input_space)
 
-        random_state = np.random.RandomState(42)
+        random_state = NpRandomState(42)
         integer_log_uniform = converted_space.rvs(n_samples=1000, random_state=random_state)
 
         # log integer

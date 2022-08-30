@@ -19,7 +19,7 @@ class Environment(metaclass=abc.ABCMeta):
     """
 
     @classmethod
-    def new(cls, env_name, class_name, config, tunables=None, service=None):
+    def new(cls, env_name, class_name, config, tunables=None, service=None):    # pylint: disable=too-many-arguments
         """
         Factory method for a new environment with a given config.
 
@@ -103,10 +103,7 @@ class Environment(metaclass=abc.ABCMeta):
         return self.name
 
     def __repr__(self):
-        return "Env: {class_name} :: '{env_name}'".format(
-            class_name=self.__class__,
-            env_name=self.name
-        )
+        return f"Env: {self.__class__} :: '{self.name}'"
 
     def _combine_tunables(self, tunables):
         """
@@ -140,7 +137,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._tunable_params
 
-    def setup(self):
+    def setup(self): # pylint: disable=no-self-use
         """
         Set up a new benchmark environment, if necessary. This method must be
         idempotent, i.e., calling it several times in a row should be
@@ -153,7 +150,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return True
 
-    def teardown(self):
+    def teardown(self): # pylint: disable=no-self-use
         """
         Tear down the benchmark environment. This method must be idempotent,
         i.e., calling it several times in a row should be equivalent to a

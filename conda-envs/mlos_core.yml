@@ -10,6 +10,7 @@ dependencies:
   - configspace
   - pip
   - pylint
+  - autopep8
   - pytest
   - setuptools
   - jupyterlab

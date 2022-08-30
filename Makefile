@@ -1,6 +1,7 @@
 CONDA_DEFAULT_ENV := mlos_core
 
 ENV_YML := conda-envs/${CONDA_DEFAULT_ENV}.yml
+PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | grep -v -e '^./build/' -e '^./doc/source/')
 MLOS_CORE_PYTHON_FILES := $(shell find mlos_core/ -type f -name '*.py' 2>/dev/null)
 MLOS_BENCH_PYTHON_FILES := $(shell find mlos_bench/ -type f -name '*.py' 2>/dev/null)
 
@@ -33,7 +34,7 @@ check: pylint
 pylint: conda-env .pylint.build-stamp
 
 .pylint.build-stamp: $(PYTHON_FILES) .pylintrc
-	conda run -n ${CONDA_DEFAULT_ENV} pylint -j0 mlos_core/mlos_core mlos_bench/mlos_bench
+	conda run -n ${CONDA_DEFAULT_ENV} pylint -j0 $(PYTHON_FILES)
 	touch .pylint.build-stamp
 
 .PHONY: test

@@ -4,11 +4,12 @@ Setup instructions for the mlos_core package.
 
 from setuptools import setup, find_packages
 
-version='0.0.4'
+_VERSION = '0.0.4'
 
+# pylint: disable=duplicate-code
 setup(
     name='mlos-core',
-    version=version,
+    version=_VERSION,
     packages=find_packages(),
     install_requires=[
         'scikit-learn>=0.22.1',
