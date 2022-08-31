@@ -83,8 +83,8 @@ jobs:
   - bash: make CONDA_DEFAULT_ENV=$(conda_env) test
     displayName: 'Run tests'
 
-  - bash: make CONDA_DEFAULT_ENV=$(conda_env) dist
-    displayName: 'Generate binary distribution files'
+  - bash: make CONDA_DEFAULT_ENV=$(conda_env) dist dist-test
+    displayName: 'Generate and test binary distribution files'
 
   - bash: make CONDA_DEFAULT_ENV=$(conda_env) doc
     # Only build docs for the default env.

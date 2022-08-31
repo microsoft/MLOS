@@ -1,9 +1,11 @@
 CONDA_DEFAULT_ENV := mlos_core
-
+PYTHON_VERSION := $(shell echo "${CONDA_DEFAULT_ENV}" | sed -r -e 's/^mlos_core[-]?//')
 ENV_YML := conda-envs/${CONDA_DEFAULT_ENV}.yml
-PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | grep -v -e '^./build/' -e '^./doc/source/')
-MLOS_CORE_PYTHON_FILES := $(shell find mlos_core/ -type f -name '*.py' 2>/dev/null)
-MLOS_BENCH_PYTHON_FILES := $(shell find mlos_bench/ -type f -name '*.py' 2>/dev/null)
+
+# Find the non-build python files we should consider as rule dependencies.
+PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./((mlos_core|mlos_bench)/)?build/' -e '^./doc/source/')
+MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
+MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
 
 # If available, use the mamba solver to speed things up.
 CONDA_SOLVER := $(shell conda list -n base | grep -q '^conda-libmamba-solver\s' && echo libmamba || echo classic)
@@ -43,6 +45,7 @@ test: pytest
 .PHONY: pytest
 pytest: conda-env .pytest.build-stamp
 
+# Make sure pytest can find our pytest_configure.py file.
 .pytest.build-stamp: export PYTHONPATH := $(PWD):$(PYTHONPATH)
 .pytest.build-stamp: $(PYTHON_FILES) pytest.ini
 	#conda run -n ${CONDA_DEFAULT_ENV} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/ mlos_bench/
@@ -53,13 +56,68 @@ pytest: conda-env .pytest.build-stamp
 dist: bdist_wheel
 
 .PHONY: bdist_wheel
-bdist_wheel: conda-env dist/mlos_core-*-py3-none-any.whl dist/mlos_bench-*-py3-none-any.whl
+bdist_wheel: conda-env mlos_core/dist/mlos_core-*-py3-none-any.whl mlos_bench/dist/mlos_bench-*-py3-none-any.whl
 
-dist/mlos_core-*-py3-none-any.whl: mlos_core/setup.py $(MLOS_CORE_PYTHON_FILES)
-	conda run -n ${CONDA_DEFAULT_ENV} python3 mlos_core/setup.py bdist_wheel
+mlos_core/dist/mlos_core-*-py3-none-any.whl: mlos_core/setup.py $(MLOS_CORE_PYTHON_FILES)
+	rm -f mlos_core/dist/mlos_core-*-py3-none-any.whl \
+	    && cd mlos_core/ \
+	    && conda run -n ${CONDA_DEFAULT_ENV} python3 setup.py bdist_wheel \
+	    && cd .. \
+	    && ls mlos_core/dist/mlos_core-*-py3-none-any.whl
 
-dist/mlos_bench-*-py3-none-any.whl: mlos_bench/setup.py $(MLOS_BENCH_PYTHON_FILES)
-	conda run -n ${CONDA_DEFAULT_ENV} python3 mlos_bench/setup.py bdist_wheel
+mlos_bench/dist/mlos_bench-*-py3-none-any.whl: mlos_bench/setup.py $(MLOS_BENCH_PYTHON_FILES)
+	rm -f mlos_bench/dist/mlos_bench-*-py3-none-any.whl \
+	    && cd mlos_bench/ \
+	    && conda run -n ${CONDA_DEFAULT_ENV} python3 setup.py bdist_wheel \
+	    && cd .. \
+	    && ls mlos_bench/dist/mlos_bench-*-py3-none-any.whl
+
+.PHONY: dist-test-env-clean
+dist-test-env-clean:
+	# Remove any existing mlos-dist-test environment so we can start clean.
+	conda env remove -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) 2>/dev/null || true
+	rm -f .dist-test-env.$(PYTHON_VERSION).build-stamp
+
+.PHONY: dist-test-env
+dist-test-env: dist .dist-test-env.$(PYTHON_VERSION).build-stamp
+
+.dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/mlos_core-*-py3-none-any.whl mlos_bench/dist/mlos_bench-*-py3-none-any.whl
+	# Check to make sure we only have a single wheel version availble.
+	# Else, run `make dist-clean` to remove prior versions.
+	ls mlos_core/dist/mlos_core-*-py3-none-any.whl | wc -l | grep -q -x 1
+	ls mlos_bench/dist/mlos_bench-*-py3-none-any.whl | wc -l | grep -q -x 1
+	# Create a clean test environment for checking the wheel files.
+	$(MAKE) dist-test-env-clean
+	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERSION)
+	conda install -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) pytest
+	# Test a clean install of the mlos_core wheel.
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install mlos_core/dist/mlos_core-*-py3-none-any.whl
+	# Install the necessary optimizers for the tests.
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install emukit scikit-optimize
+	# Test a clean install of the mlos_bench wheel.
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install mlos_bench/dist/mlos_bench-*-py3-none-any.whl
+	touch .dist-test-env.$(PYTHON_VERSION).build-stamp
+
+.PHONY: dist-test
+#dist-test: dist-clean
+dist-test: dist-test-env .dist-test.$(PYTHON_VERSION).build-stamp
+
+# Make sure pytest can find our pytest_configure.py file.
+# Unnecessary if we invoke it as "python3 -m pytest ..."
+#.dist-test.$(PYTHON_VERSION).build-stamp: export PYTHONPATH := $(PWD):$(PYTHONPATH)
+.dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) .dist-test-env.$(PYTHON_VERSION).build-stamp
+	# Make sure we're using the packages from the wheel.
+	# Note: this will pick up the local directory and change the output if we're using PYTHONPATH=.
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip list --verbose | grep mlos-core | grep ' pip'
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip list --verbose | grep mlos-bench | grep ' pip'
+	# Run a simple test that uses the mlos_core wheel (full tests can be checked with `make test`).
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_core/mlos_core/spaces/tests/spaces_test.py
+	# Run a simple test that uses the mlos_bench wheel (full tests can be checked with `make test`).
+	# TODO: conda run -n mlos-dist-test-$(PYTHON_VERSION) pytest mlos_bench/mlos_bench/path/to/some/tests.py
+	touch .dist-test.$(PYTHON_VERSION).build-stamp
+
+dist-test-clean: dist-test-env-clean
+	rm -f .dist-test.$(PYTHON_VERSION).build-stamp
 
 .doc-prereqs.build-stamp: doc/requirements.txt
 	conda run -n ${CONDA_DEFAULT_ENV} pip install -r doc/requirements.txt
@@ -102,9 +160,11 @@ clean-test:
 .PHONY: dist-clean
 dist-clean:
 	rm -rf build dist
+	rm -rf mlos_core/build mlos_core/dist
+	rm -rf mlos_bench/build mlos_bench/dist
 
 .PHONY: clean
-clean: clean-check clean-test dist-clean clean-doc clean-doc-env
+clean: clean-check clean-test dist-clean clean-doc clean-doc-env dist-test-clean
 	rm -f .conda-env.build-stamp .conda-env.*.build-stamp
 	rm -rf mlos_core.egg-info
 	rm -rf mlos_core/mlos_core.egg-info

@@ -147,6 +147,8 @@ junit/test-results.xml
 
 .conda-env.build-stamp
 .conda-env.*.build-stamp
+.dist-test-env.*.build-stamp
+.dist-test.*.build-stamp
 .doc-prereqs.build-stamp
 .pylint.build-stamp
 .pytest.build-stamp
