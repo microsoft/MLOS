@@ -31,6 +31,8 @@ def optimize(env_config_file, global_config):
         _LOG.info("Result: %s = %s", tunable_values, bench_result)
         opt.register(tunable_values, bench_result)
 
+    env.teardown()
+
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
     return best

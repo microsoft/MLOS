@@ -4,6 +4,8 @@ A collection Service functions for managing VMs on Azure.
 
 import json
 import logging
+import time
+from typing import Tuple, Dict
 import requests
 
 from mlos_bench.environment import Service, Status, _check_required_params
@@ -31,6 +33,7 @@ class AzureVMService(Service):
     # Azure Compute REST API calls as described in
     # https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines
 
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/start?tabs=HTTP
     _URL_START = (
         "https://management.azure.com"
         "/subscriptions/{subscription}"
@@ -41,6 +44,40 @@ class AzureVMService(Service):
         "?api-version=2022-03-01"
     )
 
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/power-off?tabs=HTTP
+    _URL_STOP = (
+        "https://management.azure.com"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/powerOff"
+        "?api-version=2022-03-01"
+    )
+
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate?tabs=HTTP
+    _URL_DEPROVISION = (
+        "https://management.azure.com"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/deallocate"
+        "?api-version=2022-03-01"
+    )
+
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart?tabs=HTTP
+    _URL_REBOOT = (
+        "https://management.azure.com"
+        "/subscriptions/{subscription}"
+        "/resourceGroups/{resource_group}"
+        "/providers/Microsoft.Compute"
+        "/virtualMachines/{vm_name}"
+        "/restart"
+        "?api-version=2022-03-01"
+    )
+
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command?tabs=HTTP
     _URL_REXEC_RUN = (
         "https://management.azure.com"
         "/subscriptions/{subscription}"
@@ -76,8 +113,13 @@ class AzureVMService(Service):
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
+            self.check_vm_operation_status,
+            self.wait_vm_operation,
             self.vm_provision,
             self.vm_start,
+            self.vm_stop,
+            self.vm_deprovision,
+            self.vm_reboot,
             self.remote_exec,
             self.get_remote_exec_results
         ])
@@ -92,6 +134,24 @@ class AzureVMService(Service):
         )
 
         self._url_start = AzureVMService._URL_START.format(
+            subscription=config["subscription"],
+            resource_group=config["resourceGroup"],
+            vm_name=config["vmName"]
+        )
+
+        self._url_stop = AzureVMService._URL_STOP.format(
+            subscription=config["subscription"],
+            resource_group=config["resourceGroup"],
+            vm_name=config["vmName"]
+        )
+
+        self._url_deprovision = AzureVMService._URL_DEPROVISION.format(
+            subscription=config["subscription"],
+            resource_group=config["resourceGroup"],
+            vm_name=config["vmName"]
+        )
+
+        self._url_reboot = AzureVMService._URL_REBOOT.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"]
@@ -132,7 +192,140 @@ class AzureVMService(Service):
             if val.get("value") is not None
         }
 
-    def vm_provision(self, params):
+    def _azure_vm_post_helper(self, url: str) -> Tuple[Status, Dict]:
+        """
+        General pattern for performing an action on an Azure VM via its REST API.
+
+        Parameters
+        ----------
+        url: str
+            REST API url for the target to perform on the Azure VM.
+            Should be a url that we intend to POST to.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result.
+            Status is one of {PENDING, READY, FAILED}
+            Result will have a value for 'asyncResultsUrl' if status is PENDING, and 'pollPeriod' if suggested by the API.
+        """
+        _LOG.debug("Request: POST %s", url)
+
+        response = requests.post(url, headers=self._headers)
+        _LOG.info("Response: %s", response)
+
+        # Logical flow for async operations based on:
+        # https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
+        if response.status_code == 200:
+            return (Status.READY, {})
+        elif response.status_code == 202:
+            result = {}
+            if "Azure-AsyncOperation" in response.headers:
+                result["asyncResultsUrl"] = response.headers.get("Azure-AsyncOperation")
+            elif "Location" in response.headers:
+                result["asyncResultsUrl"] = response.headers.get("Location")
+            if "Retry-After" in response.headers:
+                result["pollPeriod"] = float(response.headers["Retry-After"])
+
+            return (Status.PENDING, result)
+        else:
+            _LOG.error("Response: %s :: %s", response, response.text)
+            # _LOG.error("Bad Request:\n%s", response.request.body)
+            return (Status.FAILED, {})
+
+    def check_vm_operation_status(self, params: Dict) -> Tuple[Status, Dict]:
+        """
+        Checks the status of a pending operation on an Azure VM.
+
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, RUNNING, READY, FAILED}
+            Result is info on the operation runtime if READY, otherwise {}.
+        """
+        url = params.get("asyncResultsUrl")
+        if url is None:
+            return Status.PENDING, {}
+
+        response = requests.get(url, headers=self._headers)
+
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Response: %s\n%s", response,
+                       json.dumps(response.json(), indent=2)
+                       if response.content else "")
+        else:
+            _LOG.info("Response: %s", response)
+
+        if response.status_code == 200:
+            output = response.json()
+            status = output.get("status")
+            if status == "InProgress":
+                return Status.RUNNING, {}
+            elif status == "Succeeded":
+                return Status.READY, output
+
+        _LOG.error("Response: %s :: %s", response, response.text)
+        return Status.FAILED, {}
+
+    def wait_vm_operation(self,
+        params: Dict,
+        default_poll_period: float = 1.0,
+        timeout: float = 3600,
+    ) -> Tuple[Status, Dict]:
+        """
+        Waits for a pending operation on an Azure VM to resolve to READY or FAILED.
+        Raises TimeoutError() when timing out.
+
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        default_poll_period: float
+            Time in seconds to wait between each round of polling.
+
+        timeout: float
+            Total time in seconds to wait before timing out the operation.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {READY, FAILED}
+            Result is info on the operation runtime if READY, otherwise {}.
+        """
+
+        poll_period = params.get("pollPeriod", default_poll_period)
+
+        # Block while still RUNNING
+        time_elapsed = 0.0
+
+        status = Status.FAILED
+        output = {}
+        while time_elapsed < timeout:
+            # Wait for the suggested time first then check status
+            time.sleep(poll_period)
+            time_elapsed += poll_period
+
+            status, output = self.check_vm_operation_status(params)
+            if status != Status.RUNNING:
+                break
+        else:
+            raise TimeoutError()
+
+        return status, output
+
+    def vm_provision(self, params: Dict) -> Tuple[Status, Dict]:
         """
         Check if Azure VM is ready. Deploy a new VM, if necessary.
 
@@ -187,7 +380,7 @@ class AzureVMService(Service):
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def vm_start(self, params):
+    def vm_start(self, params: Dict) -> Tuple[Status, Dict]:
         """
         Start the VM on Azure.
 
@@ -203,21 +396,52 @@ class AzureVMService(Service):
             Status is one of {PENDING, READY, FAILED}
         """
         _LOG.info("Start VM: %s :: %s", self.config["vmName"], params)
-        _LOG.debug("Request: POST %s", self._url_start)
 
-        response = requests.post(self._url_start, headers=self._headers)
-        _LOG.info("Response: %s", response)
+        return self._azure_vm_post_helper(self._url_start)
 
-        if response.status_code == 200:
-            return (Status.PENDING, {})
-        elif response.status_code == 202:
-            return (Status.READY, {})
-        else:
-            _LOG.error("Response: %s :: %s", response, response.text)
-            # _LOG.error("Bad Request:\n%s", response.request.body)
-            return (Status.FAILED, {})
+    def vm_stop(self) -> Tuple[Status, Dict]:
+        """
+        Stops the VM on Azure by initiating a graceful shutdown.
 
-    def remote_exec(self, params):
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, READY, FAILED}
+        """
+        _LOG.info("Stop VM: %s", self.config["vmName"])
+
+        return self._azure_vm_post_helper(self._url_stop)
+
+    def vm_deprovision(self) -> Tuple[Status, Dict]:
+        """
+        Deallocates the VM on Azure by shutting it down then releasing the compute resources.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, READY, FAILED}
+        """
+        _LOG.info("Stop VM: %s", self.config["vmName"])
+
+        return self._azure_vm_post_helper(self._url_stop)
+
+    def vm_reboot(self) -> Tuple[Status, Dict]:
+        """
+        Reboot the VM on Azure by initiating a graceful shutdown.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, READY, FAILED}
+        """
+        _LOG.info("Reboot VM: %s", self.config["vmName"])
+
+        return self._azure_vm_post_helper(self._url_reboot)
+
+    def remote_exec(self, params: Dict) -> Tuple[Status, Dict]:
         """
         Run a command on Azure VM.
 
@@ -268,7 +492,7 @@ class AzureVMService(Service):
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def get_remote_exec_results(self, params):
+    def get_remote_exec_results(self, params: Dict) -> Tuple[Status, Dict]:
         """
         Get the results of the asynchronously running command.
 
@@ -288,28 +512,9 @@ class AzureVMService(Service):
         _LOG.info("Check the results on VM: %s :: %s",
                   self.config["vmName"], params.get("commandId", ""))
 
-        url = params.get("asyncResultsUrl")
-        if url is None:
-            return (Status.PENDING, {})
+        status, result = self.check_vm_operation_status(params)
 
-        response = requests.get(url, headers=self._headers)
-
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Response: %s\n%s", response,
-                       json.dumps(response.json(), indent=2)
-                       if response.content else "")
+        if status == Status.SUCCEEDED:
+            return status, result.get("properties", {}).get("output", {})
         else:
-            _LOG.info("Response: %s", response)
-
-        if response.status_code == 200:
-            # TODO: extract the results from JSON response
-            output = response.json()
-            status = output.get("status")
-            if status == "InProgress":
-                return (Status.RUNNING, {})
-            elif status == "Succeeded":
-                return (Status.READY, output.get("properties", {}).get("output", {}))
-
-        _LOG.error("Response: %s :: %s", response, response.text)
-        # _LOG.error("Bad Request:\n%s", response.request.body)
-        return (Status.FAILED, {})
+            return status, result

@@ -117,11 +117,9 @@ jobs:
       conda run -n mlos-dist-test-$(PythonVersion) pip install $mlos_core_whl
       # Install mlos_bench wheel.
       conda run -n mlos-dist-test-$(PythonVersion) pip install $mlos_bench_whl
-      # Help pytest find our pytest_configure.py
-      $env:PYTHONPATH="${PWD};${env:PYTHONPATH}"
       # Just pick one simple test to run for now.
       # The rest should have been handled in a separate step.
-      conda run -n mlos-dist-test-$(PythonVersion) pytest mlos_core/mlos_core/spaces/tests/spaces_test.py
+      conda run -n mlos-dist-test-$(PythonVersion) python -m pytest mlos_core/mlos_core/spaces/tests/spaces_test.py
       # Run a simple mlos_bench test.
-      # TODO: conda run -n mlos-dist-test-$(PythonVersion) pytest mlos_bench/mlos_bench/path/to/some/tests.py
+      conda run -n mlos-dist-test-$(PythonVersion) python -m pytest mlos_bench/mlos_bench/environment/azure/tests/azure_services_test.py
     displayName: 'Generate and test binary distribution files'

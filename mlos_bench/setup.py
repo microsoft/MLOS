@@ -13,6 +13,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'mlos-core==' + _VERSION,
+        'requests',
     ],
     # Transitive extra_requires from mlos-core.
     extras_require={

@@ -37,7 +37,17 @@ class OSEnv(Environment):
             True if operation is successful, false otherwise.
         """
         _LOG.info("OS tear down")
-        return True
+        status, params = self._service.vm_stop()
+
+        if status == Status.PENDING:
+            try:
+                status, _ = self._service.wait_vm_operation(params)
+            except TimeoutError:
+                _LOG.error("vm_stop timed out: %s", params)
+
+        _LOG.debug("Final status of tear down: %s", status)
+
+        return status == Status.READY
 
     def run(self, tunables):
         # pylint: disable=duplicate-code

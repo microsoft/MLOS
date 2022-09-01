@@ -71,7 +71,7 @@ class CompositeEnv(Environment):
         is_success : bool
             True if all children operations are successful, false otherwise.
         """
-        reverse_children = self._children.copy().reverse()
+        reverse_children = reversed(self._children.copy())
         _LOG.debug("Tear down: %s", reverse_children)
         return all(env.teardown() for env in reverse_children)
 
