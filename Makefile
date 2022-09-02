@@ -1,6 +1,6 @@
-CONDA_DEFAULT_ENV := mlos_core
-PYTHON_VERSION := $(shell echo "${CONDA_DEFAULT_ENV}" | sed -r -e 's/^mlos_core[-]?//')
-ENV_YML := conda-envs/${CONDA_DEFAULT_ENV}.yml
+CONDA_ENV_NAME := mlos_core
+PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos_core[-]?//')
+ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
 # Find the non-build python files we should consider as rule dependencies.
 PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./((mlos_core|mlos_bench)/)?build/' -e '^./doc/source/')
@@ -16,27 +16,36 @@ CONDA_INFO_LEVEL := -q
 all: check test dist # doc
 
 .PHONY: conda-env
-conda-env: .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
+conda-env: .conda-env.${CONDA_ENV_NAME}.build-stamp
 
-.conda-env.${CONDA_DEFAULT_ENV}.build-stamp: ${ENV_YML} mlos_core/setup.py mlos_bench/setup.py
-	conda env list -q | grep -q "^${CONDA_DEFAULT_ENV} " || conda env create --experimental-solver ${CONDA_SOLVER} ${CONDA_INFO_LEVEL} -n ${CONDA_DEFAULT_ENV} -f ${ENV_YML}
-	conda env update --experimental-solver ${CONDA_SOLVER} ${CONDA_INFO_LEVEL} -n ${CONDA_DEFAULT_ENV} --prune -f ${ENV_YML}
+.conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} mlos_core/setup.py mlos_bench/setup.py
+	conda env list -q | grep -q "^${CONDA_ENV_NAME} " || conda env create --experimental-solver ${CONDA_SOLVER} ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} -f ${ENV_YML}
+	conda env update --experimental-solver ${CONDA_SOLVER} ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} --prune -f ${ENV_YML}
 	$(MAKE) clean-check clean-test clean-doc
-	touch .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
+	touch .conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-conda-env
 clean-conda-env:
-	@conda env remove -n ${CONDA_DEFAULT_ENV}
-	rm -f .conda-env.${CONDA_DEFAULT_ENV}.build-stamp
+	conda env remove -n ${CONDA_ENV_NAME}
+	rm -f .conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: check
-check: pylint
+check: pycodestyle pylint
+
+.PHONY: pycodestyle
+pycodestyle: conda-env .pycodestyle.build-stamp
+
+.pycodestyle.build-stamp: $(PYTHON_FILES) setup.cfg
+	# Check for decent pep8 code style with pycodestyle.
+	# Note: if this fails, try using autopep8 to fix it.
+	conda run -n ${CONDA_ENV_NAME} pycodestyle $(PYTHON_FILES)
+	touch .pycodestyle.build-stamp
 
 .PHONY: pylint
 pylint: conda-env .pylint.build-stamp
 
 .pylint.build-stamp: $(PYTHON_FILES) .pylintrc
-	conda run -n ${CONDA_DEFAULT_ENV} pylint -j0 $(PYTHON_FILES)
+	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(PYTHON_FILES)
 	touch .pylint.build-stamp
 
 .PHONY: test
@@ -48,8 +57,8 @@ pytest: conda-env .pytest.build-stamp
 # Make sure pytest can find our pytest_configure.py file.
 .pytest.build-stamp: export PYTHONPATH := $(PWD):$(PYTHONPATH)
 .pytest.build-stamp: $(PYTHON_FILES) pytest.ini
-	#conda run -n ${CONDA_DEFAULT_ENV} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/ mlos_bench/
-	conda run -n ${CONDA_DEFAULT_ENV} pytest --cov --cov-report=xml mlos_core/ mlos_bench/ --junitxml=junit/test-results.xml
+	#conda run -n ${CONDA_ENV_NAME} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/ mlos_bench/
+	conda run -n ${CONDA_ENV_NAME} pytest --cov --cov-report=xml mlos_core/ mlos_bench/ --junitxml=junit/test-results.xml
 	touch .pytest.build-stamp
 
 .PHONY: dist
@@ -61,14 +70,14 @@ bdist_wheel: conda-env mlos_core/dist/mlos_core-*-py3-none-any.whl mlos_bench/di
 mlos_core/dist/mlos_core-*-py3-none-any.whl: mlos_core/setup.py $(MLOS_CORE_PYTHON_FILES)
 	rm -f mlos_core/dist/mlos_core-*-py3-none-any.whl \
 	    && cd mlos_core/ \
-	    && conda run -n ${CONDA_DEFAULT_ENV} python3 setup.py bdist_wheel \
+	    && conda run -n ${CONDA_ENV_NAME} python3 setup.py bdist_wheel \
 	    && cd .. \
 	    && ls mlos_core/dist/mlos_core-*-py3-none-any.whl
 
 mlos_bench/dist/mlos_bench-*-py3-none-any.whl: mlos_bench/setup.py $(MLOS_BENCH_PYTHON_FILES)
 	rm -f mlos_bench/dist/mlos_bench-*-py3-none-any.whl \
 	    && cd mlos_bench/ \
-	    && conda run -n ${CONDA_DEFAULT_ENV} python3 setup.py bdist_wheel \
+	    && conda run -n ${CONDA_ENV_NAME} python3 setup.py bdist_wheel \
 	    && cd .. \
 	    && ls mlos_bench/dist/mlos_bench-*-py3-none-any.whl
 
@@ -120,7 +129,7 @@ dist-test-clean: dist-test-env-clean
 	rm -f .dist-test.$(PYTHON_VERSION).build-stamp
 
 .doc-prereqs.build-stamp: doc/requirements.txt
-	conda run -n ${CONDA_DEFAULT_ENV} pip install -r doc/requirements.txt
+	conda run -n ${CONDA_ENV_NAME} pip install -r doc/requirements.txt
 	touch .doc-prereqs.build-stamp
 
 .PHONY: doc-prereqs
@@ -132,9 +141,9 @@ clean-doc-env:
 
 .PHONY: doc
 doc: conda-env doc-prereqs clean-doc
-	cd doc/ && conda run -n ${CONDA_DEFAULT_ENV} sphinx-apidoc -f -e -M -o source/api/mlos_core/ ../mlos_core/ ../mlos_*/setup.py ../pytest_configure.py
-	cd doc/ && conda run -n ${CONDA_DEFAULT_ENV} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py ../pytest_configure.py
-	conda run -n ${CONDA_DEFAULT_ENV} make -j -C doc/ html
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_core/ ../mlos_core/ ../mlos_*/setup.py ../pytest_configure.py
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py ../pytest_configure.py
+	conda run -n ${CONDA_ENV_NAME} make -j -C doc/ html
 	test -s doc/build/html/index.html
 	test -s doc/build/html/generated/mlos_core.optimizers.BaseOptimizer.html
 	test -s doc/build/html/generated/mlos_bench.main.optimize.html
@@ -149,6 +158,7 @@ clean-doc:
 .PHONY: clean-check
 clean-check:
 	rm -f .pylint.build-stamp
+	rm -f .pycodestyle.build-stamp
 
 .PHONY: clean-test
 clean-test:

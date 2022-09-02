@@ -1,15 +1,36 @@
 # vim: set ft=dosini:
 
 [MAIN]
-
 # Specify a score threshold to be exceeded before program exits with error.
-fail-under=9.5
+fail-under=9.7
+
+# Load some extra checkers.
+load-plugins=
+    pylint.extensions.bad_builtin,
+    pylint.extensions.code_style,
+    pylint.extensions.docparams,
+    pylint.extensions.docstyle,
+    pylint.extensions.for_any_all,
+    pylint.extensions.mccabe,
+    pylint.extensions.no_self_use,
+    pylint.extensions.private_import,
+    pylint.extensions.redefined_loop_name,
+    pylint.extensions.redefined_variable_type,
+    pylint.extensions.set_membership,
+    pylint.extensions.typing
 
 [FORMAT]
-
 # Maximum number of characters on a single line.
 max-line-length=132
 
 [MESSAGE CONTROL]
+disable=
+    no-else-return,
+    consider-using-assignment-expr,
+    deprecated-typing-alias,    # disable for now - only deprecated recently
+    docstring-first-line-empty,
+    missing-raises-doc
 
-disable=no-else-return
+[STRING]
+#check-quote-consistency=yes
+check-str-concat-over-line-jumps=yes

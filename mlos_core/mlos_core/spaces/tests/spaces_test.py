@@ -21,11 +21,13 @@ def assert_uniform_counts(counts):
     _, p = scipy.stats.chisquare(counts)    # pylint: disable=invalid-name
     assert p > .3
 
+
 def invalid_conversion_function(*args):
     """
     A quick dummy function for the base class to make pylint happy.
     """
     raise NotImplementedError('subclass must override conversion_function')
+
 
 class BaseConversion:
     """

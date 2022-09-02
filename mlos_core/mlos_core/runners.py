@@ -1,10 +1,11 @@
 """
-Contains classes related to experiment exectution runners.
+Contains classes related to experiment execution runners.
 These classes contain the policies for managing things like retries and failed
 configs when interacting with the optimizer(s).
 """
 
 # TODO: Implement retry/failure handling logic.
+
 
 class ExperimentRunner:
     """Manages pending observations for parallel & asynchronous optimization."""
@@ -27,7 +28,7 @@ class ExperimentRunner:
         """
         self.optimizer.register(configurations, scores, context)
 
-    def suggest(self, configurations, context=None):
+    def suggest(self, context=None):
         """Gets a new configuration suggestion from the optimizer associated
         with this ExperimentRunner and automatically registers it as "pending",
         under the assumption that it will be executed as an experiment trial.
@@ -44,3 +45,4 @@ class ExperimentRunner:
         """
         configurations = self.optimizer.suggest(context)
         self.optimizer.register_pending(configurations, context)
+        return configurations

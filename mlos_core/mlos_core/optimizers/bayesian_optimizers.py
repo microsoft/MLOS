@@ -100,7 +100,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        from emukit.examples.gp_bayesian_optimization.single_objective_bayesian_optimization import GPBayesianOptimization  # pylint: disable=import-outside-toplevel
+        from emukit.examples.gp_bayesian_optimization.single_objective_bayesian_optimization import GPBayesianOptimization  # noqa pylint: disable=import-outside-toplevel
         if context is not None:
             raise NotImplementedError()
         if len(self._observations) <= 10:

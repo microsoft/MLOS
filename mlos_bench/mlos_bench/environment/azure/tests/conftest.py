@@ -1,9 +1,17 @@
+"""
+Configuration test fixtures for azure_services in mlos_bench.
+"""
+
 import pytest
 
 from mlos_bench.environment.azure.azure_services import AzureVMService
 
+
 @pytest.fixture
 def azure_vm_service():
+    """
+    Creates a dummy Azure VM service for tests that require it.
+    """
     service = AzureVMService(config={
         "deployTemplatePath": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
         "deploymentName": "TEST_DEPLOYMENT",

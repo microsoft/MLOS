@@ -5,7 +5,7 @@ A collection Service functions for managing VMs on Azure.
 import json
 import logging
 import time
-from typing import Tuple, Dict
+from typing import Any, Tuple, Dict
 import requests
 
 from mlos_bench.environment import Service, Status, _check_required_params
@@ -13,7 +13,7 @@ from mlos_bench.environment import Service, Status, _check_required_params
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service):
+class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
     """
     Helper methods to manage VMs on Azure.
     """
@@ -22,11 +22,11 @@ class AzureVMService(Service):
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
 
     _URL_DEPLOY = (
-        "https://management.azure.com"
-        "/subscriptions/{subscription}"
-        "/resourceGroups/{resource_group}"
-        "/providers/Microsoft.Resources"
-        "/deployments/{deployment_name}"
+        "https://management.azure.com" +
+        "/subscriptions/{subscription}" +
+        "/resourceGroups/{resource_group}" +
+        "/providers/Microsoft.Resources" +
+        "/deployments/{deployment_name}" +
         "?api-version=2022-05-01"
     )
 
@@ -35,56 +35,56 @@ class AzureVMService(Service):
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/start?tabs=HTTP
     _URL_START = (
-        "https://management.azure.com"
-        "/subscriptions/{subscription}"
-        "/resourceGroups/{resource_group}"
-        "/providers/Microsoft.Compute"
-        "/virtualMachines/{vm_name}"
-        "/start"
+        "https://management.azure.com" +
+        "/subscriptions/{subscription}" +
+        "/resourceGroups/{resource_group}" +
+        "/providers/Microsoft.Compute" +
+        "/virtualMachines/{vm_name}" +
+        "/start" +
         "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/power-off?tabs=HTTP
     _URL_STOP = (
-        "https://management.azure.com"
-        "/subscriptions/{subscription}"
-        "/resourceGroups/{resource_group}"
-        "/providers/Microsoft.Compute"
-        "/virtualMachines/{vm_name}"
-        "/powerOff"
+        "https://management.azure.com" +
+        "/subscriptions/{subscription}" +
+        "/resourceGroups/{resource_group}" +
+        "/providers/Microsoft.Compute" +
+        "/virtualMachines/{vm_name}" +
+        "/powerOff" +
         "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate?tabs=HTTP
     _URL_DEPROVISION = (
-        "https://management.azure.com"
-        "/subscriptions/{subscription}"
-        "/resourceGroups/{resource_group}"
-        "/providers/Microsoft.Compute"
-        "/virtualMachines/{vm_name}"
-        "/deallocate"
+        "https://management.azure.com" +
+        "/subscriptions/{subscription}" +
+        "/resourceGroups/{resource_group}" +
+        "/providers/Microsoft.Compute" +
+        "/virtualMachines/{vm_name}" +
+        "/deallocate" +
         "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart?tabs=HTTP
     _URL_REBOOT = (
-        "https://management.azure.com"
-        "/subscriptions/{subscription}"
-        "/resourceGroups/{resource_group}"
-        "/providers/Microsoft.Compute"
-        "/virtualMachines/{vm_name}"
-        "/restart"
+        "https://management.azure.com" +
+        "/subscriptions/{subscription}" +
+        "/resourceGroups/{resource_group}" +
+        "/providers/Microsoft.Compute" +
+        "/virtualMachines/{vm_name}" +
+        "/restart" +
         "?api-version=2022-03-01"
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command?tabs=HTTP
     _URL_REXEC_RUN = (
-        "https://management.azure.com"
-        "/subscriptions/{subscription}"
-        "/resourceGroups/{resource_group}"
-        "/providers/Microsoft.Compute"
-        "/virtualMachines/{vm_name}"
-        "/runCommand"
+        "https://management.azure.com" +
+        "/subscriptions/{subscription}" +
+        "/resourceGroups/{resource_group}" +
+        "/providers/Microsoft.Compute" +
+        "/virtualMachines/{vm_name}" +
+        "/runCommand" +
         "?api-version=2022-03-01"
     )
 
@@ -276,7 +276,7 @@ class AzureVMService(Service):
         return Status.FAILED, {}
 
     def wait_vm_operation(self,
-        params: Dict,
+        params: Dict[str, Any],
         default_poll_period: float = 1.0,
         timeout: float = 3600,
     ) -> Tuple[Status, Dict]:
@@ -441,13 +441,14 @@ class AzureVMService(Service):
 
         return self._azure_vm_post_helper(self._url_reboot)
 
-    def remote_exec(self, params: Dict) -> Tuple[Status, Dict]:
+    # TODO: Consider replacing this dict with expected params with a custom object with named attrs.
+    def remote_exec(self, params: Dict[str, Any]) -> Tuple[Status, Dict]:
         """
         Run a command on Azure VM.
 
         Parameters
         ----------
-        tunables : dict
+        params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
             Must have "commandId", "script", and "parameters" keys.
 

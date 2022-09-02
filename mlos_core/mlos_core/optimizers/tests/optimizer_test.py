@@ -52,7 +52,7 @@ def test_create_optimizer_and_suggest(optimizer_class: Type[BaseOptimizer], kwar
 ])
 def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwargs):
     def objective(x):   # pylint: disable=invalid-name
-        return (6*x-2)**2*np.sin(12*x-4)
+        return (6 * x - 2)**2 * np.sin(12 * x - 4)
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(42)
 

@@ -2,6 +2,7 @@
 Tunable parameter definition.
 """
 import collections
+from typing import Any, Dict, List
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes
@@ -202,14 +203,14 @@ class TunableGroups:
         """
         return self._tunable_groups.keys()
 
-    def subgroup(self, group_names):
+    def subgroup(self, group_names: List[str]):
         """
         Select the covariance groups from the current set and create a new
         TunableGroups object that consists of those covariance groups.
 
         Parameters
         ----------
-        group_names : [str]
+        group_names : list of str
             IDs of the covariant tunable groups.
 
         Returns
@@ -223,21 +224,21 @@ class TunableGroups:
             tunables._add_group(self._tunable_groups[name])
         return tunables
 
-    def get_param_values(self, group_names=None, into_params=None):
+    def get_param_values(self, group_names: List[str] = None, into_params: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
 
         Parameters
         ----------
-        group_names : [str] or None
+        group_names : list of str or None
             IDs of the covariant tunable groups.
             Select parameters from all groups if omitted.
-        into_params : dict of {str: value}
+        into_params : dict
             An optional dict to copy the parameters and their values into.
 
         Returns
         -------
-        into_params : dict of {str: value}
+        into_params : dict
             Flat dict of all parameters and their values from given covariance groups.
         """
         if group_names is None:
@@ -248,13 +249,13 @@ class TunableGroups:
             into_params.update(self._tunable_groups[name].get_values())
         return into_params
 
-    def reset(self, group_names=None):
+    def reset(self, group_names: List[str] = None):
         """
         Clear the update flag of given covariant groups.
 
         Parameters
         ----------
-        group_names : [str] or None
+        group_names : list of str or None
             IDs of the (covariant) tunable groups. Reset all groups if omitted.
         """
         for name in (group_names or self.get_names()):

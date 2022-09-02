@@ -72,21 +72,21 @@ jobs:
     displayName: Workaround a mamba cache bug in ADO
     # https://github.com/mamba-org/mamba/issues/488
 
-  - bash: make CONDA_DEFAULT_ENV=$(conda_env) CONDA_INFO_LEVEL=-v conda-env
+  - bash: make CONDA_ENV_NAME=$(conda_env) CONDA_INFO_LEVEL=-v conda-env
     displayName: 'Create/update mlos_core conda environment'
 
   - bash: conda run -n $(conda_env) pip install pytest-azurepipelines
     displayName: 'Install pytest-azurepipelines'
 
-  - bash: make CONDA_DEFAULT_ENV=$(conda_env) check
+  - bash: make CONDA_ENV_NAME=$(conda_env) check
     displayName: 'Run lint checks'
-  - bash: make CONDA_DEFAULT_ENV=$(conda_env) test
+  - bash: make CONDA_ENV_NAME=$(conda_env) test
     displayName: 'Run tests'
 
-  - bash: make CONDA_DEFAULT_ENV=$(conda_env) dist dist-test
+  - bash: make CONDA_ENV_NAME=$(conda_env) dist dist-test
     displayName: 'Generate and test binary distribution files'
 
-  - bash: make CONDA_DEFAULT_ENV=$(conda_env) doc
+  - bash: make CONDA_ENV_NAME=$(conda_env) doc
     # Only build docs for the default env.
     condition: eq(variables['conda_env'], 'mlos_core')
     displayName: 'Generate documentation'

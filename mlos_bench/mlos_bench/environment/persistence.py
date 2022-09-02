@@ -6,6 +6,7 @@ service functions.
 
 import json
 import logging
+from typing import List
 
 from mlos_bench.environment.tunable import TunableGroups
 from mlos_bench.environment.base_service import Service
@@ -129,13 +130,13 @@ def _build_composite_service(config_list, global_config=None, parent=None):
     return service
 
 
-def build_service(config, global_config=None, parent=None):
+def build_service(config: List[dict], global_config=None, parent=None):
     """
     Factory method for a new service with a given config.
 
     Parameters
     ----------
-    config : [dict] or dict
+    config : dict or list of dict
         A list where each element is a dictionary with 2 mandatory fields:
             "class": FQN of a Python class to instantiate;
             "config": Free-format dictionary to pass to the constructor.
@@ -212,13 +213,13 @@ def load_environment(json_file_name, global_config=None,
         return build_environment(config, global_config, tunables, service)
 
 
-def load_services(json_file_names, global_config=None, parent=None):
+def load_services(json_file_names: List[str], global_config: dict = None, parent: Service = None):
     """
     Create a new collection of tunable parameters.
 
     Parameters
     ----------
-    json_file_name : str
+    json_file_names : list of str
         The service JSON configuration file.
     global_config : dict
         Global parameters to add to the service config.
@@ -242,13 +243,13 @@ def load_services(json_file_names, global_config=None, parent=None):
     return service
 
 
-def load_tunables(json_file_names, parent=None):
+def load_tunables(json_file_names: List[str], parent: TunableGroups = None):
     """
     Load a collection of tunable parameters from JSON files.
 
     Parameters
     ----------
-    json_file_names : [str]
+    json_file_names : list of str
         A list of JSON files to load.
     parent : TunableGroups
         An optional collection of tunables to add to the new collection.

@@ -10,6 +10,7 @@ dependencies:
   - configspace
   - pip
   - pylint
+  - pycodestyle
   - autopep8
   - pytest
   - setuptools

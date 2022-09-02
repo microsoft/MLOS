@@ -6,6 +6,7 @@ import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
 
+
 class RandomOptimizer(BaseOptimizer):
     """Optimizer class that produces random suggestions.
     Useful for baseline comparison against Bayesian optimizers.

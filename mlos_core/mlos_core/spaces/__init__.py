@@ -64,7 +64,7 @@ def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace):
             if log:
                 return emukit.core.DiscreteParameter(
                     name=parameter.name,
-                    domain=np.exp(np.arange(np.ceil(np.log(parameter.lower)), np.floor(np.log(parameter.upper+1)))))
+                    domain=np.exp(np.arange(np.ceil(np.log(parameter.lower)), np.floor(np.log(parameter.upper + 1)))))
             return emukit.core.DiscreteParameter(name=parameter.name, domain=np.arange(parameter.lower, parameter.upper + 1))
         elif isinstance(parameter, ConfigSpace.CategoricalHyperparameter):
             if len(np.unique(parameter.probabilities)) > 1:

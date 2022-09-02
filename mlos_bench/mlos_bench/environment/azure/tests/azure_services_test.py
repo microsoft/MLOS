@@ -11,6 +11,7 @@ from mlos_bench.environment import Status
 # pylint: disable=missing-function-docstring
 # pylint: disable=too-many-arguments
 
+
 @pytest.mark.parametrize(
     ("operation_name", "accepts_params"), [
         ("vm_start", True),
