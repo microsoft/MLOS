@@ -39,12 +39,26 @@ This is a list of major functions and classes provided by `mlos_bench`.
 
 Main
 ====
-.. currentmodule:: mlos_bench.main
+
+:doc:`run_opt.py </api/mlos_bench/mlos_bench.run_opt>`
+
+    The main optimization loop script.
+
+.. currentmodule:: mlos_bench.run_opt
 .. autosummary::
    :toctree: generated/
    :template: functions.rst
 
    optimize
+
+:doc:`run_bench.py </api/mlos_bench/mlos_bench.run_bench>`
+
+    A helper script for testing a single application/workload run.
+
+.. currentmodule:: mlos_bench.run_bench
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
 
 Optimizer
 =========

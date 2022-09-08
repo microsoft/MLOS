@@ -30,11 +30,11 @@ Installation instructions for `az` (Azure CLI) [can be found here](https://docs.
     az account get-access-token
     ```
 
-3. Make a copy of `services-example.json` so that we can adapt it with our own details.
+3. Make a copy of `services.json` so that we can adapt it with our own details.
 For example,
 
     ```sh
-    cp config/azure/services-example.json config/azure/services-mine.json
+    cp config/azure/services.json ./services-mine.json
     ```
 
 4. Modify our new service configuration file with our target resource group information, as well as desired VM name, denoted in `{{ ... }}` below.
@@ -63,11 +63,11 @@ For example,
     ]
     ```
 
-5. Make a copy of `config-example.json` so that we can adapt it with our own details.
+5. Make a copy of `env-azure-ubuntu-redis.json` so that we can adapt it with our own details.
 For example,
 
     ```sh
-    cp config/config-example.json config/config-mine.json
+    cp config/env-azure-ubuntu-redis.json ./config-mine.json
     ```
 
 6. Modify our new configuration file with desired resource names, denoted in `{{ ... }}` below.
@@ -82,7 +82,7 @@ For example,
         ],
 
         "include_services": [
-            "{{ Path to your new service config, e.g. ./mlos_bench/config/azure/services-mine.json }}"
+            "{{ Path to your new service config, e.g. ./services-mine.json }}"
         ],
 
         "config": {
@@ -123,11 +123,19 @@ Create and activate the environment with:
     conda activate mlos_core
     ```
 
-8. Run our configuration through `mlos_bench`.
+8. Store the Azure security credentials in the `global.json` config file.
+
+    ```sh
+    az account get-access-token > ./global.json
+    ```
+    > You have to repeat that operation every hour or so to update the file with the new access token.
+
+
+9. Run our configuration through `mlos_bench`.
 We can do so and pipe the output into log file `osat.log` as follows:
 
     ```sh
-    python mlos_bench/mlos_bench/main.py --config mlos_bench/config/config-mine.json --accessToken "$(az account get-access-token --query accessToken --output tsv)" 2>&1 > ./osat.log
+    python mlos_bench/mlos_bench/run_opt.py --config ./config-mine.json --global ./global.json 2>&1 | tee ./osat.log
     ```
 
-9. Check `osat.log` to verify we get output corresponding to the `ls -l /` command we remotely executed in the VM.
+10. Check `osat.log` to verify we get output corresponding to the `ls -l /` command we remotely executed in the VM.

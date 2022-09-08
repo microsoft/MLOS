@@ -179,7 +179,7 @@ class Environment(metaclass=abc.ABCMeta):
             True if operation is successful, false otherwise.
         """
 
-    def submit(self, tunables):
+    def submit(self, tunables: TunableGroups):
         """
         Submit a new experiment to the environment. Set up the environment,
         if necessary.
@@ -195,6 +195,7 @@ class Environment(metaclass=abc.ABCMeta):
             True if operation is successful, false otherwise.
         """
         _LOG.info("Submit: %s", tunables)
+        assert isinstance(tunables, TunableGroups)
         if self.setup():
             return self.run(tunables)
         return False

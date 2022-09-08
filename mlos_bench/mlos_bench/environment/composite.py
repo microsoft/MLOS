@@ -40,11 +40,6 @@ class CompositeEnv(Environment):
 
         self._children = []
         for child_config in config["children"]:
-
-            local_config = shared_config.copy()
-            local_config.update(child_config.get("config", {}))
-            child_config["config"] = local_config
-
             env = build_environment(child_config, shared_config, tunables, self._service)
             self._children.append(env)
             self._tunable_params.update(env.tunable_params())

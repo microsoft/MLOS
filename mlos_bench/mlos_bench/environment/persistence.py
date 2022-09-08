@@ -45,12 +45,9 @@ def build_environment(config, global_config=None, tunables=None, service=None):
 
     env_name = config["name"]
     env_class = config["class"]
-    env_config = config.get("config", {})
 
-    if global_config:
-        local_config = global_config.copy()
-        local_config.update(env_config)
-        env_config = local_config
+    env_config = config.setdefault("config", {})
+    env_config.update(global_config or {})
 
     env_services_path = config.get("include_services")
     if env_services_path is not None:
@@ -86,12 +83,9 @@ def _build_standalone_service(config, global_config=None):
         An instance of the `Service` class initialized with `config`.
     """
     svc_class = config["class"]
-    svc_config = config.get("config", {})
 
-    if global_config:
-        local_config = global_config.copy()
-        local_config.update(svc_config)
-        svc_config = local_config
+    svc_config = config.setdefault("config", {})
+    svc_config.update(global_config or {})
 
     _LOG.debug("Creating service: %s", svc_class)
     service = Service.new(svc_class, svc_config)

@@ -4,7 +4,7 @@
   "parameters": {
     "vmName": {
       "type": "string",
-      "defaultValue": "osat-linux-vm",
+      "defaultValue": "os-autotune-linux-vm",
       "metadata": {
         "description": "OS Autotune Linux VM"
       }
@@ -68,21 +68,21 @@
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "osat-vnet",
+      "defaultValue": "os-autotune-vnet",
       "metadata": {
         "description": "Name of the VNET"
       }
     },
     "subnetName": {
       "type": "string",
-      "defaultValue": "osat-subnet",
+      "defaultValue": "os-autotune-subnet",
       "metadata": {
         "description": "Name of the subnet in the virtual network"
       }
     },
     "networkSecurityGroupName": {
       "type": "string",
-      "defaultValue": "osat-sg",
+      "defaultValue": "os-autotune-nsg",
       "metadata": {
         "description": "Name of the Network Security Group"
       }
