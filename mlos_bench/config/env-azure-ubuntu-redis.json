@@ -50,27 +50,21 @@
 
                 "config": {
 
-                    "pollDelay": 10,
-
                     "tunable_params": ["kernel", "redis"],
 
                     "const_args": {
-                        "commandId": "RunShellScript",
-                        "script": [
-                            "echo $param1 $param2",
-                            "sudo ls -l /"
-                        ],
-                        "parameters": [
-                            {
-                                "name": "param1",
-                                "value": "111"
-                            },
-                            {
-                                "name": "param2",
-                                "value": "222"
-                            }
-                        ]
-                    }
+                        "storageAccountName": "osatsharedstorage",
+                        "storageFileShareName": "os-autotune-file-share",
+                        "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
+                    },
+
+                    "script": [
+                        "sudo mkdir -p /mnt/os-autotune",
+                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName /mnt/os-autotune -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
+                        "ls -lap /mnt/os-autotune/os-autotune/common/examples/redis"
+                    ],
+
+                    "pollDelay": 10
                 }
             }
         ]

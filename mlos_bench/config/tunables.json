@@ -26,7 +26,7 @@
     "kernel": {
         "cost": 1,
         "params": {
-            "kernel.sched_migration_cost_ns": {
+            "kernel_sched_migration_cost_ns": {
                 "description": "Cost of migrating the thread to another core",
                 "type": "int",
                 "default": -1,

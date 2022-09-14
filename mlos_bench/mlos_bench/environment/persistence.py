@@ -45,9 +45,7 @@ def build_environment(config, global_config=None, tunables=None, service=None):
 
     env_name = config["name"]
     env_class = config["class"]
-
     env_config = config.setdefault("config", {})
-    env_config.update(global_config or {})
 
     env_services_path = config.get("include_services")
     if env_services_path is not None:
@@ -58,7 +56,7 @@ def build_environment(config, global_config=None, tunables=None, service=None):
         tunables = load_tunables(env_tunables_path, tunables)
 
     _LOG.debug("Creating env: %s :: %s", env_name, env_class)
-    env = Environment.new(env_name, env_class, env_config, tunables, service)
+    env = Environment.new(env_name, env_class, env_config, global_config, tunables, service)
 
     _LOG.info("Created env: %s :: %s", env_name, env)
     return env
@@ -84,8 +82,10 @@ def _build_standalone_service(config, global_config=None):
     """
     svc_class = config["class"]
 
+    global_config = global_config or {}
     svc_config = config.setdefault("config", {})
-    svc_config.update(global_config or {})
+    for key in set(svc_config).intersection(global_config):
+        svc_config[key] = global_config[key]
 
     _LOG.debug("Creating service: %s", svc_class)
     service = Service.new(svc_class, svc_config)

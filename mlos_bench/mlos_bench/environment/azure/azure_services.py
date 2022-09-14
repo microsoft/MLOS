@@ -5,7 +5,7 @@ A collection Service functions for managing VMs on Azure.
 import json
 import logging
 import time
-from typing import Any, Tuple, Dict
+from typing import Any, Tuple, List, Dict
 import requests
 
 from mlos_bench.environment import Service, Status, _check_required_params
@@ -207,7 +207,8 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         result : (Status, dict={})
             A pair of Status and result.
             Status is one of {PENDING, READY, FAILED}
-            Result will have a value for 'asyncResultsUrl' if status is PENDING, and 'pollPeriod' if suggested by the API.
+            Result will have a value for 'asyncResultsUrl' if status is PENDING,
+            and 'pollPeriod' if suggested by the API.
         """
         _LOG.debug("Request: POST %s", url)
 
@@ -275,11 +276,8 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         _LOG.error("Response: %s :: %s", response, response.text)
         return Status.FAILED, {}
 
-    def wait_vm_operation(self,
-        params: Dict[str, Any],
-        default_poll_period: float = 1.0,
-        timeout: float = 3600,
-    ) -> Tuple[Status, Dict]:
+    def wait_vm_operation(self, params: Dict[str, Any], default_poll_period: float = 1.0,
+                          timeout: float = 3600) -> Tuple[Status, Dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to READY or FAILED.
         Raises TimeoutError() when timing out.
@@ -441,16 +439,18 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
 
         return self._azure_vm_post_helper(self._url_reboot)
 
-    # TODO: Consider replacing this dict with expected params with a custom object with named attrs.
-    def remote_exec(self, params: Dict[str, Any]) -> Tuple[Status, Dict]:
+    def remote_exec(self, script: List[str], params: Dict[str, Any]) -> Tuple[Status, Dict]:
         """
         Run a command on Azure VM.
 
         Parameters
         ----------
+        script : List[str]
+            A list of lines to execute as a script on a remote VM.
         params : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-            Must have "commandId", "script", and "parameters" keys.
+            Flat dictionary of (key, value) pairs of parameters.
+            They usually come from `const_args` and `tunable_params`
+            properties of the Environment.
 
         Returns
         -------
@@ -458,13 +458,14 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             A pair of Status and result.
             Status is one of {PENDING, READY, FAILED}
         """
-        _LOG.info("Run a command on VM: %s :: %s",
-                  self.config["vmName"], params["commandId"])
+        if _LOG.isEnabledFor(logging.INFO):
+            _LOG.info("Run a script on VM: %s\n  %s",
+                      self.config["vmName"], "\n  ".join(script))
 
         json_req = {
-            "commandId": params["commandId"],
-            "script": params["script"],
-            "parameters": params.get("parameters", [])
+            "commandId": "RunShellScript",
+            "script": script,
+            "parameters": [{"name": key, "value": val} for (key, val) in params.items()]
         }
 
         if _LOG.isEnabledFor(logging.DEBUG):
@@ -510,8 +511,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             A pair of Status and result.
             Status is one of {PENDING, RUNNING, READY, FAILED}
         """
-        _LOG.info("Check the results on VM: %s :: %s",
-                  self.config["vmName"], params.get("commandId", ""))
+        _LOG.info("Check the results on VM: %s", self.config["vmName"])
 
         status, result = self.check_vm_operation_status(params)
 

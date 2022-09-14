@@ -19,7 +19,8 @@ class Environment(metaclass=abc.ABCMeta):
     """
 
     @classmethod
-    def new(cls, env_name, class_name, config, tunables=None, service=None):    # pylint: disable=too-many-arguments
+    def new(cls, env_name, class_name, config, global_config=None, tunables=None, service=None):
+        # pylint: disable=too-many-arguments
         """
         Factory method for a new environment with a given config.
 
@@ -35,6 +36,9 @@ class Environment(metaclass=abc.ABCMeta):
             Free-format dictionary that contains the benchmark environment
             configuration. It will be passed as a constructor parameter of
             the class specified by `name`.
+        global_config : dict
+            Free-format dictionary of global parameters (e.g., security credentials)
+            to be mixed in into the "const_args" section of the local config.
         tunables : TunableGroups
             A collection of groups of tunable parameters for all environments.
         service: Service
@@ -59,9 +63,10 @@ class Environment(metaclass=abc.ABCMeta):
                   env_name, class_name, env_class)
 
         assert issubclass(env_class, cls)
-        return env_class(env_name, config, tunables, service)
+        return env_class(env_name, config, global_config, tunables, service)
 
-    def __init__(self, name, config, tunables=None, service=None):
+    def __init__(self, name, config, global_config=None, tunables=None, service=None):
+        # pylint: disable=too-many-arguments
         """
         Create a new environment with a given config.
 
@@ -72,8 +77,10 @@ class Environment(metaclass=abc.ABCMeta):
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration. Each config must have at least the "tunable_params"
-            and the "const_args" sections; the "cost" field can be omitted
-            and is 0 by default.
+            and the "const_args" sections.
+        global_config : dict
+            Free-format dictionary of global parameters (e.g., security credentials)
+            to be mixed in into the "const_args" section of the local config.
         tunables : TunableGroups
             A collection of groups of tunable parameters for all environments.
         service: Service
@@ -86,6 +93,8 @@ class Environment(metaclass=abc.ABCMeta):
         self._result = (Status.PENDING, None)
 
         self._const_args = config.get("const_args", {})
+        for key in set(self._const_args).intersection(global_config or {}):
+            self._const_args[key] = global_config[key]
 
         if tunables is None:
             tunables = TunableGroups()
@@ -137,7 +146,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._tunable_params
 
-    def setup(self):    # pylint: disable=no-self-use
+    def setup(self):  # pylint: disable=no-self-use
         """
         Set up a new benchmark environment, if necessary. This method must be
         idempotent, i.e., calling it several times in a row should be
@@ -150,7 +159,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return True
 
-    def teardown(self): # pylint: disable=no-self-use
+    def teardown(self):  # pylint: disable=no-self-use
         """
         Tear down the benchmark environment. This method must be idempotent,
         i.e., calling it several times in a row should be equivalent to a

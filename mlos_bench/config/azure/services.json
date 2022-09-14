@@ -6,7 +6,7 @@
             "deployTemplatePath": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
 
             "subscription": "AZURE SUBSCRIPTION ID",
-            "accessToken": "AZURE ACCESS TOKEN, E.G. FROM `az account get-access-token`",
+            "accessToken": "AZURE ACCESS TOKEN FROM `az account get-access-token`",
 
             "resourceGroup": "os-autotune",
             "deploymentName": "os-autotune-001",

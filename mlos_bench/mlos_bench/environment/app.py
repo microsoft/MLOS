@@ -19,7 +19,8 @@ class AppEnv(Environment):
 
     _POLL_DELAY = 5  # Default polling interval in seconds.
 
-    def __init__(self, name, config, tunables, service=None):
+    def __init__(self, name, config, global_config=None, tunables=None, service=None):
+        # pylint: disable=too-many-arguments
         """
         Create a new application environment with a given config.
 
@@ -30,15 +31,18 @@ class AppEnv(Environment):
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration. Each config must have at least the "tunable_params"
-            and the "const_args" sections; the "cost" field can be omitted
-            and is 0 by default.
+            and the "const_args" sections.
+        global_config : dict
+            Free-format dictionary of global parameters (e.g., security credentials)
+            to be mixed in into the "const_args" section of the local config.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name, config, tunables, service)
+        super().__init__(name, config, global_config, tunables, service)
+        self._script = self.config["script"]
         self._poll_delay = self.config.get("pollDelay", AppEnv._POLL_DELAY)
 
     def setup(self):
@@ -72,15 +76,12 @@ class AppEnv(Environment):
         """
         _LOG.info("Run: %s", tunables)
 
-        # FIXME: Plug in the tunables into the script for remote execution
-        # params = self._combine_tunables(tunables)
-        params = self._const_args
-
+        params = self._combine_tunables(tunables)
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Benchmark:\n%s", json.dumps(params, indent=2))
 
         # TODO: Configure the application and start the benchmark
-        (status, output) = self._service.remote_exec(params)
+        (status, output) = self._service.remote_exec(self._script, params)
         self._result = (status, None)
 
         if status not in {Status.PENDING, Status.READY}:

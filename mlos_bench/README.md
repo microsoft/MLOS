@@ -9,29 +9,34 @@ It makes use of the `mlos-core` package for its optimizer.
 To get started, we can adapt an example configuration to test out running `mlos-bench`.
 For these instructions, we will be using Azure for our resources.
 
-1. Ensure you have a SSH public key to authenticate with. If not available, you can generate one with `ssh-keygen`.
+1. Make sure that you have Azure CLI tool installed and working.
 
-    ```sh
-    # Generate SSH key if not available yet
-    ssh-keygen -t rsa
+    > Installation instructions for `az` (Azure CLI) [can be found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 
-    # Obtain your public key, starting with 'ssh-rsa ...'
-    cat ~/.ssh/id_rsa.pub
-    ```
+    If necessary, login to Azure and set your default subscription:
 
-2. Check that you can generate access tokens to interact with Azure resources.
-Installation instructions for `az` (Azure CLI) [can be found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
-
-    ```sh
-    # If using for the az cli first time, a login will be required
+    ```powershell
+    # If using az cli for the first time, a login will be required:
     az login
-
-    # The access token is under the `accessToken` key
-    az account get-access-token
+    # Make sure that GSL subscription is your default:
+    az account set --subscription "..."
     ```
+
+2. Generate access tokens to interact with Azure resources.
+
+    A script at `./scripts/generate-azure-credentials-config.ps1` produces a JSON with Azure credentials.
+    This data is in the format that can be used by our framework.
+
+    ```powershell
+    # If using for the az cli first time, a login will be required
+    ./scripts/generate-azure-credentials-config.ps1 > ./global_config.json
+    ```
+
+    On Linux, use `./scripts/generate-azure-credentials-config.sh` (requires `az` and `jq` to be installed).
 
 3. Make a copy of `services.json` so that we can adapt it with our own details.
-For example,
+
+    For example,
 
     ```sh
     cp config/azure/services.json ./services-mine.json
@@ -123,19 +128,12 @@ Create and activate the environment with:
     conda activate mlos_core
     ```
 
-8. Store the Azure security credentials in the `global.json` config file.
+8. Run our configuration through `mlos_bench`.
+
+    We can also copy the output into log file `os-autotune.log` as follows:
 
     ```sh
-    az account get-access-token > ./global.json
-    ```
-    > You have to repeat that operation every hour or so to update the file with the new access token.
-
-
-9. Run our configuration through `mlos_bench`.
-We can do so and pipe the output into log file `osat.log` as follows:
-
-    ```sh
-    python mlos_bench/mlos_bench/run_opt.py --config ./config-mine.json --global ./global.json 2>&1 | tee ./osat.log
+    ./mlos_bench/mlos_bench/run_opt.py --config ./config-mine.json --global ./global_config.json --log ./os-autotune.log
     ```
 
-10. Check `osat.log` to verify we get output corresponding to the `ls -l /` command we remotely executed in the VM.
+9. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.

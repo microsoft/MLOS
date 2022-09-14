@@ -8,12 +8,9 @@ import argparse
 
 from mlos_bench.environment.persistence import load_environment
 
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(filename)s:%(lineno)d %(levelname)s %(message)s',
-    datefmt='%H:%M:%S'
-)
+_LOG_LEVEL = logging.DEBUG
+_LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(levelname)s %(message)s'
+logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT)
 
 _LOG = logging.getLogger(__name__)
 
@@ -30,6 +27,10 @@ class Launcher:
         self._env_config_file = None
         self._global_config = {}
         self._parser = argparse.ArgumentParser(description=description)
+
+        self._parser.add_argument(
+            '--log', required=False, dest='log_file',
+            help='Path to the log file. Use stdout if omitted.')
 
         self._parser.add_argument(
             '--config', required=True,
@@ -53,10 +54,20 @@ class Launcher:
         Parse command line arguments and load global config parameters.
         """
         (args, args_rest) = self._parser.parse_known_args()
+
+        if args.log_file:
+            log_handler = logging.FileHandler(args.log_file)
+            log_handler.setLevel(_LOG_LEVEL)
+            log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
+            logging.root.addHandler(log_handler)
+
         self._env_config_file = args.config
+
         if args.global_config is not None:
             self._global_config = Launcher.load_config(args.global_config)
+
         self._global_config.update(Launcher._try_parse_extra_args(args_rest))
+
         return args
 
     @staticmethod

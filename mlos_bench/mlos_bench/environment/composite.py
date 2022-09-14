@@ -15,7 +15,8 @@ class CompositeEnv(Environment):
     Composite benchmark environment.
     """
 
-    def __init__(self, name, config, tunables, service=None):
+    def __init__(self, name, config, global_config=None, tunables=None, service=None):
+        # pylint: disable=too-many-arguments
         """
         Create a new environment with a given config.
 
@@ -26,21 +27,20 @@ class CompositeEnv(Environment):
         config : dict
             Free-format dictionary that contains the environment
             configuration. Must have a "children" section.
+        global_config : dict
+            Free-format dictionary of global parameters (e.g., security credentials)
+            to be mixed in into the "const_args" section of the local config.
         tunables : TunableGroups
             A collection of groups of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name, config, tunables, service)
-
-        # Propagate all config parameters except "children" to every child config.
-        shared_config = config.copy()
-        del shared_config["children"]
+        super().__init__(name, config, global_config, tunables, service)
 
         self._children = []
         for child_config in config["children"]:
-            env = build_environment(child_config, shared_config, tunables, self._service)
+            env = build_environment(child_config, global_config, tunables, self._service)
             self._children.append(env)
             self._tunable_params.update(env.tunable_params())
 
