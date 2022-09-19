@@ -41,7 +41,12 @@
 
                 "config": {
                     "tunable_params": ["boot"],
-                    "const_args": {}
+                    "fileShareMountScriptPath": "mlos_bench/config/azure/mount-fileshare.sh",
+                    "const_args": {
+                        "storageAccountName": "osatstorage",
+                        "storageFileShareName": "osat-fs",
+                        "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
+                    }
                 }
             },
             {
@@ -53,15 +58,10 @@
                     "tunable_params": ["kernel", "redis"],
 
                     "const_args": {
-                        "storageAccountName": "osatsharedstorage",
-                        "storageFileShareName": "os-autotune-file-share",
-                        "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
                     },
 
                     "script": [
-                        "sudo mkdir -p /mnt/os-autotune",
-                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName /mnt/os-autotune -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
-                        "ls -lap /mnt/os-autotune/os-autotune/common/examples/redis"
+                        "/mnt/osat-fs/run-workload.sh"
                     ],
 
                     "pollDelay": 10

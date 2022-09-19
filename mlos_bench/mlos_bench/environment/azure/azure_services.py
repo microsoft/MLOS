@@ -213,7 +213,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         _LOG.debug("Request: POST %s", url)
 
         response = requests.post(url, headers=self._headers)
-        _LOG.info("Response: %s", response)
+        _LOG.debug("Response: %s", response)
 
         # Logical flow for async operations based on:
         # https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
@@ -262,8 +262,6 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             _LOG.debug("Response: %s\n%s", response,
                        json.dumps(response.json(), indent=2)
                        if response.content else "")
-        else:
-            _LOG.info("Response: %s", response)
 
         if response.status_code == 200:
             output = response.json()
@@ -299,7 +297,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict)
             A pair of Status and result.
-            Status is one of {READY, FAILED}
+            Status is one of {PENDING, READY, FAILED}
             Result is info on the operation runtime if READY, otherwise {}.
         """
 
@@ -509,13 +507,13 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict)
             A pair of Status and result.
-            Status is one of {PENDING, RUNNING, READY, FAILED}
+            Status is one of {PENDING, READY, FAILED}
         """
         _LOG.info("Check the results on VM: %s", self.config["vmName"])
 
-        status, result = self.check_vm_operation_status(params)
+        status, result = self.wait_vm_operation(params)
 
-        if status == Status.SUCCEEDED:
+        if status == Status.READY:
             return status, result.get("properties", {}).get("output", {})
         else:
             return status, result

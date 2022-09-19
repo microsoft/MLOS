@@ -44,8 +44,9 @@ class VMEnv(Environment):
                 status, _ = self._service.wait_vm_operation(params)
             except TimeoutError:
                 _LOG.error("vm_deprovision timed out: %s", params)
+                return False
 
-        _LOG.debug("Final status of tear down: %s", status)
+        _LOG.info("Final status of VM tear down: %s", status)
 
         return status == Status.READY
 
@@ -73,5 +74,12 @@ class VMEnv(Environment):
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Deploy VM:\n%s", json.dumps(params, indent=2))
 
-        (status, _output) = self._service.vm_provision(params)
+        (status, output) = self._service.vm_provision(params)
+
+        if status == Status.PENDING:
+            try:
+                status, _ = self._service.wait_vm_operation(output)
+            except TimeoutError:
+                _LOG.error("vm_provision timed out: %s", output)
+
         return status in {Status.PENDING, Status.READY}

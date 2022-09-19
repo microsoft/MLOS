@@ -6,6 +6,8 @@ scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir"
 source ./common.sh
 
+check_docker
+
 # Remove any previously running/failed instances.
 docker rm --force $REDIS_SERVER_NAME 2>/dev/null || true
 

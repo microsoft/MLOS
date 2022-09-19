@@ -3,11 +3,13 @@ Application-specific benchmark environment.
 """
 
 import json
-import time
 import logging
+from typing import Optional
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
+from mlos_bench.environment.base_service import Service
+from mlos_bench.environment.tunable import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
@@ -19,7 +21,13 @@ class AppEnv(Environment):
 
     _POLL_DELAY = 5  # Default polling interval in seconds.
 
-    def __init__(self, name, config, global_config=None, tunables=None, service=None):
+    def __init__(self,
+        name: str,
+        config: dict,
+        global_config: Optional[dict] = None,
+        tunables: Optional[TunableGroups] = None,
+        service: Optional[Service] = None,
+    ):
         # pylint: disable=too-many-arguments
         """
         Create a new application environment with a given config.
@@ -58,7 +66,25 @@ class AppEnv(Environment):
         _LOG.info("Set up")
         return True
 
-    def run(self, tunables):
+    def teardown(self):
+        # Teardown app
+        _LOG.info("App tear down")
+
+        # Cleanup for the app
+        status, cmd_output = self._service.remote_exec(["/mnt/osat-fs/cleanup-app.sh"], {})
+        # Wait for cleanup script to complete
+        if status == Status.PENDING:
+            try:
+                status, _cleanup_output = self._service.get_remote_exec_results(cmd_output)
+            except TimeoutError:
+                _LOG.error("Cleanup app timed out: %s", cmd_output)
+                return False
+
+        _LOG.info("Final status of app tear down: %s", status)
+
+        return status == Status.READY
+
+    def run(self, tunables: TunableGroups):
         """
         Submit a new experiment to the application environment.
         (Re)configure an application and launch the benchmark.
@@ -75,6 +101,17 @@ class AppEnv(Environment):
             True if operation is successful, false otherwise.
         """
         _LOG.info("Run: %s", tunables)
+
+        # Setup app
+        status, cmd_output = self._service.remote_exec(["/mnt/osat-fs/setup-app.sh"], {})
+        # Wait for setup script to complete
+        if status == Status.PENDING:
+            try:
+                status, _setup_output = self._service.get_remote_exec_results(cmd_output)
+                _LOG.debug("Setup app: %s", _setup_output)
+            except TimeoutError:
+                _LOG.error("Setup app timed out: %s", cmd_output)
+                return False
 
         params = self._combine_tunables(tunables)
         if _LOG.isEnabledFor(logging.DEBUG):
@@ -132,14 +169,12 @@ class AppEnv(Environment):
             benchmark_result is a floating point time of the benchmark in
             seconds or None if the status is not COMPLETED.
         """
-        output = None
-        while True:
-            (status, output) = self._check_results()
-            if status != Status.RUNNING:
-                break
-            _LOG.debug("Sleep: %d", self._poll_delay)
-            time.sleep(self._poll_delay)
+        try:
+            status, output = self._service.get_remote_exec_results(self.config)
+        except TimeoutError:
+            _LOG.error("App result timed out: %s", self.config)
+            return self._result
 
-        _LOG.info("Benchmark result: %s", output)
+        _LOG.info("Benchmark result:\n%s", output["value"][0]["message"])
         self._result = (status, 123.456)  # FIXME: use the actual data
         return self._result

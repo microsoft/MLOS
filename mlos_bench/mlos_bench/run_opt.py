@@ -18,6 +18,7 @@ def _main():
     launcher.parse_args()
     env = launcher.load_env()
     result = optimize(env)
+    env.teardown()
     _LOG.info("Final result: %s", result)
 
 

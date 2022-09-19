@@ -36,6 +36,8 @@ def _main():
     bench_result = env.result()  # Block and wait for the final result
     _LOG.info("Result: %s", bench_result)
 
+    env.teardown()
+
 
 if __name__ == "__main__":
     _main()
