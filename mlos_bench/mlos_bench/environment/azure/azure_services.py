@@ -5,7 +5,9 @@ A collection Service functions for managing VMs on Azure.
 import json
 import logging
 import time
-from typing import Any, Tuple, List, Dict
+
+from typing import Any, Tuple, List, Dict, Callable
+
 import requests
 
 from mlos_bench.environment import Service, Status, _check_required_params
@@ -17,6 +19,9 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
     """
     Helper methods to manage VMs on Azure.
     """
+
+    _POLL_INTERVAL = 4   # seconds
+    _POLL_TIMEOUT = 300  # seconds
 
     # Azure Resources Deployment REST API as described in
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
@@ -33,7 +38,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
     # Azure Compute REST API calls as described in
     # https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/start?tabs=HTTP
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/start
     _URL_START = (
         "https://management.azure.com" +
         "/subscriptions/{subscription}" +
@@ -44,7 +49,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         "?api-version=2022-03-01"
     )
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/power-off?tabs=HTTP
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/power-off
     _URL_STOP = (
         "https://management.azure.com" +
         "/subscriptions/{subscription}" +
@@ -55,7 +60,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         "?api-version=2022-03-01"
     )
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate?tabs=HTTP
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate
     _URL_DEPROVISION = (
         "https://management.azure.com" +
         "/subscriptions/{subscription}" +
@@ -66,7 +71,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         "?api-version=2022-03-01"
     )
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart?tabs=HTTP
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart
     _URL_REBOOT = (
         "https://management.azure.com" +
         "/subscriptions/{subscription}" +
@@ -77,7 +82,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         "?api-version=2022-03-01"
     )
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command?tabs=HTTP
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/run-command
     _URL_REXEC_RUN = (
         "https://management.azure.com" +
         "/subscriptions/{subscription}" +
@@ -114,6 +119,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         # Register methods that we want to expose to the Environment objects.
         self.register([
             self.check_vm_operation_status,
+            self.wait_vm_deployment,
             self.wait_vm_operation,
             self.vm_provision,
             self.vm_start,
@@ -123,6 +129,9 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             self.remote_exec,
             self.get_remote_exec_results
         ])
+
+        self._poll_interval = int(config.get("pollInterval", AzureVMService._POLL_INTERVAL))
+        self._poll_timeout = int(config.get("pollTimeout", AzureVMService._POLL_TIMEOUT))
 
         with open(config['deployTemplatePath'], encoding='utf-8') as fh_json:
             self._deploy_template = json.load(fh_json)
@@ -169,14 +178,6 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         }
 
     @staticmethod
-    def _build_arm_parameters(params):
-        """
-        Merge input with config parameters and convert the results
-        into the ARM Template format.
-        """
-        return {key: {"value": val} for (key, val) in params.items()}
-
-    @staticmethod
     def _extract_arm_parameters(json_data):
         """
         Extract parameters from the ARM Template REST response JSON.
@@ -206,7 +207,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict={})
             A pair of Status and result.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED}
             Result will have a value for 'asyncResultsUrl' if status is PENDING,
             and 'pollPeriod' if suggested by the API.
         """
@@ -218,7 +219,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         # Logical flow for async operations based on:
         # https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
         if response.status_code == 200:
-            return (Status.READY, {})
+            return (Status.SUCCEEDED, {})
         elif response.status_code == 202:
             result = {}
             if "Azure-AsyncOperation" in response.headers:
@@ -249,8 +250,8 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict)
             A pair of Status and result.
-            Status is one of {PENDING, RUNNING, READY, FAILED}
-            Result is info on the operation runtime if READY, otherwise {}.
+            Status is one of {PENDING, RUNNING, SUCCEEDED, FAILED}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
         url = params.get("asyncResultsUrl")
         if url is None:
@@ -269,16 +270,38 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             if status == "InProgress":
                 return Status.RUNNING, {}
             elif status == "Succeeded":
-                return Status.READY, output
+                return Status.SUCCEEDED, output
 
         _LOG.error("Response: %s :: %s", response, response.text)
         return Status.FAILED, {}
 
-    def wait_vm_operation(self, params: Dict[str, Any], default_poll_period: float = 1.0,
-                          timeout: float = 3600) -> Tuple[Status, Dict]:
+    def wait_vm_deployment(self, is_setup: bool, params: Dict[str, Any]) -> Tuple[Status, Dict]:
         """
-        Waits for a pending operation on an Azure VM to resolve to READY or FAILED.
-        Raises TimeoutError() when timing out.
+        Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+        Return TIMED_OUT when timing out.
+
+        Parameters
+        ----------
+        is_setup : bool
+            If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        _LOG.info("Wait for VM %s to %s", self.config["vmName"],
+                  "provision" if is_setup else "deprovision")
+        return self._wait_while(self._check_deployment, Status.PENDING, params)
+
+    def wait_vm_operation(self, params: Dict[str, Any]) -> Tuple[Status, Dict]:
+        """
+        Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+        Return TIMED_OUT when timing out.
 
         Parameters
         ----------
@@ -287,39 +310,93 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             Must have the "asyncResultsUrl" key to get the results.
             If the key is not present, return Status.PENDING.
 
-        default_poll_period: float
-            Time in seconds to wait between each round of polling.
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        _LOG.info("Wait for operation on VM %s", self.config["vmName"])
+        return self._wait_while(self.check_vm_operation_status, Status.RUNNING, params)
 
-        timeout: float
-            Total time in seconds to wait before timing out the operation.
+    def _wait_while(self, func: Callable[[Dict[str, Any]], Tuple[Status, Dict]],
+                    loop_status: Status, params: Dict[str, Any]) -> Tuple[Status, Dict]:
+        """
+        Invoke `func` periodically while the status is equal to `loop_status`.
+        Return TIMED_OUT when timing out.
+
+        Parameters
+        ----------
+        func : a function
+            A function that takes `params` and returns a pair of (Status, {})
+        loop_status: Status
+            Steady state status - keep polling `func` while it returns `loop_status`.
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
 
         Returns
         -------
         result : (Status, dict)
             A pair of Status and result.
-            Status is one of {PENDING, READY, FAILED}
-            Result is info on the operation runtime if READY, otherwise {}.
         """
+        poll_period = params.get("pollPeriod", self._poll_interval)
 
-        poll_period = params.get("pollPeriod", default_poll_period)
+        _LOG.debug("Wait for VM %s status %s :: poll %.2f timeout %d s",
+                   self.config["vmName"], loop_status, poll_period, self._poll_timeout)
 
-        # Block while still RUNNING
-        time_elapsed = 0.0
-
-        status = Status.FAILED
-        output = {}
-        while time_elapsed < timeout:
+        ts_timeout = time.time() + self._poll_timeout
+        poll_delay = poll_period
+        while True:
             # Wait for the suggested time first then check status
-            time.sleep(poll_period)
-            time_elapsed += poll_period
-
-            status, output = self.check_vm_operation_status(params)
-            if status != Status.RUNNING:
+            ts_start = time.time()
+            if ts_start >= ts_timeout:
                 break
-        else:
-            raise TimeoutError()
 
-        return status, output
+            if poll_delay > 0:
+                _LOG.debug("Sleep for: %.2f of %.2f s", poll_delay, poll_period)
+                time.sleep(poll_delay)
+
+            (status, output) = func(params)
+            if status != loop_status:
+                return status, output
+
+            ts_end = time.time()
+            poll_delay = poll_period - ts_end + ts_start
+
+        _LOG.warning("Request timed out: %s", params)
+        return (Status.TIMED_OUT, {})
+
+    def _check_deployment(self, _params: Dict) -> Tuple[Status, Dict]:
+        """
+        Check if Azure deployment exists.
+        Return SUCCEEDED if true, PENDING otherwise.
+
+        Parameters
+        ----------
+        _params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            This parameter is not used; we need it for compatibility with
+            other polling functions used in `_wait_while()`.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {SUCCEEDED, PENDING, FAILED}
+        """
+        _LOG.info("Check deployment: %s", self.config["vmName"])
+
+        response = requests.head(self._url_deploy, headers=self._headers)
+        _LOG.debug("Response: %s", response)
+
+        if response.status_code == 204:
+            return (Status.SUCCEEDED, {})
+        elif response.status_code == 404:
+            return (Status.PENDING, {})
+
+        _LOG.error("Response: %s :: %s", response, response.text)
+        return (Status.FAILED, {})
 
     def vm_provision(self, params: Dict) -> Tuple[Status, Dict]:
         """
@@ -336,7 +413,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         _LOG.info("Deploy VM: %s :: %s", self.config["vmName"], params)
 
@@ -344,7 +421,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             "properties": {
                 "mode": "Incremental",
                 "template": self._deploy_template,
-                "parameters": AzureVMService._build_arm_parameters(params)
+                "parameters": {key: {"value": val} for (key, val) in params.items()}
             }
         }
 
@@ -363,14 +440,14 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             _LOG.info("Response: %s", response)
 
         if response.status_code == 200:
+            return (Status.PENDING, {})
+        elif response.status_code == 201:
             output = AzureVMService._extract_arm_parameters(response.json())
             if _LOG.isEnabledFor(logging.DEBUG):
-                _LOG.debug("Extracted parameters:\n%s",
-                           json.dumps(output, indent=2))
+                _LOG.debug("Extracted parameters:\n%s", json.dumps(output, indent=2))
             # self.config.update(params)
-            return (Status.READY, output)
-        elif response.status_code == 201:
-            return (Status.PENDING, {})
+            output.setdefault("asyncResultsUrl", self._url_deploy)
+            return (Status.PENDING, output)
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
             # _LOG.error("Bad Request:\n%s", response.request.body)
@@ -389,10 +466,9 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         _LOG.info("Start VM: %s :: %s", self.config["vmName"], params)
-
         return self._azure_vm_post_helper(self._url_start)
 
     def vm_stop(self) -> Tuple[Status, Dict]:
@@ -403,10 +479,9 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         _LOG.info("Stop VM: %s", self.config["vmName"])
-
         return self._azure_vm_post_helper(self._url_stop)
 
     def vm_deprovision(self) -> Tuple[Status, Dict]:
@@ -417,10 +492,9 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        _LOG.info("Stop VM: %s", self.config["vmName"])
-
+        _LOG.info("Deprovision VM: %s", self.config["vmName"])
         return self._azure_vm_post_helper(self._url_stop)
 
     def vm_reboot(self) -> Tuple[Status, Dict]:
@@ -431,10 +505,9 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         _LOG.info("Reboot VM: %s", self.config["vmName"])
-
         return self._azure_vm_post_helper(self._url_reboot)
 
     def remote_exec(self, script: List[str], params: Dict[str, Any]) -> Tuple[Status, Dict]:
@@ -454,7 +527,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict)
             A pair of Status and result.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         if _LOG.isEnabledFor(logging.INFO):
             _LOG.info("Run a script on VM: %s\n  %s",
@@ -482,7 +555,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
 
         if response.status_code == 200:
             # TODO: extract the results from JSON response
-            return (Status.READY, {})
+            return (Status.SUCCEEDED, {})
         elif response.status_code == 202:
             return (Status.PENDING, {
                 "asyncResultsUrl": response.headers.get("Azure-AsyncOperation")
@@ -507,13 +580,13 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         -------
         result : (Status, dict)
             A pair of Status and result.
-            Status is one of {PENDING, READY, FAILED}
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         _LOG.info("Check the results on VM: %s", self.config["vmName"])
 
         status, result = self.wait_vm_operation(params)
 
-        if status == Status.READY:
+        if status == Status.SUCCEEDED:
             return status, result.get("properties", {}).get("output", {})
         else:
             return status, result

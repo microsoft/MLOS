@@ -3,14 +3,17 @@
         "class": "mlos_bench.environment.azure.AzureVMService",
 
         "config": {
-            "deployTemplatePath": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
+            "deployTemplatePath": "./mlos_bench/config/azure/arm-templates/azuredeploy-ubuntu-vm.json",
 
             "subscription": "AZURE SUBSCRIPTION ID",
             "accessToken": "AZURE ACCESS TOKEN FROM `az account get-access-token`",
 
             "resourceGroup": "os-autotune",
             "deploymentName": "os-autotune-001",
-            "vmName": "os-autotune-linux-vm"
+            "vmName": "os-autotune-linux-vm",
+
+            "pollInterval": 10,
+            "pollTimeout": 300
         }
     }
 ]

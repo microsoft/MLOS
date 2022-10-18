@@ -1,0 +1,25 @@
+{
+    "name": "Redis on Linux",
+    "class": "mlos_bench.environment.AppEnv",
+
+    "config": {
+
+        "tunable_params": ["redis"],
+
+        "const_args": {},
+
+        "setup": [
+            "/mnt/os-autotune/os-autotune/common/examples/redis/setup-app.sh",
+            "/mnt/os-autotune/os-autotune/common/examples/redis/setup-workload.sh"
+        ],
+
+        "run": [
+            "/mnt/os-autotune/os-autotune/common/examples/redis/run-workload.sh"
+        ],
+
+        "teardown": [
+            "/mnt/os-autotune/os-autotune/common/examples/redis/cleanup-workload.sh",
+            "/mnt/os-autotune/os-autotune/common/examples/redis/cleanup-app.sh"
+        ]
+    }
+}

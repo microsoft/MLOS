@@ -13,12 +13,14 @@ def azure_vm_service():
     Creates a dummy Azure VM service for tests that require it.
     """
     service = AzureVMService(config={
-        "deployTemplatePath": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
+        "deployTemplatePath": "./mlos_bench/config/azure/arm-templates/azuredeploy-ubuntu-vm.json",
         "deploymentName": "TEST_DEPLOYMENT",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
         "accessToken": "TEST_TOKEN",
-        "vmName": "dummy-vm"
+        "vmName": "dummy-vm",
+        "pollInterval": 1,
+        "pollTimeout": 2
     })
 
     return service

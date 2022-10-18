@@ -2,10 +2,10 @@
 VM-level benchmark environment on Azure.
 """
 
-import json
 import logging
 
 from mlos_bench.environment import Environment, Status
+from mlos_bench.environment.tunable import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
@@ -15,43 +15,7 @@ class VMEnv(Environment):
     Azure VM environment.
     """
 
-    def setup(self):
-        """
-        Check if the Azure VM can be provisioned.
-
-        Returns
-        -------
-        is_success : bool
-            True if operation is successful, false otherwise.
-        """
-        _LOG.info("VM set up")
-        return True
-
-    def teardown(self):
-        """
-        Shut down the VM and release it.
-
-        Returns
-        -------
-        is_success : bool
-            True if operation is successful, false otherwise.
-        """
-        _LOG.info("VM tear down")
-        status, params = self._service.vm_deprovision()
-
-        if status == Status.PENDING:
-            try:
-                status, _ = self._service.wait_vm_operation(params)
-            except TimeoutError:
-                _LOG.error("vm_deprovision timed out: %s", params)
-                return False
-
-        _LOG.info("Final status of VM tear down: %s", status)
-
-        return status == Status.READY
-
-    def run(self, tunables):
-        # pylint: disable=duplicate-code
+    def setup(self, tunables: TunableGroups) -> bool:
         """
         Check if Azure VM is ready. (Re)provision and start it, if necessary.
 
@@ -68,18 +32,25 @@ class VMEnv(Environment):
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        _LOG.info("Run: %s", tunables)
-        params = self._combine_tunables(tunables)
+        _LOG.info("VM set up: %s :: %s", self, tunables)
+        if not super().setup(tunables):
+            return False
 
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Deploy VM:\n%s", json.dumps(params, indent=2))
-
-        (status, output) = self._service.vm_provision(params)
-
+        (status, params) = self._service.vm_provision(self._params)
         if status == Status.PENDING:
-            try:
-                status, _ = self._service.wait_vm_operation(output)
-            except TimeoutError:
-                _LOG.error("vm_provision timed out: %s", output)
+            (status, _) = self._service.wait_vm_deployment(True, params)
 
-        return status in {Status.PENDING, Status.READY}
+        self._is_ready = status == Status.SUCCEEDED
+        return self._is_ready
+
+    def teardown(self):
+        """
+        Shut down the VM and release it.
+        """
+        _LOG.info("VM tear down: %s", self)
+        (status, params) = self._service.vm_deprovision()
+        if status == Status.PENDING:
+            (status, _) = self._service.wait_vm_deployment(False, params)
+
+        super().teardown()
+        _LOG.debug("Final status of VM deprovisioning: %s :: %s", self, status)

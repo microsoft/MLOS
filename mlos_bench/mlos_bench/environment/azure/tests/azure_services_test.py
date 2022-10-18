@@ -21,13 +21,15 @@ from mlos_bench.environment import Status
     ])
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"), [
-        (200, Status.READY),
+        (200, Status.SUCCEEDED),
         (202, Status.PENDING),
         (401, Status.FAILED),
         (404, Status.FAILED),
     ])
 @patch("mlos_bench.environment.azure.azure_services.requests")
-def test_vm_operation_status(mock_requests, azure_vm_service, operation_name, accepts_params, http_status_code, operation_status):
+def test_vm_operation_status(mock_requests, azure_vm_service, operation_name,
+                             accepts_params, http_status_code, operation_status):
+
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
     mock_requests.post.return_value = mock_response
@@ -63,19 +65,16 @@ def test_wait_vm_operation_ready(mock_requests, mock_sleep, azure_vm_service):
 
     assert (async_url, ) == mock_requests.get.call_args[0]
     assert (retry_after, ) == mock_sleep.call_args[0]
-    assert status == Status.READY
+    assert status == Status.SUCCEEDED
 
 
-@patch("mlos_bench.environment.azure.azure_services.time.sleep")
 @patch("mlos_bench.environment.azure.azure_services.requests")
-def test_wait_vm_operation_timeout(mock_requests, mock_sleep, azure_vm_service):
+def test_wait_vm_operation_timeout(mock_requests, azure_vm_service):
 
     # Mock response header
-    async_url = "DUMMY_ASYNC_URL"
-    retry_after = 10
     params = {
-        "asyncResultsUrl": async_url,
-        "pollPeriod": retry_after,
+        "asyncResultsUrl": "DUMMY_ASYNC_URL",
+        "pollPeriod": 1
     }
 
     mock_status_response = MagicMock(status_code=200)
@@ -84,17 +83,13 @@ def test_wait_vm_operation_timeout(mock_requests, mock_sleep, azure_vm_service):
     }
     mock_requests.get.return_value = mock_status_response
 
-    with pytest.raises(TimeoutError):
-        azure_vm_service.wait_vm_operation(params, timeout=100)
-
-    assert async_url == mock_requests.get.call_args.args[0]
-    assert mock_sleep.call_count == 10
-    assert mock_requests.get.call_count == 10
+    (status, _) = azure_vm_service.wait_vm_operation(params)
+    assert status == Status.TIMED_OUT
 
 
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"), [
-        (200, Status.READY),
+        (200, Status.SUCCEEDED),
         (202, Status.PENDING),
         (401, Status.FAILED),
         (404, Status.FAILED),
@@ -135,7 +130,7 @@ def test_remote_exec_headers_output(mock_requests, azure_vm_service):
     assert async_url_key in cmd_output
     assert cmd_output[async_url_key] == async_url_value
 
-    assert mock_requests.post.call_args.kwargs["json"] == {
+    assert mock_requests.post.call_args[1]["json"] == {
         "commandId": "RunShellScript",
         "script": script,
         "parameters": [
@@ -147,7 +142,7 @@ def test_remote_exec_headers_output(mock_requests, azure_vm_service):
 
 @pytest.mark.parametrize(
     ("operation_status", "wait_output", "results_output"), [
-        (Status.READY, {
+        (Status.SUCCEEDED, {
             "properties": {
                 "output": [
                     {"message": "DUMMY_STDOUT_STDERR"},
@@ -159,7 +154,9 @@ def test_remote_exec_headers_output(mock_requests, azure_vm_service):
         (Status.PENDING, {}, {}),
         (Status.FAILED, {}, {}),
     ])
-def test_get_remote_exec_results(azure_vm_service, operation_status: Status, wait_output: dict, results_output: dict):
+def test_get_remote_exec_results(azure_vm_service, operation_status: Status,
+                                 wait_output: dict, results_output: dict):
+
     params = {"asyncResultsUrl": "DUMMY_ASYNC_URL"}
 
     mock_wait_vm_operation = MagicMock()
@@ -169,5 +166,5 @@ def test_get_remote_exec_results(azure_vm_service, operation_status: Status, wai
     status, cmd_output = azure_vm_service.get_remote_exec_results(params)
 
     assert status == operation_status
-    assert mock_wait_vm_operation.call_args.args[0] == params
+    assert mock_wait_vm_operation.call_args[0][0] == params
     assert cmd_output == results_output

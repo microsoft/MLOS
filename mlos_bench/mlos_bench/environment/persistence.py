@@ -120,7 +120,9 @@ def _build_composite_service(config_list, global_config=None, parent=None):
         service.register(parent.export())
     for config in config_list:
         service.register(_build_standalone_service(config, global_config).export())
-    _LOG.info("Created mix-in service: %s", service.export())
+    if _LOG.isEnabledFor(logging.DEBUG):
+        _LOG.debug("Created mix-in service:\n%s", "\n".join(
+            '  f"{key}": "{val}"' for key, val in service.export().items()))
     return service
 
 
@@ -201,7 +203,7 @@ def load_environment(json_file_name, global_config=None,
     service : Service
         An optional reference of the parent service to mix in.
     """
-    _LOG.info("Load environment: %s", json_file_name)
+    _LOG.info("Load environment: '%s'", json_file_name)
     with open(json_file_name, encoding='utf-8') as fh_json:
         config = json.load(fh_json)
         return build_environment(config, global_config, tunables, service)
@@ -230,7 +232,7 @@ def load_services(json_file_names: List[str], global_config: dict = None, parent
     if parent:
         service.register(parent.export())
     for fname in json_file_names:
-        _LOG.debug("Load services: %s", fname)
+        _LOG.debug("Load services: '%s'", fname)
         with open(fname, encoding='utf-8') as fh_json:
             config = json.load(fh_json)
             service.register(build_service(config, global_config).export())
@@ -248,12 +250,12 @@ def load_tunables(json_file_names: List[str], parent: TunableGroups = None):
     parent : TunableGroups
         An optional collection of tunables to add to the new collection.
     """
-    _LOG.info("Load tunables: %s", json_file_names)
+    _LOG.info("Load tunables: '%s'", json_file_names)
     groups = TunableGroups()
     if parent is not None:
         groups.update(parent)
     for fname in json_file_names:
-        _LOG.debug("Load tunables: %s", fname)
+        _LOG.debug("Load tunables: '%s'", fname)
         with open(fname, encoding='utf-8') as fh_json:
             config = json.load(fh_json)
             groups.update(TunableGroups(config))

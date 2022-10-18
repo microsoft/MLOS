@@ -1,0 +1,28 @@
+{
+    "name": "Ubuntu Kernel",
+    "class": "mlos_bench.environment.AppEnv",
+
+    "config": {
+
+        "tunable_params": ["kernel"],
+
+        "const_args": {
+            "storageAccountName": "osatsharedstorage",
+            "storageFileShareName": "os-autotune-file-share",
+            "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
+        },
+
+        "setup": [
+            "sudo mkdir -p /mnt/os-autotune",
+            "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName /mnt/os-autotune -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30"
+        ],
+
+        "run": [
+            "ls -lapR /mnt/os-autotune"
+        ],
+
+        "teardown": [
+            "sudo umount /mnt/os-autotune"
+        ]
+    }
+}

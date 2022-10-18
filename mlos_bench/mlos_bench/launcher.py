@@ -9,7 +9,7 @@ import argparse
 from mlos_bench.environment.persistence import load_environment
 
 _LOG_LEVEL = logging.DEBUG
-_LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(levelname)s %(message)s'
+_LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
 logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT)
 
 _LOG = logging.getLogger(__name__)

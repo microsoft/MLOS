@@ -90,7 +90,8 @@ class Environment(metaclass=abc.ABCMeta):
         self.name = name
         self.config = config
         self._service = service
-        self._result = (Status.PENDING, None)
+        self._is_ready = False
+        self._params = {}
 
         self._const_args = config.get("const_args", {})
         for key in set(self._const_args).intersection(global_config or {}):
@@ -128,7 +129,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        config : dict
+        params : dict
             Free-format dictionary that contains the new environment configuration.
         """
         return tunables.get_param_values(
@@ -146,101 +147,52 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._tunable_params
 
-    def setup(self):  # pylint: disable=no-self-use
+    def setup(self, tunables: TunableGroups) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be
         idempotent, i.e., calling it several times in a row should be
         equivalent to a single call.
 
+        Parameters
+        ----------
+        tunables : TunableGroups
+            A collection of tunable parameters along with their values.
+
         Returns
         -------
         is_success : bool
             True if operation is successful, false otherwise.
         """
+        _LOG.info("Setup %s :: %s", self, tunables)
+        assert isinstance(tunables, TunableGroups)
+
+        self._params = self._combine_tunables(tunables)
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Combined parameters:\n%s", json.dumps(self._params, indent=2))
+
         return True
 
-    def teardown(self):  # pylint: disable=no-self-use
+    def teardown(self):
         """
         Tear down the benchmark environment. This method must be idempotent,
         i.e., calling it several times in a row should be equivalent to a
         single call.
-
-        Returns
-        -------
-        is_success : bool
-            True if operation is successful, false otherwise.
         """
-        return True
+        _LOG.info("Teardown %s", self)
+        self._is_ready = False
 
-    @abc.abstractmethod
-    def run(self, tunables):
+    def benchmark(self):
         """
         Submit a new experiment to the environment.
 
-        Parameters
-        ----------
-        tunables : TunableGroups
-            A collection of tunable parameters along with their values.
-
         Returns
         -------
-        is_success : bool
-            True if operation is successful, false otherwise.
-        """
-
-    def submit(self, tunables: TunableGroups):
-        """
-        Submit a new experiment to the environment. Set up the environment,
-        if necessary.
-
-        Parameters
-        ----------
-        tunables : TunableGroups
-            A collection of tunable parameters along with their values.
-
-        Returns
-        -------
-        is_success : bool
-            True if operation is successful, false otherwise.
-        """
-        _LOG.info("Submit: %s", tunables)
-        assert isinstance(tunables, TunableGroups)
-        if self.setup():
-            return self.run(tunables)
-        return False
-
-    def status(self):
-        """
-        Get the status of the environment.
-
-        Returns
-        -------
-        status : mlos_bench.environment.Status
-            Current status of the benchmark environment.
-        """
-        return self._result[0]
-
-    def result(self):
-        """
-        Get the results of the benchmark. This is a blocking call that waits
-        for the completion of the benchmark. It can have PENDING status only if
-        the environment object has been read from the storage and not updated
-        with the actual status yet.
-
-        Base implementation returns the results of the last .update() call.
-
-        Returns
-        -------
-        (benchmark_status, benchmark_result) : (enum, float)
+        (benchmark_status, benchmark_result) : (Status, float)
             A pair of (benchmark status, benchmark result) values.
-            benchmark_status is one one of:
-                PENDING
-                RUNNING
-                COMPLETED
-                CANCELED
-                FAILED
             benchmark_result is a floating point time of the benchmark in
             seconds or None if the status is not COMPLETED.
         """
-        _LOG.info("Result: %s", self._result)
-        return self._result
+        if self._is_ready:
+            return (Status.READY, None)
+        _LOG.warning("Environment not ready: %s", self)
+        return (Status.PENDING, None)
