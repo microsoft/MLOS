@@ -11,6 +11,7 @@ from mlos_bench.environment.base_environment import Environment
 
 from mlos_bench.environment.app import AppEnv
 from mlos_bench.environment.composite import CompositeEnv
+from mlos_bench.environment.config_persistence import ConfigPersistenceService
 
 
 def _check_required_params(config: Dict[str, Any], required_params: Iterable[str]):
@@ -43,4 +44,5 @@ __all__ = [
     'Environment',
     'AppEnv',
     'CompositeEnv',
+    'ConfigPersistenceService'
 ]

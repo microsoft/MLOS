@@ -2,11 +2,10 @@
 Helper functions to launch the benchmark and the optimizer from the command line.
 """
 
-import json
 import logging
 import argparse
 
-from mlos_bench.environment.persistence import load_environment
+from mlos_bench.environment import ConfigPersistenceService
 
 _LOG_LEVEL = logging.DEBUG
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
@@ -24,6 +23,7 @@ class Launcher:
 
         _LOG.info("Launch: %s", description)
 
+        self._config_loader = None
         self._env_config_file = None
         self._global_config = {}
         self._parser = argparse.ArgumentParser(description=description)
@@ -36,6 +36,10 @@ class Launcher:
             '--config', required=True,
             help='Path to JSON file with the configuration'
                  ' of the benchmarking environment')
+
+        self._parser.add_argument(
+            '--config-dir', required=False,
+            help='Root path to the location of *all* JSON config files.')
 
         self._parser.add_argument(
             '--global', required=False, dest='global_config',
@@ -62,21 +66,16 @@ class Launcher:
             logging.root.addHandler(log_handler)
 
         self._env_config_file = args.config
+        self._config_loader = ConfigPersistenceService({"config_dir": args.config_dir})
 
         if args.global_config is not None:
-            self._global_config = Launcher.load_config(args.global_config)
+            self._global_config = self._config_loader.load_config(args.global_config)
 
         self._global_config.update(Launcher._try_parse_extra_args(args_rest))
+        if args.config_dir:
+            self._global_config["config_dir"] = args.config_dir
 
         return args
-
-    @staticmethod
-    def load_config(json_file_name):
-        """
-        Load JSON config file.
-        """
-        with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
-            return json.load(fh_json)
 
     @staticmethod
     def _try_parse_extra_args(cmdline):
@@ -108,9 +107,17 @@ class Launcher:
         _LOG.debug("Parsed config: %s", config)
         return config
 
+    def load_config(self, json_file_name: str) -> dict:
+        """
+        Load JSON config file. Use path relative to `config_dir` if required.
+        """
+        assert self._config_loader is not None, "Call after invoking .parse_args()"
+        return self._config_loader.load_config(json_file_name)
+
     def load_env(self):
         """
-        Create a new benchmarking environment
-        from the configs and command line parameters.
+        Create a new benchmarking environment from the configs and command line parameters.
+        Inject the persistence service so that the environment can load other configs.
         """
-        return load_environment(self._env_config_file, self._global_config)
+        return self._config_loader.load_environment(
+            self._env_config_file, self._global_config, service=self._config_loader)

@@ -7,7 +7,6 @@ import logging
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_service import Service
 from mlos_bench.environment.base_environment import Environment
-from mlos_bench.environment.persistence import build_environment, load_environment
 from mlos_bench.environment.tunable import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -44,10 +43,10 @@ class CompositeEnv(Environment):
 
         self._children = []
         for child_config_file in config.get("include_children", []):
-            self._add_child(load_environment(
+            self._add_child(self._service.load_environment(
                 child_config_file, global_config, tunables, self._service))
         for child_config in config.get("children", []):
-            self._add_child(build_environment(
+            self._add_child(self._service.build_environment(
                 child_config, global_config, tunables, self._service))
         if not self._children:
             raise ValueError("At least one child environment must be present")

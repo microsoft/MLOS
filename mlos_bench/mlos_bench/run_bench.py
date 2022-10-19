@@ -27,7 +27,7 @@ def _main():
 
     args = launcher.parse_args()
 
-    tunable_values = Launcher.load_config(args.tunables)
+    tunable_values = launcher.load_config(args.tunables)
     env = launcher.load_env()
 
     tunables = env.tunable_params()

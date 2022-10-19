@@ -3,8 +3,8 @@ A collection Service functions for managing VMs on Azure.
 """
 
 import json
-import logging
 import time
+import logging
 
 from typing import Any, Tuple, List, Dict, Callable
 
@@ -133,8 +133,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         self._poll_interval = int(config.get("pollInterval", AzureVMService._POLL_INTERVAL))
         self._poll_timeout = int(config.get("pollTimeout", AzureVMService._POLL_TIMEOUT))
 
-        with open(config['deployTemplatePath'], encoding='utf-8') as fh_json:
-            self._deploy_template = json.load(fh_json)
+        self._deploy_template = self.load_config(config['deployTemplatePath'])
 
         self._url_deploy = AzureVMService._URL_DEPLOY.format(
             subscription=config["subscription"],
@@ -209,7 +208,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
             Result will have a value for 'asyncResultsUrl' if status is PENDING,
-            and 'pollPeriod' if suggested by the API.
+            and 'pollInterval' if suggested by the API.
         """
         _LOG.debug("Request: POST %s", url)
 
@@ -227,7 +226,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             elif "Location" in response.headers:
                 result["asyncResultsUrl"] = response.headers.get("Location")
             if "Retry-After" in response.headers:
-                result["pollPeriod"] = float(response.headers["Retry-After"])
+                result["pollInterval"] = float(response.headers["Retry-After"])
 
             return (Status.PENDING, result)
         else:
@@ -340,7 +339,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         result : (Status, dict)
             A pair of Status and result.
         """
-        poll_period = params.get("pollPeriod", self._poll_interval)
+        poll_period = params.get("pollInterval", self._poll_interval)
 
         _LOG.debug("Wait for VM %s status %s :: poll %.2f timeout %d s",
                    self.config["vmName"], loop_status, poll_period, self._poll_timeout)

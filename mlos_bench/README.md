@@ -57,7 +57,7 @@ For these instructions, we will be using Azure for our resources.
             "class": "mlos_bench.environment.azure.AzureVMService",
 
             "config": {
-                "deployTemplatePath": "./mlos_bench/config/azure/azuredeploy-ubuntu-vm.json",
+                "deployTemplatePath": "azure/azuredeploy-ubuntu-vm.json",
 
                 "subscription": "{{ ID of subscription to use }}",
                 "resourceGroup": "{{ Name of resource group to use }}",
@@ -83,7 +83,7 @@ For example,
         "class": "mlos_bench.environment.CompositeEnv",
 
         "include_tunables": [
-            "./mlos_bench/config/tunables.json"
+            "tunables.json"
         ],
 
         "include_services": [

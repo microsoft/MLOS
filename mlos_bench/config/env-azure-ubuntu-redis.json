@@ -3,19 +3,19 @@
     "class": "mlos_bench.environment.CompositeEnv",
 
     "include_tunables": [
-        "./mlos_bench/config/tunables.json"
+        "tunables.json"
     ],
 
     "include_services": [
-        "./mlos_bench/config/azure/services.json"
+        "azure/services.json"
     ],
 
     "config": {
         "include_children": [
-            "./mlos_bench/config/azure/provision-ubuntu-vm.json",
-            "./mlos_bench/config/linux-boot/boot-ubuntu.json",
-            "./mlos_bench/config/linux-setup/setup-ubuntu.json",
-            "./mlos_bench/config/applications/redis.json"
+            "azure/provision-ubuntu-vm.json",
+            "linux-boot/boot-ubuntu.json",
+            "linux-setup/setup-ubuntu.json",
+            "applications/redis.json"
         ]
     }
 }

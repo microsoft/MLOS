@@ -52,7 +52,7 @@ def test_wait_vm_operation_ready(mock_requests, mock_sleep, azure_vm_service):
     retry_after = 12345
     params = {
         "asyncResultsUrl": async_url,
-        "pollPeriod": retry_after,
+        "pollInterval": retry_after,
     }
 
     mock_status_response = MagicMock(status_code=200)
@@ -74,7 +74,7 @@ def test_wait_vm_operation_timeout(mock_requests, azure_vm_service):
     # Mock response header
     params = {
         "asyncResultsUrl": "DUMMY_ASYNC_URL",
-        "pollPeriod": 1
+        "pollInterval": 1
     }
 
     mock_status_response = MagicMock(status_code=200)

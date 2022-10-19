@@ -3,7 +3,8 @@
         "class": "mlos_bench.environment.azure.AzureVMService",
 
         "config": {
-            "deployTemplatePath": "./mlos_bench/config/azure/arm-templates/azuredeploy-ubuntu-vm.json",
+            "config_dir": "./mlos_bench/config",
+            "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.json",
 
             "subscription": "AZURE SUBSCRIPTION ID",
             "accessToken": "AZURE ACCESS TOKEN FROM `az account get-access-token`",
