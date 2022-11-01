@@ -112,7 +112,7 @@ jobs:
       conda create -y -v -n mlos-dist-test-$(PythonVersion) python=$(PythonVersion)
       conda install -y -v -n mlos-dist-test-$(PythonVersion) pytest
       conda install -y -v -n mlos-dist-test-$(PythonVersion) conda-forge::gpy
-      conda run -n mlos-dist-test-$(PythonVersion) pip install emukit scikit-optimize
+      conda run -n mlos-dist-test-$(PythonVersion) pip install -r test-requirements.txt
       # Install mlos_core wheel.
       conda run -n mlos-dist-test-$(PythonVersion) pip install $mlos_core_whl
       # Install mlos_bench wheel.

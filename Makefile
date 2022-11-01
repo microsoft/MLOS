@@ -101,8 +101,8 @@ dist-test-env: dist .dist-test-env.$(PYTHON_VERSION).build-stamp
 	conda install -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) pytest
 	# Test a clean install of the mlos_core wheel.
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install mlos_core/dist/mlos_core-*-py3-none-any.whl
-	# Install the necessary optimizers for the tests.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install emukit scikit-optimize
+	# Install the necessary extra requirements for the tests.
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install -r test-requirements.txt
 	# Test a clean install of the mlos_bench wheel.
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install mlos_bench/dist/mlos_bench-*-py3-none-any.whl
 	touch .dist-test-env.$(PYTHON_VERSION).build-stamp

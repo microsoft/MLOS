@@ -19,6 +19,7 @@ setup(
     extras_require={
         'emukit': 'emukit',
         'skopt': 'scikit-optimize',
+        'azure': 'azure-storage-file-share',
     },
     author='Microsoft',
     author_email='mlos-maintainers@service.microsoft.com',

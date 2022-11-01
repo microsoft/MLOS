@@ -1,0 +1,4 @@
+# Extra requirements that are needed for running tests
+emukit
+scikit-optimize
+azure-storage-file-share

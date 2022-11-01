@@ -28,6 +28,7 @@ dependencies:
   - pip:
     - scikit-optimize
     - emukit
+    - azure-storage-file-share
     - "--editable ../mlos_core"
     - "--editable ../mlos_bench"
     - pytest-cov

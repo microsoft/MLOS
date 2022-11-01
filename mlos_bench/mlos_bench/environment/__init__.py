@@ -8,6 +8,7 @@ from mlos_bench.environment.status import Status
 from mlos_bench.environment.tunable import Tunable, TunableGroups
 from mlos_bench.environment.base_service import Service
 from mlos_bench.environment.base_environment import Environment
+from mlos_bench.environment.base_fileshare import FileShareService
 
 from mlos_bench.environment.app import AppEnv
 from mlos_bench.environment.composite import CompositeEnv
@@ -44,5 +45,6 @@ __all__ = [
     'Environment',
     'AppEnv',
     'CompositeEnv',
-    'ConfigPersistenceService'
+    'ConfigPersistenceService',
+    'FileShareService',
 ]
