@@ -3,8 +3,12 @@ Application-specific benchmark environment.
 """
 
 import logging
-
+import subprocess
+import sys
+import tempfile
 from typing import Optional
+
+import pandas as pd
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -50,6 +54,9 @@ class AppEnv(Environment):
         self._script_setup = self.config.get("setup")
         self._script_run = self.config.get("run")
         self._script_teardown = self.config.get("teardown")
+        self._script_postprocess = self.config.get("postprocess")
+        if self._script_postprocess is not None:
+            self._script_postprocess = self._service.get_config_path(self._script_postprocess)
 
     def setup(self, tunables: TunableGroups) -> bool:
         """
@@ -110,8 +117,38 @@ class AppEnv(Environment):
 
         # Configure the application and start the benchmark
         (status, _) = result = self._remote_exec(self._script_run)
+
+        if not self._script_postprocess:
+            return result
+
+        with tempfile.TemporaryDirectory() as local_dir:
+            self._service.download(self._const_args["outputPrefix"], local_dir)
+
+            # Post-process results
+            proc = subprocess.run(
+                [
+                    # Execute the post-processing script with the current python env
+                    sys.executable,
+                    self._script_postprocess,
+                    # Pass the download dir as the argument to the script
+                    local_dir,
+                ],
+                shell=True,
+                check=True,
+                capture_output=True,
+            )
+            script_results = proc.stdout.decode().strip()
+            if proc.returncode == 0:
+                metrics_df = pd.read_csv(script_results)
+            else:
+                metrics_df = None
+                _LOG.error(
+                    "Non-zero exit code %d during post-processing with %s. STDOUT: \n%s",
+                    proc.returncode, self._script_postprocess, script_results)
+
+        result = (status, metrics_df)
         _LOG.info("Run complete: %s :: %s", self, result)
-        return (status, 123.456)  # FIXME: use the actual data
+        return result
 
     def _remote_exec(self, script):
         """
@@ -132,8 +169,7 @@ class AppEnv(Environment):
         (status, output) = self._service.remote_exec(script, self._params)
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
-            self._params.update(output)
-            (status, output) = self._service.get_remote_exec_results(self._params)
+            (status, output) = self._service.get_remote_exec_results(output)
             # TODO: extract the results from `output`.
         _LOG.debug("Status: %s :: %s", status, output)
         return (status, output)

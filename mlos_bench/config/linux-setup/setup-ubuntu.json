@@ -9,20 +9,21 @@
         "const_args": {
             "storageAccountName": "osatsharedstorage",
             "storageFileShareName": "os-autotune-file-share",
-            "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
+            "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`",
+            "mountPoint": "/mnt/osat_fs"
         },
 
         "setup": [
-            "sudo mkdir -p /mnt/os-autotune",
-            "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName /mnt/os-autotune -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30"
+            "mkdir -p $mountPoint",
+            "mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30"
         ],
 
         "run": [
-            "ls -lapR /mnt/os-autotune"
+            "ls -lap $mountPoint"
         ],
 
         "teardown": [
-            "sudo umount /mnt/os-autotune"
+            "umount $mountPoint"
         ]
     }
 }

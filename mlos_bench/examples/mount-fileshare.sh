@@ -8,7 +8,8 @@ if [ $EUID != 0 ]; then
     exit 1
 fi
 
-if ! mountpoint -q /mnt/osat-fs; then
-    mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName /mnt/osat-fs \
-        -o username=$storageAccountName,password=$storageAccountKey,dir_mode=0777,file_mode=0777,serverino,nosharesock,actimeo=30
+mkdir -m 777 -p "$mountPoint"
+if ! mountpoint -q "$mountPoint"; then
+    mount -t cifs //"$storageAccountName".file.core.windows.net/"$storageFileShareName" "$mountPoint" \
+        -o username="$storageAccountName",password="$storageAccountKey",dir_mode=0777,file_mode=0777,serverino,nosharesock,actimeo=30
 fi

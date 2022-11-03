@@ -8,9 +8,10 @@ source ./common.sh
 
 check_docker
 
-# TODO: Run the client workload.
+# Run the client workload.
 # Here we reuse the redis server container image, but replace its entrypoint with the redis-benchmark utility.
 docker run --rm --name $REDIS_CLIENT_NAME --entrypoint /usr/local/bin/redis-benchmark $REDIS_IMAGE \
-    -h $REDIS_SERVER_HOST -p $REDIS_PORT -t set
-
-# TODO: Parse the results.
+    -h $REDIS_SERVER_HOST -p $REDIS_PORT \
+    -t set \
+    -q --csv \
+    | tee /tmp/mlos_bench/output/results.csv
