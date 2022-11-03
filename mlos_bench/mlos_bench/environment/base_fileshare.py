@@ -2,9 +2,13 @@
 Base class for remote file shares.
 """
 
+import logging
+
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.environment.base_service import Service
+
+_LOG = logging.getLogger(__name__)
 
 
 class FileShareService(Service, metaclass=ABCMeta):
@@ -43,8 +47,11 @@ class FileShareService(Service, metaclass=ABCMeta):
         local_path : str
             Path to store the downloaded content to.
         recursive : bool
-            To download a single file if False, or recursively download a directory if True.
+            If False, ignore the subdirectories;
+            if True (the default), download the entire directory tree.
         """
+        _LOG.info("Download from File Share %srecursively: %s -> %s",
+                  remote_path, local_path, "" if recursive else "non-")
 
     @abstractmethod
     def upload(self, local_path: str, remote_path: str, recursive: bool = True):
@@ -56,7 +63,10 @@ class FileShareService(Service, metaclass=ABCMeta):
         local_path : str
             Path to the local directory to upload contents from.
         remote_path : str
-            Path in the remote file share to store the downloaded content to.
+            Path in the remote file share to store the uploaded content to.
         recursive : bool
-            To upload a single file if False, or recursively upload a directory if True.
+            If False, ignore the subdirectories;
+            if True (the default), upload the entire directory tree.
         """
+        _LOG.info("Upload to File Share %srecursively: %s -> %s",
+                  local_path, remote_path, "" if recursive else "non-")

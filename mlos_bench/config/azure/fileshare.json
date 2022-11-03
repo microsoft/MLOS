@@ -5,8 +5,7 @@
         "config": {
             "storageAccountName": "osatstorage",
             "storageFileShareName": "osat-fs",
-            "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`",
-            "mountPoint": "/mnt/osat_fs"
+            "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
         }
     }
 ]
