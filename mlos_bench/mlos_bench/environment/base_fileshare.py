@@ -16,7 +16,7 @@ class FileShareService(Service, metaclass=ABCMeta):
     An abstract base of all file shares.
     """
 
-    def __init__(self, config):
+    def __init__(self, config: dict, parent: Service):
         """
         Create a new file share with a given config.
 
@@ -26,8 +26,10 @@ class FileShareService(Service, metaclass=ABCMeta):
             Free-format dictionary that contains the file share configuration.
             It will be passed as a constructor parameter of the class
             specified by `class_name`.
+        parent : Service
+            Parent service that can provide mixin functions.
         """
-        super().__init__(config)
+        super().__init__(config, parent)
 
         self.register([
             self.download,

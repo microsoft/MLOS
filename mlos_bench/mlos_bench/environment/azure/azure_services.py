@@ -93,7 +93,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         "?api-version=2022-03-01"
     )
 
-    def __init__(self, config):
+    def __init__(self, config: dict, parent: Service):
         """
         Create a new instance of Azure services proxy.
 
@@ -102,8 +102,10 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration.
+        parent : Service
+            Parent service that can provide mixin functions.
         """
-        super().__init__(config)
+        super().__init__(config, parent)
 
         _check_required_params(
             config, {
@@ -133,7 +135,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         self._poll_interval = int(config.get("pollInterval", AzureVMService._POLL_INTERVAL))
         self._poll_timeout = int(config.get("pollTimeout", AzureVMService._POLL_TIMEOUT))
 
-        self._deploy_template = self.load_config(config['deployTemplatePath'])
+        self._deploy_template = self._parent.load_config(config['deployTemplatePath'])
 
         self._url_deploy = AzureVMService._URL_DEPLOY.format(
             subscription=config["subscription"],

@@ -56,7 +56,7 @@ class AppEnv(Environment):
         self._script_teardown = self.config.get("teardown")
         self._script_postprocess = self.config.get("postprocess")
         if self._script_postprocess is not None:
-            self._script_postprocess = self._service.get_config_path(self._script_postprocess)
+            self._script_postprocess = self._service.resolve_path(self._script_postprocess)
 
     def setup(self, tunables: TunableGroups) -> bool:
         """

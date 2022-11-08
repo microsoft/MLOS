@@ -38,8 +38,8 @@ class Launcher:
                  ' of the benchmarking environment')
 
         self._parser.add_argument(
-            '--config-dir', required=False,
-            help='Root path to the location of *all* JSON config files.')
+            '--config-path', nargs="+", required=False,
+            help='Locations of JSON config files.')
 
         self._parser.add_argument(
             '--global', required=False, dest='global_config',
@@ -66,14 +66,14 @@ class Launcher:
             logging.root.addHandler(log_handler)
 
         self._env_config_file = args.config
-        self._config_loader = ConfigPersistenceService({"config_dir": args.config_dir})
+        self._config_loader = ConfigPersistenceService({"config_path": args.config_path})
 
         if args.global_config is not None:
             self._global_config = self._config_loader.load_config(args.global_config)
 
         self._global_config.update(Launcher._try_parse_extra_args(args_rest))
-        if args.config_dir:
-            self._global_config["config_dir"] = args.config_dir
+        if args.config_path:
+            self._global_config["config_path"] = args.config_path
 
         return args
 
@@ -109,7 +109,7 @@ class Launcher:
 
     def load_config(self, json_file_name: str) -> dict:
         """
-        Load JSON config file. Use path relative to `config_dir` if required.
+        Load JSON config file. Use path relative to `config_path` if required.
         """
         assert self._config_loader is not None, "Call after invoking .parse_args()"
         return self._config_loader.load_config(json_file_name)

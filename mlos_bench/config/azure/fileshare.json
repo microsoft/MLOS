@@ -3,7 +3,6 @@
         "class": "mlos_bench.environment.azure.AzureFileShareService",
 
         "config": {
-            "config_dir": "./mlos_bench/config",
             "storageAccountName": "osatstorage",
             "storageFileShareName": "osat-fs",
             "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"

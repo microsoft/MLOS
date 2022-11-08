@@ -4,6 +4,7 @@ that encapsulate benchmark environments, tunable parameters, and
 service functions.
 """
 
+import os
 import json
 import logging
 
@@ -21,7 +22,7 @@ class ConfigPersistenceService(Service):
     Collection of methods to deserialize the Environment, Service, and TunableGroups objects.
     """
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict = None, parent: Service = None):
         """
         Create a new instance of config persistence service.
 
@@ -30,12 +31,16 @@ class ConfigPersistenceService(Service):
         config : dict
             Free-format dictionary that contains parameters for the service.
             (E.g., root path for config files, etc.)
+        parent : Service
+            An optional parent service that can provide mixin functions.
         """
-        super().__init__(config)
-        self._config_dir = self.config.get("config_dir")
+        super().__init__(config, parent)
+        self._config_path = self.config.get("config_path", [])
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
+            self.resolve_path,
+            self.load_config,
             ConfigPersistenceService.build_service,
             ConfigPersistenceService.build_tunables,
             self.build_environment,
@@ -43,6 +48,50 @@ class ConfigPersistenceService(Service):
             self.load_tunables,
             self.load_environment,
         ])
+
+    def resolve_path(self, file_path: str) -> str:
+        """
+        Prepend the suitable `_config_path` to `path` if the latter is not absolute.
+        If `_config_path` is `None` or `path` is absolute, return `path` as is.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the input config file.
+
+        Returns
+        -------
+        path : str
+            An actual absolute path to the config.
+        """
+        if not os.path.isabs(file_path):
+            for path in self._config_path:
+                full_path = os.path.join(path, file_path)
+                if os.path.exists(full_path):
+                    file_path = full_path
+                    break
+        return os.path.abspath(file_path)
+
+    def load_config(self, json_file_name: str) -> dict:
+        """
+        Load JSON config file. Search for a file relative to `_config_path`
+        if the input path is not absolute.
+        This method is exported to be used as a service.
+
+        Parameters
+        ----------
+        json_file_name : str
+            Path to the input config file.
+
+        Returns
+        -------
+        config : dict
+            Free-format dictionary that contains the configuration.
+        """
+        json_file_name = self.resolve_path(json_file_name)
+        _LOG.info("Load config: %s", json_file_name)
+        with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
+            return json.load(fh_json)
 
     def build_environment(self, config: dict,
                           global_config: dict = None,
@@ -94,7 +143,9 @@ class ConfigPersistenceService(Service):
         return env
 
     @classmethod
-    def _build_standalone_service(cls, config: dict, global_config: dict = None) -> Service:
+    def _build_standalone_service(cls, config: dict,
+                                  global_config: dict = None,
+                                  parent: Service = None) -> Service:
         """
         Factory method for a new service with a given config.
 
@@ -106,6 +157,8 @@ class ConfigPersistenceService(Service):
                 "config": Free-format dictionary to pass to the constructor.
         global_config : dict
             Global parameters to add to the service config.
+        parent: Service
+            An optional reference of the parent service to mix in.
 
         Returns
         -------
@@ -120,7 +173,7 @@ class ConfigPersistenceService(Service):
             svc_config[key] = global_config[key]
 
         _LOG.debug("Creating service: %s", svc_class)
-        service = Service.new(svc_class, svc_config)
+        service = Service.new(svc_class, svc_config, parent)
 
         _LOG.info("Created service: %s", service)
         return service
@@ -154,7 +207,8 @@ class ConfigPersistenceService(Service):
             service.register(parent.export())
 
         for config in config_list:
-            service.register(cls._build_standalone_service(config, global_config).export())
+            service.register(cls._build_standalone_service(
+                config, global_config, service).export())
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Created mix-in service:\n%s", "\n".join(
@@ -276,7 +330,7 @@ class ConfigPersistenceService(Service):
         for fname in json_file_names:
             config = self.load_config(fname)
             service.register(
-                ConfigPersistenceService.build_service(config, global_config).export())
+                ConfigPersistenceService.build_service(config, global_config, service).export())
         return service
 
     def load_tunables(self, json_file_names: List[str],

@@ -3,7 +3,6 @@
         "class": "mlos_bench.environment.azure.AzureVMService",
 
         "config": {
-            "config_dir": "./mlos_bench/config",
             "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.json",
 
             "subscription": "AZURE SUBSCRIPTION ID",
