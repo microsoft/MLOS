@@ -12,7 +12,8 @@ setup(
     version=_VERSION,
     packages=find_packages(),
     install_requires=[
-        'scikit-learn>=0.22.1',
+        'scikit-learn>=1.1.3',
+        'joblib>=1.1.1',    # CVE-2022-21797: scikit-learn dependency, addressed in 1.2.0dev0, which isn't currently released
         'scipy>=1.3.2',
         'numpy>=1.18.1',
         'pandas>=1.0.3',
