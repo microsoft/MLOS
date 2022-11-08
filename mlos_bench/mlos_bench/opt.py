@@ -26,8 +26,7 @@ class Optimizer:
         """
         # For now, get just the default values.
         # FIXME: Need to iterate over the actual values.
-        # TODO: Use self._tunables.copy() here when implemented.
-        tunables = self._tunables
+        tunables = self._tunables.copy()
         # TODO: Populate the tunables with some random values
         _LOG.info("Suggest: %s", tunables)
         return tunables

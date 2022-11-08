@@ -1,7 +1,9 @@
 """
 Tunable parameter definition.
 """
+import copy
 import collections
+
 from typing import Any, Dict, List
 
 
@@ -10,7 +12,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     A tunable parameter definition and its current value.
     """
 
-    def __init__(self, name, config):
+    def __init__(self, name: str, config: dict):
         """
         Create an instance of a new tunable parameter.
 
@@ -22,8 +24,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             Python dict that represents a Tunable (e.g., deserialized from JSON)
         """
         self._name = name
+        self._type = config["type"]  # required
         self._description = config.get("description")
-        self._type = config["type"]
         self._default = config.get("default")
         self._values = config.get("values")
         self._range = config.get("range")
@@ -42,8 +44,48 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         else:
             raise ValueError("Invalid parameter type: " + self._type)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Produce a human-readable version of the Tunable (mostly for logging).
+
+        Returns
+        -------
+        string : str
+            A human-readable version of the Tunable.
+        """
         return f"{self._name}={self._current_value}"
+
+    def __eq__(self, other) -> bool:
+        """
+        Check if two Tunable objects are equal.
+
+        Parameters
+        ----------
+        other : Tunable
+            A tunable object to compare to.
+
+        Returns
+        -------
+        is_equal : bool
+            True if the Tunables correspond to the same parameter and have the same value and type.
+            NOTE: ranges and special values are not currently considered in the comparison.
+        """
+        return (
+            self._name == other._name and
+            self._type == other._type and
+            self._current_value == other._current_value
+        )
+
+    def copy(self):
+        """
+        Deep copy of the Tunable object.
+
+        Returns
+        -------
+        tunable : Tunable
+            A new Tunable object that is a deep copy of the original one.
+        """
+        return copy.deepcopy(self)
 
     @property
     def value(self):
@@ -67,7 +109,7 @@ class CovariantTunableGroup:
     Changing any of the parameters in the group incurs the same cost of the experiment.
     """
 
-    def __init__(self, name, config):
+    def __init__(self, name: str, config: dict):
         """
         Create a new group of tunable parameters.
 
@@ -87,6 +129,50 @@ class CovariantTunableGroup:
             for (name, tunable_config) in config.get("params", {}).items()
         }
 
+    @property
+    def name(self) -> str:
+        """
+        Get the name of the covariant group.
+
+        Returns
+        -------
+        name : str
+            Name (i.e., a string id) of the covariant group.
+        """
+        return self._name
+
+    def copy(self):
+        """
+        Deep copy of the CovariantTunableGroup object.
+
+        Returns
+        -------
+        group : CovariantTunableGroup
+            A new instance of the CovariantTunableGroup object
+            that is a deep copy of the original one.
+        """
+        return copy.deepcopy(self)
+
+    def __eq__(self, other) -> bool:
+        """
+        Check if two CovariantTunableGroup objects are equal.
+
+        Parameters
+        ----------
+        other : CovariantTunableGroup
+            A covariant tunable group object to compare to.
+
+        Returns
+        -------
+        is_equal : bool
+            True if two CovariantTunableGroup objects are equal.
+        """
+        return (self._name == other._name and
+                self._cost == other._cost and
+                self._is_updated == other._is_updated and
+                all(t1 == t2 for (t1, t2) in zip(self._tunables.values(),
+                                                 other._tunables.values())))
+
     def reset(self):
         """
         Clear the update flag. That is, state that running an experiment with the
@@ -94,7 +180,18 @@ class CovariantTunableGroup:
         """
         self._is_updated = False
 
-    def get_cost(self):
+    def is_updated(self) -> bool:
+        """
+        Check if any of the tunable values in the group has been updated.
+
+        Returns
+        -------
+        is_updated : bool
+            True if any of the tunable values in the group has been updated, False otherwise.
+        """
+        return self._is_updated
+
+    def get_cost(self) -> int:
         """
         Get the cost of the experiment given current tunable values.
 
@@ -105,25 +202,34 @@ class CovariantTunableGroup:
         """
         return self._cost if self._is_updated else 0
 
-    def get_names(self):
+    def get_names(self) -> List[str]:
         """
         Get the names of all tunables in the group.
         """
         return self._tunables.keys()
 
-    def get_values(self):
+    def get_values(self) -> Dict[str, Any]:
         """
         Get current values of all tunables in the group.
         """
         return {name: tunable.value for (name, tunable) in self._tunables.items()}
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Produce a human-readable version of the CovariantTunableGroup
+        (mostly for logging).
+
+        Returns
+        -------
+        string : str
+            A human-readable version of the CovariantTunableGroup.
+        """
         return f"{self._name}: {self._tunables}"
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str):
         return self._tunables[name].value
 
-    def __setitem__(self, name, value):
+    def __setitem__(self, name: str, value):
         self._is_updated = True
         self._tunables[name].value = value
         return value
@@ -134,7 +240,7 @@ class TunableGroups:
     A collection of covariant groups of tunable parameters.
     """
 
-    def __init__(self, config=None):
+    def __init__(self, config: dict = None):
         """
         Create a new group of tunable parameters.
 
@@ -148,7 +254,36 @@ class TunableGroups:
         for (name, group_config) in (config or {}).items():
             self._add_group(CovariantTunableGroup(name, group_config))
 
-    def _add_group(self, group):
+    def __eq__(self, other) -> bool:
+        """
+        Check if two TunableGroups are equal.
+
+        Parameters
+        ----------
+        other : TunableGroups
+            A tunable groups object to compare to.
+
+        Returns
+        -------
+        is_equal : bool
+            True if two TunableGroups are equal.
+        """
+        return all(g1 == g2 for (g1, g2) in zip(self._tunable_groups.values(),
+                                                other._tunable_groups.values()))
+
+    def copy(self):
+        """
+        Deep copy of the TunableGroups object.
+
+        Returns
+        -------
+        tunables : TunableGroups
+            A new instance of the TunableGroups object
+            that is a deep copy of the original one.
+        """
+        return copy.deepcopy(self)
+
+    def _add_group(self, group: CovariantTunableGroup):
         """
         Add a CovariantTunableGroup to the current collection.
 
@@ -156,8 +291,7 @@ class TunableGroups:
         ----------
             group : CovariantTunableGroup
         """
-        # pylint: disable=protected-access
-        self._tunable_groups[group._name] = group
+        self._tunable_groups[group.name] = group
         self._index.update(dict.fromkeys(group.get_names(), group))
 
     def update(self, tunables):
@@ -174,6 +308,14 @@ class TunableGroups:
         self._tunable_groups.update(tunables._tunable_groups)
 
     def __repr__(self):
+        """
+        Produce a human-readable version of the TunableGroups (mostly for logging).
+
+        Returns
+        -------
+        string : str
+            A human-readable version of the TunableGroups.
+        """
         return "{ " + ", ".join(
             f"{group_name}::{tunable}"
             for (group_name, group) in self._tunable_groups.items()
@@ -192,7 +334,7 @@ class TunableGroups:
         # Use double index to make sure we set the is_updated flag of the group
         self._index[name][name] = value
 
-    def get_names(self):
+    def get_names(self) -> List[str]:
         """
         Get the names of all covariance groups in the collection.
 
@@ -224,7 +366,8 @@ class TunableGroups:
             tunables._add_group(self._tunable_groups[name])
         return tunables
 
-    def get_param_values(self, group_names: List[str] = None, into_params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def get_param_values(self, group_names: List[str] = None,
+                         into_params: Dict[str, Any] = None) -> Dict[str, Any]:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
 
@@ -248,6 +391,23 @@ class TunableGroups:
         for name in group_names:
             into_params.update(self._tunable_groups[name].get_values())
         return into_params
+
+    def is_updated(self, group_names: List[str] = None) -> bool:
+        """
+        Check if any of the given covariant tunable groups has been updated.
+
+        Parameters
+        ----------
+        group_names : list of str or None
+            IDs of the (covariant) tunable groups. Check all groups if omitted.
+
+        Returns
+        -------
+        is_updated : bool
+            True if any of the specified tunable groups has been updated, False otherwise.
+        """
+        return any(self._tunable_groups[name].is_updated()
+                   for name in (group_names or self.get_names()))
 
     def reset(self, group_names: List[str] = None):
         """
