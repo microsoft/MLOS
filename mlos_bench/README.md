@@ -4,6 +4,9 @@ This directory contains the code for the `mlos-bench` experiment runner package.
 
 It makes use of the `mlos-core` package for its optimizer.
 
+# Description
+
+
 ## Quickstart
 
 To get started, we can adapt an example configuration to test out running `mlos-bench`.
