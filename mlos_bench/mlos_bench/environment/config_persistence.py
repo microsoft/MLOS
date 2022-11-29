@@ -62,15 +62,14 @@ class ConfigPersistenceService(Service):
         Returns
         -------
         path : str
-            An actual absolute path to the config.
+            An actual path to the config or script.
         """
         if not os.path.isabs(file_path):
             for path in self._config_path:
                 full_path = os.path.join(path, file_path)
                 if os.path.exists(full_path):
-                    file_path = full_path
-                    break
-        return os.path.abspath(file_path)
+                    return full_path
+        return file_path
 
     def load_config(self, json_file_name: str) -> dict:
         """
@@ -212,7 +211,7 @@ class ConfigPersistenceService(Service):
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Created mix-in service:\n%s", "\n".join(
-                '  "%s": %s' % kv for kv in service.export().items()))
+                f'  "{key}": {val}' for (key, val) in service.export().items()))
 
         return service
 

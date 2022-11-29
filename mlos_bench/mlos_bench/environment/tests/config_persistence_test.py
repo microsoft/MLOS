@@ -40,7 +40,7 @@ def test_resolve_path_fail(config_persistence_service: ConfigPersistenceService)
     file_path = "foo/non-existent-config.json"
     path = config_persistence_service.resolve_path(file_path)
     assert not os.path.exists(path)
-    assert path == os.path.abspath(file_path)
+    assert path == file_path
 
 
 def test_load_config(config_persistence_service: ConfigPersistenceService):

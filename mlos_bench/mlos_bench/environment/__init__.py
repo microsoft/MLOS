@@ -12,6 +12,8 @@ from mlos_bench.environment.base_fileshare import FileShareService
 
 from mlos_bench.environment.app import AppEnv
 from mlos_bench.environment.composite import CompositeEnv
+
+from mlos_bench.environment.local_exec import LocalExecService
 from mlos_bench.environment.config_persistence import ConfigPersistenceService
 
 
@@ -45,6 +47,7 @@ __all__ = [
     'Environment',
     'AppEnv',
     'CompositeEnv',
+    'LocalExecService',
     'ConfigPersistenceService',
     'FileShareService',
 ]
