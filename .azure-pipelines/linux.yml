@@ -66,8 +66,10 @@ jobs:
   # Try and speed up the pipeline by using a faster solver:
   - bash: |
       conda install -v -y -n base conda-libmamba-solver
-      conda config --set experimental_solver libmamba
-    displayName: Install and default to experimental mamba solver
+      # Try to set either of the configs for the solver.
+      conda config --set experimental_solver libmamba || true
+      conda config --set solver libmamba || true
+    displayName: Install and default to mamba solver
   - bash: rm -f /usr/share/miniconda/pkgs/cache/*.json
     displayName: Workaround a mamba cache bug in ADO
     # https://github.com/mamba-org/mamba/issues/488

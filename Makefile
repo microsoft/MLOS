@@ -9,6 +9,8 @@ MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/de
 
 # If available, use the mamba solver to speed things up.
 CONDA_SOLVER := $(shell conda list -n base | grep -q '^conda-libmamba-solver\s' && echo libmamba || echo classic)
+export CONDA_EXPERIMENTAL_SOLVER := ${CONDA_SOLVER}
+export EXPERIMENTAL_SOLVER := ${CONDA_SOLVER}
 # Allow overriding the default verbosity of conda for CI jobs.
 CONDA_INFO_LEVEL := -q
 
@@ -19,8 +21,8 @@ all: check test dist # doc
 conda-env: .conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} mlos_core/setup.py mlos_bench/setup.py
-	conda env list -q | grep -q "^${CONDA_ENV_NAME} " || conda env create --experimental-solver ${CONDA_SOLVER} ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} -f ${ENV_YML}
-	conda env update --experimental-solver ${CONDA_SOLVER} ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} --prune -f ${ENV_YML}
+	conda env list -q | grep -q "^${CONDA_ENV_NAME} " || conda env create ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} -f ${ENV_YML}
+	conda env update ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} --prune -f ${ENV_YML}
 	$(MAKE) clean-check clean-test clean-doc
 	touch .conda-env.${CONDA_ENV_NAME}.build-stamp
 
