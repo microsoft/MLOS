@@ -24,12 +24,12 @@ def config_persistence_service():
 
 
 @pytest.fixture
-def azure_vm_service(config_persistence_service):
+def azure_vm_service(config_persistence_service: ConfigPersistenceService):
     """
     Creates a dummy Azure VM service for tests that require it.
     """
     return AzureVMService(config={
-        "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.json",
+        "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
         "deploymentName": "TEST_DEPLOYMENT",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
@@ -41,7 +41,7 @@ def azure_vm_service(config_persistence_service):
 
 
 @pytest.fixture
-def azure_fileshare():
+def azure_fileshare(config_persistence_service: ConfigPersistenceService):
     """
     Creates a dummy AzureFileShareService for tests that require it.
     """

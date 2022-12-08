@@ -3,8 +3,9 @@
         "class": "mlos_bench.environment.azure.AzureFileShareService",
 
         "config": {
-            "storageAccountName": "osatstorage",
-            "storageFileShareName": "osat-fs",
+            "storageAccountName": "osatsharedstorage",
+            "storageFileShareName": "os-autotune-file-share",
+            // Placeholder for a value provided in the global config:
             "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
         }
     }

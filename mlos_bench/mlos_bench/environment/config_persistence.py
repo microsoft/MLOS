@@ -5,10 +5,12 @@ service functions.
 """
 
 import os
-import json
+import json    # For logging only
 import logging
 
-from typing import List
+from typing import Optional, List
+
+import json5   # To read configs with comments and other JSON5 syntax features
 
 from mlos_bench.environment.tunable import TunableGroups
 from mlos_bench.environment.base_service import Service
@@ -47,9 +49,11 @@ class ConfigPersistenceService(Service):
             self.load_services,
             self.load_tunables,
             self.load_environment,
+            self.load_environment_list,
         ])
 
-    def resolve_path(self, file_path: str) -> str:
+    def resolve_path(self, file_path: str,
+                     extra_paths: Optional[List[str]] = None) -> str:
         """
         Prepend the suitable `_config_path` to `path` if the latter is not absolute.
         If `_config_path` is `None` or `path` is absolute, return `path` as is.
@@ -58,17 +62,23 @@ class ConfigPersistenceService(Service):
         ----------
         file_path : str
             Path to the input config file.
+        extra_paths : List[str]
+            Additional directories to prepend to the list of search paths.
 
         Returns
         -------
         path : str
             An actual path to the config or script.
         """
+        path_list = (extra_paths or []) + self._config_path
+        _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
         if not os.path.isabs(file_path):
-            for path in self._config_path:
+            for path in path_list:
                 full_path = os.path.join(path, file_path)
                 if os.path.exists(full_path):
+                    _LOG.debug("Path resolved: %s", full_path)
                     return full_path
+        _LOG.debug("Path not resolved: %s", file_path)
         return file_path
 
     def load_config(self, json_file_name: str) -> dict:
@@ -90,7 +100,7 @@ class ConfigPersistenceService(Service):
         json_file_name = self.resolve_path(json_file_name)
         _LOG.info("Load config: %s", json_file_name)
         with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
-            return json.load(fh_json)
+            return json5.load(fh_json)
 
     def build_environment(self, config: dict,
                           global_config: dict = None,
@@ -302,6 +312,37 @@ class ConfigPersistenceService(Service):
         config = self.load_config(json_file_name)
         return self.build_environment(config, global_config, tunables, service)
 
+    def load_environment_list(
+            self, json_file_name: str, global_config: dict = None,
+            tunables: TunableGroups = None, service: Service = None) -> List[Environment]:
+        """
+        Load and build a list of environments from the config file.
+
+        Parameters
+        ----------
+        json_file_name : str
+            The environment JSON configuration file.
+            Can contain either one environment or a list of environments.
+        global_config : dict
+            Global parameters to add to the environment config.
+        tunables : TunableGroups
+            An optional collection of tunables to add to the environment.
+        service : Service
+            An optional reference of the parent service to mix in.
+
+        Returns
+        -------
+        env : List[Environment]
+            A list of new benchmarking environments.
+        """
+        config_list = self.load_config(json_file_name)
+        if isinstance(config_list, dict):
+            config_list = [config_list]
+        return [
+            self.build_environment(config, global_config, tunables, service)
+            for config in config_list
+        ]
+
     def load_services(self, json_file_names: List[str],
                       global_config: dict = None, parent: Service = None) -> Service:
         """
@@ -322,10 +363,8 @@ class ConfigPersistenceService(Service):
         service : Service
             A collection of service methods.
         """
-        _LOG.info("Load services: %s", json_file_names)
-        service = Service(global_config)
-        if parent:
-            service.register(parent.export())
+        _LOG.info("Load services: %s parent: %s", json_file_names, parent.__class__.__name__)
+        service = Service(global_config, parent)
         for fname in json_file_names:
             config = self.load_config(fname)
             service.register(

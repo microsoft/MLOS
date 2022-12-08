@@ -3,12 +3,7 @@ Application-specific benchmark environment.
 """
 
 import logging
-import subprocess
-import sys
-import tempfile
 from typing import Optional
-
-import pandas as pd
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -18,9 +13,9 @@ from mlos_bench.environment.tunable import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
-class AppEnv(Environment):
+class RemoteEnv(Environment):
     """
-    Application-level benchmark environment.
+    Environment to run benchmarks on a remote host.
     """
 
     def __init__(self,
@@ -31,7 +26,7 @@ class AppEnv(Environment):
                  service: Optional[Service] = None):
         # pylint: disable=too-many-arguments
         """
-        Create a new application environment with a given config.
+        Create a new environment for remote execution.
 
         Parameters
         ----------
@@ -41,6 +36,8 @@ class AppEnv(Environment):
             Free-format dictionary that contains the benchmark environment
             configuration. Each config must have at least the "tunable_params"
             and the "const_args" sections.
+            `RemoteEnv` must also have at least some of the following parameters:
+            {setup, run, teardown, wait_boot}
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
@@ -51,17 +48,23 @@ class AppEnv(Environment):
             deploy or reboot a VM, etc.).
         """
         super().__init__(name, config, global_config, tunables, service)
+
+        self._wait_boot = self.config.get("wait_boot", False)
         self._script_setup = self.config.get("setup")
         self._script_run = self.config.get("run")
         self._script_teardown = self.config.get("teardown")
-        self._script_postprocess = self.config.get("postprocess")
-        if self._script_postprocess is not None:
-            self._script_postprocess = self._service.resolve_path(self._script_postprocess)
+
+        if self._script_setup is None and \
+           self._script_run is None and \
+           self._script_teardown is None and \
+           not self._wait_boot:
+            raise ValueError("At least one of {setup, run, teardown}" +
+                             " must be present or wait_boot set to True.")
 
     def setup(self, tunables: TunableGroups) -> bool:
         """
         Check if the environment is ready and set up the application
-        and benchmarks, if necessary.
+        and benchmarks on a remote host.
 
         Parameters
         ----------
@@ -77,29 +80,27 @@ class AppEnv(Environment):
         if not super().setup(tunables):
             return False
 
-        if not self._script_setup:
+        if self._wait_boot:
+            _LOG.info("Wait for the remote environment to start: %s", self)
+            (status, params) = self._service.vm_start(self._params)
+            if status == Status.PENDING:
+                (status, _) = self._service.wait_vm_operation(params)
+            if status != Status.SUCCEEDED:
+                return False
+
+        if self._script_setup:
+            _LOG.info("Set up the remote environment: %s", self)
+            (status, _) = self._remote_exec(self._script_setup)
+            _LOG.info("Remote set up complete: %s :: %s", self, status)
+            self._is_ready = (status == Status.SUCCEEDED)
+        else:
             self._is_ready = True
-            return True
 
-        _LOG.info("Set up: %s", self)
-        (status, _) = self._remote_exec(self._script_setup)
-        _LOG.info("Set up complete: %s :: %s", self, status)
-        self._is_ready = (status == Status.SUCCEEDED)
         return self._is_ready
-
-    def teardown(self):
-        """
-        Clean up and shut down the application environment.
-        """
-        if self._script_teardown:
-            _LOG.info("Tear down: %s", self)
-            (status, _) = self._remote_exec(self._script_teardown)
-            _LOG.info("Tear down complete: %s :: %s", self, status)
-        super().teardown()
 
     def benchmark(self):
         """
-        Submit a new experiment to the application environment.
+        Submit a new experiment to the remote application environment.
         (Re)configure an application and launch the benchmark.
 
         Returns
@@ -110,45 +111,24 @@ class AppEnv(Environment):
             benchmark_result is a floating point time of the benchmark in
             seconds or None if the status is not COMPLETED.
         """
-        _LOG.info("Run benchmark on: %s", self)
+        _LOG.info("Run benchmark remotely on: %s", self)
         (status, _) = result = super().benchmark()
         if not (status == Status.READY and self._script_run):
             return result
 
-        # Configure the application and start the benchmark
-        (status, _) = result = self._remote_exec(self._script_run)
-
-        if not self._script_postprocess:
-            return result
-
-        with tempfile.TemporaryDirectory() as local_dir:
-            self._service.download(self._const_args["outputPrefix"], local_dir)
-
-            # Post-process results
-            proc = subprocess.run(
-                [
-                    # Execute the post-processing script with the current python env
-                    sys.executable,
-                    self._script_postprocess,
-                    # Pass the download dir as the argument to the script
-                    local_dir,
-                ],
-                shell=True,
-                check=True,
-                capture_output=True,
-            )
-            script_results = proc.stdout.decode().strip()
-            if proc.returncode == 0:
-                metrics_df = pd.read_csv(script_results)
-            else:
-                metrics_df = None
-                _LOG.error(
-                    "Non-zero exit code %d during post-processing with %s. STDOUT: \n%s",
-                    proc.returncode, self._script_postprocess, script_results)
-
-        result = (status, metrics_df)
-        _LOG.info("Run complete: %s :: %s", self, result)
+        result = self._remote_exec(self._script_run)
+        _LOG.info("Remote run complete: %s :: %s", self, result)
         return result
+
+    def teardown(self):
+        """
+        Clean up and shut down the remote environment.
+        """
+        if self._script_teardown:
+            _LOG.info("Remote teardown: %s", self)
+            (status, _) = self._remote_exec(self._script_teardown)
+            _LOG.info("Remote teardown complete: %s :: %s", self, status)
+        super().teardown()
 
     def _remote_exec(self, script):
         """

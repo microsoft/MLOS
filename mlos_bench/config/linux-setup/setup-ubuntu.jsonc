@@ -1,0 +1,67 @@
+[
+    // Local: Generate kernel config and upload it to the shared storage
+    {
+        "name": "Generate Linux kernel parameters for Ubuntu",
+        "class": "mlos_bench.environment.LocalFileShareEnv",
+
+        "config": {
+
+            "tunable_params": ["kernel"],
+
+            "required_args": ["experimentName", "experimentId"],
+
+            // Dump tunable parameters to a local JSON file:
+            "dump_params_file": "kernel-params.json",
+
+            "setup": [
+                "linux-setup/generate_kernel_config_script.py kernel-params.json config-kernel.sh"
+            ],
+
+            "upload": [
+                {
+                    "from": "config-kernel.sh",
+                    "to": "$experimentName/$experimentId/input/config-kernel.sh"
+                },
+                {
+                    "from": "kernel-params.json",
+                    "to": "$experimentName/$experimentId/input/kernel-params.json"
+                }
+            ]
+        }
+    },
+
+    // Remote: Apply new kernel configuration to a VM
+    {
+        "name": "Apply Linux kernel parameters to a remote Ubuntu VM",
+        "class": "mlos_bench.environment.RemoteEnv",
+
+        "config": {
+
+            "tunable_params": ["kernel"],
+
+            "required_args": [
+                "storageAccountName",
+                "storageFileShareName",
+                "storageAccountKey",
+                "mountPoint",
+                "experimentName",
+                "experimentId"
+            ],
+
+            "const_args": {
+                "storageAccountName": "osatsharedstorage",
+                "storageFileShareName": "os-autotune-file-share",
+                "mountPoint": "/mnt/osat_fs"
+            },
+
+            "wait_boot": true,
+
+            "setup": [
+                "sudo mkdir -p $mountPoint",
+                "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
+                // "sudo $mountPoint/$experimentName/$experimentId/input/config-kernel.sh"
+                "cat $mountPoint/$experimentName/$experimentId/input/config-kernel.sh"
+            ]
+        }
+    }
+]

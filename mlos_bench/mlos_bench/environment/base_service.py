@@ -69,9 +69,15 @@ class Service:
         self._parent = parent
         self._services = {}
 
+        if parent:
+            self.register(parent.export())
+
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Parent mixins: %s", [] if parent is None else list(parent._services.keys()))
-            _LOG.debug("Service config:\n%s", json.dumps(self.config, indent=2))
+            _LOG.debug("Service: %s Config:\n%s",
+                       self.__class__.__name__, json.dumps(self.config, indent=2))
+            _LOG.debug("Service: %s Parent mixins: %s",
+                       self.__class__.__name__,
+                       [] if parent is None else list(parent._services.keys()))
 
     def register(self, services):
         """
@@ -84,6 +90,11 @@ class Service:
         """
         if not isinstance(services, dict):
             services = {svc.__name__: svc for svc in services}
+
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Service: %s Add methods: %s",
+                       self.__class__.__name__, list(services.keys()))
+
         self._services.update(services)
         self.__dict__.update(self._services)
 

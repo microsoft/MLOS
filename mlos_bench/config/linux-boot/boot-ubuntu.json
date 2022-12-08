@@ -1,9 +1,0 @@
-{
-    "name": "Boot Ubuntu VM on Azure",
-    "class": "mlos_bench.environment.azure.OSEnv",
-
-    "config": {
-        "tunable_params": ["boot"],
-        "const_args": {}
-    }
-}

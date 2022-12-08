@@ -14,6 +14,7 @@ setup(
     install_requires=[
         'mlos-core==' + _VERSION,
         'requests',
+        'json5',
     ],
     # Transitive extra_requires from mlos-core.
     extras_require={
@@ -26,5 +27,5 @@ setup(
     description=('MLOS Core Python interface for parameter optimization.'),
     license='MIT',
     keywords='',
-    # python_requires='>=3.7',
+    python_requires='>=3.8',
 )

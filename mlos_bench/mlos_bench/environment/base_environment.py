@@ -97,6 +97,14 @@ class Environment(metaclass=abc.ABCMeta):
         for key in set(self._const_args).intersection(global_config or {}):
             self._const_args[key] = global_config[key]
 
+        for key in config.get("required_args", []):
+            if key in self._const_args:
+                continue
+            if key in global_config:
+                self._const_args[key] = global_config[key]
+            else:
+                raise ValueError("Missing required parameter: " + key)
+
         if tunables is None:
             tunables = TunableGroups()
 

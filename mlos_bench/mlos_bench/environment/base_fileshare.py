@@ -53,7 +53,7 @@ class FileShareService(Service, metaclass=ABCMeta):
             if True (the default), download the entire directory tree.
         """
         _LOG.info("Download from File Share %srecursively: %s -> %s",
-                  remote_path, local_path, "" if recursive else "non-")
+                  "" if recursive else "non-", remote_path, local_path)
 
     @abstractmethod
     def upload(self, local_path: str, remote_path: str, recursive: bool = True):
@@ -71,4 +71,4 @@ class FileShareService(Service, metaclass=ABCMeta):
             if True (the default), upload the entire directory tree.
         """
         _LOG.info("Upload to File Share %srecursively: %s -> %s",
-                  local_path, remote_path, "" if recursive else "non-")
+                  "" if recursive else "non-", local_path, remote_path)

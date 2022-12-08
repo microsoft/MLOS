@@ -1,0 +1,85 @@
+[
+    // Local: Generate new Redis config and upload it to a shared storage
+    {
+        "name": "Generate Redis configuration",
+        "class": "mlos_bench.environment.LocalFileShareEnv",
+
+        "config": {
+            "tunable_params": ["redis"],
+
+            "required_args": ["experimentName", "experimentId"],
+
+            // Dump tunable parameters to a local JSON file:
+            "dump_params_file": "redis-params.json",
+
+            "setup": [
+                "applications/generate_redis_config.py redis-params.json redis.cfg"
+            ],
+
+            "upload": [
+                {"from": "redis.cfg", "to": "$experimentName/$experimentId/input/redis.cfg"},
+                {"from": "redis/", "to": "$experimentName/$experimentId/scripts"}
+            ]
+        }
+    },
+
+    // Remote: Start Redis with the new config and run the benchmarks
+    {
+        "name": "Benchmark Redis on Linux",
+        "class": "mlos_bench.environment.RemoteEnv",
+
+        "config": {
+
+            "tunable_params": ["redis"],
+
+            "required_args": ["experimentName", "experimentId", "mountPoint"],
+
+            "const_args": {
+                "mountPoint": "/mnt/osat_fs"
+            },
+
+            "setup": [
+                "$mountPoint/$experimentName/$experimentId/scripts/setup-workload.sh",
+                "$mountPoint/$experimentName/$experimentId/scripts/setup-app.sh"
+            ],
+
+            "run": [
+                "$mountPoint/$experimentName/$experimentId/scripts/run-workload.sh",
+                "mkdir -p $mountPoint/$experimentName/$experimentId/output/",
+                "cp -r /tmp/mlos_bench/output/* $mountPoint/$experimentName/$experimentId/output/"
+            ],
+
+            "teardown": [
+                "$mountPoint/$experimentName/$experimentId/scripts/cleanup-workload.sh",
+                "$mountPoint/$experimentName/$experimentId/scripts/cleanup-app.sh"
+            ]
+        }
+    },
+
+    // Local: Download Redis benchmark data from the shared storage and process it
+    {
+        "name": "Download and post-process Redis benchmark data",
+        "class": "mlos_bench.environment.LocalFileShareEnv",
+
+        "config": {
+
+            "tunable_params": ["redis"],
+
+            "required_args": ["experimentName", "experimentId"],
+
+            "download": [
+                {
+                    "from": "$experimentName/$experimentId/output",
+                    "to": "$PWD/redis-bench-output/"
+                }
+            ],
+
+            "run": [
+                "applications/process_redis_results.py redis-bench-output/results.csv redis-benchmark.csv"
+            ],
+
+            // Read benchmark results from a local CSV file:
+            "read_results_file": "redis-benchmark.csv"
+        }
+    }
+]

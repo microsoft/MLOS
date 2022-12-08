@@ -1,0 +1,22 @@
+{
+    "name": "Azure VM Ubuntu Redis",
+    "class": "mlos_bench.environment.CompositeEnv",
+
+    "include_tunables": [
+        "tunables.jsonc"
+    ],
+
+    "include_services": [
+        "azure/service-provision-vm.jsonc",
+        "azure/service-fileshare.jsonc"
+    ],
+
+    "config": {
+        "include_children": [
+            "azure/provision-ubuntu-vm.jsonc",
+            "linux-boot/boot-ubuntu.jsonc",
+            "linux-setup/setup-ubuntu.jsonc",
+            "applications/redis.jsonc"
+        ]
+    }
+}

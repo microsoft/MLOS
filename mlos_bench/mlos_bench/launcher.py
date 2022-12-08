@@ -5,9 +5,9 @@ Helper functions to launch the benchmark and the optimizer from the command line
 import logging
 import argparse
 
-from mlos_bench.environment import ConfigPersistenceService
+from mlos_bench.environment import LocalExecService, ConfigPersistenceService
 
-_LOG_LEVEL = logging.DEBUG
+_LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
 logging.basicConfig(level=_LOG_LEVEL, format=_LOG_FORMAT)
 
@@ -31,6 +31,11 @@ class Launcher:
         self._parser.add_argument(
             '--log', required=False, dest='log_file',
             help='Path to the log file. Use stdout if omitted.')
+
+        self._parser.add_argument(
+            '--log-level', required=False, type=int, default=_LOG_LEVEL,
+            help=f'Logging level. Default is {_LOG_LEVEL} ({logging.getLevelName(_LOG_LEVEL)}).' +
+                 f' Set to {logging.DEBUG} for debug, {logging.WARNING} for warnings only.')
 
         self._parser.add_argument(
             '--config', required=True,
@@ -59,9 +64,10 @@ class Launcher:
         """
         (args, args_rest) = self._parser.parse_known_args()
 
+        logging.root.setLevel(args.log_level)
         if args.log_file:
             log_handler = logging.FileHandler(args.log_file)
-            log_handler.setLevel(_LOG_LEVEL)
+            log_handler.setLevel(args.log_level)
             log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
             logging.root.addHandler(log_handler)
 
@@ -120,4 +126,5 @@ class Launcher:
         Inject the persistence service so that the environment can load other configs.
         """
         return self._config_loader.load_environment(
-            self._env_config_file, self._global_config, service=self._config_loader)
+            self._env_config_file, self._global_config,
+            service=LocalExecService(parent=self._config_loader))

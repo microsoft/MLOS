@@ -11,11 +11,8 @@ import shlex
 import subprocess
 import logging
 
-from typing import Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict
 
-import pandas
-
-from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_service import Service
 
 _LOG = logging.getLogger(__name__)
@@ -42,13 +39,30 @@ class LocalExecService(Service):
         """
         super().__init__(config, parent)
         self._temp_dir = self.config.get("temp_dir")
+        self.register([self.temp_dir_context, self.local_exec])
 
-        # Register methods to expose to the Environment objects.
-        self.register([self.local_exec])
+    def temp_dir_context(self, path: Optional[str] = None):
+        """
+        Create a temp directory or use the provided path.
 
-    def local_exec(self, script_lines: List[str], env: Dict[str, str] = None,
-                   cwd: str = None, output_csv_file: str = None,
-                   return_on_error: bool = False) -> Tuple[Status, str]:
+        Parameters
+        ----------
+        path : str
+            A path to the temporary directory. Create a new one if None.
+
+        Returns
+        -------
+        temp_dir_context : TemporaryDirectory
+            Temporary directory context to use in the `with` clause.
+        """
+        if path is None and self._temp_dir is None:
+            return tempfile.TemporaryDirectory()
+        return contextlib.nullcontext(path or self._temp_dir)
+
+    def local_exec(self, script_lines: List[str],
+                   env: Optional[Dict[str, str]] = None,
+                   cwd: Optional[str] = None,
+                   return_on_error: bool = False) -> Tuple[int, str, str]:
         """
         Execute the script lines from `script_lines` in a local process.
 
@@ -62,56 +76,44 @@ class LocalExecService(Service):
         cwd : str
             Work directory to run the script at.
             If omitted, use `temp_dir` or create a temporary dir.
-        output_csv_file : str
-            Output file to read as pandas DataFrame. (optional)
         return_on_error : bool
             If True, stop running script lines on first non-zero return code.
             The default is False.
 
         Returns
         -------
-        (return_code, output) : (Status, str or DataFrame)
-            A 2-tuple of status and output of the script process.
+        (return_code, stdout, stderr) : (int, str, str)
+            A 3-tuple of return code, stdout, and stderr of the script process.
         """
-        if cwd is None and self._temp_dir is None:
-            temp_dir_context = tempfile.TemporaryDirectory()
-        else:
-            temp_dir_context = contextlib.nullcontext(cwd or self._temp_dir)
-
-        output = None
         (return_code, stdout_list, stderr_list) = (0, [], [])
-        with temp_dir_context as temp_dir:
+        with self.temp_dir_context(cwd) as temp_dir:
+
             _LOG.debug("Run in directory: %s", temp_dir)
+
             for line in script_lines:
-                cmd = shlex.split(line)
-                (return_code, stdout, stderr) = self._local_exec_script(
-                    cmd[0], cmd[1:], env, temp_dir)
+                (return_code, stdout, stderr) = self._local_exec_script(line, env, temp_dir)
                 stdout_list.append(stdout)
                 stderr_list.append(stderr)
                 if return_code != 0 and return_on_error:
                     break
-            if output_csv_file:
-                if not os.path.exists(output_csv_file):
-                    output_csv_file = os.path.join(temp_dir, output_csv_file)
-                output = pandas.read_csv(output_csv_file)
-            else:
-                output = "\n".join(stdout_list)
 
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Run: stdout:\n%s", output)
-            _LOG.debug("Run: stderr:\n%s", "\n".join(stderr_list))
+        stdout = "\n".join(stdout_list)
+        stderr = "\n".join(stderr_list)
 
-        return (Status.SUCCEEDED if return_code == 0 else Status.FAILED, output)
+        _LOG.debug("Run: stdout:\n%s", stdout)
+        _LOG.debug("Run: stderr:\n%s", stderr)
 
-    def _local_exec_script(self, script_path: str, args: List[str],
+        return (return_code, stdout, stderr)
+
+    def _local_exec_script(self, script_line: str,
                            env: Dict[str, str], cwd: str) -> Tuple[int, str, str]:
         """
         Execute the script from `script_path` in a local process.
 
         Parameters
         ----------
-        script_path : str
-            Path to the script to run.
+        script_line : str
+            Line of the script to tun in the local process.
         args : List[str]
             Command line arguments for the script.
         env : Dict[str, str]
@@ -124,20 +126,34 @@ class LocalExecService(Service):
         (return_code, stdout, stderr) : (int, str, str)
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
-        cmd = [self._parent.resolve_path(script_path)] + args
+        if env:
+            env = {key: str(val) for (key, val) in env.items()}
+
+        cmd = shlex.split(script_line)
+        script_path = self._parent.resolve_path(cmd[0])
+        if os.path.exists(script_path):
+            script_path = os.path.abspath(script_path)
+
+        cmd = [script_path] + cmd[1:]
         if script_path.strip().lower().endswith(".py"):
             cmd = [sys.executable] + cmd
+            if env and sys.platform == 'win32':
+                # A hack to run Python on Windows with env variables set:
+                env_copy = os.environ.copy()
+                env_copy["PYTHONPATH"] = ""
+                env_copy.update(env)
+                env = env_copy
 
-        if _LOG.isEnabledFor(logging.INFO):
-            _LOG.info("Run: '%s'", " ".join(cmd))
+        _LOG.info("Run: %s", cmd)
 
         try:
             if sys.platform != 'win32':
                 cmd = [" ".join(cmd)]
+
             proc = subprocess.run(cmd, env=env, cwd=cwd, shell=True,
                                   text=True, check=False, capture_output=True)
 
-            _LOG.debug("Run: exit code = %d", proc.returncode)
+            _LOG.debug("Run: return code = %d", proc.returncode)
             return (proc.returncode, proc.stdout, proc.stderr)
 
         except FileNotFoundError as ex:
