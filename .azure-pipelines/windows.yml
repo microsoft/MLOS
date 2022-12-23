@@ -38,7 +38,14 @@ jobs:
       value: "23"
 
   steps:
-  - pwsh: Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+  - pwsh: |
+      Write-Host "##vso[task.prependpath]$env:CONDA\condabin"
+      Write-Host "##vso[task.prependpath]$env:CONDA\bin"
+      Write-Host "##vso[task.prependpath]$env:CONDA\Scripts"
+      Write-Host "##vso[task.prependpath]$env:CONDA\Library\bin"
+      Write-Host "##vso[task.prependpath]$env:CONDA\Library\usr\bin"
+      Write-Host "##vso[task.prependpath]$env:CONDA\Library\mingw-w64\bin"
+      Write-Host "##vso[task.prependpath]$env:CONDA"
     displayName: Add conda to PATH
 
   - pwsh: |
@@ -51,7 +58,11 @@ jobs:
       echo "cache_cur_hour: $(cache_cur_hour)"
       echo "cache_prev_hour: $(cache_prev_hour)"
       echo "CONDA_CACHE_DIR: $(CONDA_CACHE_DIR)"
-    displayName: 'Print some pipeline variables'
+      echo "CONDA: $env:CONDA"
+      echo "CONDA_PREFIX: $env:CONDA_PREFIX"
+      echo "CONDA_ROOT: $env:CONDA_ROOT"
+      echo "PATH: $env:PATH"
+    displayName: 'Print some pipeline and environment variables'
   - task: Cache@2
     displayName: Restore cached conda environment
     inputs:
@@ -72,11 +83,18 @@ jobs:
     displayName: Update and configure conda
 
   # Try and speed up the pipeline by using a faster solver:
-  # Nevermind, seems to be broken in ADO Windows runners atm :'(
-  #- pwsh: |
-  #    conda install -v -y -n base conda-libmamba-solver
-  #    conda config --set experimental_solver libmamba
-  #  displayName: Install and default to experimental mamba solver
+  - pwsh: |
+      conda install -v -y -n base conda-libmamba-solver
+      conda config --set experimental_solver libmamba
+      conda config --set solver libmamba
+      Write-Host "##vso[task.setvariable variable=CONDA_EXPERIMENTAL_SOLVER;]libmamba"
+      Write-Host "##vso[task.setvariable variable=EXPERIMENTAL_SOLVER;]libmamba"
+    ignoreLASTEXITCODE: true
+    errorActionPreference: continue
+    displayName: Install and default to experimental mamba solver
+  - pwsh: Remove-Item -Recurse -Force $env:CONDA\pkgs\cache\*.json
+    displayName: Workaround a mamba cache bug in ADO
+    # https://github.com/mamba-org/mamba/issues/488
 
   - pwsh: |
       if (! (conda env list | Select-String -Pattern "^$(conda_env) ") ) { conda env create -v -n $(conda_env) -f conda-envs/$(conda_env).yml }

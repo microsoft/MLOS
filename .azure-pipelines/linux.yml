@@ -69,6 +69,8 @@ jobs:
       # Try to set either of the configs for the solver.
       conda config --set experimental_solver libmamba || true
       conda config --set solver libmamba || true
+      echo "##vso[task.setvariable variable=CONDA_EXPERIMENTAL_SOLVER;]libmamba"
+      echo "##vso[task.setvariable variable=EXPERIMENTAL_SOLVER;]libmamba"
     displayName: Install and default to mamba solver
   - bash: rm -f /usr/share/miniconda/pkgs/cache/*.json
     displayName: Workaround a mamba cache bug in ADO
