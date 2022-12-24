@@ -1,0 +1,3 @@
+# Be explicit about certain file types.
+*.sh text eol=lf
+*.bat text eol=crlf
