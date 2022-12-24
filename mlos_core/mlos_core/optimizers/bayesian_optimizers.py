@@ -11,8 +11,6 @@ import pandas as pd
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_space
 
-# TODO: provide a default optimizer.
-
 
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
     """Abstract base class defining the interface for Bayesian optimization. """

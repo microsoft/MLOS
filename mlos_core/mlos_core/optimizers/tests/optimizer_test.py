@@ -12,7 +12,8 @@ import pandas as pd
 import numpy as np
 import ConfigSpace as CS
 
-from mlos_core.optimizers import BaseOptimizer, EmukitOptimizer, SkoptOptimizer, RandomOptimizer
+from mlos_core.optimizers import (OptimizerType, OptimizerFactory,
+    BaseOptimizer, EmukitOptimizer, SkoptOptimizer, RandomOptimizer)
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 
 
@@ -99,3 +100,34 @@ def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwarg
 
         pred_all = optimizer.surrogate_predict(all_observations[['x']])
         assert pred_all.shape == (20,)
+
+
+@pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
+    # Default optimizer
+    (None, {}),
+    # Enumerate all supported Optimizers
+    *[(member, {}) for member in OptimizerType],
+    # Optimizer with non-empty kwargs argument
+    (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
+])
+def test_create_optimizer_with_factory_method(optimizer_type: OptimizerType, kwargs):
+    # Start defining a ConfigurationSpace for the Optimizer to search.
+    input_space = CS.ConfigurationSpace(seed=1234)
+
+    # Add a single continuous input dimension between 0 and 1.
+    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='x', lower=0, upper=1))
+
+    if optimizer_type is None:
+        optimizer = OptimizerFactory.create(input_space, **kwargs)
+    else:
+        optimizer = OptimizerFactory.create(input_space, optimizer_type, **kwargs)
+    assert optimizer is not None
+
+    assert optimizer.parameter_space is not None
+
+    suggestion = optimizer.suggest()
+    assert suggestion is not None
+
+    if optimizer_type is not None:
+        myrepr = repr(optimizer)
+        assert myrepr.startswith(optimizer_type.value.__name__)
