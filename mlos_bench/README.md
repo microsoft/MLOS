@@ -4,8 +4,26 @@ This directory contains the code for the `mlos-bench` experiment runner package.
 
 It makes use of the `mlos-core` package for its optimizer.
 
-# Description
+## Description
 
+`mlos-bench` is an end-to-end benchmarking service that can be independently launched for experimentation but is also integrated with `mlos-core` as its optimizer for OS tuning.
+ Given a user-provided VM configuration, `mlos-bench` provisions a configured environment and remotely executes benchmarks on the cloud.
+ Experiment results (benchmark results & telemetry) are stored as input to the `mlos-core` optimization engine loop to evaluate proposed configuration parameters and produce new results.
+
+## Features
+
+With a JSON config file and command line parameters as input, `mlos-bench` streamlines workload performance measurement by automating the following benchmarking steps:
+
+1. Set up & clean up benchmark and application configuration
+    - **Ease of use:** Mlos-bench abstracts away controls for managing VMs in Azure, e.g., setup, teardown, stop, deprovision, and reboot. Get visibility into VM status through Azure Portal, ensuring that a VM is provisioned & running before issuing commands to it.
+    - **Versatility:** Mlos-bench provides a common interface to control a collection of environments (application, OS, VM), regardless of where or which cloud they come from. This allows changes to easily propagate to all environment layers when a new set of kernel parameters are applied.
+    - **Efficiency:** In adapting an environment to new parameters, mlos-bench optimizes for low re-configuration costs during optimization. For example, considering that not all OS kernel parameter adjustments require a full reboot, as some can be changed during run-time.
+2. Run benchmarks in the provisioned environment & standardize results for the optimizer
+    - Through Azure File Share, access docker scripts to run benchmarks & store results as input for optimization. For example, execute Redis benchmark uploaded to the file share, running a benchmark docker container with specified parameters. The file share is mounted to VMs via remote execution, instead of ARM templates.
+    - **Configurable:** Specify a python script in the initial config to post-process & standardize benchmark results. An example post-processing script for Redis benchmarks is included.
+    - **Local & remote benchmark execution:** Benchmarks can be run both locally in Hyper-V and remotely on Azure. Local execution allows better accuracy, while Azure runs are required to estimate the benchmark noise and understand the VM behavior when using cloud storage.
+    - **Cloud agnostic:** Mlos-bench can remotely execute benchmarks on other clouds, outside of Azure - e.g., controls for EC2 instances and ability to provision environments on AWS with Terraform.
+    - **Persistence:** Storage integration is available to persist experiment parameters and track results for re-use, either for analysis during & after trials, or warm-starting future experiments.
 
 ## Quickstart
 
