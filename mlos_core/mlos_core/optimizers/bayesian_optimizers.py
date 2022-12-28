@@ -14,6 +14,7 @@ from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_s
 
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
     """Abstract base class defining the interface for Bayesian optimization. """
+
     @abstractmethod
     def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         """Obtain a prediction from this Bayesian optimizer's surrogate model for the given configuration(s).
@@ -74,7 +75,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         self._observations.append((configurations, scores, context))
         if context is not None:
             # not sure how that works here?
-            raise NotImplementedError
+            raise NotImplementedError()
         if self.gpbo is None:
             # we're in the random initialization phase
             # just remembering the observation above is enough
@@ -121,10 +122,10 @@ class EmukitOptimizer(BaseBayesianOptimizer):
 
     def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         if context is not None:
-            raise NotImplementedError
+            raise NotImplementedError()
         # TODO return variance in some way
         # TODO check columns in configurations
-        mean_predictions, variance_predictions = self.gpbo.model.predict(np.array(configurations))
+        mean_predictions, _variance_predictions = self.gpbo.model.predict(np.array(configurations))
         # make 2ndim array into column vector
         return mean_predictions.reshape(-1,)
 
@@ -162,7 +163,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         self._observations.append((configurations, scores, context))
 
         if context is not None:
-            raise NotImplementedError
+            raise NotImplementedError()
         self.base_optimizer.tell(np.array(configurations).tolist(), np.array(scores).tolist())
 
     def suggest(self, context: pd.DataFrame = None):
@@ -179,7 +180,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if context is not None:
-            raise NotImplementedError
+            raise NotImplementedError()
         return pd.DataFrame([self.base_optimizer.ask()], columns=self.parameter_space.get_hyperparameter_names())
 
     def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
@@ -187,7 +188,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
 
     def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         if context is not None:
-            raise NotImplementedError
+            raise NotImplementedError()
         # TODO check configuration columns
         return self.base_optimizer.models[-1].predict(np.array(configurations))
 

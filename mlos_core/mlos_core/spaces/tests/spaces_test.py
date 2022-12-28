@@ -13,7 +13,7 @@ import scipy
 import skopt.space
 
 import ConfigSpace as CS
-from ConfigSpace.hyperparameters import NormalIntegerHyperparameter # pylint: disable=no-name-in-module
+from ConfigSpace.hyperparameters import NormalIntegerHyperparameter  # pylint: disable=no-name-in-module
 from mlos_core.spaces import configspace_to_emukit_space, configspace_to_skopt_space
 
 
