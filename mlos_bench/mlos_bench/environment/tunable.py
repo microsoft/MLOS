@@ -420,3 +420,16 @@ class TunableGroups:
         """
         for name in (group_names or self.get_names()):
             self._tunable_groups[name].reset()
+
+    def assign(self, param_values: Dict[str, Any]):
+        """
+        In-place update the values of the tunables from the dictionary
+        of (key, value) pairs.
+
+        Parameters
+        ----------
+        param_values : Dict[str, Any]
+            Dictionary mapping Tunable parameter names to new values.
+        """
+        for key, value in param_values.items():
+            self[key] = value
