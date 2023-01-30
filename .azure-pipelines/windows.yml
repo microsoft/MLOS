@@ -11,20 +11,10 @@ jobs:
   strategy:
     matrix:
       DefaultPython:
-        # Currently 3.9
+        # Floating most recent version of python (useful to catch new compatibility issues in nightly builds).
         conda_env: 'mlos_core'
         PythonVersion: ''
-  # Python 3.6 is currently incompatible.
-  #   Python36:
-  #     conda_env: 'mlos_core-3.6'
-  #     PythonVersion: '3.6'
   # Skipping testing of additional versions on Windows for now.
-  #    Python38:
-  #      conda_env: 'mlos_core-3.8'
-  #     PythonVersion: '3.8'
-  #    Python39:
-  #      conda_env: 'mlos_core-3.9'
-  #     PythonVersion: '3.9'
 
   variables:
     - name: CONDA_CACHE_DIR
@@ -127,14 +117,14 @@ jobs:
       $mlos_bench_whl = (Resolve-Path mlos_bench/dist/mlos_bench-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
       echo $mlos_bench_whl
       # Setup a clean environment to test installing/using them.
-      conda create -y -v -n mlos-dist-test-$(PythonVersion) python=$(PythonVersion)
-      conda install -y -v -n mlos-dist-test-$(PythonVersion) pytest
+      $PythonVersReq = (conda list -n $(conda_env) | Select-String -AllMatches -Pattern '^python\s+([0-9.]+)\s+').Matches.Groups[1].Value
+      conda create -y -v -n mlos-dist-test-$(PythonVersion) python=${PythonVersReq}
       conda install -y -v -n mlos-dist-test-$(PythonVersion) conda-forge::gpy
-      conda run -n mlos-dist-test-$(PythonVersion) pip install -r test-requirements.txt
+      conda run -n mlos-dist-test-$(PythonVersion) pip install pytest
       # Install mlos_core wheel.
-      conda run -n mlos-dist-test-$(PythonVersion) pip install $mlos_core_whl
+      conda run -n mlos-dist-test-$(PythonVersion) pip install "${mlos_core_whl}[full]"
       # Install mlos_bench wheel.
-      conda run -n mlos-dist-test-$(PythonVersion) pip install $mlos_bench_whl
+      conda run -n mlos-dist-test-$(PythonVersion) pip install "${mlos_bench_whl}[full]"
       # Just pick one simple test to run for now.
       # The rest should have been handled in a separate step.
       conda run -n mlos-dist-test-$(PythonVersion) python -m pytest mlos_core/mlos_core/spaces/tests/spaces_test.py

@@ -6,6 +6,13 @@ pr:
     include:
     - '*'
 
+schedules:
+- cron: "0 0 * * *"
+  displayName: Nightly build
+  branches:
+    include:
+    - main
+
 jobs:
   - template: .azure-pipelines/linux.yml
     parameters:

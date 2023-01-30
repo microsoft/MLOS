@@ -11,7 +11,7 @@ jobs:
   strategy:
     matrix:
       DefaultPython:
-        # Currently 3.9
+        # Floating most recent version of python (useful to catch new compatibility issues in nightly builds).
         conda_env: 'mlos_core'
   # Python 3.6 is currently incompatible.
   #   Python36:
@@ -20,6 +20,11 @@ jobs:
         conda_env: 'mlos_core-3.8'
       Python39:
         conda_env: 'mlos_core-3.9'
+      Python310:
+        conda_env: 'mlos_core-3.10'
+      # FIXME: There are currently several missing/broken dependencies for python 3.11.
+      #Python311:
+      #  conda_env: 'mlos_core-3.11'
 
   variables:
     - name: CONDA_CACHE_DIR
@@ -87,7 +92,7 @@ jobs:
   - bash: make CONDA_ENV_NAME=$(conda_env) test
     displayName: 'Run tests'
 
-  - bash: make CONDA_ENV_NAME=$(conda_env) dist dist-test
+  - bash: make CONDA_ENV_NAME=$(conda_env) CONDA_INFO_LEVEL=-v dist dist-test
     displayName: 'Generate and test binary distribution files'
 
   - bash: make CONDA_ENV_NAME=$(conda_env) doc

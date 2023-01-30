@@ -150,6 +150,7 @@ junit/test-results.xml
 .dist-test-env.*.build-stamp
 .dist-test.*.build-stamp
 .doc-prereqs.build-stamp
+.doc-prereqs.*.build-stamp
 .pycodestyle.build-stamp
 .pylint.build-stamp
 .pytest.build-stamp

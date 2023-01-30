@@ -77,7 +77,8 @@ Environments
    :template: class.rst
 
    Environment
-   AppEnv
+   LocalEnv
+   RemoteEnv
    CompositeEnv
    Service
    Status

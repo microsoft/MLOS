@@ -1,4 +1,4 @@
-CONDA_ENV_NAME := mlos_core
+CONDA_ENV_NAME ?= mlos_core
 PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos_core[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
@@ -7,12 +7,24 @@ PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '
 MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
 MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
 
-# If available, use the mamba solver to speed things up.
-CONDA_SOLVER := $(shell conda list -n base | grep -q '^conda-libmamba-solver\s' && echo libmamba || echo classic)
-export CONDA_EXPERIMENTAL_SOLVER := ${CONDA_SOLVER}
-export EXPERIMENTAL_SOLVER := ${CONDA_SOLVER}
+# If available, and not already set to something else, use the mamba solver to speed things up.
+CONDA_SOLVER ?= $(shell conda list -n base | grep -q '^conda-libmamba-solver\s' && echo libmamba || echo classic)
+# To handle multiple versions of conda, make sure we only have one of the environment variables set.
+ifneq ($(shell conda config --show | grep '^experimental_solver:'),)
+    export CONDA_EXPERIMENTAL_SOLVER := ${CONDA_SOLVER}
+    export EXPERIMENTAL_SOLVER := ${CONDA_SOLVER}
+    undefine CONDA_SOLVER
+    unexport CONDA_SOLVER
+else
+    export CONDA_SOLVER := ${CONDA_SOLVER}
+    undefine CONDA_EXPERIMENTAL_SOLVER
+    unexport CONDA_EXPERIMENTAL_SOLVER
+    undefine EXPERIMENTAL_SOLVER
+    unexport EXPERIMENTAL_SOLVER
+endif
+
 # Allow overriding the default verbosity of conda for CI jobs.
-CONDA_INFO_LEVEL := -q
+CONDA_INFO_LEVEL ?= -q
 
 .PHONY: all
 all: check test dist # doc
@@ -92,21 +104,27 @@ dist-test-env-clean:
 .PHONY: dist-test-env
 dist-test-env: dist .dist-test-env.$(PYTHON_VERSION).build-stamp
 
+.dist-test-env.$(PYTHON_VERSION).build-stamp: .conda-env.${CONDA_ENV_NAME}.build-stamp
+# Use the same version of python as the one we used to build the wheels.
+.dist-test-env.$(PYTHON_VERSION).build-stamp: PYTHON_VERS_REQ=$(shell conda list -n ${CONDA_ENV_NAME} | egrep '^python\s+' | sed -r -e 's/^python\s+//' | cut -d' ' -f1)
 .dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/mlos_core-*-py3-none-any.whl mlos_bench/dist/mlos_bench-*-py3-none-any.whl
 	# Check to make sure we only have a single wheel version availble.
 	# Else, run `make dist-clean` to remove prior versions.
 	ls mlos_core/dist/mlos_core-*-py3-none-any.whl | wc -l | grep -q -x 1
 	ls mlos_bench/dist/mlos_bench-*-py3-none-any.whl | wc -l | grep -q -x 1
+	# Symlink them to make the install step easier.
+	rm -rf mlos_core/dist/tmp && mkdir -p mlos_core/dist/tmp
+	cd mlos_core/dist/tmp && ln -s ../mlos_core-*-py3-none-any.whl mlos_core-latest-py3-none-any.whl
+	rm -rf mlos_bench/dist/tmp && mkdir -p mlos_bench/dist/tmp
+	cd mlos_bench/dist/tmp && ln -s ../mlos_bench-*-py3-none-any.whl mlos_bench-latest-py3-none-any.whl
 	# Create a clean test environment for checking the wheel files.
 	$(MAKE) dist-test-env-clean
-	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERSION)
-	conda install -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) pytest
+	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERS_REQ)
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install pytest
 	# Test a clean install of the mlos_core wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install mlos_core/dist/mlos_core-*-py3-none-any.whl
-	# Install the necessary extra requirements for the tests.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install -r test-requirements.txt
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full]"
 	# Test a clean install of the mlos_bench wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install mlos_bench/dist/mlos_bench-*-py3-none-any.whl
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full]"
 	touch .dist-test-env.$(PYTHON_VERSION).build-stamp
 
 .PHONY: dist-test
@@ -130,16 +148,17 @@ dist-test: dist-test-env .dist-test.$(PYTHON_VERSION).build-stamp
 dist-test-clean: dist-test-env-clean
 	rm -f .dist-test.$(PYTHON_VERSION).build-stamp
 
-.doc-prereqs.build-stamp: doc/requirements.txt
-	conda run -n ${CONDA_ENV_NAME} pip install -r doc/requirements.txt
-	touch .doc-prereqs.build-stamp
+.doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
+	conda run -n ${CONDA_ENV_NAME} pip install -U -r doc/requirements.txt
+	touch .doc-prereqs.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: doc-prereqs
-doc-prereqs: .doc-prereqs.build-stamp
+doc-prereqs: .doc-prereqs.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-doc-env
 clean-doc-env:
 	rm -f .doc-prereqs.build-stamp
+	rm -f .doc-prereqs.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: doc
 doc: conda-env doc-prereqs clean-doc

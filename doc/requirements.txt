@@ -1,6 +1,7 @@
 sphinx
 nbsphinx
 jupyter_core>=4.11.2    # nbsphix dependency - addresses CVE-2022-39286
+nbconvert==7.2.1        # Work around an issue with mistune attributes with newer versions
 mistune>=2.0.3          # Address CVE-2022-34749
 numpydoc
 sphinx-rtd-theme

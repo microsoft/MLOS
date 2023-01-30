@@ -3,11 +3,9 @@ channels:
   - defaults
 #  - conda-forge
 dependencies:
-  - scikit-learn
   - scipy
   - numpy
   - pandas
-  - configspace
   - pip
   - pylint
   - pycodestyle
@@ -22,16 +20,11 @@ dependencies:
   - matplotlib
   - seaborn
   - python=3.9
-  #- conda-forge::c-compiler
-  #- conda-forge::cxx-compiler
-  # Install gpy via conda (not pip) for emukit so we can side step some compiler issues on Windows platforms.
+  # See comments in mlos_core.yml.
   - conda-forge::gpy
   - pip:
-    - scikit-optimize
-    - emukit
-    - azure-storage-file-share
-    - "--editable ../mlos_core"
-    - "--editable ../mlos_bench"
+    - "--editable ../mlos_core[full]"
+    - "--editable ../mlos_bench[full]"
     - pytest-cov
     - pytest-forked
     - pytest-xdist

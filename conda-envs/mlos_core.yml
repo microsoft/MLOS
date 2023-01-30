@@ -3,11 +3,9 @@ channels:
   - defaults
 #  - conda-forge
 dependencies:
-  - scikit-learn
   - scipy
   - numpy
   - pandas
-  - configspace
   - pip
   - pylint
   - pycodestyle
@@ -21,17 +19,19 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  - python
+  # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
+  - python<3.11
+  # Virtual packages for compiler dependencies.
+  # Note: this doesn't actually install the compilers on Windows.
+  # It just adds the vs2019_win-64 and vswhere packages to help find the
+  # compilers which still (seem) to need to be installed manually.
   #- conda-forge::c-compiler
   #- conda-forge::cxx-compiler
-  # Install gpy via conda (not pip) for emukit so we can side step some compiler issues on Windows platforms.
+  # Instead, install gpy via conda (not pip) for emukit so we can side step some compiler issues on Windows platforms.
   - conda-forge::gpy
   - pip:
-    - scikit-optimize
-    - emukit
-    - azure-storage-file-share
-    - "--editable ../mlos_core"
-    - "--editable ../mlos_bench"
+    - "--editable ../mlos_core[full]"
+    - "--editable ../mlos_bench[full]"
     - pytest-cov
     - pytest-forked
     - pytest-xdist
