@@ -7,7 +7,7 @@ See `--help` output for details.
 
 import logging
 
-from mlos_bench.opt import Optimizer
+from mlos_bench.mock_opt import MockOptimizer
 from mlos_bench.launcher import Launcher
 
 _LOG = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ def optimize(env, no_teardown):
     """
     Main optimization loop.
     """
-    opt = Optimizer(env.tunable_params())
+    opt = MockOptimizer(env.tunable_params())
     _LOG.info("Env: %s Optimizer: %s", env, opt)
 
     while opt.not_converged():

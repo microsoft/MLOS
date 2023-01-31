@@ -4,7 +4,7 @@ Tunable parameter definition.
 import copy
 import collections
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes
@@ -101,6 +101,44 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         self._current_value = value
         return value
+
+    @property
+    def type(self) -> str:
+        """
+        Get the data type of the tunable.
+
+        Returns
+        -------
+        type : str
+            Data type of the tunable - one of {'int', 'float', 'categorical'}.
+        """
+        return self._type
+
+    @property
+    def range(self) -> Tuple[Any, Any]:
+        """
+        Get the range of the tunable if it is numerical, None otherwise.
+
+        Returns
+        -------
+        range : (number, number)
+            A 2-tuple of numbers that represents the range of the tunable.
+            Numbers can be int or float, depending on the type of the tunable.
+        """
+        return self._range
+
+    @property
+    def categorical_values(self) -> List[str]:
+        """
+        Get the list of all possible values of a categorical tunable.
+        Return None if the tunable is not categorical.
+
+        Returns
+        -------
+        values : List[str]
+            List of all possible values of a categorical tunable.
+        """
+        return self._values
 
 
 class CovariantTunableGroup:
@@ -226,8 +264,25 @@ class CovariantTunableGroup:
         """
         return f"{self._name}: {self._tunables}"
 
+    def get_tunable(self, name: str) -> Tunable:
+        """
+        Access the entire Tunable in a group (not just its value).
+        Throw KeyError if the tunable is not in the group.
+
+        Parameters
+        ----------
+        name : str
+            Name of the tunable parameter.
+
+        Returns
+        -------
+        tunable : Tunable
+            An instance of the Tunable parameter.
+        """
+        return self._tunables[name]
+
     def __getitem__(self, name: str):
-        return self._tunables[name].value
+        return self.get_tunable(name).value
 
     def __setitem__(self, name: str, value):
         self._is_updated = True
@@ -333,6 +388,36 @@ class TunableGroups:
         """
         # Use double index to make sure we set the is_updated flag of the group
         self._index[name][name] = value
+
+    def __iter__(self):
+        """
+        An iterator over all tunables in the group.
+
+        Returns
+        -------
+        [(tunable, group), ...] : iter(Tunable, CovariantTunableGroup)
+            An iterator over all tunables in all groups. Each element is a 2-tuple
+            of an instance of the Tunable parameter and covariant group it belongs to.
+        """
+        return ((group.get_tunable(name), group) for (name, group) in self._index.items())
+
+    def get_tunable(self, name: str) -> Tuple[Tunable, CovariantTunableGroup]:
+        """
+        Access the entire Tunable (not just its value) and its covariant group.
+        Throw KeyError if the tunable is not found.
+
+        Parameters
+        ----------
+        name : str
+            Name of the tunable parameter.
+
+        Returns
+        -------
+        (tunable, group) : (Tunable, CovariantTunableGroup)
+            A 2-tuple of an instance of the Tunable parameter and covariant group it belongs to.
+        """
+        group = self._index[name]
+        return (group.get_tunable(name), group)
 
     def get_names(self) -> List[str]:
         """
