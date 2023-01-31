@@ -11,6 +11,11 @@ It is intended to provide a simplified, easier to consume (e.g. via ``pip``), wi
 
 For these design requirements we intend to reuse as much from existing OSS libraries as possible and layer policies and optimizations specifically geared towards autotuning over top.
 
+See Also:
+
+- `Source Code <https://aka.ms/mlos-core/src>`_
+- `OS Autotune Project Page <https://aka.ms/os-autotune>`_
+
 .. toctree::
    :hidden:
    :maxdepth: 3
