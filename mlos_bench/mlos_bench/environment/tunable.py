@@ -12,6 +12,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     A tunable parameter definition and its current value.
     """
 
+    _TYPE = {
+        "int": int,
+        "float": float,
+        "categorical": str,
+    }
+
     def __init__(self, name: str, config: dict):
         """
         Create an instance of a new tunable parameter.
@@ -40,9 +46,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError("Special values must be None for the categorical type")
         elif self._type in {"int", "float"}:
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
-                raise ValueError("Invalid range: " + self._range)
+                raise ValueError(f"Invalid range: {self._range}")
         else:
-            raise ValueError("Invalid parameter type: " + self._type)
+            raise ValueError(f"Invalid parameter type: {self._type}")
 
     def __repr__(self) -> str:
         """
@@ -99,8 +105,33 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         Set the current value of the tunable.
         """
-        self._current_value = value
-        return value
+        if not self.is_valid(value):
+            raise ValueError(f"Invalid value for the tunable: {value}")
+        # After the validation, coerce the input to the right data type.
+        # We need this for the values produced by some optimizers (e.g., scikit-optimize).
+        self._current_value = self._TYPE[self._type](value)
+        return self._current_value
+
+    def is_valid(self, value) -> bool:
+        """
+        Check if the value can be assigned to the tunable.
+
+        Parameters
+        ----------
+        value : Any
+            Value to validate.
+
+        Returns
+        -------
+        is_valid : bool
+            True if the value is valid, False otherwise.
+        """
+        if self._type == "categorical":
+            return value in self._values
+        elif self._type in {"int", "float"} and self._range:
+            return (self._range[0] <= value <= self._range[1]) or value == self._default
+        else:
+            raise ValueError(f"Invalid parameter type: {self._type}")
 
     @property
     def type(self) -> str:

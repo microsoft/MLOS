@@ -2,8 +2,6 @@
 Unit tests for Tunable to ConfigSpace conversion.
 """
 
-import pytest
-
 from ConfigSpace import UniformIntegerHyperparameter
 from ConfigSpace import UniformFloatHyperparameter
 from ConfigSpace import CategoricalHyperparameter
@@ -12,111 +10,7 @@ from mlos_bench.environment import Tunable, TunableGroups
 from mlos_bench.convert_configspace import _tunable_to_hyperparameter
 from mlos_bench.convert_configspace import tunable_groups_to_configspace
 
-# pylint: disable=redefined-outer-name,protected-access
-
-
-@pytest.fixture
-def tunable_categorical() -> Tunable:
-    """
-    A test fixture for a categorical Tunable object.
-
-    Returns
-    -------
-    tunable : Tunable
-        An instance of a categorical Tunable.
-    """
-    return Tunable("vmSize", {
-        "description": "Azure VM size",
-        "type": "categorical",
-        "default": "Standard_B4ms",
-        "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
-    })
-
-
-@pytest.fixture
-def tunable_int() -> Tunable:
-    """
-    A test fixture for an integer Tunable object.
-
-    Returns
-    -------
-    tunable : Tunable
-        An instance of an integer Tunable.
-    """
-    return Tunable("kernel_sched_migration_cost_ns", {
-        "description": "Cost of migrating the thread to another core",
-        "type": "int",
-        "default": -1,
-        "range": [-1, 500000],
-        "special": [-1]
-    })
-
-
-@pytest.fixture
-def tunable_float() -> Tunable:
-    """
-    A test fixture for a float Tunable object.
-
-    Returns
-    -------
-    tunable : Tunable
-        An instance of a float Tunable.
-    """
-    return Tunable("chaos_monkey_prob", {
-        "description": "Probability of spontaneous VM shutdown",
-        "type": "float",
-        "default": 0.01,
-        "range": [0, 1]
-    })
-
-
-@pytest.fixture
-def tunable_groups() -> TunableGroups:
-    """
-    A test fixture that produces a mock TunableGroups.
-    Returns
-    -------
-    tunable_groups : TunableGroups
-        A new TunableGroups object for testing.
-    """
-    tunables = TunableGroups({
-        "provision": {
-            "cost": 1000,
-            "params": {
-                "vmSize": {
-                    "description": "Azure VM size",
-                    "type": "categorical",
-                    "default": "Standard_B4ms",
-                    "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
-                }
-            }
-        },
-        "boot": {
-            "cost": 300,
-            "params": {
-                "rootfs": {
-                    "description": "Root file system",
-                    "type": "categorical",
-                    "default": "xfs",
-                    "values": ["xfs", "ext4", "ext2"]
-                }
-            }
-        },
-        "kernel": {
-            "cost": 1,
-            "params": {
-                "kernel_sched_migration_cost_ns": {
-                    "description": "Cost of migrating the thread to another core",
-                    "type": "int",
-                    "default": -1,
-                    "range": [-1, 500000],
-                    "special": [-1]
-                }
-            }
-        }
-    })
-    tunables.reset()
-    return tunables
+# pylint: disable=protected-access
 
 
 def _cmp_tunable_hyperparameter_categorical(

@@ -1,12 +1,10 @@
 """
-Unit tests for deep copy of tunable objects and groups.
+Common fixtures for Tunable and TunableGroups tests.
 """
 
 import pytest
 
 from mlos_bench.environment import Tunable, TunableGroups
-
-# pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
@@ -17,7 +15,7 @@ def tunable_categorical() -> Tunable:
     Returns
     -------
     tunable : Tunable
-        A categorical Tunable object.
+        An instance of a categorical Tunable.
     """
     return Tunable("vmSize", {
         "description": "Azure VM size",
@@ -35,14 +33,32 @@ def tunable_int() -> Tunable:
     Returns
     -------
     tunable : Tunable
-        An integer Tunable object.
+        An instance of an integer Tunable.
     """
     return Tunable("kernel_sched_migration_cost_ns", {
         "description": "Cost of migrating the thread to another core",
         "type": "int",
         "default": -1,
-        "range": [0, 500000],
+        "range": [-1, 500000],
         "special": [-1]
+    })
+
+
+@pytest.fixture
+def tunable_float() -> Tunable:
+    """
+    A test fixture that produces a float Tunable object with limited range.
+
+    Returns
+    -------
+    tunable : Tunable
+        An instance of a float Tunable.
+    """
+    return Tunable("chaos_monkey_prob", {
+        "description": "Probability of spontaneous VM shutdown",
+        "type": "float",
+        "default": 0.01,
+        "range": [0, 1]
     })
 
 
@@ -68,7 +84,6 @@ def tunable_groups() -> TunableGroups:
                 }
             }
         },
-
         "boot": {
             "cost": 300,
             "params": {
@@ -80,7 +95,6 @@ def tunable_groups() -> TunableGroups:
                 }
             }
         },
-
         "kernel": {
             "cost": 1,
             "params": {
@@ -88,7 +102,7 @@ def tunable_groups() -> TunableGroups:
                     "description": "Cost of migrating the thread to another core",
                     "type": "int",
                     "default": -1,
-                    "range": [0, 500000],
+                    "range": [-1, 500000],
                     "special": [-1]
                 }
             }
@@ -96,25 +110,3 @@ def tunable_groups() -> TunableGroups:
     })
     tunables.reset()
     return tunables
-
-
-def test_copy_tunable_int(tunable_int):
-    """
-    Check if deep copy works for Tunable object.
-    """
-    tunable_copy = tunable_int.copy()
-    assert tunable_int == tunable_copy
-    tunable_copy.value += 200
-    assert tunable_int != tunable_copy
-
-
-def test_copy_tunable_groups(tunable_groups):
-    """
-    Check if deep copy works for TunableGroups object.
-    """
-    tunable_groups_copy = tunable_groups.copy()
-    assert tunable_groups == tunable_groups_copy
-    tunable_groups_copy["vmSize"] += "_different_value"
-    assert tunable_groups_copy.is_updated()
-    assert not tunable_groups.is_updated()
-    assert tunable_groups != tunable_groups_copy
