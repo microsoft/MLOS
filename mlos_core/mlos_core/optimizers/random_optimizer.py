@@ -16,7 +16,7 @@ class RandomOptimizer(BaseOptimizer):
     parameter_space : ConfigSpace.ConfigurationSpace
         The parameter space to optimize.
     """
-    def register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configurations for logging.
@@ -32,10 +32,9 @@ class RandomOptimizer(BaseOptimizer):
         context : None
             Not Yet Implemented.
         """
-        self._observations.append((configurations, scores, context))
         # should we pop them from self.pending_observations?
 
-    def suggest(self, context: pd.DataFrame = None):
+    def _suggest(self, context: pd.DataFrame = None):
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -50,7 +49,7 @@ class RandomOptimizer(BaseOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        return pd.DataFrame(self.parameter_space.sample_configuration().get_dictionary(), index=[0])
+        return pd.DataFrame(self.optimizer_parameter_space.sample_configuration().get_dictionary(), index=[0])
 
     def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         raise NotImplementedError()
