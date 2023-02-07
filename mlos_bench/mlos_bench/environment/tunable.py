@@ -134,6 +134,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"Invalid parameter type: {self._type}")
 
     @property
+    def name(self) -> str:
+        """
+        Get the name / string ID of the tunable.
+        """
+        return self._name
+
+    @property
     def type(self) -> str:
         """
         Get the data type of the tunable.
@@ -388,12 +395,18 @@ class TunableGroups:
         ----------
         tunables : TunableGroups
             A collection of covariant tunable groups.
+
+        Returns
+        -------
+        self : TunableGroups
+            Self-reference for chaining.
         """
         # pylint: disable=protected-access
         self._index.update(tunables._index)
         self._tunable_groups.update(tunables._tunable_groups)
+        return self
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Produce a human-readable version of the TunableGroups (mostly for logging).
 
@@ -407,13 +420,13 @@ class TunableGroups:
             for (group_name, group) in self._tunable_groups.items()
             for tunable in group._tunables.values()) + " }"
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str):
         """
         Get the current value of a single tunable parameter.
         """
         return self._index[name][name]
 
-    def __setitem__(self, name, value):
+    def __setitem__(self, name: str, value):
         """
         Update the current value of a single tunable parameter.
         """
@@ -533,9 +546,15 @@ class TunableGroups:
         ----------
         group_names : list of str or None
             IDs of the (covariant) tunable groups. Reset all groups if omitted.
+
+        Returns
+        -------
+        self : TunableGroups
+            Self-reference for chaining.
         """
         for name in (group_names or self.get_names()):
             self._tunable_groups[name].reset()
+        return self
 
     def assign(self, param_values: Dict[str, Any]):
         """
@@ -546,6 +565,12 @@ class TunableGroups:
         ----------
         param_values : Dict[str, Any]
             Dictionary mapping Tunable parameter names to new values.
+
+        Returns
+        -------
+        self : TunableGroups
+            Self-reference for chaining.
         """
         for key, value in param_values.items():
             self[key] = value
+        return self
