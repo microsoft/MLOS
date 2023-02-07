@@ -14,6 +14,14 @@ For these design requirements we intend to reuse as much from existing OSS libra
 
 The development environment for MlosCore uses `conda` to ease dependency management.
 
+### Devcontainer
+
+For a quick start, you can use the provided [VSCode devcontainer](https://code.visualstudio.com/docs/remote/containers) configuration.
+
+Simply open the project in VSCode and follow the prompts to build and open the devcontainer and the conda environment and additional tools will be installed automatically inside the container.
+
+### Manually
+
 > See Also: [`conda` install instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 >
 > Note: to support Windows we rely on some pre-compiled packages from `conda-forge` channels, which increases the `conda` solver time during environment create/update.

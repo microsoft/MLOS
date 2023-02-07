@@ -11,6 +11,10 @@ dependencies:
   - pycodestyle
   - autopep8
   - pytest
+  - pytest-cov
+  - pytest-forked
+  - pytest-xdist
+  - pytest-timeout
   - setuptools
   - json5
   - jupyterlab
@@ -26,7 +30,3 @@ dependencies:
   - pip:
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"
-    - pytest-cov
-    - pytest-forked
-    - pytest-xdist
-    - pytest-timeout

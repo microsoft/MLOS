@@ -26,13 +26,19 @@ endif
 # Allow overriding the default verbosity of conda for CI jobs.
 CONDA_INFO_LEVEL ?= -q
 
+# Run make in parallel by default.
+MAKEFLAGS += -j$(shell nproc)
+
 .PHONY: all
-all: check test dist # doc
+all: check test dist dist-test # doc
 
 .PHONY: conda-env
 conda-env: .conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .conda-env.${CONDA_ENV_NAME}.build-stamp: ${ENV_YML} mlos_core/setup.py mlos_bench/setup.py
+	@echo "CONDA_SOLVER: ${CONDA_SOLVER}"
+	@echo "CONDA_EXPERIMENTAL_SOLVER: ${CONDA_EXPERIMENTAL_SOLVER}"
+	@echo "CONDA_INFO_LEVEL: ${CONDA_INFO_LEVEL}"
 	conda env list -q | grep -q "^${CONDA_ENV_NAME} " || conda env create ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} -f ${ENV_YML}
 	conda env update ${CONDA_INFO_LEVEL} -n ${CONDA_ENV_NAME} --prune -f ${ENV_YML}
 	$(MAKE) clean-check clean-test clean-doc
@@ -44,36 +50,47 @@ clean-conda-env:
 	rm -f .conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: check
-check: pycodestyle pylint
+check: pycodestyle pydocstyle pylint
 
 .PHONY: pycodestyle
-pycodestyle: conda-env .pycodestyle.build-stamp
+pycodestyle: conda-env .pycodestyle.${CONDA_ENV_NAME}.build-stamp
 
-.pycodestyle.build-stamp: $(PYTHON_FILES) setup.cfg
+.pycodestyle.${CONDA_ENV_NAME}.build-stamp: .conda-env.${CONDA_ENV_NAME}.build-stamp
+.pycodestyle.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) setup.cfg
 	# Check for decent pep8 code style with pycodestyle.
 	# Note: if this fails, try using autopep8 to fix it.
 	conda run -n ${CONDA_ENV_NAME} pycodestyle $(PYTHON_FILES)
-	touch .pycodestyle.build-stamp
+	touch .pycodestyle.${CONDA_ENV_NAME}.build-stamp
+
+.PHONY: pydocstyle
+pydocstyle: conda-env .pydocstyle.${CONDA_ENV_NAME}.build-stamp
+
+.pydocstyle.${CONDA_ENV_NAME}.build-stamp: .conda-env.${CONDA_ENV_NAME}.build-stamp
+.pydocstyle.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) setup.cfg
+	# Check for decent pep8 doc style with pydocstyle.
+	# TODO: FIXME: Force this to break the build.
+	conda run -n ${CONDA_ENV_NAME} pydocstyle $(PYTHON_FILES) || true
+	#touch .pydocstyle.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: pylint
-pylint: conda-env .pylint.build-stamp
+pylint: conda-env .pylint.${CONDA_ENV_NAME}.build-stamp
 
-.pylint.build-stamp: $(PYTHON_FILES) .pylintrc
+.pylint.${CONDA_ENV_NAME}.build-stamp: .conda-env.${CONDA_ENV_NAME}.build-stamp
+.pylint.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) .pylintrc
 	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(PYTHON_FILES)
-	touch .pylint.build-stamp
+	touch .pylint.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: test
 test: pytest
 
 .PHONY: pytest
-pytest: conda-env .pytest.build-stamp
+pytest: conda-env .pytest.${CONDA_ENV_NAME}.build-stamp
 
-# Make sure pytest can find our pytest_configure.py file.
-.pytest.build-stamp: export PYTHONPATH := $(PWD):$(PYTHONPATH)
-.pytest.build-stamp: $(PYTHON_FILES) pytest.ini
+.pytest.${CONDA_ENV_NAME}.build-stamp: .conda-env.${CONDA_ENV_NAME}.build-stamp
+.pytest.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) pytest.ini
 	#conda run -n ${CONDA_ENV_NAME} pytest -n auto --cov=mlos_core --cov-report=xml mlos_core/ mlos_bench/
 	conda run -n ${CONDA_ENV_NAME} pytest --cov --cov-report=xml mlos_core/ mlos_bench/ --junitxml=junit/test-results.xml
-	touch .pytest.build-stamp
+	touch .pytest.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: dist
 dist: bdist_wheel
@@ -81,6 +98,7 @@ dist: bdist_wheel
 .PHONY: bdist_wheel
 bdist_wheel: conda-env mlos_core/dist/mlos_core-*-py3-none-any.whl mlos_bench/dist/mlos_bench-*-py3-none-any.whl
 
+mlos_core/dist/mlos_core-*-py3-none-any.whl: .conda-env.${CONDA_ENV_NAME}.build-stamp
 mlos_core/dist/mlos_core-*-py3-none-any.whl: mlos_core/setup.py $(MLOS_CORE_PYTHON_FILES)
 	rm -f mlos_core/dist/mlos_core-*-py3-none-any.whl \
 	    && cd mlos_core/ \
@@ -88,6 +106,7 @@ mlos_core/dist/mlos_core-*-py3-none-any.whl: mlos_core/setup.py $(MLOS_CORE_PYTH
 	    && cd .. \
 	    && ls mlos_core/dist/mlos_core-*-py3-none-any.whl
 
+mlos_bench/dist/mlos_bench-*-py3-none-any.whl: .conda-env.${CONDA_ENV_NAME}.build-stamp
 mlos_bench/dist/mlos_bench-*-py3-none-any.whl: mlos_bench/setup.py $(MLOS_BENCH_PYTHON_FILES)
 	rm -f mlos_bench/dist/mlos_bench-*-py3-none-any.whl \
 	    && cd mlos_bench/ \
@@ -120,7 +139,7 @@ dist-test-env: dist .dist-test-env.$(PYTHON_VERSION).build-stamp
 	# Create a clean test environment for checking the wheel files.
 	$(MAKE) dist-test-env-clean
 	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERS_REQ)
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install pytest
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install pytest pytest-timeout pytest-forked pytest-xdist
 	# Test a clean install of the mlos_core wheel.
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full]"
 	# Test a clean install of the mlos_bench wheel.
@@ -131,9 +150,7 @@ dist-test-env: dist .dist-test-env.$(PYTHON_VERSION).build-stamp
 #dist-test: dist-clean
 dist-test: dist-test-env .dist-test.$(PYTHON_VERSION).build-stamp
 
-# Make sure pytest can find our pytest_configure.py file.
 # Unnecessary if we invoke it as "python3 -m pytest ..."
-#.dist-test.$(PYTHON_VERSION).build-stamp: export PYTHONPATH := $(PWD):$(PYTHONPATH)
 .dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) .dist-test-env.$(PYTHON_VERSION).build-stamp
 	# Make sure we're using the packages from the wheel.
 	# Note: this will pick up the local directory and change the output if we're using PYTHONPATH=.
@@ -146,8 +163,9 @@ dist-test: dist-test-env .dist-test.$(PYTHON_VERSION).build-stamp
 	touch .dist-test.$(PYTHON_VERSION).build-stamp
 
 dist-test-clean: dist-test-env-clean
-	rm -f .dist-test.$(PYTHON_VERSION).build-stamp
+	rm -f .dist-test-env.$(PYTHON_VERSION).build-stamp
 
+.doc-prereqs.${CONDA_ENV_NAME}.build-stamp: .conda-env.${CONDA_ENV_NAME}.build-stamp
 .doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
 	conda run -n ${CONDA_ENV_NAME} pip install -U -r doc/requirements.txt
 	touch .doc-prereqs.${CONDA_ENV_NAME}.build-stamp
@@ -162,8 +180,8 @@ clean-doc-env:
 
 .PHONY: doc
 doc: conda-env doc-prereqs clean-doc
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_core/ ../mlos_core/ ../mlos_*/setup.py ../pytest_configure.py
-	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py ../pytest_configure.py
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_core/ ../mlos_core/ ../mlos_*/setup.py
+	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
 	conda run -n ${CONDA_ENV_NAME} make -j -C doc/ html
 	test -s doc/build/html/index.html
 	test -s doc/build/html/generated/mlos_core.optimizers.BaseOptimizer.html
@@ -179,11 +197,14 @@ clean-doc:
 .PHONY: clean-check
 clean-check:
 	rm -f .pylint.build-stamp
+	rm -f .pylint.${CONDA_ENV_NAME}.build-stamp
 	rm -f .pycodestyle.build-stamp
+	rm -f .pycodestyle.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-test
 clean-test:
 	rm -f .pytest.build-stamp
+	rm -f .pytest.${CONDA_ENV_NAME}.build-stamp
 	rm -rf .pytest_cache/
 	rm -f coverage.xml .coverage
 	rm -rf junit/test-results.xml

@@ -3,6 +3,8 @@
     "python.defaultInterpreterPath": "${env:HOME}${env:USERPROFILE}/.conda/envs/mlos_core/bin/python",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
+    "python.linting.pycodestyleEnabled": true,
+    "python.linting.pydocstyleEnabled": true,
     "python.testing.pytestEnabled": true,
     "cSpell.ignoreWords": [
         "arange",

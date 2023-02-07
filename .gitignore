@@ -152,8 +152,11 @@ junit/test-results.xml
 .doc-prereqs.build-stamp
 .doc-prereqs.*.build-stamp
 .pycodestyle.build-stamp
+.pycodestyle.*.build-stamp
 .pylint.build-stamp
+.pylint.*.build-stamp
 .pytest.build-stamp
+.pytest.*.build-stamp
 
 .vs/
 .vscode/
@@ -163,3 +166,4 @@ junit/test-results.xml
 # Test config. May contain sensitive information
 # like Azure credentials etc.
 /config.json
+.env

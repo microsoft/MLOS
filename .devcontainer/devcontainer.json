@@ -1,0 +1,88 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/anaconda
+// vim: set ft=jsonc:
+{
+    "name": "Miniconda (Python 3)",
+    "build": {
+        // Use the .devcontainer folder as the build context to improve
+        // container build cache hits and (re)build times.
+        "context": "./tmp",
+        "dockerfile": "Dockerfile",
+        // Try to pull the image from the lastest one we published during the build pipelines.
+        //"cacheFrom": "mloscore.azurecr.io/mlos-core-devcontainer",
+        "args": {
+            // Support local proxy caches for rebuilding the container more quickly.
+            "http_proxy": "${localEnv:http_proxy}",
+            "https_proxy": "${localEnv:https_proxy}",
+            "no_proxy": "${localEnv:no_proxy}"
+        }
+    },
+    // Prep some host side things for the container build
+    "initializeCommand": [".devcontainer/scripts/prep-container-build"],
+    // Make sure the container user can read/write to the package caches.
+    "onCreateCommand": "sudo -n chown -R vscode /opt/conda/pkgs/cache /var/cache/pip",
+    // Make sure the conda env is up to date with the source tree expectations.
+    "updateContentCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos_core -f ${containerWorkspaceFolder}/conda-envs/mlos_core.yml",
+    "settings": {
+        // Adjust the python interpreter path to point to the conda environment
+        "python.defaultInterpreterPath": "/opt/conda/envs/mlos_core/bin/python",
+        "python.linting.pylintPath": "/opt/conda/envs/mlos_core/bin/pylint"
+    },
+    "runArgs": [
+        "--env-file=.env"
+    ],
+    // Various mounting, run, post-create, and user settings
+    "containerEnv": {
+        "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
+        "CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
+        "SSH_AUTH_SOCK": "${localEnv:SSH_AUTH_SOCK}",
+        "PIP_CACHE_DIR": "/var/cache/pip",
+        // Support local proxy caches for rebuilding the container more quickly.
+        "http_proxy": "${localEnv:http_proxy}",
+        "https_proxy": "${localEnv:https_proxy}",
+        "no_proxy": "${localEnv:no_proxy}"
+    },
+    // Features to add to the dev container. More info: https://containers.dev/features.
+    "features": {
+        "ghcr.io/devcontainers/features/azure-cli:1": {},
+        "ghcr.io/devcontainers/features/conda:1": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {},
+        "ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},
+        "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
+    },
+    // Add the IDs of extensions you want installed when the container is created.
+    "extensions": [
+        "EditorConfig.EditorConfig",
+        "streetsidesoftware.code-spell-checker",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "donjayamanne.python-environment-manager",
+        "ms-toolsai.jupyter",
+        "lextudio.restructuredtext",
+        "trond-snekvik.simple-rst",
+        "DavidAnson.vscode-markdownlint", // Linter for markdown files
+        "huntertran.auto-markdown-toc", // Auto-generated Markdown Table of Contents
+        "ms-azuretools.vscode-docker",
+        "waderyan.gitblame", // Enhances git blame experience
+        "donjayamanne.githistory", // Enhanced git history experience
+        "eamodio.gitlens",
+        "ms-vsliveshare.vsliveshare", // Allows easy code share
+        "Gruntfuggly.todo-tree", // Highlights TODO comments in code
+        "github.copilot", // Copilot integration
+        "IBM.output-colorizer", // Colorize your output/test logs
+        "hashicorp.terraform", // Terraform syntax highlighting
+        "redhat.vscode-yaml", // Kubernetes manifest syntax highlighting
+        "stkb.rewrap", // "Alt + Q" -> rewrap comments after n characters on one line
+        "tyriar.sort-lines", // "Ctrl + Shift + P -> Sort lines" -> sort lines alphabetically
+        "esbenp.prettier-vscode" // A pretty good formatter for many languages
+    ]
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [],
+    // Use 'postCreateCommand' to run commands after the container is created.
+    // "postCreateCommand": "python --version",
+    // Configure tool-specific properties.
+    // "customizations": {},
+    // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+    // "remoteUser": "root"
+}

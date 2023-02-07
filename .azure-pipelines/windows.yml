@@ -97,7 +97,6 @@ jobs:
   - pwsh: conda run -n $(conda_env) pylint -j0 mlos_core/mlos_core mlos_bench/mlos_bench
     displayName: 'Run lint checks'
   - pwsh: |
-      $env:PYTHONPATH="${PWD};${env:PYTHONPATH}"
       conda run -n $(conda_env) pytest mlos_core/ mlos_bench/
     displayName: 'Run tests'
 
@@ -120,7 +119,7 @@ jobs:
       $PythonVersReq = (conda list -n $(conda_env) | Select-String -AllMatches -Pattern '^python\s+([0-9.]+)\s+').Matches.Groups[1].Value
       conda create -y -v -n mlos-dist-test-$(PythonVersion) python=${PythonVersReq}
       conda install -y -v -n mlos-dist-test-$(PythonVersion) conda-forge::gpy
-      conda run -n mlos-dist-test-$(PythonVersion) pip install pytest
+      conda run -n mlos-dist-test-$(PythonVersion) pip install pytest pytest-timeout pytest-forked pytest-xdist
       # Install mlos_core wheel.
       conda run -n mlos-dist-test-$(PythonVersion) pip install "${mlos_core_whl}[full]"
       # Install mlos_bench wheel.

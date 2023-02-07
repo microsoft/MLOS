@@ -108,3 +108,51 @@ jobs:
       api_location: 'api'
       output_location: '/'
       azure_static_web_apps_api_token: $(deployment_token)
+
+- job: DevContainer
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - bash: |
+      if [ "$(Build.Reason)" == "Schedule" ]; then
+        echo "##vso[task.setvariable variable=NO_CACHE;]true"
+      fi
+    displayName: 'Set NO_CACHE variable for nightly builds'
+  - bash: |
+      set -x
+      echo "NO_CACHE: $NO_CACHE"
+      .devcontainer/build/build-devcontainer.sh
+    displayName: 'Build the devcontainer image'
+  - bash: |
+      set -x
+      docker run -d --rm --user root --volume $(pwd):/workspaces/MlosCore --workdir /workspaces/MlosCore --name mlos-core-devcontainer mlos-core-devcontainer sleep infinity
+    displayName: 'Start the devcontainer in the background'
+  - bash: |
+      set -x
+      docker exec --user root mlos-core-devcontainer groupmod -g `id -g` vscode
+      docker exec --user root mlos-core-devcontainer usermod -u `id -u` -g `id -g` vscode
+      docker exec --user root mlos-core-devcontainer chown -R vscode:vscode /home/vscode
+      docker exec --user root mlos-core-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
+      docker exec --user root mlos-core-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
+    displayName: 'Fixup vscode uid/gid in the running container'
+  - bash: |
+      set -x
+      docker exec --user vscode mlos-core-devcontainer make -j all doc
+    displayName: 'Build and test mlos-core with the devcontainer (in parallel)'
+  - bash: |
+      set -x
+      docker stop -t 1 mlos-core-devcontainer || true
+      docker rm --force mlos-core-devcontainer || true
+    displayName: 'Cleanup the devcontainer'
+  - bash: |
+      echo $(ACR_PASSWORD) | docker login --username $(ACR_USERNAME) --password-stdin $(ACR_LOGINURL)
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['ACR_LOGINURL'], ''))
+    displayName: Login to ACR
+  - bash: |
+      set -x
+      docker tag devcontainer-cli $(ACR_LOGINURL)/devcontainer-cli
+      docker push $(ACR_LOGINURL)/devcontainer-cli
+      docker tag mlos-core-devcontainer $(ACR_LOGINURL)/mlos-core-devcontainer
+      docker push $(ACR_LOGINURL)/mlos-core-devcontainer
+    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['ACR_LOGINURL'], ''))
+    displayName: Push Docker images

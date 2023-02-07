@@ -6,6 +6,21 @@
         "ms-python.python",
         "donjayamanne.python-environment-manager",
         "lextudio.restructuredtext",
-        "trond-snekvik.simple-rst"
+        "trond-snekvik.simple-rst",
+        "DavidAnson.vscode-markdownlint", // Linter for markdown files
+        "huntertran.auto-markdown-toc", // Auto-generated Markdown Table of Contents
+        "ms-azuretools.vscode-docker",
+        "waderyan.gitblame", // Enhances git blame experience
+        "donjayamanne.githistory", // Enhanced git history experience
+        "eamodio.gitlens",
+        "ms-vsliveshare.vsliveshare", // Allows easy code share
+        "Gruntfuggly.todo-tree", // Highlights TODO comments in code
+        "github.copilot", // Copilot integration
+        "IBM.output-colorizer", // Colorize your output/test logs
+        "hashicorp.terraform", // Terraform syntax highlighting
+        "redhat.vscode-yaml", // Kubernetes manifest syntax highlighting
+        "stkb.rewrap", // "Alt + Q" -> rewrap comments after n characters on one line
+        "tyriar.sort-lines", // "Ctrl + Shift + P -> Sort lines" -> sort lines alphabetically
+        "esbenp.prettier-vscode" // A pretty good formatter for many languages
     ]
 }

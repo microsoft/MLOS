@@ -1,6 +1,9 @@
 """
-Provides some pytest configuration overrides.
+Provides some pytest configuration overrides for both modules.
 """
+
+# Note: This file is named conftest.py so that pytest picks it up automatically
+# without the need to adjust PYTHONPATH or sys.path as much.
 
 import os
 from warnings import warn
