@@ -126,9 +126,6 @@ class LocalExecService(Service):
         (return_code, stdout, stderr) : (int, str, str)
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
-        if env:
-            env = {key: str(val) for (key, val) in env.items()}
-
         cmd = shlex.split(script_line)
         script_path = self._parent.resolve_path(cmd[0])
         if os.path.exists(script_path):
@@ -137,7 +134,10 @@ class LocalExecService(Service):
         cmd = [script_path] + cmd[1:]
         if script_path.strip().lower().endswith(".py"):
             cmd = [sys.executable] + cmd
-            if env and sys.platform == 'win32':
+
+        if env:
+            env = {key: str(val) for (key, val) in env.items()}
+            if sys.platform == 'win32':
                 # A hack to run Python on Windows with env variables set:
                 env_copy = os.environ.copy()
                 env_copy["PYTHONPATH"] = ""
