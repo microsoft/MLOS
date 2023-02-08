@@ -67,7 +67,7 @@ Optimizer
    :toctree: generated/
    :template: class.rst
 
-   Optimizer
+   MockOptimizer
 
 Environments
 ============

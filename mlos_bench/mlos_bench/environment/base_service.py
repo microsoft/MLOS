@@ -4,9 +4,10 @@ Base class for the service mix-ins.
 
 import json
 import logging
-import importlib
 
 from typing import Callable, Dict
+
+from mlos_bench.util import instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
 
@@ -39,18 +40,7 @@ class Service:
         svc : Service
             An instance of the `Service` class initialized with `config`.
         """
-        # We need to import mlos_bench to make the factory methods
-        # like `Service.new()` work.
-        class_name_split = class_name.split(".")
-        module_name = ".".join(class_name_split[:-1])
-        class_id = class_name_split[-1]
-
-        env_module = importlib.import_module(module_name)
-        svc_class = getattr(env_module, class_id)
-        _LOG.info("Instantiating: %s :: %s", class_name, svc_class)
-
-        assert issubclass(svc_class, cls)
-        return svc_class(config, parent)
+        return instantiate_from_config(cls, class_name, config, parent)
 
     def __init__(self, config: dict = None, parent=None):
         """

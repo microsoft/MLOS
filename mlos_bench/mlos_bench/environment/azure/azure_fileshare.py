@@ -9,7 +9,8 @@ from typing import Set
 
 from azure.storage.fileshare import ShareClient
 
-from mlos_bench.environment import _check_required_params, Service, FileShareService
+from mlos_bench.environment import Service, FileShareService
+from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class AzureFileShareService(FileShareService):
         """
         super().__init__(config, parent)
 
-        _check_required_params(
+        check_required_params(
             config, {
                 "storageAccountName",
                 "storageFileShareName",

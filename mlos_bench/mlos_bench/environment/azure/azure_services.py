@@ -10,7 +10,8 @@ from typing import Any, Tuple, List, Dict, Callable
 
 import requests
 
-from mlos_bench.environment import Service, Status, _check_required_params
+from mlos_bench.environment import Service, Status
+from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
@@ -107,7 +108,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         """
         super().__init__(config, parent)
 
-        _check_required_params(
+        check_required_params(
             config, {
                 "deployTemplatePath",
                 "subscription",

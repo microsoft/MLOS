@@ -5,10 +5,10 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-import importlib
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.tunable import TunableGroups
+from mlos_bench.util import instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
 
@@ -50,20 +50,8 @@ class Environment(metaclass=abc.ABCMeta):
         env : Environment
             An instance of the `Environment` class initialized with `config`.
         """
-        # We need to import mlos_bench to make the factory methods
-        # like `Environment.new()` work.
-        class_name_split = class_name.split(".")
-        module_name = ".".join(class_name_split[:-1])
-        class_id = class_name_split[-1]
-
-        env_module = importlib.import_module(module_name)
-        env_class = getattr(env_module, class_id)
-
-        _LOG.info("Instantiating: %s :: class %s = %s",
-                  env_name, class_name, env_class)
-
-        assert issubclass(env_class, cls)
-        return env_class(env_name, config, global_config, tunables, service)
+        return instantiate_from_config(cls, class_name, env_name, config,
+                                       global_config, tunables, service)
 
     def __init__(self, name, config, global_config=None, tunables=None, service=None):
         # pylint: disable=too-many-arguments
