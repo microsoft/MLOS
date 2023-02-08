@@ -4,18 +4,15 @@ Functions to convert TunableGroups to ConfigSpace for use with the mlos_core opt
 
 import logging
 
-from typing import List
-
 from ConfigSpace.hyperparameters import Hyperparameter
 from ConfigSpace import UniformIntegerHyperparameter
 from ConfigSpace import UniformFloatHyperparameter
 from ConfigSpace import CategoricalHyperparameter
+from ConfigSpace import ConfigurationSpace
 
 from mlos_bench.environment import Tunable, TunableGroups
 
 _LOG = logging.getLogger(__name__)
-
-# pylint: disable=protected-access
 
 
 def _tunable_to_hyperparameter(
@@ -38,25 +35,25 @@ def _tunable_to_hyperparameter(
         A ConfigSpace Hyperparameter object that corresponds to the Tunable.
     """
     meta = {"group": group_name, "cost": cost}  # {"lower": "", "upper": "", "scaling": ""}
-    if tunable._type == "categorical":
+    if tunable.type == "categorical":
         return CategoricalHyperparameter(
-            tunable._name, choices=tunable._values,
+            tunable.name, choices=tunable.categorical_values,
             default_value=tunable.value, meta=meta)
-    elif tunable._type == "int":
+    elif tunable.type == "int":
         return UniformIntegerHyperparameter(
-            tunable._name, lower=tunable._range[0], upper=tunable._range[1],
+            tunable.name, lower=tunable.range[0], upper=tunable.range[1],
             default_value=tunable.value, meta=meta)
-    elif tunable._type == "float":
+    elif tunable.type == "float":
         return UniformFloatHyperparameter(
-            tunable._name, lower=tunable._range[0], upper=tunable._range[1],
+            tunable.name, lower=tunable.range[0], upper=tunable.range[1],
             default_value=tunable.value, meta=meta)
     else:
-        raise TypeError("Undefined Parameter Type: " + tunable._type)
+        raise TypeError(f"Undefined Parameter Type: {tunable.type}")
 
 
-def tunable_groups_to_configspace(tunables: TunableGroups) -> List[Hyperparameter]:
+def tunable_groups_to_configspace(tunables: TunableGroups) -> ConfigurationSpace:
     """
-    Convert TunableGroups to a list of ConfigSpace hyperparameters.
+    Convert TunableGroups to  hyperparameters in ConfigurationSpace.
 
     Parameters
     ----------
@@ -65,9 +62,12 @@ def tunable_groups_to_configspace(tunables: TunableGroups) -> List[Hyperparamete
 
     Returns
     -------
-    configspace : List[Hyperparameter]
-        A list of ConfigSpace Hyperparameter objects.
+    configspace : ConfigurationSpace
+        A new ConfigurationSpace instance that corresponds to the input TunableGroups.
     """
-    return [_tunable_to_hyperparameter(tunable, group_name, group.get_cost())
-            for (group_name, group) in tunables._tunable_groups.items()
-            for tunable in group._tunables.values()]
+    space = ConfigurationSpace()
+    space.add_hyperparameters([
+        _tunable_to_hyperparameter(tunable, group.name, group.get_cost())
+        for (tunable, group) in tunables
+    ])
+    return space
