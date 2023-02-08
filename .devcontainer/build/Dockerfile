@@ -2,12 +2,10 @@
 FROM node:latest
 
 # Install some basic dependencies
-# TODO: Check if build-essentials are really needed.
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         apt-transport-https ca-certificates curl gnupg2 software-properties-common \
-        lsb-release less jq \
-        build-essential g++ libx11-dev libxkbfile-dev libsecret-1-dev python-is-python3 python3-minimal
+        lsb-release less jq
 
 # Install docker CLI
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \

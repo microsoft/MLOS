@@ -137,7 +137,7 @@ jobs:
     displayName: 'Fixup vscode uid/gid in the running container'
   - bash: |
       set -x
-      docker exec --user vscode mlos-core-devcontainer make -j all doc
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v -j all doc
     displayName: 'Build and test mlos-core with the devcontainer (in parallel)'
   - bash: |
       set -x

@@ -54,6 +54,7 @@ RUN /opt/conda/bin/conda init bash \
 COPY --chown=vscode:conda mlos_core_deps.yml /tmp/conda-tmp/
 RUN umask 0002 \
     && /opt/conda/bin/conda env update -n mlos_core -v -f /tmp/conda-tmp/mlos_core_deps.yml \
-    && /opt/conda/bin/conda clean -v -y -a
+    && /opt/conda/bin/conda clean -v -y -a \
+    && mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/
 RUN mkdir -p /home/vscode/.conda/envs \
     && ln -s /opt/conda/envs/mlos_core /home/vscode/.conda/envs/mlos_core
