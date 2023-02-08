@@ -2,8 +2,8 @@
 Contains the wrapper classes for different Bayesian optimizers.
 """
 
+from typing import List, Optional
 from abc import ABCMeta, abstractmethod
-from typing import Optional
 
 import ConfigSpace
 import numpy as np
@@ -59,9 +59,31 @@ class EmukitOptimizer(BaseBayesianOptimizer):
     """
     def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
         super().__init__(parameter_space, space_adapter)
-
         self.emukit_parameter_space = configspace_to_emukit_space(self.optimizer_parameter_space)
+        self._emukit_column_names = self._column_names(self.optimizer_parameter_space)
         self.gpbo = None
+
+    def _column_names(self, parameter_space: ConfigSpace.ConfigurationSpace) -> List[str]:
+        """
+        Returns a list of column names for the emukit dataframe.
+
+        Parameters
+        ----------
+        parameter_space : ConfigSpace.ConfigurationSpace
+            The parameter space to optimize.
+
+        Returns
+        -------
+        names : [str]
+            List of column names.
+        """
+        names = []
+        for hp in parameter_space.get_hyperparameters():
+            if isinstance(hp, ConfigSpace.CategoricalHyperparameter):
+                names.extend([f'{hp.name}={v}' for v in hp.choices])
+            else:
+                names.append(hp.name)
+        return names
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
@@ -115,7 +137,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
                 self._initialize_optimizer()
             # this should happen any time after the initial model is created
             config = self.gpbo.get_next_points(results=[])
-        return pd.DataFrame(config, columns=self.optimizer_parameter_space.get_hyperparameter_names())
+        return pd.DataFrame(config, columns=self._emukit_column_names)
 
     def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         raise NotImplementedError()

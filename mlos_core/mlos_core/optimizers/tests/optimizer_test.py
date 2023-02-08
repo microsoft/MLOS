@@ -27,8 +27,11 @@ def test_create_optimizer_and_suggest(optimizer_class: Type[BaseOptimizer], kwar
     # Start defining a ConfigurationSpace for the Optimizer to search.
     input_space = CS.ConfigurationSpace(seed=1234)
 
-    # Add a single continuous input dimension between 0 and 1.
+    # Add a continuous input dimension between 0 and 1.
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='x', lower=0, upper=1))
+    # Add a categorical hyperparameter with 4 possible values.
+    input_space.add_hyperparameter(CS.CategoricalHyperparameter(
+        name='y', choices=["foo", "bar", "baz", "xyzzy"]))
 
     optimizer = optimizer_class(input_space, **kwargs)
     assert optimizer is not None
