@@ -7,7 +7,7 @@ See `--help` output for details.
 
 import logging
 
-from mlos_bench.mock_opt import MockOptimizer
+from mlos_bench.opt.mock_opt import MockOptimizer
 from mlos_bench.launcher import Launcher
 
 _LOG = logging.getLogger(__name__)

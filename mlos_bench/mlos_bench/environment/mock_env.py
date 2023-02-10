@@ -72,17 +72,17 @@ class MockEnv(Environment):
             return result
 
         # Simple convex function of all tunable parameters.
-        bench = numpy.mean(numpy.square([
+        score = numpy.mean(numpy.square([
             self._normalized(tunable) for (tunable, _group) in self._tunable_params
         ]))
 
         # Add noise and shift the benchmark value from [0, 1] to a given range.
         noise = self._random.gauss(0, MockEnv._NOISE_VAR) if self._random else 0
-        bench = numpy.clip(bench + noise, 0, 1)
+        score = numpy.clip(score + noise, 0, 1)
         if self._range:
-            bench = self._range[0] + bench * (self._range[1] - self._range[0])
+            score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        data = pandas.DataFrame({"benchmark": [bench]})
+        data = pandas.DataFrame({"score": [score]})
         return (Status.SUCCEEDED, data)
 
     @staticmethod
@@ -103,8 +103,4 @@ class MockEnv(Environment):
         else:
             raise ValueError("Invalid parameter type: " + tunable.type)
         # Explicitly clip the value in case of numerical errors.
-        if val < 0:
-            val = 0.0
-        elif val > 1:
-            val = 1.0
-        return val
+        return numpy.clip(val, 0, 1)

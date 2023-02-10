@@ -62,7 +62,7 @@ Main
 
 Optimizer
 =========
-.. currentmodule:: mlos_bench.mock_opt
+.. currentmodule:: mlos_bench.opt.mock_opt
 .. autosummary::
    :toctree: generated/
    :template: class.rst
