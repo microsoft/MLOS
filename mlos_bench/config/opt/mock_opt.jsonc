@@ -1,0 +1,8 @@
+// Mock optimizer to test the benchmarking framework.
+{
+    "class": "mlos_bench.opt.MockOptimizer",
+
+    "config": {
+        "max_iterations": 20
+    }
+}

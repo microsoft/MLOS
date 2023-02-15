@@ -4,59 +4,50 @@ Mock optimizer for OS Autotune.
 
 import random
 import logging
+from typing import Tuple
+
+from ..environment.status import Status
+from ..environment.tunable import TunableGroups
+
+from .base_opt import Optimizer
 
 _LOG = logging.getLogger(__name__)
 
 
-class MockOptimizer:
+class MockOptimizer(Optimizer):
     """
     Mock optimizer to test the Environment API.
     """
 
-    _MAX_ITER = 3
+    def __init__(self, tunables: TunableGroups, config: dict):
+        super().__init__(tunables, config)
+        self._best_config = None
+        self._best_score = None
 
-    def __init__(self, tunables):
-        _LOG.info("Create: %s", tunables)
-        self._iter = 1
-        self._tunables = tunables
-        self._last_values = None
+    _FUNC_RANDOM = {
+        "categorical": lambda tunable: random.choice(tunable.categorical_values),
+        "float": lambda tunable: random.uniform(*tunable.range),
+        "int": lambda tunable: random.randint(*tunable.range),
+    }
 
-    def suggest(self):
+    def suggest(self) -> TunableGroups:
         """
         Generate the next (random) suggestion.
         """
         tunables = self._tunables.copy()
         for (tunable, _group) in tunables:
-            if tunable.type == "categorical":
-                tunable.value = random.choice(tunable.categorical_values)
-            elif tunable.type == "float":
-                tunable.value = random.uniform(*tunable.range)
-            elif tunable.type == "int":
-                tunable.value = random.randint(*tunable.range)
-            else:
-                raise ValueError("Invalid parameter type: " + tunable.type)
+            tunable.value = self._FUNC_RANDOM[tunable.type](tunable)
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 
-    def register(self, tunables, bench):
-        """
-        Register the observation for the given configuration.
-        """
-        (bench_status, bench_result) = bench
-        _LOG.info("Iteration %d :: Register: %s = %s %s",
-                  self._iter, tunables, bench_status, bench_result)
-        self._last_values = tunables
+    def register(self, tunables: TunableGroups, status: Status, score: float):
+        _LOG.info("Iteration %d :: Register: %s = %s score: %s",
+                  self._iter, tunables, status, score)
+        if status == Status.SUCCEEDED and (
+                self._best_score is None or score < self._best_score):
+            self._best_score = score
+            self._best_config = tunables.copy()
         self._iter += 1
 
-    def not_converged(self):
-        """
-        Return True if not converged, False otherwise.
-        """
-        return self._iter <= MockOptimizer._MAX_ITER
-
-    def get_best_observation(self):
-        """
-        Get the best observation so far.
-        """
-        # FIXME: Use the tunables' values, as passed into .register()
-        return (self._last_values, 0.0)
+    def get_best_observation(self) -> Tuple[float, TunableGroups]:
+        return (self._best_score, self._best_config)

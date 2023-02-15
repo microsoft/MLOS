@@ -58,6 +58,13 @@ class Launcher:
         """
         return self._parser
 
+    @property
+    def global_config(self) -> dict:
+        """
+        Get the global parameters that can override the values in the config snippets.
+        """
+        return self._global_config
+
     def parse_args(self):
         """
         Parse command line arguments and load global config parameters.

@@ -8,6 +8,7 @@ from mlos_bench.environment.base_service import Service
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.environment.base_fileshare import FileShareService
 
+from mlos_bench.environment.mock_env import MockEnv
 from mlos_bench.environment.remote_env import RemoteEnv
 from mlos_bench.environment.local_env import LocalEnv
 from mlos_bench.environment.local_env_fileshare import LocalFileShareEnv
@@ -18,16 +19,20 @@ from mlos_bench.environment.config_persistence import ConfigPersistenceService
 
 
 __all__ = [
+
     'Status',
     'Tunable',
     'TunableGroups',
-    'Service',
+
     'Environment',
+    'MockEnv',
     'RemoteEnv',
     'LocalEnv',
     'LocalFileShareEnv',
     'CompositeEnv',
+
+    'Service',
     'LocalExecService',
-    'ConfigPersistenceService',
     'FileShareService',
+    'ConfigPersistenceService',
 ]

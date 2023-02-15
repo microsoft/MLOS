@@ -49,8 +49,6 @@ Main
    :toctree: generated/
    :template: functions.rst
 
-   optimize
-
 :doc:`run_bench.py </api/mlos_bench/mlos_bench.run_bench>`
 
     A helper script for testing a single application/workload run.
@@ -60,31 +58,45 @@ Main
    :toctree: generated/
    :template: function.rst
 
-Optimizer
-=========
-.. currentmodule:: mlos_bench.opt.mock_opt
-.. autosummary::
-   :toctree: generated/
-   :template: class.rst
-
-   MockOptimizer
-
-Environments
-============
+Benchmark Environments
+======================
 .. currentmodule:: mlos_bench.environment
 .. autosummary::
    :toctree: generated/
    :template: class.rst
 
    Environment
+   MockEnv
    LocalEnv
+   LocalFileShareEnv
    RemoteEnv
    CompositeEnv
-   Service
    Status
 
-Azure
------
+Tunable Parameters
+------------------
+.. currentmodule:: mlos_bench.environment
+.. autosummary::
+    :toctree: generated/
+    :template: class.rst
+
+    Tunable
+    TunableGroups
+
+Service Mix-ins
+---------------
+.. currentmodule:: mlos_bench.environment
+.. autosummary::
+    :toctree: generated/
+    :template: class.rst
+
+   Service
+   LocalExecService
+   FileShareService
+   ConfigPersistenceService
+
+Azure Environments
+------------------
 
 .. currentmodule:: mlos_bench.environment.azure
 .. autosummary::
@@ -93,4 +105,24 @@ Azure
 
     OSEnv
     VMEnv
+
+Azure Services
+--------------
+
+.. currentmodule:: mlos_bench.environment.azure
+.. autosummary::
+    :toctree: generated/
+    :template: class.rst
+
     AzureVMService
+    AzureFileShareService
+
+Optimizer Adapters
+==================
+.. currentmodule:: mlos_bench.opt
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   Optimizer
+   MockOptimizer

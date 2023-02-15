@@ -118,3 +118,23 @@ Create and activate the environment with:
     ```
 
 8. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.
+
+## Optimization
+
+Searching for an optimal set of tunable parameters is very similar to running a single benchmark.
+Here's an example of how to run the optimization script:
+
+```sh
+./mlos_bench/mlos_bench/run_opt.py \
+    --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
+    --config env-azure-ubuntu-redis.jsonc \              # Root config (location relative to --config-path)
+    --global global_config.json \                        # Config generated at step 2. Uses --config-path
+    --optimizer ./opt/mlos_core_opt.jsonc \              # Optimizer config (relative to --config-path)
+    --log ./os-autotune.log \                            # Log file (also prints to stdout)
+    --log-level 10 \                                     # Log level = DEBUG
+    --no-teardown \                                      # Do not shutdown/deprovision a VM
+    --experimentName RedisBench \                        # Experiment name (can be in global_config.json)
+    --experimentId 001                                   # Unique experiment ID (can come from the persistent storage service)
+```
+
+The only difference between `run_bench.py` and `run_opt.py` scripts is that the latter has the `--optimzier` parameter instead of using a fixed set of tunables via `--tunables` option.

@@ -185,7 +185,7 @@ doc: conda-env doc-prereqs clean-doc
 	conda run -n ${CONDA_ENV_NAME} make -j -C doc/ html
 	test -s doc/build/html/index.html
 	test -s doc/build/html/generated/mlos_core.optimizers.BaseOptimizer.html
-	test -s doc/build/html/generated/mlos_bench.run_opt.optimize.html
+	test -s doc/build/html/generated/mlos_bench.environment.Environment.html
 	test -s doc/build/html/api/mlos_core/mlos_core.html
 	test -s doc/build/html/api/mlos_bench/mlos_bench.html
 	cp doc/staticwebapp.config.json doc/build/html/
