@@ -7,9 +7,9 @@ import logging
 from typing import Tuple
 from abc import ABCMeta, abstractmethod
 
-from ..environment.status import Status
-from ..environment.tunable import TunableGroups
-from ..util import instantiate_from_config
+from mlos_bench.environment.status import Status
+from mlos_bench.environment.tunable import TunableGroups
+from mlos_bench.util import instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
 
@@ -28,7 +28,7 @@ class Optimizer(metaclass=ABCMeta):
         ----------
         class_name: str
             FQN of a Python class to instantiate, e.g.,
-            "mlos_bench.opt.ScikitOptimizer".
+            "mlos_bench.optimizer.MlosCoreOptimizer".
             Must be derived from the `Optimizer` class.
         tunables : TunableGroups
             The tunables to optimize.
@@ -57,9 +57,10 @@ class Optimizer(metaclass=ABCMeta):
         """
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)
+        self._config = config.copy()
         self._tunables = tunables
         self._iter = 1
-        self._max_iter = int(config.get('max_iterations', 10))
+        self._max_iter = int(self._config.pop('max_iterations', 10))
 
     @abstractmethod
     def suggest(self) -> TunableGroups:

@@ -9,8 +9,8 @@ import json
 import logging
 
 from mlos_bench.launcher import Launcher
+from mlos_bench.optimizer import Optimizer
 from mlos_bench.environment import Status, Environment, TunableGroups
-from mlos_bench.opt import Optimizer
 
 _LOG = logging.getLogger(__name__)
 

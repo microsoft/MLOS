@@ -1,0 +1,10 @@
+// MLOS Core optimizer
+{
+    "class": "mlos_bench.optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "max_iterations": 20,
+        "optimizer_type": "SKOPT",
+        "base_estimator": "gp"
+    }
+}

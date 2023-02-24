@@ -6,10 +6,10 @@ import random
 import logging
 from typing import Tuple
 
-from ..environment.status import Status
-from ..environment.tunable import TunableGroups
+from mlos_bench.environment.status import Status
+from mlos_bench.environment.tunable import TunableGroups
 
-from .base_opt import Optimizer
+from mlos_bench.optimizer.base_optimizer import Optimizer
 
 _LOG = logging.getLogger(__name__)
 

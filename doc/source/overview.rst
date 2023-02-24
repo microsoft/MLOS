@@ -119,10 +119,11 @@ Azure Services
 
 Optimizer Adapters
 ==================
-.. currentmodule:: mlos_bench.opt
+.. currentmodule:: mlos_bench.optimizer
 .. autosummary::
    :toctree: generated/
    :template: class.rst
 
    Optimizer
    MockOptimizer
+   MlosCoreOptimizer
