@@ -15,7 +15,7 @@ from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_s
 
 
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
-    """Abstract base class defining the interface for Bayesian optimization. """
+    """Abstract base class defining the interface for Bayesian optimization."""
 
     @abstractmethod
     def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
@@ -57,6 +57,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
     space_adapter : BaseSpaceAdapter
         The space adapter class to employ for parameter space transformations.
     """
+
     def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
         super().__init__(parameter_space, space_adapter)
         self.emukit_parameter_space = configspace_to_emukit_space(self.optimizer_parameter_space)
@@ -182,6 +183,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
     parameter_space : ConfigSpace.ConfigurationSpace
         The parameter space to optimize.
     """
+
     def __init__(
         self,
         parameter_space: ConfigSpace.ConfigurationSpace,

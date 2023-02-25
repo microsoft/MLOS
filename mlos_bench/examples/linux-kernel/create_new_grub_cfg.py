@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Python script to parse through JSON and create new config file.
+
 This script will be run in the SCHEDULER.
 NEW_CFG will need to be copied over to the VM (/etc/default/grub.d).
 """

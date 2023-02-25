@@ -41,7 +41,7 @@ class LocalFileShareEnv(LocalEnv):
             and the "const_args" sections.
             `LocalFileShareEnv` must also have at least some of the following
             parameters: {setup, upload, run, download, teardown,
-                         dump_params_file, read_results_file}
+            dump_params_file, read_results_file}
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.

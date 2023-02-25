@@ -9,6 +9,7 @@ class Status(enum.Enum):
     """
     Enum for the status of the benchmark.
     """
+
     UNKNOWN = 0
     PENDING = 1
     READY = 2

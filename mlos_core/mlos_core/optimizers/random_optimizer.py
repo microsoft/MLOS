@@ -16,6 +16,7 @@ class RandomOptimizer(BaseOptimizer):
     parameter_space : ConfigSpace.ConfigurationSpace
         The parameter space to optimize.
     """
+
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
 

@@ -340,7 +340,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         NOTE: This method is experimental, and there is currently no guarrantee that it works as expected.
 
         Raises
-        -------
+        ------
             RuntimeError: if reverse mapping computation fails.
         """
         from scipy.linalg import pinv, LinAlgError  # pylint: disable=import-outside-toplevel

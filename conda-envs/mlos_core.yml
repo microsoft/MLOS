@@ -10,6 +10,7 @@ dependencies:
   - pylint
   - pycodestyle
   - autopep8
+  - pydocstyle
   - pytest
   - pytest-cov
   - pytest-forked

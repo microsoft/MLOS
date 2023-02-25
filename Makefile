@@ -68,9 +68,8 @@ pydocstyle: conda-env .pydocstyle.${CONDA_ENV_NAME}.build-stamp
 .pydocstyle.${CONDA_ENV_NAME}.build-stamp: .conda-env.${CONDA_ENV_NAME}.build-stamp
 .pydocstyle.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) setup.cfg
 	# Check for decent pep8 doc style with pydocstyle.
-	# TODO: FIXME: Force this to break the build.
-	conda run -n ${CONDA_ENV_NAME} pydocstyle $(PYTHON_FILES) || true
-	#touch .pydocstyle.${CONDA_ENV_NAME}.build-stamp
+	conda run -n ${CONDA_ENV_NAME} pydocstyle $(PYTHON_FILES)
+	touch .pydocstyle.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: pylint
 pylint: conda-env .pylint.${CONDA_ENV_NAME}.build-stamp

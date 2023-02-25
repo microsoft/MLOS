@@ -65,6 +65,7 @@
                 "ms-python.vscode-pylance",
                 "ms-python.python",
                 "donjayamanne.python-environment-manager",
+                "njpwerner.autodocstring",
                 "ms-toolsai.jupyter",
                 "lextudio.restructuredtext",
                 "trond-snekvik.simple-rst",

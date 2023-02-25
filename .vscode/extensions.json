@@ -5,6 +5,7 @@
         "ms-python.vscode-pylance",
         "ms-python.python",
         "donjayamanne.python-environment-manager",
+        "njpwerner.autodocstring",
         "lextudio.restructuredtext",
         "trond-snekvik.simple-rst",
         "DavidAnson.vscode-markdownlint", // Linter for markdown files

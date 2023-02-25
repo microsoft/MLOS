@@ -6,6 +6,7 @@
     "python.linting.pycodestyleEnabled": true,
     "python.linting.pydocstyleEnabled": true,
     "python.testing.pytestEnabled": true,
+    "autoDocstring.docstringFormat": "numpy",
     "cSpell.ignoreWords": [
         "arange",
         "astype",

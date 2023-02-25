@@ -23,6 +23,7 @@ class BaseOptimizer(metaclass=ABCMeta):
     space_adapter : BaseSpaceAdapter
         The space adapter class to employ for parameter space transformations.
     """
+
     def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
         self.parameter_space: ConfigSpace.ConfigurationSpace = parameter_space
         self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = \
