@@ -7,20 +7,45 @@ This is a list of major functions and classes provided by `mlos_core`.
 .. currentmodule:: mlos_core
 
 Optimizers
-==============
+==========
 .. currentmodule:: mlos_core.optimizers
+.. autosummary::
+   :toctree: generated/
+
+   :template: class.rst
+
+   OptimizerType
+   OptimizerFactory
+
+   :template: function.rst
+
+   OptimizerFactory.create
+
+.. currentmodule:: mlos_core.optimizers.optimizer
 .. autosummary::
    :toctree: generated/
    :template: class.rst
 
    BaseOptimizer
+
+.. currentmodule:: mlos_core.optimizers.random_optimizer
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
    RandomOptimizer
+
+.. currentmodule:: mlos_core.optimizers.bayesian_optimizers
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   BaseBayesianOptimizer
    EmukitOptimizer
    SkoptOptimizer
 
-
 Spaces
-=========
+======
 .. currentmodule:: mlos_core.spaces
 .. autosummary::
    :toctree: generated/
@@ -28,6 +53,35 @@ Spaces
 
    configspace_to_emukit_space
    configspace_to_skopt_space
+
+Space Adapters
+--------------
+.. currentmodule:: mlos_core.spaces.adapters
+.. autosummary::
+   :toctree: generated/
+
+   :template: class.rst
+
+   SpaceAdapterType
+   SpaceAdapterFactory
+
+   :template: function.rst
+
+   SpaceAdapterFactory.create
+
+.. currentmodule:: mlos_core.spaces.adapters.adapter
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   BaseSpaceAdapter
+
+.. currentmodule:: mlos_core.spaces.adapters.llamatune
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   LlamaTuneAdapter
 
 #############################
 mlos-bench API

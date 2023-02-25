@@ -183,7 +183,7 @@ doc: conda-env doc-prereqs clean-doc
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
 	conda run -n ${CONDA_ENV_NAME} make -j -C doc/ html
 	test -s doc/build/html/index.html
-	test -s doc/build/html/generated/mlos_core.optimizers.BaseOptimizer.html
+	test -s doc/build/html/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html
 	test -s doc/build/html/generated/mlos_bench.environment.Environment.html
 	test -s doc/build/html/api/mlos_core/mlos_core.html
 	test -s doc/build/html/api/mlos_bench/mlos_bench.html

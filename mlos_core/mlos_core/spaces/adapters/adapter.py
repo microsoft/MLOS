@@ -21,6 +21,14 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         self._orig_parameter_space: ConfigSpace.ConfigurationSpace = orig_parameter_space
         self._random_state = orig_parameter_space.random
 
+    def __repr__(self):
+        # pylint: disable=consider-using-f-string
+        return "{}(original_parameter_space={}, target_parameter_space={})".format(
+            self.__class__.__name__,
+            self.orig_parameter_space,
+            self.target_parameter_space,
+        )
+
     @property
     def orig_parameter_space(self) -> ConfigSpace.ConfigurationSpace:
         """
@@ -32,7 +40,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
     @abstractmethod
     def target_parameter_space(self) -> ConfigSpace.ConfigurationSpace:
         """
-        Target parameter space that is feeded to the underlying optimizer.
+        Target parameter space that is fed to the underlying optimizer.
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 

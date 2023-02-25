@@ -1,5 +1,5 @@
 """
-Implementation of LlamaTune space adapter
+Implementation of LlamaTune space adapter.
 """
 from typing import Optional
 from warnings import warn
@@ -76,7 +76,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         self._h_matrix = self._random_state.choice(range(num_low_dims), num_orig_dims)
         self._sigma_vector = self._random_state.choice([-1, 1], num_orig_dims)
 
-        # Used to retrive the low-dim point, given the high-dim one
+        # Used to retrieve the low-dim point, given the high-dim one
         self._suggested_configs = {}
         self._pinv_matrix = None
         self._use_approximate_reverse_mapping = use_approximate_reverse_mapping
@@ -102,7 +102,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                                      "Approximate reverse mapping is currently disabled; thus *only* configurations suggested "
                                      "previously by the optimzer can be registered.")
 
-                # ...yet, we try to support that by implementing an approximate reverse mapping using peudoinverse matrix.
+                # ...yet, we try to support that by implementing an approximate reverse mapping using pseudo-inverse matrix.
                 if self._pinv_matrix is None:
                     self._try_generate_approx_inverse_mapping()
 
@@ -207,7 +207,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         for param, norm_value in zip(original_parameters, original_config_values):
             # Clip value to force it to fall in [0, 1]
             # NOTE: HeSBO projection ensures that theoretically but due to
-            #       floating point ops nuances this is not always guarranteed
+            #       floating point ops nuances this is not always guaranteed
             value = max(0., min(1., norm_value))    # pylint: disable=redefined-loop-name
 
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
@@ -326,7 +326,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 raise ValueError(error_prefix + f"Total special values percentage for parameter '{param}' surpass 100%.")
             # ... and reasonable?
             if total_percentage >= 0.5:
-                warn(f"Total special values percentage for parameter '{param}' exceeeds 50%.", UserWarning)
+                warn(f"Total special values percentage for parameter '{param}' exceeds 50%.", UserWarning)
 
             sanitized_dict[param] = tuple_list
 
@@ -334,10 +334,10 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
     def _try_generate_approx_inverse_mapping(self):
         """Tries to generate an approximate reverse mapping: i.e., from high-dimensional space to the low-dimensional one.
-        Reverse mapping is generated using the pseudoinverse matrix, of original HeSBO projection matrix.
+        Reverse mapping is generated using the pseudo-inverse matrix, of original HeSBO projection matrix.
         This mapping can be potentially used to register configurations that were *not* previously suggested by the optimizer.
 
-        NOTE: This method is experimental, and there is currently no guarrantee that it works as expected.
+        NOTE: This method is experimental, and there is currently no guarantee that it works as expected.
 
         Raises
         ------
