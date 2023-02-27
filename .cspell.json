@@ -1,0 +1,38 @@
+{
+    "useGitignore": true,
+    "words": [
+        "arange",
+        "astype",
+        "autotune",
+        "bincount",
+        "chisquare",
+        "conda",
+        "configspace",
+        "dataframe",
+        "discretization",
+        "discretize",
+        "emukit",
+        "gpbo",
+        "hyperparameters",
+        "ipykernel",
+        "iterrows",
+        "jupyterlab",
+        "matplotlib",
+        "mlos",
+        "nsmallest",
+        "numpy",
+        "pylint",
+        "pyplot",
+        "pytest",
+        "scikit",
+        "scipy",
+        "seaborn",
+        "setuptools",
+        "skopt",
+        "tolist",
+        "tunables",
+        "xlabel",
+        "ylabel"
+    ]
+    // vim: set ft=jsonc:
+}

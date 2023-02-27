@@ -1,0 +1,34 @@
+# Requires -Version 5.0
+# A script to build the devcontainer-cli image.
+#
+$ErrorActionPreference = 'Stop'
+
+# Make sure we're in the root of the repository.
+Set-Location "$PSScriptRoot"
+
+# Build the helper container that has the devcontainer CLI for building the devcontainer.
+
+docker ps > $null
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "ERROR: docker ps failed.  Make sure docker is running."
+    exit 1
+}
+
+$devcontainer_cli_build_args = ''
+if ("$env:NO_CACHE" -eq 'true') {
+    $devcontainer_cli_build_args = '--no-cache --pull'
+}
+else {
+    #$devcontainer_cli_build_args = '--cache-from mloscore.azurecr.io/devcontainer-cli'
+    docker pull mloscore.azurecr.io/devcontainer-cli
+}
+
+$cmd = "docker.exe build -t devcontainer-cli -t cspell " +
+    "$devcontainer_cli_build_args " +
+    "-f Dockerfile ."
+Write-Host "Running: $cmd"
+Invoke-Expression -Verbose "$cmd"
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to build devcontainer-cli container."
+    exit $LASTEXITCODE
+}

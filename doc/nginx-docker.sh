@@ -6,8 +6,25 @@ scriptpath=$(readlink -f "$0")
 scriptdir=$(dirname "$scriptpath")
 cd "$scriptdir"
 
+# Make it work inside a devcontainer too.
+repo_root=$(readlink -f "$scriptdir/..")
+if [ -n "${LOCAL_WORKSPACE_FOLDER:-}" ]; then
+    repo_root="$LOCAL_WORKSPACE_FOLDER"
+fi
+
 if [ "$1" == 'start' ]; then
-    docker run -d --name mlos-doc-nginx -v $PWD/nginx-default.conf:/etc/nginx/conf.d/default.conf -v $PWD:/doc -p 8080:80 nginx
+    set -x
+    docker build --progress=plain -t mlos-doc-nginx \
+        --build-arg http_proxy=$http_proxy \
+        --build-arg https_proxy=$https_proxy \
+        --build-arg no_proxy=$no_proxy \
+        -f Dockerfile /dev/null
+    docker run -d --name mlos-doc-nginx \
+        -v "$repo_root/doc/nginx-default.conf":/etc/nginx/conf.d/default.conf \
+        -v "$repo_root/doc":/doc \
+        -p 8080:80 \
+        mlos-doc-nginx
+    set +x
 elif [ "$1" == 'stop' ]; then
     docker stop mlos-doc-nginx || true
     docker rm mlos-doc-nginx || true

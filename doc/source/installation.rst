@@ -32,6 +32,11 @@ Manually
 
     conda env create -f conda-envs/mlos_core.yml
 
+
+  .. note::
+    See the `conda-envs/` directory for additional conda environment files, including those used for Windows (e.g. `conda-envs/mlos_core-windows.yml`).
+
+
   or
 
   .. code-block:: shell

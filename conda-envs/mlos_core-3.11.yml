@@ -1,11 +1,9 @@
 name: mlos_core-3.11
 channels:
   - defaults
-#  - conda-forge
 dependencies:
-  - scipy
-  - numpy
-  - pandas
+  # Basic dev environment packages.
+  # All other dependencies for the mlos modules come from pip.
   - pip
   - pylint
   - pycodestyle
@@ -17,8 +15,6 @@ dependencies:
   - pytest-xdist
   - pytest-timeout
   - setuptools
-  - json5
-  - jupyterlab
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -26,8 +22,7 @@ dependencies:
   - seaborn
   - python=3.11
   # See comments in mlos_core.yml.
-  # FIXME: Doesn't exist for 3.11 yet
-  #- conda-forge::gpy
+  #- gcc_linux-64
   - pip:
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

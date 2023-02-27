@@ -22,10 +22,10 @@ dependencies:
   - seaborn
   # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
   - python<3.11
-  # We need a compiler to build GPy so we can avoid the older binary version that's only in conda-forge which adds various other
-  # problems for us.
-  # NOTE: GPy is currently required by emukit.
-  #- gcc_linux-64
+  # Require a compiler to be installed/configured and build GPy directly.
+  - vs2019_win-64
+  - vswhere
+  - conda-forge::GPy
   - pip:
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

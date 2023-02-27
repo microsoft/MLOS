@@ -87,31 +87,22 @@ jobs:
   - bash: conda run -n $(conda_env) pip install pytest-azurepipelines
     displayName: 'Install pytest-azurepipelines'
 
-  - bash: make CONDA_ENV_NAME=$(conda_env) check
-    displayName: 'Run lint checks'
+  # This is moreso about code cleanliness, which is a dev thing, not a
+  # functionality thing, and the rules for that change between python versions,
+  # so only do this for the default in the devcontainer.
+  #- bash: make CONDA_ENV_NAME=$(conda_env) check
+  #  displayName: 'Run lint checks'
   - bash: make CONDA_ENV_NAME=$(conda_env) test
     displayName: 'Run tests'
 
   - bash: make CONDA_ENV_NAME=$(conda_env) CONDA_INFO_LEVEL=-v dist dist-test
     displayName: 'Generate and test binary distribution files'
 
-  - bash: make CONDA_ENV_NAME=$(conda_env) doc
-    # Only build docs for the default env.
-    condition: eq(variables['conda_env'], 'mlos_core')
-    displayName: 'Generate documentation'
-  - task: AzureStaticWebApp@0
-    # Only publish docs on the main branch.
-    condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['conda_env'], 'mlos_core'))
-    displayName: 'Publish documentation'
-    inputs:
-      app_location: '/doc/build/html'
-      api_location: 'api'
-      output_location: '/'
-      azure_static_web_apps_api_token: $(deployment_token)
-
 - job: DevContainer
   pool:
     vmImage: 'ubuntu-latest'
+  variables:
+    DOCKER_BUILDKIT: 1
   steps:
   - bash: |
       if [ "$(Build.Reason)" == "Schedule" ]; then
@@ -123,9 +114,17 @@ jobs:
       echo "NO_CACHE: $NO_CACHE"
       .devcontainer/build/build-devcontainer.sh
     displayName: 'Build the devcontainer image'
+
   - bash: |
       set -x
-      docker run -d --rm --user root --volume $(pwd):/workspaces/MlosCore --workdir /workspaces/MlosCore --name mlos-core-devcontainer mlos-core-devcontainer sleep infinity
+      docker run -d --rm --user root \
+        --volume /var/run/docker.sock:/var/run/docker.sock \
+        --env DOCKER_BUILDKIT=$(DOCKER_BUILDKIT) \
+        --volume $(pwd):/workspaces/MlosCore \
+        --env CONTAINER_WORKSPACE_FOLDER=/workspaces/MlosCore \
+        --env LOCAL_WORKSPACE_FOLDER=$(pwd) \
+        --workdir /workspaces/MlosCore \
+        --name mlos-core-devcontainer mlos-core-devcontainer sleep infinity
     displayName: 'Start the devcontainer in the background'
   - bash: |
       set -x
@@ -135,15 +134,51 @@ jobs:
       docker exec --user root mlos-core-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
       docker exec --user root mlos-core-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
     displayName: 'Fixup vscode uid/gid in the running container'
+
   - bash: |
       set -x
-      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v -j all doc
-    displayName: 'Build and test mlos-core with the devcontainer (in parallel)'
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
+    displayName: 'Update the conda env in the devcontainer'
+
+  - bash: |
+      set -x
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v check
+    displayName: 'Run lint checks'
+  - bash: |
+      set -x
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v test
+    displayName: 'Run tests'
+
+  - bash: |
+      set -x
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
+    displayName: 'Generate and test binary distribution files'
+
+  - bash: |
+      set -x
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
+    displayName: 'Test rebuilding the devcontainer in the devcontainer'
+
+  - bash: |
+      set -x
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v doc
+    displayName: 'Generate docs and test check them'
+  - task: AzureStaticWebApp@0
+    # Only publish docs on the main branch.
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+    displayName: 'Publish documentation'
+    inputs:
+      app_location: '/doc/build/html'
+      api_location: 'api'
+      output_location: '/'
+      azure_static_web_apps_api_token: $(deployment_token)
+
   - bash: |
       set -x
       docker stop -t 1 mlos-core-devcontainer || true
       docker rm --force mlos-core-devcontainer || true
     displayName: 'Cleanup the devcontainer'
+
   - bash: |
       echo $(ACR_PASSWORD) | docker login --username $(ACR_USERNAME) --password-stdin $(ACR_LOGINURL)
     condition: and(eq(variables['Build.SourceBranch'], 'refs/heads/main'), ne(variables['ACR_LOGINURL'], ''))

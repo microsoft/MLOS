@@ -3,29 +3,20 @@
 // vim: set ft=jsonc:
 {
     "name": "Miniconda (Python 3)",
-    "build": {
-        // Use the .devcontainer folder as the build context to improve
-        // container build cache hits and (re)build times.
-        "context": "./tmp",
-        "dockerfile": "Dockerfile",
-        // Try to pull the image from the lastest one we published during the build pipelines.
-        //"cacheFrom": "mloscore.azurecr.io/mlos-core-devcontainer",
-        "args": {
-            // Support local proxy caches for rebuilding the container more quickly.
-            "http_proxy": "${localEnv:http_proxy}",
-            "https_proxy": "${localEnv:https_proxy}",
-            "no_proxy": "${localEnv:no_proxy}"
-        }
-    },
+    // Use a docker compose file so we can automatically setup an nginx server to test viewing the docs.
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    "forwardPorts": [
+        "docs-www:80"
+    ],
     // Prep some host side things for the container build
     "initializeCommand": [".devcontainer/scripts/prep-container-build"],
     // Make sure the container user can read/write to the package caches.
     "onCreateCommand": "sudo -n mkdir -p /opt/conda/pkgs/cache /var/cache/pip && sudo -n chown -R vscode /opt/conda/pkgs/cache /var/cache/pip",
     // Make sure the conda env is up to date with the source tree expectations.
     "updateContentCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos_core -f ${containerWorkspaceFolder}/conda-envs/mlos_core.yml",
-    "runArgs": [
-        "--env-file=.env"
-    ],
     // Various mounting, run, post-create, and user settings
     "containerEnv": {
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
@@ -46,8 +37,6 @@
         "ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},
         "ghcr.io/stuartleeks/dev-container-features/shell-history:0": {}
     },
-    // Use 'forwardPorts' to make a list of ports inside the container available locally.
-    // "forwardPorts": [],
     // Use 'postCreateCommand' to run commands after the container is created.
     // "postCreateCommand": "python --version",
     // Configure tool-specific properties.
@@ -56,7 +45,8 @@
             "settings": {
                 // Adjust the python interpreter path to point to the conda environment
                 "python.defaultInterpreterPath": "/opt/conda/envs/mlos_core/bin/python",
-                "python.linting.pylintPath": "/opt/conda/envs/mlos_core/bin/pylint"
+                "python.linting.pylintPath": "/opt/conda/envs/mlos_core/bin/pylint",
+                "pylint.path": ["/opt/conda/envs/mlos_core/bin/pylint"]
             },
             // Add the IDs of extensions you want installed when the container is created.
             "extensions": [
@@ -64,6 +54,7 @@
                 "streetsidesoftware.code-spell-checker",
                 "ms-python.vscode-pylance",
                 "ms-python.python",
+                "ms-python.pylint",
                 "donjayamanne.python-environment-manager",
                 "njpwerner.autodocstring",
                 "ms-toolsai.jupyter",

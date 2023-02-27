@@ -13,6 +13,7 @@ jobs:
       DefaultPython:
         # Floating most recent version of python (useful to catch new compatibility issues in nightly builds).
         conda_env: 'mlos_core'
+        conda_env_yml: 'mlos_core-windows.yml'
         PythonVersion: ''
   # Skipping testing of additional versions on Windows for now.
 
@@ -56,13 +57,13 @@ jobs:
   - task: Cache@2
     displayName: Restore cached conda environment
     inputs:
-      key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | azure-pipelines.yml | .azure-pipelines/windows.yml'
+      key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env_yml) | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | azure-pipelines.yml | .azure-pipelines/windows.yml'
       path: $(CONDA_CACHE_DIR)
       # Prefer cached environments from the last hour or day.
       restoreKeys: |
-        conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)"
-        conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_prev_hour)"
-  #     conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env).yml | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)"
+        conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env_yml) | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)"
+        conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env_yml) | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_prev_hour)"
+  #     conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env_yml) | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)"
       cacheHitVar: CONDA_CACHE_RESTORED
 
   # NOTE: these steps are handled by the Makefile in Linux environments for reusability.
@@ -87,8 +88,8 @@ jobs:
     # https://github.com/mamba-org/mamba/issues/488
 
   - pwsh: |
-      if (! (conda env list | Select-String -Pattern "^$(conda_env) ") ) { conda env create -v -n $(conda_env) -f conda-envs/$(conda_env).yml }
-      conda env update -v -n $(conda_env) -f conda-envs/$(conda_env).yml --prune
+      if (! (conda env list | Select-String -Pattern "^$(conda_env) ") ) { conda env create -v -n $(conda_env) -f conda-envs/$(conda_env_yml) }
+      conda env update -v -n $(conda_env) -f conda-envs/$(conda_env_yml) --prune
     displayName: 'Create/update mlos_core conda environment'
 
   - pwsh: conda run -n $(conda_env) pip install pytest-azurepipelines
@@ -118,7 +119,8 @@ jobs:
       # Setup a clean environment to test installing/using them.
       $PythonVersReq = (conda list -n $(conda_env) | Select-String -AllMatches -Pattern '^python\s+([0-9.]+)\s+').Matches.Groups[1].Value
       conda create -y -v -n mlos-dist-test-$(PythonVersion) python=${PythonVersReq}
-      conda install -y -v -n mlos-dist-test-$(PythonVersion) conda-forge::gpy
+      conda install -y -v -n mlos-dist-test-$(PythonVersion) vswhere vs2019_win-64
+      conda install -y -v -n mlos-dist-test-$(PythonVersion) conda-forge::GPy
       conda run -n mlos-dist-test-$(PythonVersion) pip install pytest pytest-timeout pytest-forked pytest-xdist
       # Install mlos_core wheel.
       conda run -n mlos-dist-test-$(PythonVersion) pip install "${mlos_core_whl}[full]"
@@ -130,3 +132,46 @@ jobs:
       # Run a simple mlos_bench test.
       conda run -n mlos-dist-test-$(PythonVersion) python -m pytest mlos_bench/mlos_bench/environment/azure/tests/azure_services_test.py
     displayName: 'Generate and test binary distribution files'
+
+# NOTE: Windows ADO agents don't support Linux Docker containers.
+# This will have to be tested manually for now using the ".devcontainer/build/build-devcontainer.ps1" script.
+#
+#- job: WindowsDevContainer
+#  pool:
+#    vmImage: windows-latest
+#  steps:
+#  - pwsh: |
+#      if ("$(Build.Reason)" -eq "Schedule") {
+#        Write-Host "##vso[task.setvariable variable=NO_CACHE;]true"
+#      }
+#    displayName: 'Set NO_CACHE variable for nightly builds'
+#  - pwsh: |
+#      Write-Host "NO_CACHE: $env:NO_CACHE"
+#      .devcontainer/build/build-devcontainer.ps1
+#    displayName: 'Build devcontainer in Windows'
+#  - pwsh: |
+#      docker run -d --rm --user root `
+#        --volume /var/run/docker.sock:/var/run/docker.sock `
+#        --volume ${PWD}:/workspaces/MlosCore \
+#        --env CONTAINER_WORKSPACE_FOLDER=/workspaces/MlosCore \
+#        --env LOCAL_WORKSPACE_FOLDER=${PWD} \
+#        --workdir /workspaces/MlosCore \
+#        --name mlos-core-devcontainer mlos-core-devcontainer sleep infinity
+#    displayName: 'Start the devcontainer in the background'
+#
+#  - pwsh: |
+#      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
+#    displayName: 'Update the conda env in the devcontainer'
+#
+#  - pwsh: |
+#      docker exec --user vscode mlos-core-devcontainer conda run -n $(conda_env) pip show mlos_core
+#      docker exec --user vscode mlos-core-devcontainer conda run -n $(conda_env) pip show mlos_bench
+#    displayName: 'Basic devcontainer test'
+#
+#  # Skip other tests - they should get run identically in the Linux job.
+#
+#  - pwsh: |
+#      docker stop -t 1 mlos-core-devcontainer || true
+#      docker rm --force mlos-core-devcontainer || true
+#    displayName: 'Cleanup the devcontainer'
+#    ignoreLASTEXITCODE: true

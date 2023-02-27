@@ -1,5 +1,7 @@
 # MlosCore
 
+[![Build Status](https://msgsl.visualstudio.com/MLOS/_apis/build/status/MlosCore?branchName=main)](https://msgsl.visualstudio.com/MLOS/_build/latest?definitionId=34&branchName=main)
+
 This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original [MLOS](https://github.com/microsoft/MLOS) as well as the `mlos-bench` module intended to help automate and manage running experiments for autotuning systems with `mlos-core`.
 
 It is intended to provide a simplified, easier to consume (e.g. via `pip`), with lower dependencies abstraction to
@@ -24,7 +26,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
 > See Also: [`conda` install instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 >
-> Note: to support Windows we rely on some pre-compiled packages from `conda-forge` channels, which increases the `conda` solver time during environment create/update.
+> Note: to support Windows we currently rely on some pre-compiled packages from `conda-forge` channels, which increases the `conda` solver time during environment create/update.
 >
 > To work around this the (currently) experimental `libmamba` solver can be used.
 >
@@ -35,6 +37,8 @@ Simply open the project in VSCode and follow the prompts to build and open the d
      ```sh
     conda env create -f conda-envs/mlos_core.yml
     ```
+
+    > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos_core-windows.yml`](./conda-envs/mlos_core-windows.yml)).
 
    or
 

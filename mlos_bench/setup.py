@@ -35,5 +35,6 @@ setup(
     description=('MLOS Bench Python interface for benchmark automation and optimization.'),
     license='MIT',
     keywords='',
+    url='https://aka.ms/mlos-core',
     python_requires='>=3.8',
 )

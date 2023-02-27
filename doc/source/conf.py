@@ -42,7 +42,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
     'numpydoc',
-    'matplotlib.sphinxext.plot_directive'
+    'matplotlib.sphinxext.plot_directive',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -50,10 +50,15 @@ templates_path = ['_templates']
 
 # generate autosummary even if no references
 autosummary_generate = True
+# but don't complain about missing stub files
+# See Also: <https://stackoverflow.com/a/73294408>
+numpydoc_class_members_toctree = False
 
 autodoc_default_options = {
     'members': True,
     'undoc-members': True,
+    # Don't generate documentation for some (non-private) functions that are more for internal implementation use.
+    'exclude-members': 'mlos_bench.util.check_required_params'
 }
 
 # Generate the plots for the gallery

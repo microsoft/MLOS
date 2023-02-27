@@ -145,24 +145,13 @@ junit/test-results.xml
 
 junit/test-results.xml
 
-.conda-env.build-stamp
-.conda-env.*.build-stamp
-.dist-test-env.*.build-stamp
-.dist-test.*.build-stamp
-.doc-prereqs.build-stamp
-.doc-prereqs.*.build-stamp
-.pycodestyle.build-stamp
-.pycodestyle.*.build-stamp
-.pydocstyle.*.build-stamp
-.pylint.build-stamp
-.pylint.*.build-stamp
-.pytest.build-stamp
-.pytest.*.build-stamp
+build/*.build-stamp
 
 .vs/
 .vscode/
 !.vscode/settings.json
 !.vscode/extensions.json
+!.devcontainer/build/
 
 # Test config. May contain sensitive information
 # like Azure credentials etc.

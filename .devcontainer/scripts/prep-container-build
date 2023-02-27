@@ -5,35 +5,35 @@ set -eu
 set -x
 
 scriptdir=$(dirname "$(readlink -f "$0")")
-# Start in the root of the repository.
-cd "$scriptdir/../../"
+# Start in the script directory.
+cd "$scriptdir"
 
-# Make sure the .env file exists for the devcontainer to load.
-if [ ! -f .env ]; then
-    echo "Creating empty .env file for devcontainer."
-    touch .env
+# Build a basic container with the dependencies we need to run the prep script.
+docker build --progress=plain \
+    --build-arg http_proxy="${http_proxy:-}" \
+    --build-arg https_proxy="${https_proxy:-}" \
+    --build-arg no_proxy="${no_proxy:-}" \
+    --build-arg USER_UID=$(id -u) \
+    --build-arg USER_GID=$(id -g) \
+    -t mlos-core-basic-prep-deps \
+    -f common/Dockerfile common/
+# Move up to the repo root.
+cd ../../
+
+reporoot="$PWD"
+if [ -n "${LOCAL_WORKSPACE_FOLDER:-}" ]; then
+    reporoot="$LOCAL_WORKSPACE_FOLDER"
 fi
 
-# Create (partial) conda environment file for the container to build from.
-# Note: this should make it more cacheable as well.
-# See Also: updateContentCommand in .devcontainer/devcontainer.json
-echo "Creating base mlos_core_deps.yml environment file for devcontainer context."
-if [ -d .devcontainer/tmp ]; then
-    rm -rf .devcontainer/tmp
-fi
-mkdir -p .devcontainer/tmp/
-cat ./conda-envs/mlos_core.yml \
-    | sed 's|#.*||' \
-    | egrep -v -e '--editable' -e '^\s*$' \
-    | tee .devcontainer/tmp/mlos_core_deps.yml
-md5sum .devcontainer/tmp/mlos_core_deps.yml
+# Run the script in the container.
+docker run --rm -v "$reporoot:/src" --workdir /src \
+    --user vscode \
+    mlos-core-basic-prep-deps \
+    /src/.devcontainer/scripts/common/prep-container-build.sh
 
+# Prior to building the container locally, try to pull the latest version from
+# upstream to see if we can use it as a cache.
 if [ "${NO_CACHE:-}" != 'true' ]; then
-    if type jq >/dev/null 2>&1; then
-        cacheFrom=$(cat .devcontainer/devcontainer.json | sed 's|//.*||' | jq -r .build.cacheFrom | grep -v -x -e null | cat)
-    fi
-    if [ -z "${cacheFrom:-}" ]; then
-        cacheFrom='mloscore.azurecr.io/mlos-core-devcontainer'
-    fi
-    docker pull "$cacheFrom" || true
+    cacheFrom='mloscore.azurecr.io/mlos-core-devcontainer'
+    (docker pull -q "$cacheFrom" >/dev/null || true )&
 fi

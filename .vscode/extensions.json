@@ -4,6 +4,7 @@
         "streetsidesoftware.code-spell-checker",
         "ms-python.vscode-pylance",
         "ms-python.python",
+        "ms-python.pylint",
         "donjayamanne.python-environment-manager",
         "njpwerner.autodocstring",
         "lextudio.restructuredtext",
