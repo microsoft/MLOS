@@ -4,7 +4,11 @@ Common fixtures for Tunable and TunableGroups tests.
 
 import pytest
 
-from mlos_bench.environment import Tunable, TunableGroups
+from mlos_bench.environment import Tunable, TunableGroups, MockEnv
+
+# pylint: disable=redefined-outer-name
+# -- Ignore pylint complaints about pytest references to
+# `tunable_groups` fixture as both a function and a parameter.
 
 
 @pytest.fixture
@@ -110,3 +114,34 @@ def tunable_groups() -> TunableGroups:
     })
     tunables.reset()
     return tunables
+
+
+@pytest.fixture
+def mock_env(tunable_groups: TunableGroups) -> MockEnv:
+    """
+    Test fixture for MockEnv.
+    """
+    return MockEnv(
+        "Test Env",
+        config={
+            "tunable_groups": ["provision", "boot", "kernel"],
+            "seed": 13,
+            "range": [60, 120]
+        },
+        tunables=tunable_groups
+    )
+
+
+@pytest.fixture
+def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
+    """
+    Test fixture for MockEnv.
+    """
+    return MockEnv(
+        "Test Env No Noise",
+        config={
+            "tunable_groups": ["provision", "boot", "kernel"],
+            "range": [60, 120]
+        },
+        tunables=tunable_groups
+    )

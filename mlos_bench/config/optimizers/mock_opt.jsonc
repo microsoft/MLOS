@@ -3,6 +3,7 @@
     "class": "mlos_bench.optimizer.MockOptimizer",
 
     "config": {
-        "max_iterations": 20
+        "max_iterations": 5,
+        "seed": 42
     }
 }

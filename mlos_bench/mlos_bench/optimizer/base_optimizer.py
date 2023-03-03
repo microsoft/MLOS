@@ -40,7 +40,7 @@ class Optimizer(metaclass=ABCMeta):
         Returns
         -------
         opt : Optimizer
-            An instance of the `Optimzier` class initialized with `config`.
+            An instance of the `Optimizer` class initialized with `config`.
         """
         return instantiate_from_config(cls, class_name, tunables, config)
 

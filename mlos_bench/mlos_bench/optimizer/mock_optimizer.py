@@ -21,14 +21,14 @@ class MockOptimizer(Optimizer):
 
     def __init__(self, tunables: TunableGroups, config: dict):
         super().__init__(tunables, config)
+        rnd = random.Random(config.get("seed", 42))
+        self._random = {
+            "categorical": lambda tunable: rnd.choice(tunable.categorical_values),
+            "float": lambda tunable: rnd.uniform(*tunable.range),
+            "int": lambda tunable: rnd.randint(*tunable.range),
+        }
         self._best_config = None
         self._best_score = None
-
-    _FUNC_RANDOM = {
-        "categorical": lambda tunable: random.choice(tunable.categorical_values),
-        "float": lambda tunable: random.uniform(*tunable.range),
-        "int": lambda tunable: random.randint(*tunable.range),
-    }
 
     def suggest(self) -> TunableGroups:
         """
@@ -36,7 +36,7 @@ class MockOptimizer(Optimizer):
         """
         tunables = self._tunables.copy()
         for (tunable, _group) in tunables:
-            tunable.value = self._FUNC_RANDOM[tunable.type](tunable)
+            tunable.value = self._random[tunable.type](tunable)
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 

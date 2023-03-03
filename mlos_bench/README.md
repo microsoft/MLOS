@@ -129,7 +129,7 @@ Here's an example of how to run the optimization script:
     --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
     --config env-azure-ubuntu-redis.jsonc \              # Root config (location relative to --config-path)
     --global global_config.json \                        # Config generated at step 2. Uses --config-path
-    --optimizer ./opt/mlos_core_opt.jsonc \              # Optimizer config (relative to --config-path)
+    --optimizer ./optimizers/mlos_core_opt.jsonc \       # Optimizer config (relative to --config-path)
     --log ./os-autotune.log \                            # Log file (also prints to stdout)
     --log-level 10 \                                     # Log level = DEBUG
     --no-teardown \                                      # Do not shutdown/deprovision a VM
@@ -137,4 +137,4 @@ Here's an example of how to run the optimization script:
     --experimentId 001                                   # Unique experiment ID (can come from the persistent storage service)
 ```
 
-The only difference between `run_bench.py` and `run_opt.py` scripts is that the latter has the `--optimzier` parameter instead of using a fixed set of tunables via `--tunables` option.
+The only difference between `run_bench.py` and `run_opt.py` scripts is that the latter has the `--optimizer` parameter instead of using a fixed set of tunables via `--tunables` option.

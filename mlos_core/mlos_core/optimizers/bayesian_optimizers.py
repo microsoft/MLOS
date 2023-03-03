@@ -64,7 +64,8 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         self._emukit_column_names = self._column_names(self.optimizer_parameter_space)
         self.gpbo = None
 
-    def _column_names(self, parameter_space: ConfigSpace.ConfigurationSpace) -> List[str]:
+    @staticmethod
+    def _column_names(parameter_space: ConfigSpace.ConfigurationSpace) -> List[str]:
         """
         Returns a list of column names for the emukit dataframe.
 
@@ -79,11 +80,11 @@ class EmukitOptimizer(BaseBayesianOptimizer):
             List of column names.
         """
         names = []
-        for hp in parameter_space.get_hyperparameters():
-            if isinstance(hp, ConfigSpace.CategoricalHyperparameter):
-                names.extend([f'{hp.name}={v}' for v in hp.choices])
+        for param in parameter_space.get_hyperparameters():
+            if isinstance(param, ConfigSpace.CategoricalHyperparameter):
+                names.extend([f'{param.name}={v}' for v in param.choices])
             else:
-                names.append(hp.name)
+                names.append(param.name)
         return names
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
@@ -188,14 +189,16 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         self,
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter: Optional[BaseSpaceAdapter] = None,
-        base_estimator='gp'
+        base_estimator: str = 'gp',
+        seed: Optional[int] = None,
     ):
         super().__init__(parameter_space, space_adapter)
 
         from skopt import Optimizer as Optimizer_Skopt  # pylint: disable=import-outside-toplevel
         self.base_optimizer = Optimizer_Skopt(
             configspace_to_skopt_space(self.optimizer_parameter_space),
-            base_estimator=base_estimator
+            base_estimator=base_estimator,
+            random_state=seed,
         )
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
