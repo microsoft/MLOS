@@ -7,7 +7,7 @@ from typing import Tuple
 
 import pandas as pd
 
-from mlos_core.optimizers import OptimizerType, OptimizerFactory
+from mlos_core.optimizers import OptimizerType, OptimizerFactory, SpaceAdapterType
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.tunable import TunableGroups
@@ -28,7 +28,14 @@ class MlosCoreOptimizer(Optimizer):
         space = tunable_groups_to_configspace(tunables)
         _LOG.debug("ConfigSpace: %s", space)
         opt_type = getattr(OptimizerType, self._config.pop('optimizer_type', 'SKOPT'))
-        self._opt = OptimizerFactory.create(space, opt_type, optimizer_kwargs=self._config)
+        space_adapter_type = self._config.pop('space_adapter_type', None)
+        space_adapter_config = self._config.pop('space_adapter_config', {})
+        if space_adapter_type is not None:
+            space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
+        self._opt = OptimizerFactory.create(
+            space, opt_type, optimizer_kwargs=self._config,
+            space_adapter_type=space_adapter_type,
+            space_adapter_kwargs=space_adapter_config)
 
     def suggest(self) -> TunableGroups:
         df_config = self._opt.suggest()
