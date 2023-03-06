@@ -2,8 +2,6 @@
 Tests for Bayesian Optimizers.
 """
 
-# pylint: disable=missing-function-docstring
-
 from typing import Type
 
 import pytest
@@ -12,8 +10,10 @@ import pandas as pd
 import numpy as np
 import ConfigSpace as CS
 
-from mlos_core.optimizers import (OptimizerType, OptimizerFactory,
-    BaseOptimizer, EmukitOptimizer, SkoptOptimizer, RandomOptimizer)
+from mlos_core.optimizers import (
+    OptimizerType, OptimizerFactory, BaseOptimizer,
+    EmukitOptimizer, SkoptOptimizer, RandomOptimizer)
+
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
@@ -23,17 +23,12 @@ from mlos_core.spaces.adapters import SpaceAdapterType
     (SkoptOptimizer, {'base_estimator': 'gp'}),
     (RandomOptimizer, {})
 ])
-def test_create_optimizer_and_suggest(optimizer_class: Type[BaseOptimizer], kwargs):
-    # Start defining a ConfigurationSpace for the Optimizer to search.
-    input_space = CS.ConfigurationSpace(seed=1234)
-
-    # Add a continuous input dimension between 0 and 1.
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='x', lower=0, upper=1))
-    # Add a categorical hyperparameter with 4 possible values.
-    input_space.add_hyperparameter(CS.CategoricalHyperparameter(
-        name='y', choices=["foo", "bar", "baz", "xyzzy"]))
-
-    optimizer = optimizer_class(input_space, **kwargs)
+def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace,
+                                      optimizer_class: Type[BaseOptimizer], kwargs):
+    """
+    Test that we can create an optimizer and get a suggestion from it.
+    """
+    optimizer = optimizer_class(configuration_space, **kwargs)
     assert optimizer is not None
 
     assert optimizer.parameter_space is not None
@@ -51,23 +46,20 @@ def test_create_optimizer_and_suggest(optimizer_class: Type[BaseOptimizer], kwar
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
     (EmukitOptimizer, {}),
-    (SkoptOptimizer, {'base_estimator': 'gp'}),
-    (SkoptOptimizer, {'base_estimator': 'et'}),
+    (SkoptOptimizer, {'base_estimator': 'gp', 'seed': 42}),
+    (SkoptOptimizer, {'base_estimator': 'et', 'seed': 42}),
     (RandomOptimizer, {})
 ])
-def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwargs):
+def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
+                                     optimizer_class: Type[BaseOptimizer], kwargs):
+    """
+    Toy problem to test the optimizers.
+    """
     def objective(x):   # pylint: disable=invalid-name
         return (6 * x - 2)**2 * np.sin(12 * x - 4)
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(42)
-
-    # Start defining a ConfigurationSpace for the Optimizer to search.
-    input_space = CS.ConfigurationSpace(seed=1234)
-
-    # Add a single continuous input dimension between 0 and 1.
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='x', lower=0, upper=1))
-
-    optimizer = optimizer_class(input_space, **kwargs)
+    optimizer = optimizer_class(configuration_space, **kwargs)
 
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_best_observation()
@@ -78,7 +70,7 @@ def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwarg
     for _ in range(20):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
-        assert suggestion.columns == ['x']
+        assert (suggestion.columns == ['x', 'y', 'z']).all()
         # check that suggestion is in the space
         configuration = CS.Configuration(optimizer.parameter_space, suggestion.iloc[0].to_dict())
         # Raises an error if outside of configuration space
@@ -89,20 +81,20 @@ def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwarg
 
     best_observation = optimizer.get_best_observation()
     assert isinstance(best_observation, pd.DataFrame)
-    assert (best_observation.columns == ['x', 'score']).all()
+    assert (best_observation.columns == ['x', 'y', 'z', 'score']).all()
     assert best_observation['score'].iloc[0] < -5
 
     all_observations = optimizer.get_observations()
     assert isinstance(all_observations, pd.DataFrame)
-    assert all_observations.shape == (20, 2)
-    assert (all_observations.columns == ['x', 'score']).all()
+    assert all_observations.shape == (20, 4)
+    assert (all_observations.columns == ['x', 'y', 'z', 'score']).all()
 
     # It would be better to put this into bayesian_optimizer_test but then we'd have to refit the model
     if isinstance(optimizer, BaseBayesianOptimizer):
-        pred_best = optimizer.surrogate_predict(best_observation[['x']])
+        pred_best = optimizer.surrogate_predict(best_observation[['x', 'y', 'z']])
         assert pred_best.shape == (1,)
 
-        pred_all = optimizer.surrogate_predict(all_observations[['x']])
+        pred_all = optimizer.surrogate_predict(all_observations[['x', 'y', 'z']])
         assert pred_all.shape == (20,)
 
 
@@ -114,17 +106,15 @@ def test_basic_interface_toy_problem(optimizer_class: Type[BaseOptimizer], kwarg
     # Optimizer with non-empty kwargs argument
     (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
 ])
-def test_create_optimizer_with_factory_method(optimizer_type: OptimizerType, kwargs):
-    # Start defining a ConfigurationSpace for the Optimizer to search.
-    input_space = CS.ConfigurationSpace(seed=1234)
-
-    # Add a single continuous input dimension between 0 and 1.
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='x', lower=0, upper=1))
-
+def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
+                                              optimizer_type: OptimizerType, kwargs):
+    """
+    Test that we can create an optimizer via a factory.
+    """
     if optimizer_type is None:
-        optimizer = OptimizerFactory.create(input_space, optimizer_kwargs=kwargs)
+        optimizer = OptimizerFactory.create(configuration_space, optimizer_kwargs=kwargs)
     else:
-        optimizer = OptimizerFactory.create(input_space, optimizer_type, optimizer_kwargs=kwargs)
+        optimizer = OptimizerFactory.create(configuration_space, optimizer_type, optimizer_kwargs=kwargs)
     assert optimizer is not None
 
     assert optimizer.parameter_space is not None
@@ -141,9 +131,12 @@ def test_create_optimizer_with_factory_method(optimizer_type: OptimizerType, kwa
     # Enumerate all supported Optimizers
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
-    (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
+    (OptimizerType.SKOPT, {'base_estimator': 'gp', 'seed': 42}),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
+    """
+    Toy problem to test the optimizers with llamatune space adapter.
+    """
     def objective(point):   # pylint: disable=invalid-name
         # Best value can be reached by tuning an 1-dimensional search space
         return np.sin(point['x'] * point['y'])

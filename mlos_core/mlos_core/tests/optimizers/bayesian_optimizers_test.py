@@ -2,8 +2,6 @@
 Tests for Bayesian Optimizers.
 """
 
-# pylint: disable=missing-function-docstring
-
 from typing import Type
 
 import pytest
@@ -18,10 +16,12 @@ from mlos_core.optimizers import BaseOptimizer, EmukitOptimizer, SkoptOptimizer
     (EmukitOptimizer, {}),
     (SkoptOptimizer, {'base_estimator': 'gp'}),
 ])
-def test_context_not_implemented_error(optimizer_class: Type[BaseOptimizer], kwargs):
-    input_space = CS.ConfigurationSpace(seed=1234)
-    input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='x', lower=0, upper=1))
-    optimizer = optimizer_class(input_space, **kwargs)
+def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpace,
+                                       optimizer_class: Type[BaseOptimizer], kwargs):
+    """
+    Make sure we raise exceptions for the functionality that has not been implemented yet.
+    """
+    optimizer = optimizer_class(configuration_space, **kwargs)
     suggestion = optimizer.suggest()
     score = pd.DataFrame({'score': [1]})
     # test context not implemented errors

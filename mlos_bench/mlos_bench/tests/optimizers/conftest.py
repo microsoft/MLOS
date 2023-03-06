@@ -23,7 +23,7 @@ def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
 
 
 @pytest.fixture
-def scikit_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
+def scikit_gp_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     Test fixture for mlos_core Scikit optimizer.
     """
@@ -33,6 +33,22 @@ def scikit_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "max_iterations": 20,
             "optimizer_type": "SKOPT",
             "base_estimator": "gp",
+            "seed": 42
+        },
+    )
+
+
+@pytest.fixture
+def scikit_et_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
+    """
+    Test fixture for mlos_core Scikit optimizer.
+    """
+    return MlosCoreOptimizer(
+        tunables=tunable_groups,
+        config={
+            "max_iterations": 20,
+            "optimizer_type": "SKOPT",
+            "base_estimator": "et",
             "seed": 42
         },
     )

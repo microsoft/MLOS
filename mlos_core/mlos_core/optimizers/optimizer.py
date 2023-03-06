@@ -2,10 +2,12 @@
 Contains the BaseOptimizer abstract class.
 """
 
+import collections
 from abc import ABCMeta, abstractmethod
 from typing import Optional
 
 import ConfigSpace
+import numpy as np
 import pandas as pd
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
@@ -166,3 +168,51 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("No observations registered yet.")
         observations = self.get_observations()
         return observations.nsmallest(1, columns='score')
+
+    def _from_1hot(self, config: np.array) -> pd.DataFrame:
+        """
+        Convert numpy array from one-hot encoding to a DataFrame
+        with categoricals and ints in proper columns.
+        """
+        df_dict = collections.defaultdict(list)
+        for i in range(config.shape[0]):
+            j = 0
+            for param in self.optimizer_parameter_space.get_hyperparameters():
+                if isinstance(param, ConfigSpace.CategoricalHyperparameter):
+                    for (offset, val) in enumerate(param.choices):
+                        if config[i][j + offset] == 1:
+                            df_dict[param.name].append(val)
+                            break
+                    j += len(param.choices)
+                else:
+                    val = config[i][j]
+                    if isinstance(param, ConfigSpace.UniformIntegerHyperparameter):
+                        val = int(val)
+                    df_dict[param.name].append(val)
+                    j += 1
+        return pd.DataFrame(df_dict)
+
+    def _to_1hot(self, config: pd.DataFrame) -> np.array:
+        """
+        Convert pandas DataFrame to one-hot-encoded numpy array.
+        """
+        n_cols = 0
+        n_rows = config.shape[0] if config.ndim > 1 else 1
+        for param in self.optimizer_parameter_space.get_hyperparameters():
+            if isinstance(param, ConfigSpace.CategoricalHyperparameter):
+                n_cols += len(param.choices)
+            else:
+                n_cols += 1
+        one_hot = np.zeros((n_rows, n_cols), dtype=np.float32)
+        for i in range(n_rows):
+            j = 0
+            for (col, param) in enumerate(self.optimizer_parameter_space.get_hyperparameters()):
+                val = config.iloc[(i, col) if config.ndim > 1 else col]
+                if isinstance(param, ConfigSpace.CategoricalHyperparameter):
+                    offset = param.choices.index(val)
+                    one_hot[i][j + offset] = 1
+                    j += len(param.choices)
+                else:
+                    one_hot[i][j] = val
+                    j += 1
+        return one_hot

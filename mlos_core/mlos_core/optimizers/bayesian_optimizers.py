@@ -2,7 +2,7 @@
 Contains the wrapper classes for different Bayesian optimizers.
 """
 
-from typing import List, Optional
+from typing import Optional
 from abc import ABCMeta, abstractmethod
 
 import ConfigSpace
@@ -61,31 +61,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
     def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
         super().__init__(parameter_space, space_adapter)
         self.emukit_parameter_space = configspace_to_emukit_space(self.optimizer_parameter_space)
-        self._emukit_column_names = self._column_names(self.optimizer_parameter_space)
         self.gpbo = None
-
-    @staticmethod
-    def _column_names(parameter_space: ConfigSpace.ConfigurationSpace) -> List[str]:
-        """
-        Returns a list of column names for the emukit dataframe.
-
-        Parameters
-        ----------
-        parameter_space : ConfigSpace.ConfigurationSpace
-            The parameter space to optimize.
-
-        Returns
-        -------
-        names : [str]
-            List of column names.
-        """
-        names = []
-        for param in parameter_space.get_hyperparameters():
-            if isinstance(param, ConfigSpace.CategoricalHyperparameter):
-                names.extend([f'{param.name}={v}' for v in param.choices])
-            else:
-                names.append(param.name)
-        return names
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
@@ -111,7 +87,8 @@ class EmukitOptimizer(BaseBayesianOptimizer):
             return
         results = []
         for (_, config), score in zip(configurations.iterrows(), scores):
-            results.append(UserFunctionResult(config, np.array([score])))
+            one_hot = self._to_1hot(config)
+            results.append(UserFunctionResult(one_hot[0], np.array([score])))
         self.gpbo.loop_state.update(results)
         self.gpbo._update_models()  # pylint: disable=protected-access
 
@@ -139,7 +116,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
                 self._initialize_optimizer()
             # this should happen any time after the initial model is created
             config = self.gpbo.get_next_points(results=[])
-        return pd.DataFrame(config, columns=self._emukit_column_names)
+        return self._from_1hot(config)
 
     def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         raise NotImplementedError()
@@ -150,8 +127,10 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         if self.space_adapter is not None:
             raise NotImplementedError()
         # TODO return variance in some way
-        # TODO check columns in configurations
-        mean_predictions, _variance_predictions = self.gpbo.model.predict(np.array(configurations))
+        if self._space_adapter:
+            configurations = self._space_adapter.inverse_transform(configurations)
+        one_hot = self._to_1hot(configurations)
+        mean_predictions, _variance_predictions = self.gpbo.model.predict(one_hot)
         # make 2ndim array into column vector
         return mean_predictions.reshape(-1,)
 
@@ -171,7 +150,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
 
         self.gpbo = GPBayesianOptimization(
             variables_list=self.emukit_parameter_space.parameters,
-            X=np.array(initial_input),
+            X=self._to_1hot(initial_input),
             Y=np.array(initial_output)
         )
 
@@ -200,6 +179,34 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             base_estimator=base_estimator,
             random_state=seed,
         )
+        if base_estimator == 'et':
+            self._transform = self._to_1hot
+        elif base_estimator == 'gp':
+            self._transform = self._to_numeric
+        else:
+            self._transform = np.array
+
+    def _to_numeric(self, config: pd.DataFrame) -> np.array:
+        """
+        Convert categorical values in the DataFrame to ordinal integers and return a numpy array.
+        This transformation is necessary for the Gaussian Process based optimizer.
+
+        Parameters
+        ----------
+        config : pd.DataFrame
+            Dataframe of configurations / parameters.
+            The columns are parameter names and the rows are the configurations.
+
+        Returns
+        -------
+        config : np.array
+            Numpy array of floats with all categoricals replaced with their ordinal numbers.
+        """
+        config = config.copy()
+        for param in self.optimizer_parameter_space.get_hyperparameters():
+            if isinstance(param, ConfigSpace.CategoricalHyperparameter):
+                config[param.name] = config[param.name].apply(param.choices.index)
+        return config.to_numpy()
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
@@ -217,7 +224,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         """
         if context is not None:
             raise NotImplementedError()
-        self.base_optimizer.tell(np.array(configurations).tolist(), np.array(scores).tolist())
+        return self.base_optimizer.tell(configurations.to_numpy().tolist(), scores.to_list())
 
     def _suggest(self, context: pd.DataFrame = None):
         """Suggests a new configuration.
@@ -244,8 +251,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             raise NotImplementedError()
         if self.space_adapter is not None:
             raise NotImplementedError()
-        # TODO check configuration columns
-        return self.base_optimizer.models[-1].predict(np.array(configurations))
+        return self.base_optimizer.models[-1].predict(self._transform(configurations))
 
     def acquisition_function(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
         # This seems actually non-trivial to get out of skopt, so maybe we actually shouldn't implement this.

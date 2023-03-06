@@ -17,6 +17,7 @@
         "ipykernel",
         "iterrows",
         "jupyterlab",
+        "llamatune",
         "matplotlib",
         "mlos",
         "nsmallest",
