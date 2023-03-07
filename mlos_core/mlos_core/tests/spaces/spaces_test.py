@@ -4,7 +4,9 @@ Tests for mlos_core.spaces
 
 # pylint: disable=missing-function-docstring
 
+from abc import ABCMeta, abstractmethod
 from typing import Any, Callable
+
 import numpy as np
 from numpy.random import RandomState as NpRandomState
 import pandas as pd
@@ -13,13 +15,14 @@ import scipy
 import skopt.space
 
 import ConfigSpace as CS
-from ConfigSpace.hyperparameters import NormalIntegerHyperparameter  # pylint: disable=no-name-in-module
+from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
+
 from mlos_core.spaces import configspace_to_emukit_space, configspace_to_skopt_space
 
 
 def assert_uniform_counts(counts):
-    _, p = scipy.stats.chisquare(counts)    # pylint: disable=invalid-name
-    assert p > .3
+    _chi_sq, p_value = scipy.stats.chisquare(counts)
+    assert p_value > .3
 
 
 def invalid_conversion_function(*args):
@@ -29,20 +32,52 @@ def invalid_conversion_function(*args):
     raise NotImplementedError('subclass must override conversion_function')
 
 
-class BaseConversion:
+class BaseConversion(metaclass=ABCMeta):
     """
     Base class for testing optimizer space conversions.
     """
     conversion_function: Callable[..., Any] = invalid_conversion_function
 
+    @abstractmethod
     def sample(self, config_space, n_samples=1):
-        raise NotImplementedError('subclass must override')
+        """
+        Sample from the given configuration space.
 
+        Parameters
+        ----------
+        config_space : CS.ConfigurationSpace
+            Configuration space to sample from.
+        n_samples : int, optional
+            Number of samples to use, by default 1.
+        """
+
+    @abstractmethod
     def get_parameter_names(self, config_space):
-        raise NotImplementedError('subclass must override')
+        """
+        Get the parameter names from the given configuration space.
 
+        Parameters
+        ----------
+        config_space : CS.ConfigurationSpace
+            Configuration space.
+        """
+
+    @abstractmethod
     def categorical_counts(self, points):
-        raise NotImplementedError('subclass must override')
+        """
+        Get the counts of each categorical value in the given points.
+
+        Parameters
+        ----------
+        points : np.array
+            Counts of each categorical value.
+        """
+
+    @abstractmethod
+    def test_dimensionality(self):
+        """
+        Check that the dimensionality of the converted space is correct.
+        """
 
     def test_unsupported_hyperparameter(self):
         input_space = CS.ConfigurationSpace()
@@ -111,6 +146,15 @@ class TestSkoptConversion(BaseConversion):
     def categorical_counts(self, points):
         return pd.value_counts(points[:, 0]).values
 
+    def test_dimensionality(self):
+        input_space = CS.ConfigurationSpace()
+        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("a", lower=1, upper=10))
+        input_space.add_hyperparameter(CS.CategoricalHyperparameter("b", choices=["bof", "bum"]))
+        input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
+        output_space = configspace_to_skopt_space(input_space)
+        assert output_space.transformed_n_dims == len(input_space.get_hyperparameters())
+        assert output_space.n_dims == len(input_space.get_hyperparameters())
+
     def test_weighted_categorical(self):
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"], weights=[0.9, 0.1]))
@@ -158,6 +202,16 @@ class TestEmukitConversion(BaseConversion):
 
     def categorical_counts(self, points):
         return np.sum(points, axis=0)
+
+    def test_dimensionality(self):
+        input_space = CS.ConfigurationSpace()
+        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("a", lower=1, upper=10))
+        input_space.add_hyperparameter(CS.CategoricalHyperparameter("b", choices=["bof", "bum"]))
+        input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
+        output_space = configspace_to_emukit_space(input_space)
+        # NOTE: categorical params get expanded to multiple dimensions in the
+        # hyperparameter space for emukit when OneHotEncoding is used.
+        assert output_space.dimensionality == 5
 
     def test_weighted_categorical(self):
         np.random.seed(42)
