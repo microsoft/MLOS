@@ -42,7 +42,7 @@ class MlosCoreOptimizer(Optimizer):
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return self._tunables.copy().assign(df_config.loc[0].to_dict())
 
-    def register(self, tunables: TunableGroups, status: Status, score: float):
+    def register(self, tunables: TunableGroups, status: Status, score: float = None):
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
         # By default, hyperparameters in ConfigurationSpace are sorted by name:

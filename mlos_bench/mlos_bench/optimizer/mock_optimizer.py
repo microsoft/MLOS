@@ -40,7 +40,7 @@ class MockOptimizer(Optimizer):
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 
-    def register(self, tunables: TunableGroups, status: Status, score: float):
+    def register(self, tunables: TunableGroups, status: Status, score: float = None):
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
         if status == Status.SUCCEEDED and (

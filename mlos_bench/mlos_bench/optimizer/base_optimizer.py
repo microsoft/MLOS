@@ -76,7 +76,7 @@ class Optimizer(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def register(self, tunables: TunableGroups, status: Status, score: float):
+    def register(self, tunables: TunableGroups, status: Status, score: float = None):
         """
         Register the observation for the given configuration.
 
