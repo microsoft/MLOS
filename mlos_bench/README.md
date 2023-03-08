@@ -107,9 +107,9 @@ Create and activate the environment with:
     ```sh
     ./mlos_bench/mlos_bench/run_bench.py \
         --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
-        --config env-azure-ubuntu-redis.jsonc \              # Root config (location relative to --config-path)
-        --global global_config.json \                        # Config generated at step 2. Uses --config-path
-        --tunables tunable-values-example.json \             # Key/value pairs of tunable parameters
+        --environment env-azure-ubuntu-redis.jsonc \         # Root config (location relative to --config-path)
+        --tunables tunable-values-example.json \             # Key/value pairs of tunable parameters. Uses --config-path
+        --globals global_config.json \                       # Config generated at step 2. Uses --config-path
         --log ./os-autotune.log \                            # Log file (also prints to stdout)
         --log-level 10 \                                     # Log level = DEBUG
         --no-teardown \                                      # Do not shutdown/deprovision a VM
@@ -127,9 +127,9 @@ Here's an example of how to run the optimization script:
 ```sh
 ./mlos_bench/mlos_bench/run_opt.py \
     --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
-    --config env-azure-ubuntu-redis.jsonc \              # Root config (location relative to --config-path)
-    --global global_config.json \                        # Config generated at step 2. Uses --config-path
+    --environment env-azure-ubuntu-redis.jsonc \         # Root config (location relative to --config-path)
     --optimizer ./optimizers/mlos_core_opt.jsonc \       # Optimizer config (relative to --config-path)
+    --globals global_config.json \                       # Config generated at step 2. Uses --config-path
     --log ./os-autotune.log \                            # Log file (also prints to stdout)
     --log-level 10 \                                     # Log level = DEBUG
     --no-teardown \                                      # Do not shutdown/deprovision a VM
