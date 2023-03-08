@@ -84,7 +84,7 @@ def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
 
         if not env.setup(tunables):
             _LOG.warning("Setup failed: %s :: %s", env, tunables)
-            opt.register(tunables, Status.FAILED, None)
+            opt.register(tunables, Status.FAILED)
             continue
 
         (status, value) = env.benchmark()  # Block and wait for the final result
