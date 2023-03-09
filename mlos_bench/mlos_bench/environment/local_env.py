@@ -134,7 +134,7 @@ class LocalEnv(Environment):
             or None if the status is not COMPLETED.
         """
         (status, _) = result = super().benchmark()
-        if not (status == Status.READY and self._script_run):
+        if not (status.is_ready and self._script_run):
             return result
 
         with self._service.temp_dir_context(self._temp_dir) as temp_dir:

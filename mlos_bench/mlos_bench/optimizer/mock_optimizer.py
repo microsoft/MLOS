@@ -43,8 +43,7 @@ class MockOptimizer(Optimizer):
     def register(self, tunables: TunableGroups, status: Status, score: float):
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
-        if status == Status.SUCCEEDED and (
-                self._best_score is None or score < self._best_score):
+        if status.is_succeeded and (self._best_score is None or score < self._best_score):
             self._best_score = score
             self._best_config = tunables.copy()
         self._iter += 1

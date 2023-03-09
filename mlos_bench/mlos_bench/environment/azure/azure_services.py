@@ -588,7 +588,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
 
         status, result = self.wait_vm_operation(params)
 
-        if status == Status.SUCCEEDED:
+        if status.is_succeeded:
             return status, result.get("properties", {}).get("output", {})
         else:
             return status, result
