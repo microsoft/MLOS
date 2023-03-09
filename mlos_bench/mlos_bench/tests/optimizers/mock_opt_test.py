@@ -46,3 +46,16 @@ def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
 
     (score, _tunables) = mock_opt.get_best_observation()
     assert score == pytest.approx(66.66, 0.01)
+
+
+def test_mock_optimizer_register_fail(mock_opt: MockOptimizer):
+    """
+    Check the input acceptance conditions for Optimizer.register().
+    """
+    tunables = mock_opt.suggest()
+    mock_opt.register(tunables, Status.SUCCEEDED, 10)
+    mock_opt.register(tunables, Status.FAILED)
+    with pytest.raises(ValueError):
+        mock_opt.register(tunables, Status.SUCCEEDED, None)
+    with pytest.raises(ValueError):
+        mock_opt.register(tunables, Status.FAILED, 10)

@@ -76,7 +76,7 @@ class Optimizer(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def register(self, tunables: TunableGroups, status: Status, score: float):
+    def register(self, tunables: TunableGroups, status: Status, score: float = None):
         """
         Register the observation for the given configuration.
 
@@ -90,6 +90,10 @@ class Optimizer(metaclass=ABCMeta):
         score : float
             The benchmark result, or None if the experiment was not successful.
         """
+        _LOG.info("Iteration %d :: Register: %s = %s score: %s",
+                  self._iter, tunables, status, score)
+        if status.is_succeeded == (score is None):  # XOR
+            raise ValueError("Status and score must be consistent.")
 
     def not_converged(self) -> bool:
         """
