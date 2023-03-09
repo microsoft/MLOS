@@ -7,9 +7,10 @@ See `--help` output for details.
 
 import logging
 
-from mlos_bench.launcher import Launcher
-from mlos_bench.optimizer import Optimizer, load_optimizer
+from mlos_bench.util import Launcher
+from mlos_bench.optimizer import Optimizer
 from mlos_bench.environment import Status, Environment
+from mlos_bench.storage import Storage
 
 _LOG = logging.getLogger(__name__)
 
@@ -23,6 +24,10 @@ def _main():
         help='Path to the optimizer configuration file.')
 
     launcher.parser.add_argument(
+        '--db', required=True,
+        help='Path to the database configuration file.')
+
+    launcher.parser.add_argument(
         '--no-teardown', required=False, default=False, action='store_true',
         help='Disable teardown of the environment after the optimization.')
 
@@ -31,10 +36,10 @@ def _main():
     global_config = launcher.global_config
     env = launcher.load_env()
 
-    opt = load_optimizer(
+    opt = Optimizer.load(
         env.tunable_params(), launcher.load_config(args.optimizer), global_config)
 
-    db = None
+    db = Storage.load(launcher.load_config(args.db), global_config)
 
     result = _optimize(env, opt, db, global_config["experimentId"])
     _LOG.info("Final result: %s", result)
@@ -59,7 +64,7 @@ def _optimize(env: Environment, opt: Optimizer, db,
 
     # TODO: Restore the telemetry and the optimization target.
     opt_target = 'score'
-    opt_direction = 'min'
+    # opt_direction = 'min'
 
     while opt.not_converged():
 

@@ -1,5 +1,5 @@
 """
-Bse class for an interface between the benchmarking framework
+Base class for an interface between the benchmarking framework
 and mlos_core optimizers.
 """
 
@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.tunable import TunableGroups
-from mlos_bench.util import instantiate_from_config
+from mlos_bench.util import prepare_class_load, instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
 
@@ -18,6 +18,30 @@ class Optimizer(metaclass=ABCMeta):
     """
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
+
+    @staticmethod
+    def load(tunables: TunableGroups, config: dict, global_config: dict = None):
+        """
+        Instantiate the Optimizer shim from the configuration.
+
+        Parameters
+        ----------
+        tunables : TunableGroups
+            Tunable parameters of the environment.
+        config : dict
+            Configuration of the optimizer.
+        global_config : dict
+            Global configuration parameters (optional).
+
+        Returns
+        -------
+        opt : Optimizer
+            A new Optimizer instance.
+        """
+        (class_name, opt_config) = prepare_class_load(config, global_config)
+        opt = Optimizer.new(class_name, tunables, opt_config)
+        _LOG.info("Created optimizer: %s", opt)
+        return opt
 
     @classmethod
     def new(cls, class_name: str, tunables: TunableGroups, config: dict):
