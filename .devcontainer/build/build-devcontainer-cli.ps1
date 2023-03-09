@@ -14,16 +14,29 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+if ($env:DOCKER_BUILDKIT -eq $null) {
+    $env:DOCKER_BUILDKIT = 1
+}
 $devcontainer_cli_build_args = ''
-if ("$env:NO_CACHE" -eq 'true') {
-    $devcontainer_cli_build_args = '--no-cache --pull'
+docker buildx version > $null
+if ($LASTEXITCODE -ne 0) {
+    $devcontainer_cli_build_args += ' --progress=plain'
 }
 else {
-    #$devcontainer_cli_build_args = '--cache-from mloscore.azurecr.io/devcontainer-cli'
-    docker pull mloscore.azurecr.io/devcontainer-cli
+    Write-Warning 'NOTE: docker buildkit unavailable.'
 }
 
-$cmd = "docker.exe build -t devcontainer-cli -t cspell " +
+if ("$env:NO_CACHE" -eq 'true') {
+    $devcontainer_cli_build_args += ' --no-cache --pull'
+}
+else {
+    $cacheFrom = 'mloscore.azurecr.io/devcontainer-cli:latest'
+    $devcontainer_cli_build_args += " --cache-from $cacheFrom"
+    docker pull $cacheFrom
+}
+
+$cmd = "docker.exe build -t devcontainer-cli:latest -t cspell:latest " +
+    "--build-arg BUILDKIT_INLINE_CACHE=1 " +
     "$devcontainer_cli_build_args " +
     "-f Dockerfile ."
 Write-Host "Running: $cmd"

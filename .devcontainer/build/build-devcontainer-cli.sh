@@ -18,16 +18,25 @@ if [ -w /var/run/docker-host.sock ]; then
     DOCKER_GID=$(stat -c'%g' /var/run/docker-host.sock)
 fi
 
+export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
 devcontainer_cli_build_args=''
-if [ "${NO_CACHE:-}" == 'true' ]; then
-    devcontainer_cli_build_args='--no-cache --pull'
+if docker buildx version 2>/dev/null; then
+    devcontainer_cli_build_args+=' --progress=plain'
 else
-    #devcontainer_cli_build_args='--cache-from mloscore.azurecr.io/devcontainer-cli'
-    docker pull mloscore.azurecr.io/devcontainer-cli || true
+    echo 'NOTE: docker buildkit unavailable.' >&2
 fi
 
-docker build -t devcontainer-cli:latest -t cspell:latest --progress=plain \
+if [ "${NO_CACHE:-}" == 'true' ]; then
+    devcontainer_cli_build_args+=' --no-cache --pull'
+else
+    cacheFrom='mloscore.azurecr.io/devcontainer-cli:latest'
+    devcontainer_cli_build_args+=" --cache-from $cacheFrom"
+    docker pull "$cacheFrom" || true
+fi
+
+docker build -t devcontainer-cli:latest -t cspell:latest \
     $devcontainer_cli_build_args \
+    --build-arg BUILDKIT_INLINE_CACHE=1 \
     --build-arg NODE_UID=$(id -u) \
     --build-arg NODE_GID=$(id -g) \
     --build-arg DOCKER_GID=$DOCKER_GID \

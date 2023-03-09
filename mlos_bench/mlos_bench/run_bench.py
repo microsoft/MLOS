@@ -18,8 +18,8 @@ def _main():
     launcher = Launcher("OS Autotune benchmark")
 
     launcher.parser.add_argument(
-        '--tunables', required=True,
-        help='Path to JSON file that contains values of the tunable parameters')
+        '--tunables', nargs="+", required=True,
+        help='Path to one or more JSON files that contain values of the tunable parameters.')
 
     launcher.parser.add_argument(
         '--no-teardown', required=False, default=False, action='store_true',
@@ -27,12 +27,11 @@ def _main():
 
     args = launcher.parse_args()
 
-    tunable_values = launcher.load_config(args.tunables)
     env = launcher.load_env()
-
     tunables = env.tunable_params()
-    for (key, val) in tunable_values.items():
-        tunables[key] = val
+
+    for data_file in args.tunables:
+        tunables.assign(launcher.load_config(data_file))
 
     _LOG.info("Benchmark: %s with tunables:\n%s", env, tunables)
     if env.setup(tunables):
