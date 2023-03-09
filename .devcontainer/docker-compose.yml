@@ -6,9 +6,12 @@ services:
       context: ./tmp
       dockerfile: ../Dockerfile
       args:
+        BUILDKIT_INLINE_CACHE: 1
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
+      cache_from:
+        - mloscore.azurecr.io/mlos-core-devcontainer:latest
 
     volumes:
       - ../..:/workspaces:cached
