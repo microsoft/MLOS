@@ -88,10 +88,7 @@ def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
             continue
 
         (status, value) = env.benchmark()  # Block and wait for the final result
-        if status == Status.SUCCEEDED:
-            value = value.loc[0, 'score']
-        else:
-            value = None
+        value = value.loc[0, 'score'] if status.is_succeeded else None
 
         _LOG.info("Result: %s = %s :: %s", tunables, status, value)
         opt.register(tunables, status, value)
