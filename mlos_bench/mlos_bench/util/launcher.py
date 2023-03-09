@@ -1,5 +1,5 @@
 """
-Helper functions to launch the benchmark and the optimizer from the command line.
+Helper class to launch the benchmark and the optimizer from the command line.
 """
 
 import logging
