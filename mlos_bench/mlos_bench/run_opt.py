@@ -5,12 +5,11 @@ OS Autotune main optimization loop.
 See `--help` output for details.
 """
 
-import json
 import logging
 
 from mlos_bench.launcher import Launcher
-from mlos_bench.optimizer import Optimizer
-from mlos_bench.environment import Status, Environment, TunableGroups
+from mlos_bench.optimizer import Optimizer, load_optimizer
+from mlos_bench.environment import Status, Environment
 
 _LOG = logging.getLogger(__name__)
 
@@ -29,69 +28,36 @@ def _main():
 
     args = launcher.parse_args()
 
-    config = launcher.global_config
+    global_config = launcher.global_config
     env = launcher.load_env()
 
-    opt = _load_optimizer(
-        env.tunable_params(), launcher.load_config(args.optimizer), config)
+    opt = load_optimizer(
+        env.tunable_params(), launcher.load_config(args.optimizer), global_config)
 
-    result = _optimize(config["experimentId"], env, opt)
+    db = None
+
+    result = _optimize(env, opt, db, global_config["experimentId"])
     _LOG.info("Final result: %s", result)
 
     if not args.no_teardown:
         env.teardown()
 
 
-def _load_optimizer(tunables: TunableGroups, config: dict, global_config: dict) -> Optimizer:
-    """
-    Instantiate the Optimizer shim from the configuration.
-
-    Parameters
-    ----------
-    tunables : TunableGroups
-        Tunable parameters of the environment.
-    config : dict
-        Configuration of the optimizer.
-    global_config : dict
-        Global configuration parameters.
-
-    Returns
-    -------
-    opt : Optimizer
-        A new Optimizer instance.
-    """
-    class_name = config["class"]
-    opt_config = config.setdefault("config", {})
-
-    for key in set(opt_config).intersection(global_config or {}):
-        opt_config[key] = global_config[key]
-
-    if _LOG.isEnabledFor(logging.DEBUG):
-        _LOG.debug("Creating optimizer: %s with config:\n%s",
-                   class_name, json.dumps(opt_config, indent=2))
-
-    opt = Optimizer.new(class_name, tunables, opt_config)
-
-    _LOG.info("Created optimizer: %s", opt)
-    return opt
-
-
-def _optimize(experiment_id: str, env: Environment, opt: Optimizer):
+def _optimize(env: Environment, opt: Optimizer, db,
+              experiment_id: str, run_id: int = 0):
     """
     Main optimization loop.
     """
     _LOG.info("Experiment: %s Env: %s Optimizer: %s", experiment_id, env, opt)
 
-    # Somehow connect to the persistence service using the global parameters
-    db = None
-
-    # Get records of (tunables, status, score) (?) from the previous runs
-    # of the same experiment (or several experiments).
-    # Q: How to restore the telemetry and specify the optimization target?
-    (run_id, tunables_data) = db.restore(experiment_id)
+    # Get records of (tunables, status, score) from the previous runs
+    # of the same experiment (or several compatible experiments).
+    (last_run_id, tunables_data) = db.restore(experiment_id)
     opt.update(tunables_data)
-    # ...can do it more than once for multiple experiments
 
+    run_id = last_run_id or run_id
+
+    # TODO: Restore the telemetry and the optimization target.
     opt_target = 'score'
     opt_direction = 'min'
 
