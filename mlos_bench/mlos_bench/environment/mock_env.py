@@ -68,7 +68,7 @@ class MockEnv(Environment):
             or None if the status is not SUCCEEDED.
         """
         (status, _) = result = super().benchmark()
-        if status != Status.READY:
+        if not status.is_ready:
             return result
 
         # Simple convex function of all tunable parameters.

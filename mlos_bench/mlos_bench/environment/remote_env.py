@@ -113,7 +113,7 @@ class RemoteEnv(Environment):
         """
         _LOG.info("Run benchmark remotely on: %s", self)
         (status, _) = result = super().benchmark()
-        if not (status == Status.READY and self._script_run):
+        if not (status.is_ready and self._script_run):
             return result
 
         result = self._remote_exec(self._script_run)

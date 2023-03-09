@@ -32,15 +32,22 @@ class Status(enum.Enum):
         }
 
     @property
-    def is_succeeded(self):
-        """
-        Check if the status of the environment is SUCCEEDED.
-        """
-        return self == Status.SUCCEEDED
-
-    @property
     def is_pending(self):
         """
         Check if the status of the environment is PENDING.
         """
         return self == Status.PENDING
+
+    @property
+    def is_ready(self):
+        """
+        Check if the status of the environment is READY.
+        """
+        return self == Status.READY
+
+    @property
+    def is_succeeded(self):
+        """
+        Check if the status of the environment is SUCCEEDED.
+        """
+        return self == Status.SUCCEEDED
