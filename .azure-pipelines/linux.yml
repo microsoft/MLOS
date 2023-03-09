@@ -103,6 +103,7 @@ jobs:
     vmImage: 'ubuntu-latest'
   variables:
     DOCKER_BUILDKIT: 1
+    BUILDKIT_INLINE_CACHE: 1
   steps:
   - bash: |
       if [ "$(Build.Reason)" == "Schedule" ]; then

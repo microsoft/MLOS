@@ -325,4 +325,4 @@ clean: clean-check clean-test dist-clean clean-doc clean-doc-env dist-test-clean
 devcontainer:
 	./.devcontainer/build/build-devcontainer.sh
 	@echo
-	@echo "Run ./.devcontainer/scripts/run-devcontainer.sh to start the newly build devcontainer."
+	@echo "Run ./.devcontainer/scripts/run-devcontainer.sh to start the newly built devcontainer."

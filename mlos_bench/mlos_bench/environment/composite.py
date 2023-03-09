@@ -4,7 +4,6 @@ Composite benchmark environment.
 
 import logging
 
-from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_service import Service
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.environment.tunable import TunableGroups
@@ -108,13 +107,13 @@ class CompositeEnv(Environment):
         """
         _LOG.info("Benchmark: %s", self._children)
         (status, _) = result = super().benchmark()
-        if status != Status.READY:
+        if not status.is_ready:
             return result
         for env in self._children:
             _LOG.debug("Child env. run: %s", env)
             (status, _) = result = env.benchmark()
             _LOG.debug("Child env. benchmark: %s :: %s", env, result)
-            if not Status.is_good(status):
+            if not status.is_good:
                 break
         _LOG.info("Benchmark completed: %s :: %s", self, result)
         return result

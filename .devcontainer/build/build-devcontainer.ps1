@@ -38,8 +38,8 @@ if ("$env:NO_CACHE" -eq 'true') {
     $devcontainer_build_args = '--no-cache'
 }
 else {
-    $cacheFrom = 'mloscore.azurecr.io/mlos-core-devcontainer'
-    #devcontainer_build_args="--cache-from $cacheFrom"
+    $cacheFrom = 'mloscore.azurecr.io/mlos-core-devcontainer:latest'
+    $devcontainer_build_args = "--cache-from $cacheFrom"
     docker pull "$cacheFrom"
 }
 
@@ -52,10 +52,12 @@ $cmd = "docker run -i --rm " +
     "--user root " +
     "-v '${rootdir}:/src' " +
     "-v /var/run/docker.sock:/var/run/docker.sock " +
+    "--env DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1} " +
+    "--env BUILDKIT_INLINE_CACHE=1 " +
     "devcontainer-cli " +
     "devcontainer build --workspace-folder /src " +
     "$devcontainer_build_args " +
-    "--image-name mlos-core-devcontainer"
+    "--image-name mlos-core-devcontainer:latest"
 Write-Host "Running: $cmd"
 Invoke-Expression -Verbose "$cmd"
 if ($LASTEXITCODE -ne 0) {
