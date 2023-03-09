@@ -41,8 +41,7 @@ class MockOptimizer(Optimizer):
         return tunables
 
     def register(self, tunables: TunableGroups, status: Status, score: float = None):
-        _LOG.info("Iteration %d :: Register: %s = %s score: %s",
-                  self._iter, tunables, status, score)
+        super().register(tunables, status, score)
         if status.is_succeeded and (self._best_score is None or score < self._best_score):
             self._best_score = score
             self._best_config = tunables.copy()
