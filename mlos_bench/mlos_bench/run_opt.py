@@ -28,13 +28,18 @@ def _main():
         help='Disable teardown of the environment after the optimization.')
 
     args = launcher.parse_args()
+
+    config = launcher.global_config
     env = launcher.load_env()
 
     opt = _load_optimizer(
-        env.tunable_params(), launcher.load_config(args.optimizer), launcher.global_config)
+        env.tunable_params(), launcher.load_config(args.optimizer), config)
 
-    result = _optimize(env, opt, args.no_teardown)
+    result = _optimize(config["experimentId"], env, opt)
     _LOG.info("Final result: %s", result)
+
+    if not args.no_teardown:
+        env.teardown()
 
 
 def _load_optimizer(tunables: TunableGroups, config: dict, global_config: dict) -> Optimizer:
@@ -71,33 +76,47 @@ def _load_optimizer(tunables: TunableGroups, config: dict, global_config: dict) 
     return opt
 
 
-def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
+def _optimize(experiment_id: str, env: Environment, opt: Optimizer):
     """
     Main optimization loop.
     """
-    _LOG.info("Env: %s Optimizer: %s", env, opt)
+    _LOG.info("Experiment: %s Env: %s Optimizer: %s", experiment_id, env, opt)
+
+    # Somehow connect to the persistence service using the global parameters
+    db = None
+
+    # Get records of (tunables, status, score) (?) from the previous runs
+    # of the same experiment (or several experiments).
+    # Q: How to restore the telemetry and specify the optimization target?
+    (run_id, tunables_data) = db.restore(experiment_id)
+    opt.update(tunables_data)
+    # ...can do it more than once for multiple experiments
+
+    opt_target = 'score'
+    opt_direction = 'min'
 
     while opt.not_converged():
 
+        run_id += 1
         tunables = opt.suggest()
-        _LOG.info("Suggestion: %s", tunables)
+        _LOG.info("%s:%d Suggestion: %s", experiment_id, run_id, tunables)
 
-        if not env.setup(tunables):
-            _LOG.warning("Setup failed: %s :: %s", env, tunables)
-            opt.register(tunables, Status.FAILED)
-            continue
+        with db.experiment(tunables, experiment_id, run_id) as exp:
 
-        (status, value) = env.benchmark()  # Block and wait for the final result
-        if status == Status.SUCCEEDED:
-            value = value.loc[0, 'score']
-        else:
-            value = None
+            if not env.setup(tunables):  # pass experimentName and experimentId here
+                _LOG.warning("Setup failed: %s :: %s", env, tunables)
+                exp.update(Status.FAILED)
+                opt.register(tunables, Status.FAILED)
+                continue
 
-        _LOG.info("Result: %s = %s :: %s", tunables, status, value)
-        opt.register(tunables, status, value)
+            (status, value) = env.benchmark()  # Block and wait for the final result.
+            # `value` is a DataFrame with one row and one or more benchmark results.
+            exp.update(status, value)
 
-    if not no_teardown:
-        env.teardown()
+            value = value.loc[0, opt_target] if status.is_succeeded else None
+
+            _LOG.info("Result: %s = %s :: %s", tunables, status, value)
+            opt.register(tunables, status, value)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)

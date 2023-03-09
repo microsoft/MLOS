@@ -83,16 +83,16 @@ class RemoteEnv(Environment):
         if self._wait_boot:
             _LOG.info("Wait for the remote environment to start: %s", self)
             (status, params) = self._service.vm_start(self._params)
-            if status == Status.PENDING:
+            if status.is_pending:
                 (status, _) = self._service.wait_vm_operation(params)
-            if status != Status.SUCCEEDED:
+            if not status.is_succeeded:
                 return False
 
         if self._script_setup:
             _LOG.info("Set up the remote environment: %s", self)
             (status, _) = self._remote_exec(self._script_setup)
             _LOG.info("Remote set up complete: %s :: %s", self, status)
-            self._is_ready = (status == Status.SUCCEEDED)
+            self._is_ready = status.is_succeeded
         else:
             self._is_ready = True
 

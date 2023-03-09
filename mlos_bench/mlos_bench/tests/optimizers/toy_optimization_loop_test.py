@@ -6,7 +6,7 @@ from typing import Tuple
 
 import pytest
 
-from mlos_bench.environment import Status, TunableGroups, Environment, MockEnv
+from mlos_bench.environment import TunableGroups, Environment, MockEnv
 from mlos_bench.optimizer import Optimizer, MockOptimizer, MlosCoreOptimizer
 
 
@@ -23,7 +23,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
 
         (status, value) = env.benchmark()
         score = value.loc[0, 'score']
-        assert status == Status.SUCCEEDED
+        assert status.is_succeeded
         assert 60 <= score <= 120
 
         opt.register(tunables, status, score)

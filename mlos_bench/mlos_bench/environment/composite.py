@@ -114,7 +114,7 @@ class CompositeEnv(Environment):
             _LOG.debug("Child env. run: %s", env)
             (status, _) = result = env.benchmark()
             _LOG.debug("Child env. benchmark: %s :: %s", env, result)
-            if not Status.is_good(status):
+            if status.is_good:
                 break
         _LOG.info("Benchmark completed: %s :: %s", self, result)
         return result

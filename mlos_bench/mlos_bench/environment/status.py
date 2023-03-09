@@ -19,14 +19,28 @@ class Status(enum.Enum):
     FAILED = 6
     TIMED_OUT = 7
 
-    @staticmethod
-    def is_good(status):
+    @property
+    def is_good(self):
         """
         Check if the status of the environment is good.
         """
-        return status in {
+        return self in {
             Status.PENDING,
             Status.READY,
             Status.RUNNING,
             Status.SUCCEEDED,
         }
+
+    @property
+    def is_succeeded(self):
+        """
+        Check if the status of the environment is SUCCEEDED.
+        """
+        return self == Status.SUCCEEDED
+
+    @property
+    def is_pending(self):
+        """
+        Check if the status of the environment is PENDING.
+        """
+        return self == Status.PENDING
