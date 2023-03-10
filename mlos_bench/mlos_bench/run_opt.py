@@ -7,7 +7,7 @@ See `--help` output for details.
 
 import logging
 
-from mlos_bench.util import Launcher
+from mlos_bench.launcher import Launcher
 from mlos_bench.optimizer import Optimizer
 from mlos_bench.environment import Status, Environment
 from mlos_bench.storage import Storage
@@ -37,7 +37,7 @@ def _main():
     env = launcher.load_env()
 
     opt = Optimizer.load(
-        env.tunable_params(), launcher.load_config(args.optimizer), global_config)
+        env.tunable_params(), launcher.load_config(args.optimizer), launcher.global_config)
 
     db = Storage.load(launcher.load_config(args.db), global_config)
 
