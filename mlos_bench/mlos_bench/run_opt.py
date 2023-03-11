@@ -7,6 +7,8 @@ See `--help` output for details.
 
 import logging
 
+import pandas as pd
+
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizer import Optimizer
 from mlos_bench.environment import Status, Environment
@@ -48,6 +50,17 @@ def _main():
         env.teardown()
 
 
+def _get_score(status: Status, value: pd.DataFrame,
+               opt_target: str, opt_direction: str = 'min'):
+    """
+    Extract a scalar benchmark score from the dataframe.
+    """
+    if not status.is_succeeded:
+        return None
+    value = value.loc[0, opt_target]
+    return value if opt_direction == 'min' else -value
+
+
 def _optimize(env: Environment, opt: Optimizer, storage: Storage,
               experiment_id: str, run_id: int = 0):
     """
@@ -55,39 +68,48 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage,
     """
     _LOG.info("Experiment: %s Env: %s Optimizer: %s", experiment_id, env, opt)
 
-    # Get records of (tunables, status, score) from the previous runs
-    # of the same experiment (or several compatible experiments).
-    (last_run_id, tunables_data) = storage.restore(experiment_id)
-    opt.update(tunables_data)
-
-    run_id = last_run_id or run_id
-
-    # TODO: Restore the telemetry and the optimization target.
+    # TODO: Think how to provide these parameters.
     opt_target = 'score'
-    # opt_direction = 'min'
+    opt_direction = 'min'
 
-    while opt.not_converged():
+    # Start new or resume the existing experiment. Verify that
+    # the experiment configuration is compatible with the previous runs.
+    with storage.experiment(experiment_id) as exp:
 
-        run_id += 1
-        tunables = opt.suggest()
-        _LOG.info("%s:%d Suggestion: %s", experiment_id, run_id, tunables)
+        # Merge in the data from other experiments. Raise an exception
+        # if the tunable parameters or configurations are not compatible.
+        exp.merge(["experiment1", "experiment2"])
 
-        with storage.experiment(tunables, experiment_id, run_id) as exp:
+        # Load (tunable values, status, value) to warm-up the optimizer.
+        # This call returns data from ALL merged-in experiments and attempts
+        # to impute the missing tunable values.
+        tunables_data = exp.load(opt_target, opt_direction)
+        opt.update(tunables_data)
 
-            if not env.setup(tunables):  # pass experiment_id and run_id here
-                _LOG.warning("Setup failed: %s :: %s", env, tunables)
-                exp.update(Status.FAILED)
-                opt.register(tunables, Status.FAILED)
-                continue
+        run_id = exp.last_run_id or run_id
 
-            (status, value) = env.benchmark()  # Block and wait for the final result.
-            # `value` is a DataFrame with one row and one or more benchmark results.
-            exp.update(status, value)
+        while opt.not_converged():
 
-            value = value.loc[0, opt_target] if status.is_succeeded else None
+            run_id += 1
+            tunables = opt.suggest()
+            _LOG.info("%s:%d Suggestion: %s", experiment_id, run_id, tunables)
 
-            _LOG.info("Result: %s = %s :: %s", tunables, status, value)
-            opt.register(tunables, status, value)
+            with exp.run(tunables, run_id) as run:
+
+                if not env.setup(tunables):  # pass experiment_id and run_id here
+                    _LOG.warning("Setup failed: %s :: %s", env, tunables)
+                    run.update(Status.FAILED)
+                    opt.register(tunables, Status.FAILED)
+                    continue
+
+                (status, value) = env.benchmark()  # Block and wait for the final result.
+                # `value` is a DataFrame with one row and one or more benchmark results.
+                run.update(status, value)
+
+                value = _get_score(status, value, opt_target, opt_direction)
+                _LOG.info("Result: %s = %s :: %s", tunables, status, value)
+
+                opt.register(tunables, status, value)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
