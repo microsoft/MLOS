@@ -37,11 +37,11 @@ def _main():
     env = launcher.load_env()
 
     opt = Optimizer.load(
-        env.tunable_params(), launcher.load_config(args.optimizer), launcher.global_config)
+        env.tunable_params(), launcher.load_config(args.optimizer), global_config)
 
     storage = Storage.load(launcher.load_config(args.db), global_config)
 
-    result = _optimize(env, opt, storage, global_config["experimentId"])
+    result = _optimize(env, opt, storage, global_config["experiment_id"])
     _LOG.info("Final result: %s", result)
 
     if not args.no_teardown:
