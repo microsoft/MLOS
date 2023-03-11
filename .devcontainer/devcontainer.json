@@ -16,7 +16,7 @@
     // Make sure the container user can read/write to the package caches.
     "onCreateCommand": "sudo -n mkdir -p /opt/conda/pkgs/cache /var/cache/pip && sudo -n chown -R vscode /opt/conda/pkgs/cache /var/cache/pip",
     // Make sure the conda env is up to date with the source tree expectations.
-    "updateContentCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos_core -f ${containerWorkspaceFolder}/conda-envs/mlos_core.yml",
+    "postCreateCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos_core -f ${containerWorkspaceFolder}/conda-envs/mlos_core.yml",
     // Various mounting, run, post-create, and user settings
     "containerEnv": {
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
