@@ -73,7 +73,7 @@ class LocalEnv(Environment):
         if self._script_run is None and self._read_results_file is not None:
             raise ValueError("'run' must be present if 'read_results_file' is specified")
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict) -> bool:
         """
         Check if the environment is ready and set up the application
         and benchmarks, if necessary.
@@ -83,13 +83,16 @@ class LocalEnv(Environment):
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
             values. Setting these parameters should not require an OS reboot.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        if not super().setup(tunables):
+        if not super().setup(tunables, global_config):
             return False
 
         if not self._script_setup:

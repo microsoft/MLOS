@@ -76,7 +76,7 @@ class LocalFileShareEnv(LocalEnv):
             for (path_from, path_to) in from_to
         )
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict) -> bool:
         """
         Run setup scripts locally and upload the scripts and data to the shared storage.
 
@@ -85,6 +85,9 @@ class LocalFileShareEnv(LocalEnv):
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
             values. Setting these parameters should not require an OS reboot.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
@@ -94,7 +97,7 @@ class LocalFileShareEnv(LocalEnv):
         prev_temp_dir = self._temp_dir
         with self._service.temp_dir_context(self._temp_dir) as self._temp_dir:
             # Override _temp_dir so that setup and upload both use the same path.
-            self._is_ready = super().setup(tunables)
+            self._is_ready = super().setup(tunables, global_config)
             if self._is_ready:
                 params = self._params.copy()
                 params["PWD"] = self._temp_dir

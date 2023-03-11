@@ -15,7 +15,7 @@ class VMEnv(Environment):
     "Remote" VM environment.
     """
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict) -> bool:
         """
         Check if VM is ready. (Re)provision and start it, if necessary.
 
@@ -26,6 +26,9 @@ class VMEnv(Environment):
             parameters' values. VMEnv tunables are variable parameters that,
             together with the VMEnv configuration, are sufficient to provision
             and start a VM.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
@@ -33,7 +36,7 @@ class VMEnv(Environment):
             True if operation is successful, false otherwise.
         """
         _LOG.info("VM set up: %s :: %s", self, tunables)
-        if not super().setup(tunables):
+        if not super().setup(tunables, global_config):
             return False
 
         (status, params) = self._service.vm_provision(self._params)

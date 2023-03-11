@@ -143,7 +143,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._tunable_params
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be
         idempotent, i.e., calling it several times in a row should be
@@ -153,6 +153,9 @@ class Environment(metaclass=abc.ABCMeta):
         ----------
         tunables : TunableGroups
             A collection of tunable parameters along with their values.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
@@ -163,6 +166,8 @@ class Environment(metaclass=abc.ABCMeta):
         assert isinstance(tunables, TunableGroups)
 
         self._params = self._combine_tunables(tunables)
+        for key in set(self._params).intersection(global_config or {}):
+            self._params[key] = global_config[key]
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Combined parameters:\n%s", json.dumps(self._params, indent=2))
 

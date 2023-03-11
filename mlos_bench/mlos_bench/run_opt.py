@@ -43,7 +43,7 @@ def _main():
 
     storage = Storage.load(launcher.load_config(args.db), global_config)
 
-    result = _optimize(env, opt, storage, global_config["experiment_id"])
+    result = _optimize(env, opt, storage, global_config)
     _LOG.info("Final result: %s", result)
 
     if not args.no_teardown:
@@ -61,14 +61,15 @@ def _get_score(status: Status, value: pd.DataFrame,
     return value if opt_direction == 'min' else -value
 
 
-def _optimize(env: Environment, opt: Optimizer, storage: Storage,
-              experiment_id: str, run_id: int = 0):
+def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config: dict):
     """
     Main optimization loop.
     """
+    experiment_id = global_config["experiment_id"]
+    run_id = int(global_config.get("run_id", 0))
     _LOG.info("Experiment: %s Env: %s Optimizer: %s", experiment_id, env, opt)
 
-    # TODO: Think how to provide these parameters.
+    # TODO: Think where to get these parameters from. (global_config? storage?)
     opt_target = 'score'
     opt_direction = 'min'
 
@@ -96,7 +97,7 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage,
 
             with exp.run(tunables, run_id) as run:
 
-                if not env.setup(tunables):  # pass experiment_id and run_id here
+                if not env.setup(tunables, global_config):
                     _LOG.warning("Setup failed: %s :: %s", env, tunables)
                     run.update(Status.FAILED)
                     opt.register(tunables, Status.FAILED)

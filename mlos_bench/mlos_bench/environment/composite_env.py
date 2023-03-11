@@ -62,7 +62,7 @@ class CompositeEnv(Environment):
         self._children.append(env)
         self._tunable_params.update(env.tunable_params())
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict) -> bool:
         """
         Set up the children environments.
 
@@ -76,10 +76,13 @@ class CompositeEnv(Environment):
         is_success : bool
             True if all children setup() operations are successful,
             false otherwise.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
         """
         self._is_ready = (
-            super().setup(tunables) and
-            all(env.setup(tunables) for env in self._children)
+            super().setup(tunables, global_config) and
+            all(env.setup(tunables, global_config) for env in self._children)
         )
         return self._is_ready
 
