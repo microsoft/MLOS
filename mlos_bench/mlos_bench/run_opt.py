@@ -39,16 +39,16 @@ def _main():
     opt = Optimizer.load(
         env.tunable_params(), launcher.load_config(args.optimizer), launcher.global_config)
 
-    db = Storage.load(launcher.load_config(args.db), global_config)
+    storage = Storage.load(launcher.load_config(args.db), global_config)
 
-    result = _optimize(env, opt, db, global_config["experimentId"])
+    result = _optimize(env, opt, storage, global_config["experimentId"])
     _LOG.info("Final result: %s", result)
 
     if not args.no_teardown:
         env.teardown()
 
 
-def _optimize(env: Environment, opt: Optimizer, db,
+def _optimize(env: Environment, opt: Optimizer, storage: Storage,
               experiment_id: str, run_id: int = 0):
     """
     Main optimization loop.
@@ -57,7 +57,7 @@ def _optimize(env: Environment, opt: Optimizer, db,
 
     # Get records of (tunables, status, score) from the previous runs
     # of the same experiment (or several compatible experiments).
-    (last_run_id, tunables_data) = db.restore(experiment_id)
+    (last_run_id, tunables_data) = storage.restore(experiment_id)
     opt.update(tunables_data)
 
     run_id = last_run_id or run_id
@@ -72,9 +72,9 @@ def _optimize(env: Environment, opt: Optimizer, db,
         tunables = opt.suggest()
         _LOG.info("%s:%d Suggestion: %s", experiment_id, run_id, tunables)
 
-        with db.experiment(tunables, experiment_id, run_id) as exp:
+        with storage.experiment(tunables, experiment_id, run_id) as exp:
 
-            if not env.setup(tunables):  # pass experimentName and experimentId here
+            if not env.setup(tunables):  # pass experiment_id and run_id here
                 _LOG.warning("Setup failed: %s :: %s", env, tunables)
                 exp.update(Status.FAILED)
                 opt.register(tunables, Status.FAILED)

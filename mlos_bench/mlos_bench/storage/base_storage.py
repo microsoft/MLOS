@@ -3,11 +3,31 @@ Base interface for saving and restoring the benchmark data.
 """
 
 import logging
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 
+import pandas as pd
+
+from mlos_bench.environment import Status, TunableGroups
 from mlos_bench.util import prepare_class_load, instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
+
+
+class Experiment(metaclass=ABCMeta):
+    """
+    Base class for
+    """
+
+    def __init__(self, tunables: TunableGroups, experiment_id: str, run_id: int):
+        self._tunables = tunables
+        self._experiment_id = experiment_id
+        self._run_id = run_id
+
+    @abstractmethod
+    def update(self, status: Status, value: pd.DataFrame = None):
+        """
+        Update the storage with the results of the experiment.
+        """
 
 
 class Storage(metaclass=ABCMeta):
@@ -34,9 +54,9 @@ class Storage(metaclass=ABCMeta):
             A new instance of the Storage class.
         """
         (class_name, db_config) = prepare_class_load(config, global_config)
-        db = Storage.new(class_name, db_config)
-        _LOG.info("Created storage: %s", db)
-        return db
+        storage = Storage.new(class_name, db_config)
+        _LOG.info("Created storage: %s", storage)
+        return storage
 
     @classmethod
     def new(cls, class_name: str, config: dict):
@@ -71,3 +91,21 @@ class Storage(metaclass=ABCMeta):
         """
         _LOG.debug("Storage config: %s", config)
         self._config = config.copy()
+
+    @abstractmethod
+    def restore(self, experiment_id: str):
+        """
+        Restore the experimental data from the storage.
+
+        Parameters
+        ----------
+        experiment_id : str
+            Unique experiment ID.
+        """
+
+    @abstractmethod
+    def experiment(self, tunables: TunableGroups,
+                   experiment_id: str, run_id: int) -> Experiment:
+        """
+        Create a new experiment in the storage.
+        """
