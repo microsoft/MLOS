@@ -62,7 +62,7 @@ class CompositeEnv(Environment):
         self._children.append(env)
         self._tunable_params.update(env.tunable_params())
 
-    def setup(self, tunables: TunableGroups, global_config: dict) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
         """
         Set up the children environments.
 

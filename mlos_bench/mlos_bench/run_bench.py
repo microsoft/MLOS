@@ -34,7 +34,7 @@ def _main():
         tunables.assign(launcher.load_config(data_file))
 
     _LOG.info("Benchmark: %s with tunables:\n%s", env, tunables)
-    if env.setup(tunables):
+    if env.setup(tunables, launcher.global_config):
         bench_result = env.benchmark()  # Block and wait for the final result
         _LOG.info("Result: %s", bench_result)
     else:
