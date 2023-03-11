@@ -7,7 +7,8 @@ import argparse
 
 from typing import List, Dict, Any
 
-from mlos_bench.environment import Environment, LocalExecService, ConfigPersistenceService
+from mlos_bench.environment import Environment
+from mlos_bench.service import LocalExecService, ConfigPersistenceService
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'

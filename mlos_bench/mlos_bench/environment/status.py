@@ -1,5 +1,5 @@
 """
-Enum for the status of the benchmark.
+Enum for the status of the benchmark/environment.
 """
 
 import enum
@@ -7,7 +7,7 @@ import enum
 
 class Status(enum.Enum):
     """
-    Enum for the status of the benchmark.
+    Enum for the status of the benchmark/environment.
     """
 
     UNKNOWN = 0
@@ -22,7 +22,7 @@ class Status(enum.Enum):
     @property
     def is_good(self):
         """
-        Check if the status of the environment is good.
+        Check if the status of the benchmark/environment is good.
         """
         return self in {
             Status.PENDING,
@@ -34,20 +34,41 @@ class Status(enum.Enum):
     @property
     def is_pending(self):
         """
-        Check if the status of the environment is PENDING.
+        Check if the status of the benchmark/environment is PENDING.
         """
         return self == Status.PENDING
 
     @property
     def is_ready(self):
         """
-        Check if the status of the environment is READY.
+        Check if the status of the benchmark/environment is READY.
         """
         return self == Status.READY
 
     @property
     def is_succeeded(self):
         """
-        Check if the status of the environment is SUCCEEDED.
+        Check if the status of the benchmark/environment is SUCCEEDED.
         """
         return self == Status.SUCCEEDED
+
+    @property
+    def is_failed(self):
+        """
+        Check if the status of the benchmark/environment is FAILED.
+        """
+        return self == Status.FAILED
+
+    @property
+    def is_canceled(self):
+        """
+        Check if the status of the benchmark/environment is CANCELED.
+        """
+        return self == Status.CANCELED
+
+    @property
+    def is_timed_out(self):
+        """
+        Check if the status of the benchmark/environment is TIMEDOUT.
+        """
+        return self == Status.FAILED

@@ -4,7 +4,8 @@ Common fixtures for Tunable and TunableGroups tests.
 
 import pytest
 
-from mlos_bench.environment import Tunable, TunableGroups, MockEnv
+from mlos_bench.environment.mock_env import MockEnv
+from mlos_bench.tunables import Tunable, TunableGroups
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to

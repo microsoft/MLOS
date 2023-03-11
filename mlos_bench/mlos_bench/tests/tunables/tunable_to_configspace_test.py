@@ -9,7 +9,7 @@ from ConfigSpace import UniformFloatHyperparameter
 from ConfigSpace import CategoricalHyperparameter
 from ConfigSpace import ConfigurationSpace
 
-from mlos_bench.environment import Tunable, TunableGroups
+from mlos_bench.tunables import Tunable, TunableGroups
 
 from mlos_bench.optimizer.convert_configspace import _tunable_to_hyperparameter
 from mlos_bench.optimizer.convert_configspace import tunable_groups_to_configspace

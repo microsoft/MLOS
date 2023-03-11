@@ -130,7 +130,7 @@ jobs:
       # The rest should have been handled in a separate step.
       conda run -n mlos-dist-test-$(PythonVersion) python -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
       # Run a simple mlos_bench test.
-      conda run -n mlos-dist-test-$(PythonVersion) python -m pytest mlos_bench/mlos_bench/tests/environments/mock_env_test.py
+      conda run -n mlos-dist-test-$(PythonVersion) python -m pytest mlos_bench/mlos_bench/tests/environment/mock_env_test.py
     displayName: 'Generate and test binary distribution files'
 
 # NOTE: Windows ADO agents don't support Linux Docker containers.

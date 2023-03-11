@@ -10,7 +10,8 @@ from ConfigSpace import UniformFloatHyperparameter
 from ConfigSpace import CategoricalHyperparameter
 from ConfigSpace import ConfigurationSpace
 
-from mlos_bench.environment import Tunable, TunableGroups
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 

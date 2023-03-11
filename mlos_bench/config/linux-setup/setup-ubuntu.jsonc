@@ -33,7 +33,7 @@
     // Remote: Apply new kernel configuration to a VM
     {
         "name": "Apply Linux kernel parameters to a remote Ubuntu VM",
-        "class": "mlos_bench.environment.RemoteEnv",
+        "class": "mlos_bench.environment.remote.RemoteEnv",
 
         "config": {
 

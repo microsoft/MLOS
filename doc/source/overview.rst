@@ -109,57 +109,74 @@ Benchmark Environments
    :toctree: generated/
    :template: class.rst
 
+   Status
    Environment
+   CompositeEnv
    MockEnv
+
+Local Environments
+-------------------
+
+.. currentmodule:: mlos_bench.environment.local
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
    LocalEnv
    LocalFileShareEnv
+
+Remote Environments
+-------------------
+
+.. currentmodule:: mlos_bench.environment.remote
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
    RemoteEnv
-   CompositeEnv
-   Status
+   OSEnv
+   VMEnv
 
 Tunable Parameters
-------------------
-.. currentmodule:: mlos_bench.environment
+==================
+.. currentmodule:: mlos_bench.tunables
 .. autosummary::
-    :toctree: generated/
-    :template: class.rst
+   :toctree: generated/
+   :template: class.rst
 
-    Tunable
-    TunableGroups
+   Tunable
+   TunableGroups
 
 Service Mix-ins
----------------
-.. currentmodule:: mlos_bench.environment
+===============
+.. currentmodule:: mlos_bench.service
 .. autosummary::
-    :toctree: generated/
-    :template: class.rst
+   :toctree: generated/
+   :template: class.rst
 
    Service
-   LocalExecService
    FileShareService
    ConfigPersistenceService
 
-Azure Environments
-------------------
-
-.. currentmodule:: mlos_bench.environment.azure
+Local Services
+---------------
+.. currentmodule:: mlos_bench.service.local
 .. autosummary::
-    :toctree: generated/
-    :template: class.rst
+   :toctree: generated/
+   :template: class.rst
 
-    OSEnv
-    VMEnv
+   LocalExecService
 
-Azure Services
---------------
+Remote Azure Services
+---------------------
 
-.. currentmodule:: mlos_bench.environment.azure
+.. currentmodule:: mlos_bench.service.remote.azure
 .. autosummary::
-    :toctree: generated/
-    :template: class.rst
+   :toctree: generated/
+   :template: class.rst
 
-    AzureVMService
-    AzureFileShareService
+   AzureVMService
+   AzureFileShareService
 
 Optimizer Adapters
 ==================

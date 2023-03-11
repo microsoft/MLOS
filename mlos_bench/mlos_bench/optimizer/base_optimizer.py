@@ -8,7 +8,7 @@ from typing import Tuple
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.environment.status import Status
-from mlos_bench.environment.tunable import TunableGroups
+from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
 
 _LOG = logging.getLogger(__name__)

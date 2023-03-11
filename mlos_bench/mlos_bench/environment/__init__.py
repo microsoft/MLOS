@@ -1,28 +1,18 @@
 """
-Benchmarking environments for OS Autotune.
+Tunable Environments for mlos_bench.
 """
 
 from mlos_bench.environment.status import Status
-from mlos_bench.environment.tunable import Tunable, TunableGroups
-from mlos_bench.environment.base_service import Service
 from mlos_bench.environment.base_environment import Environment
-from mlos_bench.environment.base_fileshare import FileShareService
 
 from mlos_bench.environment.mock_env import MockEnv
-from mlos_bench.environment.remote_env import RemoteEnv
-from mlos_bench.environment.local_env import LocalEnv
-from mlos_bench.environment.local_env_fileshare import LocalFileShareEnv
-from mlos_bench.environment.composite import CompositeEnv
-
-from mlos_bench.environment.local_exec import LocalExecService
-from mlos_bench.environment.config_persistence import ConfigPersistenceService
-
+from mlos_bench.environment.remote.remote_env import RemoteEnv
+from mlos_bench.environment.local.local_env import LocalEnv
+from mlos_bench.environment.local.local_env_fileshare import LocalFileShareEnv
+from mlos_bench.environment.composite_env import CompositeEnv
 
 __all__ = [
-
     'Status',
-    'Tunable',
-    'TunableGroups',
 
     'Environment',
     'MockEnv',
@@ -30,9 +20,4 @@ __all__ = [
     'LocalEnv',
     'LocalFileShareEnv',
     'CompositeEnv',
-
-    'Service',
-    'LocalExecService',
-    'FileShareService',
-    'ConfigPersistenceService',
 ]
