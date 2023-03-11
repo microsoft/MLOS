@@ -8,7 +8,7 @@ See `--help` output for details.
 
 import logging
 
-from mlos_bench.util import Launcher
+from mlos_bench.launcher import Launcher
 
 _LOG = logging.getLogger(__name__)
 

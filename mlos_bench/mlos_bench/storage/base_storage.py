@@ -7,27 +7,11 @@ from abc import ABCMeta, abstractmethod
 
 import pandas as pd
 
-from mlos_bench.environment import Status, TunableGroups
+from mlos_bench.environment import Status
+from mlos_bench.tunables import TunableGroups
 from mlos_bench.util import prepare_class_load, instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
-
-
-class Experiment(metaclass=ABCMeta):
-    """
-    Base class for
-    """
-
-    def __init__(self, tunables: TunableGroups, experiment_id: str, run_id: int):
-        self._tunables = tunables
-        self._experiment_id = experiment_id
-        self._run_id = run_id
-
-    @abstractmethod
-    def update(self, status: Status, value: pd.DataFrame = None):
-        """
-        Update the storage with the results of the experiment.
-        """
 
 
 class Storage(metaclass=ABCMeta):
@@ -105,7 +89,42 @@ class Storage(metaclass=ABCMeta):
 
     @abstractmethod
     def experiment(self, tunables: TunableGroups,
-                   experiment_id: str, run_id: int) -> Experiment:
+                   experiment_id: str, run_id: int):
         """
         Create a new experiment in the storage.
+
+        Parameters
+        ----------
+        tunables : TunableGroups
+            Tunable parameters of the experiment.
+        experiment_id : str
+            Unique experiment ID.
+        run_id : int
+            Unique run ID within the experiment.
+
+        Returns
+        -------
+        experiment : Experiment
+            An object that allows to update the storage with
+            the results of the experiment and related data.
+        """
+
+
+class ExperimentStorage(metaclass=ABCMeta):
+    """
+    Base interface for storing the results of a single run of the experiment.
+    This class is instantiated in the `Storage.experiment()` method.
+    """
+
+    def __init__(self, storage: Storage, tunables: TunableGroups,
+                 experiment_id: str, run_id: int):
+        self._storage = storage
+        self._tunables = tunables
+        self._experiment_id = experiment_id
+        self._run_id = run_id
+
+    @abstractmethod
+    def update(self, status: Status, value: pd.DataFrame = None):
+        """
+        Update the storage with the results of the experiment.
         """

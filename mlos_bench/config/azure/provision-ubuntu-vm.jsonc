@@ -1,6 +1,6 @@
 {
     "name": "Deploy Ubuntu VM on Azure",
-    "class": "mlos_bench.environment.azure.VMEnv",
+    "class": "mlos_bench.environment.remote.VMEnv",
 
     "config": {
 

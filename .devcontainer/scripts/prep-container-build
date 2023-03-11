@@ -8,8 +8,10 @@ scriptdir=$(dirname "$(readlink -f "$0")")
 # Start in the script directory.
 cd "$scriptdir"
 
+export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
+
 # Build a basic container with the dependencies we need to run the prep script.
-docker build --progress=plain \
+docker build \
     --build-arg http_proxy="${http_proxy:-}" \
     --build-arg https_proxy="${https_proxy:-}" \
     --build-arg no_proxy="${no_proxy:-}" \
@@ -33,7 +35,13 @@ docker run --rm -v "$reporoot:/src" --workdir /src \
 
 # Prior to building the container locally, try to pull the latest version from
 # upstream to see if we can use it as a cache.
+# TODO: Ideally we'd only do this when rebuilding the image, but not sure how
+# to detect that form of startup yet.
 if [ "${NO_CACHE:-}" != 'true' ]; then
     cacheFrom='mloscore.azurecr.io/mlos-core-devcontainer'
-    (docker pull -q "$cacheFrom" >/dev/null || true )&
+    # Make sure we use an empty config to avoid auth issues for devs with the
+    # registry, which should allow anonymous pulls
+    tmpdir=$(mktemp -d)
+    docker --config="$tmpdir" pull -q "$cacheFrom" >/dev/null || true
+    rmdir "$tmpdir"
 fi

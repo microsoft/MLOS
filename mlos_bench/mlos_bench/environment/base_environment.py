@@ -7,7 +7,7 @@ import json
 import logging
 
 from mlos_bench.environment.status import Status
-from mlos_bench.environment.tunable import TunableGroups
+from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ class Environment(metaclass=abc.ABCMeta):
             Human-readable name of the environment.
         class_name: str
             FQN of a Python class to instantiate, e.g.,
-            "mlos_bench.environment.azure.VMEnv".
+            "mlos_bench.environment.remote.VMEnv".
             Must be derived from the `Environment` class.
         config : dict
             Free-format dictionary that contains the benchmark environment

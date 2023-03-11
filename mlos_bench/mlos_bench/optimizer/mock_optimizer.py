@@ -7,7 +7,7 @@ import logging
 from typing import Tuple
 
 from mlos_bench.environment.status import Status
-from mlos_bench.environment.tunable import TunableGroups
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
 

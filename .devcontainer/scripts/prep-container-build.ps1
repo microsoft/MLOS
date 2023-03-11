@@ -26,9 +26,16 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-# Try to pull the cached image.
+# Prior to building the container locally, try to pull the latest version from
+# upstream to see if we can use it as a cache.
+# TODO: Ideally we'd only do this when rebuilding the image, but not sure how
+# to detect that form of startup yet.
 if ($env:NO_CACHE -ne 'true') {
     $cacheFrom = 'mloscore.azurecr.io/mlos-core-devcontainer'
     Write-Host "Pulling cached image $cacheFrom"
-    docker pull $cacheFrom
+    # Make sure we use an empty config to avoid auth issues for devs with the
+    # registry, which should allow anonymous pulls
+    $tmpdir = (Join-Path $env:TEMP $(New-Guid) | %{ New-Item -Type Directory $_ } | Select-Object -ExpandProperty Fullname)
+    docker --config="$tmpdir" pull $cacheFrom
+    Remove-Item "$tmpdir"
 }
