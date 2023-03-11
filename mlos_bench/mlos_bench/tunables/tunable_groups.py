@@ -6,7 +6,7 @@ import copy
 from typing import Any, Dict, List, Tuple
 
 from mlos_bench.tunables.tunable import Tunable
-from mlos_bench.tunables.covariant_groups import CovariantTunableGroup
+from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 
 
 class TunableGroups:

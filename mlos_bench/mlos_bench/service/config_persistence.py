@@ -12,6 +12,7 @@ from typing import Optional, List
 
 import json5   # To read configs with comments and other JSON5 syntax features
 
+from mlos_bench.util import prepare_class_load
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -129,13 +130,8 @@ class ConfigPersistenceService(Service):
         env : Environment
             An instance of the `Environment` class initialized with `config`.
         """
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Build environment from config:\n%s",
-                       json.dumps(config, indent=2))
-
         env_name = config["name"]
-        env_class = config["class"]
-        env_config = config.setdefault("config", {})
+        (env_class, env_config) = prepare_class_load(config)
 
         env_services_path = config.get("include_services")
         if env_services_path is not None:
@@ -174,16 +170,8 @@ class ConfigPersistenceService(Service):
         svc : Service
             An instance of the `Service` class initialized with `config`.
         """
-        svc_class = config["class"]
-
-        global_config = global_config or {}
-        svc_config = config.setdefault("config", {})
-        for key in set(svc_config).intersection(global_config):
-            svc_config[key] = global_config[key]
-
-        _LOG.debug("Creating service: %s", svc_class)
+        (svc_class, svc_config) = prepare_class_load(config, global_config)
         service = Service.new(svc_class, svc_config, parent)
-
         _LOG.info("Created service: %s", service)
         return service
 

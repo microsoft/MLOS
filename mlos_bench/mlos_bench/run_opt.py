@@ -5,13 +5,11 @@ OS Autotune main optimization loop.
 See `--help` output for details.
 """
 
-import json
 import logging
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizer import Optimizer
 from mlos_bench.environment import Status, Environment
-from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
@@ -31,45 +29,11 @@ def _main():
     args = launcher.parse_args()
     env = launcher.load_env()
 
-    opt = _load_optimizer(
+    opt = Optimizer.load(
         env.tunable_params(), launcher.load_config(args.optimizer), launcher.global_config)
 
     result = _optimize(env, opt, args.no_teardown)
     _LOG.info("Final result: %s", result)
-
-
-def _load_optimizer(tunables: TunableGroups, config: dict, global_config: dict) -> Optimizer:
-    """
-    Instantiate the Optimizer shim from the configuration.
-
-    Parameters
-    ----------
-    tunables : TunableGroups
-        Tunable parameters of the environment.
-    config : dict
-        Configuration of the optimizer.
-    global_config : dict
-        Global configuration parameters.
-
-    Returns
-    -------
-    opt : Optimizer
-        A new Optimizer instance.
-    """
-    class_name = config["class"]
-    opt_config = config.setdefault("config", {})
-
-    for key in set(opt_config).intersection(global_config or {}):
-        opt_config[key] = global_config[key]
-
-    if _LOG.isEnabledFor(logging.DEBUG):
-        _LOG.debug("Creating optimizer: %s with config:\n%s",
-                   class_name, json.dumps(opt_config, indent=2))
-
-    opt = Optimizer.new(class_name, tunables, opt_config)
-
-    _LOG.info("Created optimizer: %s", opt)
-    return opt
 
 
 def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
