@@ -102,6 +102,11 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage,
                     opt.register(tunables, Status.FAILED)
                     continue
 
+                # In async mode, poll the environment for the status and
+                # telemetry and update the storage with the intermediate results.
+                (status, telemetry) = env.status()
+                run.update_telemetry(status, telemetry)
+
                 (status, value) = env.benchmark()  # Block and wait for the final result.
                 # `value` is a DataFrame with one row and one or more benchmark results.
                 run.update(status, value)
