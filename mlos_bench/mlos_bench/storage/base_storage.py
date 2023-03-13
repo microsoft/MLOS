@@ -101,9 +101,27 @@ class ExperimentStorage(metaclass=ABCMeta):
     This class is instantiated in the `Storage.experiment()` method.
     """
 
-    def __init__(self, storage: Storage, experiment_id: str,):
+    def __init__(self, storage: Storage, experiment_id: str):
         self._storage = storage
         self._experiment_id = experiment_id
+
+    def __enter__(self):
+        """
+        Enter the context of the experiment.
+        """
+        _LOG.debug("Starting experiment: %s", self._experiment_id)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        End the context of the experiment.
+        """
+        if exc_val is None:
+            _LOG.debug("Finishing experiment: %s", self._experiment_id)
+        else:
+            _LOG.warning("Finishing experiment: %s", self._experiment_id,
+                         exc_info=(exc_type, exc_val, exc_tb))
+        return False  # Do not suppress exceptions
 
     @abstractmethod
     def merge(self, experiment_ids: List[str]):
@@ -170,6 +188,24 @@ class RunStorage(metaclass=ABCMeta):
         self._tunables = tunables
         self._experiment_id = experiment_id
         self._run_id = run_id
+
+    def __enter__(self):
+        """
+        Enter the context of the experiment run.
+        """
+        _LOG.debug("Starting experiment run: %s:%d", self._experiment_id, self._run_id)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        End the context of the experiment run.
+        """
+        if exc_val is None:
+            _LOG.debug("Finishing experiment run: %s:%d", self._experiment_id, self._run_id)
+        else:
+            _LOG.warning("Finishing experiment run: %s:%d", self._experiment_id, self._run_id,
+                         exc_info=(exc_type, exc_val, exc_tb))
+        return False  # Do not suppress exceptions
 
     @abstractmethod
     def update(self, status: Status, value: pd.DataFrame = None):
