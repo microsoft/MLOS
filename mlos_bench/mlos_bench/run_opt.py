@@ -51,14 +51,14 @@ def _main():
 
 
 def _get_score(status: Status, value: pd.DataFrame,
-               opt_target: str, opt_direction: str = 'min'):
+               opt_target: str, opt_is_min: bool = True):
     """
     Extract a scalar benchmark score from the dataframe.
     """
     if not status.is_succeeded:
         return None
     value = value.loc[0, opt_target]
-    return value if opt_direction == 'min' else -value
+    return value if opt_is_min else -value
 
 
 def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config: dict):
@@ -71,7 +71,7 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
 
     # TODO: Think where to get these parameters from. (global_config? storage?)
     opt_target = 'score'
-    opt_direction = 'min'
+    opt_is_min = True
 
     # Start new or resume the existing experiment. Verify that
     # the experiment configuration is compatible with the previous runs.
@@ -84,7 +84,7 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
         # Load (tunable values, status, value) to warm-up the optimizer.
         # This call returns data from ALL merged-in experiments and attempts
         # to impute the missing tunable values.
-        tunables_data = exp.load(opt_target, opt_direction)
+        tunables_data = exp.load(opt_target, opt_is_min)
         opt.update(tunables_data)
 
         run_id = exp.last_run_id or run_id
@@ -106,13 +106,13 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
                 # In async mode, poll the environment for the status and
                 # telemetry and update the storage with the intermediate results.
                 (status, telemetry) = env.status()
-                run.update_telemetry(status, telemetry)
+                run.update(status, telemetry)
 
                 (status, value) = env.benchmark()  # Block and wait for the final result.
                 # `value` is a DataFrame with one row and one or more benchmark results.
                 run.update(status, value)
 
-                value = _get_score(status, value, opt_target, opt_direction)
+                value = _get_score(status, value, opt_target, opt_is_min)
                 _LOG.info("Result: %s = %s :: %s", tunables, status, value)
 
                 opt.register(tunables, status, value)

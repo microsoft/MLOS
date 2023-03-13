@@ -4,6 +4,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
+from typing import List
 
 import pandas as pd
 
@@ -77,34 +78,18 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
 
     @abstractmethod
-    def restore(self, experiment_id: str):
-        """
-        Restore the experimental data from the storage.
-
-        Parameters
-        ----------
-        experiment_id : str
-            Unique experiment ID.
-        """
-
-    @abstractmethod
-    def experiment(self, tunables: TunableGroups,
-                   experiment_id: str, run_id: int):
+    def experiment(self, experiment_id: str):
         """
         Create a new experiment in the storage.
 
         Parameters
         ----------
-        tunables : TunableGroups
-            Tunable parameters of the experiment.
         experiment_id : str
             Unique experiment ID.
-        run_id : int
-            Unique run ID within the experiment.
 
         Returns
         -------
-        experiment : Experiment
+        experiment : ExperimentStorage
             An object that allows to update the storage with
             the results of the experiment and related data.
         """
@@ -112,8 +97,71 @@ class Storage(metaclass=ABCMeta):
 
 class ExperimentStorage(metaclass=ABCMeta):
     """
-    Base interface for storing the results of a single run of the experiment.
+    Base interface for storing the results of the experiment.
     This class is instantiated in the `Storage.experiment()` method.
+    """
+
+    def __init__(self, storage: Storage, experiment_id: str,):
+        self._storage = storage
+        self._experiment_id = experiment_id
+
+    @abstractmethod
+    def merge(self, experiment_ids: List[str]):
+        """
+        Merge in the results of other experiments.
+
+        Parameters
+        ----------
+        experiment_ids : List[str]
+            List of IDs of the experiments to merge in.
+        """
+
+    @abstractmethod
+    def load(self, opt_target: str = 'score', opt_is_min: bool = True):
+        """
+        Load (tunable values, status, value) to warm-up the optimizer.
+        This call returns data from ALL merged-in experiments and attempts
+        to impute the missing tunable values.
+
+        Parameters
+        ----------
+        opt_target : str
+            Name of the optimization target.
+        opt_is_min : bool
+            Whether the optimization target is a minimization problem.
+        """
+
+    @property
+    @abstractmethod
+    def last_run_id(self) -> int:
+        """
+        Return the ID of the last run in the experiment.
+        """
+
+    @abstractmethod
+    def run(self, tunables: TunableGroups, run_id: int):
+        """
+        Create a new experiment run in the storage.
+
+        Parameters
+        ----------
+        tunables : TunableGroups
+            Tunable parameters of the experiment.
+        run_id : int
+            Unique experiment run ID.
+
+        Returns
+        -------
+        run : RunStorage
+            An object that allows to update the storage with
+            the results of the experiment run.
+        """
+
+
+class RunStorage(metaclass=ABCMeta):
+    """
+    Base interface for storing the results of a single run of the experiment.
+    This class is instantiated in the `ExperimentStorage.run()` method.
     """
 
     def __init__(self, storage: Storage, tunables: TunableGroups,
