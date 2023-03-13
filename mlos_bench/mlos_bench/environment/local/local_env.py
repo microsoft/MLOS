@@ -6,7 +6,7 @@ import os
 import json
 import logging
 
-from typing import Optional
+from typing import Tuple, Optional
 
 import pandas
 
@@ -123,18 +123,17 @@ class LocalEnv(Environment):
 
         return self._is_ready
 
-    def benchmark(self):
+    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
         """
         Run an experiment in the local application environment.
         (Re)configure an application and launch the benchmark.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, DataFrame)
+        (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
             A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a pandas DataFrame of the benchmark data
-            or None if the status is not COMPLETED.
+            benchmark_result is a one-row DataFrame containing final
+            benchmark results or None if the status is not COMPLETED.
         """
         (status, _) = result = super().benchmark()
         if not (status.is_ready and self._script_run):

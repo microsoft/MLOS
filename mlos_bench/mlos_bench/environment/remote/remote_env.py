@@ -101,7 +101,7 @@ class RemoteEnv(Environment):
 
         return self._is_ready
 
-    def benchmark(self):
+    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
         """
         Submit a new experiment to the remote application environment.
         (Re)configure an application and launch the benchmark.

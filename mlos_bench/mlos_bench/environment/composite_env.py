@@ -3,8 +3,12 @@ Composite benchmark environment.
 """
 
 import logging
+from typing import Tuple
+
+import pandas
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -96,17 +100,16 @@ class CompositeEnv(Environment):
             env.teardown()
         super().teardown()
 
-    def benchmark(self):
+    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
         """
         Submit a new experiment to the environment.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, float)
+        (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
             A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not SUCCEEDED.
+            benchmark_result is a one-row DataFrame containing final
+            benchmark results or None if the status is not COMPLETED.
         """
         _LOG.info("Benchmark: %s", self._children)
         (status, _) = result = super().benchmark()

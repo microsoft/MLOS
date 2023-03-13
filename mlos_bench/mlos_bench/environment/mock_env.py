@@ -4,7 +4,7 @@ Scheduler-side environment to mock the benchmark results.
 
 import random
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy
 import pandas
@@ -55,17 +55,16 @@ class MockEnv(Environment):
         self._range = self.config.get("range")
         self._is_ready = True
 
-    def benchmark(self):
+    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
         """
         Produce mock benchmark data for one experiment.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, DataFrame)
+        (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
             A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a pandas DataFrame of the benchmark data
-            or None if the status is not SUCCEEDED.
+            benchmark_result is a one-row DataFrame containing final
+            benchmark results or None if the status is not COMPLETED.
         """
         (status, _) = result = super().benchmark()
         if not status.is_ready:

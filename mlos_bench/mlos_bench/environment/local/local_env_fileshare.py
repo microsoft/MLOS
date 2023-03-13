@@ -8,7 +8,10 @@ import logging
 from string import Template
 from typing import Optional, Dict, List, Tuple, Any
 
+import pandas
+
 from mlos_bench.service.base_service import Service
+from mlos_bench.environment.status import Status
 from mlos_bench.environment.local.local_env import LocalEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -107,18 +110,17 @@ class LocalFileShareEnv(LocalEnv):
             self._temp_dir = prev_temp_dir
             return self._is_ready
 
-    def benchmark(self):
+    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
         """
         Download benchmark results from the shared storage
         and run post-processing scripts locally.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, float)
+        (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
             A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not COMPLETED.
+            benchmark_result is a one-row DataFrame containing final
+            benchmark results or None if the status is not COMPLETED.
         """
         prev_temp_dir = self._temp_dir
         with self._service.temp_dir_context(self._temp_dir) as self._temp_dir:
