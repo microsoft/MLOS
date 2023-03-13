@@ -50,17 +50,6 @@ def _main():
         env.teardown()
 
 
-def _get_score(status: Status, value: pd.DataFrame,
-               opt_target: str, opt_is_min: bool = True):
-    """
-    Extract a scalar benchmark score from the dataframe.
-    """
-    if not status.is_succeeded:
-        return None
-    value = value.loc[0, opt_target]
-    return value if opt_is_min else -value
-
-
 def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config: dict):
     """
     Main optimization loop.
@@ -81,7 +70,7 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
         # if the tunable parameters or configurations are not compatible.
         exp.merge(["experiment1", "experiment2"])
 
-        # Load (tunable values, status, value) to warm-up the optimizer.
+        # Load (tunable values, status, score) to warm-up the optimizer.
         # This call returns data from ALL merged-in experiments and attempts
         # to impute the missing tunable values.
         tunables_data = exp.load(opt_target, opt_is_min)
@@ -120,6 +109,17 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
     return best
+
+
+def _get_score(status: Status, value: pd.DataFrame,
+               opt_target: str, opt_is_min: bool = True) -> float:
+    """
+    Extract a scalar benchmark score from the dataframe.
+    """
+    if not status.is_succeeded:
+        return None
+    value = value.loc[0, opt_target]
+    return value if opt_is_min else -value
 
 
 if __name__ == "__main__":

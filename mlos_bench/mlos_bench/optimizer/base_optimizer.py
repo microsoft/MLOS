@@ -86,6 +86,18 @@ class Optimizer(metaclass=ABCMeta):
         self._iter = 1
         self._max_iter = int(self._config.pop('max_iterations', 10))
 
+    # @abstractmethod
+    def update(self, tunables_data):
+        """
+        Pre-load the optimizer with the bulk data from previous experiments.
+
+        Parameters
+        ----------
+        tunables_data : List[Tuple[TunableGroups, Status, float]] (?)
+            Triplets of (tunable values, status, score) from other experiments.
+        """
+        # TODO: implement later
+
     @abstractmethod
     def suggest(self) -> TunableGroups:
         """
