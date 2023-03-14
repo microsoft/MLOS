@@ -49,7 +49,8 @@ def _main():
         env.teardown()
 
 
-def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config: dict):
+def _optimize(env: Environment, opt: Optimizer,
+              storage: Storage, global_config: dict):
     """
     Main optimization loop.
 
@@ -90,7 +91,8 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
     return best
 
 
-def _trial(env: Environment, opt: Optimizer, run: Storage.Run, global_config: dict):
+def _trial(env: Environment, opt: Optimizer,
+           run: Storage.Run, global_config: dict):
     """
     Run a single trial.
 
