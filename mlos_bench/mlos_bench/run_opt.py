@@ -52,52 +52,53 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
     """
     Main optimization loop.
     """
-    experiment_id = global_config["experiment_id"]
-    run_id = int(global_config.get("run_id", 0))
-    _LOG.info("Experiment: %s Env: %s Optimizer: %s", experiment_id, env, opt)
-
     # Start new or resume the existing experiment. Verify that
     # the experiment configuration is compatible with the previous runs.
-    with storage.experiment(experiment_id) as exp:
+    with storage.experiment() as exp:
 
-        # Merge in the data from other experiments. Raise an exception
-        # if the tunable parameters or configurations are not compatible.
-        exp.merge(["experiment1", "experiment2"])
+        _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
 
         # Load (tunable values, status, score) to warm-up the optimizer.
         # `.load()` returns data from ALL merged-in experiments and attempts
         # to impute the missing tunable values.
         opt.update(exp.load())
 
-        run_id = exp.last_run_id or run_id
+        # First, complete any pending runs.
+        for run in exp.pending():
+            _trial(env, opt, run, global_config)
 
+        # Then, run new trials until the optimizer is done.
         while opt.not_converged():
-
-            run_id += 1
             tunables = opt.suggest()
-            _LOG.info("%s:%d Suggestion: %s", experiment_id, run_id, tunables)
-
-            with exp.run(tunables, run_id) as run:
-
-                if not env.setup(tunables, global_config):
-                    _LOG.warning("Setup failed: %s :: %s", env, tunables)
-                    run.update(Status.FAILED)
-                    opt.register(tunables, Status.FAILED)
-                    continue
-
-                # In async mode, poll the environment for the status and
-                # telemetry and update the storage with the intermediate results.
-                (status, telemetry) = env.status()
-                run.update(status, telemetry)
-
-                (status, score) = env.benchmark()  # Block and wait for the final result.
-                _LOG.info("Result: %s :: %s\n%s", tunables, status, score)
-                run.update(status, score)
-                opt.register(tunables, status, score)
+            with exp.run(tunables) as run:
+                _trial(env, opt, run, global_config)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
     return best
+
+
+def _trial(env: Environment, opt: Optimizer, run: Storage.Run, global_config: dict):
+    """
+    Run a single trial.
+    """
+    _LOG.info("Run: %s", run)
+
+    if not env.setup(run.tunables, run.config(global_config)):
+        _LOG.warning("Setup failed: %s :: %s", env, run.tunables)
+        run.update(Status.FAILED)
+        opt.register(run.tunables, Status.FAILED)
+        return
+
+    # In async mode, poll the environment for status and telemetry
+    # and update the storage with the intermediate results.
+    (status, telemetry) = env.status()
+    run.update(status, telemetry)
+
+    (status, score) = env.benchmark()  # Block and wait for the final result.
+    _LOG.info("Result: %s :: %s\n%s", run.tunables, status, score)
+    run.update(status, score)
+    opt.register(run.tunables, status, score)
 
 
 if __name__ == "__main__":

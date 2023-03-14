@@ -6,7 +6,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-import pandas as pd
+import pandas
 
 from mlos_bench.environment import Status
 from mlos_bench.tunables import TunableGroups
@@ -78,130 +78,140 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
 
     @abstractmethod
-    def experiment(self, experiment_id: str):
+    def experiment(self):
         """
         Create a new experiment in the storage.
 
-        Parameters
-        ----------
-        experiment_id : str
-            Unique experiment ID.
-
         Returns
         -------
-        experiment : ExperimentStorage
+        experiment : Storage.Experiment
             An object that allows to update the storage with
             the results of the experiment and related data.
         """
-
-
-class ExperimentStorage(metaclass=ABCMeta):
-    """
-    Base interface for storing the results of the experiment.
-    This class is instantiated in the `Storage.experiment()` method.
-    """
-
-    def __init__(self, storage: Storage, experiment_id: str):
-        self._storage = storage
-        self._experiment_id = experiment_id
-
-    def __enter__(self):
+    class Experiment(metaclass=ABCMeta):
         """
-        Enter the context of the experiment.
-        """
-        _LOG.debug("Starting experiment: %s", self._experiment_id)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """
-        End the context of the experiment.
-        """
-        if exc_val is None:
-            _LOG.debug("Finishing experiment: %s", self._experiment_id)
-        else:
-            _LOG.warning("Finishing experiment: %s", self._experiment_id,
-                         exc_info=(exc_type, exc_val, exc_tb))
-        return False  # Do not suppress exceptions
-
-    @abstractmethod
-    def merge(self, experiment_ids: List[str]):
-        """
-        Merge in the results of other experiments.
-
-        Parameters
-        ----------
-        experiment_ids : List[str]
-            List of IDs of the experiments to merge in.
+        Base interface for storing the results of the experiment.
+        This class is instantiated in the `Storage.experiment()` method.
         """
 
-    @abstractmethod
-    def load(self):
+        def __init__(self, storage, experiment_id: str):
+            self._storage = storage
+            self._experiment_id = experiment_id
+
+        def __enter__(self):
+            """
+            Enter the context of the experiment.
+            """
+            _LOG.debug("Starting experiment: %s", self)
+            return self
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            """
+            End the context of the experiment.
+            """
+            if exc_val is None:
+                _LOG.debug("Finishing experiment: %s", self)
+            else:
+                _LOG.warning("Finishing experiment: %s", self,
+                             exc_info=(exc_type, exc_val, exc_tb))
+            return False  # Do not suppress exceptions
+
+        def __repr__(self) -> str:
+            return self._experiment_id
+
+        @abstractmethod
+        def merge(self, experiment_ids: List[str]):
+            """
+            Merge in the results of other experiments.
+
+            Parameters
+            ----------
+            experiment_ids : List[str]
+                List of IDs of the experiments to merge in.
+            """
+
+        @abstractmethod
+        def load(self) -> pandas.DataFrame:
+            """
+            Load (tunable values, status, value) to warm-up the optimizer.
+            This call returns data from ALL merged-in experiments and attempts
+            to impute the missing tunable values.
+            """
+
+        @abstractmethod
+        def pending(self):
+            """
+            Return an iterator over the pending experiment runs.
+            """
+
+        @abstractmethod
+        def run(self, tunables: TunableGroups):
+            """
+            Create a new experiment run in the storage.
+
+            Parameters
+            ----------
+            tunables : TunableGroups
+                Tunable parameters of the experiment.
+
+            Returns
+            -------
+            run : Storage.Run
+                An object that allows to update the storage with
+                the results of the experiment run.
+            """
+
+    class Run(metaclass=ABCMeta):
         """
-        Load (tunable values, status, value) to warm-up the optimizer.
-        This call returns data from ALL merged-in experiments and attempts
-        to impute the missing tunable values.
+        Base interface for storing the results of a single run of the experiment.
+        This class is instantiated in the `Storage.Experiment.run()` method.
         """
 
-    @property
-    @abstractmethod
-    def last_run_id(self) -> int:
-        """
-        Return the ID of the last run in the experiment.
-        """
+        def __init__(self, storage, tunables: TunableGroups, experiment_id: str, run_id: int):
+            self._storage = storage
+            self._tunables = tunables
+            self._experiment_id = experiment_id
+            self._run_id = run_id
 
-    @abstractmethod
-    def run(self, tunables: TunableGroups, run_id: int):
-        """
-        Create a new experiment run in the storage.
+        def __enter__(self):
+            """
+            Enter the context of the experiment run.
+            """
+            _LOG.debug("Starting experiment run: %s", self)
+            return self
 
-        Parameters
-        ----------
-        tunables : TunableGroups
-            Tunable parameters of the experiment.
-        run_id : int
-            Unique experiment run ID.
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            """
+            End the context of the experiment run.
+            """
+            if exc_val is None:
+                _LOG.debug("Finishing experiment run: %s", self)
+            else:
+                _LOG.warning("Finishing experiment run: %s",
+                             self, exc_info=(exc_type, exc_val, exc_tb))
+            return False  # Do not suppress exceptions
 
-        Returns
-        -------
-        run : RunStorage
-            An object that allows to update the storage with
-            the results of the experiment run.
-        """
+        def __repr__(self) -> str:
+            return f"{self._experiment_id}:{self._run_id}"
 
+        @property
+        def tunables(self) -> TunableGroups:
+            """
+            Tunable parameters of the current trial.
+            """
+            return self._tunables
 
-class RunStorage(metaclass=ABCMeta):
-    """
-    Base interface for storing the results of a single run of the experiment.
-    This class is instantiated in the `ExperimentStorage.run()` method.
-    """
+        def config(self, global_config: dict) -> dict:
+            """
+            Produce a copy of the global configuration updated with parameters of the current run.
+            """
+            config = global_config.copy()
+            config["experiment_id"] = self._experiment_id
+            config["run_id"] = self._run_id
+            return config
 
-    def __init__(self, storage: Storage, tunables: TunableGroups,
-                 experiment_id: str, run_id: int):
-        self._storage = storage
-        self._tunables = tunables
-        self._experiment_id = experiment_id
-        self._run_id = run_id
-
-    def __enter__(self):
-        """
-        Enter the context of the experiment run.
-        """
-        _LOG.debug("Starting experiment run: %s:%d", self._experiment_id, self._run_id)
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """
-        End the context of the experiment run.
-        """
-        if exc_val is None:
-            _LOG.debug("Finishing experiment run: %s:%d", self._experiment_id, self._run_id)
-        else:
-            _LOG.warning("Finishing experiment run: %s:%d", self._experiment_id, self._run_id,
-                         exc_info=(exc_type, exc_val, exc_tb))
-        return False  # Do not suppress exceptions
-
-    @abstractmethod
-    def update(self, status: Status, value: pd.DataFrame = None):
-        """
-        Update the storage with the results of the experiment.
-        """
+        @abstractmethod
+        def update(self, status: Status, value: pandas.DataFrame = None):
+            """
+            Update the storage with the results of the experiment.
+            """
