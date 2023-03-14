@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/devcontainers/miniconda:3
 
 # Add some additional packages for the devcontainer terminal environment.
+USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
         bash bash-completion \
@@ -25,6 +26,8 @@ ENV CONDA_PKGS_DIRS=/opt/conda/pkgs
 RUN mkdir -p ${CONDA_PKGS_DIRS} \
     && chown -R vscode:conda ${CONDA_PKGS_DIRS} \
     && chmod -R u=rwX,g=rwXs,o=rX ${CONDA_PKGS_DIRS}
+
+USER vscode
 
 # Use the mamba solver (necessary for some quality of life speedups due to
 # required packages to support Windows)
