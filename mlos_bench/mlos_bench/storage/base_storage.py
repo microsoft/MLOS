@@ -76,8 +76,8 @@ class Storage(metaclass=ABCMeta):
         """
         _LOG.debug("Storage config: %s", config)
         self._config = config.copy()
-        self._experiment_id = self._config['experiment_id']
-        self._run_id = self._config.get('run_id')
+        self._experiment_id = self._config["experimentId"]
+        self._run_id = self._config.get("runId")
         if self._run_id is not None:
             self._run_id = int(self._run_id)
 
@@ -211,8 +211,8 @@ class Storage(metaclass=ABCMeta):
             parameters of the current run.
             """
             config = global_config.copy()
-            config["experiment_id"] = self._experiment_id
-            config["run_id"] = self._run_id
+            config["experimentId"] = self._experiment_id
+            config["runId"] = self._run_id
             return config
 
         @abstractmethod
