@@ -33,24 +33,36 @@ def _main():
 
     args = launcher.parse_args()
 
-    global_config = launcher.global_config
     env = launcher.load_env()
 
-    opt = Optimizer.load(
-        env.tunable_params(), launcher.load_config(args.optimizer), global_config)
+    opt = Optimizer.load(env.tunable_params(),
+                         launcher.load_config(args.optimizer),
+                         launcher.global_config)
 
-    storage = Storage.load(launcher.load_config(args.db), global_config)
+    storage = Storage.load(launcher.load_config(args.db),
+                           launcher.global_config)
 
-    result = _optimize(env, opt, storage, global_config)
+    result = _optimize(env, opt, storage, launcher.global_config)
     _LOG.info("Final result: %s", result)
 
     if not args.no_teardown:
         env.teardown()
 
 
-def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config: dict):
+def _optimize(env: Environment, opt: Optimizer, storage: Storage, config: dict):
     """
     Main optimization loop.
+
+    Parameters
+    ----------
+    env : Environment
+        benchmarking environment to run the optimization on.
+    opt : Optimizer
+        An interface to mlos_core optimizers.
+    storage : Storage
+        A storage system to persist the experiment data.
+    config : dict
+        Global configuration parameters.
     """
     # Start new or resume the existing experiment. Verify that
     # the experiment configuration is compatible with the previous runs.
@@ -65,26 +77,37 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
 
         # First, complete any pending runs.
         for run in exp.pending():
-            _trial(env, opt, run, global_config)
+            _trial(env, opt, run, config)
 
         # Then, run new trials until the optimizer is done.
         while opt.not_converged():
             tunables = opt.suggest()
             with exp.run(tunables) as run:
-                _trial(env, opt, run, global_config)
+                _trial(env, opt, run, config)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
     return best
 
 
-def _trial(env: Environment, opt: Optimizer, run: Storage.Run, global_config: dict):
+def _trial(env: Environment, opt: Optimizer, run: Storage.Run, config: dict):
     """
     Run a single trial.
+
+    Parameters
+    ----------
+    env : Environment
+        benchmarking environment to run the optimization on.
+    opt : Optimizer
+        An interface to mlos_core optimizers.
+    storage : Storage
+        A storage system to persist the experiment data.
+    config : dict
+        Global configuration parameters.
     """
     _LOG.info("Run: %s", run)
 
-    if not env.setup(run.tunables, run.config(global_config)):
+    if not env.setup(run.tunables, run.config(config)):
         _LOG.warning("Setup failed: %s :: %s", env, run.tunables)
         run.update(Status.FAILED)
         opt.register(run.tunables, Status.FAILED)
