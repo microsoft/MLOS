@@ -77,9 +77,9 @@ class Storage(metaclass=ABCMeta):
         _LOG.debug("Storage config: %s", config)
         self._config = config.copy()
         self._experiment_id = self._config["experimentId"]
-        self._run_id = self._config.get("runId")
-        if self._run_id is not None:
-            self._run_id = int(self._run_id)
+        self._trial_id = self._config.get("trialId")
+        if self._trial_id is not None:
+            self._trial_id = int(self._trial_id)
 
     @abstractmethod
     def experiment(self):
@@ -149,7 +149,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def run(self, tunables: TunableGroups):
+        def trial(self, tunables: TunableGroups):
             """
             Create a new experiment run in the storage.
 
@@ -160,22 +160,22 @@ class Storage(metaclass=ABCMeta):
 
             Returns
             -------
-            run : Storage.Run
+            trial : Storage.Trial
                 An object that allows to update the storage with
                 the results of the experiment run.
             """
 
-    class Run(metaclass=ABCMeta):
+    class Trial(metaclass=ABCMeta):
         """
         Base interface for storing the results of a single run of the experiment.
-        This class is instantiated in the `Storage.Experiment.run()` method.
+        This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, storage, tunables: TunableGroups, experiment_id: str, run_id: int):
+        def __init__(self, storage, tunables: TunableGroups, experiment_id: str, trial_id: int):
             self._storage = storage
             self._tunables = tunables
             self._experiment_id = experiment_id
-            self._run_id = run_id
+            self._trial_id = trial_id
 
         def __enter__(self):
             """
@@ -196,7 +196,7 @@ class Storage(metaclass=ABCMeta):
             return False  # Do not suppress exceptions
 
         def __repr__(self) -> str:
-            return f"{self._experiment_id}:{self._run_id}"
+            return f"{self._experiment_id}:{self._trial_id}"
 
         @property
         def tunables(self) -> TunableGroups:
@@ -212,7 +212,7 @@ class Storage(metaclass=ABCMeta):
             """
             config = global_config.copy()
             config["experimentId"] = self._experiment_id
-            config["runId"] = self._run_id
+            config["trialId"] = self._trial_id
             return config
 
         @abstractmethod

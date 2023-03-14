@@ -7,7 +7,7 @@
         "config": {
             "tunable_params": ["redis"],
 
-            "required_args": ["experimentId", "runId"],
+            "required_args": ["experimentId", "trialId"],
 
             // Dump tunable parameters to a local JSON file:
             "dump_params_file": "redis-params.json",
@@ -17,8 +17,8 @@
             ],
 
             "upload": [
-                {"from": "redis.cfg", "to": "$experimentId/$runId/input/redis.cfg"},
-                {"from": "redis/", "to": "$experimentId/$runId/scripts"}
+                {"from": "redis.cfg", "to": "$experimentId/$trialId/input/redis.cfg"},
+                {"from": "redis/", "to": "$experimentId/$trialId/scripts"}
             ]
         }
     },
@@ -32,26 +32,26 @@
 
             "tunable_params": ["redis"],
 
-            "required_args": ["experimentId", "runId", "mountPoint"],
+            "required_args": ["experimentId", "trialId", "mountPoint"],
 
             "const_args": {
                 "mountPoint": "/mnt/osat_fs"
             },
 
             "setup": [
-                "$mountPoint/$experimentId/$runId/scripts/setup-workload.sh",
-                "$mountPoint/$experimentId/$runId/scripts/setup-app.sh"
+                "$mountPoint/$experimentId/$trialId/scripts/setup-workload.sh",
+                "$mountPoint/$experimentId/$trialId/scripts/setup-app.sh"
             ],
 
             "run": [
-                "$mountPoint/$experimentId/$runId/scripts/run-workload.sh",
-                "mkdir -p $mountPoint/$experimentId/$runId/output/",
-                "cp -r /tmp/mlos_bench/output/* $mountPoint/$experimentId/$runId/output/"
+                "$mountPoint/$experimentId/$trialId/scripts/run-workload.sh",
+                "mkdir -p $mountPoint/$experimentId/$trialId/output/",
+                "cp -r /tmp/mlos_bench/output/* $mountPoint/$experimentId/$trialId/output/"
             ],
 
             "teardown": [
-                "$mountPoint/$experimentId/$runId/scripts/cleanup-workload.sh",
-                "$mountPoint/$experimentId/$runId/scripts/cleanup-app.sh"
+                "$mountPoint/$experimentId/$trialId/scripts/cleanup-workload.sh",
+                "$mountPoint/$experimentId/$trialId/scripts/cleanup-app.sh"
             ]
         }
     },
@@ -65,11 +65,11 @@
 
             "tunable_params": ["redis"],
 
-            "required_args": ["experimentId", "runId"],
+            "required_args": ["experimentId", "trialId"],
 
             "download": [
                 {
-                    "from": "$experimentId/$runId/output",
+                    "from": "$experimentId/$trialId/output",
                     "to": "$PWD/redis-bench-output/"
                 }
             ],

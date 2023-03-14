@@ -8,7 +8,7 @@
 
             "tunable_params": ["kernel"],
 
-            "required_args": ["experimentId", "runId"],
+            "required_args": ["experimentId", "trialId"],
 
             // Dump tunable parameters to a local JSON file:
             "dump_params_file": "kernel-params.json",
@@ -20,11 +20,11 @@
             "upload": [
                 {
                     "from": "config-kernel.sh",
-                    "to": "$experimentId/$runId/input/config-kernel.sh"
+                    "to": "$experimentId/$trialId/input/config-kernel.sh"
                 },
                 {
                     "from": "kernel-params.json",
-                    "to": "$experimentId/$runId/input/kernel-params.json"
+                    "to": "$experimentId/$trialId/input/kernel-params.json"
                 }
             ]
         }
@@ -45,7 +45,7 @@
                 "storageAccountKey",
                 "mountPoint",
                 "experimentId",
-                "runId"
+                "trialId"
             ],
 
             "const_args": {
@@ -59,8 +59,8 @@
             "setup": [
                 "sudo mkdir -p $mountPoint",
                 "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
-                // "sudo $mountPoint/$experimentId/$runId/input/config-kernel.sh"
-                "cat $mountPoint/$experimentId/$runId/input/config-kernel.sh"
+                // "sudo $mountPoint/$experimentId/$trialId/input/config-kernel.sh"
+                "cat $mountPoint/$experimentId/$trialId/input/config-kernel.sh"
             ]
         }
     }

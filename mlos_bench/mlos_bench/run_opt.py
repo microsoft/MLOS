@@ -74,23 +74,23 @@ def _optimize(env: Environment, opt: Optimizer,
         # to impute the missing tunable values.
         opt.update(exp.load())
 
-        # First, complete any pending runs.
-        for run in exp.pending():
-            _trial(env, opt, run, global_config)
+        # First, complete any pending trials.
+        for trial in exp.pending():
+            _run(env, opt, trial, global_config)
 
         # Then, run new trials until the optimizer is done.
         while opt.not_converged():
             tunables = opt.suggest()
-            with exp.run(tunables) as run:
-                _trial(env, opt, run, global_config)
+            with exp.trial(tunables) as trial:
+                _run(env, opt, trial, global_config)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
     return best
 
 
-def _trial(env: Environment, opt: Optimizer,
-           run: Storage.Run, global_config: dict):
+def _run(env: Environment, opt: Optimizer,
+         trial: Storage.Trial, global_config: dict):
     """
     Run a single trial.
 
@@ -105,23 +105,23 @@ def _trial(env: Environment, opt: Optimizer,
     global_config : dict
         Global configuration parameters.
     """
-    _LOG.info("Run: %s", run)
+    _LOG.info("Trial: %s", trial)
 
-    if not env.setup(run.tunables, run.config(global_config)):
-        _LOG.warning("Setup failed: %s :: %s", env, run.tunables)
-        run.update(Status.FAILED)
-        opt.register(run.tunables, Status.FAILED)
+    if not env.setup(trial.tunables, trial.config(global_config)):
+        _LOG.warning("Setup failed: %s :: %s", env, trial.tunables)
+        trial.update(Status.FAILED)
+        opt.register(trial.tunables, Status.FAILED)
         return
 
     # In async mode, poll the environment for status and telemetry
     # and update the storage with the intermediate results.
     (status, telemetry) = env.status()
-    run.update(status, telemetry)
+    trial.update(status, telemetry)
 
     (status, score) = env.benchmark()  # Block and wait for the final result.
-    _LOG.info("Result: %s :: %s\n%s", run.tunables, status, score)
-    run.update(status, score)
-    opt.register(run.tunables, status, score)
+    _LOG.info("Result: %s :: %s\n%s", trial.tunables, status, score)
+    trial.update(status, score)
+    opt.register(trial.tunables, status, score)
 
 
 if __name__ == "__main__":
