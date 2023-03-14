@@ -76,6 +76,10 @@ class Storage(metaclass=ABCMeta):
         """
         _LOG.debug("Storage config: %s", config)
         self._config = config.copy()
+        self._experiment_id = self._config['experiment_id']
+        self._run_id = self._config.get('run_id')
+        if self._run_id is not None:
+            self._run_id = int(self._run_id)
 
     @abstractmethod
     def experiment(self):
@@ -203,7 +207,8 @@ class Storage(metaclass=ABCMeta):
 
         def config(self, global_config: dict) -> dict:
             """
-            Produce a copy of the global configuration updated with parameters of the current run.
+            Produce a copy of the global configuration updated with
+            parameters of the current run.
             """
             config = global_config.copy()
             config["experiment_id"] = self._experiment_id
