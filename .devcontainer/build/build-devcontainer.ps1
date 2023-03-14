@@ -35,6 +35,8 @@ else {
 
 $devcontainer_build_args = ''
 if ("$env:NO_CACHE" -eq 'true') {
+    $base_image = (Get-Content "$rootdir/.devcontainer/Dockerfile" | Select-String '^FROM' | Select-Object -ExpandProperty Line | ForEach-Object { $_ -replace '^FROM\s+','' } | ForEach-Object { $_ -replace ' AS\s+.*','' } | Select-Object -First 1)
+    docker pull $base_image
     $devcontainer_build_args = '--no-cache'
 }
 else {

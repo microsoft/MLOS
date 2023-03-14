@@ -7,7 +7,7 @@ scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir/"
 
 # Build the helper container that has the devcontainer CLI for building the devcontainer.
-./build-devcontainer-cli.sh
+NO_CACHE=${NO_CACHE:-} ./build-devcontainer-cli.sh
 
 DOCKER_GID=$(stat -c'%g' /var/run/docker.sock)
 # Make this work inside a devcontainer as well.
@@ -32,11 +32,13 @@ fi
 
 devcontainer_build_args=''
 if [ "${NO_CACHE:-}" == 'true' ]; then
+    base_image=$(grep '^FROM ' "$rootdir/.devcontainer/Dockerfile" | sed -e 's/^FROM //' -e 's/ AS .*//' | head -n1)
+    docker pull "$base_image" || true
     devcontainer_build_args='--no-cache'
 else
-    cacheFrom='mloscore.azurecr.io/mlos-core-devcontainer:latest'
-    devcontainer_build_args="--cache-from $cacheFrom"
-    docker pull "$cacheFrom" || true
+    cache_from='mloscore.azurecr.io/mlos-core-devcontainer:latest'
+    devcontainer_build_args="--cache-from $cache_from"
+    docker pull "$cache_from" || true
 fi
 
 # Make this work inside a devcontainer as well.
