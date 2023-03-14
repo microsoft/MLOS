@@ -53,6 +53,12 @@ class Launcher:
             help='Path to one or more JSON files that contain additional' +
                  ' [private] parameters of the benchmarking environment.')
 
+        self._parser.add_argument(
+            '--no-teardown', required=False, default=True,
+            destination='teardown', action='store_false',
+            help='Disable teardown of the environment after the benchmark.')
+
+
     @property
     def parser(self) -> argparse.ArgumentParser:
         """

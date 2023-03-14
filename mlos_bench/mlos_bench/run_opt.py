@@ -24,12 +24,8 @@ def _main():
         help='Path to the optimizer configuration file.')
 
     launcher.parser.add_argument(
-        '--db', required=True,
-        help='Path to the database configuration file.')
-
-    launcher.parser.add_argument(
-        '--no-teardown', required=False, default=False, action='store_true',
-        help='Disable teardown of the environment after the optimization.')
+        '--storage', required=True,
+        help='Path to the storage configuration file.')
 
     args = launcher.parse_args()
 
@@ -39,13 +35,13 @@ def _main():
                          launcher.load_config(args.optimizer),
                          launcher.global_config)
 
-    storage = Storage.load(launcher.load_config(args.db),
+    storage = Storage.load(launcher.load_config(args.storage),
                            launcher.global_config)
 
     result = _optimize(env, opt, storage, launcher.global_config)
     _LOG.info("Final result: %s", result)
 
-    if not args.no_teardown:
+    if args.teardown:
         env.teardown()
 
 
