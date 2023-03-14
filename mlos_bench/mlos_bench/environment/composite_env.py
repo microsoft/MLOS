@@ -74,15 +74,15 @@ class CompositeEnv(Environment):
         ----------
         tunables : TunableGroups
             A collection of tunable parameters along with their values.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
         is_success : bool
             True if all children setup() operations are successful,
             false otherwise.
-        global_config : dict
-            Free-format dictionary of global parameters of the environment
-            that are not used in the optimization process.
         """
         self._is_ready = (
             super().setup(tunables, global_config) and
