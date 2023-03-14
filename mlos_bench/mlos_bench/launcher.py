@@ -58,7 +58,6 @@ class Launcher:
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
-
     @property
     def parser(self) -> argparse.ArgumentParser:
         """
