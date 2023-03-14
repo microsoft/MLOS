@@ -49,7 +49,7 @@ def _main():
         env.teardown()
 
 
-def _optimize(env: Environment, opt: Optimizer, storage: Storage, config: dict):
+def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config: dict):
     """
     Main optimization loop.
 
@@ -61,7 +61,7 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, config: dict):
         An interface to mlos_core optimizers.
     storage : Storage
         A storage system to persist the experiment data.
-    config : dict
+    global_config : dict
         Global configuration parameters.
     """
     # Start new or resume the existing experiment. Verify that
@@ -77,20 +77,20 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, config: dict):
 
         # First, complete any pending runs.
         for run in exp.pending():
-            _trial(env, opt, run, config)
+            _trial(env, opt, run, global_config)
 
         # Then, run new trials until the optimizer is done.
         while opt.not_converged():
             tunables = opt.suggest()
             with exp.run(tunables) as run:
-                _trial(env, opt, run, config)
+                _trial(env, opt, run, global_config)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
     return best
 
 
-def _trial(env: Environment, opt: Optimizer, run: Storage.Run, config: dict):
+def _trial(env: Environment, opt: Optimizer, run: Storage.Run, global_config: dict):
     """
     Run a single trial.
 
@@ -102,12 +102,12 @@ def _trial(env: Environment, opt: Optimizer, run: Storage.Run, config: dict):
         An interface to mlos_core optimizers.
     storage : Storage
         A storage system to persist the experiment data.
-    config : dict
+    global_config : dict
         Global configuration parameters.
     """
     _LOG.info("Run: %s", run)
 
-    if not env.setup(run.tunables, run.config(config)):
+    if not env.setup(run.tunables, run.config(global_config)):
         _LOG.warning("Setup failed: %s :: %s", env, run.tunables)
         run.update(Status.FAILED)
         opt.register(run.tunables, Status.FAILED)
