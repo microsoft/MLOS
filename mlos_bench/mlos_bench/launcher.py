@@ -55,7 +55,7 @@ class Launcher:
 
         self._parser.add_argument(
             '--no-teardown', required=False, default=True,
-            destination='teardown', action='store_false',
+            dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
 
