@@ -61,8 +61,10 @@ def _optimize(env: Environment, opt: Optimizer,
     global_config : dict
         Global configuration parameters.
     """
-    # Start new or resume the existing experiment. Verify that
-    # the experiment configuration is compatible with the previous runs.
+    # Start new or resume the existing experiment. Verify that the
+    # experiment configuration is compatible with the previous runs.
+    # If the `merge` config parameter is present, merge in the data
+    # from other experiments and check for compatibility.
     with storage.experiment() as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
