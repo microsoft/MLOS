@@ -135,18 +135,11 @@ class ExperimentStorage(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def load(self, opt_target: str = 'score', opt_is_min: bool = True):
+    def load(self):
         """
         Load (tunable values, status, value) to warm-up the optimizer.
         This call returns data from ALL merged-in experiments and attempts
         to impute the missing tunable values.
-
-        Parameters
-        ----------
-        opt_target : str
-            Name of the optimization target.
-        opt_is_min : bool
-            Whether the optimization target is a minimization problem.
         """
 
     @property

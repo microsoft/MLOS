@@ -4,7 +4,9 @@ Mock optimizer for OS Autotune.
 
 import random
 import logging
-from typing import Tuple
+from typing import Tuple, Union
+
+import pandas
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -40,12 +42,14 @@ class MockOptimizer(Optimizer):
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 
-    def register(self, tunables: TunableGroups, status: Status, score: float = None):
-        super().register(tunables, status, score)
+    def register(self, tunables: TunableGroups, status: Status,
+                 score: Union[float, pandas.DataFrame] = None) -> float:
+        score = super().register(tunables, status, score)
         if status.is_succeeded and (self._best_score is None or score < self._best_score):
             self._best_score = score
             self._best_config = tunables.copy()
         self._iter += 1
+        return score
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
         return (self._best_score, self._best_config)

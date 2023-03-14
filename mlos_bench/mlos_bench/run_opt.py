@@ -7,8 +7,6 @@ See `--help` output for details.
 
 import logging
 
-import pandas as pd
-
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizer import Optimizer
 from mlos_bench.environment import Status, Environment
@@ -58,10 +56,6 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
     run_id = int(global_config.get("run_id", 0))
     _LOG.info("Experiment: %s Env: %s Optimizer: %s", experiment_id, env, opt)
 
-    # TODO: Think where to get these parameters from. (global_config? storage?)
-    opt_target = 'score'
-    opt_is_min = True
-
     # Start new or resume the existing experiment. Verify that
     # the experiment configuration is compatible with the previous runs.
     with storage.experiment(experiment_id) as exp:
@@ -71,10 +65,9 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
         exp.merge(["experiment1", "experiment2"])
 
         # Load (tunable values, status, score) to warm-up the optimizer.
-        # This call returns data from ALL merged-in experiments and attempts
+        # `.load()` returns data from ALL merged-in experiments and attempts
         # to impute the missing tunable values.
-        tunables_data = exp.load(opt_target, opt_is_min)
-        opt.update(tunables_data)
+        opt.update(exp.load())
 
         run_id = exp.last_run_id or run_id
 
@@ -97,29 +90,14 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage, global_config:
                 (status, telemetry) = env.status()
                 run.update(status, telemetry)
 
-                (status, value) = env.benchmark()  # Block and wait for the final result.
-                # `value` is a DataFrame with one row and one or more benchmark results.
-                run.update(status, value)
-
-                value = _get_score(status, value, opt_target, opt_is_min)
-                _LOG.info("Result: %s = %s :: %s", tunables, status, value)
-
-                opt.register(tunables, status, value)
+                (status, score) = env.benchmark()  # Block and wait for the final result.
+                _LOG.info("Result: %s :: %s\n%s", tunables, status, score)
+                run.update(status, score)
+                opt.register(tunables, status, score)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
     return best
-
-
-def _get_score(status: Status, value: pd.DataFrame,
-               opt_target: str, opt_is_min: bool = True) -> float:
-    """
-    Extract a scalar benchmark score from the dataframe.
-    """
-    if not status.is_succeeded:
-        return None
-    value = value.loc[0, opt_target]
-    return value if opt_is_min else -value
 
 
 if __name__ == "__main__":

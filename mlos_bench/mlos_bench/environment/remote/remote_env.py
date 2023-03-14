@@ -3,7 +3,9 @@ Remotely executed benchmark environment.
 """
 
 import logging
-from typing import Optional
+from typing import Optional, Tuple
+
+import pandas
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment

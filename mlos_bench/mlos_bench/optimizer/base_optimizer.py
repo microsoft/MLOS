@@ -4,8 +4,10 @@ and mlos_core optimizers.
 """
 
 import logging
-from typing import Tuple
+from typing import Tuple, Union
 from abc import ABCMeta, abstractmethod
+
+import pandas
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -85,6 +87,14 @@ class Optimizer(metaclass=ABCMeta):
         self._tunables = tunables
         self._iter = 1
         self._max_iter = int(self._config.pop('max_iterations', 10))
+        self._target = self._config.pop('maximize', None)
+        if self._target is None:
+            self._target = self._config.pop('minimize', 'score')
+            self._is_minimization = True
+        else:
+            if 'minimize' in self._config:
+                raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
+            self._is_minimization = False
 
     # @abstractmethod
     def update(self, tunables_data):
@@ -112,7 +122,8 @@ class Optimizer(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def register(self, tunables: TunableGroups, status: Status, score: float = None):
+    def register(self, tunables: TunableGroups, status: Status,
+                 score: Union[float, pandas.DataFrame] = None) -> float:
         """
         Register the observation for the given configuration.
 
@@ -123,13 +134,43 @@ class Optimizer(metaclass=ABCMeta):
             Usually it's the same config that the `.suggest()` method returned.
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : float
-            The benchmark result, or None if the experiment was not successful.
+        score : Union[float, pandas.DataFrame]
+            A scalar or one-row data frame with the final benchmark results.
+            None if the experiment was not successful.
+
+        Returns
+        -------
+        value : float
+            A scalar benchmark score to MINIMIZE.
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
         if status.is_succeeded == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
+        return self._get_score(status, score)
+
+    def _get_score(self, status: Status, score: Union[float, pandas.DataFrame]) -> float:
+        """
+        Extract a scalar benchmark score from the dataframe.
+        Change the sign if we are maximizing.
+
+        Parameters
+        ----------
+        status : Status
+            Final status of the experiment (e.g., SUCCEEDED or FAILED).
+        score : Union[float, pandas.DataFrame]
+            A scalar or one-row data frame with the final benchmark results.
+            None if the experiment was not successful.
+
+        Returns
+        -------
+        value : float
+            A scalar benchmark score to be used as a primary target for MINIMIZATION.
+        """
+        if not status.is_succeeded:
+            return None
+        value = score.loc[0, self._target] if isinstance(score, pandas.DataFrame) else score
+        return value if self._is_minimization else -value
 
     def not_converged(self) -> bool:
         """

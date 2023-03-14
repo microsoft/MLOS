@@ -3,7 +3,7 @@ A wrapper for mlos_core optimizers for OS Autotune.
 """
 
 import logging
-from typing import Tuple
+from typing import Tuple, Union
 
 import pandas as pd
 
@@ -42,13 +42,15 @@ class MlosCoreOptimizer(Optimizer):
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return self._tunables.copy().assign(df_config.loc[0].to_dict())
 
-    def register(self, tunables: TunableGroups, status: Status, score: float = None):
-        super().register(tunables, status, score)
+    def register(self, tunables: TunableGroups, status: Status,
+                 score: Union[float, pd.DataFrame] = None) -> float:
+        score = super().register(tunables, status, score)
         # By default, hyperparameters in ConfigurationSpace are sorted by name:
         df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
         _LOG.debug("Dataframe:\n%s", df_config)
         self._opt.register(df_config, pd.Series([score]))
         self._iter += 1
+        return score
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
         df_config = self._opt.get_best_observation()
