@@ -52,4 +52,4 @@ class MockOptimizer(Optimizer):
         return score
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
-        return (self._best_score, self._best_config)
+        return (self._best_score * self._sign, self._best_config)

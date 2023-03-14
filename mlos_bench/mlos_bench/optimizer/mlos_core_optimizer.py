@@ -55,5 +55,5 @@ class MlosCoreOptimizer(Optimizer):
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
         df_config = self._opt.get_best_observation()
         params = df_config.loc[0].to_dict()
-        score = params.pop('score')
+        score = params.pop('score') * self._sign
         return (score, self._tunables.copy().assign(params))

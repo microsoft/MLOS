@@ -90,11 +90,11 @@ class Optimizer(metaclass=ABCMeta):
         self._target = self._config.pop('maximize', None)
         if self._target is None:
             self._target = self._config.pop('minimize', 'score')
-            self._is_minimization = True
+            self._sign = 1
         else:
             if 'minimize' in self._config:
                 raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
-            self._is_minimization = False
+            self._sign = -1
 
     # @abstractmethod
     def update(self, tunables_data):
@@ -164,13 +164,14 @@ class Optimizer(metaclass=ABCMeta):
 
         Returns
         -------
-        value : float
+        score : float
             A scalar benchmark score to be used as a primary target for MINIMIZATION.
         """
         if not status.is_succeeded:
             return None
-        value = score.loc[0, self._target] if isinstance(score, pandas.DataFrame) else score
-        return value if self._is_minimization else -value
+        if isinstance(score, pandas.DataFrame):
+            score = score.loc[0, self._target]
+        return score * self._sign
 
     def not_converged(self) -> bool:
         """
