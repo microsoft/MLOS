@@ -85,7 +85,7 @@ def test_emukit_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_emukit_optimization_loop_max(mock_env_no_noise: MockEnv,
-                                     emukit_opt_max: MlosCoreOptimizer):
+                                      emukit_opt_max: MlosCoreOptimizer):
     """
     Toy optimization loop with mock environment and EmuKit optimizer
     in maximization mode.
