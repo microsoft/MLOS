@@ -19,6 +19,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     return MlosCoreOptimizer(
         tunables=tunable_groups,
         config={
+            "minimize": "score",
             "max_iterations": 20,
             "optimizer_type": "EMUKIT",
             "space_adapter_type": "LLAMATUNE",
