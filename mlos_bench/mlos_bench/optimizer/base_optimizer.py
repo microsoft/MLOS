@@ -87,26 +87,25 @@ class Optimizer(metaclass=ABCMeta):
         self._tunables = tunables
         self._iter = 1
         self._max_iter = int(self._config.pop('max_iterations', 10))
-        self._target = self._config.pop('maximize', None)
-        if self._target is None:
-            self._target = self._config.pop('minimize', 'score')
-            self._sign = 1
+        self._opt_target = self._config.pop('maximize', None)
+        if self._opt_target is None:
+            self._opt_target = self._config.pop('minimize', 'score')
+            self._opt_sign = 1
         else:
             if 'minimize' in self._config:
                 raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
-            self._sign = -1
+            self._opt_sign = -1
 
-    # @abstractmethod
-    def update(self, tunables_data):
+    @abstractmethod
+    def update(self, tunables_data: pandas.DataFrame):
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
         Parameters
         ----------
-        tunables_data : List[Tuple[TunableGroups, Status, float]] (?)
-            Triplets of (tunable values, status, score) from other experiments.
+        tunables_data : pandas.DataFrame
+            Records of (tunable values, status, score) from other experiments.
         """
-        # TODO: implement later
 
     @abstractmethod
     def suggest(self) -> TunableGroups:
@@ -170,8 +169,8 @@ class Optimizer(metaclass=ABCMeta):
         if not status.is_succeeded:
             return None
         if isinstance(score, pandas.DataFrame):
-            score = score.loc[0, self._target]
-        return score * self._sign
+            score = score.loc[0, self._opt_target]
+        return score * self._opt_sign
 
     def not_converged(self) -> bool:
         """

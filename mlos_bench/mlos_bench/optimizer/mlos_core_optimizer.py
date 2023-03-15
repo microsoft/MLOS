@@ -37,6 +37,9 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
+    def update(self, tunables_data: pd.DataFrame):
+        pass
+
     def suggest(self) -> TunableGroups:
         df_config = self._opt.suggest()
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
@@ -55,5 +58,5 @@ class MlosCoreOptimizer(Optimizer):
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
         df_config = self._opt.get_best_observation()
         params = df_config.loc[0].to_dict()
-        score = params.pop('score') * self._sign
+        score = params.pop(self._opt_target) * self._opt_sign
         return (score, self._tunables.copy().assign(params))

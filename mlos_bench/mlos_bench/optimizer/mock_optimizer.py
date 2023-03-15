@@ -32,6 +32,9 @@ class MockOptimizer(Optimizer):
         self._best_config = None
         self._best_score = None
 
+    def update(self, tunables_data: pandas.DataFrame):
+        pass
+
     def suggest(self) -> TunableGroups:
         """
         Generate the next (random) suggestion.
@@ -52,4 +55,4 @@ class MockOptimizer(Optimizer):
         return score
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
-        return (self._best_score * self._sign, self._best_config)
+        return (self._best_score * self._opt_sign, self._best_config)
