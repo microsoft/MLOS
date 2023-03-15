@@ -97,14 +97,14 @@ class Optimizer(metaclass=ABCMeta):
             self._opt_sign = -1
 
     @abstractmethod
-    def update(self, tunables_data: pandas.DataFrame):
+    def update(self, data: pandas.DataFrame):
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
         Parameters
         ----------
-        tunables_data : pandas.DataFrame
-            Records of (tunable values, status, score) from other experiments.
+        data : pandas.DataFrame
+            Records of tunable values and benchmark scores from other experiments.
         """
 
     @abstractmethod

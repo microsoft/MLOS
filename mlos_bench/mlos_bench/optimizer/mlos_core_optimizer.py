@@ -43,11 +43,11 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
-    def update(self, tunables_data: pd.DataFrame):
+    def update(self, data: pd.DataFrame):
         tunables_names = list(self._tunables.get_param_values().keys())
-        df_config = tunables_data[tunables_names]
-        df_scores = tunables_data[self._opt_target] * self._opt_sign
-        self._opt.resgister(df_config, df_scores)
+        df_configs = data[tunables_names]
+        df_scores = data[self._opt_target] * self._opt_sign
+        self._opt.resgister(df_configs, df_scores)
 
     def suggest(self) -> TunableGroups:
         df_config = self._opt.suggest()

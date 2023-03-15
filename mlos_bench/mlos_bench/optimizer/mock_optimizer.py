@@ -32,12 +32,12 @@ class MockOptimizer(Optimizer):
         self._best_config = None
         self._best_score = None
 
-    def update(self, tunables_data: pandas.DataFrame):
+    def update(self, data: pandas.DataFrame):
         tunables_names = list(self._tunables.get_param_values().keys())
-        df_config = tunables_data[tunables_names]
-        df_scores = tunables_data[self._opt_target]
-        for (row, score) in zip(df_config.itertuples(index=False), df_scores):
-            tunables = self._tunables.copy().assign(row.to_dict())
+        for i in data.index:
+            tunables = self._tunables.copy().assign(
+                data.loc[i, tunables_names].to_dict())
+            score = data.loc[i, self._opt_target]
             self.register(tunables, Status.SUCCEEDED, score)
 
     def suggest(self) -> TunableGroups:
