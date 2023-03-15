@@ -24,14 +24,20 @@ class MlosCoreOptimizer(Optimizer):
     """
 
     def __init__(self, tunables: TunableGroups, config: dict):
+
         super().__init__(tunables, config)
+
         space = tunable_groups_to_configspace(tunables)
         _LOG.debug("ConfigSpace: %s", space)
+
         opt_type = getattr(OptimizerType, self._config.pop('optimizer_type', 'SKOPT'))
+
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})
+
         if space_adapter_type is not None:
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
+
         self._opt = OptimizerFactory.create(
             space, opt_type, optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
