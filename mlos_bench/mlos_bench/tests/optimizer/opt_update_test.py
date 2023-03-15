@@ -52,41 +52,49 @@ def _test_opt_update_max(opt: Optimizer, data: pandas.DataFrame):
     }
 
 
-def test_mock_opt_update_min(mock_opt: MockOptimizer,
-                             mock_configs_df: pandas.DataFrame):
+def test_update_mock_min(mock_opt: MockOptimizer,
+                         mock_configs_df: pandas.DataFrame):
     """
     Test the bulk update of the mock optimizer on the minimization problem.
     """
     _test_opt_update_min(mock_opt, mock_configs_df)
 
 
-def test_mock_opt_update_max(mock_opt_max: MockOptimizer,
-                             mock_configs_df: pandas.DataFrame):
+def test_update_mock_max(mock_opt_max: MockOptimizer,
+                         mock_configs_df: pandas.DataFrame):
     """
     Test the bulk update of the mock optimizer on the maximization problem.
     """
     _test_opt_update_max(mock_opt_max, mock_configs_df)
 
 
-def test_emukit_opt_update(emukit_opt: MlosCoreOptimizer,
-                           mock_configs_df: pandas.DataFrame):
+def test_update_emukit(emukit_opt: MlosCoreOptimizer,
+                       mock_configs_df: pandas.DataFrame):
     """
     Test the bulk update of the EmuKit optimizer.
     """
     _test_opt_update_min(emukit_opt, mock_configs_df)
 
 
-def test_emukit_opt_update_max(emukit_opt_max: MlosCoreOptimizer,
-                               mock_configs_df: pandas.DataFrame):
+def test_update_emukit_max(emukit_opt_max: MlosCoreOptimizer,
+                           mock_configs_df: pandas.DataFrame):
     """
     Test the bulk update of the EmuKit optimizer on the maximization problem.
     """
     _test_opt_update_max(emukit_opt_max, mock_configs_df)
 
 
-def test_scikit_opt_update(scikit_gp_opt: MlosCoreOptimizer,
-                           mock_configs_df: pandas.DataFrame):
+def test_update_scikit_gp(scikit_gp_opt: MlosCoreOptimizer,
+                          mock_configs_df: pandas.DataFrame):
     """
-    Test the bulk update of the scikit-optimize optimizer.
+    Test the bulk update of the scikit-optimize GP optimizer.
     """
     _test_opt_update_min(scikit_gp_opt, mock_configs_df)
+
+
+def test_update_scikit_et(scikit_et_opt: MlosCoreOptimizer,
+                          mock_configs_df: pandas.DataFrame):
+    """
+    Test the bulk update of the scikit-optimize ET optimizer.
+    """
+    _test_opt_update_min(scikit_et_opt, mock_configs_df)
