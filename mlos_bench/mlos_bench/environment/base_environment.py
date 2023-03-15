@@ -6,6 +6,8 @@ import abc
 import json
 import logging
 
+from typing import Optional, Tuple, Union
+
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
@@ -177,16 +179,20 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Teardown %s", self)
         self._is_ready = False
 
-    def benchmark(self):
+    def run(self) -> Tuple[Status, Optional[Union[float, dict]]]:
         """
-        Submit a new experiment to the environment.
+        Executes the run script for this environment.
+
+        For instance, this may start a new experiment, download results, reconfigure the environment, etc.
+        Details are configurable via the environment config.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (Status, float)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not COMPLETED.
+        (status, output) : (Status, float|dict)
+            A pair of (Status, output) values.
+            status is of type mlos_bench.environment.Status.
+            output is a floating point time of the benchmark in seconds or a
+            dict of result output or None if the status is not COMPLETED.
         """
         if self._is_ready:
             return (Status.READY, None)

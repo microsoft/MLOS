@@ -16,7 +16,7 @@ _LOG = logging.getLogger(__name__)
 
 def _main():
 
-    launcher = Launcher("OS Autotune optimizer")
+    launcher = Launcher("mlos_bench run_opt")
 
     launcher.parser.add_argument(
         '--optimizer', required=True,
@@ -52,7 +52,7 @@ def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
             opt.register(tunables, Status.FAILED)
             continue
 
-        (status, value) = env.benchmark()  # Block and wait for the final result
+        (status, value) = env.run()  # Block and wait for the final result
         value = value.loc[0, 'score'] if status.is_succeeded else None
 
         _LOG.info("Result: %s = %s :: %s", tunables, status, value)

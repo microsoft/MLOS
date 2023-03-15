@@ -1,5 +1,5 @@
 """
-Mock optimizer for OS Autotune.
+Mock optimizer for mlos_bench.
 """
 
 import random

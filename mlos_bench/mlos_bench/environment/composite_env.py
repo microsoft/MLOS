@@ -93,27 +93,27 @@ class CompositeEnv(Environment):
             env.teardown()
         super().teardown()
 
-    def benchmark(self):
+    def run(self):
         """
         Submit a new experiment to the environment.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, float)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not SUCCEEDED.
+        (status, benchmark_result) : (Status, float|dict)
+            A pair of (Status, output) values.
+            status is of type mlos_bench.environment.Status.
+            output is a floating point time of the benchmark in seconds or a
+            dict of result output or None if the status is not COMPLETED.
         """
-        _LOG.info("Benchmark: %s", self._children)
-        (status, _) = result = super().benchmark()
+        _LOG.info("Run: %s", self._children)
+        (status, _) = result = super().run()
         if not status.is_ready:
             return result
         for env in self._children:
             _LOG.debug("Child env. run: %s", env)
-            (status, _) = result = env.benchmark()
-            _LOG.debug("Child env. benchmark: %s :: %s", env, result)
+            (status, _) = result = env.run()
+            _LOG.debug("Child env. run results: %s :: %s", env, result)
             if not status.is_good:
                 break
-        _LOG.info("Benchmark completed: %s :: %s", self, result)
+        _LOG.info("Run completed: %s :: %s", self, result)
         return result

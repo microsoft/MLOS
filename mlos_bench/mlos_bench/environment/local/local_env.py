@@ -20,7 +20,7 @@ _LOG = logging.getLogger(__name__)
 
 class LocalEnv(Environment):
     """
-    Scheduler-side benchmark environment that runs scripts locally.
+    Scheduler-side Environment that runs scripts locally.
     """
 
     def __init__(self,
@@ -82,7 +82,10 @@ class LocalEnv(Environment):
         ----------
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
-            values. Setting these parameters should not require an OS reboot.
+            values.
+            In a local environment these could be used to prepare a config file
+            on the scheduler prior to transferring it to the remote
+            environment, for instance.
 
         Returns
         -------
@@ -116,30 +119,29 @@ class LocalEnv(Environment):
                 _LOG.warning("ERROR: Local setup returns with code %d stderr:\n%s",
                              return_code, stderr)
 
-            self._is_ready = (return_code == 0)
+            self._is_ready = return_code == 0
 
         return self._is_ready
 
-    def benchmark(self):
+    def run(self):
         """
-        Run an experiment in the local application environment.
-        (Re)configure an application and launch the benchmark.
+        Run a script in the local scheduler environment.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, DataFrame)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a pandas DataFrame of the benchmark data
-            or None if the status is not COMPLETED.
+        (status, output) : (Status, float|dict)
+            A pair of (Status, output) values.
+            status is of type mlos_bench.environment.Status.
+            output is a floating point time of the benchmark in seconds or a
+            dict of result output or None if the status is not COMPLETED.
         """
-        (status, _) = result = super().benchmark()
+        (status, _) = result = super().run()
         if not (status.is_ready and self._script_run):
             return result
 
         with self._service.temp_dir_context(self._temp_dir) as temp_dir:
 
-            _LOG.info("Run benchmark locally on: %s at %s", self, temp_dir)
+            _LOG.info("Run script locally on: %s at %s", self, temp_dir)
             (return_code, _stdout, stderr) = self._service.local_exec(
                 self._script_run, env=self._params, cwd=temp_dir)
 

@@ -1,5 +1,5 @@
 """
-Remotely executed benchmark environment.
+Remotely executed benchmark/script environment.
 """
 
 import logging
@@ -15,7 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 class RemoteEnv(Environment):
     """
-    Environment to run benchmarks on a remote host.
+    Environment to run benchmarks and scripts on a remote host.
     """
 
     def __init__(self,
@@ -98,21 +98,24 @@ class RemoteEnv(Environment):
 
         return self._is_ready
 
-    def benchmark(self):
+    def run(self):
         """
-        Submit a new experiment to the remote application environment.
-        (Re)configure an application and launch the benchmark.
+        Runs the run script on the remote environment.
+
+        This can be used to, for instance, submit a new experiment to the
+        remote application environment by (re)configuring an application and
+        launching the benchmark, or run a script that collects the results.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, float)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not COMPLETED.
+        (status, output) : (Status, float|dict)
+            A pair of (Status, output) values.
+            status is of type mlos_bench.environment.Status.
+            output is a floating point time of the benchmark in seconds or a
+            dict of result output or None if the status is not COMPLETED.
         """
-        _LOG.info("Run benchmark remotely on: %s", self)
-        (status, _) = result = super().benchmark()
+        _LOG.info("Run script remotely on: %s", self)
+        (status, _) = result = super().run()
         if not (status.is_ready and self._script_run):
             return result
 

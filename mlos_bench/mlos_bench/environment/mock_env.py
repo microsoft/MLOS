@@ -55,19 +55,19 @@ class MockEnv(Environment):
         self._range = self.config.get("range")
         self._is_ready = True
 
-    def benchmark(self):
+    def run(self):
         """
         Produce mock benchmark data for one experiment.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, DataFrame)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a pandas DataFrame of the benchmark data
+        (status, output) : (Status, DataFrame)
+            A pair of (Status, output) values.
+            status is of type mlos_bench.environment.Status.
+            output is a pandas DataFrame of the benchmark data
             or None if the status is not SUCCEEDED.
         """
-        (status, _) = result = super().benchmark()
+        (status, _) = result = super().run()
         if not status.is_ready:
             return result
 
