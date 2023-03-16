@@ -5,8 +5,6 @@ Composite benchmark environment.
 import logging
 from typing import Optional, Tuple
 
-import pandas
-
 from mlos_bench.service.base_service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -97,7 +95,7 @@ class CompositeEnv(Environment):
             env.teardown()
         super().teardown()
 
-    def run(self) -> Tuple[Status, Optional[pandas.DataFrame]]:
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Submit a new experiment to the environment.
         Return the result of the *last* child environment if successful,
@@ -105,10 +103,11 @@ class CompositeEnv(Environment):
 
         Returns
         -------
-        (status, output) : (Status, pandas.DataFrame)
-            A pair of (Status, output) values, where `output` is a one-row DataFrame
-            with the benchmark results or None if the status is not COMPLETED.
-            Benchmark score is usually in the `score` column of the DataFrame.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         _LOG.info("Run: %s", self._children)
         (status, _) = result = super().run()

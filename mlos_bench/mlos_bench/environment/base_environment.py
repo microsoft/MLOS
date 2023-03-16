@@ -8,8 +8,6 @@ import logging
 
 from typing import Optional, Tuple
 
-import pandas
-
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
@@ -181,7 +179,7 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Teardown %s", self)
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, Optional[pandas.DataFrame]]:
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Executes the run script for this environment.
 
@@ -190,10 +188,11 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        (status, output) : (Status, pandas.DataFrame)
-            A pair of (Status, output) values, where `output` is a one-row DataFrame
-            with the benchmark results or None if the status is not COMPLETED.
-            Benchmark score is usually in the `score` column of the DataFrame.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         if self._is_ready:
             return (Status.READY, None)

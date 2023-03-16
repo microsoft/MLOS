@@ -5,8 +5,6 @@ Remotely executed benchmark/script environment.
 import logging
 from typing import Optional, Tuple, List
 
-import pandas
-
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
@@ -100,7 +98,7 @@ class RemoteEnv(Environment):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[pandas.DataFrame]]:
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Runs the run script on the remote environment.
 
@@ -110,10 +108,11 @@ class RemoteEnv(Environment):
 
         Returns
         -------
-        (status, output) : (Status, pandas.DataFrame)
-            A pair of (Status, output) values, where `output` is a one-row DataFrame
-            with the benchmark results or None if the status is not COMPLETED.
-            Benchmark score is usually in the `score` column of the DataFrame.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         _LOG.info("Run script remotely on: %s", self)
         (status, _) = result = super().run()
@@ -134,7 +133,7 @@ class RemoteEnv(Environment):
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script: List[str]) -> Tuple[Status, Optional[pandas.DataFrame]]:
+    def _remote_exec(self, script: List[str]) -> Tuple[Status, Optional[dict]]:
         """
         Run a script on the remote host.
 
@@ -145,8 +144,8 @@ class RemoteEnv(Environment):
 
         Returns
         -------
-        result : (Status, pandas.DataFrame)
-            A pair of Status and one-row DataFrame with the benchmark results.
+        result : (Status, dict)
+            A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         _LOG.debug("Submit script: %s", self)
