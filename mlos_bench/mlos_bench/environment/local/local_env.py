@@ -153,12 +153,13 @@ class LocalEnv(Environment):
                 return (Status.FAILED, None)
 
             data = pandas.read_csv(self._service.resolve_path(
-                self._read_results_file, extra_paths=[temp_dir])).to_dict(orient="records")
-            if len(data) != 1:
-                _LOG.warning("ERROR: Local run returns %d results", len(data))
-                raise NotImplementedError("Multiple results are not supported yet")
-            data = data[0]
+                self._read_results_file, extra_paths=[temp_dir]))
 
+            _LOG.debug("Read data:\n%s", data)
+            if len(data) != 1:
+                _LOG.warning("Local run has %d results - returning the last one", len(data))
+
+            data = data.iloc[-1].to_dict()
             _LOG.info("Local run complete: %s ::\n%s", self, data)
             return (Status.SUCCEEDED, data)
 
