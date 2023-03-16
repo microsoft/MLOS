@@ -4,27 +4,30 @@
 $ErrorActionPreference = 'Stop'
 
 # Make sure we're in the root of the repository.
-Set-Location "$PSScriptRoot"
+Set-Location "$PSScriptRoot/../.."
 
-# Build a basic container with the dependencies we need to run the prep script.
-docker build `
-    -t mlos-core-basic-prep-deps `
-    -f common/Dockerfile common/
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to build mlos-core-basic-prep-deps container."
-    exit $LASTEXITCODE
+# Make sure the .env file exists for the devcontainer to load.
+if (!(Test-Path .env)) {
+    Write-Host "Creating empty .env file for devcontainer."
+    New-Item -Type File .env
 }
-# Move up to the repo root.
-Set-Location ../../
-# Run the script in the container.
-docker run --rm -v "${PWD}:/src" --workdir /src `
-    --user root `
-    mlos-core-basic-prep-deps `
-    /src/.devcontainer/scripts/common/prep-container-build.sh
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to run prep-container-build.sh in container."
-    exit $LASTEXITCODE
+
+# Prep some files to use as context for the devcontainer to build from.
+if (Test-Path .devcontainer/tmp) {
+    Remove-Item -Recurse -Force .devcontainer/tmp
 }
+New-Item -Type Directory .devcontainer/tmp
+
+Copy-Item conda-envs/mlos_core.yml .devcontainer/tmp/mlos_core.yml
+foreach ($pkg in @('mlos_core', 'mlos_bench')) {
+    Copy-Item "$pkg/setup.py" ".devcontainer/tmp/${pkg}.setup.py"
+}
+Copy-Item doc/requirements.txt .devcontainer/tmp/doc.requirements.txt
+
+# Copy the script that will be run in the devcontainer to prep the files from
+# those in a cross platform way (e.g. proper line endings and whatnot so that
+# it's cacheable and reusable across platforms).
+Copy-Item .devcontainer/scripts/common/prep-deps-files.sh .devcontainer/tmp/prep-deps-files.sh
 
 # Prior to building the container locally, try to pull the latest version from
 # upstream to see if we can use it as a cache.
@@ -33,9 +36,5 @@ if ($LASTEXITCODE -ne 0) {
 if ($env:NO_CACHE -ne 'true') {
     $cacheFrom = 'mloscore.azurecr.io/mlos-core-devcontainer'
     Write-Host "Pulling cached image $cacheFrom"
-    # Make sure we use an empty config to avoid auth issues for devs with the
-    # registry, which should allow anonymous pulls
-    $tmpdir = (Join-Path $env:TEMP $(New-Guid) | %{ New-Item -Type Directory $_ } | Select-Object -ExpandProperty Fullname)
-    docker --config="$tmpdir" pull $cacheFrom
-    Remove-Item "$tmpdir"
+    docker pull $cacheFrom
 }

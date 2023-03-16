@@ -60,12 +60,11 @@ class MockEnv(Environment):
 
         Returns
         -------
-<<<<<<< HEAD
-        (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_result is a one-row DataFrame containing final
-            benchmark results or None if the status is not COMPLETED.
-||||||| 273bdc8
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         (status, _) = result = super().run()
         if not status.is_ready:

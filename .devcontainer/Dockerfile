@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/devcontainers/miniconda:3
+FROM mcr.microsoft.com/devcontainers/miniconda:3 AS base
 
 # Add some additional packages for the devcontainer terminal environment.
 USER root
@@ -51,11 +51,18 @@ RUN umask 0002 \
 # - The rest happens during first container start once the source is available.
 # See Also: updateContentCommand in .devcontainer/devcontainer.json
 RUN mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/
-USER vscode
 RUN /opt/conda/bin/conda init bash \
     && /opt/conda/bin/conda config --set solver libmamba
+
+# Prepare the mlos_core_deps.yml file in a cross platform way.
+FROM mcr.microsoft.com/devcontainers/miniconda:3 AS deps-prep
+COPY --chown=vscode:conda prep-deps-files.sh mlos_core.yml mlos_core.setup.py mlos_bench.setup.py doc.requirements.txt /tmp/conda-tmp/
+RUN /tmp/conda-tmp/prep-deps-files.sh \
+    && ls -l /tmp/conda-tmp/ # && cat /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/mlos_core_deps.yml
+
 # Install some additional dependencies for the mlos_core environment.
-COPY --chown=vscode:conda mlos_core_deps.yml combined.requirements.txt /tmp/conda-tmp/
+FROM base AS devcontainer
+COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_core_deps.yml /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/
 RUN umask 0002 \
     && /opt/conda/bin/conda env create -n mlos_core -v -f /tmp/conda-tmp/mlos_core_deps.yml \
     && /opt/conda/bin/conda run -n mlos_core pip install -U -r /tmp/conda-tmp/combined.requirements.txt \

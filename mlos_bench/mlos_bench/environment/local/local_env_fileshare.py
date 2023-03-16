@@ -85,10 +85,9 @@ class LocalFileShareEnv(LocalEnv):
         ----------
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
-            values.
-            In a local environment these could be used to prepare a config file
-            on the scheduler prior to transferring it to the remote
-            environment, for instance.
+            values. In a local environment these could be used to prepare a config
+            file on the scheduler prior to transferring it to the remote environment,
+            for instance.
         global_config : dict
             Free-format dictionary of global parameters of the environment
             that are not used in the optimization process.

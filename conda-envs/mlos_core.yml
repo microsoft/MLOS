@@ -27,5 +27,6 @@ dependencies:
   # NOTE: GPy is currently required by emukit.
   #- gcc_linux-64
   - pip:
+    - pytest-local-badge
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

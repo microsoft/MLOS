@@ -27,5 +27,6 @@ dependencies:
   - vswhere
   - conda-forge::GPy
   - pip:
+    - pytest-local-badge
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

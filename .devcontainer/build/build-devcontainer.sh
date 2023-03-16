@@ -38,7 +38,9 @@ if [ "${NO_CACHE:-}" == 'true' ]; then
 else
     cache_from='mloscore.azurecr.io/mlos-core-devcontainer:latest'
     devcontainer_build_args="--cache-from $cache_from"
-    docker pull "$cache_from" || true
+    tmpdir=$(mktemp -d)
+    docker --config="$tmpdir" pull "$cache_from" || true
+    rmdir "$tmpdir"
 fi
 
 # Make this work inside a devcontainer as well.

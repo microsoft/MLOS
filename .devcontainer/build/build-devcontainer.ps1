@@ -33,6 +33,9 @@ else {
     Set-Location "$origLocation"
 }
 
+if ($null -eq $env:DOCKER_BUILDKIT) {
+    $env:DOCKER_BUILDKIT = 1
+}
 $devcontainer_build_args = ''
 if ("$env:NO_CACHE" -eq 'true') {
     $base_image = (Get-Content "$rootdir/.devcontainer/Dockerfile" | Select-String '^FROM' | Select-Object -ExpandProperty Line | ForEach-Object { $_ -replace '^FROM\s+','' } | ForEach-Object { $_ -replace ' AS\s+.*','' } | Select-Object -First 1)
@@ -54,7 +57,7 @@ $cmd = "docker run -i --rm " +
     "--user root " +
     "-v '${rootdir}:/src' " +
     "-v /var/run/docker.sock:/var/run/docker.sock " +
-    "--env DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1} " +
+    "--env DOCKER_BUILDKIT=${env:DOCKER_BUILDKIT} " +
     "--env BUILDKIT_INLINE_CACHE=1 " +
     "devcontainer-cli " +
     "devcontainer build --workspace-folder /src " +
