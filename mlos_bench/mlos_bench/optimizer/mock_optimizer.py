@@ -4,9 +4,7 @@ Mock optimizer for mlos_bench.
 
 import random
 import logging
-from typing import Tuple, Union
-
-import pandas
+from typing import Tuple, List, Union
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -32,12 +30,10 @@ class MockOptimizer(Optimizer):
         self._best_config = None
         self._best_score = None
 
-    def update(self, data: pandas.DataFrame):
-        tunables_names = list(self._tunables.get_param_values().keys())
-        for i in data.index:
-            tunables = self._tunables.copy().assign(
-                data.loc[i, tunables_names].to_dict())
-            score = data.loc[i, self._opt_target]
+    def update(self, data: List[dict]):
+        for values in data:
+            tunables = self._tunables.copy().assign(values)
+            score = values[self._opt_target]
             self.register(tunables, Status.SUCCEEDED, score)
 
     def suggest(self) -> TunableGroups:
@@ -51,7 +47,7 @@ class MockOptimizer(Optimizer):
         return tunables
 
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Union[float, pandas.DataFrame] = None) -> float:
+                 score: Union[float, dict] = None) -> float:
         score = super().register(tunables, status, score)
         if status.is_succeeded and (self._best_score is None or score < self._best_score):
             self._best_score = score

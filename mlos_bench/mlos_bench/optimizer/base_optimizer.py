@@ -4,10 +4,8 @@ and mlos_core optimizers.
 """
 
 import logging
-from typing import Tuple, Union
+from typing import Tuple, List, Union
 from abc import ABCMeta, abstractmethod
-
-import pandas
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -97,14 +95,15 @@ class Optimizer(metaclass=ABCMeta):
             self._opt_sign = -1
 
     @abstractmethod
-    def update(self, data: pandas.DataFrame):
+    def update(self, data: List[dict]):
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
         Parameters
         ----------
-        data : pandas.DataFrame
+        data : List[dict]
             Records of tunable values and benchmark scores from other experiments.
+            The data is expected to be in `pandas.DataFrame.to_dict('records')` format.
         """
 
     @abstractmethod
@@ -122,7 +121,7 @@ class Optimizer(metaclass=ABCMeta):
 
     @abstractmethod
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Union[float, pandas.DataFrame] = None) -> float:
+                 score: Union[float, dict] = None) -> float:
         """
         Register the observation for the given configuration.
 
@@ -133,8 +132,8 @@ class Optimizer(metaclass=ABCMeta):
             Usually it's the same config that the `.suggest()` method returned.
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, pandas.DataFrame]
-            A scalar or one-row data frame with the final benchmark results.
+        score : Union[float, dict]
+            A scalar or a dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
@@ -148,7 +147,7 @@ class Optimizer(metaclass=ABCMeta):
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)
 
-    def _get_score(self, status: Status, score: Union[float, pandas.DataFrame]) -> float:
+    def _get_score(self, status: Status, score: Union[float, dict]) -> float:
         """
         Extract a scalar benchmark score from the dataframe.
         Change the sign if we are maximizing.
@@ -157,8 +156,8 @@ class Optimizer(metaclass=ABCMeta):
         ----------
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, pandas.DataFrame]
-            A scalar or one-row data frame with the final benchmark results.
+        score : Union[float, dict]
+            A scalar or a dict with the final benchmark results.
             None if the experiment was not successful.
 
         Returns
@@ -168,8 +167,8 @@ class Optimizer(metaclass=ABCMeta):
         """
         if not status.is_succeeded:
             return None
-        if isinstance(score, pandas.DataFrame):
-            score = score.loc[0, self._opt_target]
+        if isinstance(score, dict):
+            score = score[self._opt_target]
         return score * self._opt_sign
 
     def not_converged(self) -> bool:

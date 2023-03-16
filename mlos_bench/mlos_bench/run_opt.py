@@ -118,10 +118,10 @@ def _run(env: Environment, opt: Optimizer,
     (status, telemetry) = env.status()
     trial.update(status, telemetry)
 
-    (status, score) = env.run()  # Block and wait for the final result.
-    _LOG.info("Result: %s :: %s\n%s", trial.tunables, status, score)
-    trial.update(status, score)
-    opt.register(trial.tunables, status, score)
+    (status, results) = env.run()  # Block and wait for the final result.
+    _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
+    trial.update(status, results)
+    opt.register(trial.tunables, status, results)
 
 
 if __name__ == "__main__":
