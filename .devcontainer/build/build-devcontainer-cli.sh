@@ -30,8 +30,10 @@ if [ "${NO_CACHE:-}" == 'true' ]; then
     devcontainer_cli_build_args+=' --no-cache --pull'
 else
     cacheFrom='mloscore.azurecr.io/devcontainer-cli:latest'
+    tmpdir=$(mktemp -d)
     devcontainer_cli_build_args+=" --cache-from $cacheFrom"
-    docker pull "$cacheFrom" || true
+    docker --config="$tmpdir" pull "$cacheFrom" || true
+    rmdir "$tmpdir"
 fi
 
 docker build -t devcontainer-cli:latest -t cspell:latest \

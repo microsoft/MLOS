@@ -14,12 +14,12 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-if ($env:DOCKER_BUILDKIT -eq $null) {
+if ($null -eq $env:DOCKER_BUILDKIT) {
     $env:DOCKER_BUILDKIT = 1
 }
 $devcontainer_cli_build_args = ''
 docker buildx version > $null
-if ($LASTEXITCODE -ne 0) {
+if ($LASTEXITCODE -eq 0) {
     $devcontainer_cli_build_args += ' --progress=plain'
 }
 else {

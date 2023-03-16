@@ -8,30 +8,30 @@ scriptdir=$(dirname "$(readlink -f "$0")")
 # Start in the script directory.
 cd "$scriptdir"
 
-export DOCKER_BUILDKIT=${DOCKER_BUILDKIT:-1}
-
-# Build a basic container with the dependencies we need to run the prep script.
-docker build \
-    --build-arg http_proxy="${http_proxy:-}" \
-    --build-arg https_proxy="${https_proxy:-}" \
-    --build-arg no_proxy="${no_proxy:-}" \
-    --build-arg USER_UID=$(id -u) \
-    --build-arg USER_GID=$(id -g) \
-    -t mlos-core-basic-prep-deps \
-    -f common/Dockerfile common/
 # Move up to the repo root.
 cd ../../
 
-reporoot="$PWD"
-if [ -n "${LOCAL_WORKSPACE_FOLDER:-}" ]; then
-    reporoot="$LOCAL_WORKSPACE_FOLDER"
+# Make sure the .env file exists for the devcontainer to load.
+if [ ! -f .env ]; then
+    echo "Creating empty .env file for devcontainer."
+    touch .env
 fi
 
-# Run the script in the container.
-docker run --rm -v "$reporoot:/src" --workdir /src \
-    --user vscode \
-    mlos-core-basic-prep-deps \
-    /src/.devcontainer/scripts/common/prep-container-build.sh
+# Prep some files to use as context for the devcontainer to build from.
+if [ -d .devcontainer/tmp ]; then
+    rm -rf .devcontainer/tmp
+fi
+mkdir -p .devcontainer/tmp/
+cp -v conda-envs/mlos_core.yml .devcontainer/tmp/mlos_core.yml
+for pkg in mlos_core mlos_bench; do
+    cp -v $pkg/setup.py .devcontainer/tmp/$pkg.setup.py
+done
+cp -v doc/requirements.txt .devcontainer/tmp/doc.requirements.txt
+
+# Copy the script that will be run in the devcontainer to prep the files from
+# those in a cross platform way (e.g. proper line endings and whatnot so that
+# it's cacheable and reusable across platforms).
+cp -v .devcontainer/scripts/common/prep-deps-files.sh .devcontainer/tmp/prep-deps-files.sh
 
 # Prior to building the container locally, try to pull the latest version from
 # upstream to see if we can use it as a cache.
