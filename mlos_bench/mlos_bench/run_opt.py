@@ -52,8 +52,8 @@ def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
             opt.register(tunables, Status.FAILED)
             continue
 
-        (status, value) = env.run()  # Block and wait for the final result
-        value = value.loc[0, 'score'] if status.is_succeeded else None
+        (status, output) = env.run()  # Block and wait for the final result
+        value = output['score'] if status.is_succeeded else None
 
         _LOG.info("Result: %s = %s :: %s", tunables, status, value)
         opt.register(tunables, status, value)

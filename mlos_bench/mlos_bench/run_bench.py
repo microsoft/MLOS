@@ -35,8 +35,8 @@ def _main():
 
     _LOG.info("Benchmark: %s with tunables:\n%s", env, tunables)
     if env.setup(tunables):
-        bench_result = env.run()  # Block and wait for the final result
-        _LOG.info("Result: %s", bench_result)
+        (status, bench_result) = env.run()  # Block and wait for the final result
+        _LOG.info("Status: %s, Result: %s", status, bench_result)
     else:
         _LOG.warning("Environment setup failed: %s", env)
 
