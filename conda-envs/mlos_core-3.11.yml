@@ -24,5 +24,6 @@ dependencies:
   # See comments in mlos_core.yml.
   #- gcc_linux-64
   - pip:
+    - pytest-local-badge
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

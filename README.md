@@ -1,6 +1,7 @@
 # MlosCore
 
-[![Build Status](https://msgsl.visualstudio.com/MLOS/_apis/build/status/MlosCore?branchName=main)](https://msgsl.visualstudio.com/MLOS/_build/latest?definitionId=34&branchName=main)
+[![Linux Build Status](https://msgsl.visualstudio.com/MLOS/_apis/build/status/MlosCore%20Linux?branchName=main)](https://msgsl.visualstudio.com/MLOS/_build/latest?definitionId=34&branchName=main)
+[![Windows Build Status](https://msgsl.visualstudio.com/MLOS/_apis/build/status/MlosCore%20Windows?branchName=main)](https://msgsl.visualstudio.com/MLOS/_build/latest?definitionId=61&branchName=main)
 
 This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original [MLOS](https://github.com/microsoft/MLOS) as well as the `mlos-bench` module intended to help automate and manage running experiments for autotuning systems with `mlos-core`.
 

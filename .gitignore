@@ -142,8 +142,7 @@ cython_debug/
 .*.swo
 
 junit/test-results.xml
-
-junit/test-results.xml
+test-output.xml
 
 build/*.build-stamp
 

@@ -84,6 +84,10 @@ jobs:
   # NOTE: these steps are handled by the Makefile in Linux environments for reusability.
 
   - pwsh: |
+      Get-ChildItem -Recurse Env:
+    displayName: 'Log some environment variables for debugging'
+
+  - pwsh: |
       conda config --set channel_priority strict
       #conda update -v -y -n base conda
     displayName: Update and configure conda
@@ -113,7 +117,7 @@ jobs:
   - pwsh: conda run -n $(conda_env) pylint -j0 mlos_core/mlos_core mlos_bench/mlos_bench
     displayName: 'Run lint checks'
   - pwsh: |
-      conda run -n $(conda_env) pytest mlos_core/ mlos_bench/
+      conda run -n $(conda_env) pytest --cov=. --cov-append --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --napoleon-docstrings --test-run-title="$(System.JobDisplayName)" mlos_core/ mlos_bench/
     displayName: 'Run tests'
 
   # Note: unlike the Makefile version, the pwsh version of these rules are all run within a single shell context, so we can
