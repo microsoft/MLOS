@@ -206,8 +206,13 @@ class BaseOptimizer(metaclass=ABCMeta):
         one_hot = np.zeros((n_rows, n_cols), dtype=np.float32)
         for i in range(n_rows):
             j = 0
-            for (col, param) in enumerate(self.optimizer_parameter_space.get_hyperparameters()):
-                val = config.iloc[(i, col) if config.ndim > 1 else col]
+            for param in self.optimizer_parameter_space.get_hyperparameters():
+                if config.ndim > 1:
+                    col = config.columns.get_loc(param.name)
+                    val = config.iloc[i, col]
+                else:
+                    col = config.index.get_loc(param.name)
+                    val = config.iloc[col]
                 if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                     offset = param.choices.index(val)
                     one_hot[i][j + offset] = 1
