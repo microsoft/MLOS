@@ -206,7 +206,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         for param in self.optimizer_parameter_space.get_hyperparameters():
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                 config[param.name] = config[param.name].apply(param.choices.index)
-        return config.to_numpy()
+        return config.to_numpy(dtype=np.float32)
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
@@ -224,7 +224,11 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         """
         if context is not None:
             raise NotImplementedError()
-        return self.base_optimizer.tell(configurations.to_numpy().tolist(), scores.to_list())
+        # DataFrame columns must be in the same order
+        # as the hyperparameters in the config space:
+        param_names = self.optimizer_parameter_space.get_hyperparameter_names()
+        data = configurations[param_names].to_numpy().tolist()
+        self.base_optimizer.tell(data, scores.to_list())
 
     def _suggest(self, context: pd.DataFrame = None):
         """Suggests a new configuration.
