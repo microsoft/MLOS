@@ -6,7 +6,7 @@ import os
 import json
 import logging
 
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import pandas
 
@@ -20,7 +20,7 @@ _LOG = logging.getLogger(__name__)
 
 class LocalEnv(Environment):
     """
-    Scheduler-side benchmark environment that runs scripts locally.
+    Scheduler-side Environment that runs scripts locally.
     """
 
     def __init__(self,
@@ -82,7 +82,9 @@ class LocalEnv(Environment):
         ----------
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
-            values. Setting these parameters should not require an OS reboot.
+            values. In a local environment these could be used to prepare a config
+            file on the scheduler prior to transferring it to the remote environment,
+            for instance.
         global_config : dict
             Free-format dictionary of global parameters of the environment
             that are not used in the optimization process.
@@ -119,29 +121,29 @@ class LocalEnv(Environment):
                 _LOG.warning("ERROR: Local setup returns with code %d stderr:\n%s",
                              return_code, stderr)
 
-            self._is_ready = (return_code == 0)
+            self._is_ready = return_code == 0
 
         return self._is_ready
 
-    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
-        Run an experiment in the local application environment.
-        (Re)configure an application and launch the benchmark.
+        Run a script in the local scheduler environment.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_result is a one-row DataFrame containing final
-            benchmark results or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
-        (status, _) = result = super().benchmark()
+        (status, _) = result = super().run()
         if not (status.is_ready and self._script_run):
             return result
 
         with self._service.temp_dir_context(self._temp_dir) as temp_dir:
 
-            _LOG.info("Run benchmark locally on: %s at %s", self, temp_dir)
+            _LOG.info("Run script locally on: %s at %s", self, temp_dir)
             (return_code, _stdout, stderr) = self._service.local_exec(
                 self._script_run, env=self._params, cwd=temp_dir)
 
@@ -151,7 +153,11 @@ class LocalEnv(Environment):
                 return (Status.FAILED, None)
 
             data = pandas.read_csv(self._service.resolve_path(
-                self._read_results_file, extra_paths=[temp_dir]))
+                self._read_results_file, extra_paths=[temp_dir])).to_dict(orient="records")
+            if len(data) != 1:
+                _LOG.warning("ERROR: Local run returns %d results", len(data))
+                raise NotImplementedError("Multiple results are not supported yet")
+            data = data[0]
 
             _LOG.info("Local run complete: %s ::\n%s", self, data)
             return (Status.SUCCEEDED, data)

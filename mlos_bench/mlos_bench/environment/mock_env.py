@@ -7,7 +7,6 @@ import logging
 from typing import Optional, Tuple
 
 import numpy
-import pandas
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -55,22 +54,23 @@ class MockEnv(Environment):
         self._range = self.config.get("range")
         self._is_ready = True
 
-    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Produce mock benchmark data for one experiment.
 
         Returns
         -------
+<<<<<<< HEAD
         (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
             A pair of (benchmark status, benchmark result) values.
             benchmark_result is a one-row DataFrame containing final
             benchmark results or None if the status is not COMPLETED.
+||||||| 273bdc8
         """
-        (status, _) = result = super().benchmark()
+        (status, _) = result = super().run()
         if not status.is_ready:
             return result
 
-        # Simple convex function of all tunable parameters.
         score = numpy.mean(numpy.square([
             self._normalized(tunable) for (tunable, _group) in self._tunable_params
         ]))
@@ -81,7 +81,7 @@ class MockEnv(Environment):
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        data = pandas.DataFrame({"score": [score]})
+        data = {"score": score}
         return (Status.SUCCEEDED, data)
 
     @staticmethod

@@ -15,7 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 def _main():
 
-    launcher = Launcher("OS Autotune benchmark")
+    launcher = Launcher("mlos_bench run_bench")
 
     launcher.parser.add_argument(
         '--tunables', nargs="+", required=True,
@@ -30,9 +30,9 @@ def _main():
         tunables.assign(launcher.load_config(data_file))
 
     _LOG.info("Benchmark: %s with tunables:\n%s", env, tunables)
-    if env.setup(tunables, launcher.global_config):
-        bench_result = env.benchmark()  # Block and wait for the final result
-        _LOG.info("Result: %s", bench_result)
+    if env.setup(tunables):
+        (status, bench_result) = env.run()  # Block and wait for the final result
+        _LOG.info("Status: %s, Result: %s", status, bench_result)
     else:
         _LOG.warning("Environment setup failed: %s", env)
 

@@ -5,9 +5,7 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from typing import Tuple
-
-import pandas
+from typing import Optional, Tuple
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -185,31 +183,32 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Teardown %s", self)
         self._is_ready = False
 
-    def benchmark(self) -> Tuple[Status, pandas.DataFrame]:
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
-        Submit a new experiment to the environment.
+        Execute the run script for this environment.
+
+        For instance, this may start a new experiment, download results, reconfigure
+        the environment, etc. Details are configurable via the environment config.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (Status, pandas.DataFrame)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_result is a one-row DataFrame containing final
-            benchmark results or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
-        if self._is_ready:
-            return (Status.READY, None)
-        _LOG.warning("Environment not ready: %s", self)
-        return (Status.PENDING, None)
+        return self.status()
 
-    def status(self) -> Tuple[Status, pandas.DataFrame]:
+    def status(self) -> Tuple[Status, Optional[dict]]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, telemetry) : (Status, pandas.DataFrame)
+        (benchmark_status, telemetry) : (Status, dict)
             A pair of (benchmark status, telemetry) values.
-            `telemetry` can be None if the environment is not running.
+            `telemetry` is a free-form dict or None if the environment is not running.
         """
         if self._is_ready:
             return (Status.READY, None)

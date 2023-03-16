@@ -1,6 +1,4 @@
 # TODOs
 
-- rename `benchmark` to `run`
-
 - Rename `_wait_vm` to `_wait_for_host`?
   - Do this as a part of the ssh change.

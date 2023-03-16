@@ -19,10 +19,10 @@ _LOG = logging.getLogger(__name__)
 
 class Launcher:
     """
-    Common parts of the OS Autotune command line launcher.
+    Common parts of the mlos_bench command line launchers.
     """
 
-    def __init__(self, description: str = 'OS Autotune launcher'):
+    def __init__(self, description: str):
 
         _LOG.info("Launch: %s", description)
 
