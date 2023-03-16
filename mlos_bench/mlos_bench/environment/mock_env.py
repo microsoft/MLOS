@@ -70,6 +70,7 @@ class MockEnv(Environment):
         if not status.is_ready:
             return result
 
+        # Simple convex function of all tunable parameters.
         score = numpy.mean(numpy.square([
             self._normalized(tunable) for (tunable, _group) in self._tunable_params
         ]))
