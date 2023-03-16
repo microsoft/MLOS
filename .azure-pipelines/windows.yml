@@ -1,8 +1,23 @@
-parameters:
-  name: 'Windows'
+name: 'MlosCore Windows'
+
+trigger:
+- main
+
+pr:
+  branches:
+    include:
+    - '*'
+
+schedules:
+- cron: "0 0 * * *"
+  displayName: Nightly build
+  branches:
+    include:
+    - main
+  always: "true"
 
 jobs:
-- job: ${{ parameters.name }}
+- job: 'Windows'
 
   pool:
     vmImage: windows-latest
@@ -57,7 +72,7 @@ jobs:
   - task: Cache@2
     displayName: Restore cached conda environment
     inputs:
-      key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env_yml) | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | azure-pipelines.yml | .azure-pipelines/windows.yml'
+      key: 'conda | "$(Agent.OS)" | "$(conda_env)" | conda-envs/$(conda_env_yml) | mlos_core/setup.py | mlos_bench/setup.py | "$(cache_cur_date)" | "$(cache_cur_hour)" | .azure-pipelines/windows.yml'
       path: $(CONDA_CACHE_DIR)
       # Prefer cached environments from the last hour or day.
       restoreKeys: |
