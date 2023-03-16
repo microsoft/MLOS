@@ -6,8 +6,6 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import List
 
-import pandas
-
 from mlos_bench.environment import Status
 from mlos_bench.tunables import TunableGroups
 from mlos_bench.util import prepare_class_load, instantiate_from_config
@@ -135,11 +133,12 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self) -> pandas.DataFrame:
+        def load(self) -> List[dict]:
             """
             Load (tunable values, status, value) to warm-up the optimizer.
             This call returns data from ALL merged-in experiments and attempts
-            to impute the missing tunable values.
+            to impute the missing tunable values. The data is expected to be
+            in `pandas.DataFrame.to_dict('records')` format.
             """
 
         @abstractmethod
@@ -216,7 +215,7 @@ class Storage(metaclass=ABCMeta):
             return config
 
         @abstractmethod
-        def update(self, status: Status, value: pandas.DataFrame = None):
+        def update(self, status: Status, value: dict = None):
             """
             Update the storage with the results of the experiment.
             """
