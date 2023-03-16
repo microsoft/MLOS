@@ -3,8 +3,10 @@ Composite benchmark environment.
 """
 
 import logging
+from typing import Optional, Tuple
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -54,7 +56,7 @@ class CompositeEnv(Environment):
         if not self._children:
             raise ValueError("At least one child environment must be present")
 
-    def _add_child(self, env):
+    def _add_child(self, env: Environment):
         """
         Add a new child environment to the composite environment.
         This method is called from the constructor only.
@@ -93,27 +95,29 @@ class CompositeEnv(Environment):
             env.teardown()
         super().teardown()
 
-    def benchmark(self):
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Submit a new experiment to the environment.
+        Return the result of the *last* child environment if successful,
+        or the status of the last failed environment otherwise.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, float)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not SUCCEEDED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
-        _LOG.info("Benchmark: %s", self._children)
-        (status, _) = result = super().benchmark()
+        _LOG.info("Run: %s", self._children)
+        (status, _) = result = super().run()
         if not status.is_ready:
             return result
         for env in self._children:
             _LOG.debug("Child env. run: %s", env)
-            (status, _) = result = env.benchmark()
-            _LOG.debug("Child env. benchmark: %s :: %s", env, result)
+            (status, _) = result = env.run()
+            _LOG.debug("Child env. run results: %s :: %s", env, result)
             if not status.is_good:
                 break
-        _LOG.info("Benchmark completed: %s :: %s", self, result)
+        _LOG.info("Run completed: %s :: %s", self, result)
         return result

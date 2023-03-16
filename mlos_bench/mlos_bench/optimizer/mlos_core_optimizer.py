@@ -1,5 +1,5 @@
 """
-A wrapper for mlos_core optimizers for OS Autotune.
+A wrapper for mlos_core optimizers for mlos_bench.
 """
 
 import logging

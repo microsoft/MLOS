@@ -1,5 +1,5 @@
 """
-Scheduler-side benchmark environment to run scripts locally
+Scheduler-side Environment to run scripts locally
 and upload/download data to the shared storage.
 """
 
@@ -9,6 +9,7 @@ from string import Template
 from typing import Optional, Dict, List, Tuple, Any
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.environment.status import Status
 from mlos_bench.environment.local.local_env import LocalEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -17,7 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 class LocalFileShareEnv(LocalEnv):
     """
-    Scheduler-side benchmark environment that runs scripts locally
+    Scheduler-side Environment that runs scripts locally
     and uploads/downloads data to the shared file storage.
     """
 
@@ -84,7 +85,10 @@ class LocalFileShareEnv(LocalEnv):
         ----------
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
-            values. Setting these parameters should not require an OS reboot.
+            values.
+            In a local environment these could be used to prepare a config file
+            on the scheduler prior to transferring it to the remote
+            environment, for instance.
 
         Returns
         -------
@@ -104,18 +108,18 @@ class LocalFileShareEnv(LocalEnv):
             self._temp_dir = prev_temp_dir
             return self._is_ready
 
-    def benchmark(self):
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Download benchmark results from the shared storage
         and run post-processing scripts locally.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, float)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         prev_temp_dir = self._temp_dir
         with self._service.temp_dir_context(self._temp_dir) as self._temp_dir:
@@ -126,6 +130,6 @@ class LocalFileShareEnv(LocalEnv):
                 self._service.download(
                     path_from, self._service.resolve_path(
                         path_to, extra_paths=[self._temp_dir]))
-            result = super().benchmark()
+            result = super().run()
             self._temp_dir = prev_temp_dir
             return result

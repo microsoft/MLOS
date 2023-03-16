@@ -1,9 +1,9 @@
 """
-Remotely executed benchmark environment.
+Remotely executed benchmark/script environment.
 """
 
 import logging
-from typing import Optional
+from typing import Optional, Tuple, List
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -15,7 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 class RemoteEnv(Environment):
     """
-    Environment to run benchmarks on a remote host.
+    Environment to run benchmarks and scripts on a remote host.
     """
 
     def __init__(self,
@@ -98,21 +98,24 @@ class RemoteEnv(Environment):
 
         return self._is_ready
 
-    def benchmark(self):
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
-        Submit a new experiment to the remote application environment.
-        (Re)configure an application and launch the benchmark.
+        Runs the run script on the remote environment.
+
+        This can be used to, for instance, submit a new experiment to the
+        remote application environment by (re)configuring an application and
+        launching the benchmark, or run a script that collects the results.
 
         Returns
         -------
-        (benchmark_status, benchmark_result) : (enum, float)
-            A pair of (benchmark status, benchmark result) values.
-            benchmark_status is of type mlos_bench.environment.Status.
-            benchmark_result is a floating point time of the benchmark in
-            seconds or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
-        _LOG.info("Run benchmark remotely on: %s", self)
-        (status, _) = result = super().benchmark()
+        _LOG.info("Run script remotely on: %s", self)
+        (status, _) = result = super().run()
         if not (status.is_ready and self._script_run):
             return result
 
@@ -130,7 +133,7 @@ class RemoteEnv(Environment):
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script):
+    def _remote_exec(self, script: List[str]) -> Tuple[Status, Optional[dict]]:
         """
         Run a script on the remote host.
 
@@ -142,7 +145,7 @@ class RemoteEnv(Environment):
         Returns
         -------
         result : (Status, dict)
-            A pair of Status and result.
+            A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         _LOG.debug("Submit script: %s", self)
