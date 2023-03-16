@@ -31,9 +31,10 @@ class MockOptimizer(Optimizer):
         self._best_score = None
 
     def update(self, data: List[dict]):
-        for values in data:
+        for record in data:
+            values = record.copy()
+            score = values.pop(self._opt_target)
             tunables = self._tunables.copy().assign(values)
-            score = values[self._opt_target]
             self.register(tunables, Status.SUCCEEDED, score)
 
     def suggest(self) -> TunableGroups:
