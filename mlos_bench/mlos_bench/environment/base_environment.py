@@ -6,7 +6,9 @@ import abc
 import json
 import logging
 
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple
+
+import pandas
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -179,20 +181,19 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Teardown %s", self)
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, Optional[Union[float, dict]]]:
+    def run(self) -> Tuple[Status, Optional[pandas.DataFrame]]:
         """
         Executes the run script for this environment.
 
-        For instance, this may start a new experiment, download results, reconfigure the environment, etc.
-        Details are configurable via the environment config.
+        For instance, this may start a new experiment, download results, reconfigure
+        the environment, etc. Details are configurable via the environment config.
 
         Returns
         -------
-        (status, output) : (Status, float|dict)
-            A pair of (Status, output) values.
-            status is of type mlos_bench.environment.Status.
-            output is a floating point time of the benchmark in seconds or a
-            dict of result output or None if the status is not COMPLETED.
+        (status, output) : (Status, pandas.DataFrame)
+            A pair of (Status, output) values, where `output` is a one-row DataFrame
+            with the benchmark results or None if the status is not COMPLETED.
+            Benchmark score is usually in the `score` column of the DataFrame.
         """
         if self._is_ready:
             return (Status.READY, None)
