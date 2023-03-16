@@ -3,8 +3,10 @@ Composite benchmark environment.
 """
 
 import logging
+from typing import Optional, Tuple
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -54,7 +56,7 @@ class CompositeEnv(Environment):
         if not self._children:
             raise ValueError("At least one child environment must be present")
 
-    def _add_child(self, env):
+    def _add_child(self, env: Environment):
         """
         Add a new child environment to the composite environment.
         This method is called from the constructor only.
@@ -93,17 +95,19 @@ class CompositeEnv(Environment):
             env.teardown()
         super().teardown()
 
-    def run(self):
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Submit a new experiment to the environment.
+        Return the result of the *last* child environment if successful,
+        or the status of the last failed environment otherwise.
 
         Returns
         -------
-        (status, benchmark_result) : (Status, float|dict)
-            A pair of (Status, output) values.
-            status is of type mlos_bench.environment.Status.
-            output is a floating point time of the benchmark in seconds or a
-            dict of result output or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         _LOG.info("Run: %s", self._children)
         (status, _) = result = super().run()

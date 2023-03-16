@@ -6,7 +6,7 @@ import os
 import json
 import logging
 
-from typing import Optional
+from typing import Optional, Tuple
 
 import pandas
 
@@ -123,17 +123,17 @@ class LocalEnv(Environment):
 
         return self._is_ready
 
-    def run(self):
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Run a script in the local scheduler environment.
 
         Returns
         -------
-        (status, output) : (Status, float|dict)
-            A pair of (Status, output) values.
-            status is of type mlos_bench.environment.Status.
-            output is a floating point time of the benchmark in seconds or a
-            dict of result output or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         (status, _) = result = super().run()
         if not (status.is_ready and self._script_run):
@@ -151,7 +151,11 @@ class LocalEnv(Environment):
                 return (Status.FAILED, None)
 
             data = pandas.read_csv(self._service.resolve_path(
-                self._read_results_file, extra_paths=[temp_dir]))
+                self._read_results_file, extra_paths=[temp_dir])).to_dict(orient="records")
+            if len(data) != 1:
+                _LOG.warning("ERROR: Local run returns %d results", len(data))
+                raise NotImplementedError("Multiple results are not supported yet")
+            data = data[0]
 
             _LOG.info("Local run complete: %s ::\n%s", self, data)
             return (Status.SUCCEEDED, data)

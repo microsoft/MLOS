@@ -9,6 +9,7 @@ from string import Template
 from typing import Optional, Dict, List, Tuple, Any
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.environment.status import Status
 from mlos_bench.environment.local.local_env import LocalEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -107,18 +108,18 @@ class LocalFileShareEnv(LocalEnv):
             self._temp_dir = prev_temp_dir
             return self._is_ready
 
-    def run(self):
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Download benchmark results from the shared storage
         and run post-processing scripts locally.
 
         Returns
         -------
-        (status, output) : (Status, float|dict)
-            A pair of (Status, output) values.
-            status is of type mlos_bench.environment.Status.
-            output is a floating point time of the benchmark in seconds or a
-            dict of result output or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         prev_temp_dir = self._temp_dir
         with self._service.temp_dir_context(self._temp_dir) as self._temp_dir:

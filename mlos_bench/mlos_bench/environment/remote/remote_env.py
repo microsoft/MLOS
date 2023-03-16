@@ -3,7 +3,7 @@ Remotely executed benchmark/script environment.
 """
 
 import logging
-from typing import Optional
+from typing import Optional, Tuple, List
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -98,7 +98,7 @@ class RemoteEnv(Environment):
 
         return self._is_ready
 
-    def run(self):
+    def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Runs the run script on the remote environment.
 
@@ -108,11 +108,11 @@ class RemoteEnv(Environment):
 
         Returns
         -------
-        (status, output) : (Status, float|dict)
-            A pair of (Status, output) values.
-            status is of type mlos_bench.environment.Status.
-            output is a floating point time of the benchmark in seconds or a
-            dict of result output or None if the status is not COMPLETED.
+        (status, output) : (Status, dict)
+            A pair of (Status, output) values, where `output` is a dict
+            with the results or None if the status is not COMPLETED.
+            If run script is a benchmark, then the score is usually expected to
+            be in the `score` field.
         """
         _LOG.info("Run script remotely on: %s", self)
         (status, _) = result = super().run()
@@ -133,7 +133,7 @@ class RemoteEnv(Environment):
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script):
+    def _remote_exec(self, script: List[str]) -> Tuple[Status, Optional[dict]]:
         """
         Run a script on the remote host.
 
@@ -145,7 +145,7 @@ class RemoteEnv(Environment):
         Returns
         -------
         result : (Status, dict)
-            A pair of Status and result.
+            A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         _LOG.debug("Submit script: %s", self)
