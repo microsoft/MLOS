@@ -61,7 +61,7 @@ class RemoteEnv(Environment):
             raise ValueError("At least one of {setup, run, teardown}" +
                              " must be present or wait_boot set to True.")
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
         """
         Check if the environment is ready and set up the application
         and benchmarks on a remote host.
@@ -71,13 +71,16 @@ class RemoteEnv(Environment):
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
             values. Setting these parameters should not require an OS reboot.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        if not super().setup(tunables):
+        if not super().setup(tunables, global_config):
             return False
 
         if self._wait_boot:
