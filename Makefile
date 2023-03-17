@@ -96,7 +96,7 @@ PYTEST_MODULES :=
 pytest: conda-env build/pytest.${CONDA_ENV_NAME}.build-stamp
 
 build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_CORE_PYTHON_FILES) conftest.py pytest.ini
+build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_CORE_PYTHON_FILES) conftest.py setup.cfg
 build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp:
 	# Update the PYTEST_MODULES list to include mlos_core.
 	$(eval PYTEST_MODULES += mlos_core)
@@ -106,7 +106,7 @@ build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp:
 # Run the mlos_bench target update after mlos_core target update.
 build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: build/pytest.mlos_core.${CONDA_ENV_NAME}.needs-build-stamp
 build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_BENCH_PYTHON_FILES) conftest.py pytest.ini
+build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp: $(MLOS_BENCH_PYTHON_FILES) conftest.py setup.cfg
 build/pytest.mlos_bench.${CONDA_ENV_NAME}.needs-build-stamp:
 	# Update the PYTEST_MODULES list to include mlos_bench.
 	$(eval PYTEST_MODULES += mlos_bench)
