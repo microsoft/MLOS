@@ -33,7 +33,7 @@ jobs:
 
     defaults:
       run:
-        shell: bash -eu -x
+        shell: bash --noprofile --norc -eo pipefail -u -x {0}
 
     env:
       DOCKER_BUILDKIT: 1

@@ -31,7 +31,7 @@ jobs:
 
     defaults:
       run:
-        shell: bash -eu -x
+        shell: bash --noprofile --norc -eo pipefail -u -x {0}
 
     env:
       cache_cur_date: 0000-00-00
