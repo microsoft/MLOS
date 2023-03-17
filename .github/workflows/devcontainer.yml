@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: gaurav-nelson/github-action-markdown-link-check@v1
       with:
         use-quiet-mode: yes
@@ -40,7 +40,7 @@ jobs:
       BUILDKIT_INLINE_CACHE: 1
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set NO_CACHE variable for nightly builds
       if: github.event_name == 'schedule'
