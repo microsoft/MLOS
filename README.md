@@ -57,7 +57,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
     conda activate mlos_core
     ```
 
-2. Run the [`BayesianOptimization.ipynb`](./Notebooks/BayesianOptimization.ipynb) notebook.
+2. Run the [`BayesianOptimization.ipynb`](./mlos_core/notebooks/BayesianOptimization.ipynb) notebook.
 
 ## Distributing
 
