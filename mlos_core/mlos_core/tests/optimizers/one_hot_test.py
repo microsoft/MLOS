@@ -17,10 +17,11 @@ from mlos_core.optimizers import EmukitOptimizer
 def data_frame() -> pd.DataFrame:
     """
     Toy data frame corresponding to the `configuration_space` hyperparameters.
+    The columns are deliberately *not* in alphabetic order.
     """
     return pd.DataFrame({
-        'x': [0.1, 0.2, 0.3],
         'y': ['a', 'b', 'c'],
+        'x': [0.1, 0.2, 0.3],
         'z': [1, 5, 8],
     })
 
@@ -29,6 +30,7 @@ def data_frame() -> pd.DataFrame:
 def one_hot() -> np.array:
     """
     One-hot encoding of the `data_frame` above.
+    The columns follow the order of the hyperparameters in `configuration_space`.
     """
     return np.array([
         [0.1, 1.0, 0.0, 0.0, 1.0],
