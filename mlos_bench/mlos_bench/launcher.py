@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Helper functions to launch the benchmark and the optimizer from the command line.
 """

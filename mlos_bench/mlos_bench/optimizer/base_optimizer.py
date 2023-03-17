@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Base class for an interface between the benchmarking framework
 and mlos_core optimizers.

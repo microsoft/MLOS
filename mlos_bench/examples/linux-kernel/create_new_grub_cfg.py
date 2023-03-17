@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Python script to parse through JSON and create new config file.
 

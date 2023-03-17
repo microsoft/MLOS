@@ -1,3 +1,8 @@
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
+
 # Environment variables, distribution check, root access for boot-time parameters.
 # This file should be in the VM.
 

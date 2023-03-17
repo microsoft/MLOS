@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Unit tests for assigning values to the individual parameters within tunable groups.
 """

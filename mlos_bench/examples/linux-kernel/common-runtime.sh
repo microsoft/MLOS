@@ -1,3 +1,8 @@
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
+
 # Environment variables and root access for runtime parameters.
 # This file should be in the VM.
 
