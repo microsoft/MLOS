@@ -140,15 +140,15 @@ jobs:
 
     - name: Container Registry Login
       #if: ${{ env.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'  # FIXME
-      if: ${{ env.ACR_LOGINURL != '' }} && ( github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' ) # FIXME
+      if: ${{ secrets.ACR_LOGINURL != '' }} && ( github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' ) # FIXME
       uses: docker/login-action@v2
       with:
         registry: ${{ secrets.ACR_LOGINURL }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
-      #if: ${{ env.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'  # FIXME
-      if: ${{ env.ACR_LOGINURL != '' }} && ( github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' ) # FIXME
+      #if: ${{ secrets.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'  # FIXME
+      if: ${{ secrets.ACR_LOGINURL != '' }} && ( github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' ) # FIXME
       timeout-minutes: 15
       shell: bash
       # We only push to the :latest tag, to avoid needing to cleanup the
