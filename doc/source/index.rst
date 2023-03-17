@@ -28,7 +28,6 @@ See Also
 --------
 
 - `Source Code <https://aka.ms/mlos-core/src>`_
-- `OS Autotune Project Page <https://aka.ms/os-autotune>`_
 
 .. toctree::
    :hidden:
