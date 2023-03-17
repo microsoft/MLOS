@@ -1,4 +1,8 @@
 #!/bin/bash
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 
 # Prep some files for the devcontainer build in a way that's cross platform.
 # We do this by running this script from a container that has the tools we need

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 CONDA_ENV_NAME ?= mlos_core
 PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos_core[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
@@ -38,7 +41,7 @@ clean-conda-env:
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: check
-check: pycodestyle pydocstyle pylint # cspell
+check: pycodestyle pydocstyle pylint # cspell licenseheaders
 
 .PHONY: pycodestyle
 pycodestyle: conda-env build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
@@ -61,6 +64,17 @@ build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_F
 build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
 	# Check for decent pep8 doc style with pydocstyle.
 	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter-out setup.cfg,$+)
+	touch $@
+
+.PHONY: licenseheaders
+licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+
+build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+	conda run -n ${CONDA_ENV_NAME} pip install licenseheaders
+	touch $@
+
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp $(PYTHON_FILES) doc/mit-license.tmpl
+	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 -x mlos_bench/setup.py mlos_core/setup.py
 	touch $@
 
 .PHONY: cspell
@@ -361,6 +375,8 @@ clean-check:
 	rm -f build/pydocstyle.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-test
 clean-test:

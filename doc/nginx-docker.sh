@@ -1,4 +1,8 @@
 #!/bin/bash
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 
 # A quick script to start a local webserver for testing the sphinx documentation.
 

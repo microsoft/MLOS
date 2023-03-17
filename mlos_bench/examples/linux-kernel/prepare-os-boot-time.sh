@@ -1,4 +1,8 @@
 #!/bin/bash
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 
 # Script to store old grub config and reboot VM (if necessary).
 # Config file created in scheduler should have been moved to

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 FROM mcr.microsoft.com/devcontainers/miniconda:3 AS base
 
 # Add some additional packages for the devcontainer terminal environment.

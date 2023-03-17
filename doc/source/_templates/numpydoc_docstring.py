@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 {{index}}
 {{summary}}
 {{extended_summary}}

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 OS Autotune benchmark launcher without involving the optimizer.
 Used mostly for development/testing purposes.

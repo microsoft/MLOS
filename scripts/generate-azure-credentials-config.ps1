@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 az account get-access-token |
     ConvertFrom-Json |
     Add-Member "storageAccountKey" (

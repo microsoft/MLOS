@@ -1,4 +1,8 @@
 #!/bin/bash
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 
 # Quick hacky script to start a devcontainer in a non-vscode shell for testing.
 # See Also:

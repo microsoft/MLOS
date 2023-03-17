@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Scheduler-side Environment to run scripts locally
 and upload/download data to the shared storage.

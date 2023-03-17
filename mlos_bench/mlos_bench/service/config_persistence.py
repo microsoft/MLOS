@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Helper functions to load, instantiate, and serialize Python objects
 that encapsulate benchmark environments, tunable parameters, and

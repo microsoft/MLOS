@@ -1,6 +1,9 @@
 # Requires -Version 5.0
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 # A script to build the devcontainer-cli image.
-#
+
 $ErrorActionPreference = 'Stop'
 
 # Make sure we're in the root of the repository.
