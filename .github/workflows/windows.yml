@@ -68,7 +68,7 @@ jobs:
         Write-Host "cache_cur_date: $env:cache_cur_date"
         Write-Host "cache_cur_hour: $env:cache_cur_hour
         Write-Host "cache_prev_hour: $env:cache_prev_hour"
-        Write-Host "cache-hit: ${{ steps.restore-conda-cache.outputs.cache-hit }}"
+        #Write-Host "cache-hit: ${{ steps.restore-conda-cache.outputs.cache-hit }}"
 
     - name: Update and configure conda
       run: |
