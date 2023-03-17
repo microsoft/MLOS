@@ -34,9 +34,9 @@ def mock_configurations() -> list:
     ]
 
 
-def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
+def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
     """
-    Make sure that mock optimizer produces consistent suggestions.
+    Run several iterations of the oiptimizer and return the best score.
     """
     for (tunable_values, score) in mock_configurations:
         assert mock_opt.not_converged()
@@ -45,7 +45,23 @@ def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
         mock_opt.register(tunables, Status.SUCCEEDED, score)
 
     (score, _tunables) = mock_opt.get_best_observation()
+    return score
+
+
+def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
+    """
+    Make sure that mock optimizer produces consistent suggestions.
+    """
+    score = _optimize(mock_opt, mock_configurations)
     assert score == pytest.approx(66.66, 0.01)
+
+
+def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: list):
+    """
+    Check the maximization mode of the mock optimizer.
+    """
+    score = _optimize(mock_opt_max, mock_configurations)
+    assert score == pytest.approx(99.99, 0.01)
 
 
 def test_mock_optimizer_register_fail(mock_opt: MockOptimizer):
