@@ -76,7 +76,7 @@ def _optimize(env: Environment, opt: Optimizer,
         # Load (tunable values, status, score) to warm-up the optimizer.
         # `.load()` returns data from ALL merged-in experiments and attempts
         # to impute the missing tunable values.
-        opt.update(exp.load())
+        opt.bulk_register(exp.load())
 
         # First, complete any pending trials.
         for trial in exp.pending():
