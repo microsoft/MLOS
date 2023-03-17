@@ -78,11 +78,9 @@ jobs:
     # Try and speed up the pipeline by using a faster solver:
     - name: Install and default to mamba solver
       run: |
-        set -x
         conda install -v -y -n base conda-libmamba-solver
         # Try to set either of the configs for the solver.
-        conda config --set experimental_solver libmamba || true
-        conda config --set solver libmamba || true
+        if (!(conda config --set experimental_solver libmamba)) { conda config --set solver libmamba }
         "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
         "EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
 
