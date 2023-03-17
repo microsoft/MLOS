@@ -71,7 +71,7 @@ jobs:
       run: |
         printenv
         echo "cache_cur_date: $cache_cur_date"
-        echo "cache_cur_hour: $cache_cur_hour
+        echo "cache_cur_hour: $cache_cur_hour"
         echo "cache_prev_hour: $cache_prev_hour"
         echo "cache-hit: ${{ steps.restore-conda-cache.outputs.cache-hit }}"
 
