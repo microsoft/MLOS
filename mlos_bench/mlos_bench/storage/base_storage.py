@@ -74,7 +74,7 @@ class Storage(metaclass=ABCMeta):
         """
         _LOG.debug("Storage config: %s", config)
         self._config = config.copy()
-        self._experiment_id = self._config["experimentId"]
+        self._experiment_id = self._config["experimentId"].strip()
         self._trial_id = self._config.get("trialId")
         if self._trial_id is not None:
             self._trial_id = int(self._trial_id)
