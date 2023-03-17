@@ -16,11 +16,11 @@
             "tunable_params": ["boot"],
 
             // Values provided from the global config/optimizer:
-            "required_args": ["experimentName", "experimentId"],
+            "required_args": ["experimentId", "trialId"],
 
             "const_args": {
-                "experimentName": "RedisBench",  // Placeholder for value passed from outside
-                "experimentId": "001"            // Placeholder for value passed from the optimizer
+                "experimentId": "RedisBench",  // Placeholder for value passed from outside
+                "trialId": 1                   // Placeholder for value passed from the optimizer
             },
 
             // Dump tunable parameters to a local JSON file:
@@ -33,7 +33,7 @@
             "upload": [
                 {
                     "from": "grub.cfg",
-                    "to": "$experimentName/$experimentId/input/grub.cfg"
+                    "to": "$experimentId/$trialId/input/grub.cfg"
                 }
             ]
         }
@@ -53,8 +53,8 @@
                 "storageFileShareName",
                 "storageAccountKey",
                 "mountPoint",
-                "experimentName",
-                "experimentId"
+                "experimentId",
+                "trialId"
             ],
 
             "const_args": {
@@ -69,10 +69,10 @@
                 "sudo mkdir -p $mountPoint",
                 "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
                 // TODO: Apply GRUB parameters from config on shared storage at:
-                // "$mountPoint/$experimentName/$experimentId/input/grub.cfg"
+                // "$mountPoint/$experimentId/$trialId/input/grub.cfg"
                 // "sudo update-grub",
                 // "sudo shutdown -r now"  // Reboot to apply the parameters
-                "cat $mountPoint/$experimentName/$experimentId/input/grub.cfg"
+                "cat $mountPoint/$experimentId/$trialId/input/grub.cfg"
             ],
 
             "teardown": [

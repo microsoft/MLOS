@@ -113,8 +113,8 @@ Create and activate the environment with:
         --log ./os-autotune.log \                            # Log file (also prints to stdout)
         --log-level 10 \                                     # Log level = DEBUG
         --no-teardown \                                      # Do not shutdown/deprovision a VM
-        --experimentName RedisBench \                        # Experiment name (can be in global_config.json)
-        --experimentId 001                                   # Unique experiment ID (can come from the persistent storage service)
+        --experimentId RedisBench \                          # Experiment ID (can be in global_config.json)
+        --trialId 1                                          # Trial ID (can come from the persistent storage service)
     ```
 
 8. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.
@@ -133,8 +133,8 @@ Here's an example of how to run the optimization script:
     --log ./os-autotune.log \                            # Log file (also prints to stdout)
     --log-level 10 \                                     # Log level = DEBUG
     --no-teardown \                                      # Do not shutdown/deprovision a VM
-    --experimentName RedisBench \                        # Experiment name (can be in global_config.json)
-    --experimentId 001                                   # Unique experiment ID (can come from the persistent storage service)
+    --experimentId RedisBench \                          # Experiment ID (can be in global_config.json)
+    --trialId 1                                          # Trial ID (can come from the persistent storage service)
 ```
 
 The only difference between `run_bench.py` and `run_opt.py` scripts is that the latter has the `--optimizer` parameter instead of using a fixed set of tunables via `--tunables` option.
