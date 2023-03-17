@@ -42,7 +42,7 @@ def _test_opt_update_min(opt: Optimizer, data: List[dict]):
     """
     Test the bulk update of the optimizer on the minimization problem.
     """
-    opt.update(data)
+    opt.bulk_register(data)
     (score, tunables) = opt.get_best_observation()
     assert score == pytest.approx(66.66, 0.01)
     assert tunables.get_param_values() == {
@@ -56,7 +56,7 @@ def _test_opt_update_max(opt: Optimizer, data: List[dict]):
     """
     Test the bulk update of the optimizer on the maximiation prtoblem.
     """
-    opt.update(data)
+    opt.bulk_register(data)
     (score, tunables) = opt.get_best_observation()
     assert score == pytest.approx(99.99, 0.01)
     assert tunables.get_param_values() == {

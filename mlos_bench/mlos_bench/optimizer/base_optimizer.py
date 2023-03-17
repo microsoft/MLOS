@@ -95,7 +95,7 @@ class Optimizer(metaclass=ABCMeta):
             self._opt_sign = -1
 
     @abstractmethod
-    def update(self, data: List[dict]):
+    def bulk_register(self, data: List[dict]):
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 

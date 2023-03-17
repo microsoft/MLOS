@@ -30,7 +30,7 @@ class MockOptimizer(Optimizer):
         self._best_config = None
         self._best_score = None
 
-    def update(self, data: List[dict]):
+    def bulk_register(self, data: List[dict]):
         for record in data:
             values = record.copy()
             score = values.pop(self._opt_target)
