@@ -20,7 +20,7 @@
 
             "const_args": {
                 "experimentId": "RedisBench",  // Placeholder for value passed from outside
-                "trialId": "001"            // Placeholder for value passed from the optimizer
+                "trialId": 1                   // Placeholder for value passed from the optimizer
             },
 
             // Dump tunable parameters to a local JSON file:
