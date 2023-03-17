@@ -43,7 +43,7 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
-    def update(self, data: List[dict]):
+    def bulk_register(self, data: List[dict]):
         data = pd.DataFrame(data)
         tunables_names = list(self._tunables.get_param_values().keys())
         df_configs = data[tunables_names]
