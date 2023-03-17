@@ -73,7 +73,7 @@ class LocalEnv(Environment):
         if self._script_run is None and self._read_results_file is not None:
             raise ValueError("'run' must be present if 'read_results_file' is specified")
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
         """
         Check if the environment is ready and set up the application
         and benchmarks, if necessary.
@@ -82,17 +82,19 @@ class LocalEnv(Environment):
         ----------
         tunables : TunableGroups
             A collection of tunable OS and application parameters along with their
-            values.
-            In a local environment these could be used to prepare a config file
-            on the scheduler prior to transferring it to the remote
-            environment, for instance.
+            values. In a local environment these could be used to prepare a config
+            file on the scheduler prior to transferring it to the remote environment,
+            for instance.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        if not super().setup(tunables):
+        if not super().setup(tunables, global_config):
             return False
 
         if not self._script_setup:
@@ -151,12 +153,13 @@ class LocalEnv(Environment):
                 return (Status.FAILED, None)
 
             data = pandas.read_csv(self._service.resolve_path(
-                self._read_results_file, extra_paths=[temp_dir])).to_dict(orient="records")
-            if len(data) != 1:
-                _LOG.warning("ERROR: Local run returns %d results", len(data))
-                raise NotImplementedError("Multiple results are not supported yet")
-            data = data[0]
+                self._read_results_file, extra_paths=[temp_dir]))
 
+            _LOG.debug("Read data:\n%s", data)
+            if len(data) != 1:
+                _LOG.warning("Local run has %d results - returning the last one", len(data))
+
+            data = data.iloc[-1].to_dict()
             _LOG.info("Local run complete: %s ::\n%s", self, data)
             return (Status.SUCCEEDED, data)
 

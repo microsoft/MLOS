@@ -5,7 +5,6 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-
 from typing import Optional, Tuple
 
 from mlos_bench.environment.status import Status
@@ -145,7 +144,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._tunable_params
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be
         idempotent, i.e., calling it several times in a row should be
@@ -155,6 +154,9 @@ class Environment(metaclass=abc.ABCMeta):
         ----------
         tunables : TunableGroups
             A collection of tunable parameters along with their values.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
@@ -165,6 +167,8 @@ class Environment(metaclass=abc.ABCMeta):
         assert isinstance(tunables, TunableGroups)
 
         self._params = self._combine_tunables(tunables)
+        for key in set(self._params).intersection(global_config or {}):
+            self._params[key] = global_config[key]
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Combined parameters:\n%s", json.dumps(self._params, indent=2))
 
@@ -181,7 +185,7 @@ class Environment(metaclass=abc.ABCMeta):
 
     def run(self) -> Tuple[Status, Optional[dict]]:
         """
-        Executes the run script for this environment.
+        Execute the run script for this environment.
 
         For instance, this may start a new experiment, download results, reconfigure
         the environment, etc. Details are configurable via the environment config.
@@ -193,6 +197,18 @@ class Environment(metaclass=abc.ABCMeta):
             with the results or None if the status is not COMPLETED.
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
+        """
+        return self.status()
+
+    def status(self) -> Tuple[Status, Optional[dict]]:
+        """
+        Check the status of the benchmark environment.
+
+        Returns
+        -------
+        (benchmark_status, telemetry) : (Status, dict)
+            A pair of (benchmark status, telemetry) values.
+            `telemetry` is a free-form dict or None if the environment is not running.
         """
         if self._is_ready:
             return (Status.READY, None)

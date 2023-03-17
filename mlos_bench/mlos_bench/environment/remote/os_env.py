@@ -15,7 +15,7 @@ class OSEnv(Environment):
     OS Level Environment for a host.
     """
 
-    def setup(self, tunables: TunableGroups) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
         """
         Check if the host is up and running; boot it, if necessary.
 
@@ -26,6 +26,9 @@ class OSEnv(Environment):
             parameters' values. VMEnv tunables are variable parameters that,
             together with the VMEnv configuration, are sufficient to provision
             and start a VM.
+        global_config : dict
+            Free-format dictionary of global parameters of the environment
+            that are not used in the optimization process.
 
         Returns
         -------
@@ -33,7 +36,7 @@ class OSEnv(Environment):
             True if operation is successful, false otherwise.
         """
         _LOG.info("OS set up: %s :: %s", self, tunables)
-        if not super().setup(tunables):
+        if not super().setup(tunables, global_config):
             return False
 
         (status, params) = self._service.vm_start(self._params)
