@@ -85,4 +85,3 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
 - API and Examples Documentation: <https://aka.ms/mlos-core/docs>
 - Source Code Repository: <https://aka.ms/mlos-core/src>
-- Initial Design Discussion Doc: [MlosCoreApiDesign.docx](https://microsoft.sharepoint.com/:w:/t/CISLGSL/ESAS3G9q4P5Hoult9uqTfB4B3xh2v6yUfp3YNgIvoyR_IA?e=B6klWZ)
