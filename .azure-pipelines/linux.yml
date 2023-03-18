@@ -163,15 +163,15 @@ jobs:
 
   - bash: |
       set -x
+      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
+    displayName: 'Update the conda env in the devcontainer'
+
+  - bash: |
+      set -x
       docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
       # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
       git diff --no-pager --exit-code
     displayName: 'Check that all of the python files have licenseheaders'
-
-  - bash: |
-      set -x
-      docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
-    displayName: 'Update the conda env in the devcontainer'
 
   - bash: |
       set -x

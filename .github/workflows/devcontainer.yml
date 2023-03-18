@@ -64,17 +64,17 @@ jobs:
         docker exec --user root mlos-core-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
         docker exec --user root mlos-core-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
 
+    - name: Update the conda env in the devcontainer
+      timeout-minutes: 10
+      run: |
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
+
     - name: Check for missing licenseheaders
       timeout-minutes: 3
       run: |
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
         # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
         git diff --no-pager --exit-code
-
-    - name: Update the conda env in the devcontainer
-      timeout-minutes: 10
-      run: |
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
 
     - name: Run lint checks
       timeout-minutes: 5
