@@ -23,3 +23,4 @@ jobs:
         use-verbose-mode: no
         folder-path: './doc, ./mlos_core, ./mlos_bench, ./.devcontainer'
         file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md'
+        config-file: './.github/workflows/markdown-link-check-config.json'
