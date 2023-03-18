@@ -13,19 +13,6 @@ on:
     - cron: "1 0 * * *"
 
 jobs:
-  # Check in-repo markdown links
-  markdown-link-check:
-    runs-on: ubuntu-latest
-    timeout-minutes: 3
-    steps:
-    - uses: actions/checkout@v3
-    - uses: gaurav-nelson/github-action-markdown-link-check@v1
-      with:
-        use-quiet-mode: yes
-        use-verbose-mode: no
-        folder-path: './doc, ./mlos_core, ./mlos_bench, ./.devcontainer'
-        file-path: './CODE_OF_CONDUCT.md, ./CONTRIBUTING.md, ./README.md, ./SECURITY.md'
-
   DevContainer:
     runs-on: ubuntu-latest
 
