@@ -1,8 +1,7 @@
 # MlosCore
 
-<!--
-TODO: Add links to build status badges.
--->
+[![Test Run Status](https://microsoft.github.io/MLOS/_images/tests.svg)](https://microsoft.github.io/MLOS/_images/tests.svg)
+[![Code Coverage Status](https://microsoft.github.io/MLOS/_images/coverage.svg)](https://microsoft.github.io/MLOS/_images/coverage.svg)
 
 This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original [MLOS](https://github.com/microsoft/MLOS) as well as the `mlos-bench` module intended to help automate and manage running experiments for autotuning systems with `mlos-core`.
 
