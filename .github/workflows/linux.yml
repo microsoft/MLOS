@@ -55,6 +55,7 @@ jobs:
         echo "cache_cur_date=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
         echo "cache_cur_hour=$(date -u +%H)" >> $GITHUB_ENV
         echo "cache_prev_hour=$(date -u -d'1 hour ago' +%H)" >> $GITHUB_ENV
+        echo "CONDA=$CONDA" >> $GITHUB_ENV
 
     - name: Restore cached conda environment
       id: restore-conda-cache
