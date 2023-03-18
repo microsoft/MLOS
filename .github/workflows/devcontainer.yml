@@ -115,23 +115,24 @@ jobs:
 
     - name: Deploy to GitHub pages
       #if: github.ref == 'refs/heads/main' # FIXME
-      if: github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' # FIXME
+      if: ( github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' ) # FIXME
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
         folder: doc/build/html
+        clean: true
 
     # TODO: Add code coverage upload support?
 
-    - name: Upload coverage to codecov
-      #if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'  # FIXME
-      if: github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' # FIXME
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        flags: unittests
-        fail_ci_if_error: true
+#    - name: Upload coverage to codecov
+#      #if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'  # FIXME
+#      if: ( github.ref == 'refs/heads/main_mlos-core' || github.ref == 'refs/heads/github-actions' ) # FIXME
+#      uses: codecov/codecov-action@v1
+#      with:
+#        token: ${{ secrets.CODECOV_TOKEN }}
+#        file: ./coverage.xml
+#        flags: unittests
+#        fail_ci_if_error: true
 
     - name: Cleanup the devcontainer
       run: |
