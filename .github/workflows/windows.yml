@@ -38,7 +38,7 @@ jobs:
         "cache_cur_date=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
         "cache_cur_hour=$(date -u +%H)" >> $GITHUB_ENV
         "cache_prev_hour=$(date -u -d'1 hour ago' +%H)" >> $GITHUB_ENV
-        echo "CONDA=$env:CONDA" >> $GITHUB_ENV
+        "CONDA=$env:CONDA" >> $GITHUB_ENV
 
     - name: Add conda libs to the PATH
       run: |
@@ -57,7 +57,7 @@ jobs:
       if: github.event_name != 'schedule'
       uses: actions/cache@v3
       with:
-        path: ${{ env.CONDA }}/envs
+        path: ${{ env.CONDA }}/envs/mlos_core
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
           conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
