@@ -1,7 +1,7 @@
 # MlosCore
 
-[![Linux Build Status](https://msgsl.visualstudio.com/MLOS/_apis/build/status/MlosCore%20Linux?branchName=main)](https://msgsl.visualstudio.com/MLOS/_build/latest?definitionId=34&branchName=main)
-[![Windows Build Status](https://msgsl.visualstudio.com/MLOS/_apis/build/status/MlosCore%20Windows?branchName=main)](https://msgsl.visualstudio.com/MLOS/_build/latest?definitionId=61&branchName=main)
+[![Test Run Status](https://microsoft.github.io/MLOS/_images/tests.svg)](https://microsoft.github.io/MLOS/_images/tests.svg)
+[![Code Coverage Status](https://microsoft.github.io/MLOS/_images/coverage.svg)](https://microsoft.github.io/MLOS/_images/coverage.svg)
 
 This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original [MLOS](https://github.com/microsoft/MLOS) as well as the `mlos-bench` module intended to help automate and manage running experiments for autotuning systems with `mlos-core`.
 
@@ -56,7 +56,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
     conda activate mlos_core
     ```
 
-2. Run the [`BayesianOptimization.ipynb`](./Notebooks/BayesianOptimization.ipynb) notebook.
+2. Run the [`BayesianOptimization.ipynb`](./mlos_core/notebooks/BayesianOptimization.ipynb) notebook.
 
 ## Distributing
 
@@ -83,5 +83,8 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
 ## See Also
 
+<!-- TODO: Reenable checking these once they no longer require authentication. -->
+<!-- markdown-link-check-disable -->
 - API and Examples Documentation: <https://aka.ms/mlos-core/docs>
 - Source Code Repository: <https://aka.ms/mlos-core/src>
+<!-- markdown-link-check-enable -->
