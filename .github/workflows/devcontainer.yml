@@ -89,6 +89,7 @@ jobs:
       run: |
         set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v test
+        ls -lR htmlcov/
 
     - name: Generate and test binary distribution files
       timeout-minutes: 10
@@ -106,6 +107,7 @@ jobs:
       run: |
         set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v doc
+        ls -lR doc/build/html/htmlcov/
 
     - name: Deploy to GitHub pages
       if: github.ref == 'refs/heads/main'
