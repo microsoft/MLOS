@@ -120,14 +120,14 @@ jobs:
         docker rm --force mlos-core-devcontainer || true
 
     - name: Container Registry Login
-      if: ${{ env.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'
+      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
       uses: docker/login-action@v2
       with:
         registry: ${{ secrets.ACR_LOGINURL }}
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
-      if: ${{ env.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'
+      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
       timeout-minutes: 15
       # We only push to the :latest tag, to avoid needing to cleanup the
       # registry manually (there's currently no API for that).
