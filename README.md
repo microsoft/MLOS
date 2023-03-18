@@ -85,8 +85,5 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
 ## See Also
 
-<!-- TODO: Reenable checking these once they no longer require authentication. -->
-<!-- markdown-link-check-disable -->
 - API and Examples Documentation: <https://aka.ms/mlos-core/docs>
 - Source Code Repository: <https://aka.ms/mlos-core/src>
-<!-- markdown-link-check-enable -->
