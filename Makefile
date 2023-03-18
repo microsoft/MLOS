@@ -41,10 +41,7 @@ clean-conda-env:
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: check
-check: pycodestyle pydocstyle pylint # cspell licenseheaders
-ifneq ($(DOCKER),)
-check: markdown-link-check
-endif
+check: pycodestyle pydocstyle pylint # cspell licenseheaders markdown-link-check
 
 .PHONY: pycodestyle
 pycodestyle: conda-env build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
