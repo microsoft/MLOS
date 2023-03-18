@@ -117,16 +117,6 @@ jobs:
         folder: doc/build/html
         clean: true
 
-# TODO: Add code coverage upload support
-#    - name: Upload coverage to codecov
-#      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
-#      uses: codecov/codecov-action@v1
-#      with:
-#        token: ${{ secrets.CODECOV_TOKEN }}
-#        file: ./coverage.xml
-#        flags: unittests
-#        fail_ci_if_error: true
-
     - name: Cleanup the devcontainer
       run: |
         set -x
