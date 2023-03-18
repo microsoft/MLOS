@@ -6,9 +6,9 @@ on:
       tags:
         description: Manual MLOS Markdown Link Check run
   push:
-    branches: [ main_mlos-core ]  # FIXME: switch to main
+    branches: [ main ]
   pull_request:
-    branches: [ main_mlos-core ]  # FIXME: switch to main
+    branches: [ main ]
 
 jobs:
   # Check in-repo markdown links
