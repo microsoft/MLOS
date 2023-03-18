@@ -74,7 +74,7 @@ jobs:
       run: |
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
         # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
-        git diff --no-pager --exit-code
+        git --no-pager diff --exit-code
 
     - name: Run lint checks
       timeout-minutes: 5
@@ -133,7 +133,6 @@ jobs:
     - name: Publish the container images
       if: ${{ env.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'
       timeout-minutes: 15
-      shell: bash
       # We only push to the :latest tag, to avoid needing to cleanup the
       # registry manually (there's currently no API for that).
       run: |
