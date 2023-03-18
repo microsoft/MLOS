@@ -149,23 +149,9 @@ PYTEST_OPTIONS :=
 # Allow optionally skipping coverage calculations during local testing to skip up inner dev loop.
 SKIP_COVERAGE := $(shell echo $${SKIP_COVERAGE:-} | grep -i -x -e 1 -e true)
 
-# When running in Azure pipeline, add some additional arguments for pytest-azurepipelines plugin.
-ifneq ($(SYSTEM_JOBDISPLAYNAME),)
-    PYTEST_OPTIONS += --napoleon-docstrings --test-run-title="$(SYSTEM_JOBDISPLAYNAME)"
-    ifeq ($(SYSTEM_JOBDISPLAYNAME),DevContainer)
-        SKIP_COVERAGE :=
-    else
-        SKIP_COVERAGE := true
-        PYTEST_OPTIONS += --no-coverage-upload
-    endif
-endif
-
 ifeq ($(SKIP_COVERAGE),)
     PYTEST_OPTIONS += --cov=. --cov-append --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
 endif
-
-testing:
-	@echo "$(PYTEST_OPTIONS)"
 
 # Run the pytest target on only the modules that have changed recently, but
 # make sure the coverage report is for both of them when used in the pipeline.
