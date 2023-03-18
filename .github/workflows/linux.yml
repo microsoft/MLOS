@@ -42,6 +42,7 @@ jobs:
     - name: Set cache timestamp variables
       id: set_cache_vars
       run: |
+        set -x
         if [ -z "${{ matrix.python_version }}" ]; then
           CONDA_ENV_NAME=mlos_core
         else
@@ -66,6 +67,7 @@ jobs:
 
     - name: Log some environment variables for debugging
       run: |
+        set -x
         printenv
         echo "cache_cur_date: $cache_cur_date"
         echo "cache_cur_hour: $cache_cur_hour"
@@ -74,6 +76,7 @@ jobs:
 
     - name: Update and configure conda
       run: |
+        set -x
         conda config --set channel_priority strict
         #conda update -v -y -n base conda
 

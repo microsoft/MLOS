@@ -32,17 +32,20 @@ jobs:
 
     - name: Log some environment variables for debugging
       run: |
+        set -x
         printenv
         echo "NO_CACHE: ${NO_CACHE:-}"
 
     - name: Build the devcontainer image
       timeout-minutes: 15
       run: |
+        set -x
         .devcontainer/build/build-devcontainer.sh
 
     - name: Start the devcontainer in the background
       timeout-minutes: 3
       run: |
+        set -x
         docker run -d --rm --user root \
           --volume /var/run/docker.sock:/var/run/docker.sock \
           --env DOCKER_BUILDKIT=$DOCKER_BUILDKIT \
@@ -54,6 +57,7 @@ jobs:
     - name: Fixup vscode uid/gid in the running container
       timeout-minutes: 3
       run: |
+        set -x
         docker exec --user root mlos-core-devcontainer groupmod -g `id -g` vscode
         docker exec --user root mlos-core-devcontainer usermod -u `id -u` -g `id -g` vscode
         docker exec --user root mlos-core-devcontainer chown -R vscode:vscode /home/vscode
@@ -63,11 +67,13 @@ jobs:
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
       run: |
+        set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
 
     - name: Check for missing licenseheaders
       timeout-minutes: 3
       run: |
+        set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
         # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
         git --no-pager diff --exit-code
@@ -75,25 +81,30 @@ jobs:
     - name: Run lint checks
       timeout-minutes: 5
       run: |
+        set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v check
 
     - name: Run tests
       timeout-minutes: 10
       run: |
+        set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v test
 
     - name: Generate and test binary distribution files
       timeout-minutes: 10
       run: |
+        set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
 
     - name: Test rebuilding the devcontainer in the devcontainer
       timeout-minutes: 3
       run: |
+        set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
 
     - name: Generate docs and test check them
       run: |
+        set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v doc
 
     - name: Deploy to GitHub pages
@@ -116,6 +127,7 @@ jobs:
 
     - name: Cleanup the devcontainer
       run: |
+        set -x
         docker stop -t 1 mlos-core-devcontainer || true
         docker rm --force mlos-core-devcontainer || true
 
@@ -132,6 +144,7 @@ jobs:
       # We only push to the :latest tag, to avoid needing to cleanup the
       # registry manually (there's currently no API for that).
       run: |
+        set -x
         docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
         docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
         docker tag mlos-core-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-core-devcontainer:latest
