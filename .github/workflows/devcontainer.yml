@@ -6,9 +6,9 @@ on:
       tags:
         description: Manual MLOS DevContainer run
   push:
-    branches: [ main_mlos-core ]  # FIXME: switch to main
+    branches: [ main_mlos-core, github-actions ]  # FIXME: switch to main
   pull_request:
-    branches: [ main_mlos-core ]  # FIXME: switch to main
+    branches: [ main_mlos-core, github-actions ]  # FIXME: switch to main
   schedule:
     - cron: "1 0 * * *"
 
