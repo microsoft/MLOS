@@ -314,7 +314,7 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile
 	# See check-doc
 
 .PHONY: doc
-doc: doc/build/html/staticwebapp.config.json build/check-doc.build-stamp build/linklint-doc.build-stamp doc/build/html/.nojekyll
+doc: doc/build/html/.nojekyll build/check-doc.build-stamp build/linklint-doc.build-stamp
 
 doc/build/html/htmlcov/index.html: doc/build/html/index.html
 	# Make the codecov html report available for the site.
@@ -322,13 +322,9 @@ doc/build/html/htmlcov/index.html: doc/build/html/index.html
 	mkdir -p doc/build/html/htmlcov
 	touch doc/build/html/htmlcov/index.html
 
-doc/build/html/.nojekyll: doc/build/html/index.html
+doc/build/html/.nojekyll: doc/build/html/index.html doc/build/html/htmlcov/index.html
 	# Make sure that github pages doesn't try to run jekyll on the docs.
 	touch doc/build/html/.nojekyll
-
-doc/build/html/staticwebapp.config.json: doc/build/html/index.html doc/build/html/htmlcov/index.html doc/staticwebapp.config.json
-	# Copy the azure static web app config file to the doc build directory.
-	cp doc/staticwebapp.config.json doc/build/html/
 
 .PHONY: check-doc
 check-doc: build/check-doc.build-stamp
