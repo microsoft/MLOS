@@ -18,10 +18,6 @@ jobs:
 
     # Here we only test a single (latest) version of python.
 
-    defaults:
-      run:
-        shell: bash --noprofile --norc -eo pipefail -u -x {0}
-
     env:
       DOCKER_BUILDKIT: 1
       BUILDKIT_INLINE_CACHE: 1

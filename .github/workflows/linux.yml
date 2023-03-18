@@ -29,10 +29,6 @@ jobs:
           # FIXME: There are currently several missing/broken dependencies for python 3.11.
           #- "3.11"
 
-    defaults:
-      run:
-        shell: bash --noprofile --norc -eo pipefail -u -x {0}
-
     env:
       cache_cur_date: 0000-00-00
       cache_cur_hour: 00
