@@ -131,7 +131,7 @@ jobs:
         username: ${{ secrets.ACR_USERNAME }}
         password: ${{ secrets.ACR_PASSWORD }}
     - name: Publish the container images
-      if: ${{ secrets.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'
+      if: ${{ env.ACR_LOGINURL != '' }} && github.ref == 'refs/heads/main'
       timeout-minutes: 15
       shell: bash
       # We only push to the :latest tag, to avoid needing to cleanup the
