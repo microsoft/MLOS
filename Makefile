@@ -21,7 +21,7 @@ MKDIR_BUILD := $(shell mkdir -p build)
 MAKEFLAGS += -j$(shell nproc)
 
 .PHONY: all
-all: check test dist dist-test # doc
+all: check test dist dist-test doc licenseheaders
 
 .PHONY: conda-env
 conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
@@ -42,6 +42,9 @@ clean-conda-env:
 
 .PHONY: check
 check: pycodestyle pydocstyle pylint # cspell licenseheaders
+ifneq ($(DOCKER),)
+check: markdown-link-check
+endif
 
 .PHONY: pycodestyle
 pycodestyle: conda-env build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
@@ -89,6 +92,20 @@ endif
 build/cspell-container.build-stamp:
 	# Build the docker image with cspell in it.
 	$(MAKE) -C .devcontainer/build cspell
+	touch $@
+
+.PHONY: markdown-link-check
+ifeq ($(DOCKER),)
+markdown-link-check:
+	@echo "NOTE: docker is not available. Skipping markdown-link-check check."
+else
+markdown-link-check: build/markdown-link-check-container.build-stamp
+	./.devcontainer/scripts/run-markdown-link-check.sh
+endif
+
+build/markdown-link-check-container.build-stamp:
+	# Build the docker image with markdown-link-check in it.
+	$(MAKE) -C .devcontainer/build markdown-link-check
 	touch $@
 
 .PHONY: pylint

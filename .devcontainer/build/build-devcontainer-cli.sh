@@ -40,7 +40,7 @@ else
     rmdir "$tmpdir"
 fi
 
-docker build -t devcontainer-cli:latest -t cspell:latest \
+docker build -t devcontainer-cli:latest -t cspell:latest -t markdown-link-check:latest \
     $devcontainer_cli_build_args \
     --build-arg BUILDKIT_INLINE_CACHE=1 \
     --build-arg NODE_UID=$(id -u) \
