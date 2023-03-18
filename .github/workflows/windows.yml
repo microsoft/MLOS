@@ -6,9 +6,9 @@ on:
       tags:
         description: Manual MLOS Linux run
   push:
-    branches: [ main_mlos-core ]  # FIXME: switch to main
+    branches: [ main ]
   pull_request:
-    branches: [ main_mlos-core ]  # FIXME: switch to main
+    branches: [ main ]
   schedule:
     - cron: "1 0 * * *"
 
