@@ -4,7 +4,7 @@ Welcome to MlosCore's documentation!
 .. image:: badges/tests.svg
 
 .. image:: badges/coverage.svg
-   :target: htmlcov/index.html
+   :target: cov/index.html
 
 ``mlos_core``
 -------------
