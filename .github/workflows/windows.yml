@@ -35,10 +35,10 @@ jobs:
     - name: Set cache timestamp variables
       id: set_cache_vars
       run: |
-        "cache_cur_date=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
-        "cache_cur_hour=$(date -u +%H)" >> $GITHUB_ENV
-        "cache_prev_hour=$(date -u -d'1 hour ago' +%H)" >> $GITHUB_ENV
-        "CONDA=$env:CONDA" >> $GITHUB_ENV
+        "cache_cur_date=$(date -u +%Y-%m-%d)" >> $env:GITHUB_ENV
+        "cache_cur_hour=$(date -u +%H)" >> $env:GITHUB_ENV
+        "cache_prev_hour=$(date -u -d'1 hour ago' +%H)" >> $env:GITHUB_ENV
+        "CONDA=$env:CONDA" >> $env:GITHUB_ENV
 
     - name: Add conda libs to the PATH
       run: |
@@ -50,7 +50,7 @@ jobs:
         $env:PATH = "$env:CONDA\Library\bin;$env:PATH"
         $env:PATH = "$env:CONDA\Library\mingw-w64\bin;$env:PATH"
         $env:PATH = "$env:CONDA;$env:PATH"
-        "$env:PATH" >> $GITHUB_ENV
+        "$env:PATH" >> $env:GITHUB_ENV
 
     - name: Restore cached conda environment
       id: restore-conda-cache
@@ -82,8 +82,8 @@ jobs:
         conda install -v -y -n base conda-libmamba-solver
         # Try to set either of the configs for the solver.
         if (!(conda config --set experimental_solver libmamba)) { conda config --set solver libmamba }
-        "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
-        "EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
+        "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $env:GITHUB_ENV
+        "EXPERIMENTAL_SOLVER=libmamba" >> $env:GITHUB_ENV
 
     - name: Create/update mlos_core conda environment
       run: |
