@@ -275,7 +275,7 @@ sphinx-apidoc: $(SPHINX_API_RST_FILES)
 
 ifeq ($(SKIP_COVERAGE),)
 doc/build/html/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
-doc/build/html/cov/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
+doc/build/html/htmlcov/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 endif
 
 doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile
@@ -299,21 +299,20 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile
 .PHONY: doc
 doc: doc/build/html/.nojekyll build/check-doc.build-stamp build/linklint-doc.build-stamp
 
-doc/build/html/cov/index.html: doc/build/html/index.html
+doc/build/html/htmlcov/index.html: doc/build/html/index.html
 	# Make the codecov html report available for the site.
 	test -d htmlcov && cp -a htmlcov doc/build/html/ || true
 	mkdir -p doc/build/html/htmlcov
 	touch doc/build/html/htmlcov/index.html
-	mv doc/build/html/htmlcov doc/build/html/cov
 
-doc/build/html/.nojekyll: doc/build/html/index.html doc/build/html/cov/index.html
+doc/build/html/.nojekyll: doc/build/html/index.html doc/build/html/htmlcov/index.html
 	# Make sure that github pages doesn't try to run jekyll on the docs.
 	touch doc/build/html/.nojekyll
 
 .PHONY: check-doc
 check-doc: build/check-doc.build-stamp
 
-build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/cov/index.html
+build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html
 	# Check for a few files to make sure the docs got generated in a way we want.
 	test -s doc/build/html/index.html
 	test -s doc/build/html/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html
@@ -346,7 +345,7 @@ else
 linklint-doc: build/linklint-doc.build-stamp
 endif
 
-build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/cov/index.html build/check-doc.build-stamp
+build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html build/check-doc.build-stamp
 	@echo "Starting nginx docker container for serving docs."
 	./doc/nginx-docker.sh restart
 	docker exec mlos-doc-nginx curl -sSf http://localhost/index.html >/dev/null

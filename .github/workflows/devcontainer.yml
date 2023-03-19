@@ -106,6 +106,8 @@ jobs:
       run: |
         set -x
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v doc
+        # Make sure we can publish the coverage report.
+        rm -f doc/build/html/htmlcov/.gitignore
 
     - name: Deploy to GitHub pages
       #if: github.ref == 'refs/heads/main' # FIXME
