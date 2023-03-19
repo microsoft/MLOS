@@ -50,7 +50,7 @@ jobs:
         $env:PATH = "$env:CONDA\Library\bin;$env:PATH"
         $env:PATH = "$env:CONDA\Library\mingw-w64\bin;$env:PATH"
         $env:PATH = "$env:CONDA;$env:PATH"
-        "$env:PATH" >> $env:GITHUB_ENV
+        "PATH=$env:PATH" >> $env:GITHUB_ENV
 
     - name: Restore cached conda environment
       id: restore-conda-cache
