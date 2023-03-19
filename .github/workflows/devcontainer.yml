@@ -110,7 +110,7 @@ jobs:
         rm -f doc/build/html/htmlcov/.gitignore
 
     - name: Deploy to GitHub pages
-      #if: github.ref == 'refs/heads/main' # FIXME
+      if: github.ref == 'refs/heads/main'
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
