@@ -108,7 +108,7 @@ jobs:
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v doc
 
     - name: Deploy to GitHub pages
-      if: github.ref == 'refs/heads/main'
+      #if: github.ref == 'refs/heads/main' # FIXME
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
