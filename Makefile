@@ -322,6 +322,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \
 		| egrep -v \
+			-e "warnings.warn\(f'\"{wd.path}\" is shallow and may cause errors'\)" \
 			-e "No such file or directory: '.*.examples'.$$" \
 			-e 'Problems with "include" directive path:' \
 			-e 'duplicate object description' \
