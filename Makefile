@@ -144,7 +144,7 @@ PYTEST_OPTIONS :=
 SKIP_COVERAGE := $(shell echo $${SKIP_COVERAGE:-} | grep -i -x -e 1 -e true)
 
 ifeq ($(SKIP_COVERAGE),)
-    PYTEST_OPTIONS += --cov=. --cov-append --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
+    PYTEST_OPTIONS += --cov=. --cov-append --cov-fail-under=0.8 --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
 endif
 
 # Run the pytest target on only the modules that have changed recently, but
