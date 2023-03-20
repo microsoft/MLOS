@@ -74,15 +74,15 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
     ```sh
     # this will install just the optimizer component with emukit support:
-    pip install dist/mlos_core-0.0.4-py3-none-any.whl[emukit]
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[emukit]
 
     # this will install just the optimizer component with skopt support:
-    pip install dist/mlos_core-0.0.4-py3-none-any.whl[skopt]
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[skopt]
     ```
 
     ```sh
     # this will install both the optimizer and the experiment runner:
-    pip install dist/mlos_bench-0.0.4-py3-none-any.whl
+    pip install dist/mlos_bench-0.1.0-py3-none-any.whl
     ```
 
 ## See Also

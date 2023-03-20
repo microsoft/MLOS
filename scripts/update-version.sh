@@ -4,20 +4,14 @@
 ## Licensed under the MIT License.
 ##
 
-set -eu
+# This script is used to update the git tags, version numbers, etc. in a number of files.
+# See Also: .bumpversion.cfg (which gets rewritten by the tool, and strips comments, so we keep a separate config file for it)
 
-NEWVERS=${NEWVERS:-0.0.4}
+set -eu
 
 scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir/.."
 
-sed -i -r -e "s/-[0-9]+\.[0-9]+\.[0-9]+([~]?[a-z0-9]+)?-py/-$NEWVERS-py/" \
-    README.md \
-    doc/source/installation.rst
-
-quotechars='"'
-quotechars+="'"
-
-sed -i -r 's/((_VERSION|release)\s*=\s*['$quotechars'])[0-9]+\.[0-9]+\.[0-9]+([~]?[a-z0-9]+)?(['$quotechars'])/\1'${NEWVERS}'\4/' \
-    mlos_{core,bench}/setup.py \
-    doc/source/conf.py
+set -x
+# Example usage: "./update-version.sh --dry-run patch" to bump v0.0.4 -> v0.0.5, for instance.
+conda run -n ${CONDA_ENV_NAME:-mlos_core} bumpversion --verbose $*

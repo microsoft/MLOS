@@ -23,7 +23,9 @@ New-Item -Type Directory .devcontainer/tmp
 
 Copy-Item conda-envs/mlos_core.yml .devcontainer/tmp/mlos_core.yml
 foreach ($pkg in @('mlos_core', 'mlos_bench')) {
-    Copy-Item "$pkg/setup.py" ".devcontainer/tmp/${pkg}.setup.py"
+    New-Item -Type Directory ".devcontainer/tmp/${pkg}"
+    Copy-Item "$pkg/setup.py" ".devcontainer/tmp/${pkg}/setup.py"
+    Copy-Item "$pkg/_version.py" ".devcontainer/tmp/${pkg}/_version.py"
 }
 Copy-Item doc/requirements.txt .devcontainer/tmp/doc.requirements.txt
 
