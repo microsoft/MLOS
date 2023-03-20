@@ -6,16 +6,20 @@
 Setup instructions for the mlos_bench package.
 """
 
+from logging import warning
 from itertools import chain
-from setuptools import setup, find_packages
 
-from setuptools_scm import get_version
+from setuptools import setup, find_packages
 
 from _version import _VERSION    # pylint: disable=import-private-name
 
-version = get_version(root='..', relative_to=__file__)
-if version is not None:
-    _VERSION = version
+try:
+    from setuptools_scm import get_version
+    version = get_version(root='..', relative_to=__file__)
+    if version is not None:
+        _VERSION = version
+except ImportError:
+    warning("setuptools_scm not found, using version from _version.py")
 
 extra_requires = {
     # Additional tools for extra functionality.

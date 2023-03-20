@@ -17,6 +17,10 @@ set -x
 scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir"
 
+pip install --no-cache-dir setuptools-scm
+
+ls -lR /tmp/conda-tmp/
+
 cat /tmp/conda-tmp/mlos_core.yml \
     | sed 's|#.*||' \
     | egrep -v -e '--editable' -e '^\s*$' \
@@ -27,7 +31,7 @@ tmpdir=$(mktemp -d)
 get_python_deps() {
     local pkg="$1"
     touch /tmp/conda-tmp/$pkg.requirements.txt
-    python3 /tmp/conda-tmp/$pkg.setup.py egg_info --egg-base "$tmpdir/"
+    python3 /tmp/conda-tmp/$pkg/setup.py egg_info --egg-base "$tmpdir/"
     cat "$tmpdir/$pkg.egg-info/requires.txt" \
         | grep -v -e '^\[' -e '^\s*$' \
         | grep -v '^mlos-core' \
