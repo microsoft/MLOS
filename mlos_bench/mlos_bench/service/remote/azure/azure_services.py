@@ -26,8 +26,10 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
     Helper methods to manage VMs on Azure.
     """
 
-    _POLL_INTERVAL = 4   # seconds
-    _POLL_TIMEOUT = 300  # seconds
+    _POLL_INTERVAL = 4     # seconds
+    _POLL_TIMEOUT = 300    # seconds
+
+    _REQUEST_TIMEOUT = 5   # seconds. Can be a pair of (connect, read) timeouts.
 
     # Azure Resources Deployment REST API as described in
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
@@ -138,8 +140,13 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             self.get_remote_exec_results
         ])
 
-        self._poll_interval = int(config.get("pollInterval", AzureVMService._POLL_INTERVAL))
-        self._poll_timeout = int(config.get("pollTimeout", AzureVMService._POLL_TIMEOUT))
+        # These parameters can come from command line as strings, so conversion is needed.
+        self._poll_interval = float(config.get("pollInterval", AzureVMService._POLL_INTERVAL))
+        self._poll_timeout = float(config.get("pollTimeout", AzureVMService._POLL_TIMEOUT))
+        self._request_timeout = config.get("requestTimeout", AzureVMService._REQUEST_TIMEOUT)
+        if isinstance(self._request_timeout, str):
+            # Can be a 2-tuple of (connect timeout, read timeout).
+            self._request_timeout = json.loads(self._request_timeout)
 
         self._deploy_template = self._parent.load_config(config['deployTemplatePath'])
 
@@ -220,7 +227,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         """
         _LOG.debug("Request: POST %s", url)
 
-        response = requests.post(url, headers=self._headers)
+        response = requests.post(url, headers=self._headers, timeout=self._request_timeout)
         _LOG.debug("Response: %s", response)
 
         # Logical flow for async operations based on:
@@ -264,7 +271,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         if url is None:
             return Status.PENDING, {}
 
-        response = requests.get(url, headers=self._headers)
+        response = requests.get(url, headers=self._headers, timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
@@ -394,7 +401,8 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         """
         _LOG.info("Check deployment: %s", self.config["vmName"])
 
-        response = requests.head(self._url_deploy, headers=self._headers)
+        response = requests.head(
+            self._url_deploy, headers=self._headers, timeout=self._request_timeout)
         _LOG.debug("Response: %s", response)
 
         if response.status_code == 204:
@@ -436,8 +444,8 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             _LOG.debug("Request: PUT %s\n%s",
                        self._url_deploy, json.dumps(json_req, indent=2))
 
-        response = requests.put(
-            self._url_deploy, headers=self._headers, json=json_req)
+        response = requests.put(self._url_deploy, json=json_req,
+                                headers=self._headers, timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
@@ -550,8 +558,8 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
             _LOG.debug("Request: POST %s\n%s",
                        self._url_rexec_run, json.dumps(json_req, indent=2))
 
-        response = requests.post(
-            self._url_rexec_run, headers=self._headers, json=json_req)
+        response = requests.post(self._url_rexec_run, json=json_req,
+                                 headers=self._headers, timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
