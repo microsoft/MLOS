@@ -69,11 +69,7 @@ build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NA
 .PHONY: licenseheaders
 licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 
-build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-	conda run -n ${CONDA_ENV_NAME} pip install licenseheaders
-	touch $@
-
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp $(PYTHON_FILES) doc/mit-license.tmpl
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) doc/mit-license.tmpl
 	# Note: to avoid makefile dependency loops, we don't touch the setup.py files as that would force the conda-env to be rebuilt.
 	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 -x mlos_bench/setup.py mlos_core/setup.py
 	touch $@
