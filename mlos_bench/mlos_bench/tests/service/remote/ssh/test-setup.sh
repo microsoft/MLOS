@@ -22,8 +22,7 @@ docker build -t "$image_name" \
     --build-arg no_proxy=${no_proxy:-} \
     -f Dockerfile .
 
-#--rm
-docker run -d --env TIMEOUT=$timeout --network="$network_name" --name "$image_name" "$server_name"
+docker run -d --rm --env TIMEOUT=$timeout --network="$network_name" --name "$image_name" "$server_name"
 
 # TODO: Do this in the python code:
 # Run a simple test client to connect to the server.
