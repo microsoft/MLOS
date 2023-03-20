@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Base interface for saving and restoring the benchmark data.
 """
