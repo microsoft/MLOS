@@ -28,8 +28,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
 
     _POLL_INTERVAL = 4     # seconds
     _POLL_TIMEOUT = 300    # seconds
-
-    _REQUEST_TIMEOUT = 5   # seconds. Can be a pair of (connect, read) timeouts.
+    _REQUEST_TIMEOUT = 5   # seconds
 
     # Azure Resources Deployment REST API as described in
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
@@ -143,10 +142,7 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         # These parameters can come from command line as strings, so conversion is needed.
         self._poll_interval = float(config.get("pollInterval", AzureVMService._POLL_INTERVAL))
         self._poll_timeout = float(config.get("pollTimeout", AzureVMService._POLL_TIMEOUT))
-        self._request_timeout = config.get("requestTimeout", AzureVMService._REQUEST_TIMEOUT)
-        if isinstance(self._request_timeout, str):
-            # Can be a 2-tuple of (connect timeout, read timeout).
-            self._request_timeout = json.loads(self._request_timeout)
+        self._request_timeout = float(config.get("requestTimeout", AzureVMService._REQUEST_TIMEOUT))
 
         self._deploy_template = self._parent.load_config(config['deployTemplatePath'])
 
