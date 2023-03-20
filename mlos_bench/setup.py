@@ -20,6 +20,9 @@ try:
         _VERSION = version
 except ImportError:
     warning("setuptools_scm not found, using version from _version.py")
+except LookupError as e:
+    warning(f"setuptools_scm failed to find git version, using version from _version.py: {e}")
+
 
 extra_requires = {
     # Additional tools for extra functionality.

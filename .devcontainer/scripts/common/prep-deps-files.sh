@@ -17,10 +17,6 @@ set -x
 scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir"
 
-pip install --no-cache-dir setuptools-scm
-
-ls -lR /tmp/conda-tmp/
-
 cat /tmp/conda-tmp/mlos_core.yml \
     | sed 's|#.*||' \
     | egrep -v -e '--editable' -e '^\s*$' \
