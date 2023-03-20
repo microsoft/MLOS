@@ -23,6 +23,9 @@ RUN npm install -g @devcontainers/cli
 # Also add the cspell tool to image.
 RUN npm install -g cspell
 
+# Also add the markdown-link-check tool to image.
+RUN npm install -g markdown-link-check
+
 # Adjust the uid/gid of the node user to match the host user
 ARG NODE_UID=1000
 ARG NODE_GID=1000

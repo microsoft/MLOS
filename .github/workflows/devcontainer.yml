@@ -1,0 +1,143 @@
+name: MLOS DevContainer
+
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Manual MLOS DevContainer run
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "1 0 * * *"
+
+jobs:
+  DevContainer:
+    runs-on: ubuntu-latest
+
+    # Here we only test a single (latest) version of python.
+
+    env:
+      DOCKER_BUILDKIT: 1
+      BUILDKIT_INLINE_CACHE: 1
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set NO_CACHE variable for nightly builds
+      if: github.event_name == 'schedule'
+      run: |
+        echo "NO_CACHE=true" >> $GITHUB_ENV
+
+    - name: Log some environment variables for debugging
+      run: |
+        set -x
+        printenv
+        echo "NO_CACHE: ${NO_CACHE:-}"
+
+    - name: Build the devcontainer image
+      timeout-minutes: 15
+      run: |
+        set -x
+        .devcontainer/build/build-devcontainer.sh
+
+    - name: Start the devcontainer in the background
+      timeout-minutes: 3
+      run: |
+        set -x
+        docker run -d --rm --user root \
+          --volume /var/run/docker.sock:/var/run/docker.sock \
+          --env DOCKER_BUILDKIT=$DOCKER_BUILDKIT \
+          --volume $(pwd):/workspaces/MlosCore \
+          --env CONTAINER_WORKSPACE_FOLDER=/workspaces/MlosCore \
+          --env LOCAL_WORKSPACE_FOLDER=$(pwd) \
+          --workdir /workspaces/MlosCore \
+          --name mlos-core-devcontainer mlos-core-devcontainer sleep infinity
+    - name: Fixup vscode uid/gid in the running container
+      timeout-minutes: 3
+      run: |
+        set -x
+        docker exec --user root mlos-core-devcontainer groupmod -g `id -g` vscode
+        docker exec --user root mlos-core-devcontainer usermod -u `id -u` -g `id -g` vscode
+        docker exec --user root mlos-core-devcontainer chown -R vscode:vscode /home/vscode
+        docker exec --user root mlos-core-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
+        docker exec --user root mlos-core-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
+
+    - name: Update the conda env in the devcontainer
+      timeout-minutes: 10
+      run: |
+        set -x
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
+
+    - name: Check for missing licenseheaders
+      timeout-minutes: 3
+      run: |
+        set -x
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
+        # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
+        git --no-pager diff --exit-code
+
+    - name: Run lint checks
+      timeout-minutes: 5
+      run: |
+        set -x
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v check
+
+    - name: Run tests
+      timeout-minutes: 10
+      run: |
+        set -x
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v test
+
+    - name: Generate and test binary distribution files
+      timeout-minutes: 10
+      run: |
+        set -x
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
+
+    - name: Test rebuilding the devcontainer in the devcontainer
+      timeout-minutes: 3
+      run: |
+        set -x
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
+
+    - name: Generate docs and test check them
+      run: |
+        set -x
+        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v doc
+        # Make sure we can publish the coverage report.
+        rm -f doc/build/html/htmlcov/.gitignore
+
+    - name: Deploy to GitHub pages
+      if: github.ref == 'refs/heads/main'
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: doc/build/html
+        clean: true
+
+    - name: Cleanup the devcontainer
+      run: |
+        set -x
+        docker stop -t 1 mlos-core-devcontainer || true
+        docker rm --force mlos-core-devcontainer || true
+
+    - name: Container Registry Login
+      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ secrets.ACR_LOGINURL }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+    - name: Publish the container images
+      if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
+      timeout-minutes: 15
+      # We only push to the :latest tag, to avoid needing to cleanup the
+      # registry manually (there's currently no API for that).
+      run: |
+        set -x
+        docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
+        docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
+        docker tag mlos-core-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-core-devcontainer:latest
+        docker push ${{ secrets.ACR_LOGINURL }}/mlos-core-devcontainer:latest
