@@ -1,4 +1,8 @@
 #!/bin/bash
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 
 # Script to restore runtime parameters of VM to original state.
 # This script should be run in the VM.

@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Functions to convert TunableGroups to ConfigSpace for use with the mlos_core optimizers.
 """

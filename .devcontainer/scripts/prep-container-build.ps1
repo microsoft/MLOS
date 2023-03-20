@@ -1,4 +1,7 @@
 # Requires -Version 3.0
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 # A script to prepare the build environment for the devcontainer.
 
 $ErrorActionPreference = 'Stop'

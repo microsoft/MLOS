@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Python script to parse through JSON, store runtime parameter paths, and
 create script to apply new runtime parameters in VM.

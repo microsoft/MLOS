@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 CONDA_ENV_NAME ?= mlos_core
 PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos_core[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
@@ -18,7 +21,7 @@ MKDIR_BUILD := $(shell mkdir -p build)
 MAKEFLAGS += -j$(shell nproc)
 
 .PHONY: all
-all: check test dist dist-test # doc
+all: check test dist dist-test doc licenseheaders
 
 .PHONY: conda-env
 conda-env: build/conda-env.${CONDA_ENV_NAME}.build-stamp
@@ -38,7 +41,7 @@ clean-conda-env:
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: check
-check: pycodestyle pydocstyle pylint # cspell
+check: pycodestyle pydocstyle pylint # cspell licenseheaders markdown-link-check
 
 .PHONY: pycodestyle
 pycodestyle: conda-env build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
@@ -63,6 +66,17 @@ build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NA
 	conda run -n ${CONDA_ENV_NAME} pydocstyle $(filter-out setup.cfg,$+)
 	touch $@
 
+.PHONY: licenseheaders
+licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+
+build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+	conda run -n ${CONDA_ENV_NAME} pip install licenseheaders
+	touch $@
+
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp $(PYTHON_FILES) doc/mit-license.tmpl
+	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 -x mlos_bench/setup.py mlos_core/setup.py
+	touch $@
+
 .PHONY: cspell
 ifeq ($(DOCKER),)
 cspell:
@@ -75,6 +89,20 @@ endif
 build/cspell-container.build-stamp:
 	# Build the docker image with cspell in it.
 	$(MAKE) -C .devcontainer/build cspell
+	touch $@
+
+.PHONY: markdown-link-check
+ifeq ($(DOCKER),)
+markdown-link-check:
+	@echo "NOTE: docker is not available. Skipping markdown-link-check check."
+else
+markdown-link-check: build/markdown-link-check-container.build-stamp
+	./.devcontainer/scripts/run-markdown-link-check.sh
+endif
+
+build/markdown-link-check-container.build-stamp:
+	# Build the docker image with markdown-link-check in it.
+	$(MAKE) -C .devcontainer/build markdown-link-check
 	touch $@
 
 .PHONY: pylint
@@ -118,23 +146,9 @@ PYTEST_OPTIONS :=
 # Allow optionally skipping coverage calculations during local testing to skip up inner dev loop.
 SKIP_COVERAGE := $(shell echo $${SKIP_COVERAGE:-} | grep -i -x -e 1 -e true)
 
-# When running in Azure pipeline, add some additional arguments for pytest-azurepipelines plugin.
-ifneq ($(SYSTEM_JOBDISPLAYNAME),)
-    PYTEST_OPTIONS += --napoleon-docstrings --test-run-title="$(SYSTEM_JOBDISPLAYNAME)"
-    ifeq ($(SYSTEM_JOBDISPLAYNAME),DevContainer)
-        SKIP_COVERAGE :=
-    else
-        SKIP_COVERAGE := true
-        PYTEST_OPTIONS += --no-coverage-upload
-    endif
-endif
-
 ifeq ($(SKIP_COVERAGE),)
     PYTEST_OPTIONS += --cov=. --cov-append --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
 endif
-
-testing:
-	@echo "$(PYTEST_OPTIONS)"
 
 # Run the pytest target on only the modules that have changed recently, but
 # make sure the coverage report is for both of them when used in the pipeline.
@@ -283,7 +297,7 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile
 	# See check-doc
 
 .PHONY: doc
-doc: doc/build/html/staticwebapp.config.json build/check-doc.build-stamp build/linklint-doc.build-stamp
+doc: doc/build/html/.nojekyll build/check-doc.build-stamp build/linklint-doc.build-stamp
 
 doc/build/html/htmlcov/index.html: doc/build/html/index.html
 	# Make the codecov html report available for the site.
@@ -291,9 +305,9 @@ doc/build/html/htmlcov/index.html: doc/build/html/index.html
 	mkdir -p doc/build/html/htmlcov
 	touch doc/build/html/htmlcov/index.html
 
-doc/build/html/staticwebapp.config.json: doc/build/html/index.html doc/build/html/htmlcov/index.html doc/staticwebapp.config.json
-	# Copy the azure static web app config file to the doc build directory.
-	cp doc/staticwebapp.config.json doc/build/html/
+doc/build/html/.nojekyll: doc/build/html/index.html doc/build/html/htmlcov/index.html
+	# Make sure that github pages doesn't try to run jekyll on the docs.
+	touch doc/build/html/.nojekyll
 
 .PHONY: check-doc
 check-doc: build/check-doc.build-stamp
@@ -361,6 +375,8 @@ clean-check:
 	rm -f build/pydocstyle.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pydocstyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pydocstyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: clean-test
 clean-test:

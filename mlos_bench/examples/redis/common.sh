@@ -1,3 +1,8 @@
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
+
 REDIS_IMAGE='redis:7.0'
 REDIS_PORT='6379'
 REDIS_SERVER_NAME='redis-server'

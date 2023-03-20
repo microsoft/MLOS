@@ -1,0 +1,108 @@
+name: MLOS Linux
+
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: Manual MLOS Linux run
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: "1 0 * * *"
+
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+
+    # Test multiple versions of python.
+    strategy:
+      matrix:
+        python_version:
+          # Empty string is the floating most recent version of python
+          # (useful to catch new compatibility issues in nightly builds)
+          - ""
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          # FIXME: There are currently several missing/broken dependencies for python 3.11.
+          #- "3.11"
+
+    env:
+      cache_cur_date: 0000-00-00
+      cache_cur_hour: 00
+      cache_prev_hour: 23
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: conda-incubator/setup-miniconda@v2
+
+    - name: Set cache timestamp variables
+      id: set_cache_vars
+      run: |
+        set -x
+        if [ -z "${{ matrix.python_version }}" ]; then
+          CONDA_ENV_NAME=mlos_core
+        else
+          CONDA_ENV_NAME="mlos_core-${{ matrix.python_version }}"
+        fi
+        echo "CONDA_ENV_NAME=$CONDA_ENV_NAME" >> $GITHUB_ENV
+        echo "cache_cur_date=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
+        echo "cache_cur_hour=$(date -u +%H)" >> $GITHUB_ENV
+        echo "cache_prev_hour=$(date -u -d'1 hour ago' +%H)" >> $GITHUB_ENV
+        echo "CONDA=$CONDA" >> $GITHUB_ENV
+
+    - name: Restore cached conda environment
+      id: restore-conda-cache
+      if: github.event_name != 'schedule'
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.CONDA }}/envs/${{ env.CONDA_ENV_NAME }}
+        key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
+        restore-keys: |
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
+          conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}
+
+    - name: Log some environment variables for debugging
+      run: |
+        set -x
+        printenv
+        echo "cache_cur_date: $cache_cur_date"
+        echo "cache_cur_hour: $cache_cur_hour"
+        echo "cache_prev_hour: $cache_prev_hour"
+        echo "cache-hit: ${{ steps.restore-conda-cache.outputs.cache-hit }}"
+
+    - name: Update and configure conda
+      run: |
+        set -x
+        conda config --set channel_priority strict
+        #conda update -v -y -n base conda
+
+    # Try and speed up the pipeline by using a faster solver:
+    - name: Install and default to mamba solver
+      run: |
+        set -x
+        conda install -v -y -n base conda-libmamba-solver
+        # Try to set either of the configs for the solver.
+        conda config --set experimental_solver libmamba || true
+        conda config --set solver libmamba || true
+        echo "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
+        echo "EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
+
+    - name: Create/update mlos_core conda environment
+      run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v conda-env
+
+    # This is moreso about code cleanliness, which is a dev thing, not a
+    # functionality thing, and the rules for that change between python versions,
+    # so only do this for the default in the devcontainer.
+    #- name: Run lint checks
+    #  run: make CONDA_ENV_NAME=$CONDA_ENV_NAME check
+
+    # Only run the coverage checks on the devcontainer job.
+    - name: Run tests
+      run: make CONDA_ENV_NAME=$CONDA_ENV_NAME SKIP_COVERAGE=true test
+
+    - name: Generate and test binary distribution files
+      run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v dist dist-test

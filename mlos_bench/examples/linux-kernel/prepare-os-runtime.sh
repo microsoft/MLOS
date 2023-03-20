@@ -1,4 +1,8 @@
 #!/bin/bash
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 
 # Script to apply new runtime parameters of booted VM.
 # This script should be run in the VM.

@@ -12,7 +12,7 @@ Which are implemented using [`Services`](../service/).
 
 Environments also have [`Tunables`](../tunables/) and [`TunableGroups`](../tunables/) for controlling their configuration.
 
-Environments can also be stackable via the [`CompositeEnvironment`](./composite.py) class.
+Environments can also be stackable via the [`CompositeEnvironment`](./composite_env.py) class.
 
 For instance, a VM, OS, and Application Environment can be stacked together to form a full benchmarking environment, each with their own tunables.
 
