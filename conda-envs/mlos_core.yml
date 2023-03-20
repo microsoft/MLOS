@@ -15,6 +15,7 @@ dependencies:
   - pytest-xdist
   - pytest-timeout
   - setuptools
+  - setuptools-scm
   - jupyter
   - ipykernel
   - nb_conda_kernels
@@ -27,6 +28,7 @@ dependencies:
   # NOTE: GPy is currently required by emukit.
   #- gcc_linux-64
   - pip:
+    - bump2version
     - pytest-local-badge
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

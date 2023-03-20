@@ -12,9 +12,6 @@ set -eu
 scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir/"
 
-CONDA_ENV_NAME=${CONDA_ENV_NAME:-mlos_core}
-conda run -n $CONDA_ENV_NAME pip install bump2version
-
 set -x
 # Example usage: "./update-version.sh --dry-run patch" to bump v0.0.4 -> v0.0.5, for instance.
-conda run -n $CONDA_ENV_NAME bumpversion --verbose $*
+conda run -n ${CONDA_ENV_NAME:-mlos_core} bumpversion --verbose $*

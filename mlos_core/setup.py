@@ -9,7 +9,13 @@ Setup instructions for the mlos_core package.
 from itertools import chain
 from setuptools import setup, find_packages
 
-from _version import _VERSION    # pylint: disable=import-private-name
+from setuptools_scm import get_version
+
+from _version import _VERSION   # pylint: disable=import-private-name
+
+version = get_version(root='..', relative_to=__file__)
+if version is not None:
+    _VERSION = version
 
 extra_requires = {
     'emukit': 'emukit',
