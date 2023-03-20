@@ -143,7 +143,7 @@ class Optimizer(metaclass=ABCMeta):
         Returns
         -------
         value : float
-            A scalar benchmark score to MINIMIZE.
+            The scalar benchmark score extracted (and possibly transformed) from the dataframe that's being minimized.
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
