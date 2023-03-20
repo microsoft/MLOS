@@ -1,3 +1,4 @@
+# Basic Dockerfile for testing the SSH service.
 FROM debian:latest
 
 ARG PORT=2222
