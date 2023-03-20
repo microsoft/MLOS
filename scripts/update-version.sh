@@ -10,7 +10,7 @@
 set -eu
 
 scriptdir=$(dirname "$(readlink -f "$0")")
-cd "$scriptdir/"
+cd "$scriptdir/.."
 
 set -x
 # Example usage: "./update-version.sh --dry-run patch" to bump v0.0.4 -> v0.0.5, for instance.
