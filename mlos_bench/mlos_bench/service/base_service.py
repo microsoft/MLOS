@@ -9,6 +9,8 @@ Base class for the service mix-ins.
 import json
 import logging
 
+from abc import ABCMeta
+
 from typing import Callable, Dict
 
 from mlos_bench.util import instantiate_from_config
@@ -16,9 +18,9 @@ from mlos_bench.util import instantiate_from_config
 _LOG = logging.getLogger(__name__)
 
 
-class Service:
+class Service(metaclass=ABCMeta):
     """
-    An abstract base of all environment services.
+    Base class for all Services and used to build up mix-ins.
     """
 
     @classmethod
@@ -88,6 +90,8 @@ class Service:
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Service: %s Add methods: %s",
                        self.__class__.__name__, list(services.keys()))
+
+        # TODO? Throw a warning when an existing method is being overwritten?
 
         self._services.update(services)
         self.__dict__.update(self._services)

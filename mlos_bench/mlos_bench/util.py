@@ -56,7 +56,7 @@ def instantiate_from_config(base_class: type, class_name: str, *args, **kwargs):
         Currently it's one of {Environment, Service, Optimizer}.
     class_name : str
         FQN of a Python class to instantiate, e.g.,
-        "mlos_bench.environment.remote.VMEnv".
+        "mlos_bench.environment.remote.HostEnv".
         Must be derived from the `base_class`.
     args : list
         Positional arguments to pass to the constructor.

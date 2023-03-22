@@ -15,13 +15,14 @@ from typing import Any, Tuple, List, Dict, Callable
 import requests
 
 from mlos_bench.environment import Status
-from mlos_bench.service import Service
+from mlos_bench.service.base_service import Service
+from mlos_bench.service.remote.base_remote_exec_service import RemoteExecService
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
+class AzureVMService(RemoteExecService, HostService, Service):  # pylint: disable=too-many-instance-attributes
     """
     Helper methods to manage VMs on Azure.
     """
@@ -417,8 +418,8 @@ class AzureVMService(Service):  # pylint: disable=too-many-instance-attributes
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-            VMEnv tunables are variable parameters that, together with the
-            VMEnv configuration, are sufficient to provision a VM.
+            HostEnv tunables are variable parameters that, together with the
+            HostEnv configuration, are sufficient to provision a VM.
 
         Returns
         -------

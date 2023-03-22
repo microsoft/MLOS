@@ -4,6 +4,8 @@
 #
 """
 Remotely executed benchmark/script environment.
+
+e.g. Application Environment
 """
 
 import logging
@@ -12,6 +14,7 @@ from typing import Optional, Tuple, List
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.remote.base_remote_exec_service import RemoteExecService
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -19,7 +22,9 @@ _LOG = logging.getLogger(__name__)
 
 class RemoteEnv(Environment):
     """
-    Environment to run benchmarks and scripts on a remote host.
+    Environment to run benchmarks and scripts on a remote host OS.
+
+    e.g. Application Environment
     """
 
     def __init__(self,
@@ -49,7 +54,7 @@ class RemoteEnv(Environment):
             A collection of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM, OS, etc.).
         """
         super().__init__(name, config, global_config, tunables, service)
 
@@ -89,9 +94,9 @@ class RemoteEnv(Environment):
 
         if self._wait_boot:
             _LOG.info("Wait for the remote environment to start: %s", self)
-            (status, params) = self._service.vm_start(self._params)
+            (status, params) = self._service.host_start(self._params)
             if status.is_pending:
-                (status, _) = self._service.wait_vm_operation(params)
+                (status, _) = self._service.wait_host_operation(params)
             if not status.is_succeeded:
                 return False
 
@@ -155,11 +160,13 @@ class RemoteEnv(Environment):
             A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
+        remote_exec_service: RemoteExecService = self._service
+        # TODO: Assert it's a subclass?
         _LOG.debug("Submit script: %s", self)
-        (status, output) = self._service.remote_exec(script, self._params)
+        (status, output) = remote_exec_service.remote_exec(script, self._params)
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
-            (status, output) = self._service.get_remote_exec_results(output)
+            (status, output) = remote_exec_service.get_remote_exec_results(output)
             # TODO: extract the results from `output`.
         _LOG.debug("Status: %s :: %s", status, output)
         return (status, output)

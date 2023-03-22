@@ -12,6 +12,7 @@ import logging
 from typing import Optional, Tuple
 
 from mlos_bench.environment.status import Status
+from mlos_bench.service.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
 
@@ -24,7 +25,14 @@ class Environment(metaclass=abc.ABCMeta):
     """
 
     @classmethod
-    def new(cls, env_name, class_name, config, global_config=None, tunables=None, service=None):
+    def new(cls,
+            env_name: str,
+            class_name: str,
+            config: dict,
+            global_config: dict = None,
+            tunables: TunableGroups = None,
+            service: Service = None
+    ):
         # pylint: disable=too-many-arguments
         """
         Factory method for a new environment with a given config.
@@ -35,7 +43,7 @@ class Environment(metaclass=abc.ABCMeta):
             Human-readable name of the environment.
         class_name: str
             FQN of a Python class to instantiate, e.g.,
-            "mlos_bench.environment.remote.VMEnv".
+            "mlos_bench.environment.remote.HostEnv".
             Must be derived from the `Environment` class.
         config : dict
             Free-format dictionary that contains the benchmark environment
@@ -58,7 +66,31 @@ class Environment(metaclass=abc.ABCMeta):
         return instantiate_from_config(cls, class_name, env_name, config,
                                        global_config, tunables, service)
 
-    def __init__(self, name, config, global_config=None, tunables=None, service=None):
+    # TODO
+    @abc.abstractmethod
+    def _validate_service(self, service: Service) -> None:
+        """
+        Validate the Service object being used for this environment.
+
+        Parameters
+        ----------
+        service: Service
+            An optional service object (e.g., providing methods to
+            deploy or reboot a VM, etc.).
+
+        Returns
+        -------
+        None
+        """
+        raise NotImplementedError('This method should be implemented by the derived class.')
+
+    def __init__(self,
+                 name: str,
+                 config: dict,
+                 global_config: dict = None,
+                 tunables: TunableGroups = None,
+                 service: Service = None
+    ):
         # pylint: disable=too-many-arguments
         """
         Create a new environment with a given config.
@@ -116,7 +148,7 @@ class Environment(metaclass=abc.ABCMeta):
     def __repr__(self):
         return f"Env: {self.__class__} :: '{self.name}'"
 
-    def _combine_tunables(self, tunables):
+    def _combine_tunables(self, tunables: TunableGroups):
         """
         Plug tunable values into the base config. If the tunable group is unknown,
         ignore it (it might belong to another environment). This method should

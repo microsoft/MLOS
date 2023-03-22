@@ -27,9 +27,9 @@ class OSEnv(Environment):
         ----------
         tunables : TunableGroups
             A collection of groups of tunable parameters along with the
-            parameters' values. VMEnv tunables are variable parameters that,
-            together with the VMEnv configuration, are sufficient to provision
-            and start a VM.
+            parameters' values. HostEnv tunables are variable parameters that,
+            together with the HostEnv configuration, are sufficient to provision
+            and start a host.
         global_config : dict
             Free-format dictionary of global parameters of the environment
             that are not used in the optimization process.
@@ -43,9 +43,9 @@ class OSEnv(Environment):
         if not super().setup(tunables, global_config):
             return False
 
-        (status, params) = self._service.vm_start(self._params)
+        (status, params) = self._service.host_start(self._params)
         if status.is_pending:
-            (status, _) = self._service.wait_vm_operation(params)
+            (status, _) = self._service.wait_host_operation(params)
 
         self._is_ready = status in {Status.SUCCEEDED, Status.READY}
         return self._is_ready
@@ -55,9 +55,9 @@ class OSEnv(Environment):
         Clean up and shut down the host without deprovisioning it.
         """
         _LOG.info("OS tear down: %s", self)
-        (status, params) = self._service.vm_stop()
+        (status, params) = self._service.host_stop()
         if status.is_pending:
-            (status, _) = self._service.wait_vm_operation(params)
+            (status, _) = self._service.wait_host_operation(params)
 
         super().teardown()
         _LOG.debug("Final status of OS stopping: %s :: %s", self, status)
