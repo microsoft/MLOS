@@ -62,7 +62,7 @@ class Storage(metaclass=ABCMeta):
 
         Returns
         -------
-        db : Optimizer
+        db : Storage
             An instance of the `Storage` class initialized with `config`.
         """
         return instantiate_from_config(cls, class_name, config)
@@ -94,6 +94,7 @@ class Storage(metaclass=ABCMeta):
             An object that allows to update the storage with
             the results of the experiment and related data.
         """
+
     class Experiment(metaclass=ABCMeta):
         """
         Base interface for storing the results of the experiment.
