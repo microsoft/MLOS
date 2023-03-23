@@ -138,7 +138,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self) -> List[dict]:
+        def load(self, opt_target: str) -> List[dict]:
             """
             Load (tunable values, status, value) to warm-up the optimizer.
             This call returns data from ALL merged-in experiments and attempts
@@ -175,8 +175,8 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, storage, tunables: TunableGroups, experiment_id: str, trial_id: int):
-            self._storage = storage
+        def __init__(self, conn, tunables: TunableGroups, experiment_id: str, trial_id: int):
+            self._conn = conn
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
