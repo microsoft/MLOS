@@ -6,7 +6,7 @@
 Saving and restoring the benchmark data in DB-API-compliant SQL database - the Trial part.
 """
 
-import time
+from datetime import datetime
 import logging
 
 from mlos_bench.environment import Status
@@ -20,7 +20,7 @@ class Trial(Storage.Trial):
     Storing the results of a single run of the experiment in SQL database.
     """
 
-    def _update(self, table: str, timestamp: float, status: Status, value: dict = None):
+    def _update(self, table: str, timestamp: datetime, status: Status, value: dict = None):
         """
         Update the status of the trial and optionally add some results.
 
@@ -29,7 +29,7 @@ class Trial(Storage.Trial):
         table: str
             The name of the table to store the results in.
             Must be either 'trial_telemetry' or 'trail_results'.
-        timestamp: float
+        timestamp: datetime
             The timestamp of the final results. (Use `None` for telemetry).
         status: Status
             The status of the trial.
@@ -63,7 +63,7 @@ class Trial(Storage.Trial):
             raise
 
     def update(self, status: Status, value: dict = None):
-        self._update("trial_results", time.time(), status, value)
+        self._update("trial_results", datetime.now(), status, value)
 
     def update_telemetry(self, status: Status, value: dict = None):
         self._update("trial_telemetry", None, status, value)

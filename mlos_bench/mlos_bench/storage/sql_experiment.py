@@ -32,11 +32,23 @@ class Experiment(Storage.Experiment):
 
     def __enter__(self):
         super().__enter__()
+        _LOG.debug("Connecting to the database: %s with: %s", self._db.__name__, self._config)
         self._conn = self._db.connect(**self._config)
-        self._trial_id = self._conn.execute(
+        (trial_id,) = self._conn.execute(
             "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
             (self._experiment_id,)
-        ).fetchone()[0] or self._trial_id
+        ).fetchone()
+        if trial_id:
+            self._trial_id = trial_id
+        else:
+            # TODO: check and store git repo and commit.
+            self._conn.execute(
+                """
+                INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
+                VALUES (?, ?, ?, ?)
+                """,
+                (self._experiment_id, None, "", "")
+            )
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
