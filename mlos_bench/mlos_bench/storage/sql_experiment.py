@@ -24,20 +24,19 @@ class Experiment(Storage.Experiment):
     """
 
     def __init__(self, tunables: TunableGroups,
-                 experiment_id: str, db: ModuleType, config: dict):
-        super().__init__(tunables, experiment_id)
+                 experiment_id: str, trial_id: int, db: ModuleType, config: dict):
+        super().__init__(tunables, experiment_id, trial_id)
         self._db = db
         self._config = config
         self._conn = None
-        self._last_trial_id = 0
 
     def __enter__(self):
         super().__enter__()
         self._conn = self._db.connect(**self._config)
-        self._last_trial_id = self._conn.execute(
+        self._trial_id = self._conn.execute(
             "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
             (self._experiment_id,)
-        ).fetchone()[0] or 0
+        ).fetchone()[0] or self._trial_id
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -92,9 +91,9 @@ class Experiment(Storage.Experiment):
             yield Trial(self._conn, tunables, self._experiment_id, trial_id)
 
     def trial(self, tunables: TunableGroups):
-        self._last_trial_id += 1
+        self._trial_id += 1
         self._conn.execute(
             "INSERT INTO trial_status (exp_id, trial_id, status) VALUES (?, ?, 'PENDING')",
-            (self._experiment_id, self._last_trial_id)
+            (self._experiment_id, self._trial_id)
         )
-        return Trial(self._conn, tunables, self._experiment_id, self._last_trial_id)
+        return Trial(self._conn, tunables, self._experiment_id, self._trial_id)

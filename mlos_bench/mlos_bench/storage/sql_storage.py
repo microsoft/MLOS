@@ -29,4 +29,5 @@ class SqlStorage(Storage):
         self._db = importlib.import_module(module_name)
 
     def experiment(self):
-        return Experiment(self._tunables, self._experiment_id, self._db, self._config)
+        return Experiment(self._tunables, self._experiment_id, self._trial_id,
+                          self._db, self._config)

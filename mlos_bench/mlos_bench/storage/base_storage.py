@@ -88,10 +88,8 @@ class Storage(metaclass=ABCMeta):
         _LOG.debug("Storage config: %s", config)
         self._tunables = tunables.copy()
         self._config = config.copy()
-        self._experiment_id = self._config["experimentId"].strip()
-        self._trial_id = self._config.get("trialId")
-        if self._trial_id is not None:
-            self._trial_id = int(self._trial_id)
+        self._experiment_id = self._config.pop("experimentId").strip()
+        self._trial_id = int(self._config.pop("trialId", 0))
 
     @abstractmethod
     def experiment(self):
@@ -111,9 +109,10 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, tunables: TunableGroups, experiment_id: str):
+        def __init__(self, tunables: TunableGroups, experiment_id: str, trial_id: int = 0):
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
+            self._trial_id = trial_id
 
         def __enter__(self):
             """

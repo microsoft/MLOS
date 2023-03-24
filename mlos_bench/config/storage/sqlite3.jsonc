@@ -3,6 +3,11 @@
     "class": "mlos_bench.storage.SqlStorage",
 
     "config": {
+
+        // Can be provided via the command line or other global config.
+        "experimentId": "test-experiment-1",
+        "trialId": 0,  // optional
+
         "db_module": "sqlite3",
         // Parameters below must match kwargs of the .connect() call.
         // kwargs are passed as-is; config loader --path resolution not used.
