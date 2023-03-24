@@ -8,7 +8,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import List
+from typing import List, Tuple
 
 from mlos_bench.environment import Status
 from mlos_bench.tunables import TunableGroups
@@ -137,12 +137,11 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, opt_target: str) -> List[dict]:
+        def load(self, opt_target: str) -> Tuple[List[dict], List[float]]:
             """
-            Load (tunable values, status, value) to warm-up the optimizer.
+            Load (tunable values, benchmark scores) to warm-up the optimizer.
             This call returns data from ALL merged-in experiments and attempts
-            to impute the missing tunable values. The data is expected to be
-            in `pandas.DataFrame.to_dict('records')` format.
+            to impute the missing tunable values.
             """
 
         @abstractmethod

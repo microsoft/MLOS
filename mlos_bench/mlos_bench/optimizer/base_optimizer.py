@@ -99,15 +99,16 @@ class Optimizer(metaclass=ABCMeta):
             self._opt_sign = -1
 
     @abstractmethod
-    def bulk_register(self, data: List[dict]):
+    def bulk_register(self, configs: List[dict], scores: List[float]):
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
         Parameters
         ----------
-        data : List[dict]
-            Records of tunable values and benchmark scores from other experiments.
-            The data is expected to be in `pandas.DataFrame.to_dict('records')` format.
+        configs : List[dict]
+            Records of tunable values from other experiments.
+        scores : List[float]
+            Benchmark results from experiments that correspond to `configs`.
         """
 
     @abstractmethod

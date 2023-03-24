@@ -47,11 +47,10 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
-    def bulk_register(self, data: List[dict]):
-        data = pd.DataFrame(data)
+    def bulk_register(self, configs: List[dict], scores: List[float]):
         tunables_names = list(self._tunables.get_param_values().keys())
-        df_configs = data[tunables_names]
-        df_scores = data[self._opt_target] * self._opt_sign
+        df_configs = pd.DataFrame(configs)[tunables_names]
+        df_scores = pd.Series(scores) * self._opt_sign
         self._opt.register(df_configs, df_scores)
 
     def suggest(self) -> TunableGroups:

@@ -7,7 +7,7 @@ Saving and restoring the benchmark data in DB-API-compliant SQL database - the E
 """
 
 import logging
-from typing import List
+from typing import List, Tuple
 
 from mlos_bench.storage import Storage
 from mlos_bench.tunables import TunableGroups
@@ -47,8 +47,9 @@ class Experiment(Storage.Experiment):
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError()
 
-    def load(self, opt_target: str) -> List[dict]:
-        res = []
+    def load(self, opt_target: str) -> Tuple[List[dict], List[float]]:
+        configs = []
+        scores = []
         cur_trials = self._conn.execute(
             """
             SELECT trial_id FROM trial_status
@@ -65,10 +66,9 @@ class Experiment(Storage.Experiment):
                 """,
                 (self._experiment_id, trial_id, opt_target)
             )
-            score = cur_score.fetchone()[0]
-            tunables[opt_target] = score
-            res.append(tunables)
-        return res
+            configs.append(tunables)
+            scores.append(cur_score.fetchone()[0])
+        return (configs, scores)
 
     def _get_tunables(self, trial_id: int) -> dict:
         return dict(self._conn.execute(
