@@ -34,11 +34,9 @@ class MockOptimizer(Optimizer):
         self._best_config = None
         self._best_score = None
 
-    def bulk_register(self, data: List[dict]):
-        for record in data:
-            values = record.copy()
-            score = values.pop(self._opt_target)
-            tunables = self._tunables.copy().assign(values)
+    def bulk_register(self, configs: List[dict], scores: List[float]):
+        for (params, score) in zip(configs, scores):
+            tunables = self._tunables.copy().assign(params)
             self.register(tunables, Status.SUCCEEDED, score)
 
     def suggest(self) -> TunableGroups:
