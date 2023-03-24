@@ -7,6 +7,7 @@ Saving and restoring the benchmark data in DB-API-compliant SQL database - the E
 """
 
 import logging
+from types import ModuleType
 from typing import List, Tuple
 
 from mlos_bench.storage import Storage
@@ -22,7 +23,8 @@ class Experiment(Storage.Experiment):
     Logic for retrieving and storing the results of a single experiment.
     """
 
-    def __init__(self, tunables: TunableGroups, experiment_id: str, db, config: dict):
+    def __init__(self, tunables: TunableGroups,
+                 experiment_id: str, db: ModuleType, config: dict):
         super().__init__(tunables, experiment_id)
         self._db = db
         self._config = config
