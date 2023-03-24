@@ -10,8 +10,7 @@ import importlib
 import logging
 
 from mlos_bench.tunables import TunableGroups
-from mlos_bench.storage import Storage
-
+from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql_experiment import Experiment
 
 _LOG = logging.getLogger(__name__)

@@ -10,9 +10,8 @@ import logging
 from types import ModuleType
 from typing import List, Tuple
 
-from mlos_bench.storage import Storage
 from mlos_bench.tunables import TunableGroups
-
+from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql_trial import Trial
 
 _LOG = logging.getLogger(__name__)
@@ -25,6 +24,7 @@ class Experiment(Storage.Experiment):
 
     def __init__(self, tunables: TunableGroups,
                  experiment_id: str, trial_id: int, db: ModuleType, config: dict):
+        # pylint: disable=too-many-arguments
         super().__init__(tunables, experiment_id, trial_id)
         self._db = db
         self._config = config

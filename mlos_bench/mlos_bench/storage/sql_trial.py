@@ -9,8 +9,8 @@ Saving and restoring the benchmark data in DB-API-compliant SQL database - the T
 import time
 import logging
 
-from mlos_bench.storage import Storage
 from mlos_bench.environment import Status
+from mlos_bench.storage.base_storage import Storage
 
 _LOG = logging.getLogger(__name__)
 
