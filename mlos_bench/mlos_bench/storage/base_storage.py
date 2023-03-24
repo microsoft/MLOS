@@ -101,8 +101,7 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, storage, experiment_id: str):
-            self._storage = storage
+        def __init__(self, experiment_id: str):
             self._experiment_id = experiment_id
 
         def __enter__(self):
