@@ -58,7 +58,7 @@ class Experiment(Storage.Experiment):
             """,
             (self._experiment_id,)
         )
-        for (trial_id,) in cur_trials:
+        for (trial_id,) in cur_trials.fetchall():
             tunables = self._get_tunables(trial_id)
             cur_score = self._conn.execute(
                 """
@@ -86,7 +86,7 @@ class Experiment(Storage.Experiment):
             "SELECT trial_id FROM trial_status WHERE exp_id = ? AND ts_end IS NULL",
             (self._experiment_id,)
         )
-        for (trial_id,) in cur_trials:
+        for (trial_id,) in cur_trials.fetchall():
             tunables = self._tunables.copy().assign(self._get_tunables(trial_id))
             yield Trial(self._conn, tunables, self._experiment_id, trial_id)
 

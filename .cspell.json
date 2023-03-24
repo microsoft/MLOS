@@ -12,6 +12,7 @@
         "dataframe",
         "discretization",
         "discretize",
+        "duckdb",
         "emukit",
         "ENOENT",
         "executemany",
