@@ -98,6 +98,13 @@ class Optimizer(metaclass=ABCMeta):
                 raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
             self._opt_sign = -1
 
+    @property
+    def target(self) -> str:
+        """
+        The name of the target metric to optimize.
+        """
+        return self._opt_target
+
     @abstractmethod
     def bulk_register(self, configs: List[dict], scores: List[float]):
         """
