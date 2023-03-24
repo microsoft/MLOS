@@ -1,0 +1,9 @@
+// Local SQLite3 database.
+{
+    "class": "mlos_bench.storage.SqlStorage",
+
+    "config": {
+        "db_module": "sqlite3",
+        "database": "./mlos_bench.sqlite3"
+    }
+}

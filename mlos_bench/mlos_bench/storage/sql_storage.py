@@ -6,9 +6,8 @@
 Saving and restoring the benchmark data in DB-API-compliant SQL database.
 """
 
+import importlib
 import logging
-
-import sqlite3
 
 from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage import Storage
@@ -25,7 +24,9 @@ class SqlStorage(Storage):
 
     def __init__(self, tunables: TunableGroups, config: dict):
         super().__init__(tunables, config)
-        self._db = sqlite3
+        module_name = self._config.pop("db_module")
+        _LOG.debug("Using DB module: %s", module_name)
+        self._db = importlib.import_module(module_name)
 
     def experiment(self):
         return Experiment(self._tunables, self._experiment_id, self._db, self._config)
