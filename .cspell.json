@@ -21,6 +21,7 @@
         "ipykernel",
         "iterrows",
         "jupyterlab",
+        "kwargs",
         "llamatune",
         "matplotlib",
         "mlos",
