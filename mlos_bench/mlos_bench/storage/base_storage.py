@@ -214,3 +214,9 @@ class Storage(metaclass=ABCMeta):
             """
             Update the storage with the results of the experiment.
             """
+
+        @abstractmethod
+        def update_telemetry(self, status: Status, value: dict = None):
+            """
+            Save the experiment's telemetry data and intermediate status.
+            """

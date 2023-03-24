@@ -20,15 +20,30 @@ class Trial(Storage.Trial):
     Storing the results of a single run of the experiment in SQL database.
     """
 
-    def update(self, status: Status, value: dict = None):
+    def _update(self, table: str, timestamp: float, status: Status, value: dict = None):
+        """
+        Update the status of the trial and optionally add some results.
+
+        Parameters
+        ----------
+        table: str
+            The name of the table to store the results in.
+            Must be either 'trial_telemetry' or 'trail_results'.
+        timestamp: float
+            The timestamp of the final results. (Use `None` for telemetry).
+        status: Status
+            The status of the trial.
+        value: dict
+            Pairs of (key, value): intermediate or final results of the trial.
+        """
         _LOG.debug("Updating experiment run: %s", self)
         cursor = self._conn.cursor()
         cursor.execute("BEGIN")
         try:
             if value:
                 cursor.executemany(
-                    """
-                    INSERT INTO trial_results (exp_id, trial_id, param_id, param_value)
+                    f"""
+                    INSERT INTO {table} (exp_id, trial_id, param_id, param_value)
                     VALUES (?, ?, ?, ?)
                     """,
                     ((self._experiment_id, self._trial_id, key, val)
@@ -40,9 +55,15 @@ class Trial(Storage.Trial):
                 UPDATE trial_status SET status = ?, ts_end = ?
                 WHERE exp_id = ? AND trial_id = ?
                 """,
-                (status.name, time.time(), self._experiment_id, self._trial_id)
+                (status.name, timestamp, self._experiment_id, self._trial_id)
             )
             cursor.execute("COMMIT")
         except Exception:
             cursor.execute("ROLLBACK")
             raise
+
+    def update(self, status: Status, value: dict = None):
+        self._update("trial_results", time.time(), status, value)
+
+    def update_telemetry(self, status: Status, value: dict = None):
+        self._update("trial_telemetry", None, status, value)

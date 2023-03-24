@@ -77,7 +77,8 @@ def _optimize(env: Environment, opt: Optimizer,
         # Load (tunable values, benchmark scores) to warm-up the optimizer.
         # `.load()` returns data from ALL merged-in experiments and attempts
         # to impute the missing tunable values.
-        opt.bulk_register(*exp.load(opt.target))
+        (configs, scores) = exp.load(opt.target)
+        opt.bulk_register(configs, scores)
 
         # First, complete any pending trials.
         for trial in exp.pending():
@@ -121,7 +122,7 @@ def _run(env: Environment, opt: Optimizer,
     # In async mode, poll the environment for status and telemetry
     # and update the storage with the intermediate results.
     (status, telemetry) = env.status()
-    trial.update(status, telemetry)
+    trial.update_telemetry(status, telemetry)
 
     (status, results) = env.run()  # Block and wait for the final result.
     _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
