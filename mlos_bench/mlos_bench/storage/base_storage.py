@@ -24,12 +24,15 @@ class Storage(metaclass=ABCMeta):
     """
 
     @staticmethod
-    def load(config: dict, global_config: dict = None):
+    def load(tunables: TunableGroups, config: dict, global_config: dict = None):
         """
         Instantiate the Storage object from configuration.
 
         Parameters
         ----------
+        tunables : TunableGroups
+            Tunable parameters of the environment. We need them to validate the
+            configurations of merged-in experiments and restored/pending trials.
         config : dict
             Configuration of the storage system, as loaded from JSON.
         global_config : dict
@@ -41,12 +44,12 @@ class Storage(metaclass=ABCMeta):
             A new instance of the Storage class.
         """
         (class_name, db_config) = prepare_class_load(config, global_config)
-        storage = Storage.new(class_name, db_config)
+        storage = Storage.new(class_name, tunables, db_config)
         _LOG.info("Created storage: %s", storage)
         return storage
 
     @classmethod
-    def new(cls, class_name: str, config: dict):
+    def new(cls, class_name: str, tunables: TunableGroups, config: dict):
         """
         Factory method for a new Storage object with a given config.
 
@@ -55,6 +58,9 @@ class Storage(metaclass=ABCMeta):
         class_name: str
             FQN of a Python class to instantiate.
             Must be derived from the `Storage` class.
+        tunables : TunableGroups
+            Tunable parameters of the environment. We need them to validate the
+            configurations of merged-in experiments and restored/pending trials.
         config : dict
             Free-format dictionary that contains the storage configuration.
             It will be passed as a constructor parameter of the class
@@ -65,18 +71,22 @@ class Storage(metaclass=ABCMeta):
         db : Storage
             An instance of the `Storage` class initialized with `config`.
         """
-        return instantiate_from_config(cls, class_name, config)
+        return instantiate_from_config(cls, class_name, tunables, config)
 
-    def __init__(self, config: dict):
+    def __init__(self, tunables: TunableGroups, config: dict):
         """
         Create a new storage object.
 
         Parameters
         ----------
+        tunables : TunableGroups
+            Tunable parameters of the environment. We need them to validate the
+            configurations of merged-in experiments and restored/pending trials.
         config : dict
             Free-format key/value pairs of configuration parameters.
         """
         _LOG.debug("Storage config: %s", config)
+        self._tunables = tunables.copy()
         self._config = config.copy()
         self._experiment_id = self._config["experimentId"].strip()
         self._trial_id = self._config.get("trialId")
@@ -101,7 +111,8 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, experiment_id: str):
+        def __init__(self, tunables: TunableGroups, experiment_id: str):
+            self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
 
         def __enter__(self):
@@ -145,15 +156,9 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def pending(self, tunables: TunableGroups):
+        def pending(self):
             """
             Return an iterator over the pending experiment runs.
-
-            Parameters
-            ----------
-            tunables : TunableGroups
-                Tunable parameters of the environment to be used as
-                a placeholder / original copy for the tunables in each trial.
             """
 
         @abstractmethod

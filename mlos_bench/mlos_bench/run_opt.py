@@ -39,7 +39,8 @@ def _main():
                          launcher.load_config(args.optimizer),
                          launcher.global_config)
 
-    storage = Storage.load(launcher.load_config(args.storage),
+    storage = Storage.load(env.tunable_params(),
+                           launcher.load_config(args.storage),
                            launcher.global_config)
 
     result = _optimize(env, opt, storage, launcher.global_config)
@@ -79,7 +80,7 @@ def _optimize(env: Environment, opt: Optimizer,
         opt.bulk_register(*exp.load(opt.target))
 
         # First, complete any pending trials.
-        for trial in exp.pending(env.tunable_params):
+        for trial in exp.pending():
             _run(env, opt, trial, global_config)
 
         # Then, run new trials until the optimizer is done.

@@ -22,16 +22,16 @@ class Experiment(Storage.Experiment):
     Logic for retrieving and storing the results of a single experiment.
     """
 
-    def __init__(self, db, connection_kwargs, experiment_id: str):
-        super().__init__(experiment_id)
+    def __init__(self, tunables: TunableGroups, experiment_id: str, db, config: dict):
+        super().__init__(tunables, experiment_id)
         self._db = db
-        self._connection_kwargs = connection_kwargs
+        self._config = config
         self._conn = None
         self._last_trial_id = 0
 
     def __enter__(self):
         super().__enter__()
-        self._conn = self._db.connect(**self._connection_kwargs)
+        self._conn = self._db.connect(**self._config)
         self._last_trial_id = self._conn.execute(
             "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
             (self._experiment_id,)
@@ -79,15 +79,15 @@ class Experiment(Storage.Experiment):
             (self._experiment_id, trial_id)
         ).fetchall())
 
-    def pending(self, tunables: TunableGroups):
+    def pending(self):
         _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
         cur_trials = self._conn.execute(
             "SELECT trial_id FROM trial_status WHERE exp_id = ? AND ts_end IS NULL",
             (self._experiment_id,)
         )
         for (trial_id,) in cur_trials:
-            new_tunables = tunables.copy().assign(self._get_tunables(trial_id))
-            yield Trial(self._conn, new_tunables, self._experiment_id, trial_id)
+            tunables = self._tunables.copy().assign(self._get_tunables(trial_id))
+            yield Trial(self._conn, tunables, self._experiment_id, trial_id)
 
     def trial(self, tunables: TunableGroups):
         self._last_trial_id += 1

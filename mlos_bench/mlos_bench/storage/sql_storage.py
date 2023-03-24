@@ -10,6 +10,7 @@ import logging
 
 import sqlite3
 
+from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage import Storage
 
 from mlos_bench.storage.sql_experiment import Experiment
@@ -22,10 +23,9 @@ class SqlStorage(Storage):
     An implementation of the Storage interface for a DB-API-compliant database.
     """
 
-    def __init__(self, config: dict):
-        super().__init__(config)
+    def __init__(self, tunables: TunableGroups, config: dict):
+        super().__init__(tunables, config)
         self._db = sqlite3
-        self._connection_params = config.get("connection_params", {})
 
     def experiment(self):
-        return Experiment(self._db, self._connection_params, self._experiment_id)
+        return Experiment(self._tunables, self._experiment_id, self._db, self._config)
