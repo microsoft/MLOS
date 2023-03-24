@@ -48,7 +48,7 @@ CREATE TABLE trial_status (
     trial_id trial_id_t DEFAULT nextval('trial_id_seq'),
     ts_start TIMESTAMP NOT NULL DEFAULT now(),
     ts_end TIMESTAMP,
-    trial_status status_t,
+    status status_t,
 
     PRIMARY KEY (exp_id, trial_id),
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)

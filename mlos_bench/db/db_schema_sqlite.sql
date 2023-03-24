@@ -26,7 +26,7 @@ CREATE TABLE trial_status (
     ts_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ts_end TIMESTAMP,
     -- Should match the text IDs of `mlos_bench.environment.Status` enum:
-    trial_status VARCHAR(16),
+    status VARCHAR(16),
 
     PRIMARY KEY (exp_id, trial_id),
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)

@@ -147,9 +147,15 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def pending(self):
+        def pending(self, tunables: TunableGroups):
             """
             Return an iterator over the pending experiment runs.
+
+            Parameters
+            ----------
+            tunables : TunableGroups
+                Tunable parameters of the environment to be used as
+                a placeholder / original copy for the tunables in each trial.
             """
 
         @abstractmethod
@@ -180,24 +186,6 @@ class Storage(metaclass=ABCMeta):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
-
-        def __enter__(self):
-            """
-            Enter the context of the experiment run.
-            """
-            _LOG.debug("Starting experiment run: %s", self)
-            return self
-
-        def __exit__(self, exc_type, exc_val, exc_tb):
-            """
-            End the context of the experiment run.
-            """
-            if exc_val is None:
-                _LOG.debug("Finishing experiment run: %s", self)
-            else:
-                _LOG.warning("Finishing experiment run: %s",
-                             self, exc_info=(exc_type, exc_val, exc_tb))
-            return False  # Do not suppress exceptions
 
         def __repr__(self) -> str:
             return f"{self._experiment_id}:{self._trial_id}"

@@ -6,6 +6,7 @@
 Saving and restoring the benchmark data in DB-API-compliant SQL database.
 """
 
+import time
 import logging
 from typing import List
 
@@ -49,6 +50,7 @@ class SqlStorage(Storage):
                 "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
                 (self._experiment_id,)
             ).fetchone()[0] or 0
+            return self
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             if self._conn:
@@ -69,14 +71,7 @@ class SqlStorage(Storage):
                 (self._experiment_id,)
             )
             for (trial_id,) in cur_trials:
-                cur_tunables = self._conn.execute(
-                    """
-                    SELECT param_id, param_value FROM trial_config
-                    WHERE exp_id = ? AND trial_id = ?
-                    """,
-                    (self._experiment_id, trial_id)
-                )
-                tunables = dict(cur_tunables.fetchall())
+                tunables = self._get_tunables(trial_id)
                 cur_score = self._conn.execute(
                     """
                     SELECT param_value FROM trial_results
@@ -89,29 +84,62 @@ class SqlStorage(Storage):
                 res.append(tunables)
             return res
 
-        def pending(self):
+        def _get_tunables(self, trial_id: int) -> dict:
+            return dict(self._conn.execute(
+                """
+                SELECT param_id, param_value FROM trial_config
+                WHERE exp_id = ? AND trial_id = ?
+                """,
+                (self._experiment_id, trial_id)
+            ).fetchall())
+
+        def pending(self, tunables: TunableGroups):
             _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
-            return []
+            cur_trials = self._conn.execute(
+                "SELECT trial_id FROM trial_status WHERE exp_id = ? AND ts_end IS NULL",
+                (self._experiment_id,)
+            )
+            for (trial_id,) in cur_trials:
+                new_tunables = tunables.copy().assign(self._get_tunables(trial_id))
+                yield SqlStorage.Trial(self._conn, new_tunables, self._experiment_id, trial_id)
 
         def trial(self, tunables: TunableGroups):
             self._last_trial_id += 1
-            return SqlStorage.Trial(self._conn, tunables,
-                                    self._experiment_id, self._last_trial_id)
+            self._conn.execute(
+                "INSERT INTO trial_status (exp_id, trial_id, status) VALUES (?, ?, 'PENDING')",
+                (self._experiment_id, self._last_trial_id)
+            )
+            return SqlStorage.Trial(
+                self._conn, tunables, self._experiment_id, self._last_trial_id)
 
     class Trial(Storage.Trial):
         """
         Storing the results of a single run of the experiment.
         """
 
-        def __init__(self, conn, tunables: TunableGroups,
-                     experiment_id: str, trial_id: int):
-            super().__init__(conn, tunables, experiment_id, trial_id)
-            _LOG.debug("Creating experiment run: %s", self)
-            self._conn.execute(
-                "INSERT INTO trial_status (exp_id, trial_id) VALUES (?, ?)",
-                (self._experiment_id, self._trial_id)
-            )
-
         def update(self, status: Status, value: dict = None):
             _LOG.debug("Updating experiment run: %s", self)
-            raise NotImplementedError()
+            cursor = self._conn.cursor()
+            cursor.execute("BEGIN")
+            try:
+                if value:
+                    cursor.executemany(
+                        """
+                        INSERT INTO trial_results (exp_id, trial_id, param_id, param_value)
+                        VALUES (?, ?, ?, ?)
+                        """,
+                        ((self._experiment_id, self._trial_id, key, val)
+                         for (key, val) in value.items())
+                    )
+                # FIXME: use the actual timestamp from the benchmark.
+                cursor.execute(
+                    """
+                    UPDATE trial_status SET status = ?, ts_end = ?
+                    WHERE exp_id = ? AND trial_id = ?
+                    """,
+                    (status.name, time.time(), self._experiment_id, self._trial_id)
+                )
+                cursor.execute("COMMIT")
+            except Exception:
+                cursor.execute("ROLLBACK")
+                raise

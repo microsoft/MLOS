@@ -79,14 +79,14 @@ def _optimize(env: Environment, opt: Optimizer,
         opt.bulk_register(exp.load())
 
         # First, complete any pending trials.
-        for trial in exp.pending():
+        for trial in exp.pending(env.tunable_params):
             _run(env, opt, trial, global_config)
 
         # Then, run new trials until the optimizer is done.
         while opt.not_converged():
             tunables = opt.suggest()
-            with exp.trial(tunables) as trial:
-                _run(env, opt, trial, global_config)
+            trial = exp.trial(tunables)
+            _run(env, opt, trial, global_config)
 
     best = opt.get_best_observation()
     _LOG.info("Env: %s best result: %s", env, best)
