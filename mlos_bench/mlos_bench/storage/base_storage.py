@@ -7,6 +7,7 @@ Base interface for saving and restoring the benchmark data.
 """
 
 import logging
+import subprocess
 from abc import ABCMeta, abstractmethod
 from typing import List, Tuple
 
@@ -134,6 +135,26 @@ class Storage(metaclass=ABCMeta):
 
         def __repr__(self) -> str:
             return self._experiment_id
+
+        def _git_info(self, _path: str = ".") -> Tuple[str, str]:
+            """
+            Get the git repository and commit hash of the current working directory.
+
+            Parameters
+            ----------
+            _path : str
+                Path to the git repository. Currently not used.
+
+            Returns
+            -------
+            (git_repo, git_commit) : Tuple[str, str]
+                Git repository URL and last commit hash.
+            """
+            git_repo = subprocess.check_output(
+                ["git", "remote", "get-url", "origin"], text=True).strip()
+            git_commit = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], text=True).strip()
+            return (git_repo, git_commit)
 
         @abstractmethod
         def merge(self, experiment_ids: List[str]):

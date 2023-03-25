@@ -33,6 +33,7 @@ class Experiment(Storage.Experiment):
     def __enter__(self):
         super().__enter__()
         _LOG.debug("Connecting to the database: %s with: %s", self._db.__name__, self._config)
+        (git_repo, git_commit) = self._git_info()
         self._conn = self._db.connect(**self._config)
         (trial_id,) = self._conn.execute(
             "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
@@ -47,7 +48,7 @@ class Experiment(Storage.Experiment):
                 INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
                 VALUES (?, ?, ?, ?)
                 """,
-                (self._experiment_id, None, "", "")
+                (self._experiment_id, None, git_repo, git_commit)
             )
         return self
 
