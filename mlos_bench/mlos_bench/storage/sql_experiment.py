@@ -113,7 +113,8 @@ class Experiment(Storage.Experiment):
                 INSERT INTO trial_config (exp_id, trial_id, param_id, param_value)
                 VALUES (?, ?, ?, ?)
                 """,
-                ((self._experiment_id, trial_id, tunable.name, tunable.value)
+                ((self._experiment_id, trial_id, tunable.name,
+                  str(tunable.value) if tunable.value is not None else None)
                  for (tunable, _group) in tunables)
             )
             cursor.execute(
