@@ -36,12 +36,14 @@ class MockOptimizer(Optimizer):
 
     def bulk_register(self, configs: List[dict], scores: List[float]):
         super().bulk_register(configs, scores)
+        n_iter = self._iter  # Do not advance the iteration counter during warm-up.
         for (params, score) in zip(configs, scores):
             tunables = self._tunables.copy().assign(params)
             self.register(tunables, Status.SUCCEEDED, float(score))
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %f", self.target, score)
+        self._iter = n_iter
 
     def suggest(self) -> TunableGroups:
         """
