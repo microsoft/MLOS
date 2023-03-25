@@ -136,14 +136,14 @@ class Storage(metaclass=ABCMeta):
         def __repr__(self) -> str:
             return self._experiment_id
 
-        def _git_info(self, _path: str = ".") -> Tuple[str, str]:
+        def _git_info(self, path: str = ".") -> Tuple[str, str]:
             """
             Get the git repository and commit hash of the current working directory.
 
             Parameters
             ----------
-            _path : str
-                Path to the git repository. Currently not used.
+            path : str
+                Path to the git repository.
 
             Returns
             -------
@@ -151,9 +151,9 @@ class Storage(metaclass=ABCMeta):
                 Git repository URL and last commit hash.
             """
             git_repo = subprocess.check_output(
-                ["git", "remote", "get-url", "origin"], text=True).strip()
+                ["cd", path, "&&", "git", "remote", "get-url", "origin"], text=True).strip()
             git_commit = subprocess.check_output(
-                ["git", "rev-parse", "HEAD"], text=True).strip()
+                ["cd", path, "&&", "git", "rev-parse", "HEAD"], text=True).strip()
             return (git_repo, git_commit)
 
         @abstractmethod
