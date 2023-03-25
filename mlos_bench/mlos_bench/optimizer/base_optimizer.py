@@ -121,6 +121,7 @@ class Optimizer(metaclass=ABCMeta):
         scores : List[float]
             Benchmark results from experiments that correspond to `configs`.
         """
+        _LOG.debug("Warm-up: %d configs, %d scores", len(configs), len(scores))
 
     @abstractmethod
     def suggest(self) -> TunableGroups:
