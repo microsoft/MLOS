@@ -158,6 +158,8 @@ build/*.build-stamp
 .env
 
 # Test databases
-*.db
-*.db.wal
 *.sqlite*
+*.db
+*.duckdb
+*.db.wal
+*.duckdb.wal
