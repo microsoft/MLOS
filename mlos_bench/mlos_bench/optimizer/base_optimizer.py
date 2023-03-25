@@ -186,7 +186,7 @@ class Optimizer(metaclass=ABCMeta):
             return None
         if isinstance(score, dict):
             score = score[self._opt_target]
-        return score * self._opt_sign
+        return float(score) * self._opt_sign
 
     def not_converged(self) -> bool:
         """
