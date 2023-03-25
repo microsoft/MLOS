@@ -51,7 +51,7 @@ class MlosCoreOptimizer(Optimizer):
         super().bulk_register(configs, scores)
         tunables_names = list(self._tunables.get_param_values().keys())
         df_configs = pd.DataFrame(configs)[tunables_names]
-        df_scores = pd.Series(scores) * self._opt_sign
+        df_scores = pd.Series(scores, dtype=float) * self._opt_sign
         self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -68,7 +68,7 @@ class MlosCoreOptimizer(Optimizer):
         # By default, hyperparameters in ConfigurationSpace are sorted by name:
         df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
         _LOG.debug("Dataframe:\n%s", df_config)
-        self._opt.register(df_config, pd.Series([score]))
+        self._opt.register(df_config, pd.Series([score], dtype=float))
         self._iter += 1
         return score
 

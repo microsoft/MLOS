@@ -38,7 +38,7 @@ class MockOptimizer(Optimizer):
         super().bulk_register(configs, scores)
         for (params, score) in zip(configs, scores):
             tunables = self._tunables.copy().assign(params)
-            self.register(tunables, Status.SUCCEEDED, score)
+            self.register(tunables, Status.SUCCEEDED, float(score))
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %f", self.target, score)
