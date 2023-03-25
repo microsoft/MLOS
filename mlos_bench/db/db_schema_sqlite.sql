@@ -4,12 +4,12 @@
 --
 -- SQLite3/DuckDB version of the DB schema.
 
-DROP TABLE IF EXISTS experiment_config;
+DROP TABLE IF EXISTS trial_telemetry;
+DROP TABLE IF EXISTS trial_results;
+DROP TABLE IF EXISTS trial_config;
 DROP TABLE IF EXISTS experiment_merge;
 DROP TABLE IF EXISTS trial_status;
-DROP TABLE IF EXISTS trial_config;
-DROP TABLE IF EXISTS trial_results;
-DROP TABLE IF EXISTS trial_telemetry;
+DROP TABLE IF EXISTS experiment_config;
 
 CREATE TABLE experiment_config (
     exp_id VARCHAR(128) NOT NULL,

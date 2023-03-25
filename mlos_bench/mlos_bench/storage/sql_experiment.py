@@ -103,9 +103,30 @@ class Experiment(Storage.Experiment):
             yield Trial(self._conn, tunables, self._experiment_id, trial_id)
 
     def trial(self, tunables: TunableGroups):
-        self._trial_id += 1
-        self._conn.execute(
-            "INSERT INTO trial_status (exp_id, trial_id, status) VALUES (?, ?, 'PENDING')",
-            (self._experiment_id, self._trial_id)
-        )
-        return Trial(self._conn, tunables, self._experiment_id, self._trial_id)
+        trial_id = self._trial_id + 1
+        _LOG.debug("Updating trial: %s:%d", self._experiment_id, trial_id)
+        cursor = self._conn.cursor()
+        cursor.execute("BEGIN")
+        try:
+            cursor.executemany(
+                """
+                INSERT INTO trial_config (exp_id, trial_id, param_id, param_value)
+                VALUES (?, ?, ?, ?)
+                """,
+                ((self._experiment_id, trial_id, tunable.name, tunable.value)
+                 for (tunable, _group) in tunables)
+            )
+            cursor.execute(
+                """
+                INSERT INTO trial_status (exp_id, trial_id, status)
+                VALUES (?, ?, 'PENDING')
+                """,
+                (self._experiment_id, trial_id)
+            )
+            trial = Trial(self._conn, tunables, self._experiment_id, trial_id)
+            cursor.execute("COMMIT")
+            self._trial_id = trial_id
+            return trial
+        except Exception:
+            cursor.execute("ROLLBACK")
+            raise
