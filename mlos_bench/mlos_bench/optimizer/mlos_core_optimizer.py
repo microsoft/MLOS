@@ -55,7 +55,7 @@ class MlosCoreOptimizer(Optimizer):
         self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
-            _LOG.debug("Warm-up end: %s = %f", self.target, score)
+            _LOG.debug("Warm-up end: %s = %s", self.target, score)
 
     def suggest(self) -> TunableGroups:
         df_config = self._opt.suggest()
@@ -74,6 +74,8 @@ class MlosCoreOptimizer(Optimizer):
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
         df_config = self._opt.get_best_observation()
+        if len(df_config) == 0:
+            return (None, None)
         params = df_config.iloc[0].to_dict()
         score = params.pop(self._opt_target) * self._opt_sign
         return (score, self._tunables.copy().assign(params))

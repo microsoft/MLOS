@@ -42,7 +42,7 @@ class MockOptimizer(Optimizer):
             self.register(tunables, Status.SUCCEEDED, float(score))
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
-            _LOG.debug("Warm-up end: %s = %f", self.target, score)
+            _LOG.debug("Warm-up end: %s = %s", self.target, score)
         self._iter = n_iter
 
     def suggest(self) -> TunableGroups:
@@ -65,4 +65,6 @@ class MockOptimizer(Optimizer):
         return score
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
+        if self._best_score is None:
+            return (None, None)
         return (self._best_score * self._opt_sign, self._best_config)
