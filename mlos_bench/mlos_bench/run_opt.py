@@ -90,9 +90,9 @@ def _optimize(env: Environment, opt: Optimizer,
             trial = exp.trial(tunables)
             _run(env, opt, trial, global_config)
 
-    best = opt.get_best_observation()
-    _LOG.info("Env: %s best result: %s", env, best)
-    return best
+    (best_score, best_config) = opt.get_best_observation()
+    _LOG.info("Env: %s best score: %f", env, best_score)
+    return (best_score, best_config)
 
 
 def _run(env: Environment, opt: Optimizer,
