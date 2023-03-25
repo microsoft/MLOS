@@ -159,4 +159,5 @@ build/*.build-stamp
 
 # Test databases
 *.db
+*.db.wal
 *.sqlite*
