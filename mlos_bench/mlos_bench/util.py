@@ -11,6 +11,7 @@ Various helper functions for mlos_bench.
 import json
 import logging
 import importlib
+import subprocess
 from typing import Any, Tuple, Dict, Iterable
 
 _LOG = logging.getLogger(__name__)
@@ -100,3 +101,24 @@ def check_required_params(config: Dict[str, Any], required_params: Iterable[str]
         raise ValueError(
             "The following parameters must be provided in the configuration"
             + f" or as command line arguments: {missing_params}")
+
+def get_git_info(path: str = ".") -> Tuple[str, str]:
+    """
+    Get the git repository and commit hash of the current working directory.
+
+    Parameters
+    ----------
+    path : str
+        Path to the git repository.
+
+    Returns
+    -------
+    (git_repo, git_commit) : Tuple[str, str]
+        Git repository URL and last commit hash.
+    """
+    git_repo = subprocess.check_output(
+        ["cd", path, "&&", "git", "remote", "get-url", "origin"], text=True).strip()
+    git_commit = subprocess.check_output(
+        ["cd", path, "&&", "git", "rev-parse", "HEAD"], text=True).strip()
+    return (git_repo, git_commit)
+

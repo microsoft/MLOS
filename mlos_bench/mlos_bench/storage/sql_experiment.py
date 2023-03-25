@@ -11,6 +11,7 @@ from types import ModuleType
 from typing import List, Tuple
 
 from mlos_bench.tunables import TunableGroups
+from mlos_bench.util import get_git_info
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql_trial import Trial
 
@@ -33,7 +34,7 @@ class Experiment(Storage.Experiment):
     def __enter__(self):
         super().__enter__()
         _LOG.debug("Connecting to the database: %s with: %s", self._db.__name__, self._config)
-        (git_repo, git_commit) = self._git_info()
+        (git_repo, git_commit) = get_git_info()
         self._conn = self._db.connect(**self._config)
         (trial_id,) = self._conn.execute(
             "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
