@@ -27,6 +27,9 @@ class SqlStorage(Storage):
         _LOG.debug("Using DB module: %s", module_name)
         self._db = importlib.import_module(module_name)
 
+    def __repr__(self) -> str:
+        return f"{self._db.__name__}:{self._config}"
+
     def experiment(self):
         return Experiment(self._tunables, self._experiment_id, self._trial_id,
                           self._db, self._config)

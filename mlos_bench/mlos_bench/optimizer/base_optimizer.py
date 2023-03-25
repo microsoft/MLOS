@@ -98,6 +98,10 @@ class Optimizer(metaclass=ABCMeta):
                 raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
             self._opt_sign = -1
 
+    def __repr__(self) -> str:
+        opt_direction = 'min' if self._opt_sign > 0 else 'max'
+        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})"
+
     @property
     def target(self) -> str:
         """
