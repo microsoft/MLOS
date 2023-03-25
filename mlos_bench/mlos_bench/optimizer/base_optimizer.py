@@ -98,6 +98,10 @@ class Optimizer(metaclass=ABCMeta):
                 raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
             self._opt_sign = -1
 
+    def __repr__(self) -> str:
+        opt_direction = 'min' if self._opt_sign > 0 else 'max'
+        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})"
+
     @property
     def target(self) -> str:
         """
@@ -117,6 +121,7 @@ class Optimizer(metaclass=ABCMeta):
         scores : List[float]
             Benchmark results from experiments that correspond to `configs`.
         """
+        _LOG.debug("Warm-up: %d configs, %d scores", len(configs), len(scores))
 
     @abstractmethod
     def suggest(self) -> TunableGroups:
@@ -181,7 +186,7 @@ class Optimizer(metaclass=ABCMeta):
             return None
         if isinstance(score, dict):
             score = score[self._opt_target]
-        return score * self._opt_sign
+        return float(score) * self._opt_sign
 
     def not_converged(self) -> bool:
         """
