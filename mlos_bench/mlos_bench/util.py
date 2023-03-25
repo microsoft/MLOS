@@ -102,6 +102,7 @@ def check_required_params(config: Dict[str, Any], required_params: Iterable[str]
             "The following parameters must be provided in the configuration"
             + f" or as command line arguments: {missing_params}")
 
+
 def get_git_info(path: str = ".") -> Tuple[str, str]:
     """
     Get the git repository and commit hash of the current working directory.
@@ -117,8 +118,9 @@ def get_git_info(path: str = ".") -> Tuple[str, str]:
         Git repository URL and last commit hash.
     """
     git_repo = subprocess.check_output(
-        ["cd", path, "&&", "git", "remote", "get-url", "origin"], text=True).strip()
+        ["cd", path, "&&", "git", "remote", "get-url", "origin"],
+        shell=True, text=True).strip()
     git_commit = subprocess.check_output(
-        ["cd", path, "&&", "git", "rev-parse", "HEAD"], text=True).strip()
+        ["cd", path, "&&", "git", "rev-parse", "HEAD"],
+        shell=True, text=True).strip()
     return (git_repo, git_commit)
-
