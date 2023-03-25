@@ -103,30 +103,29 @@ class Experiment(Storage.Experiment):
             yield Trial(self._conn, tunables, self._experiment_id, trial_id)
 
     def trial(self, tunables: TunableGroups):
-        trial_id = self._trial_id + 1
-        _LOG.debug("Updating trial: %s:%d", self._experiment_id, trial_id)
+        _LOG.debug("Updating trial: %s:%d", self._experiment_id, self._trial_id)
         cursor = self._conn.cursor()
         cursor.execute("BEGIN")
         try:
-            cursor.executemany(
-                """
-                INSERT INTO trial_config (exp_id, trial_id, param_id, param_value)
-                VALUES (?, ?, ?, ?)
-                """,
-                ((self._experiment_id, trial_id, tunable.name,
-                  str(tunable.value) if tunable.value is not None else None)
-                 for (tunable, _group) in tunables)
-            )
             cursor.execute(
                 """
                 INSERT INTO trial_status (exp_id, trial_id, status)
                 VALUES (?, ?, 'PENDING')
                 """,
-                (self._experiment_id, trial_id)
+                (self._experiment_id, self._trial_id)
             )
-            trial = Trial(self._conn, tunables, self._experiment_id, trial_id)
+            cursor.executemany(
+                """
+                INSERT INTO trial_config (exp_id, trial_id, param_id, param_value)
+                VALUES (?, ?, ?, ?)
+                """,
+                ((self._experiment_id, self._trial_id, tunable.name,
+                  str(tunable.value) if tunable.value is not None else None)
+                 for (tunable, _group) in tunables)
+            )
+            trial = Trial(self._conn, tunables, self._experiment_id, self._trial_id)
             cursor.execute("COMMIT")
-            self._trial_id = trial_id
+            self._trial_id += 1
             return trial
         except Exception:
             cursor.execute("ROLLBACK")
