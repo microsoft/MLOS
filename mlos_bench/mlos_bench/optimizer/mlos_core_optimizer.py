@@ -67,10 +67,12 @@ class MlosCoreOptimizer(Optimizer):
     def register(self, tunables: TunableGroups, status: Status,
                  score: Union[float, dict] = None) -> float:
         score = super().register(tunables, status, score)
-        # By default, hyperparameters in ConfigurationSpace are sorted by name:
-        df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
-        _LOG.debug("Dataframe:\n%s", df_config)
-        self._opt.register(df_config, pd.Series([score], dtype=float))
+        # TODO: mlos_core currently does not support registration of failed trials:
+        if status.is_succeeded:
+            # By default, hyperparameters in ConfigurationSpace are sorted by name:
+            df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
+            _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)
+            self._opt.register(df_config, pd.Series([score], dtype=float))
         self._iter += 1
         return score
 
