@@ -47,8 +47,9 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
-    def bulk_register(self, configs: List[dict], scores: List[float]):
-        super().bulk_register(configs, scores)
+    def bulk_register(self, configs: List[dict], scores: List[float]) -> bool:
+        if not super().bulk_register(configs, scores):
+            return False
         tunables_names = list(self._tunables.get_param_values().keys())
         df_configs = pd.DataFrame(configs)[tunables_names]
         df_scores = pd.Series(scores, dtype=float) * self._opt_sign
@@ -56,6 +57,7 @@ class MlosCoreOptimizer(Optimizer):
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
+        return True
 
     def suggest(self) -> TunableGroups:
         df_config = self._opt.suggest()
