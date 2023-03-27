@@ -32,25 +32,36 @@ class Experiment(Storage.Experiment):
         self._conn = None
 
     def __enter__(self):
+
         super().__enter__()
         _LOG.debug("Connecting to the database: %s with: %s", self._db.__name__, self._config)
-        (git_repo, git_commit) = get_git_info()
         self._conn = self._db.connect(**self._config)
+
+        (cur_git_repo, cur_git_commit) = get_git_info()
+        (git_repo, git_commit) = self._conn.execute(
+            "SELECT git_repo, git_commit FROM experiment_config WHERE exp_id = ?",
+            (self._experiment_id,)
+        ).fetchone()
+
+        if git_commit != cur_git_commit:
+            if git_commit is None:
+                self._conn.execute(
+                    """
+                    INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
+                    VALUES (?, ?, ?, ?)
+                    """,
+                    (self._experiment_id, None, cur_git_repo, cur_git_commit)
+                )
+            else:
+                _LOG.warning("Experiment %s git expected: %s %s", self, git_repo, git_commit)
+
         (trial_id,) = self._conn.execute(
             "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
             (self._experiment_id,)
         ).fetchone()
         if trial_id:
-            self._trial_id = trial_id
-        else:
-            # TODO: check and store git repo and commit.
-            self._conn.execute(
-                """
-                INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
-                VALUES (?, ?, ?, ?)
-                """,
-                (self._experiment_id, None, git_repo, git_commit)
-            )
+            self._trial_id = trial_id + 1
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
