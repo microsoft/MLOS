@@ -110,7 +110,7 @@ class Optimizer(metaclass=ABCMeta):
         return self._opt_target
 
     @abstractmethod
-    def bulk_register(self, configs: List[dict], scores: List[float]):
+    def bulk_register(self, configs: List[dict], scores: List[float]) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
@@ -120,8 +120,14 @@ class Optimizer(metaclass=ABCMeta):
             Records of tunable values from other experiments.
         scores : List[float]
             Benchmark results from experiments that correspond to `configs`.
+
+        Returns
+        -------
+        is_successful : bool
+            True if registration was successful, False otherwise.
         """
-        _LOG.debug("Warm-up: %d configs, %d scores", len(configs), len(scores))
+        _LOG.debug("Warm-up: %d configs, %d scores", len(configs or []), len(scores or []))
+        return bool(configs and scores)
 
     @abstractmethod
     def suggest(self) -> TunableGroups:
