@@ -7,11 +7,9 @@ Saving and restoring the benchmark data in DB-API-compliant SQL database - the E
 """
 
 import logging
-from types import ModuleType
 from typing import List, Tuple
 
 from mlos_bench.tunables import TunableGroups
-from mlos_bench.util import get_git_info
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql_trial import Trial
 
@@ -23,51 +21,31 @@ class Experiment(Storage.Experiment):
     Logic for retrieving and storing the results of a single experiment.
     """
 
-    def __init__(self, tunables: TunableGroups,
-                 experiment_id: str, trial_id: int, db: ModuleType, config: dict):
-        # pylint: disable=too-many-arguments
-        super().__init__(tunables, experiment_id, trial_id)
-        self._db = db
-        self._config = config
-        self._conn = None
-
     def __enter__(self):
-
         super().__enter__()
-        _LOG.debug("Connecting to the database: %s with: %s", self._db.__name__, self._config)
-        self._conn = self._db.connect(**self._config)
-
-        (cur_git_repo, cur_git_commit) = get_git_info()
-        (git_repo, git_commit) = self._conn.execute(
+        git_info = self._conn.execute(
             "SELECT git_repo, git_commit FROM experiment_config WHERE exp_id = ?",
             (self._experiment_id,)
         ).fetchone()
-
-        if git_commit != cur_git_commit:
-            if git_commit is None:
-                self._conn.execute(
-                    """
-                    INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (self._experiment_id, None, cur_git_repo, cur_git_commit)
-                )
-            else:
+        if git_info is None:
+            self._conn.execute(
+                """
+                INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
+                VALUES (?, ?, ?, ?)
+                """,
+                (self._experiment_id, None, self._git_repo, self._git_commit)
+            )
+        else:
+            (git_repo, git_commit) = git_info
+            if git_commit != self._git_commit:
                 _LOG.warning("Experiment %s git expected: %s %s", self, git_repo, git_commit)
-
-        (trial_id,) = self._conn.execute(
-            "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
-            (self._experiment_id,)
-        ).fetchone()
-        if trial_id:
-            self._trial_id = trial_id + 1
-
+            (trial_id,) = self._conn.execute(
+                "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
+                (self._experiment_id,)
+            ).fetchone()
+            if trial_id:
+                self._trial_id = trial_id + 1
         return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self._conn:
-            self._conn.close()
-        return super().__exit__(exc_type, exc_val, exc_tb)
 
     def merge(self, experiment_ids: List[str]):
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)

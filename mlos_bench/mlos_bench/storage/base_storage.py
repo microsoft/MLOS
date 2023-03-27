@@ -12,7 +12,7 @@ from typing import List, Tuple
 
 from mlos_bench.environment import Status
 from mlos_bench.tunables import TunableGroups
-from mlos_bench.util import prepare_class_load, instantiate_from_config
+from mlos_bench.util import prepare_class_load, instantiate_from_config, get_git_info
 
 _LOG = logging.getLogger(__name__)
 
@@ -109,10 +109,12 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, tunables: TunableGroups, experiment_id: str, trial_id: int = 0):
+        def __init__(self, conn, tunables: TunableGroups, experiment_id: str, trial_id: int = 0):
+            self._conn = conn
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
             self._trial_id = trial_id
+            (self._git_repo, self._git_commit) = get_git_info()
 
         def __enter__(self):
             """

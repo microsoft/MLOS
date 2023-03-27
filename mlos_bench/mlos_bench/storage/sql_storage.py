@@ -25,11 +25,18 @@ class SqlStorage(Storage):
         super().__init__(tunables, config)
         module_name = self._config.pop("db_module")
         _LOG.debug("Using DB module: %s", module_name)
-        self._db = importlib.import_module(module_name)
+        db_mod = importlib.import_module(module_name)
+        self._repr = f"{db_mod.__name__}:{self._config}"
+        _LOG.info("Connecting to the database: %s", self)
+        self._conn = db_mod.connect(**self._config.get("connect_args", {}))
+        script_fname = self._config.get("init_script")
+        if script_fname is not None:
+            _LOG.info("Storage init script: %s", script_fname)
+            with open(script_fname, encoding="utf-8") as script:
+                self._conn.executescript(script.read())
 
     def __repr__(self) -> str:
-        return f"{self._db.__name__}:{self._config}"
+        return self._repr
 
     def experiment(self):
-        return Experiment(self._tunables, self._experiment_id, self._trial_id,
-                          self._db, self._config)
+        return Experiment(self._conn, self._tunables, self._experiment_id, self._trial_id)
