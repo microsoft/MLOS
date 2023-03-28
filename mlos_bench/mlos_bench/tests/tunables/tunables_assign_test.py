@@ -56,7 +56,23 @@ def test_tunables_assign_coerce_str_range_check(tunable_groups):
 
 def test_tunables_assign_coerce_str_invalid(tunable_groups):
     """
-    Make sure we fail when assigning an invalid string.
+    Make sure we fail when assigning an invalid string to an integer tunable.
     """
     with pytest.raises(ValueError):
-        tunable_groups.assign({"kernel_sched_migration_cost_ns": "INVALID"})
+        tunable_groups.assign({"kernel_sched_migration_cost_ns": "1.1"})
+
+
+def test_tunable_assign_str_to_int(tunable_int):
+    """
+    Check str to int coercion.
+    """
+    tunable_int.value = "10"
+    assert tunable_int.value == 10
+
+
+def test_tunable_assign_str_to_float(tunable_float):
+    """
+    Check str to float coercion.
+    """
+    tunable_float.value = "0.5"
+    assert tunable_float.value == 0.5
