@@ -18,3 +18,4 @@ def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment):
     (configs, scores) = exp_storage_memory_sql.load('score')
     assert configs is None
     assert scores is None
+
