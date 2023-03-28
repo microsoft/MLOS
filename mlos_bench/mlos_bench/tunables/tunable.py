@@ -109,11 +109,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         Set the current value of the tunable.
         """
-        if not self.is_valid(value):
+        # We need this coercion for the values produced by some optimizers
+        # (e.g., scikit-optimize) and for data restored from certain storage
+        # systems (where values can be strings).
+        coerced_value = self._TYPE[self._type](value)
+        if not self.is_valid(coerced_value):
             raise ValueError(f"Invalid value for the tunable: {value}")
-        # After the validation, coerce the input to the right data type.
-        # We need this for the values produced by some optimizers (e.g., scikit-optimize).
-        self._current_value = self._TYPE[self._type](value)
+        self._current_value = coerced_value
         return self._current_value
 
     def is_valid(self, value) -> bool:
