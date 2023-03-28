@@ -22,11 +22,10 @@ def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
         "experimentId": "pytest",
         "trialId": 1,
         "db_module": "sqlite3",
-        "connect_args": {
-            "database": ":memory:",
-            "isolation_level": None
-        },
-        "init_script": "mlos_bench/db/db_schema_sqlite.sql"
+        "init_script": "mlos_bench/db/db_schema_sqlite.sql",
+        # .connect() kwargs:
+        "database": ":memory:",
+        "isolation_level": None,
     })
     # pylint: disable=unnecessary-dunder-call
     return storage.experiment().__enter__()

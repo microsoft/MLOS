@@ -12,9 +12,7 @@
 
         // Parameters below must match kwargs of the .connect() call.
         // kwargs are passed as-is; config loader --path resolution not used.
-        "connect_args": {
-            "database": "./mlos_bench.sqlite3",
-            "isolation_level": null  // Required for SQLite3
-        }
+        "database": "./mlos_bench.sqlite3",
+        "isolation_level": null  // Required for SQLite3
     }
 }
