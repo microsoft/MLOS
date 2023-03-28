@@ -11,8 +11,10 @@ from mlos_bench.storage import Storage
 # pylint: disable=redefined-outer-name
 
 
-def test_exp_create(exp_storage_memory_sql: Storage.Experiment):
+def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment):
     """
-    Try to create a new experiment in storage.
+    Try to retrieve old experimental data from the empty storage.
     """
-    assert exp_storage_memory_sql is not None
+    (configs, scores) = exp_storage_memory_sql.load('score')
+    assert configs is None
+    assert scores is None
