@@ -195,6 +195,13 @@ class Storage(metaclass=ABCMeta):
             return f"{self._experiment_id}:{self._trial_id}"
 
         @property
+        def trial_id(self) -> int:
+            """
+            ID of the current trial.
+            """
+            return self._trial_id
+
+        @property
         def tunables(self) -> TunableGroups:
             """
             Tunable parameters of the current trial.
