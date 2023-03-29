@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS trial_status;
 DROP TABLE IF EXISTS experiment_config;
 
 CREATE TABLE experiment_config (
-    exp_id VARCHAR(128) NOT NULL,
+    exp_id VARCHAR(255) NOT NULL,
     descr TEXT,
     git_repo VARCHAR(255) NOT NULL,
     git_commit VARCHAR(40) NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE experiment_config (
 );
 
 CREATE TABLE trial_status (
-    exp_id VARCHAR(128) NOT NULL,
+    exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
     ts_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ts_end TIMESTAMP,
@@ -33,9 +33,9 @@ CREATE TABLE trial_status (
 );
 
 CREATE TABLE experiment_merge (
-    dest_exp_id VARCHAR(128) NOT NULL,
+    dest_exp_id VARCHAR(255) NOT NULL,
     dest_trial_id INTEGER NOT NULL,
-    source_exp_id VARCHAR(128) NOT NULL,
+    source_exp_id VARCHAR(255) NOT NULL,
     source_trial_id INTEGER NOT NULL,
 
     UNIQUE (dest_exp_id, dest_trial_id, source_exp_id, source_trial_id),
@@ -48,9 +48,9 @@ CREATE TABLE experiment_merge (
 );
 
 CREATE TABLE trial_config (
-    exp_id VARCHAR(128) NOT NULL,
+    exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
-    param_id VARCHAR(256) NOT NULL,
+    param_id VARCHAR(255) NOT NULL,
     param_value VARCHAR(255),
 
     PRIMARY KEY (exp_id, trial_id, param_id),
@@ -59,9 +59,9 @@ CREATE TABLE trial_config (
 );
 
 CREATE TABLE trial_results (
-    exp_id VARCHAR(128) NOT NULL,
+    exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
-    param_id VARCHAR(256) NOT NULL,
+    param_id VARCHAR(255) NOT NULL,
     param_value VARCHAR(255),
 
     PRIMARY KEY (exp_id, trial_id, param_id),
@@ -70,10 +70,10 @@ CREATE TABLE trial_results (
 );
 
 CREATE TABLE trial_telemetry (
-    exp_id VARCHAR(128) NOT NULL,
+    exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
     ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    param_id VARCHAR(256) NOT NULL,
+    param_id VARCHAR(255) NOT NULL,
     param_value VARCHAR(255),
 
     UNIQUE (exp_id, trial_id, ts, param_id),
