@@ -22,6 +22,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     return MlosCoreOptimizer(
         tunables=tunable_groups,
+        service=None,
         config={
             "minimize": "score",
             "max_iterations": 20,

@@ -20,6 +20,7 @@ def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
     """
     return MockOptimizer(
         tunables=tunable_groups,
+        service=None,
         config={
             "minimize": "score",
             "max_iterations": 5,
@@ -35,6 +36,7 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
     """
     return MockOptimizer(
         tunables=tunable_groups,
+        service=None,
         config={
             "maximize": "score",
             "max_iterations": 5,
@@ -50,6 +52,7 @@ def scikit_gp_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     return MlosCoreOptimizer(
         tunables=tunable_groups,
+        service=None,
         config={
             "minimize": "score",
             "max_iterations": 20,
@@ -67,6 +70,7 @@ def scikit_et_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     return MlosCoreOptimizer(
         tunables=tunable_groups,
+        service=None,
         config={
             "minimize": "score",
             "max_iterations": 20,
@@ -84,6 +88,7 @@ def emukit_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     return MlosCoreOptimizer(
         tunables=tunable_groups,
+        service=None,
         config={
             "minimize": "score",
             "max_iterations": 20,
@@ -99,6 +104,7 @@ def emukit_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     return MlosCoreOptimizer(
         tunables=tunable_groups,
+        service=None,
         config={
             "maximize": "score",
             "max_iterations": 20,
