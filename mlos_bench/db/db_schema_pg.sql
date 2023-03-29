@@ -14,11 +14,13 @@ DROP TABLE IF EXISTS trial_telemetry CASCADE;
 DROP TYPE IF EXISTS experiment_id_t CASCADE;
 DROP TYPE IF EXISTS trial_id_t CASCADE;
 DROP TYPE IF EXISTS param_id_t CASCADE;
+DROP TYPE IF EXISTS param_value_t CASCADE;
 DROP TYPE IF EXISTS status_t CASCADE;
 
-CREATE DOMAIN experiment_id_t AS VARCHAR(128) NOT NULL;
+CREATE DOMAIN experiment_id_t AS VARCHAR(255) NOT NULL;
 CREATE DOMAIN trial_id_t AS INTEGER NOT NULL;
-CREATE DOMAIN param_id_t AS VARCHAR(256) NOT NULL;
+CREATE DOMAIN param_id_t AS VARCHAR(255) NOT NULL;
+CREATE DOMAIN param_value_t AS VARCHAR(255);
 
 -- Should match the `mlos_bench.environment.Status` enum.
 CREATE TYPE status_t AS ENUM (
@@ -75,7 +77,7 @@ CREATE TABLE trial_config (
     exp_id experiment_id_t,
     trial_id trial_id_t,
     param_id param_id_t,
-    param_value VARCHAR(255),
+    param_value param_value_t,
 
     PRIMARY KEY (exp_id, trial_id, param_id),
     FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
@@ -86,7 +88,7 @@ CREATE TABLE trial_results (
     exp_id experiment_id_t,
     trial_id trial_id_t,
     param_id param_id_t,
-    param_value VARCHAR(255),
+    param_value param_value_t,
 
     PRIMARY KEY (exp_id, trial_id, param_id),
     FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
@@ -98,7 +100,7 @@ CREATE TABLE trial_telemetry (
     trial_id trial_id_t,
     ts TIMESTAMP NOT NULL DEFAULT now(),
     param_id param_id_t,
-    param_value VARCHAR(255),
+    param_value param_value_t,
 
     UNIQUE (exp_id, trial_id, ts, param_id),
     FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
