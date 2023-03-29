@@ -71,7 +71,7 @@ class Experiment(Storage.Experiment):
                 (self._experiment_id, trial_id, opt_target)
             )
             configs.append(tunables)
-            scores.append(cur_score.fetchone()[0])
+            scores.append(float(cur_score.fetchone()[0]))
         return (configs, scores)
 
     def _get_tunables(self, trial_id: int) -> dict:
@@ -91,6 +91,7 @@ class Experiment(Storage.Experiment):
         )
         for (trial_id,) in cur_trials.fetchall():
             tunables = self._tunables.copy().assign(self._get_tunables(trial_id))
+            tunables.reset()  # Drop the .is_updated flag!
             yield Trial(self._conn, tunables, self._experiment_id, trial_id)
 
     def trial(self, tunables: TunableGroups):
