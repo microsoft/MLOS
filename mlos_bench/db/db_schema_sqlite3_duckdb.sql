@@ -32,6 +32,7 @@ CREATE TABLE trial_status (
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
 );
 
+
 CREATE TABLE experiment_merge (
     dest_exp_id VARCHAR(255) NOT NULL,
     dest_trial_id INTEGER NOT NULL,
