@@ -46,8 +46,7 @@ class TunableGroups:
         is_equal : bool
             True if two TunableGroups are equal.
         """
-        return all(g1 == g2 for (g1, g2) in zip(self._tunable_groups.values(),
-                                                other._tunable_groups.values()))
+        return self._tunable_groups == other._tunable_groups
 
     def copy(self):
         """
