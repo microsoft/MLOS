@@ -79,8 +79,7 @@ class CovariantTunableGroup:
         return (self._name == other._name and
                 self._cost == other._cost and
                 self._is_updated == other._is_updated and
-                all(t1 == t2 for (t1, t2) in zip(self._tunables.values(),
-                                                 other._tunables.values())))
+                self._tunables == other._tunables)
 
     def reset(self):
         """
