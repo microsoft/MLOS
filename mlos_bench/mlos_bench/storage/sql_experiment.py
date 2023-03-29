@@ -23,12 +23,13 @@ class Experiment(Storage.Experiment):
 
     def __enter__(self):
         super().__enter__()
-        git_info = self._conn.execute(
+        cursor = self._conn.cursor()
+        git_info = cursor.execute(
             "SELECT git_repo, git_commit FROM experiment_config WHERE exp_id = ?",
             (self._experiment_id,)
         ).fetchone()
         if git_info is None:
-            self._conn.execute(
+            cursor.execute(
                 """
                 INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
                 VALUES (?, ?, ?, ?)
@@ -39,7 +40,7 @@ class Experiment(Storage.Experiment):
             (git_repo, git_commit) = git_info
             if git_commit != self._git_commit:
                 _LOG.warning("Experiment %s git expected: %s %s", self, git_repo, git_commit)
-            (trial_id,) = self._conn.execute(
+            (trial_id,) = cursor.execute(
                 "SELECT MAX(trial_id) FROM trial_status WHERE exp_id = ?",
                 (self._experiment_id,)
             ).fetchone()
@@ -54,7 +55,8 @@ class Experiment(Storage.Experiment):
     def load(self, opt_target: str) -> Tuple[List[dict], List[float]]:
         configs = []
         scores = []
-        cur_trials = self._conn.execute(
+        cur_trials = self._conn.cursor()
+        cur_trials.execute(
             """
             SELECT trial_id FROM trial_status
             WHERE exp_id = ? AND status = 'SUCCEEDED'
@@ -63,7 +65,8 @@ class Experiment(Storage.Experiment):
         )
         for (trial_id,) in cur_trials.fetchall():
             tunables = self._get_tunables(trial_id)
-            cur_score = self._conn.execute(
+            cur_score = self._conn.cursor()
+            cur_score.execute(
                 """
                 SELECT param_value FROM trial_results
                 WHERE exp_id = ? AND trial_id = ? AND param_id = ?
@@ -75,29 +78,36 @@ class Experiment(Storage.Experiment):
         return (configs, scores)
 
     def _get_tunables(self, trial_id: int) -> dict:
-        return dict(self._conn.execute(
+        cursor = self._conn.cursor()
+        cursor.execute(
             """
             SELECT param_id, param_value FROM trial_config
             WHERE exp_id = ? AND trial_id = ?
             """,
             (self._experiment_id, trial_id)
-        ).fetchall())
+        )
+        return dict(cursor.fetchall())
 
     def pending(self):
         _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
-        cur_trials = self._conn.execute(
-            "SELECT trial_id FROM trial_status WHERE exp_id = ? AND ts_end IS NULL",
+        cur_trials = self._conn.cursor()
+        cur_trials.execute(
+            """
+            SELECT trial_id FROM trial_status
+            WHERE exp_id = ? AND ts_end IS NULL
+            """,
             (self._experiment_id,)
         )
         for (trial_id,) in cur_trials.fetchall():
-            tunables = self._tunables.copy().assign(self._get_tunables(trial_id))
-            tunables.reset()  # Drop the .is_updated flag!
+            # Reset .is_updated flag after assignment!
+            tunables = self._tunables.copy().assign(
+                self._get_tunables(trial_id)).reset()
             yield Trial(self._conn, tunables, self._experiment_id, trial_id)
 
     def trial(self, tunables: TunableGroups):
         _LOG.debug("Updating trial: %s:%d", self._experiment_id, self._trial_id)
         cursor = self._conn.cursor()
-        cursor.execute("BEGIN")
+        cursor.execute("BEGIN")  # Required for SQLite3 and DuckDB
         try:
             cursor.execute(
                 """
