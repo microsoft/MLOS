@@ -25,7 +25,7 @@ def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
             "experimentId": "pytest",
             "trialId": 1,
             "db_module": "sqlite3",
-            "init_script": "mlos_bench/db/db_schema_sqlite.sql",
+            "init_script": "mlos_bench/db/db_schema_sqlite3_duckdb.sql",
             # .connect() kwargs:
             "database": ":memory:",
             "isolation_level": None,
