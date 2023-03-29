@@ -156,3 +156,10 @@ build/*.build-stamp
 # like Azure credentials etc.
 /config.json
 .env
+
+# Test databases
+*.sqlite*
+*.db
+*.duckdb
+*.db.wal
+*.duckdb.wal
