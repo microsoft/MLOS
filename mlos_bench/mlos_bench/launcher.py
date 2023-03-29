@@ -147,3 +147,11 @@ class Launcher:
         return self._config_loader.load_environment(
             self._env_config_file, self._global_config,
             service=LocalExecService(parent=self._config_loader))
+
+    def load_generic(self, env: Environment, cls, json_file_name: str):
+        """
+        Create a new instance of class `cls` from JSON configuration.
+        """
+        return self._config_loader.build_generic(
+            cls, env.tunable_params(), self._config_loader,
+            self.load_config(json_file_name), self.global_config)

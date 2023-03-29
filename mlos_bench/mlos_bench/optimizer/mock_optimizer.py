@@ -10,6 +10,7 @@ import random
 import logging
 from typing import Tuple, List, Union
 
+from mlos_bench.service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -23,8 +24,8 @@ class MockOptimizer(Optimizer):
     Mock optimizer to test the Environment API.
     """
 
-    def __init__(self, tunables: TunableGroups, config: dict):
-        super().__init__(tunables, config)
+    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+        super().__init__(tunables, service, config)
         rnd = random.Random(config.get("seed", 42))
         self._random = {
             "categorical": lambda tunable: rnd.choice(tunable.categorical_values),

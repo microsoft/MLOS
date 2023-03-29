@@ -13,6 +13,7 @@ import pandas as pd
 
 from mlos_core.optimizers import OptimizerType, OptimizerFactory, SpaceAdapterType
 
+from mlos_bench.service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -27,9 +28,9 @@ class MlosCoreOptimizer(Optimizer):
     A wrapper class for the mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
 
-        super().__init__(tunables, config)
+        super().__init__(tunables, service, config)
 
         space = tunable_groups_to_configspace(tunables)
         _LOG.debug("ConfigSpace: %s", space)

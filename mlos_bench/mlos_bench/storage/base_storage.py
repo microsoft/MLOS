@@ -11,8 +11,9 @@ from abc import ABCMeta, abstractmethod
 from typing import List, Tuple
 
 from mlos_bench.environment import Status
+from mlos_bench.service import Service
 from mlos_bench.tunables import TunableGroups
-from mlos_bench.util import prepare_class_load, instantiate_from_config, get_git_info
+from mlos_bench.util import get_git_info
 
 _LOG = logging.getLogger(__name__)
 
@@ -23,57 +24,7 @@ class Storage(metaclass=ABCMeta):
     and storage systems (e.g., SQLite or MLFLow).
     """
 
-    @staticmethod
-    def load(tunables: TunableGroups, config: dict, global_config: dict = None):
-        """
-        Instantiate the Storage object from configuration.
-
-        Parameters
-        ----------
-        tunables : TunableGroups
-            Tunable parameters of the environment. We need them to validate the
-            configurations of merged-in experiments and restored/pending trials.
-        config : dict
-            Configuration of the storage system, as loaded from JSON.
-        global_config : dict
-            Global configuration parameters (optional).
-
-        Returns
-        -------
-        db : Storage
-            A new instance of the Storage class.
-        """
-        (class_name, db_config) = prepare_class_load(config, global_config)
-        storage = Storage.new(class_name, tunables, db_config)
-        _LOG.info("Created storage: %s", storage)
-        return storage
-
-    @classmethod
-    def new(cls, class_name: str, tunables: TunableGroups, config: dict):
-        """
-        Factory method for a new Storage object with a given config.
-
-        Parameters
-        ----------
-        class_name: str
-            FQN of a Python class to instantiate.
-            Must be derived from the `Storage` class.
-        tunables : TunableGroups
-            Tunable parameters of the environment. We need them to validate the
-            configurations of merged-in experiments and restored/pending trials.
-        config : dict
-            Free-format dictionary that contains the storage configuration.
-            It will be passed as a constructor parameter of the class
-            specified by `class_name`.
-
-        Returns
-        -------
-        db : Storage
-            An instance of the `Storage` class initialized with `config`.
-        """
-        return instantiate_from_config(cls, class_name, tunables, config)
-
-    def __init__(self, tunables: TunableGroups, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
         """
         Create a new storage object.
 
@@ -87,9 +38,17 @@ class Storage(metaclass=ABCMeta):
         """
         _LOG.debug("Storage config: %s", config)
         self._tunables = tunables.copy()
+        self._service = service
         self._config = config.copy()
         self._experiment_id = self._config.pop("experimentId").strip()
         self._trial_id = int(self._config.pop("trialId", 0))
+
+    @property
+    def experiment_id(self) -> str:
+        """
+        String ID of the experiment being stored.
+        """
+        return self._experiment_id
 
     @abstractmethod
     def experiment(self):

@@ -9,6 +9,7 @@ Saving and restoring the benchmark data in DB-API-compliant SQL database.
 import importlib
 import logging
 
+from mlos_bench.service import Service
 from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql_experiment import Experiment
@@ -21,8 +22,8 @@ class SqlStorage(Storage):
     An implementation of the Storage interface for a DB-API-compliant database.
     """
 
-    def __init__(self, tunables: TunableGroups, config: dict):
-        super().__init__(tunables, config)
+    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+        super().__init__(tunables, service, config)
         module_name = self._config.pop("db_module")
         script_fname = self._config.pop("init_script", None)
         _LOG.debug("Import DB module: %s", module_name)

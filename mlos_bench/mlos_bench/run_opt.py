@@ -34,14 +34,8 @@ def _main():
     args = launcher.parse_args()
 
     env = launcher.load_env()
-
-    opt = Optimizer.load(env.tunable_params(),
-                         launcher.load_config(args.optimizer),
-                         launcher.global_config)
-
-    storage = Storage.load(env.tunable_params(),
-                           launcher.load_config(args.storage),
-                           launcher.global_config)
+    opt = launcher.load_generic(env, Optimizer, args.optimizer)
+    storage = launcher.load_generic(env, Storage, args.storage)
 
     result = _optimize(env, opt, storage, launcher.global_config)
     _LOG.info("Final result: %s", result)
