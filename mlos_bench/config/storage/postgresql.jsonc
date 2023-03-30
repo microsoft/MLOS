@@ -9,7 +9,7 @@
         "trialId": 0,  // optional
 
         // Parameters below must match kwargs of sqlalchemy.URL.create().
-        "drivername": "postgres",
+        "drivername": "postgresql+psycopg2",
 
         "database": "osat",
         "username": "postgres",

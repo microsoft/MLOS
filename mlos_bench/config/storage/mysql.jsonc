@@ -9,7 +9,7 @@
         "trialId": 0,  // optional
 
         // Parameters below must match kwargs of sqlalchemy.URL.create().
-        "drivername": "mysql",
+        "drivername": "mysql+mysqlconnector",
 
         "database": "osat",
         "username": "root",
