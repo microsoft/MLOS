@@ -1,4 +1,4 @@
-// PostgreSQL storage.
+// MySQL / MariaDB storage.
 {
     "class": "mlos_bench.storage.SqlStorage",
 
@@ -8,14 +8,13 @@
         "experimentId": "test-experiment-1",
         "trialId": 0,  // optional
 
-        "db_module": "psycopg2",
+        "db_module": "mysql.connector",
 
         // Parameters below must match kwargs of the .connect() call.
-        "dbname": "osat",
-        "user": "postgres",
+        "user": "root",
         "password": "PLACERHOLDER PASSWORD",  // Comes from global config
         "host": "localhost",
-        "port": 5432
-        // Alternatively, use "dsn" to pass the connection string.
+        "port": 3306,
+        "database": "osat"
     }
 }
