@@ -11,10 +11,8 @@
         "experimentId": "test-experiment-1",
         "trialId": 0,  // optional
 
-        "db_module": "sqlite3",
-
-        // Parameters below must match kwargs of the .connect() call.
-        "database": "mlos_bench.sqlite3",
-        "isolation_level": null  // Required for SQLite3
+        // Parameters below must match kwargs of sqlalchemy.URL.create().
+        "drivername": "sqlite",
+        "database": "mlos_bench.sqlite3"
     }
 }

@@ -68,8 +68,9 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, conn, tunables: TunableGroups, experiment_id: str, trial_id: int = 0):
-            self._conn = conn
+        def __init__(self, engine, tunables: TunableGroups,
+                     experiment_id: str, trial_id: int = 0):
+            self._engine = engine
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
             self._trial_id = trial_id
@@ -144,8 +145,9 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, conn, tunables: TunableGroups, experiment_id: str, trial_id: int):
-            self._conn = conn
+        def __init__(self, engine, tunables: TunableGroups,
+                     experiment_id: str, trial_id: int):
+            self._engine = engine
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id

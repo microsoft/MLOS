@@ -6,8 +6,9 @@
 Saving and restoring the benchmark data in DB-API-compliant SQL database.
 """
 
-import importlib
 import logging
+
+from sqlalchemy import URL, create_engine, text
 
 from mlos_bench.service import Service
 from mlos_bench.tunables import TunableGroups
@@ -23,21 +24,29 @@ class SqlStorage(Storage):
     """
 
     def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+
         super().__init__(tunables, service, config)
-        module_name = self._config.pop("db_module")
         script_fname = self._config.pop("init_script", None)
-        _LOG.debug("Import DB module: %s", module_name)
-        db_mod = importlib.import_module(module_name)
-        self._repr = f"{db_mod.__name__}:{self._config}"
+
+        url = URL.create(**self._config)
+        self._repr = f"{url.get_backend_name()}:{url.database}"
         _LOG.info("Connect to the database: %s", self)
-        self._conn = db_mod.connect(**self._config)
+
+        self._engine = create_engine(url)  # , echo=True)
+
         if script_fname is not None:
             _LOG.info("Storage init script: %s", script_fname)
-            with open(script_fname, encoding="utf-8") as script:
-                self._conn.executescript(script.read())
+            with self._engine.begin() as conn, \
+                 open(script_fname, encoding="utf-8") as script:
+                script_lines = script.read()
+                if self._engine.dialect.name in {"sqlite", "duckdb"}:
+                    conn.connection.executescript(script_lines)
+                else:
+                    conn.execute(text(script_lines))
 
     def __repr__(self) -> str:
         return self._repr
 
     def experiment(self):
-        return Experiment(self._conn, self._tunables, self._experiment_id, self._trial_id)
+        return Experiment(self._engine, self._tunables,
+                          self._experiment_id, self._trial_id)

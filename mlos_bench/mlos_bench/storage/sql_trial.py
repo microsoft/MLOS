@@ -6,8 +6,10 @@
 Saving and restoring the benchmark data in DB-API-compliant SQL database - the Trial part.
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
+
+from sqlalchemy import text
 
 from mlos_bench.environment import Status
 from mlos_bench.storage.base_storage import Storage
@@ -37,30 +39,40 @@ class Trial(Storage.Trial):
             Pairs of (key, value): intermediate or final results of the trial.
         """
         _LOG.debug("Updating experiment run: %s", self)
-        cursor = self._conn.cursor()
-        cursor.execute("BEGIN")
-        try:
-            if value:
-                cursor.executemany(
-                    f"""
-                    INSERT INTO {table} (exp_id, trial_id, param_id, param_value)
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    ((self._experiment_id, self._trial_id, key, val)
-                        for (key, val) in value.items())
+        with self._engine.begin() as conn:
+            try:
+                if value:
+                    conn.execute(
+                        text(f"""
+                            INSERT INTO {table} (exp_id, trial_id, param_id, param_value)
+                            VALUES (:exp_id, :trial_id, :param_id, :param_value)
+                        """),
+                        [
+                            {
+                                "exp_id": self._experiment_id,
+                                "trial_id": self._trial_id,
+                                "param_id": key,
+                                "param_value": val,
+                            }
+                            for (key, val) in value.items()
+                        ]
+                    )
+                # FIXME: use the actual timestamp from the benchmark.
+                conn.execute(
+                    text("""
+                        UPDATE trial_status SET status = :status, ts_end = :ts_end
+                        WHERE exp_id = :exp_id AND trial_id = :trial_id
+                    """),
+                    {
+                        "exp_id": self._experiment_id,
+                        "trial_id": self._trial_id,
+                        "status": status.name,
+                        "ts_end": timestamp,
+                    }
                 )
-            # FIXME: use the actual timestamp from the benchmark.
-            cursor.execute(
-                """
-                UPDATE trial_status SET status = ?, ts_end = ?
-                WHERE exp_id = ? AND trial_id = ?
-                """,
-                (status.name, timestamp, self._experiment_id, self._trial_id)
-            )
-            cursor.execute("COMMIT")
-        except Exception:
-            cursor.execute("ROLLBACK")
-            raise
+            except Exception:
+                conn.rollback()
+                raise
 
     def update(self, status: Status, value: dict = None):
         self._update("trial_results", datetime.now(), status, value)
