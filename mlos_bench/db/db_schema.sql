@@ -2,7 +2,8 @@
 -- Copyright (c) Microsoft Corporation.
 -- Licensed under the MIT License.
 --
--- SQLite3/DuckDB version of the DB schema.
+-- DB schema for storing MLOS benchmarking results.
+-- The syntax works for SQLite3, DuckDB, and MySQL / MariaDB.
 
 DROP TABLE IF EXISTS trial_telemetry;
 DROP TABLE IF EXISTS trial_results;

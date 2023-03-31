@@ -56,7 +56,7 @@ CREATE TABLE trial_status (
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
 );
 
-ALTER SEQUENCE trial_id_seq owned by trial_status.trial_id;
+ALTER SEQUENCE trial_id_seq OWNED BY trial_status.trial_id;
 
 CREATE TABLE experiment_merge (
     dest_exp_id experiment_id_t,
