@@ -76,3 +76,19 @@ def test_tunable_assign_str_to_float(tunable_float):
     """
     tunable_float.value = "0.5"
     assert tunable_float.value == 0.5
+
+
+def test_tunable_assign_float_to_int(tunable_int):
+    """
+    Check float to int coercion.
+    """
+    tunable_int.value = 10.0
+    assert tunable_int.value == 10
+
+
+def test_tunable_assign_float_to_int_fail(tunable_int):
+    """
+    Check the invalid float to int coercion.
+    """
+    with pytest.raises(ValueError):
+        tunable_int.value = 10.1
