@@ -11,6 +11,26 @@ DROP TABLE IF EXISTS trial_config;
 DROP TABLE IF EXISTS experiment_merge;
 DROP TABLE IF EXISTS trial_status;
 DROP TABLE IF EXISTS experiment_config;
+DROP TABLE IF EXISTS status_value;
+
+-- Values and IDs should match the `mlos_bench.environment.Status` enum:
+CREATE TABLE status_value (
+    status_id INTEGER NOT NULL,
+    status_name VARCHAR(16) NOT NULL,
+
+    PRIMARY KEY (status_name),
+    UNIQUE (status_id)
+);
+
+INSERT INTO status_value (status_id, status_name) VALUES
+    (0, 'UNKNOWN'),
+    (1, 'PENDING'),
+    (2, 'READY'),
+    (3, 'RUNNING'),
+    (4, 'SUCCEEDED'),
+    (5, 'CANCELED'),
+    (6, 'FAILED'),
+    (7, 'TIMED_OUT');
 
 CREATE TABLE experiment_config (
     exp_id VARCHAR(255) NOT NULL,
@@ -27,10 +47,11 @@ CREATE TABLE trial_status (
     ts_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     ts_end TIMESTAMP,
     -- Should match the text IDs of `mlos_bench.environment.Status` enum:
-    status VARCHAR(16),
+    status VARCHAR(16) NOT NULL,
 
     PRIMARY KEY (exp_id, trial_id),
-    FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
+    FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id),
+    FOREIGN KEY (status) REFERENCES status_value(status_name)
 );
 
 CREATE TABLE experiment_merge (
