@@ -43,11 +43,9 @@ CREATE TABLE experiment_config (
     PRIMARY KEY (exp_id)
 );
 
-CREATE SEQUENCE trial_id_seq;
-
 CREATE TABLE trial_status (
     exp_id experiment_id_t,
-    trial_id trial_id_t DEFAULT nextval('trial_id_seq'),
+    trial_id trial_id_t,
     ts_start TIMESTAMP NOT NULL DEFAULT now(),
     ts_end TIMESTAMP,
     status status_t,
@@ -55,8 +53,6 @@ CREATE TABLE trial_status (
     PRIMARY KEY (exp_id, trial_id),
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
 );
-
-ALTER SEQUENCE trial_id_seq OWNED BY trial_status.trial_id;
 
 CREATE TABLE experiment_merge (
     dest_exp_id experiment_id_t,
