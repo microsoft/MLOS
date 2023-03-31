@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Saving and restoring the benchmark data in DB-API-compliant SQL database - the Experiment part.
+Saving and restoring the benchmark data using SQLAlchemy.
 """
 
 import logging

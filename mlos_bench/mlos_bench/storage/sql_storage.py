@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Saving and restoring the benchmark data in DB-API-compliant SQL database.
+Saving and restoring the benchmark data in SQL database.
 """
 
 import logging
@@ -20,7 +20,7 @@ _LOG = logging.getLogger(__name__)
 
 class SqlStorage(Storage):
     """
-    An implementation of the Storage interface for a DB-API-compliant database.
+    An implementation of the Storage interface using SQLAlchemy backend.
     """
 
     def __init__(self, tunables: TunableGroups, service: Service, config: dict):
