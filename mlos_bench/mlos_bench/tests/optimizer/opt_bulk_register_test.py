@@ -50,7 +50,7 @@ def mock_scores() -> List[float]:
     """
     Mock benchmark results from earlier experiments.
     """
-    return [11.11, 88.88, 66.66, 99.99]
+    return [None, 88.88, 66.66, 99.99]
 
 
 @pytest.fixture
