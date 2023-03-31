@@ -3,7 +3,7 @@
 -- Licensed under the MIT License.
 --
 -- DB schema for storing MLOS benchmarking results.
--- The syntax works for SQLite3, DuckDB, and MySQL / MariaDB.
+-- The syntax works for SQLite3, DuckDB, PostgreSQL, and MySQL / MariaDB.
 
 DROP TABLE IF EXISTS trial_telemetry;
 DROP TABLE IF EXISTS trial_results;
@@ -32,7 +32,6 @@ CREATE TABLE trial_status (
     PRIMARY KEY (exp_id, trial_id),
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
 );
-
 
 CREATE TABLE experiment_merge (
     dest_exp_id VARCHAR(255) NOT NULL,
