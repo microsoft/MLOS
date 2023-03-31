@@ -26,14 +26,19 @@ class Experiment(Storage.Experiment):
     def __enter__(self):
         super().__enter__()
         with self._engine.begin() as conn:
-            git_info = conn.execute(
+            # Get git info and the last trial ID for the experiment.
+            exp_info = conn.execute(
                 text("""
-                    SELECT git_repo, git_commit FROM experiment_config
-                    WHERE exp_id = :exp_id
+                    SELECT e.git_repo, e.git_commit, MAX(t.trial_id) AS trial_id
+                    FROM experiment_config AS e
+                    LEFT OUTER JOIN trial_status AS t ON (e.exp_id = t.exp_id)
+                    WHERE e.exp_id = :exp_id
+                    GROUP BY e.git_repo, e.git_commit
                 """),
                 {"exp_id": self._experiment_id}
             ).fetchone()
-            if git_info is None:
+            if exp_info is None:
+                # It's a new experiment: create a record for it in the database.
                 conn.execute(
                     text("""
                         INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
@@ -47,18 +52,11 @@ class Experiment(Storage.Experiment):
                     }
                 )
             else:
-                if git_info.git_commit != self._git_commit:
+                if exp_info.git_commit != self._git_commit:
                     _LOG.warning("Experiment %s git expected: %s %s",
-                                 self, git_info.git_repo, git_info.git_commit)
-                trial = conn.execute(
-                    text("""
-                        SELECT MAX(trial_id) as trial_id
-                        FROM trial_status WHERE exp_id = :exp_id
-                    """),
-                    {"exp_id": self._experiment_id}
-                ).fetchone()
-                if trial is not None:
-                    self._trial_id = trial.trial_id + 1
+                                 self, exp_info.git_repo, exp_info.git_commit)
+                if exp_info.trial_id is not None:
+                    self._trial_id = exp_info.trial_id
         return self
 
     def merge(self, experiment_ids: List[str]):
