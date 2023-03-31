@@ -8,7 +8,7 @@ and mlos_core optimizers.
 """
 
 import logging
-from typing import Tuple, List, Union
+from typing import Optional, Tuple, List, Union
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.environment.status import Status
@@ -110,7 +110,8 @@ class Optimizer(metaclass=ABCMeta):
         return self._opt_target
 
     @abstractmethod
-    def bulk_register(self, configs: List[dict], scores: List[float]) -> bool:
+    def bulk_register(self, configs: List[dict], scores: List[float],
+                      status: Optional[List[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
@@ -120,13 +121,20 @@ class Optimizer(metaclass=ABCMeta):
             Records of tunable values from other experiments.
         scores : List[float]
             Benchmark results from experiments that correspond to `configs`.
+        status : Optional[List[float]]
+            Status of the experiments that correspond to `configs`.
 
         Returns
         -------
-        is_successful : bool
-            True if registration was successful, False otherwise.
+        is_not_empty : bool
+            True if there is data to register, false otherwise.
         """
-        _LOG.debug("Warm-up: %d configs, %d scores", len(configs or []), len(scores or []))
+        _LOG.info("Warm-up the optimizer with: %d configs, %d scores, %d status values",
+                  len(configs or []), len(scores or []), len(status or []))
+        if len(configs or []) != len(scores or []):
+            raise ValueError("Numbers of configs and scores do not match.")
+        if status is not None and len(configs or []) != len(status or []):
+            raise ValueError("Numbers of configs and status values do not match.")
         return bool(configs and scores)
 
     @abstractmethod
