@@ -38,6 +38,7 @@ class Experiment(Storage.Experiment):
                 {"exp_id": self._experiment_id}
             ).fetchone()
             if exp_info is None:
+                _LOG.info("Start new experiment: %s", self._experiment_id)
                 # It's a new experiment: create a record for it in the database.
                 conn.execute(
                     text("""
@@ -52,11 +53,13 @@ class Experiment(Storage.Experiment):
                     }
                 )
             else:
+                if exp_info.trial_id is not None:
+                    self._trial_id = exp_info.trial_id
+                _LOG.info("Continue experiment: %s last trial: %s resume from: %d",
+                          self._experiment_id, exp_info.trial_id, self._trial_id)
                 if exp_info.git_commit != self._git_commit:
                     _LOG.warning("Experiment %s git expected: %s %s",
                                  self, exp_info.git_repo, exp_info.git_commit)
-                if exp_info.trial_id is not None:
-                    self._trial_id = exp_info.trial_id
         return self
 
     def merge(self, experiment_ids: List[str]):
@@ -110,7 +113,7 @@ class Experiment(Storage.Experiment):
                 yield Trial(self._engine, tunables, self._experiment_id, trial.trial_id)
 
     def trial(self, tunables: TunableGroups):
-        _LOG.debug("Updating trial: %s:%d", self._experiment_id, self._trial_id)
+        _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
         with self._engine.begin() as conn:
             try:
                 conn.execute(
