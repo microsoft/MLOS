@@ -8,7 +8,7 @@ Mock optimizer for mlos_bench.
 
 import random
 import logging
-from typing import Tuple, List, Union
+from typing import Optional, Tuple, List, Union
 
 from mlos_bench.service import Service
 from mlos_bench.environment.status import Status
@@ -35,12 +35,15 @@ class MockOptimizer(Optimizer):
         self._best_config = None
         self._best_score = None
 
-    def bulk_register(self, configs: List[dict], scores: List[float]) -> bool:
-        if not super().bulk_register(configs, scores):
+    def bulk_register(self, configs: List[dict], scores: List[float],
+                      status: Optional[List[Status]] = None) -> bool:
+        if not super().bulk_register(configs, scores, status):
             return False
-        for (params, score) in zip(configs, scores):
+        if status is None:
+            status = [Status.SUCCEEDED] * len(configs)
+        for (params, score, trial_status) in zip(configs, scores, status):
             tunables = self._tunables.copy().assign(params)
-            self.register(tunables, Status.SUCCEEDED, float(score))
+            self.register(tunables, trial_status, None if score is None else float(score))
             self._iter -= 1  # Do not advance the iteration counter during warm-up.
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
