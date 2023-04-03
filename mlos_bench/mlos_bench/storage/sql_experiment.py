@@ -54,7 +54,7 @@ class Experiment(Storage.Experiment):
                 )
             else:
                 if exp_info.trial_id is not None:
-                    self._trial_id = exp_info.trial_id
+                    self._trial_id = exp_info.trial_id + 1
                 _LOG.info("Continue experiment: %s last trial: %s resume from: %d",
                           self._experiment_id, exp_info.trial_id, self._trial_id)
                 if exp_info.git_commit != self._git_commit:
