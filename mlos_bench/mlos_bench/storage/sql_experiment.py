@@ -72,18 +72,18 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 text("""
-                    SELECT s.trial_id, r.param_value
+                    SELECT s.trial_id, r.metric_value
                     FROM trial_status AS s
                     JOIN trial_results AS r ON (s.exp_id = r.exp_id AND s.trial_id = r.trial_id)
-                    WHERE s.exp_id = :exp_id AND s.status = 'SUCCEEDED' AND r.param_id = :param_id
+                    WHERE s.exp_id = :exp_id AND s.status = 'SUCCEEDED' AND r.metric_id = :metric_id
                     ORDER BY s.trial_id ASC
                 """),
-                {"exp_id": self._experiment_id, "param_id": opt_target}
+                {"exp_id": self._experiment_id, "metric_id": opt_target}
             )
             for trial in cur_trials:
                 tunables = self._get_tunables(conn, trial.trial_id)
                 configs.append(tunables)
-                scores.append(float(trial.param_value))
+                scores.append(float(trial.metric_value))
             return (configs, scores)
 
     def _get_tunables(self, conn, trial_id: int) -> dict:
