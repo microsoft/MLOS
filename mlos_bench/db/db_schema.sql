@@ -62,10 +62,10 @@ CREATE TABLE trial_config (
 CREATE TABLE trial_results (
     exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
-    param_id VARCHAR(255) NOT NULL,
-    param_value VARCHAR(255),
+    metric_id VARCHAR(255) NOT NULL,
+    metric_value VARCHAR(255),
 
-    PRIMARY KEY (exp_id, trial_id, param_id),
+    PRIMARY KEY (exp_id, trial_id, metric_id),
     FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
 );
@@ -74,10 +74,10 @@ CREATE TABLE trial_telemetry (
     exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
     ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    param_id VARCHAR(255) NOT NULL,
-    param_value VARCHAR(255),
+    metric_id VARCHAR(255) NOT NULL,
+    metric_value VARCHAR(255),
 
-    UNIQUE (exp_id, trial_id, ts, param_id),
+    UNIQUE (exp_id, trial_id, ts, metric_id),
     FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
     FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
 );
