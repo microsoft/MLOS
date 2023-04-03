@@ -44,15 +44,15 @@ class Trial(Storage.Trial):
                 if value:
                     conn.execute(
                         text(f"""
-                            INSERT INTO {table} (exp_id, trial_id, param_id, param_value)
-                            VALUES (:exp_id, :trial_id, :param_id, :param_value)
+                            INSERT INTO {table} (exp_id, trial_id, metric_id, metric_value)
+                            VALUES (:exp_id, :trial_id, :metric_id, :metric_value)
                         """),
                         [
                             {
                                 "exp_id": self._experiment_id,
                                 "trial_id": self._trial_id,
-                                "param_id": key,
-                                "param_value": val,
+                                "metric_id": key,
+                                "metric_value": val,
                             }
                             for (key, val) in value.items()
                         ]
