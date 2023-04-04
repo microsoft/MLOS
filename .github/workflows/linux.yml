@@ -30,9 +30,12 @@ jobs:
           #- "3.11"
 
     env:
-      cache_cur_date: 0000-00-00
-      cache_cur_hour: 00
-      cache_prev_hour: 23
+      cache_cur_date: unset
+      cache_cur_hour: unset
+      cache_prev_hour: unset
+      CONDA_ENV_NAME: unset
+      # See notes about $CONDA below.
+      CONDA_DIR: unset
 
     steps:
     - uses: actions/checkout@v3
@@ -52,14 +55,17 @@ jobs:
         echo "cache_cur_date=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
         echo "cache_cur_hour=$(date -u +%H)" >> $GITHUB_ENV
         echo "cache_prev_hour=$(date -u -d'1 hour ago' +%H)" >> $GITHUB_ENV
-        echo "CONDA=$CONDA" >> $GITHUB_ENV
+        # $CONDA should be set by the setup-miniconda action.
+        # We set a separate environment variable to allow the dependabot tool
+        # to parse this file since it expects all env vars to be declared above.
+        echo "CONDA_DIR=$CONDA" >> $GITHUB_ENV
 
     - name: Restore cached conda environment
       id: restore-conda-cache
-      if: github.event_name != 'schedule'
+      if: ${{ github.event_name != 'schedule' }}
       uses: actions/cache@v3
       with:
-        path: ${{ env.CONDA }}/envs/${{ env.CONDA_ENV_NAME }}
+        path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
           conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
