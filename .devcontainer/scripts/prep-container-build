@@ -26,7 +26,9 @@ fi
 mkdir -p .devcontainer/tmp/
 cp -v conda-envs/mlos_core.yml .devcontainer/tmp/mlos_core.yml
 for pkg in mlos_core mlos_bench; do
-    cp -v $pkg/setup.py .devcontainer/tmp/$pkg.setup.py
+    mkdir -p .devcontainer/tmp/$pkg
+    cp -v $pkg/setup.py .devcontainer/tmp/$pkg/setup.py
+    cp -v $pkg/_version.py .devcontainer/tmp/$pkg/_version.py
 done
 cp -v doc/requirements.txt .devcontainer/tmp/doc.requirements.txt
 

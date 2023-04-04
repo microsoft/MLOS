@@ -69,11 +69,8 @@ build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NA
 .PHONY: licenseheaders
 licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 
-build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-	conda run -n ${CONDA_ENV_NAME} pip install licenseheaders
-	touch $@
-
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: build/licenseheaders-prereqs.${CONDA_ENV_NAME}.build-stamp $(PYTHON_FILES) doc/mit-license.tmpl
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) doc/mit-license.tmpl
+	# Note: to avoid makefile dependency loops, we don't touch the setup.py files as that would force the conda-env to be rebuilt.
 	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 -x mlos_bench/setup.py mlos_core/setup.py
 	touch $@
 
@@ -147,7 +144,7 @@ PYTEST_OPTIONS :=
 SKIP_COVERAGE := $(shell echo $${SKIP_COVERAGE:-} | grep -i -x -e 1 -e true)
 
 ifeq ($(SKIP_COVERAGE),)
-    PYTEST_OPTIONS += --cov=. --cov-append --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
+    PYTEST_OPTIONS += --cov=. --cov-append --cov-fail-under=0.8 --cov-report=xml --cov-report=html --junitxml=junit/test-results.xml --local-badge-output-dir=doc/source/badges/
 endif
 
 # Run the pytest target on only the modules that have changed recently, but
@@ -325,6 +322,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \
 		| egrep -v \
+			-e "warnings.warn\(f'\"{wd.path}\" is shallow and may cause errors'\)" \
 			-e "No such file or directory: '.*.examples'.$$" \
 			-e 'Problems with "include" directive path:' \
 			-e 'duplicate object description' \
