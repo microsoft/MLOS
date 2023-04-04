@@ -138,7 +138,7 @@ class ConfigPersistenceService(Service):
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Instantiating: %s with config:\n%s",
-                    class_name, json.dumps(class_config, indent=2))
+                       class_name, json.dumps(class_config, indent=2))
 
         return (class_name, class_config)
 
