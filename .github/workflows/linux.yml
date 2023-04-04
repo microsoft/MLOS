@@ -30,10 +30,10 @@ jobs:
           #- "3.11"
 
     env:
-      cache_cur_date: 1970-01-01
-      cache_cur_hour: 00
-      cache_prev_hour: 23
-      CONDA_ENV_NAME: mlos_core-${{ matrix.python_version }}
+      cache_cur_date: unset
+      cache_cur_hour: unset
+      cache_prev_hour: unset
+      CONDA_ENV_NAME: unset
       # See notes about $CONDA below.
       CONDA_DIR: unset
 
