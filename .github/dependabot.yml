@@ -6,13 +6,19 @@
 version: 2
 updates:
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/.devcontainer/"
     schedule:
       interval: "daily"
     assignees:
     - "microsoft/mlos-committers"
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/mlos_core/"
+    schedule:
+      interval: "daily"
+    assignees:
+    - "microsoft/mlos-committers"
+  - package-ecosystem: "pip"
+    directory: "/mlos_bench/"
     schedule:
       interval: "daily"
     assignees:
