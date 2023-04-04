@@ -27,6 +27,7 @@ except LookupError as e:
 extra_requires = {
     # Additional tools for extra functionality.
     'azure': 'azure-storage-file-share',
+    'sqlalchemy': 'sqlalchemy',
     # Transitive extra_requires from mlos-core.
     'emukit': 'emukit',
     'skopt': 'scikit-optimize',

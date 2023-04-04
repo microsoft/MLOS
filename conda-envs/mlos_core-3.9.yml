@@ -28,6 +28,5 @@ dependencies:
     - bump2version
     - licenseheaders
     - pytest-local-badge
-    - sqlalchemy
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"
