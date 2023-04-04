@@ -30,8 +30,8 @@ class Experiment(Storage.Experiment):
             exp_info = conn.execute(
                 text("""
                     SELECT e.git_repo, e.git_commit, MAX(t.trial_id) AS trial_id
-                    FROM experiment_config AS e
-                    LEFT OUTER JOIN trial_status AS t ON (e.exp_id = t.exp_id)
+                    FROM experiment AS e
+                    LEFT OUTER JOIN trial AS t ON (e.exp_id = t.exp_id)
                     WHERE e.exp_id = :exp_id
                     GROUP BY e.git_repo, e.git_commit
                 """),
@@ -42,7 +42,7 @@ class Experiment(Storage.Experiment):
                 # It's a new experiment: create a record for it in the database.
                 conn.execute(
                     text("""
-                        INSERT INTO experiment_config (exp_id, descr, git_repo, git_commit)
+                        INSERT INTO experiment (exp_id, descr, git_repo, git_commit)
                         VALUES (:exp_id, :descr, :git_repo, :git_commit)
                     """),
                     {
@@ -72,11 +72,11 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 text("""
-                    SELECT s.trial_id, r.metric_value
-                    FROM trial_status AS s
-                    JOIN trial_results AS r ON (s.exp_id = r.exp_id AND s.trial_id = r.trial_id)
-                    WHERE s.exp_id = :exp_id AND s.status = 'SUCCEEDED' AND r.metric_id = :metric_id
-                    ORDER BY s.trial_id ASC
+                    SELECT t.trial_id, r.metric_value
+                    FROM trial AS t
+                    JOIN trial_results AS r ON (t.exp_id = r.exp_id AND t.trial_id = r.trial_id)
+                    WHERE t.exp_id = :exp_id AND t.status = 'SUCCEEDED' AND r.metric_id = :metric_id
+                    ORDER BY t.trial_id ASC
                 """),
                 {"exp_id": self._experiment_id, "metric_id": opt_target}
             )
@@ -101,7 +101,7 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 text("""
-                    SELECT trial_id FROM trial_status
+                    SELECT trial_id FROM trial
                     WHERE exp_id = :exp_id AND ts_end IS NULL
                 """),
                 {"exp_id": self._experiment_id}
@@ -118,7 +118,7 @@ class Experiment(Storage.Experiment):
             try:
                 conn.execute(
                     text("""
-                        INSERT INTO trial_status (exp_id, trial_id, status)
+                        INSERT INTO trial (exp_id, trial_id, status)
                         VALUES (:exp_id, :trial_id, 'PENDING')
                     """),
                     {"exp_id": self._experiment_id, "trial_id": self._trial_id}

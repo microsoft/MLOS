@@ -60,7 +60,7 @@ class Trial(Storage.Trial):
                 # FIXME: use the actual timestamp from the benchmark.
                 conn.execute(
                     text("""
-                        UPDATE trial_status SET status = :status, ts_end = :ts_end
+                        UPDATE trial SET status = :status, ts_end = :ts_end
                         WHERE exp_id = :exp_id AND trial_id = :trial_id
                     """),
                     {
