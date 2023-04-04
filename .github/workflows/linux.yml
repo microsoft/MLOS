@@ -62,7 +62,7 @@ jobs:
 
     - name: Restore cached conda environment
       id: restore-conda-cache
-      if: github.event_name != 'schedule'
+      if: ${{ github.event_name != 'schedule' }}
       uses: actions/cache@v3
       with:
         path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
