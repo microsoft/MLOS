@@ -7,7 +7,7 @@ A wrapper for mlos_core optimizers for mlos_bench.
 """
 
 import logging
-from typing import Tuple
+from typing import Optional, Tuple, List, Union
 
 import pandas as pd
 
@@ -28,34 +28,63 @@ class MlosCoreOptimizer(Optimizer):
     """
 
     def __init__(self, tunables: TunableGroups, config: dict):
+
         super().__init__(tunables, config)
+
         space = tunable_groups_to_configspace(tunables)
         _LOG.debug("ConfigSpace: %s", space)
+
         opt_type = getattr(OptimizerType, self._config.pop('optimizer_type', 'SKOPT'))
+
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})
+
         if space_adapter_type is not None:
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
+
         self._opt = OptimizerFactory.create(
             space, opt_type, optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
+
+    def bulk_register(self, configs: List[dict], scores: List[float],
+                      status: Optional[List[Status]] = None) -> bool:
+        if not super().bulk_register(configs, scores, status):
+            return False
+        tunables_names = list(self._tunables.get_param_values().keys())
+        df_configs = pd.DataFrame(configs)[tunables_names]
+        df_scores = pd.Series(scores, dtype=float) * self._opt_sign
+        if status is not None:
+            df_status_succ = pd.Series(status) == Status.SUCCEEDED
+            df_configs = df_configs[df_status_succ]
+            df_scores = df_scores[df_status_succ]
+        self._opt.register(df_configs, df_scores)
+        if _LOG.isEnabledFor(logging.DEBUG):
+            (score, _) = self.get_best_observation()
+            _LOG.debug("Warm-up end: %s = %s", self.target, score)
+        return True
 
     def suggest(self) -> TunableGroups:
         df_config = self._opt.suggest()
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return self._tunables.copy().assign(df_config.loc[0].to_dict())
 
-    def register(self, tunables: TunableGroups, status: Status, score: float = None):
-        super().register(tunables, status, score)
-        # By default, hyperparameters in ConfigurationSpace are sorted by name:
-        df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
-        _LOG.debug("Dataframe:\n%s", df_config)
-        self._opt.register(df_config, pd.Series([score]))
+    def register(self, tunables: TunableGroups, status: Status,
+                 score: Union[float, dict] = None) -> float:
+        score = super().register(tunables, status, score)
+        # TODO: mlos_core currently does not support registration of failed trials:
+        if status.is_succeeded:
+            # By default, hyperparameters in ConfigurationSpace are sorted by name:
+            df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
+            _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)
+            self._opt.register(df_config, pd.Series([score], dtype=float))
         self._iter += 1
+        return score
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
         df_config = self._opt.get_best_observation()
-        params = df_config.loc[0].to_dict()
-        score = params.pop('score')
+        if len(df_config) == 0:
+            return (None, None)
+        params = df_config.iloc[0].to_dict()
+        score = params.pop(self._opt_target) * self._opt_sign
         return (score, self._tunables.copy().assign(params))

@@ -59,7 +59,7 @@ RUN /opt/conda/bin/conda init bash \
 
 # Prepare the mlos_core_deps.yml file in a cross platform way.
 FROM mcr.microsoft.com/devcontainers/miniconda:3 AS deps-prep
-COPY --chown=vscode:conda prep-deps-files.sh mlos_core.yml mlos_core.setup.py mlos_bench.setup.py doc.requirements.txt /tmp/conda-tmp/
+COPY --chown=vscode:conda . /tmp/conda-tmp/
 RUN /tmp/conda-tmp/prep-deps-files.sh \
     && ls -l /tmp/conda-tmp/ # && cat /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/mlos_core_deps.yml
 

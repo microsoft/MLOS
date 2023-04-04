@@ -19,6 +19,8 @@
 import os
 import sys
 
+from logging import warning
+
 import sphinx_rtd_theme
 
 #sys.path.insert(0, os.path.abspath('../..'))
@@ -33,7 +35,17 @@ copyright = '2022, GSL'
 author = 'GSL'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.4'
+release = '0.1.0'
+
+try:
+    from setuptools_scm import get_version
+    version = get_version(root='../..', relative_to=__file__)
+    if version is not None:
+        release = version
+except ImportError:
+    warning("setuptools_scm not found, using version from _version.py")
+except LookupError as e:
+    warning(f"setuptools_scm failed to find git version, using version from _version.py: {e}")
 
 
 # -- General configuration ---------------------------------------------------
