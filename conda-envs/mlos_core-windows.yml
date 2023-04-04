@@ -21,6 +21,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - sqlalchemy
   # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
   - python<3.11
   # Require a compiler to be installed/configured and build GPy directly.

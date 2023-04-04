@@ -21,6 +21,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - sqlalchemy
   - python=3.10
   # See comments in mlos_core.yml.
   #- gcc_linux-64
