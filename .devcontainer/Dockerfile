@@ -34,13 +34,8 @@ USER vscode
 
 # Use the mamba solver (necessary for some quality of life speedups due to
 # required packages to support Windows)
-# FIXME: Simplify this conda solver install rule once the new mamba is released.
-# See Also: https://github.com/conda/conda-libmamba-solver/issues/169#issuecomment-1490509810
 RUN umask 0002 \
-    && ( \
-        /opt/conda/bin/conda install -v -y -n base 'conda-libmamba-solver>=23.3.0' \
-        || /opt/conda/bin/conda install -v -y -n base 'conda-forge::conda-libmamba-solver=23.3.0' \
-    ) \
+    && /opt/conda/bin/conda install -v -y -n base conda-libmamba-solver \
     && /opt/conda/bin/conda config --set solver libmamba
 
 # Update the base. This helps save space by making sure the same version
