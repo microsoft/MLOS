@@ -184,13 +184,36 @@ class Storage(metaclass=ABCMeta):
             return config
 
         @abstractmethod
-        def update(self, status: Status, value: Optional[Union[Dict[str, float], float]] = None):
+        def update(self, status: Status,
+                   value: Optional[Union[Dict[str, float], float]] = None
+                   ) -> Optional[Dict[str, float]]:
             """
             Update the storage with the results of the experiment.
+
+            Parameters
+            ----------
+
+            status : Status
+                Status of the experiment run.
+            value : Optional[Union[Dict[str, float], float]]
+                One or several metrics of the experiment run.
+                Must contain the optimization target if the status is SUCCEEDED.
+
+            Returns
+            -------
+            value : Optional[Dict[str, float]]
+                Same as value, but always in the dict format.
             """
+            _LOG.info("Store trial: %s :: %s %s", self, status, value)
+            if isinstance(value, dict) and self._opt_target not in value:
+                _LOG.warning("Trial %s :: opt. target missing: %s", self, self._opt_target)
+                # raise ValueError(
+                #     f"Optimization target '{self._opt_target}' is missing from {value}")
+            return {self._opt_target: value} if isinstance(value, (float, int)) else value
 
         @abstractmethod
         def update_telemetry(self, status: Status, value: dict = None):
             """
             Save the experiment's telemetry data and intermediate status.
             """
+            _LOG.info("Store telemetry: %s :: %s %s", self, status, value)

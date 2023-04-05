@@ -75,10 +75,12 @@ class Trial(Storage.Trial):
                 conn.rollback()
                 raise
 
-    def update(self, status: Status, value: Optional[Union[Dict[str, float], float]] = None):
-        if isinstance(value, (float, int)):
-            value = {self._opt_target: value}
+    def update(self, status: Status,
+               value: Optional[Union[Dict[str, float], float]] = None
+               ) -> Optional[Dict[str, float]]:
+        value = super().update(status, value)
         self._update("trial_results", datetime.now(), status, value)
 
     def update_telemetry(self, status: Status, value: dict = None):
+        super().update_telemetry(status, value)
         self._update("trial_telemetry", None, status, value)
