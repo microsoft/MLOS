@@ -7,7 +7,7 @@ Saving and restoring the benchmark data using SQLAlchemy.
 """
 
 import logging
-from typing import List, Tuple
+from typing import Optional, List, Tuple
 
 from sqlalchemy import text
 
@@ -29,7 +29,8 @@ class Experiment(Storage.Experiment):
             # Get git info and the last trial ID for the experiment.
             exp_info = conn.execute(
                 text("""
-                    SELECT e.git_repo, e.git_commit, MAX(t.trial_id) AS trial_id
+                    SELECT e.git_repo, e.git_commit, e.metric_id,
+                           MAX(t.trial_id) AS trial_id
                     FROM experiment AS e
                     LEFT OUTER JOIN trial AS t ON (e.exp_id = t.exp_id)
                     WHERE e.exp_id = :exp_id
@@ -42,12 +43,13 @@ class Experiment(Storage.Experiment):
                 # It's a new experiment: create a record for it in the database.
                 conn.execute(
                     text("""
-                        INSERT INTO experiment (exp_id, descr, git_repo, git_commit)
-                        VALUES (:exp_id, :descr, :git_repo, :git_commit)
+                        INSERT INTO experiment (exp_id, descr, metric_id, git_repo, git_commit)
+                        VALUES (:exp_id, :descr, :metric_id, :git_repo, :git_commit)
                     """),
                     {
                         "exp_id": self._experiment_id,
-                        "descr": None,
+                        "descr": self._description,
+                        "metric_id": self._opt_target,
                         "git_repo": self._git_repo,
                         "git_commit": self._git_commit
                     }
@@ -66,7 +68,7 @@ class Experiment(Storage.Experiment):
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError()
 
-    def load(self, opt_target: str) -> Tuple[List[dict], List[float]]:
+    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float]]:
         configs = []
         scores = []
         with self._engine.connect() as conn:
@@ -78,7 +80,10 @@ class Experiment(Storage.Experiment):
                     WHERE t.exp_id = :exp_id AND t.status = 'SUCCEEDED' AND r.metric_id = :metric_id
                     ORDER BY t.trial_id ASC
                 """),
-                {"exp_id": self._experiment_id, "metric_id": opt_target}
+                {
+                    "exp_id": self._experiment_id,
+                    "metric_id": opt_target or self._opt_target
+                }
             )
             for trial in cur_trials:
                 tunables = self._get_tunables(conn, trial.trial_id)
