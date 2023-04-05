@@ -8,7 +8,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import List, Tuple
+from typing import Optional, Union, List, Tuple, Dict
 
 from mlos_bench.environment import Status
 from mlos_bench.service import Service
@@ -16,6 +16,8 @@ from mlos_bench.tunables import TunableGroups
 from mlos_bench.util import get_git_info
 
 _LOG = logging.getLogger(__name__)
+
+# pylint: disable=too-few-public-methods,too-many-arguments
 
 
 class Storage(metaclass=ABCMeta):
@@ -40,20 +42,20 @@ class Storage(metaclass=ABCMeta):
         self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()
-        self._experiment_id = self._config.pop("experimentId").strip()
-        self._trial_id = int(self._config.pop("trialId", 0))
-
-    @property
-    def experiment_id(self) -> str:
-        """
-        String ID of the experiment being stored.
-        """
-        return self._experiment_id
 
     @abstractmethod
-    def experiment(self):
+    def experiment(self, exp_id: str, trial_id: int, opt_target: str):
         """
         Create a new experiment in the storage.
+
+        Parameters
+        ----------
+        exp_id : str
+            Unique identifier of the experiment.
+        trial_id : int
+            Starting number of the trial.
+        opt_target : str
+            Name of metric we're optimizing for.
 
         Returns
         -------
@@ -69,11 +71,12 @@ class Storage(metaclass=ABCMeta):
         """
 
         def __init__(self, engine, tunables: TunableGroups,
-                     experiment_id: str, trial_id: int = 0):
+                     experiment_id: str, trial_id: int, opt_target: str):
             self._engine = engine
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
             self._trial_id = trial_id
+            self._opt_target = opt_target
             (self._git_repo, self._git_commit) = get_git_info()
 
         def __enter__(self):
@@ -146,11 +149,12 @@ class Storage(metaclass=ABCMeta):
         """
 
         def __init__(self, engine, tunables: TunableGroups,
-                     experiment_id: str, trial_id: int):
+                     experiment_id: str, trial_id: int, opt_target: str):
             self._engine = engine
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
+            self._opt_target = opt_target
 
         def __repr__(self) -> str:
             return f"{self._experiment_id}:{self._trial_id}"
@@ -180,7 +184,7 @@ class Storage(metaclass=ABCMeta):
             return config
 
         @abstractmethod
-        def update(self, status: Status, value: dict = None):
+        def update(self, status: Status, value: Optional[Union[Dict[str, float], float]] = None):
             """
             Update the storage with the results of the experiment.
             """

@@ -47,6 +47,5 @@ class SqlStorage(Storage):
     def __repr__(self) -> str:
         return self._repr
 
-    def experiment(self):
-        return Experiment(self._engine, self._tunables,
-                          self._experiment_id, self._trial_id)
+    def experiment(self, exp_id: str, trial_id: int, opt_target: str):
+        return Experiment(self._engine, self._tunables, exp_id, trial_id, opt_target)

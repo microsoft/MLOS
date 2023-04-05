@@ -17,7 +17,7 @@ def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment):
     """
     Try to retrieve old experimental data from the empty storage.
     """
-    (configs, scores) = exp_storage_memory_sql.load('score')
+    (configs, scores) = exp_storage_memory_sql.load()
     assert not configs
     assert not scores
 
@@ -95,7 +95,7 @@ def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,
     (pending,) = list(exp_storage_memory_sql.pending())
     assert pending.trial_id == trial_pend.trial_id
 
-    (configs, scores) = exp_storage_memory_sql.load('score')
+    (configs, scores) = exp_storage_memory_sql.load()
     assert len(configs) == 1
     assert len(scores) == 1
     assert scores[0] == score

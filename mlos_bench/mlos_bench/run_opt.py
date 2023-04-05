@@ -60,18 +60,20 @@ def _optimize(env: Environment, opt: Optimizer,
     global_config : dict
         Global configuration parameters.
     """
+    experiment_id = global_config["experimentId"].strip()
+    trial_id = int(global_config.get("trialId", 1))
     # Start new or resume the existing experiment. Verify that the
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
     # from other experiments and check for compatibility.
-    with storage.experiment() as exp:
+    with storage.experiment(experiment_id, trial_id, opt.target) as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
 
         # Load (tunable values, benchmark scores) to warm-up the optimizer.
         # `.load()` returns data from ALL merged-in experiments and attempts
         # to impute the missing tunable values.
-        (configs, scores) = exp.load(opt.target)
+        (configs, scores) = exp.load()
         opt.bulk_register(configs, scores)
 
         # First, complete any pending trials.

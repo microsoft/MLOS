@@ -43,12 +43,11 @@ class Experiment(Storage.Experiment):
                 # It's a new experiment: create a record for it in the database.
                 conn.execute(
                     text("""
-                        INSERT INTO experiment (exp_id, descr, metric_id, git_repo, git_commit)
-                        VALUES (:exp_id, :descr, :metric_id, :git_repo, :git_commit)
+                        INSERT INTO experiment (exp_id, metric_id, git_repo, git_commit)
+                        VALUES (:exp_id, :metric_id, :git_repo, :git_commit)
                     """),
                     {
                         "exp_id": self._experiment_id,
-                        "descr": self._description,
                         "metric_id": self._opt_target,
                         "git_repo": self._git_repo,
                         "git_commit": self._git_commit
@@ -59,6 +58,9 @@ class Experiment(Storage.Experiment):
                     self._trial_id = exp_info.trial_id + 1
                 _LOG.info("Continue experiment: %s last trial: %s resume from: %d",
                           self._experiment_id, exp_info.trial_id, self._trial_id)
+                if exp_info.metric_id != self._opt_target:
+                    _LOG.warning("Experiment %s optimization target mismatch: %s != %s",
+                                 self, exp_info.metric_id, self._opt_target)
                 if exp_info.git_commit != self._git_commit:
                     _LOG.warning("Experiment %s git expected: %s %s",
                                  self, exp_info.git_repo, exp_info.git_commit)
@@ -115,7 +117,8 @@ class Experiment(Storage.Experiment):
                 # Reset .is_updated flag after assignment!
                 tunables = self._tunables.copy().assign(
                     self._get_tunables(conn, trial.trial_id)).reset()
-                yield Trial(self._engine, tunables, self._experiment_id, trial.trial_id)
+                yield Trial(self._engine, tunables,
+                            self._experiment_id, trial.trial_id, self._opt_target)
 
     def trial(self, tunables: TunableGroups):
         _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
@@ -143,7 +146,8 @@ class Experiment(Storage.Experiment):
                         for (tunable, _group) in tunables
                     ]
                 )
-                trial = Trial(self._engine, tunables, self._experiment_id, self._trial_id)
+                trial = Trial(self._engine, tunables,
+                              self._experiment_id, self._trial_id, self._opt_target)
                 self._trial_id += 1
                 return trial
             except Exception:

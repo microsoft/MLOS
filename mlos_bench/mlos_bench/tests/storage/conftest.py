@@ -22,12 +22,10 @@ def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
         tunables=tunable_groups,
         service=None,
         config={
-            "experimentId": "pytest",
-            "trialId": 1,
             "drivername": "sqlite",
             "database": ":memory:",
             "init_script": "mlos_bench/db/db_schema.sql",
         }
     )
     # pylint: disable=unnecessary-dunder-call
-    return storage.experiment().__enter__()
+    return storage.experiment("pytest", 1, "score").__enter__()

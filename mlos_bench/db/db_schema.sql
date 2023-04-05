@@ -16,7 +16,7 @@ DROP TABLE IF EXISTS experiment;
 CREATE TABLE experiment (
     exp_id VARCHAR(255) NOT NULL,
     descr TEXT,
-    metric_id VARCHAR(255) NOT NULL,
+    metric_id VARCHAR(255) NOT NULL,  -- Metric we're optimizing for.
     git_repo VARCHAR(255) NOT NULL,
     git_commit VARCHAR(40) NOT NULL,
 
