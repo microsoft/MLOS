@@ -72,7 +72,7 @@ def test_exp_trial_success(exp_storage_memory_sql: Storage.Experiment,
     Start a trial, finish it successfully, and and check that it is NOT pending.
     """
     trial = exp_storage_memory_sql.trial(tunable_groups)
-    trial.update(Status.SUCCEEDED, {'score': 99.9})
+    trial.update(Status.SUCCEEDED, 99.9)
     trials = list(exp_storage_memory_sql.pending())
     assert not trials
 
@@ -90,7 +90,7 @@ def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,
     trial_pend = exp_storage_memory_sql.trial(tunable_groups)
 
     trial_fail.update(Status.FAILED)
-    trial_succ.update(Status.SUCCEEDED, {'score': score})
+    trial_succ.update(Status.SUCCEEDED, score)
 
     (pending,) = list(exp_storage_memory_sql.pending())
     assert pending.trial_id == trial_pend.trial_id
