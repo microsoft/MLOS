@@ -5,13 +5,8 @@
     // Apply --config-path resolution to these config parameters:
     "resolve_path": ["database"],
 
+    // Parameters must match kwargs of sqlalchemy.URL.create().
     "config": {
-
-        // Can be provided via the command line or other global config.
-        "experimentId": "test-experiment-1",
-        "trialId": 0,  // optional
-
-        // Parameters below must match kwargs of sqlalchemy.URL.create().
         "drivername": "sqlite",
         "database": "mlos_bench.sqlite3"
     }

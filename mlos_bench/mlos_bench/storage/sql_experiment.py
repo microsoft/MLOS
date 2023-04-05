@@ -34,7 +34,7 @@ class Experiment(Storage.Experiment):
                     FROM experiment AS e
                     LEFT OUTER JOIN trial AS t ON (e.exp_id = t.exp_id)
                     WHERE e.exp_id = :exp_id
-                    GROUP BY e.git_repo, e.git_commit
+                    GROUP BY e.git_repo, e.git_commit, e.metric_id
                 """),
                 {"exp_id": self._experiment_id}
             ).fetchone()
