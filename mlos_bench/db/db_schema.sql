@@ -8,11 +8,12 @@
 DROP TABLE IF EXISTS trial_telemetry;
 DROP TABLE IF EXISTS trial_results;
 DROP TABLE IF EXISTS trial_config;
+DROP TABLE IF EXISTS tunable_params;
 DROP TABLE IF EXISTS experiment_merge;
-DROP TABLE IF EXISTS trial_status;
-DROP TABLE IF EXISTS experiment_config;
+DROP TABLE IF EXISTS trial;
+DROP TABLE IF EXISTS experiment;
 
-CREATE TABLE experiment_config (
+CREATE TABLE experiment (
     exp_id VARCHAR(255) NOT NULL,
     descr TEXT,
     git_repo VARCHAR(255) NOT NULL,
@@ -21,7 +22,7 @@ CREATE TABLE experiment_config (
     PRIMARY KEY (exp_id)
 );
 
-CREATE TABLE trial_status (
+CREATE TABLE trial (
     exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
     ts_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -30,7 +31,7 @@ CREATE TABLE trial_status (
     status VARCHAR(16) NOT NULL,
 
     PRIMARY KEY (exp_id, trial_id),
-    FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
+    FOREIGN KEY (exp_id) REFERENCES experiment(exp_id)
 );
 
 CREATE TABLE experiment_merge (
@@ -42,10 +43,21 @@ CREATE TABLE experiment_merge (
     UNIQUE (dest_exp_id, dest_trial_id, source_exp_id, source_trial_id),
 
     FOREIGN KEY (dest_exp_id, dest_trial_id)
-        REFERENCES trial_status(exp_id, trial_id),
+        REFERENCES trial(exp_id, trial_id),
 
     FOREIGN KEY (source_exp_id, source_trial_id)
-        REFERENCES trial_status(exp_id, trial_id)
+        REFERENCES trial(exp_id, trial_id)
+);
+
+-- Tunable parameters and their types, used for merging the data from several experiments.
+-- Records in this table must match the `mlos_bench.tunables.Tunable` class.
+CREATE TABLE tunable_params (
+    param_id VARCHAR(255) NOT NULL,
+    param_type VARCHAR(32) NOT NULL,  -- One of {int, float, categorical}
+    param_default VARCHAR(255),
+    param_meta VARCHAR(1023),  -- JSON-encoded metadata (range or categories).
+
+    PRIMARY KEY (param_id)
 );
 
 CREATE TABLE trial_config (
@@ -55,8 +67,10 @@ CREATE TABLE trial_config (
     param_value VARCHAR(255),
 
     PRIMARY KEY (exp_id, trial_id, param_id),
-    FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
-    FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
+    -- TODO: Enable when we pre-populate the `tunable_params` table:
+    -- FOREIGN KEY (param_id) REFERENCES tunable_params(param_id),
+    FOREIGN KEY (exp_id, trial_id) REFERENCES trial(exp_id, trial_id),
+    FOREIGN KEY (exp_id) REFERENCES experiment(exp_id)
 );
 
 CREATE TABLE trial_results (
@@ -66,8 +80,8 @@ CREATE TABLE trial_results (
     metric_value VARCHAR(255),
 
     PRIMARY KEY (exp_id, trial_id, metric_id),
-    FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
-    FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
+    FOREIGN KEY (exp_id, trial_id) REFERENCES trial(exp_id, trial_id),
+    FOREIGN KEY (exp_id) REFERENCES experiment(exp_id)
 );
 
 CREATE TABLE trial_telemetry (
@@ -78,6 +92,6 @@ CREATE TABLE trial_telemetry (
     metric_value VARCHAR(255),
 
     UNIQUE (exp_id, trial_id, ts, metric_id),
-    FOREIGN KEY (exp_id, trial_id) REFERENCES trial_status(exp_id, trial_id),
-    FOREIGN KEY (exp_id) REFERENCES experiment_config(exp_id)
+    FOREIGN KEY (exp_id, trial_id) REFERENCES trial(exp_id, trial_id),
+    FOREIGN KEY (exp_id) REFERENCES experiment(exp_id)
 );
