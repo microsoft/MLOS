@@ -1,0 +1,41 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/.devcontainer/build/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/mlos_core/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/mlos_bench/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pip"
+    directory: "/doc/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "docker"
+    directory: "/doc/"
+    schedule:
+      interval: "daily"
+# TODO: Add conda support eventually.
+# See Also: https://github.com/dependabot/dependabot-core/issues/1249
+#  - package-ecosystem: "conda"
+#    directory: "/conda-envs/"
+#    schedule:
+#      interval: "daily"
