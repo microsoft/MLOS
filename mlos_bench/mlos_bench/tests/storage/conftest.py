@@ -28,4 +28,4 @@ def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
         }
     )
     # pylint: disable=unnecessary-dunder-call
-    return storage.experiment("pytest", 1, "score").__enter__()
+    return storage.experiment("pytest-experiment", 1, "score").__enter__()
