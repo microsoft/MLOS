@@ -8,6 +8,7 @@
 DROP TABLE IF EXISTS trial_telemetry;
 DROP TABLE IF EXISTS trial_results;
 DROP TABLE IF EXISTS trial_config;
+DROP TABLE IF EXISTS trial_tunables;
 DROP TABLE IF EXISTS tunable_params;
 DROP TABLE IF EXISTS experiment_merge;
 DROP TABLE IF EXISTS trial;
@@ -61,7 +62,8 @@ CREATE TABLE tunable_params (
     PRIMARY KEY (param_id)
 );
 
-CREATE TABLE trial_config (
+-- Values of the tunable parameters of the experiment, fixed for a particular trial.
+CREATE TABLE trial_tunables (
     exp_id VARCHAR(255) NOT NULL,
     trial_id INTEGER NOT NULL,
     param_id VARCHAR(255) NOT NULL,
@@ -70,6 +72,19 @@ CREATE TABLE trial_config (
     PRIMARY KEY (exp_id, trial_id, param_id),
     -- TODO: Enable when we pre-populate the `tunable_params` table:
     -- FOREIGN KEY (param_id) REFERENCES tunable_params(param_id),
+    FOREIGN KEY (exp_id, trial_id) REFERENCES trial(exp_id, trial_id),
+    FOREIGN KEY (exp_id) REFERENCES experiment(exp_id)
+);
+
+-- Values of additional non-tunable parameters of the trial,
+-- e.g., scheduled execution time, VM name / location, number of repeats, etc.
+CREATE TABLE trial_config (
+    exp_id VARCHAR(255) NOT NULL,
+    trial_id INTEGER NOT NULL,
+    param_id VARCHAR(255) NOT NULL,
+    param_value VARCHAR(255),
+
+    PRIMARY KEY (exp_id, trial_id, param_id),
     FOREIGN KEY (exp_id, trial_id) REFERENCES trial(exp_id, trial_id),
     FOREIGN KEY (exp_id) REFERENCES experiment(exp_id)
 );

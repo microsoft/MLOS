@@ -148,13 +148,14 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, engine, tunables: TunableGroups,
-                     experiment_id: str, trial_id: int, opt_target: str):
+        def __init__(self, engine, tunables: TunableGroups, experiment_id: str,
+                     trial_id: int, opt_target: str, config: dict = None):
             self._engine = engine
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
             self._opt_target = opt_target
+            self._config = config or {}
 
         def __repr__(self) -> str:
             return f"{self._experiment_id}:{self._trial_id}"
@@ -173,12 +174,13 @@ class Storage(metaclass=ABCMeta):
             """
             return self._tunables
 
-        def config(self, global_config: dict) -> dict:
+        def config(self, global_config: dict = None) -> dict:
             """
-            Produce a copy of the global configuration updated with
-            parameters of the current run.
+            Produce a copy of the global configuration updated
+            with the parameters of the current trial.
             """
-            config = global_config.copy()
+            config = self._config.copy()
+            config.update(global_config or {})
             config["experimentId"] = self._experiment_id
             config["trialId"] = self._trial_id
             return config
@@ -215,5 +217,13 @@ class Storage(metaclass=ABCMeta):
         def update_telemetry(self, status: Status, value: dict = None):
             """
             Save the experiment's telemetry data and intermediate status.
+
+            Parameters
+            ----------
+
+            status : Status
+                Current status of the trial.
+            value : Optional[Dict[str, float]]
+                Telemetry data.
             """
             _LOG.info("Store telemetry: %s :: %s %s", self, status, value)

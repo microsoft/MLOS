@@ -42,6 +42,20 @@ class Trial(Storage.Trial):
         _LOG.debug("Updating experiment run: %s", self)
         with self._engine.begin() as conn:
             try:
+                # FIXME: Use the actual timestamp from the benchmark.
+                conn.execute(
+                    text("""
+                        UPDATE trial SET status = :status, ts_end = :ts_end
+                        WHERE exp_id = :exp_id AND trial_id = :trial_id
+                    """),
+                    {
+                        "exp_id": self._experiment_id,
+                        "trial_id": self._trial_id,
+                        "status": status.name,
+                        "ts_end": timestamp,
+                    }
+                )
+                # FIXME: Save timestamps for the telemetry data.
                 if value:
                     conn.execute(
                         text(f"""
@@ -58,19 +72,6 @@ class Trial(Storage.Trial):
                             for (key, val) in value.items()
                         ]
                     )
-                # FIXME: use the actual timestamp from the benchmark.
-                conn.execute(
-                    text("""
-                        UPDATE trial SET status = :status, ts_end = :ts_end
-                        WHERE exp_id = :exp_id AND trial_id = :trial_id
-                    """),
-                    {
-                        "exp_id": self._experiment_id,
-                        "trial_id": self._trial_id,
-                        "status": status.name,
-                        "ts_end": timestamp,
-                    }
-                )
             except Exception:
                 conn.rollback()
                 raise

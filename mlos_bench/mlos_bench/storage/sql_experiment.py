@@ -88,20 +88,37 @@ class Experiment(Storage.Experiment):
                 }
             )
             for trial in cur_trials:
-                tunables = self._get_tunables(conn, trial.trial_id)
+                tunables = self._get_params(conn, "trial_tunables", trial.trial_id)
                 configs.append(tunables)
                 scores.append(float(trial.metric_value))
             return (configs, scores)
 
-    def _get_tunables(self, conn, trial_id: int) -> dict:
-        cur_tunables = conn.execute(
-            text("""
-                SELECT param_id, param_value FROM trial_config
+    def _get_params(self, conn, table_name: str, trial_id: int) -> dict:
+        cur_params = conn.execute(
+            text(f"""
+                SELECT param_id, param_value FROM {table_name}
                 WHERE exp_id = :exp_id AND trial_id = :trial_id
             """),
             {"exp_id": self._experiment_id, "trial_id": trial_id}
         )
-        return {row.param_id: row.param_value for row in cur_tunables}
+        return {row.param_id: row.param_value for row in cur_params}
+
+    def _save_params(self, conn, table_name: str, params: dict):
+        conn.execute(
+            text(f"""
+                INSERT INTO {table_name} (exp_id, trial_id, param_id, param_value)
+                VALUES (:exp_id, :trial_id, :param_id, :param_value)
+            """),
+            [
+                {
+                    "exp_id": self._experiment_id,
+                    "trial_id": self._trial_id,
+                    "param_id": key,
+                    "param_value": None if val is None else str(val)
+                }
+                for (key, val) in params
+            ]
+        )
 
     def pending(self):
         _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
@@ -114,13 +131,14 @@ class Experiment(Storage.Experiment):
                 {"exp_id": self._experiment_id}
             )
             for trial in cur_trials:
-                # Reset .is_updated flag after assignment!
+                # Reset .is_updated flag after the assignment!
                 tunables = self._tunables.copy().assign(
-                    self._get_tunables(conn, trial.trial_id)).reset()
-                yield Trial(self._engine, tunables,
-                            self._experiment_id, trial.trial_id, self._opt_target)
+                    self._get_params(conn, "trial_tunables", trial.trial_id)).reset()
+                config = self._get_params(conn, "trial_config", trial.trial_id)
+                yield Trial(self._engine, tunables, self._experiment_id,
+                            trial.trial_id, self._opt_target, config)
 
-    def trial(self, tunables: TunableGroups):
+    def trial(self, tunables: TunableGroups, config: dict = None):
         _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
         with self._engine.begin() as conn:
             try:
@@ -131,23 +149,12 @@ class Experiment(Storage.Experiment):
                     """),
                     {"exp_id": self._experiment_id, "trial_id": self._trial_id}
                 )
-                conn.execute(
-                    text("""
-                        INSERT INTO trial_config (exp_id, trial_id, param_id, param_value)
-                        VALUES (:exp_id, :trial_id, :param_id, :param_value)
-                    """),
-                    [
-                        {
-                            "exp_id": self._experiment_id,
-                            "trial_id": self._trial_id,
-                            "param_id": tunable.name,
-                            "param_value": None if tunable.value is None else str(tunable.value)
-                        }
-                        for (tunable, _group) in tunables
-                    ]
-                )
-                trial = Trial(self._engine, tunables,
-                              self._experiment_id, self._trial_id, self._opt_target)
+                self._save_params(conn, "trial_tunables", (
+                    (tunable.name, tunable.value) for (tunable, _group) in tunables))
+                if config is not None:
+                    self._save_params(conn, "trial_config", config.items())
+                trial = Trial(self._engine, tunables, self._experiment_id,
+                              self._trial_id, self._opt_target, config)
                 self._trial_id += 1
                 return trial
             except Exception:
