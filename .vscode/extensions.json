@@ -11,7 +11,7 @@
         "trond-snekvik.simple-rst",
         "DavidAnson.vscode-markdownlint", // Linter for markdown files
         "huntertran.auto-markdown-toc", // Auto-generated Markdown Table of Contents
-        "cschleiden.vscode-github-actions", // GitHub Actions integration
+        "github.vscode-github-actions", // GitHub Actions integration
         "ms-azuretools.vscode-docker",
         "waderyan.gitblame", // Enhances git blame experience
         "donjayamanne.githistory", // Enhanced git history experience

@@ -23,9 +23,9 @@ jobs:
     env:
       CONDA_ENV_NAME: mlos_core
       CONDA_ENV_YML: mlos_core-windows.yml
-      cache_cur_date: 0000-00-00
-      cache_cur_hour: 00
-      cache_prev_hour: 23
+      cache_cur_date: unset
+      cache_cur_hour: unset
+      cache_prev_hour: unset
 
     steps:
     - uses: actions/checkout@v3

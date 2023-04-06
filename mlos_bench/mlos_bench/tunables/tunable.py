@@ -7,8 +7,11 @@ Tunable parameter definition.
 """
 import copy
 import collections
+import logging
 
 from typing import Any, List, Tuple
+
+_LOG = logging.getLogger(__name__)
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes
@@ -109,11 +112,27 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         Set the current value of the tunable.
         """
-        if not self.is_valid(value):
-            raise ValueError(f"Invalid value for the tunable: {value}")
-        # After the validation, coerce the input to the right data type.
-        # We need this for the values produced by some optimizers (e.g., scikit-optimize).
-        self._current_value = self._TYPE[self._type](value)
+        # We need this coercion for the values produced by some optimizers
+        # (e.g., scikit-optimize) and for data restored from certain storage
+        # systems (where values can be strings).
+        try:
+            coerced_value = self._TYPE[self._type](value)
+        except Exception:
+            _LOG.error("Impossible conversion: %s %s <- %s %s",
+                       self._type, self._name, type(value), value)
+            raise
+
+        if self._type == "int" and isinstance(value, float) and value != coerced_value:
+            _LOG.error("Loss of precision: %s %s <- %s %s",
+                       self._type, self._name, type(value), value)
+            raise ValueError(f"Loss of precision: {self._name}={value}")
+
+        if not self.is_valid(coerced_value):
+            _LOG.error("Invalid assignment: %s %s <- %s %s",
+                       self._type, self._name, type(value), value)
+            raise ValueError(f"Invalid value for the tunable: {self._name}={value}")
+
+        self._current_value = coerced_value
         return self._current_value
 
     def is_valid(self, value) -> bool:

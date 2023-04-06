@@ -8,7 +8,7 @@ and mlos_core optimizers.
 """
 
 import logging
-from typing import Tuple, List, Union
+from typing import Optional, Tuple, List, Union
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.environment.status import Status
@@ -98,17 +98,44 @@ class Optimizer(metaclass=ABCMeta):
                 raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
             self._opt_sign = -1
 
+    def __repr__(self) -> str:
+        opt_direction = 'min' if self._opt_sign > 0 else 'max'
+        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})"
+
+    @property
+    def target(self) -> str:
+        """
+        The name of the target metric to optimize.
+        """
+        return self._opt_target
+
     @abstractmethod
-    def bulk_register(self, data: List[dict]):
+    def bulk_register(self, configs: List[dict], scores: List[float],
+                      status: Optional[List[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
         Parameters
         ----------
-        data : List[dict]
-            Records of tunable values and benchmark scores from other experiments.
-            The data is expected to be in `pandas.DataFrame.to_dict('records')` format.
+        configs : List[dict]
+            Records of tunable values from other experiments.
+        scores : List[float]
+            Benchmark results from experiments that correspond to `configs`.
+        status : Optional[List[float]]
+            Status of the experiments that correspond to `configs`.
+
+        Returns
+        -------
+        is_not_empty : bool
+            True if there is data to register, false otherwise.
         """
+        _LOG.info("Warm-up the optimizer with: %d configs, %d scores, %d status values",
+                  len(configs or []), len(scores or []), len(status or []))
+        if len(configs or []) != len(scores or []):
+            raise ValueError("Numbers of configs and scores do not match.")
+        if status is not None and len(configs or []) != len(status or []):
+            raise ValueError("Numbers of configs and status values do not match.")
+        return bool(configs and scores)
 
     @abstractmethod
     def suggest(self) -> TunableGroups:
@@ -173,7 +200,7 @@ class Optimizer(metaclass=ABCMeta):
             return None
         if isinstance(score, dict):
             score = score[self._opt_target]
-        return score * self._opt_sign
+        return float(score) * self._opt_sign
 
     def not_converged(self) -> bool:
         """

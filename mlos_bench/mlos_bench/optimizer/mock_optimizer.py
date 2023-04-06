@@ -8,7 +8,7 @@ Mock optimizer for mlos_bench.
 
 import random
 import logging
-from typing import Tuple, List, Union
+from typing import Optional, Tuple, List, Union
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -34,12 +34,20 @@ class MockOptimizer(Optimizer):
         self._best_config = None
         self._best_score = None
 
-    def bulk_register(self, data: List[dict]):
-        for record in data:
-            values = record.copy()
-            score = values.pop(self._opt_target)
-            tunables = self._tunables.copy().assign(values)
-            self.register(tunables, Status.SUCCEEDED, score)
+    def bulk_register(self, configs: List[dict], scores: List[float],
+                      status: Optional[List[Status]] = None) -> bool:
+        if not super().bulk_register(configs, scores, status):
+            return False
+        if status is None:
+            status = [Status.SUCCEEDED] * len(configs)
+        for (params, score, trial_status) in zip(configs, scores, status):
+            tunables = self._tunables.copy().assign(params)
+            self.register(tunables, trial_status, None if score is None else float(score))
+            self._iter -= 1  # Do not advance the iteration counter during warm-up.
+        if _LOG.isEnabledFor(logging.DEBUG):
+            (score, _) = self.get_best_observation()
+            _LOG.debug("Warm-up end: %s = %s", self.target, score)
+        return True
 
     def suggest(self) -> TunableGroups:
         """
@@ -61,4 +69,6 @@ class MockOptimizer(Optimizer):
         return score
 
     def get_best_observation(self) -> Tuple[float, TunableGroups]:
+        if self._best_score is None:
+            return (None, None)
         return (self._best_score * self._opt_sign, self._best_config)
