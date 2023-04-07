@@ -1,7 +1,3 @@
---
--- Copyright (c) Microsoft Corporation.
--- Licensed under the MIT License.
---
 
 DROP TABLE IF EXISTS benchmark CASCADE;
 DROP TABLE IF EXISTS benchmark_status CASCADE;
