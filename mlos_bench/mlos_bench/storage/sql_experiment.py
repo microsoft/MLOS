@@ -78,7 +78,7 @@ class Experiment(Storage.Experiment):
                 text("""
                     SELECT t.trial_id, r.metric_value
                     FROM trial AS t
-                    JOIN trial_results AS r ON (t.exp_id = r.exp_id AND t.trial_id = r.trial_id)
+                    JOIN trial_result AS r ON (t.exp_id = r.exp_id AND t.trial_id = r.trial_id)
                     WHERE t.exp_id = :exp_id AND t.status = 'SUCCEEDED' AND r.metric_id = :metric_id
                     ORDER BY t.trial_id ASC
                 """),
@@ -125,7 +125,7 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 text("""
-                    SELECT trial_id FROM trial
+                    SELECT trial_id, config_id FROM trial
                     WHERE exp_id = :exp_id AND ts_end IS NULL
                 """),
                 {"exp_id": self._experiment_id}
