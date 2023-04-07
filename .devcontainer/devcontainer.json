@@ -47,8 +47,8 @@
                 "python.defaultInterpreterPath": "/opt/conda/envs/mlos_core/bin/python",
                 "python.linting.pylintPath": "/opt/conda/envs/mlos_core/bin/pylint",
                 "pylint.path": ["/opt/conda/envs/mlos_core/bin/pylint"],
-                "python.linting.mypyPath": "/opt/conda/envs/mlos_core/bin/mypy",
-                "mypy-type-checker.path": ["/opt/conda/envs/mlos_core/bin/mypy"]
+                "python.linting.mypyPath": "${workspaceFolder}/scripts/dmypy-wrapper.sh",
+                "mypy-type-checker.path": ["${workspaceFolder}/scripts/dmypy-wrapper.sh"]
             },
             // Add the IDs of extensions you want installed when the container is created.
             "extensions": [

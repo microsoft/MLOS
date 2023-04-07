@@ -33,5 +33,7 @@ dependencies:
     - licenseheaders
     - pytest-local-badge
     - types-setuptools
+    - types-pygments
+    - types-colorama
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

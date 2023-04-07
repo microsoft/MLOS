@@ -8,6 +8,8 @@ Tests for LlamaTune space adapter.
 
 # pylint: disable=missing-function-docstring
 
+from typing import Dict, Set
+
 import pytest
 
 import ConfigSpace as CS
@@ -372,7 +374,7 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
         param: {special_value: 0 for special_value, _ in tuples_list}
         for param, tuples_list in adapter._special_param_values_dict.items()    # pylint: disable=protected-access
     }
-    unique_values_dict = {param: set() for param in input_space.get_hyperparameter_names()}
+    unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.get_hyperparameter_names()}
 
     num_configs = 1000
     for config in adapter.target_parameter_space.sample_configuration(size=num_configs):

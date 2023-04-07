@@ -7,6 +7,8 @@
     "python.linting.pycodestyleEnabled": true,
     "python.linting.pydocstyleEnabled": true,
     "python.linting.mypyEnabled": true,
+    "python.linting.mypyPath": "${workspaceFolder}/scripts/dmypy-wrapper.sh",
+    "mypy-type-checker.path": ["${workspaceFolder}/scripts/dmypy-wrapper.sh"],
     "autoDocstring.docstringFormat": "numpy",
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"
