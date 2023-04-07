@@ -41,7 +41,7 @@ clean-conda-env:
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: check
-check: pycodestyle pydocstyle pylint # cspell licenseheaders markdown-link-check
+check: pycodestyle pydocstyle pylint mypy # cspell licenseheaders markdown-link-check
 
 .PHONY: pycodestyle
 pycodestyle: conda-env build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
@@ -110,6 +110,16 @@ build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES
 
 build/pylint.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp .pylintrc
 	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter-out .pylintrc,$+)
+	touch $@
+
+.PHONY: mypy
+mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+
+build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+
+build/mypy.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
+	conda run -n ${CONDA_ENV_NAME} mypy $(filter-out setup.cfg,$+)
 	touch $@
 
 .PHONY: test
@@ -365,6 +375,8 @@ clean-check:
 	rm -f build/pylint.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.build-stamp
 	rm -f build/pycodestyle.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp
