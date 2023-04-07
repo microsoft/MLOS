@@ -9,6 +9,7 @@ dependencies:
   - pycodestyle
   - autopep8
   - pydocstyle
+  - mypy
   - pytest
   - pytest-cov
   - pytest-forked
