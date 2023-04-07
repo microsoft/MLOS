@@ -23,3 +23,19 @@ The build pipeline publishes the devcontainer image to the Azure Container Regis
 The secrets for this are stored in the pipeline, but also available in a Key Vault in the MlosCore RG.
 
 One can also use `az acr login` to push an image manually if need be.
+
+### Image cleanup
+
+To save space in the ACR, we purge images older than 7 days.
+
+```sh
+#DRY_RUN_ARGS='--dry-run'
+
+PURGE_CMD="acr purge --filter 'devcontainer-cli:.*' --filter 'mlos-core-devcontainer:.*' --untagged --ago 7d $DRY_RUN_ARGS"
+
+# Setup a daily task:
+az acr task create --name dailyPurgeTask --cmd "$PURGE_CMD" --registry mloscore --schedule "0 1 * * *" --context /dev/null
+
+# Or, run it manually.
+az acr run --cmd "$PURGE_CMD" --registry mloscore --context /dev/null
+```
