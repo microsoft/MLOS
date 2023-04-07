@@ -46,7 +46,9 @@
                 // Adjust the python interpreter path to point to the conda environment
                 "python.defaultInterpreterPath": "/opt/conda/envs/mlos_core/bin/python",
                 "python.linting.pylintPath": "/opt/conda/envs/mlos_core/bin/pylint",
-                "pylint.path": ["/opt/conda/envs/mlos_core/bin/pylint"]
+                "pylint.path": ["/opt/conda/envs/mlos_core/bin/pylint"],
+                "python.linting.mypyPath": "/opt/conda/envs/mlos_core/bin/mypy",
+                "mypy-type-checker.path": ["/opt/conda/envs/mlos_core/bin/mypy"]
             },
             // Add the IDs of extensions you want installed when the container is created.
             "extensions": [
@@ -55,6 +57,7 @@
                 "ms-python.vscode-pylance",
                 "ms-python.python",
                 "ms-python.pylint",
+                "ms-python.mypy-type-checker",
                 "donjayamanne.python-environment-manager",
                 "njpwerner.autodocstring",
                 "ms-toolsai.jupyter",

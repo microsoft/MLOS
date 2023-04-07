@@ -5,6 +5,7 @@
         "ms-python.vscode-pylance",
         "ms-python.python",
         "ms-python.pylint",
+        "ms-python.mypy-type-checker",
         "donjayamanne.python-environment-manager",
         "njpwerner.autodocstring",
         "lextudio.restructuredtext",
