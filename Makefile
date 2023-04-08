@@ -115,16 +115,12 @@ build/pylint.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.
 .PHONY: mypy
 mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 
-.PHONY: dmypy
-dmypy: conda-env build/conda-env.${CONDA_ENV_NAME}.build-stamp
-	conda run -n ${CONDA_ENV_NAME} dmypy status || conda run -n ${CONDA_ENV_NAME} dmypy start
-	test setup.cfg -nt /proc/$(pgrep dmypy) && dmypy restart
-
 build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 
-build/mypy.%.${CONDA_ENV_NAME}.build-stamp: dmypy build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
-	conda run -n ${CONDA_ENV_NAME} dmypy check $(filter-out dmypy setup.cfg,$+)
+build/mypy.%.${CONDA_ENV_NAME}.build-stamp: scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
+	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
+		$(filter-out scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg,$+)
 	touch $@
 
 .PHONY: test
