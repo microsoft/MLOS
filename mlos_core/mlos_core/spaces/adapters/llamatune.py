@@ -5,11 +5,12 @@
 """
 Implementation of LlamaTune space adapter.
 """
-from typing import Optional
+from typing import Dict, Optional
 from warnings import warn
 
 import ConfigSpace
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
@@ -81,8 +82,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         self._sigma_vector = self._random_state.choice([-1, 1], num_orig_dims)
 
         # Used to retrieve the low-dim point, given the high-dim one
-        self._suggested_configs = {}
-        self._pinv_matrix = None
+        self._suggested_configs: Dict[ConfigSpace.Configuration, ConfigSpace.Configuration] = {}
+        self._pinv_matrix: npt.NDArray
         self._use_approximate_reverse_mapping = use_approximate_reverse_mapping
 
     @property
@@ -107,12 +108,13 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                                      "previously by the optimzer can be registered.")
 
                 # ...yet, we try to support that by implementing an approximate reverse mapping using pseudo-inverse matrix.
-                if self._pinv_matrix is None:
+                if not self._pinv_matrix:
                     self._try_generate_approx_inverse_mapping()
 
                 # Perform approximate reverse mapping
                 # NOTE: applying special value biasing is not possible
                 vector = self._config_scaler.inverse_transform([configuration.get_array()])[0]
+                assert self._pinv_matrix
                 target_config_vector = self._pinv_matrix.dot(vector)
                 target_config = ConfigSpace.Configuration(self.target_parameter_space, vector=target_config_vector)
 
@@ -252,28 +254,27 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
         # Check if input value corresponds to some special value
         perc_sum = 0.
+        ret: float
         for special_value, biasing_perc in special_values_list:
             perc_sum += biasing_perc
             if input_value < perc_sum:
-                return param._inverse_transform(special_value)  # pylint: disable=protected-access
+                ret = param._inverse_transform(special_value)  # pylint: disable=protected-access
+                return ret
 
         # Scale input value uniformly to non-special values
-        return param._inverse_transform(                                         # pylint: disable=protected-access
+        ret = param._inverse_transform(                                         # pylint: disable=protected-access
             param._transform_scalar((input_value - perc_sum) / (1 - perc_sum)))  # pylint: disable=protected-access
+        return ret
 
     # pylint: disable=too-complex,too-many-branches
-    def _validate_special_param_values(self, special_param_values_dict: dict) -> dict:
+    def _validate_special_param_values(self, special_param_values_dict: dict):
         """Checks that the user-provided dict of special parameter values is valid.
+        And assigns it to the corresponding attribute.
 
         Parameters
         ----------
         special_param_values_dict: dict
             User-provided dict of special parameter values.
-
-        Returns
-        -------
-        sanitized_dict: dict
-            Sanitized dictionary; keys are parameter names, values are lists of (special value, biasing %) tuple(s).
 
         Raises
         ------
@@ -299,7 +300,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 tuple_list = [(value, self.DEFAULT_SPECIAL_PARAM_VALUE_BIASING_PERCENTAGE)]
             elif isinstance(value, tuple) and [type(v) for v in value] == [int, float]:
                 # User specifies both special value and biasing percentage
-                tuple_list = [value]
+                tuple_list = [value]    # type: ignore
             elif isinstance(value, list) and value:
                 if all(isinstance(t, int) for t in value):
                     # User specifies list of special values
