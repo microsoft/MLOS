@@ -2,6 +2,7 @@
 -- Copyright (c) Microsoft Corporation.
 -- Licensed under the MIT License.
 --
+
 -- DB schema for storing MLOS benchmarking results.
 -- The syntax works for SQLite3, DuckDB, PostgreSQL, and MySQL / MariaDB.
 

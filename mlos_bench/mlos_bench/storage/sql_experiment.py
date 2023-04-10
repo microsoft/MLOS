@@ -76,7 +76,7 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 text("""
-                    SELECT t.trial_id, r.metric_value
+                    SELECT t.trial_id, t.config_id, r.metric_value
                     FROM trial AS t
                     JOIN trial_result AS r ON (t.exp_id = r.exp_id AND t.trial_id = r.trial_id)
                     WHERE t.exp_id = :exp_id AND t.status = 'SUCCEEDED' AND r.metric_id = :metric_id
@@ -88,20 +88,15 @@ class Experiment(Storage.Experiment):
                 }
             )
             for trial in cur_trials:
-                tunables = self._get_params(conn, "trial_tunables", trial.trial_id)
-                configs.append(tunables)
+                cur_params = conn.execute(
+                    text("""
+                        SELECT param_id, param_value FROM config_param WHERE config_id = :config_id
+                    """),
+                    {"config_id": trial.config_id}
+                )
+                configs.append({row.param_id: row.param_value for row in cur_params})
                 scores.append(float(trial.metric_value))
             return (configs, scores)
-
-    def _get_params(self, conn, table_name: str, trial_id: int) -> dict:
-        cur_params = conn.execute(
-            text(f"""
-                SELECT param_id, param_value FROM {table_name}
-                WHERE exp_id = :exp_id AND trial_id = :trial_id
-            """),
-            {"exp_id": self._experiment_id, "trial_id": trial_id}
-        )
-        return {row.param_id: row.param_value for row in cur_params}
 
     def _save_params(self, conn, table_name: str, params: dict):
         conn.execute(
