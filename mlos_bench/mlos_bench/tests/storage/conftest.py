@@ -24,7 +24,6 @@ def exp_storage_memory_sql(tunable_groups: TunableGroups) -> Storage.Experiment:
         config={
             "drivername": "sqlite",
             "database": ":memory:",
-            "init_script": "mlos_bench/db/db_schema.sql",
         }
     )
     # pylint: disable=unnecessary-dunder-call
