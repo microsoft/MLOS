@@ -39,6 +39,9 @@ setup(
     name='mlos-core',
     version=_VERSION,
     packages=find_packages(),
+    package_data={
+        'mlos_core': ['py.typed'],
+    },
     install_requires=[
         'scikit-learn<1.2', # FIXME: temporarily work around some version mismatch issues (PR 850)
         'joblib>=1.1.1',    # CVE-2022-21797: scikit-learn dependency, addressed in 1.2.0dev0, which isn't currently released
