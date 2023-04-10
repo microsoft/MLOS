@@ -8,12 +8,26 @@ Tests for space adapter factory.
 
 # pylint: disable=missing-function-docstring
 
+from typing import Union
+
 import pytest
 
 import ConfigSpace as CS
 
-from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType
+from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType, ConcreteSpaceAdapter
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
+
+
+@pytest.mark.parametrize(('space_adapter_type'), [
+    # Enumerate all supported SpaceAdapters
+    *[member for member in SpaceAdapterType],
+])
+def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType):
+    """
+    Test that all optimizer types are listed in the ConcreteOptimizer constraints.
+    """
+    assert space_adapter_type.value in ConcreteSpaceAdapter.__constraints__
 
 
 @pytest.mark.parametrize(('space_adapter_type', 'kwargs'), [
@@ -22,7 +36,7 @@ from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
     # Enumerate all supported Optimizers
     *[(member, {}) for member in SpaceAdapterType],
 ])
-def test_create_space_adapter_with_factory_method(space_adapter_type: SpaceAdapterType, kwargs):
+def test_create_space_adapter_with_factory_method(space_adapter_type: Union[None, SpaceAdapterType], kwargs):
     # Start defining a ConfigurationSpace for the Optimizer to search.
     input_space = CS.ConfigurationSpace(seed=1234)
 
@@ -37,14 +51,14 @@ def test_create_space_adapter_with_factory_method(space_adapter_type: SpaceAdapt
             kwargs = {}
         kwargs.setdefault('num_low_dims', 1)
 
-    space_adapter: BaseSpaceAdapter = None
+    space_adapter: BaseSpaceAdapter
     if space_adapter_type is None:
         space_adapter = SpaceAdapterFactory.create(input_space)
     else:
         space_adapter = SpaceAdapterFactory.create(input_space, space_adapter_type, space_adapter_kwargs=kwargs)
 
     if space_adapter_type is None or space_adapter_type is SpaceAdapterType.IDENTITY:
-        assert space_adapter is None
+        assert isinstance(space_adapter, IdentityAdapter)
     else:
         assert space_adapter is not None
         assert space_adapter.orig_parameter_space is not None

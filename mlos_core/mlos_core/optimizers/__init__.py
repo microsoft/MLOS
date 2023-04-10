@@ -60,7 +60,7 @@ class OptimizerFactory:
         parameter_space: ConfigSpace.ConfigurationSpace,
         optimizer_type: OptimizerType = OptimizerType.SKOPT,
         optimizer_kwargs: Optional[dict] = None,
-        space_adapter_type: Optional[SpaceAdapterType] = SpaceAdapterType.IDENTITY,
+        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
         space_adapter_kwargs: Optional[dict] = None,
     ) -> ConcreteOptimizer:
         """Creates a new optimizer instance, given the parameter space, optimizer type and potential optimizer options.
@@ -91,4 +91,5 @@ class OptimizerFactory:
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
         space_adapter = SpaceAdapterFactory.create(parameter_space, space_adapter_type, space_adapter_kwargs=space_adapter_kwargs)
-        return optimizer_type.value(parameter_space, space_adapter=space_adapter, **optimizer_kwargs)
+        optimizer: ConcreteOptimizer = optimizer_type.value(parameter_space, space_adapter=space_adapter, **optimizer_kwargs)
+        return optimizer
