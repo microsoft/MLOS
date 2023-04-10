@@ -88,6 +88,10 @@ jobs:
       timeout-minutes: 10
       run: |
         set -x
+        # Simulate test collection in vscode.
+        docker exec --user vscode mlos-core-devcontainer \
+          conda run -n mlos_core python -m pytest -svxl -n auto --collect-only --rootdir /workspaces/MLOS -s --cache-clear
+        # Now actually run the tests.
         docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v test
 
     - name: Generate and test binary distribution files
