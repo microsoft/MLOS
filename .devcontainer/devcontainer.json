@@ -45,6 +45,7 @@
             "settings": {
                 // Adjust the python interpreter path to point to the conda environment
                 "python.defaultInterpreterPath": "/opt/conda/envs/mlos_core/bin/python",
+                "python.testing.pytestPath": "/opt/conda/envs/mlos_core/bin/pytest",
                 "python.linting.pylintPath": "/opt/conda/envs/mlos_core/bin/pylint",
                 "pylint.path": ["/opt/conda/envs/mlos_core/bin/pylint"],
                 "python.linting.mypyPath": "/opt/conda/envs/mlos_core/bin/mypy",
