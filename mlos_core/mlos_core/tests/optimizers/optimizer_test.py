@@ -15,7 +15,7 @@ import numpy as np
 import ConfigSpace as CS
 
 from mlos_core.optimizers import (
-    OptimizerType, OptimizerFactory, BaseOptimizer,
+    OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer,
     EmukitOptimizer, SkoptOptimizer, RandomOptimizer)
 
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
@@ -129,6 +129,17 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     if optimizer_type is not None:
         myrepr = repr(optimizer)
         assert myrepr.startswith(optimizer_type.value.__name__)
+
+
+@pytest.mark.parametrize(('optimizer_type'), [
+    # Enumerate all supported Optimizers
+    *[member for member in OptimizerType],
+])
+def test_concrete_optimizer_type(optimizer_type: OptimizerType):
+    """
+    Test that all optimizer types are listed in the ConcreteOptimizer constraints.
+    """
+    assert optimizer_type.value in ConcreteOptimizer.__constraints__
 
 
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [

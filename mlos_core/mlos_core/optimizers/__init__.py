@@ -39,7 +39,15 @@ class OptimizerType(Enum):
     """An instance of SkoptOptimizer class will be used"""
 
 
-ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
+# To make mypy happy, we need to define a type variable for each optimizer type.
+# https://github.com/python/mypy/issues/12952
+# ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
+# To address this, we add a test for complete coverage of the enum.
+ConcreteOptimizer = TypeVar('ConcreteOptimizer',
+                            RandomOptimizer,
+                            EmukitOptimizer,
+                            SkoptOptimizer,
+                    )
 
 
 class OptimizerFactory:
