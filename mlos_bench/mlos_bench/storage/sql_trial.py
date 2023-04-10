@@ -67,7 +67,7 @@ class Trial(Storage.Trial):
                                 "exp_id": self._experiment_id,
                                 "trial_id": self._trial_id,
                                 "metric_id": key,
-                                "metric_value": val,
+                                "metric_value": None if val is None else str(val),
                             }
                             for (key, val) in value.items()
                         ]
@@ -80,7 +80,7 @@ class Trial(Storage.Trial):
                value: Optional[Union[Dict[str, float], float]] = None
                ) -> Optional[Dict[str, float]]:
         value = super().update(status, value)
-        self._update("trial_results", datetime.now(), status, value)
+        self._update("trial_result", datetime.now(), status, value)
 
     def update_telemetry(self, status: Status, value: dict = None):
         super().update_telemetry(status, value)

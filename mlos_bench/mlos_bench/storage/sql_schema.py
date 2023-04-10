@@ -31,18 +31,22 @@ class DbSchema:
         self.experiment = Table(
             "experiment",
             self.meta,
-            Column("exp_id", String(255), nullable=False, primary_key=True),
+            Column("exp_id", String(255), nullable=False),
             Column("description", String),
-            Column("opt_target", String(255), nullable=False),
+            Column("metric_id", String(255), nullable=False),  # Optimization target
             Column("git_repo", String, nullable=False),
             Column("git_commit", String(40), nullable=False),
+
+            PrimaryKeyConstraint("exp_id"),
         )
 
         self.config = Table(
             "config",
             self.meta,
-            Column("config_id", Integer, nullable=False, primary_key=True, autoincrement=True),
+            Column("config_id", Integer, nullable=False, autoincrement=True),
             Column("config_hash", String, nullable=False, unique=True),
+
+            PrimaryKeyConstraint("config_id"),
         )
 
         self.trial = Table(
@@ -51,10 +55,10 @@ class DbSchema:
             Column("exp_id", String(255), nullable=False),
             Column("trial_id", Integer, nullable=False),
             Column("config_id", Integer, nullable=False),
-            Column("ts_start", DateTime, nullable=False),
+            Column("ts_start", DateTime, nullable=False, default="now"),
             Column("ts_end", DateTime),
             # Should match the text IDs of `mlos_bench.environment.Status` enum:
-            Column("trial_status", String(16), nullable=False),
+            Column("status", String(16), nullable=False),
 
             PrimaryKeyConstraint("exp_id", "trial_id"),
             ForeignKeyConstraint(["exp_id"], [self.experiment.c.exp_id]),
@@ -107,7 +111,7 @@ class DbSchema:
             self.meta,
             Column("exp_id", String(255), nullable=False),
             Column("trial_id", Integer, nullable=False),
-            Column("ts", DateTime, nullable=False),
+            Column("ts", DateTime, nullable=False, default="now"),
             Column("metric_id", String(255), nullable=False),
             Column("metric_value", String(255)),
 

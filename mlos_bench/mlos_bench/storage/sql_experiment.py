@@ -6,11 +6,12 @@
 Saving and restoring the benchmark data using SQLAlchemy.
 """
 
-import hashlib
 import logging
+import hashlib
+from datetime import datetime
 from typing import Optional, List, Tuple
 
-from sqlalchemy import text
+from sqlalchemy import text, column
 
 from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage.base_storage import Storage
@@ -26,10 +27,9 @@ class Experiment(Storage.Experiment):
     Logic for retrieving and storing the results of a single experiment.
     """
 
-    def __init__(self, engine, schema,
-                 tunables: TunableGroups, experiment_id: str,
-                 trial_id: int, opt_target: str, config: dict = None):
-        super().__init__(self, tunables, experiment_id, trial_id, opt_target, config)
+    def __init__(self, engine, schema, tunables: TunableGroups,
+                 experiment_id: str, trial_id: int, opt_target: str):
+        super().__init__(tunables, experiment_id, trial_id, opt_target)
         self._engine = engine
         self._schema = schema
 
@@ -53,7 +53,6 @@ class Experiment(Storage.Experiment):
                 conn.execute(self._schema.experiment.insert().values(
                     exp_id=self._experiment_id,
                     metric_id=self._opt_target,
-                    opt_target=self._opt_target,
                     git_repo=self._git_repo,
                     git_commit=self._git_commit
                 ))
@@ -100,25 +99,27 @@ class Experiment(Storage.Experiment):
 
     @staticmethod
     def _get_params(conn, table, **kwargs) -> dict:
-        cur_params = conn.execute(table.select().where(**kwargs))
+        cur_params = conn.execute(table.select().where(*[
+            column(key) == val for (key, val) in kwargs.items()]))
         return {row.param_id: row.param_value for row in cur_params}
 
     @staticmethod
     def _save_params(conn, table, params: dict, **kwargs):
-        conn.execute(table.insert().values([
+        conn.execute(table.insert(), [
             {
                 **kwargs,
                 "param_id": key,
                 "param_value": None if val is None else str(val)
             }
-            for (key, val) in params
-        ]))
+            for (key, val) in params.items()
+        ])
 
     def pending(self):
         _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
         with self._engine.connect() as conn:
             cur_trials = conn.execute(self._schema.trial.select().where(
-                exp_id=self._experiment_id, ts_end=None
+                column("exp_id") == self._experiment_id,
+                column("ts_end") is None
             ))
             for trial in cur_trials:
                 tunables = self._get_params(
@@ -138,13 +139,18 @@ class Experiment(Storage.Experiment):
         create a new record for it.
         """
         config_hash = hashlib.sha256(str(tunables).encode('utf-8')).hexdigest()
-        config_id = conn.execute(self._schema.config.select().where(
-            config_hash=config_hash
+        cur_config = conn.execute(self._schema.config.select().where(
+            column("config_hash") == config_hash
         )).fetchone()
-        if config_id is None:
-            config_id = conn.execute(self._schema.config.insert().values(
-                config_hash=config_hash,
-            )).inserted_primary_key[0]
+        if cur_config is not None:
+            return cur_config.config_id
+        # Config not found, create a new one:
+        config_id = conn.execute(self._schema.config.insert().values(
+            config_hash=config_hash)).inserted_primary_key[0]
+        self._save_params(
+            conn, self._schema.config_param,
+            {tunable.name: tunable.value for (tunable, _group) in tunables},
+            config_id=config_id)
         return config_id
 
     def trial(self, tunables: TunableGroups, config: dict = None):
@@ -156,12 +162,9 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
+                    ts_start=datetime.now(),
                     status='PENDING'
                 ))
-                self._save_params(
-                    conn, self._schema.config_param,
-                    {tunable.name: tunable.value for (tunable, _group) in tunables},
-                    config_id=config_id)
                 if config is not None:
                     self._save_params(
                         conn, self._schema.trial_param, config,
