@@ -11,6 +11,7 @@ from abc import ABCMeta, abstractmethod
 
 import ConfigSpace
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
@@ -65,7 +66,8 @@ class EmukitOptimizer(BaseBayesianOptimizer):
     def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
         super().__init__(parameter_space, space_adapter)
         self.emukit_parameter_space = configspace_to_emukit_space(self.optimizer_parameter_space)
-        self.gpbo = None
+        from emukit.examples.gp_bayesian_optimization.single_objective_bayesian_optimization import GPBayesianOptimization  # noqa pylint: disable=import-outside-toplevel
+        self.gpbo: GPBayesianOptimization
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
@@ -85,13 +87,13 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         if context is not None:
             # not sure how that works here?
             raise NotImplementedError()
-        if self.gpbo is None:
+        if getattr(self, 'gpbo', None) is None:
             # we're in the random initialization phase
             # just remembering the observation above is enough
             return
         results = []
         for (_, config), score in zip(configurations.iterrows(), scores):
-            one_hot = self._to_1hot(config)
+            one_hot = self._to_1hot(pd.DataFrame([config]))
             results.append(UserFunctionResult(one_hot[0], np.array([score])))
         self.gpbo.loop_state.update(results)
         self.gpbo._update_models()  # pylint: disable=protected-access
@@ -115,7 +117,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
             from emukit.core.initial_designs import RandomDesign    # pylint: disable=import-outside-toplevel
             config = RandomDesign(self.emukit_parameter_space).get_samples(1)
         else:
-            if self.gpbo is None:
+            if getattr(self, 'gpbo', None) is None:
                 # this should happen exactly once, when calling the 11th time
                 self._initialize_optimizer()
             # this should happen any time after the initial model is created
@@ -190,7 +192,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         else:
             self._transform = np.array
 
-    def _to_numeric(self, config: pd.DataFrame) -> np.array:
+    def _to_numeric(self, config: pd.DataFrame) -> npt.NDArray:
         """
         Convert categorical values in the DataFrame to ordinal integers and return a numpy array.
         This transformation is necessary for the Gaussian Process based optimizer.
