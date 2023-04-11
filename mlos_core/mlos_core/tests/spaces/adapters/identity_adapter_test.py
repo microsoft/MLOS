@@ -32,10 +32,10 @@ def test_identity_adapter():
     for sampled_config in input_space.sample_configuration(size=num_configs):
         sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
         target_config_df = adapter.inverse_transform(sampled_config_df)
-        assert target_config_df == sampled_config_df
+        assert target_config_df.equals(sampled_config_df)
         target_config = CS.Configuration(adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict())
         assert target_config == sampled_config
         orig_config_df = adapter.transform(target_config_df)
-        assert orig_config_df == sampled_config_df
+        assert orig_config_df.equals(sampled_config_df)
         orig_config = CS.Configuration(adapter.orig_parameter_space, values=orig_config_df.iloc[0].to_dict())
         assert orig_config == sampled_config
