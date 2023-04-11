@@ -10,7 +10,23 @@ cd "$scriptdir/.."
 
 DMYPY_STATUS_FILE='.dmypy.json'
 DMYPY_STATUS_ARGS="--status-file $DMYPY_STATUS_FILE"
-DMYPY_START_ARGS='--pretty --cache-fine-grained --install-types --non-interactive'
+DMYPY_START_ARGS=''
+
+while [ -z "${1:-}" ]; do
+    opt="$1"
+    case $opt in
+        --*)
+            DMYPY_START_ARGS+=" $opt"
+            shift
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+if [ -z "$DMYPY_START_ARGS" ]; then
+    DMYPY_START_ARGS='--pretty --cache-fine-grained --install-types --non-interactive'
+fi
 
 dmypy $DMYPY_STATUS_ARGS status >/dev/null || dmypy $DMYPY_STATUS_ARGS start -- $DMYPY_START_ARGS
 
