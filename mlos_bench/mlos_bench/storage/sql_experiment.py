@@ -119,7 +119,7 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             cur_trials = conn.execute(self._schema.trial.select().where(
                 column("exp_id") == self._experiment_id,
-                column("ts_end") is None
+                column("ts_end").is_(None)
             ))
             for trial in cur_trials:
                 tunables = self._get_params(
