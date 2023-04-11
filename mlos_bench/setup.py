@@ -34,7 +34,7 @@ extra_requires = {
 
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.
-extra_requires['full'] = list(set(chain(extra_requires.values())))
+extra_requires['full'] = list(set(chain(extra_requires.values()))) # type: ignore
 
 # pylint: disable=duplicate-code
 setup(
