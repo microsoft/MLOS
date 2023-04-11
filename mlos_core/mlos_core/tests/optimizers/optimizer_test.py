@@ -16,16 +16,15 @@ import ConfigSpace as CS
 
 from mlos_core.optimizers import (
     OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer,
-    EmukitOptimizer, SkoptOptimizer, RandomOptimizer)
+    SkoptOptimizer)
 
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
-    (EmukitOptimizer, {}),
+    *[(member.value, {}) for member in OptimizerType],
     (SkoptOptimizer, {'base_estimator': 'gp'}),
-    (RandomOptimizer, {})
 ])
 def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace,
                                       optimizer_class: Type[BaseOptimizer], kwargs):
@@ -49,10 +48,9 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
-    (EmukitOptimizer, {}),
+    *[(member.value, {}) for member in OptimizerType],
     (SkoptOptimizer, {'base_estimator': 'gp', 'seed': 42}),
     (SkoptOptimizer, {'base_estimator': 'et', 'seed': 42}),
-    (RandomOptimizer, {})
 ])
 def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
                                      optimizer_class: Type[BaseOptimizer], kwargs):
