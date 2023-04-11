@@ -21,11 +21,12 @@ class DbSchema:
     A class to define and create the DB schema.
     """
 
-    def __init__(self):
+    def __init__(self, engine):
         """
         Declare the SQLAlchemy schema for the database.
         """
-        _LOG.info("Create the DB schema")
+        _LOG.info("Create the DB schema for: %s", engine)
+        self.engine = engine
         self.meta = MetaData()
 
         self.experiment = Table(
@@ -40,14 +41,19 @@ class DbSchema:
         )
 
         # A workaround to support autoincrement in DuckDB:
-        seq_config_id = Sequence('seq_config_id')
+        if engine.dialect.name == "duckdb":
+            seq_config_id = Sequence('seq_config_id')
+            col_config_id = Column("config_id", Integer, seq_config_id,
+                                server_default=seq_config_id.next_value(),
+                                nullable=False, primary_key=True)
+        else:
+            col_config_id = Column("config_id", Integer, nullable=False,
+                                   primary_key=True, autoincrement=True)
 
         self.config = Table(
             "config",
             self.meta,
-            Column("config_id", Integer, seq_config_id,
-                   server_default=seq_config_id.next_value(),
-                   nullable=False, primary_key=True),
+            col_config_id,
             Column("config_hash", String, nullable=False, unique=True),
         )
 
@@ -124,10 +130,10 @@ class DbSchema:
 
         _LOG.debug("Schema: %s", self.meta)
 
-    def create(self, engine):
+    def create(self):
         """
         Create the DB schema.
         """
         _LOG.info("Create the DB schema")
-        self.meta.create_all(engine)
+        self.meta.create_all(self.engine)
         return self
