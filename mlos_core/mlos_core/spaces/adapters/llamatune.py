@@ -105,7 +105,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 if not self._use_approximate_reverse_mapping:
                     raise ValueError(f"{repr(configuration)}\n" "The above configuration was not suggested by the optimizer. "
                                      "Approximate reverse mapping is currently disabled; thus *only* configurations suggested "
-                                     "previously by the optimzer can be registered.")
+                                     "previously by the optimizer can be registered.")
 
                 # ...yet, we try to support that by implementing an approximate reverse mapping using pseudo-inverse matrix.
                 if getattr(self, '_pinv_matrix', None) is None:
@@ -158,8 +158,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 for idx in range(num_low_dims)
             ]
         else:
-            # Currently supported optimizers do not support definint a discretized space (like ConfigSpace does using `q` kwarg).
-            # Thus, to support space discretization, we define the low-dimensioanl space using integer hyperparameters.
+            # Currently supported optimizers do not support defining a discretized space (like ConfigSpace does using `q` kwarg).
+            # Thus, to support space discretization, we define the low-dimensional space using integer hyperparameters.
             # We also employ a scaler, which scales suggested values to [-1, 1] range, used by HeSBO projection.
             hyperparameters = [
                 ConfigSpace.UniformIntegerHyperparameter(name=f'dim_{idx}', lower=1, upper=max_unique_values_per_param)
