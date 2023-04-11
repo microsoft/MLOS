@@ -190,7 +190,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         elif base_estimator == 'gp':
             self._transform = self._to_numeric
         else:
-            self._transform = np.array
+            self._transform = self._to_ndarray
 
     def _to_numeric(self, config: pd.DataFrame) -> npt.NDArray:
         """
@@ -213,6 +213,30 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                 config[param.name] = config[param.name].apply(param.choices.index)
         return config.to_numpy(dtype=np.float32)
+
+    def _to_ndarray(self, config: pd.DataFrame) -> npt.NDArray:
+        """
+        Converts a single config to an ndarray.
+
+        Done this way to let mypy validate the different types across _transform function options.
+
+        Parameters
+        ----------
+        config : pd.DataFrame
+            Dataframe of configurations / parameters.
+            The columns are parameter names and the row is the configuration.
+
+        Returns
+        -------
+        config : np.array
+            Numpy array of the data.
+        """
+        assert len(config) == 1
+        config = config.copy()
+        # mypy complains about use of next() iterator for some reason
+        for (_, config_series) in config.iterrows():
+            return config_series.to_numpy()
+        raise ValueError('No configuration found.')
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
         """Registers the given configurations and scores.
