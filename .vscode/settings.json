@@ -6,6 +6,7 @@
     "python.linting.pylintEnabled": true,
     "python.linting.pycodestyleEnabled": true,
     "python.linting.pydocstyleEnabled": true,
+    "python.linting.mypyEnabled": true,
     "mypy.runUsingActiveInterpreter": false,
     "autoDocstring.docstringFormat": "numpy",
     "restructuredtext.linter.doc8.extraArgs": [
