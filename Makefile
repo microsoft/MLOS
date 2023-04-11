@@ -113,7 +113,7 @@ build/pylint.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.
 	touch $@
 
 .PHONY: mypy
-mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp # TODO: build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 
 build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
