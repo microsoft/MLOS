@@ -90,7 +90,7 @@ class Experiment(Storage.Experiment):
                     "metric_id": opt_target or self._opt_target
                 }
             )
-            for trial in cur_trials:
+            for trial in cur_trials.fetchall():
                 tunables = self._get_params(
                     conn, self._schema.config_param, config_id=trial.config_id)
                 configs.append(tunables)
@@ -101,7 +101,7 @@ class Experiment(Storage.Experiment):
     def _get_params(conn, table, **kwargs) -> dict:
         cur_params = conn.execute(table.select().where(*[
             column(key) == val for (key, val) in kwargs.items()]))
-        return {row.param_id: row.param_value for row in cur_params}
+        return {row.param_id: row.param_value for row in cur_params.fetchall()}
 
     @staticmethod
     def _save_params(conn, table, params: dict, **kwargs):
@@ -121,7 +121,7 @@ class Experiment(Storage.Experiment):
                 column("exp_id") == self._experiment_id,
                 column("ts_end").is_(None)
             ))
-            for trial in cur_trials:
+            for trial in cur_trials.fetchall():
                 tunables = self._get_params(
                     conn, self._schema.config_param,
                     config_id=trial.config_id)

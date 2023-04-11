@@ -58,7 +58,7 @@ class DbSchema:
             "config",
             self._meta,
             col_config_id,
-            Column("config_hash", String, nullable=False, unique=True),
+            Column("config_hash", String(64), nullable=False, unique=True),
         )
 
         self.trial = Table(

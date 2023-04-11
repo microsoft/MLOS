@@ -41,18 +41,21 @@ def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,
     assert pending.tunables == tunable_groups
 
 
-def test_exp_trial_pending_2(exp_storage_memory_sql: Storage.Experiment,
-                             tunable_groups: TunableGroups):
+def test_exp_trial_pending_many(exp_storage_memory_sql: Storage.Experiment,
+                                tunable_groups: TunableGroups):
     """
-    Start TWO trials and check that both are pending.
+    Start THREE trials and check that both are pending.
     """
     config1 = tunable_groups.copy().assign({'rootfs': 'ext4'})
     config2 = tunable_groups.copy().assign({'rootfs': 'ext2'})
-    trial1 = exp_storage_memory_sql.trial(config1)
-    trial2 = exp_storage_memory_sql.trial(config2)
-    pending = list(exp_storage_memory_sql.pending())
-    assert len(pending) == 2
-    assert {pending[0].trial_id, pending[1].trial_id} == {trial1.trial_id, trial2.trial_id}
+    trial_ids = {
+        exp_storage_memory_sql.trial(config1).trial_id,
+        exp_storage_memory_sql.trial(config2).trial_id,
+        exp_storage_memory_sql.trial(config2).trial_id,  # Submit same config twice
+    }
+    pending_ids = {pending.trial_id for pending in exp_storage_memory_sql.pending()}
+    assert len(pending_ids) == 3
+    assert trial_ids == pending_ids
 
 
 def test_exp_trial_pending_fail(exp_storage_memory_sql: Storage.Experiment,
