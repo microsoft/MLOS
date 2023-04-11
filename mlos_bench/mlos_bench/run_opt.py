@@ -66,7 +66,7 @@ def _optimize(env: Environment, opt: Optimizer,
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
     # from other experiments and check for compatibility.
-    with storage.experiment(experiment_id, trial_id, opt.target) as exp:
+    with storage.experiment(experiment_id, trial_id, env.name, opt.target) as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
 

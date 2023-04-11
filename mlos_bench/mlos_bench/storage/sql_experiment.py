@@ -28,8 +28,8 @@ class Experiment(Storage.Experiment):
     """
 
     def __init__(self, engine, schema, tunables: TunableGroups,
-                 experiment_id: str, trial_id: int, opt_target: str):
-        super().__init__(tunables, experiment_id, trial_id, opt_target)
+                 experiment_id: str, trial_id: int, description: str, opt_target: str):
+        super().__init__(tunables, experiment_id, trial_id, description, opt_target)
         self._engine = engine
         self._schema = schema
 
@@ -39,11 +39,11 @@ class Experiment(Storage.Experiment):
             # Get git info and the last trial ID for the experiment.
             exp_info = conn.execute(
                 text("""
-                SELECT e.git_repo, e.git_commit, e.metric_id, MAX(t.trial_id) AS trial_id
+                SELECT e.git_repo, e.git_commit, MAX(t.trial_id) AS trial_id
                 FROM experiment AS e
                 LEFT OUTER JOIN trial AS t ON (e.exp_id = t.exp_id)
                 WHERE e.exp_id = :exp_id
-                GROUP BY e.git_repo, e.git_commit, e.metric_id
+                GROUP BY e.git_repo, e.git_commit
                 """),
                 {"exp_id": self._experiment_id}
             ).fetchone()
@@ -52,7 +52,7 @@ class Experiment(Storage.Experiment):
                 # It's a new experiment: create a record for it in the database.
                 conn.execute(self._schema.experiment.insert().values(
                     exp_id=self._experiment_id,
-                    metric_id=self._opt_target,
+                    description=self._description,
                     git_repo=self._git_repo,
                     git_commit=self._git_commit
                 ))
@@ -61,9 +61,6 @@ class Experiment(Storage.Experiment):
                     self._trial_id = exp_info.trial_id + 1
                 _LOG.info("Continue experiment: %s last trial: %s resume from: %d",
                           self._experiment_id, exp_info.trial_id, self._trial_id)
-                if exp_info.metric_id != self._opt_target:
-                    _LOG.warning("Experiment %s optimization target mismatch: %s != %s",
-                                 self, exp_info.metric_id, self._opt_target)
                 if exp_info.git_commit != self._git_commit:
                     _LOG.warning("Experiment %s git expected: %s %s",
                                  self, exp_info.git_repo, exp_info.git_commit)

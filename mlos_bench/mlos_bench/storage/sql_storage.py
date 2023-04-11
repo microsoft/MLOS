@@ -8,7 +8,7 @@ Saving and restoring the benchmark data in SQL database.
 
 import logging
 
-from sqlalchemy import URL, create_engine, text
+from sqlalchemy import URL, create_engine
 
 from mlos_bench.service import Service
 from mlos_bench.tunables import TunableGroups
@@ -25,31 +25,17 @@ class SqlStorage(Storage):
     """
 
     def __init__(self, tunables: TunableGroups, service: Service, config: dict):
-
         super().__init__(tunables, service, config)
-        script_fname = self._config.pop("init_script", None)
-
         url = URL.create(**self._config)
         self._repr = f"{url.get_backend_name()}:{url.database}"
         _LOG.info("Connect to the database: %s", self)
-
         self._engine = create_engine(url)  # , echo=True)
         self._schema = DbSchema().create(self._engine)
-
-        if script_fname is not None:
-            _LOG.info("Storage init script: %s", script_fname)
-            with self._engine.begin() as conn, \
-                 open(script_fname, encoding="utf-8") as script:
-                script_lines = script.read()
-                if self._engine.dialect.name in {"sqlite", "duckdb"}:
-                    conn.connection.executescript(script_lines)
-                else:
-                    conn.execute(text(script_lines))
 
     def __repr__(self) -> str:
         return self._repr
 
-    def experiment(self, exp_id: str, trial_id: int, opt_target: str):
+    def experiment(self, exp_id: str, trial_id: int, description: str, opt_target: str):
         # pylint: disable=too-many-function-args
-        return Experiment(self._engine, self._schema,
-                          self._tunables, exp_id, trial_id, opt_target)
+        return Experiment(self._engine, self._schema, self._tunables,
+                          exp_id, trial_id, description, opt_target)

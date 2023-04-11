@@ -33,7 +33,6 @@ class DbSchema:
             self.meta,
             Column("exp_id", String(255), nullable=False),
             Column("description", String),
-            Column("metric_id", String(255), nullable=False),  # Optimization target
             Column("git_repo", String, nullable=False),
             Column("git_commit", String(40), nullable=False),
 

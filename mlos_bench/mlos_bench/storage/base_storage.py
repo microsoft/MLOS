@@ -44,7 +44,7 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
 
     @abstractmethod
-    def experiment(self, exp_id: str, trial_id: int, opt_target: str):
+    def experiment(self, exp_id: str, trial_id: int, description: str, opt_target: str):
         """
         Create a new experiment in the storage.
 
@@ -54,6 +54,8 @@ class Storage(metaclass=ABCMeta):
             Unique identifier of the experiment.
         trial_id : int
             Starting number of the trial.
+        description : str
+            Human-readable description of the experiment.
         opt_target : str
             Name of metric we're optimizing for.
 
@@ -70,11 +72,12 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, tunables: TunableGroups,
-                     experiment_id: str, trial_id: int, opt_target: str):
+        def __init__(self, tunables: TunableGroups, experiment_id: str,
+                     trial_id: int, description: str, opt_target: str):
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
             self._trial_id = trial_id
+            self._description = description
             self._opt_target = opt_target
             (self._git_repo, self._git_commit) = get_git_info()
 
