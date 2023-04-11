@@ -26,7 +26,7 @@ if [ "$1" == 'start' ]; then
     docker run -d --name mlos-doc-nginx \
         -v "$repo_root/doc/nginx-default.conf":/etc/nginx/conf.d/default.conf \
         -v "$repo_root/doc":/doc \
-        -p 8080:80 \
+        -p 8080:81 \
         mlos-doc-nginx
     set +x
 elif [ "$1" == 'stop' ]; then
