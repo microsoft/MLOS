@@ -8,10 +8,11 @@ Contains the BaseOptimizer abstract class.
 
 import collections
 from abc import ABCMeta, abstractmethod
-from typing import Optional
+from typing import List, Optional, Tuple, Union
 
 import ConfigSpace
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
@@ -39,8 +40,8 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Given parameter space differs from the one given to space adapter")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations = []
-        self._pending_observations = []
+        self._observations: List[Tuple[pd.DataFrame, pd.Series, Union[pd.DataFrame, None]]] = []
+        self._pending_observations: List[Tuple[pd.DataFrame, Union[pd.DataFrame, None]]] = []
 
     def __repr__(self):
         return f"{self.__class__.__name__}(parameter_space={self.parameter_space})"
@@ -173,7 +174,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         observations = self.get_observations()
         return observations.nsmallest(1, columns='score')
 
-    def _from_1hot(self, config: np.array) -> pd.DataFrame:
+    def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
         """
         Convert numpy array from one-hot encoding to a DataFrame
         with categoricals and ints in proper columns.
@@ -196,7 +197,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, config: pd.DataFrame) -> np.array:
+    def _to_1hot(self, config: pd.DataFrame) -> npt.NDArray:
         """
         Convert pandas DataFrame to one-hot-encoded numpy array.
         """

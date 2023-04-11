@@ -7,13 +7,16 @@ Basic initializer module for the mlos_core space adapters.
 """
 
 from enum import Enum
-from typing import Optional, TypeVar
+from typing import Optional, TypeVar, Union
 
 import ConfigSpace
 
+from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from mlos_core.spaces.adapters.llamatune import LlamaTuneAdapter
 
 __all__ = [
+    'IdentityAdapter',
     'LlamaTuneAdapter',
 ]
 
@@ -21,14 +24,21 @@ __all__ = [
 class SpaceAdapterType(Enum):
     """Enumerate supported MlosCore space adapters."""
 
-    IDENTITY = None
+    IDENTITY = IdentityAdapter
     """A no-op adapter will be used"""
 
     LLAMATUNE = LlamaTuneAdapter
     """An instance of LlamaTuneAdapter class will be used"""
 
 
-ConcreteSpaceAdapter = TypeVar('ConcreteSpaceAdapter', *[member.value for member in SpaceAdapterType])
+# To make mypy happy, we need to define a type variable for each optimizer type.
+# https://github.com/python/mypy/issues/12952
+# ConcreteSpaceAdapter = TypeVar('ConcreteSpaceAdapter', *[member.value for member in SpaceAdapterType])
+# To address this, we add a test for complete coverage of the enum.
+ConcreteSpaceAdapter = TypeVar('ConcreteSpaceAdapter',
+                               IdentityAdapter,
+                               LlamaTuneAdapter,
+                        )
 
 
 class SpaceAdapterFactory:
@@ -59,8 +69,9 @@ class SpaceAdapterFactory:
         -------
         Instance of concrete optimizer (e.g., None, LlamaTuneAdapter, etc.)
         """
-        if space_adapter_type is None or space_adapter_type is SpaceAdapterType.IDENTITY:
-            return None
+        if space_adapter_type is None:
+            space_adapter_type = SpaceAdapterType.IDENTITY
         if space_adapter_kwargs is None:
             space_adapter_kwargs = {}
-        return space_adapter_type.value(parameter_space, **space_adapter_kwargs)
+        space_adapter: ConcreteSpaceAdapter = space_adapter_type.value(parameter_space, **space_adapter_kwargs)
+        return space_adapter
