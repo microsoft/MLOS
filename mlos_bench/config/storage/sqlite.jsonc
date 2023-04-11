@@ -8,6 +8,6 @@
     // Parameters must match kwargs of sqlalchemy.URL.create().
     "config": {
         "drivername": "sqlite",
-        "database": "mlos_bench.sqlite3"
+        "database": "mlos_bench.sqlite"
     }
 }
