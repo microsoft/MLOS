@@ -23,6 +23,6 @@ def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,
     assert pending.config() == {
         "location": "westus2",
         "num_repeats": "100",
-        "experimentId": "pytest-experiment",
+        "experimentId": "Test-001",
         "trialId": 1,
     }
