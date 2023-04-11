@@ -19,7 +19,10 @@ from mlos_bench.storage.sql_trial import Trial
 
 _LOG = logging.getLogger(__name__)
 
-# pylint: disable=too-many-function-args
+# This is to allow passing all required values to the Experiment constructor
+# so that we don't have to expose the internals of the Storage class.
+# This constructor is not visible to the user, so it's OK to disable the warning.
+# pylint: disable=too-many-function-args,too-many-arguments
 
 
 class Experiment(Storage.Experiment):

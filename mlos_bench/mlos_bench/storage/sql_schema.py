@@ -15,6 +15,10 @@ from sqlalchemy import (
 
 _LOG = logging.getLogger(__name__)
 
+# This class is internal to SqlStorage and is mostly a struct
+# for all DB tables, so it's ok to disable the warnings.
+# pylint: disable=too-few-public-methods,too-many-instance-attributes
+
 
 class DbSchema:
     """
@@ -26,12 +30,12 @@ class DbSchema:
         Declare the SQLAlchemy schema for the database.
         """
         _LOG.info("Create the DB schema for: %s", engine)
-        self.engine = engine
-        self.meta = MetaData()
+        self._engine = engine
+        self._meta = MetaData()
 
         self.experiment = Table(
             "experiment",
-            self.meta,
+            self._meta,
             Column("exp_id", String(255), nullable=False),
             Column("description", String),
             Column("git_repo", String, nullable=False),
@@ -40,26 +44,26 @@ class DbSchema:
             PrimaryKeyConstraint("exp_id"),
         )
 
-        # A workaround to support autoincrement in DuckDB:
+        # A workaround for SQLAlchemy issue with autoincrement in DuckDB:
         if engine.dialect.name == "duckdb":
             seq_config_id = Sequence('seq_config_id')
             col_config_id = Column("config_id", BigInteger, seq_config_id,
-                                server_default=seq_config_id.next_value(),
-                                nullable=False, primary_key=True)
+                                   server_default=seq_config_id.next_value(),
+                                   nullable=False, primary_key=True)
         else:
             col_config_id = Column("config_id", BigInteger, nullable=False,
                                    primary_key=True, autoincrement=True)
 
         self.config = Table(
             "config",
-            self.meta,
+            self._meta,
             col_config_id,
             Column("config_hash", String, nullable=False, unique=True),
         )
 
         self.trial = Table(
             "trial",
-            self.meta,
+            self._meta,
             Column("exp_id", String(255), nullable=False),
             Column("trial_id", BigInteger, nullable=False),
             Column("config_id", BigInteger, nullable=False),
@@ -77,7 +81,7 @@ class DbSchema:
         # fixed for a particular trial config.
         self.config_param = Table(
             "config_param",
-            self.meta,
+            self._meta,
             Column("config_id", BigInteger, nullable=False),
             Column("param_id", String(255), nullable=False),
             Column("param_value", String(255)),
@@ -90,7 +94,7 @@ class DbSchema:
         # e.g., scheduled execution time, VM name / location, number of repeats, etc.
         self.trial_param = Table(
             "trial_param",
-            self.meta,
+            self._meta,
             Column("exp_id", String(255), nullable=False),
             Column("trial_id", BigInteger, nullable=False),
             Column("param_id", String(255), nullable=False),
@@ -103,7 +107,7 @@ class DbSchema:
 
         self.trial_result = Table(
             "trial_result",
-            self.meta,
+            self._meta,
             Column("exp_id", String(255), nullable=False),
             Column("trial_id", BigInteger, nullable=False),
             Column("metric_id", String(255), nullable=False),
@@ -116,7 +120,7 @@ class DbSchema:
 
         self.trial_telemetry = Table(
             "trial_telemetry",
-            self.meta,
+            self._meta,
             Column("exp_id", String(255), nullable=False),
             Column("trial_id", BigInteger, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
@@ -128,12 +132,12 @@ class DbSchema:
                                  [self.trial.c.exp_id, self.trial.c.trial_id]),
         )
 
-        _LOG.debug("Schema: %s", self.meta)
+        _LOG.debug("Schema: %s", self._meta)
 
     def create(self):
         """
         Create the DB schema.
         """
         _LOG.info("Create the DB schema")
-        self.meta.create_all(self.engine)
+        self._meta.create_all(self._engine)
         return self
