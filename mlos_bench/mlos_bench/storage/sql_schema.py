@@ -9,7 +9,7 @@ DB schema definition.
 import logging
 
 from sqlalchemy import (
-    MetaData, Table, Column, Integer, String, DateTime,
+    MetaData, Table, Column, Sequence, Integer, String, DateTime,
     PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint,
 )
 
@@ -39,13 +39,16 @@ class DbSchema:
             PrimaryKeyConstraint("exp_id"),
         )
 
+        # A workaround to support autoincrement in DuckDB:
+        seq_config_id = Sequence('seq_config_id')
+
         self.config = Table(
             "config",
             self.meta,
-            Column("config_id", Integer, nullable=False, autoincrement=True),
+            Column("config_id", Integer, seq_config_id,
+                   server_default=seq_config_id.next_value(),
+                   nullable=False, primary_key=True),
             Column("config_hash", String, nullable=False, unique=True),
-
-            PrimaryKeyConstraint("config_id"),
         )
 
         self.trial = Table(
