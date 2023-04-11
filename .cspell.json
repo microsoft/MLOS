@@ -20,6 +20,7 @@
         "fileshare",
         "gpbo",
         "hyperparameters",
+        "iloc",
         "ipykernel",
         "iterrows",
         "jupyterlab",

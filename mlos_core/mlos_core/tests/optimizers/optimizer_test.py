@@ -6,7 +6,7 @@
 Tests for Bayesian Optimizers.
 """
 
-from typing import Type
+from typing import Type, Union
 
 import pytest
 
@@ -110,7 +110,7 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     """
     Test that all optimizer types are listed in the ConcreteOptimizer constraints.
     """
-    assert optimizer_type.value in ConcreteOptimizer.__constraints__
+    assert optimizer_type.value in ConcreteOptimizer.__constraints__ # type: ignore # pylint: disable=no-member
 
 
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
@@ -122,7 +122,7 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
-                                              optimizer_type: OptimizerType, kwargs):
+                                              optimizer_type: Union[None, OptimizerType], kwargs):
     """
     Test that we can create an optimizer via a factory.
     """
@@ -212,6 +212,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
         assert (all_obvs.columns == ['x', 'y', 'score']).all()
 
     # .surrogate_predict method not currently implemented if space adapter is employed
-    if isinstance(optimizer, BaseBayesianOptimizer):
+    if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
             _ = llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x']])
