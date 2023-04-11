@@ -36,5 +36,4 @@ if [ setup.cfg -nt /proc/$(cat $DMYPY_STATUS_FILE | jq -e -r .pid) ]; then
 fi
 
 # Check the files passed as arguments.
-# FIXME: would have to remove some args to use with vscode.
 dmypy $DMYPY_STATUS_ARGS check $*
