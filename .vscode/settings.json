@@ -1,3 +1,4 @@
+// vim: set ft=jsonc:
 {
     "makefile.extensionOutputFolder": "./.vscode",
     "python.defaultInterpreterPath": "${env:HOME}${env:USERPROFILE}/.conda/envs/mlos_core/bin/python",
@@ -6,8 +7,8 @@
     "python.linting.pylintEnabled": true,
     "python.linting.pycodestyleEnabled": true,
     "python.linting.pydocstyleEnabled": true,
-    "python.linting.mypyEnabled": false,    // use the dmypy daemon extension instead - it's faster
-    //"mypy.runUsingActiveInterpreter": true,    // in the devcontainer we override this to use an explicit path
+    "python.linting.mypyEnabled": false,            // use the dmypy daemon extension instead - it's faster
+    //"mypy.runUsingActiveInterpreter": true,       // in the devcontainer we override this to use an explicit path
     "autoDocstring.docstringFormat": "numpy",
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"
