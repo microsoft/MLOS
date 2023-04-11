@@ -9,7 +9,7 @@
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     "forwardPorts": [
-        "docs-www:80"
+        "docs-www:81"
     ],
     // Prep some host side things for the container build
     "initializeCommand": [".devcontainer/scripts/prep-container-build"],
