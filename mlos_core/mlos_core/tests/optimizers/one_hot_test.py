@@ -10,6 +10,7 @@ import pytest
 
 import pandas as pd
 import numpy as np
+import numpy.typing as npt
 import ConfigSpace as CS
 
 from mlos_core.optimizers import EmukitOptimizer
@@ -31,7 +32,7 @@ def data_frame() -> pd.DataFrame:
 
 
 @pytest.fixture
-def one_hot() -> np.array:
+def one_hot() -> npt.NDArray:
     """
     One-hot encoding of the `data_frame` above.
     The columns follow the order of the hyperparameters in `configuration_space`.
