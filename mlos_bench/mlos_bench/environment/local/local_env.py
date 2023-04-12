@@ -125,7 +125,7 @@ class LocalEnv(Environment):
                 _LOG.warning("ERROR: Local setup returns with code %d stderr:\n%s",
                              return_code, stderr)
 
-            self._is_ready = return_code == 0
+            self._is_ready = bool(return_code == 0)
 
         return self._is_ready
 

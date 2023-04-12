@@ -7,7 +7,7 @@ Composite benchmark environment.
 """
 
 import logging
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from mlos_bench.service.base_service import Service
 from mlos_bench.environment.status import Status
@@ -46,7 +46,7 @@ class CompositeEnv(Environment):
         """
         super().__init__(name, config, global_config, tunables, service)
 
-        self._children = []
+        self._children: List[Environment] = []
 
         for child_config_file in config.get("include_children", []):
             for env in self._service.load_environment_list(

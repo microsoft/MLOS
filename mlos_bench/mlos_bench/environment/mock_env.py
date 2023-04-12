@@ -104,4 +104,5 @@ class MockEnv(Environment):
         else:
             raise ValueError("Invalid parameter type: " + tunable.type)
         # Explicitly clip the value in case of numerical errors.
-        return numpy.clip(val, 0, 1)
+        ret: float = numpy.clip(val, 0, 1)
+        return ret
