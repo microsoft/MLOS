@@ -12,7 +12,9 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         curl jq \
         vim-nox neovim python3-pynvim \
         make \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && echo "C-w: unix-filename-rubout" >> /etc/inputrc
+    # Also tweak C-w to stop at slashes as well instead of just spaces
 
 # Set some cache dirs to be owned by the vscode user even as we're currently
 # executing as root to build the container image.
