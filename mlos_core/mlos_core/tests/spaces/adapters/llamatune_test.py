@@ -8,7 +8,7 @@ Tests for LlamaTune space adapter.
 
 # pylint: disable=missing-function-docstring
 
-from typing import Dict, Set
+from typing import Dict, Iterator, Set
 
 import pytest
 
@@ -22,8 +22,8 @@ def construct_parameter_space(
     n_continuous_params: int = 0,
     n_integer_params: int = 0,
     n_categorical_params: int = 0,
-    seed=1234
-):
+    seed: int = 1234,
+) -> CS.ConfigurationSpace:
     """
     Helper function for construct an instance of `ConfigSpace.ConfigurationSpace`.
     """
@@ -58,7 +58,7 @@ def construct_parameter_space(
         },
     )
 ]))
-def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict):    # pylint: disable=too-many-locals
+def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> None:    # pylint: disable=too-many-locals
     """
     Tests LlamaTune's low-to-high space projection method.
     """
@@ -100,7 +100,7 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict):    
             _ = adapter.inverse_transform(unseen_sampled_config_df)  # pylint: disable=redefined-variable-type
 
 
-def test_special_parameter_values_validation():
+def test_special_parameter_values_validation() -> None:
     """
     Tests LlamaTune's validation process of user-provided special parameter values dictionary.
     """
@@ -173,7 +173,7 @@ def test_special_parameter_values_validation():
                                  max_unique_values_per_param=None)
 
 
-def gen_random_configs(adapter, num_configs):
+def gen_random_configs(adapter, num_configs) -> Iterator[CS.Configuration]:
     for sampled_config in adapter.target_parameter_space.sample_configuration(size=num_configs):
         # Transform low-dim config to high-dim config
         sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
@@ -182,7 +182,7 @@ def gen_random_configs(adapter, num_configs):
         yield orig_config
 
 
-def test_special_parameter_values_biasing():    # pylint: disable=too-complex
+def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-complex
     """
     Tests LlamaTune's special parameter values biasing methodology
     """
@@ -259,7 +259,7 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
     assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_occurences['int_2'][100]
 
 
-def test_max_unique_values_per_param():
+def test_max_unique_values_per_param() -> None:
     """
     Tests LlamaTune's parameter values discretization implementation.
     """

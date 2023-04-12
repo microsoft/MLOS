@@ -12,8 +12,10 @@ Provides some pytest configuration overrides for both modules.
 import os
 from warnings import warn
 
+import pytest
 
-def pytest_configure(config) -> None:   # pylint: disable=unused-argument
+
+def pytest_configure(config: pytest.Config) -> None:   # pylint: disable=unused-argument
     """
     Add some additional (global) configuration steps for pytest.
     """
