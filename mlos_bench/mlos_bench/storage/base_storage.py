@@ -196,7 +196,6 @@ class Storage(metaclass=ABCMeta):
 
             Parameters
             ----------
-
             status : Status
                 Status of the experiment run.
             value : Optional[Union[Dict[str, float], float]]
@@ -222,7 +221,6 @@ class Storage(metaclass=ABCMeta):
 
             Parameters
             ----------
-
             status : Status
                 Current status of the trial.
             value : Optional[Dict[str, float]]
