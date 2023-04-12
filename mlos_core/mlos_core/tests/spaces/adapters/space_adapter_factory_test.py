@@ -8,7 +8,7 @@ Tests for space adapter factory.
 
 # pylint: disable=missing-function-docstring
 
-from typing import Union
+from typing import Optional
 
 import pytest
 
@@ -36,7 +36,7 @@ def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType):
     # Enumerate all supported Optimizers
     *[(member, {}) for member in SpaceAdapterType],
 ])
-def test_create_space_adapter_with_factory_method(space_adapter_type: Union[None, SpaceAdapterType], kwargs):
+def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[SpaceAdapterType], kwargs):
     # Start defining a ConfigurationSpace for the Optimizer to search.
     input_space = CS.ConfigurationSpace(seed=1234)
 

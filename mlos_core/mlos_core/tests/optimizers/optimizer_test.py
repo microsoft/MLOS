@@ -6,7 +6,7 @@
 Tests for Bayesian Optimizers.
 """
 
-from typing import Type, Union
+from typing import Optional, Type
 
 import pytest
 
@@ -120,7 +120,7 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
-                                              optimizer_type: Union[None, OptimizerType], kwargs):
+                                              optimizer_type: Optional[OptimizerType], kwargs):
     """
     Test that we can create an optimizer via a factory.
     """
