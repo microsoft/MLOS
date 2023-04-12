@@ -127,7 +127,7 @@ class Environment(metaclass=abc.ABCMeta):
     def __repr__(self):
         return f"Env: {self.__class__} :: '{self.name}'"
 
-    def _combine_tunables(self, tunables):
+    def _combine_tunables(self, tunables: TunableGroups):
         """
         Plug tunable values into the base config. If the tunable group is unknown,
         ignore it (it might belong to another environment). This method should

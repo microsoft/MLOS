@@ -27,9 +27,11 @@ class TunableGroups:
         config : dict
             Python dict of serialized representation of the covariant tunable groups.
         """
-        self._index = {}  # Index (Tunable id -> CovariantTunableGroup)
-        self._tunable_groups = {}
-        for (name, group_config) in (config or {}).items():
+        if config is None:
+            config = {}
+        self._index: Dict[str, CovariantTunableGroup] = {}  # Index (Tunable id -> CovariantTunableGroup)
+        self._tunable_groups: Dict[str, CovariantTunableGroup] = {}
+        for (name, group_config) in (config).items():
             self._add_group(CovariantTunableGroup(name, group_config))
 
     def __eq__(self, other) -> bool:
@@ -46,7 +48,7 @@ class TunableGroups:
         is_equal : bool
             True if two TunableGroups are equal.
         """
-        return self._tunable_groups == other._tunable_groups
+        return bool(self._tunable_groups == other._tunable_groups)
 
     def copy(self):
         """
@@ -71,7 +73,7 @@ class TunableGroups:
         self._tunable_groups[group.name] = group
         self._index.update(dict.fromkeys(group.get_names(), group))
 
-    def update(self, tunables):
+    def update(self, tunables: "TunableGroups"):
         """
         Merge the two collections of covariant tunable groups.
 
