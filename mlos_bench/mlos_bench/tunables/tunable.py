@@ -131,7 +131,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._current_value
 
     @value.setter
-    def value(self, value: Union[int, float, str]) -> Optional[Union[int, float, str]]:
+    def value(self, value: Union[int, float, str]) -> Union[int, float, str]:
         """
         Set the current value of the tunable.
         """
@@ -178,6 +178,28 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return bool(self._range[0] <= value <= self._range[1]) or value == self._default
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
+
+    @property
+    def categorical_value(self) -> str:
+        """
+        Get the current value of the tunable as a number.
+        """
+        if self.is_categorical:
+            return str(self._current_value)
+        else:
+            raise ValueError("Cannot get categorical values for a numerical tunable.")
+
+    @property
+    def numerical_value(self) -> Union[int, float]:
+        """
+        Get the current value of the tunable as a number.
+        """
+        if self._type == "int":
+            return int(self._current_value)
+        elif self._type == "float":
+            return float(self._current_value)
+        else:
+            raise ValueError("Cannot get numerical value for a categorical tunable.")
 
     @property
     def name(self) -> str:
