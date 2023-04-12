@@ -38,8 +38,9 @@ max-line-length=132
 disable=
     no-else-return,
     consider-using-assignment-expr,
-    deprecated-typing-alias,    # disable for now - only deprecated recently
+    deprecated-typing-alias,            # disable for now - only deprecated recently
     docstring-first-line-empty,
+    consider-alternative-union-syntax,  # disable for now - still supporting python 3.8
     missing-raises-doc
 
 [STRING]

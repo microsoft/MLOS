@@ -37,6 +37,8 @@ class RandomOptimizer(BaseOptimizer):
         context : None
             Not Yet Implemented.
         """
+        if context is not None:
+            raise NotImplementedError()
         # should we pop them from self.pending_observations?
 
     def _suggest(self, context: pd.DataFrame = None):
@@ -54,6 +56,9 @@ class RandomOptimizer(BaseOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
+        if context is not None:
+            # not sure how that works here?
+            raise NotImplementedError()
         return pd.DataFrame(self.optimizer_parameter_space.sample_configuration().get_dictionary(), index=[0])
 
     def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):

@@ -39,7 +39,15 @@ class OptimizerType(Enum):
     """An instance of SkoptOptimizer class will be used"""
 
 
-ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
+# To make mypy happy, we need to define a type variable for each optimizer type.
+# https://github.com/python/mypy/issues/12952
+# ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
+# To address this, we add a test for complete coverage of the enum.
+ConcreteOptimizer = TypeVar('ConcreteOptimizer',
+                            RandomOptimizer,
+                            EmukitOptimizer,
+                            SkoptOptimizer,
+                    )
 
 
 class OptimizerFactory:
@@ -52,7 +60,7 @@ class OptimizerFactory:
         parameter_space: ConfigSpace.ConfigurationSpace,
         optimizer_type: OptimizerType = OptimizerType.SKOPT,
         optimizer_kwargs: Optional[dict] = None,
-        space_adapter_type: Optional[SpaceAdapterType] = SpaceAdapterType.IDENTITY,
+        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
         space_adapter_kwargs: Optional[dict] = None,
     ) -> ConcreteOptimizer:
         """Creates a new optimizer instance, given the parameter space, optimizer type and potential optimizer options.
@@ -83,4 +91,5 @@ class OptimizerFactory:
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
         space_adapter = SpaceAdapterFactory.create(parameter_space, space_adapter_type, space_adapter_kwargs=space_adapter_kwargs)
-        return optimizer_type.value(parameter_space, space_adapter=space_adapter, **optimizer_kwargs)
+        optimizer: ConcreteOptimizer = optimizer_type.value(parameter_space, space_adapter=space_adapter, **optimizer_kwargs)
+        return optimizer
