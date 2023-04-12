@@ -9,7 +9,7 @@ import copy
 import collections
 import logging
 
-from typing import Any, List, Optional, Tuple, TypedDict, Union
+from typing import List, Optional, Tuple, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
@@ -19,12 +19,15 @@ class TunableDict(TypedDict, total=False):
     A typed dict for tunable parameters.
 
     Mostly used for mypy type checking.
+
+    These are the types expected to be received from the json config.
     """
 
     type: str
     description: Optional[str]
     default: Union[int, float, str]
     values: Optional[List[str]]
+    # For convenience, we allow the range to be specified as a list in the json, but recast it to a tuple internally.
     range: Optional[Union[Tuple[int, int], List[int], Tuple[float, float], List[float]]]
     special: Optional[Union[List[int], List[str]]]
 
@@ -54,19 +57,24 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._name = name
         self._type = config["type"]  # required
         self._description = config.get("description")
-        self._default = config.get("default")
+        self._default = config["default"]
         self._values = config.get("values")
-        self._range = config.get("range")
+        self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
+        config_range = config.get("range")
+        if config_range is not None:
+            assert len(config_range) == 2, f"Invalid range: {config_range}"
+            config_range = (config_range[0], config_range[1])
+            self._range = config_range
         self._special = config.get("special")
         self._current_value = self._default
-        if self._type == "categorical":
+        if self.is_categorical:
             if not (self._values and isinstance(self._values, collections.abc.Iterable)):
                 raise ValueError("Must specify values for the categorical type")
             if self._range is not None:
                 raise ValueError("Range must be None for the categorical type")
             if self._special is not None:
                 raise ValueError("Special values must be None for the categorical type")
-        elif self._type in {"int", "float"}:
+        elif self.is_numerical:
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
                 raise ValueError(f"Invalid range: {self._range}")
         else:
@@ -116,14 +124,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return copy.deepcopy(self)
 
     @property
-    def value(self):
+    def value(self) -> Union[int, float, str]:
         """
         Get the current value of the tunable.
         """
         return self._current_value
 
     @value.setter
-    def value(self, value):
+    def value(self, value: Union[int, float, str]) -> Optional[Union[int, float, str]]:
         """
         Set the current value of the tunable.
         """
@@ -164,9 +172,9 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         is_valid : bool
             True if the value is valid, False otherwise.
         """
-        if self._type == "categorical":
+        if self.is_categorical and self._values:
             return value in self._values
-        elif self._type in {"int", "float"} and self._range:
+        elif self.is_numerical and self._range:
             return bool(self._range[0] <= value <= self._range[1]) or value == self._default
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
@@ -191,7 +199,31 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._type
 
     @property
-    def range(self) -> Tuple[Any, Any]:
+    def is_categorical(self) -> bool:
+        """
+        Check if the tunable is categorical.
+
+        Returns
+        -------
+        is_categorical : bool
+            True if the tunable is categorical, False otherwise.
+        """
+        return self._type == "categorical"
+
+    @property
+    def is_numerical(self) -> bool:
+        """
+        Check if the tunable is an integer or float.
+
+        Returns
+        -------
+        is_int : bool
+            True if the tunable is an integer or float, False otherwise.
+        """
+        return self._type in {"int", "float"}
+
+    @property
+    def range(self) -> Union[Tuple[int, int], Tuple[float, float]]:
         """
         Get the range of the tunable if it is numerical, None otherwise.
 
@@ -201,6 +233,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             A 2-tuple of numbers that represents the range of the tunable.
             Numbers can be int or float, depending on the type of the tunable.
         """
+        assert self.is_numerical
+        assert self._range is not None
         return self._range
 
     @property
@@ -214,4 +248,6 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         values : List[str]
             List of all possible values of a categorical tunable.
         """
+        assert self.is_categorical
+        assert self._values is not None
         return self._values
