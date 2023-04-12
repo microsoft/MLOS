@@ -7,12 +7,14 @@ Contains some helper functions for converting config
 """
 
 from typing import TYPE_CHECKING
+
 import ConfigSpace
 import numpy as np
 
 
 if TYPE_CHECKING:
     import skopt.space
+    import emukit.core
 
 
 def configspace_to_skopt_space(config_space: ConfigSpace.ConfigurationSpace) -> "skopt.space.Space":
@@ -49,7 +51,7 @@ def configspace_to_skopt_space(config_space: ConfigSpace.ConfigurationSpace) -> 
     return skopt.space.Space([_one_parameter_convert(param) for param in config_space.get_hyperparameters()])
 
 
-def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace):
+def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace) -> "emukit.core.ParameterSpace":
     """Converts a ConfigSpace.ConfigurationSpace to emukit.core.ParameterSpace.
 
     Parameters
@@ -63,7 +65,7 @@ def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace):
     """
     import emukit.core  # pylint: disable=import-outside-toplevel
 
-    def _one_parameter_convert(parameter):
+    def _one_parameter_convert(parameter: ConfigSpace.hyperparameters.Hyperparameter) -> "emukit.core.Parameter":
         log = getattr(parameter, 'log', False)
         if log and not isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
             raise ValueError("Emukit doesn't support log parameters.")
