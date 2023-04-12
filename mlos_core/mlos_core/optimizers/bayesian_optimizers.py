@@ -6,7 +6,7 @@
 Contains the wrapper classes for different Bayesian optimizers.
 """
 
-from typing import Optional
+from typing import Callable, Optional
 from abc import ABCMeta, abstractmethod
 
 import ConfigSpace
@@ -19,7 +19,7 @@ from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_space
 
 
-def _to_ndarray(config: pd.DataFrame) -> npt.NDArray:
+def _df_to_ndarray(config: pd.DataFrame) -> npt.NDArray:
     """
     Converts a single config to an ndarray.
 
@@ -36,12 +36,7 @@ def _to_ndarray(config: pd.DataFrame) -> npt.NDArray:
     config : np.array
         Numpy array of the data.
     """
-    assert len(config) == 1
-    config = config.copy()
-    # mypy complains about use of next() iterator for some reason
-    for (_, config_series) in config.iterrows():
-        return config_series.to_numpy()
-    raise ValueError('No configuration found.')
+    return config.to_numpy()
 
 
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
@@ -210,12 +205,13 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             base_estimator=base_estimator,
             random_state=seed,
         )
+        self._transform: Callable[[pd.DataFrame], npt.NDArray]
         if base_estimator == 'et':
             self._transform = self._to_1hot
         elif base_estimator == 'gp':
             self._transform = self._to_numeric
         else:
-            self._transform = _to_ndarray
+            self._transform = _df_to_ndarray
 
     def _to_numeric(self, config: pd.DataFrame) -> npt.NDArray:
         """
