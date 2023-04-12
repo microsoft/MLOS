@@ -11,7 +11,6 @@ from typing import Optional, TypeVar, Union
 
 import ConfigSpace
 
-from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from mlos_core.spaces.adapters.llamatune import LlamaTuneAdapter
 

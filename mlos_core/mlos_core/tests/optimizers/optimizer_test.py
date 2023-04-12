@@ -6,7 +6,7 @@
 Tests for Bayesian Optimizers.
 """
 
-from typing import Type, Union
+from typing import Optional, Type
 
 import pytest
 
@@ -102,13 +102,14 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
 
 @pytest.mark.parametrize(('optimizer_type'), [
     # Enumerate all supported Optimizers
-    *[member for member in OptimizerType],
+    # *[member for member in OptimizerType],
+    *list(OptimizerType),
 ])
 def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     """
     Test that all optimizer types are listed in the ConcreteOptimizer constraints.
     """
-    assert optimizer_type.value in ConcreteOptimizer.__constraints__ # type: ignore # pylint: disable=no-member
+    assert optimizer_type.value in ConcreteOptimizer.__constraints__    # type: ignore  # pylint: disable=no-member
 
 
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
@@ -120,7 +121,7 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
-                                              optimizer_type: Union[None, OptimizerType], kwargs):
+                                              optimizer_type: Optional[OptimizerType], kwargs):
     """
     Test that we can create an optimizer via a factory.
     """
@@ -164,11 +165,11 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
     assert optimizer is not None
 
     # Initialize another optimizer that uses LlamaTune space adapter
-    space_adapter_kwargs = dict(
-        num_low_dims=1,
-        special_param_values=None,
-        max_unique_values_per_param=None,
-    )
+    space_adapter_kwargs = {
+        "num_low_dims": 1,
+        "special_param_values": None,
+        "max_unique_values_per_param": None,
+    }
     llamatune_optimizer = OptimizerFactory.create(
         input_space,
         optimizer_type,

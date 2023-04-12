@@ -6,7 +6,7 @@
 Contains the wrapper classes for different Bayesian optimizers.
 """
 
-from typing import Optional
+from typing import Callable, Optional
 from abc import ABCMeta, abstractmethod
 
 import ConfigSpace
@@ -17,6 +17,26 @@ import pandas as pd
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_space
+
+
+def _df_to_ndarray(config: pd.DataFrame) -> npt.NDArray:
+    """
+    Converts a single config to an ndarray.
+
+    Done this way to let mypy validate the different types across _transform function options.
+
+    Parameters
+    ----------
+    config : pd.DataFrame
+        Dataframe of configurations / parameters.
+        The columns are parameter names and the row is the configuration.
+
+    Returns
+    -------
+    config : np.array
+        Numpy array of the data.
+    """
+    return config.to_numpy()
 
 
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
@@ -185,12 +205,13 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             base_estimator=base_estimator,
             random_state=seed,
         )
+        self._transform: Callable[[pd.DataFrame], npt.NDArray]
         if base_estimator == 'et':
             self._transform = self._to_1hot
         elif base_estimator == 'gp':
             self._transform = self._to_numeric
         else:
-            self._transform = self._to_ndarray
+            self._transform = _df_to_ndarray
 
     def _to_numeric(self, config: pd.DataFrame) -> npt.NDArray:
         """

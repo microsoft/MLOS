@@ -8,7 +8,7 @@ Contains the BaseOptimizer abstract class.
 
 import collections
 from abc import ABCMeta, abstractmethod
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 import ConfigSpace
 import numpy as np
@@ -40,8 +40,8 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Given parameter space differs from the one given to space adapter")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations: List[Tuple[pd.DataFrame, pd.Series, Union[pd.DataFrame, None]]] = []
-        self._pending_observations: List[Tuple[pd.DataFrame, Union[pd.DataFrame, None]]] = []
+        self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
+        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
     def __repr__(self):
         return f"{self.__class__.__name__}(parameter_space={self.parameter_space})"
