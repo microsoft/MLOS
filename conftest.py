@@ -13,7 +13,7 @@ import os
 from warnings import warn
 
 
-def pytest_configure(config):   # pylint: disable=unused-argument
+def pytest_configure(config) -> None:   # pylint: disable=unused-argument
     """
     Add some additional (global) configuration steps for pytest.
     """

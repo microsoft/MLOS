@@ -6,11 +6,16 @@
 Contains some helper functions for converting config
 """
 
+from typing import TYPE_CHECKING
 import ConfigSpace
 import numpy as np
 
 
-def configspace_to_skopt_space(config_space: ConfigSpace.ConfigurationSpace):
+if TYPE_CHECKING:
+    import skopt.space
+
+
+def configspace_to_skopt_space(config_space: ConfigSpace.ConfigurationSpace) -> "skopt.space.Space":
     """Converts a ConfigSpace.ConfigurationSpace to a list of skopt spaces.
 
     Parameters
@@ -20,11 +25,11 @@ def configspace_to_skopt_space(config_space: ConfigSpace.ConfigurationSpace):
 
     Returns
     -------
-    list of skopt.space.Space
+    skopt.space.Space
     """
     import skopt.space  # pylint: disable=import-outside-toplevel
 
-    def _one_parameter_convert(parameter):
+    def _one_parameter_convert(parameter: ConfigSpace.hyperparameters.Hyperparameter) -> "skopt.space.Dimension":
         if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
             return skopt.space.Real(
                 low=parameter.lower,
