@@ -30,6 +30,7 @@
         "mlos",
         "nsmallest",
         "numpy",
+        "obvs",
         "perc",
         "pinv",
         "pylint",

@@ -7,11 +7,10 @@ Basic initializer module for the mlos_core space adapters.
 """
 
 from enum import Enum
-from typing import Optional, TypeVar, Union
+from typing import Optional, TypeVar
 
 import ConfigSpace
 
-from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 from mlos_core.spaces.adapters.llamatune import LlamaTuneAdapter
 

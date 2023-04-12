@@ -108,7 +108,7 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     """
     Test that all optimizer types are listed in the ConcreteOptimizer constraints.
     """
-    assert optimizer_type.value in ConcreteOptimizer.__constraints__ # type: ignore # pylint: disable=no-member
+    assert optimizer_type.value in ConcreteOptimizer.__constraints__    # type: ignore  # pylint: disable=no-member
 
 
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
