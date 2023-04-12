@@ -102,7 +102,8 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
 
 @pytest.mark.parametrize(('optimizer_type'), [
     # Enumerate all supported Optimizers
-    *[member for member in OptimizerType],
+    # *[member for member in OptimizerType],
+    list(OptimizerType),
 ])
 def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     """
@@ -164,11 +165,11 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
     assert optimizer is not None
 
     # Initialize another optimizer that uses LlamaTune space adapter
-    space_adapter_kwargs = dict(
-        num_low_dims=1,
-        special_param_values=None,
-        max_unique_values_per_param=None,
-    )
+    space_adapter_kwargs = {
+        "num_low_dims": 1,
+        "special_param_values": None,
+        "max_unique_values_per_param": None,
+    }
     llamatune_optimizer = OptimizerFactory.create(
         input_space,
         optimizer_type,

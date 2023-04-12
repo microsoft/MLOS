@@ -28,6 +28,7 @@
         "llamatune",
         "matplotlib",
         "mlos",
+        "ndarray",
         "nsmallest",
         "numpy",
         "obvs",
