@@ -9,9 +9,24 @@ import copy
 import collections
 import logging
 
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
+
+
+class TunableDict(TypedDict, total=False):
+    """
+    A typed dict for tunable parameters.
+
+    Mostly used for mypy type checking.
+    """
+
+    type: str
+    description: Optional[str]
+    default: Union[int, float, str]
+    values: Optional[List[str]]
+    range: Optional[Union[Tuple[int, int], List[int], Tuple[float, float], List[float]]]
+    special: Optional[Union[List[int], List[str]]]
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes
@@ -25,7 +40,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         "categorical": str,
     }
 
-    def __init__(self, name: str, config: dict):
+    def __init__(self, name: str, config: TunableDict):
         """
         Create an instance of a new tunable parameter.
 
@@ -83,7 +98,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             True if the Tunables correspond to the same parameter and have the same value and type.
             NOTE: ranges and special values are not currently considered in the comparison.
         """
-        return (
+        return bool(
             self._name == other._name and
             self._type == other._type and
             self._current_value == other._current_value
@@ -152,7 +167,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         if self._type == "categorical":
             return value in self._values
         elif self._type in {"int", "float"} and self._range:
-            return (self._range[0] <= value <= self._range[1]) or value == self._default
+            return bool(self._range[0] <= value <= self._range[1]) or value == self._default
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
 

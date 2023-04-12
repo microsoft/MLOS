@@ -35,7 +35,10 @@ def prepare_class_load(config: dict, global_config: dict = None) -> Tuple[str, D
     class_name = config["class"]
     class_config = config.setdefault("config", {})
 
-    for key in set(class_config).intersection(global_config or {}):
+    if global_config is None:
+        global_config = {}
+
+    for key in set(class_config).intersection(global_config):
         class_config[key] = global_config[key]
 
     if _LOG.isEnabledFor(logging.DEBUG):
