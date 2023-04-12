@@ -6,7 +6,7 @@
 Tests for Bayesian Optimizers.
 """
 
-from typing import Type
+from typing import Optional, Type
 
 import pytest
 
@@ -15,17 +15,16 @@ import numpy as np
 import ConfigSpace as CS
 
 from mlos_core.optimizers import (
-    OptimizerType, OptimizerFactory, BaseOptimizer,
-    EmukitOptimizer, SkoptOptimizer, RandomOptimizer)
+    OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer,
+    SkoptOptimizer)
 
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
-    (EmukitOptimizer, {}),
+    *[(member.value, {}) for member in OptimizerType],
     (SkoptOptimizer, {'base_estimator': 'gp'}),
-    (RandomOptimizer, {})
 ])
 def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace,
                                       optimizer_class: Type[BaseOptimizer], kwargs):
@@ -49,10 +48,9 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
-    (EmukitOptimizer, {}),
+    *[(member.value, {}) for member in OptimizerType],
     (SkoptOptimizer, {'base_estimator': 'gp', 'seed': 42}),
     (SkoptOptimizer, {'base_estimator': 'et', 'seed': 42}),
-    (RandomOptimizer, {})
 ])
 def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
                                      optimizer_class: Type[BaseOptimizer], kwargs):
@@ -102,6 +100,18 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         assert pred_all.shape == (20,)
 
 
+@pytest.mark.parametrize(('optimizer_type'), [
+    # Enumerate all supported Optimizers
+    # *[member for member in OptimizerType],
+    *list(OptimizerType),
+])
+def test_concrete_optimizer_type(optimizer_type: OptimizerType):
+    """
+    Test that all optimizer types are listed in the ConcreteOptimizer constraints.
+    """
+    assert optimizer_type.value in ConcreteOptimizer.__constraints__    # type: ignore  # pylint: disable=no-member
+
+
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
     # Default optimizer
     (None, {}),
@@ -111,7 +121,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
-                                              optimizer_type: OptimizerType, kwargs):
+                                              optimizer_type: Optional[OptimizerType], kwargs):
     """
     Test that we can create an optimizer via a factory.
     """
@@ -155,11 +165,11 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
     assert optimizer is not None
 
     # Initialize another optimizer that uses LlamaTune space adapter
-    space_adapter_kwargs = dict(
-        num_low_dims=1,
-        special_param_values=None,
-        max_unique_values_per_param=None,
-    )
+    space_adapter_kwargs = {
+        "num_low_dims": 1,
+        "special_param_values": None,
+        "max_unique_values_per_param": None,
+    }
     llamatune_optimizer = OptimizerFactory.create(
         input_space,
         optimizer_type,
@@ -201,6 +211,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
         assert (all_obvs.columns == ['x', 'y', 'score']).all()
 
     # .surrogate_predict method not currently implemented if space adapter is employed
-    if isinstance(optimizer, BaseBayesianOptimizer):
+    if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
             _ = llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x']])
