@@ -29,7 +29,8 @@ class SqlStorage(Storage):
         url = URL.create(**self._config)
         self._repr = f"{url.get_backend_name()}:{url.database}"
         _LOG.info("Connect to the database: %s", self)
-        self._engine = create_engine(url)  # , echo=True)
+        # Log SQL statements if the logging level is DEBUG:
+        self._engine = create_engine(url, echo=_LOG.isEnabledFor(logging.DEBUG))
         self._schema = DbSchema(self._engine).create()
 
     def __repr__(self) -> str:
