@@ -9,7 +9,7 @@ Saving and restoring the benchmark data using SQLAlchemy.
 import logging
 import hashlib
 from datetime import datetime
-from typing import Optional, List, Tuple
+from typing import Optional, Tuple, List, Dict, Any
 
 from sqlalchemy import text, column
 
@@ -143,9 +143,9 @@ class Experiment(Storage.Experiment):
             column("config_hash") == config_hash
         )).fetchone()
         if cur_config is not None:
-            return cur_config.config_id
+            return int(cur_config.config_id)  # mypy doesn't know it's always int
         # Config not found, create a new one:
-        config_id = conn.execute(self._schema.config.insert().values(
+        config_id: int = conn.execute(self._schema.config.insert().values(
             config_hash=config_hash)).inserted_primary_key[0]
         self._save_params(
             conn, self._schema.config_param,
@@ -153,7 +153,7 @@ class Experiment(Storage.Experiment):
             config_id=config_id)
         return config_id
 
-    def trial(self, tunables: TunableGroups, config: dict = None):
+    def trial(self, tunables: TunableGroups, config: Optional[Dict[str, Any]] = None):
         _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
         with self._engine.begin() as conn:
             try:

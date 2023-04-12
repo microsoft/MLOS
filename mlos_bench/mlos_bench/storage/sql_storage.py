@@ -7,6 +7,7 @@ Saving and restoring the benchmark data in SQL database.
 """
 
 import logging
+from typing import Optional
 
 from sqlalchemy import URL, create_engine
 
@@ -24,7 +25,7 @@ class SqlStorage(Storage):
     An implementation of the Storage interface using SQLAlchemy backend.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
         super().__init__(tunables, service, config)
         url = URL.create(**self._config)
         self._repr = f"{url.get_backend_name()}:{url.database}"

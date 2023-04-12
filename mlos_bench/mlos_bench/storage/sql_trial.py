@@ -8,7 +8,7 @@ Saving and updating benchmark data using SQLAlchemy backend.
 
 import logging
 from datetime import datetime
-from typing import Optional, Union, Dict
+from typing import Optional, Union, Dict, Any
 
 from sqlalchemy import text
 
@@ -23,7 +23,8 @@ class Trial(Storage.Trial):
     Storing the results of a single run of the experiment in SQL database.
     """
 
-    def _update(self, table: str, timestamp: datetime, status: Status, value: dict = None):
+    def _update(self, table: str, timestamp: Optional[datetime],
+                status: Status, value: Optional[Dict[str, Any]] = None):
         """
         Update the status of the trial and optionally add some results.
 
@@ -77,11 +78,12 @@ class Trial(Storage.Trial):
                 raise
 
     def update(self, status: Status,
-               value: Optional[Union[Dict[str, float], float]] = None
-               ) -> Optional[Dict[str, float]]:
+               value: Optional[Union[Dict[str, Any], Any]] = None
+               ) -> Optional[Dict[str, Any]]:
         value = super().update(status, value)
         self._update("trial_result", datetime.now(), status, value)
+        return value
 
-    def update_telemetry(self, status: Status, value: dict = None):
+    def update_telemetry(self, status: Status, value: Optional[Dict[str, Any]] = None):
         super().update_telemetry(status, value)
         self._update("trial_telemetry", None, status, value)

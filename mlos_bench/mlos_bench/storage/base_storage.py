@@ -8,7 +8,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union, List, Tuple, Dict
+from typing import Optional, Union, List, Tuple, Dict, Any
 
 from mlos_bench.environment import Status
 from mlos_bench.service import Service
@@ -26,7 +26,7 @@ class Storage(metaclass=ABCMeta):
     and storage systems (e.g., SQLite or MLFLow).
     """
 
-    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
         """
         Create a new storage object.
 
@@ -114,7 +114,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, opt_target: str) -> Tuple[List[dict], List[float]]:
+        def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float]]:
             """
             Load (tunable values, benchmark scores) to warm-up the optimizer.
             This call returns data from ALL merged-in experiments and attempts
@@ -128,7 +128,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def trial(self, tunables: TunableGroups):
+        def trial(self, tunables: TunableGroups, config: Optional[Dict[str, Any]] = None):
             """
             Create a new experiment run in the storage.
 
@@ -142,6 +142,8 @@ class Storage(metaclass=ABCMeta):
             trial : Storage.Trial
                 An object that allows to update the storage with
                 the results of the experiment run.
+            config : dict
+                Key/value pairs of additional non-tunable parameters of the trial.
             """
 
     class Trial(metaclass=ABCMeta):
@@ -151,7 +153,7 @@ class Storage(metaclass=ABCMeta):
         """
 
         def __init__(self, engine, tunables: TunableGroups, experiment_id: str,
-                     trial_id: int, opt_target: str, config: dict = None):
+                     trial_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
             self._engine = engine
             self._tunables = tunables
             self._experiment_id = experiment_id
@@ -176,7 +178,7 @@ class Storage(metaclass=ABCMeta):
             """
             return self._tunables
 
-        def config(self, global_config: dict = None) -> dict:
+        def config(self, global_config: Optional[Dict[str, Any]] = None) -> dict:
             """
             Produce a copy of the global configuration updated
             with the parameters of the current trial.
@@ -189,8 +191,8 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update(self, status: Status,
-                   value: Optional[Union[Dict[str, float], float]] = None
-                   ) -> Optional[Dict[str, float]]:
+                   value: Optional[Union[Dict[str, Any], Any]] = None
+                   ) -> Optional[Dict[str, Any]]:
             """
             Update the storage with the results of the experiment.
 
@@ -215,7 +217,7 @@ class Storage(metaclass=ABCMeta):
             return {self._opt_target: value} if isinstance(value, (float, int)) else value
 
         @abstractmethod
-        def update_telemetry(self, status: Status, value: dict = None):
+        def update_telemetry(self, status: Status, value: Optional[Dict[str, Any]] = None):
             """
             Save the experiment's telemetry data and intermediate status.
 
