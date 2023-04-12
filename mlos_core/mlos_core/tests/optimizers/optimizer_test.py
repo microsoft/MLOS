@@ -103,7 +103,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
 @pytest.mark.parametrize(('optimizer_type'), [
     # Enumerate all supported Optimizers
     # *[member for member in OptimizerType],
-    list(OptimizerType),
+    *list(OptimizerType),
 ])
 def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     """

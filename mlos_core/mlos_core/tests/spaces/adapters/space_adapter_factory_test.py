@@ -22,7 +22,7 @@ from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 @pytest.mark.parametrize(('space_adapter_type'), [
     # Enumerate all supported SpaceAdapters
     # *[member for member in SpaceAdapterType],
-    list(SpaceAdapterType),
+    *list(SpaceAdapterType),
 ])
 def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType):
     """
