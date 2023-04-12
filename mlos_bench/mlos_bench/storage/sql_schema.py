@@ -9,7 +9,7 @@ DB schema definition.
 import logging
 
 from sqlalchemy import (
-    MetaData, Table, Column, Sequence, BigInteger, String, DateTime,
+    MetaData, Table, Column, Sequence, Integer, String, DateTime,
     PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint,
 )
 
@@ -47,11 +47,11 @@ class DbSchema:
         # A workaround for SQLAlchemy issue with autoincrement in DuckDB:
         if engine.dialect.name == "duckdb":
             seq_config_id = Sequence('seq_config_id')
-            col_config_id = Column("config_id", BigInteger, seq_config_id,
+            col_config_id = Column("config_id", Integer, seq_config_id,
                                    server_default=seq_config_id.next_value(),
                                    nullable=False, primary_key=True)
         else:
-            col_config_id = Column("config_id", BigInteger, nullable=False,
+            col_config_id = Column("config_id", Integer, nullable=False,
                                    primary_key=True, autoincrement=True)
 
         self.config = Table(
@@ -65,8 +65,8 @@ class DbSchema:
             "trial",
             self._meta,
             Column("exp_id", String(255), nullable=False),
-            Column("trial_id", BigInteger, nullable=False),
-            Column("config_id", BigInteger, nullable=False),
+            Column("trial_id", Integer, nullable=False),
+            Column("config_id", Integer, nullable=False),
             Column("ts_start", DateTime, nullable=False, default="now"),
             Column("ts_end", DateTime),
             # Should match the text IDs of `mlos_bench.environment.Status` enum:
@@ -82,7 +82,7 @@ class DbSchema:
         self.config_param = Table(
             "config_param",
             self._meta,
-            Column("config_id", BigInteger, nullable=False),
+            Column("config_id", Integer, nullable=False),
             Column("param_id", String(255), nullable=False),
             Column("param_value", String(255)),
 
@@ -96,7 +96,7 @@ class DbSchema:
             "trial_param",
             self._meta,
             Column("exp_id", String(255), nullable=False),
-            Column("trial_id", BigInteger, nullable=False),
+            Column("trial_id", Integer, nullable=False),
             Column("param_id", String(255), nullable=False),
             Column("param_value", String(255)),
 
@@ -109,7 +109,7 @@ class DbSchema:
             "trial_result",
             self._meta,
             Column("exp_id", String(255), nullable=False),
-            Column("trial_id", BigInteger, nullable=False),
+            Column("trial_id", Integer, nullable=False),
             Column("metric_id", String(255), nullable=False),
             Column("metric_value", String(255)),
 
@@ -122,7 +122,7 @@ class DbSchema:
             "trial_telemetry",
             self._meta,
             Column("exp_id", String(255), nullable=False),
-            Column("trial_id", BigInteger, nullable=False),
+            Column("trial_id", Integer, nullable=False),
             Column("ts", DateTime, nullable=False, default="now"),
             Column("metric_id", String(255), nullable=False),
             Column("metric_value", String(255)),
