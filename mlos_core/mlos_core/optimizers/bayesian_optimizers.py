@@ -6,7 +6,7 @@
 Contains the wrapper classes for different Bayesian optimizers.
 """
 
-from typing import Callable, Optional, TypeAlias
+from typing import Callable, Optional
 from abc import ABCMeta, abstractmethod
 
 import ConfigSpace
@@ -17,9 +17,6 @@ import pandas as pd
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_space
-
-
-AcquisitionFnRetType: TypeAlias = None  # TODO: not yet implemented
 
 
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
@@ -42,7 +39,7 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
 
     @abstractmethod
     def acquisition_function(self, configurations: pd.DataFrame,
-                             context: Optional[pd.DataFrame] = None) -> AcquisitionFnRetType:
+                             context: Optional[pd.DataFrame] = None) -> Callable:
         """Invokes the acquisition function from this Bayesian optimizer for the given configuration.
 
         Parameters
@@ -150,7 +147,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         return mean_predictions.reshape(-1,)    # type: ignore
 
     def acquisition_function(self, configurations: pd.DataFrame,
-                             context: Optional[pd.DataFrame] = None) -> AcquisitionFnRetType:
+                             context: Optional[pd.DataFrame] = None) -> Callable:
         raise NotImplementedError()
 
     def _initialize_optimizer(self) -> None:
@@ -277,6 +274,6 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer.models[-1].predict(self._transform(configurations))  # type: ignore
 
     def acquisition_function(self, configurations: pd.DataFrame,
-                             context: Optional[pd.DataFrame] = None) -> AcquisitionFnRetType:
+                             context: Optional[pd.DataFrame] = None) -> Callable:
         # This seems actually non-trivial to get out of skopt, so maybe we actually shouldn't implement this.
         raise NotImplementedError()
