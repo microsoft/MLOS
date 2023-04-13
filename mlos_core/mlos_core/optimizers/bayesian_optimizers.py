@@ -277,6 +277,6 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer.models[-1].predict(self._transform(configurations))  # type: ignore
 
     def acquisition_function(self, configurations: pd.DataFrame,
-                             context: Optional[pd.DataFrame] = None)-> AcquisitionFnRetType:
+                             context: Optional[pd.DataFrame] = None) -> AcquisitionFnRetType:
         # This seems actually non-trivial to get out of skopt, so maybe we actually shouldn't implement this.
         raise NotImplementedError()
