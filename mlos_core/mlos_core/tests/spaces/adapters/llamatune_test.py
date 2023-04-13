@@ -8,7 +8,7 @@ Tests for LlamaTune space adapter.
 
 # pylint: disable=missing-function-docstring
 
-from typing import Dict, Iterator, Set
+from typing import Any, Dict, Iterator, List, Set
 
 import pytest
 
@@ -114,19 +114,19 @@ def test_special_parameter_values_validation() -> None:
 
     # Only UniformIntegerHyperparameters are currently supported
     with pytest.raises(NotImplementedError):
-        special_param_values_dict = {'str': 'choice_1'}
+        special_param_values_dict_1 = {'str': 'choice_1'}
         _ = LlamaTuneAdapter(
             input_space,
             num_low_dims=2,
-            special_param_values=special_param_values_dict,
+            special_param_values=special_param_values_dict_1,
             max_unique_values_per_param=None
         )
     with pytest.raises(NotImplementedError):
-        special_param_values_dict = {'cont': -1}
+        special_param_values_dict_2 = {'cont': -1}
         _ = LlamaTuneAdapter(
             input_space,
             num_low_dims=2,
-            special_param_values=special_param_values_dict,
+            special_param_values=special_param_values_dict_2,
             max_unique_values_per_param=None
         )
 
@@ -141,7 +141,7 @@ def test_special_parameter_values_validation() -> None:
         )
 
     # Invalid dicts; ValueError should be thrown
-    invalid_special_param_values_dicts = [
+    invalid_special_param_values_dicts: List[Dict[str, Any]] = [
         {'int-Q': 0},           # parameter does not exist
         {'int': {0: 0.2}},      # invalid definition
         {'int': 0.2},           # invalid parameter value
@@ -173,7 +173,7 @@ def test_special_parameter_values_validation() -> None:
                                  max_unique_values_per_param=None)
 
 
-def gen_random_configs(adapter, num_configs) -> Iterator[CS.Configuration]:
+def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[CS.Configuration]:
     for sampled_config in adapter.target_parameter_space.sample_configuration(size=num_configs):
         # Transform low-dim config to high-dim config
         sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
@@ -197,7 +197,7 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
     eps = 0.2
 
     # Single parameter; single special value
-    special_param_value_dicts = [
+    special_param_value_dicts: List[Dict[str, Any]] = [
         {'int_1': 0},
         {'int_1': (0, bias_percentage)},
         {'int_1': [0]},
@@ -238,25 +238,25 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
     adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
                                max_unique_values_per_param=None)
 
-    special_values_occurrences = {
+    special_values_instances: Dict[str, Dict[int, int]] = {
         'int_1': {0: 0, 1: 0},
         'int_2': {2: 0, 100: 0},
     }
     for config in gen_random_configs(adapter, num_configs):
         if config['int_1'] == 0:
-            special_values_occurrences['int_1'][0] += 1
+            special_values_instances['int_1'][0] += 1
         elif config['int_1'] == 1:
-            special_values_occurrences['int_1'][1] += 1
+            special_values_instances['int_1'][1] += 1
 
         if config['int_2'] == 2:
-            special_values_occurrences['int_2'][2] += 1
+            special_values_instances['int_2'][2] += 1
         elif config['int_2'] == 100:
-            special_values_occurrences['int_2'][100] += 1
+            special_values_instances['int_2'][100] += 1
 
-    assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurrences['int_1'][0]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_occurrences['int_1'][1]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_occurrences['int_2'][2]
-    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_occurrences['int_2'][100]
+    assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_instances['int_1'][0]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances['int_1'][1]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances['int_2'][2]
+    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_instances['int_2'][100]
 
 
 def test_max_unique_values_per_param() -> None:
@@ -285,7 +285,7 @@ def test_max_unique_values_per_param() -> None:
                                    max_unique_values_per_param=max_unique_values_per_param)
 
         # Keep track of unique values generated for each parameter
-        unique_values_dict = {param: set() for param in input_space.get_hyperparameter_names()}
+        unique_values_dict: Dict[str, set] = {param: set() for param in input_space.get_hyperparameter_names()}
         for config in gen_random_configs(adapter, num_configs):
             for param, value in config.items():
                 unique_values_dict[param].add(value)
@@ -431,13 +431,13 @@ def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_
     """
     Tests LlamaTune's space adapter deterministic behavior when given same seed in the input parameter space.
     """
-    def generate_target_param_space_configs(seed):
+    def generate_target_param_space_configs(seed: int) -> List[CS.Configuration]:
         input_space = construct_parameter_space(**param_space_kwargs, seed=seed)
 
         # Init adapter and sample points in the low-dim space
         adapter = LlamaTuneAdapter(input_space, num_low_dims=num_target_space_dims, special_param_values=None,
                                    max_unique_values_per_param=None, use_approximate_reverse_mapping=False)
-        return adapter.target_parameter_space.sample_configuration(size=100)
+        return adapter.target_parameter_space.sample_configuration(size=100)    # type: ignore
 
     assert generate_target_param_space_configs(42) == generate_target_param_space_configs(42)
     assert generate_target_param_space_configs(1234) != generate_target_param_space_configs(42)
