@@ -22,7 +22,7 @@ class Service:
     """
 
     @classmethod
-    def new(cls, class_name: str, config: dict, parent: "Service") -> "Service":
+    def new(cls, class_name: str, config: dict, parent: Optional["Service"]) -> "Service":
         """
         Factory method for a new service with a given config.
 
