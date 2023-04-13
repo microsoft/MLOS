@@ -81,7 +81,7 @@ class LocalFileShareEnv(LocalEnv):
             for (path_from, path_to) in from_to
         )
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Run setup scripts locally and upload the scripts and data to the shared storage.
 

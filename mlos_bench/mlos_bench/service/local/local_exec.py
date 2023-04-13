@@ -29,7 +29,7 @@ class LocalExecService(Service):
     due to reduced dependency management complications vs the target environment.
     """
 
-    def __init__(self, config: dict = None, parent: Service = None):
+    def __init__(self, config: Optional[dict] = None, parent: Optional[Service] = None):
         """
         Create a new instance of a service to run scripts locally.
 

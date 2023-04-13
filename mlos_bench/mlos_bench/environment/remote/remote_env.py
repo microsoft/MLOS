@@ -65,7 +65,7 @@ class RemoteEnv(Environment):
             raise ValueError("At least one of {setup, run, teardown}" +
                              " must be present or wait_boot set to True.")
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if the environment is ready and set up the application
         and benchmarks on a remote host.

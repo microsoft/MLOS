@@ -19,7 +19,7 @@ class VMEnv(Environment):
     "Remote" VM environment.
     """
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if VM is ready. (Re)provision and start it, if necessary.
 

@@ -77,7 +77,7 @@ class LocalEnv(Environment):
         if self._script_run is None and self._read_results_file is not None:
             raise ValueError("'run' must be present if 'read_results_file' is specified")
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if the environment is ready and set up the application
         and benchmarks, if necessary.

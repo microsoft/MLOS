@@ -19,7 +19,7 @@ class OSEnv(Environment):
     OS Level Environment for a host.
     """
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if the host is up and running; boot it, if necessary.
 

@@ -22,8 +22,8 @@ class CompositeEnv(Environment):
     Composite benchmark environment.
     """
 
-    def __init__(self, name: str, config: dict, global_config: dict = None,
-                 tunables: TunableGroups = None, service: Service = None):
+    def __init__(self, name: str, config: dict, global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None, service: Optional[Service] = None):
         # pylint: disable=too-many-arguments
         """
         Create a new environment with a given config.
@@ -68,7 +68,7 @@ class CompositeEnv(Environment):
         self._children.append(env)
         self._tunable_params.update(env.tunable_params())
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Set up the children environments.
 
