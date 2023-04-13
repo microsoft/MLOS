@@ -118,7 +118,7 @@ class CovariantTunableGroup:
         """
         return self._tunables.keys()
 
-    def get_values(self) -> Dict[str, Any]:
+    def get_values(self) -> Dict[str, TunableValue]:
         """
         Get current values of all tunables in the group.
         """

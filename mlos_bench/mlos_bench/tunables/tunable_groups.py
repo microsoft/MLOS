@@ -184,7 +184,7 @@ class TunableGroups:
         return tunables
 
     def get_param_values(self, group_names: Optional[List[str]] = None,
-                         into_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+                         into_params: Optional[Dict[str, Any]] = None) -> Dict[str, TunableValue]:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
 

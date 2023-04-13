@@ -9,10 +9,11 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
 
@@ -29,9 +30,9 @@ class Environment(metaclass=abc.ABCMeta):
             env_name: str,
             class_name: str,
             config: dict,
-            global_config: dict = None,
-            tunables: TunableGroups = None,
-            service: Service = None,
+            global_config: Optional[dict] = None,
+            tunables: Optional[TunableGroups] = None,
+            service: Optional[Service] = None,
             ) -> "Environment":
         # pylint: disable=too-many-arguments
         """
@@ -66,7 +67,12 @@ class Environment(metaclass=abc.ABCMeta):
         return instantiate_from_config(cls, class_name, env_name, config,
                                        global_config, tunables, service)
 
-    def __init__(self, name, config: dict, global_config: dict = None, tunables: TunableGroups = None, service: Service = None):
+    def __init__(self,
+                 name: str,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None,
+                 service: Optional[Service] = None):
         # pylint: disable=too-many-arguments
         """
         Create a new environment with a given config.
@@ -92,7 +98,7 @@ class Environment(metaclass=abc.ABCMeta):
         self.config = config
         self._service = service
         self._is_ready = False
-        self._params = {}
+        self._params: Dict[str, TunableValue] = {}
 
         if global_config is None:
             global_config = {}
@@ -121,13 +127,13 @@ class Environment(metaclass=abc.ABCMeta):
             _LOG.debug("Config for: %s\n%s",
                        name, json.dumps(self.config, indent=2))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Env: {self.__class__} :: '{self.name}'"
 
-    def _combine_tunables(self, tunables: TunableGroups):
+    def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
         """
         Plug tunable values into the base config. If the tunable group is unknown,
         ignore it (it might belong to another environment). This method should
@@ -141,14 +147,14 @@ class Environment(metaclass=abc.ABCMeta):
 
         Returns
         -------
-        params : dict
+        params : Dict[str, Union[int, float, str]]
             Free-format dictionary that contains the new environment configuration.
         """
         return tunables.get_param_values(
-            group_names=self._tunable_params.get_names(),
+            group_names=list(self._tunable_params.get_names()),
             into_params=self._const_args.copy())
 
-    def tunable_params(self):
+    def tunable_params(self) -> TunableGroups:
         """
         Get the configuration space of the given environment.
 
@@ -159,7 +165,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return self._tunable_params
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Set up a new benchmark environment, if necessary. This method must be
         idempotent, i.e., calling it several times in a row should be
@@ -192,7 +198,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         return True
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Tear down the benchmark environment. This method must be idempotent,
         i.e., calling it several times in a row should be equivalent to a
