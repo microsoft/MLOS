@@ -78,18 +78,18 @@ class BaseConversion(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def test_dimensionality(self):
+    def test_dimensionality(self) -> None:
         """
         Check that the dimensionality of the converted space is correct.
         """
 
-    def test_unsupported_hyperparameter(self):
+    def test_unsupported_hyperparameter(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(NormalIntegerHyperparameter("a", 2, 1))
         with pytest.raises(ValueError, match="NormalIntegerHyperparameter"):
             self.conversion_function(input_space)
 
-    def test_continuous_bounds(self):
+    def test_continuous_bounds(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformFloatHyperparameter("a", lower=100, upper=200))
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("b", lower=-10, upper=-5))
@@ -100,7 +100,7 @@ class BaseConversion(metaclass=ABCMeta):
         assert 100 <= point[0] <= 200
         assert -10 <= point[1] <= -5
 
-    def test_uniform_samples(self):
+    def test_uniform_samples(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformFloatHyperparameter("a", lower=1, upper=5))
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("c", lower=1, upper=20))
@@ -118,7 +118,7 @@ class BaseConversion(metaclass=ABCMeta):
         integer_uniform = integer_uniform - integer_uniform.min()
         assert_uniform_counts(np.bincount(integer_uniform.astype(int)))
 
-    def test_uniform_categorical(self):
+    def test_uniform_categorical(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
         converted_space = self.conversion_function(input_space)
@@ -127,10 +127,10 @@ class BaseConversion(metaclass=ABCMeta):
         assert 35 < counts[0] < 65
         assert 35 < counts[1] < 65
 
-    def test_weighted_categorical(self):
+    def test_weighted_categorical(self) -> None:
         raise NotImplementedError('subclass must override')
 
-    def test_log_spaces(self):
+    def test_log_spaces(self) -> None:
         raise NotImplementedError('subclass must override')
 
 
@@ -150,7 +150,7 @@ class TestSkoptConversion(BaseConversion):
     def categorical_counts(self, points):
         return pd.value_counts(points[:, 0]).values
 
-    def test_dimensionality(self):
+    def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("a", lower=1, upper=10))
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("b", choices=["bof", "bum"]))
@@ -159,7 +159,7 @@ class TestSkoptConversion(BaseConversion):
         assert output_space.transformed_n_dims == len(input_space.get_hyperparameters())
         assert output_space.n_dims == len(input_space.get_hyperparameters())
 
-    def test_weighted_categorical(self):
+    def test_weighted_categorical(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"], weights=[0.9, 0.1]))
         # unpack the space to only get a parameter so we can count more easily later
@@ -171,7 +171,7 @@ class TestSkoptConversion(BaseConversion):
         assert counts["foo"] > 80
         assert counts["bar"] > 5
 
-    def test_log_spaces(self):
+    def test_log_spaces(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformFloatHyperparameter("b", lower=1, upper=5, log=True))
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
@@ -207,7 +207,7 @@ class TestEmukitConversion(BaseConversion):
     def categorical_counts(self, points):
         return np.sum(points, axis=0)
 
-    def test_dimensionality(self):
+    def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("a", lower=1, upper=10))
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("b", choices=["bof", "bum"]))
@@ -217,14 +217,14 @@ class TestEmukitConversion(BaseConversion):
         # hyperparameter space for emukit when OneHotEncoding is used.
         assert output_space.dimensionality == 5
 
-    def test_weighted_categorical(self):
+    def test_weighted_categorical(self) -> None:
         np.random.seed(42)
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"], weights=[0.9, 0.1]))
         with pytest.raises(ValueError, match="non-uniform"):
             configspace_to_emukit_space(input_space)
 
-    def test_log_spaces(self):
+    def test_log_spaces(self) -> None:
         # continuous not supported
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformFloatHyperparameter("b", lower=1, upper=5, log=True))

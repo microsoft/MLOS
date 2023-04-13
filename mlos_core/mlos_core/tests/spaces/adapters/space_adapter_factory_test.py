@@ -24,7 +24,7 @@ from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
     # *[member for member in SpaceAdapterType],
     *list(SpaceAdapterType),
 ])
-def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType):
+def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType) -> None:
     """
     Test that all optimizer types are listed in the ConcreteOptimizer constraints.
     """
@@ -37,7 +37,7 @@ def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType):
     # Enumerate all supported Optimizers
     *[(member, {}) for member in SpaceAdapterType],
 ])
-def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[SpaceAdapterType], kwargs):
+def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[SpaceAdapterType], kwargs) -> None:
     # Start defining a ConfigurationSpace for the Optimizer to search.
     input_space = CS.ConfigurationSpace(seed=1234)
 

@@ -105,7 +105,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     # *[member for member in OptimizerType],
     *list(OptimizerType),
 ])
-def test_concrete_optimizer_type(optimizer_type: OptimizerType):
+def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
     """
     Test that all optimizer types are listed in the ConcreteOptimizer constraints.
     """
@@ -147,7 +147,7 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     # Optimizer with non-empty kwargs argument
     (OptimizerType.SKOPT, {'base_estimator': 'gp', 'seed': 42}),
 ])
-def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
+def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs) -> None:
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """

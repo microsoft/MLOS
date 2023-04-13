@@ -311,7 +311,7 @@ def test_max_unique_values_per_param() -> None:
         },
     )
 ]))
-def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: dict):  # pylint: disable=too-many-locals
+def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: dict) -> None:  # pylint: disable=too-many-locals
     """
     Tests LlamaTune's approximate high-to-low space projection method, using pseudoinverse.
     """
@@ -359,7 +359,7 @@ def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: 
     )
     for max_unique_values_per_param in (50, 250)
 ]))
-def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_unique_values_per_param: int):
+def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_unique_values_per_param: int) -> None:
     """
     Tests LlamaTune space adapter when all components are active.
     """
@@ -427,7 +427,7 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
         },
     )
 ]))
-def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_space_kwargs: dict):
+def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_space_kwargs: dict) -> None:
     """
     Tests LlamaTune's space adapter deterministic behavior when given same seed in the input parameter space.
     """
