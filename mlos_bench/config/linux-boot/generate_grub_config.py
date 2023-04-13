@@ -13,7 +13,7 @@ import json
 import argparse
 
 
-def _main(fname_input: str, fname_output: str):
+def _main(fname_input: str, fname_output: str) -> None:
     with open(fname_input, "rt", encoding="utf-8") as fh_tunables, \
          open(fname_output, "wt", encoding="utf-8", newline="") as fh_config:
         for (key, val) in json.load(fh_tunables).items():
