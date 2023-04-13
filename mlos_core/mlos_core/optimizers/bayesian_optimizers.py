@@ -22,26 +22,6 @@ from mlos_core.spaces import configspace_to_skopt_space, configspace_to_emukit_s
 AcquisitionFnRetType: TypeAlias = None  # TODO: not yet implemented
 
 
-def _df_to_ndarray(config: pd.DataFrame) -> npt.NDArray:
-    """
-    Converts a single config to an ndarray.
-
-    Done this way to let mypy validate the different types across _transform function options.
-
-    Parameters
-    ----------
-    config : pd.DataFrame
-        Dataframe of configurations / parameters.
-        The columns are parameter names and the row is the configuration.
-
-    Returns
-    -------
-    config : np.array
-        Numpy array of the data.
-    """
-    return config.to_numpy()
-
-
 class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
     """Abstract base class defining the interface for Bayesian optimization."""
 
@@ -214,7 +194,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         elif base_estimator == 'gp':
             self._transform = self._to_numeric
         else:
-            self._transform = _df_to_ndarray
+            self._transform = pd.DataFrame.to_numpy
 
     def _to_numeric(self, config: pd.DataFrame) -> npt.NDArray:
         """
