@@ -51,7 +51,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
-    def register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] =  None) -> None:
+    def register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] = None) -> None:
         """Wrapper method, which employs the space adapter (if any), before registering the configurations and scores.
 
         Parameters
@@ -73,7 +73,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return self._register(configurations, scores, context)
 
     @abstractmethod
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] =  None) -> None:
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -89,7 +89,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: Optional[pd.DataFrame] =  None) -> pd.DataFrame:
+    def suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
@@ -108,7 +108,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return configuration
 
     @abstractmethod
-    def _suggest(self, context: Optional[pd.DataFrame] =  None) -> pd.DataFrame:
+    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.
 
         Parameters
