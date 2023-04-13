@@ -9,7 +9,7 @@ Tests for mlos_core.spaces
 # pylint: disable=missing-function-docstring
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable, List, NoReturn, Union, TypeAlias
+from typing import Any, Callable, List, NoReturn, Union
 
 import numpy as np
 from numpy.random import RandomState as NpRandomState
@@ -27,8 +27,8 @@ from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
 from mlos_core.spaces import configspace_to_emukit_space, configspace_to_skopt_space
 
 
-OptimizerSpace: TypeAlias = Union[skopt.space.Space, emukit.core.ParameterSpace]
-OptimizerParam: TypeAlias = Union[skopt.space.Dimension, emukit.core.Parameter]
+OptimizerSpace = Union[skopt.space.Space, emukit.core.ParameterSpace]
+OptimizerParam = Union[skopt.space.Dimension, emukit.core.Parameter]
 
 
 def assert_uniform_counts(counts: npt.NDArray) -> None:
