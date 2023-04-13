@@ -136,14 +136,14 @@ class Storage(metaclass=ABCMeta):
             ----------
             tunables : TunableGroups
                 Tunable parameters of the experiment.
+            config : dict
+                Key/value pairs of additional non-tunable parameters of the trial.
 
             Returns
             -------
             trial : Storage.Trial
                 An object that allows to update the storage with
                 the results of the experiment run.
-            config : dict
-                Key/value pairs of additional non-tunable parameters of the trial.
             """
 
     class Trial(metaclass=ABCMeta):
