@@ -9,7 +9,7 @@ Unit tests for assigning values to the individual parameters within tunable grou
 import pytest
 
 
-def test_tunables_assign_unknown_param(tunable_groups):
+def test_tunables_assign_unknown_param(tunable_groups) -> None:
     """
     Make sure that bulk assignment fails for parameters
     that don't exist in the TunableGroups object.
@@ -23,7 +23,7 @@ def test_tunables_assign_unknown_param(tunable_groups):
         })
 
 
-def test_tunables_assign_invalid_categorical(tunable_groups):
+def test_tunables_assign_invalid_categorical(tunable_groups) -> None:
     """
     Check parameter validation for categorical tunables.
     """
@@ -31,7 +31,7 @@ def test_tunables_assign_invalid_categorical(tunable_groups):
         tunable_groups.assign({"vmSize": "InvalidSize"})
 
 
-def test_tunables_assign_invalid_range(tunable_groups):
+def test_tunables_assign_invalid_range(tunable_groups) -> None:
     """
     Check parameter out-of-range validation for numerical tunables.
     """
@@ -39,14 +39,14 @@ def test_tunables_assign_invalid_range(tunable_groups):
         tunable_groups.assign({"kernel_sched_migration_cost_ns": -2})
 
 
-def test_tunables_assign_coerce_str(tunable_groups):
+def test_tunables_assign_coerce_str(tunable_groups) -> None:
     """
     Check the conversion from strings when assigning to an integer parameter.
     """
     tunable_groups.assign({"kernel_sched_migration_cost_ns": "10000"})
 
 
-def test_tunables_assign_coerce_str_range_check(tunable_groups):
+def test_tunables_assign_coerce_str_range_check(tunable_groups) -> None:
     """
     Check the range when assigning to an integer tunable.
     """
@@ -54,7 +54,7 @@ def test_tunables_assign_coerce_str_range_check(tunable_groups):
         tunable_groups.assign({"kernel_sched_migration_cost_ns": "5500000"})
 
 
-def test_tunables_assign_coerce_str_invalid(tunable_groups):
+def test_tunables_assign_coerce_str_invalid(tunable_groups) -> None:
     """
     Make sure we fail when assigning an invalid string to an integer tunable.
     """
@@ -62,7 +62,7 @@ def test_tunables_assign_coerce_str_invalid(tunable_groups):
         tunable_groups.assign({"kernel_sched_migration_cost_ns": "1.1"})
 
 
-def test_tunable_assign_str_to_int(tunable_int):
+def test_tunable_assign_str_to_int(tunable_int) -> None:
     """
     Check str to int coercion.
     """
@@ -70,7 +70,7 @@ def test_tunable_assign_str_to_int(tunable_int):
     assert tunable_int.value == 10
 
 
-def test_tunable_assign_str_to_float(tunable_float):
+def test_tunable_assign_str_to_float(tunable_float) -> None:
     """
     Check str to float coercion.
     """
@@ -78,7 +78,7 @@ def test_tunable_assign_str_to_float(tunable_float):
     assert tunable_float.value == 0.5
 
 
-def test_tunable_assign_float_to_int(tunable_int):
+def test_tunable_assign_float_to_int(tunable_int) -> None:
     """
     Check float to int coercion.
     """
@@ -86,7 +86,7 @@ def test_tunable_assign_float_to_int(tunable_int):
     assert tunable_int.value == 10
 
 
-def test_tunable_assign_float_to_int_fail(tunable_int):
+def test_tunable_assign_float_to_int_fail(tunable_int) -> None:
     """
     Check the invalid float to int coercion.
     """

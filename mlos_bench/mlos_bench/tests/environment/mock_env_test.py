@@ -12,7 +12,7 @@ from mlos_bench.environment import MockEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups):
+def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups) -> None:
     """
     Check the default values of the mock environment.
     """
@@ -26,7 +26,7 @@ def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups):
     assert data["score"] == pytest.approx(98.21, 0.01)
 
 
-def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGroups):
+def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGroups) -> None:
     """
     Check the default values of the mock environment.
     """

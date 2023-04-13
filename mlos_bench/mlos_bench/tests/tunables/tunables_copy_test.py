@@ -7,7 +7,7 @@ Unit tests for deep copy of tunable objects and groups.
 """
 
 
-def test_copy_tunable_int(tunable_int):
+def test_copy_tunable_int(tunable_int) -> None:
     """
     Check if deep copy works for Tunable object.
     """
@@ -17,7 +17,7 @@ def test_copy_tunable_int(tunable_int):
     assert tunable_int != tunable_copy
 
 
-def test_copy_tunable_groups(tunable_groups):
+def test_copy_tunable_groups(tunable_groups) -> None:
     """
     Check if deep copy works for TunableGroups object.
     """

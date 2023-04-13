@@ -75,7 +75,7 @@ def _cmp_tunable_hyperparameter_float(
     assert cs_param.default_value == tunable.value
 
 
-def test_tunable_to_hyperparameter_categorical(tunable_categorical):
+def test_tunable_to_hyperparameter_categorical(tunable_categorical) -> None:
     """
     Check the conversion of Tunable to CategoricalHyperparameter.
     """
@@ -83,7 +83,7 @@ def test_tunable_to_hyperparameter_categorical(tunable_categorical):
     _cmp_tunable_hyperparameter_categorical(tunable_categorical, cs_param)
 
 
-def test_tunable_to_hyperparameter_int(tunable_int):
+def test_tunable_to_hyperparameter_int(tunable_int) -> None:
     """
     Check the conversion of Tunable to UniformIntegerHyperparameter.
     """
@@ -91,7 +91,7 @@ def test_tunable_to_hyperparameter_int(tunable_int):
     _cmp_tunable_hyperparameter_int(tunable_int, cs_param)
 
 
-def test_tunable_to_hyperparameter_float(tunable_float):
+def test_tunable_to_hyperparameter_float(tunable_float) -> None:
     """
     Check the conversion of Tunable to UniformFloatHyperparameter.
     """
@@ -106,7 +106,7 @@ _CMP_FUNC = {
 }
 
 
-def test_tunable_groups_to_hyperparameters(tunable_groups: TunableGroups):
+def test_tunable_groups_to_hyperparameters(tunable_groups: TunableGroups) -> None:
     """
     Check the conversion of TunableGroups to ConfigurationSpace.
     Make sure that the corresponding Tunable and Hyperparameter objects match.

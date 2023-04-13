@@ -25,7 +25,7 @@ def local_exec_service() -> LocalExecService:
     }))
 
 
-def test_run_python_script(local_exec_service: LocalExecService):
+def test_run_python_script(local_exec_service: LocalExecService) -> None:
     """
     Run a Python script using a local_exec service.
     """

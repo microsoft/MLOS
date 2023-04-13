@@ -16,7 +16,7 @@ from unittest.mock import Mock, patch, call
 
 @patch("mlos_bench.service.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.makedirs")
-def test_download_file(mock_makedirs, mock_open, azure_fileshare):
+def test_download_file(mock_makedirs, mock_open, azure_fileshare) -> None:
     filename = "test.csv"
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
@@ -66,7 +66,7 @@ def make_dir_client_returns(remote_folder: str):
 
 @patch("mlos_bench.service.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.makedirs")
-def test_download_folder_non_recursive(mock_makedirs, mock_open, azure_fileshare):
+def test_download_folder_non_recursive(mock_makedirs, mock_open, azure_fileshare) -> None:
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
     dir_client_returns = make_dir_client_returns(remote_folder)
@@ -87,7 +87,7 @@ def test_download_folder_non_recursive(mock_makedirs, mock_open, azure_fileshare
 
 @patch("mlos_bench.service.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.makedirs")
-def test_download_folder_recursive(mock_makedirs, mock_open, azure_fileshare):
+def test_download_folder_recursive(mock_makedirs, mock_open, azure_fileshare) -> None:
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
     dir_client_returns = make_dir_client_returns(remote_folder)
@@ -111,7 +111,7 @@ def test_download_folder_recursive(mock_makedirs, mock_open, azure_fileshare):
 
 @patch("mlos_bench.service.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.path.isdir")
-def test_upload_file(mock_isdir, mock_open, azure_fileshare):
+def test_upload_file(mock_isdir, mock_open, azure_fileshare) -> None:
     filename = "test.csv"
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
@@ -175,7 +175,7 @@ def process_paths(input_path):
 @patch("mlos_bench.service.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.path.isdir")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.scandir")
-def test_upload_directory_non_recursive(mock_scandir, mock_isdir, mock_open, azure_fileshare):
+def test_upload_directory_non_recursive(mock_scandir, mock_isdir, mock_open, azure_fileshare) -> None:
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
     scandir_returns = make_scandir_returns(local_folder)
@@ -193,7 +193,7 @@ def test_upload_directory_non_recursive(mock_scandir, mock_isdir, mock_open, azu
 @patch("mlos_bench.service.remote.azure.azure_fileshare.open")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.path.isdir")
 @patch("mlos_bench.service.remote.azure.azure_fileshare.os.scandir")
-def test_upload_directory_recursive(mock_scandir, mock_isdir, mock_open, azure_fileshare):
+def test_upload_directory_recursive(mock_scandir, mock_isdir, mock_open, azure_fileshare) -> None:
     remote_folder = "a/remote/folder"
     local_folder = "some/local/folder"
     scandir_returns = make_scandir_returns(local_folder)

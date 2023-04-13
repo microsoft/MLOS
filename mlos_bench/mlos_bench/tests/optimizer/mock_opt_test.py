@@ -52,7 +52,7 @@ def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
     return score
 
 
-def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
+def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list) -> None:
     """
     Make sure that mock optimizer produces consistent suggestions.
     """
@@ -60,7 +60,7 @@ def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
     assert score == pytest.approx(66.66, 0.01)
 
 
-def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: list):
+def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: list) -> None:
     """
     Check the maximization mode of the mock optimizer.
     """
@@ -68,7 +68,7 @@ def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: li
     assert score == pytest.approx(99.99, 0.01)
 
 
-def test_mock_optimizer_register_fail(mock_opt: MockOptimizer):
+def test_mock_optimizer_register_fail(mock_opt: MockOptimizer) -> None:
     """
     Check the input acceptance conditions for Optimizer.register().
     """

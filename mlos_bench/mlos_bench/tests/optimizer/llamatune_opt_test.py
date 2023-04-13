@@ -41,7 +41,7 @@ def mock_scores() -> list:
     return [88.88, 66.66, 99.99]
 
 
-def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list):
+def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list) -> None:
     """
     Make sure that llamatune+emukit optimizer initializes and works correctly.
     """

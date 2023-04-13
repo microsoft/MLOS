@@ -49,7 +49,7 @@ def test_vm_operation_status(mock_requests, azure_vm_service, operation_name,
 
 @patch("mlos_bench.service.remote.azure.azure_services.time.sleep")
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_wait_vm_operation_ready(mock_requests, mock_sleep, azure_vm_service):
+def test_wait_vm_operation_ready(mock_requests, mock_sleep, azure_vm_service) -> None:
 
     # Mock response header
     async_url = "DUMMY_ASYNC_URL"
@@ -73,7 +73,7 @@ def test_wait_vm_operation_ready(mock_requests, mock_sleep, azure_vm_service):
 
 
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_wait_vm_operation_timeout(mock_requests, azure_vm_service):
+def test_wait_vm_operation_timeout(mock_requests, azure_vm_service) -> None:
 
     # Mock response header
     params = {
@@ -99,7 +99,7 @@ def test_wait_vm_operation_timeout(mock_requests, azure_vm_service):
         (404, Status.FAILED),
     ])
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_remote_exec_status(mock_requests, azure_vm_service, http_status_code, operation_status):
+def test_remote_exec_status(mock_requests, azure_vm_service, http_status_code, operation_status) -> None:
 
     script = ["command_1", "command_2"]
 
@@ -113,7 +113,7 @@ def test_remote_exec_status(mock_requests, azure_vm_service, http_status_code, o
 
 
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_remote_exec_headers_output(mock_requests, azure_vm_service):
+def test_remote_exec_headers_output(mock_requests, azure_vm_service) -> None:
 
     async_url_key = "asyncResultsUrl"
     async_url_value = "DUMMY_ASYNC_URL"
