@@ -30,9 +30,9 @@ class Launcher:
 
         _LOG.info("Launch: %s", description)
 
-        self._config_loader = None
-        self._env_config_file = None
-        self._global_config = {}
+        self._config_loader: ConfigPersistenceService
+        self._env_config_file: str
+        self._global_config: Dict[str, Any] = {}
         self._parser = argparse.ArgumentParser(description=description)
 
         self._parser.add_argument(
@@ -89,7 +89,9 @@ class Launcher:
 
         if args.globals is not None:
             for config_file in args.globals:
-                self._global_config.update(self._config_loader.load_config(config_file))
+                conf = self._config_loader.load_config(config_file)
+                assert isinstance(conf, dict)
+                self._global_config.update(conf)
 
         self._global_config.update(Launcher._try_parse_extra_args(args_rest))
         if args.config_path:
@@ -132,7 +134,9 @@ class Launcher:
         Load JSON config file. Use path relative to `config_path` if required.
         """
         assert self._config_loader is not None, "Call after invoking .parse_args()"
-        return self._config_loader.load_config(json_file_name)
+        conf = self._config_loader.load_config(json_file_name)
+        assert isinstance(conf, dict)
+        return conf
 
     def load_env(self) -> Environment:
         """

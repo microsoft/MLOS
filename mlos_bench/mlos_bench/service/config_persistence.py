@@ -99,7 +99,7 @@ class ConfigPersistenceService(Service):
 
         Returns
         -------
-        config : dict
+        config : Union[dict, List[dict]]
             Free-format dictionary that contains the configuration.
         """
         json_file_name = self.resolve_path(json_file_name)
