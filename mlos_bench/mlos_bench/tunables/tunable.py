@@ -95,7 +95,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         return f"{self._name}={self._current_value}"
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check if two Tunable objects are equal.
 
@@ -110,13 +110,15 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             True if the Tunables correspond to the same parameter and have the same value and type.
             NOTE: ranges and special values are not currently considered in the comparison.
         """
+        if not isinstance(other, Tunable):
+            return False
         return bool(
             self._name == other._name and
             self._type == other._type and
             self._current_value == other._current_value
         )
 
-    def copy(self):
+    def copy(self) -> "Tunable":
         """
         Deep copy of the Tunable object.
 
@@ -162,13 +164,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._current_value = coerced_value
         return self._current_value
 
-    def is_valid(self, value) -> bool:
+    def is_valid(self, value: TunableValue) -> bool:
         """
         Check if the value can be assigned to the tunable.
 
         Parameters
         ----------
-        value : Any
+        value : Union[int, float, str]
             Value to validate.
 
         Returns
@@ -179,6 +181,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         if self.is_categorical and self._values:
             return value in self._values
         elif self.is_numerical and self._range:
+            assert isinstance(value, (int, float))
             return bool(self._range[0] <= value <= self._range[1]) or value == self._default
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
