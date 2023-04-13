@@ -313,7 +313,7 @@ def test_max_unique_values_per_param() -> None:
 ]))
 def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: dict) -> None:  # pylint: disable=too-many-locals
     """
-    Tests LlamaTune's approximate high-to-low space projection method, using pseudoinverse.
+    Tests LlamaTune's approximate high-to-low space projection method, using pseudo-inverse.
     """
     input_space = construct_parameter_space(**param_space_kwargs)
 
