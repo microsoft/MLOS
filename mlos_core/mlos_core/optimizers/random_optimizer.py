@@ -6,6 +6,8 @@
 Contains the RandomOptimizer class.
 """
 
+from typing import Optional
+
 import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
@@ -21,7 +23,7 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None) -> None:
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] =  None) -> None:
         """Registers the given configurations and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configurations for logging.
@@ -41,7 +43,7 @@ class RandomOptimizer(BaseOptimizer):
             raise NotImplementedError()
         # should we pop them from self.pending_observations?
 
-    def _suggest(self, context: pd.DataFrame = None) -> pd.DataFrame:
+    def _suggest(self, context: Optional[pd.DataFrame] =  None) -> pd.DataFrame:
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -61,6 +63,6 @@ class RandomOptimizer(BaseOptimizer):
             raise NotImplementedError()
         return pd.DataFrame(self.optimizer_parameter_space.sample_configuration().get_dictionary(), index=[0])
 
-    def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None) -> None:
+    def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] =  None) -> None:
         raise NotImplementedError()
         # self._pending_observations.append((configurations, context))
