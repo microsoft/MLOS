@@ -43,7 +43,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
         self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(parameter_space={self.parameter_space})"
 
     @property
@@ -51,7 +51,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
-    def register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
+    def register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None) -> None:
         """Wrapper method, which employs the space adapter (if any), before registering the configurations and scores.
 
         Parameters
@@ -65,6 +65,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
+        # TODO: Validate that if context is ever added it must always be added.
         self._observations.append((configurations, scores, context))
 
         if self._space_adapter:
@@ -72,7 +73,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return self._register(configurations, scores, context)
 
     @abstractmethod
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -88,7 +89,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: pd.DataFrame = None):
+    def suggest(self, context: pd.DataFrame = None) -> pd.DataFrame:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
@@ -107,7 +108,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return configuration
 
     @abstractmethod
-    def _suggest(self, context: pd.DataFrame = None):
+    def _suggest(self, context: pd.DataFrame = None) -> pd.DataFrame:
         """Suggests a new configuration.
 
         Parameters
@@ -123,7 +124,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None) -> None:
         """Registers the given configurations as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
@@ -138,7 +139,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def get_observations(self):
+    def get_observations(self) -> pd.DataFrame:
         """Returns the observations as a dataframe.
 
         Returns
@@ -151,7 +152,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         configs = pd.concat([config for config, _, _ in self._observations])
         scores = pd.concat([score for _, score, _ in self._observations])
         try:
-            contexts = pd.concat([context for _, _, context in self._observations])
+            contexts = pd.concat([context for _, _, context in self._observations if context is not None])
         except ValueError:
             contexts = None
         configs["score"] = scores
@@ -161,7 +162,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise NotImplementedError()  # pragma: no cover
         return configs
 
-    def get_best_observation(self):
+    def get_best_observation(self) -> pd.DataFrame:
         """Returns the best observation so far as a dataframe.
 
         Returns

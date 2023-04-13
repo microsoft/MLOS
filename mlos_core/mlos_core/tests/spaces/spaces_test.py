@@ -9,14 +9,17 @@ Tests for mlos_core.spaces
 # pylint: disable=missing-function-docstring
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, List, NoReturn, Union, TypeAlias
 
 import numpy as np
 from numpy.random import RandomState as NpRandomState
+import numpy.typing as npt
 import pandas as pd
 import pytest
+
 import scipy
 import skopt.space
+import emukit.core
 
 import ConfigSpace as CS
 from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
@@ -24,12 +27,16 @@ from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
 from mlos_core.spaces import configspace_to_emukit_space, configspace_to_skopt_space
 
 
-def assert_uniform_counts(counts):
+OptimizerSpace: TypeAlias = Union[skopt.space.Space, emukit.core.ParameterSpace]
+OptimizerParam: TypeAlias = Union[skopt.space.Dimension, emukit.core.Parameter]
+
+
+def assert_uniform_counts(counts: npt.NDArray) -> None:
     _chi_sq, p_value = scipy.stats.chisquare(counts)
     assert p_value > .3
 
 
-def invalid_conversion_function(*args):
+def invalid_conversion_function(*args: Any) -> NoReturn:
     """
     A quick dummy function for the base class to make pylint happy.
     """
@@ -40,10 +47,10 @@ class BaseConversion(metaclass=ABCMeta):
     """
     Base class for testing optimizer space conversions.
     """
-    conversion_function: Callable[..., Any] = invalid_conversion_function
+    conversion_function: Callable[..., OptimizerSpace] = invalid_conversion_function
 
     @abstractmethod
-    def sample(self, config_space, n_samples=1):
+    def sample(self, config_space: OptimizerSpace, n_samples: int = 1) -> OptimizerParam:
         """
         Sample from the given configuration space.
 
@@ -56,7 +63,7 @@ class BaseConversion(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def get_parameter_names(self, config_space):
+    def get_parameter_names(self, config_space: OptimizerSpace) -> List[str]:
         """
         Get the parameter names from the given configuration space.
 
@@ -67,7 +74,7 @@ class BaseConversion(metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def categorical_counts(self, points):
+    def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
         """
         Get the counts of each categorical value in the given points.
 
@@ -141,14 +148,14 @@ class TestSkoptConversion(BaseConversion):
 
     conversion_function = staticmethod(configspace_to_skopt_space)
 
-    def sample(self, config_space, n_samples=1):
+    def sample(self, config_space: skopt.space.Space, n_samples: int = 1) -> npt.NDArray:
         return np.array(config_space.rvs(n_samples=n_samples))
 
-    def get_parameter_names(self, config_space):
-        return config_space.dimension_names
+    def get_parameter_names(self, config_space: skopt.space.Space) -> List[str]:
+        return list(config_space.dimension_names)
 
-    def categorical_counts(self, points):
-        return pd.value_counts(points[:, 0]).values
+    def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
+        return pd.value_counts(points[:, 0]).values     # type: ignore
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
@@ -198,14 +205,18 @@ class TestEmukitConversion(BaseConversion):
 
     conversion_function = staticmethod(configspace_to_emukit_space)
 
-    def sample(self, config_space, n_samples=1):
-        return config_space.sample_uniform(point_count=n_samples)
+    # Note: these types are currently correct via manual inspection of the
+    # emukit code, however since emukit doesn't py.typed mark itself yet mypy
+    # can't introspect them correctly.
 
-    def get_parameter_names(self, config_space):
-        return config_space.parameter_names
+    def sample(self, config_space: emukit.core.ParameterSpace, n_samples: int = 1) -> npt.NDArray:
+        return config_space.sample_uniform(point_count=n_samples) # type: ignore
 
-    def categorical_counts(self, points):
-        return np.sum(points, axis=0)
+    def get_parameter_names(self, config_space: emukit.core.ParameterSpace) -> List[str]:
+        return config_space.parameter_names # type: ignore
+
+    def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
+        return np.sum(points, axis=0) # type: ignore
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()

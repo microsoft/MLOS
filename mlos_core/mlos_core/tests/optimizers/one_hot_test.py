@@ -45,7 +45,7 @@ def one_hot() -> npt.NDArray:
 
 
 def test_to_1hot(configuration_space: CS.ConfigurationSpace,
-                 data_frame: pd.DataFrame, one_hot: npt.NDArray):
+                 data_frame: pd.DataFrame, one_hot: npt.NDArray) -> None:
     """
     Toy problem to test one-hot encoding.
     """
@@ -54,7 +54,7 @@ def test_to_1hot(configuration_space: CS.ConfigurationSpace,
 
 
 def test_from_1hot(configuration_space: CS.ConfigurationSpace,
-                   data_frame: pd.DataFrame, one_hot: npt.NDArray):
+                   data_frame: pd.DataFrame, one_hot: npt.NDArray) -> None:
     """
     Toy problem to test one-hot decoding.
     """
