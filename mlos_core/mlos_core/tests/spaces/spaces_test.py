@@ -210,13 +210,13 @@ class TestEmukitConversion(BaseConversion):
     # can't introspect them correctly.
 
     def sample(self, config_space: emukit.core.ParameterSpace, n_samples: int = 1) -> npt.NDArray:
-        return config_space.sample_uniform(point_count=n_samples) # type: ignore
+        return config_space.sample_uniform(point_count=n_samples)   # type: ignore
 
     def get_parameter_names(self, config_space: emukit.core.ParameterSpace) -> List[str]:
-        return config_space.parameter_names # type: ignore
+        return config_space.parameter_names     # type: ignore
 
     def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
-        return np.sum(points, axis=0) # type: ignore
+        return np.sum(points, axis=0)   # type: ignore
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
