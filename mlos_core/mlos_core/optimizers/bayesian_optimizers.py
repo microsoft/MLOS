@@ -23,7 +23,8 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
     """Abstract base class defining the interface for Bayesian optimization."""
 
     @abstractmethod
-    def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def surrogate_predict(self, configurations: pd.DataFrame,
+                          context: Optional[pd.DataFrame] = None):
         """Obtain a prediction from this Bayesian optimizer's surrogate model for the given configuration(s).
 
         Parameters
@@ -37,7 +38,8 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def acquisition_function(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def acquisition_function(self, configurations: pd.DataFrame,
+                             context: Optional[pd.DataFrame] = None):
         """Invokes the acquisition function from this Bayesian optimizer for the given configuration.
 
         Parameters
@@ -63,13 +65,15 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         The space adapter class to employ for parameter space transformations.
     """
 
-    def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
+    def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace,
+                 space_adapter: Optional[BaseSpaceAdapter] = None):
         super().__init__(parameter_space, space_adapter)
         self.emukit_parameter_space = configspace_to_emukit_space(self.optimizer_parameter_space)
         from emukit.examples.gp_bayesian_optimization.single_objective_bayesian_optimization import GPBayesianOptimization  # noqa pylint: disable=import-outside-toplevel
         self.gpbo: GPBayesianOptimization
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
+                  context: Optional[pd.DataFrame] = None):
         """Registers the given configurations and scores.
 
         Parameters
@@ -98,7 +102,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         self.gpbo.loop_state.update(results)
         self.gpbo._update_models()  # pylint: disable=protected-access
 
-    def _suggest(self, context: pd.DataFrame = None):
+    def _suggest(self, context: Optional[pd.DataFrame] = None):
         """Suggests a new configuration.
 
         Parameters
@@ -124,10 +128,12 @@ class EmukitOptimizer(BaseBayesianOptimizer):
             config = self.gpbo.get_next_points(results=[])
         return self._from_1hot(config)
 
-    def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def register_pending(self, configurations: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None):
         raise NotImplementedError()
 
-    def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def surrogate_predict(self, configurations: pd.DataFrame,
+                          context: Optional[pd.DataFrame] = None):
         if context is not None:
             raise NotImplementedError()
         if self.space_adapter is not None:
@@ -140,7 +146,8 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         # make 2ndim array into column vector
         return mean_predictions.reshape(-1,)
 
-    def acquisition_function(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def acquisition_function(self, configurations: pd.DataFrame,
+                             context: Optional[pd.DataFrame] = None):
         raise NotImplementedError()
 
     def _initialize_optimizer(self):
@@ -215,7 +222,8 @@ class SkoptOptimizer(BaseBayesianOptimizer):
                 config[param.name] = config[param.name].apply(param.choices.index)
         return config.to_numpy(dtype=np.float32)
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
+                  context: Optional[pd.DataFrame] = None):
         """Registers the given configurations and scores.
 
         Parameters
@@ -237,7 +245,7 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         data = configurations[param_names].to_numpy().tolist()
         self.base_optimizer.tell(data, scores.to_list())
 
-    def _suggest(self, context: pd.DataFrame = None):
+    def _suggest(self, context: Optional[pd.DataFrame] = None):
         """Suggests a new configuration.
 
         Parameters
@@ -254,16 +262,18 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             raise NotImplementedError()
         return pd.DataFrame([self.base_optimizer.ask()], columns=self.optimizer_parameter_space.get_hyperparameter_names())
 
-    def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def register_pending(self, configurations: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None):
         raise NotImplementedError()
 
-    def surrogate_predict(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def surrogate_predict(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None):
         if context is not None:
             raise NotImplementedError()
         if self.space_adapter is not None:
             raise NotImplementedError()
         return self.base_optimizer.models[-1].predict(self._transform(configurations))
 
-    def acquisition_function(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def acquisition_function(self, configurations: pd.DataFrame,
+                             context: Optional[pd.DataFrame] = None):
         # This seems actually non-trivial to get out of skopt, so maybe we actually shouldn't implement this.
         raise NotImplementedError()
