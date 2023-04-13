@@ -112,7 +112,7 @@ class Optimizer(metaclass=ABCMeta):
         return self._opt_target
 
     @abstractmethod
-    def bulk_register(self, configs: List[dict], scores: List[float],
+    def bulk_register(self, configs: List[dict], scores: List[Optional[float]],
                       status: Optional[List[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.

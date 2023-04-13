@@ -47,7 +47,7 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
-    def bulk_register(self, configs: List[dict], scores: List[float],
+    def bulk_register(self, configs: List[dict], scores: List[Optional[float]],
                       status: Optional[List[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False

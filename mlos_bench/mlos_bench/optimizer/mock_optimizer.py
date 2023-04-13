@@ -8,9 +8,11 @@ Mock optimizer for mlos_bench.
 
 import random
 import logging
-from typing import Optional, Tuple, List, Union
+
+from typing import Callable, Dict, List, Optional, Tuple, Union
 
 from mlos_bench.environment.status import Status
+from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
@@ -26,15 +28,15 @@ class MockOptimizer(Optimizer):
     def __init__(self, tunables: TunableGroups, config: dict):
         super().__init__(tunables, config)
         rnd = random.Random(config.get("seed", 42))
-        self._random = {
+        self._random: Dict[str, Callable[[Tunable], TunableValue]] = {
             "categorical": lambda tunable: rnd.choice(tunable.categorical_values),
             "float": lambda tunable: rnd.uniform(*tunable.range),
-            "int": lambda tunable: rnd.randint(*tunable.range),
+            "int": lambda tunable: rnd.randint(*tunable.range),     # type: ignore
         }
-        self._best_config = None
-        self._best_score = None
+        self._best_config: Optional[TunableGroups] = None
+        self._best_score: Optional[float] = None
 
-    def bulk_register(self, configs: List[dict], scores: List[float],
+    def bulk_register(self, configs: List[dict], scores: List[Optional[float]],
                       status: Optional[List[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
@@ -60,15 +62,18 @@ class MockOptimizer(Optimizer):
         return tunables
 
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Union[float, dict] = None) -> float:
-        score = super().register(tunables, status, score)
-        if status.is_succeeded and (self._best_score is None or score < self._best_score):
-            self._best_score = score
+                 score: Optional[Union[float, dict]] = None) -> Optional[float]:
+        registered_score = super().register(tunables, status, score)
+        if status.is_succeeded and (
+            self._best_score is None or (registered_score is not None and registered_score < self._best_score)
+        ):
+            self._best_score = registered_score
             self._best_config = tunables.copy()
         self._iter += 1
-        return score
+        return registered_score
 
-    def get_best_observation(self) -> Tuple[float, TunableGroups]:
+    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
         if self._best_score is None:
             return (None, None)
+        assert self._best_config is not None
         return (self._best_score * self._opt_sign, self._best_config)
