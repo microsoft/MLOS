@@ -12,6 +12,7 @@ import pytest
 
 import pandas as pd
 import numpy as np
+import numpy.typing as npt
 import ConfigSpace as CS
 
 from mlos_core.optimizers import (
@@ -27,10 +28,12 @@ from mlos_core.spaces.adapters import SpaceAdapterType
     (SkoptOptimizer, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace,
-                                      optimizer_class: Type[BaseOptimizer], kwargs):
+                                      optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
     """
     Test that we can create an optimizer and get a suggestion from it.
     """
+    if kwargs is None:
+        kwargs = {}
     optimizer = optimizer_class(configuration_space, **kwargs)
     assert optimizer is not None
 
@@ -53,12 +56,15 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
     (SkoptOptimizer, {'base_estimator': 'et', 'seed': 42}),
 ])
 def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
-                                     optimizer_class: Type[BaseOptimizer], kwargs):
+                                     optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers.
     """
-    def objective(x):   # pylint: disable=invalid-name
-        return (6 * x - 2)**2 * np.sin(12 * x - 4)
+    if kwargs is None:
+        kwargs = {}
+
+    def objective(x: pd.Series) -> npt.ArrayLike:   # pylint: disable=invalid-name
+        return (6 * x - 2)**2 * np.sin(12 * x - 4)  # type: ignore
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(42)
     optimizer = optimizer_class(configuration_space, **kwargs)
@@ -105,7 +111,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     # *[member for member in OptimizerType],
     *list(OptimizerType),
 ])
-def test_concrete_optimizer_type(optimizer_type: OptimizerType):
+def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
     """
     Test that all optimizer types are listed in the ConcreteOptimizer constraints.
     """
@@ -121,10 +127,12 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType):
     (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
-                                              optimizer_type: Optional[OptimizerType], kwargs):
+                                              optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
     """
     Test that we can create an optimizer via a factory.
     """
+    if kwargs is None:
+        kwargs = {}
     if optimizer_type is None:
         optimizer = OptimizerFactory.create(configuration_space, optimizer_kwargs=kwargs)
     else:
@@ -147,13 +155,16 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     # Optimizer with non-empty kwargs argument
     (OptimizerType.SKOPT, {'base_estimator': 'gp', 'seed': 42}),
 ])
-def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
+def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
-    def objective(point):   # pylint: disable=invalid-name
+    if kwargs is None:
+        kwargs = {}
+
+    def objective(point: pd.DataFrame) -> pd.Series:   # pylint: disable=invalid-name
         # Best value can be reached by tuning an 1-dimensional search space
-        return np.sin(point['x'] * point['y'])
+        return np.sin(point['x'] * point['y'])  # type: ignore
 
     input_space = CS.ConfigurationSpace(seed=1234)
     # Add two continuous inputs
@@ -161,7 +172,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0, upper=3))
 
     # Initialize optimizer
-    optimizer = OptimizerFactory.create(input_space, optimizer_type, optimizer_kwargs=kwargs)
+    optimizer: BaseOptimizer = OptimizerFactory.create(input_space, optimizer_type, optimizer_kwargs=kwargs)
     assert optimizer is not None
 
     # Initialize another optimizer that uses LlamaTune space adapter
@@ -170,7 +181,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs):
         "special_param_values": None,
         "max_unique_values_per_param": None,
     }
-    llamatune_optimizer = OptimizerFactory.create(
+    llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
         input_space,
         optimizer_type,
         optimizer_kwargs=kwargs,

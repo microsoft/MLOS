@@ -8,7 +8,7 @@ Tests for LlamaTune space adapter.
 
 # pylint: disable=missing-function-docstring
 
-from typing import Dict, Set
+from typing import Any, Dict, Iterator, List, Set
 
 import pytest
 
@@ -22,8 +22,8 @@ def construct_parameter_space(
     n_continuous_params: int = 0,
     n_integer_params: int = 0,
     n_categorical_params: int = 0,
-    seed=1234
-):
+    seed: int = 1234,
+) -> CS.ConfigurationSpace:
     """
     Helper function for construct an instance of `ConfigSpace.ConfigurationSpace`.
     """
@@ -58,7 +58,7 @@ def construct_parameter_space(
         },
     )
 ]))
-def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict):    # pylint: disable=too-many-locals
+def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> None:    # pylint: disable=too-many-locals
     """
     Tests LlamaTune's low-to-high space projection method.
     """
@@ -89,7 +89,7 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict):    
         target_config = CS.Configuration(adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict())
         assert target_config == sampled_config
 
-    # Try inverse projection (i.e., high-to-low) for previously unseed configs
+    # Try inverse projection (i.e., high-to-low) for previously unseen configs
     unseen_sampled_configs = adapter.target_parameter_space.sample_configuration(size=25)
     for unseen_sampled_config in unseen_sampled_configs:
         if unseen_sampled_config in sampled_configs:
@@ -100,7 +100,7 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict):    
             _ = adapter.inverse_transform(unseen_sampled_config_df)  # pylint: disable=redefined-variable-type
 
 
-def test_special_parameter_values_validation():
+def test_special_parameter_values_validation() -> None:
     """
     Tests LlamaTune's validation process of user-provided special parameter values dictionary.
     """
@@ -114,19 +114,19 @@ def test_special_parameter_values_validation():
 
     # Only UniformIntegerHyperparameters are currently supported
     with pytest.raises(NotImplementedError):
-        special_param_values_dict = {'str': 'choice_1'}
+        special_param_values_dict_1 = {'str': 'choice_1'}
         _ = LlamaTuneAdapter(
             input_space,
             num_low_dims=2,
-            special_param_values=special_param_values_dict,
+            special_param_values=special_param_values_dict_1,
             max_unique_values_per_param=None
         )
     with pytest.raises(NotImplementedError):
-        special_param_values_dict = {'cont': -1}
+        special_param_values_dict_2 = {'cont': -1}
         _ = LlamaTuneAdapter(
             input_space,
             num_low_dims=2,
-            special_param_values=special_param_values_dict,
+            special_param_values=special_param_values_dict_2,
             max_unique_values_per_param=None
         )
 
@@ -141,7 +141,7 @@ def test_special_parameter_values_validation():
         )
 
     # Invalid dicts; ValueError should be thrown
-    invalid_special_param_values_dicts = [
+    invalid_special_param_values_dicts: List[Dict[str, Any]] = [
         {'int-Q': 0},           # parameter does not exist
         {'int': {0: 0.2}},      # invalid definition
         {'int': 0.2},           # invalid parameter value
@@ -173,7 +173,7 @@ def test_special_parameter_values_validation():
                                  max_unique_values_per_param=None)
 
 
-def gen_random_configs(adapter, num_configs):
+def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[CS.Configuration]:
     for sampled_config in adapter.target_parameter_space.sample_configuration(size=num_configs):
         # Transform low-dim config to high-dim config
         sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
@@ -182,7 +182,7 @@ def gen_random_configs(adapter, num_configs):
         yield orig_config
 
 
-def test_special_parameter_values_biasing():    # pylint: disable=too-complex
+def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-complex
     """
     Tests LlamaTune's special parameter values biasing methodology
     """
@@ -197,7 +197,7 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
     eps = 0.2
 
     # Single parameter; single special value
-    special_param_value_dicts = [
+    special_param_value_dicts: List[Dict[str, Any]] = [
         {'int_1': 0},
         {'int_1': (0, bias_percentage)},
         {'int_1': [0]},
@@ -207,9 +207,9 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
         adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
                                    max_unique_values_per_param=None)
 
-        special_value_occurences = sum(
+        special_value_occurrences = sum(
             1 for config in gen_random_configs(adapter, num_configs) if config['int_1'] == 0)
-        assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurences
+        assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurrences
 
     # Single parameter; multiple special values
     special_param_value_dicts = [
@@ -220,15 +220,15 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
         adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
                                    max_unique_values_per_param=None)
 
-        special_values_occurences = {0: 0, 1: 0}
+        special_values_occurrences = {0: 0, 1: 0}
         for config in gen_random_configs(adapter, num_configs):
             if config['int_1'] == 0:
-                special_values_occurences[0] += 1
+                special_values_occurrences[0] += 1
             elif config['int_1'] == 1:
-                special_values_occurences[1] += 1
+                special_values_occurrences[1] += 1
 
-        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurences[0]
-        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurences[1]
+        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurrences[0]
+        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurrences[1]
 
     # Multiple parameters; multiple special values; different biasing percentage
     spv_dict = {
@@ -238,28 +238,28 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
     adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
                                max_unique_values_per_param=None)
 
-    special_values_occurences = {
+    special_values_instances: Dict[str, Dict[int, int]] = {
         'int_1': {0: 0, 1: 0},
         'int_2': {2: 0, 100: 0},
     }
     for config in gen_random_configs(adapter, num_configs):
         if config['int_1'] == 0:
-            special_values_occurences['int_1'][0] += 1
+            special_values_instances['int_1'][0] += 1
         elif config['int_1'] == 1:
-            special_values_occurences['int_1'][1] += 1
+            special_values_instances['int_1'][1] += 1
 
         if config['int_2'] == 2:
-            special_values_occurences['int_2'][2] += 1
+            special_values_instances['int_2'][2] += 1
         elif config['int_2'] == 100:
-            special_values_occurences['int_2'][100] += 1
+            special_values_instances['int_2'][100] += 1
 
-    assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurences['int_1'][0]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_occurences['int_1'][1]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_occurences['int_2'][2]
-    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_occurences['int_2'][100]
+    assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_instances['int_1'][0]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances['int_1'][1]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances['int_2'][2]
+    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_instances['int_2'][100]
 
 
-def test_max_unique_values_per_param():
+def test_max_unique_values_per_param() -> None:
     """
     Tests LlamaTune's parameter values discretization implementation.
     """
@@ -285,7 +285,7 @@ def test_max_unique_values_per_param():
                                    max_unique_values_per_param=max_unique_values_per_param)
 
         # Keep track of unique values generated for each parameter
-        unique_values_dict = {param: set() for param in input_space.get_hyperparameter_names()}
+        unique_values_dict: Dict[str, set] = {param: set() for param in input_space.get_hyperparameter_names()}
         for config in gen_random_configs(adapter, num_configs):
             for param, value in config.items():
                 unique_values_dict[param].add(value)
@@ -311,9 +311,9 @@ def test_max_unique_values_per_param():
         },
     )
 ]))
-def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: dict):  # pylint: disable=too-many-locals
+def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: dict) -> None:  # pylint: disable=too-many-locals
     """
-    Tests LlamaTune's approximate high-to-low space projection method, using pseudoinverse.
+    Tests LlamaTune's approximate high-to-low space projection method, using pseudo-inverse.
     """
     input_space = construct_parameter_space(**param_space_kwargs)
 
@@ -359,7 +359,7 @@ def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: 
     )
     for max_unique_values_per_param in (50, 250)
 ]))
-def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_unique_values_per_param: int):
+def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_unique_values_per_param: int) -> None:
     """
     Tests LlamaTune space adapter when all components are active.
     """
@@ -370,7 +370,7 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
     adapter = LlamaTuneAdapter(input_space, num_low_dims=num_low_dims, special_param_values=special_param_values,
                                max_unique_values_per_param=max_unique_values_per_param)
 
-    special_value_occurences = {
+    special_value_occurrences = {
         param: {special_value: 0 for special_value, _ in tuples_list}
         for param, tuples_list in adapter._special_param_values_dict.items()    # pylint: disable=protected-access
     }
@@ -392,19 +392,19 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
         assert target_config == config
 
         for param, value in orig_config.items():
-            # Keep track of special value occurences
-            if param in special_value_occurences:
-                if value in special_value_occurences[param]:
-                    special_value_occurences[param][value] += 1
+            # Keep track of special value occurrences
+            if param in special_value_occurrences:
+                if value in special_value_occurrences[param]:
+                    special_value_occurrences[param][value] += 1
 
             # Keep track of unique values generated for each parameter
             unique_values_dict[param].add(value)
 
-    # Ensure that occurences of special values do not significantly deviate from expected
+    # Ensure that occurrences of special values do not significantly deviate from expected
     eps = 0.2
     for param, tuples_list in adapter._special_param_values_dict.items():  # pylint: disable=protected-access
         for value, bias_percentage in tuples_list:
-            assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurences[param][value]
+            assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurrences[param][value]
 
     # Ensure that number of unique values is less than the maximum number allowed
     for _, unique_values in unique_values_dict.items():
@@ -427,17 +427,17 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
         },
     )
 ]))
-def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_space_kwargs: dict):
+def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_space_kwargs: dict) -> None:
     """
     Tests LlamaTune's space adapter deterministic behavior when given same seed in the input parameter space.
     """
-    def generate_target_param_space_configs(seed):
+    def generate_target_param_space_configs(seed: int) -> List[CS.Configuration]:
         input_space = construct_parameter_space(**param_space_kwargs, seed=seed)
 
         # Init adapter and sample points in the low-dim space
         adapter = LlamaTuneAdapter(input_space, num_low_dims=num_target_space_dims, special_param_values=None,
                                    max_unique_values_per_param=None, use_approximate_reverse_mapping=False)
-        return adapter.target_parameter_space.sample_configuration(size=100)
+        return adapter.target_parameter_space.sample_configuration(size=100)    # type: ignore
 
     assert generate_target_param_space_configs(42) == generate_target_param_space_configs(42)
     assert generate_target_param_space_configs(1234) != generate_target_param_space_configs(42)
