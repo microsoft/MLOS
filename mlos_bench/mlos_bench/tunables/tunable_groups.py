@@ -7,7 +7,7 @@ TunableGroups definition.
 """
 import copy
 
-from typing import Any, Dict, List, Iterable, Optional, Tuple
+from typing import Any, Dict, Generator, List, Iterable, Optional, Tuple
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
@@ -121,7 +121,7 @@ class TunableGroups:
         # Use double index to make sure we set the is_updated flag of the group
         self._index[name][name] = value
 
-    def __iter__(self) -> Iterable[Tuple[Tunable, CovariantTunableGroup]]:
+    def __iter__(self) -> Generator[Tuple[Tunable, CovariantTunableGroup], None, None]:
         """
         An iterator over all tunables in the group.
 
@@ -131,7 +131,8 @@ class TunableGroups:
             An iterator over all tunables in all groups. Each element is a 2-tuple
             of an instance of the Tunable parameter and covariant group it belongs to.
         """
-        return ((group.get_tunable(name), group) for (name, group) in self._index.items())
+        for (name, group) in self._index.items():
+            yield (group.get_tunable(name), group)
 
     def get_tunable(self, name: str) -> Tuple[Tunable, CovariantTunableGroup]:
         """

@@ -32,7 +32,7 @@ from mlos_bench.environment import Status
     ])
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
 def test_vm_operation_status(mock_requests, azure_vm_service, operation_name,
-                             accepts_params, http_status_code, operation_status):
+                             accepts_params, http_status_code, operation_status) -> None:
 
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
