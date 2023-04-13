@@ -54,9 +54,11 @@ if TYPE_CHECKING:
     from mlos_bench.service.base_service import Service
     from mlos_bench.optimizer import Optimizer
 
+# T is a generic with a constraint of the three base classes.
 T = TypeVar('T', "Environment", "Service", "Optimizer")
 
 
+# FIXME: Technically this should return a type "class_name" derived from "base_class".
 def instantiate_from_config(base_class: Type[T], class_name: str, *args: Any, **kwargs: Any) -> T:
     """
     Factory method for a new class instantiated from config.
@@ -77,7 +79,7 @@ def instantiate_from_config(base_class: Type[T], class_name: str, *args: Any, **
 
     Returns
     -------
-    inst : Any
+    inst : Union[Environment, Service, Optimizer]
         An instance of the `class_name` class.
     """
     # We need to import mlos_bench to make the factory methods work.
@@ -90,7 +92,7 @@ def instantiate_from_config(base_class: Type[T], class_name: str, *args: Any, **
     _LOG.info("Instantiating: %s :: %s", class_name, impl)
 
     assert issubclass(impl, base_class)
-    ret = impl(*args, **kwargs)
+    ret: T = impl(*args, **kwargs)
     assert isinstance(ret, base_class)
     return ret
 
