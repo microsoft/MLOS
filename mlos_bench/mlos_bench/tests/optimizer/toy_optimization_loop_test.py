@@ -27,8 +27,9 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
         assert env.setup(tunables)
 
         (status, output) = env.run()
-        score = output['score']
         assert status.is_succeeded
+        assert output is not None
+        score = output['score']
         assert 60 <= score <= 120
 
         opt.register(tunables, status, score)
@@ -37,7 +38,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
 
 
 def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
-                                mock_opt: MockOptimizer):
+                                mock_opt: MockOptimizer) -> None:
     """
     Toy optimization loop with mock environment and optimizer.
     """
@@ -51,7 +52,7 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_scikit_gp_optimization_loop(mock_env_no_noise: MockEnv,
-                                     scikit_gp_opt: MlosCoreOptimizer):
+                                     scikit_gp_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and Scikit GP optimizer.
     """
@@ -65,7 +66,7 @@ def test_scikit_gp_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_scikit_et_optimization_loop(mock_env_no_noise: MockEnv,
-                                     scikit_et_opt: MlosCoreOptimizer):
+                                     scikit_et_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and Scikit ET optimizer.
     """
@@ -79,7 +80,7 @@ def test_scikit_et_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_emukit_optimization_loop(mock_env_no_noise: MockEnv,
-                                  emukit_opt: MlosCoreOptimizer):
+                                  emukit_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and EmuKit optimizer.
     """
@@ -89,7 +90,7 @@ def test_emukit_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_emukit_optimization_loop_max(mock_env_no_noise: MockEnv,
-                                      emukit_opt_max: MlosCoreOptimizer):
+                                      emukit_opt_max: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and EmuKit optimizer
     in maximization mode.
