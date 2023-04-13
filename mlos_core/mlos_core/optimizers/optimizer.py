@@ -124,7 +124,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] =  None) -> None:
+    def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
