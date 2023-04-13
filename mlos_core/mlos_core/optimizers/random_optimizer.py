@@ -5,6 +5,7 @@
 """
 Contains the RandomOptimizer class.
 """
+from typing import Optional
 
 from typing import Optional
 
@@ -23,7 +24,12 @@ class RandomOptimizer(BaseOptimizer):
         The parameter space to optimize.
     """
 
+<<<<<<< HEAD
     def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] = None) -> None:
+=======
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
+                  context: Optional[pd.DataFrame] = None):
+>>>>>>> main
         """Registers the given configurations and scores.
 
         Doesn't do anything on the RandomOptimizer except storing configurations for logging.
@@ -43,7 +49,11 @@ class RandomOptimizer(BaseOptimizer):
             raise NotImplementedError()
         # should we pop them from self.pending_observations?
 
+<<<<<<< HEAD
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+=======
+    def _suggest(self, context: Optional[pd.DataFrame] = None):
+>>>>>>> main
         """Suggests a new configuration.
 
         Sampled at random using ConfigSpace.
@@ -63,6 +73,11 @@ class RandomOptimizer(BaseOptimizer):
             raise NotImplementedError()
         return pd.DataFrame(self.optimizer_parameter_space.sample_configuration().get_dictionary(), index=[0])
 
+<<<<<<< HEAD
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
+=======
+    def register_pending(self, configurations: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None):
+>>>>>>> main
         raise NotImplementedError()
         # self._pending_observations.append((configurations, context))
