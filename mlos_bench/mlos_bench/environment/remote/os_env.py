@@ -6,6 +6,8 @@
 OS-level remote Environment on Azure.
 """
 
+from typing import Optional
+
 import logging
 
 from mlos_bench.environment import Environment, Status
@@ -50,7 +52,7 @@ class OSEnv(Environment):
         self._is_ready = status in {Status.SUCCEEDED, Status.READY}
         return self._is_ready
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Clean up and shut down the host without deprovisioning it.
         """

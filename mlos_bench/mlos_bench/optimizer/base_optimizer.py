@@ -213,7 +213,7 @@ class Optimizer(metaclass=ABCMeta):
         return self._iter <= self._max_iter
 
     @abstractmethod
-    def get_best_observation(self) -> Tuple[float, TunableGroups]:
+    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
         """
         Get the best observation so far.
 
