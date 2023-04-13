@@ -6,8 +6,11 @@
 Unit tests for deep copy of tunable objects and groups.
 """
 
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
-def test_copy_tunable_int(tunable_int) -> None:
+
+def test_copy_tunable_int(tunable_int: Tunable) -> None:
     """
     Check if deep copy works for Tunable object.
     """
@@ -17,7 +20,7 @@ def test_copy_tunable_int(tunable_int) -> None:
     assert tunable_int != tunable_copy
 
 
-def test_copy_tunable_groups(tunable_groups) -> None:
+def test_copy_tunable_groups(tunable_groups: TunableGroups) -> None:
     """
     Check if deep copy works for TunableGroups object.
     """
