@@ -5,7 +5,6 @@
 """
 Contains the RandomOptimizer class.
 """
-from typing import Optional
 
 from typing import Optional
 
