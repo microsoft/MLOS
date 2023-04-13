@@ -14,6 +14,10 @@ from typing import List, Optional, Tuple, TypedDict, Union
 _LOG = logging.getLogger(__name__)
 
 
+"""A tunable parameter value type alias."""
+TunableValue = Union[int, float, str]
+
+
 class TunableDict(TypedDict, total=False):
     """
     A typed dict for tunable parameters.
@@ -25,7 +29,7 @@ class TunableDict(TypedDict, total=False):
 
     type: str
     description: Optional[str]
-    default: Union[int, float, str]
+    default: TunableValue
     values: Optional[List[str]]
     # For convenience, we allow the range to be specified as a list in the json, but recast it to a tuple internally.
     range: Optional[Union[Tuple[int, int], List[int], Tuple[float, float], List[float]]]
@@ -124,14 +128,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return copy.deepcopy(self)
 
     @property
-    def value(self) -> Union[int, float, str]:
+    def value(self) -> TunableValue:
         """
         Get the current value of the tunable.
         """
         return self._current_value
 
     @value.setter
-    def value(self, value: Union[int, float, str]) -> Union[int, float, str]:
+    def value(self, value: TunableValue) -> TunableValue:
         """
         Set the current value of the tunable.
         """

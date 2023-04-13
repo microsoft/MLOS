@@ -7,9 +7,9 @@ TunableGroups definition.
 """
 import copy
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Iterable, Optional, Tuple
 
-from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 
 
@@ -18,7 +18,7 @@ class TunableGroups:
     A collection of covariant groups of tunable parameters.
     """
 
-    def __init__(self, config: dict = None):
+    def __init__(self, config: Optional[dict] = None):
         """
         Create a new group of tunable parameters.
 
@@ -34,7 +34,7 @@ class TunableGroups:
         for (name, group_config) in (config).items():
             self._add_group(CovariantTunableGroup(name, group_config))
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check if two TunableGroups are equal.
 
@@ -48,9 +48,11 @@ class TunableGroups:
         is_equal : bool
             True if two TunableGroups are equal.
         """
+        if not isinstance(other, TunableGroups):
+            return False
         return bool(self._tunable_groups == other._tunable_groups)
 
-    def copy(self):
+    def copy(self) -> "TunableGroups":
         """
         Deep copy of the TunableGroups object.
 
@@ -62,7 +64,7 @@ class TunableGroups:
         """
         return copy.deepcopy(self)
 
-    def _add_group(self, group: CovariantTunableGroup):
+    def _add_group(self, group: CovariantTunableGroup) -> None:
         """
         Add a CovariantTunableGroup to the current collection.
 
@@ -73,7 +75,7 @@ class TunableGroups:
         self._tunable_groups[group.name] = group
         self._index.update(dict.fromkeys(group.get_names(), group))
 
-    def update(self, tunables: "TunableGroups"):
+    def update(self, tunables: "TunableGroups") -> "TunableGroups":
         """
         Merge the two collections of covariant tunable groups.
 
@@ -106,20 +108,20 @@ class TunableGroups:
             for (group_name, group) in self._tunable_groups.items()
             for tunable in group._tunables.values()) + " }"
 
-    def __getitem__(self, name: str):
+    def __getitem__(self, name: str) -> TunableValue:
         """
         Get the current value of a single tunable parameter.
         """
         return self._index[name][name]
 
-    def __setitem__(self, name: str, value):
+    def __setitem__(self, name: str, value: TunableValue) -> None:
         """
         Update the current value of a single tunable parameter.
         """
         # Use double index to make sure we set the is_updated flag of the group
         self._index[name][name] = value
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Tuple[Tunable, CovariantTunableGroup]]:
         """
         An iterator over all tunables in the group.
 
@@ -149,7 +151,7 @@ class TunableGroups:
         group = self._index[name]
         return (group.get_tunable(name), group)
 
-    def get_names(self) -> List[str]:
+    def get_names(self) -> Iterable[str]:
         """
         Get the names of all covariance groups in the collection.
 
@@ -160,7 +162,7 @@ class TunableGroups:
         """
         return self._tunable_groups.keys()
 
-    def subgroup(self, group_names: List[str]):
+    def subgroup(self, group_names: List[str]) -> "TunableGroups":
         """
         Select the covariance groups from the current set and create a new
         TunableGroups object that consists of those covariance groups.
@@ -181,8 +183,8 @@ class TunableGroups:
             tunables._add_group(self._tunable_groups[name])
         return tunables
 
-    def get_param_values(self, group_names: List[str] = None,
-                         into_params: Dict[str, Any] = None) -> Dict[str, Any]:
+    def get_param_values(self, group_names: Optional[List[str]] = None,
+                         into_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
 
@@ -200,14 +202,14 @@ class TunableGroups:
             Flat dict of all parameters and their values from given covariance groups.
         """
         if group_names is None:
-            group_names = self.get_names()
+            group_names = list(self.get_names())
         if into_params is None:
             into_params = {}
         for name in group_names:
             into_params.update(self._tunable_groups[name].get_values())
         return into_params
 
-    def is_updated(self, group_names: List[str] = None) -> bool:
+    def is_updated(self, group_names: Optional[List[str]] = None) -> bool:
         """
         Check if any of the given covariant tunable groups has been updated.
 
@@ -224,7 +226,7 @@ class TunableGroups:
         return any(self._tunable_groups[name].is_updated()
                    for name in (group_names or self.get_names()))
 
-    def reset(self, group_names: List[str] = None):
+    def reset(self, group_names: Optional[List[str]] = None) -> "TunableGroups":
         """
         Clear the update flag of given covariant groups.
 
@@ -242,7 +244,7 @@ class TunableGroups:
             self._tunable_groups[name].reset()
         return self
 
-    def assign(self, param_values: Dict[str, Any]):
+    def assign(self, param_values: Dict[str, Any]) -> "TunableGroups":
         """
         In-place update the values of the tunables from the dictionary
         of (key, value) pairs.
