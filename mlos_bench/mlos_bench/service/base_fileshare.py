@@ -41,7 +41,7 @@ class FileShareService(Service, metaclass=ABCMeta):
         ])
 
     @abstractmethod
-    def download(self, remote_path: str, local_path: str, recursive: bool = True):
+    def download(self, remote_path: str, local_path: str, recursive: bool = True) -> None:
         """
         Downloads contents from a remote share path to a local path.
 
@@ -56,11 +56,11 @@ class FileShareService(Service, metaclass=ABCMeta):
             If False, ignore the subdirectories;
             if True (the default), download the entire directory tree.
         """
-        _LOG.info("Download from File Share %srecursively: %s -> %s",
-                  "" if recursive else "non-", remote_path, local_path)
+        _LOG.info("Download from File Share %s recursively: %s -> %s",
+                  "" if recursive else "non", remote_path, local_path)
 
     @abstractmethod
-    def upload(self, local_path: str, remote_path: str, recursive: bool = True):
+    def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
         """
         Uploads contents from a local path to remote share path.
 
@@ -74,5 +74,5 @@ class FileShareService(Service, metaclass=ABCMeta):
             If False, ignore the subdirectories;
             if True (the default), upload the entire directory tree.
         """
-        _LOG.info("Upload to File Share %srecursively: %s -> %s",
-                  "" if recursive else "non-", local_path, remote_path)
+        _LOG.info("Upload to File Share %s recursively: %s -> %s",
+                  "" if recursive else "non", local_path, remote_path)
