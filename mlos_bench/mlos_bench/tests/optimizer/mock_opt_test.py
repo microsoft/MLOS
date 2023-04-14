@@ -40,7 +40,7 @@ def mock_configurations() -> list:
 
 def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
     """
-    Run several iterations of the oiptimizer and return the best score.
+    Run several iterations of the optimizer and return the best score.
     """
     for (tunable_values, score) in mock_configurations:
         assert mock_opt.not_converged()
