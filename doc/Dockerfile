@@ -1,4 +1,5 @@
 FROM nginx:latest
 RUN apt-get update && apt-get install -y --no-install-recommends linklint curl
 # Our ngxinx config overrides the default listening port.
-EXPOSE 81
+ARG NGINX_PORT=81
+EXPOSE ${NGINX_PORT}

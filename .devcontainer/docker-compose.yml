@@ -29,13 +29,12 @@ services:
 
   docs-www:
     image: nginx:latest
+    env_file: ../.env
     restart: unless-stopped
     volumes:
+      # Our nginx config overrides the default listening port and serving directory.
       - ../doc:/doc
-      - ../doc/nginx-default.conf:/etc/nginx/conf.d/default.conf
-    # Our ngxinx config overrides the default listening port.
-    expose:
-    - 81
+      - ../doc/nginx-default.conf:/etc/nginx/templates/default.conf.template
 
     # Add "forwardPorts": ["81"] to **devcontainer.json** to forward nginx locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
