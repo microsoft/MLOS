@@ -12,9 +12,9 @@ from typing import Optional, Tuple
 
 import numpy
 
+from mlos_bench.service.base_service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
-from mlos_bench.service.base_service import Service
 from mlos_bench.tunables import Tunable, TunableGroups
 
 _LOG = logging.getLogger(__name__)

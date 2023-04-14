@@ -9,7 +9,7 @@ Unit tests for configuration persistence service.
 import os
 import pytest
 
-from mlos_bench.service import ConfigPersistenceService
+from mlos_bench.service.config_persistence import ConfigPersistenceService
 
 # pylint: disable=redefined-outer-name
 

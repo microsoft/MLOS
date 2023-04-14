@@ -13,7 +13,8 @@ from typing import Set
 
 from azure.storage.fileshare import ShareClient
 
-from mlos_bench.service import Service, FileShareService
+from mlos_bench.service.base_service import Service
+from mlos_bench.service.base_fileshare import FileShareService
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)

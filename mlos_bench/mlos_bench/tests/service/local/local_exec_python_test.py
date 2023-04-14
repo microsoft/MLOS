@@ -10,7 +10,8 @@ import json
 
 import pytest
 
-from mlos_bench.service import LocalExecService, ConfigPersistenceService
+from mlos_bench.service.local.local_exec import LocalExecService
+from mlos_bench.service.config_persistence import ConfigPersistenceService
 
 # pylint: disable=redefined-outer-name
 

@@ -9,7 +9,7 @@ Configuration test fixtures for azure_services in mlos_bench.
 from unittest.mock import patch
 import pytest
 
-from mlos_bench.service import ConfigPersistenceService
+from mlos_bench.service.config_persistence import ConfigPersistenceService
 from mlos_bench.service.remote.azure import AzureVMService, AzureFileShareService
 
 # pylint: disable=redefined-outer-name
