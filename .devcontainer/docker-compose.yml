@@ -16,10 +16,10 @@ services:
     volumes:
       - ../..:/workspaces:cached
 
-    env_file: ../.env
-
     # Overrides default command so things don't shut down after the process ends.
     command: /bin/sh -c "while true; do sleep 1000; done"
+
+    env_file: ../.env
 
   docs-www:
     build:
