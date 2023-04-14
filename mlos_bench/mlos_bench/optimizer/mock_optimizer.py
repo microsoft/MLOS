@@ -31,7 +31,7 @@ class MockOptimizer(Optimizer):
         self._random: Dict[str, Callable[[Tunable], TunableValue]] = {
             "categorical": lambda tunable: rnd.choice(tunable.categorical_values),
             "float": lambda tunable: rnd.uniform(*tunable.range),
-            "int": lambda tunable: rnd.randint(*tunable.range),     # type: ignore
+            "int": lambda tunable: rnd.randint(*tunable.range),
         }
         self._best_config: Optional[TunableGroups] = None
         self._best_score: Optional[float] = None

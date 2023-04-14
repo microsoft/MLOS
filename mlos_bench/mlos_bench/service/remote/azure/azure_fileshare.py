@@ -75,7 +75,7 @@ class AzureFileShareService(FileShareService):
             file_client = self._share_client.get_file_client(remote_path)
             data = file_client.download_file()
             with open(local_path, "wb") as output_file:
-                data.readinto(output_file)
+                data.readinto(output_file)  # type: ignore[no-untyped-call]
 
     def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
         super().upload(local_path, remote_path, recursive)

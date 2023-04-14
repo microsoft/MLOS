@@ -9,7 +9,6 @@ dependencies:
   - pycodestyle
   - autopep8
   - pydocstyle
-  - mypy
   - pytest
   - pytest-cov
   - pytest-forked
@@ -29,6 +28,7 @@ dependencies:
     - bump2version
     - licenseheaders
     - pytest-local-badge
+    - mypy
     - types-setuptools
     - types-pygments
     - types-colorama
