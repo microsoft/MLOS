@@ -42,8 +42,10 @@ Copy-Item .devcontainer/scripts/common/prep-deps-files.sh .devcontainer/tmp/prep
 # upstream to see if we can use it as a cache.
 # TODO: Ideally we'd only do this when rebuilding the image, but not sure how
 # to detect that form of startup yet.
+# See Also: https://github.com/microsoft/vscode-remote-release/issues/8179
 if ($env:NO_CACHE -ne 'true') {
     $cacheFrom = 'mloscore.azurecr.io/mlos-core-devcontainer'
-    Write-Host "Pulling cached image $cacheFrom"
-    docker pull $cacheFrom
+    # Skip pulling for now (see TODO note above)
+    Write-Host "Consider pulling image $cacheFrom for build caching."
+    #docker pull $cacheFrom
 }
