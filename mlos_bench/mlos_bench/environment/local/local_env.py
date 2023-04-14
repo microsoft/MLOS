@@ -17,6 +17,7 @@ import pandas
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.local.local_exec import LocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -57,6 +58,7 @@ class LocalEnv(Environment):
             deploy or reboot a VM, etc.).
         """
         super().__init__(name, config, global_config, tunables, service)
+        assert isinstance(service, LocalExec)
 
         self._temp_dir = self.config.get("temp_dir")
         self._script_setup = self.config.get("setup")

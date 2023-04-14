@@ -15,14 +15,23 @@ import shlex
 import subprocess
 import logging
 
-from typing import Optional, Tuple, List, Dict
+from typing import Optional, Tuple, List, Dict, Protocol, runtime_checkable
 
 from mlos_bench.service.base_service import Service
 
 _LOG = logging.getLogger(__name__)
 
 
-class LocalExecService(Service):
+@runtime_checkable
+class LocalExec(Protocol):
+    def local_exec(self, script_lines: List[str],
+                   env: Optional[Dict[str, str]] = None,
+                   cwd: Optional[str] = None,
+                   return_on_error: bool = False) -> Tuple[int, str, str]:
+        ...
+
+
+class LocalExecService(Service, LocalExec):
     """
     Collection of methods to run scripts and commands in an external process
     on the node acting as the scheduler. Can be useful for data processing
