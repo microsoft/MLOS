@@ -6,6 +6,8 @@
 "Remote" VM Environment.
 """
 
+from typing import Optional
+
 import logging
 
 from mlos_bench.environment import Environment
