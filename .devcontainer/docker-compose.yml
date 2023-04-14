@@ -16,26 +16,35 @@ services:
     volumes:
       - ../..:/workspaces:cached
 
+    env_file: ../.env
+
     # Overrides default command so things don't shut down after the process ends.
     command: /bin/sh -c "while true; do sleep 1000; done"
 
+  docs-www:
+    build:
+      context: ./tmp
+      dockerfile: ../../doc/Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        NGINX_PORT: ${NGINX_PORT}
+
     env_file: ../.env
 
-    # Runs app on the same network as the nginx container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:docs-www
+    # Export the port that nginx is listening on for the localhost.
+    # This will map it to a random port to avoid conflicts.
+    # To find which one it's using run `docker ps | grep mlos.*devcontainer-docs-www` and inspect the PORTs column.
+    ports:
+      - "${NGINX_PORT}"
 
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-
-  docs-www:
-    image: nginx:latest
     restart: unless-stopped
     volumes:
+      # Our nginx config overrides the default listening port and serving directory.
       - ../doc:/doc
-      - ../doc/nginx-default.conf:/etc/nginx/conf.d/default.conf
-    # Our ngxinx config overrides the default listening port.
-    expose:
-    - 81
+      - ../doc/nginx-default.conf:/etc/nginx/templates/default.conf.template
 
     # Add "forwardPorts": ["81"] to **devcontainer.json** to forward nginx locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
