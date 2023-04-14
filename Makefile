@@ -357,7 +357,11 @@ endif
 build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html build/check-doc.build-stamp
 	@echo "Starting nginx docker container for serving docs."
 	./doc/nginx-docker.sh restart
-	nginx_port=`docker port mlos-doc-nginx | cut -d/ -f1` && docker exec mlos-doc-nginx curl -sSf http://localhost:$${nginx_port}/index.html >/dev/null
+	docker port mlos-doc-nginx
+	nginx_port=`docker port mlos-doc-nginx | grep 0.0.0.0:8080 | cut -d/ -f1` \
+		&& echo nginx_port=$${nginx_port} \
+		&& set -x \
+		&& docker exec mlos-doc-nginx curl -sSf http://localhost:$${nginx_port}/index.html >/dev/null
 	@echo "Running linklint on the docs."
 	docker exec mlos-doc-nginx linklint -net -redirect -root /doc/build/html/ /@ -error -warn > doc/build/linklint.out 2>&1
 	@if cat doc/build/linklint.out | grep -e ^ERROR -e ^WARN | grep -v 'missing named anchors' | grep -q .; then \
