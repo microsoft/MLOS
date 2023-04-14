@@ -12,8 +12,8 @@ scriptpath=$(readlink -f "$0")
 scriptdir=$(dirname "$scriptpath")
 cd "$scriptdir"
 
-if [ -f ../.env ]; then
-    source ../.env
+if [ -f ../.devcontainer/.env ]; then
+    source ../.devcontainer/.env
 fi
 NGINX_PORT="${NGINX_PORT:-81}"
 

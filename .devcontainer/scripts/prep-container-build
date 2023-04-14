@@ -18,9 +18,10 @@ if [ ! -f .env ]; then
     echo "Creating empty .env file for devcontainer."
     touch .env
 fi
-if ! egrep -q "^NGINX_PORT=[0-9]+$" .env; then
-    sed -i -e '/^NGINX_PORT=/d' .env
-    echo "NGINX_PORT=$(($(shuf -i 0-30000 -n 1) + 80))" >> .env
+# Also prep the random NGINX_PORT for the docker-compose command.
+if ! [ -e .devcontainer/.env ] || ! egrep -q "^NGINX_PORT=[0-9]+$" .devcontainer/.env; then
+    NGINX_PORT=$(($(shuf -i 0-30000 -n 1) + 80))
+    echo "NGINX_PORT=$NGINX_PORT" > .devcontainer/.env
 fi
 
 # Prep some files to use as context for the devcontainer to build from.
