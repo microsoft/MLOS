@@ -14,6 +14,10 @@ if (!(Test-Path .env)) {
     Write-Host "Creating empty .env file for devcontainer."
     New-Item -Type File .env
 }
+if (!(Get-Content .\.env | Select-String '^NGINX_PORT=[0-9]+$')) {
+    $NGINX_PORT = (Get-Random) % 30000 + 80
+    echo "NGINX_PORT=$NGINX_PORT" >> .env
+}
 
 # Prep some files to use as context for the devcontainer to build from.
 if (Test-Path .devcontainer/tmp) {
