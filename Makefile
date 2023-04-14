@@ -358,7 +358,7 @@ build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov
 	@echo "Starting nginx docker container for serving docs."
 	./doc/nginx-docker.sh restart
 	docker port mlos-doc-nginx
-	nginx_port=`docker port mlos-doc-nginx | cut -d/ -f1` \
+	nginx_port=`docker port mlos-doc-nginx | grep 0.0.0.0:8080 | cut -d/ -f1` \
 		&& echo nginx_port=$${nginx_port} \
 		&& set -x \
 		&& docker exec mlos-doc-nginx curl -sSf http://localhost:$${nginx_port}/index.html >/dev/null
