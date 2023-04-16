@@ -89,7 +89,7 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict):    
         target_config = CS.Configuration(adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict())
         assert target_config == sampled_config
 
-    # Try inverse projection (i.e., high-to-low) for previously unseed configs
+    # Try inverse projection (i.e., high-to-low) for previously unseen configs
     unseen_sampled_configs = adapter.target_parameter_space.sample_configuration(size=25)
     for unseen_sampled_config in unseen_sampled_configs:
         if unseen_sampled_config in sampled_configs:
@@ -207,9 +207,9 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
         adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
                                    max_unique_values_per_param=None)
 
-        special_value_occurences = sum(
+        special_value_occurrences = sum(
             1 for config in gen_random_configs(adapter, num_configs) if config['int_1'] == 0)
-        assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurences
+        assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurrences
 
     # Single parameter; multiple special values
     special_param_value_dicts = [
@@ -220,15 +220,15 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
         adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
                                    max_unique_values_per_param=None)
 
-        special_values_occurences = {0: 0, 1: 0}
+        special_values_occurrences = {0: 0, 1: 0}
         for config in gen_random_configs(adapter, num_configs):
             if config['int_1'] == 0:
-                special_values_occurences[0] += 1
+                special_values_occurrences[0] += 1
             elif config['int_1'] == 1:
-                special_values_occurences[1] += 1
+                special_values_occurrences[1] += 1
 
-        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurences[0]
-        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurences[1]
+        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurrences[0]
+        assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurrences[1]
 
     # Multiple parameters; multiple special values; different biasing percentage
     spv_dict = {
@@ -238,25 +238,25 @@ def test_special_parameter_values_biasing():    # pylint: disable=too-complex
     adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
                                max_unique_values_per_param=None)
 
-    special_values_occurences = {
+    special_values_instances = {
         'int_1': {0: 0, 1: 0},
         'int_2': {2: 0, 100: 0},
     }
     for config in gen_random_configs(adapter, num_configs):
         if config['int_1'] == 0:
-            special_values_occurences['int_1'][0] += 1
+            special_values_instances['int_1'][0] += 1
         elif config['int_1'] == 1:
-            special_values_occurences['int_1'][1] += 1
+            special_values_instances['int_1'][1] += 1
 
         if config['int_2'] == 2:
-            special_values_occurences['int_2'][2] += 1
+            special_values_instances['int_2'][2] += 1
         elif config['int_2'] == 100:
-            special_values_occurences['int_2'][100] += 1
+            special_values_instances['int_2'][100] += 1
 
-    assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_occurences['int_1'][0]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_occurences['int_1'][1]
-    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_occurences['int_2'][2]
-    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_occurences['int_2'][100]
+    assert (1 - eps) * int(num_configs * bias_percentage) <= special_values_instances['int_1'][0]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances['int_1'][1]
+    assert (1 - eps) * int(num_configs * bias_percentage / 2) <= special_values_instances['int_2'][2]
+    assert (1 - eps) * int(num_configs * bias_percentage * 1.5) <= special_values_instances['int_2'][100]
 
 
 def test_max_unique_values_per_param():
@@ -313,7 +313,7 @@ def test_max_unique_values_per_param():
 ]))
 def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: dict):  # pylint: disable=too-many-locals
     """
-    Tests LlamaTune's approximate high-to-low space projection method, using pseudoinverse.
+    Tests LlamaTune's approximate high-to-low space projection method, using pseudo-inverse.
     """
     input_space = construct_parameter_space(**param_space_kwargs)
 
@@ -370,7 +370,7 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
     adapter = LlamaTuneAdapter(input_space, num_low_dims=num_low_dims, special_param_values=special_param_values,
                                max_unique_values_per_param=max_unique_values_per_param)
 
-    special_value_occurences = {
+    special_value_occurrences = {
         param: {special_value: 0 for special_value, _ in tuples_list}
         for param, tuples_list in adapter._special_param_values_dict.items()    # pylint: disable=protected-access
     }
@@ -392,19 +392,19 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
         assert target_config == config
 
         for param, value in orig_config.items():
-            # Keep track of special value occurences
-            if param in special_value_occurences:
-                if value in special_value_occurences[param]:
-                    special_value_occurences[param][value] += 1
+            # Keep track of special value occurrences
+            if param in special_value_occurrences:
+                if value in special_value_occurrences[param]:
+                    special_value_occurrences[param][value] += 1
 
             # Keep track of unique values generated for each parameter
             unique_values_dict[param].add(value)
 
-    # Ensure that occurences of special values do not significantly deviate from expected
+    # Ensure that occurrences of special values do not significantly deviate from expected
     eps = 0.2
     for param, tuples_list in adapter._special_param_values_dict.items():  # pylint: disable=protected-access
         for value, bias_percentage in tuples_list:
-            assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurences[param][value]
+            assert (1 - eps) * int(num_configs * bias_percentage) <= special_value_occurrences[param][value]
 
     # Ensure that number of unique values is less than the maximum number allowed
     for _, unique_values in unique_values_dict.items():
