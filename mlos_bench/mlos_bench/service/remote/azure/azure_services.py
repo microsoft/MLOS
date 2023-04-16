@@ -14,7 +14,7 @@ from typing import Callable, List, Tuple
 
 import requests
 
-from mlos_bench.environment import Status
+from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.service.types.os_operations_type import SupportsOSOps

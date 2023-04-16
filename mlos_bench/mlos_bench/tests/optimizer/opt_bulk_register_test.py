@@ -10,7 +10,7 @@ from typing import Optional, List
 
 import pytest
 
-from mlos_bench.environment import Status
+from mlos_bench.environment.status import Status
 from mlos_bench.optimizer import Optimizer, MockOptimizer, MlosCoreOptimizer
 
 # pylint: disable=redefined-outer-name

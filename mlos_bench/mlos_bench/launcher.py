@@ -11,7 +11,7 @@ import argparse
 
 from typing import List, Dict, Any
 
-from mlos_bench.environment import Environment
+from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.local.local_exec import LocalExecService
 from mlos_bench.service.config_persistence import ConfigPersistenceService
 

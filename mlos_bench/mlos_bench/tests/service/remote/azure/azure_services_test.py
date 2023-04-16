@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mlos_bench.environment import Status
+from mlos_bench.environment.status import Status
 
 from mlos_bench.service.remote.azure.azure_services import AzureVMService
 

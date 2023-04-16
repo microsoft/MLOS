@@ -16,7 +16,6 @@ if TYPE_CHECKING:
 
 @runtime_checkable
 class SupportsRemoteExec(Protocol):
-    # pylint: disable=too-few-public-methods
     """
     Protocol interface for Service types that provide helper functions to run
     scripts on a remote host OS.
@@ -40,4 +39,22 @@ class SupportsRemoteExec(Protocol):
         result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+
+    def get_remote_exec_results(self, params: dict) -> Tuple["Status", dict]:
+        """
+        Get the results of the asynchronously running command.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """

@@ -23,9 +23,33 @@ class VMEnv(Environment):
     "Remote" VM environment.
     """
 
-    def __init__(self, name: str, config: dict, global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None, service: Optional[Service] = None):
+    def __init__(self,
+                 name: str,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None,
+                 service: Optional[Service] = None):
         # pylint: disable=too-many-arguments
+        """
+        Create a new environment for VM operations.
+
+        Parameters
+        ----------
+        name: str
+            Human-readable name of the environment.
+        config : dict
+            Free-format dictionary that contains the benchmark environment
+            configuration. Each config must have at least the "tunable_params"
+            and the "const_args" sections.
+        global_config : dict
+            Free-format dictionary of global parameters (e.g., security credentials)
+            to be mixed in into the "const_args" section of the local config.
+        tunables : TunableGroups
+            A collection of tunable parameters for *all* environments.
+        service: Service
+            An optional service object (e.g., providing methods to
+            deploy or reboot a VM, etc.).
+        """
         super().__init__(name, config, global_config, tunables, service)
 
         assert self._service is not None and isinstance(self._service, SupportsVMOps), \

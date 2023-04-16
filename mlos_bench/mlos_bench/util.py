@@ -52,7 +52,7 @@ def prepare_class_load(config: dict, global_config: Optional[dict] = None) -> Tu
 if TYPE_CHECKING:
     from mlos_bench.environment.base_environment import Environment
     from mlos_bench.service.base_service import Service
-    from mlos_bench.optimizer import Optimizer
+    from mlos_bench.optimizer.base_optimizer import Optimizer
 
 # T is a generic with a constraint of the three base classes.
 T = TypeVar('T', "Environment", "Service", "Optimizer")

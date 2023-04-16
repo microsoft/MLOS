@@ -8,8 +8,8 @@ Unit tests for mock mlos_bench optimizer.
 
 import pytest
 
-from mlos_bench.environment import Status
-from mlos_bench.optimizer import MockOptimizer
+from mlos_bench.environment.status import Status
+from mlos_bench.optimizer.mock_optimizer import MockOptimizer
 
 # pylint: disable=redefined-outer-name
 

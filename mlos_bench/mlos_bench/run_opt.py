@@ -14,8 +14,9 @@ from typing import Tuple
 import logging
 
 from mlos_bench.launcher import Launcher
-from mlos_bench.optimizer import Optimizer
-from mlos_bench.environment import Status, Environment
+from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.environment.base_environment import Environment
+from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)

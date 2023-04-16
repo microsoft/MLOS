@@ -8,7 +8,7 @@ Unit tests for mock benchmark environment.
 
 import pytest
 
-from mlos_bench.environment import MockEnv
+from mlos_bench.environment.mock_env import MockEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
