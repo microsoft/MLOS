@@ -17,14 +17,13 @@ import requests
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.service.types.os_operations_type import SupportsOSOps
 from mlos_bench.service.types.vm_provisioner_type import SupportsVMOps
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service, SupportsVMOps, SupportsOSOps, SupportsRemoteExec):  # pylint: disable=too-many-instance-attributes
+class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: disable=too-many-instance-attributes
     """
     Helper methods to manage VMs on Azure.
     """
@@ -137,7 +136,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsOSOps, SupportsRemoteExec):
             self.vm_start,
             self.vm_stop,
             self.vm_deprovision,
-            self.vm_reboot,
+            self.vm_restart,
             self.remote_exec,
             self.get_remote_exec_results
         ])
@@ -511,7 +510,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsOSOps, SupportsRemoteExec):
         _LOG.info("Deprovision VM: %s", self.config["vmName"])
         return self._azure_vm_post_helper(self._url_stop)
 
-    def vm_reboot(self) -> Tuple[Status, dict]:
+    def vm_restart(self) -> Tuple[Status, dict]:
         """
         Reboot the VM on Azure by initiating a graceful shutdown.
 

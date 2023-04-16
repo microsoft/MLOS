@@ -9,7 +9,7 @@ OS Autotune main optimization loop.
 See `--help` output for details.
 """
 
-from typing import Tuple
+from typing import Tuple, Union
 
 import logging
 
@@ -44,7 +44,7 @@ def _main() -> None:
     _LOG.info("Final result: %s", result)
 
 
-def _optimize(env: Environment, opt: Optimizer, no_teardown: bool) -> Tuple[float, TunableGroups]:
+def _optimize(env: Environment, opt: Optimizer, no_teardown: bool) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
     """
     Main optimization loop.
     """

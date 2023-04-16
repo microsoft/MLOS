@@ -9,7 +9,7 @@ Mock optimizer for mlos_bench.
 import random
 import logging
 
-from typing import Callable, Dict, List, Optional, Tuple, Union
+from typing import Callable, Dict, Optional, Sequence, Tuple, Union
 
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable import Tunable, TunableValue
@@ -36,8 +36,8 @@ class MockOptimizer(Optimizer):
         self._best_config: Optional[TunableGroups] = None
         self._best_score: Optional[float] = None
 
-    def bulk_register(self, configs: List[dict], scores: List[Optional[float]],
-                      status: Optional[List[Status]] = None) -> bool:
+    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+                      status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
         if status is None:

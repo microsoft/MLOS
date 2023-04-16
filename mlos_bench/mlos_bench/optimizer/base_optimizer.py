@@ -8,7 +8,7 @@ and mlos_core optimizers.
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.environment.status import Status
@@ -112,18 +112,18 @@ class Optimizer(metaclass=ABCMeta):
         return self._opt_target
 
     @abstractmethod
-    def bulk_register(self, configs: List[dict], scores: List[Optional[float]],
-                      status: Optional[List[Status]] = None) -> bool:
+    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+                      status: Optional[Sequence[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
         Parameters
         ----------
-        configs : List[dict]
+        configs : Sequence[dict]
             Records of tunable values from other experiments.
-        scores : List[float]
+        scores : Sequence[float]
             Benchmark results from experiments that correspond to `configs`.
-        status : Optional[List[float]]
+        status : Optional[Sequence[float]]
             Status of the experiments that correspond to `configs`.
 
         Returns

@@ -7,7 +7,7 @@ A wrapper for mlos_core optimizers for mlos_bench.
 """
 
 import logging
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
@@ -47,8 +47,8 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
-    def bulk_register(self, configs: List[dict], scores: List[Optional[float]],
-                      status: Optional[List[Status]] = None) -> bool:
+    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+                      status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
         tunables_names = list(self._tunables.get_param_values().keys())

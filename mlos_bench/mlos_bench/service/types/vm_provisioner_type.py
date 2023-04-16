@@ -83,9 +83,9 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_deprovision(self) -> Tuple["Status", dict]:
+    def vm_restart(self) -> Tuple["Status", dict]:
         """
-        Deallocates the VM by shutting it down then releasing the compute resources.
+        Restarts the VM by initiating a graceful shutdown.
 
         Returns
         -------
@@ -94,9 +94,9 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_reboot(self) -> Tuple["Status", dict]:
+    def vm_deprovision(self) -> Tuple["Status", dict]:
         """
-        Reboot the VM by initiating a graceful shutdown.
+        Deallocates the VM by shutting it down then releasing the compute resources.
 
         Returns
         -------

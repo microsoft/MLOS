@@ -41,6 +41,9 @@ setup(
     name='mlos-bench',
     version=_VERSION,
     packages=find_packages(),
+    package_data={
+        'mlos_bench': ['py.typed'],
+    },
     install_requires=[
         'mlos-core==' + _VERSION,
         'requests',

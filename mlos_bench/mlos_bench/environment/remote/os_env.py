@@ -13,7 +13,6 @@ import logging
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.types.os_operations_type import SupportsOSOps
 from mlos_bench.service.types.vm_provisioner_type import SupportsVMOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -55,10 +54,6 @@ class OSEnv(Environment):
             deploy or reboot a VM, etc.).
         """
         super().__init__(name, config, global_config, tunables, service)
-
-        assert self._service is not None and isinstance(self._service, SupportsOSOps), \
-            "OSEnv requires a service that supports OS operations"
-        self._os_service: SupportsOSOps = self._service
 
         # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
         assert self._service is not None and isinstance(self._service, SupportsVMOps), \

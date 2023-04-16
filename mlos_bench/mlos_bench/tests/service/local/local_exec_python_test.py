@@ -5,11 +5,15 @@
 """
 Unit tests for LocalExecService to run Python scripts locally.
 """
+
+from typing import Dict
+
 import os
 import json
 
 import pytest
 
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.service.local.local_exec import LocalExecService
 from mlos_bench.service.config_persistence import ConfigPersistenceService
 
@@ -34,7 +38,7 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
     output_file = "./config-kernel.sh"
 
     # Tunable parameters to save in JSON
-    params = {
+    params: Dict[str, TunableValue] = {
         "sched_migration_cost_ns": 40000,
         "sched_granularity_ns": 800000
     }

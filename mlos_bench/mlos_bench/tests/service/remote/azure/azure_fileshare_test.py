@@ -26,13 +26,13 @@ def test_download_file(mock_makedirs: MagicMock, mock_open: MagicMock, azure_fil
     local_path = f"{local_folder}/{filename}"
     # pylint: disable=protected-access
     mock_share_client = azure_fileshare._share_client
-    mock_share_client.get_directory_client.return_value = Mock(
+    mock_share_client.get_directory_client.return_value = Mock(     # type: ignore[attr-defined]
         exists=Mock(return_value=False)
     )
 
     azure_fileshare.download(remote_path, local_path)
 
-    mock_share_client.get_file_client.assert_called_with(remote_path)
+    mock_share_client.get_file_client.assert_called_with(remote_path)   # type: ignore[attr-defined]
     mock_makedirs.assert_called_with(
         local_folder,
         exist_ok=True,
@@ -76,14 +76,14 @@ def test_download_folder_non_recursive(mock_makedirs: MagicMock,
     dir_client_returns = make_dir_client_returns(remote_folder)
     # pylint: disable=protected-access
     mock_share_client = azure_fileshare._share_client
-    mock_share_client.get_directory_client.side_effect = lambda x: dir_client_returns[x]
+    mock_share_client.get_directory_client.side_effect = lambda x: dir_client_returns[x]    # type: ignore[attr-defined]
 
     azure_fileshare.download(remote_folder, local_folder, recursive=False)
 
-    mock_share_client.get_file_client.assert_called_with(
+    mock_share_client.get_file_client.assert_called_with(   # type: ignore[attr-defined]
         f"{remote_folder}/a_file_1.csv",
     )
-    mock_share_client.get_directory_client.assert_has_calls([
+    mock_share_client.get_directory_client.assert_has_calls([   # type: ignore[attr-defined]
         call(remote_folder),
         call(f"{remote_folder}/a_file_1.csv"),
     ], any_order=True)
@@ -97,15 +97,15 @@ def test_download_folder_recursive(mock_makedirs: MagicMock, mock_open: MagicMoc
     dir_client_returns = make_dir_client_returns(remote_folder)
     # pylint: disable=protected-access
     mock_share_client = azure_fileshare._share_client
-    mock_share_client.get_directory_client.side_effect = lambda x: dir_client_returns[x]
+    mock_share_client.get_directory_client.side_effect = lambda x: dir_client_returns[x]    # type: ignore[attr-defined]
 
     azure_fileshare.download(remote_folder, local_folder, recursive=True)
 
-    mock_share_client.get_file_client.assert_has_calls([
+    mock_share_client.get_file_client.assert_has_calls([    # type: ignore[attr-defined]
         call(f"{remote_folder}/a_file_1.csv"),
         call(f"{remote_folder}/a_folder/a_file_2.csv"),
     ], any_order=True)
-    mock_share_client.get_directory_client.assert_has_calls([
+    mock_share_client.get_directory_client.assert_has_calls([   # type: ignore[attr-defined]
         call(remote_folder),
         call(f"{remote_folder}/a_file_1.csv"),
         call(f"{remote_folder}/a_folder"),
@@ -127,7 +127,7 @@ def test_upload_file(mock_isdir: MagicMock, mock_open: MagicMock, azure_fileshar
 
     azure_fileshare.upload(local_path, remote_path)
 
-    mock_share_client.get_file_client.assert_called_with(remote_path)
+    mock_share_client.get_file_client.assert_called_with(remote_path)   # type: ignore[attr-defined]
     open_path, open_mode = mock_open.call_args.args
     assert os.path.abspath(local_path) == os.path.abspath(open_path)
     assert open_mode == "rb"
@@ -194,7 +194,7 @@ def test_upload_directory_non_recursive(mock_scandir: MagicMock,
 
     azure_fileshare.upload(local_folder, remote_folder, recursive=False)
 
-    mock_share_client.get_file_client.assert_called_with(f"{remote_folder}/a_file_1.csv")
+    mock_share_client.get_file_client.assert_called_with(f"{remote_folder}/a_file_1.csv")   # type: ignore[attr-defined]
 
 
 @patch("mlos_bench.service.remote.azure.azure_fileshare.open")
@@ -215,7 +215,7 @@ def test_upload_directory_recursive(mock_scandir: MagicMock,
 
     azure_fileshare.upload(local_folder, remote_folder, recursive=True)
 
-    mock_share_client.get_file_client.assert_has_calls([
+    mock_share_client.get_file_client.assert_has_calls([    # type: ignore[attr-defined]
         call(f"{remote_folder}/a_file_1.csv"),
         call(f"{remote_folder}/a_folder/a_file_2.csv"),
     ], any_order=True)

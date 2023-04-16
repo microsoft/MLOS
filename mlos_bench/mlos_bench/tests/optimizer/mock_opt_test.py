@@ -49,6 +49,8 @@ def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
         mock_opt.register(tunables, Status.SUCCEEDED, score)
 
     (score, _tunables) = mock_opt.get_best_observation()
+    assert score is not None
+    assert isinstance(score, float)
     return score
 
 
