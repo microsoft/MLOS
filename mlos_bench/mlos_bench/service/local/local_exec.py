@@ -15,23 +15,15 @@ import shlex
 import subprocess
 import logging
 
-from typing import Optional, Tuple, List, Dict, Protocol, runtime_checkable
+from typing import Dict, List, Optional, Tuple, Union
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.local.local_exec_type import SupportsLocalExec
 
 _LOG = logging.getLogger(__name__)
 
 
-@runtime_checkable
-class LocalExec(Protocol):
-    def local_exec(self, script_lines: List[str],
-                   env: Optional[Dict[str, str]] = None,
-                   cwd: Optional[str] = None,
-                   return_on_error: bool = False) -> Tuple[int, str, str]:
-        ...
-
-
-class LocalExecService(Service, LocalExec):
+class LocalExecService(Service, SupportsLocalExec):
     """
     Collection of methods to run scripts and commands in an external process
     on the node acting as the scheduler. Can be useful for data processing
@@ -54,7 +46,7 @@ class LocalExecService(Service, LocalExec):
         self._temp_dir = self.config.get("temp_dir")
         self.register([self.temp_dir_context, self.local_exec])
 
-    def temp_dir_context(self, path: Optional[str] = None):
+    def temp_dir_context(self, path: Optional[str] = None) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
         """
         Create a temp directory or use the provided path.
 

@@ -13,6 +13,7 @@ from typing import Dict, Optional, Tuple
 
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
@@ -99,6 +100,10 @@ class Environment(metaclass=abc.ABCMeta):
         self._service = service
         self._is_ready = False
         self._params: Dict[str, TunableValue] = {}
+
+        self._config_service: SupportsConfigLoading
+        if self._service is not None and isinstance(self._service, SupportsConfigLoading):
+            self._config_service = self._service
 
         if global_config is None:
             global_config = {}

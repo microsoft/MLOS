@@ -17,7 +17,7 @@ import pandas
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.local.local_exec import LocalExec
+from mlos_bench.service.local.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -58,7 +58,10 @@ class LocalEnv(Environment):
             deploy or reboot a VM, etc.).
         """
         super().__init__(name, config, global_config, tunables, service)
-        assert isinstance(service, LocalExec)
+
+        assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
+            "LocalEnv requires a service that supports local execution"
+        self._local_exec_service: SupportsLocalExec = self._service
 
         self._temp_dir = self.config.get("temp_dir")
         self._script_setup = self.config.get("setup")
@@ -107,7 +110,7 @@ class LocalEnv(Environment):
             self._is_ready = True
             return True
 
-        with self._service.temp_dir_context(self._temp_dir) as temp_dir:
+        with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
 
             _LOG.info("Set up the environment locally: %s at %s", self, temp_dir)
 
@@ -118,7 +121,7 @@ class LocalEnv(Environment):
                     json.dump(tunables.get_param_values(self._tunable_params.get_names()),
                               fh_tunables)
 
-            (return_code, _stdout, stderr) = self._service.local_exec(
+            (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
                 self._script_setup, env=self._params, cwd=temp_dir)
 
             if return_code == 0:
@@ -147,10 +150,10 @@ class LocalEnv(Environment):
         if not (status.is_ready and self._script_run):
             return result
 
-        with self._service.temp_dir_context(self._temp_dir) as temp_dir:
+        with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
 
             _LOG.info("Run script locally on: %s at %s", self, temp_dir)
-            (return_code, _stdout, stderr) = self._service.local_exec(
+            (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
                 self._script_run, env=self._params, cwd=temp_dir)
 
             if return_code != 0:
@@ -158,7 +161,7 @@ class LocalEnv(Environment):
                              return_code, stderr)
                 return (Status.FAILED, None)
 
-            data = pandas.read_csv(self._service.resolve_path(
+            data = pandas.read_csv(self._config_service.resolve_path(
                 self._read_results_file, extra_paths=[temp_dir]))
 
             _LOG.debug("Read data:\n%s", data)
@@ -175,6 +178,6 @@ class LocalEnv(Environment):
         """
         if self._script_teardown:
             _LOG.info("Local teardown: %s", self)
-            (status, _) = self._service.local_exec(self._script_teardown, env=self._params)
+            (status, _) = self._local_exec_service.local_exec(self._script_teardown, env=self._params)
             _LOG.info("Local teardown complete: %s :: %s", self, status)
         super().teardown()
