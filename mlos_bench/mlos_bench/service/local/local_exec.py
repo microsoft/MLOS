@@ -18,7 +18,7 @@ import logging
 from typing import Dict, List, Optional, Tuple, Union, TYPE_CHECKING
 
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.local.local_exec_type import SupportsLocalExec
+from mlos_bench.service.types.local_exec_type import SupportsLocalExec
 
 if TYPE_CHECKING:
     from mlos_bench.tunables.tunable import TunableValue

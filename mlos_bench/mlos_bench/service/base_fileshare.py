@@ -11,7 +11,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.fileshare_type import SupportsFileShareOps
+from mlos_bench.service.types.fileshare_type import SupportsFileShareOps
 
 _LOG = logging.getLogger(__name__)
 

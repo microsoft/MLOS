@@ -13,8 +13,8 @@ from string import Template
 from typing import Dict, Generator, List, Optional, Tuple
 
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.local.local_exec_type import SupportsLocalExec
-from mlos_bench.service.fileshare_type import SupportsFileShareOps
+from mlos_bench.service.types.local_exec_type import SupportsLocalExec
+from mlos_bench.service.types.fileshare_type import SupportsFileShareOps
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.local.local_env import LocalEnv
 from mlos_bench.tunables.tunable import TunableValue

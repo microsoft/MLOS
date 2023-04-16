@@ -17,13 +17,14 @@ import pandas
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.local.local_exec_type import SupportsLocalExec
+from mlos_bench.service.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
 
 class LocalEnv(Environment):
+    # pylint: disable=too-many-instance-attributes
     """
     Scheduler-side Environment that runs scripts locally.
     """

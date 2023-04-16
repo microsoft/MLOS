@@ -11,7 +11,7 @@ import logging
 
 from typing import Callable, Dict, List, Optional, Union
 
-from mlos_bench.service.config_loader_type import SupportsConfigLoading
+from mlos_bench.service.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.util import instantiate_from_config
 
 _LOG = logging.getLogger(__name__)

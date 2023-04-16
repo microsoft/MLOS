@@ -13,7 +13,7 @@ from typing import Dict, Optional, Tuple
 
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.config_loader_type import SupportsConfigLoading
+from mlos_bench.service.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
@@ -22,6 +22,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Environment(metaclass=abc.ABCMeta):
+    # pylint: disable=too-many-instance-attributes
     """
     An abstract base of all benchmark environments.
     """

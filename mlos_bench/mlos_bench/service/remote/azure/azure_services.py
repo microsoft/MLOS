@@ -10,7 +10,7 @@ import json
 import time
 import logging
 
-from typing import Any, Tuple, List, Dict, Callable
+from typing import Callable, List, Tuple
 
 import requests
 

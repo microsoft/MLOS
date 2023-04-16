@@ -19,7 +19,7 @@ import json5   # To read configs with comments and other JSON5 syntax features
 from mlos_bench.util import prepare_class_load
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.config_loader_type import SupportsConfigLoading
+from mlos_bench.service.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
