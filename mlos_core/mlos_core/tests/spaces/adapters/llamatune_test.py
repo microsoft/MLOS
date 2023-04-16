@@ -437,7 +437,8 @@ def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_
         # Init adapter and sample points in the low-dim space
         adapter = LlamaTuneAdapter(input_space, num_low_dims=num_target_space_dims, special_param_values=None,
                                    max_unique_values_per_param=None, use_approximate_reverse_mapping=False)
-        return adapter.target_parameter_space.sample_configuration(size=100)    # type: ignore
+        sample_configs: List[CS.Configuration] = adapter.target_parameter_space.sample_configuration(size=100)
+        return sample_configs
 
     assert generate_target_param_space_configs(42) == generate_target_param_space_configs(42)
     assert generate_target_param_space_configs(1234) != generate_target_param_space_configs(42)

@@ -155,7 +155,7 @@ class TestSkoptConversion(BaseConversion):
         return list(config_space.dimension_names)
 
     def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
-        return pd.value_counts(points[:, 0]).values     # type: ignore
+        return pd.value_counts(points[:, 0]).values     # type: ignore[no-any-return, return-value]
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
@@ -210,13 +210,16 @@ class TestEmukitConversion(BaseConversion):
     # can't introspect them correctly.
 
     def sample(self, config_space: emukit.core.ParameterSpace, n_samples: int = 1) -> npt.NDArray:
-        return config_space.sample_uniform(point_count=n_samples)   # type: ignore
+        ret: npt.NDArray = config_space.sample_uniform(point_count=n_samples)
+        return ret
 
     def get_parameter_names(self, config_space: emukit.core.ParameterSpace) -> List[str]:
-        return config_space.parameter_names     # type: ignore
+        ret: List[str] = config_space.parameter_names
+        return ret
 
     def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
-        return np.sum(points, axis=0)   # type: ignore
+        ret: npt.NDArray = np.sum(points, axis=0)
+        return ret
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()

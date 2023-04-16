@@ -64,7 +64,8 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         kwargs = {}
 
     def objective(x: pd.Series) -> npt.ArrayLike:   # pylint: disable=invalid-name
-        return (6 * x - 2)**2 * np.sin(12 * x - 4)  # type: ignore
+        ret: npt.ArrayLike = (6 * x - 2)**2 * np.sin(12 * x - 4)
+        return ret
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(42)
     optimizer = optimizer_class(configuration_space, **kwargs)
@@ -164,7 +165,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
     def objective(point: pd.DataFrame) -> pd.Series:   # pylint: disable=invalid-name
         # Best value can be reached by tuning an 1-dimensional search space
-        return np.sin(point['x'] * point['y'])  # type: ignore
+        ret: pd.Series = np.sin(point['x'] * point['y'])
+        return ret
 
     input_space = CS.ConfigurationSpace(seed=1234)
     # Add two continuous inputs

@@ -144,7 +144,8 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         # TODO return variance in some way
         mean_predictions, _variance_predictions = self.gpbo.model.predict(one_hot)
         # make 2ndim array into column vector
-        return mean_predictions.reshape(-1,)    # type: ignore
+        ret: npt.NDArray = mean_predictions.reshape(-1,)
+        return ret
 
     def acquisition_function(self, configurations: pd.DataFrame,
                              context: Optional[pd.DataFrame] = None) -> Callable:
@@ -271,7 +272,8 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             raise NotImplementedError()
         if self.space_adapter is not None:
             raise NotImplementedError()
-        return self.base_optimizer.models[-1].predict(self._transform(configurations))  # type: ignore
+        ret: npt.NDArray = self.base_optimizer.models[-1].predict(self._transform(configurations))
+        return ret
 
     def acquisition_function(self, configurations: pd.DataFrame,
                              context: Optional[pd.DataFrame] = None) -> Callable:

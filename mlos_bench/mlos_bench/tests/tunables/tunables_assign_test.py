@@ -70,7 +70,7 @@ def test_tunable_assign_str_to_int(tunable_int: Tunable) -> None:
     Check str to int coercion.
     """
     tunable_int.value = "10"
-    assert tunable_int.value == 10      # type: ignore
+    assert tunable_int.value == 10      # type: ignore[comparison-overlap]
 
 
 def test_tunable_assign_str_to_float(tunable_float: Tunable) -> None:
@@ -78,7 +78,7 @@ def test_tunable_assign_str_to_float(tunable_float: Tunable) -> None:
     Check str to float coercion.
     """
     tunable_float.value = "0.5"
-    assert tunable_float.value == 0.5   # type: ignore
+    assert tunable_float.value == 0.5   # type: ignore[comparison-overlap]
 
 
 def test_tunable_assign_float_to_int(tunable_int: Tunable) -> None:

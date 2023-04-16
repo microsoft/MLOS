@@ -105,7 +105,7 @@ class ConfigPersistenceService(Service):
         json_file_name = self.resolve_path(json_file_name)
         _LOG.info("Load config: %s", json_file_name)
         with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
-            return json5.load(fh_json)  # type: ignore
+            return json5.load(fh_json)  # type: ignore[ignore]
 
     def build_environment(self, config: dict,
                           global_config: Optional[dict] = None,
