@@ -68,8 +68,8 @@ class LocalEnv(Environment):
         self._script_run = self.config.get("run")
         self._script_teardown = self.config.get("teardown")
 
-        self._dump_params_file = self.config.get("dump_params_file")
-        self._read_results_file = self.config.get("read_results_file")
+        self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
+        self._read_results_file: Optional[str] = self.config.get("read_results_file")
 
         if self._script_setup is None and \
            self._script_run is None and \
@@ -161,6 +161,7 @@ class LocalEnv(Environment):
                              return_code, stderr)
                 return (Status.FAILED, None)
 
+            assert self._read_results_file is not None
             data = pandas.read_csv(self._config_loader_service.resolve_path(
                 self._read_results_file, extra_paths=[temp_dir]))
 
@@ -168,16 +169,16 @@ class LocalEnv(Environment):
             if len(data) != 1:
                 _LOG.warning("Local run has %d results - returning the last one", len(data))
 
-            data = data.iloc[-1].to_dict()
-            _LOG.info("Local run complete: %s ::\n%s", self, data)
-            return (Status.SUCCEEDED, data)
+            data_dict = data.iloc[-1].to_dict()
+            _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
+            return (Status.SUCCEEDED, data_dict)
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Clean up the local environment.
         """
         if self._script_teardown:
             _LOG.info("Local teardown: %s", self)
-            (status, _) = self._local_exec_service.local_exec(self._script_teardown, env=self._params)
+            (status, _, _) = self._local_exec_service.local_exec(self._script_teardown, env=self._params)
             _LOG.info("Local teardown complete: %s :: %s", self, status)
         super().teardown()
