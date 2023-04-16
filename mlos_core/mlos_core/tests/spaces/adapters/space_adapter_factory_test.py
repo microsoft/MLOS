@@ -28,7 +28,7 @@ def test_concrete_optimizer_type(space_adapter_type: SpaceAdapterType) -> None:
     """
     Test that all optimizer types are listed in the ConcreteOptimizer constraints.
     """
-    assert space_adapter_type.value in ConcreteSpaceAdapter.__constraints__     # type: ignore  # pylint: disable=no-member
+    assert space_adapter_type.value in ConcreteSpaceAdapter.__constraints__     # type: ignore[attr-defined]  # pylint: disable=no-member
 
 
 @pytest.mark.parametrize(('space_adapter_type', 'kwargs'), [
