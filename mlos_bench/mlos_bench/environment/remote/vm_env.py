@@ -10,7 +10,9 @@ from typing import Optional
 
 import logging
 
-from mlos_bench.environment import Environment
+from mlos_bench.environment.base_environment import Environment
+from mlos_bench.service.base_service import Service
+from mlos_bench.service.types.vm_provisioner_type import SupportsVMOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -20,6 +22,15 @@ class VMEnv(Environment):
     """
     "Remote" VM environment.
     """
+
+    def __init__(self, name: str, config: dict, global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None, service: Optional[Service] = None):
+        # pylint: disable=too-many-arguments
+        super().__init__(name, config, global_config, tunables, service)
+
+        assert self._service is not None and isinstance(self._service, SupportsVMOps), \
+            "VMEnv requires a service that supports VM operations"
+        self._vm_service: SupportsVMOps = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -45,21 +56,21 @@ class VMEnv(Environment):
         if not super().setup(tunables, global_config):
             return False
 
-        (status, params) = self._service.vm_provision(self._params)
+        (status, params) = self._vm_service.vm_provision(self._params)
         if status.is_pending:
-            (status, _) = self._service.wait_vm_deployment(True, params)
+            (status, _) = self._vm_service.wait_vm_deployment(True, params)
 
         self._is_ready = status.is_succeeded
         return self._is_ready
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Shut down the VM and release it.
         """
         _LOG.info("VM tear down: %s", self)
-        (status, params) = self._service.vm_deprovision()
+        (status, params) = self._vm_service.vm_deprovision()
         if status.is_pending:
-            (status, _) = self._service.wait_vm_deployment(False, params)
+            (status, _) = self._vm_service.wait_vm_deployment(False, params)
 
         super().teardown()
         _LOG.debug("Final status of VM deprovisioning: %s :: %s", self, status)
