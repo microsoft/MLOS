@@ -161,7 +161,7 @@ class LocalEnv(Environment):
                              return_code, stderr)
                 return (Status.FAILED, None)
 
-            data = pandas.read_csv(self._config_service.resolve_path(
+            data = pandas.read_csv(self._config_loader_service.resolve_path(
                 self._read_results_file, extra_paths=[temp_dir]))
 
             _LOG.debug("Read data:\n%s", data)

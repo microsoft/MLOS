@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Tuple, Union, Protocol, runtime_checkab
 if TYPE_CHECKING:
     import tempfile
     import contextlib
+    from mlos_bench.tunables.tunable import TunableValue
 
 
 @runtime_checkable
@@ -26,7 +27,7 @@ class SupportsLocalExec(Protocol):
     """
 
     def local_exec(self, script_lines: List[str],
-                   env: Optional[Dict[str, str]] = None,
+                   env: Optional[Dict[str, "TunableValue"]] = None,
                    cwd: Optional[str] = None,
                    return_on_error: bool = False) -> Tuple[int, str, str]:
         """
@@ -37,7 +38,7 @@ class SupportsLocalExec(Protocol):
         script_lines : List[str]
             Lines of the script to run locally.
             Treat every line as a separate command to run.
-        env : Dict[str, str]
+        env : Dict[str, Union[int, float, str]]
             Environment variables (optional).
         cwd : str
             Work directory to run the script at.

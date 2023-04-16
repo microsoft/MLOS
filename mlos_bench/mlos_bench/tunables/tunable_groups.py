@@ -7,7 +7,7 @@ TunableGroups definition.
 """
 import copy
 
-from typing import Any, Dict, Generator, List, Iterable, Optional, Tuple
+from typing import Any, Dict, Generator, Iterable, Optional, Tuple
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
@@ -163,7 +163,7 @@ class TunableGroups:
         """
         return self._tunable_groups.keys()
 
-    def subgroup(self, group_names: List[str]) -> "TunableGroups":
+    def subgroup(self, group_names: Iterable[str]) -> "TunableGroups":
         """
         Select the covariance groups from the current set and create a new
         TunableGroups object that consists of those covariance groups.
@@ -184,7 +184,7 @@ class TunableGroups:
             tunables._add_group(self._tunable_groups[name])
         return tunables
 
-    def get_param_values(self, group_names: Optional[List[str]] = None,
+    def get_param_values(self, group_names: Optional[Iterable[str]] = None,
                          into_params: Optional[Dict[str, Any]] = None) -> Dict[str, TunableValue]:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
@@ -203,14 +203,14 @@ class TunableGroups:
             Flat dict of all parameters and their values from given covariance groups.
         """
         if group_names is None:
-            group_names = list(self.get_names())
+            group_names = self.get_names()
         if into_params is None:
             into_params = {}
         for name in group_names:
             into_params.update(self._tunable_groups[name].get_values())
         return into_params
 
-    def is_updated(self, group_names: Optional[List[str]] = None) -> bool:
+    def is_updated(self, group_names: Optional[Iterable[str]] = None) -> bool:
         """
         Check if any of the given covariant tunable groups has been updated.
 
@@ -227,7 +227,7 @@ class TunableGroups:
         return any(self._tunable_groups[name].is_updated()
                    for name in (group_names or self.get_names()))
 
-    def reset(self, group_names: Optional[List[str]] = None) -> "TunableGroups":
+    def reset(self, group_names: Optional[Iterable[str]] = None) -> "TunableGroups":
         """
         Clear the update flag of given covariant groups.
 

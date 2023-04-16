@@ -101,9 +101,9 @@ class Environment(metaclass=abc.ABCMeta):
         self._is_ready = False
         self._params: Dict[str, TunableValue] = {}
 
-        self._config_service: SupportsConfigLoading
+        self._config_loader_service: SupportsConfigLoading
         if self._service is not None and isinstance(self._service, SupportsConfigLoading):
-            self._config_service = self._service
+            self._config_loader_service = self._service
 
         if global_config is None:
             global_config = {}

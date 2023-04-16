@@ -11,6 +11,7 @@ import logging
 
 from typing import Callable, Dict, List, Optional, Union
 
+from mlos_bench.service.config_loader_type import SupportsConfigLoading
 from mlos_bench.util import instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
@@ -65,6 +66,10 @@ class Service:
 
         if parent:
             self.register(parent.export())
+
+        self._config_loader_service: SupportsConfigLoading
+        if parent and isinstance(parent, SupportsConfigLoading):
+            self._config_loader_service = parent
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Service: %s Config:\n%s",
