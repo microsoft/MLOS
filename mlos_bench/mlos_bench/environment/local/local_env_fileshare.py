@@ -13,6 +13,7 @@ from string import Template
 from typing import Optional, Dict, List, Tuple, Any
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.local.local_exec_type import SupportsLocalExec
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.local.local_env import LocalEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -57,6 +58,11 @@ class LocalFileShareEnv(LocalEnv):
             deploy or reboot a VM, etc.).
         """
         super().__init__(name, config, global_config, tunables, service)
+
+        assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
+            "LocalEnv requires a service that supports local execution"
+        self._local_exec_service: SupportsLocalExec = self._service
+
         self._upload = self._template_from_to("upload")
         self._download = self._template_from_to("download")
 
@@ -102,7 +108,7 @@ class LocalFileShareEnv(LocalEnv):
             True if operation is successful, false otherwise.
         """
         prev_temp_dir = self._temp_dir
-        with self._service.temp_dir_context(self._temp_dir) as self._temp_dir:
+        with self._local_exec_service.temp_dir_context(self._temp_dir) as self._temp_dir:
             # Override _temp_dir so that setup and upload both use the same path.
             self._is_ready = super().setup(tunables, global_config)
             if self._is_ready:
@@ -128,7 +134,7 @@ class LocalFileShareEnv(LocalEnv):
             be in the `score` field.
         """
         prev_temp_dir = self._temp_dir
-        with self._service.temp_dir_context(self._temp_dir) as self._temp_dir:
+        with self._local_exec_service.temp_dir_context(self._temp_dir) as self._temp_dir:
             # Override _temp_dir so that download and run both use the same path.
             params = self._params.copy()
             params["PWD"] = self._temp_dir
