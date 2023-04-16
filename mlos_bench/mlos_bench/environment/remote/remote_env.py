@@ -130,7 +130,7 @@ class RemoteEnv(Environment):
         _LOG.info("Remote run complete: %s :: %s", self, result)
         return result
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Clean up and shut down the remote environment.
         """
