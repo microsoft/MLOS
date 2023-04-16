@@ -10,12 +10,14 @@ and upload/download data to the shared storage.
 import logging
 
 from string import Template
-from typing import Optional, Dict, List, Tuple, Any
+from typing import Dict, Generator, List, Optional, Tuple
 
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.local.local_exec_type import SupportsLocalExec
+from mlos_bench.service.fileshare_type import SupportsFileShareOps
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.local.local_env import LocalEnv
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -63,6 +65,10 @@ class LocalFileShareEnv(LocalEnv):
             "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
 
+        assert self._service is not None and isinstance(self._service, SupportsFileShareOps), \
+            "LocalEnv requires a service that supports file upload/download operations"
+        self._file_share_service: SupportsFileShareOps = self._service
+
         self._upload = self._template_from_to("upload")
         self._download = self._template_from_to("download")
 
@@ -77,7 +83,8 @@ class LocalFileShareEnv(LocalEnv):
         ]
 
     @staticmethod
-    def _expand(from_to: List[Tuple[Template, Template]], params: Dict[str, Any]):
+    def _expand(from_to: List[Tuple[Template, Template]],
+                params: Dict[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
         Return a generator of (str, str) pairs of paths.
@@ -115,7 +122,7 @@ class LocalFileShareEnv(LocalEnv):
                 params = self._params.copy()
                 params["PWD"] = self._temp_dir
                 for (path_from, path_to) in self._expand(self._upload, params):
-                    self._service.upload(self._config_loader_service.resolve_path(
+                    self._file_share_service.upload(self._config_loader_service.resolve_path(
                         path_from, extra_paths=[self._temp_dir]), path_to)
             self._temp_dir = prev_temp_dir
             return self._is_ready
@@ -139,7 +146,7 @@ class LocalFileShareEnv(LocalEnv):
             params = self._params.copy()
             params["PWD"] = self._temp_dir
             for (path_from, path_to) in self._expand(self._download, params):
-                self._service.download(
+                self._file_share_service.download(
                     path_from, self._config_loader_service.resolve_path(
                         path_to, extra_paths=[self._temp_dir]))
             result = super().run()

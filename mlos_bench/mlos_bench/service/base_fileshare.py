@@ -11,11 +11,12 @@ import logging
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.fileshare_type import SupportsFileShareOps
 
 _LOG = logging.getLogger(__name__)
 
 
-class FileShareService(Service, metaclass=ABCMeta):
+class FileShareService(SupportsFileShareOps, Service, metaclass=ABCMeta):
     """
     An abstract base of all file shares.
     """
