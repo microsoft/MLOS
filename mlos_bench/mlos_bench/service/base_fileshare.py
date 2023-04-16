@@ -16,7 +16,7 @@ from mlos_bench.service.types.fileshare_type import SupportsFileShareOps
 _LOG = logging.getLogger(__name__)
 
 
-class FileShareService(SupportsFileShareOps, Service, metaclass=ABCMeta):
+class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
     """
     An abstract base of all file shares.
     """
