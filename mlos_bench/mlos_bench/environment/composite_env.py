@@ -49,18 +49,18 @@ class CompositeEnv(Environment):
         self._children: List[Environment] = []
 
         for child_config_file in config.get("include_children", []):
-            for env in self._service.load_environment_list(
+            for env in self._config_loader_service.load_environment_list(
                     child_config_file, global_config, tunables, self._service):
                 self._add_child(env)
 
         for child_config in config.get("children", []):
-            self._add_child(self._service.build_environment(
+            self._add_child(self._config_loader_service.build_environment(
                 child_config, global_config, tunables, self._service))
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
 
-    def _add_child(self, env: Environment):
+    def _add_child(self, env: Environment) -> None:
         """
         Add a new child environment to the composite environment.
         This method is called from the constructor only.
@@ -92,7 +92,7 @@ class CompositeEnv(Environment):
         )
         return self._is_ready
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Tear down the children environments. This method is idempotent,
         i.e., calling it several times is equivalent to a single call.
