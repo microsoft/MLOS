@@ -115,7 +115,7 @@ class LocalFileShareEnv(LocalEnv):
                 params = self._params.copy()
                 params["PWD"] = self._temp_dir
                 for (path_from, path_to) in self._expand(self._upload, params):
-                    self._service.upload(self._service.resolve_path(
+                    self._service.upload(self._config_loader_service.resolve_path(
                         path_from, extra_paths=[self._temp_dir]), path_to)
             self._temp_dir = prev_temp_dir
             return self._is_ready
@@ -140,7 +140,7 @@ class LocalFileShareEnv(LocalEnv):
             params["PWD"] = self._temp_dir
             for (path_from, path_to) in self._expand(self._download, params):
                 self._service.download(
-                    path_from, self._service.resolve_path(
+                    path_from, self._config_loader_service.resolve_path(
                         path_to, extra_paths=[self._temp_dir]))
             result = super().run()
             self._temp_dir = prev_temp_dir
