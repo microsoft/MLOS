@@ -119,10 +119,10 @@ build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
 
 .PHONY: dmypy
-dmypy: scripts/dmypy-wrapper.sh setup.cfg
-	scripts/dmypy-wrapper.sh
+dmypy: scripts/dmypy-wrapper.sh setup.cfg build/conda-env.${CONDA_ENV_NAME}.build-stamp
+	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh
 
-build/mypy.%.${CONDA_ENV_NAME}.build-stamp: dmypy build/conda-env.${CONDA_ENV_NAME}.build-stamp
+build/mypy.%.${CONDA_ENV_NAME}.build-stamp: dmypy
 	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh $(filter-out dmypy build/conda-env.${CONDA_ENV_NAME}.build-stamp,$+)
 	touch $@
 
