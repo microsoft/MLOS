@@ -13,7 +13,7 @@ from mlos_bench.environment import Status
 # pylint: disable=redefined-outer-name
 
 
-def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment):
+def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment) -> None:
     """
     Try to retrieve old experimental data from the empty storage.
     """
@@ -22,7 +22,7 @@ def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment):
     assert not scores
 
 
-def test_exp_pending_empty(exp_storage_memory_sql: Storage.Experiment):
+def test_exp_pending_empty(exp_storage_memory_sql: Storage.Experiment) -> None:
     """
     Try to retrieve pending experiments from the empty storage.
     """
@@ -31,7 +31,7 @@ def test_exp_pending_empty(exp_storage_memory_sql: Storage.Experiment):
 
 
 def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,
-                           tunable_groups: TunableGroups):
+                           tunable_groups: TunableGroups) -> None:
     """
     Start a trial and check that it is pending.
     """
@@ -42,7 +42,7 @@ def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,
 
 
 def test_exp_trial_pending_many(exp_storage_memory_sql: Storage.Experiment,
-                                tunable_groups: TunableGroups):
+                                tunable_groups: TunableGroups) -> None:
     """
     Start THREE trials and check that both are pending.
     """
@@ -59,7 +59,7 @@ def test_exp_trial_pending_many(exp_storage_memory_sql: Storage.Experiment,
 
 
 def test_exp_trial_pending_fail(exp_storage_memory_sql: Storage.Experiment,
-                                tunable_groups: TunableGroups):
+                                tunable_groups: TunableGroups) -> None:
     """
     Start a trial, fail it, and and check that it is NOT pending.
     """
@@ -70,7 +70,7 @@ def test_exp_trial_pending_fail(exp_storage_memory_sql: Storage.Experiment,
 
 
 def test_exp_trial_success(exp_storage_memory_sql: Storage.Experiment,
-                           tunable_groups: TunableGroups):
+                           tunable_groups: TunableGroups) -> None:
     """
     Start a trial, finish it successfully, and and check that it is NOT pending.
     """
@@ -81,7 +81,7 @@ def test_exp_trial_success(exp_storage_memory_sql: Storage.Experiment,
 
 
 def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,
-                             tunable_groups: TunableGroups):
+                             tunable_groups: TunableGroups) -> None:
     """
     Start THREE trials, let one succeed, another one fail and keep one not updated.
     Check that one is still pending another one can be loaded into the optimizer.

@@ -89,7 +89,7 @@ class Storage(metaclass=ABCMeta):
             _LOG.debug("Starting experiment: %s", self)
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+        def __exit__(self, exc_type, exc_val, exc_tb):
             """
             End the context of the experiment.
             """
@@ -129,7 +129,8 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def trial(self, tunables: TunableGroups, config: Optional[Dict[str, Any]] = None):
+        def trial(self, tunables: TunableGroups,
+                  config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
             """
             Create a new experiment run in the storage.
 
@@ -217,7 +218,8 @@ class Storage(metaclass=ABCMeta):
             return {self._opt_target: value} if isinstance(value, (float, int)) else value
 
         @abstractmethod
-        def update_telemetry(self, status: Status, value: Optional[Dict[str, Any]] = None):
+        def update_telemetry(self, status: Status,
+                             value: Optional[Dict[str, Any]] = None) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 

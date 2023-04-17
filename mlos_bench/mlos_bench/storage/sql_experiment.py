@@ -111,15 +111,14 @@ class Experiment(Storage.Experiment):
             return (configs, scores)
 
     @staticmethod
-    def _get_params(conn: Connection, table: Table,
-                    **kwargs: Dict[str, Any]) -> Dict[str, Any]:
+    def _get_params(conn: Connection, table: Table, **kwargs: Any) -> Dict[str, Any]:
         cur_params = conn.execute(table.select().where(*[
             column(key) == val for (key, val) in kwargs.items()]))
         return {row.param_id: row.param_value for row in cur_params.fetchall()}
 
     @staticmethod
     def _save_params(conn: Connection, table: Table,
-                     params: Dict[str, Any], **kwargs: Dict[str, Any]) -> None:
+                     params: Dict[str, Any], **kwargs: Any) -> None:
         conn.execute(table.insert(), [
             {
                 **kwargs,

@@ -11,7 +11,7 @@ from mlos_bench.tunables import TunableGroups
 
 
 def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,
-                           tunable_groups: TunableGroups):
+                           tunable_groups: TunableGroups) -> None:
     """
     Schedule a trial and check that it is pending and has the right configuration.
     """
