@@ -6,9 +6,16 @@
 
 # A quick script to start a local webserver for testing the sphinx documentation.
 
+set -eu
+
 scriptpath=$(readlink -f "$0")
 scriptdir=$(dirname "$scriptpath")
 cd "$scriptdir"
+
+if [ -f ../.devcontainer/.env ]; then
+    source ../.devcontainer/.env
+fi
+NGINX_PORT="${NGINX_PORT:-81}"
 
 # Make it work inside a devcontainer too.
 repo_root=$(readlink -f "$scriptdir/..")
@@ -16,23 +23,29 @@ if [ -n "${LOCAL_WORKSPACE_FOLDER:-}" ]; then
     repo_root="$LOCAL_WORKSPACE_FOLDER"
 fi
 
-if [ "$1" == 'start' ]; then
+cmd="${1:-}"
+
+if [ "$cmd" == 'start' ]; then
     set -x
+    tmpdir=$(mktemp -d)
     docker build --progress=plain -t mlos-doc-nginx \
         --build-arg http_proxy=$http_proxy \
         --build-arg https_proxy=$https_proxy \
         --build-arg no_proxy=$no_proxy \
-        -f Dockerfile /dev/null
+        --build-arg NGINX_PORT=$NGINX_PORT \
+        -f Dockerfile "$tmpdir"
+    rmdir "$tmpdir"
     docker run -d --name mlos-doc-nginx \
-        -v "$repo_root/doc/nginx-default.conf":/etc/nginx/conf.d/default.conf \
+        -v "$repo_root/doc/nginx-default.conf":/etc/nginx/templates/default.conf.template \
         -v "$repo_root/doc":/doc \
-        -p 8080:81 \
+        --env NGINX_PORT=$NGINX_PORT \
+        -p 8080:$NGINX_PORT \
         mlos-doc-nginx
     set +x
-elif [ "$1" == 'stop' ]; then
+elif [ "$cmd" == 'stop' ]; then
     docker stop mlos-doc-nginx || true
     docker rm mlos-doc-nginx || true
-elif [ "$1" == 'restart' ]; then
+elif [ "$cmd" == 'restart' ]; then
     "$scriptpath" 'stop'
     "$scriptpath" 'start'
 else
