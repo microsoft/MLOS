@@ -155,7 +155,7 @@ class TestSkoptConversion(BaseConversion):
         return list(config_space.dimension_names)
 
     def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
-        return pd.value_counts(points[:, 0]).values     # type: ignore[no-any-return, return-value]
+        return pd.value_counts(points[:, 0]).values     # type: ignore[return-value]
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
