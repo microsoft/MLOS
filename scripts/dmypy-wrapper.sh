@@ -17,7 +17,7 @@ DMYPY_STATUS_ARGS="--status-file $DMYPY_STATUS_FILE"
 DMYPY_START_ARGS=''
 
 while [ -z "${1:-}" ]; do
-    opt="$1"
+    opt="${1:-}"
     case $opt in
         --*)
             DMYPY_START_ARGS+=" $opt"
@@ -37,6 +37,11 @@ dmypy $DMYPY_STATUS_ARGS status >/dev/null || dmypy $DMYPY_STATUS_ARGS start -- 
 # Restart the daemon if the config file has changed.
 if [ setup.cfg -nt /proc/$(cat $DMYPY_STATUS_FILE | jq -e -r .pid) ]; then
     dmypy $DMYPY_STATUS_ARGS restart -- $DMYPY_START_ARGS
+fi
+
+if [ -z "${1:-}" ]; then
+	dmypy status
+	exit $?
 fi
 
 # Check the files passed as arguments.
