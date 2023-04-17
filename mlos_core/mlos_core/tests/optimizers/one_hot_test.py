@@ -45,7 +45,7 @@ def one_hot() -> npt.NDArray:
 
 
 def test_to_1hot(configuration_space: CS.ConfigurationSpace,
-                 data_frame: pd.DataFrame, one_hot: npt.NDArray):
+                 data_frame: pd.DataFrame, one_hot: npt.NDArray) -> None:
     """
     Toy problem to test one-hot encoding.
     """
@@ -54,7 +54,7 @@ def test_to_1hot(configuration_space: CS.ConfigurationSpace,
 
 
 def test_from_1hot(configuration_space: CS.ConfigurationSpace,
-                   data_frame: pd.DataFrame, one_hot: npt.NDArray):
+                   data_frame: pd.DataFrame, one_hot: npt.NDArray) -> None:
     """
     Toy problem to test one-hot decoding.
     """
@@ -62,7 +62,7 @@ def test_from_1hot(configuration_space: CS.ConfigurationSpace,
     assert optimizer._from_1hot(one_hot).to_dict() == data_frame.to_dict()
 
 
-def test_round_trip(configuration_space: CS.ConfigurationSpace, data_frame: pd.DataFrame):
+def test_round_trip(configuration_space: CS.ConfigurationSpace, data_frame: pd.DataFrame) -> None:
     """
     Round-trip test for one-hot-encoding and then decoding a data frame.
     """
@@ -73,7 +73,7 @@ def test_round_trip(configuration_space: CS.ConfigurationSpace, data_frame: pd.D
     assert (df_round_trip.z == data_frame.z).all()
 
 
-def test_round_trip_reverse(configuration_space: CS.ConfigurationSpace, one_hot: npt.NDArray):
+def test_round_trip_reverse(configuration_space: CS.ConfigurationSpace, one_hot: npt.NDArray) -> None:
     """
     Round-trip test for one-hot-decoding and then encoding of a numpy array.
     """

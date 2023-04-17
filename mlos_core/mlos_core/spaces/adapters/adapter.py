@@ -25,7 +25,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         self._orig_parameter_space: ConfigSpace.ConfigurationSpace = orig_parameter_space
         self._random_state = orig_parameter_space.random
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         # pylint: disable=consider-using-f-string
         return "{}(original_parameter_space={}, target_parameter_space={})".format(
             self.__class__.__name__,
