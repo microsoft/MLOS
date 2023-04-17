@@ -14,7 +14,7 @@ import pandas as pd
 from mlos_core.spaces.adapters import IdentityAdapter
 
 
-def test_identity_adapter():
+def test_identity_adapter() -> None:
     """
     Tests identity adapter
     """

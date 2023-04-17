@@ -266,7 +266,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         return ret
 
     # pylint: disable=too-complex,too-many-branches
-    def _validate_special_param_values(self, special_param_values_dict: dict):
+    def _validate_special_param_values(self, special_param_values_dict: dict) -> None:
         """Checks that the user-provided dict of special parameter values is valid.
         And assigns it to the corresponding attribute.
 
@@ -299,7 +299,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 tuple_list = [(value, self.DEFAULT_SPECIAL_PARAM_VALUE_BIASING_PERCENTAGE)]
             elif isinstance(value, tuple) and [type(v) for v in value] == [int, float]:
                 # User specifies both special value and biasing percentage
-                tuple_list = [value]    # type: ignore
+                tuple_list = [value]    # type: ignore[list-item]
             elif isinstance(value, list) and value:
                 if all(isinstance(t, int) for t in value):
                     # User specifies list of special values
@@ -336,7 +336,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
         self._special_param_values_dict = sanitized_dict
 
-    def _try_generate_approx_inverse_mapping(self):
+    def _try_generate_approx_inverse_mapping(self) -> None:
         """Tries to generate an approximate reverse mapping: i.e., from high-dimensional space to the low-dimensional one.
         Reverse mapping is generated using the pseudo-inverse matrix, of original HeSBO projection matrix.
         This mapping can be potentially used to register configurations that were *not* previously suggested by the optimizer.
