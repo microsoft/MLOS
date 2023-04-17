@@ -339,7 +339,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 			-e 'Problems with "include" directive path:' \
 			-e 'duplicate object description' \
 			-e "document isn't included in any toctree" \
-			-e "WARNING: more than one target found for cross-reference" \
+			-e "more than one target found for cross-reference" \
 			-e "toctree contains reference to nonexisting document 'auto_examples/index'" \
 			-e "failed to import function 'create' from module '(SpaceAdapter|Optimizer)Factory'" \
 			-e "No module named '(SpaceAdapter|Optimizer)Factory'" \
