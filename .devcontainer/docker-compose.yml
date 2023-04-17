@@ -21,21 +21,31 @@ services:
 
     env_file: ../.env
 
-    # Runs app on the same network as the nginx container, allows "forwardPorts" in devcontainer.json function.
-    network_mode: service:docs-www
-
-    # Use "forwardPorts" in **devcontainer.json** to forward an app port locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-
   docs-www:
-    image: nginx:latest
+    build:
+      context: ./tmp
+      dockerfile: ../../doc/Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        # This value is picked up automatically from the .env file in the .devcontainer directory
+        # (where docker-compose is run from).
+        # We prep that file automatically with the prep-container-build script.
+        NGINX_PORT: ${NGINX_PORT:-81}
+
+    # Export the port that nginx is listening on for the localhost.
+    # This will map it to a random port to avoid conflicts.
+    # To find which one it's using run `docker ps | grep mlos.*devcontainer-docs-www` and inspect the PORTs column.
+    ports:
+      - "${NGINX_PORT:-81}"
+
     restart: unless-stopped
     volumes:
+      # Our nginx config overrides the default listening port and serving directory.
       - ../doc:/doc
-      - ../doc/nginx-default.conf:/etc/nginx/conf.d/default.conf
-    # Our ngxinx config overrides the default listening port.
-    expose:
-    - 81
+      - ../doc/nginx-default.conf:/etc/nginx/templates/default.conf.template
 
     # Add "forwardPorts": ["81"] to **devcontainer.json** to forward nginx locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
