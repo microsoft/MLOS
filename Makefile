@@ -12,7 +12,7 @@ MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/de
 
 DOCKER := $(shell which docker)
 # Make sure the build directory exists.
-MKDIR_BUILD := $(shell mkdir build || true)
+MKDIR_BUILD := $(shell test -d build || mkdir build)
 
 # Allow overriding the default verbosity of conda for CI jobs.
 #CONDA_INFO_LEVEL ?= -q
