@@ -9,7 +9,7 @@ DB schema definition.
 import logging
 
 from sqlalchemy import (
-    MetaData, Table, Column, Sequence, Integer, String, DateTime,
+    Engine, MetaData, Table, Column, Sequence, Integer, String, DateTime,
     PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint,
 )
 
@@ -25,7 +25,7 @@ class DbSchema:
     A class to define and create the DB schema.
     """
 
-    def __init__(self, engine):
+    def __init__(self, engine: Engine):
         """
         Declare the SQLAlchemy schema for the database.
         """
@@ -134,7 +134,7 @@ class DbSchema:
 
         _LOG.debug("Schema: %s", self._meta)
 
-    def create(self):
+    def create(self) -> 'DbSchema':
         """
         Create the DB schema.
         """

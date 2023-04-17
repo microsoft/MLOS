@@ -11,10 +11,11 @@ import hashlib
 from datetime import datetime
 from typing import Optional, Tuple, List, Dict, Iterator, Any
 
-from sqlalchemy import column, func
+from sqlalchemy import Engine, Connection, Table, column, func
 
 from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.sql_schema import DbSchema
 from mlos_bench.storage.sql_trial import Trial
 
 _LOG = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ class Experiment(Storage.Experiment):
     Logic for retrieving and storing the results of a single experiment.
     """
 
-    def __init__(self, engine, schema, tunables: TunableGroups,
+    def __init__(self, engine: Engine, schema: DbSchema, tunables: TunableGroups,
                  experiment_id: str, trial_id: int, description: str, opt_target: str):
         super().__init__(tunables, experiment_id, trial_id, description, opt_target)
         self._engine = engine
@@ -110,13 +111,15 @@ class Experiment(Storage.Experiment):
             return (configs, scores)
 
     @staticmethod
-    def _get_params(conn, table, **kwargs) -> dict:
+    def _get_params(conn: Connection, table: Table,
+                    **kwargs: Dict[str, Any]) -> Dict[str, Any]:
         cur_params = conn.execute(table.select().where(*[
             column(key) == val for (key, val) in kwargs.items()]))
         return {row.param_id: row.param_value for row in cur_params.fetchall()}
 
     @staticmethod
-    def _save_params(conn, table, params: dict, **kwargs):
+    def _save_params(conn: Connection, table: Table,
+                     params: Dict[str, Any], **kwargs: Dict[str, Any]) -> None:
         conn.execute(table.insert(), [
             {
                 **kwargs,
@@ -140,12 +143,13 @@ class Experiment(Storage.Experiment):
                 config = self._get_params(
                     conn, self._schema.trial_param,
                     exp_id=self._experiment_id, trial_id=trial.trial_id)
-                # Reset .is_updated flag after the assignment:
                 yield Trial(
-                    self._engine, self._tunables.copy().assign(tunables).reset(),
+                    self._engine, self._schema,
+                    # Reset .is_updated flag after the assignment:
+                    self._tunables.copy().assign(tunables).reset(),
                     self._experiment_id, trial.trial_id, self._opt_target, config)
 
-    def _get_config_id(self, conn, tunables: TunableGroups) -> int:
+    def _get_config_id(self, conn: Connection, tunables: TunableGroups) -> int:
         """
         Get the config ID for the given tunables. If the config does not exist,
         create a new record for it.
@@ -182,8 +186,9 @@ class Experiment(Storage.Experiment):
                     self._save_params(
                         conn, self._schema.trial_param, config,
                         exp_id=self._experiment_id, trial_id=self._trial_id)
-                trial = Trial(self._engine, tunables, self._experiment_id,
-                              self._trial_id, self._opt_target, config)
+                trial = Trial(
+                    self._engine, self._schema, tunables, self._experiment_id,
+                    self._trial_id, self._opt_target, config)
                 self._trial_id += 1
                 return trial
             except Exception:

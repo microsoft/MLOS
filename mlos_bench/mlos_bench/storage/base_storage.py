@@ -153,9 +153,8 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, engine, tunables: TunableGroups, experiment_id: str,
-                     trial_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
-            self._engine = engine
+        def __init__(self, tunables: TunableGroups, experiment_id: str, trial_id: int,
+                     opt_target: str, config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
