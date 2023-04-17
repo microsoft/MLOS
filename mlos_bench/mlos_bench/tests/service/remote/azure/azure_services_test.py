@@ -23,7 +23,7 @@ from mlos_bench.service.remote.azure.azure_services import AzureVMService
         ("vm_start", True),
         ("vm_stop", False),
         ("vm_deprovision", False),
-        ("vm_reboot", False),
+        ("vm_restart", False),
     ])
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"), [
