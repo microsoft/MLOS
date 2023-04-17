@@ -147,12 +147,13 @@ class LocalExecService(Service, SupportsLocalExec):
         env: Dict[str, str] = {}
         if env_params:
             env = {key: str(val) for (key, val) in env_params.items()}
-            if sys.platform == 'win32':
-                # A hack to run Python on Windows with env variables set:
-                env_copy = os.environ.copy()
-                env_copy["PYTHONPATH"] = ""
-                env_copy.update(env)
-                env = env_copy
+
+        if sys.platform == 'win32':
+            # A hack to run Python on Windows with env variables set:
+            env_copy = os.environ.copy()
+            env_copy["PYTHONPATH"] = ""
+            env_copy.update(env)
+            env = env_copy
 
         _LOG.info("Run: %s", cmd)
 
