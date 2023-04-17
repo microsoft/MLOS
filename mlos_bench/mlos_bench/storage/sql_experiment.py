@@ -9,9 +9,9 @@ Saving and restoring the benchmark data using SQLAlchemy.
 import logging
 import hashlib
 from datetime import datetime
-from typing import Optional, Tuple, List, Dict, Any
+from typing import Optional, Tuple, List, Dict, Iterator, Any
 
-from sqlalchemy import text, column
+from sqlalchemy import column, func
 
 from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage.base_storage import Storage
@@ -36,19 +36,26 @@ class Experiment(Storage.Experiment):
         self._engine = engine
         self._schema = schema
 
-    def __enter__(self):
+    def __enter__(self) -> Storage.Experiment:
         super().__enter__()
         with self._engine.begin() as conn:
             # Get git info and the last trial ID for the experiment.
+            # pylint: disable=not-callable
             exp_info = conn.execute(
-                text("""
-                SELECT e.git_repo, e.git_commit, MAX(t.trial_id) AS trial_id
-                FROM experiment AS e
-                LEFT OUTER JOIN trial AS t ON (e.exp_id = t.exp_id)
-                WHERE e.exp_id = :exp_id
-                GROUP BY e.git_repo, e.git_commit
-                """),
-                {"exp_id": self._experiment_id}
+                self._schema.experiment.select().with_only_columns(
+                    self._schema.experiment.c.git_repo,
+                    self._schema.experiment.c.git_commit,
+                    func.max(self._schema.trial.c.trial_id).label("trial_id"),
+                ).join(
+                    self._schema.trial,
+                    self._schema.trial.c.exp_id == self._schema.experiment.c.exp_id,
+                    isouter=True
+                ).where(
+                    self._schema.experiment.c.exp_id == self._experiment_id,
+                ).group_by(
+                    self._schema.experiment.c.git_repo,
+                    self._schema.experiment.c.git_commit,
+                )
             ).fetchone()
             if exp_info is None:
                 _LOG.info("Start new experiment: %s", self._experiment_id)
@@ -57,7 +64,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     description=self._description,
                     git_repo=self._git_repo,
-                    git_commit=self._git_commit
+                    git_commit=self._git_commit,
                 ))
             else:
                 if exp_info.trial_id is not None:
@@ -69,7 +76,7 @@ class Experiment(Storage.Experiment):
                                  self, exp_info.git_repo, exp_info.git_commit)
         return self
 
-    def merge(self, experiment_ids: List[str]):
+    def merge(self, experiment_ids: List[str]) -> None:
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError()
 
@@ -78,17 +85,22 @@ class Experiment(Storage.Experiment):
         scores = []
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
-                text("""
-                SELECT t.trial_id, t.config_id, r.metric_value
-                FROM trial AS t
-                JOIN trial_result AS r ON (t.exp_id = r.exp_id AND t.trial_id = r.trial_id)
-                WHERE t.exp_id = :exp_id AND t.status = 'SUCCEEDED' AND r.metric_id = :metric_id
-                ORDER BY t.trial_id ASC
-                """),
-                {
-                    "exp_id": self._experiment_id,
-                    "metric_id": opt_target or self._opt_target
-                }
+                self._schema.trial.select().with_only_columns(
+                    self._schema.trial.c.trial_id,
+                    self._schema.trial.c.config_id,
+                    self._schema.trial_result.c.metric_value,
+                ).join(
+                    self._schema.trial_result, (
+                        (self._schema.trial.c.exp_id == self._schema.trial_result.c.exp_id) &
+                        (self._schema.trial.c.trial_id == self._schema.trial_result.c.trial_id)
+                    )
+                ).where(
+                    self._schema.trial.c.status == 'SUCCEEDED',
+                    self._schema.trial.c.exp_id == self._experiment_id,
+                    self._schema.trial_result.c.metric_id == (opt_target or self._opt_target),
+                ).order_by(
+                    self._schema.trial.c.trial_id.asc(),
+                )
             )
             for trial in cur_trials.fetchall():
                 tunables = self._get_params(
@@ -114,12 +126,12 @@ class Experiment(Storage.Experiment):
             for (key, val) in params.items()
         ])
 
-    def pending(self):
+    def pending(self) -> Iterator[Storage.Trial]:
         _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
         with self._engine.connect() as conn:
             cur_trials = conn.execute(self._schema.trial.select().where(
-                column("exp_id") == self._experiment_id,
-                column("ts_end").is_(None)
+                self._schema.trial.c.exp_id == self._experiment_id,
+                self._schema.trial.c.ts_end.is_(None)
             ))
             for trial in cur_trials.fetchall():
                 tunables = self._get_params(
@@ -129,9 +141,9 @@ class Experiment(Storage.Experiment):
                     conn, self._schema.trial_param,
                     exp_id=self._experiment_id, trial_id=trial.trial_id)
                 # Reset .is_updated flag after the assignment:
-                yield Trial(self._engine,
-                            self._tunables.copy().assign(tunables).reset(),
-                            self._experiment_id, trial.trial_id, self._opt_target, config)
+                yield Trial(
+                    self._engine, self._tunables.copy().assign(tunables).reset(),
+                    self._experiment_id, trial.trial_id, self._opt_target, config)
 
     def _get_config_id(self, conn, tunables: TunableGroups) -> int:
         """
@@ -153,7 +165,8 @@ class Experiment(Storage.Experiment):
             config_id=config_id)
         return config_id
 
-    def trial(self, tunables: TunableGroups, config: Optional[Dict[str, Any]] = None):
+    def trial(self, tunables: TunableGroups,
+              config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
         _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
         with self._engine.begin() as conn:
             try:
@@ -163,7 +176,7 @@ class Experiment(Storage.Experiment):
                     trial_id=self._trial_id,
                     config_id=config_id,
                     ts_start=datetime.now(),
-                    status='PENDING'
+                    status='PENDING',
                 ))
                 if config is not None:
                     self._save_params(

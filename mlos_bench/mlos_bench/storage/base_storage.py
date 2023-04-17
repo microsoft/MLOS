@@ -8,7 +8,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union, List, Tuple, Dict, Any
+from typing import Optional, Union, List, Tuple, Dict, Iterator, Any
 
 from mlos_bench.environment import Status
 from mlos_bench.service import Service
@@ -44,7 +44,8 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
 
     @abstractmethod
-    def experiment(self, exp_id: str, trial_id: int, description: str, opt_target: str):
+    def experiment(self, exp_id: str, trial_id: int, description: str,
+                   opt_target: str) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -81,14 +82,14 @@ class Storage(metaclass=ABCMeta):
             self._opt_target = opt_target
             (self._git_repo, self._git_commit) = get_git_info()
 
-        def __enter__(self):
+        def __enter__(self) -> 'Storage.Experiment':
             """
             Enter the context of the experiment.
             """
             _LOG.debug("Starting experiment: %s", self)
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
             """
             End the context of the experiment.
             """
@@ -103,7 +104,7 @@ class Storage(metaclass=ABCMeta):
             return self._experiment_id
 
         @abstractmethod
-        def merge(self, experiment_ids: List[str]):
+        def merge(self, experiment_ids: List[str]) -> None:
             """
             Merge in the results of other experiments.
 
@@ -122,7 +123,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def pending(self):
+        def pending(self) -> Iterator['Storage.Trial']:
             """
             Return an iterator over the pending experiment runs.
             """
