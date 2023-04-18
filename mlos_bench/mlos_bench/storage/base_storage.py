@@ -85,23 +85,49 @@ class Storage(metaclass=ABCMeta):
         def __enter__(self) -> 'Storage.Experiment':
             """
             Enter the context of the experiment.
+
+            Override the `_setup` method to add custom context initialization.
             """
             _LOG.debug("Starting experiment: %s", self)
+            self._setup()
             return self
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             """
             End the context of the experiment.
+
+            Override the `_teardown` method to add custom context teardown logic.
             """
-            if exc_val is None:
+            is_ok = exc_val is None
+            if is_ok:
                 _LOG.debug("Finishing experiment: %s", self)
             else:
                 _LOG.warning("Finishing experiment: %s", self,
                              exc_info=(exc_type, exc_val, exc_tb))
+            self._teardown(is_ok)
             return False  # Do not suppress exceptions
 
         def __repr__(self) -> str:
             return self._experiment_id
+
+        def _setup(self) -> None:
+            """
+            Create a record of the new experiment or find an existing one in the storage.
+
+            This method is called by `Storage.Experiment.__enter__()`.
+            """
+
+        def _teardown(self, is_ok: bool) -> None:
+            """
+            Finalize the experiment in the storage.
+
+            This method is called by `Storage.Experiment.__exit__()`.
+
+            Parameters
+            ----------
+            is_ok : bool
+                True if there were no exceptions during the experiment, False otherwise.
+            """
 
         @abstractmethod
         def merge(self, experiment_ids: List[str]) -> None:

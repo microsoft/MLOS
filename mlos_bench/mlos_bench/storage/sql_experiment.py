@@ -37,8 +37,8 @@ class Experiment(Storage.Experiment):
         self._engine = engine
         self._schema = schema
 
-    def __enter__(self) -> Storage.Experiment:
-        super().__enter__()
+    def _setup(self) -> None:
+        super()._setup()
         with self._engine.begin() as conn:
             # Get git info and the last trial ID for the experiment.
             # pylint: disable=not-callable
@@ -75,7 +75,6 @@ class Experiment(Storage.Experiment):
                 if exp_info.git_commit != self._git_commit:
                     _LOG.warning("Experiment %s git expected: %s %s",
                                  self, exp_info.git_repo, exp_info.git_commit)
-        return self
 
     def merge(self, experiment_ids: List[str]) -> None:
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
