@@ -1,6 +1,6 @@
 // MySQL / MariaDB storage.
 {
-    "class": "mlos_bench.storage.SqlStorage",
+    "class": "mlos_bench.storage.sql_storage.SqlStorage",
 
     // Parameters must match kwargs of sqlalchemy.URL.create().
     "config": {

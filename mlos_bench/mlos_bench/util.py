@@ -16,7 +16,7 @@ from typing import Any, Tuple, Dict, Iterable
 _LOG = logging.getLogger(__name__)
 
 
-def instantiate_from_config(base_class: type, class_name: str, *args, **kwargs):
+def instantiate_from_config(base_class: type, class_name: str, *args: Any, **kwargs: Any) -> Any:
     """
     Factory method for a new class instantiated from config.
 
@@ -52,7 +52,7 @@ def instantiate_from_config(base_class: type, class_name: str, *args, **kwargs):
     return impl(*args, **kwargs)
 
 
-def check_required_params(config: Dict[str, Any], required_params: Iterable[str]):
+def check_required_params(config: Dict[str, Any], required_params: Iterable[str]) -> None:
     """
     Check if all required parameters are present in the configuration.
     Raise ValueError if any of the parameters are missing.
@@ -88,10 +88,8 @@ def get_git_info(path: str = ".") -> Tuple[str, str]:
         Git repository URL and last commit hash.
     """
     git_repo = subprocess.check_output(
-        ["cd", path, "&&", "git", "remote", "get-url", "origin"],
-        shell=True, text=True).strip()
+        ["git", "-C", path, "remote", "get-url", "origin"], text=True).strip()
     git_commit = subprocess.check_output(
-        ["cd", path, "&&", "git", "rev-parse", "HEAD"],
-        shell=True, text=True).strip()
+        ["git", "-C", path, "rev-parse", "HEAD"], text=True).strip()
     _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
     return (git_repo, git_commit)

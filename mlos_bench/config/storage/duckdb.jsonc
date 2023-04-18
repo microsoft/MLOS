@@ -1,6 +1,6 @@
 // Local DuckDB storage.
 {
-    "class": "mlos_bench.storage.SqlStorage",
+    "class": "mlos_bench.storage.sql_storage.SqlStorage",
 
     // Apply --config-path resolution to these config parameters:
     "resolve_path": ["database"],

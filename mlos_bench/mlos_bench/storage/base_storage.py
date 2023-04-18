@@ -49,6 +49,10 @@ class Storage(metaclass=ABCMeta):
         """
         Create a new experiment in the storage.
 
+        We need the `opt_target` parameter here to know what metric to retrieve
+        when we load the data from previous trials. Later we will replace it with
+        full metadata about the optimization direction, multiple objectives, etc.
+
         Parameters
         ----------
         exp_id : str
