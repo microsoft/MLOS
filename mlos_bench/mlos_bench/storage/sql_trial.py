@@ -25,11 +25,18 @@ class Trial(Storage.Trial):
     Store the results of a single run of the experiment in SQL database.
     """
 
-    def __init__(self, engine: Engine, schema: DbSchema, tunables: TunableGroups,
-                 experiment_id: str, trial_id: int, opt_target: str,
-                 config: Optional[Dict[str, Any]] = None):
-        # pylint: disable=too-many-arguments
-        super().__init__(tunables, experiment_id, trial_id, opt_target, config)
+    def __init__(self, *,
+                 engine: Engine, schema: DbSchema, tunables: TunableGroups,
+                 experiment_id: str, trial_id: int, config_id: int,
+                 opt_target: str, config: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            tunables=tunables,
+            experiment_id=experiment_id,
+            trial_id=trial_id,
+            config_id=config_id,
+            opt_target=opt_target,
+            config=config,
+        )
         self._engine = engine
         self._schema = schema
 
@@ -66,6 +73,7 @@ class Trial(Storage.Trial):
                     )
                 )
                 if cur_status.rowcount not in {1, -1}:
+                    _LOG.warning("Trial %s :: update failed: %s", self, status)
                     raise RuntimeError(
                         f"Failed to update the status of the trial {self} to {status}." +
                         f" ({cur_status.rowcount} rows)")

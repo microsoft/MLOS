@@ -19,6 +19,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Storage(metaclass=ABCMeta):
+    # pylint: disable=too-few-public-methods
     """
     An abstract interface between the benchmarking framework
     and storage systems (e.g., SQLite or MLFLow).
@@ -42,8 +43,8 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
 
     @abstractmethod
-    def experiment(self, exp_id: str, trial_id: int, description: str,
-                   opt_target: str) -> 'Storage.Experiment':
+    def experiment(self, experiment_id: str, trial_id: int,
+                   description: str, opt_target: str) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -53,7 +54,7 @@ class Storage(metaclass=ABCMeta):
 
         Parameters
         ----------
-        exp_id : str
+        experiment_id : str
             Unique identifier of the experiment.
         trial_id : int
             Starting number of the trial.
@@ -75,7 +76,8 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, tunables: TunableGroups, experiment_id: str,
+        def __init__(self, *,
+                     tunables: TunableGroups, experiment_id: str,
                      trial_id: int, description: str, opt_target: str):
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
@@ -183,12 +185,14 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, tunables: TunableGroups, experiment_id: str, trial_id: int,
-                     opt_target: str, config: Optional[Dict[str, Any]] = None):
+        def __init__(self, *,
+                     tunables: TunableGroups, experiment_id: str, trial_id: int,
+                     config_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
             # pylint: disable=too-many-arguments
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
+            self._config_id = config_id
             self._opt_target = opt_target
             self._config = config or {}
 
@@ -201,6 +205,13 @@ class Storage(metaclass=ABCMeta):
             ID of the current trial.
             """
             return self._trial_id
+
+        @property
+        def config_id(self) -> int:
+            """
+            ID of the current trial configuration.
+            """
+            return self._config_id
 
         @property
         def tunables(self) -> TunableGroups:

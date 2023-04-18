@@ -26,10 +26,16 @@ class Experiment(Storage.Experiment):
     Logic for retrieving and storing the results of a single experiment.
     """
 
-    def __init__(self, engine: Engine, schema: DbSchema, tunables: TunableGroups,
+    def __init__(self, *,
+                 engine: Engine, schema: DbSchema, tunables: TunableGroups,
                  experiment_id: str, trial_id: int, description: str, opt_target: str):
-        # pylint: disable=too-many-arguments
-        super().__init__(tunables, experiment_id, trial_id, description, opt_target)
+        super().__init__(
+            tunables=tunables,
+            experiment_id=experiment_id,
+            trial_id=trial_id,
+            description=description,
+            opt_target=opt_target,
+        )
         self._engine = engine
         self._schema = schema
 
@@ -138,10 +144,16 @@ class Experiment(Storage.Experiment):
                     conn, self._schema.trial_param,
                     exp_id=self._experiment_id, trial_id=trial.trial_id)
                 yield Trial(
-                    self._engine, self._schema,
+                    engine=self._engine,
+                    schema=self._schema,
                     # Reset .is_updated flag after the assignment:
-                    self._tunables.copy().assign(tunables).reset(),
-                    self._experiment_id, trial.trial_id, self._opt_target, config)
+                    tunables=self._tunables.copy().assign(tunables).reset(),
+                    experiment_id=self._experiment_id,
+                    trial_id=trial.trial_id,
+                    config_id=trial.config_id,
+                    opt_target=self._opt_target,
+                    config=config,
+                )
 
     def _get_config_id(self, conn: Connection, tunables: TunableGroups) -> int:
         """
@@ -181,8 +193,15 @@ class Experiment(Storage.Experiment):
                         conn, self._schema.trial_param, config,
                         exp_id=self._experiment_id, trial_id=self._trial_id)
                 trial = Trial(
-                    self._engine, self._schema, tunables, self._experiment_id,
-                    self._trial_id, self._opt_target, config)
+                    engine=self._engine,
+                    schema=self._schema,
+                    tunables=tunables,
+                    experiment_id=self._experiment_id,
+                    trial_id=self._trial_id,
+                    config_id=config_id,
+                    opt_target=self._opt_target,
+                    config=config,
+                )
                 self._trial_id += 1
                 return trial
             except Exception:

@@ -39,8 +39,14 @@ class SqlStorage(Storage):
     def __repr__(self) -> str:
         return self._repr
 
-    def experiment(self, exp_id: str, trial_id: int,
+    def experiment(self, experiment_id: str, trial_id: int,
                    description: str, opt_target: str) -> Storage.Experiment:
-        # pylint: disable=too-many-function-args
-        return Experiment(self._engine, self._schema, self._tunables,
-                          exp_id, trial_id, description, opt_target)
+        return Experiment(
+            engine=self._engine,
+            schema=self._schema,
+            tunables=self._tunables,
+            experiment_id=experiment_id,
+            trial_id=trial_id,
+            description=description,
+            opt_target=opt_target,
+        )
