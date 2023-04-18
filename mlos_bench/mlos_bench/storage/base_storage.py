@@ -106,7 +106,8 @@ class Storage(metaclass=ABCMeta):
         @abstractmethod
         def merge(self, experiment_ids: List[str]) -> None:
             """
-            Merge in the results of other experiments.
+            Merge in the results of other (compatible) experiments trials.
+            Used to help warm up the optimizer for this experiment.
 
             Parameters
             ----------
@@ -125,7 +126,7 @@ class Storage(metaclass=ABCMeta):
         @abstractmethod
         def pending(self) -> Iterator['Storage.Trial']:
             """
-            Return an iterator over the pending experiment runs.
+            Return an iterator over the pending trial runs for this experiment.
             """
 
         @abstractmethod
@@ -145,7 +146,7 @@ class Storage(metaclass=ABCMeta):
             -------
             trial : Storage.Trial
                 An object that allows to update the storage with
-                the results of the experiment run.
+                the results of the experiment trial run.
             """
 
     class Trial(metaclass=ABCMeta):
