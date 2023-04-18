@@ -8,8 +8,8 @@ Unit tests for mock mlos_bench optimizer.
 
 import pytest
 
-from mlos_bench.environment import Status
-from mlos_bench.optimizer import MockOptimizer
+from mlos_bench.environment.status import Status
+from mlos_bench.optimizer.mock_optimizer import MockOptimizer
 
 # pylint: disable=redefined-outer-name
 
@@ -40,7 +40,7 @@ def mock_configurations() -> list:
 
 def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
     """
-    Run several iterations of the oiptimizer and return the best score.
+    Run several iterations of the optimizer and return the best score.
     """
     for (tunable_values, score) in mock_configurations:
         assert mock_opt.not_converged()
@@ -49,10 +49,12 @@ def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
         mock_opt.register(tunables, Status.SUCCEEDED, score)
 
     (score, _tunables) = mock_opt.get_best_observation()
+    assert score is not None
+    assert isinstance(score, float)
     return score
 
 
-def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
+def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list) -> None:
     """
     Make sure that mock optimizer produces consistent suggestions.
     """
@@ -60,7 +62,7 @@ def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list):
     assert score == pytest.approx(66.66, 0.01)
 
 
-def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: list):
+def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: list) -> None:
     """
     Check the maximization mode of the mock optimizer.
     """
@@ -68,7 +70,7 @@ def test_mock_optimizer_max(mock_opt_max: MockOptimizer, mock_configurations: li
     assert score == pytest.approx(99.99, 0.01)
 
 
-def test_mock_optimizer_register_fail(mock_opt: MockOptimizer):
+def test_mock_optimizer_register_fail(mock_opt: MockOptimizer) -> None:
     """
     Check the input acceptance conditions for Optimizer.register().
     """

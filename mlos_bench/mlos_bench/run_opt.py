@@ -9,16 +9,20 @@ OS Autotune main optimization loop.
 See `--help` output for details.
 """
 
+from typing import Tuple, Union
+
 import logging
 
 from mlos_bench.launcher import Launcher
-from mlos_bench.optimizer import Optimizer
-from mlos_bench.environment import Status, Environment
+from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.environment.base_environment import Environment
+from mlos_bench.environment.status import Status
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
 
-def _main():
+def _main() -> None:
 
     launcher = Launcher("mlos_bench run_opt")
 
@@ -40,7 +44,7 @@ def _main():
     _LOG.info("Final result: %s", result)
 
 
-def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
+def _optimize(env: Environment, opt: Optimizer, no_teardown: bool) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
     """
     Main optimization loop.
     """
@@ -57,7 +61,11 @@ def _optimize(env: Environment, opt: Optimizer, no_teardown: bool):
             continue
 
         (status, output) = env.run()  # Block and wait for the final result
-        value = output['score'] if status.is_succeeded else None
+        if status.is_succeeded:
+            assert output is not None
+            value = output['score']
+        else:
+            value = None
 
         _LOG.info("Result: %s = %s :: %s", tunables, status, value)
         opt.register(tunables, status, value)

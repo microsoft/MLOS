@@ -28,5 +28,11 @@ dependencies:
     - bump2version
     - licenseheaders
     - pytest-local-badge
+    - mypy
+    - types-setuptools
+    - types-pygments
+    - types-colorama
+    - pandas-stubs
+    - types-requests
     - "--editable ../mlos_core[full]"
     - "--editable ../mlos_bench[full]"

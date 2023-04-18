@@ -12,7 +12,7 @@ import argparse
 import pandas as pd
 
 
-def _main(input_file: str, output_file: str):
+def _main(input_file: str, output_file: str) -> None:
     """
     Re-shape Redis benchmark CSV results from wide to long.
     """

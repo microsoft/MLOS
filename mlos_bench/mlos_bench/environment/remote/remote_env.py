@@ -14,7 +14,8 @@ from typing import Optional, Tuple, List
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.remote.base_remote_exec_service import RemoteExecService
+from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
+from mlos_bench.service.types.vm_provisioner_type import SupportsVMOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -58,6 +59,15 @@ class RemoteEnv(Environment):
         """
         super().__init__(name, config, global_config, tunables, service)
 
+        assert self._service is not None and isinstance(self._service, SupportsRemoteExec), \
+            "RemoteEnv requires a service that supports remote execution operations"
+        self._remote_exec_service: SupportsRemoteExec = self._service
+
+        # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
+        assert self._service is not None and isinstance(self._service, SupportsVMOps), \
+            "RemoteEnv requires a service that supports host operations"
+        self._host_service: SupportsVMOps = self._service
+
         self._wait_boot = self.config.get("wait_boot", False)
         self._script_setup = self.config.get("setup")
         self._script_run = self.config.get("run")
@@ -70,7 +80,7 @@ class RemoteEnv(Environment):
             raise ValueError("At least one of {setup, run, teardown}" +
                              " must be present or wait_boot set to True.")
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if the environment is ready and set up the application
         and benchmarks on a remote host.
@@ -94,9 +104,9 @@ class RemoteEnv(Environment):
 
         if self._wait_boot:
             _LOG.info("Wait for the remote environment to start: %s", self)
-            (status, params) = self._service.host_start(self._params)
+            (status, params) = self._host_service.host_start(self._params)
             if status.is_pending:
-                (status, _) = self._service.wait_host_operation(params)
+                (status, _) = self._host_service.wait_host_operation(params)
             if not status.is_succeeded:
                 return False
 
@@ -135,7 +145,7 @@ class RemoteEnv(Environment):
         _LOG.info("Remote run complete: %s :: %s", self, result)
         return result
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Clean up and shut down the remote environment.
         """
@@ -160,13 +170,10 @@ class RemoteEnv(Environment):
             A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
-        remote_exec_service: RemoteExecService = self._service
-        # TODO: Assert it's a subclass?
-        _LOG.debug("Submit script: %s", self)
-        (status, output) = remote_exec_service.remote_exec(script, self._params)
+        (status, output) = self._remote_exec_service.remote_exec(script, self._params)
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
-            (status, output) = remote_exec_service.get_remote_exec_results(output)
+            (status, output) = self._remote_exec_service.get_remote_exec_results(output)
             # TODO: extract the results from `output`.
         _LOG.debug("Status: %s :: %s", status, output)
         return (status, output)

@@ -7,7 +7,7 @@ Composite benchmark environment.
 """
 
 import logging
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from mlos_bench.service.base_service import Service
 from mlos_bench.environment.status import Status
@@ -22,8 +22,8 @@ class CompositeEnv(Environment):
     Composite benchmark environment.
     """
 
-    def __init__(self, name: str, config: dict, global_config: dict = None,
-                 tunables: TunableGroups = None, service: Service = None):
+    def __init__(self, name: str, config: dict, global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None, service: Optional[Service] = None):
         # pylint: disable=too-many-arguments
         """
         Create a new environment with a given config.
@@ -46,21 +46,21 @@ class CompositeEnv(Environment):
         """
         super().__init__(name, config, global_config, tunables, service)
 
-        self._children = []
+        self._children: List[Environment] = []
 
         for child_config_file in config.get("include_children", []):
-            for env in self._service.load_environment_list(
+            for env in self._config_loader_service.load_environment_list(
                     child_config_file, global_config, tunables, self._service):
                 self._add_child(env)
 
         for child_config in config.get("children", []):
-            self._add_child(self._service.build_environment(
+            self._add_child(self._config_loader_service.build_environment(
                 child_config, global_config, tunables, self._service))
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
 
-    def _add_child(self, env: Environment):
+    def _add_child(self, env: Environment) -> None:
         """
         Add a new child environment to the composite environment.
         This method is called from the constructor only.
@@ -68,7 +68,7 @@ class CompositeEnv(Environment):
         self._children.append(env)
         self._tunable_params.update(env.tunable_params())
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Set up the children environments.
 
@@ -92,7 +92,7 @@ class CompositeEnv(Environment):
         )
         return self._is_ready
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Tear down the children environments. This method is idempotent,
         i.e., calling it several times is equivalent to a single call.

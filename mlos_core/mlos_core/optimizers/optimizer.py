@@ -8,10 +8,11 @@ Contains the BaseOptimizer abstract class.
 
 import collections
 from abc import ABCMeta, abstractmethod
-from typing import Optional
+from typing import List, Optional, Tuple
 
 import ConfigSpace
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
@@ -39,10 +40,10 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise ValueError("Given parameter space differs from the one given to space adapter")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations = []
-        self._pending_observations = []
+        self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
+        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}(parameter_space={self.parameter_space})"
 
     @property
@@ -50,7 +51,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         """Get the space adapter instance (if any)."""
         return self._space_adapter
 
-    def register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
+    def register(self, configurations: pd.DataFrame, scores: pd.Series,
+                 context: Optional[pd.DataFrame] = None) -> None:
         """Wrapper method, which employs the space adapter (if any), before registering the configurations and scores.
 
         Parameters
@@ -64,6 +66,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
+        # TODO: Validate that if context is ever added it must always be added.
         self._observations.append((configurations, scores, context))
 
         if self._space_adapter:
@@ -71,7 +74,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         return self._register(configurations, scores, context)
 
     @abstractmethod
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: pd.DataFrame = None):
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series,
+                  context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -87,7 +91,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: pd.DataFrame = None):
+    def suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
@@ -106,7 +110,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         return configuration
 
     @abstractmethod
-    def _suggest(self, context: pd.DataFrame = None):
+    def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.
 
         Parameters
@@ -122,7 +126,8 @@ class BaseOptimizer(metaclass=ABCMeta):
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     @abstractmethod
-    def register_pending(self, configurations: pd.DataFrame, context: pd.DataFrame = None):
+    def register_pending(self, configurations: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations as "pending".
         That is it say, it has been suggested by the optimizer, and an experiment trial has been started.
         This can be useful for executing multiple trials in parallel, retry logic, etc.
@@ -137,7 +142,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def get_observations(self):
+    def get_observations(self) -> pd.DataFrame:
         """Returns the observations as a dataframe.
 
         Returns
@@ -150,7 +155,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         configs = pd.concat([config for config, _, _ in self._observations])
         scores = pd.concat([score for _, score, _ in self._observations])
         try:
-            contexts = pd.concat([context for _, _, context in self._observations])
+            contexts = pd.concat([context for _, _, context in self._observations if context is not None])
         except ValueError:
             contexts = None
         configs["score"] = scores
@@ -160,7 +165,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             raise NotImplementedError()  # pragma: no cover
         return configs
 
-    def get_best_observation(self):
+    def get_best_observation(self) -> pd.DataFrame:
         """Returns the best observation so far as a dataframe.
 
         Returns
@@ -173,7 +178,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         observations = self.get_observations()
         return observations.nsmallest(1, columns='score')
 
-    def _from_1hot(self, config: np.array) -> pd.DataFrame:
+    def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
         """
         Convert numpy array from one-hot encoding to a DataFrame
         with categoricals and ints in proper columns.
@@ -196,7 +201,7 @@ class BaseOptimizer(metaclass=ABCMeta):
                     j += 1
         return pd.DataFrame(df_dict)
 
-    def _to_1hot(self, config: pd.DataFrame) -> np.array:
+    def _to_1hot(self, config: pd.DataFrame) -> npt.NDArray:
         """
         Convert pandas DataFrame to one-hot-encoded numpy array.
         """

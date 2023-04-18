@@ -5,11 +5,12 @@
 """
 Implementation of LlamaTune space adapter.
 """
-from typing import Optional
+from typing import Dict, Optional
 from warnings import warn
 
 import ConfigSpace
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
@@ -81,8 +82,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         self._sigma_vector = self._random_state.choice([-1, 1], num_orig_dims)
 
         # Used to retrieve the low-dim point, given the high-dim one
-        self._suggested_configs = {}
-        self._pinv_matrix = None
+        self._suggested_configs: Dict[ConfigSpace.Configuration, ConfigSpace.Configuration] = {}
+        self._pinv_matrix: npt.NDArray
         self._use_approximate_reverse_mapping = use_approximate_reverse_mapping
 
     @property
@@ -104,10 +105,10 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 if not self._use_approximate_reverse_mapping:
                     raise ValueError(f"{repr(configuration)}\n" "The above configuration was not suggested by the optimizer. "
                                      "Approximate reverse mapping is currently disabled; thus *only* configurations suggested "
-                                     "previously by the optimzer can be registered.")
+                                     "previously by the optimizer can be registered.")
 
                 # ...yet, we try to support that by implementing an approximate reverse mapping using pseudo-inverse matrix.
-                if self._pinv_matrix is None:
+                if getattr(self, '_pinv_matrix', None) is None:
                     self._try_generate_approx_inverse_mapping()
 
                 # Perform approximate reverse mapping
@@ -156,8 +157,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 for idx in range(num_low_dims)
             ]
         else:
-            # Currently supported optimizers do not support definint a discretized space (like ConfigSpace does using `q` kwarg).
-            # Thus, to support space discretization, we define the low-dimensioanl space using integer hyperparameters.
+            # Currently supported optimizers do not support defining a discretized space (like ConfigSpace does using `q` kwarg).
+            # Thus, to support space discretization, we define the low-dimensional space using integer hyperparameters.
             # We also employ a scaler, which scales suggested values to [-1, 1] range, used by HeSBO projection.
             hyperparameters = [
                 ConfigSpace.UniformIntegerHyperparameter(name=f'dim_{idx}', lower=1, upper=max_unique_values_per_param)
@@ -252,28 +253,27 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
         # Check if input value corresponds to some special value
         perc_sum = 0.
+        ret: float
         for special_value, biasing_perc in special_values_list:
             perc_sum += biasing_perc
             if input_value < perc_sum:
-                return param._inverse_transform(special_value)  # pylint: disable=protected-access
+                ret = param._inverse_transform(special_value)  # pylint: disable=protected-access
+                return ret
 
         # Scale input value uniformly to non-special values
-        return param._inverse_transform(                                         # pylint: disable=protected-access
+        ret = param._inverse_transform(                                         # pylint: disable=protected-access
             param._transform_scalar((input_value - perc_sum) / (1 - perc_sum)))  # pylint: disable=protected-access
+        return ret
 
     # pylint: disable=too-complex,too-many-branches
-    def _validate_special_param_values(self, special_param_values_dict: dict) -> dict:
+    def _validate_special_param_values(self, special_param_values_dict: dict) -> None:
         """Checks that the user-provided dict of special parameter values is valid.
+        And assigns it to the corresponding attribute.
 
         Parameters
         ----------
         special_param_values_dict: dict
             User-provided dict of special parameter values.
-
-        Returns
-        -------
-        sanitized_dict: dict
-            Sanitized dictionary; keys are parameter names, values are lists of (special value, biasing %) tuple(s).
 
         Raises
         ------
@@ -299,7 +299,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 tuple_list = [(value, self.DEFAULT_SPECIAL_PARAM_VALUE_BIASING_PERCENTAGE)]
             elif isinstance(value, tuple) and [type(v) for v in value] == [int, float]:
                 # User specifies both special value and biasing percentage
-                tuple_list = [value]
+                tuple_list = [value]    # type: ignore[list-item]
             elif isinstance(value, list) and value:
                 if all(isinstance(t, int) for t in value):
                     # User specifies list of special values
@@ -336,7 +336,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
         self._special_param_values_dict = sanitized_dict
 
-    def _try_generate_approx_inverse_mapping(self):
+    def _try_generate_approx_inverse_mapping(self) -> None:
         """Tries to generate an approximate reverse mapping: i.e., from high-dimensional space to the low-dimensional one.
         Reverse mapping is generated using the pseudo-inverse matrix, of original HeSBO projection matrix.
         This mapping can be potentially used to register configurations that were *not* previously suggested by the optimizer.

@@ -12,7 +12,7 @@ MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/de
 
 DOCKER := $(shell which docker)
 # Make sure the build directory exists.
-MKDIR_BUILD := $(shell mkdir -p build)
+MKDIR_BUILD := $(shell test -d build || mkdir build)
 
 # Allow overriding the default verbosity of conda for CI jobs.
 #CONDA_INFO_LEVEL ?= -q
@@ -41,7 +41,7 @@ clean-conda-env:
 	rm -f build/conda-env.${CONDA_ENV_NAME}.build-stamp
 
 .PHONY: check
-check: pycodestyle pydocstyle pylint # cspell licenseheaders markdown-link-check
+check: pycodestyle pydocstyle pylint mypy # cspell licenseheaders markdown-link-check
 
 .PHONY: pycodestyle
 pycodestyle: conda-env build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp build/pycodestyle.mlos_bench.${CONDA_ENV_NAME}.build-stamp
@@ -110,6 +110,18 @@ build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES
 
 build/pylint.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp .pylintrc
 	conda run -n ${CONDA_ENV_NAME} pylint -j0 $(filter-out .pylintrc,$+)
+	touch $@
+
+.PHONY: mypy
+mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+
+build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
+build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
+
+.NOTPARALLEL: build/mypy.%.${CONDA_ENV_NAME}.build-stamp
+build/mypy.%.${CONDA_ENV_NAME}.build-stamp: scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
+	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
+		$(filter-out scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg,$+)
 	touch $@
 
 .PHONY: test
@@ -327,6 +339,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 			-e 'Problems with "include" directive path:' \
 			-e 'duplicate object description' \
 			-e "document isn't included in any toctree" \
+			-e "more than one target found for cross-reference" \
 			-e "toctree contains reference to nonexisting document 'auto_examples/index'" \
 			-e "failed to import function 'create' from module '(SpaceAdapter|Optimizer)Factory'" \
 			-e "No module named '(SpaceAdapter|Optimizer)Factory'" \
@@ -346,7 +359,11 @@ endif
 build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/index.html build/check-doc.build-stamp
 	@echo "Starting nginx docker container for serving docs."
 	./doc/nginx-docker.sh restart
-	docker exec mlos-doc-nginx curl -sSf http://localhost/index.html >/dev/null
+	docker port mlos-doc-nginx
+	nginx_port=`docker port mlos-doc-nginx | grep 0.0.0.0:8080 | cut -d/ -f1` \
+		&& echo nginx_port=$${nginx_port} \
+		&& set -x \
+		&& docker exec mlos-doc-nginx curl -sSf http://localhost:$${nginx_port}/index.html >/dev/null
 	@echo "Running linklint on the docs."
 	docker exec mlos-doc-nginx linklint -net -redirect -root /doc/build/html/ /@ -error -warn > doc/build/linklint.out 2>&1
 	@if cat doc/build/linklint.out | grep -e ^ERROR -e ^WARN | grep -v 'missing named anchors' | grep -q .; then \
@@ -365,6 +382,8 @@ clean-check:
 	rm -f build/pylint.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pylint.mlos_core.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pylint.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
+	rm -f build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.build-stamp
 	rm -f build/pycodestyle.${CONDA_ENV_NAME}.build-stamp
 	rm -f build/pycodestyle.mlos_core.${CONDA_ENV_NAME}.build-stamp

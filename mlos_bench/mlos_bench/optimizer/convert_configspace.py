@@ -8,6 +8,8 @@ Functions to convert TunableGroups to ConfigSpace for use with the mlos_core opt
 
 import logging
 
+from typing import Optional
+
 from ConfigSpace.hyperparameters import Hyperparameter
 from ConfigSpace import UniformIntegerHyperparameter
 from ConfigSpace import UniformFloatHyperparameter
@@ -21,7 +23,7 @@ _LOG = logging.getLogger(__name__)
 
 
 def _tunable_to_hyperparameter(
-        tunable: Tunable, group_name: str = None, cost: int = 0) -> Hyperparameter:
+        tunable: Tunable, group_name: Optional[str] = None, cost: int = 0) -> Hyperparameter:
     """
     Convert a single Tunable to an equivalent ConfigSpace Hyperparameter object.
 

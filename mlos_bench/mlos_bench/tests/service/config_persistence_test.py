@@ -9,7 +9,7 @@ Unit tests for configuration persistence service.
 import os
 import pytest
 
-from mlos_bench.service import ConfigPersistenceService
+from mlos_bench.service.config_persistence import ConfigPersistenceService
 
 # pylint: disable=redefined-outer-name
 
@@ -27,7 +27,7 @@ def config_persistence_service() -> ConfigPersistenceService:
     })
 
 
-def test_resolve_path(config_persistence_service: ConfigPersistenceService):
+def test_resolve_path(config_persistence_service: ConfigPersistenceService) -> None:
     """
     Check if we can actually find a file somewhere in `config_path`.
     """
@@ -37,7 +37,7 @@ def test_resolve_path(config_persistence_service: ConfigPersistenceService):
     assert os.path.exists(path)
 
 
-def test_resolve_path_fail(config_persistence_service: ConfigPersistenceService):
+def test_resolve_path_fail(config_persistence_service: ConfigPersistenceService) -> None:
     """
     Check if non-existent file resolves without using `config_path`.
     """
@@ -47,7 +47,7 @@ def test_resolve_path_fail(config_persistence_service: ConfigPersistenceService)
     assert path == file_path
 
 
-def test_load_config(config_persistence_service: ConfigPersistenceService):
+def test_load_config(config_persistence_service: ConfigPersistenceService) -> None:
     """
     Check if we can successfully load a config file located relative to `config_path`.
     """

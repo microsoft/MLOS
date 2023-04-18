@@ -6,38 +6,41 @@
 Tests for Bayesian Optimizers.
 """
 
-from typing import Type
+from typing import Optional, Type
 
 import pytest
 
 import pandas as pd
 import ConfigSpace as CS
 
-from mlos_core.optimizers import BaseOptimizer, EmukitOptimizer, SkoptOptimizer
+from mlos_core.optimizers import BaseOptimizer, OptimizerType
+from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
-    (EmukitOptimizer, {}),
-    (SkoptOptimizer, {'base_estimator': 'gp'}),
+    *[(member.value, {}) for member in OptimizerType],
 ])
 def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpace,
-                                       optimizer_class: Type[BaseOptimizer], kwargs):
+                                       optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
     """
     Make sure we raise exceptions for the functionality that has not been implemented yet.
     """
+    if kwargs is None:
+        kwargs = {}
     optimizer = optimizer_class(configuration_space, **kwargs)
     suggestion = optimizer.suggest()
-    score = pd.DataFrame({'score': [1]})
+    scores = pd.DataFrame({'score': [1]})
     # test context not implemented errors
     with pytest.raises(NotImplementedError):
-        optimizer.register(suggestion, score, context="something")
+        optimizer.register(suggestion, scores['score'], context=pd.DataFrame([["something"]]))
 
     with pytest.raises(NotImplementedError):
-        optimizer.suggest(context="something")
+        optimizer.suggest(context=pd.DataFrame([["something"]]))
 
-    with pytest.raises(NotImplementedError):
-        optimizer.surrogate_predict(suggestion, context="something")
+    if isinstance(optimizer, BaseBayesianOptimizer):
+        with pytest.raises(NotImplementedError):
+            optimizer.surrogate_predict(suggestion, context=pd.DataFrame([["something"]]))
 
-    # acquisition function not implemented
-    with pytest.raises(NotImplementedError):
-        optimizer.acquisition_function(suggestion)
+        # acquisition function not implemented
+        with pytest.raises(NotImplementedError):
+            optimizer.acquisition_function(suggestion)

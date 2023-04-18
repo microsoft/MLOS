@@ -17,12 +17,14 @@ import pandas
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
 
 class LocalEnv(Environment):
+    # pylint: disable=too-many-instance-attributes
     """
     Scheduler-side Environment that runs scripts locally.
     """
@@ -58,13 +60,17 @@ class LocalEnv(Environment):
         """
         super().__init__(name, config, global_config, tunables, service)
 
+        assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
+            "LocalEnv requires a service that supports local execution"
+        self._local_exec_service: SupportsLocalExec = self._service
+
         self._temp_dir = self.config.get("temp_dir")
         self._script_setup = self.config.get("setup")
         self._script_run = self.config.get("run")
         self._script_teardown = self.config.get("teardown")
 
-        self._dump_params_file = self.config.get("dump_params_file")
-        self._read_results_file = self.config.get("read_results_file")
+        self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
+        self._read_results_file: Optional[str] = self.config.get("read_results_file")
 
         if self._script_setup is None and \
            self._script_run is None and \
@@ -77,7 +83,7 @@ class LocalEnv(Environment):
         if self._script_run is None and self._read_results_file is not None:
             raise ValueError("'run' must be present if 'read_results_file' is specified")
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if the environment is ready and set up the application
         and benchmarks, if necessary.
@@ -105,7 +111,7 @@ class LocalEnv(Environment):
             self._is_ready = True
             return True
 
-        with self._service.temp_dir_context(self._temp_dir) as temp_dir:
+        with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
 
             _LOG.info("Set up the environment locally: %s at %s", self, temp_dir)
 
@@ -116,7 +122,7 @@ class LocalEnv(Environment):
                     json.dump(tunables.get_param_values(self._tunable_params.get_names()),
                               fh_tunables)
 
-            (return_code, _stdout, stderr) = self._service.local_exec(
+            (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
                 self._script_setup, env=self._params, cwd=temp_dir)
 
             if return_code == 0:
@@ -125,7 +131,7 @@ class LocalEnv(Environment):
                 _LOG.warning("ERROR: Local setup returns with code %d stderr:\n%s",
                              return_code, stderr)
 
-            self._is_ready = return_code == 0
+            self._is_ready = bool(return_code == 0)
 
         return self._is_ready
 
@@ -145,10 +151,10 @@ class LocalEnv(Environment):
         if not (status.is_ready and self._script_run):
             return result
 
-        with self._service.temp_dir_context(self._temp_dir) as temp_dir:
+        with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
 
             _LOG.info("Run script locally on: %s at %s", self, temp_dir)
-            (return_code, _stdout, stderr) = self._service.local_exec(
+            (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
                 self._script_run, env=self._params, cwd=temp_dir)
 
             if return_code != 0:
@@ -156,23 +162,24 @@ class LocalEnv(Environment):
                              return_code, stderr)
                 return (Status.FAILED, None)
 
-            data = pandas.read_csv(self._service.resolve_path(
+            assert self._read_results_file is not None
+            data = pandas.read_csv(self._config_loader_service.resolve_path(
                 self._read_results_file, extra_paths=[temp_dir]))
 
             _LOG.debug("Read data:\n%s", data)
             if len(data) != 1:
                 _LOG.warning("Local run has %d results - returning the last one", len(data))
 
-            data = data.iloc[-1].to_dict()
-            _LOG.info("Local run complete: %s ::\n%s", self, data)
-            return (Status.SUCCEEDED, data)
+            data_dict = data.iloc[-1].to_dict()
+            _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
+            return (Status.SUCCEEDED, data_dict)
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Clean up the local environment.
         """
         if self._script_teardown:
             _LOG.info("Local teardown: %s", self)
-            (status, _) = self._service.local_exec(self._script_teardown, env=self._params)
+            (status, _, _) = self._local_exec_service.local_exec(self._script_teardown, env=self._params)
             _LOG.info("Local teardown complete: %s :: %s", self, status)
         super().teardown()
