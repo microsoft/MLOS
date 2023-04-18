@@ -31,8 +31,10 @@ class SqlStorage(Storage):
         self._repr = f"{url.get_backend_name()}:{url.database}"
         _LOG.info("Connect to the database: %s", self)
         # Log SQL statements if the logging level is DEBUG:
-        self._engine = create_engine(url, echo=_LOG.isEnabledFor(logging.DEBUG))
+        self._engine = create_engine(url)  # , echo=_LOG.isEnabledFor(logging.DEBUG))
         self._schema = DbSchema(self._engine).create()
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("DDL statements:\n%s", self._schema)
 
     def __repr__(self) -> str:
         return self._repr
