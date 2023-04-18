@@ -38,7 +38,7 @@ def test_exp_trial_configs(exp_storage_memory_sql: Storage.Experiment,
     trials1 = [
         exp_storage_memory_sql.new_trial(config1),
         exp_storage_memory_sql.new_trial(config1),
-        exp_storage_memory_sql.new_trial(config1),
+        exp_storage_memory_sql.new_trial(config1.copy()),  # Same values, different instance
     ]
     assert trials1[0].config_id == trials1[1].config_id
     assert trials1[0].config_id == trials1[2].config_id
@@ -47,7 +47,7 @@ def test_exp_trial_configs(exp_storage_memory_sql: Storage.Experiment,
     trials2 = [
         exp_storage_memory_sql.new_trial(config2),
         exp_storage_memory_sql.new_trial(config2),
-        exp_storage_memory_sql.new_trial(config2),
+        exp_storage_memory_sql.new_trial(config2.copy()),  # Same values, different instance
     ]
     assert trials2[0].config_id == trials2[1].config_id
     assert trials2[0].config_id == trials2[2].config_id
