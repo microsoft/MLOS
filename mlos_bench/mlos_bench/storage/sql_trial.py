@@ -64,9 +64,10 @@ class Trial(Storage.Trial):
                         ts_end=timestamp,
                     )
                 )
-                if cur_status.rowcount != 1:
+                if cur_status.rowcount not in {1, -1}:
                     raise RuntimeError(
-                        f"Failed to update the status of the trial {self} to {status}.")
+                        f"Failed to update the status of the trial {self} to {status}." +
+                        f" ({cur_status.rowcount} rows)")
                 # FIXME: Save timestamps for the telemetry data.
                 if value:
                     conn.execute(table.insert().values([
