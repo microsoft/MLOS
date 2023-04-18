@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class SupportsHostOps(Protocol):
+class SupportsHostProvisioning(Protocol):
     """
     Protocol interface for Host/VM provisioning operations.
     """
@@ -65,72 +65,4 @@ class SupportsHostOps(Protocol):
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
-        """
-
-    def start_host(self, params: dict) -> Tuple["Status", dict]:
-        """
-        Start a Host/VM.
-
-        Parameters
-        ----------
-        params : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-        """
-
-    def stop_host(self, force: bool = False) -> Tuple["Status", dict]:
-        """
-        Stops the Host/VM by initiating a (graceful) shutdown.
-
-        Parameters
-        ----------
-        force : bool
-            If True, force stop the Host/VM.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-        """
-
-    def restart_host(self, force: bool = False) -> Tuple["Status", dict]:
-        """
-        Restarts the host by initiating a (graceful) shutdown.
-
-        Parameters
-        ----------
-        force : bool
-            If True, force restart the Host/VM.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-        """
-
-    def wait_host_operation(self, params: dict) -> Tuple["Status", dict]:
-        """
-        Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
-        Return TIMED_OUT when timing out.
-
-        Parameters
-        ----------
-        params: dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-            Must have the "asyncResultsUrl" key to get the results.
-            If the key is not present, return Status.PENDING.
-
-        Returns
-        -------
-        result : (Status, dict)
-            A pair of Status and result.
-            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
-            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """

@@ -15,7 +15,7 @@ from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.service.types.host_provisioner_type import SupportsHostOps
+from mlos_bench.service.types.host_ops_type import SupportsHostOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -63,7 +63,6 @@ class RemoteEnv(Environment):
             "RemoteEnv requires a service that supports remote execution operations"
         self._remote_exec_service: SupportsRemoteExec = self._service
 
-        # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
         assert self._service is not None and isinstance(self._service, SupportsHostOps), \
             "RemoteEnv requires a service that supports host operations"
         self._host_service: SupportsHostOps = self._service

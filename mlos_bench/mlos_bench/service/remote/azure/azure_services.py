@@ -17,14 +17,16 @@ import requests
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.service.types.host_provisioner_type import SupportsHostOps
+from mlos_bench.service.types.host_provisioner_type import SupportsHostProvisioning
+from mlos_bench.service.types.host_ops_type import SupportsHostOps
 from mlos_bench.service.types.os_ops_type import SupportsOSOps
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):  # pylint: disable=too-many-instance-attributes
+class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):
+    # pylint: disable=too-many-instance-attributes
     """
     Helper methods to manage VMs on Azure.
     """
@@ -133,11 +135,14 @@ class AzureVMService(Service, SupportsHostOps, SupportsOSOps, SupportsRemoteExec
             self.check_vm_operation_status,
             self.wait_host_deployment,
             self.wait_host_operation,
+            self.wait_os_operation,
             self.provision_host,
+            self.deprovision_host,
             self.start_host,
             self.stop_host,
-            self.deprovision_host,
+            self.shutdown,
             self.restart_host,
+            self.reboot,
             self.remote_exec,
             self.get_remote_exec_results
         ])
@@ -310,6 +315,9 @@ class AzureVMService(Service, SupportsHostOps, SupportsOSOps, SupportsRemoteExec
         _LOG.info("Wait for VM %s to %s", self.config["vmName"],
                   "provision" if is_setup else "deprovision")
         return self._wait_while(self._check_deployment, Status.PENDING, params)
+
+    def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
+        return self.wait_host_operation(params)
 
     def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -513,6 +521,9 @@ class AzureVMService(Service, SupportsHostOps, SupportsOSOps, SupportsRemoteExec
         _LOG.info("Stop VM: %s", self.config["vmName"])
         return self._azure_vm_post_helper(self._url_stop)
 
+    def shutdown(self, force: bool = False) -> Tuple["Status", dict]:
+        return self.stop_host(force=force)
+
     def restart_host(self, force: bool = False) -> Tuple[Status, dict]:
         """
         Reboot the VM on Azure by initiating a graceful shutdown.
@@ -527,6 +538,9 @@ class AzureVMService(Service, SupportsHostOps, SupportsOSOps, SupportsRemoteExec
             raise NotImplementedError()
         _LOG.info("Reboot VM: %s", self.config["vmName"])
         return self._azure_vm_post_helper(self._url_reboot)
+
+    def reboot(self, force: bool = False) -> Tuple["Status", dict]:
+        return self.restart_host(force=force)
 
     def remote_exec(self, script: List[str], params: dict) -> Tuple[Status, dict]:
         """

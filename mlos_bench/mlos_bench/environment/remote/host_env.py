@@ -12,7 +12,7 @@ import logging
 
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.types.host_provisioner_type import SupportsHostOps
+from mlos_bench.service.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -52,9 +52,9 @@ class HostEnv(Environment):
         """
         super().__init__(name, config, global_config, tunables, service)
 
-        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
+        assert self._service is not None and isinstance(self._service, SupportsHostProvisioning), \
             "HostEnv requires a service that supports host operations"
-        self._vm_service: SupportsHostOps = self._service
+        self._host_service: SupportsHostProvisioning = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """

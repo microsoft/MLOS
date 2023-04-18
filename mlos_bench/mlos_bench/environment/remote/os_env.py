@@ -13,7 +13,8 @@ import logging
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.service.types.host_ops_type import SupportsHostOps
+from mlos_bench.service.types.os_ops_type import SupportsOSOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -55,10 +56,13 @@ class OSEnv(Environment):
         """
         super().__init__(name, config, global_config, tunables, service)
 
-        # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
-        assert self._service is not None and isinstance(self._service, SupportsVMOps), \
+        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
             "RemoteEnv requires a service that supports host operations"
-        self._host_service: SupportsVMOps = self._service
+        self._host_service: SupportsHostOps = self._service
+
+        assert self._service is not None and isinstance(self._service, SupportsOSOps), \
+            "RemoteEnv requires a service that supports host operations"
+        self._os_service: SupportsOSOps = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -84,12 +88,9 @@ class OSEnv(Environment):
         if not super().setup(tunables, global_config):
             return False
 
-        (status, params) = self._host_service.host_start(self._params)
+        (status, params) = self._host_service.start_host(self._params)
         if status.is_pending:
             (status, _) = self._host_service.wait_host_operation(params)
-        (status, params) = self._host_service.vm_start(self._params)
-        if status.is_pending:
-            (status, _) = self._host_service.wait_vm_operation(params)
 
         self._is_ready = status in {Status.SUCCEEDED, Status.READY}
         return self._is_ready
@@ -99,7 +100,11 @@ class OSEnv(Environment):
         Clean up and shut down the host without deprovisioning it.
         """
         _LOG.info("OS tear down: %s", self)
-        (status, params) = self._host_service.host_stop()
+        (status, params) = self._os_service.shutdown()
+        if status.is_pending:
+            (status, _) = self._os_service.wait_os_operation(params)
+
+        (status, params) = self._host_service.stop_host()
         if status.is_pending:
             (status, _) = self._host_service.wait_host_operation(params)
 
