@@ -43,7 +43,7 @@ def test_exp_trial_configs(exp_storage_memory_sql: Storage.Experiment,
     assert trials1[0].config_id == trials1[1].config_id
     assert trials1[0].config_id == trials1[2].config_id
 
-    config2 = tunable_groups.copy().assign({'rootfs': 'ext4'})
+    config2 = tunable_groups.copy().assign({'rootfs': 'xfs'})
     trials2 = [
         exp_storage_memory_sql.new_trial(config2),
         exp_storage_memory_sql.new_trial(config2),
