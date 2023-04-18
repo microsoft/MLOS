@@ -7,10 +7,6 @@
     "dockerComposeFile": "docker-compose.yml",
     "service": "app",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-    // Use 'forwardPorts' to make a list of ports inside the container available locally.
-    "forwardPorts": [
-        "docs-www:81"
-    ],
     // Prep some host side things for the container build
     "initializeCommand": [".devcontainer/scripts/prep-container-build"],
     // Make sure the container user can read/write to the package caches.

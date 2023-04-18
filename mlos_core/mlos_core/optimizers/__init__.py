@@ -18,6 +18,7 @@ from mlos_core.optimizers.bayesian_optimizers import (
 from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
 
 __all__ = [
+    'SpaceAdapterType',
     'OptimizerFactory',
     'BaseOptimizer',
     'RandomOptimizer',

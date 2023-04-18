@@ -8,7 +8,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union, List, Tuple, Dict, Any
+from typing import Optional, Union, List, Tuple, Dict, Iterator, Any
 
 from mlos_bench.environment import Status
 from mlos_bench.service import Service
@@ -44,7 +44,8 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
 
     @abstractmethod
-    def experiment(self, exp_id: str, trial_id: int, description: str, opt_target: str):
+    def experiment(self, exp_id: str, trial_id: int, description: str,
+                   opt_target: str) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -81,31 +82,58 @@ class Storage(metaclass=ABCMeta):
             self._opt_target = opt_target
             (self._git_repo, self._git_commit) = get_git_info()
 
-        def __enter__(self):
+        def __enter__(self) -> 'Storage.Experiment':
             """
             Enter the context of the experiment.
+
+            Override the `_setup` method to add custom context initialization.
             """
             _LOG.debug("Starting experiment: %s", self)
+            self._setup()
             return self
 
         def __exit__(self, exc_type, exc_val, exc_tb):
             """
             End the context of the experiment.
+
+            Override the `_teardown` method to add custom context teardown logic.
             """
-            if exc_val is None:
+            is_ok = exc_val is None
+            if is_ok:
                 _LOG.debug("Finishing experiment: %s", self)
             else:
                 _LOG.warning("Finishing experiment: %s", self,
                              exc_info=(exc_type, exc_val, exc_tb))
+            self._teardown(is_ok)
             return False  # Do not suppress exceptions
 
         def __repr__(self) -> str:
             return self._experiment_id
 
-        @abstractmethod
-        def merge(self, experiment_ids: List[str]):
+        def _setup(self) -> None:
             """
-            Merge in the results of other experiments.
+            Create a record of the new experiment or find an existing one in the storage.
+
+            This method is called by `Storage.Experiment.__enter__()`.
+            """
+
+        def _teardown(self, is_ok: bool) -> None:
+            """
+            Finalize the experiment in the storage.
+
+            This method is called by `Storage.Experiment.__exit__()`.
+
+            Parameters
+            ----------
+            is_ok : bool
+                True if there were no exceptions during the experiment, False otherwise.
+            """
+
+        @abstractmethod
+        def merge(self, experiment_ids: List[str]) -> None:
+            """
+            Merge in the results of other (compatible) experiments trials.
+            Used to help warm up the optimizer for this experiment.
 
             Parameters
             ----------
@@ -122,13 +150,14 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def pending(self):
+        def pending_trials(self) -> Iterator['Storage.Trial']:
             """
-            Return an iterator over the pending experiment runs.
+            Return an iterator over the pending trial runs for this experiment.
             """
 
         @abstractmethod
-        def trial(self, tunables: TunableGroups, config: Optional[Dict[str, Any]] = None):
+        def new_trial(self, tunables: TunableGroups,
+                      config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
             """
             Create a new experiment run in the storage.
 
@@ -143,7 +172,7 @@ class Storage(metaclass=ABCMeta):
             -------
             trial : Storage.Trial
                 An object that allows to update the storage with
-                the results of the experiment run.
+                the results of the experiment trial run.
             """
 
     class Trial(metaclass=ABCMeta):
@@ -152,9 +181,8 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.Experiment.trial()` method.
         """
 
-        def __init__(self, engine, tunables: TunableGroups, experiment_id: str,
-                     trial_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
-            self._engine = engine
+        def __init__(self, tunables: TunableGroups, experiment_id: str, trial_id: int,
+                     opt_target: str, config: Optional[Dict[str, Any]] = None):
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
@@ -217,7 +245,8 @@ class Storage(metaclass=ABCMeta):
             return {self._opt_target: value} if isinstance(value, (float, int)) else value
 
         @abstractmethod
-        def update_telemetry(self, status: Status, value: Optional[Dict[str, Any]] = None):
+        def update_telemetry(self, status: Status,
+                             value: Optional[Dict[str, Any]] = None) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 

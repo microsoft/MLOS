@@ -31,13 +31,16 @@ class SqlStorage(Storage):
         self._repr = f"{url.get_backend_name()}:{url.database}"
         _LOG.info("Connect to the database: %s", self)
         # Log SQL statements if the logging level is DEBUG:
-        self._engine = create_engine(url, echo=_LOG.isEnabledFor(logging.DEBUG))
+        self._engine = create_engine(url)  # , echo=_LOG.isEnabledFor(logging.DEBUG))
         self._schema = DbSchema(self._engine).create()
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("DDL statements:\n%s", self._schema)
 
     def __repr__(self) -> str:
         return self._repr
 
-    def experiment(self, exp_id: str, trial_id: int, description: str, opt_target: str):
+    def experiment(self, exp_id: str, trial_id: int,
+                   description: str, opt_target: str) -> Storage.Experiment:
         # pylint: disable=too-many-function-args
         return Experiment(self._engine, self._schema, self._tunables,
                           exp_id, trial_id, description, opt_target)

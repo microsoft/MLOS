@@ -10,21 +10,30 @@ import logging
 from datetime import datetime
 from typing import Optional, Union, Dict, Any
 
-from sqlalchemy import text
+from sqlalchemy import Engine, Table
 
 from mlos_bench.environment import Status
+from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage.base_storage import Storage
+from mlos_bench.storage.sql_schema import DbSchema
 
 _LOG = logging.getLogger(__name__)
 
 
 class Trial(Storage.Trial):
     """
-    Storing the results of a single run of the experiment in SQL database.
+    Store the results of a single run of the experiment in SQL database.
     """
 
-    def _update(self, table: str, timestamp: Optional[datetime],
-                status: Status, value: Optional[Dict[str, Any]] = None):
+    def __init__(self, engine: Engine, schema: DbSchema, tunables: TunableGroups,
+                 experiment_id: str, trial_id: int, opt_target: str,
+                 config: Optional[Dict[str, Any]] = None):
+        super().__init__(tunables, experiment_id, trial_id, opt_target, config)
+        self._engine = engine
+        self._schema = schema
+
+    def _update(self, table: Table, timestamp: Optional[datetime],
+                status: Status, value: Optional[Dict[str, Any]] = None) -> None:
         """
         Update the status of the trial and optionally add some results.
 
@@ -45,34 +54,25 @@ class Trial(Storage.Trial):
             try:
                 # FIXME: Use the actual timestamp from the benchmark.
                 conn.execute(
-                    text("""
-                        UPDATE trial SET status = :status, ts_end = :ts_end
-                        WHERE exp_id = :exp_id AND trial_id = :trial_id
-                    """),
-                    {
-                        "exp_id": self._experiment_id,
-                        "trial_id": self._trial_id,
-                        "status": status.name,
-                        "ts_end": timestamp,
-                    }
+                    self._schema.trial.update().where(
+                        self._schema.trial.c.exp_id == self._experiment_id,
+                        self._schema.trial.c.trial_id == self._trial_id,
+                    ).values(
+                        status=status.name,
+                        ts_end=timestamp,
+                    )
                 )
                 # FIXME: Save timestamps for the telemetry data.
                 if value:
-                    conn.execute(
-                        text(f"""
-                            INSERT INTO {table} (exp_id, trial_id, metric_id, metric_value)
-                            VALUES (:exp_id, :trial_id, :metric_id, :metric_value)
-                        """),
-                        [
-                            {
-                                "exp_id": self._experiment_id,
-                                "trial_id": self._trial_id,
-                                "metric_id": key,
-                                "metric_value": None if val is None else str(val),
-                            }
-                            for (key, val) in value.items()
-                        ]
-                    )
+                    conn.execute(table.insert().values([
+                        {
+                            "exp_id": self._experiment_id,
+                            "trial_id": self._trial_id,
+                            "metric_id": key,
+                            "metric_value": None if val is None else str(val),
+                        }
+                        for (key, val) in value.items()
+                    ]))
             except Exception:
                 conn.rollback()
                 raise
@@ -81,9 +81,9 @@ class Trial(Storage.Trial):
                value: Optional[Union[Dict[str, Any], Any]] = None
                ) -> Optional[Dict[str, Any]]:
         value = super().update(status, value)
-        self._update("trial_result", datetime.now(), status, value)
+        self._update(self._schema.trial_result, datetime.now(), status, value)
         return value
 
-    def update_telemetry(self, status: Status, value: Optional[Dict[str, Any]] = None):
+    def update_telemetry(self, status: Status, value: Optional[Dict[str, Any]] = None) -> None:
         super().update_telemetry(status, value)
-        self._update("trial_telemetry", None, status, value)
+        self._update(self._schema.trial_telemetry, None, status, value)

@@ -7,9 +7,11 @@ DB schema definition.
 """
 
 import logging
+from typing import List, Any
 
 from sqlalchemy import (
-    MetaData, Table, Column, Sequence, Integer, String, DateTime,
+    Engine, MetaData, Dialect, create_mock_engine,
+    Table, Column, Sequence, Integer, String, DateTime,
     PrimaryKeyConstraint, ForeignKeyConstraint, UniqueConstraint,
 )
 
@@ -20,12 +22,31 @@ _LOG = logging.getLogger(__name__)
 # pylint: disable=too-few-public-methods,too-many-instance-attributes
 
 
+class _DDL:
+    """
+    A helper class to capture the DDL statements from SQLAlchemy.
+
+    It is used in `DbSchema.__str__()` method below.
+    """
+
+    def __init__(self, dialect: Dialect):
+        self._dialect = dialect
+        self.statements: List[str] = []
+
+    def __call__(self, sql: Any, *_args: Any, **_kwargs: Any) -> None:
+        self.statements.append(str(sql.compile(dialect=self._dialect)))
+
+    def __repr__(self) -> str:
+        res = ";\n".join(self.statements)
+        return res + ";" if res else ""
+
+
 class DbSchema:
     """
     A class to define and create the DB schema.
     """
 
-    def __init__(self, engine):
+    def __init__(self, engine: Engine):
         """
         Declare the SQLAlchemy schema for the database.
         """
@@ -134,10 +155,16 @@ class DbSchema:
 
         _LOG.debug("Schema: %s", self._meta)
 
-    def create(self):
+    def create(self) -> 'DbSchema':
         """
         Create the DB schema.
         """
         _LOG.info("Create the DB schema")
         self._meta.create_all(self._engine)
         return self
+
+    def __repr__(self) -> str:
+        ddl = _DDL(self._engine.dialect)
+        mock_engine = create_mock_engine(self._engine.url, executor=ddl)
+        self._meta.create_all(mock_engine, checkfirst=False)
+        return str(ddl)
