@@ -150,14 +150,14 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def pending(self) -> Iterator['Storage.Trial']:
+        def pending_trials(self) -> Iterator['Storage.Trial']:
             """
             Return an iterator over the pending trial runs for this experiment.
             """
 
         @abstractmethod
-        def trial(self, tunables: TunableGroups,
-                  config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
+        def new_trial(self, tunables: TunableGroups,
+                      config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
             """
             Create a new experiment run in the storage.
 

@@ -127,7 +127,7 @@ class Experiment(Storage.Experiment):
             for (key, val) in params.items()
         ])
 
-    def pending(self) -> Iterator[Storage.Trial]:
+    def pending_trials(self) -> Iterator[Storage.Trial]:
         _LOG.info("Retrieve pending trials for: %s", self._experiment_id)
         with self._engine.connect() as conn:
             cur_trials = conn.execute(self._schema.trial.select().where(
@@ -167,8 +167,8 @@ class Experiment(Storage.Experiment):
             config_id=config_id)
         return config_id
 
-    def trial(self, tunables: TunableGroups,
-              config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
+    def new_trial(self, tunables: TunableGroups,
+                  config: Optional[Dict[str, Any]] = None) -> Storage.Trial:
         _LOG.debug("Create trial: %s:%d", self._experiment_id, self._trial_id)
         with self._engine.begin() as conn:
             try:

@@ -10,16 +10,18 @@ See `--help` output for details.
 """
 
 import logging
+from typing import Tuple
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizer import Optimizer
 from mlos_bench.environment import Status, Environment
+from mlos_bench.tunables import TunableGroups
 from mlos_bench.storage import Storage
 
 _LOG = logging.getLogger(__name__)
 
 
-def _main():
+def _main() -> None:
 
     launcher = Launcher("mlos_bench run_opt")
 
@@ -45,7 +47,7 @@ def _main():
 
 
 def _optimize(env: Environment, opt: Optimizer,
-              storage: Storage, global_config: dict):
+              storage: Storage, global_config: dict) -> Tuple[float, TunableGroups]:
     """
     Main optimization loop.
 
@@ -77,13 +79,13 @@ def _optimize(env: Environment, opt: Optimizer,
         opt.bulk_register(configs, scores)
 
         # First, complete any pending trials.
-        for trial in exp.pending():
+        for trial in exp.pending_trials():
             _run(env, opt, trial, global_config)
 
         # Then, run new trials until the optimizer is done.
         while opt.not_converged():
             tunables = opt.suggest()
-            trial = exp.trial(tunables)
+            trial = exp.new_trial(tunables)
             _run(env, opt, trial, global_config)
 
     (best_score, best_config) = opt.get_best_observation()
@@ -92,7 +94,7 @@ def _optimize(env: Environment, opt: Optimizer,
 
 
 def _run(env: Environment, opt: Optimizer,
-         trial: Storage.Trial, global_config: dict):
+         trial: Storage.Trial, global_config: dict) -> None:
     """
     Run a single trial.
 
