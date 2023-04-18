@@ -5,6 +5,7 @@
 """
 Unit tests for the storage subsystem.
 """
+import pytest
 
 from mlos_bench.storage import Storage
 from mlos_bench.tunables import TunableGroups
@@ -78,6 +79,17 @@ def test_exp_trial_success(exp_storage_memory_sql: Storage.Experiment,
     trial.update(Status.SUCCEEDED, 99.9)
     trials = list(exp_storage_memory_sql.pending_trials())
     assert not trials
+
+
+def test_exp_trial_update_twice(exp_storage_memory_sql: Storage.Experiment,
+                                tunable_groups: TunableGroups) -> None:
+    """
+    Update the trial status twice and receive an error.
+    """
+    trial = exp_storage_memory_sql.new_trial(tunable_groups)
+    trial.update(Status.FAILED)
+    with pytest.raises(RuntimeError):
+        trial.update(Status.SUCCEEDED, 99.9)
 
 
 def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,

@@ -53,15 +53,20 @@ class Trial(Storage.Trial):
         with self._engine.begin() as conn:
             try:
                 # FIXME: Use the actual timestamp from the benchmark.
-                conn.execute(
+                cur_status = conn.execute(
                     self._schema.trial.update().where(
                         self._schema.trial.c.exp_id == self._experiment_id,
                         self._schema.trial.c.trial_id == self._trial_id,
+                        self._schema.trial.c.status.notin_(
+                            ['SUCCEEDED', 'CANCELED', 'FAILED', 'TIMED_OUT']),
                     ).values(
                         status=status.name,
                         ts_end=timestamp,
                     )
                 )
+                if cur_status.rowcount != 1:
+                    raise RuntimeError(
+                        f"Failed to update the status of the trial {self} to {status}.")
                 # FIXME: Save timestamps for the telemetry data.
                 if value:
                     conn.execute(table.insert().values([
