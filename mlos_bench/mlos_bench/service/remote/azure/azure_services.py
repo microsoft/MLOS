@@ -17,13 +17,14 @@ import requests
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.service.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.service.types.host_provisioner_type import SupportsHostOps
+from mlos_bench.service.types.os_ops_type import SupportsOSOps
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: disable=too-many-instance-attributes
+class AzureVMService(Service, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):  # pylint: disable=too-many-instance-attributes
     """
     Helper methods to manage VMs on Azure.
     """
@@ -130,13 +131,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         # Register methods that we want to expose to the Environment objects.
         self.register([
             self.check_vm_operation_status,
-            self.wait_vm_deployment,
-            self.wait_vm_operation,
-            self.vm_provision,
-            self.vm_start,
-            self.vm_stop,
-            self.vm_deprovision,
-            self.vm_restart,
+            self.wait_host_deployment,
+            self.wait_host_operation,
+            self.provision_host,
+            self.start_host,
+            self.stop_host,
+            self.deprovision_host,
+            self.restart_host,
             self.remote_exec,
             self.get_remote_exec_results
         ])
@@ -287,7 +288,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         _LOG.error("Response: %s :: %s", response, response.text)
         return Status.FAILED, {}
 
-    def wait_vm_deployment(self, is_setup: bool, params: dict) -> Tuple[Status, dict]:
+    def wait_host_deployment(self, is_setup: bool, params: dict) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -310,7 +311,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
                   "provision" if is_setup else "deprovision")
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
-    def wait_vm_operation(self, params: dict) -> Tuple[Status, dict]:
+    def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -411,7 +412,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         _LOG.error("Response: %s :: %s", response, response.text)
         return (Status.FAILED, {})
 
-    def vm_provision(self, params: dict) -> Tuple[Status, dict]:
+    def provision_host(self, params: dict) -> Tuple[Status, dict]:
         """
         Check if Azure VM is ready. Deploy a new VM, if necessary.
 
@@ -466,7 +467,20 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def vm_start(self, params: dict) -> Tuple[Status, dict]:
+    def deprovision_host(self) -> Tuple[Status, dict]:
+        """
+        Deallocates the VM on Azure by shutting it down then releasing the compute resources.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+        _LOG.info("Deprovision VM: %s", self.config["vmName"])
+        return self._azure_vm_post_helper(self._url_stop)
+
+    def start_host(self, params: dict) -> Tuple[Status, dict]:
         """
         Start the VM on Azure.
 
@@ -484,7 +498,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         _LOG.info("Start VM: %s :: %s", self.config["vmName"], params)
         return self._azure_vm_post_helper(self._url_start)
 
-    def vm_stop(self) -> Tuple[Status, dict]:
+    def stop_host(self, force: bool = False) -> Tuple[Status, dict]:
         """
         Stops the VM on Azure by initiating a graceful shutdown.
 
@@ -494,23 +508,12 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        if force:
+            raise NotImplementedError()
         _LOG.info("Stop VM: %s", self.config["vmName"])
         return self._azure_vm_post_helper(self._url_stop)
 
-    def vm_deprovision(self) -> Tuple[Status, dict]:
-        """
-        Deallocates the VM on Azure by shutting it down then releasing the compute resources.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-        """
-        _LOG.info("Deprovision VM: %s", self.config["vmName"])
-        return self._azure_vm_post_helper(self._url_stop)
-
-    def vm_restart(self) -> Tuple[Status, dict]:
+    def restart_host(self, force: bool = False) -> Tuple[Status, dict]:
         """
         Reboot the VM on Azure by initiating a graceful shutdown.
 
@@ -520,6 +523,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        if force:
+            raise NotImplementedError()
         _LOG.info("Reboot VM: %s", self.config["vmName"])
         return self._azure_vm_post_helper(self._url_reboot)
 
@@ -597,7 +602,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         """
         _LOG.info("Check the results on VM: %s", self.config["vmName"])
 
-        status, result = self.wait_vm_operation(params)
+        status, result = self.wait_host_operation(params)
 
         if status.is_succeeded:
             return status, result.get("properties", {}).get("output", {})

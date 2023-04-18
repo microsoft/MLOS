@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Protocol interface for VM provisioning operations.
+Protocol interface for Host/VM provisioning operations.
 """
 
 from typing import Tuple, Protocol, runtime_checkable, TYPE_CHECKING
@@ -13,14 +13,14 @@ if TYPE_CHECKING:
 
 
 @runtime_checkable
-class SupportsVMOps(Protocol):
+class SupportsHostOps(Protocol):
     """
-    Protocol interface for VM provisioning operations.
+    Protocol interface for Host/VM provisioning operations.
     """
 
-    def vm_provision(self, params: dict) -> Tuple["Status", dict]:
+    def provision_host(self, params: dict) -> Tuple["Status", dict]:
         """
-        Check if VM is ready. Deploy a new VM, if necessary.
+        Check if Host/VM is ready. Deploy a new Host/VM, if necessary.
 
         Parameters
         ----------
@@ -36,15 +36,15 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_vm_deployment(self, is_setup: bool, params: dict) -> Tuple["Status", dict]:
+    def wait_host_deployment(self, is_setup: bool, params: dict) -> Tuple["Status", dict]:
         """
-        Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+        Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
 
         Parameters
         ----------
         is_setup : bool
-            If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
+            If True, wait for Host/VM being deployed; otherwise, wait for successful deprovisioning.
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
 
@@ -56,9 +56,20 @@ class SupportsVMOps(Protocol):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
 
-    def vm_start(self, params: dict) -> Tuple["Status", dict]:
+    def deprovision_host(self) -> Tuple["Status", dict]:
         """
-        Start a VM.
+        Deallocates the Host/VM by shutting it down then releasing the compute resources.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+
+    def start_host(self, params: dict) -> Tuple["Status", dict]:
+        """
+        Start a Host/VM.
 
         Parameters
         ----------
@@ -72,9 +83,14 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_stop(self) -> Tuple["Status", dict]:
+    def stop_host(self, force: bool = False) -> Tuple["Status", dict]:
         """
-        Stops the VM by initiating a graceful shutdown.
+        Stops the Host/VM by initiating a (graceful) shutdown.
+
+        Parameters
+        ----------
+        force : bool
+            If True, force stop the Host/VM.
 
         Returns
         -------
@@ -83,9 +99,14 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_restart(self) -> Tuple["Status", dict]:
+    def restart_host(self, force: bool = False) -> Tuple["Status", dict]:
         """
-        Restarts the VM by initiating a graceful shutdown.
+        Restarts the host by initiating a (graceful) shutdown.
+
+        Parameters
+        ----------
+        force : bool
+            If True, force restart the Host/VM.
 
         Returns
         -------
@@ -94,20 +115,9 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_deprovision(self) -> Tuple["Status", dict]:
+    def wait_host_operation(self, params: dict) -> Tuple["Status", dict]:
         """
-        Deallocates the VM by shutting it down then releasing the compute resources.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-        """
-
-    def wait_vm_operation(self, params: dict) -> Tuple["Status", dict]:
-        """
-        Waits for a pending operation on a VM to resolve to SUCCEEDED or FAILED.
+        Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
 
         Parameters

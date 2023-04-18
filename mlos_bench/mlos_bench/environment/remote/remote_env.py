@@ -15,7 +15,7 @@ from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.service.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.service.types.host_provisioner_type import SupportsHostOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -55,7 +55,7 @@ class RemoteEnv(Environment):
             A collection of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, OS, etc.).
+            deploy or reboot a Host, VM, OS, etc.).
         """
         super().__init__(name, config, global_config, tunables, service)
 
@@ -64,9 +64,9 @@ class RemoteEnv(Environment):
         self._remote_exec_service: SupportsRemoteExec = self._service
 
         # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
-        assert self._service is not None and isinstance(self._service, SupportsVMOps), \
+        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
             "RemoteEnv requires a service that supports host operations"
-        self._host_service: SupportsVMOps = self._service
+        self._host_service: SupportsHostOps = self._service
 
         self._wait_boot = self.config.get("wait_boot", False)
         self._script_setup = self.config.get("setup")
@@ -104,7 +104,7 @@ class RemoteEnv(Environment):
 
         if self._wait_boot:
             _LOG.info("Wait for the remote environment to start: %s", self)
-            (status, params) = self._host_service.host_start(self._params)
+            (status, params) = self._host_service.start_host(self._params)
             if status.is_pending:
                 (status, _) = self._host_service.wait_host_operation(params)
             if not status.is_succeeded:

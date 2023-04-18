@@ -67,7 +67,7 @@ def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock
     }
     mock_requests.get.return_value = mock_status_response
 
-    status, _ = azure_vm_service.wait_vm_operation(params)
+    status, _ = azure_vm_service.wait_host_operation(params)
 
     assert (async_url, ) == mock_requests.get.call_args[0]
     assert (retry_after, ) == mock_sleep.call_args[0]
@@ -89,7 +89,7 @@ def test_wait_vm_operation_timeout(mock_requests: MagicMock, azure_vm_service: A
     }
     mock_requests.get.return_value = mock_status_response
 
-    (status, _) = azure_vm_service.wait_vm_operation(params)
+    (status, _) = azure_vm_service.wait_host_operation(params)
     assert status == Status.TIMED_OUT
 
 

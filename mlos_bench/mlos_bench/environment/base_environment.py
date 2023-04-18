@@ -59,7 +59,7 @@ class Environment(metaclass=abc.ABCMeta):
             A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM/Host, etc.).
 
         Returns
         -------
@@ -94,7 +94,7 @@ class Environment(metaclass=abc.ABCMeta):
             A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM/Host, etc.).
         """
         self.name = name
         self.config = config

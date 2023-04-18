@@ -6,9 +6,13 @@
 Remote host Environment.
 """
 
+from typing import Optional
+
 import logging
 
-from mlos_bench.environment import Environment
+from mlos_bench.environment.base_environment import Environment
+from mlos_bench.service.base_service import Service
+from mlos_bench.service.types.host_provisioner_type import SupportsHostOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -19,21 +23,42 @@ class HostEnv(Environment):
     Remote host environment.
     """
 
-    def setup(self, tunables: TunableGroups, global_config: dict = None) -> bool:
+    def __init__(self,
+                 name: str,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None,
+                 service: Optional[Service] = None):
+        # pylint: disable=too-many-arguments
         """
-        Check if the host is ready. (Re)provision and start it, if necessary.
+        Create a new environment for host operations.
 
-        For VM hosts, this will involve creating the VM (if necessary) using
-        its Service provider mix-in and ensuring its powered on.
+        Parameters
+        ----------
+        name: str
+            Human-readable name of the environment.
+        config : dict
+            Free-format dictionary that contains the benchmark environment
+            configuration. Each config must have at least the "tunable_params"
+            and the "const_args" sections.
+        global_config : dict
+            Free-format dictionary of global parameters (e.g., security credentials)
+            to be mixed in into the "const_args" section of the local config.
+        tunables : TunableGroups
+            A collection of tunable parameters for *all* environments.
+        service: Service
+            An optional service object (e.g., providing methods to
+            deploy or reboot a VM/host, etc.).
+        """
+        super().__init__(name, config, global_config, tunables, service)
 
-        Note: for physical hosts very often this will be a no-op and expected
-        to be a manual operation for physical hosts.
+        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
+            "HostEnv requires a service that supports host operations"
+        self._vm_service: SupportsHostOps = self._service
 
-        However, there are some environments (e.g. CloudLab or Redfish firmware
-        configuration) where the host can be provisioned, configured, and
-        started programmatically.  This is a good place to hook into such
-        environments.
-
+    def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
+        """
+        Check if host is ready. (Re)provision and start it, if necessary.
 
         Parameters
         ----------
@@ -55,21 +80,21 @@ class HostEnv(Environment):
         if not super().setup(tunables, global_config):
             return False
 
-        (status, params) = self._service.host_provision(self._params)
+        (status, params) = self._host_service.provision_host(self._params)
         if status.is_pending:
-            (status, _) = self._service.wait_host_deployment(True, params)
+            (status, _) = self._host_service.wait_host_deployment(True, params)
 
         self._is_ready = status.is_succeeded
         return self._is_ready
 
-    def teardown(self):
+    def teardown(self) -> None:
         """
         Shut down the Host and release it.
         """
         _LOG.info("Host tear down: %s", self)
-        (status, params) = self._service.host_deprovision()
+        (status, params) = self._host_service.deprovision_host()
         if status.is_pending:
-            (status, _) = self._service.wait_host_deployment(False, params)
+            (status, _) = self._host_service.wait_host_deployment(False, params)
 
         super().teardown()
         _LOG.debug("Final status of Host deprovisioning: %s :: %s", self, status)
