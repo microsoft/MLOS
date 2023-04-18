@@ -28,6 +28,7 @@ class Trial(Storage.Trial):
     def __init__(self, engine: Engine, schema: DbSchema, tunables: TunableGroups,
                  experiment_id: str, trial_id: int, opt_target: str,
                  config: Optional[Dict[str, Any]] = None):
+        # pylint: disable=too-many-arguments
         super().__init__(tunables, experiment_id, trial_id, opt_target, config)
         self._engine = engine
         self._schema = schema

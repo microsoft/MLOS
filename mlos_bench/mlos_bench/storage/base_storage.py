@@ -17,8 +17,6 @@ from mlos_bench.util import get_git_info
 
 _LOG = logging.getLogger(__name__)
 
-# pylint: disable=too-few-public-methods,too-many-arguments
-
 
 class Storage(metaclass=ABCMeta):
     """
@@ -187,6 +185,7 @@ class Storage(metaclass=ABCMeta):
 
         def __init__(self, tunables: TunableGroups, experiment_id: str, trial_id: int,
                      opt_target: str, config: Optional[Dict[str, Any]] = None):
+            # pylint: disable=too-many-arguments
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
