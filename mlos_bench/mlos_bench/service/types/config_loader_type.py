@@ -6,11 +6,13 @@
 Protocol interface for helper functions to lookup and load configs.
 """
 
-from typing import List, Optional, Union, Protocol, runtime_checkable
+from typing import List, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
 
-from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.service.base_service import Service
-from mlos_bench.environment.base_environment import Environment
+
+if TYPE_CHECKING:
+    from mlos_bench.tunables.tunable_groups import TunableGroups
+    from mlos_bench.service.base_service import Service
+    from mlos_bench.environment.base_environment import Environment
 
 
 @runtime_checkable
@@ -57,8 +59,8 @@ class SupportsConfigLoading(Protocol):
 
     def build_environment(self, config: dict,
                           global_config: Optional[dict] = None,
-                          tunables: Optional[TunableGroups] = None,
-                          service: Optional[Service] = None) -> Environment:
+                          tunables: Optional["TunableGroups"] = None,
+                          service: Optional["Service"] = None) -> "Environment":
         """
         Factory method for a new environment with a given config.
 
@@ -85,7 +87,7 @@ class SupportsConfigLoading(Protocol):
 
     def load_environment_list(
             self, json_file_name: str, global_config: Optional[dict] = None,
-            tunables: Optional[TunableGroups] = None, service: Optional[Service] = None) -> List[Environment]:
+            tunables: Optional["TunableGroups"] = None, service: Optional["Service"] = None) -> List["Environment"]:
         """
         Load and build a list of environments from the config file.
 
