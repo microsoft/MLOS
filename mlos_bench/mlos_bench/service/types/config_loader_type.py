@@ -9,6 +9,7 @@ Protocol interface for helper functions to lookup and load configs.
 from typing import List, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
 
 
+# Avoid's circular import issues.
 if TYPE_CHECKING:
     from mlos_bench.tunables.tunable_groups import TunableGroups
     from mlos_bench.service.base_service import Service
