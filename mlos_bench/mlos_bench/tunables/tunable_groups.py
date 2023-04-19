@@ -131,8 +131,7 @@ class TunableGroups:
             An iterator over all tunables in all groups. Each element is a 2-tuple
             of an instance of the Tunable parameter and covariant group it belongs to.
         """
-        for (name, group) in self._index.items():
-            yield (group.get_tunable(name), group)
+        return ((group.get_tunable(name), group) for (name, group) in self._index.items())
 
     def get_tunable(self, name: str) -> Tuple[Tunable, CovariantTunableGroup]:
         """

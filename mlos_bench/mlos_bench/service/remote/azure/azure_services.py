@@ -542,7 +542,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
     def reboot(self, force: bool = False) -> Tuple["Status", dict]:
         return self.restart_host(force=force)
 
-    def remote_exec(self, script: List[str], params: dict) -> Tuple[Status, dict]:
+    def remote_exec(self, script: Iterable[str], params: dict) -> Tuple[Status, dict]:
         """
         Run a command on Azure VM.
 

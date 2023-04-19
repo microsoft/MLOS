@@ -50,7 +50,7 @@ class HostEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM/host, etc.).
         """
-        super().__init__(name, config, global_config, tunables, service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
         assert self._service is not None and isinstance(self._service, SupportsHostProvisioning), \
             "HostEnv requires a service that supports host operations"

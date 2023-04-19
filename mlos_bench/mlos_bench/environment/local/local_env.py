@@ -64,10 +64,6 @@ class LocalEnv(Environment):
             "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
 
-        assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
-            "LocalEnv requires a service that supports local execution"
-        self._local_exec_service: SupportsLocalExec = self._service
-
         self._temp_dir = self.config.get("temp_dir")
         self._script_setup = self.config.get("setup")
         self._script_run = self.config.get("run")
