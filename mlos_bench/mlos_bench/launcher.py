@@ -9,7 +9,7 @@ Helper functions to launch the benchmark and the optimizer from the command line
 import logging
 import argparse
 
-from typing import List, Dict, Any
+from typing import Optional, List, Dict, Any
 
 from mlos_bench.environment import Environment
 from mlos_bench.service import LocalExecService, ConfigPersistenceService
@@ -30,9 +30,9 @@ class Launcher:
 
         _LOG.info("Launch: %s", description)
 
-        self._config_loader = None
-        self._env_config_file = None
-        self._global_config = {}
+        self._config_loader: Optional[ConfigPersistenceService] = None
+        self._env_config_file: str = ""
+        self._global_config: Dict[str, Any] = {}
         self._parser = argparse.ArgumentParser(description=description)
 
         self._parser.add_argument(
@@ -68,6 +68,14 @@ class Launcher:
         Get the command line parser (so we can add more arguments to it).
         """
         return self._parser
+
+    @property
+    def root_env_config(self) -> str:
+        """
+        Get the global parameters that can override the values in the config snippets.
+        """
+        assert self._env_config_file, "Call after invoking .parse_args()"
+        return self._env_config_file
 
     @property
     def global_config(self) -> Dict[str, Any]:
@@ -144,14 +152,16 @@ class Launcher:
         Create a new benchmarking environment from the configs and command line parameters.
         Inject the persistence service so that the environment can load other configs.
         """
+        assert self._config_loader is not None, "Call after invoking .parse_args()"
         return self._config_loader.load_environment(
             self._env_config_file, self._global_config,
             service=LocalExecService(parent=self._config_loader))
 
-    def load_generic(self, env: Environment, cls, json_file_name: str):
+    def load_generic(self, env: Environment, cls: type, json_file_name: str) -> Any:
         """
         Create a new instance of class `cls` from JSON configuration.
         """
+        assert self._config_loader is not None, "Call after invoking .parse_args()"
         return self._config_loader.build_generic(
             cls, env.tunable_params(), self._config_loader,
             self.load_config(json_file_name), self.global_config)
