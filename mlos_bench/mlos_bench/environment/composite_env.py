@@ -22,9 +22,13 @@ class CompositeEnv(Environment):
     Composite benchmark environment.
     """
 
-    def __init__(self, name: str, config: dict, global_config: Optional[dict] = None,
-                 tunables: Optional[TunableGroups] = None, service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
+    def __init__(self,
+                 *,
+                 name: str,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 tunables: Optional[TunableGroups] = None,
+                 service: Optional[Service] = None):
         """
         Create a new environment with a given config.
 
@@ -44,7 +48,7 @@ class CompositeEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name, config, global_config, tunables, service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
         self._children: List[Environment] = []
 

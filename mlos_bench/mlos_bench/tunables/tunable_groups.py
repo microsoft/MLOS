@@ -7,7 +7,7 @@ TunableGroups definition.
 """
 import copy
 
-from typing import Any, Dict, Generator, Iterable, Optional, Tuple
+from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
@@ -31,7 +31,7 @@ class TunableGroups:
             config = {}
         self._index: Dict[str, CovariantTunableGroup] = {}  # Index (Tunable id -> CovariantTunableGroup)
         self._tunable_groups: Dict[str, CovariantTunableGroup] = {}
-        for (name, group_config) in (config).items():
+        for (name, group_config) in config.items():
             self._add_group(CovariantTunableGroup(name, group_config))
 
     def __eq__(self, other: object) -> bool:
@@ -185,7 +185,7 @@ class TunableGroups:
         return tunables
 
     def get_param_values(self, group_names: Optional[Iterable[str]] = None,
-                         into_params: Optional[Dict[str, Any]] = None) -> Dict[str, TunableValue]:
+                         into_params: Optional[Dict[str, TunableValue]] = None) -> Dict[str, TunableValue]:
         """
         Get the current values of the tunables that belong to the specified covariance groups.
 
@@ -245,14 +245,14 @@ class TunableGroups:
             self._tunable_groups[name].reset()
         return self
 
-    def assign(self, param_values: Dict[str, Any]) -> "TunableGroups":
+    def assign(self, param_values: Mapping[str, TunableValue]) -> "TunableGroups":
         """
         In-place update the values of the tunables from the dictionary
         of (key, value) pairs.
 
         Parameters
         ----------
-        param_values : Dict[str, Any]
+        param_values : Mapping[str, TunableValue]
             Dictionary mapping Tunable parameter names to new values.
 
         Returns

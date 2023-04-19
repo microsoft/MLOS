@@ -10,7 +10,7 @@ and upload/download data to the shared storage.
 import logging
 
 from string import Template
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import List, Generator, Iterable, Mapping, Optional, Tuple
 
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.local_exec_type import SupportsLocalExec
@@ -30,12 +30,12 @@ class LocalFileShareEnv(LocalEnv):
     """
 
     def __init__(self,
+                 *,
                  name: str,
                  config: dict,
                  global_config: Optional[dict] = None,
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
         """
         Create a new application environment with a given config.
 
@@ -59,7 +59,7 @@ class LocalFileShareEnv(LocalEnv):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name, config, global_config, tunables, service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
         assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
             "LocalEnv requires a service that supports local execution"
@@ -83,8 +83,8 @@ class LocalFileShareEnv(LocalEnv):
         ]
 
     @staticmethod
-    def _expand(from_to: List[Tuple[Template, Template]],
-                params: Dict[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
+    def _expand(from_to: Iterable[Tuple[Template, Template]],
+                params: Mapping[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
         Return a generator of (str, str) pairs of paths.

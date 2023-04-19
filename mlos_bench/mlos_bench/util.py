@@ -12,7 +12,7 @@ import json
 import logging
 import importlib
 
-from typing import Any, Dict, Iterable, Optional, Tuple, Type, TypeVar, TYPE_CHECKING
+from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING
 
 _LOG = logging.getLogger(__name__)
 
@@ -97,7 +97,7 @@ def instantiate_from_config(base_class: Type[T], class_name: str, *args: Any, **
     return ret
 
 
-def check_required_params(config: Dict[str, Any], required_params: Iterable[str]) -> None:
+def check_required_params(config: Mapping[str, Any], required_params: Iterable[str]) -> None:
     """
     Check if all required parameters are present in the configuration.
     Raise ValueError if any of the parameters are missing.

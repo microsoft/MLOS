@@ -28,12 +28,12 @@ class MockEnv(Environment):
     _NOISE_VAR = 0.2  # Variance of the Gaussian noise added to the benchmark value.
 
     def __init__(self,
+                 *,
                  name: str,
                  config: dict,
                  global_config: Optional[dict] = None,
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
         """
         Create a new environment that produces mock benchmark data.
 
@@ -52,7 +52,7 @@ class MockEnv(Environment):
         service: Service
             An optional service object. Not used by this class.
         """
-        super().__init__(name, config, global_config, tunables, service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
         seed = self.config.get("seed")
         self._random = random.Random(seed) if seed is not None else None
         self._range = self.config.get("range")

@@ -15,7 +15,7 @@ import shlex
 import subprocess
 import logging
 
-from typing import Dict, List, Optional, Tuple, Union, TYPE_CHECKING
+from typing import Dict, Iterable, Mapping, Optional, Tuple, Union, TYPE_CHECKING
 
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.local_exec_type import SupportsLocalExec
@@ -67,8 +67,8 @@ class LocalExecService(Service, SupportsLocalExec):
             return tempfile.TemporaryDirectory()
         return contextlib.nullcontext(path or self._temp_dir)
 
-    def local_exec(self, script_lines: List[str],
-                   env: Optional[Dict[str, "TunableValue"]] = None,
+    def local_exec(self, script_lines: Iterable[str],
+                   env: Optional[Mapping[str, "TunableValue"]] = None,
                    cwd: Optional[str] = None,
                    return_on_error: bool = False) -> Tuple[int, str, str]:
         """
@@ -76,10 +76,10 @@ class LocalExecService(Service, SupportsLocalExec):
 
         Parameters
         ----------
-        script_lines : List[str]
+        script_lines : Iterable[str]
             Lines of the script to run locally.
             Treat every line as a separate command to run.
-        env : Dict[str, Union[int, float, str]]
+        env : Mapping[str, Union[int, float, str]]
             Environment variables (optional).
         cwd : str
             Work directory to run the script at.
@@ -114,7 +114,7 @@ class LocalExecService(Service, SupportsLocalExec):
         return (return_code, stdout, stderr)
 
     def _local_exec_script(self, script_line: str,
-                           env_params: Optional[Dict[str, "TunableValue"]],
+                           env_params: Optional[Mapping[str, "TunableValue"]],
                            cwd: str) -> Tuple[int, str, str]:
         """
         Execute the script from `script_path` in a local process.
@@ -123,9 +123,9 @@ class LocalExecService(Service, SupportsLocalExec):
         ----------
         script_line : str
             Line of the script to tun in the local process.
-        args : List[str]
+        args : Iterable[str]
             Command line arguments for the script.
-        env_params : Dict[str, Union[int, float, str]]
+        env_params : Mapping[str, Union[int, float, str]]
             Environment variables.
         cwd : str
             Work directory to run the script at.

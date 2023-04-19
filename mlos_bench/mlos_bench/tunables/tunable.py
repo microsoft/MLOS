@@ -9,7 +9,7 @@ import copy
 import collections
 import logging
 
-from typing import List, Optional, Tuple, TypedDict, Union
+from typing import List, Optional, Sequence, Tuple, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
@@ -31,8 +31,7 @@ class TunableDict(TypedDict, total=False):
     description: Optional[str]
     default: TunableValue
     values: Optional[List[str]]
-    # For convenience, we allow the range to be specified as a list in the json, but recast it to a tuple internally.
-    range: Optional[Union[Tuple[int, int], List[int], Tuple[float, float], List[float]]]
+    range: Optional[Union[Sequence[int], Sequence[float]]]
     special: Optional[Union[List[int], List[str]]]
 
 

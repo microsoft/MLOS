@@ -10,7 +10,7 @@ import json
 import time
 import logging
 
-from typing import Callable, List, Tuple
+from typing import Callable, Iterable, Tuple
 
 import requests
 
@@ -548,7 +548,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
 
         Parameters
         ----------
-        script : List[str]
+        script : Iterable[str]
             A list of lines to execute as a script on a remote VM.
         params : dict
             Flat dictionary of (key, value) pairs of parameters.
@@ -567,7 +567,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
 
         json_req = {
             "commandId": "RunShellScript",
-            "script": script,
+            "script": list(script),
             "parameters": [{"name": key, "value": val} for (key, val) in params.items()]
         }
 

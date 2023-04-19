@@ -7,13 +7,12 @@ Protocol interface for Service types that provide helper functions to run
 scripts and commands locally on the scheduler side.
 """
 
-from typing import Dict, List, Optional, Tuple, Union, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import Iterable, Mapping, Optional, Tuple, Union, Protocol, runtime_checkable
 
+import tempfile
+import contextlib
 
-if TYPE_CHECKING:
-    import tempfile
-    import contextlib
-    from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable import TunableValue
 
 
 @runtime_checkable
@@ -26,8 +25,8 @@ class SupportsLocalExec(Protocol):
     Used in LocalEnv and provided by LocalExecService.
     """
 
-    def local_exec(self, script_lines: List[str],
-                   env: Optional[Dict[str, "TunableValue"]] = None,
+    def local_exec(self, script_lines: Iterable[str],
+                   env: Optional[Mapping[str, TunableValue]] = None,
                    cwd: Optional[str] = None,
                    return_on_error: bool = False) -> Tuple[int, str, str]:
         """
@@ -35,10 +34,10 @@ class SupportsLocalExec(Protocol):
 
         Parameters
         ----------
-        script_lines : List[str]
+        script_lines : Iterable[str]
             Lines of the script to run locally.
             Treat every line as a separate command to run.
-        env : Dict[str, Union[int, float, str]]
+        env : Mapping[str, Union[int, float, str]]
             Environment variables (optional).
         cwd : str
             Work directory to run the script at.
@@ -53,7 +52,7 @@ class SupportsLocalExec(Protocol):
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
 
-    def temp_dir_context(self, path: Optional[str] = None) -> Union["tempfile.TemporaryDirectory", "contextlib.nullcontext"]:
+    def temp_dir_context(self, path: Optional[str] = None) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
         """
         Create a temp directory or use the provided path.
 

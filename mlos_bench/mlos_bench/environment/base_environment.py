@@ -29,6 +29,7 @@ class Environment(metaclass=abc.ABCMeta):
 
     @classmethod
     def new(cls,
+            *,
             env_name: str,
             class_name: str,
             config: dict,
@@ -36,7 +37,6 @@ class Environment(metaclass=abc.ABCMeta):
             tunables: Optional[TunableGroups] = None,
             service: Optional[Service] = None,
             ) -> "Environment":
-        # pylint: disable=too-many-arguments
         """
         Factory method for a new environment with a given config.
 
@@ -70,12 +70,12 @@ class Environment(metaclass=abc.ABCMeta):
                                        global_config, tunables, service)
 
     def __init__(self,
+                 *,
                  name: str,
                  config: dict,
                  global_config: Optional[dict] = None,
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
         """
         Create a new environment with a given config.
 

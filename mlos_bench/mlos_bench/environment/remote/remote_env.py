@@ -9,7 +9,7 @@ e.g. Application Environment
 """
 
 import logging
-from typing import Optional, Tuple, List
+from typing import Iterable, Optional, Tuple
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -29,12 +29,12 @@ class RemoteEnv(Environment):
     """
 
     def __init__(self,
+                 *,
                  name: str,
                  config: dict,
                  global_config: Optional[dict] = None,
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
         """
         Create a new environment for remote execution.
 
@@ -57,7 +57,16 @@ class RemoteEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a Host, VM, OS, etc.).
         """
-        super().__init__(name, config, global_config, tunables, service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+
+        assert self._service is not None and isinstance(self._service, SupportsRemoteExec), \
+            "RemoteEnv requires a service that supports remote execution operations"
+        self._remote_exec_service: SupportsRemoteExec = self._service
+
+        # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
+        assert self._service is not None and isinstance(self._service, SupportsVMOps), \
+            "RemoteEnv requires a service that supports host operations"
+        self._host_service: SupportsVMOps = self._service
 
         assert self._service is not None and isinstance(self._service, SupportsRemoteExec), \
             "RemoteEnv requires a service that supports remote execution operations"
@@ -154,7 +163,7 @@ class RemoteEnv(Environment):
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script: List[str]) -> Tuple[Status, Optional[dict]]:
+    def _remote_exec(self, script: Iterable[str]) -> Tuple[Status, Optional[dict]]:
         """
         Run a script on the remote host.
 
@@ -169,6 +178,7 @@ class RemoteEnv(Environment):
             A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
+        _LOG.debug("Submit script: %s", self)
         (status, output) = self._remote_exec_service.remote_exec(script, self._params)
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
