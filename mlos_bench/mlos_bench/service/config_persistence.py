@@ -132,8 +132,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         class_name = config["class"]
         class_config = config.setdefault("config", {})
 
+        if global_config is None:
+            global_config = {}
+
         class_params = set(class_config)
-        for key in class_params.intersection(global_config or []):
+        for key in class_params.intersection(global_config):
             class_config[key] = global_config[key]
 
         for key in class_params.intersection(config.get("resolve_path", [])):
