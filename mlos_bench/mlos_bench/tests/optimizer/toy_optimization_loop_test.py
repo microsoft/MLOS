@@ -35,9 +35,9 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
 
         opt.register(tunables, status, score)
 
-    obvs = opt.get_best_observation()
-    assert isinstance(obvs, tuple) and len(obvs) == 2 and obvs[0] is not None and obvs[1] is not None
-    return obvs
+    (best_score, best_tunables) = opt.get_best_observation()
+    assert isinstance(best_score, float) and isinstance(best_tunables, TunableGroups)
+    return (best_score, best_tunables)
 
 
 def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
