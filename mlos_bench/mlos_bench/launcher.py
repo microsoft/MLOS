@@ -12,6 +12,8 @@ import argparse
 from typing import Optional, List, Dict, Any
 
 from mlos_bench.environment import Environment
+from mlos_bench.optimizer import Optimizer
+from mlos_bench.storage import Storage
 from mlos_bench.service import LocalExecService, ConfigPersistenceService
 
 _LOG_LEVEL = logging.INFO
@@ -157,7 +159,23 @@ class Launcher:
             self._env_config_file, self._global_config,
             service=LocalExecService(parent=self._config_loader))
 
-    def load_generic(self, env: Environment, cls: type, json_file_name: str) -> Any:
+    def load_optimizer(self, env: Environment, json_file_name: str) -> Optimizer:
+        """
+        Create a new instance of the Optimizer from JSON configuration.
+        """
+        opt = self._load(env, Optimizer, json_file_name)
+        assert isinstance(opt, Optimizer)
+        return opt
+
+    def load_storage(self, env: Environment, json_file_name: str) -> Storage:
+        """
+        Create a new instance of the Storage from JSON configuration.
+        """
+        storage = self._load(env, Storage, json_file_name)
+        assert isinstance(storage, Storage)
+        return storage
+
+    def _load(self, env: Environment, cls: type, json_file_name: str) -> Any:
         """
         Create a new instance of class `cls` from JSON configuration.
         """

@@ -36,8 +36,8 @@ def _main() -> None:
     args = launcher.parse_args()
 
     env = launcher.load_env()
-    opt = launcher.load_generic(env, Optimizer, args.optimizer)
-    storage = launcher.load_generic(env, Storage, args.storage)
+    opt = launcher.load_optimizer(env, args.optimizer)
+    storage = launcher.load_storage(env, args.storage)
 
     result = _optimize(env, opt, storage, launcher.global_config)
     _LOG.info("Final result: %s", result)
