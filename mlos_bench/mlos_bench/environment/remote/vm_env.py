@@ -24,12 +24,12 @@ class VMEnv(Environment):
     """
 
     def __init__(self,
+                 *,
                  name: str,
                  config: dict,
                  global_config: Optional[dict] = None,
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
         """
         Create a new environment for VM operations.
 
@@ -50,7 +50,7 @@ class VMEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name, config, global_config, tunables, service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
         assert self._service is not None and isinstance(self._service, SupportsVMOps), \
             "VMEnv requires a service that supports VM operations"

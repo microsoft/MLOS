@@ -147,7 +147,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             tunables = self.load_tunables(env_tunables_path, tunables)
 
         _LOG.debug("Creating env: %s :: %s", env_name, env_class)
-        env = Environment.new(env_name, env_class, env_config, global_config, tunables, service)
+        env = Environment.new(env_name=env_name, class_name=env_class,
+                              config=env_config, global_config=global_config,
+                              tunables=tunables, service=service)
 
         _LOG.info("Created env: %s :: %s", env_name, env)
         return env
