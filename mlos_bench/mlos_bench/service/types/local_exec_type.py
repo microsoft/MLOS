@@ -7,13 +7,12 @@ Protocol interface for Service types that provide helper functions to run
 scripts and commands locally on the scheduler side.
 """
 
-from typing import Dict, List, Optional, Tuple, Union, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import Dict, List, Optional, Tuple, Union, Protocol, runtime_checkable
 
+import tempfile
+import contextlib
 
-if TYPE_CHECKING:
-    import tempfile
-    import contextlib
-    from mlos_bench.tunables.tunable import TunableValue
+from mlos_bench.tunables.tunable import TunableValue
 
 
 @runtime_checkable
@@ -27,7 +26,7 @@ class SupportsLocalExec(Protocol):
     """
 
     def local_exec(self, script_lines: List[str],
-                   env: Optional[Dict[str, "TunableValue"]] = None,
+                   env: Optional[Dict[str, TunableValue]] = None,
                    cwd: Optional[str] = None,
                    return_on_error: bool = False) -> Tuple[int, str, str]:
         """
@@ -53,7 +52,7 @@ class SupportsLocalExec(Protocol):
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
 
-    def temp_dir_context(self, path: Optional[str] = None) -> Union["tempfile.TemporaryDirectory", "contextlib.nullcontext"]:
+    def temp_dir_context(self, path: Optional[str] = None) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
         """
         Create a temp directory or use the provided path.
 
