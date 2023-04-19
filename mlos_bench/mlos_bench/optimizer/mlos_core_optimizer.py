@@ -28,7 +28,7 @@ class MlosCoreOptimizer(Optimizer):
     A wrapper class for the mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
 
         super().__init__(tunables, service, config)
 

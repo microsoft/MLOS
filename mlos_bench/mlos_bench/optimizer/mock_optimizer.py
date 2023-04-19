@@ -26,7 +26,7 @@ class MockOptimizer(Optimizer):
     Mock optimizer to test the Environment API.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
         super().__init__(tunables, service, config)
         rnd = random.Random(config.get("seed", 42))
         self._random: Dict[str, Callable[[Tunable], TunableValue]] = {

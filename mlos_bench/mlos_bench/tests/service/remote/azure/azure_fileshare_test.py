@@ -24,7 +24,7 @@ def test_download_file(mock_makedirs: MagicMock, mock_open: MagicMock, azure_fil
     local_folder = "some/local/folder"
     remote_path = f"{remote_folder}/{filename}"
     local_path = f"{local_folder}/{filename}"
-    mock_share_client = azure_fileshare._share_client # pylint: disable=protected-access
+    mock_share_client = azure_fileshare._share_client  # pylint: disable=protected-access
     with patch.object(mock_share_client, "get_file_client") as mock_get_file_client, \
          patch.object(mock_share_client, "get_directory_client") as mock_get_directory_client:
         mock_get_directory_client.return_value = Mock(exists=Mock(return_value=False))

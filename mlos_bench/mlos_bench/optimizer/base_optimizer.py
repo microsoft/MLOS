@@ -23,7 +23,7 @@ class Optimizer(metaclass=ABCMeta):
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Service, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
         """
         Create a new optimizer for the given configuration space defined by the tunables.
 

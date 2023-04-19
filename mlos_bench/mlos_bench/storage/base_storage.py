@@ -9,6 +9,7 @@ Base interface for saving and restoring the benchmark data.
 import logging
 from abc import ABCMeta, abstractmethod
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Any
+from types import TracebackType
 
 from mlos_bench.environment import Status
 from mlos_bench.service import Service
@@ -96,7 +97,8 @@ class Storage(metaclass=ABCMeta):
             self._setup()
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception],
+                     exc_tb: Optional[TracebackType]) -> bool:
             """
             End the context of the experiment.
 
