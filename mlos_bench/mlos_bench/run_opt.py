@@ -10,7 +10,7 @@ See `--help` output for details.
 """
 
 import logging
-from typing import Tuple
+from typing import Optional, Tuple, Dict, Any
 
 from mlos_bench.launcher import Launcher
 from mlos_bench.optimizer.base_optimizer import Optimizer
@@ -47,8 +47,8 @@ def _main() -> None:
         env.teardown()
 
 
-def _optimize(env: Environment, opt: Optimizer,
-              storage: Storage, global_config: dict) -> Tuple[float, TunableGroups]:
+def _optimize(env: Environment, opt: Optimizer, storage: Storage,
+              global_config: Dict[str, Any]) -> Tuple[Optional[float], Optional[TunableGroups]]:
     """
     Main optimization loop.
 
@@ -95,7 +95,7 @@ def _optimize(env: Environment, opt: Optimizer,
 
 
 def _run(env: Environment, opt: Optimizer,
-         trial: Storage.Trial, global_config: dict) -> None:
+         trial: Storage.Trial, global_config: Dict[str, Any]) -> None:
     """
     Run a single trial.
 
