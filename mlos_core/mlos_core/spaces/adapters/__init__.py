@@ -7,7 +7,7 @@ Basic initializer module for the mlos_core space adapters.
 """
 
 from enum import Enum
-from typing import Optional, TypeVar, Union
+from typing import Optional, TypeVar
 
 import ConfigSpace
 

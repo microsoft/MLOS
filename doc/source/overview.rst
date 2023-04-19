@@ -156,6 +156,12 @@ Service Mix-ins
 
    Service
    FileShareService
+
+.. currentmodule:: mlos_bench.service.config_persistence
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
    ConfigPersistenceService
 
 Local Services

@@ -72,7 +72,7 @@ def mock_env(tunable_groups: TunableGroups) -> MockEnv:
     Test fixture for MockEnv.
     """
     return MockEnv(
-        "Test Env",
+        name="Test Env",
         config={
             "tunable_groups": ["provision", "boot", "kernel"],
             "seed": 13,
@@ -88,7 +88,7 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
     Test fixture for MockEnv.
     """
     return MockEnv(
-        "Test Env No Noise",
+        name="Test Env No Noise",
         config={
             "tunable_groups": ["provision", "boot", "kernel"],
             "range": [60, 120]

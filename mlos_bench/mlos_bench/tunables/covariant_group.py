@@ -7,9 +7,9 @@ Tunable parameter definition.
 """
 import copy
 
-from typing import Any, Dict, List
+from typing import Dict, Iterable
 
-from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable import Tunable, TunableValue
 
 
 class CovariantTunableGroup:
@@ -32,8 +32,8 @@ class CovariantTunableGroup:
         """
         self._is_updated = True
         self._name = name
-        self._cost = config.get("cost", 0)
-        self._tunables = {
+        self._cost = int(config.get("cost", 0))
+        self._tunables: Dict[str, Tunable] = {
             name: Tunable(name, tunable_config)
             for (name, tunable_config) in config.get("params", {}).items()
         }
@@ -50,7 +50,7 @@ class CovariantTunableGroup:
         """
         return self._name
 
-    def copy(self):
+    def copy(self) -> "CovariantTunableGroup":
         """
         Deep copy of the CovariantTunableGroup object.
 
@@ -62,7 +62,7 @@ class CovariantTunableGroup:
         """
         return copy.deepcopy(self)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check if two CovariantTunableGroup objects are equal.
 
@@ -76,12 +76,14 @@ class CovariantTunableGroup:
         is_equal : bool
             True if two CovariantTunableGroup objects are equal.
         """
+        if not isinstance(other, CovariantTunableGroup):
+            return False
         return (self._name == other._name and
                 self._cost == other._cost and
                 self._is_updated == other._is_updated and
                 self._tunables == other._tunables)
 
-    def reset(self):
+    def reset(self) -> None:
         """
         Clear the update flag. That is, state that running an experiment with the
         current values of the tunables in this group has no extra cost.
@@ -110,13 +112,13 @@ class CovariantTunableGroup:
         """
         return self._cost if self._is_updated else 0
 
-    def get_names(self) -> List[str]:
+    def get_names(self) -> Iterable[str]:
         """
         Get the names of all tunables in the group.
         """
         return self._tunables.keys()
 
-    def get_values(self) -> Dict[str, Any]:
+    def get_values(self) -> Dict[str, TunableValue]:
         """
         Get current values of all tunables in the group.
         """
@@ -151,10 +153,10 @@ class CovariantTunableGroup:
         """
         return self._tunables[name]
 
-    def __getitem__(self, name: str):
+    def __getitem__(self, name: str) -> TunableValue:
         return self.get_tunable(name).value
 
-    def __setitem__(self, name: str, value):
+    def __setitem__(self, name: str, value: TunableValue) -> TunableValue:
         self._is_updated = True
         self._tunables[name].value = value
         return value

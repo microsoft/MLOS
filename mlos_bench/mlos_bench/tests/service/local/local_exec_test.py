@@ -11,7 +11,8 @@ import sys
 import pytest
 import pandas
 
-from mlos_bench.service import LocalExecService, ConfigPersistenceService
+from mlos_bench.service.local.local_exec import LocalExecService
+from mlos_bench.service.config_persistence import ConfigPersistenceService
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to
@@ -26,7 +27,7 @@ def local_exec_service() -> LocalExecService:
     return LocalExecService(parent=ConfigPersistenceService())
 
 
-def test_run_script(local_exec_service: LocalExecService):
+def test_run_script(local_exec_service: LocalExecService) -> None:
     """
     Run a script locally and check the results.
     """
@@ -37,7 +38,7 @@ def test_run_script(local_exec_service: LocalExecService):
     assert stderr.strip() == ""
 
 
-def test_run_script_multiline(local_exec_service: LocalExecService):
+def test_run_script_multiline(local_exec_service: LocalExecService) -> None:
     """
     Run a multiline script locally and check the results.
     """
@@ -51,7 +52,7 @@ def test_run_script_multiline(local_exec_service: LocalExecService):
     assert stderr.strip() == ""
 
 
-def test_run_script_multiline_env(local_exec_service: LocalExecService):
+def test_run_script_multiline_env(local_exec_service: LocalExecService) -> None:
     """
     Run a multiline script locally and pass the environment variables to it.
     """
@@ -68,7 +69,7 @@ def test_run_script_multiline_env(local_exec_service: LocalExecService):
     assert stderr.strip() == ""
 
 
-def test_run_script_read_csv(local_exec_service: LocalExecService):
+def test_run_script_read_csv(local_exec_service: LocalExecService) -> None:
     """
     Run a script locally and read the resulting CSV file.
     """
@@ -89,7 +90,7 @@ def test_run_script_read_csv(local_exec_service: LocalExecService):
         assert all(data.col2 == [222, 444])
 
 
-def test_run_script_write_read_txt(local_exec_service: LocalExecService):
+def test_run_script_write_read_txt(local_exec_service: LocalExecService) -> None:
     """
     Write data a temp location and run a script that updates it there.
     """
@@ -112,7 +113,7 @@ def test_run_script_write_read_txt(local_exec_service: LocalExecService):
             assert fh_input.read().split() == ["hello", "world", "test"]
 
 
-def test_run_script_fail(local_exec_service: LocalExecService):
+def test_run_script_fail(local_exec_service: LocalExecService) -> None:
     """
     Try to run a non-existent command.
     """

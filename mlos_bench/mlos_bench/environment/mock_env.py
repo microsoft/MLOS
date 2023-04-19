@@ -12,9 +12,9 @@ from typing import Optional, Tuple
 
 import numpy
 
+from mlos_bench.service.base_service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
-from mlos_bench.service.base_service import Service
 from mlos_bench.tunables import Tunable, TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -28,12 +28,12 @@ class MockEnv(Environment):
     _NOISE_VAR = 0.2  # Variance of the Gaussian noise added to the benchmark value.
 
     def __init__(self,
+                 *,
                  name: str,
                  config: dict,
                  global_config: Optional[dict] = None,
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
         """
         Create a new environment that produces mock benchmark data.
 
@@ -52,7 +52,7 @@ class MockEnv(Environment):
         service: Service
             An optional service object. Not used by this class.
         """
-        super().__init__(name, config, global_config, tunables, service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
         seed = self.config.get("seed")
         self._random = random.Random(seed) if seed is not None else None
         self._range = self.config.get("range")
@@ -95,15 +95,14 @@ class MockEnv(Environment):
         That is, map current value to the [0, 1] range.
         """
         val = None
-        if tunable.type == "categorical":
-            val = (tunable.categorical_values.index(tunable.value) /
+        if tunable.is_categorical:
+            val = (tunable.categorical_values.index(tunable.categorical_value) /
                    float(len(tunable.categorical_values) - 1))
-        elif tunable.type in {"int", "float"}:
-            if not tunable.range:
-                raise ValueError("Tunable must have a range: " + tunable.name)
-            val = ((tunable.value - tunable.range[0]) /
+        elif tunable.is_numerical:
+            val = ((tunable.numerical_value - tunable.range[0]) /
                    float(tunable.range[1] - tunable.range[0]))
         else:
             raise ValueError("Invalid parameter type: " + tunable.type)
         # Explicitly clip the value in case of numerical errors.
-        return numpy.clip(val, 0, 1)
+        ret: float = numpy.clip(val, 0, 1)
+        return ret

@@ -9,14 +9,14 @@ Configuration test fixtures for azure_services in mlos_bench.
 from unittest.mock import patch
 import pytest
 
-from mlos_bench.service import ConfigPersistenceService
+from mlos_bench.service.config_persistence import ConfigPersistenceService
 from mlos_bench.service.remote.azure import AzureVMService, AzureFileShareService
 
 # pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
-def config_persistence_service():
+def config_persistence_service() -> ConfigPersistenceService:
     """
     Test fixture for ConfigPersistenceService.
     """
@@ -28,7 +28,7 @@ def config_persistence_service():
 
 
 @pytest.fixture
-def azure_vm_service(config_persistence_service: ConfigPersistenceService):
+def azure_vm_service(config_persistence_service: ConfigPersistenceService) -> AzureVMService:
     """
     Creates a dummy Azure VM service for tests that require it.
     """
@@ -45,7 +45,7 @@ def azure_vm_service(config_persistence_service: ConfigPersistenceService):
 
 
 @pytest.fixture
-def azure_fileshare(config_persistence_service: ConfigPersistenceService):
+def azure_fileshare(config_persistence_service: ConfigPersistenceService) -> AzureFileShareService:
     """
     Creates a dummy AzureFileShareService for tests that require it.
     """

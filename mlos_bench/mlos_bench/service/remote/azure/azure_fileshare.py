@@ -13,7 +13,8 @@ from typing import Set
 
 from azure.storage.fileshare import ShareClient
 
-from mlos_bench.service import Service, FileShareService
+from mlos_bench.service.base_service import Service
+from mlos_bench.service.base_fileshare import FileShareService
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
@@ -57,7 +58,7 @@ class AzureFileShareService(FileShareService):
             credential=config["storageAccountKey"],
         )
 
-    def download(self, remote_path: str, local_path: str, recursive: bool = True):
+    def download(self, remote_path: str, local_path: str, recursive: bool = True) -> None:
         super().download(remote_path, local_path, recursive)
         dir_client = self._share_client.get_directory_client(remote_path)
         if dir_client.exists():
@@ -75,13 +76,13 @@ class AzureFileShareService(FileShareService):
             file_client = self._share_client.get_file_client(remote_path)
             data = file_client.download_file()
             with open(local_path, "wb") as output_file:
-                data.readinto(output_file)
+                data.readinto(output_file)  # type: ignore[no-untyped-call]
 
-    def upload(self, local_path: str, remote_path: str, recursive: bool = True):
+    def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
         super().upload(local_path, remote_path, recursive)
         self._upload(local_path, remote_path, recursive, set())
 
-    def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: Set[str]):
+    def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: Set[str]) -> None:
         """
         Upload contents from a local path to an Azure file share.
         This method is called from `.upload()` above. We need it to avoid exposing
@@ -124,7 +125,7 @@ class AzureFileShareService(FileShareService):
             with open(local_path, "rb") as file_data:
                 file_client.upload_file(file_data)
 
-    def _remote_makedirs(self, remote_path: str):
+    def _remote_makedirs(self, remote_path: str) -> None:
         """
         Create remote directories for the entire path.
         Succeeds even some or all directories along the path already exist.

@@ -7,7 +7,7 @@ A wrapper for mlos_core optimizers for mlos_bench.
 """
 
 import logging
-from typing import Optional, Tuple, List, Union
+from typing import Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
@@ -47,17 +47,17 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
 
-    def bulk_register(self, configs: List[dict], scores: List[float],
-                      status: Optional[List[Status]] = None) -> bool:
+    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+                      status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
         tunables_names = list(self._tunables.get_param_values().keys())
         df_configs = pd.DataFrame(configs)[tunables_names]
         df_scores = pd.Series(scores, dtype=float) * self._opt_sign
         if status is not None:
-            df_status_succ = pd.Series(status) == Status.SUCCEEDED
-            df_configs = df_configs[df_status_succ]
-            df_scores = df_scores[df_status_succ]
+            df_status_ok = pd.Series(status) == Status.SUCCEEDED
+            df_configs = df_configs[df_status_ok]
+            df_scores = df_scores[df_status_ok]
         self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
@@ -70,7 +70,7 @@ class MlosCoreOptimizer(Optimizer):
         return self._tunables.copy().assign(df_config.loc[0].to_dict())
 
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Union[float, dict] = None) -> float:
+                 score: Optional[Union[float, dict]] = None) -> Optional[float]:
         score = super().register(tunables, status, score)
         # TODO: mlos_core currently does not support registration of failed trials:
         if status.is_succeeded:
@@ -81,7 +81,7 @@ class MlosCoreOptimizer(Optimizer):
         self._iter += 1
         return score
 
-    def get_best_observation(self) -> Tuple[float, TunableGroups]:
+    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
         df_config = self._opt.get_best_observation()
         if len(df_config) == 0:
             return (None, None)

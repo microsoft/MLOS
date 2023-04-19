@@ -1,7 +1,10 @@
 // vim: set ft=jsonc:
 {
     "makefile.extensionOutputFolder": "./.vscode",
-    "python.defaultInterpreterPath": "${env:HOME}${env:USERPROFILE}/.conda/envs/mlos_core/bin/python",
+    // Note: this only works in WSL/Linux currently.
+    "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos_core/bin/python",
+    // For Windows it should be this instead:
+    //"python.defaultInterpreterPath": "${env:USERPROFILE}/.conda/envs/mlos_core/python.exe",
     "python.testing.pytestEnabled": true,
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
