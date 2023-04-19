@@ -8,15 +8,59 @@ Various helper functions for mlos_bench.
 
 # NOTE: This has to be placed in the top-level mlos_bench package to avoid circular imports.
 
+import json
 import logging
 import importlib
 import subprocess
-from typing import Any, Tuple, Dict, Iterable
+from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING
 
 _LOG = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from mlos_bench.environment.base_environment import Environment
+    from mlos_bench.service.base_service import Service
+    from mlos_bench.optimizer.base_optimizer import Optimizer
 
-def instantiate_from_config(base_class: type, class_name: str, *args: Any, **kwargs: Any) -> Any:
+# T is a generic with a constraint of the three base classes.
+T = TypeVar('T', "Environment", "Service", "Optimizer")
+
+
+def prepare_class_load(config: dict,
+                       global_config: Optional[dict] = None) -> Tuple[str, Dict[str, Any]]:
+    """
+    Extract the class instantiation parameters from the configuration.
+
+    Parameters
+    ----------
+    config : dict
+        Configuration of the optimizer.
+    global_config : dict
+        Global configuration parameters (optional).
+
+    Returns
+    -------
+    (class_name, class_config) : (str, dict)
+        Name of the class to instantiate and its configuration.
+    """
+    class_name = config["class"]
+    class_config = config.setdefault("config", {})
+
+    if global_config is None:
+        global_config = {}
+
+    for key in set(class_config).intersection(global_config):
+        class_config[key] = global_config[key]
+
+    if _LOG.isEnabledFor(logging.DEBUG):
+        _LOG.debug("Instantiating: %s with config:\n%s",
+                   class_name, json.dumps(class_config, indent=2))
+
+    return (class_name, class_config)
+
+
+# FIXME: Technically, this should return a type "class_name" derived from "base_class".
+def instantiate_from_config(base_class: Type[T], class_name: str,
+                            *args: Any, **kwargs: Any) -> T:
     """
     Factory method for a new class instantiated from config.
 
@@ -36,7 +80,7 @@ def instantiate_from_config(base_class: type, class_name: str, *args: Any, **kwa
 
     Returns
     -------
-    inst : Any
+    inst : Union[Environment, Service, Optimizer]
         An instance of the `class_name` class.
     """
     # We need to import mlos_bench to make the factory methods work.
@@ -49,10 +93,12 @@ def instantiate_from_config(base_class: type, class_name: str, *args: Any, **kwa
     _LOG.info("Instantiating: %s :: %s", class_name, impl)
 
     assert issubclass(impl, base_class)
-    return impl(*args, **kwargs)
+    ret: T = impl(*args, **kwargs)
+    assert isinstance(ret, base_class)
+    return ret
 
 
-def check_required_params(config: Dict[str, Any], required_params: Iterable[str]) -> None:
+def check_required_params(config: Mapping[str, Any], required_params: Iterable[str]) -> None:
     """
     Check if all required parameters are present in the configuration.
     Raise ValueError if any of the parameters are missing.

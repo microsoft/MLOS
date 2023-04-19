@@ -15,21 +15,25 @@ import shlex
 import subprocess
 import logging
 
-from typing import Optional, Tuple, List, Dict
+from typing import Dict, Iterable, Mapping, Optional, Tuple, Union, TYPE_CHECKING
 
 from mlos_bench.service.base_service import Service
+from mlos_bench.service.types.local_exec_type import SupportsLocalExec
+
+if TYPE_CHECKING:
+    from mlos_bench.tunables.tunable import TunableValue
 
 _LOG = logging.getLogger(__name__)
 
 
-class LocalExecService(Service):
+class LocalExecService(Service, SupportsLocalExec):
     """
     Collection of methods to run scripts and commands in an external process
     on the node acting as the scheduler. Can be useful for data processing
     due to reduced dependency management complications vs the target environment.
     """
 
-    def __init__(self, config: dict = None, parent: Service = None):
+    def __init__(self, config: Optional[dict] = None, parent: Optional[Service] = None):
         """
         Create a new instance of a service to run scripts locally.
 
@@ -45,7 +49,7 @@ class LocalExecService(Service):
         self._temp_dir = self.config.get("temp_dir")
         self.register([self.temp_dir_context, self.local_exec])
 
-    def temp_dir_context(self, path: Optional[str] = None):
+    def temp_dir_context(self, path: Optional[str] = None) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
         """
         Create a temp directory or use the provided path.
 
@@ -63,8 +67,8 @@ class LocalExecService(Service):
             return tempfile.TemporaryDirectory()
         return contextlib.nullcontext(path or self._temp_dir)
 
-    def local_exec(self, script_lines: List[str],
-                   env: Optional[Dict[str, str]] = None,
+    def local_exec(self, script_lines: Iterable[str],
+                   env: Optional[Mapping[str, "TunableValue"]] = None,
                    cwd: Optional[str] = None,
                    return_on_error: bool = False) -> Tuple[int, str, str]:
         """
@@ -72,10 +76,10 @@ class LocalExecService(Service):
 
         Parameters
         ----------
-        script_lines : List[str]
+        script_lines : Iterable[str]
             Lines of the script to run locally.
             Treat every line as a separate command to run.
-        env : Dict[str, str]
+        env : Mapping[str, Union[int, float, str]]
             Environment variables (optional).
         cwd : str
             Work directory to run the script at.
@@ -110,7 +114,8 @@ class LocalExecService(Service):
         return (return_code, stdout, stderr)
 
     def _local_exec_script(self, script_line: str,
-                           env: Dict[str, str], cwd: str) -> Tuple[int, str, str]:
+                           env_params: Optional[Mapping[str, "TunableValue"]],
+                           cwd: str) -> Tuple[int, str, str]:
         """
         Execute the script from `script_path` in a local process.
 
@@ -118,9 +123,9 @@ class LocalExecService(Service):
         ----------
         script_line : str
             Line of the script to tun in the local process.
-        args : List[str]
+        args : Iterable[str]
             Command line arguments for the script.
-        env : Dict[str, str]
+        env_params : Mapping[str, Union[int, float, str]]
             Environment variables.
         cwd : str
             Work directory to run the script at.
@@ -131,7 +136,7 @@ class LocalExecService(Service):
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
         cmd = shlex.split(script_line)
-        script_path = self._parent.resolve_path(cmd[0])
+        script_path = self._config_loader_service.resolve_path(cmd[0])
         if os.path.exists(script_path):
             script_path = os.path.abspath(script_path)
 
@@ -139,14 +144,16 @@ class LocalExecService(Service):
         if script_path.strip().lower().endswith(".py"):
             cmd = [sys.executable] + cmd
 
-        if env:
-            env = {key: str(val) for (key, val) in env.items()}
-            if sys.platform == 'win32':
-                # A hack to run Python on Windows with env variables set:
-                env_copy = os.environ.copy()
-                env_copy["PYTHONPATH"] = ""
-                env_copy.update(env)
-                env = env_copy
+        env: Dict[str, str] = {}
+        if env_params:
+            env = {key: str(val) for (key, val) in env_params.items()}
+
+        if sys.platform == 'win32':
+            # A hack to run Python on Windows with env variables set:
+            env_copy = os.environ.copy()
+            env_copy["PYTHONPATH"] = ""
+            env_copy.update(env)
+            env = env_copy
 
         _LOG.info("Run: %s", cmd)
 

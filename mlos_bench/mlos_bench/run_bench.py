@@ -17,7 +17,7 @@ from mlos_bench.launcher import Launcher
 _LOG = logging.getLogger(__name__)
 
 
-def _main():
+def _main() -> None:
 
     launcher = Launcher("mlos_bench run_bench")
 

@@ -10,7 +10,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from mlos_bench.environment import Status
+from mlos_bench.environment.status import Status
+
+from mlos_bench.service.remote.azure.azure_services import AzureVMService
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=too-many-arguments
@@ -21,7 +23,7 @@ from mlos_bench.environment import Status
         ("vm_start", True),
         ("vm_stop", False),
         ("vm_deprovision", False),
-        ("vm_reboot", False),
+        ("vm_restart", False),
     ])
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"), [
@@ -31,8 +33,8 @@ from mlos_bench.environment import Status
         (404, Status.FAILED),
     ])
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_vm_operation_status(mock_requests, azure_vm_service, operation_name,
-                             accepts_params, http_status_code, operation_status):
+def test_vm_operation_status(mock_requests: MagicMock, azure_vm_service: AzureVMService, operation_name: str,
+                             accepts_params: bool, http_status_code: int, operation_status: Status) -> None:
 
     mock_response = MagicMock()
     mock_response.status_code = http_status_code
@@ -49,7 +51,7 @@ def test_vm_operation_status(mock_requests, azure_vm_service, operation_name,
 
 @patch("mlos_bench.service.remote.azure.azure_services.time.sleep")
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_wait_vm_operation_ready(mock_requests, mock_sleep, azure_vm_service):
+def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock, azure_vm_service: AzureVMService) -> None:
 
     # Mock response header
     async_url = "DUMMY_ASYNC_URL"
@@ -73,7 +75,7 @@ def test_wait_vm_operation_ready(mock_requests, mock_sleep, azure_vm_service):
 
 
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_wait_vm_operation_timeout(mock_requests, azure_vm_service):
+def test_wait_vm_operation_timeout(mock_requests: MagicMock, azure_vm_service: AzureVMService) -> None:
 
     # Mock response header
     params = {
@@ -99,8 +101,8 @@ def test_wait_vm_operation_timeout(mock_requests, azure_vm_service):
         (404, Status.FAILED),
     ])
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_remote_exec_status(mock_requests, azure_vm_service, http_status_code, operation_status):
-
+def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service: AzureVMService,
+                            http_status_code: int, operation_status: Status) -> None:
     script = ["command_1", "command_2"]
 
     mock_response = MagicMock()
@@ -113,7 +115,7 @@ def test_remote_exec_status(mock_requests, azure_vm_service, http_status_code, o
 
 
 @patch("mlos_bench.service.remote.azure.azure_services.requests")
-def test_remote_exec_headers_output(mock_requests, azure_vm_service):
+def test_remote_exec_headers_output(mock_requests: MagicMock, azure_vm_service: AzureVMService) -> None:
 
     async_url_key = "asyncResultsUrl"
     async_url_value = "DUMMY_ASYNC_URL"
@@ -158,14 +160,15 @@ def test_remote_exec_headers_output(mock_requests, azure_vm_service):
         (Status.PENDING, {}, {}),
         (Status.FAILED, {}, {}),
     ])
-def test_get_remote_exec_results(azure_vm_service, operation_status: Status,
-                                 wait_output: dict, results_output: dict):
+def test_get_remote_exec_results(azure_vm_service: AzureVMService, operation_status: Status,
+                                 wait_output: dict, results_output: dict) -> None:
 
     params = {"asyncResultsUrl": "DUMMY_ASYNC_URL"}
 
     mock_wait_vm_operation = MagicMock()
     mock_wait_vm_operation.return_value = (operation_status, wait_output)
-    azure_vm_service.wait_vm_operation = mock_wait_vm_operation
+    # azure_vm_service.wait_vm_operation = mock_wait_vm_operation
+    setattr(azure_vm_service, "wait_vm_operation", mock_wait_vm_operation)
 
     status, cmd_output = azure_vm_service.get_remote_exec_results(params)
 

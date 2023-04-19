@@ -8,7 +8,7 @@ and mlos_core optimizers.
 """
 
 import logging
-from typing import Optional, Tuple, List, Union
+from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
 
 from mlos_bench.service import Service
@@ -41,11 +41,13 @@ class Optimizer(metaclass=ABCMeta):
         self._service = service
         self._iter = 1
         self._max_iter = int(self._config.pop('max_iterations', 10))
-        self._opt_target = self._config.pop('maximize', None)
-        if self._opt_target is None:
+        self._opt_target: str
+        _opt_target = self._config.pop('maximize', None)
+        if _opt_target is None:
             self._opt_target = self._config.pop('minimize', 'score')
             self._opt_sign = 1
         else:
+            self._opt_target = _opt_target
             if 'minimize' in self._config:
                 raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
             self._opt_sign = -1
@@ -62,18 +64,18 @@ class Optimizer(metaclass=ABCMeta):
         return self._opt_target
 
     @abstractmethod
-    def bulk_register(self, configs: List[dict], scores: List[float],
-                      status: Optional[List[Status]] = None) -> bool:
+    def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
+                      status: Optional[Sequence[Status]] = None) -> bool:
         """
         Pre-load the optimizer with the bulk data from previous experiments.
 
         Parameters
         ----------
-        configs : List[dict]
+        configs : Sequence[dict]
             Records of tunable values from other experiments.
-        scores : List[float]
+        scores : Sequence[float]
             Benchmark results from experiments that correspond to `configs`.
-        status : Optional[List[float]]
+        status : Optional[Sequence[float]]
             Status of the experiments that correspond to `configs`.
 
         Returns
@@ -104,7 +106,7 @@ class Optimizer(metaclass=ABCMeta):
 
     @abstractmethod
     def register(self, tunables: TunableGroups, status: Status,
-                 score: Union[float, dict] = None) -> float:
+                 score: Optional[Union[float, Dict[str, float]]] = None) -> Optional[float]:
         """
         Register the observation for the given configuration.
 
@@ -115,7 +117,7 @@ class Optimizer(metaclass=ABCMeta):
             Usually it's the same config that the `.suggest()` method returned.
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, dict]
+        score : Union[float, Dict[str, float]]
             A scalar or a dict with the final benchmark results.
             None if the experiment was not successful.
 
@@ -130,7 +132,7 @@ class Optimizer(metaclass=ABCMeta):
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)
 
-    def _get_score(self, status: Status, score: Union[float, dict]) -> float:
+    def _get_score(self, status: Status, score: Optional[Union[float, Dict[str, float]]]) -> Optional[float]:
         """
         Extract a scalar benchmark score from the dataframe.
         Change the sign if we are maximizing.
@@ -139,7 +141,7 @@ class Optimizer(metaclass=ABCMeta):
         ----------
         status : Status
             Final status of the experiment (e.g., SUCCEEDED or FAILED).
-        score : Union[float, dict]
+        score : Union[float, Dict[str, float]]
             A scalar or a dict with the final benchmark results.
             None if the experiment was not successful.
 
@@ -150,6 +152,7 @@ class Optimizer(metaclass=ABCMeta):
         """
         if not status.is_succeeded:
             return None
+        assert score is not None
         if isinstance(score, dict):
             score = score[self._opt_target]
         return float(score) * self._opt_sign
@@ -162,7 +165,7 @@ class Optimizer(metaclass=ABCMeta):
         return self._iter <= self._max_iter
 
     @abstractmethod
-    def get_best_observation(self) -> Tuple[float, TunableGroups]:
+    def get_best_observation(self) -> Union[Tuple[float, TunableGroups], Tuple[None, None]]:
         """
         Get the best observation so far.
 

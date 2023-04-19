@@ -10,7 +10,7 @@ from typing import Optional, List
 
 import pytest
 
-from mlos_bench.environment import Status
+from mlos_bench.environment.status import Status
 from mlos_bench.optimizer import Optimizer, MockOptimizer, MlosCoreOptimizer
 
 # pylint: disable=redefined-outer-name
@@ -46,7 +46,7 @@ def mock_configs() -> List[dict]:
 
 
 @pytest.fixture
-def mock_scores() -> List[float]:
+def mock_scores() -> List[Optional[float]]:
     """
     Mock benchmark results from earlier experiments.
     """
@@ -62,13 +62,14 @@ def mock_status() -> List[Status]:
 
 
 def _test_opt_update_min(opt: Optimizer, configs: List[dict],
-                         scores: List[float], status: Optional[List[Status]] = None):
+                         scores: List[float], status: Optional[List[Status]] = None) -> None:
     """
     Test the bulk update of the optimizer on the minimization problem.
     """
     opt.bulk_register(configs, scores, status)
     (score, tunables) = opt.get_best_observation()
     assert score == pytest.approx(66.66, 0.01)
+    assert tunables is not None
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
         "rootfs": "ext4",
@@ -77,13 +78,14 @@ def _test_opt_update_min(opt: Optimizer, configs: List[dict],
 
 
 def _test_opt_update_max(opt: Optimizer, configs: List[dict],
-                         scores: List[float], status: Optional[List[Status]] = None):
+                         scores: List[float], status: Optional[List[Status]] = None) -> None:
     """
-    Test the bulk update of the optimizer on the maximiation prtoblem.
+    Test the bulk update of the optimizer on the maximization problem.
     """
     opt.bulk_register(configs, scores, status)
     (score, tunables) = opt.get_best_observation()
     assert score == pytest.approx(99.99, 0.01)
+    assert tunables is not None
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2s",
         "rootfs": "xfs",
@@ -92,7 +94,7 @@ def _test_opt_update_max(opt: Optimizer, configs: List[dict],
 
 
 def test_update_mock_min(mock_opt: MockOptimizer, mock_configs: List[dict],
-                         mock_scores: List[float], mock_status: List[Status]):
+                         mock_scores: List[float], mock_status: List[Status]) -> None:
     """
     Test the bulk update of the mock optimizer on the minimization problem.
     """
@@ -100,7 +102,7 @@ def test_update_mock_min(mock_opt: MockOptimizer, mock_configs: List[dict],
 
 
 def test_update_mock_max(mock_opt_max: MockOptimizer, mock_configs: List[dict],
-                         mock_scores: List[float], mock_status: List[Status]):
+                         mock_scores: List[float], mock_status: List[Status]) -> None:
     """
     Test the bulk update of the mock optimizer on the maximization problem.
     """
@@ -108,7 +110,7 @@ def test_update_mock_max(mock_opt_max: MockOptimizer, mock_configs: List[dict],
 
 
 def test_update_emukit(emukit_opt: MlosCoreOptimizer, mock_configs: List[dict],
-                       mock_scores: List[float], mock_status: List[Status]):
+                       mock_scores: List[float], mock_status: List[Status]) -> None:
     """
     Test the bulk update of the EmuKit optimizer.
     """
@@ -116,7 +118,7 @@ def test_update_emukit(emukit_opt: MlosCoreOptimizer, mock_configs: List[dict],
 
 
 def test_update_emukit_max(emukit_opt_max: MlosCoreOptimizer, mock_configs: List[dict],
-                           mock_scores: List[float], mock_status: List[Status]):
+                           mock_scores: List[float], mock_status: List[Status]) -> None:
     """
     Test the bulk update of the EmuKit optimizer on the maximization problem.
     """
@@ -124,7 +126,7 @@ def test_update_emukit_max(emukit_opt_max: MlosCoreOptimizer, mock_configs: List
 
 
 def test_update_scikit_gp(scikit_gp_opt: MlosCoreOptimizer, mock_configs: List[dict],
-                          mock_scores: List[float], mock_status: List[Status]):
+                          mock_scores: List[float], mock_status: List[Status]) -> None:
     """
     Test the bulk update of the scikit-optimize GP optimizer.
     """
@@ -132,7 +134,7 @@ def test_update_scikit_gp(scikit_gp_opt: MlosCoreOptimizer, mock_configs: List[d
 
 
 def test_update_scikit_et(scikit_et_opt: MlosCoreOptimizer, mock_configs: List[dict],
-                          mock_scores: List[float], mock_status: List[Status]):
+                          mock_scores: List[float], mock_status: List[Status]) -> None:
     """
     Test the bulk update of the scikit-optimize ET optimizer.
     """

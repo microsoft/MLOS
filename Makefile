@@ -12,7 +12,7 @@ MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/de
 
 DOCKER := $(shell which docker)
 # Make sure the build directory exists.
-MKDIR_BUILD := $(shell mkdir -p build)
+MKDIR_BUILD := $(shell test -d build || mkdir build)
 
 # Allow overriding the default verbosity of conda for CI jobs.
 #CONDA_INFO_LEVEL ?= -q
@@ -113,7 +113,7 @@ build/pylint.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.
 	touch $@
 
 .PHONY: mypy
-mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp # TODO: build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
+mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp
 
 build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES)
@@ -339,6 +339,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 			-e 'Problems with "include" directive path:' \
 			-e 'duplicate object description' \
 			-e "document isn't included in any toctree" \
+			-e "more than one target found for cross-reference" \
 			-e "toctree contains reference to nonexisting document 'auto_examples/index'" \
 			-e "failed to import function 'create' from module '(SpaceAdapter|Optimizer)Factory'" \
 			-e "No module named '(SpaceAdapter|Optimizer)Factory'" \

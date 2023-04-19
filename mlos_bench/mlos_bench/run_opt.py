@@ -13,10 +13,11 @@ import logging
 from typing import Tuple
 
 from mlos_bench.launcher import Launcher
-from mlos_bench.optimizer import Optimizer
-from mlos_bench.environment import Status, Environment
-from mlos_bench.tunables import TunableGroups
-from mlos_bench.storage import Storage
+from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.environment.base_environment import Environment
+from mlos_bench.storage.base_storage import Storage
+from mlos_bench.environment.status import Status
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 

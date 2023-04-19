@@ -35,13 +35,16 @@ extra_requires = {
 
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.
-extra_requires['full'] = list(set(chain(extra_requires.values())))
+extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
 
 # pylint: disable=duplicate-code
 setup(
     name='mlos-bench',
     version=_VERSION,
     packages=find_packages(),
+    package_data={
+        'mlos_bench': ['py.typed'],
+    },
     install_requires=[
         'mlos-core==' + _VERSION,
         'requests',
