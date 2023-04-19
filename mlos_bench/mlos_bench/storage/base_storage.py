@@ -8,7 +8,9 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Optional, Union, List, Tuple, Dict, Iterator, Any
+
+from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
+from typing_extensions import Literal
 from types import TracebackType
 
 from mlos_bench.environment import Status
@@ -26,7 +28,8 @@ class Storage(metaclass=ABCMeta):
     and storage systems (e.g., SQLite or MLFLow).
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service],
+                 config: Dict[str, Any]):
         """
         Create a new storage object.
 
@@ -97,8 +100,9 @@ class Storage(metaclass=ABCMeta):
             self._setup()
             return self
 
-        def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception],
-                     exc_tb: Optional[TracebackType]) -> bool:
+        def __exit__(self, exc_type: Optional[Type[BaseException]],
+                     exc_val: Optional[BaseException],
+                     exc_tb: Optional[TracebackType]) -> Literal[False]:
             """
             End the context of the experiment.
 
@@ -108,6 +112,7 @@ class Storage(metaclass=ABCMeta):
             if is_ok:
                 _LOG.debug("Finishing experiment: %s", self)
             else:
+                assert exc_type and exc_val
                 _LOG.warning("Finishing experiment: %s", self,
                              exc_info=(exc_type, exc_val, exc_tb))
             self._teardown(is_ok)
