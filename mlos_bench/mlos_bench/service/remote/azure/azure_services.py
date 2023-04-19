@@ -10,7 +10,7 @@ import json
 import time
 import logging
 
-from typing import Callable, List, Tuple
+from typing import Callable, Iterable, Tuple
 
 import requests
 
@@ -523,13 +523,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         _LOG.info("Reboot VM: %s", self.config["vmName"])
         return self._azure_vm_post_helper(self._url_reboot)
 
-    def remote_exec(self, script: List[str], params: dict) -> Tuple[Status, dict]:
+    def remote_exec(self, script: Iterable[str], params: dict) -> Tuple[Status, dict]:
         """
         Run a command on Azure VM.
 
         Parameters
         ----------
-        script : List[str]
+        script : Iterable[str]
             A list of lines to execute as a script on a remote VM.
         params : dict
             Flat dictionary of (key, value) pairs of parameters.
@@ -548,7 +548,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
 
         json_req = {
             "commandId": "RunShellScript",
-            "script": script,
+            "script": list(script),
             "parameters": [{"name": key, "value": val} for (key, val) in params.items()]
         }
 

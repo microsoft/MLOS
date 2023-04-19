@@ -12,7 +12,7 @@ import os
 import json    # For logging only
 import logging
 
-from typing import List, Optional, Union
+from typing import List, Iterable, Optional, Union
 
 import json5   # To read configs with comments and other JSON5 syntax features
 
@@ -59,7 +59,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         ])
 
     def resolve_path(self, file_path: str,
-                     extra_paths: Optional[List[str]] = None) -> str:
+                     extra_paths: Optional[Iterable[str]] = None) -> str:
         """
         Prepend the suitable `_config_path` to `path` if the latter is not absolute.
         If `_config_path` is `None` or `path` is absolute, return `path` as is.
@@ -68,7 +68,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         ----------
         file_path : str
             Path to the input config file.
-        extra_paths : List[str]
+        extra_paths : Iterable[str]
             Additional directories to prepend to the list of search paths.
 
         Returns
@@ -183,7 +183,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return service
 
     @classmethod
-    def _build_composite_service(cls, config_list: List[dict],
+    def _build_composite_service(cls, config_list: Iterable[dict],
                                  global_config: Optional[dict] = None,
                                  parent: Optional[Service] = None) -> Service:
         """
@@ -339,7 +339,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             for config in config_list
         ]
 
-    def load_services(self, json_file_names: List[str],
+    def load_services(self, json_file_names: Iterable[str],
                       global_config: Optional[dict] = None, parent: Optional[Service] = None) -> Service:
         """
         Read the configuration files and bundle all service methods
@@ -367,7 +367,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 ConfigPersistenceService.build_service(config, global_config, service).export())
         return service
 
-    def load_tunables(self, json_file_names: List[str],
+    def load_tunables(self, json_file_names: Iterable[str],
                       parent: Optional[TunableGroups] = None) -> TunableGroups:
         """
         Load a collection of tunable parameters from JSON files.

@@ -10,7 +10,7 @@ and upload/download data to the shared storage.
 import logging
 
 from string import Template
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import List, Generator, Iterable, Mapping, Optional, Tuple
 
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.local_exec_type import SupportsLocalExec
@@ -83,8 +83,8 @@ class LocalFileShareEnv(LocalEnv):
         ]
 
     @staticmethod
-    def _expand(from_to: List[Tuple[Template, Template]],
-                params: Dict[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
+    def _expand(from_to: Iterable[Tuple[Template, Template]],
+                params: Mapping[str, TunableValue]) -> Generator[Tuple[str, str], None, None]:
         """
         Substitute $var parameters in from/to path templates.
         Return a generator of (str, str) pairs of paths.

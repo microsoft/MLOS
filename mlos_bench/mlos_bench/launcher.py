@@ -9,7 +9,7 @@ Helper functions to launch the benchmark and the optimizer from the command line
 import logging
 import argparse
 
-from typing import List, Dict, Any
+from typing import Any, Dict, Iterable
 
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.local.local_exec import LocalExecService
@@ -101,7 +101,7 @@ class Launcher:
         return args
 
     @staticmethod
-    def _try_parse_extra_args(cmdline: List[str]) -> Dict[str, str]:
+    def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, str]:
         """
         Helper function to parse global key/value pairs from the command line.
         """

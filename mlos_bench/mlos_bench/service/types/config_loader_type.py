@@ -6,7 +6,7 @@
 Protocol interface for helper functions to lookup and load configs.
 """
 
-from typing import List, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import List, Iterable, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
 
 
 # Avoid's circular import issues.
@@ -23,7 +23,7 @@ class SupportsConfigLoading(Protocol):
     """
 
     def resolve_path(self, file_path: str,
-                     extra_paths: Optional[List[str]] = None) -> str:
+                     extra_paths: Optional[Iterable[str]] = None) -> str:
         """
         Prepend the suitable `_config_path` to `path` if the latter is not absolute.
         If `_config_path` is `None` or `path` is absolute, return `path` as is.
@@ -32,7 +32,7 @@ class SupportsConfigLoading(Protocol):
         ----------
         file_path : str
             Path to the input config file.
-        extra_paths : List[str]
+        extra_paths : Iterable[str]
             Additional directories to prepend to the list of search paths.
 
         Returns

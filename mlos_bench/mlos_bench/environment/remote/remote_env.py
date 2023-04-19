@@ -7,7 +7,7 @@ Remotely executed benchmark/script environment.
 """
 
 import logging
-from typing import Optional, Tuple, List
+from typing import Iterable, Optional, Tuple
 
 from mlos_bench.environment.status import Status
 from mlos_bench.environment.base_environment import Environment
@@ -151,7 +151,7 @@ class RemoteEnv(Environment):
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
-    def _remote_exec(self, script: List[str]) -> Tuple[Status, Optional[dict]]:
+    def _remote_exec(self, script: Iterable[str]) -> Tuple[Status, Optional[dict]]:
         """
         Run a script on the remote host.
 

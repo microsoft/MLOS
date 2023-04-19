@@ -7,7 +7,7 @@ Protocol interface for Service types that provide helper functions to run
 scripts on a remote host OS.
 """
 
-from typing import List, Tuple, Protocol, runtime_checkable
+from typing import Iterable, Tuple, Protocol, runtime_checkable
 
 
 from mlos_bench.environment.status import Status
@@ -20,13 +20,13 @@ class SupportsRemoteExec(Protocol):
     scripts on a remote host OS.
     """
 
-    def remote_exec(self, script: List[str], params: dict) -> Tuple[Status, dict]:
+    def remote_exec(self, script: Iterable[str], params: dict) -> Tuple[Status, dict]:
         """
         Run a command on remote host OS.
 
         Parameters
         ----------
-        script : List[str]
+        script : Iterable[str]
             A list of lines to execute as a script on a remote VM.
         params : dict
             Flat dictionary of (key, value) pairs of parameters.
