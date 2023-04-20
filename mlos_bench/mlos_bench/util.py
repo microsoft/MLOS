@@ -120,24 +120,27 @@ def check_required_params(config: Mapping[str, Any], required_params: Iterable[s
             + f" or as command line arguments: {missing_params}")
 
 
-def get_git_info(path: str = __file__) -> Tuple[str, str]:
+def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
     """
-    Get the git repository and commit hash of the current working directory.
+    Get the git repository, commit hash, and local path of the given file.
 
     Parameters
     ----------
     path : str
-        Path to the git repository.
+        Path to the file in git repository.
 
     Returns
     -------
-    (git_repo, git_commit) : Tuple[str, str]
-        Git repository URL and last commit hash.
+    (git_repo, git_commit, git_path) : Tuple[str, str, str]
+        Git repository URL, last commit hash, and relative file path.
     """
     dirname = os.path.dirname(path)
     git_repo = subprocess.check_output(
         ["git", "-C", dirname, "remote", "get-url", "origin"], text=True).strip()
     git_commit = subprocess.check_output(
         ["git", "-C", dirname, "rev-parse", "HEAD"], text=True).strip()
+    git_root = subprocess.check_output(
+        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True).strip()
     _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
-    return (git_repo, git_commit)
+    rel_path = os.path.relpath(os.path.abspath(path), os.path.abspath(git_root))
+    return (git_repo, git_commit, rel_path.replace("\\", "/"))

@@ -22,7 +22,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Storage(metaclass=ABCMeta):
-    # pylint: disable=too-few-public-methods
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """
     An abstract interface between the benchmarking framework
     and storage systems (e.g., SQLite or MLFLow).
@@ -66,6 +66,8 @@ class Storage(metaclass=ABCMeta):
             Unique identifier of the experiment.
         trial_id : int
             Starting number of the trial.
+        root_env_config : str
+            A path to the root JSON configuration file of the benchmarking environment.
         description : str
             Human-readable description of the experiment.
         opt_target : str
@@ -84,20 +86,10 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, *,
-                     tunables: TunableGroups,
-                     experiment_id: str,
-                     trial_id: int,
-                     root_env_config: str,
-                     description: str,
-                     opt_target: str):
+        def __init__(self, tunables: TunableGroups, experiment_id: str, root_env_config: str):
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
-            self._trial_id = trial_id
-            self._root_env_config = root_env_config
-            self._description = description
-            self._opt_target = opt_target
-            (self._git_repo, self._git_commit) = get_git_info(root_env_config)
+            (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(root_env_config)
 
         def __enter__(self) -> 'Storage.Experiment':
             """
