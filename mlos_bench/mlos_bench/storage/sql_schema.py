@@ -165,6 +165,19 @@ class DbSchema:
         return self
 
     def __repr__(self) -> str:
+        """
+        Produce a string with all SQL statements required to create the schema
+        from scratch in current SQL dialect.
+
+        That is, return a collection of CREATE TABLE statements and such.
+        NOTE: this method is quite heavy! We use it only once at startup
+        to log the schema, and if the logging level is set to DEBUG.
+
+        Returns
+        -------
+        sql : str
+            A multi-line string with SQL statements to create the DB schema from scratch.
+        """
         ddl = _DDL(self._engine.dialect)
         mock_engine = create_mock_engine(self._engine.url, executor=ddl)
         self._meta.create_all(mock_engine, checkfirst=False)
