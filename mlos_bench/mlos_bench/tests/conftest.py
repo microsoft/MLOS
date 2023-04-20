@@ -58,6 +58,12 @@ def tunable_groups() -> TunableGroups:
                     "default": -1,
                     "range": [-1, 500000],
                     "special": [-1]
+                },
+                "kernel_sched_latency_ns": {
+                    "description": "Initial value for the scheduler period",
+                    "type": "int",
+                    "default": 2000000,
+                    "range": [0, 1000000000]
                 }
             }
         }
