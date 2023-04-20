@@ -19,7 +19,7 @@ _LOG = logging.getLogger(__name__)
 
 # This class is internal to SqlStorage and is mostly a struct
 # for all DB tables, so it's ok to disable the warnings.
-# pylint: disable=too-few-public-methods,too-many-instance-attributes
+# pylint: disable=too-many-instance-attributes
 
 
 class _DDL:
@@ -59,6 +59,7 @@ class DbSchema:
             self._meta,
             Column("exp_id", String(255), nullable=False),
             Column("description", String),
+            Column("root_env_config", String, nullable=False),
             Column("git_repo", String, nullable=False),
             Column("git_commit", String(40), nullable=False),
 

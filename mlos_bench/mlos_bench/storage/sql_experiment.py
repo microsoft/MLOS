@@ -27,12 +27,19 @@ class Experiment(Storage.Experiment):
     """
 
     def __init__(self, *,
-                 engine: Engine, schema: DbSchema, tunables: TunableGroups,
-                 experiment_id: str, trial_id: int, description: str, opt_target: str):
+                 engine: Engine,
+                 schema: DbSchema,
+                 tunables: TunableGroups,
+                 experiment_id: str,
+                 trial_id: int,
+                 root_env_config: str,
+                 description: str,
+                 opt_target: str):
         super().__init__(
             tunables=tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
+            root_env_config=root_env_config,
             description=description,
             opt_target=opt_target,
         )
@@ -48,6 +55,7 @@ class Experiment(Storage.Experiment):
                 self._schema.experiment.select().with_only_columns(
                     self._schema.experiment.c.git_repo,
                     self._schema.experiment.c.git_commit,
+                    self._schema.experiment.c.root_env_config,
                     func.max(self._schema.trial.c.trial_id).label("trial_id"),
                 ).join(
                     self._schema.trial,
@@ -58,6 +66,7 @@ class Experiment(Storage.Experiment):
                 ).group_by(
                     self._schema.experiment.c.git_repo,
                     self._schema.experiment.c.git_commit,
+                    self._schema.experiment.c.root_env_config,
                 )
             ).fetchone()
             if exp_info is None:
@@ -68,6 +77,7 @@ class Experiment(Storage.Experiment):
                     description=self._description,
                     git_repo=self._git_repo,
                     git_commit=self._git_commit,
+                    root_env_config=self._root_env_config,
                 ))
             else:
                 if exp_info.trial_id is not None:

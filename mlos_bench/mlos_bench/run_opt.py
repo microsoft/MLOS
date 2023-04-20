@@ -40,14 +40,17 @@ def _main() -> None:
     opt = launcher.load_optimizer(env, args.optimizer)
     storage = launcher.load_storage(env, args.storage)
 
-    result = _optimize(env, opt, storage, launcher.global_config)
+    result = _optimize(env, opt, storage, launcher.root_env_config, launcher.global_config)
     _LOG.info("Final result: %s", result)
 
     if args.teardown:
         env.teardown()
 
 
-def _optimize(env: Environment, opt: Optimizer, storage: Storage,
+def _optimize(env: Environment,
+              opt: Optimizer,
+              storage: Storage,
+              root_env_config: str,
               global_config: Dict[str, Any]) -> Tuple[Optional[float], Optional[TunableGroups]]:
     """
     Main optimization loop.
@@ -60,6 +63,8 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage,
         An interface to mlos_core optimizers.
     storage : Storage
         A storage system to persist the experiment data.
+    root_env_config : str
+        A path to the root JSON configuration file of the benchmarking environment.
     global_config : dict
         Global configuration parameters.
     """
@@ -69,7 +74,11 @@ def _optimize(env: Environment, opt: Optimizer, storage: Storage,
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
     # from other experiments and check for compatibility.
-    with storage.experiment(experiment_id, trial_id, env.name, opt.target) as exp:
+    with storage.experiment(experiment_id=experiment_id,
+                            trial_id=trial_id,
+                            root_env_config=root_env_config,
+                            description=env.name,
+                            opt_target=opt.target) as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
 

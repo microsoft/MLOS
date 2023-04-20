@@ -39,14 +39,19 @@ class SqlStorage(Storage):
     def __repr__(self) -> str:
         return self._repr
 
-    def experiment(self, experiment_id: str, trial_id: int,
-                   description: str, opt_target: str) -> Storage.Experiment:
+    def experiment(self, *,
+                   experiment_id: str,
+                   trial_id: int,
+                   root_env_config: str,
+                   description: str,
+                   opt_target: str) -> Storage.Experiment:
         return Experiment(
             engine=self._engine,
             schema=self._schema,
             tunables=self._tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
+            root_env_config=root_env_config,
             description=description,
             opt_target=opt_target,
         )

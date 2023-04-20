@@ -47,8 +47,12 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
 
     @abstractmethod
-    def experiment(self, experiment_id: str, trial_id: int,
-                   description: str, opt_target: str) -> 'Storage.Experiment':
+    def experiment(self, *,
+                   experiment_id: str,
+                   trial_id: int,
+                   root_env_config: str,
+                   description: str,
+                   opt_target: str) -> 'Storage.Experiment':
         """
         Create a new experiment in the storage.
 
@@ -81,14 +85,19 @@ class Storage(metaclass=ABCMeta):
         """
 
         def __init__(self, *,
-                     tunables: TunableGroups, experiment_id: str,
-                     trial_id: int, description: str, opt_target: str):
+                     tunables: TunableGroups,
+                     experiment_id: str,
+                     trial_id: int,
+                     root_env_config: str,
+                     description: str,
+                     opt_target: str):
             self._tunables = tunables  # No need to copy, it's immutable
             self._experiment_id = experiment_id
             self._trial_id = trial_id
+            self._root_env_config = root_env_config
             self._description = description
             self._opt_target = opt_target
-            (self._git_repo, self._git_commit) = get_git_info()
+            (self._git_repo, self._git_commit) = get_git_info(root_env_config)
 
         def __enter__(self) -> 'Storage.Experiment':
             """
