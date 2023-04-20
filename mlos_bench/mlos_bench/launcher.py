@@ -100,8 +100,8 @@ class Launcher:
             log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
             logging.root.addHandler(log_handler)
 
-        self._env_config_file = args.environment
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path})
+        self._env_config_file = self._config_loader.resolve_path(args.environment)
 
         if args.globals is not None:
             for config_file in args.globals:
@@ -154,7 +154,7 @@ class Launcher:
         assert isinstance(conf, dict)
         return conf
 
-    def load_env(self) -> Environment:
+    def load_environment(self) -> Environment:
         """
         Create a new benchmarking environment from the configs and command line parameters.
         Inject the persistence service so that the environment can load other configs.

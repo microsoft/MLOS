@@ -36,7 +36,7 @@ def _main() -> None:
 
     args = launcher.parse_args()
 
-    env = launcher.load_env()
+    env = launcher.load_environment()
     opt = launcher.load_optimizer(env, args.optimizer)
     storage = launcher.load_storage(env, args.storage)
 
