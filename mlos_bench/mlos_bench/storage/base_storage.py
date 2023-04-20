@@ -9,9 +9,9 @@ Base interface for saving and restoring the benchmark data.
 import logging
 from abc import ABCMeta, abstractmethod
 
+from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
-from types import TracebackType
 
 from mlos_bench.environment import Status
 from mlos_bench.service import Service

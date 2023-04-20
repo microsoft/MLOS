@@ -148,8 +148,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return (class_name, class_config)
 
-    def build_generic(self, cls, tunables: TunableGroups, service: Service,
-                      config: Dict[str, Any], global_config: Dict[str, Any] = None):
+    def build_generic(self, cls: type, tunables: TunableGroups,
+                      service: Service, config: Dict[str, Any],
+                      global_config: Optional[Dict[str, Any]] = None) -> Any:
         # pylint: disable=too-many-arguments
         """
         Gerneric instantiation of mlos_bench objects like Storage and Optimizer
@@ -442,8 +443,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         service = Service(global_config, parent)
         for fname in json_file_names:
             config = self.load_config(fname)
-            service.register(ConfigPersistenceService.build_service(
-                config, global_config, service).export())
+            service.register(self.build_service(config, global_config, service).export())
         return service
 
     def load_tunables(self, json_file_names: Iterable[str],
