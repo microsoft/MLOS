@@ -11,8 +11,8 @@ from typing import Optional
 
 from sqlalchemy import URL, create_engine
 
-from mlos_bench.service import Service
-from mlos_bench.tunables import TunableGroups
+from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.service.base_service import Service
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql_schema import DbSchema
 from mlos_bench.storage.sql_experiment import Experiment

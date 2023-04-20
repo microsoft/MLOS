@@ -11,7 +11,9 @@ from typing import Optional, List
 import pytest
 
 from mlos_bench.environment.status import Status
-from mlos_bench.optimizer import Optimizer, MockOptimizer, MlosCoreOptimizer
+from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.optimizer.mock_optimizer import MockOptimizer
+from mlos_bench.optimizer.mlos_core_optimizer import MlosCoreOptimizer
 
 # pylint: disable=redefined-outer-name
 

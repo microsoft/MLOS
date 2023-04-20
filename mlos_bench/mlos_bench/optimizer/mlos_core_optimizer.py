@@ -13,11 +13,11 @@ import pandas as pd
 
 from mlos_core.optimizers import OptimizerType, OptimizerFactory, SpaceAdapterType
 
-from mlos_bench.service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.service.base_service import Service
 from mlos_bench.optimizer.convert_configspace import tunable_groups_to_configspace
 
 _LOG = logging.getLogger(__name__)

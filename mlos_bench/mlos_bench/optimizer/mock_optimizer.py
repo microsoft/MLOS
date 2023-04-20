@@ -11,12 +11,12 @@ import logging
 
 from typing import Callable, Dict, Optional, Sequence, Tuple, Union
 
-from mlos_bench.service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.service.base_service import Service
 
 _LOG = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ Test fixtures for individual Tunable objects.
 
 import pytest
 
-from mlos_bench.tunables import Tunable
+from mlos_bench.tunables.tunable import Tunable
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to

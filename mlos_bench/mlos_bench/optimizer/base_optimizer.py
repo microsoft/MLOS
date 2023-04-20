@@ -11,7 +11,7 @@ import logging
 from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
 
-from mlos_bench.service import Service
+from mlos_bench.service.base_service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 

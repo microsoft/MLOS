@@ -13,7 +13,9 @@ import pytest
 from mlos_bench.environment.base_environment import Environment
 from mlos_bench.environment.mock_env import MockEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.optimizer import Optimizer, MockOptimizer, MlosCoreOptimizer
+from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.optimizer.mock_optimizer import MockOptimizer
+from mlos_bench.optimizer.mlos_core_optimizer import MlosCoreOptimizer
 
 
 def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:

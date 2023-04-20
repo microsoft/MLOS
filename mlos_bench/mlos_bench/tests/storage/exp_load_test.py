@@ -7,9 +7,9 @@ Unit tests for the storage subsystem.
 """
 import pytest
 
-from mlos_bench.storage import Storage
-from mlos_bench.tunables import TunableGroups
-from mlos_bench.environment import Status
+from mlos_bench.environment.status import Status
+from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.storage.base_storage import Storage
 
 # pylint: disable=redefined-outer-name
 

@@ -6,8 +6,8 @@
 Unit tests for saving and retrieving additional parameters of pending trials.
 """
 
-from mlos_bench.storage import Storage
-from mlos_bench.tunables import TunableGroups
+from mlos_bench.storage.base_storage import Storage
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,

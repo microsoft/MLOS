@@ -13,7 +13,7 @@ from typing import Optional, Tuple, List, Dict, Iterator, Any
 
 from sqlalchemy import Engine, Connection, Table, column, func
 
-from mlos_bench.tunables import TunableGroups
+from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql_schema import DbSchema
 from mlos_bench.storage.sql_trial import Trial

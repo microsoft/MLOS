@@ -13,9 +13,9 @@ from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
 
-from mlos_bench.environment import Status
-from mlos_bench.service import Service
-from mlos_bench.tunables import TunableGroups
+from mlos_bench.environment.status import Status
+from mlos_bench.service.base_service import Service
+from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import get_git_info
 
 _LOG = logging.getLogger(__name__)
