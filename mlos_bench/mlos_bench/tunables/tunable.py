@@ -117,6 +117,33 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             self._current_value == other._current_value
         )
 
+    def __lt__(self, other: object) -> bool:
+        """
+        Compare the two Tunable objects. We mostly need this to create a canonical list
+        of tunable objects when hashing a TunableGroup.
+
+        Parameters
+        ----------
+        other : Tunable
+            A tunable object to compare to.
+
+        Returns
+        -------
+        is_less : bool
+            True if the current Tunable is less then the other one, False otherwise.
+        """
+        if not isinstance(other, Tunable):
+            return False
+        if self._name < other._name:
+            return True
+        if self._name == other._name and self._type < other._type:
+            return True
+        if self._name == other._name and self._type == other._type:
+            if self.is_numerical:
+                return bool(float(self._current_value) < float(other._current_value))
+            return bool(str(self._current_value) < str(other._current_value))
+        return False
+
     def copy(self) -> "Tunable":
         """
         Deep copy of the Tunable object.
