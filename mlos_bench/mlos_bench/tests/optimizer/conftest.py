@@ -39,7 +39,7 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
         service=None,
         config={
             "maximize": "score",
-            "max_iterations": 5,
+            "max_iterations": 10,
             "seed": 42
         },
     )
@@ -55,7 +55,7 @@ def scikit_gp_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         service=None,
         config={
             "minimize": "score",
-            "max_iterations": 20,
+            "max_iterations": 10,
             "optimizer_type": "SKOPT",
             "base_estimator": "gp",
             "seed": 42
@@ -73,7 +73,7 @@ def scikit_et_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         service=None,
         config={
             "minimize": "score",
-            "max_iterations": 20,
+            "max_iterations": 10,
             "optimizer_type": "SKOPT",
             "base_estimator": "et",
             "seed": 42
@@ -91,7 +91,7 @@ def emukit_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         service=None,
         config={
             "minimize": "score",
-            "max_iterations": 20,
+            "max_iterations": 5,
             "optimizer_type": "EMUKIT"
         },
     )
@@ -107,7 +107,7 @@ def emukit_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         service=None,
         config={
             "maximize": "score",
-            "max_iterations": 20,
+            "max_iterations": 5,
             "optimizer_type": "EMUKIT"
         },
     )

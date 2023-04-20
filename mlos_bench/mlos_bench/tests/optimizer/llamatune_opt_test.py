@@ -29,7 +29,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
                 "num_low_dims": 1,
             },
             "minimize": "score",
-            "max_iterations": 20,
+            "max_iterations": 10,
             "optimizer_type": "EMUKIT",
         })
 
