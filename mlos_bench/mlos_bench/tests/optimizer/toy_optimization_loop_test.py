@@ -46,11 +46,12 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
     Toy optimization loop with mock environment and optimizer.
     """
     (score, tunables) = _optimize(mock_env_no_noise, mock_opt)
-    assert score == pytest.approx(80.0, 0.01)
+    assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
         "rootfs": "xfs",
-        "kernel_sched_migration_cost_ns": 13111
+        "kernel_sched_migration_cost_ns": 13111,
+        "kernel_sched_latency_ns": 796233790,
     }
 
 
@@ -60,11 +61,12 @@ def test_scikit_gp_optimization_loop(mock_env_no_noise: MockEnv,
     Toy optimization loop with mock environment and Scikit GP optimizer.
     """
     (score, tunables) = _optimize(mock_env_no_noise, scikit_gp_opt)
-    assert score == pytest.approx(80.0, 0.01)
+    assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
-        "vmSize": "Standard_B4ms",
-        "rootfs": "ext2",
-        "kernel_sched_migration_cost_ns": 398271
+        "vmSize": "Standard_B2s",
+        "rootfs": "xfs",
+        "kernel_sched_migration_cost_ns": 91717,
+        "kernel_sched_latency_ns": 796542987,
     }
 
 
@@ -74,11 +76,12 @@ def test_scikit_et_optimization_loop(mock_env_no_noise: MockEnv,
     Toy optimization loop with mock environment and Scikit ET optimizer.
     """
     (score, tunables) = _optimize(mock_env_no_noise, scikit_et_opt)
-    assert score == pytest.approx(80.0, 0.01)
+    assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
-        "rootfs": "ext2",
-        "kernel_sched_migration_cost_ns": 146866
+        "rootfs": "xfs",
+        "kernel_sched_migration_cost_ns": 131931,
+        "kernel_sched_latency_ns": 199900595,
     }
 
 
@@ -88,7 +91,7 @@ def test_emukit_optimization_loop(mock_env_no_noise: MockEnv,
     Toy optimization loop with mock environment and EmuKit optimizer.
     """
     (score, _tunables) = _optimize(mock_env_no_noise, emukit_opt)
-    assert score == pytest.approx(80.0, 0.01)
+    assert score == pytest.approx(75.0, 0.01)
     # Emukit optimizer is not deterministic, so we can't assert the exact values of the tunables.
 
 
@@ -99,5 +102,5 @@ def test_emukit_optimization_loop_max(mock_env_no_noise: MockEnv,
     in maximization mode.
     """
     (score, _tunables) = _optimize(mock_env_no_noise, emukit_opt_max)
-    assert score == pytest.approx(80.0, 0.01)
+    assert score == pytest.approx(75.0, 0.01)
     # Emukit optimizer is not deterministic, so we can't assert the exact values of the tunables.

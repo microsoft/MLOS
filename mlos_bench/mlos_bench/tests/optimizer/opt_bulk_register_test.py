@@ -26,21 +26,25 @@ def mock_configs() -> List[dict]:
             'vmSize': 'Standard_B4ms',
             'rootfs': 'xfs',
             'kernel_sched_migration_cost_ns': 50000,
+            'kernel_sched_latency_ns': 1000000,
         },
         {
             'vmSize': 'Standard_B4ms',
             'rootfs': 'xfs',
             'kernel_sched_migration_cost_ns': 40000,
+            'kernel_sched_latency_ns': 2000000,
         },
         {
             'vmSize': 'Standard_B4ms',
             'rootfs': 'ext4',
             'kernel_sched_migration_cost_ns': 100000,
+            'kernel_sched_latency_ns': 3000000,
         },
         {
             'vmSize': 'Standard_B2s',
             'rootfs': 'xfs',
             'kernel_sched_migration_cost_ns': 200000,
+            'kernel_sched_latency_ns': 4000000,
         }
     ]
 
@@ -74,6 +78,7 @@ def _test_opt_update_min(opt: Optimizer, configs: List[dict],
         "vmSize": "Standard_B4ms",
         "rootfs": "ext4",
         "kernel_sched_migration_cost_ns": 100000,
+        'kernel_sched_latency_ns': 3000000,
     }
 
 
@@ -90,6 +95,7 @@ def _test_opt_update_max(opt: Optimizer, configs: List[dict],
         "vmSize": "Standard_B2s",
         "rootfs": "xfs",
         "kernel_sched_migration_cost_ns": 200000,
+        'kernel_sched_latency_ns': 4000000,
     }
 
 
