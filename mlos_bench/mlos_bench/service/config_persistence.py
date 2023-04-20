@@ -148,12 +148,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return (class_name, class_config)
 
-    def build_generic(self, cls: type, tunables: TunableGroups,
-                      service: Service, config: Dict[str, Any],
+    def build_generic(self, *,
+                      cls: type,
+                      tunables: TunableGroups,
+                      service: Service,
+                      config: Dict[str, Any],
                       global_config: Optional[Dict[str, Any]] = None) -> Any:
-        # pylint: disable=too-many-arguments
         """
-        Gerneric instantiation of mlos_bench objects like Storage and Optimizer
+        Generic instantiation of mlos_bench objects like Storage and Optimizer
         that depend on Service and TunableGroups.
 
         A class *MUST* have a constructor that takes exactly three arguments:
@@ -175,8 +177,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Returns
         -------
-        inst : Storage
-            A new instance of the Storage class.
+        inst : Any
+            A new instance of the `cls` class.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         inst = instantiate_from_config(cls, class_name, tunables, service, class_config)

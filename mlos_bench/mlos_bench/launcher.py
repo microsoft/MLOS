@@ -186,5 +186,9 @@ class Launcher:
         """
         assert self._config_loader is not None, "Call after invoking .parse_args()"
         return self._config_loader.build_generic(
-            cls, env.tunable_params(), self._config_loader,
-            self.load_config(json_file_name), self.global_config)
+            cls=cls,
+            tunables=env.tunable_params(),
+            service=self._config_loader,
+            config=self.load_config(json_file_name),
+            global_config=self.global_config
+        )
