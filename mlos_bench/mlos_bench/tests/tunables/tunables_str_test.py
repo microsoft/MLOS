@@ -34,6 +34,16 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
                 }
             }
         },
+        "boot": {
+            "cost": 300,
+            "params": {
+                "rootfs": {
+                    "type": "categorical",
+                    "default": "xfs",
+                    "values": ["ext2", "ext4", "xfs"]
+                }
+            }
+        },
         "provision": {
             "cost": 1000,
             "params": {
@@ -41,16 +51,6 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
                     "type": "categorical",
                     "default": "Standard_B4ms",
                     "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
-                }
-            }
-        },
-        "boot": {
-            "cost": 300,
-            "params": {
-                "rootfs": {
-                    "type": "categorical",
-                    "default": "xfs",
-                    "values": ["xfs", "ext4", "ext2"]
                 }
             }
         },
