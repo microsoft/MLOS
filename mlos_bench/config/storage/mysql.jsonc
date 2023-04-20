@@ -2,8 +2,9 @@
 {
     "class": "mlos_bench.storage.sql_storage.SqlStorage",
 
-    // Parameters must match kwargs of sqlalchemy.URL.create().
     "config": {
+        "log_sql": false,  // Write all SQL statements to the log.
+        // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
         "drivername": "mysql+mysqlconnector",
         "database": "osat",
         "username": "root",

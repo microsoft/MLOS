@@ -41,7 +41,7 @@ class Trial(Storage.Trial):
         self._schema = schema
 
     def _update(self, table: Table, timestamp: Optional[datetime],
-                status: Status, value: Optional[Dict[str, Any]] = None) -> None:
+                status: Status, metrics: Optional[Dict[str, float]] = None) -> None:
         """
         Update the status of the trial and optionally add some results.
 
@@ -54,7 +54,7 @@ class Trial(Storage.Trial):
             The timestamp of the final results. (Use `None` for telemetry).
         status: Status
             The status of the trial.
-        value: dict
+        metrics: Optional[Dict[str, float]]
             Pairs of (key, value): intermediate or final results of the trial.
         """
         _LOG.debug("Updating experiment run: %s", self)
@@ -78,7 +78,7 @@ class Trial(Storage.Trial):
                         f"Failed to update the status of the trial {self} to {status}." +
                         f" ({cur_status.rowcount} rows)")
                 # FIXME: Save timestamps for the telemetry data.
-                if value:
+                if metrics:
                     conn.execute(table.insert().values([
                         {
                             "exp_id": self._experiment_id,
@@ -86,19 +86,20 @@ class Trial(Storage.Trial):
                             "metric_id": key,
                             "metric_value": None if val is None else str(val),
                         }
-                        for (key, val) in value.items()
+                        for (key, val) in metrics.items()
                     ]))
             except Exception:
                 conn.rollback()
                 raise
 
     def update(self, status: Status,
-               value: Optional[Union[Dict[str, Any], Any]] = None
-               ) -> Optional[Dict[str, Any]]:
-        value = super().update(status, value)
-        self._update(self._schema.trial_result, datetime.now(), status, value)
-        return value
+               metrics: Optional[Union[Dict[str, float], float]] = None
+               ) -> Optional[Dict[str, float]]:
+        metrics = super().update(status, metrics)
+        self._update(self._schema.trial_result, datetime.now(), status, metrics)
+        return metrics
 
-    def update_telemetry(self, status: Status, value: Optional[Dict[str, Any]] = None) -> None:
-        super().update_telemetry(status, value)
-        self._update(self._schema.trial_telemetry, None, status, value)
+    def update_telemetry(self, status: Status,
+                         metrics: Optional[Dict[str, float]] = None) -> None:
+        super().update_telemetry(status, metrics)
+        self._update(self._schema.trial_telemetry, None, status, metrics)

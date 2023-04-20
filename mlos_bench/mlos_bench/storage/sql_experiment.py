@@ -162,7 +162,7 @@ class Experiment(Storage.Experiment):
         """
         config_hash = hashlib.sha256(str(tunables).encode('utf-8')).hexdigest()
         cur_config = conn.execute(self._schema.config.select().where(
-            column("config_hash") == config_hash
+            self._schema.config.c.config_hash == config_hash
         )).fetchone()
         if cur_config is not None:
             return int(cur_config.config_id)  # mypy doesn't know it's always int

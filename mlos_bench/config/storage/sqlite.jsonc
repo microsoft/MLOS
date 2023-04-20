@@ -5,8 +5,9 @@
     // Apply --config-path resolution to these config parameters:
     "resolve_path": ["database"],
 
-    // Parameters must match kwargs of sqlalchemy.URL.create().
     "config": {
+        "log_sql": false,  // Write all SQL statements to the log.
+        // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
         "drivername": "sqlite",
         "database": "mlos_bench.sqlite"
     }

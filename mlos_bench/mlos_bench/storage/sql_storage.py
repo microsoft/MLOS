@@ -27,11 +27,11 @@ class SqlStorage(Storage):
 
     def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
         super().__init__(tunables, service, config)
+        log_sql = self._config.pop("log_sql", False)
         url = URL.create(**self._config)
         self._repr = f"{url.get_backend_name()}:{url.database}"
         _LOG.info("Connect to the database: %s", self)
-        # Log SQL statements if the logging level is DEBUG:
-        self._engine = create_engine(url)  # , echo=_LOG.isEnabledFor(logging.DEBUG))
+        self._engine = create_engine(url, echo=log_sql)
         self._schema = DbSchema(self._engine).create()
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("DDL statements:\n%s", self._schema)

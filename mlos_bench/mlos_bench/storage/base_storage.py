@@ -227,7 +227,7 @@ class Storage(metaclass=ABCMeta):
             """
             return self._tunables
 
-        def config(self, global_config: Optional[Dict[str, Any]] = None) -> dict:
+        def config(self, global_config: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
             """
             Produce a copy of the global configuration updated
             with the parameters of the current trial.
@@ -240,8 +240,8 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update(self, status: Status,
-                   value: Optional[Union[Dict[str, Any], Any]] = None
-                   ) -> Optional[Dict[str, Any]]:
+                   metrics: Optional[Union[Dict[str, float], float]] = None
+                   ) -> Optional[Dict[str, float]]:
             """
             Update the storage with the results of the experiment.
 
@@ -249,25 +249,25 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Status of the experiment run.
-            value : Optional[Union[Dict[str, float], float]]
+            metrics : Optional[Union[Dict[str, float], float]]
                 One or several metrics of the experiment run.
                 Must contain the optimization target if the status is SUCCEEDED.
 
             Returns
             -------
-            value : Optional[Dict[str, float]]
-                Same as value, but always in the dict format.
+            metrics : Optional[Dict[str, float]]
+                Same as `metrics`, but always in the dict format.
             """
-            _LOG.info("Store trial: %s :: %s %s", self, status, value)
-            if isinstance(value, dict) and self._opt_target not in value:
+            _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
+            if isinstance(metrics, dict) and self._opt_target not in metrics:
                 _LOG.warning("Trial %s :: opt. target missing: %s", self, self._opt_target)
                 # raise ValueError(
-                #     f"Optimization target '{self._opt_target}' is missing from {value}")
-            return {self._opt_target: value} if isinstance(value, (float, int)) else value
+                #     f"Optimization target '{self._opt_target}' is missing from {metrics}")
+            return {self._opt_target: metrics} if isinstance(metrics, (float, int)) else metrics
 
         @abstractmethod
         def update_telemetry(self, status: Status,
-                             value: Optional[Dict[str, Any]] = None) -> None:
+                             metrics: Optional[Dict[str, float]] = None) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 
@@ -275,7 +275,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Current status of the trial.
-            value : Optional[Dict[str, float]]
+            metrics : Optional[Dict[str, float]]
                 Telemetry data.
             """
-            _LOG.info("Store telemetry: %s :: %s %s", self, status, value)
+            _LOG.info("Store telemetry: %s :: %s %s", self, status, metrics)
