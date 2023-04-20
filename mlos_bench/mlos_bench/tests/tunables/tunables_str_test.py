@@ -22,13 +22,11 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
             "cost": 1,
             "params": {
                 "kernel_sched_latency_ns": {
-                    "description": "Initial value for the scheduler period",
                     "type": "int",
                     "default": 2000000,
                     "range": [0, 1000000000]
                 },
                 "kernel_sched_migration_cost_ns": {
-                    "description": "Cost of migrating the thread to another core",
                     "type": "int",
                     "default": -1,
                     "range": [-1, 500000],
@@ -40,7 +38,6 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
             "cost": 1000,
             "params": {
                 "vmSize": {
-                    "description": "Azure VM size",
                     "type": "categorical",
                     "default": "Standard_B4ms",
                     "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
@@ -51,7 +48,6 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
             "cost": 300,
             "params": {
                 "rootfs": {
-                    "description": "Root file system",
                     "type": "categorical",
                     "default": "xfs",
                     "values": ["xfs", "ext4", "ext2"]
