@@ -44,11 +44,12 @@ class OptimizerType(Enum):
 # https://github.com/python/mypy/issues/12952
 # ConcreteOptimizer = TypeVar('ConcreteOptimizer', *[member.value for member in OptimizerType])
 # To address this, we add a test for complete coverage of the enum.
-ConcreteOptimizer = TypeVar('ConcreteOptimizer',
-                            RandomOptimizer,
-                            EmukitOptimizer,
-                            SkoptOptimizer,
-                    )
+ConcreteOptimizer = TypeVar(
+    'ConcreteOptimizer',
+    RandomOptimizer,
+    EmukitOptimizer,
+    SkoptOptimizer,
+)
 
 
 class OptimizerFactory:
