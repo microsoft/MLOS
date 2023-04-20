@@ -8,6 +8,7 @@ Various helper functions for mlos_bench.
 
 # NOTE: This has to be placed in the top-level mlos_bench package to avoid circular imports.
 
+import os
 import json
 import logging
 import importlib
@@ -26,7 +27,7 @@ T = TypeVar('T', "Environment", "Service", "Optimizer")
 
 
 def prepare_class_load(config: dict,
-                       global_config: Optional[dict] = None) -> Tuple[str, Dict[str, Any]]:
+                       global_config: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
     """
     Extract the class instantiation parameters from the configuration.
 
@@ -119,7 +120,7 @@ def check_required_params(config: Mapping[str, Any], required_params: Iterable[s
             + f" or as command line arguments: {missing_params}")
 
 
-def get_git_info(path: str = ".") -> Tuple[str, str]:
+def get_git_info(path: str = __file__) -> Tuple[str, str]:
     """
     Get the git repository and commit hash of the current working directory.
 
@@ -133,9 +134,10 @@ def get_git_info(path: str = ".") -> Tuple[str, str]:
     (git_repo, git_commit) : Tuple[str, str]
         Git repository URL and last commit hash.
     """
+    dirname = os.path.dirname(path)
     git_repo = subprocess.check_output(
-        ["git", "-C", path, "remote", "get-url", "origin"], text=True).strip()
+        ["git", "-C", dirname, "remote", "get-url", "origin"], text=True).strip()
     git_commit = subprocess.check_output(
-        ["git", "-C", path, "rev-parse", "HEAD"], text=True).strip()
+        ["git", "-C", dirname, "rev-parse", "HEAD"], text=True).strip()
     _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
     return (git_repo, git_commit)
