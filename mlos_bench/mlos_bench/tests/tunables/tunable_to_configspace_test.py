@@ -13,7 +13,8 @@ from ConfigSpace import UniformFloatHyperparameter
 from ConfigSpace import CategoricalHyperparameter
 from ConfigSpace import ConfigurationSpace
 
-from mlos_bench.tunables import Tunable, TunableGroups
+from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.convert_configspace import _tunable_to_hyperparameter
 from mlos_bench.optimizer.convert_configspace import tunable_groups_to_configspace
@@ -35,12 +36,14 @@ def configuration_space() -> ConfigurationSpace:
     spaces = ConfigurationSpace(space={
         "vmSize": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"],
         "rootfs": ["xfs", "ext4", "ext2"],
-        "kernel_sched_migration_cost_ns": (-1, 500000)
+        "kernel_sched_migration_cost_ns": (-1, 500000),
+        "kernel_sched_latency_ns": (0, 1000000000),
     })
 
     spaces["vmSize"].default_value = "Standard_B4ms"
     spaces["rootfs"].default_value = "xfs"
     spaces["kernel_sched_migration_cost_ns"].default_value = -1
+    spaces["kernel_sched_latency_ns"].default_value = 2000000
 
     return spaces
 

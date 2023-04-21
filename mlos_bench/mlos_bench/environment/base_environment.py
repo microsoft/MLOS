@@ -66,8 +66,15 @@ class Environment(metaclass=abc.ABCMeta):
         env : Environment
             An instance of the `Environment` class initialized with `config`.
         """
-        return instantiate_from_config(cls, class_name, env_name, config,
-                                       global_config, tunables, service)
+        return instantiate_from_config(
+            cls,
+            class_name,
+            name=env_name,
+            config=config,
+            global_config=global_config,
+            tunables=tunables,
+            service=service
+        )
 
     def __init__(self,
                  *,

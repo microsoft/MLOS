@@ -11,9 +11,9 @@ import logging
 from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
 
+from mlos_bench.service.base_service import Service
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import prepare_class_load, instantiate_from_config
 
 _LOG = logging.getLogger(__name__)
 
@@ -23,56 +23,7 @@ class Optimizer(metaclass=ABCMeta):
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
 
-    @staticmethod
-    def load(tunables: TunableGroups, config: dict, global_config: Optional[dict] = None) -> "Optimizer":
-        """
-        Instantiate the Optimizer shim from the configuration.
-
-        Parameters
-        ----------
-        tunables : TunableGroups
-            Tunable parameters of the environment.
-        config : dict
-            Configuration of the optimizer.
-        global_config : dict
-            Global configuration parameters (optional).
-
-        Returns
-        -------
-        opt : Optimizer
-            A new Optimizer instance.
-        """
-        (class_name, opt_config) = prepare_class_load(config, global_config)
-        opt = Optimizer.new(class_name, tunables, opt_config)
-        _LOG.info("Created optimizer: %s", opt)
-        return opt
-
-    @classmethod
-    def new(cls, class_name: str, tunables: TunableGroups, config: dict) -> "Optimizer":
-        """
-        Factory method for a new optimizer with a given config.
-
-        Parameters
-        ----------
-        class_name: str
-            FQN of a Python class to instantiate, e.g.,
-            "mlos_bench.optimizer.MlosCoreOptimizer".
-            Must be derived from the `Optimizer` class.
-        tunables : TunableGroups
-            The tunables to optimize.
-        config : dict
-            Free-format dictionary that contains the optimizer configuration.
-            It will be passed as a constructor parameter of the class
-            specified by `class_name`.
-
-        Returns
-        -------
-        opt : Optimizer
-            An instance of the `Optimizer` class initialized with `config`.
-        """
-        return instantiate_from_config(cls, class_name, tunables, config)
-
-    def __init__(self, tunables: TunableGroups, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
         """
         Create a new optimizer for the given configuration space defined by the tunables.
 
@@ -87,6 +38,7 @@ class Optimizer(metaclass=ABCMeta):
         _LOG.debug("Optimizer config: %s", config)
         self._config = config.copy()
         self._tunables = tunables
+        self._service = service
         self._iter = 1
         self._max_iter = int(self._config.pop('max_iterations', 10))
         self._opt_target: str

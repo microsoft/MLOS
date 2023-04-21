@@ -104,9 +104,9 @@ class TunableGroups:
             A human-readable version of the TunableGroups.
         """
         return "{ " + ", ".join(
-            f"{group_name}::{tunable}"
-            for (group_name, group) in self._tunable_groups.items()
-            for tunable in group._tunables.values()) + " }"
+            f"{group.name}::{tunable}"
+            for group in sorted(self._tunable_groups.values(), key=lambda g: (-g.cost, g.name))
+            for tunable in sorted(group._tunables.values())) + " }"
 
     def __getitem__(self, name: str) -> TunableValue:
         """

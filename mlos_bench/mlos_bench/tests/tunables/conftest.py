@@ -8,7 +8,7 @@ Test fixtures for individual Tunable objects.
 
 import pytest
 
-from mlos_bench.tunables import Tunable
+from mlos_bench.tunables.tunable import Tunable
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to
@@ -46,7 +46,7 @@ def tunable_int() -> Tunable:
     return Tunable("kernel_sched_migration_cost_ns", {
         "description": "Cost of migrating the thread to another core",
         "type": "int",
-        "default": -1,
+        "default": 40000,
         "range": [-1, 500000],
         "special": [-1]
     })

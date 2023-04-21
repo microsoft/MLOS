@@ -12,8 +12,11 @@ import argparse
 from typing import Any, Dict, Iterable
 
 from mlos_bench.environment.base_environment import Environment
+from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.storage.base_storage import Storage
 from mlos_bench.service.local.local_exec import LocalExecService
 from mlos_bench.service.config_persistence import ConfigPersistenceService
+from mlos_bench.util import BaseTypes
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
@@ -58,12 +61,25 @@ class Launcher:
             help='Path to one or more JSON files that contain additional' +
                  ' [private] parameters of the benchmarking environment.')
 
+        self._parser.add_argument(
+            '--no-teardown', required=False, default=True,
+            dest='teardown', action='store_false',
+            help='Disable teardown of the environment after the benchmark.')
+
     @property
     def parser(self) -> argparse.ArgumentParser:
         """
         Get the command line parser (so we can add more arguments to it).
         """
         return self._parser
+
+    @property
+    def root_env_config(self) -> str:
+        """
+        Get the global parameters that can override the values in the config snippets.
+        """
+        assert self._env_config_file, "Call after invoking .parse_args()"
+        return self._env_config_file
 
     @property
     def global_config(self) -> Dict[str, Any]:
@@ -85,8 +101,8 @@ class Launcher:
             log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
             logging.root.addHandler(log_handler)
 
-        self._env_config_file = args.environment
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path})
+        self._env_config_file = self._config_loader.resolve_path(args.environment)
 
         if args.globals is not None:
             for config_file in args.globals:
@@ -139,11 +155,41 @@ class Launcher:
         assert isinstance(conf, dict)
         return conf
 
-    def load_env(self) -> Environment:
+    def load_environment(self) -> Environment:
         """
         Create a new benchmarking environment from the configs and command line parameters.
         Inject the persistence service so that the environment can load other configs.
         """
+        assert self._config_loader is not None, "Call after invoking .parse_args()"
         return self._config_loader.load_environment(
             self._env_config_file, self._global_config,
             service=LocalExecService(parent=self._config_loader))
+
+    def load_optimizer(self, env: Environment, json_file_name: str) -> Optimizer:
+        """
+        Create a new instance of the Optimizer from JSON configuration.
+        """
+        opt = self._load(env, Optimizer, json_file_name)
+        assert isinstance(opt, Optimizer)
+        return opt
+
+    def load_storage(self, env: Environment, json_file_name: str) -> Storage:
+        """
+        Create a new instance of the Storage from JSON configuration.
+        """
+        storage = self._load(env, Storage, json_file_name)
+        assert isinstance(storage, Storage)
+        return storage
+
+    def _load(self, env: Environment, cls: type, json_file_name: str) -> BaseTypes:
+        """
+        Create a new instance of class `cls` from JSON configuration.
+        """
+        assert self._config_loader is not None, "Call after invoking .parse_args()"
+        return self._config_loader.build_generic(
+            base_cls=cls,
+            tunables=env.tunable_params(),
+            service=self._config_loader,
+            config=self.load_config(json_file_name),
+            global_config=self.global_config
+        )
