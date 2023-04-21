@@ -1,6 +1,6 @@
 // MySQL / MariaDB storage.
 {
-    "class": "mlos_bench.storage.sql_storage.SqlStorage",
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
 
     "config": {
         "log_sql": false,  // Write all SQL statements to the log.

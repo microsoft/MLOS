@@ -10,7 +10,7 @@ import pytest
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.storage.sql_storage import SqlStorage
+from mlos_bench.storage.sql.storage import SqlStorage
 
 
 @pytest.fixture

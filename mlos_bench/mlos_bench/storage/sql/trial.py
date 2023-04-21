@@ -15,7 +15,7 @@ from sqlalchemy import Engine, Table
 from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
-from mlos_bench.storage.sql_schema import DbSchema
+from mlos_bench.storage.sql.schema import DbSchema
 
 _LOG = logging.getLogger(__name__)
 
