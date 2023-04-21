@@ -22,8 +22,8 @@ if TYPE_CHECKING:
     from mlos_bench.service.base_service import Service
     from mlos_bench.optimizer.base_optimizer import Optimizer
 
-# T is a generic with a constraint of the three base classes.
-T = TypeVar('T', "Environment", "Service", "Optimizer")
+# BaseTypeVar is a generic with a constraint of the three base classes.
+BaseTypeVar = TypeVar('BaseTypeVar', "Environment", "Service", "Optimizer")
 
 
 def prepare_class_load(config: dict,
@@ -60,8 +60,8 @@ def prepare_class_load(config: dict,
 
 
 # FIXME: Technically, this should return a type "class_name" derived from "base_class".
-def instantiate_from_config(base_class: Type[T], class_name: str,
-                            *args: Any, **kwargs: Any) -> T:
+def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
+                            *args: Any, **kwargs: Any) -> BaseTypeVar:
     """
     Factory method for a new class instantiated from config.
 
@@ -94,7 +94,7 @@ def instantiate_from_config(base_class: Type[T], class_name: str,
     _LOG.info("Instantiating: %s :: %s", class_name, impl)
 
     assert issubclass(impl, base_class)
-    ret: T = impl(*args, **kwargs)
+    ret: BaseTypeVar = impl(*args, **kwargs)
     assert isinstance(ret, base_class)
     return ret
 

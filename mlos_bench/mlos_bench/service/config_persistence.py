@@ -12,7 +12,7 @@ import os
 import json    # For logging only
 import logging
 
-from typing import Optional, Union, List, Tuple, Dict, Iterable, Any
+from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
 
 import json5   # To read configs with comments and other JSON5 syntax features
 
@@ -20,7 +20,7 @@ from mlos_bench.environment.base_environment import Environment
 from mlos_bench.service.base_service import Service
 from mlos_bench.service.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config
+from mlos_bench.util import instantiate_from_config, BaseTypeVar
 
 _LOG = logging.getLogger(__name__)
 
@@ -149,11 +149,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return (class_name, class_config)
 
     def build_generic(self, *,
-                      cls: type,
+                      base_cls: Type[BaseTypeVar],
                       tunables: TunableGroups,
                       service: Service,
                       config: Dict[str, Any],
-                      global_config: Optional[Dict[str, Any]] = None) -> Any:
+                      global_config: Optional[Dict[str, Any]] = None) -> BaseTypeVar:
         """
         Generic instantiation of mlos_bench objects like Storage and Optimizer
         that depend on Service and TunableGroups.
@@ -163,7 +163,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        cls : ClassType
+        base_cls : ClassType
             A base class of the object to instantiate.
         tunables : TunableGroups
             Tunable parameters of the environment. We need them to validate the
@@ -181,7 +181,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A new instance of the `cls` class.
         """
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        inst = instantiate_from_config(cls, class_name, tunables, service, class_config)
+        inst = instantiate_from_config(base_cls, class_name, tunables, service, class_config)
         _LOG.info("Created: %s", inst)
         return inst
 
