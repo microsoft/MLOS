@@ -87,7 +87,7 @@ class Storage(metaclass=ABCMeta):
         """
 
         def __init__(self, tunables: TunableGroups, experiment_id: str, root_env_config: str):
-            self._tunables = tunables  # No need to copy, it's immutable
+            self._tunables = tunables.copy()
             self._experiment_id = experiment_id
             (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(root_env_config)
 
