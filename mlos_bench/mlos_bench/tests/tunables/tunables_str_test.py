@@ -16,7 +16,7 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
     regardless of the order in which we declare the covariant groups and
     tunables within each covariant group.
     """
-    # Same as `tunable_groups`, but in different order:
+    # Same as `tunable_groups` (defined in the `conftest.py` file), but in different order:
     tunables_other = TunableGroups({
         "kernel": {
             "cost": 1,
