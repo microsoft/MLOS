@@ -1,0 +1,15 @@
+// MySQL / MariaDB storage.
+{
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "config": {
+        "log_sql": false,  // Write all SQL statements to the log.
+        // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
+        "drivername": "mysql+mysqlconnector",
+        "database": "osat",
+        "username": "root",
+        "password": "PLACERHOLDER PASSWORD",  // Comes from global config
+        "host": "localhost",
+        "port": 3306
+    }
+}

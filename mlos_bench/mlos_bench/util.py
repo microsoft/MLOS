@@ -8,16 +8,28 @@ Various helper functions for mlos_bench.
 
 # NOTE: This has to be placed in the top-level mlos_bench package to avoid circular imports.
 
+import os
 import json
 import logging
 import importlib
-
-from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING
+import subprocess
+from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING, Union
 
 _LOG = logging.getLogger(__name__)
 
+if TYPE_CHECKING:
+    from mlos_bench.environment.base_environment import Environment
+    from mlos_bench.optimizer.base_optimizer import Optimizer
+    from mlos_bench.service.base_service import Service
+    from mlos_bench.storage.base_storage import Storage
 
-def prepare_class_load(config: dict, global_config: Optional[dict] = None) -> Tuple[str, Dict[str, Any]]:
+# BaseTypeVar is a generic with a constraint of the three base classes.
+BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Service", "Storage")
+BaseTypes = Union["Environment", "Optimizer", "Service", "Storage"]
+
+
+def prepare_class_load(config: dict,
+                       global_config: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
     """
     Extract the class instantiation parameters from the configuration.
 
@@ -49,17 +61,9 @@ def prepare_class_load(config: dict, global_config: Optional[dict] = None) -> Tu
     return (class_name, class_config)
 
 
-if TYPE_CHECKING:
-    from mlos_bench.environment.base_environment import Environment
-    from mlos_bench.service.base_service import Service
-    from mlos_bench.optimizer.base_optimizer import Optimizer
-
-# T is a generic with a constraint of the three base classes.
-T = TypeVar('T', "Environment", "Service", "Optimizer")
-
-
-# FIXME: Technically this should return a type "class_name" derived from "base_class".
-def instantiate_from_config(base_class: Type[T], class_name: str, *args: Any, **kwargs: Any) -> T:
+# FIXME: Technically, this should return a type "class_name" derived from "base_class".
+def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
+                            *args: Any, **kwargs: Any) -> BaseTypeVar:
     """
     Factory method for a new class instantiated from config.
 
@@ -79,7 +83,7 @@ def instantiate_from_config(base_class: Type[T], class_name: str, *args: Any, **
 
     Returns
     -------
-    inst : Union[Environment, Service, Optimizer]
+    inst : Union[Environment, Service, Optimizer, Storage]
         An instance of the `class_name` class.
     """
     # We need to import mlos_bench to make the factory methods work.
@@ -92,7 +96,7 @@ def instantiate_from_config(base_class: Type[T], class_name: str, *args: Any, **
     _LOG.info("Instantiating: %s :: %s", class_name, impl)
 
     assert issubclass(impl, base_class)
-    ret: T = impl(*args, **kwargs)
+    ret: BaseTypeVar = impl(*args, **kwargs)
     assert isinstance(ret, base_class)
     return ret
 
@@ -116,3 +120,29 @@ def check_required_params(config: Mapping[str, Any], required_params: Iterable[s
         raise ValueError(
             "The following parameters must be provided in the configuration"
             + f" or as command line arguments: {missing_params}")
+
+
+def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
+    """
+    Get the git repository, commit hash, and local path of the given file.
+
+    Parameters
+    ----------
+    path : str
+        Path to the file in git repository.
+
+    Returns
+    -------
+    (git_repo, git_commit, git_path) : Tuple[str, str, str]
+        Git repository URL, last commit hash, and relative file path.
+    """
+    dirname = os.path.dirname(path)
+    git_repo = subprocess.check_output(
+        ["git", "-C", dirname, "remote", "get-url", "origin"], text=True).strip()
+    git_commit = subprocess.check_output(
+        ["git", "-C", dirname, "rev-parse", "HEAD"], text=True).strip()
+    git_root = subprocess.check_output(
+        ["git", "-C", dirname, "rev-parse", "--show-toplevel"], text=True).strip()
+    _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
+    rel_path = os.path.relpath(os.path.abspath(path), os.path.abspath(git_root))
+    return (git_repo, git_commit, rel_path.replace("\\", "/"))

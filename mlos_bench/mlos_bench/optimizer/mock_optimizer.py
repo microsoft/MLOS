@@ -16,6 +16,7 @@ from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.service.base_service import Service
 
 _LOG = logging.getLogger(__name__)
 
@@ -25,8 +26,8 @@ class MockOptimizer(Optimizer):
     Mock optimizer to test the Environment API.
     """
 
-    def __init__(self, tunables: TunableGroups, config: dict):
-        super().__init__(tunables, config)
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
+        super().__init__(tunables, service, config)
         rnd = random.Random(config.get("seed", 42))
         self._random: Dict[str, Callable[[Tunable], TunableValue]] = {
             "categorical": lambda tunable: rnd.choice(tunable.categorical_values),

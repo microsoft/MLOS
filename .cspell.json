@@ -48,6 +48,7 @@
         "setuptools",
         "sklearn",
         "skopt",
+        "sqlalchemy",
         "tolist",
         "tunables",
         "xlabel",

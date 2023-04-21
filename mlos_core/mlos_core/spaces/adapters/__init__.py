@@ -34,10 +34,11 @@ class SpaceAdapterType(Enum):
 # https://github.com/python/mypy/issues/12952
 # ConcreteSpaceAdapter = TypeVar('ConcreteSpaceAdapter', *[member.value for member in SpaceAdapterType])
 # To address this, we add a test for complete coverage of the enum.
-ConcreteSpaceAdapter = TypeVar('ConcreteSpaceAdapter',
-                               IdentityAdapter,
-                               LlamaTuneAdapter,
-                        )
+ConcreteSpaceAdapter = TypeVar(
+    'ConcreteSpaceAdapter',
+    IdentityAdapter,
+    LlamaTuneAdapter,
+)
 
 
 class SpaceAdapterFactory:

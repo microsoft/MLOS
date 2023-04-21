@@ -17,6 +17,7 @@ from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
+from mlos_bench.service.base_service import Service
 from mlos_bench.optimizer.convert_configspace import tunable_groups_to_configspace
 
 _LOG = logging.getLogger(__name__)
@@ -27,9 +28,9 @@ class MlosCoreOptimizer(Optimizer):
     A wrapper class for the mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, config: dict):
+    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
 
-        super().__init__(tunables, config)
+        super().__init__(tunables, service, config)
 
         space = tunable_groups_to_configspace(tunables)
         _LOG.debug("ConfigSpace: %s", space)

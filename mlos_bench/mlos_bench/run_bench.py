@@ -25,13 +25,9 @@ def _main() -> None:
         '--tunables', nargs="+", required=True,
         help='Path to one or more JSON files that contain values of the tunable parameters.')
 
-    launcher.parser.add_argument(
-        '--no-teardown', required=False, default=False, action='store_true',
-        help='Disable teardown of the environment after the benchmark.')
-
     args = launcher.parse_args()
 
-    env = launcher.load_env()
+    env = launcher.load_environment()
     tunables = env.tunable_params()
 
     for data_file in args.tunables:
@@ -44,7 +40,7 @@ def _main() -> None:
     else:
         _LOG.warning("Environment setup failed: %s", env)
 
-    if not args.no_teardown:
+    if args.teardown:
         env.teardown()
 
 

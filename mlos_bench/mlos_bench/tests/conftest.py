@@ -9,7 +9,7 @@ Common fixtures for mock TunableGroups and Environment objects.
 import pytest
 
 from mlos_bench.environment.mock_env import MockEnv
-from mlos_bench.tunables import TunableGroups
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to
@@ -58,6 +58,12 @@ def tunable_groups() -> TunableGroups:
                     "default": -1,
                     "range": [-1, 500000],
                     "special": [-1]
+                },
+                "kernel_sched_latency_ns": {
+                    "description": "Initial value for the scheduler period",
+                    "type": "int",
+                    "default": 2000000,
+                    "range": [0, 1000000000]
                 }
             }
         }

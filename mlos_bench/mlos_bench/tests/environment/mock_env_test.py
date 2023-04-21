@@ -20,12 +20,12 @@ def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups) -> N
     (status, data) = mock_env.run()
     assert status.is_succeeded
     assert data is not None
-    assert data["score"] == pytest.approx(78.45, 0.01)
+    assert data["score"] == pytest.approx(73.97, 0.01)
     # Second time, results should differ because of the noise.
     (status, data) = mock_env.run()
     assert status.is_succeeded
     assert data is not None
-    assert data["score"] == pytest.approx(98.21, 0.01)
+    assert data["score"] == pytest.approx(93.22, 0.01)
 
 
 def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGroups) -> None:
@@ -38,7 +38,7 @@ def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGr
         (status, data) = mock_env_no_noise.run()
         assert status.is_succeeded
         assert data is not None
-        assert data["score"] == pytest.approx(80.11, 0.01)
+        assert data["score"] == pytest.approx(75.0, 0.01)
 
 
 @pytest.mark.parametrize(('tunable_values', 'expected_score'), [
@@ -46,12 +46,12 @@ def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGr
         "vmSize": "Standard_B2ms",
         "rootfs": "ext4",
         "kernel_sched_migration_cost_ns": 250000
-    }, 73.97),
+    }, 70.22),
     ({
         "vmSize": "Standard_B4ms",
         "rootfs": "xfs",
         "kernel_sched_migration_cost_ns": 40000
-    }, 79.1),
+    }, 74.06),
 ])
 def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
                          tunable_values: dict, expected_score: float) -> None:
@@ -71,12 +71,12 @@ def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
         "vmSize": "Standard_B2ms",
         "rootfs": "ext4",
         "kernel_sched_migration_cost_ns": 250000
-    }, 75.0),
+    }, 71.25),
     ({
         "vmSize": "Standard_B4ms",
         "rootfs": "xfs",
         "kernel_sched_migration_cost_ns": 40000
-    }, 80.1),
+    }, 75.1),
 ])
 def test_mock_env_no_noise_assign(mock_env_no_noise: MockEnv,
                                   tunable_groups: TunableGroups,

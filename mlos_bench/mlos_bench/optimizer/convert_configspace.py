@@ -74,7 +74,7 @@ def tunable_groups_to_configspace(tunables: TunableGroups) -> ConfigurationSpace
     """
     space = ConfigurationSpace()
     space.add_hyperparameters([
-        _tunable_to_hyperparameter(tunable, group.name, group.get_cost())
+        _tunable_to_hyperparameter(tunable, group.name, group.get_current_cost())
         for (tunable, group) in tunables
     ])
     return space

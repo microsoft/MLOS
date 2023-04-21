@@ -50,6 +50,20 @@ class CovariantTunableGroup:
         """
         return self._name
 
+    @property
+    def cost(self) -> int:
+        """
+        Get the cost of changing the values in the covariant group.
+        This value is a constant. Use `get_current_cost()` to get
+        the cost given the group update status.
+
+        Returns
+        -------
+        cost : int
+            Cost of changing the values in the covariant group.
+        """
+        return self._cost
+
     def copy(self) -> "CovariantTunableGroup":
         """
         Deep copy of the CovariantTunableGroup object.
@@ -101,7 +115,7 @@ class CovariantTunableGroup:
         """
         return self._is_updated
 
-    def get_cost(self) -> int:
+    def get_current_cost(self) -> int:
         """
         Get the cost of the experiment given current tunable values.
 
