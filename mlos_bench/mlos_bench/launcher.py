@@ -16,6 +16,7 @@ from mlos_bench.optimizer.base_optimizer import Optimizer
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.service.local.local_exec import LocalExecService
 from mlos_bench.service.config_persistence import ConfigPersistenceService
+from mlos_bench.util import BaseTypes
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
@@ -180,13 +181,13 @@ class Launcher:
         assert isinstance(storage, Storage)
         return storage
 
-    def _load(self, env: Environment, cls: type, json_file_name: str) -> Any:
+    def _load(self, env: Environment, cls: type, json_file_name: str) -> BaseTypes:
         """
         Create a new instance of class `cls` from JSON configuration.
         """
         assert self._config_loader is not None, "Call after invoking .parse_args()"
         return self._config_loader.build_generic(
-            cls=cls,
+            base_cls=cls,
             tunables=env.tunable_params(),
             service=self._config_loader,
             config=self.load_config(json_file_name),

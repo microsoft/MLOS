@@ -13,17 +13,19 @@ import json
 import logging
 import importlib
 import subprocess
-from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING
+from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING, Union
 
 _LOG = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from mlos_bench.environment.base_environment import Environment
-    from mlos_bench.service.base_service import Service
     from mlos_bench.optimizer.base_optimizer import Optimizer
+    from mlos_bench.service.base_service import Service
+    from mlos_bench.storage.base_storage import Storage
 
 # BaseTypeVar is a generic with a constraint of the three base classes.
-BaseTypeVar = TypeVar('BaseTypeVar', "Environment", "Service", "Optimizer")
+BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Service", "Storage")
+BaseTypes = Union["Environment", "Optimizer", "Service", "Storage"]
 
 
 def prepare_class_load(config: dict,
@@ -81,7 +83,7 @@ def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
 
     Returns
     -------
-    inst : Union[Environment, Service, Optimizer]
+    inst : Union[Environment, Service, Optimizer, Storage]
         An instance of the `class_name` class.
     """
     # We need to import mlos_bench to make the factory methods work.
