@@ -7,11 +7,12 @@
 A collection Service functions for managing hosts via SSH.
 """
 
-import json
 import time
 import logging
 
 from typing import Callable, Iterable, Tuple
+
+import asyncssh
 
 from mlos_bench.environment.status import Status
 from mlos_bench.service.base_service import Service
