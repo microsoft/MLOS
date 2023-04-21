@@ -26,7 +26,8 @@ except LookupError as e:
 
 extra_requires = {
     # Additional tools for extra functionality.
-    'azure': 'azure-storage-file-share',
+    'azure': ['azure-storage-file-share', 'requests'],
+    'ssh': 'asyncssh',
     'sqlalchemy': 'sqlalchemy',
     # Transitive extra_requires from mlos-core.
     'emukit': 'emukit',
@@ -47,7 +48,6 @@ setup(
     },
     install_requires=[
         'mlos-core==' + _VERSION,
-        'requests',
         'json5',
     ],
     extras_require=extra_requires,
