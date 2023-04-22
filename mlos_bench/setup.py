@@ -43,7 +43,10 @@ setup(
     version=_VERSION,
     packages=find_packages(),
     package_data={
-        'mlos_bench': ['py.typed'],
+        'mlos_bench': [
+            'py.typed',
+            'config',
+        ],
     },
     install_requires=[
         'mlos-core==' + _VERSION,
