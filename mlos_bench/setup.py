@@ -9,6 +9,8 @@ Setup instructions for the mlos_bench package.
 from logging import warning
 from itertools import chain
 
+import os
+
 from setuptools import setup, find_packages
 
 from _version import _VERSION    # pylint: disable=import-private-name
@@ -37,17 +39,18 @@ extra_requires = {
 # backend integrations and additional extra features.
 extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
 
+data_dir = os.path.join(os.path.dirname(__file__), 'mlos_bench/config')
+data_files = [(d, [os.path.join(d, f) for f in files]) for d, folders, files in os.walk(data_dir)]
+
 # pylint: disable=duplicate-code
 setup(
     name='mlos-bench',
     version=_VERSION,
     packages=find_packages(),
     package_data={
-        'mlos_bench': [
-            'py.typed',
-            'config',
-        ],
+        'mlos_bench': ['py.typed'],
     },
+    data_files=data_files,
     install_requires=[
         'mlos-core==' + _VERSION,
         'requests',

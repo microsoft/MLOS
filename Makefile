@@ -226,6 +226,8 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/mlos_core-*-py
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full]"
 	# Test a clean install of the mlos_bench wheel.
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full]"
+	# Test that the config dir for mlos_bench got distributed.
+	test -e ${CONDA_PREFIX}/envs/mlos-dist-test-$(PYTHON_VERSION)/lib/python$(PYTHON_VERSION)/site-packages/mlos_bench/config/README.md
 	touch $@
 
 .PHONY: dist-test
