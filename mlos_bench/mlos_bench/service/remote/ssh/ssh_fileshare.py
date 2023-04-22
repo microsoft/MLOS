@@ -3,13 +3,10 @@
 # Licensed under the MIT License.
 #
 """
-A collection FileShare functions for interacting with SSH servers as file shares.
+A collection functions for interacting with SSH servers as file shares.
 """
 
-import os
 import logging
-
-from typing import Set
 
 import asyncssh
 
@@ -21,4 +18,14 @@ _LOG = logging.getLogger(__name__)
 
 
 class SshFileShareService(FileShareService):
-    # TODO
+    """A collection of functions for interacting with SSH servers as file shares."""
+
+    def __init__(self, config: dict, parent: Service):
+        super().__init__(config, parent)
+        raise NotImplementedError(TODO)
+
+    def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
+        raise NotImplementedError(TODO)
+
+    def download(self, remote_path: str, local_path: str, recursive: bool = True) -> None:
+        raise NotImplementedError(TODO)

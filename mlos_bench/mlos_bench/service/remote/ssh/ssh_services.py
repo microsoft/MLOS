@@ -24,9 +24,49 @@ from mlos_bench.util import check_required_params
 _LOG = logging.getLogger(__name__)
 
 
-class SshService(Service, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):
-    # pylint: disable=too-many-instance-attributes
+class SshService(Service, SupportsOSOps, SupportsRemoteExec):
     """
     Helper methods to manage VMs on Azure.
     """
 
+    _POLL_INTERVAL = 4     # seconds
+    _POLL_TIMEOUT = 300    # seconds
+    _REQUEST_TIMEOUT = 5   # seconds
+
+    def __init__(self, config: dict, parent: Service):
+        """
+        Create a new instance of SSH Service.
+
+        Parameters
+        ----------
+        config : dict
+            Free-format dictionary that contains the benchmark environment
+            configuration.
+        parent : Service
+            Parent service that can provide mixin functions.
+        """
+        super().__init__(config, parent)
+
+        check_required_params(
+            config, {
+                "username",
+                "hostname"
+            }
+        )
+
+        # Register methods that we want to expose to the Environment objects.
+        self.register([
+            self.shutdown,
+            self.reboot,
+            self.wait_os_operation,
+            self.remote_exec,
+            self.get_remote_exec_results
+        ])
+
+        # These parameters can come from command line as strings, so conversion is needed.
+        self._poll_interval = float(config.get("pollInterval", SshService._POLL_INTERVAL))
+        self._poll_timeout = float(config.get("pollTimeout", SshService._POLL_TIMEOUT))
+        self._request_timeout = float(config.get("requestTimeout", SshService._REQUEST_TIMEOUT))
+
+
+    def _exec
