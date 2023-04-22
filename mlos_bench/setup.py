@@ -40,6 +40,7 @@ extra_requires = {
 extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
 
 data_dir = os.path.join(os.path.dirname(__file__), 'mlos_bench/config')
+# FIXME: Wrong output path.
 data_files = [(d, [os.path.join(d, f) for f in files]) for d, folders, files in os.walk(data_dir)]
 
 # pylint: disable=duplicate-code
