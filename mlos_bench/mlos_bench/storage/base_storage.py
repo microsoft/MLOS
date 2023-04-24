@@ -22,7 +22,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Storage(metaclass=ABCMeta):
-    # pylint: disable=too-few-public-methods,too-many-instance-attributes
+    # pylint: disable=too-few-public-methods
     """
     An abstract interface between the benchmarking framework
     and storage systems (e.g., SQLite or MLFLow).
@@ -187,10 +187,12 @@ class Storage(metaclass=ABCMeta):
                 the results of the experiment trial run.
             """
 
-    class Trial(metaclass=ABCMeta):
+    class Trial:
         """
         Base interface for storing the results of a single run of the experiment.
         This class is instantiated in the `Storage.Experiment.trial()` method.
+
+        This class is also a complete no-op implementation of the trial storage.
         """
 
         def __init__(self, *,
@@ -239,7 +241,6 @@ class Storage(metaclass=ABCMeta):
             config["trialId"] = self._trial_id
             return config
 
-        @abstractmethod
         def update(self, status: Status,
                    metrics: Optional[Union[Dict[str, float], float]] = None
                    ) -> Optional[Dict[str, float]]:
@@ -266,7 +267,6 @@ class Storage(metaclass=ABCMeta):
                 #     f"Optimization target '{self._opt_target}' is missing from {metrics}")
             return {self._opt_target: metrics} if isinstance(metrics, (float, int)) else metrics
 
-        @abstractmethod
         def update_telemetry(self, status: Status,
                              metrics: Optional[Dict[str, float]] = None) -> None:
             """
