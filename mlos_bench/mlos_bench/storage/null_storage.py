@@ -35,7 +35,7 @@ class Experiment(Storage.Experiment):
             tunables=tunables,
             experiment_id=self._experiment_id,
             trial_id=self._trial_id,
-            config_id=0,
+            config_id=self._trial_id,  # Make it always unique.
             opt_target=self._opt_target,
             config=config,
         )
@@ -44,7 +44,7 @@ class Experiment(Storage.Experiment):
         return trial
 
 
-class NoStorage(Storage):
+class NullStorage(Storage):
     # pylint: disable=too-few-public-methods
     """
     No-op implementation of the storage interface.

@@ -11,8 +11,6 @@ from mlos_bench.environment.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 
-# pylint: disable=redefined-outer-name
-
 
 def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment) -> None:
     """
