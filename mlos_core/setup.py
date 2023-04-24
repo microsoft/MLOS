@@ -37,8 +37,7 @@ extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: igno
 setup(
     name='mlos-core',
     version=_VERSION,
-    packages=find_packages(exclude=['*tests*']),
-    exclude_package_data={'': ['tests/**/*']},
+    packages=find_packages(),
     package_data={
         '': ['py.typed', '**/*.pyi'],
     },
