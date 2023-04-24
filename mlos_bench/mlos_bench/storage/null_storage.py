@@ -15,7 +15,7 @@ from mlos_bench.storage.base_storage import Storage
 _LOG = logging.getLogger(__name__)
 
 
-class Experiment(Storage.Experiment):
+class NullExperiment(Storage.Experiment):
     """
     No-op implementation of the storage for an experiment.
     """
@@ -35,7 +35,7 @@ class Experiment(Storage.Experiment):
             tunables=tunables,
             experiment_id=self._experiment_id,
             trial_id=self._trial_id,
-            config_id=self._trial_id,  # Make it always unique.
+            config_id=self._trial_id,  # Always unique since there is no storage.
             opt_target=self._opt_target,
             config=config,
         )
@@ -56,12 +56,10 @@ class NullStorage(Storage):
                    root_env_config: str,
                    description: str,
                    opt_target: str) -> 'Storage.Experiment':
-        exp = Experiment(
+        return NullExperiment(
             tunables=self._tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
             root_env_config=root_env_config,
             opt_target=opt_target,
         )
-        _LOG.info("Experiment: %s", exp)
-        return exp
