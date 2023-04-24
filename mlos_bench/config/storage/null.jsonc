@@ -1,0 +1,5 @@
+// No-op storage backend for testing and one-off benchmarks.
+{
+    "class": "mlos_bench.storage.null_storage.NullStorage",
+    "config": {}
+}
