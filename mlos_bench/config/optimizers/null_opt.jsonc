@@ -2,9 +2,6 @@
 {
     "class": "mlos_bench.optimizer.NullOptimizer",
 
-    // Apply --config-path resolution to these config parameters:
-    "resolve_path": ["include_tunables"],
-
     "config": {
         "minimize": "score",
         // Run a single benchmark with this configuration.
