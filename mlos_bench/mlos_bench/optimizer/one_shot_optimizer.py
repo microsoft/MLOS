@@ -25,9 +25,11 @@ class OneShotOptimizer(MockOptimizer):
     def __init__(self, tunables: TunableGroups,
                  service: Optional[Service], config: Dict[str, Any]):
         super().__init__(tunables, service, config)
-        if self._service is not None and isinstance(self._service, SupportsConfigLoading):
+        if self._service is None:
+            _LOG.warning("Config loading service not available")
+        else:
             for data_file in config.get("include_tunables", []):
-                tunable_values = self._service.load_config(data_file)
+                tunable_values = self._service._config_loader_service.load_config(data_file)
                 assert isinstance(tunable_values, Dict)
                 self._tunables.assign(tunable_values)
         self._tunables.assign(config.get("tunables", {}))
