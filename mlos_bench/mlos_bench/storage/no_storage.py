@@ -20,16 +20,6 @@ class Experiment(Storage.Experiment):
     No-op implementation of the storage for an experiment.
     """
 
-    def __init__(self, *,
-                 tunables: TunableGroups,
-                 experiment_id: str,
-                 trial_id: int,
-                 root_env_config: str,
-                 opt_target: str):
-        super().__init__(tunables, experiment_id, root_env_config)
-        self._trial_id = trial_id
-        self._opt_target = opt_target
-
     def merge(self, experiment_ids: List[str]) -> None:
         raise NotImplementedError()
 
@@ -41,8 +31,7 @@ class Experiment(Storage.Experiment):
 
     def new_trial(self, tunables: TunableGroups,
                   config: Optional[Dict[str, Any]] = None) -> 'Storage.Trial':
-        _LOG.info("New Trial: %s", self)
-        return Storage.Trial(
+        trial = Storage.Trial(
             tunables=tunables,
             experiment_id=self._experiment_id,
             trial_id=self._trial_id,
@@ -50,6 +39,9 @@ class Experiment(Storage.Experiment):
             opt_target=self._opt_target,
             config=config,
         )
+        _LOG.info("New Trial: %s", trial)
+        self._trial_id += 1
+        return trial
 
 
 class NoStorage(Storage):
@@ -64,11 +56,12 @@ class NoStorage(Storage):
                    root_env_config: str,
                    description: str,
                    opt_target: str) -> 'Storage.Experiment':
-        _LOG.info("Experiment: %s", self)
-        return Experiment(
+        exp = Experiment(
             tunables=self._tunables,
             experiment_id=experiment_id,
             trial_id=trial_id,
             root_env_config=root_env_config,
             opt_target=opt_target,
         )
+        _LOG.info("Experiment: %s", exp)
+        return exp

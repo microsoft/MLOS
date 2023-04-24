@@ -86,9 +86,16 @@ class Storage(metaclass=ABCMeta):
         This class is instantiated in the `Storage.experiment()` method.
         """
 
-        def __init__(self, tunables: TunableGroups, experiment_id: str, root_env_config: str):
+        def __init__(self, *,
+                     tunables: TunableGroups,
+                     experiment_id: str,
+                     trial_id: int,
+                     root_env_config: str,
+                     opt_target: str):
             self._tunables = tunables.copy()
             self._experiment_id = experiment_id
+            self._trial_id = trial_id
+            self._opt_target = opt_target
             (self._git_repo, self._git_commit, self._root_env_config) = get_git_info(root_env_config)
 
         def __enter__(self) -> 'Storage.Experiment':
