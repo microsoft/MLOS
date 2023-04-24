@@ -140,7 +140,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             class_config[key] = global_config[key]
 
         for key in class_params.intersection(config.get("resolve_path", [])):
-            class_config[key] = self.resolve_path(class_config[key])
+            if isinstance(class_config[key], str):
+                class_config[key] = self.resolve_path(class_config[key])
+            elif isinstance(class_config[key], (list, tuple)):
+                class_config[key] = [self.resolve_path(path) for path in class_config[key]]
+            else:
+                raise ValueError(f"Parameter {key} must be a string or a list")
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Instantiating: %s with config:\n%s",
