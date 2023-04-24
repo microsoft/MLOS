@@ -1,0 +1,18 @@
+// Mock optimizer to test the benchmarking framework.
+{
+    "class": "mlos_bench.optimizer.NullOptimizer",
+
+    // Apply --config-path resolution to these config parameters:
+    "resolve_path": ["include_tunables"],
+
+    "config": {
+        "minimize": "score",
+        // Run a single benchmark with this configuration.
+        // Can be overwritten from the command line.
+        "include_tunables": [
+            "tunable-values-example.json"
+        ],
+        // Additional values of the tunable parameters.
+        "tunables": {}
+    }
+}
