@@ -35,8 +35,8 @@ def null_experiment(tunable_groups: TunableGroups) -> Storage.Experiment:
     ).__enter__()
 
 
-def test_exp_trial_pending(null_experiment: Storage.Experiment,
-                           tunable_groups: TunableGroups) -> None:
+def test_null_trial_pending(null_experiment: Storage.Experiment,
+                            tunable_groups: TunableGroups) -> None:
     """
     Start two new trials and check that it is *NOT* stored aywhere.
     """
@@ -46,8 +46,8 @@ def test_exp_trial_pending(null_experiment: Storage.Experiment,
     assert not pending
 
 
-def test_exp_trial_success(null_experiment: Storage.Experiment,
-                           tunable_groups: TunableGroups) -> None:
+def test_null_trial_success(null_experiment: Storage.Experiment,
+                            tunable_groups: TunableGroups) -> None:
     """
     Start a trial, finish it successfully, and and check that it is NOT pending.
     """
@@ -57,8 +57,8 @@ def test_exp_trial_success(null_experiment: Storage.Experiment,
     assert not pending
 
 
-def test_exp_trial_pending_3(null_experiment: Storage.Experiment,
-                             tunable_groups: TunableGroups) -> None:
+def test_null_trial_pending_3(null_experiment: Storage.Experiment,
+                              tunable_groups: TunableGroups) -> None:
     """
     Start THREE trials, let one succeed, another one fail and keep one not updated.
     Check that no information is stored anywhere.
@@ -67,7 +67,11 @@ def test_exp_trial_pending_3(null_experiment: Storage.Experiment,
 
     trial_fail = null_experiment.new_trial(tunable_groups)
     trial_succ = null_experiment.new_trial(tunable_groups)
-    null_experiment.new_trial(tunable_groups)  # Pending trial
+    trial_pend = null_experiment.new_trial(tunable_groups)
+
+    assert trial_fail.trial_id == 1
+    assert trial_succ.trial_id == 2
+    assert trial_pend.trial_id == 3
 
     trial_fail.update(Status.FAILED)
     trial_succ.update(Status.SUCCEEDED, score)
