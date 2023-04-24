@@ -31,6 +31,7 @@ class NullOptimizer(MockOptimizer):
                 assert isinstance(tunable_values, Dict)
                 self._tunables.assign(tunable_values)
         self._tunables.assign(config.get("tunables", {}))
+        _LOG.info("Run a single iteration for: %s", self._tunables)
         self._max_iter = 1  # Always run for just one iteration.
 
     def suggest(self) -> TunableGroups:
