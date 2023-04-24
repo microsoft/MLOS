@@ -1,4 +1,4 @@
-// Mock optimizer to test the benchmarking framework.
+// Null optimizer that runs a single benchmark with the specified configuration.
 {
     "class": "mlos_bench.optimizer.NullOptimizer",
 
@@ -9,9 +9,7 @@
         "minimize": "score",
         // Run a single benchmark with this configuration.
         // Can be overwritten from the command line.
-        "include_tunables": [
-            "tunable-values-example.json"
-        ],
+        "include_tunables": "tunable-values-example.json",
         // Additional values of the tunable parameters.
         "tunables": {}
     }
