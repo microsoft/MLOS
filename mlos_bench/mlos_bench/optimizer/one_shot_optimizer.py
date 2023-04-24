@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Null optimizer for mlos_bench that proposes a single configuration.
+No-op optimizer for mlos_bench that proposes a single configuration.
 """
 
 import logging
@@ -17,7 +17,7 @@ from mlos_bench.optimizer.mock_optimizer import MockOptimizer
 _LOG = logging.getLogger(__name__)
 
 
-class NullOptimizer(MockOptimizer):
+class OneShotOptimizer(MockOptimizer):
     """
     Null optimizer that proposes a single configuration and converges.
     """
