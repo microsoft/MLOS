@@ -10,7 +10,6 @@ import logging
 from typing import Dict, Optional, Any
 
 from mlos_bench.service.base_service import Service
-from mlos_bench.service.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizer.mock_optimizer import MockOptimizer
 
