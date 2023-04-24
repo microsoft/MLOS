@@ -9,8 +9,6 @@ Setup instructions for the mlos_bench package.
 from logging import warning
 from itertools import chain
 
-import os
-
 from setuptools import setup, find_packages
 
 from _version import _VERSION    # pylint: disable=import-private-name
@@ -39,19 +37,30 @@ extra_requires = {
 # backend integrations and additional extra features.
 extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
 
-data_dir = os.path.join(os.path.dirname(__file__), 'mlos_bench/config')
-# FIXME: Wrong output path.
-data_files = [(d, [os.path.join(d, f) for f in files]) for d, folders, files in os.walk(data_dir)]
-
 # pylint: disable=duplicate-code
 setup(
     name='mlos-bench',
     version=_VERSION,
-    packages=find_packages(),
+    packages=find_packages(exclude=['*tests*']),
+    exclude_package_data={'': ['tests/**/*']},
     package_data={
-        'mlos_bench': ['py.typed'],
+        '': ['py.typed', '**/*.pyi'],
+        'mlos_bench': [
+            'config/**/*.md',
+            'config/**/*.jsonc',
+            'config/**/*.json',
+            'config/**/*.py',
+            'config/**/*.sh',
+            'config/**/*.cmd',
+            'config/**/*.ps1',
+        ],
     },
-    data_files=data_files,
+    entry_points={
+        'console_scripts': [
+            'mlos_bench-run_bench = mlos_bench.run_bench:main',
+            'mlos_bench-run_opt = mlos_bench.run_opt:main',
+        ],
+    },
     install_requires=[
         'mlos-core==' + _VERSION,
         'requests',

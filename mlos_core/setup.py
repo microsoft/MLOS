@@ -37,9 +37,10 @@ extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: igno
 setup(
     name='mlos-core',
     version=_VERSION,
-    packages=find_packages(),
+    packages=find_packages(exclude=['*tests*']),
+    exclude_package_data={'': ['tests/**/*']},
     package_data={
-        'mlos_core': ['py.typed'],
+        '': ['py.typed', '**/*.pyi'],
     },
     install_requires=[
         'scikit-learn<1.2', # FIXME: temporarily work around some version mismatch issues (PR 850)
