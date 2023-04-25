@@ -174,6 +174,7 @@ build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_core.${CONDA_ENV_N
 	for pytest_module in $(PYTEST_MODULES); do touch build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.needs-build-stamp; done
 	touch $@
 
+
 .PHONY: dist
 dist: bdist_wheel
 
@@ -213,6 +214,7 @@ mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
 	# Check to make sure the tests were excluded from the wheel.
 	! ( unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 tests/ )
 	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(MODULE_NAME)-*-py3-none-any.whl $(MODULE_NAME)-latest-py3-none-any.whl
+
 
 .PHONY: dist-test-env-clean
 dist-test-env-clean:
@@ -255,6 +257,7 @@ build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-e
 
 dist-test-clean: dist-test-env-clean
 	rm -f build/dist-test-env.$(PYTHON_VERSION).build-stamp
+
 
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 build/doc-prereqs.${CONDA_ENV_NAME}.build-stamp: doc/requirements.txt
@@ -384,6 +387,7 @@ build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov
 .PHONY: clean-doc
 clean-doc:
 	rm -rf doc/build/ doc/global/ doc/source/api/ doc/source/generated
+
 
 .PHONY: clean-check
 clean-check:
