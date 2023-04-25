@@ -57,8 +57,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'mlos_bench-run_bench = mlos_bench.run_bench:main',
-            'mlos_bench-run_opt = mlos_bench.run_opt:main',
+            'mlos_bench-run_bench = mlos_bench.run_bench:_main',
+            'mlos_bench-run_opt = mlos_bench.run_opt:_main',
         ],
     },
     install_requires=[
