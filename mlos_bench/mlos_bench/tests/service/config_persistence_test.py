@@ -6,6 +6,8 @@
 Unit tests for configuration persistence service.
 """
 
+from importlib.resources import files
+
 import os
 import pytest
 
@@ -21,10 +23,9 @@ def config_persistence_service() -> ConfigPersistenceService:
     """
     return ConfigPersistenceService({
         "config_path": [
-            "./non-existent-dir/test/foo/bar",      # Non-existent config path
-            # FIXME: paths are relative to the root of where pytest is run from.
-            "./mlos_bench/mlos_bench/config",       # Stock configs
-            "./mlos_bench/mlos_bench/tests/config", # Test configs
+            "./non-existent-dir/test/foo/bar",                      # Non-existent config path
+            str(files("mlos_bench.tests.config").joinpath("")),     # Test configs (relative to mlos_bench/tests)
+            str(files("mlos_bench.config").joinpath("")),           # Stock configs
         ]
     })
 
