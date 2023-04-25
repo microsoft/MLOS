@@ -4,7 +4,7 @@
 
         "config": {
 
-            "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+            "deployTemplatePath": "service/remote/azure/vm/arm-templates/azuredeploy-ubuntu-vm.jsonc",
 
             // `subscription` and `accessToken` are placeholders
             // for values provided in the global config:
