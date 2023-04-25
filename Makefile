@@ -178,37 +178,41 @@ build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_core.${CONDA_ENV_N
 dist: bdist_wheel
 
 .PHONY: bdist_wheel
-bdist_wheel: conda-env mlos_core/dist/mlos_core-*-py3-none-any.whl mlos_bench/dist/mlos_bench-*-py3-none-any.whl
+bdist_wheel: conda-env mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 
-mlos_core/dist/mlos-core-*.tar: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-mlos_core/dist/mlos-core-*.tar: mlos_core/setup.py mlos_core/MANIFEST.in $(MLOS_CORE_PYTHON_FILES)
-	rm -f mlos_core/dist/mlos-core-*.tar
-	cd mlos_core/ && conda run -n ${CONDA_ENV_NAME} python3 setup.py sdist --formats tar
-	ls mlos_core/dist/mlos-core-*.tar
-	! ( tar tf mlos_core/dist/mlos-core-*.tar | grep -m1 tests/ )
+mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: mlos_core/dist/tmp/mlos-core-latest.tar
+mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: MODULE_NAME := mlos_core
+mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl: PACKAGE_NAME := mlos-core
+mlos_core/dist/tmp/mlos-core-latest.tar: mlos_core/setup.py mlos_core/MANIFEST.in $(MLOS_CORE_PYTHON_FILES)
+mlos_core/dist/tmp/mlos-core-latest.tar: MODULE_NAME := mlos_core
+mlos_core/dist/tmp/mlos-core-latest.tar: PACKAGE_NAME := mlos-core
 
-mlos_core/dist/mlos_core-*-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-mlos_core/dist/mlos_core-*-py3-none-any.whl: mlos_core/dist/mlos-core-*.tar
-	rm -f mlos_core/dist/mlos_core-*-py3-none-any.whl
-	cd mlos_core/ && conda run -n ${CONDA_ENV_NAME} pip wheel --no-index --no-deps --wheel-dir dist dist/mlos-core-*.tar
-	ls mlos_core/dist/mlos_core-*-py3-none-any.whl
+mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: mlos_bench/dist/tmp/mlos-bench-latest.tar
+mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: MODULE_NAME := mlos_bench
+mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl: PACKAGE_NAME := mlos-bench
+mlos_bench/dist/tmp/mlos-bench-latest.tar: mlos_bench/setup.py mlos_bench/MANIFEST.in $(MLOS_BENCH_PYTHON_FILES)
+mlos_bench/dist/tmp/mlos-bench-latest.tar: MODULE_NAME := mlos_bench
+mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
+
+%-latest.tar: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+%-latest.tar:
+	mkdir -p $(MODULE_NAME)/dist/tmp
+	rm -f $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar
+	rm -f $(MODULE_NAME)/dist/tmp/$(PACKAGE_NAME)-latest.tar
+	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 setup.py sdist --formats tar
+	ls $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar
+	! ( tar tf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar | grep -m1 tests/ )
+	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(PACKAGE_NAME)-*.tar $(PACKAGE_NAME)-latest.tar
+
+%-latest-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp
+%-latest-py3-none-any.whl:
+	rm -f $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl
+	rm -f $(MODULE_NAME)/dist/tmp/$(MODULE_NAME)-latest-py3-none-any.whl
+	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} pip wheel --no-index --no-deps --wheel-dir dist dist/tmp/$(PACKAGE_NAME)-latest.tar
+	ls $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl
 	# Check to make sure the tests were excluded from the wheel.
-	! ( unzip -t mlos_core/dist/mlos_core-*-py3-none-any.whl | grep -m1 tests/ )
-
-mlos_bench/dist/mlos-bench-*.tar: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-mlos_bench/dist/mlos-bench-*.tar: mlos_bench/setup.py mlos_bench/MANIFEST.in $(MLOS_BENCH_PYTHON_FILES)
-	rm -f mlos_bench/dist/mlos-bench-*.tar
-	cd mlos_bench/ && conda run -n ${CONDA_ENV_NAME} python3 setup.py sdist --formats tar
-	ls mlos_bench/dist/mlos-bench-*.tar
-	! ( tar tf mlos_bench/dist/mlos-bench-*.tar | grep -m1 tests/ )
-
-mlos_bench/dist/mlos_bench-*-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp
-mlos_bench/dist/mlos_bench-*-py3-none-any.whl: mlos_bench/dist/mlos-bench-*.tar
-	rm -f mlos_bench/dist/mlos_bench-*-py3-none-any.whl
-	cd mlos_bench/ && conda run -n ${CONDA_ENV_NAME} pip wheel --no-index --no-deps --wheel-dir dist dist/mlos-bench-*.tar
-	ls mlos_bench/dist/mlos_bench-*-py3-none-any.whl
-	# Check to make sure the tests were excluded from the wheel.
-	! ( unzip -t mlos_bench/dist/mlos_bench-*-py3-none-any.whl | grep -m1 tests/ )
+	! ( unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 tests/ )
+	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(MODULE_NAME)-*-py3-none-any.whl $(MODULE_NAME)-latest-py3-none-any.whl
 
 .PHONY: dist-test-env-clean
 dist-test-env-clean:
@@ -222,16 +226,7 @@ dist-test-env: dist build/dist-test-env.$(PYTHON_VERSION).build-stamp
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 # Use the same version of python as the one we used to build the wheels.
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: PYTHON_VERS_REQ=$(shell conda list -n ${CONDA_ENV_NAME} | egrep '^python\s+' | sed -r -e 's/^python\s+//' | cut -d' ' -f1)
-build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/mlos_core-*-py3-none-any.whl mlos_bench/dist/mlos_bench-*-py3-none-any.whl
-	# Check to make sure we only have a single wheel version availble.
-	# Else, run `make dist-clean` to remove prior versions.
-	ls mlos_core/dist/mlos_core-*-py3-none-any.whl | wc -l | grep -q -x 1
-	ls mlos_bench/dist/mlos_bench-*-py3-none-any.whl | wc -l | grep -q -x 1
-	# Symlink them to make the install step easier.
-	rm -rf mlos_core/dist/tmp && mkdir -p mlos_core/dist/tmp
-	cd mlos_core/dist/tmp && ln -s ../mlos_core-*-py3-none-any.whl mlos_core-latest-py3-none-any.whl
-	rm -rf mlos_bench/dist/tmp && mkdir -p mlos_bench/dist/tmp
-	cd mlos_bench/dist/tmp && ln -s ../mlos_bench-*-py3-none-any.whl mlos_bench-latest-py3-none-any.whl
+build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 	# Create a clean test environment for checking the wheel files.
 	$(MAKE) dist-test-env-clean
 	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERS_REQ)
