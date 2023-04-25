@@ -136,7 +136,7 @@ class LocalExecService(Service, SupportsLocalExec):
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
         cmd = shlex.split(script_line)
-        script_path = self._config_loader_service.resolve_path(cmd[0])
+        script_path = self.config_loader_service.resolve_path(cmd[0])
         if os.path.exists(script_path):
             script_path = os.path.abspath(script_path)
 

@@ -67,9 +67,9 @@ class Service:
         if parent:
             self.register(parent.export())
 
-        self._config_loader_service: SupportsConfigLoading
+        self.config_loader_service: SupportsConfigLoading
         if parent and isinstance(parent, SupportsConfigLoading):
-            self._config_loader_service = parent
+            self.config_loader_service = parent
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Service: %s Config:\n%s",

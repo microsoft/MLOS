@@ -25,9 +25,7 @@ def local_exec_service() -> LocalExecService:
     """
     Test fixture for LocalExecService.
     """
-    return LocalExecService(parent=ConfigPersistenceService({
-        "config_path": ["mlos_bench/config"]
-    }))
+    return LocalExecService(parent=ConfigPersistenceService())
 
 
 def test_run_python_script(local_exec_service: LocalExecService) -> None:
@@ -48,8 +46,11 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
         with open(os.path.join(temp_dir, input_file), "wt", encoding="utf-8") as fh_input:
             json.dump(params, fh_input)
 
+        script_path = local_exec_service.config_loader_service.resolve_path(
+            "environment/os/linux/runtime/generate_kernel_config_script.py")
+
         (return_code, _stdout, stderr) = local_exec_service.local_exec([
-            f"linux-setup/generate_kernel_config_script.py {input_file} {output_file}"
+            f"{script_path} {input_file} {output_file}"
         ], cwd=temp_dir, env=params)
 
         assert return_code == 0

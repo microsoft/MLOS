@@ -109,10 +109,6 @@ class Environment(metaclass=abc.ABCMeta):
         self._is_ready = False
         self._params: Dict[str, TunableValue] = {}
 
-        self._config_loader_service: SupportsConfigLoading
-        if self._service is not None and isinstance(self._service, SupportsConfigLoading):
-            self._config_loader_service = self._service
-
         if global_config is None:
             global_config = {}
 
@@ -139,6 +135,11 @@ class Environment(metaclass=abc.ABCMeta):
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Config for: %s\n%s",
                        name, json.dumps(self.config, indent=2))
+
+    @property
+    def _config_loader_service(self) -> SupportsConfigLoading:
+        assert self._service is not None
+        return self._service.config_loader_service
 
     def __str__(self) -> str:
         return self.name
