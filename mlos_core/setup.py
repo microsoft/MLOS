@@ -34,12 +34,13 @@ extra_requires = {
 extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
 
 # pylint: disable=duplicate-code
+module_base_name = 'mlos_core'
 setup(
     name='mlos-core',
     version=_VERSION,
-    packages=find_packages(exclude=['*tests*']),
+    packages=find_packages(exclude=[f"{module_base_name}.tests", f"{module_base_name}.tests.*"]),
     package_data={
-        'mlos_core': ['py.typed'],
+        module_base_name: ['py.typed', '**/*.pyi'],
     },
     install_requires=[
         'scikit-learn<1.2', # FIXME: temporarily work around some version mismatch issues (PR 850)
