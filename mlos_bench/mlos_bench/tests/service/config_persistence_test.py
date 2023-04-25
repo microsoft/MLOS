@@ -31,6 +31,20 @@ def config_persistence_service() -> ConfigPersistenceService:
     })
 
 
+def test_resolve_stock_path(config_persistence_service: ConfigPersistenceService) -> None:
+    """
+    Check if we can actually find a file somewhere in `config_path`.
+    """
+    # pylint: disable=protected-access
+    assert config_persistence_service._config_path is not None
+    assert ConfigPersistenceService.BUILTIN_CONFIG_PATH in config_persistence_service._config_path
+    file_path = "storage/in-memory.jsonc"
+    path = config_persistence_service.resolve_path(file_path)
+    assert path.endswith(file_path)
+    assert os.path.exists(path)
+    assert path.startswith(ConfigPersistenceService.BUILTIN_CONFIG_PATH)
+
+
 def test_resolve_path(config_persistence_service: ConfigPersistenceService) -> None:
     """
     Check if we can actually find a file somewhere in `config_path`.
