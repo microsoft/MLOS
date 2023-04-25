@@ -45,6 +45,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         super().__init__(config, parent)
         self._config_path = self.config.get("config_path", [])
+        self._config_loader_service = self
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
