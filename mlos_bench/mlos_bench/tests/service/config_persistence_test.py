@@ -21,8 +21,10 @@ def config_persistence_service() -> ConfigPersistenceService:
     """
     return ConfigPersistenceService({
         "config_path": [
-            "./non-existent-dir/test/foo/bar",  # Non-existent config path
-            "./mlos_bench/config"               # Real path with actual configs
+            "./non-existent-dir/test/foo/bar",      # Non-existent config path
+            # FIXME: paths are relative to the root of where pytest is run from.
+            "./mlos_bench/mlos_bench/config",       # Stock configs
+            "./mlos_bench/mlos_bench/tests/config", # Test configs
         ]
     })
 
