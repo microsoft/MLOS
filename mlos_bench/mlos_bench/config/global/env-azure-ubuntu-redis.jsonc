@@ -3,7 +3,7 @@
     "class": "mlos_bench.environment.CompositeEnv",
 
     "include_tunables": [
-        "tunables.jsonc"
+        "global/tunables.jsonc"
     ],
 
     "include_services": [

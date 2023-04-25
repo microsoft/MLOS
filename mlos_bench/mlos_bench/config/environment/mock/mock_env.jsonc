@@ -3,7 +3,7 @@
     "name": "Mock environment",
     "class": "mlos_bench.environment.mock_env.MockEnv",
 
-    "include_tunables": ["tunables.jsonc"],
+    "include_tunables": ["global/tunables.jsonc"],
 
     "config": {
         "tunable_params": ["provision", "boot", "kernel", "redis"],

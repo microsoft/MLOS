@@ -1,0 +1,56 @@
+{
+    "provision": {
+        "cost": 1000,
+        "params": {
+            "vmSize": {
+                "description": "Azure VM size",
+                "type": "categorical",
+                "default": "Standard_B4ms",
+                "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
+            }
+        }
+    },
+
+    "boot": {
+        "cost": 300,
+        "params": {
+            "rootfs": {
+                "description": "Root file system",
+                "type": "categorical",
+                "default": "xfs",
+                "values": ["xfs", "ext4", "ext2"]
+            }
+        }
+    },
+
+    "kernel": {
+        "cost": 1,
+        "params": {
+            "kernel_sched_migration_cost_ns": {
+                "description": "Cost of migrating the thread to another core",
+                "type": "int",
+                "default": -1,
+                "range": [-1, 500000],
+                "special": [-1]
+            }
+        }
+    },
+
+    "redis": {
+        "cost": 1,
+        "params": {
+            "hz": {
+                "description": "Background tasks frequency",
+                "type": "int",
+                "default": 10,
+                "range": [1, 500]
+            },
+            "dynamic_hz": {
+                "description": "Enable adaptive hz",
+                "type": "categorical",
+                "default": "yes",
+                "values": ["yes", "no"]
+            }
+        }
+    }
+}
