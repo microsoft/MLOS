@@ -80,7 +80,7 @@ def test_wait_vm_operation_timeout(mock_requests: MagicMock, azure_vm_service: A
     # Mock response header
     params = {
         "asyncResultsUrl": "DUMMY_ASYNC_URL",
-        "pollInterval": 1
+        "pollInterval": 1,
     }
 
     mock_status_response = MagicMock(status_code=200)
