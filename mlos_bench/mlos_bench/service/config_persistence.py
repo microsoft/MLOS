@@ -12,6 +12,7 @@ import os
 import json    # For logging only
 import logging
 
+import importlib.resources as import_resources
 from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
 
 import json5   # To read configs with comments and other JSON5 syntax features
@@ -30,6 +31,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     Collection of methods to deserialize the Environment, Service, and TunableGroups objects.
     """
 
+    BUILTIN_CONFIG_PATH = str(import_resources.files("mlos_bench.config").joinpath(""))
+
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
         """
@@ -46,6 +49,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         super().__init__(config, parent)
         self._config_path = self.config.get("config_path", [])
         self._config_loader_service = self
+
+        if self.BUILTIN_CONFIG_PATH not in self._config_path:
+            self._config_path.append(self.BUILTIN_CONFIG_PATH)
 
         # Register methods that we want to expose to the Environment objects.
         self.register([

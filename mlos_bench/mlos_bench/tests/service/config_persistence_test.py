@@ -25,7 +25,8 @@ def config_persistence_service() -> ConfigPersistenceService:
         "config_path": [
             "./non-existent-dir/test/foo/bar",                      # Non-existent config path
             str(files("mlos_bench.tests.config").joinpath("")),     # Test configs (relative to mlos_bench/tests)
-            str(files("mlos_bench.config").joinpath("")),           # Stock configs
+            # Shouldn't be necessary since we automatically add this.
+            # str(files("mlos_bench.config").joinpath("")),         # Stock configs
         ]
     })
 
