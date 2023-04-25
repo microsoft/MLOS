@@ -14,7 +14,7 @@
             "dump_params_file": "kernel-params.json",
 
             "setup": [
-                "linux-setup/generate_kernel_config_script.py kernel-params.json config-kernel.sh"
+                "environment/os/linux/runtime/generate_kernel_config_script.py kernel-params.json config-kernel.sh"
             ],
 
             "upload": [

@@ -7,16 +7,16 @@
     ],
 
     "include_services": [
-        "azure/service-provision-vm.jsonc",
-        "azure/service-fileshare.jsonc"
+        "services/remote/azure/service-provision-vm.jsonc",
+        "services/remote/azure/service-fileshare.jsonc"
     ],
 
     "config": {
         "include_children": [
-            "azure/provision-ubuntu-vm.jsonc",
-            "linux-boot/boot-ubuntu.jsonc",
-            "linux-setup/setup-ubuntu.jsonc",
-            "applications/redis.jsonc"
+            "environment/vm/azure/provision-ubuntu-vm.jsonc",
+            "environment/os/linux/boot/boot-ubuntu.jsonc",
+            "environment/os/linux/runtime/setup-ubuntu.jsonc",
+            "environment/apps/redis/redis.jsonc"
         ]
     }
 }
