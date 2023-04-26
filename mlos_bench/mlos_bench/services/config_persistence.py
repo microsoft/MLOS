@@ -9,10 +9,11 @@ service functions.
 """
 
 import os
+import sys
+
 import json    # For logging only
 import logging
 
-import importlib.resources as import_resources
 from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
 
 import json5   # To read configs with comments and other JSON5 syntax features
@@ -23,6 +24,12 @@ from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config, BaseTypeVar
 
+if sys.version_info <= (3, 8):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
+
+
 _LOG = logging.getLogger(__name__)
 
 
@@ -31,7 +38,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     Collection of methods to deserialize the Environment, Service, and TunableGroups objects.
     """
 
-    BUILTIN_CONFIG_PATH = str(import_resources.files("mlos_bench.config").joinpath(""))
+    BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath(""))
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):

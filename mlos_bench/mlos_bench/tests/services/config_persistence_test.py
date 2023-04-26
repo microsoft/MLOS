@@ -6,12 +6,18 @@
 Unit tests for configuration persistence service.
 """
 
-from importlib.resources import files
-
 import os
+import sys
 import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+
+
+if sys.version_info <= (3, 8):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
+
 
 # pylint: disable=redefined-outer-name
 

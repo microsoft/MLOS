@@ -65,6 +65,7 @@ setup(
         'mlos-core==' + _VERSION,
         'requests',
         'json5',
+        'importlib_resources;python_version<"3.9"',
     ],
     extras_require=extra_requires,
     author='Microsoft',
