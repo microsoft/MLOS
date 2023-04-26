@@ -61,6 +61,31 @@ def prepare_class_load(config: dict,
     return (class_name, class_config)
 
 
+def get_class_from_name(class_name: str) -> type:
+    """
+    Gets the class from the fully qualified name.
+
+    Parameters
+    ----------
+    class_name : str
+        Fully qualified class name.
+
+    Returns
+    -------
+    type
+        Class object.
+    """
+    # We need to import mlos_bench to make the factory methods work.
+    class_name_split = class_name.split(".")
+    module_name = ".".join(class_name_split[:-1])
+    class_id = class_name_split[-1]
+
+    module = importlib.import_module(module_name)
+    cls = getattr(module, class_id)
+    assert isinstance(cls, type)
+    return cls
+
+
 # FIXME: Technically, this should return a type "class_name" derived from "base_class".
 def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
                             *args: Any, **kwargs: Any) -> BaseTypeVar:
@@ -86,13 +111,7 @@ def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
     inst : Union[Environment, Service, Optimizer, Storage]
         An instance of the `class_name` class.
     """
-    # We need to import mlos_bench to make the factory methods work.
-    class_name_split = class_name.split(".")
-    module_name = ".".join(class_name_split[:-1])
-    class_id = class_name_split[-1]
-
-    module = importlib.import_module(module_name)
-    impl = getattr(module, class_id)
+    impl = get_class_from_name(class_name)
     _LOG.info("Instantiating: %s :: %s", class_name, impl)
 
     assert issubclass(impl, base_class)

@@ -8,16 +8,16 @@ Tests for loading storage config examples.
 
 from typing import List
 
-import importlib
 import logging
 import os
 
 import pytest
 
-from mlos_bench.tests.config import locate_config_examples, load_config_example
+from mlos_bench.tests.config import locate_config_examples
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import get_class_from_name
 
 
 _LOG = logging.getLogger(__name__)
@@ -40,12 +40,22 @@ assert configs
 @pytest.mark.parametrize("config_path", configs)
 def test_load_storage_config_examples(config_path: str) -> None:
     """Tests loading a config example."""
+    config_loader_service = ConfigPersistenceService()
+    config = config_loader_service.load_config(config_path)
+    assert isinstance(config, dict)
     # Skip schema loading that would require a database connection for this test.
-    storage_inst = load_config_example(config_path, config_overrides={
-        "config": {
-            "lazy_schema_create": True,
-        }
-    })
-
+    config["config"]["lazy_schema_create"] = True
+    # Hack: The config loader service expects a non-abstract class name, but
+    # the Storage based class is abstract, so we need to grab the actual class
+    # name from the config first.
+    cls = get_class_from_name(config["class"])
+    assert issubclass(cls, Storage)
+    # Make an instance of the storage class based on the config.
+    storage_inst = config_loader_service.build_generic(
+        base_cls=cls,
+        tunables=TunableGroups(),
+        config=config,
+        service=config_loader_service,
+    )
     assert storage_inst is not None
-    assert isinstance(storage_inst, Storage)
+    assert isinstance(storage_inst, cls)
