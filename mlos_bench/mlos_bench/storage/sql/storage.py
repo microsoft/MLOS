@@ -9,7 +9,7 @@ Saving and restoring the benchmark data in SQL database.
 import logging
 from typing import Optional
 
-from sqlalchemy import Engine, URL, create_engine
+from sqlalchemy import URL, create_engine
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.services.base_service import Service
