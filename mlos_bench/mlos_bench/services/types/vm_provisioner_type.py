@@ -6,9 +6,10 @@
 Protocol interface for VM provisioning operations.
 """
 
-from typing import Tuple, Protocol, runtime_checkable
+from typing import Tuple, Protocol, runtime_checkable, TYPE_CHECKING
 
-from mlos_bench.environments.status import Status
+if TYPE_CHECKING:
+    from mlos_bench.environments.status import Status
 
 
 @runtime_checkable
@@ -17,7 +18,7 @@ class SupportsVMOps(Protocol):
     Protocol interface for VM provisioning operations.
     """
 
-    def vm_provision(self, params: dict) -> Tuple[Status, dict]:
+    def vm_provision(self, params: dict) -> Tuple["Status", dict]:
         """
         Check if VM is ready. Deploy a new VM, if necessary.
 
@@ -35,7 +36,7 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_vm_deployment(self, is_setup: bool, params: dict) -> Tuple[Status, dict]:
+    def wait_vm_deployment(self, is_setup: bool, params: dict) -> Tuple["Status", dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -55,7 +56,7 @@ class SupportsVMOps(Protocol):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
 
-    def vm_start(self, params: dict) -> Tuple[Status, dict]:
+    def vm_start(self, params: dict) -> Tuple["Status", dict]:
         """
         Start a VM.
 
@@ -71,7 +72,7 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_stop(self) -> Tuple[Status, dict]:
+    def vm_stop(self) -> Tuple["Status", dict]:
         """
         Stops the VM by initiating a graceful shutdown.
 
@@ -82,7 +83,7 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_restart(self) -> Tuple[Status, dict]:
+    def vm_restart(self) -> Tuple["Status", dict]:
         """
         Restarts the VM by initiating a graceful shutdown.
 
@@ -93,7 +94,7 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_deprovision(self) -> Tuple[Status, dict]:
+    def vm_deprovision(self) -> Tuple["Status", dict]:
         """
         Deallocates the VM by shutting it down then releasing the compute resources.
 
@@ -104,7 +105,7 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_vm_operation(self, params: dict) -> Tuple[Status, dict]:
+    def wait_vm_operation(self, params: dict) -> Tuple["Status", dict]:
         """
         Waits for a pending operation on a VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.

@@ -9,14 +9,16 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, TYPE_CHECKING
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
+
+if TYPE_CHECKING:
+    from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 
 _LOG = logging.getLogger(__name__)
 
@@ -137,7 +139,7 @@ class Environment(metaclass=abc.ABCMeta):
                        name, json.dumps(self.config, indent=2))
 
     @property
-    def _config_loader_service(self) -> SupportsConfigLoading:
+    def _config_loader_service(self) -> "SupportsConfigLoading":
         assert self._service is not None
         return self._service.config_loader_service
 
