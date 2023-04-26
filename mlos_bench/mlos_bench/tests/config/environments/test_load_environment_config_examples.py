@@ -38,12 +38,23 @@ assert configs
 @pytest.mark.parametrize("config_path", configs)
 def test_load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
-    config = config_loader_service.load_config(config_path)
-    assert isinstance(config, dict)
-    # Make an instance of the class based on the config.
-    env_inst = config_loader_service.build_environment(
-        config=config,
-        service=config_loader_service,
-    )
-    assert env_inst is not None
-    assert isinstance(env_inst, Environment)
+    global_config = {
+        "experimentId": "test",
+        "trialId": 1,
+    }
+
+    mock_service_configs = [
+        "services/remote/mock/mock_vm_service.jsonc",
+    ]
+
+    for mock_service_config_path in mock_service_configs:
+        mock_service_config = config_loader_service.load_config(mock_service_config_path)
+        config_loader_service.register(config_loader_service.build_service(
+                                       config=mock_service_config,
+                                       parent=config_loader_service,
+                                      ).export())
+
+    envs = config_loader_service.load_environment_list(config_path, global_config, service=config_loader_service)
+    for env in envs:
+        assert env is not None
+        assert isinstance(env, Environment)
