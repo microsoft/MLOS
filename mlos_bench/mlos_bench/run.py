@@ -24,27 +24,20 @@ _LOG = logging.getLogger(__name__)
 
 def _main() -> None:
 
-    launcher = Launcher("mlos_bench run_opt")
+    launcher = Launcher("mlos_bench")
 
-    launcher.parser.add_argument(
-        '--optimizer', required=True,
-        help='Path to the optimizer configuration file.')
+    result = _optimize(
+        launcher.environment,
+        launcher.optimizer,
+        launcher.storage,
+        launcher.root_env_config,
+        launcher.global_config
+    )
 
-    launcher.parser.add_argument(
-        '--storage', required=True,
-        help='Path to the storage configuration file.')
-
-    args = launcher.parse_args()
-
-    env = launcher.load_environment()
-    opt = launcher.load_optimizer(env, args.optimizer)
-    storage = launcher.load_storage(env, args.storage)
-
-    result = _optimize(env, opt, storage, launcher.root_env_config, launcher.global_config)
     _LOG.info("Final result: %s", result)
 
-    if args.teardown:
-        env.teardown()
+    if launcher.teardown:
+        launcher.environment.teardown()
 
 
 def _optimize(env: Environment,
