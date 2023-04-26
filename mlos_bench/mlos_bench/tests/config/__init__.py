@@ -1,3 +1,7 @@
+#
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+#
 """
 Helper functions for config example loading tests.
 """
