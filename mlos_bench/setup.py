@@ -27,7 +27,9 @@ except LookupError as e:
 extra_requires = {
     # Additional tools for extra functionality.
     'azure': 'azure-storage-file-share',
-    'sqlalchemy': 'sqlalchemy',
+    'storage-mysql': ['sqlalchemy', 'mysql-connector-python'],
+    'storage-postgres': ['sqlalchemy', 'psycogp2'],
+    'storage-duckdb': ['sqlalchemy', 'duckdb_engine'],
     # Transitive extra_requires from mlos-core.
     'emukit': 'emukit',
     'skopt': 'scikit-optimize',
@@ -36,6 +38,14 @@ extra_requires = {
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.
 extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
+
+extra_requires['full-tests'] = extra_requires['full'] + [
+    'pytest',
+    'pytest-forked',
+    'pytest-xdist',
+    'pytest-cov',
+    'pytest-local-badge',
+]
 
 # pylint: disable=duplicate-code
 MODULE_BASE_NAME = 'mlos_bench'

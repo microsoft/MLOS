@@ -234,11 +234,10 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-
 	# Create a clean test environment for checking the wheel files.
 	$(MAKE) dist-test-env-clean
 	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERS_REQ)
-	conda install -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) pytest pytest-timeout pytest-forked pytest-xdist
 	# Test a clean install of the mlos_core wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full]"
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full-tests]"
 	# Test a clean install of the mlos_bench wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full]"
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full-tests]"
 	# Test that the config dir for mlos_bench got distributed.
 	test -e `conda env list | grep "mlos-dist-test-$(PYTHON_VERSION) " | awk '{ print $$2 }'`/lib/python3.[0-9][0-9]/site-packages/mlos_bench/config/README.md
 	touch $@
