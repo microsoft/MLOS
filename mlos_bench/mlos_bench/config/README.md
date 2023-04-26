@@ -6,4 +6,4 @@ These are meant to be used as examples and starting points for your own configur
 
 In general the `config` directory layout follows that of the `mlos_bench` module/directory layout (e.g. `remote` and `local` `environments` making using of `services`, etc., each with their own `json` configs and shell scripts.).
 
-Full end-to-end examples are provided in the [`global`](./global/) directory, and make use of the `CompositeEnvironment` to combine multiple `environments` and `services` into a single `mlos_bench` run.
+Full end-to-end examples are provided in the [`composite`](./composite/) directory, and make use of the `CompositeEnvironment` to combine multiple `environments` and `services` into a single `mlos_bench` run.
