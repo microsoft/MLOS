@@ -13,7 +13,7 @@ import pytest
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 
 
-if sys.version_info <= (3, 8):
+if sys.version_info < (3, 9):
     from importlib_resources import files
 else:
     from importlib.resources import files
