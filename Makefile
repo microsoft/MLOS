@@ -341,7 +341,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	# Check for a few files to make sure the docs got generated in a way we want.
 	test -s doc/build/html/index.html
 	test -s doc/build/html/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html
-	test -s doc/build/html/generated/mlos_bench.environment.Environment.html
+	test -s doc/build/html/generated/mlos_bench.environments.Environment.html
 	test -s doc/build/html/api/mlos_core/mlos_core.html
 	test -s doc/build/html/api/mlos_bench/mlos_bench.html
 	grep -q options: doc/build/html/api/mlos_bench/mlos_bench.run_opt.html

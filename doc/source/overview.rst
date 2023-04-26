@@ -104,7 +104,7 @@ Main
 
 Benchmark Environments
 ======================
-.. currentmodule:: mlos_bench.environment
+.. currentmodule:: mlos_bench.environments
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -149,7 +149,7 @@ Tunable Parameters
 
 Service Mix-ins
 ===============
-.. currentmodule:: mlos_bench.service
+.. currentmodule:: mlos_bench.services
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -186,7 +186,7 @@ Remote Azure Services
 
 Optimizer Adapters
 ==================
-.. currentmodule:: mlos_bench.optimizer
+.. currentmodule:: mlos_bench.optimizers
 .. autosummary::
    :toctree: generated/
    :template: class.rst
