@@ -24,7 +24,7 @@ from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config, BaseTypeVar
 
-if sys.version_info < (3, 9):
+if sys.version_info < (3, 10):
     from importlib_resources import files
 else:
     from importlib.resources import files
