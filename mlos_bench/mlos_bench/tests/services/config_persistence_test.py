@@ -49,7 +49,7 @@ def test_resolve_path(config_persistence_service: ConfigPersistenceService) -> N
     """
     Check if we can actually find a file somewhere in `config_path`.
     """
-    file_path = "tunable-values-example.json"
+    file_path = "global/tunable-values-example.json"
     path = config_persistence_service.resolve_path(file_path)
     assert path.endswith(file_path)
     assert os.path.exists(path)

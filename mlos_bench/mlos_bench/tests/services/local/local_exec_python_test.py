@@ -47,7 +47,7 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
             json.dump(params, fh_input)
 
         script_path = local_exec_service.config_loader_service.resolve_path(
-            "environment/os/linux/runtime/generate_kernel_config_script.py")
+            "environments/os/linux/runtime/generate_kernel_config_script.py")
 
         (return_code, _stdout, stderr) = local_exec_service.local_exec([
             f"{script_path} {input_file} {output_file}"
