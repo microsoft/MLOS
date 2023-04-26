@@ -10,7 +10,6 @@ from typing import List
 
 import logging
 import os
-import sys
 
 import pytest
 
@@ -19,11 +18,6 @@ from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import get_class_from_name
-
-if sys.version_info < (3, 10):
-    from importlib_resources import files
-else:
-    from importlib.resources import files
 
 
 _LOG = logging.getLogger(__name__)
@@ -44,13 +38,8 @@ assert configs
 
 
 @pytest.mark.parametrize("config_path", configs)
-def test_load_optimizer_config_examples(config_path: str) -> None:
+def test_load_optimizer_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
-    config_loader_service = ConfigPersistenceService(config={
-        "config_path": [
-            files("mlos_bench.tests.config"),
-        ]
-    })
     config = config_loader_service.load_config(config_path)
     assert isinstance(config, dict)
     # Hack: The config loader service expects a non-abstract class name, but

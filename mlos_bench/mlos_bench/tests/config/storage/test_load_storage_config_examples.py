@@ -38,9 +38,8 @@ assert configs
 
 
 @pytest.mark.parametrize("config_path", configs)
-def test_load_storage_config_examples(config_path: str) -> None:
+def test_load_storage_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
-    config_loader_service = ConfigPersistenceService()
     config = config_loader_service.load_config(config_path)
     assert isinstance(config, dict)
     # Skip schema loading that would require a database connection for this test.
