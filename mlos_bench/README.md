@@ -105,7 +105,7 @@ Create and activate the environment with:
     We can also copy the output into log file `os-autotune.log` as follows:
 
     ```sh
-    ./mlos_bench/mlos_bench/run_bench.py \
+    ./mlos_bench/mlos_bench/run.py \
         --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
         --environment env-azure-ubuntu-redis.jsonc \         # Root config (location relative to --config-path)
         --tunables tunable-values-example.json \             # Key/value pairs of tunable parameters. Uses --config-path
@@ -125,10 +125,11 @@ Searching for an optimal set of tunable parameters is very similar to running a 
 Here's an example of how to run the optimization script:
 
 ```sh
-./mlos_bench/mlos_bench/run_opt.py \
+./mlos_bench/mlos_bench/run.py \
     --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
     --environment env-azure-ubuntu-redis.jsonc \         # Root config (location relative to --config-path)
     --optimizer ./optimizers/mlos_core_opt.jsonc \       # Optimizer config (relative to --config-path)
+    --storage ./storage/duckdb.jsonc \                   # Storage config (relative to --config-path)
     --globals global_config.json \                       # Config generated at step 2. Uses --config-path
     --log ./os-autotune.log \                            # Log file (also prints to stdout)
     --log-level 10 \                                     # Log level = DEBUG
@@ -137,4 +138,5 @@ Here's an example of how to run the optimization script:
     --trialId 1                                          # Trial ID (can come from the persistent storage service)
 ```
 
-The only difference between `run_bench.py` and `run_opt.py` scripts is that the latter has the `--optimizer` parameter instead of using a fixed set of tunables via `--tunables` option.
+The only difference between the two invocations is that the latter has the `--optimizer` parameter instead of using a fixed set of tunables via `--tunables` option.
+It also stores the results of each trial in the DuckDB database (configured via `--storage`).
