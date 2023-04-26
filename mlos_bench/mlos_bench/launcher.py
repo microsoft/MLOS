@@ -3,7 +3,11 @@
 # Licensed under the MIT License.
 #
 """
-Helper functions to launch the benchmark and the optimizer from the command line.
+A helper class to load the configuration files, parse the command line parameters,
+and instantiate the main components of mlos_bench system.
+
+It is used in `mlos_bench.run` module to run the benchmark/optimizer from the
+command line.
 """
 
 import logging
@@ -30,6 +34,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class Launcher:
+    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """
     Command line launcher for mlos_bench and mlos_core.
     """
@@ -63,7 +68,9 @@ class Launcher:
 
     @staticmethod
     def _parse_args(description: str) -> Tuple[argparse.Namespace, List[str]]:
-
+        """
+        Parse the command line arguments.
+        """
         parser = argparse.ArgumentParser(description=description)
 
         parser.add_argument(
