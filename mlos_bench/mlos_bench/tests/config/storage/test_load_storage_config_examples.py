@@ -50,7 +50,7 @@ def test_load_storage_config_examples(config_path: str) -> None:
     # name from the config first.
     cls = get_class_from_name(config["class"])
     assert issubclass(cls, Storage)
-    # Make an instance of the storage class based on the config.
+    # Make an instance of the class based on the config.
     storage_inst = config_loader_service.build_generic(
         base_cls=cls,
         tunables=TunableGroups(),
