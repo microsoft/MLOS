@@ -20,11 +20,7 @@ def config_persistence_service() -> ConfigPersistenceService:
     """
     Test fixture for ConfigPersistenceService.
     """
-    return ConfigPersistenceService({
-        "config_path": [
-            "./mlos_bench/config"
-        ]
-    })
+    return ConfigPersistenceService()
 
 
 @pytest.fixture
