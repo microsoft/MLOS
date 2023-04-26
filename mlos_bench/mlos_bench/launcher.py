@@ -8,8 +8,10 @@ Helper functions to launch the benchmark and the optimizer from the command line
 
 import logging
 import argparse
+from typing import Optional, Any, Tuple, List, Dict, Iterable
 
-from typing import Any, Dict, Iterable
+from mlos_bench.util import BaseTypes
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
 from mlos_bench.optimizer.one_shot_optimizer import OneShotOptimizer
@@ -19,8 +21,6 @@ from mlos_bench.storage.sql.storage import SqlStorage
 
 from mlos_bench.service.local.local_exec import LocalExecService
 from mlos_bench.service.config_persistence import ConfigPersistenceService
-
-from mlos_bench.util import BaseTypes
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
@@ -37,6 +37,33 @@ class Launcher:
     def __init__(self, description: str):
 
         _LOG.info("Launch: %s", description)
+        (args, args_rest) = self._parse_args(description)
+
+        logging.root.setLevel(args.log_level)
+        if args.log_file:
+            log_handler = logging.FileHandler(args.log_file)
+            log_handler.setLevel(args.log_level)
+            log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
+            logging.root.addHandler(log_handler)
+
+        self._config_loader = ConfigPersistenceService({"config_path": args.config_path})
+        self._parent_service = LocalExecService(parent=self._config_loader)
+
+        self.global_config = self._load_config(args.globals, args.config_path, args_rest)
+
+        self.root_env_config = self._config_loader.resolve_path(args.environment)
+        self.environment = self._config_loader.load_environment(
+            self.root_env_config, self.global_config, service=self._parent_service)
+
+        self.teardown: bool = args.teardown
+
+        self.tunables = self._load_tunable_values(args.tunables)
+        self.optimizer = self._load_optimizer(args.optimizer)
+        self.storage = self._load_storage(args.storage)
+
+    @staticmethod
+    def _parse_args(description: str) -> Tuple[argparse.Namespace, List[str]]:
+
         parser = argparse.ArgumentParser(description=description)
 
         parser.add_argument(
@@ -82,63 +109,7 @@ class Launcher:
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
-        (args, args_rest) = parser.parse_known_args()
-
-        logging.root.setLevel(args.log_level)
-        if args.log_file:
-            log_handler = logging.FileHandler(args.log_file)
-            log_handler.setLevel(args.log_level)
-            log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
-            logging.root.addHandler(log_handler)
-
-        self._config_loader = ConfigPersistenceService({"config_path": args.config_path})
-        self._parent_service = LocalExecService(parent=self._config_loader)
-
-        self.global_config: Dict[str, Any] = {}
-        if args.globals is not None:
-            for config_file in args.globals:
-                conf = self._config_loader.load_config(config_file)
-                assert isinstance(conf, dict)
-                self.global_config.update(conf)
-
-        self.global_config.update(Launcher._try_parse_extra_args(args_rest))
-        if args.config_path:
-            self.global_config["config_path"] = args.config_path
-
-        self.root_env_config = self._config_loader.resolve_path(args.environment)
-        self.environment = self._config_loader.load_environment(
-            self.root_env_config, self.global_config, service=self._parent_service)
-
-        self.teardown: bool = args.teardown
-
-        self.tunables = self.environment.tunable_params()
-        if args.tunables is not None:
-            for data_file in args.tunables:
-                values = self._config_loader.load_config(data_file)
-                assert isinstance(values, Dict)
-                self.tunables.assign(values)
-
-        self.optimizer: Optimizer
-        if args.optimizer is None:
-            self.optimizer = OneShotOptimizer(
-                self.tunables, self._parent_service, self.global_config)
-        else:
-            opt = self._load(Optimizer, args.optimizer)
-            assert isinstance(opt, Optimizer)
-            self.optimizer = opt
-
-        self.storage: Storage
-        if args.storage is None:
-            self.storage = SqlStorage(
-                self.tunables, self._parent_service, {
-                    "drivername": "sqlite",
-                    "database": ":memory:",
-                    **self.global_config,
-                })
-        else:
-            storage = self._load(Storage, args.storage)
-            assert isinstance(storage, Storage)
-            self.storage = storage
+        return parser.parse_known_args()
 
     @staticmethod
     def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, str]:
@@ -169,6 +140,65 @@ class Launcher:
 
         _LOG.debug("Parsed config: %s", config)
         return config
+
+    def _load_config(self, args_globals: Iterable[str], config_path: Iterable[str],
+                     args_rest: Iterable[str]) -> Dict[str, Any]:
+        """
+        Get key/value pairs of the global configuration parameters
+        from the specified config files (if any) and command line arguments.
+        """
+        global_config: Dict[str, Any] = {}
+        if args_globals is not None:
+            for config_file in args_globals:
+                conf = self._config_loader.load_config(config_file)
+                assert isinstance(conf, dict)
+                self.global_config.update(conf)
+        global_config.update(Launcher._try_parse_extra_args(args_rest))
+        if config_path:
+            self.global_config["config_path"] = config_path
+        return global_config
+
+    def _load_tunable_values(self, args_tunables: Optional[str]) -> TunableGroups:
+        """
+        Load key/value pairs of the tunable parameters from given JSON files, if any.
+        """
+        tunables = self.environment.tunable_params()
+        if args_tunables is not None:
+            for data_file in args_tunables:
+                values = self._config_loader.load_config(data_file)
+                assert isinstance(values, Dict)
+                tunables.assign(values)
+        return tunables
+
+    def _load_optimizer(self, args_optimizer: Optional[str]) -> Optimizer:
+        """
+        Instantiate the Optimzier object from JSON config file, if specified
+        in the --optimizer comamnd line option. If config file not specified,
+        create a one-shot optimizer to run a single benchmark trial.
+        """
+        if args_optimizer is None:
+            return OneShotOptimizer(
+                self.tunables, self._parent_service, self.global_config)
+        optimizer = self._load(Optimizer, args_optimizer)
+        assert isinstance(optimizer, Optimizer)
+        return optimizer
+
+    def _load_storage(self, args_storage: Optional[str]) -> Storage:
+        """
+        Instantiate the Storage object from JSON file provided in the --storage
+        command line aparameter. If omitted, create an ephemeral in-memory SQL
+        storage instead.
+        """
+        if args_storage is None:
+            return SqlStorage(
+                self.tunables, self._parent_service, {
+                    "drivername": "sqlite",
+                    "database": ":memory:",
+                    **self.global_config,
+                })
+        storage = self._load(Storage, args_storage)
+        assert isinstance(storage, Storage)
+        return storage
 
     def _load(self, cls: type, json_file_name: str) -> BaseTypes:
         """
