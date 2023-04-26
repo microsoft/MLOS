@@ -117,7 +117,7 @@ Benchmark Environments
 Local Environments
 -------------------
 
-.. currentmodule:: mlos_bench.environment.local
+.. currentmodule:: mlos_bench.environments.local
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -128,7 +128,7 @@ Local Environments
 Remote Environments
 -------------------
 
-.. currentmodule:: mlos_bench.environment.remote
+.. currentmodule:: mlos_bench.environments.remote
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -157,7 +157,7 @@ Service Mix-ins
    Service
    FileShareService
 
-.. currentmodule:: mlos_bench.service.config_persistence
+.. currentmodule:: mlos_bench.services.config_persistence
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -166,7 +166,7 @@ Service Mix-ins
 
 Local Services
 ---------------
-.. currentmodule:: mlos_bench.service.local
+.. currentmodule:: mlos_bench.services.local
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -176,7 +176,7 @@ Local Services
 Remote Azure Services
 ---------------------
 
-.. currentmodule:: mlos_bench.service.remote.azure
+.. currentmodule:: mlos_bench.services.remote.azure
 .. autosummary::
    :toctree: generated/
    :template: class.rst

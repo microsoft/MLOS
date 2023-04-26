@@ -1,14 +1,14 @@
 {
     "name": "Azure VM Ubuntu Redis",
-    "class": "mlos_bench.environment.CompositeEnv",
+    "class": "mlos_bench.environments.CompositeEnv",
 
     "include_tunables": [
         "global/tunables.jsonc"
     ],
 
     "include_services": [
-        "services/remote/azure/service-provision-vm.jsonc",
-        "services/remote/azure/service-fileshare.jsonc"
+        "service/remote/azure/service-provision-vm.jsonc",
+        "service/remote/azure/service-fileshare.jsonc"
     ],
 
     "config": {
