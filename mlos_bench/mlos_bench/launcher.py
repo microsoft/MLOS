@@ -16,6 +16,7 @@ from typing import Optional, Any, Tuple, List, Dict, Iterable
 
 from mlos_bench.util import BaseTypes
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.environment.base_environment import Environment
 
 from mlos_bench.optimizer.base_optimizer import Optimizer
 from mlos_bench.optimizer.one_shot_optimizer import OneShotOptimizer
@@ -57,7 +58,7 @@ class Launcher:
         self.global_config = self._load_config(args.globals, args.config_path, args_rest)
 
         self.root_env_config = self._config_loader.resolve_path(args.environment)
-        self.environment = self._config_loader.load_environment(
+        self.environment: Environment = self._config_loader.load_environment(
             self.root_env_config, self.global_config, service=self._parent_service)
 
         self.teardown: bool = args.teardown
@@ -159,10 +160,10 @@ class Launcher:
             for config_file in args_globals:
                 conf = self._config_loader.load_config(config_file)
                 assert isinstance(conf, dict)
-                self.global_config.update(conf)
+                global_config.update(conf)
         global_config.update(Launcher._try_parse_extra_args(args_rest))
         if config_path:
-            self.global_config["config_path"] = config_path
+            global_config["config_path"] = config_path
         return global_config
 
     def _load_tunable_values(self, args_tunables: Optional[str]) -> TunableGroups:
@@ -197,12 +198,8 @@ class Launcher:
         storage instead.
         """
         if args_storage is None:
-            return SqlStorage(
-                self.tunables, self._parent_service, {
-                    "drivername": "sqlite",
-                    "database": ":memory:",
-                    **self.global_config,
-                })
+            return SqlStorage(self.tunables, self._parent_service,
+                              {"drivername": "sqlite", "database": ":memory:"})
         storage = self._load(Storage, args_storage)
         assert isinstance(storage, Storage)
         return storage
