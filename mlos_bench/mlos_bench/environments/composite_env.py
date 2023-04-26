@@ -70,7 +70,7 @@ class CompositeEnv(Environment):
         This method is called from the constructor only.
         """
         self._children.append(env)
-        self._tunable_params.update(env.tunable_params())
+        self._tunable_params.update(env.tunable_params)
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """

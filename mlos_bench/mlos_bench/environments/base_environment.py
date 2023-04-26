@@ -170,6 +170,7 @@ class Environment(metaclass=abc.ABCMeta):
             group_names=list(self._tunable_params.get_names()),
             into_params=self._const_args.copy())
 
+    @property
     def tunable_params(self) -> TunableGroups:
         """
         Get the configuration space of the given environment.
