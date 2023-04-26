@@ -8,6 +8,7 @@ Setup instructions for the mlos_bench package.
 
 from logging import warning
 from itertools import chain
+from typing import Dict, List
 
 from setuptools import setup, find_packages
 
@@ -24,20 +25,20 @@ except LookupError as e:
     warning(f"setuptools_scm failed to find git version, using version from _version.py: {e}")
 
 
-extra_requires = {
+extra_requires: Dict[str, List[str]] = {
     # Additional tools for extra functionality.
-    'azure': 'azure-storage-file-share',
+    'azure': ['azure-storage-file-share'],
     'storage-mysql': ['sqlalchemy', 'mysql-connector-python'],
-    'storage-postgres': ['sqlalchemy', 'psycogp2'],
+    'storage-postgres': ['sqlalchemy', 'psycopg2'],
     'storage-duckdb': ['sqlalchemy', 'duckdb_engine'],
     # Transitive extra_requires from mlos-core.
-    'emukit': 'emukit',
-    'skopt': 'scikit-optimize',
+    'emukit': ['emukit'],
+    'skopt': ['scikit-optimize'],
 }
 
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.
-extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
+extra_requires['full'] = list(set(chain(*extra_requires.values())))
 
 extra_requires['full-tests'] = extra_requires['full'] + [
     'pytest',
