@@ -1,5 +1,6 @@
+// A simple key-value assignment of an tunables instance.
 {
     "vmSize": "Standard_B2s",
-    "rootfs": "ext2",
+    "idle": "halt",
     "kernel_sched_migration_cost_ns": 40000
 }

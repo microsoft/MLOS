@@ -5,8 +5,7 @@
         "class": "mlos_bench.environments.LocalFileShareEnv",
 
         "config": {
-
-            "tunable_params": ["kernel"],
+            "include_tunables": ["environments/os/linux/runtime/linux-runtime-tunables.jsonc"],
 
             "required_args": ["experimentId", "trialId"],
 
@@ -36,8 +35,7 @@
         "class": "mlos_bench.environments.remote.RemoteEnv",
 
         "config": {
-
-            "tunable_params": ["kernel"],
+            "include_tunables": ["environments/os/linux/runtime/linux-runtime-tunables.jsonc"],
 
             "required_args": [
                 "storageAccountName",

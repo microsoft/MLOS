@@ -2,5 +2,29 @@
 
 - [ ] Add some of the global examples to a nightly CI/CD pipeline.
 
-- Per discussion with Sergiy: try switching to putting each environment's tunables along with that environment's config and scripts so that they are somewhat self contained.
-  - Need to double check that the composite env will still work this way.
+- [ ] Per discussion with Sergiy: try switching to putting each environment's tunables along with that environment's config and scripts so that they are somewhat self contained.
+  - [ ] Need to double check that the composite env will still work this way (e.g. duplicate tunables across envs)
+
+- [ ] improve handling of relative paths
+
+- [ ] json schemas for config snippets?
+
+## Laundry list of other items in this PR that need splitting
+
+- [ ] support for returning default config in first iteration
+
+- [ ] rename pluralization
+
+- [ ] generalize which mlos core optimizer we return by default
+
+- [ ] consolidation of pytest requirements to `setup.py` instead of conda envs
+
+- [ ] adding more storage `extra_requires`
+
+- [ ] rename include_tunables to include_tunable_values for the one shot optimizer config
+
+- [ ] add support for loading tunables inside an optimizer
+
+## Other random TODO ideas
+
+- [ ] rename mlos_core conda envs to just mlos

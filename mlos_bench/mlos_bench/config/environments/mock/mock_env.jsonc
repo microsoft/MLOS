@@ -3,7 +3,12 @@
     "name": "Mock environment",
     "class": "mlos_bench.environments.mock_env.MockEnv",
 
-    "include_tunables": ["tunables/tunables.jsonc"],
+    "include_tunables": [
+        "environments/apps/redis/redis-tunables.jsonc",
+        "environments/os/linux/runtime/linux-runtime-tunables.jsonc",
+        "environments/os/linux/boot/linux-boot-tunables.jsonc",
+        "environments/vm/azure/azure-vm-tunables.jsonc"
+    ],
 
     "config": {
         "tunable_params": ["provision", "boot", "kernel", "redis"],

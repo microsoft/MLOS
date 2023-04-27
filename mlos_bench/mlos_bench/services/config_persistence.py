@@ -199,6 +199,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         inst : Any
             A new instance of the `cls` class.
         """
+        tunables_path = config.get("include_tunables")
+        if tunables_path is not None:
+            tunables = self.load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         inst = instantiate_from_config(base_cls, class_name, tunables, service, class_config)
         _LOG.info("Created: %s", inst)
@@ -484,6 +487,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         tunables : TunableGroup
             Create a new collection of tunable parameters.
         """
+        # TODO: FIXME: Make sure that tunables are not duplicated.
         _LOG.info("Load tunables: '%s'", json_file_names)
         groups = TunableGroups()
         if parent is not None:

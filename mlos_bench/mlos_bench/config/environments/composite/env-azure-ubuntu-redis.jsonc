@@ -3,11 +3,14 @@
     "class": "mlos_bench.environments.CompositeEnv",
 
     "include_tunables": [
-        "tunables/tunables.jsonc"
+        "environments/vm/azure/azure-vm-tunables.jsonc",
+        "environments/os/linux/boot/linux-boot-tunables.jsonc",
+        "environments/os/linux/runtime/linux-runtime-tunables.jsonc",
+        "environments/apps/redis/redis-tunables.jsonc"
     ],
 
     "include_services": [
-        "services/remote/azure/service-provision-vm.jsonc",
+        "services/remote/azure/service-linux-vm-ops.jsonc",
         "services/remote/azure/service-fileshare.jsonc"
     ],
 

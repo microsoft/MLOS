@@ -18,7 +18,7 @@ _LOG = logging.getLogger(__name__)
 
 class OneShotOptimizer(MockOptimizer):
     """
-    Null optimizer that proposes a single configuration and converges.
+    Mock optimizer that proposes a single configuration and returns.
     """
 
     def __init__(self, tunables: TunableGroups,
@@ -27,11 +27,16 @@ class OneShotOptimizer(MockOptimizer):
         if self._service is None:
             _LOG.warning("Config loading service not available")
         else:
-            for data_file in config.get("include_tunables", []):
+            if not self._use_defaults:
+                # Generate a random suggestion.
+                self._tunables = super().suggest()
+            # Now assign the values we were given in the config.
+            for data_file in config.get("include_tunable_values", []):
                 tunable_values = self._service.config_loader_service.load_config(data_file)
                 assert isinstance(tunable_values, Dict)
                 self._tunables.assign(tunable_values)
-        self._tunables.assign(config.get("tunables", {}))
+        self._tunables.assign(config.get("tunable_values", {}))
+
         _LOG.info("Run a single iteration for: %s", self._tunables)
         self._max_iter = 1  # Always run for just one iteration.
 

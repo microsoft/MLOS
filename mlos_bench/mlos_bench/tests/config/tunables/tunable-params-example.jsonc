@@ -1,0 +1,7 @@
+{
+    "tunable-params-example": {
+        "vmSize": "Standard_B2s",
+        "idle": "halt",
+        "kernel_sched_migration_cost_ns": 40000
+    }
+}

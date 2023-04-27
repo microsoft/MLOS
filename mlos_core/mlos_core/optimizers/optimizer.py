@@ -91,7 +91,11 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
+    def _config_to_dataframe(self, config: ConfigSpace.Configuration) -> pd.DataFrame:
+        """Converts a ConfigSpace config to a DataFrame"""
+        return pd.DataFrame([config.get_dictionary()])
+
+    def suggest(self, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
@@ -99,11 +103,17 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
 
+        defaults : bool (default False)
+            Whether or not to return the default config instead of an optimizer guided one.
+
         Returns
         -------
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
+        if defaults:
+            return self._config_to_dataframe(self.parameter_space.get_default_configuration())
+
         configuration = self._suggest(context)
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)

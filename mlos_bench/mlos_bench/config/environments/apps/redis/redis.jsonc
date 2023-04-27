@@ -5,20 +5,23 @@
         "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
         "config": {
+            // TODO: reduce duplication of configuration include_tunables snippets
+            "include_tunables": ["environments/app/redis/redis-tunables.jsonc"],
             "tunable_params": ["redis"],
 
             "required_args": ["experimentId", "trialId"],
 
             // Dump tunable parameters to a local JSON file:
-            "dump_params_file": "redis-params.json",
+            "dump_params_file": "$tmpdir/redis-params.json",
 
             "setup": [
-                "applications/generate_redis_config.py redis-params.json redis.cfg"
+                "environment/apps/redis/local/scripts/generate_redis_config.py redis-params.json redis.cfg"
             ],
 
+            // TODO: improve handling of relative paths
             "upload": [
-                {"from": "redis.cfg", "to": "$experimentId/$trialId/input/redis.cfg"},
-                {"from": "redis/", "to": "$experimentId/$trialId/scripts"}
+                {"from": "$tmpdir/redis.cfg", "to": "$experimentId/$trialId/input/redis.cfg"},
+                {"from": "./remote/scripts/", "to": "$experimentId/$trialId/scripts"}
             ]
         }
     },
@@ -29,7 +32,7 @@
         "class": "mlos_bench.environments.remote.RemoteEnv",
 
         "config": {
-
+            "include_tunables": ["environments/app/redis/redis-tunables.jsonc"],
             "tunable_params": ["redis"],
 
             "required_args": ["experimentId", "trialId", "mountPoint"],
@@ -62,7 +65,7 @@
         "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
         "config": {
-
+            "include_tunables": ["environments/app/redis/redis-tunables.jsonc"],
             "tunable_params": ["redis"],
 
             "required_args": ["experimentId", "trialId"],
@@ -75,7 +78,7 @@
             ],
 
             "run": [
-                "applications/process_redis_results.py redis-bench-output/results.csv redis-benchmark.csv"
+                "environments/apps/redis/local/scripts/process_redis_results.py redis-bench-output/results.csv redis-benchmark.csv"
             ],
 
             // Read benchmark results from a local CSV file:

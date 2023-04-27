@@ -12,8 +12,8 @@
         "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
         "config": {
-
-            "tunable_params": ["boot"],
+            "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
+            "tunable_params": ["linux-kernel-boot"],
 
             // Values provided from the global config/optimizer:
             "required_args": ["experimentId", "trialId"],
@@ -26,8 +26,11 @@
             // Dump tunable parameters to a local JSON file:
             "dump_params_file": "boot-params.json",
 
+            // TODO: expand "setup" command to support array syntax like devcontainers so we can execute without a shell.
+            // In particular this should let us resolve the path to the script more easily.
+            // Alternatively: we could provide a "CWD" argument to the setup command.
             "setup": [
-                "linux-boot/generate_grub_config.py boot-params.json grub.cfg"
+                "environment/apps/redis/linux-boot/generate_grub_config.py boot-params.json grub.cfg"
             ],
 
             "upload": [
@@ -45,7 +48,7 @@
         "class": "mlos_bench.environments.RemoteEnv",
 
         "config": {
-
+            "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
             "tunable_params": ["boot"],
 
             "required_args": [
