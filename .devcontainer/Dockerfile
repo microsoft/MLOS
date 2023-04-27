@@ -12,6 +12,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         curl jq \
         vim-nox neovim python3-pynvim \
         make \
+        rename \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && echo "C-w: unix-filename-rubout" >> /etc/inputrc
     # Also tweak C-w to stop at slashes as well instead of just spaces
