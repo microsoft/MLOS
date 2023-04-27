@@ -2,7 +2,7 @@
     // Local: Generate new Redis config and upload it to a shared storage
     {
         "name": "Generate Redis configuration",
-        "class": "mlos_bench.environment.local.LocalFileShareEnv",
+        "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
         "config": {
             "tunable_params": ["redis"],
@@ -26,7 +26,7 @@
     // Remote: Start Redis with the new config and run the benchmarks
     {
         "name": "Benchmark Redis on Linux",
-        "class": "mlos_bench.environment.remote.RemoteEnv",
+        "class": "mlos_bench.environments.remote.RemoteEnv",
 
         "config": {
 
@@ -59,7 +59,7 @@
     // Local: Download Redis benchmark data from the shared storage and process it
     {
         "name": "Download and post-process Redis benchmark data",
-        "class": "mlos_bench.environment.local.LocalFileShareEnv",
+        "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
         "config": {
 
