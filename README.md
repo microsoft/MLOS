@@ -38,7 +38,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 0. Create the `mlos_core` Conda environment.
 
      ```sh
-    conda env create -f conda-envs/mlos_core.yml
+    conda env create -f conda-envs/mlos.yml
     ```
 
     > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos-windows.yml`](./conda-envs/mlos-windows.yml)).
@@ -46,7 +46,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
    or
 
     ```sh
-    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos_core.yml"
+    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
     make conda-env
     ```
 

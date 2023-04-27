@@ -22,7 +22,7 @@ dependencies:
   - matplotlib
   - seaborn
   - python=3.11
-  # See comments in mlos_core.yml.
+  # See comments in mlos.yml.
   #- gcc_linux-64
   - pip:
     - bump2version
