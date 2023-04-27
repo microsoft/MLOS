@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-CONDA_ENV_NAME ?= mlos_core
-PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos_core[-]?//')
+CONDA_ENV_NAME ?= mlos
+PYTHON_VERSION := $(shell echo "${CONDA_ENV_NAME}" | sed -r -e 's/^mlos[-]?//')
 ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 
 # Find the non-build python files we should consider as rule dependencies.

@@ -25,7 +25,7 @@ if (Test-Path .devcontainer/tmp) {
 }
 New-Item -Type Directory .devcontainer/tmp
 
-Copy-Item conda-envs/mlos_core.yml .devcontainer/tmp/mlos_core.yml
+Copy-Item conda-envs/mlos.yml .devcontainer/tmp/mlos.yml
 foreach ($pkg in @('mlos_core', 'mlos_bench')) {
     New-Item -Type Directory ".devcontainer/tmp/${pkg}"
     Copy-Item "$pkg/setup.py" ".devcontainer/tmp/${pkg}/setup.py"

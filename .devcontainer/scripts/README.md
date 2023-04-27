@@ -8,11 +8,11 @@ Allow touching (creating but not altering) a `.env` file prior to devcontainer s
 
 See Also: <https://github.com/microsoft/vscode-remote-release/issues/4568>
 
-## `mlos_core_deps.yml` file hack
+## `mlos_deps.yml` file hack
 
-When building the devcontainer image, we don't want to include the MlosCore source code initially, just its dependencies, so we filter out the MlosCore source code from the `mlos_core.yml` file when building the image and keep the context to that smaller set of files.
+When building the devcontainer image, we don't want to include the MlosCore source code initially, just its dependencies, so we filter out the MlosCore source code from the `mlos.yml` file when building the image and keep the context to that smaller set of files.
 
-When the devcontainer starts, we map the source code (and hence the `mlos_core.yml` file) into the devcontainer and then run `conda env update` to install the rest of the MlosCore dependencies.
+When the devcontainer starts, we map the source code (and hence the `mlos.yml` file) into the devcontainer and then run `conda env update` to install the rest of the MlosCore dependencies.
 
 This makes the devcontainer base more cacheable.
 

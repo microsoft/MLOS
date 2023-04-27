@@ -1,4 +1,4 @@
-name: mlos_core
+name: mlos
 channels:
   - defaults
 dependencies:

@@ -2,9 +2,9 @@
 {
     "makefile.extensionOutputFolder": "./.vscode",
     // Note: this only works in WSL/Linux currently.
-    "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos_core/bin/python",
+    "python.defaultInterpreterPath": "${env:HOME}/.conda/envs/mlos/bin/python",
     // For Windows it should be this instead:
-    //"python.defaultInterpreterPath": "${env:USERPROFILE}/.conda/envs/mlos_core/python.exe",
+    //"python.defaultInterpreterPath": "${env:USERPROFILE}/.conda/envs/mlos/python.exe",
     "python.testing.pytestEnabled": true,
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,
