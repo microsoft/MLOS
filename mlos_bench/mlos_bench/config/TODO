@@ -13,7 +13,7 @@
 
 - [ ] support for returning default config in first iteration
 
-- [ ] rename pluralization
+- [x] rename pluralization (#313)
 
 - [ ] generalize which mlos core optimizer we return by default
 
@@ -27,4 +27,4 @@
 
 ## Other random TODO ideas
 
-- [ ] rename mlos_core conda envs to just mlos
+- [x] rename mlos_core conda envs to just mlos (#319)
