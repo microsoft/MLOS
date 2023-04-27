@@ -199,4 +199,12 @@ Storage
    :template: class.rst
 
    Storage
+
+SQL DB Storage
+--------------
+.. currentmodule:: mlos_bench.storage.sql
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
    SqlStorage
