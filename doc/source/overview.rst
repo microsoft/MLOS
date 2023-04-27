@@ -202,7 +202,7 @@ Storage
 
 SQL DB Storage
 --------------
-.. currentmodule:: mlos_bench.storage.sql
+.. currentmodule:: mlos_bench.storage.sql.storage
 .. autosummary::
    :toctree: generated/
    :template: class.rst
