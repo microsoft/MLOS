@@ -1,6 +1,6 @@
 # Services
 
-Services are essentially a collection of helper functions used to `setup`, `run`, and `teardown` an [`Environment`](../environment/) in the [`mlos_bench`](../../../mlos_bench/) benchmarking automation framework.
+Services are essentially a collection of helper functions used to `setup`, `run`, and `teardown` an [`Environment`](../environments/) in the [`mlos_bench`](../../../mlos_bench/) benchmarking automation framework.
 
 They are (roughly) divided into two categories:
 

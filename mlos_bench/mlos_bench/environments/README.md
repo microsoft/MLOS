@@ -8,7 +8,7 @@ Each Environment has several stages that it goes through:
 - `run`
 - `teardown`
 
-Which are implemented using [`Services`](../service/).
+Which are implemented using [`Services`](../services/).
 
 Environments also have [`Tunables`](../tunables/) and [`TunableGroups`](../tunables/) for controlling their configuration.
 
