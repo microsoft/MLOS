@@ -86,7 +86,7 @@ class Launcher:
         self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
         self.storage = self._load_storage(args.storage or config.get("storage"))
 
-        self.teardown = args.teardown or config.get("teardown", False)
+        self.teardown = args.teardown or config.get("teardown", True)
 
     @staticmethod
     def _parse_args(description: str) -> Tuple[argparse.Namespace, List[str]]:
