@@ -67,7 +67,7 @@ class Service:
         if parent:
             self.register(parent.export())
 
-        self.config_loader_service: SupportsConfigLoading
+        self._config_loader_service: SupportsConfigLoading
         if parent and isinstance(parent, SupportsConfigLoading):
             self._config_loader_service = parent
 
