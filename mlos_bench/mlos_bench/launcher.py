@@ -45,27 +45,46 @@ class Launcher:
         _LOG.info("Launch: %s", description)
         (args, args_rest) = self._parse_args(description)
 
-        logging.root.setLevel(args.log_level)
-        if args.log_file:
-            log_handler = logging.FileHandler(args.log_file)
-            log_handler.setLevel(args.log_level)
+        # Bootstrap config loader: command line takes priority.
+        self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
+        if args.config:
+            config = self._config_loader.load_config(args.config)
+            assert isinstance(config, Dict)
+            config_path = config.get("config_path", [])
+            if config_path and not args.config_path:
+                # Reset the config loader with the paths from JSON file.
+                self._config_loader = ConfigPersistenceService({"config_path": config_path})
+        else:
+            config = {}
+
+        log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
+        log_file = args.log_file or config.get("log_file")
+        logging.root.setLevel(log_level)
+        if log_file:
+            log_handler = logging.FileHandler(log_file)
+            log_handler.setLevel(log_level)
             log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
             logging.root.addHandler(log_handler)
 
-        self._config_loader = ConfigPersistenceService({"config_path": args.config_path})
         self._parent_service = LocalExecService(parent=self._config_loader)
 
-        self.global_config = self._load_config(args.globals, args.config_path, args_rest)
+        self.global_config = self._load_config(
+            args.globals or config.get("globals", []),
+            args.config_path or config.get("config_path", []),
+            args_rest)
 
-        self.root_env_config = self._config_loader.resolve_path(args.environment)
+        env_path = args.environment or config.get("environment")
+        assert env_path, "Environment configuration file is required"
+        self.root_env_config = self._config_loader.resolve_path(env_path)
+
         self.environment: Environment = self._config_loader.load_environment(
             self.root_env_config, self.global_config, service=self._parent_service)
 
-        self.teardown: bool = args.teardown
+        self.tunables = self._load_tunable_values(args.tunables or config.get("tunables", []))
+        self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
+        self.storage = self._load_storage(args.storage or config.get("storage"))
 
-        self.tunables = self._load_tunable_values(args.tunables)
-        self.optimizer = self._load_optimizer(args.optimizer)
-        self.storage = self._load_storage(args.storage)
+        self.teardown = args.teardown or config.get("teardown", False)
 
     @staticmethod
     def _parse_args(description: str) -> Tuple[argparse.Namespace, List[str]]:
@@ -75,11 +94,16 @@ class Launcher:
         parser = argparse.ArgumentParser(description=description)
 
         parser.add_argument(
+            'config',
+            help='Main JSON5 configuration file. Its keys are the same as the' +
+                 ' command line options and can be overridden by the latter.')
+
+        parser.add_argument(
             '--log', required=False, dest='log_file',
             help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(
-            '--log-level', required=False, type=int, default=_LOG_LEVEL,
+            '--log-level', required=False, type=int,
             help=f'Logging level. Default is {_LOG_LEVEL} ({logging.getLevelName(_LOG_LEVEL)}).' +
                  f' Set to {logging.DEBUG} for debug, {logging.WARNING} for warnings only.')
 
@@ -88,7 +112,7 @@ class Launcher:
             help='One or more locations of JSON config files.')
 
         parser.add_argument(
-            '--environment', required=True,
+            '--environment', required=False,
             help='Path to JSON file with the configuration of the benchmarking environment.')
 
         parser.add_argument(
@@ -113,7 +137,7 @@ class Launcher:
                  ' [private] parameters of the benchmarking environment.')
 
         parser.add_argument(
-            '--no-teardown', required=False, default=True,
+            '--no-teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
