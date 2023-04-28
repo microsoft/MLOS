@@ -156,6 +156,13 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return copy.deepcopy(self)
 
     @property
+    def default(self) -> TunableValue:
+        """
+        Get the default value of the tunable.
+        """
+        return self._default
+
+    @property
     def value(self) -> TunableValue:
         """
         Get the current value of the tunable.
