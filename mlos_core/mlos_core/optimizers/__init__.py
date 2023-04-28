@@ -51,6 +51,8 @@ ConcreteOptimizer = TypeVar(
     SkoptOptimizer,
 )
 
+DEFAULT_OPTIMIZER_TYPE = OptimizerType.SKOPT
+
 
 class OptimizerFactory:
     """Simple factory class for creating BaseOptimizer-derived objects"""
@@ -60,7 +62,7 @@ class OptimizerFactory:
     @staticmethod
     def create(
         parameter_space: ConfigSpace.ConfigurationSpace,
-        optimizer_type: OptimizerType = OptimizerType.SKOPT,
+        optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
         optimizer_kwargs: Optional[dict] = None,
         space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
         space_adapter_kwargs: Optional[dict] = None,

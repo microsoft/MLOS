@@ -100,7 +100,10 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
             # respective high-dim point; this way we can retrieve the low-dim point, from its high-dim counterpart.
             if target_config is None:
                 # Inherently it is not supported to register points, which were not suggested by the optimizer.
-                if not self._use_approximate_reverse_mapping:
+                if configuration == self.orig_parameter_space.get_default_configuration():
+                    # Default configuration should always be registerable.
+                    pass
+                elif not self._use_approximate_reverse_mapping:
                     raise ValueError(f"{repr(configuration)}\n" "The above configuration was not suggested by the optimizer. "
                                      "Approximate reverse mapping is currently disabled; thus *only* configurations suggested "
                                      "previously by the optimizer can be registered.")

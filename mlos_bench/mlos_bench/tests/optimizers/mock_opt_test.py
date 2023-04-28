@@ -23,6 +23,12 @@ def mock_configurations() -> list:
         ({
             "vmSize": "Standard_B4ms",
             "rootfs": "xfs",
+            "kernel_sched_migration_cost_ns": -1,
+            "kernel_sched_latency_ns": 2000000,
+        }, 88.88),
+        ({
+            "vmSize": "Standard_B4ms",
+            "rootfs": "xfs",
             "kernel_sched_migration_cost_ns": 13111,
             "kernel_sched_latency_ns": 796233790,
         }, 88.88),
