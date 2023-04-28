@@ -81,7 +81,8 @@ class Launcher:
         self.environment: Environment = self._config_loader.load_environment(
             self.root_env_config, self.global_config, service=self._parent_service)
 
-        self.tunables = self._load_tunable_values(args.tunables or config.get("tunables", []))
+        # NOTE: Load the tunable values *before* the optimizer
+        self.tunables = self._load_tunable_values(args.tunable_values or config.get("tunable_values", []))
         self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
         self.storage = self._load_storage(args.storage or config.get("storage"))
 
@@ -119,7 +120,7 @@ class Launcher:
         parser.add_argument(
             '--optimizer', required=False,
             help='Path to the optimizer configuration file. If omitted, run' +
-                 ' a single trial with default (or specified in --tunables) values.')
+                 ' a single trial with default (or specified in --tunable-values).')
 
         parser.add_argument(
             '--storage', required=False,
@@ -127,7 +128,7 @@ class Launcher:
                  ' If omitted, use the ephemeral in-memory SQL storage.')
 
         parser.add_argument(
-            '--tunables', nargs="+", required=False,
+            '--tunable-values', nargs="+", required=False,
             help='Path to one or more JSON files that contain values of the tunable' +
                  ' parameters. This can be used for a single trial (when no --optimizer' +
                  ' is specified) or as default values for the first run in optimization.')
