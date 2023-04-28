@@ -55,7 +55,6 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         super().__init__(config, parent)
         self._config_path = self.config.get("config_path", [])
-        self.config_loader_service = self
 
         if self.BUILTIN_CONFIG_PATH not in self._config_path:
             self._config_path.append(self.BUILTIN_CONFIG_PATH)
