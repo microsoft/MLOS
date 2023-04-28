@@ -207,8 +207,8 @@ class Launcher:
 
     def _load_optimizer(self, args_optimizer: Optional[str]) -> Optimizer:
         """
-        Instantiate the Optimzier object from JSON config file, if specified
-        in the --optimizer comamnd line option. If config file not specified,
+        Instantiate the Optimizer object from JSON config file, if specified
+        in the --optimizer command line option. If config file not specified,
         create a one-shot optimizer to run a single benchmark trial.
         """
         if args_optimizer is None:
@@ -221,11 +221,12 @@ class Launcher:
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
         """
         Instantiate the Storage object from JSON file provided in the --storage
-        command line aparameter. If omitted, create an ephemeral in-memory SQL
+        command line parameter. If omitted, create an ephemeral in-memory SQL
         storage instead.
         """
         if args_storage is None:
-            from mlos_bench.storage.sql.storage import SqlStorage   # pylint: disable=import-outside-toplevel
+            # pylint: disable=import-outside-toplevel
+            from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
         storage = self._load(Storage, args_storage)
