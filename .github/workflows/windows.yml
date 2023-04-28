@@ -21,8 +21,8 @@ jobs:
         shell: pwsh
 
     env:
-      CONDA_ENV_NAME: mlos_core
-      CONDA_ENV_YML: mlos_core-windows.yml
+      CONDA_ENV_NAME: mlos
+      CONDA_ENV_YML: mlos-windows.yml
       cache_cur_date: unset
       cache_cur_hour: unset
       cache_prev_hour: unset
@@ -57,7 +57,7 @@ jobs:
       if: github.event_name != 'schedule'
       uses: actions/cache@v3
       with:
-        path: ${{ env.CONDA }}/envs/mlos_core
+        path: ${{ env.CONDA }}/envs/mlos
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
           conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
@@ -85,7 +85,7 @@ jobs:
         "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $env:GITHUB_ENV
         "EXPERIMENTAL_SOLVER=libmamba" >> $env:GITHUB_ENV
 
-    - name: Create/update mlos_core conda environment
+    - name: Create/update mlos conda environment
       run: |
         if (! (conda env list | Select-String -Pattern "^$env:CONDA_ENV_NAME ") ) { conda env create -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML }
         conda env update -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML --prune
