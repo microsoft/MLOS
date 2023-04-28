@@ -101,7 +101,7 @@ class Launcher:
                  ' command line options and can be overridden by the latter.')
 
         parser.add_argument(
-            '--log', required=False, dest='log_file',
+            '--log-file', required=False,
             help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(

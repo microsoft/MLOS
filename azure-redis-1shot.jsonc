@@ -1,5 +1,5 @@
 {
-    "config-path": [
+    "config_path": [
         "./mlos_bench/config",
         "./mlos_bench/examples",
         "."
@@ -9,12 +9,12 @@
     "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/duckdb.jsonc",
 
-    "tunable-values": [
+    "tunable_values": [
         "tunable-values-example.json"
     ],
 
     "globals": [
-        "config.json"
+        "global_config.json"
     ],
 
     "experimentId": "RedisBenchMock",
@@ -22,6 +22,6 @@
 
     "teardown": false,
 
-    "log": "./azure-redis-1shot.log",
-    "log-level": 10
+    "log_file": "./azure-redis-1shot.log",
+    "log_level": 10
 }
