@@ -28,9 +28,10 @@ except LookupError as e:
 extra_requires: Dict[str, List[str]] = {
     # Additional tools for extra functionality.
     'azure': ['azure-storage-file-share'],
-    'storage-mysql': ['sqlalchemy', 'mysql-connector-python'],
-    'storage-postgres': ['sqlalchemy', 'psycopg2'],
-    'storage-duckdb': ['sqlalchemy', 'duckdb_engine'],
+    'storage-sql-duckdb': ['sqlalchemy', 'duckdb_engine'],
+    'storage-sql-mysql': ['sqlalchemy', 'mysql-connector-python'],
+    'storage-sql-postgres': ['sqlalchemy', 'psycopg2'],
+    'storage-sql-sqlite': ['sqlalchemy'],   # sqlite3 comes with python, so we don't need to install it.
     # Transitive extra_requires from mlos-core.
     'emukit': ['emukit'],
     'skopt': ['scikit-optimize'],
@@ -68,8 +69,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'mlos_bench-run_bench = mlos_bench.run_bench:_main',
-            'mlos_bench-run_opt = mlos_bench.run_opt:_main',
+            'mlos_bench = mlos_bench.run:_main',
         ],
     },
     install_requires=[
@@ -77,7 +77,7 @@ setup(
         'requests',
         'json5',
         'importlib_resources;python_version<"3.10"',
-    ],
+    ] + extra_requires['storage-sql-sqlite'],   # NOTE: For now sqlite is a fallback storage backend, so we always install it.
     extras_require=extra_requires,
     author='Microsoft',
     author_email='mlos-maintainers@service.microsoft.com',

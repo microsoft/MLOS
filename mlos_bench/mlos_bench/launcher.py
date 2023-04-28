@@ -22,11 +22,10 @@ from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 
 from mlos_bench.storage.base_storage import Storage
-# TODO: Make this optional
-from mlos_bench.storage.sql.storage import SqlStorage
 
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
@@ -199,6 +198,7 @@ class Launcher:
         storage instead.
         """
         if args_storage is None:
+            from mlos_bench.storage.sql.storage import SqlStorage   # pylint: disable=import-outside-toplevel
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
         storage = self._load(Storage, args_storage)

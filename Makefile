@@ -285,7 +285,7 @@ doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_F
 	rm -rf doc/source/api/mlos_bench
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
 	# Save the help output of the mlos_bench scripts to include in the documentation.
-	conda run -n ${CONDA_ENV_NAME} mlos_bench-run --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
+	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
 	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 

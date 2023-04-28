@@ -6,6 +6,8 @@
 """
 OS Autotune main optimization loop.
 
+Note: this script is also available as a CLI tool via pip under the name "mlos_bench".
+
 See `--help` output for details.
 """
 
