@@ -1,6 +1,6 @@
 // MLOS Core optimizer
 {
-    "class": "mlos_bench.optimizer.MlosCoreOptimizer",
+    "class": "mlos_bench.optimizers.MlosCoreOptimizer",
 
     "config": {
         "minimize": "score",

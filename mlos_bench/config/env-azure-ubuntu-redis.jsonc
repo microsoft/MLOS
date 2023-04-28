@@ -1,6 +1,6 @@
 {
     "name": "Azure VM Ubuntu Redis",
-    "class": "mlos_bench.environment.CompositeEnv",
+    "class": "mlos_bench.environments.CompositeEnv",
 
     "include_tunables": [
         "tunables.jsonc"

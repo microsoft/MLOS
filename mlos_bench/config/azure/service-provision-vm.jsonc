@@ -1,6 +1,6 @@
 [
     {
-        "class": "mlos_bench.service.remote.azure.AzureVMService",
+        "class": "mlos_bench.services.remote.azure.AzureVMService",
 
         "config": {
 

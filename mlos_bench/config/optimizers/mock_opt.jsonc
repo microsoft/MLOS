@@ -1,6 +1,6 @@
 // Mock optimizer to test the benchmarking framework.
 {
-    "class": "mlos_bench.optimizer.MockOptimizer",
+    "class": "mlos_bench.optimizers.MockOptimizer",
 
     "config": {
         "minimize": "score",

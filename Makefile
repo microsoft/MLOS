@@ -252,7 +252,7 @@ build/dist-test.$(PYTHON_VERSION).build-stamp: $(PYTHON_FILES) build/dist-test-e
 	# Run a simple test that uses the mlos_core wheel (full tests can be checked with `make test`).
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
 	# Run a simple test that uses the mlos_bench wheel (full tests can be checked with `make test`).
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_bench/mlos_bench/tests/environment/mock_env_test.py
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) python3 -m pytest mlos_bench/mlos_bench/tests/environments/mock_env_test.py
 	touch $@
 
 dist-test-clean: dist-test-env-clean
@@ -282,12 +282,9 @@ doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_F
 	rm -rf doc/source/api/mlos_bench
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
 	# Save the help output of the mlos_bench scripts to include in the documentation.
-	conda run -n ${CONDA_ENV_NAME} mlos_bench/mlos_bench/run_opt.py --help > doc/source/api/mlos_bench/mlos_bench.run_opt.usage.txt
-	echo ".. literalinclude:: mlos_bench.run_opt.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run_opt.rst
-	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run_opt.rst
-	conda run -n ${CONDA_ENV_NAME} mlos_bench/mlos_bench/run_bench.py --help > doc/source/api/mlos_bench/mlos_bench.run_bench.usage.txt
-	echo ".. literalinclude:: mlos_bench.run_bench.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run_bench.rst
-	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run_bench.rst
+	conda run -n ${CONDA_ENV_NAME} mlos_bench/mlos_bench/run.py --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
+	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
+	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 
 SPHINX_API_RST_FILES := doc/source/api/mlos_core/modules.rst doc/source/api/mlos_bench/modules.rst
 
@@ -337,11 +334,10 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	# Check for a few files to make sure the docs got generated in a way we want.
 	test -s doc/build/html/index.html
 	test -s doc/build/html/generated/mlos_core.optimizers.optimizer.BaseOptimizer.html
-	test -s doc/build/html/generated/mlos_bench.environment.Environment.html
+	test -s doc/build/html/generated/mlos_bench.environments.Environment.html
 	test -s doc/build/html/api/mlos_core/mlos_core.html
 	test -s doc/build/html/api/mlos_bench/mlos_bench.html
-	grep -q options: doc/build/html/api/mlos_bench/mlos_bench.run_opt.html
-	grep -q options: doc/build/html/api/mlos_bench/mlos_bench.run_bench.html
+	grep -q options: doc/build/html/api/mlos_bench/mlos_bench.run.html
 	# Check doc logs for errors (but skip over some known ones) ...
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \

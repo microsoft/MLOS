@@ -1,6 +1,6 @@
 [
     {
-        "class": "mlos_bench.service.remote.azure.AzureFileShareService",
+        "class": "mlos_bench.services.remote.azure.AzureFileShareService",
 
         "config": {
             "storageAccountName": "osatsharedstorage",

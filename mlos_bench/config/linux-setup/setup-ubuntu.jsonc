@@ -2,7 +2,7 @@
     // Local: Generate kernel config and upload it to the shared storage
     {
         "name": "Generate Linux kernel parameters for Ubuntu",
-        "class": "mlos_bench.environment.LocalFileShareEnv",
+        "class": "mlos_bench.environments.LocalFileShareEnv",
 
         "config": {
 
@@ -33,7 +33,7 @@
     // Remote: Apply new kernel configuration to a VM
     {
         "name": "Apply Linux kernel parameters to a remote Ubuntu VM",
-        "class": "mlos_bench.environment.remote.RemoteEnv",
+        "class": "mlos_bench.environments.remote.RemoteEnv",
 
         "config": {
 

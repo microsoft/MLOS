@@ -1,7 +1,7 @@
 // Mock Environment to test the optimizer.
 {
     "name": "Mock environment",
-    "class": "mlos_bench.environment.mock_env.MockEnv",
+    "class": "mlos_bench.environments.mock_env.MockEnv",
 
     "include_tunables": ["tunables.jsonc"],
 

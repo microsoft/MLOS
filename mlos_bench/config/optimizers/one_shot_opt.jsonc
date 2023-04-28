@@ -1,6 +1,6 @@
 // Null optimizer that runs a single benchmark with the specified configuration.
 {
-    "class": "mlos_bench.optimizer.OneShotOptimizer",
+    "class": "mlos_bench.optimizers.OneShotOptimizer",
 
     "config": {
         "minimize": "score",
