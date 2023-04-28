@@ -18,9 +18,9 @@ from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar,
 _LOG = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from mlos_bench.environment.base_environment import Environment
-    from mlos_bench.optimizer.base_optimizer import Optimizer
-    from mlos_bench.service.base_service import Service
+    from mlos_bench.environments.base_environment import Environment
+    from mlos_bench.optimizers.base_optimizer import Optimizer
+    from mlos_bench.services.base_service import Service
     from mlos_bench.storage.base_storage import Storage
 
 # BaseTypeVar is a generic with a constraint of the three base classes.
@@ -74,7 +74,7 @@ def instantiate_from_config(base_class: Type[BaseTypeVar], class_name: str,
         Currently it's one of {Environment, Service, Optimizer}.
     class_name : str
         FQN of a Python class to instantiate, e.g.,
-        "mlos_bench.environment.remote.VMEnv".
+        "mlos_bench.environments.remote.VMEnv".
         Must be derived from the `base_class`.
     args : list
         Positional arguments to pass to the constructor.

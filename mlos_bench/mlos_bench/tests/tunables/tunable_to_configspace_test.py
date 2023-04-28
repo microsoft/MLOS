@@ -16,8 +16,8 @@ from ConfigSpace import ConfigurationSpace
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
-from mlos_bench.optimizer.convert_configspace import _tunable_to_hyperparameter
-from mlos_bench.optimizer.convert_configspace import tunable_groups_to_configspace
+from mlos_bench.optimizers.convert_configspace import _tunable_to_hyperparameter
+from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
 
 # pylint: disable=redefined-outer-name
 

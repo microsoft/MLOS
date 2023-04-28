@@ -74,7 +74,7 @@ E.g., in `my-config/azure/service-provision-vm.jsonc`, put your target resource 
     ```json
     [
         {
-            "class": "mlos_bench.environment.azure.AzureVMService",
+            "class": "mlos_bench.environments.azure.AzureVMService",
 
             "config": {
                 "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
