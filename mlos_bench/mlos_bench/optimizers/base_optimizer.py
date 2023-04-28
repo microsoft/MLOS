@@ -10,6 +10,7 @@ and mlos_core optimizers.
 import logging
 from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
+from distutils.util import strtobool
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
@@ -40,7 +41,8 @@ class Optimizer(metaclass=ABCMeta):
         self._tunables = tunables
         self._service = service
         self._iter = 1
-        self._max_iter = int(self._config.pop('max_iterations', 10))
+        self._use_defaults: bool = bool(strtobool(str.lower(self._config.pop('use_defaults', "True"))))
+        self._max_iter = int(self._config.pop('max_iterations', 100))
         self._opt_target: str
         _opt_target = self._config.pop('maximize', None)
         if _opt_target is None:

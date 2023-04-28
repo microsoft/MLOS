@@ -58,7 +58,10 @@ class MockOptimizer(Optimizer):
         """
         tunables = self._tunables.copy()
         for (tunable, _group) in tunables:
-            tunable.value = self._random[tunable.type](tunable)
+            if self._use_defaults and self._iter == 1:
+                tunable.value = tunable.default
+            else:
+                tunable.value = self._random[tunable.type](tunable)
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
 
