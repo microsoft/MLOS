@@ -10,7 +10,7 @@ and mlos_core optimizers.
 import logging
 from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool
+from distutils.util import strtobool    # pylint: disable=deprecated-module
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
@@ -19,7 +19,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
-class Optimizer(metaclass=ABCMeta):
+class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attributes
     """
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """

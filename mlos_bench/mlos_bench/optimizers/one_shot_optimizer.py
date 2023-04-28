@@ -21,6 +21,7 @@ class OneShotOptimizer(MockOptimizer):
     Mock optimizer that proposes a single configuration and returns.
     Explicit configs (partial or full) are possible using configuration files.
     """
+
     # TODO: Add support for multiple explicit configs (i.e., FewShot or Manual Optimizer).
 
     def __init__(self, tunables: TunableGroups,
