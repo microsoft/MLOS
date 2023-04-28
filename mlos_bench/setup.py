@@ -31,7 +31,7 @@ extra_requires: Dict[str, List[str]] = {
     'storage-sql-duckdb': ['sqlalchemy', 'duckdb_engine'],
     'storage-sql-mysql': ['sqlalchemy', 'mysql-connector-python'],
     'storage-sql-postgres': ['sqlalchemy', 'psycopg2'],
-    'storage-sql-sqlite': ['sqlalchemy', 'sqlite3'],
+    'storage-sql-sqlite': ['sqlalchemy'],   # sqlite3 comes with python, so we don't need to install it.
     # Transitive extra_requires from mlos-core.
     'emukit': ['emukit'],
     'skopt': ['scikit-optimize'],
