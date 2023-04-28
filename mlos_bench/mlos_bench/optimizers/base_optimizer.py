@@ -35,7 +35,6 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         config : dict
             Free-format key/value pairs of configuration parameters to pass to the optimizer.
         """
-        # TODO: Add support for always (or initially) returning default vs. a random sample.
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)
         self._config = config.copy()
