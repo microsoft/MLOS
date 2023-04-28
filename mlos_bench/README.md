@@ -92,12 +92,12 @@ E.g., in `my-config/azure/service-provision-vm.jsonc`, put your target resource 
 Please refer to inline comments in the corresponding `.jsonc` files for more information.
 
 6. From here onwards we assume we are in the project root directory.
-Ensure you have a conda environment (`mlos_core`) set up for executing `mlos_bench`.
+Ensure you have a conda environment (`mlos`) set up for executing `mlos_bench`.
 Create and activate the environment with:
 
     ```sh
-    conda env create -f conda-envs/mlos_core.yml
-    conda activate mlos_core
+    conda env create -f conda-envs/mlos.yml
+    conda activate mlos
     ```
 
 7. Run our configuration through `mlos_bench`.

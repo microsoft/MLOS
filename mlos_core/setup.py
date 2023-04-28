@@ -8,6 +8,7 @@ Setup instructions for the mlos_core package.
 
 from itertools import chain
 from logging import warning
+from typing import Dict, List
 
 from setuptools import setup, find_packages
 
@@ -24,23 +25,31 @@ except LookupError as e:
     warning(f"setuptools_scm failed to find git version, using version from _version.py: {e}")
 
 
-extra_requires = {
-    'emukit': 'emukit',
-    'skopt': 'scikit-optimize<=0.9.0',  # FIXME: temporarily work around some version mismatch issues (PR 850)
+extra_requires: Dict[str, List[str]] = {
+    'emukit': ['emukit'],
+    'skopt': ['scikit-optimize<=0.9.0'],  # FIXME: temporarily work around some version mismatch issues (PR 850)
 }
 
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.
-extra_requires['full'] = list(set(chain(extra_requires.values())))  # type: ignore[assignment]
+extra_requires['full'] = list(set(chain(*extra_requires.values())))
+
+extra_requires['full-tests'] = extra_requires['full'] + [
+    'pytest',
+    'pytest-forked',
+    'pytest-xdist',
+    'pytest-cov',
+    'pytest-local-badge',
+]
 
 # pylint: disable=duplicate-code
-module_base_name = 'mlos_core'
+MODULE_BASE_NAME = 'mlos_core'
 setup(
     name='mlos-core',
     version=_VERSION,
-    packages=find_packages(exclude=[f"{module_base_name}.tests", f"{module_base_name}.tests.*"]),
+    packages=find_packages(exclude=[f"{MODULE_BASE_NAME}.tests", f"{MODULE_BASE_NAME}.tests.*"]),
     package_data={
-        module_base_name: ['py.typed', '**/*.pyi'],
+        '': ['py.typed', '**/*.pyi'],
     },
     install_requires=[
         'scikit-learn<1.2', # FIXME: temporarily work around some version mismatch issues (PR 850)
