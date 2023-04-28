@@ -1,8 +1,7 @@
 {
     "config_path": [
         "./mlos_bench/config",
-        "./mlos_bench/examples",
-        "."
+        "./mlos_bench/examples"
     ],
 
     "environment": "env-azure-ubuntu-redis.jsonc",
@@ -17,7 +16,7 @@
         "global_config.json"
     ],
 
-    "experimentId": "RedisBenchMock",
+    "experimentId": "RedisBench",
     "trialId": 1,
 
     "teardown": false,
