@@ -52,6 +52,22 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
         "rootfs": "xfs",
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 2000000,
+    }
+
+
+def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
+                                mock_opt: MockOptimizer) -> None:
+    """
+    Toy optimization loop with mock environment and optimizer.
+    """
+    mock_opt._use_defaults = False  # pylint: disable=protected-access
+    (score, tunables) = _optimize(mock_env_no_noise, mock_opt)
+    assert score == pytest.approx(75.0, 0.01)
+    assert tunables.get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "rootfs": "xfs",
         "kernel_sched_migration_cost_ns": 13111,
         "kernel_sched_latency_ns": 796233790,
     }
@@ -62,6 +78,22 @@ def test_scikit_gp_optimization_loop(mock_env_no_noise: MockEnv,
     """
     Toy optimization loop with mock environment and Scikit GP optimizer.
     """
+    (score, tunables) = _optimize(mock_env_no_noise, scikit_gp_opt)
+    assert score == pytest.approx(75.0, 0.01)
+    assert tunables.get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "rootfs": "xfs",
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 2000000,
+    }
+
+
+def test_scikit_gp_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
+                                     scikit_gp_opt: MlosCoreOptimizer) -> None:
+    """
+    Toy optimization loop with mock environment and Scikit GP optimizer.
+    """
+    scikit_gp_opt._use_defaults = False  # pylint: disable=protected-access
     (score, tunables) = _optimize(mock_env_no_noise, scikit_gp_opt)
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
@@ -77,6 +109,22 @@ def test_scikit_et_optimization_loop(mock_env_no_noise: MockEnv,
     """
     Toy optimization loop with mock environment and Scikit ET optimizer.
     """
+    (score, tunables) = _optimize(mock_env_no_noise, scikit_et_opt)
+    assert score == pytest.approx(75.0, 0.01)
+    assert tunables.get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "rootfs": "xfs",
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 2000000,
+    }
+
+
+def test_scikit_et_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
+                                     scikit_et_opt: MlosCoreOptimizer) -> None:
+    """
+    Toy optimization loop with mock environment and Scikit ET optimizer.
+    """
+    scikit_et_opt._use_defaults = False  # pylint: disable=protected-access
     (score, tunables) = _optimize(mock_env_no_noise, scikit_et_opt)
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
