@@ -17,5 +17,6 @@
         "--ignore D001"
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
-    "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/"
+    "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
+    "python.analysis.typeCheckingMode": "basic"
 }
