@@ -7,7 +7,7 @@ Unit tests for the storage subsystem.
 """
 import pytest
 
-from mlos_bench.environment.status import Status
+from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 

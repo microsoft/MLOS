@@ -16,16 +16,16 @@ from typing import Optional, Any, Tuple, List, Dict, Iterable
 
 from mlos_bench.util import BaseTypes
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.environment.base_environment import Environment
+from mlos_bench.environments.base_environment import Environment
 
-from mlos_bench.optimizer.base_optimizer import Optimizer
-from mlos_bench.optimizer.one_shot_optimizer import OneShotOptimizer
+from mlos_bench.optimizers.base_optimizer import Optimizer
+from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.storage import SqlStorage
 
-from mlos_bench.service.local.local_exec import LocalExecService
-from mlos_bench.service.config_persistence import ConfigPersistenceService
+from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'

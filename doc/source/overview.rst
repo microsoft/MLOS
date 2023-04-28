@@ -100,7 +100,7 @@ Main
 
 Benchmark Environments
 ======================
-.. currentmodule:: mlos_bench.environment
+.. currentmodule:: mlos_bench.environments
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -113,7 +113,7 @@ Benchmark Environments
 Local Environments
 -------------------
 
-.. currentmodule:: mlos_bench.environment.local
+.. currentmodule:: mlos_bench.environments.local
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -124,7 +124,7 @@ Local Environments
 Remote Environments
 -------------------
 
-.. currentmodule:: mlos_bench.environment.remote
+.. currentmodule:: mlos_bench.environments.remote
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -145,7 +145,7 @@ Tunable Parameters
 
 Service Mix-ins
 ===============
-.. currentmodule:: mlos_bench.service
+.. currentmodule:: mlos_bench.services
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -153,7 +153,7 @@ Service Mix-ins
    Service
    FileShareService
 
-.. currentmodule:: mlos_bench.service.config_persistence
+.. currentmodule:: mlos_bench.services.config_persistence
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -162,7 +162,7 @@ Service Mix-ins
 
 Local Services
 ---------------
-.. currentmodule:: mlos_bench.service.local
+.. currentmodule:: mlos_bench.services.local
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -172,7 +172,7 @@ Local Services
 Remote Azure Services
 ---------------------
 
-.. currentmodule:: mlos_bench.service.remote.azure
+.. currentmodule:: mlos_bench.services.remote.azure
 .. autosummary::
    :toctree: generated/
    :template: class.rst
@@ -182,7 +182,7 @@ Remote Azure Services
 
 Optimizer Adapters
 ==================
-.. currentmodule:: mlos_bench.optimizer
+.. currentmodule:: mlos_bench.optimizers
 .. autosummary::
    :toctree: generated/
    :template: class.rst
