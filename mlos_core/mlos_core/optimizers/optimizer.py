@@ -14,6 +14,8 @@ import ConfigSpace
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+
+from mlos_core import config_to_dataframe
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 # pylint: disable=consider-alternative-union-syntax
@@ -91,10 +93,6 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    def _config_to_dataframe(self, config: ConfigSpace.Configuration) -> pd.DataFrame:
-        """Converts a ConfigSpace config to a DataFrame"""
-        return pd.DataFrame([config.get_dictionary()])
-
     def suggest(self, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
         """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
@@ -112,7 +110,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if defaults:
-            configuration = self._config_to_dataframe(self.parameter_space.get_default_configuration())
+            configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
