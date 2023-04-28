@@ -94,13 +94,9 @@ This is a list of major functions and classes provided by `mlos_bench`.
 Main
 ====
 
-:doc:`run_opt.py </api/mlos_bench/mlos_bench.run_opt>`
+:doc:`run.py </api/mlos_bench/mlos_bench.run>`
 
-    The main optimization loop script.
-
-:doc:`run_bench.py </api/mlos_bench/mlos_bench.run_bench>`
-
-    A helper script for testing a single application/workload run.
+    The script to run the benchmarks or the optimization loop.
 
 Benchmark Environments
 ======================
@@ -194,3 +190,21 @@ Optimizer Adapters
    Optimizer
    MockOptimizer
    MlosCoreOptimizer
+
+Storage
+=======
+.. currentmodule:: mlos_bench.storage
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   Storage
+
+SQL DB Storage
+--------------
+.. currentmodule:: mlos_bench.storage.sql.storage
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   SqlStorage
