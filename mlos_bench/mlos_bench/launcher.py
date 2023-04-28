@@ -71,7 +71,7 @@ class Launcher:
             args.globals or config.get("globals", []),
             args.config_path or config.get("config_path", []),
             args_rest,
-            {key: val for (key, val) in config.items() if key in vars(args)},
+            {key: val for (key, val) in config.items() if key not in vars(args)},
         )
 
         env_path = args.environment or config.get("environment")
@@ -101,16 +101,16 @@ class Launcher:
                  ' command line options and can be overridden by the latter.')
 
         parser.add_argument(
-            '--log-file', required=False,
+            '--log_file', required=False,
             help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(
-            '--log-level', required=False, type=int,
+            '--log_level', required=False, type=int,
             help=f'Logging level. Default is {_LOG_LEVEL} ({logging.getLevelName(_LOG_LEVEL)}).' +
                  f' Set to {logging.DEBUG} for debug, {logging.WARNING} for warnings only.')
 
         parser.add_argument(
-            '--config-path', nargs="+", required=False,
+            '--config_path', nargs="+", required=False,
             help='One or more locations of JSON config files.')
 
         parser.add_argument(
@@ -120,7 +120,7 @@ class Launcher:
         parser.add_argument(
             '--optimizer', required=False,
             help='Path to the optimizer configuration file. If omitted, run' +
-                 ' a single trial with default (or specified in --tunable-values).')
+                 ' a single trial with default (or specified in --tunable_values).')
 
         parser.add_argument(
             '--storage', required=False,
@@ -128,7 +128,7 @@ class Launcher:
                  ' If omitted, use the ephemeral in-memory SQL storage.')
 
         parser.add_argument(
-            '--tunable-values', nargs="+", required=False,
+            '--tunable_values', nargs="+", required=False,
             help='Path to one or more JSON files that contain values of the tunable' +
                  ' parameters. This can be used for a single trial (when no --optimizer' +
                  ' is specified) or as default values for the first run in optimization.')
@@ -139,7 +139,7 @@ class Launcher:
                  ' [private] parameters of the benchmarking environment.')
 
         parser.add_argument(
-            '--no-teardown', required=False, default=None,
+            '--no_teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
@@ -184,11 +184,10 @@ class Launcher:
         Get key/value pairs of the global configuration parameters
         from the specified config files (if any) and command line arguments.
         """
-        if args_globals is not None:
-            for config_file in args_globals:
-                conf = self._config_loader.load_config(config_file)
-                assert isinstance(conf, dict)
-                global_config.update(conf)
+        for config_file in (args_globals or []):
+            conf = self._config_loader.load_config(config_file)
+            assert isinstance(conf, dict)
+            global_config.update(conf)
         global_config.update(Launcher._try_parse_extra_args(args_rest))
         if config_path:
             global_config["config_path"] = config_path
