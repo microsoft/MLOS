@@ -33,4 +33,4 @@ docker run -it --rm \
     --env http_proxy="${http_proxy:-}" \
     --env https_proxy="${https_proxy:-}" \
     --env no_proxy="${no_proxy:-}" \
-    mlos-core-devcontainer
+    mlos-devcontainer

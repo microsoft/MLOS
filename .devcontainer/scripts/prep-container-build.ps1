@@ -25,7 +25,7 @@ if (Test-Path .devcontainer/tmp) {
 }
 New-Item -Type Directory .devcontainer/tmp
 
-Copy-Item conda-envs/mlos_core.yml .devcontainer/tmp/mlos_core.yml
+Copy-Item conda-envs/mlos.yml .devcontainer/tmp/mlos.yml
 foreach ($pkg in @('mlos_core', 'mlos_bench')) {
     New-Item -Type Directory ".devcontainer/tmp/${pkg}"
     Copy-Item "$pkg/setup.py" ".devcontainer/tmp/${pkg}/setup.py"
@@ -44,7 +44,7 @@ Copy-Item .devcontainer/scripts/common/prep-deps-files.sh .devcontainer/tmp/prep
 # to detect that form of startup yet.
 # See Also: https://github.com/microsoft/vscode-remote-release/issues/8179
 if ($env:NO_CACHE -ne 'true') {
-    $cacheFrom = 'mloscore.azurecr.io/mlos-core-devcontainer'
+    $cacheFrom = 'mloscore.azurecr.io/mlos-devcontainer'
     # Skip pulling for now (see TODO note above)
     Write-Host "Consider pulling image $cacheFrom for build caching."
     #docker pull $cacheFrom

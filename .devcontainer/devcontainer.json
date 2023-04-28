@@ -12,7 +12,7 @@
     // Make sure the container user can read/write to the package caches.
     "onCreateCommand": "sudo -n mkdir -p /opt/conda/pkgs/cache /var/cache/pip && sudo -n chown -R vscode /opt/conda/pkgs/cache /var/cache/pip",
     // Make sure the conda env is up to date with the source tree expectations.
-    "postCreateCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos_core -f ${containerWorkspaceFolder}/conda-envs/mlos_core.yml",
+    "postCreateCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos -f ${containerWorkspaceFolder}/conda-envs/mlos.yml",
     // Various mounting, run, post-create, and user settings
     "containerEnv": {
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
@@ -40,12 +40,12 @@
         "vscode": {
             "settings": {
                 // Adjust the python interpreter path to point to the conda environment
-                "python.defaultInterpreterPath": "/opt/conda/envs/mlos_core/bin/python",
-                "python.testing.pytestPath": "/opt/conda/envs/mlos_core/bin/pytest",
-                "python.linting.pylintPath": "/opt/conda/envs/mlos_core/bin/pylint",
-                "pylint.path": ["/opt/conda/envs/mlos_core/bin/pylint"],
-                "python.linting.mypyPath": "/opt/conda/envs/mlos_core/bin/mypy",
-                "mypy.dmypyExecutable": "/opt/conda/envs/mlos_core/bin/dmypy",
+                "python.defaultInterpreterPath": "/opt/conda/envs/mlos/bin/python",
+                "python.testing.pytestPath": "/opt/conda/envs/mlos/bin/pytest",
+                "python.linting.pylintPath": "/opt/conda/envs/mlos/bin/pylint",
+                "pylint.path": ["/opt/conda/envs/mlos/bin/pylint"],
+                "python.linting.mypyPath": "/opt/conda/envs/mlos/bin/mypy",
+                "mypy.dmypyExecutable": "/opt/conda/envs/mlos/bin/dmypy",
                 "mypy.runUsingActiveInterpreter": false
             },
             // Add the IDs of extensions you want installed when the container is created.
