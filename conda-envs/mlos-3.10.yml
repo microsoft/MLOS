@@ -9,11 +9,6 @@ dependencies:
   - pycodestyle
   - autopep8
   - pydocstyle
-  - pytest
-  - pytest-cov
-  - pytest-forked
-  - pytest-xdist
-  - pytest-timeout
   - setuptools
   - setuptools-scm
   - jupyter
@@ -27,12 +22,11 @@ dependencies:
   - pip:
     - bump2version
     - licenseheaders
-    - pytest-local-badge
     - mypy
     - types-setuptools
     - types-pygments
     - types-colorama
     - pandas-stubs
     - types-requests
-    - "--editable ../mlos_core[full]"
-    - "--editable ../mlos_bench[full]"
+    - "--editable ../mlos_core[full-tests]"
+    - "--editable ../mlos_bench[full-tests]"
