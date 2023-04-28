@@ -11,7 +11,7 @@ from typing import Optional, Sequence, Tuple, Union
 
 import pandas as pd
 
-from mlos_core.optimizers import OptimizerType, OptimizerFactory, SpaceAdapterType
+from mlos_core.optimizers import BaseOptimizer, OptimizerType, OptimizerFactory, SpaceAdapterType, DEFAULT_OPTIMIZER_TYPE
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -35,7 +35,7 @@ class MlosCoreOptimizer(Optimizer):
         space = tunable_groups_to_configspace(tunables)
         _LOG.debug("ConfigSpace: %s", space)
 
-        opt_type = getattr(OptimizerType, self._config.pop('optimizer_type', 'SKOPT'))
+        opt_type = getattr(OptimizerType, self._config.pop('optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
 
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})
@@ -43,7 +43,7 @@ class MlosCoreOptimizer(Optimizer):
         if space_adapter_type is not None:
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
 
-        self._opt = OptimizerFactory.create(
+        self._opt: BaseOptimizer = OptimizerFactory.create(
             space, opt_type, optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
             space_adapter_kwargs=space_adapter_config)
@@ -66,7 +66,8 @@ class MlosCoreOptimizer(Optimizer):
         return True
 
     def suggest(self) -> TunableGroups:
-        df_config = self._opt.suggest()
+        use_defaults = self._use_defaults and self._iter == 1
+        df_config = self._opt.suggest(defaults=use_defaults)
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return self._tunables.copy().assign(df_config.loc[0].to_dict())
 
