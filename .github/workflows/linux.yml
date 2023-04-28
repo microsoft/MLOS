@@ -47,9 +47,9 @@ jobs:
       run: |
         set -x
         if [ -z "${{ matrix.python_version }}" ]; then
-          CONDA_ENV_NAME=mlos_core
+          CONDA_ENV_NAME=mlos
         else
-          CONDA_ENV_NAME="mlos_core-${{ matrix.python_version }}"
+          CONDA_ENV_NAME="mlos-${{ matrix.python_version }}"
         fi
         echo "CONDA_ENV_NAME=$CONDA_ENV_NAME" >> $GITHUB_ENV
         echo "cache_cur_date=$(date -u +%Y-%m-%d)" >> $GITHUB_ENV
@@ -97,7 +97,7 @@ jobs:
         echo "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
         echo "EXPERIMENTAL_SOLVER=libmamba" >> $GITHUB_ENV
 
-    - name: Create/update mlos_core conda environment
+    - name: Create/update mlos conda environment
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v conda-env
 
     # This is moreso about code cleanliness, which is a dev thing, not a

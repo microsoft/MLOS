@@ -29,7 +29,7 @@ if [ -d .devcontainer/tmp ]; then
     rm -rf .devcontainer/tmp
 fi
 mkdir -p .devcontainer/tmp/
-cp -v conda-envs/mlos_core.yml .devcontainer/tmp/mlos_core.yml
+cp -v conda-envs/mlos.yml .devcontainer/tmp/mlos.yml
 for pkg in mlos_core mlos_bench; do
     mkdir -p .devcontainer/tmp/$pkg
     cp -v $pkg/setup.py .devcontainer/tmp/$pkg/setup.py
@@ -48,7 +48,7 @@ cp -v .devcontainer/scripts/common/prep-deps-files.sh .devcontainer/tmp/prep-dep
 # to detect that form of startup yet.
 # See Also: https://github.com/microsoft/vscode-remote-release/issues/8179
 if [ "${NO_CACHE:-}" != 'true' ]; then
-    cacheFrom='mloscore.azurecr.io/mlos-core-devcontainer'
+    cacheFrom='mloscore.azurecr.io/mlos-devcontainer'
     # Skip pulling for now (see TODO note above)
     echo "Consider pulling image $cacheFrom for build caching."
     ## Make sure we use an empty config to avoid auth issues for devs with the

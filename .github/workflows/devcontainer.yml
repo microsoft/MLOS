@@ -53,28 +53,28 @@ jobs:
           --env CONTAINER_WORKSPACE_FOLDER=/workspaces/MLOS \
           --env LOCAL_WORKSPACE_FOLDER=$(pwd) \
           --workdir /workspaces/MLOS \
-          --name mlos-core-devcontainer mlos-core-devcontainer sleep infinity
+          --name mlos-devcontainer mlos-devcontainer sleep infinity
     - name: Fixup vscode uid/gid in the running container
       timeout-minutes: 3
       run: |
         set -x
-        docker exec --user root mlos-core-devcontainer groupmod -g `id -g` vscode
-        docker exec --user root mlos-core-devcontainer usermod -u `id -u` -g `id -g` vscode
-        docker exec --user root mlos-core-devcontainer chown -R vscode:vscode /home/vscode
-        docker exec --user root mlos-core-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
-        docker exec --user root mlos-core-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
+        docker exec --user root mlos-devcontainer groupmod -g `id -g` vscode
+        docker exec --user root mlos-devcontainer usermod -u `id -u` -g `id -g` vscode
+        docker exec --user root mlos-devcontainer chown -R vscode:vscode /home/vscode
+        docker exec --user root mlos-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
+        docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
 
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
       run: |
         set -x
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v conda-env
+        docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v conda-env
 
     - name: Check for missing licenseheaders
       timeout-minutes: 3
       run: |
         set -x
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
+        docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v licenseheaders
         # licenseheaders changes the contents of the files, so make this check fail if there are any changes detected
         git --no-pager diff --exit-code
 
@@ -82,34 +82,34 @@ jobs:
       timeout-minutes: 5
       run: |
         set -x
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v check
+        docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v check
 
     - name: Run tests
       timeout-minutes: 10
       run: |
         set -x
         # Simulate test collection in vscode.
-        docker exec --user vscode mlos-core-devcontainer \
-          conda run -n mlos_core python -m pytest -svxl -n auto --collect-only --rootdir /workspaces/MLOS -s --cache-clear
+        docker exec --user vscode mlos-devcontainer \
+          conda run -n mlos python -m pytest -svxl -n auto --collect-only --rootdir /workspaces/MLOS -s --cache-clear
         # Now actually run the tests.
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v test
+        docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v test
 
     - name: Generate and test binary distribution files
       timeout-minutes: 10
       run: |
         set -x
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
+        docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
 
     - name: Test rebuilding the devcontainer in the devcontainer
       timeout-minutes: 3
       run: |
         set -x
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
+        docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
 
     - name: Generate docs and test check them
       run: |
         set -x
-        docker exec --user vscode mlos-core-devcontainer make CONDA_INFO_LEVEL=-v doc
+        docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v doc
         # Make sure we can publish the coverage report.
         rm -f doc/build/html/htmlcov/.gitignore
 
@@ -124,8 +124,8 @@ jobs:
     - name: Cleanup the devcontainer
       run: |
         set -x
-        docker stop -t 1 mlos-core-devcontainer || true
-        docker rm --force mlos-core-devcontainer || true
+        docker stop -t 1 mlos-devcontainer || true
+        docker rm --force mlos-devcontainer || true
 
     - name: Container Registry Login
       if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
@@ -143,5 +143,5 @@ jobs:
         set -x
         docker tag devcontainer-cli:latest ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
         docker push ${{ secrets.ACR_LOGINURL }}/devcontainer-cli:latest
-        docker tag mlos-core-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-core-devcontainer:latest
-        docker push ${{ secrets.ACR_LOGINURL }}/mlos-core-devcontainer:latest
+        docker tag mlos-devcontainer:latest ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:latest
+        docker push ${{ secrets.ACR_LOGINURL }}/mlos-devcontainer:latest
