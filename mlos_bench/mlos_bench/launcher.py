@@ -96,7 +96,7 @@ class Launcher:
         parser = argparse.ArgumentParser(description=description)
 
         parser.add_argument(
-            'config',
+            '--config', required=False,
             help='Main JSON5 configuration file. Its keys are the same as the' +
                  ' command line options and can be overridden by the latter.')
 
