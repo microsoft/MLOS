@@ -27,9 +27,8 @@ class OneShotOptimizer(MockOptimizer):
         if self._service is None:
             _LOG.warning("Config loading service not available")
         else:
-            if not self._use_defaults:
-                # Generate a random suggestion.
-                self._tunables = super().suggest()
+            # Generate a random suggestion.
+            self._tunables = super().suggest()
             # Now assign the values we were given in the config.
             for data_file in config.get("include_tunable_values", []):
                 tunable_values = self._service.config_loader_service.load_config(data_file)

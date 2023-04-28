@@ -69,7 +69,9 @@ class Service:
 
         self.config_loader_service: SupportsConfigLoading
         if parent and isinstance(parent, SupportsConfigLoading):
-            self.config_loader_service = parent
+            self._config_loader_service = parent
+        elif isinstance(self, SupportsConfigLoading):
+            self._config_loader_service = self
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Service: %s Config:\n%s",
@@ -77,6 +79,18 @@ class Service:
             _LOG.debug("Service: %s Parent mixins: %s",
                        self.__class__.__name__,
                        [] if parent is None else list(parent._services.keys()))
+
+    @property
+    def config_loader_service(self) -> SupportsConfigLoading:
+        """
+        Return a config loader service.
+
+        Returns
+        -------
+        config_loader_service : SupportsConfigLoading
+            A config loader service.
+        """
+        return self._config_loader_service
 
     def register(self, services: Union[Dict[str, Callable], List[Callable]]) -> None:
         """
