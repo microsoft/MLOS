@@ -40,7 +40,7 @@ if [ "${NO_CACHE:-}" == 'true' ]; then
     docker pull "$base_image" || true
     devcontainer_build_args='--no-cache'
 else
-    cache_from='mloscore.azurecr.io/mlos-core-devcontainer:latest'
+    cache_from='mloscore.azurecr.io/mlos-devcontainer:latest'
     devcontainer_build_args="--cache-from $cache_from"
     tmpdir=$(mktemp -d)
     docker --config="$tmpdir" pull "$cache_from" || true
@@ -64,7 +64,7 @@ docker run -i --rm \
     devcontainer-cli \
     devcontainer build --workspace-folder /src \
         $devcontainer_build_args \
-        --image-name mlos-core-devcontainer:latest
+        --image-name mlos-devcontainer:latest
 if [ "${CONTAINER_REGISTRY:-}" != '' ]; then
-    docker tag mlos-core-devcontainer:latest "$CONTAINER_REGISTRY/mlos-core-devcontainer:latest"
+    docker tag mlos-devcontainer:latest "$CONTAINER_REGISTRY/mlos-devcontainer:latest"
 fi

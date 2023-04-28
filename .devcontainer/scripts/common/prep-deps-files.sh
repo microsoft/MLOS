@@ -17,10 +17,10 @@ set -x
 scriptdir=$(dirname "$(readlink -f "$0")")
 cd "$scriptdir"
 
-cat /tmp/conda-tmp/mlos_core.yml \
+cat /tmp/conda-tmp/mlos.yml \
     | sed 's|#.*||' \
     | egrep -v -e '--editable' -e '^\s*$' \
-    | tee /tmp/conda-tmp/mlos_core_deps.yml
+    | tee /tmp/conda-tmp/mlos_deps.yml
 
 # Try to grab the requirements.txt files for the python packages.
 tmpdir=$(mktemp -d)

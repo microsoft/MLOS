@@ -1,4 +1,4 @@
-name: mlos_core-3.11
+name: mlos
 channels:
   - defaults
 dependencies:
@@ -16,9 +16,12 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  - python=3.11
-  # See comments in mlos_core.yml.
-  #- gcc_linux-64
+  # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
+  - python<3.11
+  # Require a compiler to be installed/configured and build GPy directly.
+  - vs2019_win-64
+  - vswhere
+  - conda-forge::GPy
   - pip:
     - bump2version
     - licenseheaders
