@@ -71,7 +71,9 @@ class Launcher:
         self.global_config = self._load_config(
             args.globals or config.get("globals", []),
             args.config_path or config.get("config_path", []),
-            args_rest)
+            args_rest,
+            {key: val for (key, val) in config.items() if key in vars(args)},
+        )
 
         env_path = args.environment or config.get("environment")
         assert env_path, "Environment configuration file is required"
@@ -173,13 +175,15 @@ class Launcher:
         _LOG.debug("Parsed config: %s", config)
         return config
 
-    def _load_config(self, args_globals: Iterable[str], config_path: Iterable[str],
-                     args_rest: Iterable[str]) -> Dict[str, Any]:
+    def _load_config(self,
+                     args_globals: Iterable[str],
+                     config_path: Iterable[str],
+                     args_rest: Iterable[str],
+                     global_config: Dict[str, Any]) -> Dict[str, Any]:
         """
         Get key/value pairs of the global configuration parameters
         from the specified config files (if any) and command line arguments.
         """
-        global_config: Dict[str, Any] = {}
         if args_globals is not None:
             for config_file in args_globals:
                 conf = self._config_loader.load_config(config_file)
