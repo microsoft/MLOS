@@ -112,9 +112,11 @@ class BaseOptimizer(metaclass=ABCMeta):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if defaults:
-            return self._config_to_dataframe(self.parameter_space.get_default_configuration())
-
-        configuration = self._suggest(context)
+            configuration = self._config_to_dataframe(self.parameter_space.get_default_configuration())
+            if self.space_adapter is not None:
+                configuration = self.space_adapter.inverse_transform(configuration)
+        else:
+            configuration = self._suggest(context)
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
         return configuration
