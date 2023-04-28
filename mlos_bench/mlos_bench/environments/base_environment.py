@@ -9,14 +9,16 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional, Tuple, TYPE_CHECKING
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config
+
+if TYPE_CHECKING:
+    from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 
 _LOG = logging.getLogger(__name__)
 
@@ -109,10 +111,6 @@ class Environment(metaclass=abc.ABCMeta):
         self._is_ready = False
         self._params: Dict[str, TunableValue] = {}
 
-        self._config_loader_service: SupportsConfigLoading
-        if self._service is not None and isinstance(self._service, SupportsConfigLoading):
-            self._config_loader_service = self._service
-
         if global_config is None:
             global_config = {}
 
@@ -139,6 +137,11 @@ class Environment(metaclass=abc.ABCMeta):
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Config for: %s\n%s",
                        name, json.dumps(self.config, indent=2))
+
+    @property
+    def _config_loader_service(self) -> "SupportsConfigLoading":
+        assert self._service is not None
+        return self._service.config_loader_service
 
     def __str__(self) -> str:
         return self.name
@@ -167,6 +170,7 @@ class Environment(metaclass=abc.ABCMeta):
             group_names=list(self._tunable_params.get_names()),
             into_params=self._const_args.copy())
 
+    @property
     def tunable_params(self) -> TunableGroups:
         """
         Get the configuration space of the given environment.

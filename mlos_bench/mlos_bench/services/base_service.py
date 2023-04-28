@@ -78,6 +78,18 @@ class Service:
                        self.__class__.__name__,
                        [] if parent is None else list(parent._services.keys()))
 
+    @property
+    def config_loader_service(self) -> SupportsConfigLoading:
+        """
+        Return a config loader service.
+
+        Returns
+        -------
+        config_loader_service : SupportsConfigLoading
+            A config loader service.
+        """
+        return self._config_loader_service
+
     def register(self, services: Union[Dict[str, Callable], List[Callable]]) -> None:
         """
         Register new mix-in services.

@@ -197,7 +197,7 @@ class Launcher:
         """
         Load key/value pairs of the tunable parameters from given JSON files, if any.
         """
-        tunables = self.environment.tunable_params()
+        tunables = self.environment.tunable_params
         if args_tunables is not None:
             for data_file in args_tunables:
                 values = self._config_loader.load_config(data_file)
