@@ -10,7 +10,7 @@ and mlos_core optimizers.
 import logging
 from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
-from distutils.util import strtobool
+from distutils.util import strtobool    # pylint: disable=deprecated-module
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
@@ -19,7 +19,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
-class Optimizer(metaclass=ABCMeta):
+class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attributes
     """
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
@@ -42,8 +42,8 @@ class Optimizer(metaclass=ABCMeta):
         self._tunables = tunables
         self._service = service
         self._iter = 1
-        self._use_defaults: bool = bool(strtobool(self._config.pop('use_defaults', "True")))
-        self._max_iter = int(self._config.pop('max_iterations', 100))
+        self._use_defaults: bool = bool(strtobool(str.lower(self._config.pop('use_defaults', "True"))))
+        self._max_iter = int(self._config.pop('max_iterations', 25))
         self._opt_target: str
         _opt_target = self._config.pop('maximize', None)
         if _opt_target is None:

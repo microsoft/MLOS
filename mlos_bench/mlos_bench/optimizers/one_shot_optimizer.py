@@ -19,7 +19,10 @@ _LOG = logging.getLogger(__name__)
 class OneShotOptimizer(MockOptimizer):
     """
     Mock optimizer that proposes a single configuration and returns.
+    Explicit configs (partial or full) are possible using configuration files.
     """
+
+    # TODO: Add support for multiple explicit configs (i.e., FewShot or Manual Optimizer).
 
     def __init__(self, tunables: TunableGroups,
                  service: Optional[Service], config: Dict[str, Any]):
@@ -27,7 +30,7 @@ class OneShotOptimizer(MockOptimizer):
         if self._service is None:
             _LOG.warning("Config loading service not available")
         else:
-            # Generate a random suggestion.
+            # Generate initial random or default suggestion based on optimizer config.
             self._tunables = super().suggest()
             # Now assign the values we were given in the config.
             for data_file in config.get("include_tunable_values", []):
