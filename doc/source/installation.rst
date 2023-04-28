@@ -30,18 +30,18 @@ Manually
 
   .. code-block:: shell
 
-    conda env create -f conda-envs/mlos_core.yml
+    conda env create -f conda-envs/mlos.yml
 
 
   .. note::
-    See the `conda-envs/` directory for additional conda environment files, including those used for Windows (e.g. `conda-envs/mlos_core-windows.yml`).
+    See the `conda-envs/` directory for additional conda environment files, including those used for Windows (e.g. `conda-envs/mlos-windows.yml`).
 
 
   or
 
   .. code-block:: shell
 
-    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos_core.yml"
+    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
     make conda-env
 
 
@@ -49,7 +49,7 @@ Manually
 
   .. code-block:: shell
 
-    conda activate mlos_core
+    conda activate mlos
 
 2. Run the BayesianOptimization.ipynb notebook.
 
