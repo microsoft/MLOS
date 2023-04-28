@@ -7,10 +7,10 @@ Protocol interface for Service types that provide helper functions to run
 scripts on a remote host OS.
 """
 
-from typing import Iterable, Tuple, Protocol, runtime_checkable
+from typing import Iterable, Tuple, Protocol, runtime_checkable, TYPE_CHECKING
 
-
-from mlos_bench.environments.status import Status
+if TYPE_CHECKING:
+    from mlos_bench.environments.status import Status
 
 
 @runtime_checkable
@@ -20,7 +20,7 @@ class SupportsRemoteExec(Protocol):
     scripts on a remote host OS.
     """
 
-    def remote_exec(self, script: Iterable[str], params: dict) -> Tuple[Status, dict]:
+    def remote_exec(self, script: Iterable[str], params: dict) -> Tuple["Status", dict]:
         """
         Run a command on remote host OS.
 
@@ -40,7 +40,7 @@ class SupportsRemoteExec(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def get_remote_exec_results(self, params: dict) -> Tuple[Status, dict]:
+    def get_remote_exec_results(self, params: dict) -> Tuple["Status", dict]:
         """
         Get the results of the asynchronously running command.
 
