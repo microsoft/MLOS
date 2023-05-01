@@ -6,14 +6,14 @@
 Helper functions to run scripts and commands locally on the scheduler side.
 """
 
-import os
-import sys
-import errno
-import tempfile
 import contextlib
+import errno
+import logging
+import os
 import shlex
 import subprocess
-import logging
+import sys
+import tempfile
 
 from typing import Dict, Iterable, Mapping, Optional, Tuple, Union, TYPE_CHECKING
 
