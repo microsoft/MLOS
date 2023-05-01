@@ -55,7 +55,7 @@ def test_resolve_path(config_persistence_service: ConfigPersistenceService) -> N
     """
     Check if we can actually find a file somewhere in `config_path`.
     """
-    file_path = "tunables/tunable-values-example.json"
+    file_path = "tunables/tunable-values-example.jsonc"
     path = config_persistence_service.resolve_path(file_path)
     assert path.endswith(file_path)
     assert os.path.exists(path)
@@ -75,7 +75,7 @@ def test_load_config(config_persistence_service: ConfigPersistenceService) -> No
     """
     Check if we can successfully load a config file located relative to `config_path`.
     """
-    tunables_data = config_persistence_service.load_config("global/tunable-values-example.json")
+    tunables_data = config_persistence_service.load_config("tunables/tunable-values-example.jsonc")
     assert tunables_data is not None
     assert isinstance(tunables_data, dict)
     assert len(tunables_data) >= 1
