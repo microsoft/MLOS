@@ -22,7 +22,7 @@
             "noautogroup": {
                 "type": "categorical",
                 "default": null,
-                "values": [null, "noautogroup", null] // TODO: make sure categorical values are unique
+                "values": [null, "noautogroup"]
             },
             "nohugevmalloc": {
                 "type": "categorical",
