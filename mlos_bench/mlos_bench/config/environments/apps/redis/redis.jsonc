@@ -4,9 +4,8 @@
         "name": "Generate Redis configuration",
         "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
+        "include_tunables": ["environments/apps/redis/redis-tunables.jsonc"],
         "config": {
-            // TODO: reduce duplication of configuration include_tunables snippets
-            "include_tunables": ["environments/app/redis/redis-tunables.jsonc"],
             "tunable_params": ["redis"],
 
             "required_args": ["experimentId", "trialId"],
@@ -31,8 +30,8 @@
         "name": "Benchmark Redis on Linux",
         "class": "mlos_bench.environments.remote.RemoteEnv",
 
+        "include_tunables": ["environments/apps/redis/redis-tunables.jsonc"],
         "config": {
-            "include_tunables": ["environments/app/redis/redis-tunables.jsonc"],
             "tunable_params": ["redis"],
 
             "required_args": ["experimentId", "trialId", "mountPoint"],
@@ -64,8 +63,8 @@
         "name": "Download and post-process Redis benchmark data",
         "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
+        "include_tunables": ["environments/apps/redis/redis-tunables.jsonc"],
         "config": {
-            "include_tunables": ["environments/app/redis/redis-tunables.jsonc"],
             "tunable_params": ["redis"],
 
             "required_args": ["experimentId", "trialId"],

@@ -11,8 +11,9 @@
         "name": "Generate boot parameters for a Ubuntu VM",
         "class": "mlos_bench.environments.local.LocalFileShareEnv",
 
+        "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
+
         "config": {
-            "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
             "tunable_params": ["linux-kernel-boot"],
 
             // Values provided from the global config/optimizer:
@@ -47,9 +48,10 @@
         "name": "Apply boot parameters to a remote Ubuntu VM",
         "class": "mlos_bench.environments.RemoteEnv",
 
+        "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
+
         "config": {
-            "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
-            "tunable_params": ["boot"],
+            "tunable_params": ["linux-kernel-boot"],
 
             "required_args": [
                 "storageAccountName",

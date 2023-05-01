@@ -61,6 +61,7 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
         "services/local/mock/mock_local_exec_service.jsonc",
         "services/remote/mock/mock_fileshare_service.jsonc",
         "services/remote/mock/mock_vm_service.jsonc",
+        "services/remote/mock/mock_remote_exec_service.jsonc",
     ]
 
     for mock_service_config_path in mock_service_configs:
