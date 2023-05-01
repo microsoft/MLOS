@@ -1,12 +1,12 @@
 {
     "config_path": [
-        "./mlos_bench/config",
-        "./mlos_bench/examples"
+        "mlos_bench/config",
+        "mlos_bench/examples"
     ],
 
     "environment": "env-azure-ubuntu-redis.jsonc",
     "optimizer": "optimizers/one_shot_opt.jsonc",
-    "storage": "storage/duckdb.jsonc",
+    "storage": "storage/sqlite.jsonc",
 
     "tunable_values": [
         "tunable-values-example.json"
@@ -21,6 +21,6 @@
 
     "teardown": false,
 
-    "log_file": "./azure-redis-1shot.log",
+    "log_file": "azure-redis-1shot.log",
     "log_level": 10
 }
