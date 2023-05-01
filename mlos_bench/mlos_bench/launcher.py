@@ -58,8 +58,9 @@ class Launcher:
         self.global_config = self._load_config(args.globals, args.config_path, args_rest)
 
         self.root_env_config = self._config_loader.resolve_path(args.environment)
+        tunable_groups = TunableGroups()    # base tunable groups that all others get build on
         self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, self.global_config, service=self._parent_service)
+            self.root_env_config, self.global_config, service=self._parent_service, tunables=tunable_groups)
 
         self.teardown: bool = args.teardown
 
@@ -180,8 +181,8 @@ class Launcher:
 
     def _load_optimizer(self, args_optimizer: Optional[str]) -> Optimizer:
         """
-        Instantiate the Optimzier object from JSON config file, if specified
-        in the --optimizer comamnd line option. If config file not specified,
+        Instantiate the Optimizer object from JSON config file, if specified
+        in the --optimizer command line option. If config file not specified,
         create a one-shot optimizer to run a single benchmark trial.
         """
         if args_optimizer is None:
@@ -194,7 +195,7 @@ class Launcher:
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
         """
         Instantiate the Storage object from JSON file provided in the --storage
-        command line aparameter. If omitted, create an ephemeral in-memory SQL
+        command line parameter. If omitted, create an ephemeral in-memory SQL
         storage instead.
         """
         if args_storage is None:

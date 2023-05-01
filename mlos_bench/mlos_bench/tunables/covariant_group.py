@@ -7,7 +7,7 @@ Tunable parameter definition.
 """
 import copy
 
-from typing import Dict, Iterable
+from typing import Dict, Iterable, Union
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 
@@ -150,27 +150,34 @@ class CovariantTunableGroup:
         """
         return f"{self._name}: {self._tunables}"
 
-    def get_tunable(self, name: str) -> Tunable:
+    def get_tunable(self, tunable: Union[str, Tunable]) -> Tunable:
         """
         Access the entire Tunable in a group (not just its value).
         Throw KeyError if the tunable is not in the group.
 
         Parameters
         ----------
-        name : str
+        tunable : str
             Name of the tunable parameter.
 
         Returns
         -------
-        tunable : Tunable
+        Tunable
             An instance of the Tunable parameter.
         """
+        name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return self._tunables[name]
 
-    def __getitem__(self, name: str) -> TunableValue:
-        return self.get_tunable(name).value
+    def __contains__(self, tunable: Union[str, Tunable]) -> bool:
+        name: str = tunable.name if isinstance(tunable, Tunable) else tunable
+        return name in self._tunables
 
-    def __setitem__(self, name: str, value: TunableValue) -> TunableValue:
+    def __getitem__(self, tunable: Union[str, Tunable]) -> TunableValue:
+        return self.get_tunable(tunable).value
+
+    def __setitem__(self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]) -> TunableValue:
         self._is_updated = True
+        name: str = tunable.name if isinstance(tunable, Tunable) else tunable
+        value: TunableValue = tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value
         self._tunables[name].value = value
         return value

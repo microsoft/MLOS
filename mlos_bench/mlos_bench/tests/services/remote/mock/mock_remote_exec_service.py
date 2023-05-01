@@ -8,7 +8,7 @@ A collection Service functions for mocking remote script execution.
 
 import logging
 
-from typing import Iterable, Tuple, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import Iterable, Tuple
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -48,7 +48,6 @@ class MockRemoteExecService(Service, SupportsRemoteExec):
             self.remote_exec,
             self.get_remote_exec_results,
         ])
-
 
     def remote_exec(self, script: Iterable[str], params: dict) -> Tuple[Status, dict]:
         """

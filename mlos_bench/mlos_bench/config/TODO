@@ -11,19 +11,19 @@
 
 ## Laundry list of other items in this PR that need splitting
 
-- [ ] support for returning default config in first iteration
+- [x] support for returning default config in first iteration
 
 - [x] rename pluralization (#313)
 
-- [ ] generalize which mlos core optimizer we return by default
+- [x] generalize which mlos core optimizer we return by default
 
-- [ ] consolidation of pytest requirements to `setup.py` instead of conda envs
+- [x] consolidation of pytest requirements to `setup.py` instead of conda envs
 
-- [ ] adding more storage `extra_requires`
+- [x] adding more storage `extra_requires`
 
-- [ ] rename include_tunables to include_tunable_values for the one shot optimizer config
+- [x] rename include_tunables to include_tunable_values for the one shot optimizer config
 
-- [ ] add support for loading tunables inside an optimizer
+- [x] add support for loading tunables inside an optimizer
 
 ## Other random TODO ideas
 

@@ -12,6 +12,7 @@
         "dataframe",
         "discretization",
         "discretize",
+        "drivername",
         "dtype",
         "duckdb",
         "emukit",

@@ -7,7 +7,7 @@ TunableGroups definition.
 """
 import copy
 
-from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple
+from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
 
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
@@ -108,18 +108,29 @@ class TunableGroups:
             for group in sorted(self._tunable_groups.values(), key=lambda g: (-g.cost, g.name))
             for tunable in sorted(group._tunables.values())) + " }"
 
-    def __getitem__(self, name: str) -> TunableValue:
+    def __contains__(self, tunable: Union[str, Tunable]) -> bool:
+        """
+        Checks if the given name/tunable is in this tunable group.
+        """
+        name: str = tunable.name if isinstance(tunable, Tunable) else tunable
+        return name in self._index
+
+    def __getitem__(self, tunable: Union[str, Tunable]) -> TunableValue:
         """
         Get the current value of a single tunable parameter.
         """
+        name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return self._index[name][name]
 
-    def __setitem__(self, name: str, value: TunableValue) -> None:
+    def __setitem__(self, tunable: Union[str, Tunable], tunable_value: Union[TunableValue, Tunable]) -> TunableValue:
         """
         Update the current value of a single tunable parameter.
         """
         # Use double index to make sure we set the is_updated flag of the group
+        name: str = tunable.name if isinstance(tunable, Tunable) else tunable
+        value: TunableValue = tunable_value.value if isinstance(tunable_value, Tunable) else tunable_value
         self._index[name][name] = value
+        return self._index[name][name]
 
     def __iter__(self) -> Generator[Tuple[Tunable, CovariantTunableGroup], None, None]:
         """

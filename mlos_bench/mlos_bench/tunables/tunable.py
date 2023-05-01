@@ -233,7 +233,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"Invalid parameter type: {self._type}")
 
     @property
-    def categorical_value(self) -> str:
+    def categorical_value(self) -> Optional[str]:
         """
         Get the current value of the tunable as a number.
         """
@@ -241,6 +241,16 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return str(self._current_value)
         else:
             raise ValueError("Cannot get categorical values for a numerical tunable.")
+
+    @categorical_value.setter
+    def categorical_value(self, new_value: Optional[str]) -> Optional[str]:
+        """
+        Set the current value of the tunable.
+        """
+        assert self.is_categorical
+        assert new_value is None or isinstance(new_value, str)
+        self.value = new_value
+        return self.value
 
     @property
     def numerical_value(self) -> Union[int, float]:
@@ -254,6 +264,18 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return float(self._current_value)
         else:
             raise ValueError("Cannot get numerical value for a categorical tunable.")
+
+    @numerical_value.setter
+    def numerical_value(self, new_value: Union[int, float]) -> Union[int, float]:
+        """
+        Set the current value of the tunable.
+        """
+        # We need this coercion for the values produced by some optimizers
+        # (e.g., scikit-optimize) and for data restored from certain storage
+        # systems (where values can be strings).
+        assert self.is_numerical
+        self.value = new_value
+        return self.value
 
     @property
     def name(self) -> str:

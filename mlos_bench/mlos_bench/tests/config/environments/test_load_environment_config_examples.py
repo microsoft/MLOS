@@ -15,7 +15,9 @@ import pytest
 
 from mlos_bench.tests.config import locate_config_examples
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 _LOG = logging.getLogger(__name__)
@@ -39,9 +41,8 @@ assert configs
 
 
 @pytest.mark.parametrize("config_path", configs)
-def test_load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+def test_load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> List[Environment]:
     """Tests loading a config example."""
-
     # Make sure that any "required_args" are provided.
     global_config = {
         "experimentId": "test",
@@ -64,6 +65,8 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
         "services/remote/mock/mock_remote_exec_service.jsonc",
     ]
 
+    tunable_groups = TunableGroups()    # base tunable groups that all others get build on
+
     for mock_service_config_path in mock_service_configs:
         mock_service_config = config_loader_service.load_config(mock_service_config_path)
         config_loader_service.register(config_loader_service.build_service(
@@ -71,7 +74,51 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
                                        parent=config_loader_service,
                                       ).export())
 
-    envs = config_loader_service.load_environment_list(config_path, global_config, service=config_loader_service)
+    envs = config_loader_service.load_environment_list(
+        config_path, global_config, service=config_loader_service, tunables=tunable_groups)
     for env in envs:
         assert env is not None
         assert isinstance(env, Environment)
+    return envs
+
+
+composite_configs = filter_configs(locate_config_examples(os.path.join(
+    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/composite/")))
+assert composite_configs
+
+
+@pytest.mark.parametrize("config_path", composite_configs)
+def test_load_composite_env_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+    """Tests loading a composite env config example."""
+    envs = test_load_environment_config_examples(config_loader_service, config_path)
+    assert len(envs) == 1
+    assert isinstance(envs[0], CompositeEnv)
+    composite_env: CompositeEnv = envs[0]
+
+    # pylint: disable=protected-access
+    for child_env in composite_env._children:
+        assert child_env is not None
+        assert isinstance(child_env, Environment)
+        assert child_env.tunable_params is not None
+        (child_tunable, covariant_group) = next(iter(child_env.tunable_params))
+        assert child_tunable in composite_env.tunable_params
+
+        # Check that when we change a child env, it's value is reflected in the composite env as well.
+        # That is to say, they refer to the same objects, despite having potentially been loaded from separate configs.
+        if child_tunable.is_categorical:
+            old_cat_value = child_tunable.categorical_value
+            assert child_tunable.value == old_cat_value
+            assert covariant_group[child_tunable] == old_cat_value
+            assert composite_env.tunable_params[child_tunable] == old_cat_value
+            new_cat_value = [x for x in child_tunable.categorical_values if x != old_cat_value][0]
+            child_tunable.categorical_value = new_cat_value
+            assert child_env.tunable_params[child_tunable] == new_cat_value
+            assert composite_env.tunable_params[child_tunable] == child_tunable.categorical_value
+        elif child_tunable.is_numerical:
+            old_num_value = child_tunable.numerical_value
+            assert child_tunable.value == old_num_value
+            assert covariant_group[child_tunable] == old_num_value
+            assert composite_env.tunable_params[child_tunable] == old_num_value
+            child_tunable.numerical_value += 1
+            assert child_env.tunable_params[child_tunable] == old_num_value + 1
+            assert composite_env.tunable_params[child_tunable] == child_tunable.numerical_value
