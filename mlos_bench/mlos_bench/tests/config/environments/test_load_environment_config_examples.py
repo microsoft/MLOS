@@ -41,8 +41,16 @@ assert configs
 
 
 @pytest.mark.parametrize("config_path", configs)
-def test_load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> List[Environment]:
-    """Tests loading a config example."""
+def test_load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+    """Tests loading an environment config example."""
+    envs = load_environment_config_examples(config_loader_service, config_path)
+    for env in envs:
+        assert env is not None
+        assert isinstance(env, Environment)
+
+
+def load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> List[Environment]:
+    """Loads an environment config example."""
     # Make sure that any "required_args" are provided.
     global_config = {
         "experimentId": "test",
@@ -76,9 +84,6 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
 
     envs = config_loader_service.load_environment_list(
         config_path, tunable_groups, global_config, service=config_loader_service)
-    for env in envs:
-        assert env is not None
-        assert isinstance(env, Environment)
     return envs
 
 
@@ -90,7 +95,7 @@ assert composite_configs
 @pytest.mark.parametrize("config_path", composite_configs)
 def test_load_composite_env_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a composite env config example."""
-    envs = test_load_environment_config_examples(config_loader_service, config_path)
+    envs = load_environment_config_examples(config_loader_service, config_path)
     assert len(envs) == 1
     assert isinstance(envs[0], CompositeEnv)
     composite_env: CompositeEnv = envs[0]
