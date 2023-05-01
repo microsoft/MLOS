@@ -44,12 +44,12 @@ def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGr
 @pytest.mark.parametrize(('tunable_values', 'expected_score'), [
     ({
         "vmSize": "Standard_B2ms",
-        "rootfs": "ext4",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": 250000
-    }, 70.22),
+    }, 66.4),
     ({
         "vmSize": "Standard_B4ms",
-        "rootfs": "xfs",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": 40000
     }, 74.06),
 ])
@@ -69,12 +69,12 @@ def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
 @pytest.mark.parametrize(('tunable_values', 'expected_score'), [
     ({
         "vmSize": "Standard_B2ms",
-        "rootfs": "ext4",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": 250000
-    }, 71.25),
+    }, 67.5),
     ({
         "vmSize": "Standard_B4ms",
-        "rootfs": "xfs",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": 40000
     }, 75.1),
 ])
