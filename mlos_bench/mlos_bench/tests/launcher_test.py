@@ -28,7 +28,6 @@ def config_loader(root_path: str) -> ConfigPersistenceService:
     """
     Test fixture for ConfigPersistenceService.
     """
-    # assert path is None
     return ConfigPersistenceService({
         "config_path": [
             f"{root_path}/mlos_bench/config",
@@ -66,5 +65,5 @@ def test_launch_main_app(root_path: str,
         with open(log_path, "rt", encoding="utf-8") as fh_out:
             assert len([
                 ln.strip() for ln in fh_out.readlines()
-                if " _optimize INFO Env: Mock environment best score: 70.35" in ln
+                if " INFO Env: Mock environment best score: 70.35" in ln
             ]) == 1
