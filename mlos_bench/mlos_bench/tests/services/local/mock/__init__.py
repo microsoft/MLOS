@@ -3,5 +3,5 @@
 # Licensed under the MIT License.
 #
 """
-Mock remote services for testing purposes.
+Mock local services for testing purposes.
 """

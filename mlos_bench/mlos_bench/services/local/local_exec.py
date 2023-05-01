@@ -47,7 +47,10 @@ class LocalExecService(Service, SupportsLocalExec):
         """
         super().__init__(config, parent)
         self._temp_dir = self.config.get("temp_dir")
-        self.register([self.temp_dir_context, self.local_exec])
+        self.register([
+            self.temp_dir_context,
+            self.local_exec,
+        ])
 
     def temp_dir_context(self, path: Optional[str] = None) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
         """
