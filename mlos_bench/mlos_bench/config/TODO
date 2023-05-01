@@ -3,13 +3,19 @@
 - [ ] Add some of the global examples to a nightly CI/CD pipeline.
 
 - [ ] Per discussion with Sergiy: try switching to putting each environment's tunables along with that environment's config and scripts so that they are somewhat self contained.
-  - [ ] Need to double check that the composite env will still work this way (e.g. duplicate tunables across envs)
+  - [x] Need to double check that the composite env will still work this way (e.g. duplicate tunables across envs)
 
-- [ ] improve handling of relative paths
+    > Somewhat major changes required for that ...
 
-- [ ] json schemas for config snippets?
+- [ ] improve handling of relative paths in configs (future work)
+
+- [ ] json schemas for config snippets? (future work)
 
 ## Laundry list of other items in this PR that need splitting
+
+- [ ] Add a basic `mlos_bench` CLI test to the pipelines.
+
+- [ ] Document `mlos_bench`
 
 - [x] support for returning default config in first iteration
 
