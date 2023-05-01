@@ -119,7 +119,7 @@ class LocalEnv(Environment):
                 with open(os.path.join(temp_dir, self._dump_params_file),
                           "wt", encoding="utf-8") as fh_tunables:
                     # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
-                    json.dump(tunables.get_param_values(self._tunable_params.get_names()),
+                    json.dump(tunables.get_param_values(self._tunable_params.get_covariant_group_names()),
                               fh_tunables)
 
             (return_code, _stdout, stderr) = self._local_exec_service.local_exec(

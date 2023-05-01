@@ -60,7 +60,7 @@ class Launcher:
         self.root_env_config = self._config_loader.resolve_path(args.environment)
         tunable_groups = TunableGroups()    # base tunable groups that all others get build on
         self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, self.global_config, service=self._parent_service, tunables=tunable_groups)
+            self.root_env_config, tunable_groups, self.global_config, service=self._parent_service)
 
         self.teardown: bool = args.teardown
 

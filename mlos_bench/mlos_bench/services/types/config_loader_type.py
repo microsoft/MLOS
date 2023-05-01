@@ -59,8 +59,8 @@ class SupportsConfigLoading(Protocol):
         """
 
     def build_environment(self, config: dict,
+                          tunables: "TunableGroups",
                           global_config: Optional[dict] = None,
-                          tunables: Optional["TunableGroups"] = None,
                           service: Optional["Service"] = None) -> "Environment":
         """
         Factory method for a new environment with a given config.
@@ -72,10 +72,11 @@ class SupportsConfigLoading(Protocol):
                 "name": Human-readable string describing the environment;
                 "class": FQN of a Python class to instantiate;
                 "config": Free-format dictionary to pass to the constructor.
+        tunables : TunableGroups
+            A (possibly empty) collection of groups of tunable parameters for
+            all environments.
         global_config : dict
             Global parameters to add to the environment config.
-        tunables : TunableGroups
-            A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
@@ -87,8 +88,10 @@ class SupportsConfigLoading(Protocol):
         """
 
     def load_environment_list(
-            self, json_file_name: str, global_config: Optional[dict] = None,
-            tunables: Optional["TunableGroups"] = None, service: Optional["Service"] = None) -> List["Environment"]:
+            self, json_file_name: str,
+            tunables: "TunableGroups",
+            global_config: Optional[dict] = None,
+            service: Optional["Service"] = None) -> List["Environment"]:
         """
         Load and build a list of environments from the config file.
 
@@ -97,10 +100,10 @@ class SupportsConfigLoading(Protocol):
         json_file_name : str
             The environment JSON configuration file.
             Can contain either one environment or a list of environments.
+        tunables : TunableGroups
+            A (possibly empty) collection of tunables to add to the environment.
         global_config : dict
             Global parameters to add to the environment config.
-        tunables : TunableGroups
-            An optional collection of tunables to add to the environment.
         service : Service
             An optional reference of the parent service to mix in.
 

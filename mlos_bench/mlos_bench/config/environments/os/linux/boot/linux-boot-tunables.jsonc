@@ -48,7 +48,7 @@
                 "type": "categorical",
                 "default": null,
                 "values": [null, "nopvspin"]
-            },
+            }
         }
     }
 }

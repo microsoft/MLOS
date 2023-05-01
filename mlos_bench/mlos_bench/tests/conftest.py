@@ -41,11 +41,11 @@ def tunable_groups() -> TunableGroups:
         "boot": {
             "cost": 300,
             "params": {
-                "rootfs": {
-                    "description": "Root file system",
+                "idle": {
+                    "description": "Idling method",
                     "type": "categorical",
-                    "default": "xfs",
-                    "values": ["xfs", "ext4", "ext2"]
+                    "default": "halt",
+                    "values": ["halt", "mwait", "noidle"]
                 }
             }
         },

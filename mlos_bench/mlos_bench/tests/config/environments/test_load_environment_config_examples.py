@@ -65,7 +65,7 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
         "services/remote/mock/mock_remote_exec_service.jsonc",
     ]
 
-    tunable_groups = TunableGroups()    # base tunable groups that all others get build on
+    tunable_groups = TunableGroups()    # base tunable groups that all others get built on
 
     for mock_service_config_path in mock_service_configs:
         mock_service_config = config_loader_service.load_config(mock_service_config_path)
@@ -75,7 +75,7 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
                                       ).export())
 
     envs = config_loader_service.load_environment_list(
-        config_path, global_config, service=config_loader_service, tunables=tunable_groups)
+        config_path, tunable_groups, global_config, service=config_loader_service)
     for env in envs:
         assert env is not None
         assert isinstance(env, Environment)
@@ -95,8 +95,7 @@ def test_load_composite_env_config_examples(config_loader_service: ConfigPersist
     assert isinstance(envs[0], CompositeEnv)
     composite_env: CompositeEnv = envs[0]
 
-    # pylint: disable=protected-access
-    for child_env in composite_env._children:
+    for child_env in composite_env.children:
         assert child_env is not None
         assert isinstance(child_env, Environment)
         assert child_env.tunable_params is not None

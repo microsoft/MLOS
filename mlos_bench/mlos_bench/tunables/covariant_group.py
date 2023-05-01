@@ -132,9 +132,13 @@ class CovariantTunableGroup:
         """
         return self._tunables.keys()
 
-    def get_values(self) -> Dict[str, TunableValue]:
+    def get_tunable_values_dict(self) -> Dict[str, TunableValue]:
         """
-        Get current values of all tunables in the group.
+        Get current values of all tunables in the group as a dict.
+
+        Returns
+        -------
+        tunables : Dict[str, TunableValue]
         """
         return {name: tunable.value for (name, tunable) in self._tunables.items()}
 
@@ -167,6 +171,15 @@ class CovariantTunableGroup:
         """
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         return self._tunables[name]
+
+    def get_tunables(self) -> Iterable[Tunable]:
+        """Gets the set of tunables for this CovariantTunableGroup.
+
+        Returns
+        -------
+        Iterable[Tunable]
+        """
+        return self._tunables.values()
 
     def __contains__(self, tunable: Union[str, Tunable]) -> bool:
         name: str = tunable.name if isinstance(tunable, Tunable) else tunable
