@@ -24,40 +24,30 @@ def root_path() -> str:
 
 
 @pytest.fixture
-def config_loader(root_path: str) -> ConfigPersistenceService:
-    """
-    Test fixture for ConfigPersistenceService.
-    """
-    return ConfigPersistenceService({
-        "config_path": [
-            f"{root_path}/mlos_bench/config",
-            f"{root_path}/mlos_bench/examples",
-        ]
-    })
-
-
-@pytest.fixture
-def local_exec_service(config_loader: ConfigPersistenceService) -> LocalExecService:
+def local_exec_service() -> LocalExecService:
     """
     Test fixture for LocalExecService.
     """
-    return LocalExecService(parent=config_loader)
+    return LocalExecService(parent=ConfigPersistenceService({
+        "config_path": [
+            "mlos_bench/config",
+            "mlos_bench/examples",
+        ]
+    }))
 
 
 def test_launch_main_app(root_path: str,
-                         config_loader: ConfigPersistenceService,
                          local_exec_service: LocalExecService) -> None:
     """
     Run mlos_bench command-line application with mock config and check the results in the log.
     """
-    config_path = config_loader.resolve_path("mock-1shot.jsonc")
-    assert os.path.exists(config_path)
-
     with local_exec_service.temp_dir_context() as temp_dir:
 
         log_path = os.path.join(temp_dir, "mock-1shot.log")
         (return_code, _stdout, _stderr) = local_exec_service.local_exec([
-            f"./mlos_bench/mlos_bench/run.py --config '{config_path}' --log_file '{log_path}'"
+            "./mlos_bench/mlos_bench/run.py" +
+            " --config mlos_bench/examples/mock-1shot.jsonc" +
+            f" --log_file '{log_path}'"
         ], cwd=root_path)
 
         assert return_code == 0
