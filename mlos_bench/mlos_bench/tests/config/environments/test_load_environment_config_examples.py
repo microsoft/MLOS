@@ -41,14 +41,26 @@ assert configs
 @pytest.mark.parametrize("config_path", configs)
 def test_load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
+
+    # Make sure that any "required_args" are provided.
     global_config = {
         "experimentId": "test",
         "trialId": 1,
+
+        "mountPoint": "/mnt/tmp",
+
+        # FIXME: The setup ubuntu configs currently use these values in their mounting scripts.
+        # We should abstract that out so those details are only needed when a service that uses those is used.
+        "storageAccountName": "foo",
+        "storageAccountKey": "bar",
+        "storageFileShareName": "baz",
     }
 
+    # Make sure we have the required services for the envs being used.
     mock_service_configs = [
-        "services/remote/mock/mock_vm_service.jsonc",
         "services/local/mock/mock_local_exec_service.jsonc",
+        "services/remote/mock/mock_fileshare_service.jsonc",
+        "services/remote/mock/mock_vm_service.jsonc",
     ]
 
     for mock_service_config_path in mock_service_configs:
