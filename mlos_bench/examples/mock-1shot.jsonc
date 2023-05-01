@@ -3,6 +3,7 @@
 // Licensed under the MIT License.
 //
 
+// *** DO *NOT* CHANGE! This config is used for tests! ***
 {
     "config_path": [
         "mlos_bench/config",
@@ -19,7 +20,7 @@
 
     // "globals": ["global_config.json"],
 
-    "experimentId": "RedisBenchMock",
+    "experimentId": "MockExperiment",
     "trialId": 1,
 
     "teardown": true,
