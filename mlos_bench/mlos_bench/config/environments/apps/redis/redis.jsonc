@@ -11,7 +11,7 @@
             "required_args": ["experimentId", "trialId"],
 
             // Dump tunable parameters to a local JSON file:
-            "dump_params_file": "$tmpdir/redis-params.json",
+            "dump_params_file": "redis-params.json",
 
             "setup": [
                 "environment/apps/redis/local/scripts/generate_redis_config.py redis-params.json redis.cfg"
@@ -19,8 +19,8 @@
 
             // TODO: improve handling of relative paths
             "upload": [
-                {"from": "$tmpdir/redis.cfg", "to": "$experimentId/$trialId/input/redis.cfg"},
-                {"from": "./remote/scripts/", "to": "$experimentId/$trialId/scripts"}
+                {"from": "redis.cfg", "to": "$experimentId/$trialId/input/redis.cfg"},
+                {"from": "remote/scripts/", "to": "$experimentId/$trialId/scripts"}
             ]
         }
     },
