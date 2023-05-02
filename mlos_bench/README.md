@@ -7,6 +7,7 @@ It makes use of the `mlos-core` package for its optimizer.
 ## Table of Contents
 
 <!-- markdownlint-disable MD007 -->
+
 <!-- TOC -->
 
 - [mlos-bench](#mlos-bench)
@@ -17,6 +18,7 @@ It makes use of the `mlos-core` package for its optimizer.
     - [Optimization](#optimization)
 
 <!-- /TOC -->
+
 <!-- markdownlint-enable MD007 -->
 
 ## Description
