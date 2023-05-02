@@ -80,7 +80,7 @@ def test_overlapping_group_merge_tunable_groups(tunable_groups_config: dict) -> 
                 "noidle": {
                     "description": "(different) idling method",
                     "type": "categorical",
-                    "default": "mwait",
+                    "default": "nomwait",
                     "values": ["nohalt", "nomwait", "idle"]
                 }
             }
