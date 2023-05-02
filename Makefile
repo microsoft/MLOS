@@ -215,7 +215,6 @@ mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
 	! ( unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 tests/ )
 	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(MODULE_NAME)-*-py3-none-any.whl $(MODULE_NAME)-latest-py3-none-any.whl
 
-
 .PHONY: dist-test-env-clean
 dist-test-env-clean:
 	# Remove any existing mlos-dist-test environment so we can start clean.
@@ -232,11 +231,10 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-
 	# Create a clean test environment for checking the wheel files.
 	$(MAKE) dist-test-env-clean
 	conda create -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) python=$(PYTHON_VERS_REQ)
-	conda install -y ${CONDA_INFO_LEVEL} -n mlos-dist-test-$(PYTHON_VERSION) pytest pytest-timeout pytest-forked pytest-xdist
 	# Test a clean install of the mlos_core wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full]"
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full-tests]"
 	# Test a clean install of the mlos_bench wheel.
-	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full]"
+	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full-tests]"
 	touch $@
 
 .PHONY: dist-test
@@ -282,7 +280,9 @@ doc/source/api/mlos_bench/modules.rst: $(MLOS_BENCH_PYTHON_FILES) $(COMMON_DOC_F
 	rm -rf doc/source/api/mlos_bench
 	cd doc/ && conda run -n ${CONDA_ENV_NAME} sphinx-apidoc -f -e -M -o source/api/mlos_bench/ ../mlos_bench/ ../mlos_*/setup.py
 	# Save the help output of the mlos_bench scripts to include in the documentation.
-	conda run -n ${CONDA_ENV_NAME} mlos_bench/mlos_bench/run.py --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
+	# First make sure that the latest version of mlos_bench is installed (since it uses git based tagging).
+	conda run -n ${CONDA_ENV_NAME} pip install -e mlos_core -e mlos_bench
+	conda run -n ${CONDA_ENV_NAME} mlos_bench --help > doc/source/api/mlos_bench/mlos_bench.run.usage.txt
 	echo ".. literalinclude:: mlos_bench.run.usage.txt" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 	echo "   :language: none" >> doc/source/api/mlos_bench/mlos_bench.run.rst
 

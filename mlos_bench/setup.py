@@ -58,6 +58,11 @@ setup(
     package_data={
         '': ['py.typed', '**/*.pyi'],
     },
+    entry_points={
+        'console_scripts': [
+            'mlos_bench = mlos_bench.run:_main',
+        ],
+    },
     install_requires=[
         'mlos-core==' + _VERSION,
         'requests',
