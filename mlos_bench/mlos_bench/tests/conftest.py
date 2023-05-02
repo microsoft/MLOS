@@ -21,47 +21,47 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 TUNABLE_GROUPS_JSON = """
 {
-        "provision": {
-            "cost": 1000,
-            "params": {
-                "vmSize": {
-                    "description": "Azure VM size",
-                    "type": "categorical",
-                    "default": "Standard_B4ms",
-                    "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
-                }
+    "provision": {
+        "cost": 1000,
+        "params": {
+            "vmSize": {
+                "description": "Azure VM size",
+                "type": "categorical",
+                "default": "Standard_B4ms",
+                "values": ["Standard_B2s", "Standard_B2ms", "Standard_B4ms"]
             }
-        },
-        "boot": {
-            "cost": 300,
-            "params": {
-                "idle": {
-                    "description": "Idling method",
-                    "type": "categorical",
-                    "default": "halt",
-                    "values": ["halt", "mwait", "noidle"]
-                }
+        }
+    },
+    "boot": {
+        "cost": 300,
+        "params": {
+            "idle": {
+                "description": "Idling method",
+                "type": "categorical",
+                "default": "halt",
+                "values": ["halt", "mwait", "noidle"]
             }
-        },
-        "kernel": {
-            "cost": 1,
-            "params": {
-                "kernel_sched_migration_cost_ns": {
-                    "description": "Cost of migrating the thread to another core",
-                    "type": "int",
-                    "default": -1,
-                    "range": [-1, 500000],
-                    "special": [-1]
-                },
-                "kernel_sched_latency_ns": {
-                    "description": "Initial value for the scheduler period",
-                    "type": "int",
-                    "default": 2000000,
-                    "range": [0, 1000000000]
-                }
+        }
+    },
+    "kernel": {
+        "cost": 1,
+        "params": {
+            "kernel_sched_migration_cost_ns": {
+                "description": "Cost of migrating the thread to another core",
+                "type": "int",
+                "default": -1,
+                "range": [-1, 500000],
+                "special": [-1]
+            },
+            "kernel_sched_latency_ns": {
+                "description": "Initial value for the scheduler period",
+                "type": "int",
+                "default": 2000000,
+                "range": [0, 1000000000]
             }
         }
     }
+}
 """
 
 
