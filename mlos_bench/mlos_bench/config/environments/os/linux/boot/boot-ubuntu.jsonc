@@ -31,7 +31,7 @@
             // In particular this should let us resolve the path to the script more easily.
             // Alternatively: we could provide a "CWD" argument to the setup command.
             "setup": [
-                "environment/apps/redis/linux-boot/generate_grub_config.py boot-params.json grub.cfg"
+                "environment/os/linux/boot/generate_grub_config.py boot-params.json grub.cfg"
             ],
 
             "upload": [
