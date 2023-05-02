@@ -33,6 +33,7 @@
         "mwait",
         "ndarray",
         "ndim",
+        "noidle",
         "nsmallest",
         "numpy",
         "obvs",

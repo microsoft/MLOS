@@ -77,7 +77,8 @@ class TunableGroups:
         assert group.name not in self._tunable_groups, f"Duplicate covariant tunable group name {group.name} in {self}"
         self._tunable_groups[group.name] = group
         for tunable in group.get_tunables():
-            assert tunable.name not in self._index, f"Duplicate Tunable {tunable.name} from group {group.name} in {self}"
+            if tunable.name in self._index:
+                raise ValueError(f"Duplicate Tunable {tunable.name} from group {group.name} in {self}")
             self._index[tunable.name] = group
 
     def merge(self, tunables: "TunableGroups") -> "TunableGroups":
@@ -109,9 +110,10 @@ class TunableGroups:
                 self._add_group(group)
             else:
                 # Check that there's no overlap in the tunables.
-                assert self._tunable_groups[group.name] == group, \
-                    f"Overlapping covariant tunable group name {group.name} in {self._tunable_groups[group.name]} and {tunables}"
-                # TODO: In this case, should we overwrite the tunables with the existing values?
+                if self._tunable_groups[group.name] != group:
+                    raise ValueError(f"Overlapping covariant tunable group name {group.name} " +
+                                     "in {self._tunable_groups[group.name]} and {tunables}")
+                # TODO: Else, should we overwrite tunables with the self values?
         return self
 
     def __repr__(self) -> str:
