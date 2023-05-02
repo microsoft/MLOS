@@ -110,7 +110,7 @@ class TunableGroups:
             else:
                 # Check that there's no overlap in the tunables.
                 assert self._tunable_groups[group.name] == group, \
-                    f"Overlapping covariant tunable group name {group.name} in {self} and {tunables}"
+                    f"Overlapping covariant tunable group name {group.name} in {self._tunable_groups[group.name]} and {tunables}"
                 # TODO: In this case, should we overwrite the tunables with the existing values?
         return self
 
