@@ -4,6 +4,23 @@ This directory contains the code for the `mlos-bench` experiment runner package.
 
 It makes use of the `mlos-core` package for its optimizer.
 
+## Table of Contents
+
+<!-- markdownlint-disable MD007 -->
+
+<!-- TOC -->
+
+- [mlos-bench](#mlos-bench)
+    - [Table of Contents](#table-of-contents)
+    - [Description](#description)
+    - [Features](#features)
+    - [Quickstart](#quickstart)
+    - [Optimization](#optimization)
+
+<!-- /TOC -->
+
+<!-- markdownlint-enable MD007 -->
+
 ## Description
 
 `mlos-bench` is an end-to-end benchmarking service that can be independently launched for experimentation but is also integrated with `mlos-core` as its optimizer for OS tuning.
@@ -102,40 +119,40 @@ Create and activate the environment with:
 
 7. Connect the [`Environment`](./mlos_bench/environments/), [`Service`](./mlos_bench/services/), [`Storage`](./mlos_bench/storage/), and [`Optimizer`](./mlos_bench/optimizers/) configurations in a top-level [JSON5](https://spec.json5.org) configuration - say, `config_bench.jsonc`:
 
-```jsonc
-{
-    "config_path": [                                 // Locations of config files and scripts
-        "my-config",
-        "mlos_bench/examples"
-    ],
+    ```jsonc
+    {
+        "config_path": [                                 // Locations of config files and scripts
+            "my-config",
+            "mlos_bench/examples"
+        ],
 
-    "environment": "env-azure-ubuntu-redis.jsonc",   // Root config (location relative to config_path)
+        "environment": "env-azure-ubuntu-redis.jsonc",   // Root config (location relative to config_path)
 
-    "tunable_values": [                              // Key/value pairs of tunable parameters. Uses config_path
-        "tunable-values-example.json"
-    ],
+        "tunable_values": [                              // Key/value pairs of tunable parameters. Uses config_path
+            "tunable-values-example.json"
+        ],
 
-    "globals": [                                     // Config generated at step 2. Uses config_path
-        "global_config.json"
-    ],
+        "globals": [                                     // Config generated at step 2. Uses config_path
+            "global_config.json"
+        ],
 
-    "teardown": false,                               // Do not shutdown/deprovision a VM
+        "teardown": false,                               // Do not shutdown/deprovision a VM
 
-    "log_file": "os-autotune.log",                   // Log file (also prints to stdout)
-    "log_level": 10,                                 // Log level = DEBUG
+        "log_file": "os-autotune.log",                   // Log file (also prints to stdout)
+        "log_level": 10,                                 // Log level = DEBUG
 
-    "experimentId": "RedisBench",                    // Experiment ID (can be in global_config.json)
-    "trialId": 1                                     // Trial ID (can come from the persistent storage service)
-}
-```
+        "experimentId": "RedisBench",                    // Experiment ID (can be in global_config.json)
+        "trialId": 1                                     // Trial ID (can come from the persistent storage service)
+    }
+    ```
 
 8. Run our configuration through `mlos_bench`:
 
-```sh
-mlos_bench --config "config_bench.jsonc"
-```
+    ```sh
+    mlos_bench --config "config_bench.jsonc"
+    ```
 
-This should run a single trial with the given tunable values, write teh results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter).
+    This should run a single trial with the given tunable values, write teh results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter).
 
 9. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.
 
@@ -176,6 +193,4 @@ It also stores the results of each trial in the SQLite3 database (configured via
 
 > Note that any config parameter (or even all of them) can be overridden by the corresponding command-line options, e.g.
 >
-> ```sh
-mlos_bench --config "config_opt.jsonc" --log_level 20 --trialId 1000
-> ```
+> `mlos_bench --config "config_opt.jsonc" --log_level 20 --trialId 1000`

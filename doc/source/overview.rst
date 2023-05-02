@@ -98,6 +98,8 @@ Main
 
     The script to run the benchmarks or the optimization loop.
 
+    Also available as `mlos_bench` command line tool.
+
 Benchmark Environments
 ======================
 .. currentmodule:: mlos_bench.environments
