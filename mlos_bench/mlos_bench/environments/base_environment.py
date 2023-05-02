@@ -167,7 +167,7 @@ class Environment(metaclass=abc.ABCMeta):
             Free-format dictionary that contains the new environment configuration.
         """
         return tunables.get_param_values(
-            group_names=list(self._tunable_params.get_names()),
+            group_names=list(self._tunable_params.get_covariant_group_names()),
             into_params=self._const_args.copy())
 
     @property
