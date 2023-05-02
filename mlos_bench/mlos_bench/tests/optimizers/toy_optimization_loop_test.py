@@ -58,7 +58,7 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
-                                mock_opt: MockOptimizer) -> None:
+                                            mock_opt: MockOptimizer) -> None:
     """
     Toy optimization loop with mock environment and optimizer.
     """
@@ -89,7 +89,7 @@ def test_scikit_gp_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_scikit_gp_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
-                                     scikit_gp_opt: MlosCoreOptimizer) -> None:
+                                                 scikit_gp_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and Scikit GP optimizer.
     """
@@ -120,7 +120,7 @@ def test_scikit_et_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_scikit_et_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
-                                     scikit_et_opt: MlosCoreOptimizer) -> None:
+                                                 scikit_et_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and Scikit ET optimizer.
     """

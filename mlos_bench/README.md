@@ -12,7 +12,7 @@ It makes use of the `mlos-core` package for its optimizer.
 
 ## Features
 
-With a JSON config file and command line parameters as input, `mlos-bench` streamlines workload performance measurement by automating the following benchmarking steps:
+With a [JSON5](https://spec.json5.org) config file and command line parameters as input, `mlos-bench` streamlines workload performance measurement by automating the following benchmarking steps:
 
 1. Set up & clean up benchmark and application configuration
     - **Ease of use:** Mlos-bench abstracts away controls for managing VMs in Azure, e.g., setup, teardown, stop, deprovision, and reboot. Get visibility into VM status through Azure Portal, ensuring that a VM is provisioned & running before issuing commands to it.
@@ -100,43 +100,82 @@ Create and activate the environment with:
     conda activate mlos
     ```
 
-7. Run our configuration through `mlos_bench`.
+7. Connect the [`Environment`](./mlos_bench/environments/), [`Service`](./mlos_bench/services/), [`Storage`](./mlos_bench/storage/), and [`Optimizer`](./mlos_bench/optimizers/) configurations in a top-level [JSON5](https://spec.json5.org) configuration - say, `config_bench.jsonc`:
 
-    We can also copy the output into log file `os-autotune.log` as follows:
+```jsonc
+{
+    "config_path": [                                 // Locations of config files and scripts
+        "my-config",
+        "mlos_bench/examples"
+    ],
 
-    ```sh
-    ./mlos_bench/mlos_bench/run.py \
-        --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
-        --environment env-azure-ubuntu-redis.jsonc \         # Root config (location relative to --config-path)
-        --tunables tunable-values-example.json \             # Key/value pairs of tunable parameters. Uses --config-path
-        --globals global_config.json \                       # Config generated at step 2. Uses --config-path
-        --log ./os-autotune.log \                            # Log file (also prints to stdout)
-        --log-level 10 \                                     # Log level = DEBUG
-        --no-teardown \                                      # Do not shutdown/deprovision a VM
-        --experimentId RedisBench \                          # Experiment ID (can be in global_config.json)
-        --trialId 1                                          # Trial ID (can come from the persistent storage service)
-    ```
+    "environment": "env-azure-ubuntu-redis.jsonc",   // Root config (location relative to config_path)
 
-8. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.
+    "tunable_values": [                              // Key/value pairs of tunable parameters. Uses config_path
+        "tunable-values-example.json"
+    ],
+
+    "globals": [                                     // Config generated at step 2. Uses config_path
+        "global_config.json"
+    ],
+
+    "teardown": false,                               // Do not shutdown/deprovision a VM
+
+    "log_file": "os-autotune.log",                   // Log file (also prints to stdout)
+    "log_level": 10,                                 // Log level = DEBUG
+
+    "experimentId": "RedisBench",                    // Experiment ID (can be in global_config.json)
+    "trialId": 1                                     // Trial ID (can come from the persistent storage service)
+}
+```
+
+8. Run our configuration through `mlos_bench`:
+
+```sh
+mlos_bench --config "config_bench.jsonc"
+```
+
+This should run a single trial with the given tunable values, write teh results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter).
+
+9. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.
 
 ## Optimization
 
 Searching for an optimal set of tunable parameters is very similar to running a single benchmark.
-Here's an example of how to run the optimization script:
+All we have to do is specifying the [`Storage`](./mlos_bench/storage/) and [`Optimizer`](./mlos_bench/optimizers/) in the top-level configuration, e.g.:
 
-```sh
-./mlos_bench/mlos_bench/run.py \
-    --config-path ./my-config ./mlos_bench/examples . \  # Locations of config files and scripts
-    --environment env-azure-ubuntu-redis.jsonc \         # Root config (location relative to --config-path)
-    --optimizer ./optimizers/mlos_core_opt.jsonc \       # Optimizer config (relative to --config-path)
-    --storage ./storage/duckdb.jsonc \                   # Storage config (relative to --config-path)
-    --globals global_config.json \                       # Config generated at step 2. Uses --config-path
-    --log ./os-autotune.log \                            # Log file (also prints to stdout)
-    --log-level 10 \                                     # Log level = DEBUG
-    --no-teardown \                                      # Do not shutdown/deprovision a VM
-    --experimentId RedisBench \                          # Experiment ID (can be in global_config.json)
-    --trialId 1                                          # Trial ID (can come from the persistent storage service)
+```jsonc
+{
+    "config_path": [                                 // Locations of config files and scripts
+        "my-config",
+        "mlos_bench/examples"
+    ],
+
+    "environment": "env-azure-ubuntu-redis.jsonc",   // Root config (location relative to config_path)
+    "storage": "storage/sqlite.jsonc",               // Store data in a local SQLite3 file
+    "optimizer": "optimizers/mlos_core_opt.jsonc",   // Use mlos_core optimizer
+
+    "globals": [
+        "global_config.json"                         // Config generated at step 2. Uses config_path
+    ],
+
+    "teardown": false,                               // Do not shutdown/deprovision a VM
+
+    "log_file": "os-autotune.log",                   // Log file (also prints to stdout)
+    "log_level": 10,                                 // Log level = DEBUG
+
+    "experimentId": "RedisBench",                    // Experiment ID (can be in global_config.json)
+    "trialId": 1                                     // Start ID of the trial
+}
 ```
 
-The only difference between the two invocations is that the latter has the `--optimizer` parameter instead of using a fixed set of tunables via `--tunables` option.
-It also stores the results of each trial in the DuckDB database (configured via `--storage`).
+> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-1shot.jsonc](examples/azure-redis-1shot.jsonc).
+
+The only difference between the two configurations is that the latter has the `optimizer` parameter instead of using a fixed set of tunables via `tunable_values` option.
+It also stores the results of each trial in the SQLite3 database (configured via `storage`).
+
+> Note that any config parameter (or even all of them) can be overridden by the corresponding command-line options, e.g.
+>
+> ```sh
+mlos_bench --config "config_opt.jsonc" --log_level 20 --trialId 1000
+> ```
