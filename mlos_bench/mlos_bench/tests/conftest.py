@@ -6,6 +6,8 @@
 Common fixtures for mock TunableGroups and Environment objects.
 """
 
+from typing import Any, Dict
+
 import json
 import pytest
 
@@ -64,11 +66,13 @@ TUNABLE_GROUPS_JSON = """
 
 
 @pytest.fixture
-def tunable_groups_config() -> dict:
+def tunable_groups_config() -> Dict[str, Any]:
     """
     Fixture to get the JSON string for the tunable groups.
     """
-    return json.loads(TUNABLE_GROUPS_JSON)
+    conf = json.loads(TUNABLE_GROUPS_JSON)
+    assert isinstance(conf, dict)
+    return conf
 
 
 @pytest.fixture
