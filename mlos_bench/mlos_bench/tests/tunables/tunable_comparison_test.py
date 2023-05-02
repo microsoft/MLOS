@@ -8,7 +8,9 @@ Unit tests for checking tunable comparisons.
 
 import pytest
 
+from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable import Tunable
+from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def test_tunable_int_value_lt(tunable_int: Tunable) -> None:
@@ -87,3 +89,13 @@ def test_tunable_lt_different_object(tunable_int: Tunable) -> None:
     assert (tunable_int < "foo") is False
     with pytest.raises(TypeError):
         assert "foo" < tunable_int      # type: ignore[operator]
+
+
+def test_tunable_group_ne_object(tunable_groups: TunableGroups) -> None:
+    """
+    Tests that the __eq__ operator works as expected with other objects.
+    """
+
+    assert tunable_groups != "foo"
+    (tunable, covariant_group) = next(iter(tunable_groups))
+    assert tunable != covariant_group
