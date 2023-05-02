@@ -6,6 +6,7 @@
 Common fixtures for mock TunableGroups and Environment objects.
 """
 
+import json
 import pytest
 
 from mlos_bench.environments.mock_env import MockEnv
@@ -16,18 +17,8 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 # -- Ignore pylint complaints about pytest references to
 # `tunable_groups` fixture as both a function and a parameter.
 
-
-@pytest.fixture
-def tunable_groups() -> TunableGroups:
-    """
-    A test fixture that produces a mock TunableGroups.
-
-    Returns
-    -------
-    tunable_groups : TunableGroups
-        A new TunableGroups object for testing.
-    """
-    tunables = TunableGroups({
+TUNABLE_GROUPS_JSON = """
+{
         "provision": {
             "cost": 1000,
             "params": {
@@ -68,7 +59,29 @@ def tunable_groups() -> TunableGroups:
                 }
             }
         }
-    })
+    }
+"""
+
+
+@pytest.fixture
+def tunable_groups_config() -> dict:
+    """
+    Fixture to get the JSON string for the tunable groups.
+    """
+    return json.loads(TUNABLE_GROUPS_JSON)
+
+
+@pytest.fixture
+def tunable_groups(tunable_groups_config: dict) -> TunableGroups:
+    """
+    A test fixture that produces a mock TunableGroups.
+
+    Returns
+    -------
+    tunable_groups : TunableGroups
+        A new TunableGroups object for testing.
+    """
+    tunables = TunableGroups(tunable_groups_config)
     tunables.reset()
     return tunables
 
