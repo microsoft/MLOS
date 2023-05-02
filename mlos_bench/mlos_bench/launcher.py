@@ -42,7 +42,8 @@ class Launcher:
     def __init__(self, description: str):
 
         _LOG.info("Launch: %s", description)
-        (args, args_rest) = self._parse_args(description)
+        parser = argparse.ArgumentParser(description=description)
+        (args, args_rest) = self._parse_args(parser)
 
         # Bootstrap config loader: command line takes priority.
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
@@ -75,7 +76,10 @@ class Launcher:
         )
 
         env_path = args.environment or config.get("environment")
-        assert env_path, "Environment configuration file is required"
+        if not env_path:
+            _LOG.error("No environment config specified.")
+            parser.error("At least the Environment config must be specified." +
+                         " Run `mlos_bench --help` and consult `README.md` for more info.")
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
         self.environment: Environment = self._config_loader.load_environment(
@@ -89,12 +93,10 @@ class Launcher:
         self.teardown = args.teardown or config.get("teardown", True)
 
     @staticmethod
-    def _parse_args(description: str) -> Tuple[argparse.Namespace, List[str]]:
+    def _parse_args(parser: argparse.ArgumentParser) -> Tuple[argparse.Namespace, List[str]]:
         """
         Parse the command line arguments.
         """
-        parser = argparse.ArgumentParser(description=description)
-
         parser.add_argument(
             '--config', required=False,
             help='Main JSON5 configuration file. Its keys are the same as the' +
