@@ -22,25 +22,25 @@ def mock_configurations() -> list:
     return [
         ({
             "vmSize": "Standard_B4ms",
-            "rootfs": "xfs",
+            "idle": "halt",
             "kernel_sched_migration_cost_ns": -1,
             "kernel_sched_latency_ns": 2000000,
         }, 88.88),
         ({
             "vmSize": "Standard_B4ms",
-            "rootfs": "xfs",
+            "idle": "halt",
             "kernel_sched_migration_cost_ns": 13111,
             "kernel_sched_latency_ns": 796233790,
         }, 88.88),
         ({
             "vmSize": "Standard_B2ms",
-            "rootfs": "xfs",
+            "idle": "halt",
             "kernel_sched_migration_cost_ns": 117025,
             "kernel_sched_latency_ns": 149827706,
         }, 66.66),
         ({
             "vmSize": "Standard_B4ms",
-            "rootfs": "xfs",
+            "idle": "halt",
             "kernel_sched_migration_cost_ns": 354784,
             "kernel_sched_latency_ns": 795285932,
         }, 99.99),
