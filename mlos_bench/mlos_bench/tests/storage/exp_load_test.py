@@ -47,8 +47,8 @@ def test_exp_trial_pending_many(exp_storage_memory_sql: Storage.Experiment,
     """
     Start THREE trials and check that both are pending.
     """
-    config1 = tunable_groups.copy().assign({'rootfs': 'ext4'})
-    config2 = tunable_groups.copy().assign({'rootfs': 'ext2'})
+    config1 = tunable_groups.copy().assign({'idle': 'mwait'})
+    config2 = tunable_groups.copy().assign({'idle': 'noidle'})
     trial_ids = {
         exp_storage_memory_sql.new_trial(config1).trial_id,
         exp_storage_memory_sql.new_trial(config2).trial_id,
