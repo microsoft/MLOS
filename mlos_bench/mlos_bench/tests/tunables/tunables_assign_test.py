@@ -20,7 +20,7 @@ def test_tunables_assign_unknown_param(tunable_groups: TunableGroups) -> None:
     with pytest.raises(KeyError):
         tunable_groups.assign({
             "vmSize": "Standard_B2ms",
-            "rootfs": "ext4",
+            "idle": "mwait",
             "UnknownParam_1": 1,
             "UnknownParam_2": "invalid-value"
         })
