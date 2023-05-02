@@ -30,13 +30,30 @@ def test_categorical_required_params() -> None:
 
 def test_categorical_wrong_params() -> None:
     """
-    Check that various required definitions are present for categorical tunables.
+    Disallow range param for categorical tunables.
     """
     json_config = """
     {
         "type": "categorical",
         "values": ["foo", "bar", "foo"],
         "range": [0, 1],
+        "default": "foo"
+    }
+    """
+    config = json.loads(json_config)
+    with pytest.raises(ValueError):
+        Tunable(name='test', config=config)
+
+
+def test_categorical_disallow_special_values() -> None:
+    """
+    Disallow special values for categorical values.
+    """
+    json_config = """
+    {
+        "type": "categorical",
+        "values": ["foo", "bar", "foo"],
+        "special": ["baz"],
         "default": "foo"
     }
     """

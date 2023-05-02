@@ -232,7 +232,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return value in self._values
         elif self.is_numerical and self._range:
             if isinstance(value, (int, float)):
-                return bool(self._range[0] <= value <= self._range[1]) or value == self._default
+                # TODO: allow special values outside of range?
+                return bool(self._range[0] <= value <= self._range[1]) # or value == self._default
             else:
                 raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
         else:

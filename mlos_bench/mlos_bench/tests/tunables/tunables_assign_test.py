@@ -66,6 +66,30 @@ def test_tunables_assign_coerce_str_invalid(tunable_groups: TunableGroups) -> No
         tunable_groups.assign({"kernel_sched_migration_cost_ns": "1.1"})
 
 
+def test_tunable_assign_str_to_numerical(tunable_int: Tunable) -> None:
+    """
+    Check str to int coercion.
+    """
+    with pytest.raises(ValueError):
+        tunable_int.numerical_value = "foo" # type: ignore[assignment]
+
+
+def test_tunable_assign_int_to_numerical_value(tunable_int: Tunable) -> None:
+    """
+    Check numerical value assignment.
+    """
+    tunable_int.numerical_value = 10.0
+    assert tunable_int.numerical_value == 10
+
+
+def test_tunable_assign_float_to_numerical_value(tunable_float: Tunable) -> None:
+    """
+    Check numerical value assignment.
+    """
+    tunable_float.numerical_value = 0.1
+    assert tunable_float.numerical_value == 0.1
+
+
 def test_tunable_assign_str_to_int(tunable_int: Tunable) -> None:
     """
     Check str to int coercion.
