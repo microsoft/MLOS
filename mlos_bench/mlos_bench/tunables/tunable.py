@@ -80,10 +80,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             if self._special is not None:
                 raise ValueError("Special values must be None for the categorical type")
         elif self.is_numerical:
+            if self._values is not None:
+                raise ValueError("Values must be None for the numerical type")
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
                 raise ValueError(f"Invalid range: {self._range}")
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
+        if not self.is_valid(self.default):
+            raise ValueError(f"Invalid default value: {self.default}")
 
     def __repr__(self) -> str:
         """
@@ -227,8 +231,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         if self.is_categorical and self._values:
             return value in self._values
         elif self.is_numerical and self._range:
-            assert isinstance(value, (int, float))
-            return bool(self._range[0] <= value <= self._range[1]) or value == self._default
+            if isinstance(value, (int, float)):
+                # TODO: allow special values outside of range?
+                return bool(self._range[0] <= value <= self._range[1]) # or value == self._default
+            else:
+                raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
 
