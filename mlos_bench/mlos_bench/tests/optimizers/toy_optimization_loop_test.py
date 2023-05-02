@@ -51,7 +51,7 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
-        "rootfs": "xfs",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": -1,
         "kernel_sched_latency_ns": 2000000,
     }
@@ -67,7 +67,7 @@ def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
-        "rootfs": "xfs",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": 13111,
         "kernel_sched_latency_ns": 796233790,
     }
@@ -82,7 +82,7 @@ def test_scikit_gp_optimization_loop(mock_env_no_noise: MockEnv,
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
-        "rootfs": "xfs",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": -1,
         "kernel_sched_latency_ns": 2000000,
     }
@@ -98,9 +98,9 @@ def test_scikit_gp_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B2s",
-        "rootfs": "xfs",
-        "kernel_sched_migration_cost_ns": 91717,
-        "kernel_sched_latency_ns": 796542987,
+        "idle": "noidle",
+        "kernel_sched_migration_cost_ns": 389845,
+        "kernel_sched_latency_ns": 183434790,
     }
 
 
@@ -113,7 +113,7 @@ def test_scikit_et_optimization_loop(mock_env_no_noise: MockEnv,
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
-        "rootfs": "xfs",
+        "idle": "halt",
         "kernel_sched_migration_cost_ns": -1,
         "kernel_sched_latency_ns": 2000000,
     }
@@ -129,9 +129,9 @@ def test_scikit_et_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
-        "rootfs": "xfs",
-        "kernel_sched_migration_cost_ns": 131931,
-        "kernel_sched_latency_ns": 199900595,
+        "idle": "noidle",
+        "kernel_sched_migration_cost_ns": 259177,
+        "kernel_sched_latency_ns": 787846414,
     }
 
 

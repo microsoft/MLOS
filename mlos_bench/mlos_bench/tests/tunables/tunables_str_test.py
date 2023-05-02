@@ -37,10 +37,10 @@ def test_tunable_groups_str(tunable_groups: TunableGroups) -> None:
         "boot": {
             "cost": 300,
             "params": {
-                "rootfs": {
+                "idle": {
                     "type": "categorical",
-                    "default": "xfs",
-                    "values": ["ext2", "ext4", "xfs"]
+                    "default": "halt",
+                    "values": ["halt", "mwait", "noidle"]
                 }
             }
         },
