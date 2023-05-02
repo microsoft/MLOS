@@ -113,7 +113,7 @@ class TunableGroups:
                 if self._tunable_groups[group.name] != group:
                     raise ValueError(f"Overlapping covariant tunable group name {group.name} " +
                                      "in {self._tunable_groups[group.name]} and {tunables}")
-                # TODO: In this case, should we overwrite the tunables with the existing values?
+                # TODO: Else, should we overwrite tunables with the self values?
         return self
 
     def __repr__(self) -> str:
