@@ -23,6 +23,9 @@ def test_tunable_group_indexing(tunable_groups: TunableGroups, tunable_categoric
     (tunable_categorical, covariant_group) = tunable_groups.get_tunable(tunable_categorical.name)
     assert tunable_groups.get_tunable(tunable_categorical)[0] == tunable_categorical
 
+    assert tunable_categorical in covariant_group
+    assert tunable_categorical.name in covariant_group
+
     # Check that we can lookup that tunable by name or tunable object in the covariant group.
     assert covariant_group.get_tunable(tunable_categorical) == tunable_categorical
     assert covariant_group.get_tunable(tunable_categorical.name) == tunable_categorical
