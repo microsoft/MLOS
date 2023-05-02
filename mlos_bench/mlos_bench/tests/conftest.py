@@ -9,6 +9,7 @@ Common fixtures for mock TunableGroups and Environment objects.
 import pytest
 
 from mlos_bench.environments.mock_env import MockEnv
+from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 # pylint: disable=redefined-outer-name
@@ -70,6 +71,19 @@ def tunable_groups() -> TunableGroups:
     })
     tunables.reset()
     return tunables
+
+
+@pytest.fixture
+def covariant_group(tunable_groups: TunableGroups) -> CovariantTunableGroup:
+    """
+    Text fixture to get a CovariantTunableGroup from tunable_groups.
+
+    Returns
+    -------
+    CovariantTunableGroup
+    """
+    (_, covariant_group) = next(iter(tunable_groups))
+    return covariant_group
 
 
 @pytest.fixture

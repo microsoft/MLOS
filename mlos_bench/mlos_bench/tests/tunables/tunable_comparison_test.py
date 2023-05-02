@@ -95,7 +95,11 @@ def test_tunable_group_ne_object(tunable_groups: TunableGroups) -> None:
     """
     Tests that the __eq__ operator works as expected with other objects.
     """
-
     assert tunable_groups != "foo"
-    (tunable, covariant_group) = next(iter(tunable_groups))
-    assert tunable != covariant_group
+
+
+def test_covariant_group_ne_object(covariant_group: CovariantTunableGroup) -> None:
+    """
+    Tests that the __eq__ operator works as expected with other objects.
+    """
+    assert covariant_group != "foo"

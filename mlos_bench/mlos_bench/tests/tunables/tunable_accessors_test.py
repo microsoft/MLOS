@@ -8,6 +8,7 @@ Unit tests for accessing values to the individual parameters within tunable grou
 
 import pytest
 
+from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable import Tunable
 
 
@@ -29,3 +30,18 @@ def test_numerical_access_to_categorical_tunable(tunable_categorical: Tunable) -
         print(tunable_categorical.numerical_value)
     with pytest.raises(AssertionError):
         print(tunable_categorical.range)
+
+
+def test_covariant_group_repr(covariant_group: CovariantTunableGroup) -> None:
+    """
+    Tests that the covariant group representation works as expected.
+    """
+    assert repr(covariant_group).startswith(f"{covariant_group.name}:")
+
+
+def test_covariant_group_tunables(covariant_group: CovariantTunableGroup) -> None:
+    """
+    Tests that we can access the tunables in the covariant group.
+    """
+    for tunable in covariant_group.get_tunables():
+        assert isinstance(tunable, Tunable)
