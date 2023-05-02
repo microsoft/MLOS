@@ -10,6 +10,7 @@ import pytest
 
 from mlos_bench.tunables.tunable import Tunable
 
+
 def test_categorical_tunable_disallow_repeats() -> None:
     """
     Disallow duplicate values in categorical tunables.

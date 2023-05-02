@@ -6,6 +6,7 @@
 Unit tests for assigning values to the individual parameters within tunable groups.
 """
 
+import json
 import pytest
 
 from mlos_bench.tunables.tunable import Tunable
@@ -95,3 +96,44 @@ def test_tunable_assign_float_to_int_fail(tunable_int: Tunable) -> None:
     """
     with pytest.raises(ValueError):
         tunable_int.value = 10.1
+
+
+def test_tunable_assign_null_to_categorical() -> None:
+    """
+    Checks that we can use null/None in categorical tunables.
+    """
+    json_config = """
+    {
+        "name": "categorical_test",
+        "type": "categorical",
+        "values": ["foo", null],
+        "default": "foo"
+    }
+    """
+    config = json.loads(json_config)
+    categorical_tunable = Tunable(name='categorical_test', config=config)
+    assert categorical_tunable
+    assert categorical_tunable.categorical_value == "foo"
+    categorical_tunable.value = None
+    assert categorical_tunable.value is None
+    assert categorical_tunable.value != 'None'
+
+
+def test_tunable_assign_null_to_int(tunable_int: Tunable) -> None:
+    """
+    Checks that we can't use null/None in integer tunables.
+    """
+    with pytest.raises(TypeError):
+        tunable_int.value = None
+    with pytest.raises(TypeError):
+        tunable_int.numerical_value = None    # type: ignore[assignment]
+
+
+def test_tunable_assign_null_to_float(tunable_float: Tunable) -> None:
+    """
+    Checks that we can't use null/None in float tunables.
+    """
+    with pytest.raises(TypeError):
+        tunable_float.value = None
+    with pytest.raises(TypeError):
+        tunable_float.numerical_value = None    # type: ignore[assignment]
