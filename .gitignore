@@ -154,7 +154,9 @@ build/*.build-stamp
 
 # Test config. May contain sensitive information
 # like Azure credentials etc.
-/config.json
+/config.json*
+/global_config.json*
+
 .env
 
 # Test databases

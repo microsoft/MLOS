@@ -164,7 +164,7 @@ class LocalExecService(Service, SupportsLocalExec):
             if sys.platform != 'win32':
                 cmd = [" ".join(cmd)]
 
-            proc = subprocess.run(cmd, env=env, cwd=cwd, shell=True,
+            proc = subprocess.run(cmd, env=env or None, cwd=cwd, shell=True,
                                   text=True, check=False, capture_output=True)
 
             _LOG.debug("Run: return code = %d", proc.returncode)

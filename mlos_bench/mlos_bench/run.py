@@ -94,7 +94,7 @@ def _optimize(env: Environment,
             _run(env, opt, trial, global_config)
 
     (best_score, best_config) = opt.get_best_observation()
-    _LOG.info("Env: %s best score: %f", env, best_score)
+    _LOG.info("Env: %s best score: %s", env, best_score)
     return (best_score, best_config)
 
 
