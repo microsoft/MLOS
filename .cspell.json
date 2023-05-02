@@ -29,6 +29,7 @@
         "llamatune",
         "matplotlib",
         "mlos",
+        "mwait",
         "ndarray",
         "ndim",
         "nsmallest",

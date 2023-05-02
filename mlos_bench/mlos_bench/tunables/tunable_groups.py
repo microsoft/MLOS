@@ -164,14 +164,14 @@ class TunableGroups:
         """
         return ((group.get_tunable(name), group) for (name, group) in self._index.items())
 
-    def get_tunable(self, name: str) -> Tuple[Tunable, CovariantTunableGroup]:
+    def get_tunable(self, tunable: Union[str, Tunable]) -> Tuple[Tunable, CovariantTunableGroup]:
         """
         Access the entire Tunable (not just its value) and its covariant group.
         Throw KeyError if the tunable is not found.
 
         Parameters
         ----------
-        name : str
+        tunable : Union[str, Tunable]
             Name of the tunable parameter.
 
         Returns
@@ -179,6 +179,7 @@ class TunableGroups:
         (tunable, group) : (Tunable, CovariantTunableGroup)
             A 2-tuple of an instance of the Tunable parameter and covariant group it belongs to.
         """
+        name: str = tunable.name if isinstance(tunable, Tunable) else tunable
         group = self._index[name]
         return (group.get_tunable(name), group)
 
