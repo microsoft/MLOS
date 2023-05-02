@@ -6,6 +6,8 @@
 Unit tests for checking tunable comparisons.
 """
 
+import pytest
+
 from mlos_bench.tunables.tunable import Tunable
 
 
@@ -76,3 +78,12 @@ def test_tunable_lt_same_name_different_type() -> None:
                           "default": 2
                         })
     assert tunable_cat < tunable_int
+
+
+def test_tunable_lt_different_object(tunable_int: Tunable) -> None:
+    """
+    Tests that the __lt__ operator works as expected.
+    """
+    assert (tunable_int < "foo") is False
+    with pytest.raises(TypeError):
+        assert "foo" < tunable_int      # type: ignore[operator]
