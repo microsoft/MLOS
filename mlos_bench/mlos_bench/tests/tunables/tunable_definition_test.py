@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Unit tests for assigning values to the individual parameters within tunable groups.
+Unit tests for checking tunable definition rules.
 """
 
 import pytest
