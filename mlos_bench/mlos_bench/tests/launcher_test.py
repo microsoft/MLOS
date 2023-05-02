@@ -44,11 +44,10 @@ def test_launch_main_app(root_path: str,
     with local_exec_service.temp_dir_context() as temp_dir:
 
         log_path = os.path.join(temp_dir, "mock-1shot.log")
-        (return_code, _stdout, _stderr) = local_exec_service.local_exec([
-            "./mlos_bench/mlos_bench/run.py" +
-            " --config mlos_bench/examples/mock-1shot.jsonc" +
-            f" --log_file '{log_path}'"
-        ], cwd=root_path)
+        cmd = "./mlos_bench/mlos_bench/run.py" + \
+              " --config mlos_bench/mlos_bench/tests/config/cli/mock-1shot.jsonc" + \
+              f" --log_file '{log_path}'"
+        (return_code, _stdout, _stderr) = local_exec_service.local_exec([cmd], cwd=root_path)
 
         assert return_code == 0
 

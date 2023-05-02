@@ -79,7 +79,6 @@ class Launcher:
         assert env_path, "Environment configuration file is required"
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
-        self.root_env_config = self._config_loader.resolve_path(args.environment)
         tunable_groups = TunableGroups()    # base tunable groups that all others get build on
         self.environment: Environment = self._config_loader.load_environment(
             self.root_env_config, tunable_groups, self.global_config, service=self._parent_service)

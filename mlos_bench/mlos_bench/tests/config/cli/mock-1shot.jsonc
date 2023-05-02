@@ -6,16 +6,15 @@
 // *** DO *NOT* CHANGE! This config is used for tests! ***
 {
     "config_path": [
-        "mlos_bench/config",
-        "mlos_bench/examples"
+        "mlos_bench/mlos_bench/tests/config"          // relative to the root of the repo (for now)
     ],
 
-    "environment": "mock/mock_env.jsonc",
+    "environment": "environments/mock/mock_env.jsonc",
     "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/in-memory.jsonc",
 
     "tunable_values": [
-        "tunable-values-example.json"
+        "tunables/tunable-values-example.jsonc"
     ],
 
     // "globals": ["global_config.json"],
