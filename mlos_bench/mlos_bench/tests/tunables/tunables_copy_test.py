@@ -16,7 +16,7 @@ def test_copy_tunable_int(tunable_int: Tunable) -> None:
     """
     tunable_copy = tunable_int.copy()
     assert tunable_int == tunable_copy
-    tunable_copy.value = tunable_copy.numerical_value + 200
+    tunable_copy.numerical_value += 200
     assert tunable_int != tunable_copy
 
 

@@ -9,6 +9,8 @@ service functions.
 """
 
 import os
+import sys
+
 import json    # For logging only
 import logging
 
@@ -52,11 +54,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             self.resolve_path,
             self.load_config,
             self.prepare_class_load,
-            self.build_tunables,
             self.build_service,
             self.build_environment,
             self.load_services,
-            self.load_tunables,
             self.load_environment,
             self.load_environment_list,
         ])
@@ -192,8 +192,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return inst
 
     def build_environment(self, config: Dict[str, Any],
+                          tunables: TunableGroups,
                           global_config: Optional[Dict[str, Any]] = None,
-                          tunables: Optional[TunableGroups] = None,
                           service: Optional[Service] = None) -> Environment:
         """
         Factory method for a new environment with a given config.
@@ -205,10 +205,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 "name": Human-readable string describing the environment;
                 "class": FQN of a Python class to instantiate;
                 "config": Free-format dictionary to pass to the constructor.
+        tunables : TunableGroups
+            A (possibly empty) collection of groups of tunable parameters for
+            all environments.
         global_config : dict
             Global parameters to add to the environment config.
-        tunables : TunableGroups
-            A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
@@ -227,7 +228,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         env_tunables_path = config.get("include_tunables")
         if env_tunables_path is not None:
-            tunables = self.load_tunables(env_tunables_path, tunables)
+            tunables = self._load_tunables(env_tunables_path, tunables)
 
         _LOG.debug("Creating env: %s :: %s", env_name, env_class)
         env = Environment.new(env_name=env_name, class_name=env_class,
@@ -336,39 +337,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return self._build_composite_service(config, global_config, parent)
 
-    @staticmethod
-    def build_tunables(config: Dict[str, Any],
-                       parent: Optional[TunableGroups] = None) -> TunableGroups:
-        """
-        Create a new collection of tunable parameters.
-
-        Parameters
-        ----------
-        config : dict
-            Python dict of serialized representation of the covariant tunable groups.
-        parent : TunableGroups
-            An optional collection of tunables to add to the new collection.
-
-        Returns
-        -------
-        tunables : TunableGroup
-            Create a new collection of tunable parameters.
-        """
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Build tunables from config:\n%s",
-                       json.dumps(config, indent=2))
-
-        if parent is None:
-            return TunableGroups(config)
-
-        groups = TunableGroups()
-        groups.update(parent)
-        groups.update(TunableGroups(config))
-        return groups
-
     def load_environment(self, json_file_name: str,
+                         tunables: TunableGroups,
                          global_config: Optional[Dict[str, Any]] = None,
-                         tunables: Optional[TunableGroups] = None,
                          service: Optional[Service] = None) -> Environment:
         """
         Load and build new environment from the config file.
@@ -377,10 +348,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         ----------
         json_file_name : str
             The environment JSON configuration file.
+        tunables : TunableGroups
+            A (possibly empty) collection of tunables to add to the environment.
         global_config : dict
             Global parameters to add to the environment config.
-        tunables : TunableGroups
-            An optional collection of tunables to add to the environment.
         service : Service
             An optional reference of the parent service to mix in.
 
@@ -391,11 +362,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         config = self.load_config(json_file_name)
         assert isinstance(config, dict)
-        return self.build_environment(config, global_config, tunables, service)
+        return self.build_environment(config, tunables, global_config, service)
 
     def load_environment_list(self, json_file_name: str,
+                              tunables: TunableGroups,
                               global_config: Optional[Dict[str, Any]] = None,
-                              tunables: Optional[TunableGroups] = None,
                               service: Optional[Service] = None) -> List[Environment]:
         """
         Load and build a list of environments from the config file.
@@ -405,10 +376,10 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         json_file_name : str
             The environment JSON configuration file.
             Can contain either one environment or a list of environments.
+        tunables : TunableGroups
+            An (possibly empty) collection of tunables to add to the environment.
         global_config : dict
             Global parameters to add to the environment config.
-        tunables : TunableGroups
-            An optional collection of tunables to add to the environment.
         service : Service
             An optional reference of the parent service to mix in.
 
@@ -421,7 +392,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if isinstance(config_list, dict):
             config_list = [config_list]
         return [
-            self.build_environment(config, global_config, tunables, service)
+            self.build_environment(config, tunables, global_config, service)
             for config in config_list
         ]
 
@@ -454,29 +425,31 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             service.register(self.build_service(config, global_config, service).export())
         return service
 
-    def load_tunables(self, json_file_names: Iterable[str],
-                      parent: Optional[TunableGroups] = None) -> TunableGroups:
+    def _load_tunables(self, json_file_names: Iterable[str],
+                       parent: TunableGroups) -> TunableGroups:
         """
-        Load a collection of tunable parameters from JSON files.
+        Load a collection of tunable parameters from JSON files into the parent
+        TunableGroup.
+
+        This helps allow standalone environment configs to reference
+        overlapping tunable groups configs but still allow combining them into
+        a single instance that each environment can reference.
 
         Parameters
         ----------
         json_file_names : list of str
             A list of JSON files to load.
         parent : TunableGroups
-            An optional collection of tunables to add to the new collection.
+            A (possibly empty) collection of tunables to add to the new collection.
 
         Returns
         -------
         tunables : TunableGroup
-            Create a new collection of tunable parameters.
+            The larger collection of tunable parameters.
         """
         _LOG.info("Load tunables: '%s'", json_file_names)
-        groups = TunableGroups()
-        if parent is not None:
-            groups.update(parent)
         for fname in json_file_names:
             config = self.load_config(fname)
             assert isinstance(config, dict)
-            groups.update(TunableGroups(config))
-        return groups
+            parent.merge(TunableGroups(config))
+        return parent

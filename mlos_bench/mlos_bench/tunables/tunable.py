@@ -15,7 +15,7 @@ _LOG = logging.getLogger(__name__)
 
 
 """A tunable parameter value type alias."""
-TunableValue = Union[int, float, str]
+TunableValue = Union[int, float, Optional[str]]
 
 
 class TunableDict(TypedDict, total=False):
@@ -30,7 +30,7 @@ class TunableDict(TypedDict, total=False):
     type: str
     description: Optional[str]
     default: TunableValue
-    values: Optional[List[str]]
+    values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
     special: Optional[Union[List[int], List[str]]]
 
@@ -75,6 +75,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError("Must specify values for the categorical type")
             if self._range is not None:
                 raise ValueError("Range must be None for the categorical type")
+            if len(set(self._values)) != len(self._values):
+                raise ValueError("Values must be unique for the categorical type")
             if self._special is not None:
                 raise ValueError("Special values must be None for the categorical type")
         elif self.is_numerical:
@@ -117,7 +119,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             self._current_value == other._current_value
         )
 
-    def __lt__(self, other: object) -> bool:
+    def __lt__(self, other: object) -> bool:    # pylint: disable=too-many-return-statements
         """
         Compare the two Tunable objects. We mostly need this to create a canonical list
         of tunable objects when hashing a TunableGroup.
@@ -140,7 +142,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return True
         if self._name == other._name and self._type == other._type:
             if self.is_numerical:
+                assert self._current_value is not None
+                assert other._current_value is not None
                 return bool(float(self._current_value) < float(other._current_value))
+            # else: categorical
+            if self._current_value is None:
+                return True
+            if other._current_value is None:
+                return False
             return bool(str(self._current_value) < str(other._current_value))
         return False
 
@@ -178,7 +187,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
         try:
-            coerced_value = self._TYPE[self._type](value)
+            if self.is_categorical and value is None and None in self.categorical_values:
+                # Don't string convert None (json null)
+                coerced_value = None
+            else:
+                coerced_value = self._TYPE[self._type](value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
                        self._type, self._name, type(value), value)
@@ -220,7 +233,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"Invalid parameter type: {self._type}")
 
     @property
-    def categorical_value(self) -> str:
+    def categorical_value(self) -> Optional[str]:
         """
         Get the current value of the tunable as a number.
         """
@@ -229,17 +242,40 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         else:
             raise ValueError("Cannot get categorical values for a numerical tunable.")
 
+    @categorical_value.setter
+    def categorical_value(self, new_value: Optional[str]) -> Optional[str]:
+        """
+        Set the current value of the tunable.
+        """
+        assert self.is_categorical
+        assert new_value is None or isinstance(new_value, str)
+        self.value = new_value
+        return self.value
+
     @property
     def numerical_value(self) -> Union[int, float]:
         """
         Get the current value of the tunable as a number.
         """
+        assert self._current_value is not None
         if self._type == "int":
             return int(self._current_value)
         elif self._type == "float":
             return float(self._current_value)
         else:
             raise ValueError("Cannot get numerical value for a categorical tunable.")
+
+    @numerical_value.setter
+    def numerical_value(self, new_value: Union[int, float]) -> Union[int, float]:
+        """
+        Set the current value of the tunable.
+        """
+        # We need this coercion for the values produced by some optimizers
+        # (e.g., scikit-optimize) and for data restored from certain storage
+        # systems (where values can be strings).
+        assert self.is_numerical
+        self.value = new_value
+        return self.value
 
     @property
     def name(self) -> str:
@@ -300,7 +336,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._range
 
     @property
-    def categorical_values(self) -> List[str]:
+    def categorical_values(self) -> List[Optional[str]]:
         """
         Get the list of all possible values of a categorical tunable.
         Return None if the tunable is not categorical.
