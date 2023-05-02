@@ -92,6 +92,8 @@ class CovariantTunableGroup:
         """
         if not isinstance(other, CovariantTunableGroup):
             return False
+        # TODO: May need to provide logic to relax the equality check on the
+        # tunables (e.g. "compatible" vs. "equal").
         return (self._name == other._name and
                 self._cost == other._cost and
                 self._is_updated == other._is_updated and
