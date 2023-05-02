@@ -3,6 +3,8 @@
     "class": "mlos_bench.optimizers.OneShotOptimizer",
 
     // Define the set of tunable params that the optimizer can work over.
+    // Note: these are required for us to be able to set the values in
+    // `tunables/tunable-values-example.jsonc` referenced below.
     "include_tunables": [
         "environments/vm/azure/azure-vm-tunables.jsonc",
         "environments/os/linux/boot/linux-boot-tunables.jsonc",
