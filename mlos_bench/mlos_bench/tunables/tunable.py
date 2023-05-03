@@ -275,7 +275,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     @numerical_value.setter
     def numerical_value(self, new_value: Union[int, float]) -> Union[int, float]:
         """
-        Set the current value of the tunable.
+        Set the current numerical value of the tunable.
         """
         # We need this coercion for the values produced by some optimizers
         # (e.g., scikit-optimize) and for data restored from certain storage
