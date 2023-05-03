@@ -111,8 +111,6 @@ class TunableGroups:
             else:
                 # Check that there's no overlap in the tunables.
                 # But allow for differing current values.
-                self_group_defaults = self._tunable_groups[group.name].copy()
-                self_group_defaults.restore_defaults()
                 if not self._tunable_groups[group.name].equals_defaults(group):
                     raise ValueError(f"Overlapping covariant tunable group name {group.name} " +
                                      "in {self._tunable_groups[group.name]} and {tunables}")
