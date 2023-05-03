@@ -6,7 +6,8 @@
 // *** DO *NOT* CHANGE! This config is used for tests! ***
 {
     "config_path": [
-        "mlos_bench/mlos_bench/tests/config"          // relative to the root of the repo (for now)
+        // relative to the root of the repo (for now), where this is expected to be executed from
+        "mlos_bench/mlos_bench/tests/config"
     ],
 
     "environment": "environments/mock/mock_env.jsonc",
