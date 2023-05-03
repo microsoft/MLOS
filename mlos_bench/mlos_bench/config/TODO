@@ -1,36 +1,7 @@
-# `config` Examples TODOs
+# `config` TODOs
 
 - [ ] Add some of the global examples to a nightly CI/CD pipeline.
-
-- [x] Per discussion with Sergiy: try switching to putting each environment's tunables along with that environment's config and scripts so that they are somewhat self contained.
-  - [x] Need to double check that the composite env will still work this way (e.g. duplicate tunables across envs)
-
-    > Somewhat major changes required for that ...
 
 - [ ] improve handling of relative paths in configs (future work)
 
 - [ ] json schemas for config snippets? (future work)
-
-## Laundry list of other items in this PR that need splitting
-
-- [ ] Add a basic `mlos_bench` CLI test to the pipelines.
-
-- [ ] Document `mlos_bench` CLI
-
-- [x] support for returning default config in first iteration
-
-- [x] rename pluralization (#313)
-
-- [x] generalize which mlos core optimizer we return by default
-
-- [x] consolidation of pytest requirements to `setup.py` instead of conda envs
-
-- [x] adding more storage `extra_requires`
-
-- [x] rename include_tunables to include_tunable_values for the one shot optimizer config
-
-- [x] add support for loading tunables inside an optimizer
-
-## Other random TODO ideas
-
-- [x] rename mlos_core conda envs to just mlos (#319)
