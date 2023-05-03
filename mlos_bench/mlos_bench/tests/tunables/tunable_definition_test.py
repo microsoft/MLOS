@@ -6,7 +6,7 @@
 Unit tests for checking tunable definition rules.
 """
 
-import json
+import json5 as json
 import pytest
 
 from mlos_bench.tunables.tunable import Tunable

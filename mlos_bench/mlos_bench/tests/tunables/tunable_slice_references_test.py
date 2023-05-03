@@ -6,7 +6,7 @@
 Unit tests for unique references to tunables when they're loaded multiple times.
 """
 
-import json
+import json5 as json
 import pytest
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
