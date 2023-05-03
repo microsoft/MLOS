@@ -53,9 +53,9 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
             f"{script_path} {input_file} {output_file}"
         ], cwd=temp_dir, env=params)
 
+        assert stderr.strip() == ""
         assert return_code == 0
         # assert stdout.strip() == ""
-        assert stderr.strip() == ""
 
         with open(os.path.join(temp_dir, output_file), "rt", encoding="utf-8") as fh_output:
             assert [ln.strip() for ln in fh_output.readlines()] == [

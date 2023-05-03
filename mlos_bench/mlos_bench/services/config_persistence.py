@@ -9,6 +9,7 @@ service functions.
 """
 
 import os
+import re
 import sys
 
 import json    # For logging only
@@ -94,7 +95,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
         if not os.path.isabs(file_path):
             for path in path_list:
-                full_path = os.path.join(path, file_path)
+                full_path = os.path.realpath(os.path.join(path, file_path))
+                if sys.platform == "win32":
+                    full_path = re.sub(r"\\", r"/", full_path)
                 if os.path.exists(full_path):
                     _LOG.debug("Path resolved: %s", full_path)
                     return full_path
