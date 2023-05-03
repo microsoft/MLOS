@@ -54,7 +54,7 @@ def _cmp_tunable_hyperparameter_categorical(
     Check if categorical Tunable and ConfigSpace Hyperparameter actually match.
     """
     assert isinstance(cs_param, CategoricalHyperparameter)
-    assert set(cs_param.choices) == set(tunable.categorical_values)
+    assert set(cs_param.choices) == set(tunable.categories)
     assert cs_param.default_value == tunable.value
 
 

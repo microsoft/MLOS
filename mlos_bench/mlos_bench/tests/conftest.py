@@ -8,7 +8,7 @@ Common fixtures for mock TunableGroups and Environment objects.
 
 from typing import Any, Dict
 
-import json
+import json5 as json
 import pytest
 
 from mlos_bench.environments.mock_env import MockEnv

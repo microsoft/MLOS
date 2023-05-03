@@ -6,7 +6,7 @@
 Unit tests for assigning values to the individual parameters within tunable groups.
 """
 
-import json
+import json5 as json
 import pytest
 
 from mlos_bench.tunables.tunable import Tunable

@@ -42,7 +42,7 @@ def test_copy_covariant_group(covariant_group: CovariantTunableGroup) -> None:
     tunable = next(iter(covariant_group.get_tunables()))
     new_value: TunableValue
     if tunable.is_categorical:
-        new_value = [x for x in tunable.categorical_values if x != tunable.categorical_value][0]
+        new_value = [x for x in tunable.categories if x != tunable.categorical_value][0]
     elif tunable.is_numerical:
         new_value = tunable.numerical_value + 1
     covariant_group_copy[tunable] = new_value

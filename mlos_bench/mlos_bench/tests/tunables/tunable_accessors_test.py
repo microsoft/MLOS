@@ -19,7 +19,7 @@ def test_categorical_access_to_numerical_tunable(tunable_int: Tunable) -> None:
     with pytest.raises(ValueError):
         print(tunable_int.categorical_value)
     with pytest.raises(AssertionError):
-        print(tunable_int.categorical_values)
+        print(tunable_int.categories)
 
 
 def test_numerical_access_to_categorical_tunable(tunable_categorical: Tunable) -> None:

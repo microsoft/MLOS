@@ -9,7 +9,7 @@ import copy
 import collections
 import logging
 
-from typing import List, Optional, Sequence, Tuple, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
@@ -40,10 +40,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     A tunable parameter definition and its current value.
     """
 
-    _TYPE = {
+    # Maps tunable types to their corresponding Python types by name.
+    # Note: the lhs are function points, not strings, because they're used for
+    # type coersion in the value.setter function.
+    _TYPE: Dict[str, Callable[[Any], TunableValue]] = {
         "int": int,
         "float": float,
-        "categorical": str,
+        # Don't string convert None (json null) to "None"
+        "categorical": lambda s: None if s is None else str(s),
     }
 
     def __init__(self, name: str, config: TunableDict):
@@ -255,7 +259,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         Set the current value of the tunable.
         """
         assert self.is_categorical
-        assert new_value is None or isinstance(new_value, str)
+        assert isinstance(new_value, (str, type(None)))
         self.value = new_value
         return self.value
 
@@ -343,7 +347,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._range
 
     @property
-    def categorical_values(self) -> List[Optional[str]]:
+    def categories(self) -> List[Optional[str]]:
         """
         Get the list of all possible values of a categorical tunable.
         Return None if the tunable is not categorical.

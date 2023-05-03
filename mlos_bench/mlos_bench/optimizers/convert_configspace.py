@@ -44,7 +44,7 @@ def _tunable_to_hyperparameter(
     meta = {"group": group_name, "cost": cost}  # {"lower": "", "upper": "", "scaling": ""}
     if tunable.type == "categorical":
         return CategoricalHyperparameter(
-            tunable.name, choices=tunable.categorical_values,
+            tunable.name, choices=tunable.categories,
             default_value=tunable.value, meta=meta)
     elif tunable.type == "int":
         return UniformIntegerHyperparameter(
