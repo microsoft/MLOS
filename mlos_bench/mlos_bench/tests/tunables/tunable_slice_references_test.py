@@ -42,7 +42,7 @@ def test_duplicate_merging_tunable_groups(tunable_groups_config: dict) -> None:
 
     # Update a value to indicate that they're separate copies.
     if tunable.is_categorical:
-        tunable.categorical_value = [x for x in tunable.categories if x != tunable.categorical_value][0]
+        tunable.category = [x for x in tunable.categories if x != tunable.category][0]
     elif tunable.is_numerical:
         tunable.numerical_value += 1
 

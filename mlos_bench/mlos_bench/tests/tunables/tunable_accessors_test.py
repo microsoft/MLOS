@@ -17,7 +17,7 @@ def test_categorical_access_to_numerical_tunable(tunable_int: Tunable) -> None:
     Make sure we throw an error on accessing a numerical tunable as a categorical.
     """
     with pytest.raises(ValueError):
-        print(tunable_int.categorical_value)
+        print(tunable_int.category)
     with pytest.raises(AssertionError):
         print(tunable_int.categories)
 

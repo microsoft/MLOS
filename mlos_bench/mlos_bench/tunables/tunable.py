@@ -42,7 +42,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
 
     # Maps tunable types to their corresponding Python types by name.
     # Note: the lhs are function points, not strings, because they're used for
-    # type coersion in the value.setter function.
+    # type coercion in the value.setter function.
     _TYPE: Dict[str, Callable[[Any], TunableValue]] = {
         "int": int,
         "float": float,
@@ -240,7 +240,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             raise ValueError(f"Invalid parameter type: {self._type}")
 
     @property
-    def categorical_value(self) -> Optional[str]:
+    def category(self) -> Optional[str]:
         """
         Get the current value of the tunable as a number.
         """
@@ -249,8 +249,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         else:
             raise ValueError("Cannot get categorical values for a numerical tunable.")
 
-    @categorical_value.setter
-    def categorical_value(self, new_value: Optional[str]) -> Optional[str]:
+    @category.setter
+    def category(self, new_value: Optional[str]) -> Optional[str]:
         """
         Set the current value of the tunable.
         """
@@ -275,7 +275,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     @numerical_value.setter
     def numerical_value(self, new_value: Union[int, float]) -> Union[int, float]:
         """
-        Set the current value of the tunable.
+        Set the current numerical value of the tunable.
         """
         # We need this coercion for the values produced by some optimizers
         # (e.g., scikit-optimize) and for data restored from certain storage

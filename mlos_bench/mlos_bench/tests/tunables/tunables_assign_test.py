@@ -137,7 +137,7 @@ def test_tunable_assign_null_to_categorical() -> None:
     config = json.loads(json_config)
     categorical_tunable = Tunable(name='categorical_test', config=config)
     assert categorical_tunable
-    assert categorical_tunable.categorical_value == "foo"
+    assert categorical_tunable.category == "foo"
     categorical_tunable.value = None
     assert categorical_tunable.value is None
     assert categorical_tunable.value != 'None'
