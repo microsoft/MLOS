@@ -108,14 +108,14 @@ def test_load_composite_env_config_examples(config_loader_service: ConfigPersist
         # Check that when we change a child env, it's value is reflected in the composite env as well.
         # That is to say, they refer to the same objects, despite having potentially been loaded from separate configs.
         if child_tunable.is_categorical:
-            old_cat_value = child_tunable.categorical_value
+            old_cat_value = child_tunable.category
             assert child_tunable.value == old_cat_value
             assert covariant_group[child_tunable] == old_cat_value
             assert composite_env.tunable_params[child_tunable] == old_cat_value
             new_cat_value = [x for x in child_tunable.categories if x != old_cat_value][0]
-            child_tunable.categorical_value = new_cat_value
+            child_tunable.category = new_cat_value
             assert child_env.tunable_params[child_tunable] == new_cat_value
-            assert composite_env.tunable_params[child_tunable] == child_tunable.categorical_value
+            assert composite_env.tunable_params[child_tunable] == child_tunable.category
         elif child_tunable.is_numerical:
             old_num_value = child_tunable.numerical_value
             assert child_tunable.value == old_num_value
