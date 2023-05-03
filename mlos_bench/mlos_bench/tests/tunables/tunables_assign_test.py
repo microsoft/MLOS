@@ -141,6 +141,7 @@ def test_tunable_assign_null_to_categorical() -> None:
     categorical_tunable.value = None
     assert categorical_tunable.value is None
     assert categorical_tunable.value != 'None'
+    assert categorical_tunable.categorical_value is None
 
 
 def test_tunable_assign_null_to_int(tunable_int: Tunable) -> None:
