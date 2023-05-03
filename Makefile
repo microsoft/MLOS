@@ -342,7 +342,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	test -s doc/build/html/generated/mlos_bench.environments.Environment.html
 	test -s doc/build/html/api/mlos_core/mlos_core.html
 	test -s doc/build/html/api/mlos_bench/mlos_bench.html
-	grep -q options: doc/build/html/api/mlos_bench/mlos_bench.run.html
+	grep -q -e '--config CONFIG' doc/build/html/api/mlos_bench/mlos_bench.run.html
 	# Check doc logs for errors (but skip over some known ones) ...
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \
