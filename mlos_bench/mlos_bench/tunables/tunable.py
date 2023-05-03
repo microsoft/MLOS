@@ -9,7 +9,7 @@ import copy
 import collections
 import logging
 
-from typing import List, Optional, Sequence, Tuple, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
@@ -40,10 +40,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     A tunable parameter definition and its current value.
     """
 
-    _TYPE = {
+    # Maps tunable types to their corresponding Python types by name.
+    # Note: the lhs are function points, not strings, because they're used for
+    # type coersion in the value.setter function.
+    _TYPE: Dict[str, Callable[[Any], TunableValue]] = {
         "int": int,
         "float": float,
-        "categorical": str,
+        # Don't string convert None (json null) to "None"
+        "categorical": lambda s: None if s is None else str(s),
     }
 
     def __init__(self, name: str, config: TunableDict):
@@ -191,11 +195,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
         try:
-            if self.is_categorical and value is None and None in self.categories:
-                # Don't string convert None (json null)
-                coerced_value = None
-            else:
-                coerced_value = self._TYPE[self._type](value)
+            coerced_value = self._TYPE[self._type](value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
                        self._type, self._name, type(value), value)
