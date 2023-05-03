@@ -1,7 +1,0 @@
-# `config` TODOs
-
-- [ ] Add some of the global examples to a nightly CI/CD pipeline.
-
-- [ ] improve handling of relative paths in configs (future work)
-
-- [ ] json schemas for config snippets? (future work)
