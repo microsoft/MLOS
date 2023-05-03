@@ -39,7 +39,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     Collection of methods to deserialize the Environment, Service, and TunableGroups objects.
     """
 
-    BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath(""))
+    BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath("")).replace("\\", "/")
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
