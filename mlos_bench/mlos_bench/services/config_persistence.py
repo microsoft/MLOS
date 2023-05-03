@@ -97,7 +97,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             for path in path_list:
                 full_path = os.path.realpath(os.path.join(path, file_path))
                 if sys.platform == "win32":
-                    full_path = re.sub(r"\\", r"/", full_path)
+                    full_path = full_path.replace("\\", "/")
                 if os.path.exists(full_path):
                     _LOG.debug("Path resolved: %s", full_path)
                     return full_path
