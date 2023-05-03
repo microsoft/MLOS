@@ -9,7 +9,6 @@ import copy
 import collections
 import logging
 
-from types import NoneType
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
@@ -256,7 +255,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         Set the current value of the tunable.
         """
         assert self.is_categorical
-        assert isinstance(new_value, (str, NoneType))
+        assert isinstance(new_value, (str, type(None)))
         self.value = new_value
         return self.value
 
