@@ -191,7 +191,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
         try:
-            if self.is_categorical and value is None and None in self.categorical_values:
+            if self.is_categorical and value is None and None in self.categories:
                 # Don't string convert None (json null)
                 coerced_value = None
             else:
@@ -343,7 +343,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._range
 
     @property
-    def categorical_values(self) -> List[Optional[str]]:
+    def categories(self) -> List[Optional[str]]:
         """
         Get the list of all possible values of a categorical tunable.
         Return None if the tunable is not categorical.

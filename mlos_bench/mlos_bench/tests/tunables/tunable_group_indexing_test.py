@@ -40,7 +40,7 @@ def test_tunable_group_indexing(tunable_groups: TunableGroups, tunable_categoric
     assert covariant_group[tunable_categorical.name] == tunable_categorical.value
 
     # Check that we can assign a new value by index.
-    new_value = [x for x in tunable_categorical.categorical_values if x != tunable_categorical.value][0]
+    new_value = [x for x in tunable_categorical.categories if x != tunable_categorical.value][0]
     tunable_groups[tunable_categorical] = new_value
     assert tunable_groups[tunable_categorical] == new_value
     assert tunable_groups[tunable_categorical.name] == new_value

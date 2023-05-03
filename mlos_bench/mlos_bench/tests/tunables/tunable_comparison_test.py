@@ -37,7 +37,7 @@ def test_tunable_categorical_value_lt(tunable_categorical: Tunable) -> None:
     Tests that the __lt__ operator works as expected.
     """
     tunable_categorical_2 = tunable_categorical.copy()
-    new_value = [x for x in tunable_categorical.categorical_values
+    new_value = [x for x in tunable_categorical.categories
                  if x != tunable_categorical.categorical_value and x is not None
                 ][0]
     assert tunable_categorical.categorical_value is not None
