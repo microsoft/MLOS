@@ -30,9 +30,7 @@ CONFIG_TYPE = "environments"
 
 def filter_configs(configs_to_filter: List[str]) -> List[str]:
     """If necessary, filter out json files that aren't for the module we're testing."""
-    for config_path in configs_to_filter:
-        if config_path.endswith("-tunables.jsonc"):
-            configs_to_filter.remove(config_path)
+    configs_to_filter = [config_path for config_path in configs_to_filter if not config_path.endswith("-tunables.jsonc")]
     return configs_to_filter
 
 
