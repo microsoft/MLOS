@@ -9,13 +9,13 @@ import copy
 import collections
 import logging
 
-from typing import List, Optional, Sequence, Tuple, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
 
 """A tunable parameter value type alias."""
-TunableValue = Union[int, float, str]
+TunableValue = Union[int, float, Optional[str]]
 
 
 class TunableDict(TypedDict, total=False):
@@ -30,7 +30,7 @@ class TunableDict(TypedDict, total=False):
     type: str
     description: Optional[str]
     default: TunableValue
-    values: Optional[List[str]]
+    values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
     special: Optional[Union[List[int], List[str]]]
 
@@ -40,10 +40,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     A tunable parameter definition and its current value.
     """
 
-    _TYPE = {
+    # Maps tunable types to their corresponding Python types by name.
+    # Note: the lhs are function points, not strings, because they're used for
+    # type coersion in the value.setter function.
+    _TYPE: Dict[str, Callable[[Any], TunableValue]] = {
         "int": int,
         "float": float,
-        "categorical": str,
+        # Don't string convert None (json null) to "None"
+        "categorical": lambda s: None if s is None else str(s),
     }
 
     def __init__(self, name: str, config: TunableDict):
@@ -75,13 +79,19 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
                 raise ValueError("Must specify values for the categorical type")
             if self._range is not None:
                 raise ValueError("Range must be None for the categorical type")
+            if len(set(self._values)) != len(self._values):
+                raise ValueError("Values must be unique for the categorical type")
             if self._special is not None:
                 raise ValueError("Special values must be None for the categorical type")
         elif self.is_numerical:
+            if self._values is not None:
+                raise ValueError("Values must be None for the numerical type")
             if not self._range or len(self._range) != 2 or self._range[0] >= self._range[1]:
                 raise ValueError(f"Invalid range: {self._range}")
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
+        if not self.is_valid(self.default):
+            raise ValueError(f"Invalid default value: {self.default}")
 
     def __repr__(self) -> str:
         """
@@ -117,7 +127,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             self._current_value == other._current_value
         )
 
-    def __lt__(self, other: object) -> bool:
+    def __lt__(self, other: object) -> bool:    # pylint: disable=too-many-return-statements
         """
         Compare the two Tunable objects. We mostly need this to create a canonical list
         of tunable objects when hashing a TunableGroup.
@@ -140,7 +150,14 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             return True
         if self._name == other._name and self._type == other._type:
             if self.is_numerical:
+                assert self._current_value is not None
+                assert other._current_value is not None
                 return bool(float(self._current_value) < float(other._current_value))
+            # else: categorical
+            if self._current_value is None:
+                return True
+            if other._current_value is None:
+                return False
             return bool(str(self._current_value) < str(other._current_value))
         return False
 
@@ -214,13 +231,16 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         if self.is_categorical and self._values:
             return value in self._values
         elif self.is_numerical and self._range:
-            assert isinstance(value, (int, float))
-            return bool(self._range[0] <= value <= self._range[1]) or value == self._default
+            if isinstance(value, (int, float)):
+                # TODO: allow special values outside of range?
+                return bool(self._range[0] <= value <= self._range[1]) # or value == self._default
+            else:
+                raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
         else:
             raise ValueError(f"Invalid parameter type: {self._type}")
 
     @property
-    def categorical_value(self) -> str:
+    def categorical_value(self) -> Optional[str]:
         """
         Get the current value of the tunable as a number.
         """
@@ -229,17 +249,40 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         else:
             raise ValueError("Cannot get categorical values for a numerical tunable.")
 
+    @categorical_value.setter
+    def categorical_value(self, new_value: Optional[str]) -> Optional[str]:
+        """
+        Set the current value of the tunable.
+        """
+        assert self.is_categorical
+        assert isinstance(new_value, (str, type(None)))
+        self.value = new_value
+        return self.value
+
     @property
     def numerical_value(self) -> Union[int, float]:
         """
         Get the current value of the tunable as a number.
         """
+        assert self._current_value is not None
         if self._type == "int":
             return int(self._current_value)
         elif self._type == "float":
             return float(self._current_value)
         else:
             raise ValueError("Cannot get numerical value for a categorical tunable.")
+
+    @numerical_value.setter
+    def numerical_value(self, new_value: Union[int, float]) -> Union[int, float]:
+        """
+        Set the current value of the tunable.
+        """
+        # We need this coercion for the values produced by some optimizers
+        # (e.g., scikit-optimize) and for data restored from certain storage
+        # systems (where values can be strings).
+        assert self.is_numerical
+        self.value = new_value
+        return self.value
 
     @property
     def name(self) -> str:
@@ -300,7 +343,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         return self._range
 
     @property
-    def categorical_values(self) -> List[str]:
+    def categories(self) -> List[Optional[str]]:
         """
         Get the list of all possible values of a categorical tunable.
         Return None if the tunable is not categorical.
