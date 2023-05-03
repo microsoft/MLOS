@@ -1,0 +1,19 @@
+// Mock Environment to test the optimizer.
+{
+    "name": "Mock environment",
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+
+    "include_tunables": [
+        "environments/apps/redis/redis-tunables.jsonc",
+        "environments/os/linux/runtime/linux-runtime-tunables.jsonc",
+        "environments/os/linux/boot/linux-boot-tunables.jsonc",
+        "environments/vm/azure/azure-vm-tunables.jsonc"
+    ],
+
+    "config": {
+        "tunable_params": ["azure-vm", "linux-kernel-boot", "linux-kernel-runtime", "redis"],
+        "required_args": ["experimentId", "trialId"],
+        "seed": 42,         // Seed for the random noise generator. Omit to produce noise-free data.
+        "range": [60, 120]  // Range of the generated output value of the benchmark.
+    }
+}

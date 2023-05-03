@@ -123,13 +123,12 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
                 "accessToken",
                 "resourceGroup",
                 "deploymentName",
-                "vmName"
+                "vmName",
             }
         )
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
-            self.check_vm_operation_status,
             self.wait_vm_deployment,
             self.wait_vm_operation,
             self.vm_provision,
@@ -138,7 +137,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             self.vm_deprovision,
             self.vm_restart,
             self.remote_exec,
-            self.get_remote_exec_results
+            self.get_remote_exec_results,
         ])
 
         # These parameters can come from command line as strings, so conversion is needed.
@@ -247,7 +246,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def check_vm_operation_status(self, params: dict) -> Tuple[Status, dict]:
+    def _check_vm_operation_status(self, params: dict) -> Tuple[Status, dict]:
         """
         Checks the status of a pending operation on an Azure VM.
 
@@ -330,7 +329,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
         _LOG.info("Wait for operation on VM %s", self.config["vmName"])
-        return self._wait_while(self.check_vm_operation_status, Status.RUNNING, params)
+        return self._wait_while(self._check_vm_operation_status, Status.RUNNING, params)
 
     def _wait_while(self, func: Callable[[dict], Tuple[Status, dict]],
                     loop_status: Status, params: dict) -> Tuple[Status, dict]:

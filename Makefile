@@ -119,9 +119,10 @@ mypy: conda-env build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp build/mypy.ml
 build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp: $(MLOS_CORE_PYTHON_FILES)
 build/mypy.mlos_bench.${CONDA_ENV_NAME}.build-stamp: $(MLOS_BENCH_PYTHON_FILES) build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp
 
+NON_MYPY_FILES := scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp build/mypy.mlos_core.${CONDA_ENV_NAME}.build-stamp setup.cfg
 build/mypy.%.${CONDA_ENV_NAME}.build-stamp: scripts/dmypy-wrapper.sh build/conda-env.${CONDA_ENV_NAME}.build-stamp setup.cfg
 	conda run -n ${CONDA_ENV_NAME} scripts/dmypy-wrapper.sh \
-		$(filter-out scripts/dmypy-wrapper.sh build/*.build-stamp setup.cfg,$+)
+		$(filter-out $(NON_MYPY_FILES),$+)
 	touch $@
 
 
@@ -204,6 +205,7 @@ mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
 	cd $(MODULE_NAME)/ && conda run -n ${CONDA_ENV_NAME} python3 setup.py sdist --formats tar
 	ls $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar
 	! ( tar tf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar | grep -m1 tests/ )
+	[ "$(MODULE_NAME)" != "mlos_bench" ] || tar tf $(MODULE_NAME)/dist/$(PACKAGE_NAME)-*.tar | grep -m1 mlos_bench/config/
 	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(PACKAGE_NAME)-*.tar $(PACKAGE_NAME)-latest.tar
 
 %-latest-py3-none-any.whl: build/conda-env.${CONDA_ENV_NAME}.build-stamp
@@ -214,6 +216,8 @@ mlos_bench/dist/tmp/mlos-bench-latest.tar: PACKAGE_NAME := mlos-bench
 	ls $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl
 	# Check to make sure the tests were excluded from the wheel.
 	! ( unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 tests/ )
+	# Check to make sure the mlos_bench module has the config directory.
+	[ "$(MODULE_NAME)" != "mlos_bench" ] || unzip -t $(MODULE_NAME)/dist/$(MODULE_NAME)-*-py3-none-any.whl | grep -m1 mlos_bench/config/
 	cd $(MODULE_NAME)/dist/tmp && ln -s ../$(MODULE_NAME)-*-py3-none-any.whl $(MODULE_NAME)-latest-py3-none-any.whl
 
 .PHONY: dist-test-env-clean
@@ -227,7 +231,7 @@ dist-test-env: dist build/dist-test-env.$(PYTHON_VERSION).build-stamp
 
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: build/conda-env.${CONDA_ENV_NAME}.build-stamp
 # Use the same version of python as the one we used to build the wheels.
-build/dist-test-env.$(PYTHON_VERSION).build-stamp: PYTHON_VERS_REQ=$(shell conda list -n ${CONDA_ENV_NAME} | egrep '^python\s+' | sed -r -e 's/^python\s+//' | cut -d' ' -f1)
+build/dist-test-env.$(PYTHON_VERSION).build-stamp: PYTHON_VERS_REQ=$(shell conda list -n ${CONDA_ENV_NAME} | egrep '^python\s+' | sed -r -e 's/^python\s+//' | cut -d' ' -f1 | cut -d. -f1-2)
 build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl
 	# Create a clean test environment for checking the wheel files.
 	$(MAKE) dist-test-env-clean
@@ -236,6 +240,8 @@ build/dist-test-env.$(PYTHON_VERSION).build-stamp: mlos_core/dist/tmp/mlos_core-
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_core/dist/tmp/mlos_core-latest-py3-none-any.whl[full-tests]"
 	# Test a clean install of the mlos_bench wheel.
 	conda run -n mlos-dist-test-$(PYTHON_VERSION) pip install "mlos_bench/dist/tmp/mlos_bench-latest-py3-none-any.whl[full-tests]"
+	# Test that the config dir for mlos_bench got distributed.
+	test -e `conda env list | grep "mlos-dist-test-$(PYTHON_VERSION) " | awk '{ print $$2 }'`/lib/python$(PYTHON_VERS_REQ)/site-packages/mlos_bench/config/README.md
 	touch $@
 
 .PHONY: dist-test
@@ -338,7 +344,7 @@ build/check-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov/in
 	test -s doc/build/html/generated/mlos_bench.environments.Environment.html
 	test -s doc/build/html/api/mlos_core/mlos_core.html
 	test -s doc/build/html/api/mlos_bench/mlos_bench.html
-	grep -q options: doc/build/html/api/mlos_bench/mlos_bench.run.html
+	grep -q -e '--config CONFIG' doc/build/html/api/mlos_bench/mlos_bench.run.html
 	# Check doc logs for errors (but skip over some known ones) ...
 	@cat doc/build/log.txt \
 		| egrep -C1 -e WARNING -e CRITICAL -e ERROR \

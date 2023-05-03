@@ -1,5 +1,0 @@
-{
-    "vmSize": "Standard_B2s",
-    "rootfs": "ext2",
-    "kernel_sched_migration_cost_ns": 40000
-}

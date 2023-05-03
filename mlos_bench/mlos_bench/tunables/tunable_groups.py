@@ -110,10 +110,10 @@ class TunableGroups:
                 self._add_group(group)
             else:
                 # Check that there's no overlap in the tunables.
-                if self._tunable_groups[group.name] != group:
+                # But allow for differing current values.
+                if not self._tunable_groups[group.name].equals_defaults(group):
                     raise ValueError(f"Overlapping covariant tunable group name {group.name} " +
                                      "in {self._tunable_groups[group.name]} and {tunables}")
-                # TODO: Else, should we overwrite tunables with the self values?
         return self
 
     def __repr__(self) -> str:
@@ -281,7 +281,7 @@ class TunableGroups:
             Self-reference for chaining.
         """
         for name in (group_names or self.get_covariant_group_names()):
-            self._tunable_groups[name].reset()
+            self._tunable_groups[name].reset_is_updated()
         return self
 
     def assign(self, param_values: Mapping[str, TunableValue]) -> "TunableGroups":

@@ -57,6 +57,15 @@ setup(
     packages=find_packages(exclude=[f"{MODULE_BASE_NAME}.tests", f"{MODULE_BASE_NAME}.tests.*"]),
     package_data={
         '': ['py.typed', '**/*.pyi'],
+        'mlos_bench': [
+            'config/**/*.md',
+            'config/**/*.jsonc',
+            'config/**/*.json',
+            'config/**/*.py',
+            'config/**/*.sh',
+            'config/**/*.cmd',
+            'config/**/*.ps1',
+        ],
     },
     entry_points={
         'console_scripts': [
@@ -67,6 +76,7 @@ setup(
         'mlos-core==' + _VERSION,
         'requests',
         'json5',
+        'importlib_resources;python_version<"3.10"',
     ] + extra_requires['storage-sql-sqlite'],   # NOTE: For now sqlite is a fallback storage backend, so we always install it.
     extras_require=extra_requires,
     author='Microsoft',

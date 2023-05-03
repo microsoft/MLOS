@@ -1,0 +1,30 @@
+//
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+//
+
+// *** DO *NOT* CHANGE! This config is used for tests! ***
+{
+    "config_path": [
+        // relative to the root of the repo (for now), where this is expected to be executed from
+        "mlos_bench/mlos_bench/tests/config"
+    ],
+
+    "environment": "environments/mock/mock_env.jsonc",
+    "optimizer": "optimizers/one_shot_opt.jsonc",
+    "storage": "storage/in-memory.jsonc",
+
+    "tunable_values": [
+        "tunables/tunable-values-example.jsonc"
+    ],
+
+    // "globals": ["global_config.json"],
+
+    "experimentId": "MockExperiment",
+    "trialId": 1,
+
+    "teardown": true,
+
+    // "log_file": "mock-1shot.log",
+    "log_level": 20  // INFO
+}

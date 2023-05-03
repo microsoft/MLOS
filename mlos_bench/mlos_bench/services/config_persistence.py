@@ -9,6 +9,7 @@ service functions.
 """
 
 import os
+import re
 import sys
 
 import json    # For logging only
@@ -24,6 +25,12 @@ from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import instantiate_from_config, BaseTypeVar
 
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
+
+
 _LOG = logging.getLogger(__name__)
 
 
@@ -31,6 +38,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     """
     Collection of methods to deserialize the Environment, Service, and TunableGroups objects.
     """
+
+    BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath("")).replace("\\", "/")
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
@@ -48,6 +57,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         super().__init__(config, parent)
         self._config_path = self.config.get("config_path", [])
         self._config_loader_service = self
+
+        if self.BUILTIN_CONFIG_PATH not in self._config_path:
+            self._config_path.append(self.BUILTIN_CONFIG_PATH)
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
@@ -83,7 +95,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
         if not os.path.isabs(file_path):
             for path in path_list:
-                full_path = os.path.join(path, file_path)
+                full_path = os.path.realpath(os.path.join(path, file_path))
+                if sys.platform == "win32":
+                    full_path = full_path.replace("\\", "/")
                 if os.path.exists(full_path):
                     _LOG.debug("Path resolved: %s", full_path)
                     return full_path
@@ -186,6 +200,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         inst : Any
             A new instance of the `cls` class.
         """
+        tunables_path = config.get("include_tunables")
+        if tunables_path is not None:
+            tunables = self._load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         inst = instantiate_from_config(base_cls, class_name, tunables, service, class_config)
         _LOG.info("Created: %s", inst)

@@ -31,14 +31,14 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
     DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM = 10000
     """Default number of (max) unique values of each parameter, when space discretization is used"""
 
-    def __init__(
+    def __init__(   # pylint: disable=too-many-arguments
         self,
         orig_config_space: ConfigSpace.ConfigurationSpace,
         num_low_dims: int = DEFAULT_NUM_LOW_DIMS,
         special_param_values: Optional[dict] = None,
         max_unique_values_per_param: Optional[int] = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
         use_approximate_reverse_mapping: bool = False,
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         """Create a space adapter that employs LlamaTune's techniques.
 
         Parameters

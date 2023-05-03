@@ -1,0 +1,15 @@
+{
+    "linux-kernel-runtime": {
+        "cost": 1,
+        // TODO: FIXME: These should include actual filesystem paths to the parameters.
+        "params": {
+            "kernel_sched_migration_cost_ns": {
+                "description": "Cost of migrating the thread to another core",
+                "type": "int",
+                "default": -1,
+                "range": [-1, 500000],
+                "special": [-1]
+            }
+        }
+    }
+}

@@ -6,14 +6,14 @@
 Helper functions to run scripts and commands locally on the scheduler side.
 """
 
-import os
-import sys
-import errno
-import tempfile
 import contextlib
+import errno
+import logging
+import os
 import shlex
 import subprocess
-import logging
+import sys
+import tempfile
 
 from typing import Dict, Iterable, Mapping, Optional, Tuple, Union, TYPE_CHECKING
 
@@ -47,7 +47,10 @@ class LocalExecService(Service, SupportsLocalExec):
         """
         super().__init__(config, parent)
         self._temp_dir = self.config.get("temp_dir")
-        self.register([self.temp_dir_context, self.local_exec])
+        self.register([
+            self.temp_dir_context,
+            self.local_exec,
+        ])
 
     def temp_dir_context(self, path: Optional[str] = None) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
         """

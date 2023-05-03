@@ -1,0 +1,18 @@
+// Azure VM Tunables
+{
+    "azure-vm": {
+        "cost": 1000,
+        "params": {
+            "vmSize": {
+                "description": "Azure VM size",
+                "type": "categorical",
+                "default": "Standard_B4ms",
+                "values": [
+                    "Standard_B2s",
+                    "Standard_B2ms",
+                    "Standard_B4ms"
+                ]
+            }
+        }
+    }
+}
