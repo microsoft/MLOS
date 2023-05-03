@@ -38,13 +38,13 @@ def test_tunable_categorical_value_lt(tunable_categorical: Tunable) -> None:
     """
     tunable_categorical_2 = tunable_categorical.copy()
     new_value = [x for x in tunable_categorical.categories
-                 if x != tunable_categorical.categorical_value and x is not None
+                 if x != tunable_categorical.category and x is not None
                 ][0]
-    assert tunable_categorical.categorical_value is not None
-    tunable_categorical_2.categorical_value = new_value
-    if tunable_categorical.categorical_value < new_value:
+    assert tunable_categorical.category is not None
+    tunable_categorical_2.category = new_value
+    if tunable_categorical.category < new_value:
         assert tunable_categorical < tunable_categorical_2
-    elif tunable_categorical.categorical_value > new_value:
+    elif tunable_categorical.category > new_value:
         assert tunable_categorical > tunable_categorical_2
 
 

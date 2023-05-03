@@ -97,7 +97,7 @@ class MockEnv(Environment):
         """
         val = None
         if tunable.is_categorical:
-            val = (tunable.categories.index(tunable.categorical_value) /
+            val = (tunable.categories.index(tunable.category) /
                    float(len(tunable.categories) - 1))
         elif tunable.is_numerical:
             val = ((tunable.numerical_value - tunable.range[0]) /
