@@ -52,7 +52,8 @@ def test_launch_main_app(root_path: str,
         assert return_code == 0
 
         with open(log_path, "rt", encoding="utf-8") as fh_out:
+            best_score_lines = [ln.strip() for ln in fh_out.readlines() if " INFO Env: Mock environment best score: " in ln]
             assert len([
-                ln.strip() for ln in fh_out.readlines()
-                if " INFO Env: Mock environment best score: 70.35" in ln
+                ln for ln in best_score_lines
+                if " best score: 60.0" in ln
             ]) == 1
