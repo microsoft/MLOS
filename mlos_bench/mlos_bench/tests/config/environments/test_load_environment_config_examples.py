@@ -114,7 +114,7 @@ def test_load_composite_env_config_examples(config_loader_service: ConfigPersist
             assert child_tunable.value == old_cat_value
             assert covariant_group[child_tunable] == old_cat_value
             assert composite_env.tunable_params[child_tunable] == old_cat_value
-            new_cat_value = [x for x in child_tunable.categorical_values if x != old_cat_value][0]
+            new_cat_value = [x for x in child_tunable.categories if x != old_cat_value][0]
             child_tunable.categorical_value = new_cat_value
             assert child_env.tunable_params[child_tunable] == new_cat_value
             assert composite_env.tunable_params[child_tunable] == child_tunable.categorical_value
