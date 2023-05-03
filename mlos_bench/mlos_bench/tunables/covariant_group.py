@@ -99,7 +99,39 @@ class CovariantTunableGroup:
                 self._is_updated == other._is_updated and
                 self._tunables == other._tunables)
 
-    def reset(self) -> None:
+    def equals_defaults(self, other: "CovariantTunableGroup") -> bool:
+        """
+        Checks to see if the other CovariantTunableGroup is the same, ignoring
+        the current values of the two groups' Tunables.
+
+        Parameters
+        ----------
+        other : CovariantTunableGroup
+
+        Returns
+        -------
+        bool
+        """
+        # NOTE: May be worth considering to implement this check without copies.
+        cpy = self.copy()
+        cpy.restore_defaults()
+        cpy.reset_is_updated()
+
+        other = other.copy()
+        other.restore_defaults()
+        other.reset_is_updated()
+        return cpy == other
+
+    def restore_defaults(self) -> None:
+        """
+        Restore all tunable parameters to their default values.
+        """
+        for tunable in self._tunables.values():
+            if tunable.value != tunable.default:
+                self._is_updated = True
+            tunable.value = tunable.default
+
+    def reset_is_updated(self) -> None:
         """
         Clear the update flag. That is, state that running an experiment with the
         current values of the tunables in this group has no extra cost.

@@ -51,13 +51,11 @@ def test_duplicate_merging_tunable_groups(tunable_groups_config: dict) -> None:
     assert covariant_group != covariant_group_dup
     assert parent_tunables != tunables_dup
 
-    # Try merging again.
-    # Should be disallowed atm since the (strict) equality check on covariant groups fails.
+    # Should be ok since we only changed the value.
     parent_tunable_copy = parent_tunables.copy()
-    with pytest.raises(ValueError):
-        parent_tunables = parent_tunables.merge(tunables_dup)
+    parent_tunables = parent_tunables.merge(tunables_dup)
 
-    # Make sure nothing changed.
+    # Make sure nothing changed in the parent.
     assert tunable != tunable_dup
     assert covariant_group != covariant_group_dup
     assert parent_tunables != tunables_dup
