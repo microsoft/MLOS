@@ -195,11 +195,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
         try:
-            if self.is_categorical and value is None and None in self.categorical_values:
-                # Don't string convert None (json null)
-                coerced_value = None
-            else:
-                coerced_value = self._TYPE[self._type](value)
+            coerced_value = self._TYPE[self._type](value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
                        self._type, self._name, type(value), value)
