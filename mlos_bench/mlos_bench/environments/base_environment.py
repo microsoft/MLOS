@@ -127,12 +127,11 @@ class Environment(metaclass=abc.ABCMeta):
                 raise ValueError("Missing required parameter: " + key)
 
         if tunables is None:
+            _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
             tunables = TunableGroups()
 
         tunable_groups = config.get("tunable_params")
-        self._tunable_params = (
-            tunables.subgroup(tunable_groups) if tunable_groups else tunables
-        )
+        self._tunable_params = tunables.subgroup(tunable_groups) if tunable_groups else tunables
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Config for: %s\n%s",

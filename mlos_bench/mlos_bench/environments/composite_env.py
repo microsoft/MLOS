@@ -54,15 +54,22 @@ class CompositeEnv(Environment):
 
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
-                    child_config_file, global_config, tunables, self._service):
+                    child_config_file, self._tunable_params, global_config, self._service):
                 self._add_child(env)
 
         for child_config in config.get("children", []):
             self._add_child(self._config_loader_service.build_environment(
-                child_config, global_config, tunables, self._service))
+                child_config, self._tunable_params, global_config, self._service))
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
+
+    @property
+    def children(self) -> List[Environment]:
+        """
+        Return the list of child environments.
+        """
+        return self._children
 
     def _add_child(self, env: Environment) -> None:
         """
@@ -70,7 +77,7 @@ class CompositeEnv(Environment):
         This method is called from the constructor only.
         """
         self._children.append(env)
-        self._tunable_params.update(env.tunable_params)
+        self._tunable_params.merge(env.tunable_params)
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """

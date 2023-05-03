@@ -12,7 +12,7 @@ command line.
 
 import logging
 import argparse
-from typing import Optional, Any, Tuple, List, Dict, Iterable
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from mlos_bench.util import BaseTypes
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -25,6 +25,7 @@ from mlos_bench.storage.base_storage import Storage
 
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+
 
 _LOG_LEVEL = logging.INFO
 _LOG_FORMAT = '%(asctime)s %(filename)s:%(lineno)d %(funcName)s %(levelname)s %(message)s'
@@ -82,8 +83,9 @@ class Launcher:
                          " Run `mlos_bench --help` and consult `README.md` for more info.")
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
+        tunable_groups = TunableGroups()    # base tunable groups that all others get build on
         self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, self.global_config, service=self._parent_service)
+            self.root_env_config, tunable_groups, self.global_config, service=self._parent_service)
 
         # NOTE: Load the tunable values *before* the optimizer
         self.tunables = self._load_tunable_values(args.tunable_values or config.get("tunable_values", []))

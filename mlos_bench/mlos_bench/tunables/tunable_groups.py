@@ -68,16 +68,30 @@ class TunableGroups:
         """
         Add a CovariantTunableGroup to the current collection.
 
+        Note: non-overlapping groups are expected to be added to the collection.
+
         Parameters
         ----------
             group : CovariantTunableGroup
         """
+        assert group.name not in self._tunable_groups, f"Duplicate covariant tunable group name {group.name} in {self}"
         self._tunable_groups[group.name] = group
-        self._index.update(dict.fromkeys(group.get_names(), group))
+        for tunable in group.get_tunables():
+            if tunable.name in self._index:
+                raise ValueError(f"Duplicate Tunable {tunable.name} from group {group.name} in {self}")
+            self._index[tunable.name] = group
 
-    def update(self, tunables: "TunableGroups") -> "TunableGroups":
+    def merge(self, tunables: "TunableGroups") -> "TunableGroups":
         """
         Merge the two collections of covariant tunable groups.
+
+        Unlike the dict `update` method, this method does not modify the
+        original when overlapping keys are found.
+        It is expected be used to merge the tunable groups referenced by a
+        standalone Environment config into a parent CompositeEnvironment,
+        for instance.
+        This allows self contained, potentially overlapping, but also
+        overridable configs to be composed together.
 
         Parameters
         ----------
@@ -90,8 +104,16 @@ class TunableGroups:
             Self-reference for chaining.
         """
         # pylint: disable=protected-access
-        self._index.update(tunables._index)
-        self._tunable_groups.update(tunables._tunable_groups)
+        # Check that covariant groups are unique, else throw an error.
+        for group in tunables._tunable_groups.values():
+            if group.name not in self._tunable_groups:
+                self._add_group(group)
+            else:
+                # Check that there's no overlap in the tunables.
+                if self._tunable_groups[group.name] != group:
+                    raise ValueError(f"Overlapping covariant tunable group name {group.name} " +
+                                     "in {self._tunable_groups[group.name]} and {tunables}")
+                # TODO: Else, should we overwrite tunables with the self values?
         return self
 
     def __repr__(self) -> str:
@@ -178,6 +200,12 @@ class TunableGroups:
         """
         Select the covariance groups from the current set and create a new
         TunableGroups object that consists of those covariance groups.
+
+        Note: The new TunableGroup will include *references* (not copies) to
+        original ones, so each will get updated together.
+        This is often desirable to support the use case of multiple related
+        Environments (e.g. Local vs Remote) using the same set of tunables
+        within a CompositeEnvironment.
 
         Parameters
         ----------
