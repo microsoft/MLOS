@@ -1,12 +1,11 @@
 // MLOS Core optimizer
 {
-    "$schema": "../schemas/optimizers/optimizer-schema.jsonc",
+    "$schema": "../schemas/optimizers/optimizer-schema.json",
     "class": "mlos_bench.optimizers.MlosCoreOptimizer",
 
     "config": {
         "minimize": "score",
         "max_iterations": 20,
-        "optimizer_type": "SKOPT",
-        "base_estimator": "gp"
+        "optimizer_type": "RANDOM"
     }
 }

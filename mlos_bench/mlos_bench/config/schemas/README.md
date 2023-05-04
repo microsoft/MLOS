@@ -44,13 +44,18 @@ check-jsonschema --verbose --default-filetype json5 \
 
 ## Development
 
-### Conventions
-
-- We do not typically specify `"default"` values in the schema files, since for most validators those aren't enforced, and it would require additional maintenance effort to keep the defaults in sync with the code.
-- We typically specify `"additionalProperties": false` in order to prevent typos in the config files from going unnoticed, however this can be overridden for portions of the schema if necessary.
-
 ### Editing
 
 Unlike the config files, the schemas are written in plain `json` instead of `jsonc` since some tooling for schema validation doesn't support parsing json files with comments.
+You can add comments within an object using the `"$comment"` property to work around this a little.
 
 When referencing a schema in a config file (see above), the `$schema` property will allow for autocomplete in some editors such as [VSCode](https://code.visualstudio.com/).
+
+### Conventions
+
+- We do not typically specify `"default"` values in the schema files, since for most validators those aren't enforced, and it would require additional maintenance effort to keep the defaults in sync with the code.
+- We typically specify `"unevaluatedProperties": false` in order to prevent typos in the config files from going unnoticed, however this can be overridden for portions of the schema if necessary.
+  > Note: It's important to use `"unevaluatedProperties": false` from the [2020-09 draft](https://json-schema.org/understanding-json-schema/reference/object.html?highlight=unevaluated#unevaluated-properties), and not `"additionalProperties": false` due to the order in which those two rules get processed.
+- When specifying "conditions" always pair the property clause `"properties": { "property-name": { "const": "value" } }` to match it with the `"required": ["property-name"]` clause to ensure that it is a strict match.
+- Close all `if-then-else` statements inside a `"oneOf"` block with an `"else": false`, else the clause will implicitly default to `true`.
+  > As a nice corollary, this should force a full set of matching descriptions in the `"oneOf"` block so we don't accidentally leave off a supported matching value.

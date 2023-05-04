@@ -1,6 +1,6 @@
 // Mock optimizer to test the benchmarking framework.
 {
-    "$schema": "../schemas/optimizers/optimizer-schema.jsonc",
+    "$schema": "../schemas/optimizers/optimizer-schema.json",
 
     "class": "mlos_bench.optimizers.MockOptimizer",
 
