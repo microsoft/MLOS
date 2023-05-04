@@ -107,10 +107,10 @@ def test_bad_extended_merge_tunable_group(tunable_groups_config: dict) -> None:
             "cost": 300,
             "params": {
                 "idle": {
-                    "description": "Idling method",
                     "type": "categorical",
-                    "values": ["halt", "mwait", "noidle"],
-                    "default": "mwait"
+                    "description": "Idling method",
+                    "default": "mwait",
+                    "values": ["halt", "mwait", "noidle"]
                 }
             }
         }
