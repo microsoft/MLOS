@@ -6,11 +6,9 @@
 A collection Service functions for mocking managing VMs.
 """
 
-from typing import Any, Tuple
-
-from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.tests.services.remote.mock import mock_operation
 
 
 class MockVMService(Service, SupportsVMOps):
@@ -32,7 +30,7 @@ class MockVMService(Service, SupportsVMOps):
         """
         super().__init__(config, parent)
         self.register({
-            name: self._mock_operation for name in (
+            name: mock_operation for name in (
                 "wait_vm_deployment",
                 "wait_vm_operation",
                 "vm_provision",
@@ -42,15 +40,3 @@ class MockVMService(Service, SupportsVMOps):
                 "vm_restart",
             )
         })
-
-    @staticmethod
-    def _mock_operation(*args: Any, **kwargs: Any) -> Tuple[Status, dict]:
-        """
-        Mock VM operation that always succeeds.
-
-        Returns
-        -------
-        result : (Status, dict)
-            A pair of Status and result, always (SUCCEEDED, {}).
-        """
-        return Status.SUCCEEDED, {}
