@@ -9,7 +9,6 @@ service functions.
 """
 
 import os
-import re
 import sys
 
 import json    # For logging only

@@ -43,7 +43,7 @@ class MockVMService(Service, SupportsVMOps):
             }
         )
 
-        # Register methods that we want to expose to the Environment objects.
+        # Register (mock) methods to expose to the Environment objects.
         self.register([
             self.wait_vm_deployment,
             self.wait_vm_operation,

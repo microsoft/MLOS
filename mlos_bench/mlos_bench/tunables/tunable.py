@@ -74,6 +74,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             self._range = config_range
         self._special = config.get("special")
         self._current_value = self._default
+        self._sanity_check()
+
+    def _sanity_check(self) -> None:
+        """
+        Check if the status of the Tunable is valid, and throw ValueError if it is not.
+        """
         if self.is_categorical:
             if not (self._values and isinstance(self._values, collections.abc.Iterable)):
                 raise ValueError("Must specify values for the categorical type")
@@ -233,7 +239,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         elif self.is_numerical and self._range:
             if isinstance(value, (int, float)):
                 # TODO: allow special values outside of range?
-                return bool(self._range[0] <= value <= self._range[1]) # or value == self._default
+                return bool(self._range[0] <= value <= self._range[1])  # or value == self._default
             else:
                 raise ValueError(f"Invalid value type for tunable {self}: {value}={type(value)}")
         else:

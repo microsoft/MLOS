@@ -109,8 +109,8 @@ def test_bad_extended_merge_tunable_group(tunable_groups_config: dict) -> None:
                 "idle": {
                     "description": "Idling method",
                     "type": "categorical",
-                    "default": "mwait",
-                    "values": ["halt", "mwait", "noidle"]
+                    "values": ["halt", "mwait", "noidle"],
+                    "default": "mwait"
                 }
             }
         }

@@ -107,10 +107,13 @@ class CovariantTunableGroup:
         Parameters
         ----------
         other : CovariantTunableGroup
+            A covariant tunable group object to compare to.
 
         Returns
         -------
-        bool
+        are_equal : bool
+            True if the two CovariantTunableGroup objects' *metadata* are the same,
+            False optherwise.
         """
         # NOTE: May be worth considering to implement this check without copies.
         cpy = self.copy()

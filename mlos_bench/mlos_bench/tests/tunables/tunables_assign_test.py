@@ -71,7 +71,7 @@ def test_tunable_assign_str_to_numerical(tunable_int: Tunable) -> None:
     Check str to int coercion.
     """
     with pytest.raises(ValueError):
-        tunable_int.numerical_value = "foo" # type: ignore[assignment]
+        tunable_int.numerical_value = "foo"  # type: ignore[assignment]
 
 
 def test_tunable_assign_int_to_numerical_value(tunable_int: Tunable) -> None:
