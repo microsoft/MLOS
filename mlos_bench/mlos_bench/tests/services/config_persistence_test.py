@@ -48,7 +48,10 @@ def test_resolve_stock_path(config_persistence_service: ConfigPersistenceService
     path = config_persistence_service.resolve_path(file_path)
     assert path.endswith(file_path)
     assert os.path.exists(path)
-    assert path.startswith(ConfigPersistenceService.BUILTIN_CONFIG_PATH)
+    assert os.path.samefile(
+        ConfigPersistenceService.BUILTIN_CONFIG_PATH,
+        os.path.commonpath([ConfigPersistenceService.BUILTIN_CONFIG_PATH, path])
+    )
 
 
 def test_resolve_path(config_persistence_service: ConfigPersistenceService) -> None:
