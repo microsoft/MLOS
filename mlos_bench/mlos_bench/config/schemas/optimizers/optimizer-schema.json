@@ -1,0 +1,163 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.jsonc",
+    "title": "mlos_bench Optimizer config",
+    "type": "object",
+
+    "definitions": {
+        "config_base_optimizer": {
+            "$comment": "config properties common to all optimizer types.",
+            "type": "object",
+            "properties": {
+                "minimize": {
+                    "description": "The name of the metric to minimize.",
+                    "$comment": "In oneOf spec below require one of 'minimize' or 'maximize'.",
+                    "type": "string"
+                },
+                "maximize": {
+                    "description": "The name of the metric to maximize.",
+                    "$comment": "In oneOf spec below require one of 'minimize' or 'maximize'.",
+                    "type": "string"
+                },
+                "max_iterations": {
+                    "description": "The maximum number of iterations to run.",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "seed": {
+                    "description": "The seed to use for the random number generator.",
+                    "type": "integer"
+                }
+            },
+            "oneOf": [
+                {
+                    "required": ["minimize"]
+                },
+                {
+                    "required": ["maximize"]
+                }
+            ]
+        },
+
+        "config_mlos_core_optimizer": {
+            "$comment": "Properties specific to the mlos_core optimizer type.",
+            "type": "object",
+            "properties": {
+                "optimizer_type": {
+                    "description": "The underlying optimizer type to use.",
+                    "$comment": "TODO: Add support for sub options based on optimizer type selected.",
+                    "enum": [
+                        "SKOPT",
+                        "EMUKIT",
+                        "RANDOM"
+                    ]
+                }
+            }
+        },
+
+        "config_tunable_values_optimizer": {
+            "$comment": "Properties specific to optimizers that allow a specific set of tunable values to be used.",
+            "type": "object",
+            "properties": {
+                "include_tunable_values": {
+                    "$comment": "List of files with tunable values to include in the optimization.",
+                    "type": "array"
+                },
+                "tunable_values": {
+                    "$comment": "List of dictionary of tunable values to include in the optimization.",
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    }
+                }
+            }
+        }
+    },
+
+    "properties": {
+        "$schema": {
+            "description": "The schema to use for validating the optimizer config (accepts both URLs and local paths).",
+            "type": "string",
+            "$comment": "This should match the name of this file.",
+            "pattern": "schemas/optimizers/optimizer-schema.jsonc$"
+        },
+
+        "class": {
+            "description": "The name of the optimizer class to use.",
+            "$comment": "required",
+            "enum": [
+                "mlos_bench.optimizers.MlosCoreOptimizer",
+                "mlos_bench.optimizers.MockOptimizer",
+                "mlos_bench.optimizers.OneShotOptimizer"
+            ]
+        }
+    },
+    "required": ["class"],
+    "$comment": "FIXME: adding config isn't working quite right yet.",
+    "additionalProperties": {
+            "allOf": [
+                {
+                    "if": {
+                        "properties": {
+                            "class": {
+                                "const": "mlos_bench.optimizers.MockOptimizer"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "config": {
+                                "type": "object",
+                                "allOf": [
+                                    {"$ref": "#/definitions/config_base_optimizer"}
+                                ],
+                                "additionalProperties": false
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "class": {
+                                "const": "mlos_bench.optimizers.MlosCoreOptimizer"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "config": {
+                                "type": "object",
+                                "allOf": [
+                                    {"$ref": "#/definitions/config_base_optimizer"},
+                                    {"$ref": "#/definitions/config_mlos_core_optimizer"}
+                                ],
+                                "additionalProperties": false
+                            }
+                        }
+                    }
+                },
+                {
+                    "if": {
+                        "properties": {
+                            "class": {
+                                "const": "mlos_bench.optimizers.OneShotOptimizer"
+                            }
+                        }
+                    },
+                    "then": {
+                        "properties": {
+                            "config": {
+                                "type": "object",
+                                "allOf": [
+                                    {"$ref": "#/definitions/config_base_optimizer"},
+                                    {"$ref": "#/definitions/config_tunable_values_optimizer"}
+                                ],
+                                "additionalProperties": false
+                            }
+                        }
+                    }
+                }
+            ]
+    }
+}

@@ -204,7 +204,7 @@ class Launcher:
         tunables = self.environment.tunable_params
         if args_tunables is not None:
             for data_file in args_tunables:
-                values = self._config_loader.load_config(data_file)
+                values = self._config_loader.load_config(data_file, TUNABLE_PARAMS_SCHEMA)
                 assert isinstance(values, Dict)
                 tunables.assign(values)
         return tunables
@@ -218,7 +218,7 @@ class Launcher:
         if args_optimizer is None:
             return OneShotOptimizer(
                 self.tunables, self._parent_service, self.global_config)
-        optimizer = self._load(Optimizer, args_optimizer)
+        optimizer = self._load(Optimizer, args_optimizer, OPTIMIZER_SCHEMA)
         assert isinstance(optimizer, Optimizer)
         return optimizer
 
@@ -233,15 +233,15 @@ class Launcher:
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
-        storage = self._load(Storage, args_storage)
+        storage = self._load(Storage, args_storage, STORAGE_SCHEMA)
         assert isinstance(storage, Storage)
         return storage
 
-    def _load(self, cls: type, json_file_name: str) -> BaseTypes:
+    def _load(self, cls: type, json_file_name: str, schema_type: FIXME) -> BaseTypes:
         """
         Create a new instance of class `cls` from JSON configuration.
         """
-        class_config = self._config_loader.load_config(json_file_name)
+        class_config = self._config_loader.load_config(json_file_name, schema_type)
         assert isinstance(class_config, Dict)
         return self._config_loader.build_generic(
             base_cls=cls,

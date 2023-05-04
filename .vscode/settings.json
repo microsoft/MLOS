@@ -13,6 +13,10 @@
     "python.linting.mypyEnabled": false,            // use the dmypy daemon extension instead - it's faster
     // "mypy.runUsingActiveInterpreter": true,      // in the devcontainer we override this to use an explicit path
     "autoDocstring.docstringFormat": "numpy",
+    "json.validate.enable": true,
+    "json.schemas": [
+        // TODO
+    ],
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"
     ],

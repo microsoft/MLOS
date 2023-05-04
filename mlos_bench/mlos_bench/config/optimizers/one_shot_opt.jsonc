@@ -1,5 +1,7 @@
 // Mock optimizer that runs a single benchmark with the specified configuration.
 {
+    "$schema": "../schemas/optimizers/optimizer-schema.jsonc",
+
     "class": "mlos_bench.optimizers.OneShotOptimizer",
 
     // Define the set of tunable params that the optimizer can work over.
@@ -21,7 +23,7 @@
             "tunables/tunable-values-example.jsonc"
         ],
         // Additional values of the tunable parameters.
-        "tunables_values": {},
+        "tunable_values": {},
 
         // Whether to assign the "default" tunable parameter as a value or a
         // random value for those parameters not specified.

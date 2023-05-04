@@ -1,5 +1,6 @@
 // MLOS Core optimizer
 {
+    "$schema": "../schemas/optimizers/optimizer-schema.jsonc",
     "class": "mlos_bench.optimizers.MlosCoreOptimizer",
 
     "config": {

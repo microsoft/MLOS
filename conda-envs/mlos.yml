@@ -25,6 +25,7 @@ dependencies:
   - pip:
     - bump2version
     - licenseheaders
+    - check-jsonschema
     - mypy
     - types-setuptools
     - types-pygments

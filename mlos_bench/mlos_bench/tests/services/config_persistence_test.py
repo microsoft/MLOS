@@ -82,3 +82,13 @@ def test_load_config(config_persistence_service: ConfigPersistenceService) -> No
     assert tunables_data is not None
     assert isinstance(tunables_data, dict)
     assert len(tunables_data) >= 1
+
+# TODO: parameterize the different schema types
+def test_load_config_with_schema(config_persistence_service: ConfigPersistenceService) -> None:
+    """
+    Check if we can successfully load a config file located relative to `config_path` with schema validation.
+    """
+    tunables_data = config_persistence_service.load_config("tunable-values-example.json")
+    assert tunables_data is not None
+    assert isinstance(tunables_data, dict)
+    assert len(tunables_data) >= 1

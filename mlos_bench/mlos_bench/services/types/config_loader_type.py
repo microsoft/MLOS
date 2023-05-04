@@ -41,7 +41,7 @@ class SupportsConfigLoading(Protocol):
             An actual path to the config or script.
         """
 
-    def load_config(self, json_file_name: str) -> Union[dict, List[dict]]:
+    def load_config(self, json_file_name: str, schema_type: FIXME) -> Union[dict, List[dict]]:
         """
         Load JSON config file. Search for a file relative to `_config_path`
         if the input path is not absolute.
