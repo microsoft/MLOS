@@ -102,25 +102,33 @@ def test_load_composite_env_config_examples(config_loader_service: ConfigPersist
         assert child_env is not None
         assert isinstance(child_env, Environment)
         assert child_env.tunable_params is not None
-        (child_tunable, covariant_group) = next(iter(child_env.tunable_params))
-        assert child_tunable in composite_env.tunable_params
 
-        # Check that when we change a child env, it's value is reflected in the composite env as well.
-        # That is to say, they refer to the same objects, despite having potentially been loaded from separate configs.
-        if child_tunable.is_categorical:
-            old_cat_value = child_tunable.category
-            assert child_tunable.value == old_cat_value
-            assert covariant_group[child_tunable] == old_cat_value
-            assert composite_env.tunable_params[child_tunable] == old_cat_value
-            new_cat_value = [x for x in child_tunable.categories if x != old_cat_value][0]
-            child_tunable.category = new_cat_value
-            assert child_env.tunable_params[child_tunable] == new_cat_value
-            assert composite_env.tunable_params[child_tunable] == child_tunable.category
-        elif child_tunable.is_numerical:
-            old_num_value = child_tunable.numerical_value
-            assert child_tunable.value == old_num_value
-            assert covariant_group[child_tunable] == old_num_value
-            assert composite_env.tunable_params[child_tunable] == old_num_value
-            child_tunable.numerical_value += 1
-            assert child_env.tunable_params[child_tunable] == old_num_value + 1
-            assert composite_env.tunable_params[child_tunable] == child_tunable.numerical_value
+        checked_child_env_groups = set()
+        for (child_tunable, child_group) in child_env.tunable_params:
+            # Lookup that tunable in the composite env.
+            assert child_tunable in composite_env.tunable_params
+            (composite_tunable, composite_group) = composite_env.tunable_params.get_tunable(child_tunable)
+            assert child_tunable is composite_tunable   # Check that the tunables are the same object.
+            if child_group.name not in checked_child_env_groups:
+                assert child_group is composite_group
+                checked_child_env_groups.add(child_group.name)
+
+            # Check that when we change a child env, it's value is reflected in the composite env as well.
+            # That is to say, they refer to the same objects, despite having potentially been loaded from separate configs.
+            if child_tunable.is_categorical:
+                old_cat_value = child_tunable.category
+                assert child_tunable.value == old_cat_value
+                assert child_group[child_tunable] == old_cat_value
+                assert composite_env.tunable_params[child_tunable] == old_cat_value
+                new_cat_value = [x for x in child_tunable.categories if x != old_cat_value][0]
+                child_tunable.category = new_cat_value
+                assert child_env.tunable_params[child_tunable] == new_cat_value
+                assert composite_env.tunable_params[child_tunable] == child_tunable.category
+            elif child_tunable.is_numerical:
+                old_num_value = child_tunable.numerical_value
+                assert child_tunable.value == old_num_value
+                assert child_group[child_tunable] == old_num_value
+                assert composite_env.tunable_params[child_tunable] == old_num_value
+                child_tunable.numerical_value += 1
+                assert child_env.tunable_params[child_tunable] == old_num_value + 1
+                assert composite_env.tunable_params[child_tunable] == child_tunable.numerical_value
