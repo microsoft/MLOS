@@ -238,7 +238,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             elif "Location" in response.headers:
                 result["asyncResultsUrl"] = response.headers.get("Location")
             if "Retry-After" in response.headers:
-                result["pollInterval"] = str(float(response.headers["Retry-After"]))
+                result["pollInterval"] = float(response.headers["Retry-After"])
 
             return (Status.PENDING, result)
         else:
