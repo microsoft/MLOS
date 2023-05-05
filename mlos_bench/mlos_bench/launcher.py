@@ -15,6 +15,7 @@ import argparse
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 from mlos_bench.util import BaseTypes
+from mlos_bench.config.schemas import ConfigSchemaType
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.base_environment import Environment
 
@@ -49,7 +50,7 @@ class Launcher:
         # Bootstrap config loader: command line takes priority.
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
         if args.config:
-            config = self._config_loader.load_config(args.config)
+            config = self._config_loader.load_config(args.config, schema_type=None) # FIXME: provide a schema for CLI args
             assert isinstance(config, Dict)
             config_path = config.get("config_path", [])
             if config_path and not args.config_path:
@@ -189,7 +190,7 @@ class Launcher:
         from the specified config files (if any) and command line arguments.
         """
         for config_file in (args_globals or []):
-            conf = self._config_loader.load_config(config_file)
+            conf = self._config_loader.load_config(config_file, schema_type=None)   # FIXME: provide a schema type for globals
             assert isinstance(conf, dict)
             global_config.update(conf)
         global_config.update(Launcher._try_parse_extra_args(args_rest))
@@ -204,7 +205,7 @@ class Launcher:
         tunables = self.environment.tunable_params
         if args_tunables is not None:
             for data_file in args_tunables:
-                values = self._config_loader.load_config(data_file, TUNABLE_PARAMS_SCHEMA)
+                values = self._config_loader.load_config(data_file, ConfigSchemaType.TUNABLE_PARAMS)
                 assert isinstance(values, Dict)
                 tunables.assign(values)
         return tunables
@@ -218,7 +219,7 @@ class Launcher:
         if args_optimizer is None:
             return OneShotOptimizer(
                 self.tunables, self._parent_service, self.global_config)
-        optimizer = self._load(Optimizer, args_optimizer, OPTIMIZER_SCHEMA)
+        optimizer = self._load(Optimizer, args_optimizer, ConfigSchemaType.OPTIMIZER)
         assert isinstance(optimizer, Optimizer)
         return optimizer
 
@@ -233,11 +234,11 @@ class Launcher:
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
-        storage = self._load(Storage, args_storage, STORAGE_SCHEMA)
+        storage = self._load(Storage, args_storage, ConfigSchemaType.STORAGE)
         assert isinstance(storage, Storage)
         return storage
 
-    def _load(self, cls: type, json_file_name: str, schema_type: FIXME) -> BaseTypes:
+    def _load(self, cls: type, json_file_name: str, schema_type: Optional[ConfigSchemaType]) -> BaseTypes:
         """
         Create a new instance of class `cls` from JSON configuration.
         """

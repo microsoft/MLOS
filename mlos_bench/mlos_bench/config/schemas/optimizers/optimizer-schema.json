@@ -98,7 +98,7 @@
             "type": "array",
             "items": {
                 "type": "string",
-                "$comment": "Includable paths are expected to be json.",
+                "$comment": "Paths are expected to be json.",
                 "pattern": "[.]json[c]?$"
             }
         },

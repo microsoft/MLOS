@@ -8,6 +8,8 @@ Protocol interface for helper functions to lookup and load configs.
 
 from typing import List, Iterable, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
 
+from mlos_bench.config.schemas import ConfigSchemaType
+
 
 # Avoid's circular import issues.
 if TYPE_CHECKING:
@@ -41,7 +43,7 @@ class SupportsConfigLoading(Protocol):
             An actual path to the config or script.
         """
 
-    def load_config(self, json_file_name: str, schema_type: FIXME) -> Union[dict, List[dict]]:
+    def load_config(self, json_file_name: str, schema_type: Optional[ConfigSchemaType]) -> Union[dict, List[dict]]:
         """
         Load JSON config file. Search for a file relative to `_config_path`
         if the input path is not absolute.
@@ -51,6 +53,8 @@ class SupportsConfigLoading(Protocol):
         ----------
         json_file_name : str
             Path to the input config file.
+        schema_type : Optional[ConfigSchemaType]
+            The schema type to validate the config against.
 
         Returns
         -------
