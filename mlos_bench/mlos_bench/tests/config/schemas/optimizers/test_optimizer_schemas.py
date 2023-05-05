@@ -11,50 +11,43 @@ Tests for optimizer schema validation.
 # - load and validate against expected schema
 # - extend to included extra params that should fail
 
-from typing import Optional
-
-import json     # json schema files have to be in pure json for now
 import jsonschema
 import pytest
 
-from mlos_bench.services.config_persistence import ConfigPersistenceService
-
 from mlos_core.optimizers import OptimizerType
+from mlos_bench.config.schemas import ConfigSchemaType
 
 
-_OPTIMIZER_SCHEMA: Optional[dict] = None
+OPTIMIZER_SCHEMA = ConfigSchemaType.OPTIMIZER.schema
 
 
-@pytest.fixture
-def optimizer_schema() -> dict:
+def full_optimizer_config(optimizer_type: OptimizerType) -> dict:
     """
-    Gets the optimizer schema from the json as a dictionary.
+    Returns a good optimizer config with all possible options enabled.
     """
-    global _OPTIMIZER_SCHEMA    # pylint: disable=global-statement
-    if _OPTIMIZER_SCHEMA is None:
-        schema_filepath = ConfigPersistenceService().resolve_path("schemas/optimizers/optimizer-schema.json")
-        with open(schema_filepath, mode="r", encoding="utf-8") as schema_file:
-            _OPTIMIZER_SCHEMA = json.load(schema_file)   # type: ignore[no-any-return]
-    return _OPTIMIZER_SCHEMA
-
-
-@pytest.fixture(params=[member for member in OptimizerType])
-def full_optimizer_config(request: pytest.FixtureRequest) -> dict:
-    """
-    Returns a good optimizer config.
-    """
-    if request.param == OptimizerType.EMUKIT:
+    if optimizer_type == OptimizerType.EMUKIT:
         raise NotImplementedError("TODO")
-    elif request.param == OptimizerType.RANDOM:
+    elif optimizer_type == OptimizerType.RANDOM:
         raise NotImplementedError("TODO")
-    elif request.param == OptimizerType.SKOPT:
+    elif optimizer_type == OptimizerType.SKOPT:
         raise NotImplementedError("TODO")
     else:
-        raise NotImplementedError(f"Unhandled OptimizerType: {request.param}")
+        raise NotImplementedError(f"Unhandled OptimizerType: {optimizer_type}")
 
 
-def test_good_optimizer_configs_against_schema(full_optimizer_config: dict, optimizer_schema: dict) -> None:
+# FIXME: need to parameterize the mlos_bench optimizers, and then the mlos_core optimizers
+@pytest.mark.parametrize("optimizer_type", [member for member in OptimizerType])
+def test_optimizer_configs_against_schema(optimizer_type: OptimizerType) -> None:
     """
     Checks that the optimizer config validates against the schema.
     """
-    jsonschema.validate(full_optimizer_config, optimizer_schema)
+    config = full_optimizer_config(optimizer_type)
+    jsonschema.validate(config, OPTIMIZER_SCHEMA)
+
+    optimizer_class: str = full_optimizer_config["class"]
+
+    if optimizer_class == "mlos_bench.optimizers.MockOptimizer":
+        assert optimizer_type
+        del optimizer_class["config"]["use_defaults"]
+    else:
+        raise NotImplementedError(f"Unhandled optimizer class: {optimizer_class}")
