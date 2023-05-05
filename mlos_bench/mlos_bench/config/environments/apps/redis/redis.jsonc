@@ -14,7 +14,7 @@
             "dump_params_file": "redis-params.json",
 
             "setup": [
-                "environment/apps/redis/local/scripts/generate_redis_config.py redis-params.json redis.cfg"
+                "environments/apps/redis/scripts/local/generate_redis_config.py redis-params.json redis.cfg"
             ],
 
             // TODO: improve handling of relative paths
