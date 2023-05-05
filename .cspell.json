@@ -24,6 +24,7 @@
         "iloc",
         "ipykernel",
         "iterrows",
+        "jsonschema",
         "jupyterlab",
         "kwargs",
         "linalg",
