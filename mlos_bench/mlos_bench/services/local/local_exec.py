@@ -6,18 +6,17 @@
 Helper functions to run scripts and commands locally on the scheduler side.
 """
 
-import contextlib
 import errno
 import logging
 import os
 import shlex
 import subprocess
 import sys
-import tempfile
 
-from typing import Dict, Iterable, Mapping, Optional, Tuple, Union, TYPE_CHECKING
+from typing import Dict, Iterable, Mapping, Optional, Tuple, TYPE_CHECKING
 
 from mlos_bench.services.base_service import Service
+from mlos_bench.services.local.temp_dir_context import TempDirContextService
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 
 if TYPE_CHECKING:
@@ -26,7 +25,7 @@ if TYPE_CHECKING:
 _LOG = logging.getLogger(__name__)
 
 
-class LocalExecService(Service, SupportsLocalExec):
+class LocalExecService(TempDirContextService, SupportsLocalExec):
     """
     Collection of methods to run scripts and commands in an external process
     on the node acting as the scheduler. Can be useful for data processing
@@ -46,29 +45,7 @@ class LocalExecService(Service, SupportsLocalExec):
             An optional parent service that can provide mixin functions.
         """
         super().__init__(config, parent)
-        self._temp_dir = self.config.get("temp_dir")
-        self.register([
-            self.temp_dir_context,
-            self.local_exec,
-        ])
-
-    def temp_dir_context(self, path: Optional[str] = None) -> Union[tempfile.TemporaryDirectory, contextlib.nullcontext]:
-        """
-        Create a temp directory or use the provided path.
-
-        Parameters
-        ----------
-        path : str
-            A path to the temporary directory. Create a new one if None.
-
-        Returns
-        -------
-        temp_dir_context : TemporaryDirectory
-            Temporary directory context to use in the `with` clause.
-        """
-        if path is None and self._temp_dir is None:
-            return tempfile.TemporaryDirectory()
-        return contextlib.nullcontext(path or self._temp_dir)
+        self.register([self.local_exec])
 
     def local_exec(self, script_lines: Iterable[str],
                    env: Optional[Mapping[str, "TunableValue"]] = None,
