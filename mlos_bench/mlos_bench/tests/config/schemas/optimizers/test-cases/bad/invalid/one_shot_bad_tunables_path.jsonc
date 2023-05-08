@@ -1,0 +1,8 @@
+{
+    "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
+    "class": "mlos_bench.optimizers.OneShotOptimizer",
+    
+    "include_tunables": [
+        "bad/path/to/tunables.xml"  // path should end in .json or .jsonc
+    ]
+}

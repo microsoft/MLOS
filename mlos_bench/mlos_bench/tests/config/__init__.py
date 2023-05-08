@@ -24,9 +24,11 @@ def locate_config_examples(config_examples_dir: str) -> List[str]:
     config_examples: List[str]
         List of paths to config examples.
     """
+    assert os.path.isdir(config_examples_dir)
     config_examples = []
     for root, _, files in os.walk(config_examples_dir):
         for file in files:
             if file.endswith(".json") or file.endswith(".jsonc"):
                 config_examples.append(os.path.join(root, file).replace("\\", "/"))
+    # assert config_examples
     return config_examples

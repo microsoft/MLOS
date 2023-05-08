@@ -4,7 +4,9 @@
     "title": "mlos_bench Optimizer config",
 
     "$defs": {
-        "$comment": "reusable partial schema bits (or just split out for readability)",
+        "comment": {
+            "$comment": "This section contains reusable partial schema bits (or just split out for readability)"
+        },
 
         "config_base_optimizer": {
             "$comment": "config properties common to all optimizer types.",
@@ -13,7 +15,8 @@
                 "minimize": {
                     "description": "The name of the metric to minimize.",
                     "$comment": "In oneOf spec below require one of 'minimize' or 'maximize'.",
-                    "type": "string"
+                    "type": "string",
+                    "default": "score"
                 },
                 "maximize": {
                     "description": "The name of the metric to maximize.",
@@ -34,14 +37,10 @@
                     "type": "boolean"
                 }
             },
-            "oneOf": [
-                {
-                    "required": ["minimize"]
-                },
-                {
-                    "required": ["maximize"]
-                }
-            ]
+            "not": {
+                "$comment": "Require either 'minimize' or 'maximize' or neither, but not both.",
+                "required": ["minimize", "maximize"]
+            }
         },
 
         "config_tunable_values_optimizer": {

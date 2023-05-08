@@ -1,0 +1,10 @@
+{
+    "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
+
+    "class": "mlos_bench.optimizers.MockOptimizer",
+
+    "config": {
+        "minimize": "score",
+        "seed": "wrong type"
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
+
+    // Bad optimizer class - should be rejected.
+    "class": "mlos_bench.optimizers.InvalidOptimizer",
+
+    "config": {
+        "minimize": "score"
+    }
+}
