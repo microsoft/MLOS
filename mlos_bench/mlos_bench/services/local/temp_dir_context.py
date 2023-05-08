@@ -6,6 +6,7 @@
 Helper functions to work with temp files locally on the scheduler side.
 """
 
+import abc
 import logging
 from contextlib import nullcontext
 from tempfile import TemporaryDirectory
@@ -16,9 +17,13 @@ from mlos_bench.services.base_service import Service
 _LOG = logging.getLogger(__name__)
 
 
-class TempDirContextService(Service):
+class TempDirContextService(Service, metaclass=abc.ABCMeta):
     """
-    A service that creates a temporary directory context for local scripts.
+    A *base* service class that provides a method to create a temporary
+    directory context for local scripts.
+
+    It is inherited by LocalExecService and MockLocalExecService.
+    This class is not supposed to be used as a standalone service.
     """
 
     def __init__(self, config: Optional[dict] = None, parent: Optional[Service] = None):
