@@ -87,8 +87,11 @@
             "$comment": "required",
             "enum": [
                 "mlos_bench.optimizers.MlosCoreOptimizer",
+                "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
                 "mlos_bench.optimizers.MockOptimizer",
-                "mlos_bench.optimizers.OneShotOptimizer"
+                "mlos_bench.optimizers.mock_optimizer.MockOptimizer",
+                "mlos_bench.optimizers.OneShotOptimizer",
+                "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer"
             ]
         },
 
@@ -116,7 +119,10 @@
             "if": {
                 "properties": {
                     "class": {
-                        "const": "mlos_bench.optimizers.MlosCoreOptimizer"
+                        "enum": [
+                            "mlos_bench.optimizers.MlosCoreOptimizer",
+                            "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"
+                        ]
                     }
                 },
                 "required": ["class"]
@@ -149,7 +155,10 @@
             "if": {
                 "properties": {
                     "class": {
-                        "const": "mlos_bench.optimizers.MockOptimizer"
+                        "enum": [
+                            "mlos_bench.optimizers.MockOptimizer",
+                            "mlos_bench.optimizers.mock_optimizer.MockOptimizer"
+                        ]
                     }
                 },
                 "required": ["class"]
@@ -172,7 +181,10 @@
             "if": {
                 "properties": {
                     "class": {
-                        "const": "mlos_bench.optimizers.OneShotOptimizer"
+                        "enum": [
+                            "mlos_bench.optimizers.OneShotOptimizer",
+                            "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer"
+                        ]
                     }
                 },
                 "required": ["class"]

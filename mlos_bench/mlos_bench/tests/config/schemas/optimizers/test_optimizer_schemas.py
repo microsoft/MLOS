@@ -19,7 +19,7 @@ from mlos_core.spaces.adapters import SpaceAdapterType
 from mlos_bench.config.schemas import ConfigSchemaType
 from mlos_bench.optimizers.base_optimizer import Optimizer
 
-from mlos_bench.tests import get_all_subclasses
+from mlos_bench.tests import get_all_subclasses, try_resolve_class_name
 from mlos_bench.tests.config.schemas import get_schema_test_cases, SchemaTestCaseInfo, EXTRA_CONFIG_ATTR, EXTRA_OUTER_ATTR
 
 
@@ -66,7 +66,7 @@ def test_case_coverage_mlos_bench_optimizer_type(test_case_subtype: str, mlos_be
     Checks to see if there is a given type of test case for the given mlos_bench optimizer type.
     """
     for test_case in TEST_CASES_BY_SUBTYPE[test_case_subtype].values():
-        if test_case["config"]["class"] == mlos_bench_optimizer_type:
+        if try_resolve_class_name(test_case["config"]["class"]) == mlos_bench_optimizer_type:
             return
     raise NotImplementedError(
         f"Missing test case for subtype {test_case_subtype} for Optimizer class {mlos_bench_optimizer_type}")
@@ -83,7 +83,7 @@ def test_case_coverage_mlos_core_optimizer_type(test_case_type: str, mlos_core_o
     Checks to see if there is a given type of test case for the given mlos_core optimizer type.
     """
     for test_case in TEST_CASES_BY_SUBTYPE[test_case_type].values():
-        if test_case["config"]["class"] == "mlos_bench.optimizers.MlosCoreOptimizer":
+        if try_resolve_class_name(test_case["config"]["class"]) == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
             if test_case["config"]["config"].get("optimizer_type", None) == mlos_core_optimizer_type:
                 return
     raise NotImplementedError(
@@ -98,7 +98,7 @@ def test_case_coverage_mlos_core_space_adapter_type(test_case_type: str, mlos_co
     Checks to see if there is a given type of test case for the given mlos_core space adapter type.
     """
     for test_case in TEST_CASES_BY_TYPE[test_case_type].values():
-        if test_case["config"]["class"] == "mlos_bench.optimizers.MlosCoreOptimizer":
+        if try_resolve_class_name(test_case["config"]["class"]) == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
             if test_case["config"]["config"].get("space_adapter_type", None) == mlos_core_space_adapter_type:
                 return
     raise NotImplementedError(
