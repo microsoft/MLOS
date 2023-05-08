@@ -41,6 +41,7 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
         with pytest.raises(NotImplementedError):
             optimizer.surrogate_predict(suggestion, context=pd.DataFrame([["something"]]))
 
-        # acquisition function not implemented
-        with pytest.raises(NotImplementedError):
-            optimizer.acquisition_function(suggestion)
+        if optimizer_class != OptimizerType.SMAC.value: # Currently, only SMAC implements this
+            # acquisition function not implemented
+            with pytest.raises(NotImplementedError):
+                optimizer.acquisition_function(suggestion)
