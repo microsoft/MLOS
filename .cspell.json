@@ -53,6 +53,7 @@
         "sklearn",
         "skopt",
         "sqlalchemy",
+        "subschema",
         "tolist",
         "tunables",
         "xlabel",

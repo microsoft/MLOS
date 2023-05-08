@@ -4,7 +4,7 @@
     "title": "mlos_bench Optimizer config",
 
     "$defs": {
-        "$comment": "reusable partial schema bits",
+        "$comment": "reusable partial schema bits (or just split out for readability)",
 
         "config_base_optimizer": {
             "$comment": "config properties common to all optimizer types.",
@@ -45,7 +45,7 @@
         },
 
         "config_tunable_values_optimizer": {
-            "$comment": "Properties specific to optimizers that allow a specific set of tunable values to be used.",
+            "$comment": "Properties specific to optimizers that allow a specific set of tunable values to be used (left here in case there's more than one).",
             "type": "object",
             "properties": {
                 "include_tunable_values": {
@@ -132,123 +132,11 @@
                                 "$ref": "#/$defs/config_base_optimizer"
                             },
                             {
-                                "$comment": "Extend with properties specific to the mlos_core optimizer type.",
-                                "type": "object",
-                                "properties": {
-                                    "optimizer_type": {
-                                        "description": "The underlying optimizer type to use.",
-                                        "$comment": "See Also: mlos_core/optimizers/__init__.py",
-                                        "enum": [null, "SKOPT", "EMUKIT", "RANDOM"]
-                                    },
-                                    "space_adapter_type": {
-                                        "description": "The type of space adapter to use.",
-                                        "$comment": "See Also: mlos_core/spaces/__init__.py",
-                                        "enum": [null, "IDENTITY", "LLAMATUNE"]
-                                    },
-                                    "space_adapter_config": {
-                                        "description": "The space adapter specific config.",
-                                        "$comment": "stub for possible space adapter configs based on type (set using conditionals below)",
-                                        "type": "object"
-                                    }
-                                },
-                                "allOf": [
-                                    {
-                                        "$comment": "add extra recognized params for SKOPT optimizer type",
-                                        "if": {
-                                            "properties": {
-                                                "optimizer_type": {
-                                                    "const": "SKOPT"
-                                                }
-                                            },
-                                            "required": ["optimizer_type"]
-                                        },
-                                        "then": {
-                                            "properties": {
-                                                "base_estimator": {
-                                                    "description": "The base estimator to use for the SKOPT optimizer.",
-                                                    "enum": ["gp", "et"]
-                                                }
-                                            }
-                                        }
-                                    },
-                                    {
-                                        "$comment": "a set of rules for the space adapter schema extensions",
-                                        "oneOf": [
-                                            {
-                                                "if": {
-                                                    "$comment": "disallow any extra space_adapter_configs for IDENTITY/null space_adapter_type",
-                                                    "anyOf": [
-                                                        {
-                                                            "properties": {
-                                                                "space_adapter_type": {
-                                                                    "const": null
-                                                                }
-                                                            },
-                                                            "required": ["space_adapter_type"]
-                                                        },
-                                                        {
-                                                            "properties": {
-                                                                "space_adapter_type": {
-                                                                    "const": "IDENTITY"
-                                                                }
-                                                            },
-                                                            "required": ["space_adapter_type"]
-                                                        },
-                                                        {
-                                                            "$comment": "Match when space_adapter_type is not present",
-                                                            "not": {
-                                                                "required": ["space_adapter_type"]
-                                                            }
-                                                        }
-                                                    ]
-                                                },
-                                                "then": {
-                                                    "not": {
-                                                        "$comment": "space_adapter_config should be omitted in this case",
-                                                        "required": ["space_adapter_config"]
-                                                    }
-                                                },
-                                                "else": false
-                                            },
-                                            {
-                                                "if": {
-                                                    "properties": {
-                                                        "space_adapter_type": {
-                                                            "const": "LLAMATUNE"
-                                                        }
-                                                    },
-                                                    "required": ["space_adapter_type"]
-                                                },
-                                                "then": {
-                                                    "properties": {
-                                                        "space_adapter_config": {
-                                                            "$comment": "Properties specific to the llamatune space adapter config.",
-                                                            "type": "object",
-                                                            "properties": {
-                                                                "num_low_dims": {
-                                                                    "description": "Number of dimensions used in the low-dimensional parameter search space.",
-                                                                    "type": "integer",
-                                                                    "minimum": 2
-                                                                },
-                                                                "special_param_values": {
-                                                                    "type": "object"
-                                                                },
-                                                                "max_unique_values_per_param": {
-                                                                    "type": "integer",
-                                                                    "minimum": 1
-                                                                }
-                                                            },
-                                                            "unevaluatedProperties": false
-                                                        }
-                                                    }
-                                                },
-                                                "else": false
-                                            }
-                                        ]
-                                    }
-                                ]
+                                "$comment": "Extend with properties specific to the mlos_core optimizer type by referencing another subschema file.",
+                                "$ref": "./mlos_core-optimizer-subschema.json"
                             }
                         ],
+                        "$comment": "set unevaluatedProperties to false to prevent other properties from being allowed outside the combined set of valid documents $ref'ed above",
                         "unevaluatedProperties": false
                     }
                 },
