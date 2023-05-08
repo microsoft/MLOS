@@ -15,6 +15,7 @@ from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.optimizers.bayesian_optimizers.emukit_optimizer import EmukitOptimizer
 from mlos_core.optimizers.bayesian_optimizers.skopt_optimizer import SkoptOptimizer
+from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
 
 __all__ = [
@@ -24,6 +25,7 @@ __all__ = [
     'RandomOptimizer',
     'EmukitOptimizer',
     'SkoptOptimizer',
+    'SmacOptimizer',
 ]
 
 
@@ -39,6 +41,9 @@ class OptimizerType(Enum):
     SKOPT = SkoptOptimizer
     """An instance of SkoptOptimizer class will be used"""
 
+    SMAC = SmacOptimizer
+    """An instance of SmacOptimizer class will be used"""
+
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
 # https://github.com/python/mypy/issues/12952
@@ -49,6 +54,7 @@ ConcreteOptimizer = TypeVar(
     RandomOptimizer,
     EmukitOptimizer,
     SkoptOptimizer,
+    SmacOptimizer,
 )
 
 DEFAULT_OPTIMIZER_TYPE = OptimizerType.SKOPT
