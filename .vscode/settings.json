@@ -15,7 +15,16 @@
     "autoDocstring.docstringFormat": "numpy",
     "json.validate.enable": true,
     "json.schemas": [
-        // TODO
+        // TODO: Add more rules for other mlos_bench config schemas.
+        {
+            "fileMatch": [
+                "mlos_bench/mlos_bench/tests/config/schemas/optimizers/test-cases/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/schemas/optimizers/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/config/optimizers/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/optimizers/**/*.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json"
+        }
     ],
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"
