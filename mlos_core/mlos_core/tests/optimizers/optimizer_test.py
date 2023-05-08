@@ -6,7 +6,7 @@
 Tests for Bayesian Optimizers.
 """
 
-from typing import Optional, Type
+from typing import List, Optional, Type
 
 import pytest
 
@@ -21,6 +21,8 @@ from mlos_core.optimizers import (
 
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
+
+from mlos_core.tests import get_all_subclasses
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
@@ -227,3 +229,20 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
             _ = llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x']])
+
+
+# Dynamically determine all of the optimizers we have implemented.
+optimizer_subclasses: List[Type[BaseOptimizer]] = [subclass for subclass in get_all_subclasses(BaseOptimizer)
+                                                   if issubclass(subclass, BaseOptimizer) and not subclass.__abstractmethods__]
+
+
+# Make sure they they're listed in the OptimizerType enum.
+@pytest.mark.parametrize(('optimizer_class'), optimizer_subclasses)
+def test_optimizer_type_defs(optimizer_class: type) -> None:
+    """
+    Test that all optimizer classes are listed in the OptimizerType enum.
+    """
+    for optimizer_type in OptimizerType:
+        if optimizer_type.value == optimizer_class:
+            return
+    raise NotImplementedError("Missing OptimizerType definition for optimizer class: " + optimizer_class.__name__)
