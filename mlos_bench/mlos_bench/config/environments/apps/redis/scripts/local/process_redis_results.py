@@ -28,6 +28,12 @@ def _main(input_file: str, output_file: str) -> None:
         .loc[:, ["metric", "value"]]
     )
 
+    # Add a default `score` metric to the end of the dataframe.
+    df_long = pd.concat([
+        df_long,
+        pd.DataFrame({"metric": ["score"], "value": [df_long.value[df_long.index.max()]]})
+    ])
+
     df_long.to_csv(output_file, index=False)
     print(f"Converted: {input_file} -> {output_file}")
     # print(df_long)
