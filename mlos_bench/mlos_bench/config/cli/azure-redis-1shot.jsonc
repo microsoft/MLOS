@@ -5,16 +5,16 @@
 
 {
     "config_path": [
-        "mlos_bench/config",
-        "mlos_bench/examples"
+        "mlos_bench/mlos_bench/config",
+        "mlos_bench/mlos_bench/tests/config"
     ],
 
-    "environment": "env-azure-ubuntu-redis.jsonc",
+    "environment": "environments/composite/env-azure-ubuntu-redis.jsonc",
     "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/sqlite.jsonc",
 
     "tunable_values": [
-        "tunable-values-example.json"
+        "tunables/tunable-values-example.jsonc"
     ],
 
     "globals": [
