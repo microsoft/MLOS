@@ -238,7 +238,7 @@ optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(Ba
 
 # Make sure they they're listed in the OptimizerType enum.
 @pytest.mark.parametrize(('optimizer_class'), optimizer_subclasses)
-def test_optimizer_type_defs(optimizer_class: type) -> None:
+def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     """
     Test that all optimizer classes are listed in the OptimizerType enum.
     """

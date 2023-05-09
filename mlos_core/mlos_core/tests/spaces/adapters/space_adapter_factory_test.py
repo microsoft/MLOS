@@ -79,7 +79,7 @@ space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = \
 
 # Make sure they they're listed in the OptimizerType enum.
 @pytest.mark.parametrize(('space_adapter_class'), space_adapter_subclasses)
-def test_space_adapter_type_defs(space_adapter_class: type) -> None:
+def test_space_adapter_type_defs(space_adapter_class: Type[BaseSpaceAdapter]) -> None:
     """
     Test that all space adapter classes are listed in the SpaceAdapterType enum.
     """
