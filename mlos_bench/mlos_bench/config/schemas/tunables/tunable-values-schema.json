@@ -10,24 +10,17 @@
                 "^[^$]+$": {
                     "$comment": "Tunable values are either strings, numbers, booleans or nulls.",
                     "type": ["string", "number", "boolean", "null"]
-                },
-                "^[$].+$": {
-                    "$comment": "Meta properties are prefixed with a $.",
-                    "type": "string"
                 }
             },
             "not": {
-                "properties": {
-                    "tunable_values": {}
-                },
                 "required": ["tunable_values"]
-            },
-            "unevaluatedProperties": true
+            }
         }
     },
 
     "oneOf": [
         {
+            "description": "Allow a simple object that specifies the tunable values directly.",
             "allOf": [
                 {
                     "type": "object",
@@ -44,26 +37,6 @@
                 }
             ],
             "$comment": "TODO: Add support for lists of tunable values as well."
-        },
-        {
-            "$comment": "Allow an object that specifies the schema and the tunable values separately - useful for eventual support of lists of tunable values.",
-            "type": "object",
-            "properties": {
-                "$schema": {
-                    "type": "string",
-                    "pattern": "/schemas/tunables/tunable-values-schema.json$"
-                },
-                "tunable_values": {
-                    "oneOf": [
-                        {
-                            "$ref": "#/$defs/tunable_values_set"
-                        }
-                    ],
-                    "$comment": "TODO: Add support for lists of tunable values as well."
-                },
-                "required": ["tunable_values"]
-            },
-            "unevaluatedProperties": false
         }
     ]
 }
