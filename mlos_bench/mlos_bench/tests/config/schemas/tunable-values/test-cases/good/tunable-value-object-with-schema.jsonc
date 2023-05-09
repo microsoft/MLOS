@@ -1,0 +1,10 @@
+{
+    "$schema": "../../../../../../config/schemas/tunables/tunable-values-schema.json",
+    "tunable_values": {
+        "foo": "bar",
+        "int": 1,
+        "float": 1.1,
+        "bool": true,
+        "null": null
+    }
+}

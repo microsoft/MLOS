@@ -1,0 +1,9 @@
+{
+    "tunable_values": {
+        "foo": "bar",
+        // nested tunable values should be disallowed
+        "tunable_values": {
+            "foo": "bar
+        }
+    }
+}
