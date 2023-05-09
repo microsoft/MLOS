@@ -46,7 +46,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.random_design.probability_design import ProbabilityRandomDesign # pylint: disable=import-outside-toplevel
         from smac.runhistory import TrialInfo # pylint: disable=import-outside-toplevel
 
-        self.seed: int = seed or 0
         self.trial_info_map: Mapping[ConfigSpace.Configuration, TrialInfo] = {} # Stores TrialInfo instances returned by .ask()
 
         # Instantiate Scenario
@@ -57,7 +56,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             output_directory=output_directory,
             deterministic=True,
             n_trials=1e4,
-            seed=self.seed,
+            seed=seed or -1, # if -1, SMAC will generate a random seed internally
             n_workers=n_workers,
         )
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
