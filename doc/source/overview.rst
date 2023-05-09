@@ -43,6 +43,7 @@ Optimizers
    BaseBayesianOptimizer
    EmukitOptimizer
    SkoptOptimizer
+   SmacOptimizer
 
 Spaces
 ======
