@@ -22,7 +22,7 @@ from mlos_core.optimizers import (
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
-from mlos_core.tests import get_all_subclasses
+from mlos_core.tests import get_all_concrete_subclasses
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
@@ -232,8 +232,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
 
 # Dynamically determine all of the optimizers we have implemented.
-optimizer_subclasses: List[Type[BaseOptimizer]] = [subclass for subclass in get_all_subclasses(BaseOptimizer)
-                                                   if issubclass(subclass, BaseOptimizer) and not subclass.__abstractmethods__]
+# Note: these must be sorted.
+optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(BaseOptimizer)  # type: ignore[type-abstract]
 
 
 # Make sure they they're listed in the OptimizerType enum.

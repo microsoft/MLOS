@@ -18,7 +18,7 @@ from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType, Con
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
-from mlos_core.tests import get_all_subclasses
+from mlos_core.tests import get_all_concrete_subclasses
 
 
 @pytest.mark.parametrize(('space_adapter_type'), [
@@ -72,15 +72,16 @@ def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[S
 
 
 # Dynamically determine all of the optimizers we have implemented.
-space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = [subclass for subclass in get_all_subclasses(BaseSpaceAdapter)
-                                                   if issubclass(subclass, BaseSpaceAdapter) and not subclass.__abstractmethods__]
+# Note: these must be sorted.
+space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = \
+    get_all_concrete_subclasses(BaseSpaceAdapter)  # type: ignore[type-abstract]
 
 
 # Make sure they they're listed in the OptimizerType enum.
 @pytest.mark.parametrize(('space_adapter_class'), space_adapter_subclasses)
 def test_space_adapter_type_defs(space_adapter_class: type) -> None:
     """
-    Test that all optimizer classes are listed in the OptimizerType enum.
+    Test that all space adapter classes are listed in the SpaceAdapterType enum.
     """
     for space_adapter_type in SpaceAdapterType:
         if space_adapter_type.value == space_adapter_class:
