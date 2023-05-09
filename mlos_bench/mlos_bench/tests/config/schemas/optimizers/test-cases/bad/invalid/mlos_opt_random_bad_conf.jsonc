@@ -4,8 +4,8 @@
 
     "config": {
         "minimize": "score",
-        "space_adapter_type": null
+        "space_adapter_type": null,
         "optimizer_type": "RANDOM",
-        "random_seed": 0,
+        "random_seed": 0
     }
 }

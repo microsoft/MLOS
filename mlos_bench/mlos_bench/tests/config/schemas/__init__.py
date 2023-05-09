@@ -60,11 +60,14 @@ def get_schema_test_cases(test_cases_root: str) -> Dict[str, SchemaTestCaseInfo]
         for test_case_subtype in test_case_subtypes:
             for test_case in locate_config_examples(os.path.join(test_cases_root, test_case_type, test_case_subtype)):
                 with open(test_case, mode='r', encoding='utf-8') as test_case_fh:
-                    test_cases[test_case] = SchemaTestCaseInfo({
-                        "config": json5.load(test_case_fh),
-                        "test_case": test_case,
-                        "test_case_type": test_case_type,
-                        "test_case_subtype": test_case_subtype,
-                    })
+                    try:
+                        test_cases[test_case] = SchemaTestCaseInfo({
+                            "config": json5.load(test_case_fh),
+                            "test_case": test_case,
+                            "test_case_type": test_case_type,
+                            "test_case_subtype": test_case_subtype,
+                        })
+                    except Exception as ex:
+                        raise RuntimeError("Failed to load test case: " + test_case) from ex
     # assert test_case_infos
     return test_cases
