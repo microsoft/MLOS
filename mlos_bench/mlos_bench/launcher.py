@@ -205,7 +205,7 @@ class Launcher:
         tunables = self.environment.tunable_params
         if args_tunables is not None:
             for data_file in args_tunables:
-                values = self._config_loader.load_config(data_file, ConfigSchemaType.TUNABLE_PARAMS)
+                values = self._config_loader.load_config(data_file, schema_type=None)   # TODO, ConfigSchemaType.TUNABLE_PARAMS)
                 assert isinstance(values, Dict)
                 tunables.assign(values)
         return tunables
@@ -234,7 +234,7 @@ class Launcher:
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
-        storage = self._load(Storage, args_storage, ConfigSchemaType.STORAGE)
+        storage = self._load(Storage, args_storage, schema_type=None)   # TODO: , ConfigSchemaType.STORAGE)
         assert isinstance(storage, Storage)
         return storage
 

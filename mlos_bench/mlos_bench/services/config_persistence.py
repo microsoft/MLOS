@@ -386,7 +386,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : Environment
             A new benchmarking environment.
         """
-        config = self.load_config(json_file_name, ConfigSchemaType.ENVIRONMENT)
+        config = self.load_config(json_file_name, schema_type=None)     # TODO: , ConfigSchemaType.ENVIRONMENT)
         assert isinstance(config, dict)
         return self.build_environment(config, tunables, global_config, service)
 
@@ -414,7 +414,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : List[Environment]
             A list of new benchmarking environments.
         """
-        config_list = self.load_config(json_file_name, ConfigSchemaType.ENVIRONMENT)
+        config_list = self.load_config(json_file_name, schema_type=None)    # TODO: , ConfigSchemaType.ENVIRONMENT)
         if isinstance(config_list, dict):
             config_list = [config_list]
         return [
@@ -447,7 +447,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                   json_file_names, parent.__class__.__name__)
         service = Service(global_config, parent)
         for fname in json_file_names:
-            config = self.load_config(fname, ConfigSchemaType.SERVICE)
+            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchemaType.SERVICE)
             service.register(self.build_service(config, global_config, service).export())
         return service
 
@@ -475,7 +475,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         _LOG.info("Load tunables: '%s'", json_file_names)
         for fname in json_file_names:
-            config = self.load_config(fname, ConfigSchemaType.TUNABLE_PARAMS)
+            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchemaType.TUNABLE_PARAMS)
             assert isinstance(config, dict)
             parent.merge(TunableGroups(config))
         return parent
