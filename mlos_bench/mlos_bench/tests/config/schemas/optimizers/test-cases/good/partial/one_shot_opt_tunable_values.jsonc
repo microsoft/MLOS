@@ -1,12 +1,12 @@
 {
     "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
     "class": "mlos_bench.optimizers.OneShotOptimizer",
-    
+
     "include_tunables": [
         // tunable values paths are expected to end in .json or .jsonc
         "some/path/to/tunable-params.jsonc"
     ],
-    
+
     "config": {
         "tunable_values": [
             // one or more tunable value objects are allowed
