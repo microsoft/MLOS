@@ -19,14 +19,15 @@ def _load_schemas() -> None:
     """Loads all schemas and subschemas into the schema store for the validator to reference."""
     for root, _, files in walk(CONFIG_SCHEMA_DIR):
         for file_name in files:
-            if file_name.endswith(".json"):
-                file_path = path.join(root, file_name)
-                if path.getsize(file_path) == 0:
-                    continue
-                with open(file_path, mode="r", encoding="utf-8") as schema_file:
-                    schema = json.load(schema_file)
-                    _SCHEMA_STORE[file_path] = schema
-                    _SCHEMA_STORE[schema["$id"]] = schema
+            if not file_name.endswith(".json"):
+                continue
+            file_path = path.join(root, file_name)
+            if path.getsize(file_path) == 0:
+                continue
+            with open(file_path, mode="r", encoding="utf-8") as schema_file:
+                schema = json.load(schema_file)
+                _SCHEMA_STORE[file_path] = schema
+                _SCHEMA_STORE[schema["$id"]] = schema
 
 
 class ConfigSchemaType(Enum):

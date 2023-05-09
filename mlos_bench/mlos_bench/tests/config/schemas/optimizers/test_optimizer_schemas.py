@@ -29,8 +29,6 @@ from mlos_bench.tests.config.schemas import get_schema_test_cases, SchemaTestCas
 # - enumerate and try to check that we've covered all the cases
 # - for each config, load and validate against expected schema
 
-OPTIMIZER_SCHEMA = ConfigSchemaType.OPTIMIZER.schema
-
 TEST_CASES: Dict[str, SchemaTestCaseInfo] = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases"))
 TEST_CASES_BY_TYPE: Dict[str, Dict[str, SchemaTestCaseInfo]] = {}
 TEST_CASES_BY_SUBTYPE: Dict[str, Dict[str, SchemaTestCaseInfo]] = {}
@@ -128,10 +126,10 @@ def test_optimizer_configs_against_schema(test_case_name: str) -> None:
     """
     test_case = TEST_CASES[test_case_name]
     if test_case["test_case_type"] == "good":
-        jsonschema.validate(test_case["config"], OPTIMIZER_SCHEMA)
+        ConfigSchemaType.OPTIMIZER.validate(test_case["config"])
     elif test_case["test_case_type"] == "bad":
         with pytest.raises(jsonschema.ValidationError):
-            jsonschema.validate(test_case["config"], OPTIMIZER_SCHEMA)
+            ConfigSchemaType.OPTIMIZER.validate(test_case["config"])
     else:
         raise NotImplementedError(f"Unknown test case type: {test_case['test_case_type']}")
 
@@ -142,13 +140,13 @@ def test_optimizer_configs_with_extra_param() -> None:
     """
     test_case = next(iter(TEST_CASES_BY_TYPE["good"].values()))
     config = deepcopy(test_case["config"])
-    jsonschema.validate(config, OPTIMIZER_SCHEMA)
+    ConfigSchemaType.OPTIMIZER.validate(config)
     config[EXTRA_OUTER_ATTR] = "should not be here"
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(config, OPTIMIZER_SCHEMA)
+        ConfigSchemaType.OPTIMIZER.validate(config)
     del config[EXTRA_OUTER_ATTR]
     if not config.get("config"):
         config["config"] = {}
     config["config"][EXTRA_CONFIG_ATTR] = "should not be here"
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(config, OPTIMIZER_SCHEMA)
+        ConfigSchemaType.OPTIMIZER.validate(config)
