@@ -83,7 +83,5 @@ def test_space_adapter_type_defs(space_adapter_class: type) -> None:
     """
     Test that all space adapter classes are listed in the SpaceAdapterType enum.
     """
-    for space_adapter_type in SpaceAdapterType:
-        if space_adapter_type.value == space_adapter_class:
-            return
-    raise NotImplementedError("Missing SpaceAdapterType definition for space adapter class: " + space_adapter_class.__name__)
+    space_adapter_type_classes = {space_adapter_type.value for space_adapter_type in SpaceAdapterType}
+    assert space_adapter_class in space_adapter_type_classes

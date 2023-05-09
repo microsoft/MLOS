@@ -242,7 +242,5 @@ def test_optimizer_type_defs(optimizer_class: type) -> None:
     """
     Test that all optimizer classes are listed in the OptimizerType enum.
     """
-    for optimizer_type in OptimizerType:
-        if optimizer_type.value == optimizer_class:
-            return
-    raise NotImplementedError("Missing OptimizerType definition for optimizer class: " + optimizer_class.__name__)
+    optimizer_type_classes = {member.value for member in OptimizerType}
+    assert optimizer_class in optimizer_type_classes
