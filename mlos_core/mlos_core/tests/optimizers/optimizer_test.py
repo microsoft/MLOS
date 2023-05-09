@@ -236,7 +236,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(BaseOptimizer)  # type: ignore[type-abstract]
 assert optimizer_subclasses
 
-# Make sure they they're listed in the OptimizerType enum.
 @pytest.mark.parametrize(('optimizer_class'), optimizer_subclasses)
 def test_optimizer_type_defs(optimizer_class: Type[BaseOptimizer]) -> None:
     """
