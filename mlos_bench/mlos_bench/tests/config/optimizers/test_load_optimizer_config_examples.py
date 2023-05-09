@@ -44,15 +44,12 @@ def test_load_optimizer_config_examples(config_loader_service: ConfigPersistence
     """Tests loading a config example."""
     config = config_loader_service.load_config(config_path, ConfigSchemaType.OPTIMIZER)
     assert isinstance(config, dict)
-    # Hack: The config loader service expects a non-abstract class name, but
-    # the Optimizer based class is abstract, so we need to grab the actual class
-    # name from the config first.
     cls = get_class_from_name(config["class"])
     assert issubclass(cls, Optimizer)
     # Make an instance of the class based on the config.
     tunable_groups = TunableGroups()
     storage_inst = config_loader_service.build_generic(
-        base_cls=cls,
+        base_cls=Optimizer,     # type: ignore[type-abstract]
         tunables=tunable_groups,
         config=config,
         service=config_loader_service,
