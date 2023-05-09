@@ -47,8 +47,9 @@ class ConfigSchemaType(Enum):
         """Gets the schema object for this type."""
         if not _SCHEMA_STORE.get(self.value):
             _load_schemas()
-        assert _SCHEMA_STORE[self.value]
-        return _SCHEMA_STORE[self.value]
+        schema = _SCHEMA_STORE[self.value]
+        assert schema
+        return schema
 
     def validate(self, config: dict) -> None:
         """
