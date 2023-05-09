@@ -1,14 +1,14 @@
 {
     "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
     "class": "mlos_bench.optimizers.OneShotOptimizer",
-    
+
     "description": "A full config test case for the OneShotOptimizer.",
 
     "include_tunables": [
         "some/path/to/tunables.jsonc",
         "some/other/path/to/tunables.json"
     ],
-    
+
     "config": {
         // Here we do our best to list the exhaustive set of full configs available for the base optimizer config.
         "minimize": "score",
@@ -21,11 +21,9 @@
             "path/to/tunable/values.json"
         ],
 
-        "tunable_values": [
-            {
+        "tunable_values": {
                 "tunable": "value",
                 "knobs": 1
-            }
-        ]
+        }
     }
 }

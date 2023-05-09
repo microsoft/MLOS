@@ -1,7 +1,7 @@
 {
     "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
     "class": "mlos_bench.optimizers.OneShotOptimizer",
-    
+
     "config": {
         "tunable_values": [
             "foo",

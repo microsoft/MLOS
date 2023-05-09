@@ -8,11 +8,8 @@
     ],
 
     "config": {
-        "tunable_values": [
-            // one or more tunable value objects are allowed
-            {
-                "foo": "bar"
-            }
-        ]
+        "tunable_values": {
+            "foo": "bar"
+        }
     }
 }
