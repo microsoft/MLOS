@@ -1,0 +1,14 @@
+{
+    "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        // Here we do our best to list the exhaustive set of full configs available for the base optimizer config.
+        "minimize": "score",
+        "max_iterations": 20,
+        "seed": 12345,
+        "use_defaults": false,
+        "optimizer_type": "RANDOM",
+        "space_adapter_type": "IDENTITY"
+    }
+}

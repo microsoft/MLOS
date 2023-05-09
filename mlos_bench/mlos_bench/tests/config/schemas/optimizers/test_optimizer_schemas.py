@@ -8,18 +8,18 @@ Tests for optimizer schema validation.
 
 from copy import deepcopy
 from os import path
-from typing import Dict
+from typing import Dict, Optional
 
 import jsonschema
 import pytest
 
 from mlos_core.optimizers import OptimizerType
 from mlos_core.spaces.adapters import SpaceAdapterType
+from mlos_core.tests import get_all_concrete_subclasses
 
 from mlos_bench.config.schemas import ConfigSchemaType
 from mlos_bench.optimizers.base_optimizer import Optimizer
 
-from mlos_core.tests import get_all_concrete_subclasses
 from mlos_bench.tests import try_resolve_class_name
 from mlos_bench.tests.config.schemas import get_schema_test_cases, SchemaTestCaseInfo, EXTRA_CONFIG_ATTR, EXTRA_OUTER_ATTR
 
@@ -47,11 +47,11 @@ assert len(TEST_CASES_BY_SUBTYPE.keys()) > 2
 
 # Dynamically enumerate some of the cases we want to make sure we cover.
 
-expected_mlos_bench_optimizer_classes = [subclass.__module__ + "." + subclass.__name__
+expected_mlos_bench_optimizer_class_names = [subclass.__module__ + "." + subclass.__name__
                                          for subclass in get_all_concrete_subclasses(Optimizer)]    # type: ignore[type-abstract]
-assert expected_mlos_bench_optimizer_classes
+assert expected_mlos_bench_optimizer_class_names
 
-# Also make sure that we check for configs where the optimizer_type or space_adapter_type are left unspecified.
+# Also make sure that we check for configs where the optimizer_type or space_adapter_type are left unspecified (None).
 
 expected_mlos_core_optimizer_types = list(OptimizerType) + [None]
 assert expected_mlos_core_optimizer_types
@@ -60,8 +60,9 @@ expected_mlos_core_space_adapter_types = list(SpaceAdapterType) + [None]
 assert expected_mlos_core_space_adapter_types
 
 
+# Do the full cross product of all the test cases and all the optimizer types.
 @pytest.mark.parametrize("test_case_subtype", list(TEST_CASES_BY_SUBTYPE.keys()))
-@pytest.mark.parametrize("mlos_bench_optimizer_type", expected_mlos_bench_optimizer_classes)
+@pytest.mark.parametrize("mlos_bench_optimizer_type", expected_mlos_bench_optimizer_class_names)
 def test_case_coverage_mlos_bench_optimizer_type(test_case_subtype: str, mlos_bench_optimizer_type: str) -> None:
     """
     Checks to see if there is a given type of test case for the given mlos_bench optimizer type.
@@ -79,13 +80,18 @@ def test_case_coverage_mlos_bench_optimizer_type(test_case_subtype: str, mlos_be
 @pytest.mark.parametrize("test_case_type", list(TEST_CASES_BY_TYPE.keys()))
 # @pytest.mark.parametrize("test_case_subtype", list(TEST_CASES_BY_SUBTYPE.keys()))
 @pytest.mark.parametrize("mlos_core_optimizer_type", expected_mlos_core_optimizer_types)
-def test_case_coverage_mlos_core_optimizer_type(test_case_type: str, mlos_core_optimizer_type: str) -> None:
+def test_case_coverage_mlos_core_optimizer_type(test_case_type: str,
+                                                mlos_core_optimizer_type: Optional[OptimizerType]) -> None:
     """
     Checks to see if there is a given type of test case for the given mlos_core optimizer type.
     """
-    for test_case in TEST_CASES_BY_SUBTYPE[test_case_type].values():
+    optimizer_name = None if mlos_core_optimizer_type is None else mlos_core_optimizer_type.name
+    for test_case in TEST_CASES_BY_TYPE[test_case_type].values():
         if try_resolve_class_name(test_case["config"]["class"]) == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
-            if test_case["config"]["config"].get("optimizer_type", None) == mlos_core_optimizer_type:
+            optimizer_type = None
+            if test_case["config"].get("config"):
+                optimizer_type = test_case["config"]["config"].get("optimizer_type", None)
+            if optimizer_type == optimizer_name:
                 return
     raise NotImplementedError(
         f"Missing test case for type {test_case_type} for MlosCore Optimizer type {mlos_core_optimizer_type}")
@@ -94,13 +100,18 @@ def test_case_coverage_mlos_core_optimizer_type(test_case_type: str, mlos_core_o
 @pytest.mark.parametrize("test_case_type", list(TEST_CASES_BY_TYPE.keys()))
 # @pytest.mark.parametrize("test_case_subtype", list(TEST_CASES_BY_SUBTYPE.keys()))
 @pytest.mark.parametrize("mlos_core_space_adapter_type", expected_mlos_core_space_adapter_types)
-def test_case_coverage_mlos_core_space_adapter_type(test_case_type: str, mlos_core_space_adapter_type: str) -> None:
+def test_case_coverage_mlos_core_space_adapter_type(test_case_type: str,
+                                                    mlos_core_space_adapter_type: Optional[SpaceAdapterType]) -> None:
     """
     Checks to see if there is a given type of test case for the given mlos_core space adapter type.
     """
+    space_adapter_name = None if mlos_core_space_adapter_type is None else mlos_core_space_adapter_type.name
     for test_case in TEST_CASES_BY_TYPE[test_case_type].values():
         if try_resolve_class_name(test_case["config"]["class"]) == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
-            if test_case["config"]["config"].get("space_adapter_type", None) == mlos_core_space_adapter_type:
+            space_adapter_type = None
+            if test_case["config"].get("config"):
+                space_adapter_type = test_case["config"]["config"].get("space_adapter_type", None)
+            if space_adapter_type == space_adapter_name:
                 return
     raise NotImplementedError(
         f"Missing test case for type {test_case_type} for SpaceAdapter type {mlos_core_space_adapter_type}")
@@ -134,6 +145,8 @@ def test_optimizer_configs_with_extra_param() -> None:
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(config, OPTIMIZER_SCHEMA)
     del config[EXTRA_OUTER_ATTR]
+    if not config.get("config"):
+        config["config"] = {}
     config["config"][EXTRA_CONFIG_ATTR] = "should not be here"
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(config, OPTIMIZER_SCHEMA)
