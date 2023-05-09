@@ -22,7 +22,7 @@
             // In which case, unspecified values are governed by the "use_default" config parameter.
             "tunables/tunable-values-example.jsonc"
         ],
-        // Additional values of the tunable parameters, encoded as a list of dictionaries.
+        // Additional values of the tunable parameters.
         "tunable_values": {},
 
         // Whether to assign the "default" tunable parameter as a value or a
