@@ -68,7 +68,7 @@ def test_case_coverage_mlos_bench_optimizer_type(test_case_subtype: str, mlos_be
     Checks to see if there is a given type of test case for the given mlos_bench optimizer type.
     """
     for test_case in TEST_CASES_BY_SUBTYPE[test_case_subtype].values():
-        if try_resolve_class_name(test_case["config"]["class"]) == mlos_bench_optimizer_type:
+        if try_resolve_class_name(test_case["config"].get("class")) == mlos_bench_optimizer_type:
             return
     raise NotImplementedError(
         f"Missing test case for subtype {test_case_subtype} for Optimizer class {mlos_bench_optimizer_type}")
@@ -87,7 +87,8 @@ def test_case_coverage_mlos_core_optimizer_type(test_case_type: str,
     """
     optimizer_name = None if mlos_core_optimizer_type is None else mlos_core_optimizer_type.name
     for test_case in TEST_CASES_BY_TYPE[test_case_type].values():
-        if try_resolve_class_name(test_case["config"]["class"]) == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
+        if try_resolve_class_name(test_case["config"].get("class")) \
+                == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
             optimizer_type = None
             if test_case["config"].get("config"):
                 optimizer_type = test_case["config"]["config"].get("optimizer_type", None)
@@ -107,7 +108,8 @@ def test_case_coverage_mlos_core_space_adapter_type(test_case_type: str,
     """
     space_adapter_name = None if mlos_core_space_adapter_type is None else mlos_core_space_adapter_type.name
     for test_case in TEST_CASES_BY_TYPE[test_case_type].values():
-        if try_resolve_class_name(test_case["config"]["class"]) == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
+        if try_resolve_class_name(test_case["config"].get("class")) \
+                == "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer":
             space_adapter_type = None
             if test_case["config"].get("config"):
                 space_adapter_type = test_case["config"]["config"].get("space_adapter_type", None)

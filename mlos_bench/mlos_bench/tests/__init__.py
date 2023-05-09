@@ -12,10 +12,12 @@ from typing import Optional
 from mlos_bench.util import get_class_from_name
 
 
-def try_resolve_class_name(class_name: str) -> Optional[str]:
+def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
     """
     Gets the full class name from the given name or None on error.
     """
+    if class_name is None:
+        return None
     try:
         the_class = get_class_from_name(class_name)
         return the_class.__module__ + "." + the_class.__name__
