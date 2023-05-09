@@ -234,7 +234,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
 optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(BaseOptimizer)  # type: ignore[type-abstract]
-
+assert optimizer_subclasses
 
 # Make sure they they're listed in the OptimizerType enum.
 @pytest.mark.parametrize(('optimizer_class'), optimizer_subclasses)

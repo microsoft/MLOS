@@ -75,6 +75,7 @@ def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[S
 # Note: these must be sorted.
 space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = \
     get_all_concrete_subclasses(BaseSpaceAdapter)  # type: ignore[type-abstract]
+assert space_adapter_subclasses
 
 
 # Make sure they they're listed in the OptimizerType enum.
