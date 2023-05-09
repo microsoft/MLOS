@@ -78,9 +78,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
     for mock_service_config_path in mock_service_configs:
         mock_service_config = config_loader_service.load_config(mock_service_config_path, ConfigSchemaType.SERVICE)
         config_loader_service.register(config_loader_service.build_service(
-                                       config=mock_service_config,
-                                       parent=config_loader_service,
-                                      ).export())
+            config=mock_service_config, parent=config_loader_service).export())
 
     envs = config_loader_service.load_environment_list(
         config_path, tunable_groups, global_config, service=config_loader_service)

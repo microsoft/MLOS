@@ -22,18 +22,21 @@ from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
 class BaseOptimizer(metaclass=ABCMeta):
-    """Optimizer abstract base class defining the basic interface.
-
-    Parameters
-    ----------
-    parameter_space : ConfigSpace.ConfigurationSpace
-        The parameter space to optimize.
-
-    space_adapter : BaseSpaceAdapter
-        The space adapter class to employ for parameter space transformations.
+    """
+    Optimizer abstract base class defining the basic interface.
     """
 
     def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
+        """
+        Create a new instance of the base optimizer.
+
+        Parameters
+        ----------
+        parameter_space : ConfigSpace.ConfigurationSpace
+            The parameter space to optimize.
+        space_adapter : BaseSpaceAdapter
+            The space adapter class to employ for parameter space transformations.
+        """
         self.parameter_space: ConfigSpace.ConfigurationSpace = parameter_space
         self.optimizer_parameter_space: ConfigSpace.ConfigurationSpace = \
             parameter_space if space_adapter is None else space_adapter.target_parameter_space
@@ -61,7 +64,6 @@ class BaseOptimizer(metaclass=ABCMeta):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
-
         scores : pd.Series
             Scores from running the configurations. The index is the same as the index of the configurations.
 
@@ -84,7 +86,6 @@ class BaseOptimizer(metaclass=ABCMeta):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
-
         scores : pd.Series
             Scores from running the configurations. The index is the same as the index of the configurations.
 
@@ -94,15 +95,16 @@ class BaseOptimizer(metaclass=ABCMeta):
         pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
     def suggest(self, context: Optional[pd.DataFrame] = None, defaults: bool = False) -> pd.DataFrame:
-        """Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
+        """
+        Wrapper method, which employs the space adapter (if any), after suggesting a new configuration.
 
         Parameters
         ----------
         context : pd.DataFrame
             Not Yet Implemented.
-
-        defaults : bool (default False)
+        defaults : bool
             Whether or not to return the default config instead of an optimizer guided one.
+            By default, use the one from the optimizer.
 
         Returns
         -------
@@ -146,7 +148,6 @@ class BaseOptimizer(metaclass=ABCMeta):
         ----------
         configurations : pd.DataFrame
             Dataframe of configurations / parameters. The columns are parameter names and the rows are the configurations.
-
         context : pd.DataFrame
             Not Yet Implemented.
         """
