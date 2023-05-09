@@ -48,7 +48,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Number of parallel workers to use.
     """
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
         self,
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter: Optional[BaseSpaceAdapter] = None,
@@ -60,7 +60,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         n_workers: int = 1,
     ):
         super().__init__(parameter_space, space_adapter)
-       
+
         # pylint: disable=import-outside-toplevel
         from smac import HyperparameterOptimizationFacade as Optimizer_Smac
         from smac import Scenario
@@ -174,10 +174,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         if context is not None:
             raise NotImplementedError()
+        if self._space_adapter:
+            raise NotImplementedError()
+
         if len(self._observations) < self.base_optimizer._initial_design._n_configs:  # pylint: disable=protected-access
             raise RuntimeError('Surrogate model can make predictions *only* after all initial points have been evaluated')
-        if self._space_adapter:
-            configurations = self._space_adapter.inverse_transform(configurations)
 
         configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations))
         mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)  # pylint: disable=protected-access
@@ -187,7 +188,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if context is not None:
             raise NotImplementedError()
         if self._space_adapter:
-            configurations = self._space_adapter.inverse_transform(configurations)
+            raise NotImplementedError()
 
         configs: list = self._to_configspace_configs(configurations)
         return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)  # pylint: disable=protected-access
