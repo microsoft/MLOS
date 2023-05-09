@@ -19,7 +19,8 @@ from mlos_core.spaces.adapters import SpaceAdapterType
 from mlos_bench.config.schemas import ConfigSchemaType
 from mlos_bench.optimizers.base_optimizer import Optimizer
 
-from mlos_bench.tests import get_all_subclasses, try_resolve_class_name
+from mlos_core.tests import get_all_concrete_subclasses
+from mlos_bench.tests import try_resolve_class_name
 from mlos_bench.tests.config.schemas import get_schema_test_cases, SchemaTestCaseInfo, EXTRA_CONFIG_ATTR, EXTRA_OUTER_ATTR
 
 
@@ -47,7 +48,7 @@ assert len(TEST_CASES_BY_SUBTYPE.keys()) > 2
 # Dynamically enumerate some of the cases we want to make sure we cover.
 
 expected_mlos_bench_optimizer_classes = [subclass.__module__ + "." + subclass.__name__
-                                         for subclass in get_all_subclasses(Optimizer)]
+                                         for subclass in get_all_concrete_subclasses(Optimizer)]    # type: ignore[type-abstract]
 assert expected_mlos_bench_optimizer_classes
 
 # Also make sure that we check for configs where the optimizer_type or space_adapter_type are left unspecified.
