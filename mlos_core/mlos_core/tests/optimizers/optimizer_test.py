@@ -6,6 +6,7 @@
 Tests for Bayesian Optimizers.
 """
 
+from copy import deepcopy
 from typing import List, Optional, Type
 
 import pytest
@@ -165,6 +166,14 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     if kwargs is None:
         kwargs = {}
 
+    opt_kwargs: dict = deepcopy(kwargs)
+    llamatune_opt_kwargs: dict = deepcopy(kwargs)
+
+    if optimizer_type == OptimizerType.SMAC:
+        # Initializing two SMAC optimizers with identical args is problematic
+        opt_kwargs['run_name'] = 'smac'
+        llamatune_opt_kwargs['run_name'] = 'llamatune_smac'
+
     def objective(point: pd.DataFrame) -> pd.Series:   # pylint: disable=invalid-name
         # Best value can be reached by tuning an 1-dimensional search space
         ret: pd.Series = np.sin(point['x'] * point['y'])
@@ -176,7 +185,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0, upper=3))
 
     # Initialize optimizer
-    optimizer: BaseOptimizer = OptimizerFactory.create(input_space, optimizer_type, optimizer_kwargs=kwargs)
+    optimizer: BaseOptimizer = OptimizerFactory.create(input_space, optimizer_type, optimizer_kwargs=opt_kwargs)
     assert optimizer is not None
 
     # Initialize another optimizer that uses LlamaTune space adapter
@@ -188,7 +197,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
         input_space,
         optimizer_type,
-        optimizer_kwargs=kwargs,
+        optimizer_kwargs=llamatune_opt_kwargs,
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
         space_adapter_kwargs=space_adapter_kwargs
     )
@@ -228,7 +237,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
-            _ = llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x']])
+            _ = llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x', 'y']])
 
 
 # Dynamically determine all of the optimizers we have implemented.
