@@ -19,7 +19,6 @@ SCHEMA_TEST_TYPES = {
         "partial",
     ],
     "bad": [
-        "incomplete",
         "invalid",
         "unhandled",
     ],

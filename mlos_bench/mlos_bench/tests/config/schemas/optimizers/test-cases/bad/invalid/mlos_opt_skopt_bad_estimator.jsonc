@@ -1,0 +1,11 @@
+{
+    "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "minimize": "score",
+        "optimizer_type": "SKOPT",
+        // base_estimator only accepts certain values
+        "base_estimator": "foo"
+    }
+}

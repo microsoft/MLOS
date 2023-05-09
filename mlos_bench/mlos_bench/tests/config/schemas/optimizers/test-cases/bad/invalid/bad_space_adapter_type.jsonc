@@ -1,0 +1,10 @@
+{
+    "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "minimize": "score",
+        // space_adapter_type only accepts certain values
+        "space_adapter_type": "unknown"
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
+    "class": "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer",
+
+    "config": {
+        "minimize": "score",
+        "max_iterations": 20,
+        "seed": 12345,
+        "use_defaults": false,
+        "tunable_values": {
+            "foo": "bar",
+            // Values can't be objects.
+            "baz": [
+                "foo"
+            ]
+        }
+    }
+}

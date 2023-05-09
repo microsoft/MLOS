@@ -24,7 +24,17 @@
                 "mlos_bench/mlos_bench/config/optimizers/**/*.json"
             ],
             "url": "./mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json"
+        },
+        {
+            "fileMatch": [
+                "mlos_bench/mlos_bench/tests/config/schemas/tunable-values/test-cases/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/schemas/tunable-values/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/config/tunable-values/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/tunable-values/**/*.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json"
         }
+
     ],
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"

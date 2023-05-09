@@ -22,8 +22,8 @@
         ],
 
         "tunable_values": {
-                "tunable": "value",
-                "knobs": 1
+            "tunable": "value",
+            "knobs": 1
         }
     }
 }

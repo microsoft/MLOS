@@ -3,9 +3,8 @@
     "class": "mlos_bench.optimizers.OneShotOptimizer",
 
     "config": {
-        "tunable_values": {
-            "foo": "bar",
-            "array": [1, 2, 3]  // arrays are not allowed
-        }
+        "tunable_values": [{
+            "foo": "bar"
+        }]
     }
 }

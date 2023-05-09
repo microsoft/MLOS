@@ -56,8 +56,7 @@
                     }
                 },
                 "tunable_values": {
-                    "$comment": "TODO: Make this a *list* of dictionaries of tunable values to include in the optimization.",
-                    "type": "object"
+                    "$ref": "../tunables/tunable-values-schema.json#/$defs/tunable_values_set"
                 }
             }
         }
@@ -71,7 +70,7 @@
             "description": "The schema to use for validating the optimizer config (accepts both URLs and local paths).",
             "type": "string",
             "$comment": "This is optional, but if provided, should match the name of this file.",
-            "pattern": "schemas/optimizers/optimizer-schema.json$"
+            "pattern": "/schemas/optimizers/optimizer-schema.json$"
         },
 
         "description": {
