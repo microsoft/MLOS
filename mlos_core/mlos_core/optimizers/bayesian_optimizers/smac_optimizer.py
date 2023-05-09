@@ -18,13 +18,36 @@ from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
-    """ Wrapper class for SMAC based Bayesian optimization.
+    """Wrapper class for SMAC based Bayesian optimization.
 
     Parameters
     ----------
     parameter_space : ConfigSpace.ConfigurationSpace
         The parameter space to optimize.
+
+    space_adapter : BaseSpaceAdapter
+        The space adapter class to employ for parameter space transformations.
+
+    seed : Optional[int]
+        Seed is used to make results reproducible. A value of `None` will use a random seed.
+
+    run_name : str
+        Name of this run. This is used to easily distinguish across different runs.
+
+    output_directory : str
+        The directory where SMAC output will saved.
+
+    n_random_init : Optional[int]
+        Number of points evaluated at start to bootstrap the optimizer.
+
+    n_random_probability: Optional[float]
+        Probability of choosing to evaluate a random configuration during optimization.
+        Setting this to a higher value favors exploration over exploitation.
+
+    n_workers: int
+        Number of parallel workers to use.
     """
+
     def __init__(
         self,
         parameter_space: ConfigSpace.ConfigurationSpace,
@@ -37,16 +60,17 @@ class SmacOptimizer(BaseBayesianOptimizer):
         n_workers: int = 1,
     ):
         super().__init__(parameter_space, space_adapter)
+       
+        # pylint: disable=import-outside-toplevel
+        from smac import HyperparameterOptimizationFacade as Optimizer_Smac
+        from smac import Scenario
+        from smac.intensifier.abstract_intensifier import AbstractIntensifier
+        from smac.initial_design import LatinHypercubeInitialDesign
+        from smac.main.config_selector import ConfigSelector
+        from smac.random_design.probability_design import ProbabilityRandomDesign
+        from smac.runhistory import TrialInfo
 
-        from smac import HyperparameterOptimizationFacade as Optimizer_Smac # pylint: disable=import-outside-toplevel
-        from smac import Scenario # pylint: disable=import-outside-toplevel
-        from smac.intensifier.abstract_intensifier import AbstractIntensifier # pylint: disable=import-outside-toplevel
-        from smac.initial_design import LatinHypercubeInitialDesign # pylint: disable=import-outside-toplevel
-        from smac.main.config_selector import ConfigSelector # pylint: disable=import-outside-toplevel
-        from smac.random_design.probability_design import ProbabilityRandomDesign # pylint: disable=import-outside-toplevel
-        from smac.runhistory import TrialInfo # pylint: disable=import-outside-toplevel
-
-        self.trial_info_map: Mapping[ConfigSpace.Configuration, TrialInfo] = {} # Stores TrialInfo instances returned by .ask()
+        self.trial_info_map: Mapping[ConfigSpace.Configuration, TrialInfo] = {}  # Stores TrialInfo instances returned by .ask()
 
         # Instantiate Scenario
         output_directory = Path(output_directory)
@@ -56,7 +80,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             output_directory=output_directory,
             deterministic=True,
             n_trials=1e4,
-            seed=seed or -1, # if -1, SMAC will generate a random seed internally
+            seed=seed or -1,  # if -1, SMAC will generate a random seed internally
             n_workers=n_workers,
         )
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
@@ -105,7 +129,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        from smac.runhistory import StatusType, TrialInfo, TrialValue   # pylint: disable=import-outside-toplevel
+        from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
 
         if context is not None:
             raise NotImplementedError()
@@ -133,7 +157,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        from smac.runhistory import TrialInfo # pylint: disable=import-outside-toplevel
+        from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
 
         if context is not None:
             raise NotImplementedError()
@@ -150,13 +174,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         if context is not None:
             raise NotImplementedError()
-        if len(self._observations) < self.base_optimizer._initial_design._n_configs: # pylint: disable=protected-access
+        if len(self._observations) < self.base_optimizer._initial_design._n_configs:  # pylint: disable=protected-access
             raise RuntimeError('Surrogate model can make predictions *only* after all initial points have been evaluated')
         if self._space_adapter:
             configurations = self._space_adapter.inverse_transform(configurations)
 
         configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations))
-        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs) # pylint: disable=protected-access
+        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)  # pylint: disable=protected-access
         return mean_predictions.reshape(-1,)
 
     def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
@@ -166,7 +190,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             configurations = self._space_adapter.inverse_transform(configurations)
 
         configs: list = self._to_configspace_configs(configurations)
-        return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,) # pylint: disable=protected-access
+        return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)  # pylint: disable=protected-access
 
     def _to_configspace_configs(self, configurations: pd.DataFrame) -> list:
         """Convert a dataframe of configurations to a list of ConfigSpace configurations.
