@@ -10,7 +10,7 @@ import json
 import time
 import logging
 
-from typing import Callable, Iterable, Tuple
+from typing import Any, Callable, Dict, Iterable, Tuple
 
 import requests
 
@@ -232,13 +232,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         if response.status_code == 200:
             return (Status.SUCCEEDED, {})
         elif response.status_code == 202:
-            result = {}
+            result: Dict[str, Any] = {}
             if "Azure-AsyncOperation" in response.headers:
                 result["asyncResultsUrl"] = response.headers.get("Azure-AsyncOperation")
             elif "Location" in response.headers:
                 result["asyncResultsUrl"] = response.headers.get("Location")
             if "Retry-After" in response.headers:
-                result["pollInterval"] = str(float(response.headers["Retry-After"]))
+                result["pollInterval"] = float(response.headers["Retry-After"])
 
             return (Status.PENDING, result)
         else:

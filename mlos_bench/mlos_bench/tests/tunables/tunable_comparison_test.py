@@ -37,9 +37,10 @@ def test_tunable_categorical_value_lt(tunable_categorical: Tunable) -> None:
     Tests that the __lt__ operator works as expected.
     """
     tunable_categorical_2 = tunable_categorical.copy()
-    new_value = [x for x in tunable_categorical.categories
-                 if x != tunable_categorical.category and x is not None
-                ][0]
+    new_value = [
+        x for x in tunable_categorical.categories
+        if x != tunable_categorical.category and x is not None
+    ][0]
     assert tunable_categorical.category is not None
     tunable_categorical_2.category = new_value
     if tunable_categorical.category < new_value:
@@ -52,16 +53,22 @@ def test_tunable_categorical_lt_null() -> None:
     """
     Tests that the __lt__ operator works as expected.
     """
-    tunable_cat = Tunable(name="same-name", config={
-                          "type": "categorical",
-                          "values": ["floof", "fuzz"],
-                          "default": "floof"
-                        })
-    tunable_dog = Tunable(name="same-name", config={
-                          "type": "categorical",
-                          "values": [None, "doggo"],
-                          "default": None
-                        })
+    tunable_cat = Tunable(
+        name="same-name",
+        config={
+            "type": "categorical",
+            "values": ["floof", "fuzz"],
+            "default": "floof",
+        }
+    )
+    tunable_dog = Tunable(
+        name="same-name",
+        config={
+            "type": "categorical",
+            "values": [None, "doggo"],
+            "default": None,
+        }
+    )
     assert tunable_dog < tunable_cat
 
 
@@ -69,16 +76,22 @@ def test_tunable_lt_same_name_different_type() -> None:
     """
     Tests that the __lt__ operator works as expected.
     """
-    tunable_cat = Tunable(name="same-name", config={
-                          "type": "categorical",
-                          "values": ["floof", "fuzz"],
-                          "default": "floof"
-                        })
-    tunable_int = Tunable(name="same-name", config={
-                          "type": "int",
-                          "range": [1, 3],
-                          "default": 2
-                        })
+    tunable_cat = Tunable(
+        name="same-name",
+        config={
+            "type": "categorical",
+            "values": ["floof", "fuzz"],
+            "default": "floof",
+        }
+    )
+    tunable_int = Tunable(
+        name="same-name",
+        config={
+            "type": "int",
+            "range": [1, 3],
+            "default": 2,
+        }
+    )
     assert tunable_cat < tunable_int
 
 

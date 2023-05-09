@@ -14,13 +14,13 @@
             "dump_params_file": "redis-params.json",
 
             "setup": [
-                "environment/apps/redis/local/scripts/generate_redis_config.py redis-params.json redis.cfg"
+                "environments/apps/redis/scripts/local/generate_redis_config.py redis-params.json redis.cfg"
             ],
 
             // TODO: improve handling of relative paths
             "upload": [
                 {"from": "redis.cfg", "to": "$experimentId/$trialId/input/redis.cfg"},
-                {"from": "remote/scripts/", "to": "$experimentId/$trialId/scripts"}
+                {"from": "environments/apps/redis/scripts/remote/", "to": "$experimentId/$trialId/scripts"}
             ]
         }
     },
@@ -77,7 +77,7 @@
             ],
 
             "run": [
-                "environments/apps/redis/local/scripts/process_redis_results.py redis-bench-output/results.csv redis-benchmark.csv"
+                "environments/apps/redis/scripts/local/process_redis_results.py redis-bench-output/results.csv redis-benchmark.csv"
             ],
 
             // Read benchmark results from a local CSV file:
