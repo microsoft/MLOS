@@ -132,6 +132,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             config = json5.load(fh_json)
         if schema_type is not None:
             jsonschema.validate(config, schema_type.schema)
+        if config.get("$schema"):
+            del config["$schema"]
         return config   # type: ignore[no-any-return]
 
     def prepare_class_load(self, config: Dict[str, Any],
