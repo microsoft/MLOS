@@ -35,6 +35,7 @@ extra_requires: Dict[str, List[str]] = {
     # Transitive extra_requires from mlos-core.
     'emukit': ['emukit'],
     'skopt': ['scikit-optimize'],
+    'smac': ['smac'],
 }
 
 # construct special 'full' extra that adds requirements for all built-in
