@@ -6,8 +6,6 @@
 Basic initializer module for the mlos_core package.
 """
 
-from typing import Set
-
 import ConfigSpace
 import pandas as pd
 
