@@ -1,6 +1,7 @@
 {
     "useGitignore": true,
     "words": [
+        "abstractmethods",
         "arange",
         "astype",
         "autotune",

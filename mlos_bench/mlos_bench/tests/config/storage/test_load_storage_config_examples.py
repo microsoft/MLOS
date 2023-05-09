@@ -44,14 +44,11 @@ def test_load_storage_config_examples(config_loader_service: ConfigPersistenceSe
     assert isinstance(config, dict)
     # Skip schema loading that would require a database connection for this test.
     config["config"]["lazy_schema_create"] = True
-    # Hack: The config loader service expects a non-abstract class name, but
-    # the Storage based class is abstract, so we need to grab the actual class
-    # name from the config first.
     cls = get_class_from_name(config["class"])
     assert issubclass(cls, Storage)
     # Make an instance of the class based on the config.
     storage_inst = config_loader_service.build_generic(
-        base_cls=cls,
+        base_cls=Storage,   # type: ignore[type-abstract]
         tunables=TunableGroups(),
         config=config,
         service=config_loader_service,
