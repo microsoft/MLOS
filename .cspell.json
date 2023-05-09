@@ -55,6 +55,7 @@
         "skopt",
         "sqlalchemy",
         "subschema",
+        "subschemas",
         "tolist",
         "tunables",
         "xlabel",

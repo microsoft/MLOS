@@ -17,7 +17,6 @@ import logging
 from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
 
 import json5    # To read configs with comments and other JSON5 syntax features
-import jsonschema
 
 from mlos_bench.config.schemas import ConfigSchemaType
 from mlos_bench.environments.base_environment import Environment
@@ -131,7 +130,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
             config = json5.load(fh_json)
         if schema_type is not None:
-            jsonschema.validate(config, schema_type.schema)
+            schema_type.validate(config)
         if config.get("$schema"):
             del config["$schema"]
         return config   # type: ignore[no-any-return]

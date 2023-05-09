@@ -3,18 +3,30 @@ A enum simple class for describing where to find different config schemas.
 """
 
 from enum import Enum
-from os.path import dirname, realpath
+from os import path, walk
 from typing import Dict
 
-import os.path as path
-
-import json
-
-
-CONFIG_SCHEMA_DIR = realpath(dirname(__file__)).replace("\\", "/")
+import json         # schema files are pure json - no comments
+import jsonschema
 
 
-_SCHEMA_CACHE: Dict[str, dict] = {}
+CONFIG_SCHEMA_DIR = path.realpath(path.dirname(__file__)).replace("\\", "/")
+
+_SCHEMA_STORE: Dict[str, dict] = {}
+
+
+def _load_schemas() -> None:
+    """Loads all schemas and subschemas into the schema store for the validator to reference."""
+    for root, _, files in walk(CONFIG_SCHEMA_DIR):
+        for file_name in files:
+            if file_name.endswith(".json"):
+                file_path = path.join(root, file_name)
+                if path.getsize(file_path) == 0:
+                    continue
+                with open(file_path, mode="r", encoding="utf-8") as schema_file:
+                    schema = json.load(schema_file)
+                    _SCHEMA_STORE[file_path] = schema
+                    _SCHEMA_STORE[schema["$id"]] = schema
 
 
 class ConfigSchemaType(Enum):
@@ -32,7 +44,22 @@ class ConfigSchemaType(Enum):
     @property
     def schema(self) -> dict:
         """Gets the schema object for this type."""
-        if not _SCHEMA_CACHE.get(self.name):
-            with open(self.value, mode="r", encoding="utf-8") as schema_file:
-                _SCHEMA_CACHE[self.name] = json.load(schema_file)
-        return _SCHEMA_CACHE[self.name]
+        if not _SCHEMA_STORE.get(self.value):
+            _load_schemas()
+        assert _SCHEMA_STORE[self.value]
+        return _SCHEMA_STORE[self.value]
+
+    def validate(self, config: dict) -> None:
+        """
+        Validates the given config against this schema.
+
+        Parameters
+        ----------
+        config : dict
+
+        Raises
+        ------
+        jsonschema.exceptions.ValidationError
+        """
+        resolver: jsonschema.RefResolver = jsonschema.RefResolver.from_schema(self.schema, store=_SCHEMA_STORE)
+        jsonschema.validate(instance=config, schema=self.schema, resolver=resolver)
