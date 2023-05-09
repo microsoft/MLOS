@@ -18,7 +18,7 @@ def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
     Useful for dynamically enumerating expected test cases.
     """
     return set(cls.__subclasses__()).union(
-        [s for c in cls.__subclasses__() for s in _get_all_subclasses(c)])
+        s for c in cls.__subclasses__() for s in _get_all_subclasses(c))
 
 
 def get_all_concrete_subclasses(cls: Type[T]) -> List[Type[T]]:
@@ -31,4 +31,4 @@ def get_all_concrete_subclasses(cls: Type[T]) -> List[Type[T]]:
     See Also: https://github.com/python/mypy/issues/4717
     """
     return sorted([subclass for subclass in _get_all_subclasses(cls) if not getattr(subclass, "__abstractmethods__", None)],
-                  key=lambda x: x.__module__ + "." + x.__name__)
+                  key=lambda c: (c.__module__, c.__name__))

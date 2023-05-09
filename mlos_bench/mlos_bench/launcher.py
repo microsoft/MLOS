@@ -12,10 +12,11 @@ command line.
 
 import logging
 import argparse
-from typing import Any, Dict, Iterable, List, Optional, Tuple
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from mlos_bench.util import BaseTypes
 from mlos_bench.config.schemas import ConfigSchemaType
+from mlos_bench.util import BaseTypeVar
+
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.base_environment import Environment
 
@@ -219,8 +220,7 @@ class Launcher:
         if args_optimizer is None:
             return OneShotOptimizer(
                 self.tunables, self._parent_service, self.global_config)
-        optimizer = self._load(Optimizer, args_optimizer, ConfigSchemaType.OPTIMIZER)
-        assert isinstance(optimizer, Optimizer)
+        optimizer = self._load(Optimizer, args_optimizer, ConfigSchemaType.OPTIMIZER)   # type: ignore[type-abstract]
         return optimizer
 
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
@@ -234,20 +234,26 @@ class Launcher:
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
-        storage = self._load(Storage, args_storage, schema_type=None)   # TODO: , ConfigSchemaType.STORAGE)
-        assert isinstance(storage, Storage)
+        storage = self._load(Storage, args_storage, schema_type=None)   # type: ignore[type-abstract]
+        # TODO: , ConfigSchemaType.STORAGE)
         return storage
 
-    def _load(self, cls: type, json_file_name: str, schema_type: Optional[ConfigSchemaType]) -> BaseTypes:
+    def _load(self, cls: Type[BaseTypeVar], json_file_name: str, schema_type: Optional[ConfigSchemaType]) -> BaseTypeVar:
         """
         Create a new instance of class `cls` from JSON configuration.
+
+        Note: For abstract types, mypy will complain at the call site.
+        Use "# type: ignore[type-abstract]" to suppress the warning.
+        See Also: https://github.com/python/mypy/issues/4717
         """
         class_config = self._config_loader.load_config(json_file_name, schema_type)
         assert isinstance(class_config, Dict)
-        return self._config_loader.build_generic(
+        ret = self._config_loader.build_generic(
             base_cls=cls,
             tunables=self.tunables,
             service=self._parent_service,
             config=class_config,
             global_config=self.global_config
         )
+        assert isinstance(ret, cls)
+        return ret

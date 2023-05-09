@@ -13,8 +13,8 @@ import ConfigSpace
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.optimizers.random_optimizer import RandomOptimizer
-from mlos_core.optimizers.bayesian_optimizers import (
-    EmukitOptimizer, SkoptOptimizer)
+from mlos_core.optimizers.bayesian_optimizers.emukit_optimizer import EmukitOptimizer
+from mlos_core.optimizers.bayesian_optimizers.skopt_optimizer import SkoptOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
 
 __all__ = [
