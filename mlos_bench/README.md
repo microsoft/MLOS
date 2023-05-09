@@ -170,7 +170,7 @@ All we have to do is specifying the [`Storage`](./mlos_bench/storage/) and [`Opt
 
     "environment": "env-azure-ubuntu-redis.jsonc",   // Root config (location relative to config_path)
     "storage": "storage/sqlite.jsonc",               // Store data in a local SQLite3 file
-    "optimizer": "optimizers/mlos_core_opt.jsonc",   // Use mlos_core optimizer
+    "optimizer": "optimizers/mlos_core_skopt.jsonc", // Use mlos_core/scikit optimizer
 
     "globals": [
         "global_config.json"                         // Config generated at step 2. Uses config_path
