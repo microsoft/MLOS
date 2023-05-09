@@ -23,7 +23,7 @@
             "tunables/tunable-values-example.jsonc"
         ],
         // Additional values of the tunable parameters, encoded as a list of dictionaries.
-        "tunable_values": [{}],
+        "tunable_values": {},
 
         // Whether to assign the "default" tunable parameter as a value or a
         // random value for those parameters not specified.
