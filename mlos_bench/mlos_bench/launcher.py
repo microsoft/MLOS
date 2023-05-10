@@ -51,7 +51,7 @@ class Launcher:
         # Bootstrap config loader: command line takes priority.
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
         if args.config:
-            config = self._config_loader.load_config(args.config, schema_type=None)  # TODO: , schema_type=ConfigSchema.CLI)
+            config = self._config_loader.load_config(args.config, ConfigSchema.CLI)
             assert isinstance(config, Dict)
             config_path = config.get("config_path", [])
             if config_path and not args.config_path:
