@@ -1,0 +1,13 @@
+{
+    "$schema": "../../../../../../../config/schemas/tunables/tunable-params-schema.json",
+    "covariant_group_name-1": {
+        "cost": 1,
+        "params": {
+            "int": {
+                "type": "int",
+                "default": 10,
+                "range": [1, 500, 1000] // <-- this is invalid
+            }
+        }
+    }
+}
