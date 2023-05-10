@@ -6,7 +6,7 @@
             "cat": {
                 "type": "categorical",
                 "default": "foo",
-                "values": [null, "foo", "bar", "bar"],  // <-- this is invalid (non-unique)
+                "values": ["foo", "bar", "bar"],  // <-- this is invalid (non-unique)
             }
         }
     }

@@ -6,7 +6,7 @@
             "cat": {
                 "type": "categorical",
                 "default": "foo",
-                "values": [null, "foo", "bar"],
+                "values": ["foo", "bar"],
                 "foo": "bar"    // <-- this is unhandled
             }
         }
