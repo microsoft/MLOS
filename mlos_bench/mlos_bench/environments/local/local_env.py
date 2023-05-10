@@ -19,6 +19,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import path_join
 
 _LOG = logging.getLogger(__name__)
 
@@ -116,7 +117,7 @@ class LocalEnv(Environment):
             _LOG.info("Set up the environment locally: %s at %s", self, temp_dir)
 
             if self._dump_params_file:
-                with open(os.path.join(temp_dir, self._dump_params_file),
+                with open(path_join(temp_dir, self._dump_params_file),
                           "wt", encoding="utf-8") as fh_tunables:
                     # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
                     json.dump(tunables.get_param_values(self._tunable_params.get_covariant_group_names()),
