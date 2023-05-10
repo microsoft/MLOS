@@ -29,7 +29,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         The space adapter class to employ for parameter space transformations.
 
     seed : Optional[int]
-        Seed is used to make results reproducible. A value of `None` will use a random seed.
+        By default SMAC uses a known seed (0) to keep results reproducible.
+        However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
 
     run_name : str
         Name of this run. This is used to easily distinguish across different runs.
@@ -52,7 +53,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self,
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter: Optional[BaseSpaceAdapter] = None,
-        seed: Optional[int] = None,
+        seed: Optional[int] = 0,
         run_name: str = 'smac',
         output_directory: str = 'smac3_output',
         n_random_init: Optional[int] = 10,
@@ -70,7 +71,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.random_design.probability_design import ProbabilityRandomDesign
         from smac.runhistory import TrialInfo
 
-        self.trial_info_map: Mapping[ConfigSpace.Configuration, TrialInfo] = {}  # Stores TrialInfo instances returned by .ask()
+        # Store for TrialInfo instances returned by .ask()
+        self.trial_info_map: Mapping[ConfigSpace.Configuration, TrialInfo] = {}
+
+        # The default when not specified is to use a known seed (0) to keep results reproducible.
+        # However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
+        # https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario
+        seed = -1 if seed is None else seed
 
         # Instantiate Scenario
         output_directory = Path(output_directory)
