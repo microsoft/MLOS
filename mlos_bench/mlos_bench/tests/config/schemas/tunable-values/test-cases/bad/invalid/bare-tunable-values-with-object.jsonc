@@ -4,6 +4,8 @@
     "bar": "baz",
     "num": 1,
     "bool": true,
-    "null": null,
-    "array": ["foo", "bar", "baz"]
+    "object": {
+        // should be disallowed
+        "foo": "bar"
+    }
 }

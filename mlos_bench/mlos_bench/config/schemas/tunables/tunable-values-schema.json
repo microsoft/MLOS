@@ -9,7 +9,7 @@
             "patternProperties": {
                 "^[^$]+$": {
                     "$comment": "Tunable values are either strings, numbers, booleans or nulls.",
-                    "type": ["string", "number", "boolean", "null"]
+                    "type": ["string", "number", "boolean"]
                 }
             },
             "not": {

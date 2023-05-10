@@ -79,4 +79,4 @@ Distributing
 
   .. note::
 
-    Note exact versions may differ due to automatic versioning.
+    Note: exact versions may differ due to automatic versioning.
