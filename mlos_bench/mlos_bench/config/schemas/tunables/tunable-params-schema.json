@@ -14,14 +14,15 @@
                     "const": "categorical"
                 },
                 "default": {
-                    "type": ["string", "number", "boolean", "null"]
+                    "type": ["string", "number", "boolean"]
                 },
                 "values": {
                     "type": "array",
                     "items": {
-                        "type": ["string", "number", "boolean", "null"]
+                        "type": ["string", "number", "boolean"]
                     },
-                    "minItems": 1
+                    "minItems": 1,
+                    "uniqueItems": true
                 }
             },
             "required": ["type", "default", "values"],

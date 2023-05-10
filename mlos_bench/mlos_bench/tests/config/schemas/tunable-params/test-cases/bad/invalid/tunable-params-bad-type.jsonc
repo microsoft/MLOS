@@ -6,7 +6,7 @@
             "bad-cat-type": {
                 "type": "bad-cat-type",
                 "default": "foo",
-                "values": [null, "foo", "bar"]
+                "values": ["foo", "bar"]
             },
             "bad-float-type": {
                 "type": "bad-float",
