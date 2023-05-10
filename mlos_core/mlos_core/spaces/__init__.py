@@ -85,3 +85,39 @@ def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace) ->
         raise ValueError(f"Type of parameter {parameter} ({type(parameter)}) not supported.")
 
     return emukit.core.ParameterSpace([_one_parameter_convert(param) for param in config_space.get_hyperparameters()])
+
+
+def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> dict:
+    """Converts a ConfigSpace.ConfigurationSpace to dict.
+
+    Parameters
+    ----------
+    config_space : ConfigSpace.ConfigurationSpace
+        Input configuration space.
+
+    Returns
+    -------
+    dict
+    """
+    # pylint: disable=import-outside-toplevel
+    import flaml.tune
+    import flaml.tune.sample
+
+    def _one_parameter_convert(parameter: ConfigSpace.hyperparameters.Hyperparameter) -> "flaml.tune.sample.Domain":
+        if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
+            if parameter.log:
+                return flaml.tune.loguniform(parameter.lower, parameter.upper)
+            else:
+                return flaml.tune.uniform(parameter.lower, parameter.upper)
+        elif isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
+            if parameter.log:
+                return flaml.tune.lograndint(parameter.lower, parameter.upper)
+            else:
+                return flaml.tune.randint(parameter.lower, parameter.upper)
+        elif isinstance(parameter, ConfigSpace.CategoricalHyperparameter):
+            if len(np.unique(parameter.probabilities)) > 1:
+                raise ValueError("FLAML doesn't support categorical parameters with non-uniform probabilities.")
+            return flaml.tune.choice(parameter.choices)
+        raise ValueError(f"Type of parameter {parameter} ({type(parameter)}) not supported.")
+
+    return dict((param.name, _one_parameter_convert(param)) for param in config_space.get_hyperparameters())
