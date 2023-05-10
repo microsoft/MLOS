@@ -26,7 +26,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special_values"]
+                "required": ["range", "special"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -51,7 +51,7 @@
                     "minItems": 2,
                     "maxItems": 2
                 },
-                "special_values": {
+                "special": {
                     "type": "array",
                     "items": {
                         "type": "integer"
@@ -85,7 +85,7 @@
                     "minItems": 2,
                     "maxItems": 2
                 },
-                "special_values": {
+                "special": {
                     "type": "array",
                     "items": {
                         "type": "number"

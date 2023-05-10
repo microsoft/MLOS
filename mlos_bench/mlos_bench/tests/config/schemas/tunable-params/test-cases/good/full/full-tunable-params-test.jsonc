@@ -9,14 +9,14 @@
                 "type": "int",
                 "default": 10,
                 "range": [1, 500],
-                "special_values": [-1]
+                "special": [-1]
             },
             "float": {
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
                 "range": [1.1, 111.1],
-                "special_values": [-1.1]
+                "special": [-1.1]
             },
             "cat": {
                 "description": "Cat",
@@ -38,14 +38,14 @@
                 "type": "int",
                 "default": 10,
                 "range": [1, 500],
-                "special_values": [-1]
+                "special": [-1]
             },
             "float-2": {
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
                 "range": [1.1, 111.1],
-                "special_values": [-1.1]
+                "special": [-1.1]
             },
             "cat-2": {
                 "description": "Cat",
