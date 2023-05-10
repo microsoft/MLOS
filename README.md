@@ -1,4 +1,4 @@
-# MlosCore
+# MLOS
 
 [![MLOS DevContainer](https://github.com/microsoft/MLOS/actions/workflows/devcontainer.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/devcontainer.yml)
 [![MLOS Linux](https://github.com/microsoft/MLOS/actions/workflows/linux.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/linux.yml)
@@ -17,7 +17,7 @@ For these design requirements we intend to reuse as much from existing OSS libra
 
 ## Getting Started
 
-The development environment for MlosCore uses `conda` to ease dependency management.
+The development environment for MLOS uses `conda` to ease dependency management.
 
 ### Devcontainer
 
@@ -35,7 +35,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 >
 > See <https://github.com/conda-incubator/conda-libmamba-solver#getting-started> for more details.
 
-0. Create the `mlos_core` Conda environment.
+0. Create the `mlos` Conda environment.
 
      ```sh
     conda env create -f conda-envs/mlos.yml
@@ -55,12 +55,20 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 1. Initialize the shell environment.
 
     ```sh
-    conda activate mlos_core
+    conda activate mlos
     ```
 
 2. For an example of using the `mlos_core` optimizer APIs run the [`BayesianOptimization.ipynb`](./mlos_core/notebooks/BayesianOptimization.ipynb) notebook.
 
-3. TODO: Add examples of the `mlos_bench` experiment runner APIs.
+3. For an example of using the `mlos_bench` tool to run an experiment, see the [`mlos_bench` Quickstart README](./mlos_bench/README.md#quickstart).  Here's a quick summary:
+
+    ```sh
+    # get an azure token
+    ./scripts/generate-azure-credentials-config.sh
+
+    # run a simple experiment
+    mlos_bench --config ./mlos_bench/mlos_bench/config/cli/azure-redis-1shot.jsonc
+    ```
 
 ## Distributing
 
@@ -84,6 +92,8 @@ Simply open the project in VSCode and follow the prompts to build and open the d
     # this will install both the optimizer and the experiment runner:
     pip install dist/mlos_bench-0.1.0-py3-none-any.whl
     ```
+
+    > Note exact versions may differ due to automatic versioning.
 
 ## See Also
 

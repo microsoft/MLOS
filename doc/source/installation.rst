@@ -4,7 +4,7 @@ Installation
 Development
 -----------
 
-The development environment for MlosCore uses ``conda`` to ease dependency management.
+The development environment for MLOS uses ``conda`` to ease dependency management.
 
 Devcontainer
 ------------
@@ -26,7 +26,7 @@ Manually
     See `<https://github.com/conda-incubator/conda-libmamba-solver#getting-started>`_ for more details.
 
 
-0. Create the `mlos_core` Conda environment.
+0. Create the `mlos` Conda environment.
 
   .. code-block:: shell
 
@@ -77,3 +77,6 @@ Distributing
     # this will install both the optimizer and the experiment runner:
     pip install dist/mlos_bench-0.1.0-py3-none-any.whl
 
+  .. note::
+
+    Note exact versions may differ due to automatic versioning.
