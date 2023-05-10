@@ -22,7 +22,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config, BaseTypeVar
+from mlos_bench.util import instantiate_from_config, path_join, BaseTypeVar
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -94,9 +94,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
         if not os.path.isabs(file_path):
             for path in path_list:
-                full_path = os.path.realpath(os.path.join(path, file_path))
-                if sys.platform == "win32":
-                    full_path = full_path.replace("\\", "/")
+                full_path = path_join(path, file_path, abs_path=True)
                 if os.path.exists(full_path):
                     _LOG.debug("Path resolved: %s", full_path)
                     return full_path
