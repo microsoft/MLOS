@@ -5,6 +5,8 @@
 
 // *** DO *NOT* CHANGE! This config is used for tests! ***
 {
+    "$schema": "../../../config/schemas/cli/cli-schema.json",
+
     "config_path": [
         // relative to the root of the repo (for now), where this is expected to be executed from
         "mlos_bench/mlos_bench/tests/config"
@@ -26,5 +28,5 @@
     "teardown": true,
 
     // "log_file": "mock-1shot.log",
-    "log_level": 20  // INFO
+    "log_level": "INFO"
 }

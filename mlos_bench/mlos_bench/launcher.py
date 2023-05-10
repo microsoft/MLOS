@@ -61,6 +61,7 @@ class Launcher:
             config = {}
 
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
+        log_level = logging.getLevelName(log_level)
         log_file = args.log_file or config.get("log_file")
         logging.root.setLevel(log_level)
         if log_file:
@@ -111,9 +112,9 @@ class Launcher:
             help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(
-            '--log_level', required=False, type=int,
-            help=f'Logging level. Default is {_LOG_LEVEL} ({logging.getLevelName(_LOG_LEVEL)}).' +
-                 f' Set to {logging.DEBUG} for debug, {logging.WARNING} for warnings only.')
+            '--log_level', required=False, type=str,
+            help=f'Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}.' +
+                 ' Set to DEBUG for debug, WARNING for warnings only.')
 
         parser.add_argument(
             '--config_path', nargs="+", required=False,
