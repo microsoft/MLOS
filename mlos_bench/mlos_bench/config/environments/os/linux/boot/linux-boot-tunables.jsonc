@@ -21,33 +21,33 @@
             },
             "noautogroup": {
                 "type": "categorical",
-                "default": null,
-                "values": [null, "noautogroup"]
+                "default": "",
+                "values": ["", "noautogroup"]
             },
             "nohugevmalloc": {
                 "type": "categorical",
-                "default": null,
-                "values": [null, "nohugevmalloc"]
+                "default": "",
+                "values": ["", "nohugevmalloc"]
             },
             "nohalt": {
                 "type": "categorical",
-                "default": null,
-                "values": [null, "nohalt"]
+                "default": "",
+                "values": ["", "nohalt"]
             },
             "nohz": {
                 "type": "categorical",
-                "default": null,
-                "values": [null, "nohz"]
+                "default": "",
+                "values": ["", "nohz"]
             },
             "no-kvmapf": {
                 "type": "categorical",
-                "default": null,
-                "values": [null, "no-kvmapf"]
+                "default": "",
+                "values": ["", "no-kvmapf"]
             },
             "nopvspin": {
                 "type": "categorical",
-                "default": null,
-                "values": [null, "nopvspin"]
+                "default": "",
+                "values": ["", "nopvspin"]
             }
         }
     }
