@@ -164,7 +164,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         for key in class_params.intersection(global_config):
             class_config[key] = global_config[key]
 
-        for key in class_params.intersection(config.get("resolve_path", [])):
+        for key in class_params.intersection(config.get("resolve_config_property_paths", [])):
             if isinstance(class_config[key], str):
                 class_config[key] = self.resolve_path(class_config[key])
             elif isinstance(class_config[key], (list, tuple)):

@@ -1,6 +1,6 @@
 // PostgreSQL storage.
 {
-    "$schema": "../schemas/storage/storage-schema.jsonc",
+    "$schema": "../schemas/storage/storage-schema.json",
 
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
 
