@@ -4,6 +4,7 @@
 #
 """
 Contains the wrapper class for SMAC Bayesian optimizers.
+See Also: <https://automl.github.io/SMAC3/main/index.html>
 """
 
 from pathlib import Path
