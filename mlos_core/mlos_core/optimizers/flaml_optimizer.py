@@ -6,7 +6,7 @@
 Contains the FlamlOptimizer class.
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from warnings import warn
 
 import ConfigSpace
@@ -25,6 +25,9 @@ class FlamlOptimizer(BaseOptimizer):
     ----------
     parameter_space : ConfigSpace.ConfigurationSpace
         The parameter space to optimize.
+
+    space_adapter : BaseSpaceAdapter
+        The space adapter class to employ for parameter space transformations.
     """
 
     def __init__(
@@ -33,6 +36,7 @@ class FlamlOptimizer(BaseOptimizer):
         space_adapter: Optional[BaseSpaceAdapter] = None,
     ):
         super().__init__(parameter_space, space_adapter)
+
         self.flaml_parameter_space: dict = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.evaluated_configs: Dict[int, dict] = {}
         self._suggested_config: Optional[dict]
@@ -90,7 +94,23 @@ class FlamlOptimizer(BaseOptimizer):
                          context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
-    def _target_function(self, config: dict) -> None:
+    def _target_function(self, config: dict) -> Union[dict, None]:
+        """Configuration evaluation function called by FLAML optimizer.
+
+        FLAML may suggest the same configuration multiple times (due to its warm-start mechanism).
+        Once FLAML suggests an unseen configuration, we store it, and stop the optimization process.
+
+        Parameters
+        ----------
+        config: dict
+            Next configuration to be evaluated, as suggested by FLAML.
+            This config is stored internally and is returned to user, via `.suggest()` method.
+
+        Returns
+        -------
+        result: Union[dict, None]
+            Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
+        """
         config_hash: int = hash(ConfigSpace.Configuration(self.optimizer_parameter_space, values=config))
         if config_hash in self.evaluated_configs:
             score = self.evaluated_configs[config_hash]['score']
@@ -100,6 +120,22 @@ class FlamlOptimizer(BaseOptimizer):
         return None  # Returning None stops the process
 
     def _get_next_config(self) -> dict:
+        """Warm-starts a new instance of FLAML, and returns a recommended, unseen new configuration.
+
+        Since FLAML does not provide an ask-and-tell interface, we need to create a new instance of FLAML
+        each time we get asked for a new suggestion. This is suboptimal performance-wise, but works.
+        To do so, we use any previously evaluated configurations to bootstrap FLAML (i.e., warm-start).
+        For more info: https://microsoft.github.io/FLAML/docs/Use-Cases/Tune-User-Defined-Function#warm-start
+
+        Returns
+        -------
+        result: dict
+            Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
+
+        Raises
+        ------
+        RuntimeError: if FLAML did not suggest a previously unseen configuration.
+        """
         from flaml import tune  # pylint: disable=import-outside-toplevel
 
         # Parse evaluated configs to format used by FLAML
