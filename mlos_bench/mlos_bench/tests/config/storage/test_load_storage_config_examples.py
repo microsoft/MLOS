@@ -17,7 +17,7 @@ from mlos_bench.tests.config import locate_config_examples
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import get_class_from_name
+from mlos_bench.util import get_class_from_name, path_join
 
 
 _LOG = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
     return configs_to_filter
 
 
-configs = filter_configs(locate_config_examples(os.path.join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
+configs = filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
 assert configs
 
 
@@ -44,14 +44,11 @@ def test_load_storage_config_examples(config_loader_service: ConfigPersistenceSe
     assert isinstance(config, dict)
     # Skip schema loading that would require a database connection for this test.
     config["config"]["lazy_schema_create"] = True
-    # Hack: The config loader service expects a non-abstract class name, but
-    # the Storage based class is abstract, so we need to grab the actual class
-    # name from the config first.
     cls = get_class_from_name(config["class"])
     assert issubclass(cls, Storage)
     # Make an instance of the class based on the config.
     storage_inst = config_loader_service.build_generic(
-        base_cls=cls,
+        base_cls=Storage,   # type: ignore[type-abstract]
         tunables=TunableGroups(),
         config=config,
         service=config_loader_service,
