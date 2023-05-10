@@ -21,7 +21,8 @@
                     "items": {
                         "type": ["string", "number", "boolean", "null"]
                     },
-                    "minItems": 1
+                    "minItems": 1,
+                    "uniqueItems": true
                 }
             },
             "required": ["type", "default", "values"],
