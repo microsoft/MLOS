@@ -19,7 +19,6 @@ from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 class FlamlOptimizer(BaseOptimizer):
     """Optimizer class that produces random suggestions.
-    Useful for baseline comparison against Bayesian optimizers.
 
     Parameters
     ----------
@@ -28,16 +27,23 @@ class FlamlOptimizer(BaseOptimizer):
 
     space_adapter : BaseSpaceAdapter
         The space adapter class to employ for parameter space transformations.
+
+    low_cost_partial_config : dict
+        A dictionary from a subset of controlled dimensions to the initial low-cost values.
+        More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
     """
 
     def __init__(
         self,
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter: Optional[BaseSpaceAdapter] = None,
+        low_cost_partial_config: Optional[dict] = None,
     ):
         super().__init__(parameter_space, space_adapter)
 
         self.flaml_parameter_space: dict = configspace_to_flaml_space(self.optimizer_parameter_space)
+        self.low_cost_partial_config = low_cost_partial_config
+
         self.evaluated_configs: Dict[int, dict] = {}
         self._suggested_config: Optional[dict]
 
@@ -155,6 +161,7 @@ class FlamlOptimizer(BaseOptimizer):
             points_to_evaluate=list(points_to_evaluate),
             evaluated_rewards=list(evaluated_rewards),
             num_samples=len(points_to_evaluate) + 1,
+            low_cost_partial_config=self.low_cost_partial_config,
             verbose=0,
         )
         if self._suggested_config is None:
