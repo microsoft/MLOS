@@ -27,5 +27,5 @@
     "teardown": false,
 
     "log_file": "azure-redis-1shot.log",
-    "log_level": 10  // DEBUG
+    "log_level": "DEBUG"
 }

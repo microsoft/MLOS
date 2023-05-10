@@ -23,5 +23,5 @@
     "teardown": false,
 
     "log_file": "azure-redis-skopt.log",
-    "log_level": 10  // DEBUG
+    "log_level": "DEBUG"
 }

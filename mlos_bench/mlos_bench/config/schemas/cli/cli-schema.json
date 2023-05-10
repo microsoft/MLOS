@@ -64,6 +64,11 @@
             "$ref": "#/$defs/json_config_path_or_paths"
         },
 
+        "globals": {
+            "description": "Path to the json config(s) describing the global config overrides to use.",
+            "$ref": "#/$defs/json_config_path_or_paths"
+        },
+
         "experimentId": {
             "description": "Name of the experiment.",
             "$comment": "TODO: Renamed this to conform to snake case.",
