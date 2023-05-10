@@ -16,6 +16,7 @@ import pytest
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
 
@@ -43,7 +44,7 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
 
     with local_exec_service.temp_dir_context() as temp_dir:
 
-        with open(os.path.join(temp_dir, input_file), "wt", encoding="utf-8") as fh_input:
+        with open(path_join(temp_dir, input_file), "wt", encoding="utf-8") as fh_input:
             json.dump(params, fh_input)
 
         script_path = local_exec_service.config_loader_service.resolve_path(
@@ -57,7 +58,7 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
         assert return_code == 0
         # assert stdout.strip() == ""
 
-        with open(os.path.join(temp_dir, output_file), "rt", encoding="utf-8") as fh_output:
+        with open(path_join(temp_dir, output_file), "rt", encoding="utf-8") as fh_output:
             assert [ln.strip() for ln in fh_output.readlines()] == [
                 'echo "40000" > /proc/sys/kernel/sched_migration_cost_ns',
                 'echo "800000" > /proc/sys/kernel/sched_granularity_ns',

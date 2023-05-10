@@ -20,6 +20,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import path_join
 
 
 _LOG = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
     return configs_to_filter
 
 
-configs = filter_configs(locate_config_examples(os.path.join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
+configs = filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
 assert configs
 
 
@@ -86,7 +87,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
     return envs
 
 
-composite_configs = filter_configs(locate_config_examples(os.path.join(
+composite_configs = filter_configs(locate_config_examples(path_join(
     ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/composite/")))
 assert composite_configs
 

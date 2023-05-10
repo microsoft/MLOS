@@ -28,6 +28,29 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Service", "Sto
 BaseTypes = Union["Environment", "Optimizer", "Service", "Storage"]
 
 
+def path_join(*args: str, abs_path: bool = False) -> str:
+    """
+    Joins the path components and normalizes the path.
+
+    Parameters
+    ----------
+    args : str
+        Path components.
+
+    abs_path : bool
+        If True, the path is converted to be absolute.
+
+    Returns
+    -------
+    str
+        Joined path.
+    """
+    path = os.path.join(*args)
+    if abs_path:
+        path = os.path.abspath(path)
+    return os.path.normpath(path).replace("\\", "/")
+
+
 def prepare_class_load(config: dict,
                        global_config: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
     """
