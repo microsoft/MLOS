@@ -6,6 +6,7 @@
     "config": {
         "minimize": "score",
         "max_iterations": 20,
-        "optimizer_type": "RANDOM"
+        "optimizer_type": "SKOPT",
+        "base_estimator": "gp"
     }
 }
