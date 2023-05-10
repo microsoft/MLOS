@@ -28,6 +28,7 @@ except LookupError as e:
 extra_requires: Dict[str, List[str]] = {
     'emukit': ['emukit'],
     'skopt': ['scikit-optimize<=0.9.0'],  # FIXME: temporarily work around some version mismatch issues (PR 850)
+    'flaml': ['flaml[blendsearch]'],
 }
 
 # construct special 'full' extra that adds requirements for all built-in
