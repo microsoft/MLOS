@@ -128,7 +128,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
             config = json5.load(fh_json)
         if schema_type is not None:
-            schema_type.validate(config)
+            try:
+                schema_type.validate(config)
+            except Exception as ex:
+                _LOG.error("Failed to validate config %s against schema type %s at %s",
+                           json_file_name, schema_type.name, schema_type.value)
+                raise ex
         if isinstance(config, dict) and config.get("$schema"):
             # Remove $schema attributes from the config after we've validated
             # them to avoid passing them on to other objects.
