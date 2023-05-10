@@ -17,7 +17,7 @@ from mlos_core.optimizers import OptimizerType
 from mlos_core.spaces.adapters import SpaceAdapterType
 from mlos_core.tests import get_all_concrete_subclasses
 
-from mlos_bench.config.schemas import ConfigSchemaType
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.optimizers.base_optimizer import Optimizer
 
 from mlos_bench.tests import try_resolve_class_name
@@ -126,10 +126,10 @@ def test_optimizer_configs_against_schema(test_case_name: str) -> None:
     """
     test_case = TEST_CASES[test_case_name]
     if test_case["test_case_type"] == "good":
-        ConfigSchemaType.OPTIMIZER.validate(test_case["config"])
+        ConfigSchema.OPTIMIZER.validate(test_case["config"])
     elif test_case["test_case_type"] == "bad":
         with pytest.raises(jsonschema.ValidationError):
-            ConfigSchemaType.OPTIMIZER.validate(test_case["config"])
+            ConfigSchema.OPTIMIZER.validate(test_case["config"])
     else:
         raise NotImplementedError(f"Unknown test case type: {test_case['test_case_type']}")
 
@@ -140,13 +140,13 @@ def test_optimizer_configs_with_extra_param() -> None:
     """
     test_case = next(iter(TEST_CASES_BY_TYPE["good"].values()))
     config = deepcopy(test_case["config"])
-    ConfigSchemaType.OPTIMIZER.validate(config)
+    ConfigSchema.OPTIMIZER.validate(config)
     config[EXTRA_OUTER_ATTR] = "should not be here"
     with pytest.raises(jsonschema.ValidationError):
-        ConfigSchemaType.OPTIMIZER.validate(config)
+        ConfigSchema.OPTIMIZER.validate(config)
     del config[EXTRA_OUTER_ATTR]
     if not config.get("config"):
         config["config"] = {}
     config["config"][EXTRA_CONFIG_ATTR] = "should not be here"
     with pytest.raises(jsonschema.ValidationError):
-        ConfigSchemaType.OPTIMIZER.validate(config)
+        ConfigSchema.OPTIMIZER.validate(config)

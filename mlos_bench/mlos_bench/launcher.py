@@ -14,7 +14,7 @@ import logging
 import argparse
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
-from mlos_bench.config.schemas import ConfigSchemaType
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import BaseTypeVar
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -51,7 +51,7 @@ class Launcher:
         # Bootstrap config loader: command line takes priority.
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
         if args.config:
-            config = self._config_loader.load_config(args.config, schema_type=None) # FIXME: provide a schema for CLI args
+            config = self._config_loader.load_config(args.config, schema_type=None)  # TODO: , schema_type=ConfigSchema.CLI)
             assert isinstance(config, Dict)
             config_path = config.get("config_path", [])
             if config_path and not args.config_path:
@@ -206,7 +206,7 @@ class Launcher:
         tunables = self.environment.tunable_params
         if args_tunables is not None:
             for data_file in args_tunables:
-                values = self._config_loader.load_config(data_file, schema_type=None)   # TODO, ConfigSchemaType.TUNABLE_PARAMS)
+                values = self._config_loader.load_config(data_file, schema_type=None)   # TODO, ConfigSchema.TUNABLE_PARAMS)
                 assert isinstance(values, Dict)
                 tunables.assign(values)
         return tunables
@@ -220,7 +220,7 @@ class Launcher:
         if args_optimizer is None:
             return OneShotOptimizer(
                 self.tunables, self._parent_service, self.global_config)
-        optimizer = self._load(Optimizer, args_optimizer, ConfigSchemaType.OPTIMIZER)   # type: ignore[type-abstract]
+        optimizer = self._load(Optimizer, args_optimizer, ConfigSchema.OPTIMIZER)   # type: ignore[type-abstract]
         return optimizer
 
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
@@ -235,10 +235,10 @@ class Launcher:
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
         storage = self._load(Storage, args_storage, schema_type=None)   # type: ignore[type-abstract]
-        # TODO: , ConfigSchemaType.STORAGE)
+        # TODO: , ConfigSchema.STORAGE)
         return storage
 
-    def _load(self, cls: Type[BaseTypeVar], json_file_name: str, schema_type: Optional[ConfigSchemaType]) -> BaseTypeVar:
+    def _load(self, cls: Type[BaseTypeVar], json_file_name: str, schema_type: Optional[ConfigSchema]) -> BaseTypeVar:
         """
         Create a new instance of class `cls` from JSON configuration.
 

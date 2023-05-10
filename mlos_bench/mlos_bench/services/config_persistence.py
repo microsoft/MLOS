@@ -18,7 +18,7 @@ from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
 
 import json5    # To read configs with comments and other JSON5 syntax features
 
-from mlos_bench.config.schemas import ConfigSchemaType
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -106,7 +106,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
     def load_config(self,
                     json_file_name: str,
-                    schema_type: Optional[ConfigSchemaType],
+                    schema_type: Optional[ConfigSchema],
                    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Load JSON config file. Search for a file relative to `_config_path`
@@ -117,7 +117,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         ----------
         json_file_name : str
             Path to the input config file.
-        schema_type : Optional[ConfigSchemaType]
+        schema_type : Optional[ConfigSchema]
             The schema type to validate the config against.
 
         Returns
@@ -389,7 +389,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : Environment
             A new benchmarking environment.
         """
-        config = self.load_config(json_file_name, schema_type=None)     # TODO: , ConfigSchemaType.ENVIRONMENT)
+        config = self.load_config(json_file_name, schema_type=None)     # TODO: , ConfigSchema.ENVIRONMENT)
         assert isinstance(config, dict)
         return self.build_environment(config, tunables, global_config, service)
 
@@ -417,7 +417,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : List[Environment]
             A list of new benchmarking environments.
         """
-        config_list = self.load_config(json_file_name, schema_type=None)    # TODO: , ConfigSchemaType.ENVIRONMENT)
+        config_list = self.load_config(json_file_name, schema_type=None)    # TODO: , ConfigSchema.ENVIRONMENT)
         if isinstance(config_list, dict):
             config_list = [config_list]
         return [
@@ -450,7 +450,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                   json_file_names, parent.__class__.__name__)
         service = Service(global_config, parent)
         for fname in json_file_names:
-            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchemaType.SERVICE)
+            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchema.SERVICE)
             service.register(self.build_service(config, global_config, service).export())
         return service
 
@@ -478,7 +478,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         _LOG.info("Load tunables: '%s'", json_file_names)
         for fname in json_file_names:
-            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchemaType.TUNABLE_PARAMS)
+            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchema.TUNABLE_PARAMS)
             assert isinstance(config, dict)
             parent.merge(TunableGroups(config))
         return parent

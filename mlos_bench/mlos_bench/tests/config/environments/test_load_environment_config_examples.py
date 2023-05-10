@@ -15,7 +15,7 @@ import pytest
 
 from mlos_bench.tests.config import locate_config_examples
 
-from mlos_bench.config.schemas import ConfigSchemaType
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -77,7 +77,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
 
     for mock_service_config_path in mock_service_configs:
         mock_service_config = config_loader_service.load_config(mock_service_config_path, schema_type=None)
-        # TODO: , ConfigSchemaType.SERVICE)
+        # TODO: , ConfigSchema.SERVICE)
         config_loader_service.register(config_loader_service.build_service(
             config=mock_service_config, parent=config_loader_service).export())
 

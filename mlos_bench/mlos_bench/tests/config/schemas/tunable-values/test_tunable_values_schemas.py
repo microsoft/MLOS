@@ -12,7 +12,7 @@ from typing import Dict
 import jsonschema
 import pytest
 
-from mlos_bench.config.schemas import ConfigSchemaType
+from mlos_bench.config.schemas import ConfigSchema
 
 from mlos_bench.tests.config.schemas import get_schema_test_cases, SchemaTestCaseInfo
 
@@ -44,9 +44,9 @@ def test_tunable_values_configs_against_schema(test_case_name: str) -> None:
     """
     test_case = TEST_CASES[test_case_name]
     if test_case["test_case_type"] == "good":
-        ConfigSchemaType.TUNABLE_VALUES.validate(test_case["config"])
+        ConfigSchema.TUNABLE_VALUES.validate(test_case["config"])
     elif test_case["test_case_type"] == "bad":
         with pytest.raises((jsonschema.ValidationError, jsonschema.SchemaError)):
-            ConfigSchemaType.TUNABLE_VALUES.validate(test_case["config"])
+            ConfigSchema.TUNABLE_VALUES.validate(test_case["config"])
     else:
         raise NotImplementedError(f"Unknown test case type: {test_case['test_case_type']}")
