@@ -8,6 +8,7 @@ Contains the wrapper class for SMAC Bayesian optimizers.
 
 from pathlib import Path
 from typing import Mapping, Optional
+from tempfile import TemporaryDirectory
 
 import ConfigSpace
 import numpy.typing as npt
@@ -55,7 +56,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         space_adapter: Optional[BaseSpaceAdapter] = None,
         seed: Optional[int] = 0,
         run_name: str = 'smac',
-        output_directory: str = 'smac3_output',
+        output_directory: Optional[str] = None,
         n_random_init: Optional[int] = 10,
         n_random_probability: Optional[float] = 0.1,
         n_workers: int = 1,
@@ -79,8 +80,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # https://automl.github.io/SMAC3/main/api/smac.scenario.html#smac.scenario.Scenario
         seed = -1 if seed is None else seed
 
-        # Instantiate Scenario
+        # Create temporary directory for SMAC output (if none provided)
+        self.temp_output_directory: Optional[TemporaryDirectory] = None
+        if output_directory is None:
+            self.temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)  # pylint: disable=consider-using-with
+            output_directory = self.temp_output_directory.name
         output_directory = Path(output_directory)
+
+        # Instantiate Scenario
         scenario: Scenario = Scenario(
             self.optimizer_parameter_space,
             name=run_name,
@@ -111,6 +118,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             config_selector=config_selector,
             overwrite=True,
         )
+
+    def __del__(self):
+        if self.temp_output_directory is not None:
+            self.temp_output_directory.cleanup()
 
     @staticmethod
     def _dummy_target_func(seed):
