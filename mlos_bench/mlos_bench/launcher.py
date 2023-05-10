@@ -206,7 +206,7 @@ class Launcher:
         tunables = self.environment.tunable_params
         if args_tunables is not None:
             for data_file in args_tunables:
-                values = self._config_loader.load_config(data_file, schema_type=None)   # TODO, ConfigSchema.TUNABLE_PARAMS)
+                values = self._config_loader.load_config(data_file, ConfigSchema.TUNABLE_PARAMS)
                 assert isinstance(values, Dict)
                 tunables.assign(values)
         return tunables

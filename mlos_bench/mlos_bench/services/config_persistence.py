@@ -476,7 +476,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         _LOG.info("Load tunables: '%s'", json_file_names)
         for fname in json_file_names:
-            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchema.TUNABLE_PARAMS)
+            config = self.load_config(fname, ConfigSchema.TUNABLE_PARAMS)
             assert isinstance(config, dict)
             parent.merge(TunableGroups(config))
         return parent
