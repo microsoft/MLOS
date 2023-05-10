@@ -13,8 +13,10 @@ from typing import Dict
 import json         # schema files are pure json - no comments
 import jsonschema
 
+from mlos_bench.util import path_join
 
-CONFIG_SCHEMA_DIR = path.realpath(path.dirname(__file__)).replace("\\", "/")
+
+CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
 
 _SCHEMA_STORE: Dict[str, dict] = {}
 
@@ -25,7 +27,7 @@ def _load_schemas() -> None:
         for file_name in files:
             if not file_name.endswith(".json"):
                 continue
-            file_path = path.join(root, file_name)
+            file_path = path_join(root, file_name)
             if path.getsize(file_path) == 0:
                 continue
             with open(file_path, mode="r", encoding="utf-8") as schema_file:
@@ -39,13 +41,13 @@ class ConfigSchema(Enum):
     An enum to help describe schema types and help validate configs against them.
     """
 
-    CLI = path.join(CONFIG_SCHEMA_DIR, "cli/cli-schema.json")
-    ENVIRONMENT = path.join(CONFIG_SCHEMA_DIR, "environments/environment-schema.json")
-    OPTIMIZER = path.join(CONFIG_SCHEMA_DIR, "optimizers/optimizer-schema.json")
-    SERVICE = path.join(CONFIG_SCHEMA_DIR, "services/service-schema.json")
-    STORAGE = path.join(CONFIG_SCHEMA_DIR, "storage/storage-schema.json")
-    TUNABLE_PARAMS = path.join(CONFIG_SCHEMA_DIR, "tunables/tunable-params-schema.json")
-    TUNABLE_VALUES = path.join(CONFIG_SCHEMA_DIR, "tunables/tunable-values-schema.json")
+    CLI = path_join(CONFIG_SCHEMA_DIR, "cli/cli-schema.json")
+    ENVIRONMENT = path_join(CONFIG_SCHEMA_DIR, "environments/environment-schema.json")
+    OPTIMIZER = path_join(CONFIG_SCHEMA_DIR, "optimizers/optimizer-schema.json")
+    SERVICE = path_join(CONFIG_SCHEMA_DIR, "services/service-schema.json")
+    STORAGE = path_join(CONFIG_SCHEMA_DIR, "storage/storage-schema.json")
+    TUNABLE_PARAMS = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-params-schema.json")
+    TUNABLE_VALUES = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-values-schema.json")
 
     @property
     def schema(self) -> dict:
