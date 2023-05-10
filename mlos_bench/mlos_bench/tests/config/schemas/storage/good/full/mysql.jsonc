@@ -1,0 +1,14 @@
+{
+    "$schema": "../../../../../../config/schemas/storage/storage-schema.json",
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "config": {
+        "log_sql": false,
+        "drivername": "mysql+mysqlconnector",
+        "database": "mlos_bench",
+        "host": "localhost",
+        "username": "mlos_bench",
+        "password": "mlos_bench",
+        "port": 3306
+    }
+}

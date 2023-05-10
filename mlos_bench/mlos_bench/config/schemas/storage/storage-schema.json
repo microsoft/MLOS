@@ -10,6 +10,7 @@
             "properties": {
                 "log_sql": {
                     "description": "Whether to log SQL queries.",
+                    "$comment": "This one is removed from the config prior to being passed to the URL.create() function.",
                     "type": "boolean"
                 },
                 "drivername": {
@@ -101,6 +102,7 @@
         }
     },
     "required": ["class", "config"],
+    "unevaluatedProperties": false,
 
     "oneOf": [
         {
@@ -120,14 +122,13 @@
                     {
                         "properties": {
                             "config": {
-                                "$comment": "Allow all base optimizer configs",
-                                "$ref": "#/$defs/config_sql_storage",
-                                "unevaluatedProperties": false
+                                "$comment": "Basic config must be a sql alchemy based config in this case.",
+                                "$ref": "#/$defs/config_sql_storage"
                             }
                         }
                     },
                     {
-                        "$comment": "resolve_config_property_paths is only allowed for sqlite or duckdb drivers and then only for the database",
+                        "$comment": "some special rules for certain sql drivers",
                         "if": {
                             "properties": {
                                 "config": {
@@ -145,46 +146,67 @@
                             "required": ["config"]
                         },
                         "then": {
-                            "anyOf": [
+                            "allOf": [
                                 {
-                                    "properties": {
-                                        "resolve_config_property_paths": {
-                                            "const": "database"
-                                        }
-                                    },
-                                    "required": ["resolve_config_property_paths"]
-                                },
-                                {
-                                    "properties": {
-                                        "resolve_config_property_paths": {
-                                            "type": "array",
-                                            "items": {
-                                                "const": "database"
+                                    "$comment": "resolve_config_property_paths is only allowed for sqlite or duckdb drivers and then only for the database",
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "resolve_config_property_paths": {
+                                                    "const": "database"
+                                                }
                                             },
-                                            "minItems": 1,
-                                            "maxItems": 1
+                                            "required": ["resolve_config_property_paths"]
+                                        },
+                                        {
+                                            "properties": {
+                                                "resolve_config_property_paths": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "const": "database"
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 1
+                                                }
+                                            },
+                                            "required": ["resolve_config_property_paths"]
+                                        },
+                                        {
+                                            "not": {
+                                                "required": ["resolve_config_property_paths"]
+                                            }
                                         }
-                                    },
-                                    "required": ["resolve_config_property_paths"]
+                                    ]
                                 },
                                 {
+                                    "$comment": "sqlite and duckdb drivers don't need host or username",
                                     "not": {
-                                        "required": ["resolve_config_property_paths"]
+                                        "required": [
+                                            "host",
+                                            "username"
+                                        ]
                                     }
                                 }
                             ]
-                       },
-                       "else": {
+                        },
+                        "else": {
+                            "$comment": "Other drivers need to omit resolve_config_property_paths, but include host and username in their config",
+                            "properties": {
+                                "config": {
+                                    "required": ["host", "username"]
+                                }
+                            },
                             "not": {
-                                "required": ["resolve_config_property_paths"]
+                                "required": [
+                                    "resolve_config_property_paths"
+                                ]
                             }
-                       }
+                        }
                     }
                 ],
                 "$comment": "Set 'else' to false to prevent it to defaulting to a valid document match."
             },
             "else": false
         }
-    ],
-    "unevaluatedProperties": false
+    ]
 }

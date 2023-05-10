@@ -1,0 +1,12 @@
+{
+    "$schema": "../../../../../../config/schemas/storage/storage-schema.json",
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "resolve_config_property_paths": ["database"],
+
+    "config": {
+        "log_sql": false,
+        "drivername": "duckdb",
+        "database": "mlos_bench.duckdb"
+    }
+}
