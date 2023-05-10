@@ -55,7 +55,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter: Optional[BaseSpaceAdapter] = None,
         seed: Optional[int] = 0,
-        run_name: str = 'smac',
+        run_name: str = 'mlos_core-smac',
         output_directory: Optional[str] = None,
         n_random_init: Optional[int] = 10,
         n_random_probability: Optional[float] = 0.1,
