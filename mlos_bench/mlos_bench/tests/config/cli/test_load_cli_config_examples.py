@@ -26,7 +26,7 @@ _LOG.setLevel(logging.DEBUG)
 
 
 # Get the set of configs to test.
-CONFIG_TYPE = "storage"
+CONFIG_TYPE = "cli"
 
 
 def filter_configs(configs_to_filter: List[str]) -> List[str]:
@@ -39,20 +39,8 @@ assert configs
 
 
 @pytest.mark.parametrize("config_path", configs)
-def test_load_storage_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+def test_load_cli_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
-    config = config_loader_service.load_config(config_path, ConfigSchema.STORAGE)
+    config = config_loader_service.load_config(config_path, ConfigSchema.CLI)
     assert isinstance(config, dict)
-    # Skip schema loading that would require a database connection for this test.
-    config["config"]["lazy_schema_create"] = True
-    cls = get_class_from_name(config["class"])
-    assert issubclass(cls, Storage)
-    # Make an instance of the class based on the config.
-    storage_inst = config_loader_service.build_generic(
-        base_cls=Storage,   # type: ignore[type-abstract]
-        tunables=TunableGroups(),
-        config=config,
-        service=config_loader_service,
-    )
-    assert storage_inst is not None
-    assert isinstance(storage_inst, cls)
+    # TODO: for each arg that references another file, see if we can at least load that too.
