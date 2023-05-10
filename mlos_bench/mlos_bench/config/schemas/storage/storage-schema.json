@@ -106,7 +106,7 @@
 
     "oneOf": [
         {
-            "$comment": "Extensions to the allowed 'config' object properties when the optimizer is the mlos_core optimizer.",
+            "$comment": "Extensions to the allowed 'config' object properties when the storage is the mlos_core storage.",
             "if": {
                 "properties": {
                     "class": {
