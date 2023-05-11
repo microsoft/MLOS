@@ -20,7 +20,7 @@
         "include_tunable_values": [
             // Note: tunable values need not specify a value for all params.
             // In which case, unspecified values are governed by the "use_default" config parameter.
-            "tunables/tunable-values-example.jsonc"
+            "tunable-values/tunable-values-example.jsonc"
         ],
         // Additional values of the tunable parameters.
         "tunable_values": {},
