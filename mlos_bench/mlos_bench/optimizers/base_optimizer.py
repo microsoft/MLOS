@@ -10,6 +10,7 @@ and mlos_core optimizers.
 import logging
 from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
+from distutils.util import strtobool    # pylint: disable=deprecated-module
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
@@ -40,7 +41,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._tunables = tunables
         self._service = service
         self._iter = 1
-        self._use_defaults = bool(self._config.pop('use_defaults', True))
+        self._use_defaults: bool = bool(strtobool(str(self._config.pop('use_defaults', True))))
         self._max_iter = int(self._config.pop('max_iterations', 25))
         self._opt_target: str
         _opt_target = self._config.pop('maximize', None)

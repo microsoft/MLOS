@@ -1,6 +1,5 @@
 {
     // No schema required.
-    // "$schema": "../../../../../../../config/schemas/optimizers/optimizer-schema.json",
     "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
 
     "config": {

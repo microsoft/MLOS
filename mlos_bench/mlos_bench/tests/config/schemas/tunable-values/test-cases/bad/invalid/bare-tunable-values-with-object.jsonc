@@ -1,5 +1,4 @@
 {
-    "$schema": "../../../../../../../config/schemas/tunables/tunable-values-schema.json",
     "foo": "bar",
     "bar": "baz",
     "num": 1,
