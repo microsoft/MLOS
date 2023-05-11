@@ -52,7 +52,7 @@ def mock_configs() -> List[dict]:
 
 
 @pytest.fixture
-def mock_configs_str(mock_configs) -> List[dict]:
+def mock_configs_str(mock_configs: List[dict]) -> List[dict]:
     """
     Same as `mock_config` above, but with all values converted to strings.
     (This can happen when we retrieve the data from storage).
