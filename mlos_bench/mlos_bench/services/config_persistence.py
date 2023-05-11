@@ -12,6 +12,7 @@ import os
 import sys
 
 import json    # For logging only
+from jsonschema import ValidationError, SchemaError
 import logging
 
 from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
@@ -130,10 +131,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if schema_type is not None:
             try:
                 schema_type.validate(config)
-            except Exception as ex:
+            except (ValidationError, SchemaError) as ex:
                 _LOG.error("Failed to validate config %s against schema type %s at %s",
                            json_file_name, schema_type.name, schema_type.value)
-                raise ex
+                raise ValueError(f"Failed to validate config {json_file_name} against " +
+                                 "schema type {schema_type.name} at {schema_type.value}") from ex
         if isinstance(config, dict) and config.get("$schema"):
             # Remove $schema attributes from the config after we've validated
             # them to avoid passing them on to other objects.
