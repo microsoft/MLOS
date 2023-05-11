@@ -1,5 +1,4 @@
 {
-    "$schema": "../../../schemas/tunables/tunable-params-schema.json",
     "redis": {
         "cost": 1,
         "params": {
