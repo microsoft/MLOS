@@ -34,18 +34,23 @@ class SmacOptimizer(BaseBayesianOptimizer):
         By default SMAC uses a known seed (0) to keep results reproducible.
         However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
 
-    run_name : str
+    run_name : Optional[str]
         Name of this run. This is used to easily distinguish across different runs.
+        If set to `None` (default), SMAC will generate a hash from metadata.
 
     output_directory : Optional[str]
-        The directory where SMAC output will saved. If None, a temporary dir will be used.
+        The directory where SMAC output will saved. If set to `None` (default), a temporary dir will be used.
+
+    max_trials : int
+        Maximum number of trials (i.e., function evaluations) to be run. Defaults to 100.
+        Note that modifying this value directly affects the value of `n_random_init`, if latter is set to `None`.
 
     n_random_init : Optional[int]
-        Number of points evaluated at start to bootstrap the optimizer.
+        Number of points evaluated at start to bootstrap the optimizer. Defaults to 10.
 
     n_random_probability: Optional[float]
         Probability of choosing to evaluate a random configuration during optimization.
-        Setting this to a higher value favors exploration over exploitation.
+        Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
@@ -53,8 +58,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         parameter_space: ConfigSpace.ConfigurationSpace,
         space_adapter: Optional[BaseSpaceAdapter] = None,
         seed: Optional[int] = 0,
-        run_name: str = 'mlos_core-smac',
+        run_name: Optional[str] = None,
         output_directory: Optional[str] = None,
+        max_trials: int = 100,
         n_random_init: Optional[int] = 10,
         n_random_probability: Optional[float] = 0.1,
     ):
@@ -90,7 +96,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             name=run_name,
             output_directory=output_directory,
             deterministic=True,
-            n_trials=1e4,
+            n_trials=max_trials,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
             n_workers=1,  # Use a single thread for evaluating trials
         )
