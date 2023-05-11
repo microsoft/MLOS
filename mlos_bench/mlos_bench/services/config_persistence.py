@@ -105,7 +105,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     def load_config(self,
                     json_file_name: str,
                     schema_type: Optional[ConfigSchema],
-                   ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+                    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """
         Load JSON config file. Search for a file relative to `_config_path`
         if the input path is not absolute.
