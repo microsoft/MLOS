@@ -29,10 +29,10 @@
             "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/tunable-values/test-cases/**/*.jsonc",
                 "mlos_bench/mlos_bench/tests/config/schemas/tunable-values/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/tests/config/tunable-values/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/tunable-values/**/*.json",
                 "mlos_bench/mlos_bench/config/tunable-values/**/*.jsonc",
-                "mlos_bench/mlos_bench/config/tunable-values/**/*.json",
-                "mlos_bench/mlos_bench/tests/config/tunables/**/*.jsonc",
-                "mlos_bench/mlos_bench/tests/config/tunables/**/*.json"
+                "mlos_bench/mlos_bench/config/tunable-values/**/*.json"
             ],
             "url": "./mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json"
         }
