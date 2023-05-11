@@ -1,6 +1,6 @@
 // Mock optimizer that runs a single benchmark with the specified configuration.
 {
-    "$schema": "../schemas/optimizers/optimizer-schema.json",
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
 
     "class": "mlos_bench.optimizers.OneShotOptimizer",
 
