@@ -52,6 +52,18 @@ def mock_configs() -> List[dict]:
 
 
 @pytest.fixture
+def mock_configs_str(mock_configs) -> List[dict]:
+    """
+    Same as `mock_config` above, but with all values converted to strings.
+    (This can happen when we retrieve the data from storage).
+    """
+    return [
+        {key: str(val) for (key, val) in config.items()}
+        for config in mock_configs
+    ]
+
+
+@pytest.fixture
 def mock_scores() -> List[Optional[float]]:
     """
     Mock benchmark results from earlier experiments.
@@ -109,6 +121,14 @@ def test_update_mock_min(mock_opt: MockOptimizer, mock_configs: List[dict],
     _test_opt_update_min(mock_opt, mock_configs, mock_scores, mock_status)
 
 
+def test_update_mock_min_str(mock_opt: MockOptimizer, mock_configs_str: List[dict],
+                             mock_scores: List[float], mock_status: List[Status]) -> None:
+    """
+    Test the bulk update of the mock optimizer with all-strings data.
+    """
+    _test_opt_update_min(mock_opt, mock_configs_str, mock_scores, mock_status)
+
+
 def test_update_mock_max(mock_opt_max: MockOptimizer, mock_configs: List[dict],
                          mock_scores: List[float], mock_status: List[Status]) -> None:
     """
@@ -147,3 +167,12 @@ def test_update_scikit_et(scikit_et_opt: MlosCoreOptimizer, mock_configs: List[d
     Test the bulk update of the scikit-optimize ET optimizer.
     """
     _test_opt_update_min(scikit_et_opt, mock_configs, mock_scores, mock_status)
+
+
+def test_update_scikit_gp_str(
+        scikit_gp_opt: MlosCoreOptimizer, mock_configs_str: List[dict],
+        mock_scores: List[float], mock_status: List[Status]) -> None:
+    """
+    Test the bulk update of the optimizer with all-string data.
+    """
+    _test_opt_update_min(scikit_gp_opt, mock_configs_str, mock_scores, mock_status)
