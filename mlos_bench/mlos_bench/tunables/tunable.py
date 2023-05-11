@@ -198,8 +198,8 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
         try:
-            if self.is_categorical and value in self._values:
-                coerced_value = value
+            if self.is_categorical and value is None:
+                coerced_value = None
             else:
                 coerced_value = self._DTYPE[self._type](value)
         except Exception:
