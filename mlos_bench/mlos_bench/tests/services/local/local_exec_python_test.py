@@ -8,7 +8,6 @@ Unit tests for LocalExecService to run Python scripts locally.
 
 from typing import Dict
 
-import os
 import json
 
 import pytest

@@ -32,12 +32,12 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
 
-    @abstractmethod
     def acquisition_function(self, configurations: pd.DataFrame,
                              context: Optional[pd.DataFrame] = None) -> Callable:
         """Invokes the acquisition function from this Bayesian optimizer for the given configuration.
+
+        Default implementation throws NotImplementedError.
 
         Parameters
         ----------
@@ -47,4 +47,4 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        raise NotImplementedError()
