@@ -6,7 +6,6 @@
 Tests for Bayesian Optimizers.
 """
 
-from copy import deepcopy
 from typing import List, Optional, Type
 
 import pytest
