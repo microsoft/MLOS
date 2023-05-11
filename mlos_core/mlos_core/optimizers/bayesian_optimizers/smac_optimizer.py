@@ -37,8 +37,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
     run_name : str
         Name of this run. This is used to easily distinguish across different runs.
 
-    output_directory : str
-        The directory where SMAC output will saved.
+    output_directory : Optional[str]
+        The directory where SMAC output will saved. If None, a temporary dir will be used.
 
     n_random_init : Optional[int]
         Number of points evaluated at start to bootstrap the optimizer.
@@ -46,9 +46,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
     n_random_probability: Optional[float]
         Probability of choosing to evaluate a random configuration during optimization.
         Setting this to a higher value favors exploration over exploitation.
-
-    n_workers: int
-        Number of parallel workers to use.
     """
 
     def __init__(  # pylint: disable=too-many-arguments,too-many-locals
@@ -60,7 +57,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         output_directory: Optional[str] = None,
         n_random_init: Optional[int] = 10,
         n_random_probability: Optional[float] = 0.1,
-        n_workers: int = 1,
     ):
         super().__init__(parameter_space, space_adapter)
 
@@ -96,7 +92,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             deterministic=True,
             n_trials=1e4,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
-            n_workers=n_workers,
+            n_workers=1,  # Use a single thread for evaluating trials
         )
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
         config_selector: ConfigSelector = ConfigSelector(scenario, retrain_after=1)
