@@ -1,5 +1,4 @@
 {
-    "$schema": "../../../../../../config/schemas/storage/storage-schema.json",
 
     "class": "mlos_bench.storage.unknown.storage.UnknownStorage",   // <-- unhandled class
 
