@@ -6,7 +6,7 @@
 Contains the wrapper class for Emukit Bayesian optimizers.
 """
 
-from typing import Optional
+from typing import Callable, Optional
 
 import ConfigSpace
 import numpy as np
@@ -94,6 +94,10 @@ class EmukitOptimizer(BaseBayesianOptimizer):
             config = self.gpbo.get_next_points(results=[])
         return self._from_1hot(config)
 
+    def register_pending(self, configurations: pd.DataFrame,
+                         context: Optional[pd.DataFrame] = None) -> None:
+        raise NotImplementedError("Not implemented for EmuKit yet.")
+
     def surrogate_predict(self, configurations: pd.DataFrame,
                           context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         if context is not None:
@@ -108,6 +112,10 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         # make 2ndim array into column vector
         ret: npt.NDArray = mean_predictions.reshape(-1,)
         return ret
+
+    def acquisition_function(self, configurations: pd.DataFrame,
+                             context: Optional[pd.DataFrame] = None) -> Callable:
+        raise NotImplementedError("Not implemented for EmuKit yet.")
 
     def _initialize_optimizer(self) -> None:
         """Bootstrap a new Emukit optimizer on the initial observations."""
