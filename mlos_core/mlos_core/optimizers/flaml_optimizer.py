@@ -51,8 +51,6 @@ class FlamlOptimizer(BaseOptimizer):
                   context: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
-        Doesn't do anything on the RandomOptimizer except storing configurations for logging.
-
         Parameters
         ----------
         configurations : pd.DataFrame
