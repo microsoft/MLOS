@@ -5,7 +5,7 @@
 
 // *** DO *NOT* CHANGE! This config is used for tests! ***
 {
-    "$schema": "../../../config/schemas/cli/cli-schema.json",
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json",
 
     "config_path": [
         // relative to the root of the repo (for now), where this is expected to be executed from
