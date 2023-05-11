@@ -41,16 +41,6 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     """
 
     # Maps tunable types to their corresponding Python types by name.
-    # Note: the lhs are function points, not strings, because they're used for
-    # type coercion in the value.setter function.
-    _TYPE: Dict[str, Callable[[Any], TunableValue]] = {
-        "int": int,
-        "float": float,
-        # Don't string convert None (json null) to "None"
-        "categorical": lambda s: None if s is None else str(s),
-    }
-
-    # Actual storage type
     _DTYPE: Dict[str, Type] = {
         "int": int,
         "float": float,
@@ -208,7 +198,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
         try:
-            coerced_value = self._TYPE[self._type](value)
+            if self.is_categorical and value in self._values:
+                coerced_value = value
+            else:
+                coerced_value = self._DTYPE[self._type](value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
                        self._type, self._name, type(value), value)
