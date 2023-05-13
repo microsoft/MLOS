@@ -93,5 +93,6 @@ class MlosCoreOptimizer(Optimizer):
         if len(df_config) == 0:
             return (None, None)
         params = df_config.iloc[0].to_dict()
-        score = params.pop(self._opt_target) * self._opt_sign
+        _LOG.debug("Best observation: %s", params)
+        score = params.pop("score") * self._opt_sign  # mlos_core always uses the `score` column
         return (score, self._tunables.copy().assign(params))
