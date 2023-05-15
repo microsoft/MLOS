@@ -19,7 +19,7 @@ MKDIR_BUILD := $(shell test -d build || mkdir build)
 
 # Run make in parallel by default.
 MAKEFLAGS += -j$(shell nproc)
-MAKEFLAGS += -Oline
+#MAKEFLAGS += -Oline
 
 .PHONY: all
 all: check test dist dist-test doc licenseheaders
