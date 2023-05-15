@@ -8,7 +8,6 @@ Common tests for config schemas and their validation and test cases.
 
 from typing import Any, Dict, TypedDict
 
-from glob import glob
 import os
 
 import json5
