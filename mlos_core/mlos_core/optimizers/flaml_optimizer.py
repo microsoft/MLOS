@@ -6,7 +6,7 @@
 Contains the FlamlOptimizer class.
 """
 
-from typing import Dict, Optional, Union
+from typing import Dict, NamedTuple, Optional, Union
 from warnings import warn
 
 import ConfigSpace
@@ -15,6 +15,13 @@ import pandas as pd
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.spaces import configspace_to_flaml_space
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+
+
+class EvaluatedSample(NamedTuple):
+    """A named tuple representing a sample that has been evaluated."""
+
+    config: dict
+    score: float
 
 
 class FlamlOptimizer(BaseOptimizer):
@@ -44,7 +51,7 @@ class FlamlOptimizer(BaseOptimizer):
         self.flaml_parameter_space: dict = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.low_cost_partial_config = low_cost_partial_config
 
-        self.evaluated_configs: Dict[int, dict] = {}
+        self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}
         self._suggested_config: Optional[dict]
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series,
@@ -65,14 +72,11 @@ class FlamlOptimizer(BaseOptimizer):
         if context is not None:
             raise NotImplementedError()
         for (_, config), score in zip(configurations.iterrows(), scores):
-            config_hash: int = hash(ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict()))
-            if config_hash in self.evaluated_configs:
+            cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())  # noqa: E501
+            if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
 
-            self.evaluated_configs[config_hash] = {
-                'config': config.to_dict(),
-                'score': score,
-            }
+            self.evaluated_samples[cs_config] = EvaluatedSample(config=config.to_dict(), score=score)
 
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
         """Suggests a new configuration.
@@ -115,10 +119,9 @@ class FlamlOptimizer(BaseOptimizer):
         result: Union[dict, None]
             Dictionary with a single key, `score`, if config already evaluated; `None` otherwise.
         """
-        config_hash: int = hash(ConfigSpace.Configuration(self.optimizer_parameter_space, values=config))
-        if config_hash in self.evaluated_configs:
-            score = self.evaluated_configs[config_hash]['score']
-            return {'score': score}
+        cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(self.optimizer_parameter_space, values=config)
+        if cs_config in self.evaluated_samples:
+            return {'score': self.evaluated_samples[cs_config].score}
 
         self._suggested_config = config
         return None  # Returning None stops the process
@@ -145,13 +148,13 @@ class FlamlOptimizer(BaseOptimizer):
         # Parse evaluated configs to format used by FLAML
         points_to_evaluate: list = []
         evaluated_rewards: list = []
-        if len(self.evaluated_configs) > 0:
-            evaluated_configs_list: list = [(d['config'], d['score']) for d in self.evaluated_configs.values()]
-            points_to_evaluate, evaluated_rewards = list(zip(*evaluated_configs_list))
+        if len(self.evaluated_samples) > 0:
+            evaluated_samples_list: list = [(s.config, s.score) for s in self.evaluated_samples.values()]
+            points_to_evaluate, evaluated_rewards = list(zip(*evaluated_samples_list))
 
         # Warm start FLAML optimizer
         self._suggested_config = None
-        _ = tune.run(
+        tune.run(
             self._target_function,
             config=self.flaml_parameter_space,
             mode='min',
