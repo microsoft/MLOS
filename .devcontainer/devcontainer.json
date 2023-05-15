@@ -8,7 +8,9 @@
     "service": "app",
     "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
     // Prep some host side things for the container build
-    "initializeCommand": [".devcontainer/scripts/prep-container-build"],
+    "initializeCommand": [
+        ".devcontainer/scripts/prep-container-build"
+    ],
     // Make sure the container user can read/write to the package caches.
     "onCreateCommand": "sudo -n mkdir -p /opt/conda/pkgs/cache /var/cache/pip && sudo -n chown -R vscode /opt/conda/pkgs/cache /var/cache/pip",
     // Make sure the conda env is up to date with the source tree expectations.
