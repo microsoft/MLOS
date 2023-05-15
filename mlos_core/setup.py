@@ -18,14 +18,14 @@ try:
     from setuptools_scm import get_version
     version = get_version(root='..', relative_to=__file__)
     if version is not None:
-        _VERSION = version
+        _VERSION = version  # noqa: F811
 except ImportError:
     warning("setuptools_scm not found, using version from _version.py")
 except LookupError as e:
     warning(f"setuptools_scm failed to find git version, using version from _version.py: {e}")
 
 
-extra_requires: Dict[str, List[str]] = {
+extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
     'emukit': ['emukit'],
     'skopt': ['scikit-optimize<=0.9.0'],  # FIXME: temporarily work around some version mismatch issues (PR 850)
 }
@@ -52,10 +52,10 @@ setup(
         '': ['py.typed', '**/*.pyi'],
     },
     install_requires=[
-        'scikit-learn<1.2', # FIXME: temporarily work around some version mismatch issues (PR 850)
-        'joblib>=1.1.1',    # CVE-2022-21797: scikit-learn dependency, addressed in 1.2.0dev0, which isn't currently released
+        'scikit-learn<1.2',     # FIXME: temporarily work around some version mismatch issues (PR 850)
+        'joblib>=1.1.1',        # CVE-2022-21797: scikit-learn dependency, addressed in 1.2.0dev0, which isn't currently released
         'scipy>=1.3.2',
-        'numpy<1.24',       # FIXME: temporarily work around some version mismatch issues (PR 850)
+        'numpy<1.24',           # FIXME: temporarily work around some version mismatch issues (PR 850)
         'pandas>=1.0.3',
         'ConfigSpace>=0.6.1',
     ],
