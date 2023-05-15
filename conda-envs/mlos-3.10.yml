@@ -9,6 +9,7 @@ dependencies:
   - pycodestyle
   - autopep8
   - pydocstyle
+  - flake8
   - setuptools
   - setuptools-scm
   - jupyter
