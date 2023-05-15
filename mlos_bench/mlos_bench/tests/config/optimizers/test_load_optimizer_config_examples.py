@@ -5,11 +5,8 @@
 """
 Tests for loading optimizer config examples.
 """
-
-from typing import List
-
 import logging
-import os
+from typing import List
 
 import pytest
 

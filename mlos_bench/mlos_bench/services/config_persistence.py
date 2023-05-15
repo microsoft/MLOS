@@ -12,12 +12,12 @@ import os
 import sys
 
 import json    # For logging only
-from jsonschema import ValidationError, SchemaError
 import logging
 
 from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
 
 import json5    # To read configs with comments and other JSON5 syntax features
+from jsonschema import ValidationError, SchemaError
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
@@ -136,10 +136,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                            json_file_name, schema_type.name, schema_type.value)
                 raise ValueError(f"Failed to validate config {json_file_name} against " +
                                  "schema type {schema_type.name} at {schema_type.value}") from ex
-        if isinstance(config, dict) and config.get("$schema"):
-            # Remove $schema attributes from the config after we've validated
-            # them to avoid passing them on to other objects.
-            del config["$schema"]
+            if isinstance(config, dict) and config.get("$schema"):
+                # Remove $schema attributes from the config after we've validated
+                # them to avoid passing them on to other objects
+                # (e.g. SqlAlchemy based storage initializers).
+                # NOTE: we only do this for internal schemas.
+                # Other configs that get loaded may need the schema field
+                # (e.g. Azure ARM templates).
+                del config["$schema"]
         return config   # type: ignore[no-any-return]
 
     def prepare_class_load(self, config: Dict[str, Any],

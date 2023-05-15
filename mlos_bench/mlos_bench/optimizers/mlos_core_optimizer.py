@@ -52,13 +52,18 @@ class MlosCoreOptimizer(Optimizer):
                       status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
-        tunables_names = list(self._tunables.get_param_values().keys())
+        # By default, hyperparameters in ConfigurationSpace are sorted by name:
+        tunables_names = sorted(self._tunables.get_param_values().keys())
         df_configs = pd.DataFrame(configs)[tunables_names]
         df_scores = pd.Series(scores, dtype=float) * self._opt_sign
         if status is not None:
+            # TODO: mlos_core currently does not support registration of failed trials:
             df_status_ok = pd.Series(status) == Status.SUCCEEDED
             df_configs = df_configs[df_status_ok]
             df_scores = df_scores[df_status_ok]
+        # External data can have incorrect types (e.g., all strings).
+        for (tunable, _group) in self._tunables:
+            df_configs[tunable.name] = df_configs[tunable.name].astype(tunable.dtype)
         self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
