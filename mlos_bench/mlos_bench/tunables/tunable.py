@@ -9,7 +9,7 @@ import copy
 import collections
 import logging
 
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Type, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
@@ -41,13 +41,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
     """
 
     # Maps tunable types to their corresponding Python types by name.
-    # Note: the lhs are function points, not strings, because they're used for
-    # type coercion in the value.setter function.
-    _TYPE: Dict[str, Callable[[Any], TunableValue]] = {
+    _DTYPE: Dict[str, Type] = {
         "int": int,
         "float": float,
-        # Don't string convert None (json null) to "None"
-        "categorical": lambda s: None if s is None else str(s),
+        "categorical": str,
     }
 
     def __init__(self, name: str, config: TunableDict):
@@ -201,7 +198,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         # (e.g., scikit-optimize) and for data restored from certain storage
         # systems (where values can be strings).
         try:
-            coerced_value = self._TYPE[self._type](value)
+            if self.is_categorical and value is None:
+                coerced_value = None
+            else:
+                coerced_value = self._DTYPE[self._type](value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
                        self._type, self._name, type(value), value)
@@ -308,6 +308,20 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             Data type of the tunable - one of {'int', 'float', 'categorical'}.
         """
         return self._type
+
+    @property
+    def dtype(self) -> Type:
+        """
+        Get the actual Python data type of the tunable.
+
+        This is useful for bulk conversions of the input data.
+
+        Returns
+        -------
+        dtype : type
+            Data type of the tunable - one of {int, float, str}.
+        """
+        return self._DTYPE[self._type]
 
     @property
     def is_categorical(self) -> bool:
