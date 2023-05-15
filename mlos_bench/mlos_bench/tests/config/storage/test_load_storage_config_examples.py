@@ -5,10 +5,8 @@
 """
 Tests for loading storage config examples.
 """
-
-from typing import List
-
 import logging
+from typing import List
 
 import pytest
 
