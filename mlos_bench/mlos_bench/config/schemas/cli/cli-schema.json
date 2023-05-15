@@ -37,7 +37,7 @@
         },
 
         "config_path": {
-            "description": "Search path(s) for resolving additional config file references.",
+            "description": "Search path(s) for resolving additional config file references.  Note: the path to internal examples are included by default.",
             "type": "array",
             "items": {
                 "type": "string"
@@ -71,12 +71,12 @@
 
         "experimentId": {
             "description": "Name of the experiment.",
-            "$comment": "TODO: Renamed this to conform to snake case.",
+            "$comment": "TODO: Rename this to conform to snake case.",
             "type": "string"
         },
         "trialId": {
             "description": "Trial id to use for the experiment.",
-            "$comment": "TODO: Renamed this to conform to snake case.",
+            "$comment": "TODO: Rename this to conform to snake case.",
             "type": "integer"
         },
 

@@ -1,0 +1,4 @@
+{
+    "log_file": "/tmp/mlos_bench.log",
+    "log_level": 20 // <-- we use a string enum to make it easier now
+}
