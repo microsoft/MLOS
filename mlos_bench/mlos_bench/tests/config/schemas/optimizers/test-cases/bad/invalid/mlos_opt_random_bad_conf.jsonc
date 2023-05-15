@@ -1,0 +1,10 @@
+{
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "minimize": "score",
+        "space_adapter_type": null,
+        "optimizer_type": "RANDOM",
+        "random_seed": 0
+    }
+}

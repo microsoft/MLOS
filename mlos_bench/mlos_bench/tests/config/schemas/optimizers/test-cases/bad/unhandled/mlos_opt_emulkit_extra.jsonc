@@ -1,0 +1,10 @@
+{
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "minimize": "score",
+        "optimizer_type": "EMUKIT",
+        // base_estimator is only valid for optimizer_type == SKOPT
+        "base_estimator": "gp"
+    }
+}

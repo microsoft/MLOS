@@ -14,7 +14,7 @@
     "storage": "storage/sqlite.jsonc",
 
     "tunable_values": [
-        "tunables/tunable-values-example.jsonc"
+        "tunable-values/tunable-values-example.jsonc"
     ],
 
     "globals": [
