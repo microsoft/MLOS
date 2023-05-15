@@ -97,23 +97,23 @@ def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> 
 
     Returns
     -------
-    dict
+    flaml_space : dict
+        A dictionary of flaml.tune.sample.Domain objects keyed by parameter name.
     """
     # pylint: disable=import-outside-toplevel
     import flaml.tune
     import flaml.tune.sample
 
     def _one_parameter_convert(parameter: ConfigSpace.hyperparameters.Hyperparameter) -> "flaml.tune.sample.Domain":
-        if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
-            if parameter.log:
-                return flaml.tune.loguniform(parameter.lower, parameter.upper)
-            else:
-                return flaml.tune.uniform(parameter.lower, parameter.upper)
-        elif isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
-            if parameter.log:
-                return flaml.tune.lograndint(parameter.lower, parameter.upper)
-            else:
-                return flaml.tune.randint(parameter.lower, parameter.upper)
+        _FLAML_NUMERIC_PARAMS = {  # pylint: disable=invalid-name
+            (int, False): flaml.tune.randint,
+            (int, True): flaml.tune.lograndint,
+            (float, False): flaml.tune.uniform,
+            (float, True): flaml.tune.loguniform,
+        }
+
+        if isinstance(parameter, (ConfigSpace.UniformFloatHyperparameter, ConfigSpace.UniformIntegerHyperparameter)):
+            return _FLAML_NUMERIC_PARAMS[(type(parameter.default_value), parameter.log)](parameter.lower, parameter.upper)
         elif isinstance(parameter, ConfigSpace.CategoricalHyperparameter):
             if len(np.unique(parameter.probabilities)) > 1:
                 raise ValueError("FLAML doesn't support categorical parameters with non-uniform probabilities.")
