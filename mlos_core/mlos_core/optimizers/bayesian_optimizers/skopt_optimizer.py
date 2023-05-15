@@ -13,7 +13,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
+from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
 
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces import configspace_to_skopt_space
@@ -110,22 +110,22 @@ class SkoptOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
         if context is not None:
-            raise NotImplementedError()
+            raise NotImplementedError("Scikit-optimize does not support context yet.")
         return pd.DataFrame([self.base_optimizer.ask()], columns=self.optimizer_parameter_space.get_hyperparameter_names())
 
     def register_pending(self, configurations: pd.DataFrame,
                          context: Optional[pd.DataFrame] = None) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError("Not supported in scikit-optimize.")
 
     def surrogate_predict(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         if context is not None:
-            raise NotImplementedError()
+            raise NotImplementedError("Scikit-optimize does not support context yet.")
         if self.space_adapter is not None:
-            raise NotImplementedError()
+            raise NotImplementedError("Scikit-optimize does not support space adapters yet.")
         ret: npt.NDArray = self.base_optimizer.models[-1].predict(self._transform(configurations))
         return ret
 
     def acquisition_function(self, configurations: pd.DataFrame,
                              context: Optional[pd.DataFrame] = None) -> Callable:
         # This seems actually non-trivial to get out of skopt, so maybe we actually shouldn't implement this.
-        raise NotImplementedError()
+        raise NotImplementedError("Not supported in scikit-optimize.")
