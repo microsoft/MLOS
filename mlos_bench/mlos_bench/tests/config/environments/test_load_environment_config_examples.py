@@ -12,7 +12,6 @@ import pytest
 
 from mlos_bench.tests.config import locate_config_examples
 
-from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
