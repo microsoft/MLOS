@@ -46,7 +46,7 @@ assert len(TEST_CASES_BY_SUBTYPE.keys()) > 2
 # Dynamically enumerate some of the cases we want to make sure we cover.
 
 expected_mlos_bench_optimizer_class_names = [subclass.__module__ + "." + subclass.__name__
-                                         for subclass in get_all_concrete_subclasses(Optimizer)]    # type: ignore[type-abstract]
+                                             for subclass in get_all_concrete_subclasses(Optimizer)]  # type: ignore[type-abstract]
 assert expected_mlos_bench_optimizer_class_names
 
 # Also make sure that we check for configs where the optimizer_type or space_adapter_type are left unspecified (None).
