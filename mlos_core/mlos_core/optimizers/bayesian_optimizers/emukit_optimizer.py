@@ -13,7 +13,7 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
+from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
 
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces import configspace_to_emukit_space
@@ -96,14 +96,14 @@ class EmukitOptimizer(BaseBayesianOptimizer):
 
     def register_pending(self, configurations: pd.DataFrame,
                          context: Optional[pd.DataFrame] = None) -> None:
-        raise NotImplementedError()
+        raise NotImplementedError("Not implemented for EmuKit yet.")
 
     def surrogate_predict(self, configurations: pd.DataFrame,
                           context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         if context is not None:
-            raise NotImplementedError()
+            raise NotImplementedError("EmuKit does not support context yet.")
         if self.space_adapter is not None:
-            raise NotImplementedError()
+            raise NotImplementedError("EmuKit does not support space adapters yet.")
         if self._space_adapter:
             configurations = self._space_adapter.inverse_transform(configurations)
         one_hot = self._to_1hot(configurations)
@@ -115,7 +115,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
 
     def acquisition_function(self, configurations: pd.DataFrame,
                              context: Optional[pd.DataFrame] = None) -> Callable:
-        raise NotImplementedError()
+        raise NotImplementedError("Not implemented for EmuKit yet.")
 
     def _initialize_optimizer(self) -> None:
         """Bootstrap a new Emukit optimizer on the initial observations."""
