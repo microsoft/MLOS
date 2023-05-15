@@ -92,13 +92,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
             except TypeError:
                 self.temp_output_directory = TemporaryDirectory()
             output_directory = self.temp_output_directory.name
-        output_directory = Path(output_directory)
 
         # Instantiate Scenario
         scenario: Scenario = Scenario(
             self.optimizer_parameter_space,
             name=run_name,
-            output_directory=output_directory,
+            output_directory=Path(output_directory),
             deterministic=True,
             n_trials=max_trials,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
@@ -126,15 +125,23 @@ class SmacOptimizer(BaseBayesianOptimizer):
             overwrite=True,
         )
 
-    def __del__(self):
+    def __del__(self) -> None:
         if self.temp_output_directory is not None:
             self.temp_output_directory.cleanup()
 
     @staticmethod
-    def _dummy_target_func(seed):
+    def _dummy_target_func(config: ConfigSpace.Configuration, seed: int = 0) -> None:
         """Dummy target function for SMAC optimizer.
 
         Since we only use the ask-and-tell interface, this is never called.
+
+        Parameters
+        ----------
+        config : ConfigSpace.Configuration
+            Configuration to evaluate.
+
+        seed : int
+            Random seed to use for the target function. Not actually used.
         """
         # NOTE: Providing a target function when using the ask-and-tell interface is an imperfection of the API
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
@@ -188,7 +195,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
             raise NotImplementedError()
 
         trial: TrialInfo = self.base_optimizer.ask()
-        self.trial_info_map[trial.config] = trial
+        # Type ignore because this is WIP from ConfigSpace side
+        # Check here: https://github.com/automl/ConfigSpace/issues/293
+        self.trial_info_map[trial.config] = trial  # type: ignore
         return pd.DataFrame([trial.config], columns=self.optimizer_parameter_space.get_hyperparameter_names())
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
@@ -202,11 +211,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self._space_adapter:
             raise NotImplementedError()
 
-        if len(self._observations) < self.base_optimizer._initial_design._n_configs:  # pylint: disable=protected-access
+        # pylint: disable=protected-access
+        if len(self._observations) < self.base_optimizer._initial_design._n_configs:
             raise RuntimeError('Surrogate model can make predictions *only* after all initial points have been evaluated')
+        if self.base_optimizer._config_selector._model is None:
+            raise RuntimeError('Surrogate model is not yet trained')
 
         configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations))
-        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)  # pylint: disable=protected-access
+        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)
         return mean_predictions.reshape(-1,)
 
     def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
@@ -215,8 +227,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self._space_adapter:
             raise NotImplementedError()
 
+        # pylint: disable=protected-access
+        if self.base_optimizer._config_selector._acquisition_function is None:
+            raise RuntimeError('Acquisition function is not yet initialized')
+
         configs: list = self._to_configspace_configs(configurations)
-        return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)  # pylint: disable=protected-access
+        return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
 
     def _to_configspace_configs(self, configurations: pd.DataFrame) -> list:
         """Convert a dataframe of configurations to a list of ConfigSpace configurations.
