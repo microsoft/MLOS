@@ -165,4 +165,4 @@ class FlamlOptimizer(BaseOptimizer):
         if self._suggested_config is None:
             raise RuntimeError('FLAML did not produce a suggestion')
 
-        return self._suggested_config
+        return self._suggested_config  # type: ignore[unreachable]
