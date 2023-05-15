@@ -86,7 +86,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Create temporary directory for SMAC output (if none provided)
         self.temp_output_directory: Optional[TemporaryDirectory] = None
         if output_directory is None:
-            self.temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)  # pylint: disable=consider-using-with
+            # pylint: disable=consider-using-with
+            try:
+                self.temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)  # Argument added in Python 3.10
+            except TypeError:
+                self.temp_output_directory = TemporaryDirectory()
             output_directory = self.temp_output_directory.name
         output_directory = Path(output_directory)
 
