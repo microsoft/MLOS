@@ -5,11 +5,8 @@
 """
 Tests for loading service config examples.
 """
-
-from typing import List
-
 import logging
-import os
+from typing import List
 
 import pytest
 

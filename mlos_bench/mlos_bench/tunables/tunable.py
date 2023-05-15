@@ -9,7 +9,7 @@ import copy
 import collections
 import logging
 
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import Dict, List, Optional, Sequence, Tuple, Type, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 

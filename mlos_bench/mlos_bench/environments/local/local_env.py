@@ -6,7 +6,6 @@
 Scheduler-side benchmark environment to run scripts locally.
 """
 
-import os
 import json
 import logging
 
@@ -164,8 +163,9 @@ class LocalEnv(Environment):
                 return (Status.FAILED, None)
 
             assert self._read_results_file is not None
-            data = pandas.read_csv(self._config_loader_service.resolve_path(
-                self._read_results_file, extra_paths=[temp_dir]))
+            data: pandas.DataFrame = pandas.read_csv(
+                self._config_loader_service.resolve_path(
+                    self._read_results_file, extra_paths=[temp_dir]))
 
             _LOG.debug("Read data:\n%s", data)
             if len(data) != 1:
