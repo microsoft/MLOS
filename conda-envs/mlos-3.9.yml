@@ -22,12 +22,14 @@ dependencies:
   #- gcc_linux-64
   - pip:
     - bump2version
+    - check-jsonschema
     - licenseheaders
     - mypy
-    - types-setuptools
-    - types-pygments
-    - types-colorama
     - pandas-stubs
+    - types-colorama
+    - types-jsonschema
+    - types-pygments
     - types-requests
+    - types-setuptools
     - "--editable ../mlos_core[full-tests]"
     - "--editable ../mlos_bench[full-tests]"

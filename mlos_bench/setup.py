@@ -76,6 +76,7 @@ setup(
         'mlos-core==' + _VERSION,
         'requests',
         'json5',
+        'jsonschema',
         'importlib_resources;python_version<"3.10"',
     ] + extra_requires['storage-sql-sqlite'],   # NOTE: For now sqlite is a fallback storage backend, so we always install it.
     extras_require=extra_requires,
