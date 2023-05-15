@@ -126,6 +126,6 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         return ret
 
     def acquisition_function(self, configurations: pd.DataFrame,
-                             context: Optional[pd.DataFrame] = None) -> Callable:
+                             context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         # This seems actually non-trivial to get out of skopt, so maybe we actually shouldn't implement this.
         raise NotImplementedError("Not supported in scikit-optimize.")

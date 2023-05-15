@@ -8,7 +8,7 @@ Contains the wrapper classes for base Bayesian optimizers.
 
 from abc import ABCMeta, abstractmethod
 
-from typing import Callable, Optional
+from typing import Optional
 
 import pandas as pd
 import numpy.typing as npt
@@ -36,7 +36,7 @@ class BaseBayesianOptimizer(BaseOptimizer, metaclass=ABCMeta):
 
     @abstractmethod
     def acquisition_function(self, configurations: pd.DataFrame,
-                             context: Optional[pd.DataFrame] = None) -> Callable:
+                             context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         """Invokes the acquisition function from this Bayesian optimizer for the given configuration.
 
         Parameters
