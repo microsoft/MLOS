@@ -1,5 +1,7 @@
 // Mock optimizer that runs a single benchmark with the specified configuration.
 {
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
+
     "class": "mlos_bench.optimizers.OneShotOptimizer",
 
     // Define the set of tunable params that the optimizer can work over.
@@ -18,14 +20,14 @@
         "include_tunable_values": [
             // Note: tunable values need not specify a value for all params.
             // In which case, unspecified values are governed by the "use_default" config parameter.
-            "tunables/tunable-values-example.jsonc"
+            "tunable-values/tunable-values-example.jsonc"
         ],
         // Additional values of the tunable parameters.
-        "tunables_values": {},
+        "tunable_values": {},
 
         // Whether to assign the "default" tunable parameter as a value or a
         // random value for those parameters not specified.
-        //"use_defaults": true,
+        "use_defaults": true,
 
         // Other optimizer configuration parameters.
         "minimize": "score"

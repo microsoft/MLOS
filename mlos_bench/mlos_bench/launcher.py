@@ -14,7 +14,9 @@ import logging
 import argparse
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import BaseTypeVar
+
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.base_environment import Environment
 
@@ -49,7 +51,7 @@ class Launcher:
         # Bootstrap config loader: command line takes priority.
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
         if args.config:
-            config = self._config_loader.load_config(args.config)
+            config = self._config_loader.load_config(args.config, schema_type=None)  # TODO: , schema_type=ConfigSchema.CLI)
             assert isinstance(config, Dict)
             config_path = config.get("config_path", [])
             if config_path and not args.config_path:
@@ -189,7 +191,7 @@ class Launcher:
         from the specified config files (if any) and command line arguments.
         """
         for config_file in (args_globals or []):
-            conf = self._config_loader.load_config(config_file)
+            conf = self._config_loader.load_config(config_file, schema_type=None)   # FIXME: provide a schema type for globals
             assert isinstance(conf, dict)
             global_config.update(conf)
         global_config.update(Launcher._try_parse_extra_args(args_rest))
@@ -199,12 +201,12 @@ class Launcher:
 
     def _load_tunable_values(self, args_tunables: Optional[str]) -> TunableGroups:
         """
-        Load key/value pairs of the tunable parameters from given JSON files, if any.
+        Load key/value pairs of the tunable values from given JSON files, if any.
         """
         tunables = self.environment.tunable_params
         if args_tunables is not None:
             for data_file in args_tunables:
-                values = self._config_loader.load_config(data_file)
+                values = self._config_loader.load_config(data_file, ConfigSchema.TUNABLE_VALUES)
                 assert isinstance(values, Dict)
                 tunables.assign(values)
         return tunables
@@ -218,7 +220,7 @@ class Launcher:
         if args_optimizer is None:
             return OneShotOptimizer(
                 self.tunables, self._parent_service, self.global_config)
-        optimizer = self._load(Optimizer, args_optimizer)   # type: ignore[type-abstract]
+        optimizer = self._load(Optimizer, args_optimizer, ConfigSchema.OPTIMIZER)   # type: ignore[type-abstract]
         return optimizer
 
     def _load_storage(self, args_storage: Optional[str]) -> Storage:
@@ -232,10 +234,11 @@ class Launcher:
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
-        storage = self._load(Storage, args_storage)     # type: ignore[type-abstract]
+        storage = self._load(Storage, args_storage, schema_type=None)   # type: ignore[type-abstract]
+        # TODO: , ConfigSchema.STORAGE)
         return storage
 
-    def _load(self, cls: Type[BaseTypeVar], json_file_name: str) -> BaseTypeVar:
+    def _load(self, cls: Type[BaseTypeVar], json_file_name: str, schema_type: Optional[ConfigSchema]) -> BaseTypeVar:
         """
         Create a new instance of class `cls` from JSON configuration.
 
@@ -243,7 +246,7 @@ class Launcher:
         Use "# type: ignore[type-abstract]" to suppress the warning.
         See Also: https://github.com/python/mypy/issues/4717
         """
-        class_config = self._config_loader.load_config(json_file_name)
+        class_config = self._config_loader.load_config(json_file_name, schema_type)
         assert isinstance(class_config, Dict)
         ret = self._config_loader.build_generic(
             base_cls=cls,
