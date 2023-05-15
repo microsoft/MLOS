@@ -93,7 +93,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 self.temp_output_directory = TemporaryDirectory()
             output_directory = self.temp_output_directory.name
 
-        # Instantiate Scenario
         scenario: Scenario = Scenario(
             self.optimizer_parameter_space,
             name=run_name,
@@ -106,7 +105,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
         config_selector: ConfigSelector = ConfigSelector(scenario, retrain_after=1)
 
-        # Customize SMAC's randomized behavior
         initial_design: Optional[LatinHypercubeInitialDesign] = None
         if n_random_init is not None:
             initial_design = LatinHypercubeInitialDesign(scenario=scenario, n_configs=n_random_init)
@@ -114,7 +112,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if n_random_probability is not None:
             random_design = ProbabilityRandomDesign(probability=n_random_probability)
 
-        # Create SMAC optimizer
         self.base_optimizer = Optimizer_Smac(
             scenario,
             SmacOptimizer._dummy_target_func,
