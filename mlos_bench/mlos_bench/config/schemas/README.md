@@ -8,7 +8,7 @@ This directory contains [json schemas](https://json-schema.org/) for describing 
 
 ### Internally
 
-If the config file is in the same directory as the schema, it can reference the schema by filename:
+If the config file is in the same directory as the schema (e.g. when editing within this repository), it can reference the schema by filename:
 
 ```jsonc
 {
@@ -16,6 +16,10 @@ If the config file is in the same directory as the schema, it can reference the 
     ...
 }
 ```
+
+> Note: we usually avoid this approach since it makes it harder to move the schema files around and just doesn't look very nice.
+>
+> Instead, we try to use on `.vscode/settings.json` to map local repo file globs to their schema files and simply omit the `$schema` field from the config files.
 
 ### Externally
 
@@ -27,6 +31,14 @@ If the config file is in the same directory as the schema, it can reference the 
 ```
 
 > Note: the above URL is not guaranteed to be stable. It is often recommended to use a specific commit hash or tag in the URL rather than `main` if you depend on that.
+
+<!-- intentionally blank line to avoid markdown lint complaints -->
+
+> Note: when doing schema development within the `MLOS` repo, this approach may cause false errors to be reported if the remote schema file is different than the local one (and hence config files don't validate quite right).
+>
+> There is a [deficiency](https://github.com/microsoft/vscode/issues/2809#issuecomment-1544387883) in the `json.schemas` handling in `.vscode/settings.json` that currently prevents remote URLs from being mapping to local files.
+>
+> A simple workaround for now is to comment out the `$schema` field in the config file while editing, and then uncomment it when you're ready to commit.
 
 ## Validation
 

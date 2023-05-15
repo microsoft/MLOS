@@ -15,6 +15,14 @@
     "autoDocstring.docstringFormat": "numpy",
     "json.validate.enable": true,
     "json.schemas": [
+        // Note, due to a deficiency in the "url" -> (local) "schema" mapping,
+        // we have to rely on file matching only for local schema imputation on
+        // a file when it doesn't explicitly specify it either by local path
+        // (which we generally avoid) or URL.
+        // See Also:
+        // - https://github.com/microsoft/vscode/issues/2809#issuecomment-1544387883
+        // - mlos_bench/config/schemas/README.md
+
         // TODO: Add more rules for other mlos_bench config schemas.
         {
             "fileMatch": [
