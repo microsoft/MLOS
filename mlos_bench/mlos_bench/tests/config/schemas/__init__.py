@@ -77,8 +77,9 @@ def get_schema_test_cases(test_cases_root: str) -> Dict[str, SchemaTestCaseInfo]
     """
     test_cases: Dict[str, SchemaTestCaseInfo] = {}
     check_schema_dir_layout(test_cases_root)
-    for (test_case_type, schema_test_type) in _SCHEMA_TEST_TYPES.items():
-        for test_case_subtype in schema_test_type.test_case_subtypes:
+    # Note: we sort the test cases so that we can deterministically test them in parallel.
+    for (test_case_type, schema_test_type) in sorted(_SCHEMA_TEST_TYPES.items()):
+        for test_case_subtype in sorted(schema_test_type.test_case_subtypes):
             for test_case in locate_config_examples(os.path.join(test_cases_root, test_case_type, test_case_subtype)):
                 with open(test_case, mode='r', encoding='utf-8') as test_case_fh:
                     try:
