@@ -93,7 +93,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
     pip install dist/mlos_bench-0.1.0-py3-none-any.whl
     ```
 
-    > Note exact versions may differ due to automatic versioning.
+    > Note: exact versions may differ due to automatic versioning.
 
 ## See Also
 

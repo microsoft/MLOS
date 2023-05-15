@@ -1,0 +1,9 @@
+{
+    "class": "mlos_bench.optimizers.MockOptimizer",
+
+    "config": {
+        // Can't specify both min and max - should throw an error.
+        "minimize": "foo",
+        "maximize": "bar"
+    }
+}
