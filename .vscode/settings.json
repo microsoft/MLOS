@@ -10,12 +10,55 @@
     "python.linting.pylintEnabled": true,
     "python.linting.pycodestyleEnabled": true,
     "python.linting.pydocstyleEnabled": true,
-    "python.linting.mypyEnabled": false,            // use the dmypy daemon extension instead - it's faster
+    "python.linting.flake8Enabled": true,
+    "python.linting.mypyEnabled": false, // use the dmypy daemon extension instead - it's faster
     // "mypy.runUsingActiveInterpreter": true,      // in the devcontainer we override this to use an explicit path
     "autoDocstring.docstringFormat": "numpy",
+    "json.validate.enable": true,
+    "json.schemas": [
+        // Note, due to a deficiency in the "url" -> (local) "schema" mapping,
+        // we have to rely on file matching only for local schema imputation on
+        // a file when it doesn't explicitly specify it either by local path
+        // (which we generally avoid) or URL.
+        // See Also:
+        // - https://github.com/microsoft/vscode/issues/2809#issuecomment-1544387883
+        // - mlos_bench/config/schemas/README.md
+
+        // TODO: Add more rules for other mlos_bench config schemas.
+        {
+            "fileMatch": [
+                "mlos_bench/mlos_bench/tests/config/schemas/optimizers/test-cases/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/schemas/optimizers/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/config/optimizers/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/optimizers/**/*.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json"
+        },
+        {
+            "fileMatch": [
+                "mlos_bench/mlos_bench/tests/config/schemas/tunable-values/test-cases/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/schemas/tunable-values/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/tests/config/tunable-values/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/tunable-values/**/*.json",
+                "mlos_bench/mlos_bench/config/tunable-values/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/tunable-values/**/*.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json"
+        }
+
+    ],
     "restructuredtext.linter.doc8.extraArgs": [
         "--ignore D001"
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
-    "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/"
+    "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "modifications",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "python.formatting.provider": "none",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "modifications"
+    }
 }

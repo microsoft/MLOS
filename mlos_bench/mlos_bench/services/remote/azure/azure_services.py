@@ -145,7 +145,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         self._poll_timeout = float(config.get("pollTimeout", AzureVMService._POLL_TIMEOUT))
         self._request_timeout = float(config.get("requestTimeout", AzureVMService._REQUEST_TIMEOUT))
 
-        self._deploy_template = self.config_loader_service.load_config(config['deployTemplatePath'])
+        # TODO: Provide external schema validation?
+        self._deploy_template = self.config_loader_service.load_config(config['deployTemplatePath'], schema_type=None)
 
         self._url_deploy = AzureVMService._URL_DEPLOY.format(
             subscription=config["subscription"],
