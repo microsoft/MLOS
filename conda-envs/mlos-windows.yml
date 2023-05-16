@@ -22,6 +22,8 @@ dependencies:
   - vs2019_win-64
   - vswhere
   - conda-forge::GPy
+  # Install an SMAC requirement pre-compiled from conda-forge.
+  - conda-forge::pyrfr
   - pip:
     - bump2version
     - licenseheaders
