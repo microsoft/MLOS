@@ -1,30 +1,33 @@
 {
     "recommendations": [
-        "EditorConfig.EditorConfig",
-        "streetsidesoftware.code-spell-checker",
-        "ms-python.vscode-pylance",
-        "ms-python.python",
-        "ms-python.pylint",
-        "matangover.mypy",
+        "davidanson.vscode-markdownlint",
+        "donjayamanne.githistory",
         "donjayamanne.python-environment-manager",
-        "njpwerner.autodocstring",
-        "lextudio.restructuredtext",
-        "trond-snekvik.simple-rst",
-        "DavidAnson.vscode-markdownlint", // Linter for markdown files
-        "huntertran.auto-markdown-toc", // Auto-generated Markdown Table of Contents
-        "github.vscode-github-actions", // GitHub Actions integration
-        "ms-azuretools.vscode-docker",
-        "waderyan.gitblame", // Enhances git blame experience
-        "donjayamanne.githistory", // Enhanced git history experience
         "eamodio.gitlens",
-        "ms-vsliveshare.vsliveshare", // Allows easy code share
-        "Gruntfuggly.todo-tree", // Highlights TODO comments in code
-        "github.copilot", // Copilot integration
-        "IBM.output-colorizer", // Colorize your output/test logs
-        "hashicorp.terraform", // Terraform syntax highlighting
-        "redhat.vscode-yaml", // Kubernetes manifest syntax highlighting
-        "stkb.rewrap", // "Alt + Q" -> rewrap comments after n characters on one line
-        "tyriar.sort-lines", // "Ctrl + Shift + P -> Sort lines" -> sort lines alphabetically
-        "esbenp.prettier-vscode" // A pretty good formatter for many languages
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "github.copilot",
+        "github.vscode-github-actions",
+        "github.vscode-pull-request-github",
+        "gruntfuggly.todo-tree",
+        "hashicorp.terraform",
+        "huntertran.auto-markdown-toc",
+        "ibm.output-colorizer",
+        "lextudio.restructuredtext",
+        "matangover.mypy",
+        "ms-azuretools.vscode-docker",
+        "ms-python.autopep8",
+        "ms-python.flake8",
+        "ms-python.pylint",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vsliveshare.vsliveshare",
+        "njpwerner.autodocstring",
+        "redhat.vscode-yaml",
+        "stkb.rewrap",
+        "streetsidesoftware.code-spell-checker",
+        "trond-snekvik.simple-rst",
+        "tyriar.sort-lines",
+        "waderyan.gitblame"
     ]
 }
