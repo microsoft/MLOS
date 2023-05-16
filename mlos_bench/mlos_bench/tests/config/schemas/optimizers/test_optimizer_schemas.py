@@ -50,7 +50,7 @@ assert expected_mlos_core_space_adapter_types
 
 
 # Do the full cross product of all the test cases and all the optimizer types.
-@pytest.mark.parametrize("test_case_subtype", list(TEST_CASES.by_subtype.keys()))
+@pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("mlos_bench_optimizer_type", expected_mlos_bench_optimizer_class_names)
 def test_case_coverage_mlos_bench_optimizer_type(test_case_subtype: str, mlos_bench_optimizer_type: str) -> None:
     """
@@ -66,8 +66,8 @@ def test_case_coverage_mlos_bench_optimizer_type(test_case_subtype: str, mlos_be
 # a subtype test case for each optimizer and space adapter combo.
 
 
-@pytest.mark.parametrize("test_case_type", list(TEST_CASES.by_type.keys()))
-# @pytest.mark.parametrize("test_case_subtype", list(TEST_CASES.by_subtype.keys()))
+@pytest.mark.parametrize("test_case_type", sorted(TEST_CASES.by_type))
+# @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("mlos_core_optimizer_type", expected_mlos_core_optimizer_types)
 def test_case_coverage_mlos_core_optimizer_type(test_case_type: str,
                                                 mlos_core_optimizer_type: Optional[OptimizerType]) -> None:
@@ -87,8 +87,8 @@ def test_case_coverage_mlos_core_optimizer_type(test_case_type: str,
         f"Missing test case for type {test_case_type} for MlosCore Optimizer type {mlos_core_optimizer_type}")
 
 
-@pytest.mark.parametrize("test_case_type", list(TEST_CASES.by_type.keys()))
-# @pytest.mark.parametrize("test_case_subtype", list(TEST_CASES.by_subtype.keys()))
+@pytest.mark.parametrize("test_case_type", sorted(TEST_CASES.by_type))
+# @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("mlos_core_space_adapter_type", expected_mlos_core_space_adapter_types)
 def test_case_coverage_mlos_core_space_adapter_type(test_case_type: str,
                                                     mlos_core_space_adapter_type: Optional[SpaceAdapterType]) -> None:
@@ -110,7 +110,7 @@ def test_case_coverage_mlos_core_space_adapter_type(test_case_type: str,
 
 # Now we actually perform all of those validation tests.
 
-@pytest.mark.parametrize("test_case_name", list(TEST_CASES.by_path.keys()))
+@pytest.mark.parametrize("test_case_name", sorted(TEST_CASES.by_path))
 def test_optimizer_configs_against_schema(test_case_name: str) -> None:
     """
     Checks that the optimizer config validates against the schema.
