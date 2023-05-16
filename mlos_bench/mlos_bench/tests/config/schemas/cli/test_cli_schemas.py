@@ -12,7 +12,9 @@ import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
 
-from mlos_bench.tests.config.schemas import get_schema_test_cases, check_test_case_against_schema
+from mlos_bench.tests.config.schemas import (get_schema_test_cases,
+                                             check_test_case_against_schema,
+                                             check_test_case_config_with_extra_param)
 
 
 # General testing strategy:
@@ -30,3 +32,11 @@ def test_cli_configs_against_schema(test_case_name: str) -> None:
     Checks that the CLI config validates against the schema.
     """
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.CLI)
+
+
+def test_optimizer_configs_with_extra_param() -> None:
+    """
+    Checks that the cli config fails to validate if extra params are present in certain places.
+    """
+    test_case = next(iter(TEST_CASES.by_type["good"].values()))
+    check_test_case_config_with_extra_param(test_case, ConfigSchema.CLI)
