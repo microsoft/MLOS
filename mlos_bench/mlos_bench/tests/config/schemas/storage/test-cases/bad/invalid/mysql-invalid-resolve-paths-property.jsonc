@@ -1,0 +1,13 @@
+{
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "resolve_config_property_paths": ["bad_property"],  // <-- disallowed
+
+    "config": {
+        "log_sql": false,
+        "drivername": "mysql",
+        "database": "mlos_bench",
+        "host": "db.example.com",
+        "username": "username"
+    }
+}

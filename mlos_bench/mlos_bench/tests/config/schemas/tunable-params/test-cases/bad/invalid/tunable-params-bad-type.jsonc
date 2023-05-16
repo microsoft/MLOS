@@ -1,0 +1,17 @@
+{
+    "covariant_group_name-1": {
+        "cost": 1,
+        "params": {
+            "bad-cat-type": {
+                "type": "bad-cat-type",
+                "default": "foo",
+                "values": ["foo", "bar"]
+            },
+            "bad-float-type": {
+                "type": "bad-float",
+                "default": 0.1,
+                "range": [0.0, 1]
+            }
+        }
+    }
+}

@@ -234,8 +234,7 @@ class Launcher:
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, self._parent_service,
                               {"drivername": "sqlite", "database": ":memory:"})
-        storage = self._load(Storage, args_storage, schema_type=None)   # type: ignore[type-abstract]
-        # TODO: , ConfigSchema.STORAGE)
+        storage = self._load(Storage, args_storage, ConfigSchema.STORAGE)   # type: ignore[type-abstract]
         return storage
 
     def _load(self, cls: Type[BaseTypeVar], json_file_name: str, schema_type: Optional[ConfigSchema]) -> BaseTypeVar:

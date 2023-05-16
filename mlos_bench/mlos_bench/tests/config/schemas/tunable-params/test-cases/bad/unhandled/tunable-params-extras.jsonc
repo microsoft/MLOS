@@ -1,0 +1,13 @@
+{
+    "covariant_group_name-1": {
+        "cost": 1,
+        "params": {
+            "cat": {
+                "type": "categorical",
+                "default": "foo",
+                "values": ["foo", "bar"]
+            }
+        }
+    },
+    "foo": "bar"    // <-- this is unhandled
+}
