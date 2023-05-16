@@ -3,7 +3,7 @@
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
 
     // Apply --config-path resolution to these config parameters:
-    "resolve_path": ["database"],
+    "resolve_config_property_paths": ["database"],
 
     "config": {
         "log_sql": false,  // Write all SQL statements to the log.

@@ -36,6 +36,15 @@
         },
         {
             "fileMatch": [
+                "mlos_bench/mlos_bench/tests/config/schemas/storage/test-cases/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/schemas/storage/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/config/storage/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/storage/**/*.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/storage/storage-schema.json"
+        },
+        {
+            "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/**/*.jsonc",
                 "mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/**/*.json",
                 "mlos_bench/mlos_bench/config/environments/**/*-tunables.jsonc",

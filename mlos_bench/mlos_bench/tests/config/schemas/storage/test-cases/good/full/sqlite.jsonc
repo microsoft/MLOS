@@ -1,0 +1,10 @@
+{
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "resolve_config_property_paths": ["database"],
+
+    "config": {
+        "drivername": "sqlite",
+        "database": "mlos_bench.sqlite"
+    }
+}
