@@ -13,6 +13,7 @@
                 null,
                 "SKOPT",
                 "EMUKIT",
+                "FLAML",
                 "RANDOM"
             ]
         },
