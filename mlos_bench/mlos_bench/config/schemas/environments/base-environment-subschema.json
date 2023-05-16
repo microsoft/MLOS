@@ -1,0 +1,27 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/base-environment-subschema.json",
+    "title": "mlos_bench Base Environment config schema",
+    "description": "Config elements common to all Environments.",
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Name of the Environment."
+        },
+        "class": {
+            "type": "string",
+            "description": "Class of the Environment.",
+            "pattern": "^mlos_bench[.]environments[.]"
+        },
+        "include_tunables": {
+            "type": "array",
+            "items": "string",
+            "description": "Path to tunable parameter config files to include."
+        }
+    },
+    "required": [
+        "name",
+        "class"
+    ]
+}

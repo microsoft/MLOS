@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/composite-env-subschema.json",
+    "title": "mlos_bench Composite Environment config",
+    "description": "Config instance for a Composite mlos_bench Environment",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.CompositeEnv",
+                "mlos_bench.environments.composite_env.CompositeEnv"
+            ]
+        }
+    },
+    "$comment": "WIP: TODO"
+}
