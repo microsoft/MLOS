@@ -6,11 +6,9 @@
 Tests for optimizer schema validation.
 """
 
-from copy import deepcopy
 from os import path
 from typing import Optional
 
-import jsonschema
 import pytest
 
 from mlos_core.optimizers import OptimizerType
@@ -22,8 +20,8 @@ from mlos_bench.optimizers.base_optimizer import Optimizer
 
 from mlos_bench.tests import try_resolve_class_name
 from mlos_bench.tests.config.schemas import (get_schema_test_cases,
-                                             EXTRA_CONFIG_ATTR, EXTRA_OUTER_ATTR,
-                                             check_test_case_against_schema)
+                                             check_test_case_against_schema,
+                                             check_test_case_config_with_extra_param)
 
 
 # General testing strategy:
@@ -123,14 +121,4 @@ def test_optimizer_configs_with_extra_param() -> None:
     Checks that the optimizer config fails to validate if extra params are present in certain places.
     """
     test_case = next(iter(TEST_CASES.by_type["good"].values()))
-    config = deepcopy(test_case.config)
-    ConfigSchema.OPTIMIZER.validate(config)
-    config[EXTRA_OUTER_ATTR] = "should not be here"
-    with pytest.raises(jsonschema.ValidationError):
-        ConfigSchema.OPTIMIZER.validate(config)
-    del config[EXTRA_OUTER_ATTR]
-    if not config.get("config"):
-        config["config"] = {}
-    config["config"][EXTRA_CONFIG_ATTR] = "should not be here"
-    with pytest.raises(jsonschema.ValidationError):
-        ConfigSchema.OPTIMIZER.validate(config)
+    check_test_case_config_with_extra_param(test_case, ConfigSchema.OPTIMIZER)
