@@ -192,7 +192,7 @@ class Launcher:
         from the specified config files (if any) and command line arguments.
         """
         for config_file in (args_globals or []):
-            conf = self._config_loader.load_config(config_file, schema_type=None)   # FIXME: provide a schema type for globals
+            conf = self._config_loader.load_config(config_file, ConfigSchema.GLOBALS)
             assert isinstance(conf, dict)
             global_config.update(conf)
         global_config.update(Launcher._try_parse_extra_args(args_rest))
