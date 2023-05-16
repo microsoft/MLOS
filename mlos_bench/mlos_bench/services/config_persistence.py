@@ -135,7 +135,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 _LOG.error("Failed to validate config %s against schema type %s at %s",
                            json_file_name, schema_type.name, schema_type.value)
                 raise ValueError(f"Failed to validate config {json_file_name} against " +
-                                 "schema type {schema_type.name} at {schema_type.value}") from ex
+                                 f"schema type {schema_type.name} at {schema_type.value}") from ex
             if isinstance(config, dict) and config.get("$schema"):
                 # Remove $schema attributes from the config after we've validated
                 # them to avoid passing them on to other objects

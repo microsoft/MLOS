@@ -8,7 +8,7 @@ fail-under=9.8
 # See Also: https://github.com/PyCQA/pydocstyle/issues/309#issuecomment-1426642147
 # Also fail on unused imports.
 fail-on=
-    C0116,
+    missing-function-docstring,
     unused-import
 
 # Ignore pylint complaints about an upstream dependency.
