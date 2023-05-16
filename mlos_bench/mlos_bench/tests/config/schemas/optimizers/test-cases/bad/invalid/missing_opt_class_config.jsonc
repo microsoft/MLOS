@@ -1,0 +1,9 @@
+{
+
+    "config": {
+        "minimize": "score",
+        "max_iterations": 20,
+        "seed": 12345,
+        "use_defaults": false
+    }
+}

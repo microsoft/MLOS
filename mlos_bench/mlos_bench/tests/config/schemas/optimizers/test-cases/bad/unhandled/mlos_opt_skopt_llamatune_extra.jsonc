@@ -1,0 +1,21 @@
+{
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "minimize": "score",
+        "max_iterations": 20,
+        "seed": 12345,
+        "use_defaults": false,
+        "optimizer_type": "SKOPT",
+        "base_estimator": "gp",
+        "space_adapter_type": "LLAMATUNE",
+        "space_adapter_config": {
+            "num_low_dims": 2,
+            "max_unique_values_per_param": 100,
+            "special_param_values": {
+                "foo": "bar"
+            },
+            "extra_param": "should not be here"
+        }
+    }
+}

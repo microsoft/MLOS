@@ -1,0 +1,11 @@
+{
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "minimize": "score",
+        "space_adapter_type": "IDENTITY",
+        "space_adapter_config": {
+            // IDENTITY space adapter doesn't accept any config values
+        }
+    }
+}

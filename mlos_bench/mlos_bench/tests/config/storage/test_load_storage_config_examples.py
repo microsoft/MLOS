@@ -11,6 +11,7 @@ from typing import List
 import pytest
 
 from mlos_bench.tests.config import locate_config_examples
+
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -37,7 +38,7 @@ assert configs
 @pytest.mark.parametrize("config_path", configs)
 def test_load_storage_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
-    config = config_loader_service.load_config(config_path)
+    config = config_loader_service.load_config(config_path, schema_type=None)   # TODO: ConfigSchema.STORAGE)
     assert isinstance(config, dict)
     # Skip schema loading that would require a database connection for this test.
     config["config"]["lazy_schema_create"] = True
