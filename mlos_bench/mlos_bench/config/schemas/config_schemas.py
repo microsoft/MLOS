@@ -68,6 +68,7 @@ class ConfigSchema(Enum):
     """
 
     CLI = path_join(CONFIG_SCHEMA_DIR, "cli/cli-schema.json")
+    GLOBALS = path_join(CONFIG_SCHEMA_DIR, "cli/globals-schema.json")
     ENVIRONMENT = path_join(CONFIG_SCHEMA_DIR, "environments/environment-schema.json")
     OPTIMIZER = path_join(CONFIG_SCHEMA_DIR, "optimizers/optimizer-schema.json")
     SERVICE = path_join(CONFIG_SCHEMA_DIR, "services/service-schema.json")
