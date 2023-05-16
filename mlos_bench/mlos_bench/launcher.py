@@ -64,6 +64,8 @@ class Launcher:
         try:
             log_level = int(log_level)
         except ValueError:
+            # failed to parse as an int - leave it as a string and let logging
+            # module handle whether it's an appropriate log name or not
             pass
         log_level = logging.getLevelName(log_level)
         log_file = args.log_file or config.get("log_file")
