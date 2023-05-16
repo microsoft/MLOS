@@ -1,0 +1,158 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json",
+    "title": "mlos_bench Tunable Params config",
+
+    "$defs": {
+        "tunable_param_categorical": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "const": "categorical"
+                },
+                "default": {
+                    "type": ["string", "number", "boolean"]
+                },
+                "values": {
+                    "type": "array",
+                    "items": {
+                        "type": ["string", "number", "boolean"]
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                }
+            },
+            "required": ["type", "default", "values"],
+            "not": {
+                "required": ["range", "special"]
+            },
+            "$comment": "TODO: add check that default is in values",
+            "unevaluatedProperties": false
+        },
+        "tunable_param_int": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "const": "int"
+                },
+                "default": {
+                    "type": "integer"
+                },
+                "range": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                },
+                "special": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            },
+            "required": ["type", "default", "range"],
+            "not": {
+                "required": ["values"]
+            },
+            "$comment": "TODO: add check that default is in range",
+            "unevaluatedProperties": false
+        },
+        "tunable_param_float": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "type": {
+                    "const": "float"
+                },
+                "default": {
+                    "type": "number"
+                },
+                "range": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                },
+                "special": {
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                }
+            },
+            "required": ["type", "default", "range"],
+            "not": {
+                "required": ["values"]
+            },
+            "$comment": "TODO: add check that default is in range",
+            "unevaluatedProperties": false
+        },
+        "tunable_param": {
+            "oneOf": [
+                {
+                    "$ref": "#/$defs/tunable_param_categorical"
+                },
+                {
+                    "$ref": "#/$defs/tunable_param_int"
+                },
+                {
+                    "$ref": "#/$defs/tunable_param_float"
+                }
+            ]
+        },
+        "tunable_params_set": {
+            "type": "object",
+            "patternProperties": {
+                "^.+$": {
+                    "$ref": "#/$defs/tunable_param"
+                }
+            },
+            "unevaluatedProperties": false
+        },
+        "covariant_tunable_group": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "cost": {
+                    "type": "number"
+                },
+                "params": {
+                    "$ref": "#/$defs/tunable_params_set"
+                }
+            },
+            "required": ["cost", "params"],
+            "unevaluatedProperties": false
+        }
+    },
+
+    "$comment": "Tunable Params Groups config are named collection of one or more CovariantTunableGroups.",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "$comment": "Optionally allow the schema to be specified in the top level of the config, but make sure it matches the expected schema.",
+            "type": "string",
+            "pattern": "/schemas/tunables/tunable-params-schema.json$"
+        }
+    },
+    "patternProperties": {
+        "^[^$].*$": {
+            "$ref": "#/$defs/covariant_tunable_group"
+        }
+    },
+    "unevaluatedProperties": false
+}
