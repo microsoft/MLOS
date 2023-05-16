@@ -12,6 +12,7 @@ import pytest
 
 from mlos_bench.tests.config import locate_config_examples
 
+from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
