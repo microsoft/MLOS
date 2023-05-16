@@ -189,6 +189,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         observations = self.get_observations()
         return observations.nsmallest(1, columns='score')
 
+    def cleanup(self) -> None:
+        """Cleanup the optimizer."""
+        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+
     def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
         """
         Convert numpy array from one-hot encoding to a DataFrame

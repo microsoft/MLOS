@@ -123,8 +123,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         )
 
     def __del__(self) -> None:
-        if self.temp_output_directory is not None:
-            self.temp_output_directory.cleanup()
+        # Best-effort attempt to clean up, in case the user forgets to call .cleanup()
+        self.cleanup()
 
     @staticmethod
     def _dummy_target_func(config: ConfigSpace.Configuration, seed: int = 0) -> None:
@@ -230,6 +230,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         configs: list = self._to_configspace_configs(configurations)
         return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
+
+    def cleanup(self) -> None:
+        if self.temp_output_directory is not None:
+            self.temp_output_directory.cleanup()
+            self.temp_output_directory = None
 
     def _to_configspace_configs(self, configurations: pd.DataFrame) -> list:
         """Convert a dataframe of configurations to a list of ConfigSpace configurations.
