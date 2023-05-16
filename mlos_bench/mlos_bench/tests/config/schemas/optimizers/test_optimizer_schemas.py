@@ -38,9 +38,9 @@ for test_case_info in TEST_CASES.values():
     TEST_CASES_BY_SUBTYPE.setdefault(test_case_info["test_case_subtype"], {})
     TEST_CASES_BY_SUBTYPE[test_case_info["test_case_subtype"]][test_case_info["test_case"]] = test_case_info
 
-assert len(TEST_CASES_BY_TYPE["good"].keys()) > 0
-assert len(TEST_CASES_BY_TYPE["bad"].keys()) > 0
-assert len(TEST_CASES_BY_SUBTYPE.keys()) > 2
+assert len(TEST_CASES_BY_TYPE["good"]) > 0
+assert len(TEST_CASES_BY_TYPE["bad"]) > 0
+assert len(TEST_CASES_BY_SUBTYPE) > 2
 
 
 # Dynamically enumerate some of the cases we want to make sure we cover.
