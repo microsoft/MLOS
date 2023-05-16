@@ -1,0 +1,57 @@
+{
+    "covariant_group_name-1": {
+        "cost": 1,
+        "description": "Covariant group description",
+        "params": {
+            "int": {
+                "description": "Int",
+                "type": "int",
+                "default": 10,
+                "range": [1, 500],
+                "special": [-1]
+            },
+            "float": {
+                "description": "Float",
+                "type": "float",
+                "default": 10.1,
+                "range": [1.1, 111.1],
+                "special": [-1.1]
+            },
+            "cat": {
+                "description": "Cat",
+                "type": "categorical",
+                "default": "yes",
+                "values": ["yes", "no"]
+            }
+        }
+    },
+    "covariant_group_name-2": {
+        "cost": 20,
+        "description": "Covariant group description #2",
+        "params": {
+            // Note: we don't currently support overlapping tunable names
+            // across covariant groups in mlos_bench, but that can't be checked
+            // in the json schemas directly.
+            "int-2": {
+                "description": "Int",
+                "type": "int",
+                "default": 10,
+                "range": [1, 500],
+                "special": [-1]
+            },
+            "float-2": {
+                "description": "Float",
+                "type": "float",
+                "default": 10.1,
+                "range": [1.1, 111.1],
+                "special": [-1.1]
+            },
+            "cat-2": {
+                "description": "Cat",
+                "type": "categorical",
+                "default": "yes",
+                "values": ["yes", "no"]
+            }
+        }
+    }
+}
