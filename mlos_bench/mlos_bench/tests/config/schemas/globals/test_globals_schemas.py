@@ -12,9 +12,7 @@ import pytest
 
 from mlos_bench.config.schemas import ConfigSchema
 
-from mlos_bench.tests.config.schemas import (get_schema_test_cases,
-                                             check_test_case_against_schema,
-                                             check_test_case_config_with_extra_param)
+from mlos_bench.tests.config.schemas import get_schema_test_cases, check_test_case_against_schema
 
 
 # General testing strategy:
