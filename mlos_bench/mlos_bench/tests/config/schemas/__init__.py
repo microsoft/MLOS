@@ -6,6 +6,7 @@
 Common tests for config schemas and their validation and test cases.
 """
 
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Any, Dict, Set
 
@@ -38,11 +39,6 @@ _SCHEMA_TEST_TYPES = {x.test_case_type: x for x in (
     SchemaTestType(test_case_type='good', test_case_subtypes={'full', 'partial'}),
     SchemaTestType(test_case_type='bad', test_case_subtypes={'invalid', 'unhandled'}),
 )}
-
-# Some attributes we don't expect to be in any schema.
-# Used for dynamically check that we've covered all cases.
-EXTRA_OUTER_ATTR = "extra_outer_attr"
-EXTRA_CONFIG_ATTR = "extra_config_attr"
 
 
 @dataclass
@@ -142,3 +138,22 @@ def check_test_case_against_schema(test_case: SchemaTestCaseInfo, schema_type: C
             schema_type.validate(test_case.config)
     else:
         raise NotImplementedError(f"Unknown test case type: {test_case.test_case_type}")
+
+
+def check_test_case_config_with_extra_param(test_case: SchemaTestCaseInfo, schema_type: ConfigSchema) -> None:
+    """
+    Checks that the config fails to validate if extra params are present in certain places.
+    """
+    config = deepcopy(test_case.config)
+    schema_type.validate(config)
+    extra_outer_attr = "extra_outer_attr"
+    config[extra_outer_attr] = "should not be here"
+    with pytest.raises(jsonschema.ValidationError):
+        schema_type.validate(config)
+    del config[extra_outer_attr]
+    if not config.get("config"):
+        config["config"] = {}
+    extra_config_attr = "extra_config_attr"
+    config["config"][extra_config_attr] = "should not be here"
+    with pytest.raises(jsonschema.ValidationError):
+        schema_type.validate(config)
