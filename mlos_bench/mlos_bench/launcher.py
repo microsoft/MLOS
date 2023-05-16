@@ -61,6 +61,10 @@ class Launcher:
             config = {}
 
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
+        try:
+            log_level = int(log_level)
+        except ValueError:
+            pass
         log_level = logging.getLevelName(log_level)
         log_file = args.log_file or config.get("log_file")
         logging.root.setLevel(log_level)
