@@ -1,5 +1,8 @@
 name: mlos
 channels:
+  # Note: we have to reverse the channel priority for Windows to accomodate strict channel_priority setups.
+  # Hence, additional dependencies may differ from the Linux setup.
+  - conda-forge
   - defaults
 dependencies:
   # Basic dev environment packages.
@@ -24,6 +27,7 @@ dependencies:
   - vswhere
   - conda-forge::GPy
   # Install an SMAC requirement pre-compiled from conda-forge.
+  # This also requires a more recent vs2015_runtime from conda-forge.
   - conda-forge::pyrfr>=0.9.0
   - pip:
     - bump2version
