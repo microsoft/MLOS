@@ -1,0 +1,35 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/mock-env-subschema.json",
+    "title": "mlos_bench MockEnv config",
+    "description": "Config instance for a mlos_bench MockEnv",
+    "type": "object",
+    "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.MockEnv",
+                "mlos_bench.environments.mock_env.MockEnv"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "properties": {
+                "seed": {
+                    "type": "integer",
+                    "description": "Seed for the random number generator",
+                    "default": 0
+                },
+                "range": {
+                    "type": "array",
+                    "description": "Range of the random number generator",
+                    "items": {
+                        "type": "integer"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2
+                }
+            }
+        }
+    }
+}

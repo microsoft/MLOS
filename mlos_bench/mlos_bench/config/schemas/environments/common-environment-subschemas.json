@@ -1,0 +1,50 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/common-environment-subschema.json",
+    "title": "mlos_bench common Environment config subschema",
+    "description": "Config elements common to several Environments.",
+    "$defs": {
+        "command_lines": {
+            "type": "array",
+            "items": {
+                "$comment": "TODO: Add support for array syntax for command lines that execute without a shell.",
+                "type": [
+                    "string"
+                ]
+            },
+            "minItems": 1
+        },
+        "setup_run_teardown_configs": {
+            "type": "object",
+            "properties": {
+                "setup": {
+                    "$ref": "#/$defs/command_lines"
+                },
+                "run": {
+                    "$ref": "#/$defs/command_lines"
+                },
+                "teardown": {
+                    "$ref": "#/$defs/command_lines"
+                }
+            },
+            "$comment": "At least one of setup or run or teardown must be specified.",
+            "oneOf": [
+                {
+                    "required": [
+                        "setup"
+                    ]
+                },
+                {
+                    "required": [
+                        "run"
+                    ]
+                },
+                {
+                    "required": [
+                        "teardown"
+                    ]
+                }
+            ]
+        }
+    }
+}

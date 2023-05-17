@@ -1,0 +1,68 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/local/local-env-subschema.json",
+    "title": "mlos_bench LocalEnv config",
+    "description": "Config instance for a mlos_bench LocalEnv",
+    "type": "object",
+    "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.LocalEnv",
+                "mlos_bench.environments.local.LocalEnv",
+                "mlos_bench.environments.local.local_env.LocalEnv"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "../common-environment-subschema.json#/$defs/setup_run_teardown_configs"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "temp_dir": {
+                            "description": "Path to a temporary directory to use for storing intermediate files.",
+                            "type": "string"
+                        },
+                        "dump_params_file": {
+                            "description": "Path to a file to dump the parameters to.",
+                            "type": "string"
+                        },
+                        "read_results_file": {
+                            "description": "Path to a file to read the results from.",
+                            "type": "string"
+                        }
+                    },
+                    "allOf": [
+                        {
+                            "if": {
+                                "required": [
+                                    "dump_params_file"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "setup"
+                                ]
+                            }
+                        },
+                        {
+                            "if": {
+                                "required": [
+                                    "read_results_file"
+                                ]
+                            },
+                            "then": {
+                                "required": [
+                                    "run"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

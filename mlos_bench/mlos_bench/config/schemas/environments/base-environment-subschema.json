@@ -4,20 +4,36 @@
     "title": "mlos_bench Base Environment config schema",
     "description": "Config elements common to all Environments.",
     "type": "object",
+    "$comment": "See notes regarding intentional lack of $schema property here.",
     "properties": {
         "name": {
-            "type": "string",
-            "description": "Name of the Environment."
+            "description": "Name of the Environment.",
+            "type": "string"
         },
         "class": {
-            "type": "string",
             "description": "Class of the Environment.",
+            "type": "string",
             "pattern": "^mlos_bench[.]environments[.]"
         },
-        "include_tunables": {
+        "include_services": {
+            "description": "Path(s) to Service config files to include for the Environment.",
             "type": "array",
-            "items": "string",
-            "description": "Path to tunable parameter config files to include."
+            "items": {
+                "type": "string",
+                "$comment": "Paths are expected to be json.",
+                "pattern": "[.]json[c]?$"
+            },
+            "minItems": 1
+        },
+        "include_tunables": {
+            "description": "Path(s) to TunableParams config files to include for the Environment.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "$comment": "Paths are expected to be json.",
+                "pattern": "[.]json[c]?$"
+            },
+            "minItems": 1
         }
     },
     "required": [
