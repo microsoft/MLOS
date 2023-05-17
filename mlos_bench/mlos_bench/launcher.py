@@ -51,7 +51,7 @@ class Launcher:
         # Bootstrap config loader: command line takes priority.
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
         if args.config:
-            config = self._config_loader.load_config(args.config, schema_type=None)  # TODO: , schema_type=ConfigSchema.CLI)
+            config = self._config_loader.load_config(args.config, ConfigSchema.CLI)
             assert isinstance(config, Dict)
             config_path = config.get("config_path", [])
             if config_path and not args.config_path:
@@ -61,8 +61,14 @@ class Launcher:
             config = {}
 
         log_level = args.log_level or config.get("log_level", _LOG_LEVEL)
-        log_file = args.log_file or config.get("log_file")
+        try:
+            log_level = int(log_level)
+        except ValueError:
+            # failed to parse as an int - leave it as a string and let logging
+            # module handle whether it's an appropriate log name or not
+            log_level = logging.getLevelName(log_level)
         logging.root.setLevel(log_level)
+        log_file = args.log_file or config.get("log_file")
         if log_file:
             log_handler = logging.FileHandler(log_file)
             log_handler.setLevel(log_level)
@@ -111,9 +117,9 @@ class Launcher:
             help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(
-            '--log_level', required=False, type=int,
-            help=f'Logging level. Default is {_LOG_LEVEL} ({logging.getLevelName(_LOG_LEVEL)}).' +
-                 f' Set to {logging.DEBUG} for debug, {logging.WARNING} for warnings only.')
+            '--log_level', required=False, type=str,
+            help=f'Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}.' +
+                 ' Set to DEBUG for debug, WARNING for warnings only.')
 
         parser.add_argument(
             '--config_path', nargs="+", required=False,
@@ -191,7 +197,7 @@ class Launcher:
         from the specified config files (if any) and command line arguments.
         """
         for config_file in (args_globals or []):
-            conf = self._config_loader.load_config(config_file, schema_type=None)   # FIXME: provide a schema type for globals
+            conf = self._config_loader.load_config(config_file, ConfigSchema.GLOBALS)
             assert isinstance(conf, dict)
             global_config.update(conf)
         global_config.update(Launcher._try_parse_extra_args(args_rest))

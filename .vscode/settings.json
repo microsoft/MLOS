@@ -27,6 +27,26 @@
         // TODO: Add more rules for other mlos_bench config schemas.
         {
             "fileMatch": [
+                "mlos_bench/mlos_bench/tests/config/schemas/cli/test-cases/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/schemas/cli/test-cases/**/*.json",
+                "mlos_bench/mlos_bench/tests/config/cli/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/cli/**/*.json",
+                "mlos_bench/mlos_bench/config/cli/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/cli/**/*.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json"
+        },
+        {
+            "fileMatch": [
+                "global_config.jsonc",
+                "global_config.json",
+                "config.jsonc",
+                "config.json"
+            ],
+            "url": "./mlos_bench/mlos_bench/config/schemas/cli/globals-schema.json"
+        },
+        {
+            "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/optimizers/test-cases/**/*.jsonc",
                 "mlos_bench/mlos_bench/tests/config/schemas/optimizers/test-cases/**/*.json",
                 "mlos_bench/mlos_bench/config/optimizers/**/*.jsonc",

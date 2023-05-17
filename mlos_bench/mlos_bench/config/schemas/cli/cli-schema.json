@@ -1,0 +1,98 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json",
+    "title": "mlos_bench CLI config",
+
+    "$defs": {
+        "json_config_path": {
+            "type": "string",
+            "pattern": "[.]json[c]?$"
+        },
+        "json_config_path_list": {
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/json_config_path"
+            }
+        },
+        "json_config_path_or_paths": {
+            "oneOf": [
+                {
+                    "$ref": "#/$defs/json_config_path"
+                },
+                {
+                    "$ref": "#/$defs/json_config_path_list"
+                }
+            ]
+        }
+    },
+
+    "description": "config for the mlos_bench cli args",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "description": "The schema to use for validating the config (accepts both URLs and local paths).",
+            "type": "string",
+            "$comment": "This is optional, but if provided, should match the name of this file.",
+            "pattern": "/schemas/cli/cli-schema.json$"
+        },
+
+        "config_path": {
+            "description": "Search path(s) for resolving additional config file references.  Note: the path to internal examples are included by default.",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+
+        "environment": {
+            "description": "Path to the json config describing the environment to run the benchmark in.",
+            "$ref": "#/$defs/json_config_path"
+        },
+
+        "optimizer": {
+            "description": "Path to the json config describing the optimizer to use.",
+            "$ref": "#/$defs/json_config_path"
+        },
+
+        "storage": {
+            "description": "Path to the json config describing the storage backend to use.",
+            "$ref": "#/$defs/json_config_path"
+        },
+
+        "tunable_values": {
+            "description": "Path to the json config(s) describing the tunable values to use.",
+            "$ref": "#/$defs/json_config_path_or_paths"
+        },
+
+        "globals": {
+            "description": "Path to the json config(s) describing the global config overrides to use.",
+            "$ref": "#/$defs/json_config_path_or_paths"
+        },
+
+        "experimentId": {
+            "description": "Name of the experiment.",
+            "$comment": "TODO: Rename this to conform to snake case.",
+            "type": "string"
+        },
+        "trialId": {
+            "description": "Trial id to use for the experiment.",
+            "$comment": "TODO: Rename this to conform to snake case.",
+            "type": "integer"
+        },
+
+        "teardown": {
+            "description": "Whether to teardown the experiment after running it.",
+            "type": "boolean"
+        },
+
+        "log_file": {
+            "description": "Path to the log file to use.",
+            "type": "string"
+        },
+        "log_level": {
+            "description": "Log level to use.",
+            "enum": ["CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG"]
+        }
+    },
+    "unevaluatedProperties": false
+}

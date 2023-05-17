@@ -1,9 +1,6 @@
-//
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-//
-
 {
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json",
+
     "config_path": [
         "mlos_bench/mlos_bench/config",
         "mlos_bench/mlos_bench/tests/config"

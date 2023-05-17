@@ -56,7 +56,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             An optional parent service that can provide mixin functions.
         """
         super().__init__(config, parent)
-        self._config_path = self.config.get("config_path", [])
+        self._config_path: List[str] = self.config.get("config_path", [])
         self._config_loader_service = self
 
         if self.BUILTIN_CONFIG_PATH not in self._config_path:
@@ -92,7 +92,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         path : str
             An actual path to the config or script.
         """
-        path_list = (extra_paths or []) + self._config_path
+        path_list = list(extra_paths or []) + self._config_path
         _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
         if not os.path.isabs(file_path):
             for path in path_list:
