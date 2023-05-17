@@ -1,0 +1,212 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/storage/storage-schema.json",
+    "title": "mlos_bench Storage config",
+
+    "$defs": {
+        "config_sql_storage": {
+            "type": "object",
+            "$comment": "Basic params for sqlalchemy based sql storage class. See Also: https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.engine.URL.set",
+            "properties": {
+                "log_sql": {
+                    "description": "Whether to log SQL queries.",
+                    "$comment": "This one is removed from the config prior to being passed to the URL.create() function.",
+                    "type": "boolean"
+                },
+                "drivername": {
+                    "description": "The driver to use.",
+                    "type": "string",
+                    "$comment": "These are just examples of tested drivers to help the IDE autocomplete - but we don't restrict the set of possible drivers that sqlalchemy supports.",
+                    "examples": [
+                        "sqlite",
+                        "duckdb",
+                        "mysql+mysqlconnector",
+                        "postgres+psycopg2"
+                    ]
+                },
+                "database": {
+                    "description": "The database to use.",
+                    "type": "string",
+                    "examples": [
+                        "mlos_bench.sqlite",
+                        "mlos_bench.duckdb",
+                        "mlos_bench"
+                    ]
+                },
+                "username": {
+                    "description": "The username to use.",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "The password to use.",
+                    "type": "string"
+                },
+                "host": {
+                    "description": "The host to use.",
+                    "type": "string",
+                    "examples": [
+                        "localhost",
+                        "db.example.com"
+                    ]
+                },
+                "port": {
+                    "description": "The port to use (e.g. 3306 for mysql or 5432 for postgres).",
+                    "type": "integer",
+                    "examples": [
+                        3306,
+                        5432
+                    ]
+                }
+            },
+            "unevaluatedProperties": false,
+            "required": ["drivername", "database"]
+        }
+    },
+
+    "description": "config for the mlos_bench storage service",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "description": "The schema to use for validating the storage config (accepts both URLs and local paths).",
+            "type": "string",
+            "$comment": "This is optional, but if provided, should match the name of this file.",
+            "pattern": "/schemas/storage/storage-schema.json$"
+        },
+
+        "description": {
+            "description": "Optional description of the config.",
+            "type": "string"
+        },
+
+        "class": {
+            "description": "The name of the storage class to use.",
+            "$comment": "required",
+            "enum": [
+                "mlos_bench.storage.sql.storage.SqlStorage"
+            ]
+        },
+
+        "resolve_config_property_paths": {
+            "description": "An array of properties in the config that should be resolved to their full paths using the mlos_bench search path logic.",
+            "$comment": "This is only relevant for certain drivers.",
+            "type": ["string", "array"],
+            "items": {
+                "type": "string"
+            }
+        },
+
+        "config": {
+            "description": "The storage driver specific config.",
+            "$comment": "Stub for storage specific config appended with condition statements below",
+            "type": "object"
+        }
+    },
+    "required": ["class", "config"],
+    "unevaluatedProperties": false,
+
+    "oneOf": [
+        {
+            "$comment": "Extensions to the allowed 'config' object properties when the storage is the mlos_core storage.",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.storage.sql.storage.SqlStorage"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "allOf": [
+                    {
+                        "properties": {
+                            "config": {
+                                "$comment": "Basic config must be a sql alchemy based config in this case.",
+                                "$ref": "#/$defs/config_sql_storage"
+                            }
+                        }
+                    },
+                    {
+                        "$comment": "some special rules for certain sql drivers",
+                        "if": {
+                            "properties": {
+                                "config": {
+                                    "properties": {
+                                        "drivername": {
+                                            "enum": [
+                                                "sqlite",
+                                                "duckdb"
+                                            ]
+                                        }
+                                    },
+                                    "required": ["drivername"]
+                                }
+                            },
+                            "required": ["config"]
+                        },
+                        "then": {
+                            "allOf": [
+                                {
+                                    "$comment": "resolve_config_property_paths is only allowed for sqlite or duckdb drivers and then only for the database",
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "resolve_config_property_paths": {
+                                                    "const": "database"
+                                                }
+                                            },
+                                            "required": ["resolve_config_property_paths"]
+                                        },
+                                        {
+                                            "properties": {
+                                                "resolve_config_property_paths": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "const": "database"
+                                                    },
+                                                    "minItems": 1,
+                                                    "maxItems": 1
+                                                }
+                                            },
+                                            "required": ["resolve_config_property_paths"]
+                                        },
+                                        {
+                                            "not": {
+                                                "required": ["resolve_config_property_paths"]
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "$comment": "sqlite and duckdb drivers don't need host or username",
+                                    "not": {
+                                        "required": [
+                                            "host",
+                                            "username"
+                                        ]
+                                    }
+                                }
+                            ]
+                        },
+                        "else": {
+                            "$comment": "Other drivers need to omit resolve_config_property_paths, but include host and username in their config",
+                            "properties": {
+                                "config": {
+                                    "required": ["host", "username"]
+                                }
+                            },
+                            "not": {
+                                "required": [
+                                    "resolve_config_property_paths"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "$comment": "Set 'else' to false to prevent it to defaulting to a valid document match."
+            },
+            "else": false
+        }
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "config": {
+        "log_sql": false,
+        "drivername": "future_sql_driver",
+        "database": "mlos_bench",
+        "host": "localhost",
+        "username": "mlos_bench",
+        "password": "mlos_bench",
+        "port": 12345
+    }
+}

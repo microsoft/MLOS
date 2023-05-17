@@ -12,6 +12,7 @@
             "enum": [
                 null,
                 "EMUKIT",
+                "FLAML",
                 "RANDOM",
                 "SKOPT",
                 "SMAC"
