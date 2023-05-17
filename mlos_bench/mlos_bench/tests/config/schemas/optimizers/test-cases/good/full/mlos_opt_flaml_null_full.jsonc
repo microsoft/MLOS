@@ -1,0 +1,13 @@
+{
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        // Here we do our best to list the exhaustive set of full configs available for the base optimizer config.
+        "minimize": "score",
+        "max_iterations": 10,
+        "seed": 12345,
+        "use_defaults": false,
+        "optimizer_type": "FLAML",
+        "space_adapter_type": null
+    }
+}

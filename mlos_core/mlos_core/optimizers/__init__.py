@@ -16,6 +16,7 @@ from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.optimizers.bayesian_optimizers.emukit_optimizer import EmukitOptimizer
 from mlos_core.optimizers.bayesian_optimizers.skopt_optimizer import SkoptOptimizer
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
+from mlos_core.optimizers.flaml_optimizer import FlamlOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
 
 __all__ = [
@@ -23,6 +24,7 @@ __all__ = [
     'OptimizerFactory',
     'BaseOptimizer',
     'RandomOptimizer',
+    'FlamlOptimizer',
     'EmukitOptimizer',
     'SkoptOptimizer',
     'SmacOptimizer',
@@ -37,6 +39,9 @@ class OptimizerType(Enum):
 
     EMUKIT = EmukitOptimizer
     """An instance of EmukitOptimizer class will be used"""
+    
+    FLAML = FlamlOptimizer
+    """An instance of FlamlOptimizer class will be used"""
 
     SKOPT = SkoptOptimizer
     """An instance of SkoptOptimizer class will be used"""
@@ -53,6 +58,7 @@ ConcreteOptimizer = TypeVar(
     'ConcreteOptimizer',
     RandomOptimizer,
     EmukitOptimizer,
+    FlamlOptimizer,
     SkoptOptimizer,
     SmacOptimizer,
 )
