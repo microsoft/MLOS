@@ -1,8 +1,3 @@
-//
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-//
-
 {
     "config_path": [
         "mlos_bench/mlos_bench/config",
@@ -27,5 +22,7 @@
     "teardown": false,
 
     "log_file": "azure-redis-1shot.log",
-    "log_level": "DEBUG"
+    "log_level": "DEBUG",
+
+    "foo": "bar"    // <-- shouldn't be allowed
 }
