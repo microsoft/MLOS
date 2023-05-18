@@ -19,7 +19,7 @@ The environment config schema is organized as follows:
 
     Since it can include config elements for other leaf elements directly, it also references `leaf-environment-subschema.json`.
 
-  - [`leaf-environment-subschema.json`](./leaf-environment-subschemas.json)
+  - [`leaf-environment-subschemas.json`](./leaf-environment-subschemas.json)
 
     This is a simple subschema that simple recognizes one of any of the other concrete Environment subschema files, *except* `CompositeEnv`.
 
@@ -34,3 +34,5 @@ The environment config schema is organized as follows:
     - [`remote/os-env-subschema.json`](./remote/os-env-subschema.json)
     - [`remote/remote-env-subschema.json`](./remote/remote-env-subschema.json)
     - [`remote/vm-env-subschema.json`](./remote/vm-env-subschema.json)
+
+    Since nested `"config"` property objects need to specify their own `"unevaluatedProperties": false` setting locally, we also extract common reusable schema elements out to [`common-environment-subschemas.json`.](./common-environment-subschemas.json) for `$ref`-ing.
