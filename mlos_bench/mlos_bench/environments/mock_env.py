@@ -46,7 +46,7 @@ class MockEnv(Environment):
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
-            The two optional arguments are `seed` and `range`.
+            Optional arguments are `seed`, `range`, and `score_name`.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
         service: Service
@@ -57,6 +57,7 @@ class MockEnv(Environment):
         seed = self.config.get("seed")
         self._random = random.Random(seed) if seed is not None else None
         self._range = self.config.get("range")
+        self._score_name = self.config.get("score_name", "score")
         self._is_ready = True
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -81,13 +82,12 @@ class MockEnv(Environment):
         ]))
 
         # Add noise and shift the benchmark value from [0, 1] to a given range.
-        noise = self._random.gauss(0, MockEnv._NOISE_VAR) if self._random else 0
+        noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
         score = numpy.clip(score + noise, 0, 1)
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        data = {"score": score}
-        return (Status.SUCCEEDED, data)
+        return (Status.SUCCEEDED, {self._score_name: score})
 
     @staticmethod
     def _normalized(tunable: Tunable) -> float:
