@@ -40,13 +40,15 @@ class FlamlOptimizer(BaseOptimizer):
         More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
     """
 
-    def __init__(
-        self,
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        low_cost_partial_config: Optional[dict] = None,
-    ):
-        super().__init__(parameter_space, space_adapter)
+    def __init__(self, *,
+                 parameter_space: ConfigSpace.ConfigurationSpace,
+                 space_adapter: Optional[BaseSpaceAdapter] = None,
+                 low_cost_partial_config: Optional[dict] = None):
+
+        super().__init__(
+            parameter_space=parameter_space,
+            space_adapter=space_adapter,
+        )
 
         self.flaml_parameter_space: dict = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.low_cost_partial_config = low_cost_partial_config

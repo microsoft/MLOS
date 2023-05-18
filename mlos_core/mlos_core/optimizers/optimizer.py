@@ -26,7 +26,9 @@ class BaseOptimizer(metaclass=ABCMeta):
     Optimizer abstract base class defining the basic interface.
     """
 
-    def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace, space_adapter: Optional[BaseSpaceAdapter] = None):
+    def __init__(self, *,
+                 parameter_space: ConfigSpace.ConfigurationSpace,
+                 space_adapter: Optional[BaseSpaceAdapter] = None):
         """
         Create a new instance of the base optimizer.
 

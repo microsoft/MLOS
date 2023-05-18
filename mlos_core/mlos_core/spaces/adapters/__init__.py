@@ -47,31 +47,36 @@ class SpaceAdapterFactory:
     # pylint: disable=too-few-public-methods,consider-alternative-union-syntax
 
     @staticmethod
-    def create(
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-        space_adapter_kwargs: Optional[dict] = None,
-    ) -> ConcreteSpaceAdapter:
-        """Creates a new space adapter instance, given the parameter space and potential space adapter options.
+    def create(*,
+               parameter_space: ConfigSpace.ConfigurationSpace,
+               space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
+               space_adapter_kwargs: Optional[dict] = None) -> ConcreteSpaceAdapter:
+        """
+        Create a new space adapter instance, given the parameter space and potential
+        space adapter options.
 
         Parameters
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             Input configuration space.
-
         space_adapter_type : Optional[SpaceAdapterType]
             Space adapter class to be used alongside the optimizer.
-
         space_adapter_kwargs : Optional[dict]
             Optional arguments passed in SpaceAdapter class constructor.
 
         Returns
         -------
-        Instance of concrete optimizer (e.g., None, LlamaTuneAdapter, etc.)
+        space_adapter : ConcreteSpaceAdapter
+            Instance of concrete space adapter (e.g., None, LlamaTuneAdapter, etc.)
         """
         if space_adapter_type is None:
             space_adapter_type = SpaceAdapterType.IDENTITY
         if space_adapter_kwargs is None:
             space_adapter_kwargs = {}
-        space_adapter: ConcreteSpaceAdapter = space_adapter_type.value(parameter_space, **space_adapter_kwargs)
+
+        space_adapter: ConcreteSpaceAdapter = space_adapter_type.value(
+            parameter_space=parameter_space,
+            **space_adapter_kwargs
+        )
+
         return space_adapter
