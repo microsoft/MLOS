@@ -1,0 +1,20 @@
+{
+    "name": "mock_env-full",
+    "class": "mlos_bench.environments.MockEnv",
+    "include_services": [
+        "path/to/some/service.jsonc"
+    ],
+    "include_tunables": [
+        "path/to/some/tunables.jsonc"
+    ],
+    "config": {
+        "const_args": {
+            "foo": "bar"
+        },
+        "required_args": [
+            "foo"
+        ],
+        "range": [0, 1],
+        "seed": 42
+    }
+}
