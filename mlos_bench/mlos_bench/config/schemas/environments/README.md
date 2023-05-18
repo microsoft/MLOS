@@ -30,6 +30,7 @@ The environment config schema is organized as follows:
     For instance:
 
     - [`local/local-env-subschema.json`](./local/local-env-subschema.json)
+    - [`local/local-fileshare-env-subschema.json`](./local/local-fileshare-env-subschema.json)
     - [`remote/os-env-subschema.json`](./remote/os-env-subschema.json)
     - [`remote/remote-env-subschema.json`](./remote/remote-env-subschema.json)
-    - [`remote/vm-env-subschema.json`](./remote/remote-env-subschema.json)
+    - [`remote/vm-env-subschema.json`](./remote/vm-env-subschema.json)
