@@ -44,7 +44,7 @@ ConcreteSpaceAdapter = TypeVar(
 class SpaceAdapterFactory:
     """Simple factory class for creating BaseSpaceAdapter-derived objects"""
 
-    # pylint: disable=too-few-public-methods,consider-alternative-union-syntax
+    # pylint: disable=too-few-public-methods
 
     @staticmethod
     def create(*,

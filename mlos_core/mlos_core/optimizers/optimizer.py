@@ -18,8 +18,6 @@ import pandas as pd
 from mlos_core import config_to_dataframe
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
-# pylint: disable=consider-alternative-union-syntax
-
 
 class BaseOptimizer(metaclass=ABCMeta):
     """
