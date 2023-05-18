@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/leaf-environment-subschema.json",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/leaf-environment-subschemas.json",
     "title": "mlos_bench leaf Environment config",
     "description": "Config instance for a non-composite mlos_bench Environment",
     "type": "object",
