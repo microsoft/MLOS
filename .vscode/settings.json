@@ -89,9 +89,6 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
-    "editor.formatOnSave": true,
-    "editor.formatOnSaveMode": "modifications",
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "python.formatting.provider": "none",
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8",
