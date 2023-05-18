@@ -1,9 +1,44 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/common-environment-subschema.json",
-    "title": "mlos_bench common Environment config subschema",
-    "description": "Config elements common to several Environments.",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/common-environment-subschemas.json",
+    "title": "mlos_bench common Environment config subschemas",
+    "description": "config elements common to several Environments.",
     "$defs": {
+        "leaf_environment_config": {
+            "$comment": "A set of additional properties that only leaf Environment configs use (i.e., not relevant for CompositeEnv).",
+            "type": "object",
+            "properties": {
+                "tunable_params": {
+                    "type": "array",
+                    "description": "The names of tunable groups to reference (i.e., keys from the tunable params).",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1
+                },
+                "required_args": {
+                    "description": "Required arguments for the Environment to instantiate. These can be presented as environment variables for scripts to use.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 1
+                },
+                "const_args": {
+                    "description": "Default argument value constants to use for the Environment when not overridden by globals.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$comment": "The value of any const_arg can be a string, number, boolean, or null.",
+                        "type": [
+                            "string",
+                            "number",
+                            "boolean",
+                            "null"
+                        ]
+                    }
+                }
+            }
+        },
         "command_lines": {
             "type": "array",
             "items": {
@@ -28,7 +63,7 @@
                 }
             },
             "$comment": "At least one of setup or run or teardown must be specified.",
-            "oneOf": [
+            "anyOf": [
                 {
                     "required": [
                         "setup"
@@ -45,6 +80,42 @@
                     ]
                 }
             ]
+        },
+        "file_download_config": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "description": "Remote path to download the file from.",
+                    "type": "string"
+                },
+                "to": {
+                    "description": "Local path to download the file to.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "from",
+                "to"
+            ],
+            "unevaluatedProperties": false
+        },
+        "file_upload_config": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "description": "Local path to upload the file from.",
+                    "type": "string"
+                },
+                "to": {
+                    "description": "Remote path to upload the file to.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "from",
+                "to"
+            ],
+            "unevaluatedProperties": false
         }
     }
 }

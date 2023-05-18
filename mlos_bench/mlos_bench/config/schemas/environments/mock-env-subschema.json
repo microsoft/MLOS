@@ -4,7 +4,6 @@
     "title": "mlos_bench MockEnv config",
     "description": "Config instance for a mlos_bench MockEnv",
     "type": "object",
-    "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
     "properties": {
         "class": {
             "enum": [
@@ -14,22 +13,33 @@
         },
         "config": {
             "type": "object",
-            "properties": {
-                "seed": {
-                    "type": "integer",
-                    "description": "Seed for the random number generator",
-                    "default": 0
+            "allOf": [
+                {
+                    "$ref": "./common-environment-subschemas.json#/$defs/leaf_environment_config"
                 },
-                "range": {
-                    "type": "array",
-                    "description": "Range of the random number generator",
-                    "items": {
-                        "type": "integer"
-                    },
-                    "minItems": 2,
-                    "maxItems": 2
+                {
+                    "properties": {
+                        "seed": {
+                            "type": "integer",
+                            "description": "Seed for the random number generator",
+                            "default": 0
+                        },
+                        "range": {
+                            "type": "array",
+                            "description": "Range of the random number generator",
+                            "items": {
+                                "type": "integer"
+                            },
+                            "minItems": 2,
+                            "maxItems": 2
+                        }
+                    }
                 }
-            }
+            ],
+            "unevaluatedProperties": false
         }
-    }
+    },
+    "required": [
+        "class"
+    ]
 }

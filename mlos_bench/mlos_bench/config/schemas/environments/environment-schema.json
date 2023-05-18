@@ -12,7 +12,7 @@
                     "description": "The schema to use for validating an environment config (accepts both URLs and local paths).",
                     "type": "string",
                     "$comment": "This is optional, but if provided, should match the name of this file.  However, we don't expect it to be included in nested configs, so it isn't present in the base config schema.",
-                    "pattern": "/schemas/environment/environment-schema.json$"
+                    "pattern": "/schemas/environments/environment-schema.json$"
                 },
                 "description": {
                     "description": "Optional description of the config.",
@@ -23,7 +23,7 @@
         {
             "oneOf": [
                 {
-                    "$ref": "./leaf-environment-subschema.json"
+                    "$ref": "./leaf-environment-subschemas.json"
                 },
                 {
                     "$ref": "./composite-env-subschema.json"

@@ -14,8 +14,17 @@
             ]
         },
         "config": {
+            "type": "object",
             "$comment": "NOTE: there aren't currently any additional properties accepted by the VMEnv.",
-            "type": "object"
+            "allOf": [
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/leaf_environment_config"
+                }
+            ],
+            "unevaluatedProperties": false
         }
-    }
+    },
+    "required": [
+        "class"
+    ]
 }

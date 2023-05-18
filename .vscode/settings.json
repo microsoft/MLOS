@@ -36,7 +36,7 @@
                 "!mlos_bench/mlos_bench/config/environments/**/*-tunables.jsonc",
                 "!mlos_bench/mlos_bench/config/environments/**/*-tunables.json"
             ],
-            "url": "./mlos_bench/mlos_bench/config/schemas/environments/environments-schema.json"
+            "url": "./mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json"
         },
         {
             "fileMatch": [

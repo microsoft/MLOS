@@ -18,12 +18,14 @@
                 },
                 "config": {
                     "type": "object",
+                    "$comment": "config objects need to specify their entire schema, so we need to include the unevaluatedProperties handling here.",
                     "properties": {
                         "include_children": {
                             "description": "List of child environment config files to include in the composite environment.",
                             "type": "array",
                             "items": {
-                                "type": "string"
+                                "type": "string",
+                                "pattern": "[.]json[c]?$"
                             },
                             "minItems": 1
                         },
@@ -32,12 +34,13 @@
                             "type": "array",
                             "items": {
                                 "$comment": "Each config included can be a leaf environment config.  We do not currently support inline nested composite environments.",
-                                "$ref": "./leaf-environment-subschema.json",
+                                "$ref": "./leaf-environment-subschemas.json",
                                 "unevaluatedProperties": false
                             },
                             "minItems": 1
                         }
-                    }
+                    },
+                    "unevaluatedProperties": false
                 }
             }
         }
