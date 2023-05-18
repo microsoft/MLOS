@@ -19,7 +19,7 @@ The environment config schema is organized as follows:
 
     Since it can include config elements for other leaf elements directly, it also references `leaf-environment-subschema.json`.
 
-  - [`leaf-environment-subschema.json`](./leaf-environment-subschema.json)
+  - [`leaf-environment-subschema.json`](./leaf-environment-subschemas.json)
 
     This is a simple subschema that simple recognizes one of any of the other concrete Environment subschema files, *except* `CompositeEnv`.
 
