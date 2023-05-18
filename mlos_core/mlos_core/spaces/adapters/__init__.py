@@ -75,7 +75,7 @@ class SpaceAdapterFactory:
             space_adapter_kwargs = {}
 
         space_adapter: ConcreteSpaceAdapter = space_adapter_type.value(
-            parameter_space=parameter_space,
+            orig_parameter_space=parameter_space,
             **space_adapter_kwargs
         )
 

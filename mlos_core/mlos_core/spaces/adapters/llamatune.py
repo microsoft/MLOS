@@ -32,7 +32,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
     """Default number of (max) unique values of each parameter, when space discretization is used"""
 
     def __init__(self, *,
-                 orig_config_space: ConfigSpace.ConfigurationSpace,
+                 orig_parameter_space: ConfigSpace.ConfigurationSpace,
                  num_low_dims: int = DEFAULT_NUM_LOW_DIMS,
                  special_param_values: Optional[dict] = None,
                  max_unique_values_per_param: Optional[int] = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
@@ -42,7 +42,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
         Parameters
         ----------
-        parameter_space : ConfigSpace.ConfigurationSpace
+        orig_parameter_space : ConfigSpace.ConfigurationSpace
             The original (user-provided) parameter space to optimize.
         num_low_dims: int
             Number of dimensions used in the low-dimensional parameter search space.
@@ -52,9 +52,9 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
         """
-        super().__init__(orig_parameter_space=orig_config_space)
+        super().__init__(orig_parameter_space=orig_parameter_space)
 
-        if num_low_dims >= len(orig_config_space):
+        if num_low_dims >= len(orig_parameter_space):
             raise ValueError("Number of target config space dimensions should be less than those of original config space.")
 
         # Validate input special param values dict

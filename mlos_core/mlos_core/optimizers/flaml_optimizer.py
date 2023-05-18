@@ -74,7 +74,8 @@ class FlamlOptimizer(BaseOptimizer):
         if context is not None:
             raise NotImplementedError()
         for (_, config), score in zip(configurations.iterrows(), scores):
-            cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())  # noqa: E501
+            cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
+                self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
 

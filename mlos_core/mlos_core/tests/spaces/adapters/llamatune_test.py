@@ -67,13 +67,13 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> N
     # Number of target parameter space dimensions should be fewer than those of the original space
     with pytest.raises(ValueError):
         LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=len(input_space.get_hyperparameter_names())
         )
 
     # Enable only low-dimensional space projections
     adapter = LlamaTuneAdapter(
-        orig_config_space=input_space,
+        orig_parameter_space=input_space,
         num_low_dims=num_target_space_dims,
         special_param_values=None,
         max_unique_values_per_param=None
@@ -123,7 +123,7 @@ def test_special_parameter_values_validation() -> None:
     with pytest.raises(NotImplementedError):
         special_param_values_dict_1 = {'str': 'choice_1'}
         LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=2,
             special_param_values=special_param_values_dict_1,
             max_unique_values_per_param=None,
@@ -132,7 +132,7 @@ def test_special_parameter_values_validation() -> None:
     with pytest.raises(NotImplementedError):
         special_param_values_dict_2 = {'cont': -1}
         LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=2,
             special_param_values=special_param_values_dict_2,
             max_unique_values_per_param=None,
@@ -142,7 +142,7 @@ def test_special_parameter_values_validation() -> None:
     with pytest.raises(ValueError, match='value domain'):
         special_param_values_dict = {'int': -1}
         LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=2,
             special_param_values=special_param_values_dict,
             max_unique_values_per_param=None,
@@ -163,7 +163,7 @@ def test_special_parameter_values_validation() -> None:
     for spv_dict in invalid_special_param_values_dicts:
         with pytest.raises(ValueError):
             LlamaTuneAdapter(
-                orig_config_space=input_space,
+                orig_parameter_space=input_space,
                 num_low_dims=2,
                 special_param_values=spv_dict,
                 max_unique_values_per_param=None,
@@ -183,7 +183,7 @@ def test_special_parameter_values_validation() -> None:
     for spv_dict in invalid_special_param_values_dicts:
         with pytest.raises(ValueError):
             LlamaTuneAdapter(
-                orig_config_space=input_space,
+                orig_parameter_space=input_space,
                 num_low_dims=2,
                 special_param_values=spv_dict,
                 max_unique_values_per_param=None,
@@ -223,7 +223,7 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
 
     for spv_dict in special_param_value_dicts:
         adapter = LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=1,
             special_param_values=spv_dict,
             max_unique_values_per_param=None,
@@ -241,7 +241,7 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
 
     for spv_dict in special_param_value_dicts:
         adapter = LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=1,
             special_param_values=spv_dict,
             max_unique_values_per_param=None,
@@ -263,7 +263,7 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
         'int_2': [(2, bias_percentage / 2), (100, bias_percentage * 1.5)]
     }
     adapter = LlamaTuneAdapter(
-        orig_config_space=input_space,
+        orig_parameter_space=input_space,
         num_low_dims=1,
         special_param_values=spv_dict,
         max_unique_values_per_param=None,
@@ -313,7 +313,7 @@ def test_max_unique_values_per_param() -> None:
     num_configs = 200
     for max_unique_values_per_param in (5, 25, 100):
         adapter = LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=3,
             special_param_values=None,
             max_unique_values_per_param=max_unique_values_per_param,
@@ -354,7 +354,7 @@ def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: 
 
     # Enable low-dimensional space projection, but disable reverse mapping
     adapter = LlamaTuneAdapter(
-        orig_config_space=input_space,
+        orig_parameter_space=input_space,
         num_low_dims=num_target_space_dims,
         special_param_values=None,
         max_unique_values_per_param=None,
@@ -368,7 +368,7 @@ def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: 
 
     # Enable low-dimensional space projection *and* reverse mapping
     adapter = LlamaTuneAdapter(
-        orig_config_space=input_space,
+        orig_parameter_space=input_space,
         num_low_dims=num_target_space_dims,
         special_param_values=None,
         max_unique_values_per_param=None,
@@ -412,7 +412,7 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
     # Define config space with a mix of different parameter types
     input_space = construct_parameter_space(n_continuous_params=10, n_integer_params=10, n_categorical_params=5)
     adapter = LlamaTuneAdapter(
-        orig_config_space=input_space,
+        orig_parameter_space=input_space,
         num_low_dims=num_low_dims,
         special_param_values=special_param_values,
         max_unique_values_per_param=max_unique_values_per_param,
@@ -484,7 +484,7 @@ def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_
 
         # Init adapter and sample points in the low-dim space
         adapter = LlamaTuneAdapter(
-            orig_config_space=input_space,
+            orig_parameter_space=input_space,
             num_low_dims=num_target_space_dims,
             special_param_values=None,
             max_unique_values_per_param=None,
