@@ -44,7 +44,7 @@ expected_leaf_environment_class_names = [subclass_name for subclass_name in expe
 
 # Do the full cross product of all the test cases and all the optimizer types.
 @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
-@pytest.mark.parametrize("env_type", expected_environment_class_names)
+@pytest.mark.parametrize("env_class", expected_environment_class_names)
 def test_case_coverage_mlos_bench_environment_type(test_case_subtype: str, env_class: str) -> None:
     """
     Checks to see if there is a given type of test case for the given mlos_bench optimizer type.
