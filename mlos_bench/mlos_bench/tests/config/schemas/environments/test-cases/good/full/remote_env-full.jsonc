@@ -1,0 +1,29 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+    "name": "remote_env-full",
+    "description": "More descriptive text.",
+    "class": "mlos_bench.environments.remote.remote_env.RemoteEnv",
+    "include_tunables": [
+        "some/tunables.jsonc"
+    ],
+    "include_services": [
+        "some/service.jsonc"
+    ],
+    "config": {
+        "tunable_params": ["baz"],
+        "required_args": ["foo"],
+        "const_args": {
+            "foo": "bar"
+        },
+        "wait_boot": true,
+        "setup": [
+            "/bin/bash -c true"
+        ],
+        "run": [
+            "/bin/bash -c true"
+        ],
+        "teardown": [
+            "/bin/bash -c true"
+        ]
+    }
+}

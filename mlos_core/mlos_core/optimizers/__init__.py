@@ -69,43 +69,53 @@ DEFAULT_OPTIMIZER_TYPE = OptimizerType.SKOPT
 class OptimizerFactory:
     """Simple factory class for creating BaseOptimizer-derived objects"""
 
-    # pylint: disable=too-few-public-methods,consider-alternative-union-syntax
+    # pylint: disable=too-few-public-methods
 
     @staticmethod
-    def create(
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
-        optimizer_kwargs: Optional[dict] = None,
-        space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-        space_adapter_kwargs: Optional[dict] = None,
-    ) -> ConcreteOptimizer:
-        """Creates a new optimizer instance, given the parameter space, optimizer type and potential optimizer options.
+    def create(*,
+               parameter_space: ConfigSpace.ConfigurationSpace,
+               optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
+               optimizer_kwargs: Optional[dict] = None,
+               space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
+               space_adapter_kwargs: Optional[dict] = None) -> ConcreteOptimizer:
+        """
+        Create a new optimizer instance, given the parameter space, optimizer type,
+        and potential optimizer options.
 
         Parameters
         ----------
         parameter_space : ConfigSpace.ConfigurationSpace
             Input configuration space.
-
         optimizer_type : OptimizerType
             Optimizer class as defined by Enum.
-
         optimizer_kwargs : Optional[dict]
             Optional arguments passed in Optimizer class constructor.
-
         space_adapter_type : Optional[SpaceAdapterType]
             Space adapter class to be used alongside the optimizer.
-
         space_adapter_kwargs : Optional[dict]
             Optional arguments passed in SpaceAdapter class constructor.
 
         Returns
         -------
-        Instance of concrete optimizer (e.g., RandomOptimizer, EmukitOptimizer, SkoptOptimizer, etc.) class.
+        optimizer : ConcreteOptimizer
+            Instance of concrete optimizer class
+            (e.g., RandomOptimizer, EmukitOptimizer, SkoptOptimizer, etc.).
         """
         if space_adapter_kwargs is None:
             space_adapter_kwargs = {}
         if optimizer_kwargs is None:
             optimizer_kwargs = {}
-        space_adapter = SpaceAdapterFactory.create(parameter_space, space_adapter_type, space_adapter_kwargs=space_adapter_kwargs)
-        optimizer: ConcreteOptimizer = optimizer_type.value(parameter_space, space_adapter=space_adapter, **optimizer_kwargs)
+
+        space_adapter = SpaceAdapterFactory.create(
+            parameter_space=parameter_space,
+            space_adapter_type=space_adapter_type,
+            space_adapter_kwargs=space_adapter_kwargs,
+        )
+
+        optimizer: ConcreteOptimizer = optimizer_type.value(
+            parameter_space=parameter_space,
+            space_adapter=space_adapter,
+            **optimizer_kwargs
+        )
+
         return optimizer

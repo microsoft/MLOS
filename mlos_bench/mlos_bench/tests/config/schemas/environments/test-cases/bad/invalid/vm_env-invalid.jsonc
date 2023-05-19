@@ -1,0 +1,7 @@
+{
+    "name": "vm_env-invalid",
+    "class": "mlos_bench.environments.remote.vm_env.VMEnv",
+    "config": {
+        // needs at least one param
+    }
+}

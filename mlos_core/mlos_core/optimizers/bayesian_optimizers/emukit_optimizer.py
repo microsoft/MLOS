@@ -31,11 +31,18 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         The space adapter class to employ for parameter space transformations.
     """
 
-    def __init__(self, parameter_space: ConfigSpace.ConfigurationSpace,
+    def __init__(self, *,
+                 parameter_space: ConfigSpace.ConfigurationSpace,
                  space_adapter: Optional[BaseSpaceAdapter] = None):
-        super().__init__(parameter_space, space_adapter)
+
+        super().__init__(
+            parameter_space=parameter_space,
+            space_adapter=space_adapter,
+        )
+
+        # pylint: disable=import-outside-toplevel
+        from emukit.examples.gp_bayesian_optimization.single_objective_bayesian_optimization import GPBayesianOptimization
         self.emukit_parameter_space = configspace_to_emukit_space(self.optimizer_parameter_space)
-        from emukit.examples.gp_bayesian_optimization.single_objective_bayesian_optimization import GPBayesianOptimization  # noqa pylint: disable=import-outside-toplevel
         self.gpbo: GPBayesianOptimization
 
     def _register(self, configurations: pd.DataFrame, scores: pd.Series,

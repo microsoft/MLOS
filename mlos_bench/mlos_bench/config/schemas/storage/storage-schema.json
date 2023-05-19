@@ -98,7 +98,8 @@
         "config": {
             "description": "The storage driver specific config.",
             "$comment": "Stub for storage specific config appended with condition statements below",
-            "type": "object"
+            "type": "object",
+            "minProperties": 1
         }
     },
     "required": ["class", "config"],

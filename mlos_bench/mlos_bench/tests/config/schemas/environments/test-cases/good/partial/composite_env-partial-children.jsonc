@@ -1,0 +1,12 @@
+{
+    "name": "composite-env-partial",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+    "config": {
+        "children": [
+            {
+                "name": "child MockEnv",
+                "class": "mlos_bench.environments.MockEnv"
+            }
+        ]
+    }
+}

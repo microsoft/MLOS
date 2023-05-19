@@ -1,0 +1,7 @@
+{
+    "name": "empty-tunables-list",
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+    "include_tunables": [
+        // empty list is not allowed
+    ]
+}

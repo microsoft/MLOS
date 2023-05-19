@@ -1,89 +1,89 @@
-[
-    // Boot and shutdown Azure VM - all logic is in Python
-    {
-        "name": "Boot Ubuntu VM on Azure",
-        "class": "mlos_bench.environments.remote.OSEnv",
-        "config": {}
-    },
-
-    // Local: Generate GRUB config and upload it to the shared storage
-    {
-        "name": "Generate boot parameters for a Ubuntu VM",
-        "class": "mlos_bench.environments.local.LocalFileShareEnv",
-
-        "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
-
-        "config": {
-            "tunable_params": ["linux-kernel-boot"],
-
-            // Values provided from the global config/optimizer:
-            "required_args": ["experimentId", "trialId"],
-
-            "const_args": {
-                "experimentId": "RedisBench",  // Placeholder for value passed from outside
-                "trialId": 1                   // Placeholder for value passed from the optimizer
+{
+    "name": "Setup Ubuntu VM",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+    "config": {
+        "children": [
+            // Boot and shutdown Azure VM - all logic is in Python
+            {
+                "name": "Boot Ubuntu VM on Azure",
+                "class": "mlos_bench.environments.remote.OSEnv"
             },
-
-            // Dump tunable parameters to a local JSON file:
-            "dump_params_file": "boot-params.json",
-
-            // TODO: expand "setup" command to support array syntax like devcontainers so we can execute without a shell.
-            // In particular this should let us resolve the path to the script more easily.
-            // Alternatively: we could provide a "CWD" argument to the setup command.
-            "setup": [
-                "environments/os/linux/boot/scripts/local/generate_grub_config.py boot-params.json grub.cfg"
-            ],
-
-            "upload": [
-                {
-                    "from": "grub.cfg",
-                    "to": "$experimentId/$trialId/input/grub.cfg"
+            // Local: Generate GRUB config and upload it to the shared storage
+            {
+                "name": "Generate boot parameters for a Ubuntu VM",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "include_tunables": [
+                    "environments/os/linux/boot/linux-boot-tunables.jsonc"
+                ],
+                "config": {
+                    "tunable_params": [
+                        "linux-kernel-boot"
+                    ],
+                    // Values provided from the global config/optimizer:
+                    "required_args": [
+                        "experimentId",
+                        "trialId"
+                    ],
+                    "const_args": {
+                        "experimentId": "RedisBench", // Placeholder for value passed from outside
+                        "trialId": 1 // Placeholder for value passed from the optimizer
+                    },
+                    // Dump tunable parameters to a local JSON file:
+                    "dump_params_file": "boot-params.json",
+                    // TODO: expand "setup" command to support array syntax like devcontainers so we can execute without a shell.
+                    // In particular this should let us resolve the path to the script more easily.
+                    // Alternatively: we could provide a "CWD" argument to the setup command.
+                    "setup": [
+                        "environments/os/linux/boot/scripts/local/generate_grub_config.py boot-params.json grub.cfg"
+                    ],
+                    "upload": [
+                        {
+                            "from": "grub.cfg",
+                            "to": "$experimentId/$trialId/input/grub.cfg"
+                        }
+                    ]
                 }
-            ]
-        }
-    },
-
-    // Remote: Make sure the VM is up and running, update boot parameters and restart
-    {
-        "name": "Apply boot parameters to a remote Ubuntu VM",
-        "class": "mlos_bench.environments.RemoteEnv",
-
-        "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
-
-        "config": {
-            "tunable_params": ["linux-kernel-boot"],
-
-            "required_args": [
-                "storageAccountName",
-                "storageFileShareName",
-                "storageAccountKey",
-                "mountPoint",
-                "experimentId",
-                "trialId"
-            ],
-
-            "const_args": {
-                "storageAccountName": "osatsharedstorage",
-                "storageFileShareName": "os-autotune-file-share",
-                "mountPoint": "/mnt/osat_fs"
             },
-
-            "wait_boot": true,
-
-            "setup": [
-                "sudo mkdir -p $mountPoint",
-                "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
-                // TODO: Apply GRUB parameters from config on shared storage at:
-                // "$mountPoint/$experimentId/$trialId/input/grub.cfg"
-                // "sudo update-grub",
-                // "sudo shutdown -r now"  // Reboot to apply the parameters
-                "cat $mountPoint/$experimentId/$trialId/input/grub.cfg"
-            ],
-
-            "teardown": [
-                // "sudo umount $mountPoint"
-                "echo sudo umount $mountPoint"
-            ]
-        }
+            // Remote: Make sure the VM is up and running, update boot parameters and restart
+            {
+                "name": "Apply boot parameters to a remote Ubuntu VM",
+                "class": "mlos_bench.environments.RemoteEnv",
+                "include_tunables": [
+                    "environments/os/linux/boot/linux-boot-tunables.jsonc"
+                ],
+                "config": {
+                    "tunable_params": [
+                        "linux-kernel-boot"
+                    ],
+                    "required_args": [
+                        "storageAccountName",
+                        "storageFileShareName",
+                        "storageAccountKey",
+                        "mountPoint",
+                        "experimentId",
+                        "trialId"
+                    ],
+                    "const_args": {
+                        "storageAccountName": "osatsharedstorage",
+                        "storageFileShareName": "os-autotune-file-share",
+                        "mountPoint": "/mnt/osat_fs"
+                    },
+                    "wait_boot": true,
+                    "setup": [
+                        "sudo mkdir -p $mountPoint",
+                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
+                        // TODO: Apply GRUB parameters from config on shared storage at:
+                        // "$mountPoint/$experimentId/$trialId/input/grub.cfg"
+                        // "sudo update-grub",
+                        // "sudo shutdown -r now"  // Reboot to apply the parameters
+                        "cat $mountPoint/$experimentId/$trialId/input/grub.cfg"
+                    ],
+                    "teardown": [
+                        // "sudo umount $mountPoint"
+                        "echo sudo umount $mountPoint"
+                    ]
+                }
+            }
+        ]
     }
-]
+}

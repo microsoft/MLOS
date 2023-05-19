@@ -196,7 +196,6 @@ class Storage(metaclass=ABCMeta):
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
                      config_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
-            # pylint: disable=too-many-arguments
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id

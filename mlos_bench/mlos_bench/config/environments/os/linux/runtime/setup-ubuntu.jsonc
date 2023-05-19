@@ -1,65 +1,67 @@
-[
-    // Local: Generate kernel config and upload it to the shared storage
-    {
-        "name": "Generate Linux kernel parameters for Ubuntu",
-        "class": "mlos_bench.environments.LocalFileShareEnv",
-
-        "config": {
-            "include_tunables": ["environments/os/linux/runtime/linux-runtime-tunables.jsonc"],
-
-            "required_args": ["experimentId", "trialId"],
-
-            // Dump tunable parameters to a local JSON file:
-            "dump_params_file": "kernel-params.json",
-
-            "setup": [
-                "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py kernel-params.json config-kernel.sh"
-            ],
-
-            "upload": [
-                {
-                    "from": "config-kernel.sh",
-                    "to": "$experimentId/$trialId/input/config-kernel.sh"
-                },
-                {
-                    "from": "kernel-params.json",
-                    "to": "$experimentId/$trialId/input/kernel-params.json"
+{
+    "name": "Setup Ubuntu VM",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+    "config": {
+        "children": [
+            // Local: Generate kernel config and upload it to the shared storage
+            {
+                "name": "Generate Linux kernel parameters for Ubuntu",
+                "class": "mlos_bench.environments.LocalFileShareEnv",
+                "include_tunables": [
+                    "environments/os/linux/runtime/linux-runtime-tunables.jsonc"
+                ],
+                "config": {
+                    "required_args": [
+                        "experimentId",
+                        "trialId"
+                    ],
+                    // Dump tunable parameters to a local JSON file:
+                    "dump_params_file": "kernel-params.json",
+                    "setup": [
+                        "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py kernel-params.json config-kernel.sh"
+                    ],
+                    "upload": [
+                        {
+                            "from": "config-kernel.sh",
+                            "to": "$experimentId/$trialId/input/config-kernel.sh"
+                        },
+                        {
+                            "from": "kernel-params.json",
+                            "to": "$experimentId/$trialId/input/kernel-params.json"
+                        }
+                    ]
                 }
-            ]
-        }
-    },
-
-    // Remote: Apply new kernel configuration to a VM
-    {
-        "name": "Apply Linux kernel parameters to a remote Ubuntu VM",
-        "class": "mlos_bench.environments.remote.RemoteEnv",
-
-        "config": {
-            "include_tunables": ["environments/os/linux/runtime/linux-runtime-tunables.jsonc"],
-
-            "required_args": [
-                "storageAccountName",
-                "storageFileShareName",
-                "storageAccountKey",
-                "mountPoint",
-                "experimentId",
-                "trialId"
-            ],
-
-            "const_args": {
-                "storageAccountName": "osatsharedstorage",
-                "storageFileShareName": "os-autotune-file-share",
-                "mountPoint": "/mnt/osat_fs"
             },
-
-            "wait_boot": true,
-
-            "setup": [
-                "sudo mkdir -p $mountPoint",
-                "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
-                // "sudo $mountPoint/$experimentId/$trialId/input/config-kernel.sh"
-                "cat $mountPoint/$experimentId/$trialId/input/config-kernel.sh"
-            ]
-        }
+            // Remote: Apply new kernel configuration to a VM
+            {
+                "name": "Apply Linux kernel parameters to a remote Ubuntu VM",
+                "class": "mlos_bench.environments.remote.RemoteEnv",
+                "include_tunables": [
+                    "environments/os/linux/runtime/linux-runtime-tunables.jsonc"
+                ],
+                "config": {
+                    "required_args": [
+                        "storageAccountName",
+                        "storageFileShareName",
+                        "storageAccountKey",
+                        "mountPoint",
+                        "experimentId",
+                        "trialId"
+                    ],
+                    "const_args": {
+                        "storageAccountName": "osatsharedstorage",
+                        "storageFileShareName": "os-autotune-file-share",
+                        "mountPoint": "/mnt/osat_fs"
+                    },
+                    "wait_boot": true,
+                    "setup": [
+                        "sudo mkdir -p $mountPoint",
+                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
+                        // "sudo $mountPoint/$experimentId/$trialId/input/config-kernel.sh"
+                        "cat $mountPoint/$experimentId/$trialId/input/config-kernel.sh"
+                    ]
+                }
+            }
+        ]
     }
-]
+}

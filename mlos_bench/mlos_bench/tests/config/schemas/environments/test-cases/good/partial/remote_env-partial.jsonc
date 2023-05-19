@@ -1,0 +1,9 @@
+{
+    "name": "remote_env-partial",
+    "class": "mlos_bench.environments.RemoteEnv",
+    "config": {
+        "run": [
+            "/bin/bash -c true"
+        ]
+    }
+}

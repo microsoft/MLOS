@@ -37,7 +37,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
     """
     if kwargs is None:
         kwargs = {}
-    optimizer = optimizer_class(configuration_space, **kwargs)
+    optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
     assert optimizer is not None
 
     assert optimizer.parameter_space is not None
@@ -71,7 +71,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
         return ret
     # Emukit doesn't allow specifying a random state, so we set the global seed.
     np.random.seed(42)
-    optimizer = optimizer_class(configuration_space, **kwargs)
+    optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
 
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_best_observation()
@@ -138,9 +138,16 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     if kwargs is None:
         kwargs = {}
     if optimizer_type is None:
-        optimizer = OptimizerFactory.create(configuration_space, optimizer_kwargs=kwargs)
+        optimizer = OptimizerFactory.create(
+            parameter_space=configuration_space,
+            optimizer_kwargs=kwargs,
+        )
     else:
-        optimizer = OptimizerFactory.create(configuration_space, optimizer_type, optimizer_kwargs=kwargs)
+        optimizer = OptimizerFactory.create(
+            parameter_space=configuration_space,
+            optimizer_type=optimizer_type,
+            optimizer_kwargs=kwargs,
+        )
     assert optimizer is not None
 
     assert optimizer.parameter_space is not None
@@ -177,21 +184,33 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0, upper=3))
 
     # Initialize an optimizer that uses LlamaTune space adapter
+    optimizer: BaseOptimizer = OptimizerFactory.create(
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
+        optimizer_kwargs=kwargs,
+    )
+    assert optimizer is not None
+
+    # Initialize another optimizer that uses LlamaTune space adapter
     space_adapter_kwargs = {
         "num_low_dims": 1,
         "special_param_values": None,
         "max_unique_values_per_param": None,
     }
     llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
-        input_space,
-        optimizer_type,
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
         optimizer_kwargs=kwargs,
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
-        space_adapter_kwargs=space_adapter_kwargs
+        space_adapter_kwargs=space_adapter_kwargs,
     )
 
     # Initialize an optimizer that uses the original space
-    optimizer: BaseOptimizer = OptimizerFactory.create(input_space, optimizer_type, optimizer_kwargs=kwargs)
+    optimizer: BaseOptimizer = OptimizerFactory.create(
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
+        optimizer_kwargs=kwargs,
+    )
     assert optimizer is not None
 
     assert llamatune_optimizer is not None

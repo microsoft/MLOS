@@ -7,7 +7,7 @@ Local Environments for mlos_bench.
 """
 
 from mlos_bench.environments.local.local_env import LocalEnv
-from mlos_bench.environments.local.local_env_fileshare import LocalFileShareEnv
+from mlos_bench.environments.local.local_fileshare_env import LocalFileShareEnv
 
 __all__ = [
     'LocalEnv',
