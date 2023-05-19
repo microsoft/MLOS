@@ -25,7 +25,8 @@ class MockEnv(Environment):
     Scheduler-side environment to mock the benchmark results.
     """
 
-    _NOISE_VAR = 0.2  # Variance of the Gaussian noise added to the benchmark value.
+    _NOISE_VAR = 0.2
+    """Variance of the Gaussian noise added to the benchmark value."""
 
     def __init__(self,
                  *,
@@ -71,7 +72,7 @@ class MockEnv(Environment):
             with the results or None if the status is not COMPLETED.
             The keys of the `output` dict are the names of the metrics
             specified in the config; by default it's just one metric
-             named "score". All output metrics have the same value.
+            named "score". All output metrics have the same value.
         """
         (status, _) = result = super().run()
         if not status.is_ready:
