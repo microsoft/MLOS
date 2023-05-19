@@ -21,6 +21,10 @@
             "foo"
         ],
         "range": [0, 1],
-        "seed": 42
+        "seed": 42,
+        "metrics": [
+            "latency",
+            "cost"
+        ]
     }
 }

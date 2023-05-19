@@ -32,6 +32,15 @@
                             },
                             "minItems": 2,
                             "maxItems": 2
+                        },
+                        "metrics": {
+                            "type": "array",
+                            "description": "Names of fake benchmark metrics to be generate",
+                            "items": {
+                                "type": "string",
+                                "examples": ["score"]
+                            },
+                            "minItems": 1
                         }
                     }
                 }
