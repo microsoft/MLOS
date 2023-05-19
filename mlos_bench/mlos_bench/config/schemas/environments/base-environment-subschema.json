@@ -13,7 +13,28 @@
         "class": {
             "description": "Class of the Environment.",
             "type": "string",
-            "pattern": "^mlos_bench[.]environments[.]"
+            "$comment": "Listing all of the supported class names here instead of just a pattern helps autocomplete in VSCode work nicer.",
+            "enum": [
+                "mlos_bench.environments.CompositeEnv",
+                "mlos_bench.environments.composite_env.CompositeEnv",
+                "mlos_bench.environments.MockEnv",
+                "mlos_bench.environments.mock_env.MockEnv",
+                "mlos_bench.environments.LocalEnv",
+                "mlos_bench.environments.local.LocalEnv",
+                "mlos_bench.environments.local.local_env.LocalEnv",
+                "mlos_bench.environments.LocalFileShareEnv",
+                "mlos_bench.environments.local.LocalFileShareEnv",
+                "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
+                "mlos_bench.environments.OSEnv",
+                "mlos_bench.environments.remote.OSEnv",
+                "mlos_bench.environments.remote.os_env.OSEnv",
+                "mlos_bench.environments.RemoteEnv",
+                "mlos_bench.environments.remote.RemoteEnv",
+                "mlos_bench.environments.remote.remote_env.RemoteEnv",
+                "mlos_bench.environments.VMEnv",
+                "mlos_bench.environments.remote.VMEnv",
+                "mlos_bench.environments.remote.vm_env.VMEnv"
+            ]
         },
         "include_services": {
             "description": "Path(s) to Service config files to include for the Environment.",
