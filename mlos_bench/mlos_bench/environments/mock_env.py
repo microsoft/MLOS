@@ -46,7 +46,7 @@ class MockEnv(Environment):
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
-            Optional arguments are `seed`, `range`, and `score_name`.
+            Optional arguments are `seed`, `range`, and `metrics`.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
         service: Service
@@ -57,7 +57,7 @@ class MockEnv(Environment):
         seed = self.config.get("seed")
         self._random = random.Random(seed) if seed is not None else None
         self._range = self.config.get("range")
-        self._score_name = self.config.get("score_name", "score")
+        self._metrics = self.config.get("metrics", ["score"])
         self._is_ready = True
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -69,8 +69,9 @@ class MockEnv(Environment):
         (status, output) : (Status, dict)
             A pair of (Status, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
-            If run script is a benchmark, then the score is usually expected to
-            be in the `score` field.
+            The keys of the `output` dict are the names of the metrics
+            specified in the config; by default it's just one metric
+             named "score". All output metrics have the same value.
         """
         (status, _) = result = super().run()
         if not status.is_ready:
@@ -87,7 +88,7 @@ class MockEnv(Environment):
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        return (Status.SUCCEEDED, {self._score_name: score})
+        return (Status.SUCCEEDED, {metric: score for metric in self._metrics})
 
     @staticmethod
     def _normalized(tunable: Tunable) -> float:

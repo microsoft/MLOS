@@ -14,6 +14,6 @@
         "tunable_params": ["azure-vm", "linux-kernel-boot", "linux-kernel-runtime", "redis"],
         "seed": 42,            // Seed for the random noise generator. Omit to produce noise-free data.
         "range": [60, 120],    // Range of the generated output value of the benchmark.
-        "score_name": "score"  // Name of the benchmark metric. (Default is "score").
+        "metrics": ["score"]   // Names of the benchmark metrics. (Default is one metric, "score").
     }
 }

@@ -114,7 +114,7 @@ def mock_env(tunable_groups: TunableGroups) -> MockEnv:
             "tunable_groups": ["provision", "boot", "kernel"],
             "seed": 13,
             "range": [60, 120],
-            "score_name": "score"
+            "metrics": ["score"],
         },
         tunables=tunable_groups
     )
@@ -130,7 +130,7 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
         config={
             "tunable_groups": ["provision", "boot", "kernel"],
             "range": [60, 120],
-            "score_name": "score"
+            "metrics": ["score", "other_score"],
         },
         tunables=tunable_groups
     )
