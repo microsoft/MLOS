@@ -71,6 +71,13 @@ class CompositeEnv(Environment):
         """
         return self._children
 
+    def pprint(self, indent: int = 4, level: int = 0) -> str:
+        """
+        Pretty-print the environment and its children.
+        """
+        return super().pprint(indent, level) + '\n' + '\n'.join(
+            child.pprint(indent, level + 1) for child in self._children)
+
     def _add_child(self, env: Environment) -> None:
         """
         Add a new child environment to the composite environment.
