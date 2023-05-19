@@ -1,0 +1,30 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+
+    "name": "mock_env-full",
+    "description": "More descriptive text.",
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+    "include_services": [
+        "path/to/some/service.jsonc"
+    ],
+    "include_tunables": [
+        "path/to/some/tunables.jsonc"
+    ],
+    "config": {
+        "tunable_params": [
+            "some-tunable-params-name"
+        ],
+        "const_args": {
+            "foo": "bar"
+        },
+        "required_args": [
+            "foo"
+        ],
+        "range": [0, 1],
+        "seed": 42,
+        "metrics": [
+            "latency",
+            "cost"
+        ]
+    }
+}

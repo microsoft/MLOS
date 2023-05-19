@@ -1,0 +1,5 @@
+{
+    "name": "os_env-partial",
+    "class": "mlos_bench.environments.remote.OSEnv"
+    // FIXME: not very useful atm ...
+}

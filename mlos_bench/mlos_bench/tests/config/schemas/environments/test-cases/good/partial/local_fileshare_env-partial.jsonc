@@ -1,0 +1,15 @@
+{
+    "name": "local_fileshare_env-partial",
+    "class": "mlos_bench.environments.LocalFileShareEnv",
+    "config": {
+        "setup": [
+            "/bin/bash -c true"
+        ],
+        "download": [
+            {
+                "from": "https://some-host/some-path/some-file.tar.gz",
+                "to": "/some/local/path/some-file.tar.gz"
+            }
+        ]
+    }
+}

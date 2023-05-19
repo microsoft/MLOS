@@ -1,0 +1,7 @@
+{
+    "name": "empty-services-list",
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+    "include_services": [
+        // empty list is not allowed
+    ]
+}

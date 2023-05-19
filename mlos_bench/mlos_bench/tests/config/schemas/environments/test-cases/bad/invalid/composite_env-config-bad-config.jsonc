@@ -1,0 +1,7 @@
+{
+    "name": "composite-env-partial",
+    "class": "mlos_bench.environments.CompositeEnv",
+    "config": {
+        // should have either children or include_children
+    }
+}

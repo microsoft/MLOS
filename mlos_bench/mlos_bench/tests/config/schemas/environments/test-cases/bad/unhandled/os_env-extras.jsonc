@@ -1,0 +1,5 @@
+{
+    "name": "os_env-extras",
+    "class": "mlos_bench.environments.remote.os_env.OSEnv",
+    "extra": "invalid"
+}

@@ -1,0 +1,11 @@
+{
+    "name": "local_env-partial",
+    "class": "mlos_bench.environments.LocalEnv",
+    "config": {
+        "run": [
+            1,
+            {"bad": "types"},
+            false
+        ]
+    }
+}

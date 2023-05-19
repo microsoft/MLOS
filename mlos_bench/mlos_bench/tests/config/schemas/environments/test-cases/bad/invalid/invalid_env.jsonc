@@ -1,0 +1,5 @@
+{
+    "name": "invalid-env",
+    // abstract base class is not valid
+    "class": "mlos_bench.environments.base_environment.Environment"
+}
