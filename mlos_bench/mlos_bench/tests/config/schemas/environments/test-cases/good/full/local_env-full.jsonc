@@ -1,0 +1,31 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+    "name": "local_env-full",
+    "description": "More descriptive text.",
+    "class": "mlos_bench.environments.local.local_env.LocalEnv",
+    "include_tunables": [
+        "some/tunables.jsonc"
+    ],
+    "include_services": [
+        "some/service.jsonc"
+    ],
+    "config": {
+        "tunable_params": ["baz"],
+        "required_args": ["foo"],
+        "const_args": {
+            "foo": "bar"
+        },
+        "temp_dir": "/tmp/",
+        "setup": [
+            "/bin/bash -c true"
+        ],
+        "run": [
+            "/bin/bash -c true"
+        ],
+        "teardown": [
+            "/bin/bash -c true"
+        ],
+        "read_results_file": "/tmp/results.json",
+        "dump_params_file": "/tmp/dump_params.json"
+    }
+}

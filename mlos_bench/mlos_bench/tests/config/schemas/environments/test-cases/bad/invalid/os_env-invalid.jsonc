@@ -1,0 +1,7 @@
+{
+    "name": "os_env-invalid",
+    "class": "mlos_bench.environments.remote.os_env.OSEnv",
+    "config": {
+        // needs at least one param
+    }
+}

@@ -398,7 +398,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : Environment
             A new benchmarking environment.
         """
-        config = self.load_config(json_file_name, schema_type=None)     # TODO: , ConfigSchema.ENVIRONMENT)
+        config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         assert isinstance(config, dict)
         return self.build_environment(config, tunables, global_config, service)
 
@@ -426,7 +426,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : List[Environment]
             A list of new benchmarking environments.
         """
-        config_list = self.load_config(json_file_name, schema_type=None)    # TODO: , ConfigSchema.ENVIRONMENT)
+        config_list = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         if isinstance(config_list, dict):
             config_list = [config_list]
         return [
