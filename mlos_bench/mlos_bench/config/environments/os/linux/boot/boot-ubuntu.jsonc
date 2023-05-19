@@ -6,8 +6,7 @@
             // Boot and shutdown Azure VM - all logic is in Python
             {
                 "name": "Boot Ubuntu VM on Azure",
-                "class": "mlos_bench.environments.remote.OSEnv",
-                "config": {}
+                "class": "mlos_bench.environments.remote.OSEnv"
             },
             // Local: Generate GRUB config and upload it to the shared storage
             {
