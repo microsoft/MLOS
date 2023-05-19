@@ -39,7 +39,7 @@ class OptimizerType(Enum):
 
     EMUKIT = EmukitOptimizer
     """An instance of EmukitOptimizer class will be used"""
-    
+
     FLAML = FlamlOptimizer
     """An instance of FlamlOptimizer class will be used"""
 
