@@ -8,7 +8,6 @@
     "properties": {
         "class": {
             "enum": [
-                "mlos_bench.environments.VMEnv",
                 "mlos_bench.environments.remote.VMEnv",
                 "mlos_bench.environments.remote.vm_env.VMEnv"
             ]

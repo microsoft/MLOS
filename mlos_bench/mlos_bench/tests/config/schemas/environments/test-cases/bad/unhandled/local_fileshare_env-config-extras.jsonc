@@ -1,5 +1,5 @@
 {
-    "name": "local_fileshare_env-partial",
+    "name": "local_fileshare_env-config-extras",
     "class": "mlos_bench.environments.LocalFileShareEnv",
     "config": {
         "extra": "not allowed",

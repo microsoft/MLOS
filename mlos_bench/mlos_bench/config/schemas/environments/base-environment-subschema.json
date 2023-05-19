@@ -25,13 +25,11 @@
                 "mlos_bench.environments.LocalFileShareEnv",
                 "mlos_bench.environments.local.LocalFileShareEnv",
                 "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
-                "mlos_bench.environments.OSEnv",
                 "mlos_bench.environments.remote.OSEnv",
                 "mlos_bench.environments.remote.os_env.OSEnv",
                 "mlos_bench.environments.RemoteEnv",
                 "mlos_bench.environments.remote.RemoteEnv",
                 "mlos_bench.environments.remote.remote_env.RemoteEnv",
-                "mlos_bench.environments.VMEnv",
                 "mlos_bench.environments.remote.VMEnv",
                 "mlos_bench.environments.remote.vm_env.VMEnv"
             ]

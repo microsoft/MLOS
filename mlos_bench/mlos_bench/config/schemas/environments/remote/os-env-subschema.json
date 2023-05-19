@@ -8,7 +8,6 @@
     "properties": {
         "class": {
             "enum": [
-                "mlos_bench.environments.OSEnv",
                 "mlos_bench.environments.remote.OSEnv",
                 "mlos_bench.environments.remote.os_env.OSEnv"
             ]
