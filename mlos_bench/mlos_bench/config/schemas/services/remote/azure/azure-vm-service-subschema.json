@@ -1,0 +1,75 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-vm-service-subschema.json",
+    "title": "mlos_bench Azure VM Service config",
+    "description": "config for an mlos_bench Azure VM Service",
+    "type": "object",
+    "$defs": {
+        "poll_configs": {
+            "type": "object",
+            "properties": {
+                "pollInterval": {
+                    "description": "Poll interval in seconds.",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "pollTimeout": {
+                    "description": "Poll timeout in seconds.",
+                    "type": "number",
+                    "minimum": 1
+                }
+            }
+        }
+    },
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.azure.AzureVMService",
+                "mlos_bench.services.remote.azure.azure_services.AzureVMService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/$defs/poll_configs"
+                },
+                {
+                    "properties": {
+                        "deploymentTemplatePath": {
+                            "type": "string",
+                            "pattern": "[.]json[c]?$"
+                        },
+                        "subscription": {
+                            "type": "string"
+                        },
+                        "accessToken": {
+                            "type": "string"
+                        },
+                        "resourceGroup": {
+                            "type": "string"
+                        },
+                        "deploymentName": {
+                            "type": "string"
+                        },
+                        "vmName": {
+                            "$comment": "TODO: Fix this so we can support multi-VMs",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "deploymentTemplatePath",
+                        "subscription",
+                        "accessToken",
+                        "resourceGroup",
+                        "deploymentName",
+                        "vmName"
+                    ]
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"],
+    "unevaluatedProperties": false
+}

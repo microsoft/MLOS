@@ -1,0 +1,31 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/local/mock/mock-local-exec-service-subschema.json",
+    "title": "mlos_bench Mock LocalExec Service config",
+    "description": "config for an mlos_bench Mock LocalExec Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.tests.services.local.mock.mock_local_exec_service.MockLocalExecService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "properties": {
+                        "temp_dir": {
+                            "description": "Path to temp dir",
+                            "type": "string"
+                        }
+                    },
+                    "minProperties": 1
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"],
+    "unevaluatedProperties": false
+}

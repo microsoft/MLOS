@@ -1,0 +1,67 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    "title": "mlos_bench Service config",
+    "description": "config for an mlos_bench Service - this is the top level schema that should be used to validate a Service config",
+    "$defs": {
+        "service_config": {
+            "type": "object",
+            "oneOf": [
+                {
+                    "$ref": "./local/mock/mock-local-exec-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/mock/mock-fileshare-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/mock/mock-vm-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/mock/mock-remote-exec-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/azure/azure-vm-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/azure/azure-fileshare-service-subschema.json"
+                }
+            ]
+        }
+    },
+    "oneOf": [
+        {
+            "$comment": "flat service config",
+            "type": "object",
+            "allOf": [
+                {
+                    "type": "object",
+                    "$comment": "Some properties that we only accept for the top level Service config object.",
+                    "properties": {
+                        "$schema": {
+                            "description": "The schema to use for validating an Service config (accepts both URLs and local paths).",
+                            "type": "string",
+                            "$comment": "This is optional, but if provided, should match the name of this file.  However, we don't expect it to be included in nested configs, so it isn't present in the base config schema.",
+                            "pattern": "/schemas/services/service-schema.json$"
+                        },
+                        "description": {
+                            "description": "Optional description of the config.",
+                            "type": "string"
+                        }
+                    }
+                },
+                {
+                    "$ref": "#/$defs/service_config"
+                }
+            ]
+        },
+        {
+            "$comment": "List of service configs",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/service_config"
+            },
+            "minItems": 1
+        }
+    ],
+    "unevaluatedProperties": false
+}
