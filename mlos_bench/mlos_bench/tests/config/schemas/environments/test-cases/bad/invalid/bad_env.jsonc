@@ -1,0 +1,4 @@
+{
+    "name": "bad-env",
+    "class": "mlos_bench.environments.DNE"
+}

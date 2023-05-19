@@ -1,0 +1,10 @@
+{
+    "name": "remote_env-config-extras",
+    "class": "mlos_bench.environments.RemoteEnv",
+    "config": {
+        "run": [
+            "/bin/bash -c true"
+        ],
+        "wait_boot": "false"    // bad type
+    }
+}

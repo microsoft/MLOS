@@ -28,14 +28,16 @@ class SkoptOptimizer(BaseBayesianOptimizer):
         The parameter space to optimize.
     """
 
-    def __init__(
-        self,
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        base_estimator: str = 'gp',
-        seed: Optional[int] = None,
-    ):
-        super().__init__(parameter_space, space_adapter)
+    def __init__(self, *,
+                 parameter_space: ConfigSpace.ConfigurationSpace,
+                 space_adapter: Optional[BaseSpaceAdapter] = None,
+                 base_estimator: str = 'gp',
+                 seed: Optional[int] = None):
+
+        super().__init__(
+            parameter_space=parameter_space,
+            space_adapter=space_adapter,
+        )
 
         from skopt import Optimizer as Optimizer_Skopt  # pylint: disable=import-outside-toplevel
         self.base_optimizer = Optimizer_Skopt(

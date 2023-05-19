@@ -40,13 +40,15 @@ class FlamlOptimizer(BaseOptimizer):
         More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
     """
 
-    def __init__(
-        self,
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        low_cost_partial_config: Optional[dict] = None,
-    ):
-        super().__init__(parameter_space, space_adapter)
+    def __init__(self, *,
+                 parameter_space: ConfigSpace.ConfigurationSpace,
+                 space_adapter: Optional[BaseSpaceAdapter] = None,
+                 low_cost_partial_config: Optional[dict] = None):
+
+        super().__init__(
+            parameter_space=parameter_space,
+            space_adapter=space_adapter,
+        )
 
         self.flaml_parameter_space: dict = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.low_cost_partial_config = low_cost_partial_config
@@ -72,7 +74,8 @@ class FlamlOptimizer(BaseOptimizer):
         if context is not None:
             raise NotImplementedError()
         for (_, config), score in zip(configurations.iterrows(), scores):
-            cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())  # noqa: E501
+            cs_config: ConfigSpace.Configuration = ConfigSpace.Configuration(
+                self.optimizer_parameter_space, values=config.to_dict())
             if cs_config in self.evaluated_samples:
                 warn(f"Configuration {config} was already registered", UserWarning)
 

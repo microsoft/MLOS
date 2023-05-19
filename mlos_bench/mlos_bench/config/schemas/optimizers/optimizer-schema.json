@@ -53,7 +53,8 @@
                     "items": {
                         "type": "string",
                         "pattern": "[.]json[c]?$"
-                    }
+                    },
+                    "minItems": 1
                 },
                 "tunable_values": {
                     "$ref": "../tunables/tunable-values-schema.json#/$defs/tunable_values_set"
@@ -98,13 +99,15 @@
                 "type": "string",
                 "$comment": "Paths are expected to be json.",
                 "pattern": "[.]json[c]?$"
-            }
+            },
+            "minItems": 1
         },
 
         "config": {
             "description": "The optimizer specific config.",
             "$comment": "Stub for optimizer specific config appended with condition statements below",
-            "type": "object"
+            "type": "object",
+            "minProperties": 1
         }
     },
     "required": ["class"],

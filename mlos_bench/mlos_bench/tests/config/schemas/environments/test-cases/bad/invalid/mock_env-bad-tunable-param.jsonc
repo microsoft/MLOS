@@ -1,0 +1,7 @@
+{
+    "name": "bad-tunables-list",
+    "class": "mlos_bench.environments.mock_env.MockEnv",
+    "include_tunables": [
+        "path/to/bad/file.xml"  // <-- expect json(c) files
+    ]
+}
