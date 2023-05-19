@@ -1,5 +1,6 @@
 {
     "name": "mock_env-full",
+    "description": "More descriptive text.",
     "class": "mlos_bench.environments.MockEnv",
     "include_services": [
         "path/to/some/service.jsonc"
@@ -8,6 +9,9 @@
         "path/to/some/tunables.jsonc"
     ],
     "config": {
+        "tunable_params": [
+            "some-tunable-params-name"
+        ],
         "const_args": {
             "foo": "bar"
         },
