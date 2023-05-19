@@ -3,9 +3,7 @@
         "class": "mlos_bench.services.remote.azure.AzureVMService",
 
         "config": {
-
-            "deployTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-
+            "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
             // `subscription` and `accessToken` are placeholders
             // for values provided in the global config:
             "subscription": "AZURE SUBSCRIPTION ID",

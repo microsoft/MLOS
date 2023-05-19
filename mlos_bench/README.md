@@ -94,7 +94,7 @@ E.g., in `my-config/azure/service-provision-vm.jsonc`, put your target resource 
             "class": "mlos_bench.environments.azure.AzureVMService",
 
             "config": {
-                "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+                "deploymentTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
 
                 "subscription": "{{ ID of subscription to use }}",
                 "resourceGroup": "{{ Name of resource group to use }}",

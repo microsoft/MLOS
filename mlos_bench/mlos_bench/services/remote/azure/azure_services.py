@@ -118,7 +118,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
 
         check_required_params(
             config, {
-                "deployTemplatePath",
+                "deploymentTemplatePath",
                 "subscription",
                 "accessToken",
                 "resourceGroup",
@@ -146,7 +146,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         self._request_timeout = float(config.get("requestTimeout", AzureVMService._REQUEST_TIMEOUT))
 
         # TODO: Provide external schema validation?
-        self._deploy_template = self.config_loader_service.load_config(config['deployTemplatePath'], schema_type=None)
+        self._deploy_template = self.config_loader_service.load_config(config['deploymentTemplatePath'], schema_type=None)
 
         self._url_deploy = AzureVMService._URL_DEPLOY.format(
             subscription=config["subscription"],

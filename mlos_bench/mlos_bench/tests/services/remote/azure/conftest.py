@@ -29,7 +29,7 @@ def azure_vm_service(config_persistence_service: ConfigPersistenceService) -> Az
     Creates a dummy Azure VM service for tests that require it.
     """
     return AzureVMService(config={
-        "deployTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+        "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
         "deploymentName": "TEST_DEPLOYMENT",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
