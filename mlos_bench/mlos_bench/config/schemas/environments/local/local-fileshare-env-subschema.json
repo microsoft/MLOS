@@ -45,13 +45,22 @@
                                 "$ref": "../common-environment-subschemas.json#/$defs/file_upload_config"
                             }
                         }
-                    }
+                    },
+                    "anyOf": [
+                        {
+                            "required": ["upload"]
+                        },
+                        {
+                            "required": ["download"]
+                        }
+                    ]
                 }
             ],
             "unevaluatedProperties": false
         }
     },
     "required": [
-        "class"
+        "class",
+        "config"
     ]
 }

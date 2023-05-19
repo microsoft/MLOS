@@ -77,6 +77,7 @@
         }
     },
     "required": [
-        "class"
+        "class",
+        "config"
     ]
 }

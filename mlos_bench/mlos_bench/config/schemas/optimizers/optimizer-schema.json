@@ -106,7 +106,8 @@
         "config": {
             "description": "The optimizer specific config.",
             "$comment": "Stub for optimizer specific config appended with condition statements below",
-            "type": "object"
+            "type": "object",
+            "minProperties": 1
         }
     },
     "required": ["class"],

@@ -37,7 +37,8 @@
                         ]
                     }
                 }
-            }
+            },
+            "minProperties": 1
         },
         "command_lines": {
             "type": "array",

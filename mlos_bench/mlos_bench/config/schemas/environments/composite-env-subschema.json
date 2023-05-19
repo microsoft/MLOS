@@ -41,7 +41,7 @@
                         }
                     },
                     "unevaluatedProperties": false,
-                    "oneOf": [
+                    "anyOf": [
                         {
                             "required": ["include_children"]
                         },
