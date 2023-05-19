@@ -21,7 +21,7 @@ class BaseSpaceAdapter(metaclass=ABCMeta):
         The original parameter space to explore.
     """
 
-    def __init__(self, orig_parameter_space: ConfigSpace.ConfigurationSpace):
+    def __init__(self, *, orig_parameter_space: ConfigSpace.ConfigurationSpace):
         self._orig_parameter_space: ConfigSpace.ConfigurationSpace = orig_parameter_space
         self._random_state = orig_parameter_space.random
 
