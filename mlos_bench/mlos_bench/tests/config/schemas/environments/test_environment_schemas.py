@@ -42,12 +42,12 @@ expected_leaf_environment_class_names = [subclass_name for subclass_name in expe
                                          if subclass_name != COMPOSITE_ENV_CLASS_NAME]
 
 
-# Do the full cross product of all the test cases and all the optimizer types.
+# Do the full cross product of all the test cases and all the Environment types.
 @pytest.mark.parametrize("test_case_subtype", sorted(TEST_CASES.by_subtype))
 @pytest.mark.parametrize("env_class", expected_environment_class_names)
 def test_case_coverage_mlos_bench_environment_type(test_case_subtype: str, env_class: str) -> None:
     """
-    Checks to see if there is a given type of test case for the given mlos_bench optimizer type.
+    Checks to see if there is a given type of test case for the given mlos_bench Environment type.
     """
     for test_case in TEST_CASES.by_subtype[test_case_subtype].values():
         if try_resolve_class_name(test_case.config.get("class")) == env_class:
