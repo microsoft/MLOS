@@ -184,14 +184,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0, upper=3))
 
     # Initialize an optimizer that uses LlamaTune space adapter
-    optimizer: BaseOptimizer = OptimizerFactory.create(
-        parameter_space=input_space,
-        optimizer_type=optimizer_type,
-        optimizer_kwargs=kwargs,
-    )
-    assert optimizer is not None
-
-    # Initialize another optimizer that uses LlamaTune space adapter
     space_adapter_kwargs = {
         "num_low_dims": 1,
         "special_param_values": None,
