@@ -25,7 +25,8 @@ class MockEnv(Environment):
     Scheduler-side environment to mock the benchmark results.
     """
 
-    _NOISE_VAR = 0.2  # Variance of the Gaussian noise added to the benchmark value.
+    _NOISE_VAR = 0.2
+    """Variance of the Gaussian noise added to the benchmark value."""
 
     def __init__(self,
                  *,
@@ -46,7 +47,7 @@ class MockEnv(Environment):
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
-            The two optional arguments are `seed` and `range`.
+            Optional arguments are `seed`, `range`, and `metrics`.
         tunables : TunableGroups
             A collection of tunable parameters for *all* environments.
         service: Service
@@ -57,6 +58,7 @@ class MockEnv(Environment):
         seed = self.config.get("seed")
         self._random = random.Random(seed) if seed is not None else None
         self._range = self.config.get("range")
+        self._metrics = self.config.get("metrics", ["score"])
         self._is_ready = True
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -68,8 +70,9 @@ class MockEnv(Environment):
         (status, output) : (Status, dict)
             A pair of (Status, output) values, where `output` is a dict
             with the results or None if the status is not COMPLETED.
-            If run script is a benchmark, then the score is usually expected to
-            be in the `score` field.
+            The keys of the `output` dict are the names of the metrics
+            specified in the config; by default it's just one metric
+            named "score". All output metrics have the same value.
         """
         (status, _) = result = super().run()
         if not status.is_ready:
@@ -81,13 +84,12 @@ class MockEnv(Environment):
         ]))
 
         # Add noise and shift the benchmark value from [0, 1] to a given range.
-        noise = self._random.gauss(0, MockEnv._NOISE_VAR) if self._random else 0
+        noise = self._random.gauss(0, self._NOISE_VAR) if self._random else 0
         score = numpy.clip(score + noise, 0, 1)
         if self._range:
             score = self._range[0] + score * (self._range[1] - self._range[0])
 
-        data = {"score": score}
-        return (Status.SUCCEEDED, data)
+        return (Status.SUCCEEDED, {metric: score for metric in self._metrics})
 
     @staticmethod
     def _normalized(tunable: Tunable) -> float:
