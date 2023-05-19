@@ -1,0 +1,14 @@
+{
+    "name": "composite-env-partial",
+    "class": "mlos_bench.environments.CompositeEnv",
+    "config": {
+        // at the moment we don't allow these properties for CompositeEnv, only leaf Environments, but that may change in the future
+        "required_args": ["foo"],
+        "constant_args": {
+            "foo": "bar"
+        },
+        "include_children": [
+            "some/child.jsonc"
+        ],
+    }
+}

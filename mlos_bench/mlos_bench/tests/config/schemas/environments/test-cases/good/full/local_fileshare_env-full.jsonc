@@ -3,6 +3,12 @@
     "name": "local_fileshare_env-full",
     "description": "More descriptive text.",
     "class": "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
+    "include_tunables": [
+        "some/tunables.jsonc"
+    ],
+    "include_services": [
+        "some/service.jsonc"
+    ],
     "config": {
         "tunable_params": ["baz"],
         "required_args": ["foo"],
