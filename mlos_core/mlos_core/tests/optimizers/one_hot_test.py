@@ -49,7 +49,7 @@ def test_to_1hot(configuration_space: CS.ConfigurationSpace,
     """
     Toy problem to test one-hot encoding.
     """
-    optimizer = EmukitOptimizer(configuration_space)
+    optimizer = EmukitOptimizer(parameter_space=configuration_space)
     assert optimizer._to_1hot(data_frame) == pytest.approx(one_hot)
 
 
@@ -58,7 +58,7 @@ def test_from_1hot(configuration_space: CS.ConfigurationSpace,
     """
     Toy problem to test one-hot decoding.
     """
-    optimizer = EmukitOptimizer(configuration_space)
+    optimizer = EmukitOptimizer(parameter_space=configuration_space)
     assert optimizer._from_1hot(one_hot).to_dict() == data_frame.to_dict()
 
 
@@ -66,7 +66,7 @@ def test_round_trip(configuration_space: CS.ConfigurationSpace, data_frame: pd.D
     """
     Round-trip test for one-hot-encoding and then decoding a data frame.
     """
-    optimizer = EmukitOptimizer(configuration_space)
+    optimizer = EmukitOptimizer(parameter_space=configuration_space)
     df_round_trip = optimizer._from_1hot(optimizer._to_1hot(data_frame))
     assert df_round_trip.x.to_numpy() == pytest.approx(data_frame.x)
     assert (df_round_trip.y == data_frame.y).all()
@@ -77,6 +77,6 @@ def test_round_trip_reverse(configuration_space: CS.ConfigurationSpace, one_hot:
     """
     Round-trip test for one-hot-decoding and then encoding of a numpy array.
     """
-    optimizer = EmukitOptimizer(configuration_space)
+    optimizer = EmukitOptimizer(parameter_space=configuration_space)
     round_trip = optimizer._to_1hot(optimizer._from_1hot(one_hot))
     assert round_trip == pytest.approx(one_hot)

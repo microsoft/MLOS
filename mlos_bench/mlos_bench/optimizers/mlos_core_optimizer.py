@@ -35,7 +35,8 @@ class MlosCoreOptimizer(Optimizer):
         space = tunable_groups_to_configspace(tunables)
         _LOG.debug("ConfigSpace: %s", space)
 
-        opt_type = getattr(OptimizerType, self._config.pop('optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
+        opt_type = getattr(OptimizerType, self._config.pop(
+            'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
 
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})
@@ -44,9 +45,12 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_type = getattr(SpaceAdapterType, space_adapter_type)
 
         self._opt: BaseOptimizer = OptimizerFactory.create(
-            space, opt_type, optimizer_kwargs=self._config,
+            parameter_space=space,
+            optimizer_type=opt_type,
+            optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
-            space_adapter_kwargs=space_adapter_config)
+            space_adapter_kwargs=space_adapter_config
+        )
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None) -> bool:

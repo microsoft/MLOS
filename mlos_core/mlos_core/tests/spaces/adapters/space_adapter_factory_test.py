@@ -57,9 +57,13 @@ def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[S
 
     space_adapter: BaseSpaceAdapter
     if space_adapter_type is None:
-        space_adapter = SpaceAdapterFactory.create(input_space)
+        space_adapter = SpaceAdapterFactory.create(parameter_space=input_space)
     else:
-        space_adapter = SpaceAdapterFactory.create(input_space, space_adapter_type, space_adapter_kwargs=kwargs)
+        space_adapter = SpaceAdapterFactory.create(
+            parameter_space=input_space,
+            space_adapter_type=space_adapter_type,
+            space_adapter_kwargs=kwargs,
+        )
 
     if space_adapter_type is None or space_adapter_type is SpaceAdapterType.IDENTITY:
         assert isinstance(space_adapter, IdentityAdapter)

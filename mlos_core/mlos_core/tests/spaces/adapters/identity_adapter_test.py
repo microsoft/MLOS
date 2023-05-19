@@ -26,7 +26,7 @@ def test_identity_adapter() -> None:
     input_space.add_hyperparameter(
         CS.CategoricalHyperparameter(name='str_1', choices=['on', 'off']))
 
-    adapter = IdentityAdapter(input_space)
+    adapter = IdentityAdapter(orig_parameter_space=input_space)
 
     num_configs = 10
     for sampled_config in input_space.sample_configuration(size=num_configs):
