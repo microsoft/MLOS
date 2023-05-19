@@ -459,7 +459,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                   json_file_names, parent.__class__.__name__)
         service = Service(global_config, parent)
         for fname in json_file_names:
-            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchema.SERVICE)
+            config = self.load_config(fname, ConfigSchema.SERVICE)
             service.register(self.build_service(config, global_config, service).export())
         return service
 

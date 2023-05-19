@@ -12,6 +12,7 @@ import pytest
 
 from mlos_bench.tests.config import locate_config_examples
 
+from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.util import path_join
@@ -40,7 +41,7 @@ assert configs
 @pytest.mark.parametrize("config_path", configs)
 def test_load_service_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
-    config = config_loader_service.load_config(config_path, schema_type=None)   # TODO: , ConfigSchema.SERVICE)
+    config = config_loader_service.load_config(config_path, ConfigSchema.SERVICE)
     # Make an instance of the class based on the config.
     service_inst = config_loader_service.build_service(
         config=config,
