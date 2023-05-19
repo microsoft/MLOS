@@ -1,0 +1,37 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+    "name": "local_fileshare_env-full",
+    "description": "More descriptive text.",
+    "class": "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
+    "config": {
+        "tunable_params": ["baz"],
+        "required_args": ["foo"],
+        "const_args": {
+            "foo": "bar"
+        },
+        "temp_dir": "/tmp/",
+        "setup": [
+            "/bin/bash -c true"
+        ],
+        "run": [
+            "/bin/bash -c true"
+        ],
+        "teardown": [
+            "/bin/bash -c true"
+        ],
+        "read_results_file": "/tmp/results.json",
+        "dump_params_file": "/tmp/dump_params.json",
+        "download": [
+            {
+                "from": "https://some-host/some-path/some-file.tar.gz",
+                "to": "/some/local/path/some-file.tar.gz"
+            }
+        ],
+        "upload": [
+            {
+                "from": "/some/local/path/some-file.tar.gz",
+                "to": "https://some-host/some-path/some-file.tar.gz"
+            }
+        ]
+    }
+}

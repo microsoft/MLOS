@@ -3,7 +3,7 @@
 
     "name": "mock_env-full",
     "description": "More descriptive text.",
-    "class": "mlos_bench.environments.MockEnv",
+    "class": "mlos_bench.environments.mock_env.MockEnv",
     "include_services": [
         "path/to/some/service.jsonc"
     ],
