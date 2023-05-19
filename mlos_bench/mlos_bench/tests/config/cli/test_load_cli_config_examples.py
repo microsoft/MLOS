@@ -63,7 +63,7 @@ def test_load_cli_config_examples(config_loader_service: ConfigPersistenceServic
             continue
 
         if arg == "environment":
-            sub_config = config_loader_service.load_config(config[arg], schema_type=None)   # TODO: ConfigSchema.Environment
+            sub_config = config_loader_service.load_config(config[arg], ConfigSchema.ENVIRONMENT)
             assert isinstance(sub_config, dict)
         elif arg == "optimizer":
             sub_config = config_loader_service.load_config(config[arg], ConfigSchema.OPTIMIZER)
