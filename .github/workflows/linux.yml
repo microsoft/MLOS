@@ -36,6 +36,8 @@ jobs:
       CONDA_ENV_NAME: unset
       # See notes about $CONDA below.
       CONDA_DIR: unset
+      # When parallel jobs are used, group the output to make debugging easier.
+      MAKEFLAGS: -Oline
 
     steps:
     - uses: actions/checkout@v3
