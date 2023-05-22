@@ -1,12 +1,16 @@
-[
-    {
-        "class": "mlos_bench.services.remote.azure.AzureFileShareService",
+{
+    //"$schema": "../../../../config/schemas/services/service-schema.json",
 
-        "config": {
-            "storageAccountName": "osatsharedstorage",
-            "storageFileShareName": "os-autotune-file-share",
-            // Placeholder for a value provided in the global config:
-            "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
+    "services": [
+        {
+            "class": "mlos_bench.services.remote.azure.AzureFileShareService",
+
+            "config": {
+                "storageAccountName": "osatsharedstorage",
+                "storageFileShareName": "os-autotune-file-share",
+                // Placeholder for a value provided in the global config:
+                "storageAccountKey": "STORAGE ACCOUNT KEY FROM `az storage account keys list`"
+            }
         }
-    }
-]
+    ]
+}

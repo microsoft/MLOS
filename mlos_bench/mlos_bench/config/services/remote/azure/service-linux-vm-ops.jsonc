@@ -1,20 +1,24 @@
-[
-    {
-        "class": "mlos_bench.services.remote.azure.AzureVMService",
+{
+    //"$schema": "../../../../config/schemas/services/service-schema.json",
 
-        "config": {
-            "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-            // `subscription` and `accessToken` are placeholders
-            // for values provided in the global config:
-            "subscription": "AZURE SUBSCRIPTION ID",
-            "accessToken": "AZURE ACCESS TOKEN FROM `az account get-access-token`",
+    "services": [
+        {
+            "class": "mlos_bench.services.remote.azure.AzureVMService",
 
-            "resourceGroup": "os-autotune",
-            "deploymentName": "os-autotune-001",
-            "vmName": "os-autotune-linux-vm",
+            "config": {
+                "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+                // `subscription` and `accessToken` are placeholders
+                // for values provided in the global config:
+                "subscription": "AZURE SUBSCRIPTION ID",
+                "accessToken": "AZURE ACCESS TOKEN FROM `az account get-access-token`",
 
-            "pollInterval": 10,
-            "pollTimeout": 300
+                "resourceGroup": "os-autotune",
+                "deploymentName": "os-autotune-001",
+                "vmName": "os-autotune-linux-vm",
+
+                "pollInterval": 10,
+                "pollTimeout": 300
+            }
         }
-    }
-]
+    ]
+}
