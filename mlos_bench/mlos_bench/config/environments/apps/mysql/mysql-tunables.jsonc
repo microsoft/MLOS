@@ -1,0 +1,145 @@
+{
+    "mysql": {
+      "cost": 1,
+      "params": {
+        "key_buffer": {
+          "description": "Key buffer size",
+          "type": "int",
+          "default": 16,
+          "range": [1, 256]
+        },
+        "dynamic_hz": {
+          "description": "Enable adaptive hz",
+          "type": "categorical",
+          "default": "yes",
+          "values": ["yes", "no"]
+        },
+        "max_connections": {
+          "description": "Maximum number of connections",
+          "type": "int",
+          "default": 151,
+          "range": [1, 1000]
+        },
+        "innodb_buffer_pool_size": {
+          "description": "Size of the InnoDB buffer pool",
+          "type": "int",
+          "default": 134217728,
+          "range": [1048576, 4294967296]
+        },
+        "query_cache_type": {
+          "description": "Query cache type",
+          "type": "categorical",
+          "default": "OFF",
+          "values": ["OFF", "ON", "DEMAND"]
+        },
+        "join_buffer_size": {
+          "description": "Size of the join buffer",
+          "type": "int",
+          "default": 262144,
+          "range": [128, 4294967295]
+        },
+        "sort_buffer_size": {
+          "description": "Size of the sort buffer",
+          "type": "int",
+          "default": 262144,
+          "range": [65536, 4294967295]
+        },
+        "tmp_table_size": {
+          "description": "Size of the temporary table",
+          "type": "int",
+          "default": 16777216,
+          "range": [1024, 18446744073709551615]
+        },
+        "innodb_log_buffer_size": {
+          "description": "Size of the InnoDB log buffer",
+          "type": "int",
+          "default": 16777216,
+          "range": [262144, 18446744073709551615]
+        },
+        "innodb_flush_log_at_trx_commit": {
+          "description": "InnoDB flush log at transaction commit",
+          "type": "categorical",
+          "default": "1",
+          "values": ["0", "1", "2"]
+        },
+        "innodb_flush_method": {
+          "description": "InnoDB flush method",
+          "type": "categorical",
+          "default": "fsync",
+          "values": ["fsync", "O_DIRECT", "O_DSYNC"]
+        },
+        "table_open_cache": {
+          "description": "Number of open tables cache",
+          "type": "int",
+          "default": 2000,
+          "range": [1, 524288]
+        },
+        "innodb_file_per_table": {
+          "description": "Enable InnoDB file per table",
+          "type": "categorical",
+          "default": "ON",
+          "values": ["ON", "OFF"]
+        },
+        "thread_cache_size": {
+          "description": "Thread cache size",
+          "type": "int",
+          "default": 9,
+          "range": [1, 1000]
+        },
+        "innodb_flush_neighbors": {
+          "description": "InnoDB flush neighbors",
+          "type": "categorical",
+          "default": "1",
+          "values": ["0", "1"]
+        },
+        "innodb_thread_concurrency": {
+          "description": "InnoDB thread concurrency",
+          "type": "int",
+          "default": 0,
+          "range": [0, 1000]
+        },
+        "innodb_io_capacity": {
+          "description": "InnoDB I/O capacity",
+          "type": "int",
+          "default": 200,
+          "range": [100, 200000]
+        },
+        "innodb_read_io_threads": {
+          "description": "InnoDB read I/O threads",
+          "type": "int",
+          "default": 4,
+          "range": [1, 64]
+        },
+        "innodb_write_io_threads": {
+          "description": "InnoDB write I/O threads",
+          "type": "int",
+          "default": 4,
+          "range": [1, 64]
+        },
+        "innodb_purge_threads": {
+          "description": "InnoDB purge threads",
+          "type": "int",
+          "default": 4,
+          "range": [1, 32]
+        },
+        "innodb_stats_persistent_sample_pages": {
+          "description": "InnoDB persistent stats sample pages",
+          "type": "int",
+          "default": 20,
+          "range": [1, 1000]
+        },
+        "innodb_adaptive_hash_index": {
+          "description": "Enable InnoDB adaptive hash index",
+          "type": "categorical",
+          "default": "ON",
+          "values": ["ON", "OFF"]
+        },
+        "innodb_stats_on_metadata": {
+          "description": "InnoDB stats on metadata",
+          "type": "categorical",
+          "default": "ON",
+          "values": ["ON", "OFF"]
+        }
+      }
+    }
+  }

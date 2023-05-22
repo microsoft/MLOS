@@ -1,0 +1,103 @@
+{
+    "name": "mysql Composite Env",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+    "config": {
+        "children": [
+            // Local: Generate new mysql config and upload it to a shared storage
+            {
+                "name": "Generate mysql configuration",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "include_tunables": [
+                    "environments/apps/mysql/mysql-tunables.jsonc"
+                ],
+                "config": {
+                    "tunable_params": [
+                        "mysql"
+                    ],
+                    "required_args": [
+                        "experimentId",
+                        "trialId"
+                    ],
+                    // Dump tunable parameters to a local JSON file:
+                    "dump_params_file": "mysql-params.json",
+                    "setup": [
+                        "environments/apps/mysql/scripts/local/generate_mysql_config.py mysql-params.json mysql.cfg"
+                    ],
+                    // TODO: improve handling of relative paths
+                    "upload": [
+                        {
+                            "from": "mysql.cfg",
+                            "to": "$experimentId/$trialId/input/mysql.cfg"
+                        },
+                        {
+                            "from": "environments/apps/mysql/scripts/remote/",
+                            "to": "$experimentId/$trialId/scripts"
+                        }
+                    ]
+                }
+            },
+            // Remote: Start mysql with the new config and run the benchmarks
+            {
+                "name": "Benchmark mysql on Linux",
+                "class": "mlos_bench.environments.remote.RemoteEnv",
+                "include_tunables": [
+                    "environments/apps/mysql/mysql-tunables.jsonc"
+                ],
+                "config": {
+                    "tunable_params": [
+                        "mysql"
+                    ],
+                    "required_args": [
+                        "experimentId",
+                        "trialId",
+                        "mountPoint"
+                    ],
+                    "const_args": {
+                        "mountPoint": "/mnt/osat_fs"
+                    },
+                    "setup": [
+                        "$mountPoint/$experimentId/$trialId/scripts/setup-workload.sh",
+                        "$mountPoint/$experimentId/$trialId/scripts/setup-app.sh"
+                    ],
+                    "run": [
+                        "$mountPoint/$experimentId/$trialId/scripts/run-workload.sh",
+                        "mkdir -p $mountPoint/$experimentId/$trialId/output/",
+                        "cp -r /tmp/mlos_bench/output/* $mountPoint/$experimentId/$trialId/output/"
+                    ],
+                    "teardown": [
+                        "$mountPoint/$experimentId/$trialId/scripts/cleanup-workload.sh",
+                        "$mountPoint/$experimentId/$trialId/scripts/cleanup-app.sh"
+                    ]
+                }
+            },
+            // Local: Download mysql benchmark data from the shared storage and process it
+            {
+                "name": "Download and post-process mysql benchmark data",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "include_tunables": [
+                    "environments/apps/mysql/mysql-tunables.jsonc"
+                ],
+                "config": {
+                    "tunable_params": [
+                        "mysql"
+                    ],
+                    "required_args": [
+                        "experimentId",
+                        "trialId"
+                    ],
+                    "download": [
+                        {
+                            "from": "$experimentId/$trialId/output",
+                            "to": "$PWD/mysql-bench-output/"
+                        }
+                    ],
+                    "run": [
+                        "environments/apps/mysql/scripts/local/process_mysql_results.py mysql-bench-output/results.csv mysql-benchmark.csv"
+                    ],
+                    // Read benchmark results from a local CSV file:
+                    "read_results_file": "mysql-benchmark.csv"
+                }
+            }
+        ]
+    }
+}
