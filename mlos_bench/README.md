@@ -29,7 +29,7 @@ It makes use of the `mlos-core` package for its optimizer.
 
 ## Features
 
-With a [JSON5](https://spec.json5.org) config file and command line parameters as input, `mlos-bench` streamlines workload performance measurement by automating the following benchmarking steps:
+With a [JSON5](https://spec.json5.org) [config file](./mlos_bench/config/) and command line parameters as input, `mlos-bench` streamlines workload performance measurement by automating the following benchmarking steps:
 
 1. Set up & clean up benchmark and application configuration
     - **Ease of use:** Mlos-bench abstracts away controls for managing VMs in Azure, e.g., setup, teardown, stop, deprovision, and reboot. Get visibility into VM status through Azure Portal, ensuring that a VM is provisioned & running before issuing commands to it.
@@ -78,6 +78,8 @@ For these instructions, we will be using Azure for our resources.
     cp -R mlos_bench/config ./my-config
     ```
 
+    > Note: there are several other examples in [`mlos_bench/config`](./mlos_bench/config/) that you can use as a starting point for your own experiments.
+
 4. Modify the service configuration files at `my-config/azure/service-*.jsonc` with your Azure setup data.
 E.g., in `my-config/azure/service-provision-vm.jsonc`, put your target resource group information, as well as desired VM name, denoted in `{{ ... }}` below.
 
@@ -94,7 +96,7 @@ E.g., in `my-config/azure/service-provision-vm.jsonc`, put your target resource 
             "class": "mlos_bench.environments.azure.AzureVMService",
 
             "config": {
-                "deployTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+                "deploymentTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
 
                 "subscription": "{{ ID of subscription to use }}",
                 "resourceGroup": "{{ Name of resource group to use }}",

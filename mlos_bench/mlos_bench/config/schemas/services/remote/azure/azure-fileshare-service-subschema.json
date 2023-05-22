@@ -1,0 +1,44 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-fileshare-service-subschema.json",
+    "title": "mlos_bench Azure FileShare Service config",
+    "description": "config for an mlos_bench Azure FileShare Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.azure.AzureFileShareService",
+                "mlos_bench.services.remote.azure.azure_fileshare.AzureFileShareService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "../../common-defs-subschemas.json#/$defs/poll_configs"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "storageAccountName": {
+                            "type": "string"
+                        },
+                        "storageFileShareName": {
+                            "type": "string"
+                        },
+                        "storageAccountKey": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "storageAccountKey",
+                        "storageAccountName",
+                        "storageFileShareName"
+                    ]
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"]
+}

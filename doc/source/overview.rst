@@ -100,6 +100,9 @@ Main
 
     Also available as `mlos_bench` command line tool.
 
+.. note::
+    The are `json config examples <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/>`_ and `json schemas <https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config/schemas/>`_ on the main `source code <https://github.com/microsoft/MLOS>`_ repository site.
+
 Benchmark Environments
 ======================
 .. currentmodule:: mlos_bench.environments

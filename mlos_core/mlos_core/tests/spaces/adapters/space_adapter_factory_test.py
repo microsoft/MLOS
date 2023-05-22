@@ -78,7 +78,7 @@ def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[S
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
 space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = \
-    get_all_concrete_subclasses(BaseSpaceAdapter)  # type: ignore[type-abstract]
+    get_all_concrete_subclasses(BaseSpaceAdapter, pkg_name='mlos_core')  # type: ignore[type-abstract]
 assert space_adapter_subclasses
 
 

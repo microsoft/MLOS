@@ -26,7 +26,7 @@ _LOG = logging.getLogger(__name__)
 
 def _main() -> None:
 
-    launcher = Launcher("mlos_bench")
+    launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool")
 
     result = _optimize(
         launcher.environment,

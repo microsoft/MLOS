@@ -1,0 +1,7 @@
+{
+    "class": "mlos_bench.services.LocalExecService",
+
+    "config": {
+        "temp_dir": "/tmp"
+    }
+}

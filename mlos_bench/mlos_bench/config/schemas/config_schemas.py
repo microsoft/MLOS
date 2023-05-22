@@ -56,6 +56,8 @@ class SchemaStore(Mapping):
                     schema = json.load(schema_file)
                     cls._SCHEMA_STORE[file_path] = schema
                     # Let the schema be referenced by its id as well.
+                    assert "$id" in schema
+                    assert schema["$id"] not in cls._SCHEMA_STORE
                     cls._SCHEMA_STORE[schema["$id"]] = schema
 
 
