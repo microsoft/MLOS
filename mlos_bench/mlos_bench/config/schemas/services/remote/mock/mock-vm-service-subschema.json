@@ -21,6 +21,5 @@
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"],
-    "unevaluatedProperties": false
+    "required": ["class", "config"]
 }
