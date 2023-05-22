@@ -74,6 +74,18 @@ class CompositeEnv(Environment):
     def pprint(self, indent: int = 4, level: int = 0) -> str:
         """
         Pretty-print the environment and its children.
+
+        Parameters
+        ----------
+        indent : int
+            Number of spaces to indent the output at each level. Default is 4.
+        level : int
+            Current level of indentation. Default is 0.
+
+        Returns
+        -------
+        pretty : str
+            Pretty-printed environment configuration.
         """
         return super().pprint(indent, level) + '\n' + '\n'.join(
             child.pprint(indent, level + 1) for child in self._children)

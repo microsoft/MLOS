@@ -152,6 +152,19 @@ class Environment(metaclass=abc.ABCMeta):
         """
         Pretty-print the environment configuration.
         For composite environments, print all children environments as well.
+
+        Parameters
+        ----------
+        indent : int
+            Number of spaces to indent the output. Default is 4.
+        level : int
+            Current level of indentation. Default is 0.
+
+        Returns
+        -------
+        pretty : str
+            Pretty-printed environment configuration.
+            Default output is the same as `__repr__`.
         """
         return f'{" " * indent * level}{repr(self)}'
 
