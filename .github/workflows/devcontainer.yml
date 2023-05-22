@@ -52,6 +52,7 @@ jobs:
           --volume $(pwd):/workspaces/MLOS \
           --env CONTAINER_WORKSPACE_FOLDER=/workspaces/MLOS \
           --env LOCAL_WORKSPACE_FOLDER=$(pwd) \
+          --env MAKEFLAGS=-Oline \
           --workdir /workspaces/MLOS \
           --name mlos-devcontainer mlos-devcontainer sleep infinity
     - name: Fixup vscode uid/gid in the running container
