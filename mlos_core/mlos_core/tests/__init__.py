@@ -45,6 +45,7 @@ def get_all_concrete_subclasses(cls: Type[T], pkg_name: Optional[str] = None) ->
     """
     if pkg_name is not None:
         pkg = import_module(pkg_name)
-        _ = get_all_submodules(pkg)
+        submodules = get_all_submodules(pkg)
+        assert submodules
     return sorted([subclass for subclass in _get_all_subclasses(cls) if not getattr(subclass, "__abstractmethods__", None)],
                   key=lambda c: (c.__module__, c.__name__))
