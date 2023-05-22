@@ -51,8 +51,15 @@ def test_case_coverage_mlos_bench_service_type(test_case_subtype: str, service_c
     Checks to see if there is a given type of test case for the given mlos_bench Service type.
     """
     for test_case in TEST_CASES.by_subtype[test_case_subtype].values():
-        if try_resolve_class_name(test_case.config.get("class")) == service_class:
-            return
+        config_list: List[Dict[str, Any]] = []
+        if isinstance(test_case.config, dict):
+            if "class" not in test_case.config:
+                config_list = test_case.config["services"]
+            else:
+                config_list = [test_case.config]
+        for config in config_list:
+            if try_resolve_class_name(config.get("class")) == service_class:
+                return
     raise NotImplementedError(
         f"Missing test case for subtype {test_case_subtype} for service class {service_class}")
 

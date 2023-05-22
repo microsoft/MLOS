@@ -14,7 +14,7 @@ import sys
 import json    # For logging only
 import logging
 
-from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 import json5    # To read configs with comments and other JSON5 syntax features
 from jsonschema import ValidationError, SchemaError
@@ -106,7 +106,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     def load_config(self,
                     json_file_name: str,
                     schema_type: Optional[ConfigSchema],
-                    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+                    ) -> Dict[str, Any]:
         """
         Load JSON config file. Search for a file relative to `_config_path`
         if the input path is not absolute.
@@ -341,7 +341,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return service
 
     def build_service(self,
-                      config: Union[Dict[str, Any], List[Dict[str, Any]]],
+                      config: Dict[str, Any],
                       global_config: Optional[Dict[str, Any]] = None,
                       parent: Optional[Service] = None) -> Service:
         """
@@ -349,7 +349,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        config : dict or list of dict
+        config : dict or and object with a list of dicts
             A list where each element is a dictionary with 2 mandatory fields:
                 "class": FQN of a Python class to instantiate;
                 "config": Free-format dictionary to pass to the constructor.
@@ -368,18 +368,18 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             _LOG.debug("Build service from config:\n%s",
                        json.dumps(config, indent=2))
 
-        if isinstance(config, dict):
-            if "class" not in config:
-                # Top level config is a simple object with a list of services
-                config = config["services"]
-            else:
-                # Top level config is a single service
-                if parent is None:
-                    return self._build_standalone_service(config, global_config)
-                config = [config]
-        assert isinstance(config, list)
+        assert isinstance(config, dict)
+        config_list: List[Dict[str, Any]]
+        if "class" not in config:
+            # Top level config is a simple object with a list of services
+            config_list = config["services"]
+        else:
+            # Top level config is a single service
+            if parent is None:
+                return self._build_standalone_service(config, global_config)
+            config_list = [config]
 
-        return self._build_composite_service(config, global_config, parent)
+        return self._build_composite_service(config_list, global_config, parent)
 
     def load_environment(self, json_file_name: str,
                          tunables: TunableGroups,
@@ -432,12 +432,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : List[Environment]
             A list of new benchmarking environments.
         """
-        config_list = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
-        if isinstance(config_list, dict):
-            config_list = [config_list]
+        config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         return [
             self.build_environment(config, tunables, global_config, service)
-            for config in config_list
         ]
 
     def load_services(self, json_file_names: Iterable[str],

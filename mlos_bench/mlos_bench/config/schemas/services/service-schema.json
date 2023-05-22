@@ -72,15 +72,8 @@
             ]
         },
         {
-            "description": "List of Service configs (deprecated).",
-            "type": "array",
-            "items": {
-                "$ref": "#/$defs/service_config"
-            },
-            "minItems": 1
-        },
-        {
-            "description": "Object with list of Service configs. This is the preferred way to specify multiple Services.",
+            "$comment": "We no longer accept a flat list of Service objects.",
+            "description": "Object with list of Service configs.",
             "type": "object",
             "allOf": [
                 {
