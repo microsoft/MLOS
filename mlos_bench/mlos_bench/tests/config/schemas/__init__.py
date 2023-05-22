@@ -8,7 +8,7 @@ Common tests for config schemas and their validation and test cases.
 
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, Set
 
 import os
 
