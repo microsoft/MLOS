@@ -18,6 +18,17 @@
                     "minimum": 1
                 }
             }
+        },
+        "temp_dir_config": {
+            "type": "object",
+            "properties": {
+                "temp_dir": {
+                    "description": "Path to temp dir (or null to use system default).",
+                    "type": ["string", "null"]
+                }
+            },
+            "minProperties": 1
         }
+
     }
 }

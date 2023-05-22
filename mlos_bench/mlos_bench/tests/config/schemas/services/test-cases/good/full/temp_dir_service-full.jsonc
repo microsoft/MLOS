@@ -1,0 +1,9 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    "description": "TempDir Context Service configuration.",
+
+    "class": "mlos_bench.services.local.temp_dir_context.TempDirContextService",
+    "config": {
+        "temp_dir": "/tmp"
+    }
+}

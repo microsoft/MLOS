@@ -9,6 +9,12 @@
             "$comment": "additional service types should be added here",
             "oneOf": [
                 {
+                    "$ref": "./local/local-exec-service-subschema.json"
+                },
+                {
+                    "$ref": "./local/temp-dir-context-service-subschema.json"
+                },
+                {
                     "$ref": "./local/mock/mock-local-exec-service-subschema.json"
                 },
                 {

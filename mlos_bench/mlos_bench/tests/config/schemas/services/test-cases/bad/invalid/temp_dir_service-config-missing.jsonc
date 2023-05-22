@@ -1,0 +1,8 @@
+{
+    "class": "mlos_bench.services.local.temp_dir_context.TempDirContextService"
+    /* Required section missing.
+    "config": {
+        "temp_dir": "/tmp"
+    }
+    */
+}
