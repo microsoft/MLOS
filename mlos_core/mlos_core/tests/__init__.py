@@ -6,10 +6,23 @@
 Common functions for mlos_core Optimizer tests.
 """
 
-from typing import List, Set, Type, TypeVar
+from importlib import import_module
+from pkgutil import walk_packages
+from typing import List, Optional, Set, TypeAlias, Type, TypeVar
 
 
 T = TypeVar('T')
+
+
+def get_all_submodules(pkg: TypeAlias) -> List[str]:
+    """
+    Imports all submodules for a package and returns their names.
+    Useful for dynamically enumerating subclasses.
+    """
+    submodules = []
+    for _, submodule_name, _ in walk_packages(pkg.__path__, prefix=f"{pkg.__name__}.", onerror=lambda x: None):
+        submodules.append(submodule_name)
+    return submodules
 
 
 def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
@@ -21,7 +34,7 @@ def _get_all_subclasses(cls: Type[T]) -> Set[Type[T]]:
         s for c in cls.__subclasses__() for s in _get_all_subclasses(c))
 
 
-def get_all_concrete_subclasses(cls: Type[T]) -> List[Type[T]]:
+def get_all_concrete_subclasses(cls: Type[T], pkg_name: Optional[str] = None) -> List[Type[T]]:
     """
     Gets a sorted list of all of the concrete subclasses of the given class.
     Useful for dynamically enumerating expected test cases.
@@ -30,5 +43,8 @@ def get_all_concrete_subclasses(cls: Type[T]) -> List[Type[T]]:
     Use "# type: ignore[type-abstract]" to suppress the warning.
     See Also: https://github.com/python/mypy/issues/4717
     """
+    if pkg_name is not None:
+        pkg = import_module(pkg_name)
+        _ = get_all_submodules(pkg)
     return sorted([subclass for subclass in _get_all_subclasses(cls) if not getattr(subclass, "__abstractmethods__", None)],
                   key=lambda c: (c.__module__, c.__name__))

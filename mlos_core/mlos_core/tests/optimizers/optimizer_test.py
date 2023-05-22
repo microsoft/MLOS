@@ -244,7 +244,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
 # Dynamically determine all of the optimizers we have implemented.
 # Note: these must be sorted.
-optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(BaseOptimizer)  # type: ignore[type-abstract]
+optimizer_subclasses: List[Type[BaseOptimizer]] = get_all_concrete_subclasses(BaseOptimizer,  # type: ignore[type-abstract]
+                                                                              pkg_name='mlos_core')
 assert optimizer_subclasses
 
 

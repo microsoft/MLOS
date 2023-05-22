@@ -38,7 +38,7 @@ NON_CONFIG_SERVICE_CLASSES = {
 
 expected_service_class_names = [subclass.__module__ + "." + subclass.__name__
                                 for subclass
-                                in get_all_concrete_subclasses(Service)
+                                in get_all_concrete_subclasses(Service, pkg_name='mlos_bench')
                                 if subclass not in NON_CONFIG_SERVICE_CLASSES]
 assert expected_service_class_names
 
