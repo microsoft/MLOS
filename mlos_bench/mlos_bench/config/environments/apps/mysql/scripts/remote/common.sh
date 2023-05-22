@@ -3,8 +3,8 @@
 ## Licensed under the MIT License.
 ##
 
-MYSQL_IMAGE='mysql:7.0'
-MYSQL_PORT='6379'
+MYSQL_IMAGE='mysql:8.0'
+MYSQL_PORT='3306'
 MYSQL_SERVER_NAME='mysql-server'
 MYSQL_CLIENT_NAME='mysql-client'
 
