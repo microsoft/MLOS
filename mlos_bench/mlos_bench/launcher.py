@@ -42,10 +42,10 @@ class Launcher:
     Command line launcher for mlos_bench and mlos_core.
     """
 
-    def __init__(self, description: str):
+    def __init__(self, description: str, long_text: str = ""):
 
         _LOG.info("Launch: %s", description)
-        parser = argparse.ArgumentParser(description=description)
+        parser = argparse.ArgumentParser(description=f"{description} : {long_text}")
         (args, args_rest) = self._parse_args(parser)
 
         # Bootstrap config loader: command line takes priority.
@@ -110,7 +110,8 @@ class Launcher:
         parser.add_argument(
             '--config', required=False,
             help='Main JSON5 configuration file. Its keys are the same as the' +
-                 ' command line options and can be overridden by the latter.')
+                 ' command line options and can be overridden by the latter.\n' +
+                 ' See https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config for additional config examples.')
 
         parser.add_argument(
             '--log_file', required=False,
