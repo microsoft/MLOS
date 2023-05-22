@@ -4,23 +4,6 @@
     "title": "mlos_bench Azure VM Service config",
     "description": "config for an mlos_bench Azure VM Service",
     "type": "object",
-    "$defs": {
-        "poll_configs": {
-            "type": "object",
-            "properties": {
-                "pollInterval": {
-                    "description": "Poll interval in seconds.",
-                    "type": "number",
-                    "minimum": 1
-                },
-                "pollTimeout": {
-                    "description": "Poll timeout in seconds.",
-                    "type": "number",
-                    "minimum": 1
-                }
-            }
-        }
-    },
     "properties": {
         "class": {
             "enum": [
@@ -32,7 +15,7 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "#/$defs/poll_configs"
+                    "$ref": "../../common-defs-subschemas.json#/$defs/poll_configs"
                 },
                 {
                     "properties": {
@@ -70,6 +53,5 @@
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"],
-    "unevaluatedProperties": false
+    "required": ["class", "config"]
 }

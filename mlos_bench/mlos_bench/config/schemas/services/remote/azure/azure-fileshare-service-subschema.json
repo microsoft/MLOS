@@ -15,9 +15,10 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "./azure-vm-service-subschema.json#/$defs/poll_configs"
+                    "$ref": "../../common-defs-subschemas.json#/$defs/poll_configs"
                 },
                 {
+                    "type": "object",
                     "properties": {
                         "storageAccountName": {
                             "type": "string"
@@ -39,6 +40,5 @@
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"],
-    "unevaluatedProperties": false
+    "required": ["class", "config"]
 }
