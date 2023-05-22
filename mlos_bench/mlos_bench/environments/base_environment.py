@@ -146,7 +146,27 @@ class Environment(metaclass=abc.ABCMeta):
         return self.name
 
     def __repr__(self) -> str:
-        return f"Env: {self.__class__} :: '{self.name}'"
+        return f"{self.__class__.__name__}::'{self.name}'"
+
+    def pprint(self, indent: int = 4, level: int = 0) -> str:
+        """
+        Pretty-print the environment configuration.
+        For composite environments, print all children environments as well.
+
+        Parameters
+        ----------
+        indent : int
+            Number of spaces to indent the output. Default is 4.
+        level : int
+            Current level of indentation. Default is 0.
+
+        Returns
+        -------
+        pretty : str
+            Pretty-printed environment configuration.
+            Default output is the same as `__repr__`.
+        """
+        return f'{" " * indent * level}{repr(self)}'
 
     def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
         """
