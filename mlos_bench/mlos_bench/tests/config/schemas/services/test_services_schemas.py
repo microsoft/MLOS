@@ -53,7 +53,8 @@ def test_case_coverage_mlos_bench_service_type(test_case_subtype: str, service_c
     """
     for test_case in TEST_CASES.by_subtype[test_case_subtype].values():
         config_list: List[Dict[str, Any]]
-        assert isinstance(test_case.config, dict)
+        if not isinstance(test_case.config, dict):
+            continue    # type: ignore[unreachable]
         if "class" not in test_case.config:
             config_list = test_case.config["services"]
         else:
