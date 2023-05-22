@@ -33,7 +33,7 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 
 expected_service_class_names = [subclass.__module__ + "." + subclass.__name__
                                 for subclass
-                                in get_all_concrete_subclasses(Service)]  # type: ignore[type-abstract]
+                                in get_all_concrete_subclasses(Service)]
 assert expected_service_class_names
 
 
