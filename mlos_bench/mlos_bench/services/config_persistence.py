@@ -349,7 +349,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        config : dict or and object with a list of dicts
+        config : dict or an object with a list of dicts under the "services" key
             A list where each element is a dictionary with 2 mandatory fields:
                 "class": FQN of a Python class to instantiate;
                 "config": Free-format dictionary to pass to the constructor.
