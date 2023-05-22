@@ -111,7 +111,9 @@ class Launcher:
             '--config', required=False,
             help='Main JSON5 configuration file. Its keys are the same as the' +
                  ' command line options and can be overridden by the latter.\n' +
-                 ' See https://github.com/microsoft/MLOS/tree/main/mlos_bench/mlos_bench/config for additional config examples.')
+                 '\n' +
+                 ' See the `mlos_bench/config/` tree at https://github.com/microsoft/MLOS/ ' +
+                 ' for additional config examples for this and other arguments.')
 
         parser.add_argument(
             '--log_file', required=False,
