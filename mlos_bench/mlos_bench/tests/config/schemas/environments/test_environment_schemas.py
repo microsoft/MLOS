@@ -34,7 +34,7 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 
 expected_environment_class_names = [subclass.__module__ + "." + subclass.__name__
                                     for subclass
-                                    in get_all_concrete_subclasses(Environment)]  # type: ignore[type-abstract]
+                                    in get_all_concrete_subclasses(Environment)]
 assert expected_environment_class_names
 
 COMPOSITE_ENV_CLASS_NAME = CompositeEnv.__module__ + "." + CompositeEnv.__name__
