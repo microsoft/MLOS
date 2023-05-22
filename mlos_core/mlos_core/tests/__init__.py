@@ -6,9 +6,17 @@
 Common functions for mlos_core Optimizer tests.
 """
 
+import sys
+
 from importlib import import_module
 from pkgutil import walk_packages
-from typing import List, Optional, Set, TypeAlias, Type, TypeVar
+from typing import List, Optional, Set, Type, TypeVar
+
+
+if sys.version_info >= (3, 9):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 
 T = TypeVar('T')
