@@ -6,6 +6,7 @@
     "$defs": {
         "service_config": {
             "type": "object",
+            "$comment": "additional service types should be added here",
             "oneOf": [
                 {
                     "$ref": "./local/mock/mock-local-exec-service-subschema.json"
@@ -25,42 +26,78 @@
                 {
                     "$ref": "./remote/azure/azure-fileshare-service-subschema.json"
                 }
+            ],
+            "required": [
+                "class",
+                "config"
             ]
+        },
+        "top_level_items": {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "description": "The schema to use for validating an Service config (accepts both URLs and local paths).",
+                    "type": "string",
+                    "$comment": "This is optional, but if provided, should match the name of this file.  However, we don't expect it to be included in nested configs, so it isn't present in the base config schema.",
+                    "pattern": "/schemas/services/service-schema.json$"
+                },
+                "description": {
+                    "description": "Optional description of the config.",
+                    "type": "string"
+                }
+            }
         }
     },
     "oneOf": [
         {
-            "$comment": "flat service config",
+            "description": "Single flat Service config",
             "type": "object",
             "allOf": [
                 {
-                    "type": "object",
-                    "$comment": "Some properties that we only accept for the top level Service config object.",
-                    "properties": {
-                        "$schema": {
-                            "description": "The schema to use for validating an Service config (accepts both URLs and local paths).",
-                            "type": "string",
-                            "$comment": "This is optional, but if provided, should match the name of this file.  However, we don't expect it to be included in nested configs, so it isn't present in the base config schema.",
-                            "pattern": "/schemas/services/service-schema.json$"
-                        },
-                        "description": {
-                            "description": "Optional description of the config.",
-                            "type": "string"
-                        }
-                    }
+                    "$ref": "#/$defs/top_level_items"
                 },
                 {
                     "$ref": "#/$defs/service_config"
                 }
+            ],
+            "required": [
+                "class",
+                "config"
             ]
         },
         {
-            "$comment": "List of service configs",
+            "description": "List of Service configs (deprecated).",
             "type": "array",
             "items": {
                 "$ref": "#/$defs/service_config"
             },
             "minItems": 1
+        },
+        {
+            "description": "Object with list of Service configs. This is the preferred way to specify multiple Services.",
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/$defs/top_level_items"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "services": {
+                            "description": "List of Service configs.",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/service_config"
+                            },
+                            "minItems": 1
+                        }
+                    }
+                }
+            ],
+            "unevaluatedProperties": false,
+            "required": [
+                "services"
+            ]
         }
     ],
     "unevaluatedProperties": false

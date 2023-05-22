@@ -369,9 +369,15 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                        json.dumps(config, indent=2))
 
         if isinstance(config, dict):
-            if parent is None:
-                return self._build_standalone_service(config, global_config)
-            config = [config]
+            if "class" not in config:
+                # Top level config is a simple object with a list of services
+                config = config["services"]
+            else:
+                # Top level config is a single service
+                if parent is None:
+                    return self._build_standalone_service(config, global_config)
+                config = [config]
+        assert isinstance(config, list)
 
         return self._build_composite_service(config, global_config, parent)
 
