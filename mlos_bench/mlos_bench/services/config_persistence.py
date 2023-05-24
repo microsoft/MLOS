@@ -24,7 +24,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config, path_join, BaseTypeVar
+from mlos_bench.util import merge_parameters, instantiate_from_config, path_join, BaseTypeVar
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -166,16 +166,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Name of the class to instantiate and its configuration.
         """
         class_name = config["class"]
-        class_config = config.setdefault("config", {})
+        class_config = merge_parameters(config.setdefault("config", {}), global_config)
 
-        if global_config is None:
-            global_config = {}
-
-        class_params = set(class_config)
-        for key in class_params.intersection(global_config):
-            class_config[key] = global_config[key]
-
-        for key in class_params.intersection(config.get("resolve_config_property_paths", [])):
+        for key in set(class_config).intersection(config.get("resolve_config_property_paths", [])):
             if isinstance(class_config[key], str):
                 class_config[key] = self.resolve_path(class_config[key])
             elif isinstance(class_config[key], (list, tuple)):
