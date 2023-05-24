@@ -28,7 +28,7 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Service", "Sto
 BaseTypes = Union["Environment", "Optimizer", "Service", "Storage"]
 
 
-def merge_parameters(dest: dict, source: dict,
+def merge_parameters(dest: dict, source: Optional[dict] = None,
                      required_keys: Optional[Iterable[str]] = None) -> dict:
     """
     Merge the source config dict into the destination config.
@@ -39,7 +39,7 @@ def merge_parameters(dest: dict, source: dict,
     ----------
     dest : dict
         Destination config.
-    source : dict
+    source : Optional[dict]
         Source config.
     required_keys : Optional[Iterable[str]]
         An optional list of keys that must be present in the destination config.
@@ -49,6 +49,9 @@ def merge_parameters(dest: dict, source: dict,
     dest : dict
         A reference to the destination config after the merge.
     """
+    if source is None:
+        source = {}
+
     for key in set(dest).intersection(source):
         dest[key] = source[key]
 
@@ -104,9 +107,7 @@ def prepare_class_load(config: dict,
         Name of the class to instantiate and its configuration.
     """
     class_name = config["class"]
-    class_config = config.setdefault("config", {})
-
-    merge_parameters(class_config, global_config or {})
+    class_config = merge_parameters(config.setdefault("config", {}), global_config)
 
     if _LOG.isEnabledFor(logging.DEBUG):
         _LOG.debug("Instantiating: %s with config:\n%s",
