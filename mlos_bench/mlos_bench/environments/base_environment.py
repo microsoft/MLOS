@@ -156,7 +156,8 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return f'{" " * indent * level}{repr(self)}'
 
-    def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
+    def _combine_tunables(self, tunables: TunableGroups,
+                          const_args: dict) -> Dict[str, TunableValue]:
         """
         Plug tunable values into the base config. If the tunable group is unknown,
         ignore it (it might belong to another environment). This method should
@@ -167,6 +168,8 @@ class Environment(metaclass=abc.ABCMeta):
         tunables : TunableGroups
             A collection of groups of tunable parameters
             along with the parameters' values.
+        const_args : dict
+            Free-format dictionary of non-tunable parameters to combine with the tunables.
 
         Returns
         -------
@@ -175,7 +178,7 @@ class Environment(metaclass=abc.ABCMeta):
         """
         return tunables.get_param_values(
             group_names=list(self._tunable_params.get_covariant_group_names()),
-            into_params=self._const_args.copy())
+            into_params=const_args.copy())
 
     @property
     def tunable_params(self) -> TunableGroups:
@@ -211,7 +214,8 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
 
-        self._params = merge_parameters(self._combine_tunables(tunables), global_config)
+        self._params = self._combine_tunables(tunables, self._const_args)
+        merge_parameters(dest=self._params, source=global_config)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Combined parameters:\n%s", json.dumps(self._params, indent=2))

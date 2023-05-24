@@ -1,6 +1,4 @@
 {
-    //"$schema": "../../../../config/schemas/services/service-schema.json",
-
     "services": [
         {
             "class": "mlos_bench.services.remote.azure.AzureVMService",

@@ -19,34 +19,20 @@
                 },
                 {
                     "properties": {
-                        "deploymentTemplatePath": {
-                            "type": "string",
-                            "pattern": "[.]json[c]?$"
-                        },
                         "subscription": {
                             "type": "string"
                         },
                         "accessToken": {
                             "type": "string"
                         },
-                        "resourceGroup": {
-                            "type": "string"
-                        },
-                        "deploymentName": {
-                            "type": "string"
-                        },
-                        "vmName": {
-                            "$comment": "TODO: Fix this so we can support multi-VMs",
-                            "type": "string"
+                        "pollInterval": {
+                            "type": "integer",
+                            "minimum": 1
                         }
                     },
                     "required": [
-                        "deploymentTemplatePath",
                         "subscription",
-                        "accessToken",
-                        "resourceGroup",
-                        "deploymentName",
-                        "vmName"
+                        "accessToken"
                     ]
                 }
             ],
