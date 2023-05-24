@@ -166,7 +166,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Name of the class to instantiate and its configuration.
         """
         class_name = config["class"]
-        class_config = merge_parameters(config.setdefault("config", {}), global_config)
+        class_config = config.setdefault("config", {})
+
+        merge_parameters(class_config, global_config)
 
         for key in set(class_config).intersection(config.get("resolve_config_property_paths", [])):
             if isinstance(class_config[key], str):

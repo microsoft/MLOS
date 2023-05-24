@@ -110,9 +110,9 @@ class Environment(metaclass=abc.ABCMeta):
         self._service = service
         self._is_ready = False
         self._params: Dict[str, TunableValue] = {}
+        self._const_args = config.get("const_args", {})
 
-        self._const_args = merge_parameters(
-            config.get("const_args", {}), global_config, config.get("required_args"))
+        merge_parameters(self._const_args, global_config, config.get("required_args"))
 
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
@@ -211,7 +211,8 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
 
-        self._params = merge_parameters(self._combine_tunables(tunables), global_config)
+        self._params = self._combine_tunables(tunables)
+        merge_parameters(self._params, global_config)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Combined parameters:\n%s", json.dumps(self._params, indent=2))

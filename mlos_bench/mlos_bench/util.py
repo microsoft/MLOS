@@ -107,7 +107,9 @@ def prepare_class_load(config: dict,
         Name of the class to instantiate and its configuration.
     """
     class_name = config["class"]
-    class_config = merge_parameters(config.setdefault("config", {}), global_config)
+    class_config = config.setdefault("config", {})
+
+    merge_parameters(class_config, global_config)
 
     if _LOG.isEnabledFor(logging.DEBUG):
         _LOG.debug("Instantiating: %s with config:\n%s",
