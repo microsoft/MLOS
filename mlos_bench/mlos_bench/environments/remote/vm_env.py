@@ -63,6 +63,8 @@ class VMEnv(Environment):
         assert isinstance(template, dict)
         self._deploy_template = template
 
+        self._arm_params = self.config.get("arm_template_params", {})
+
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if VM is ready. (Re)provision and start it, if necessary.
@@ -87,8 +89,11 @@ class VMEnv(Environment):
         if not super().setup(tunables, global_config):
             return False
 
+        arm_params = self._combine_tunables(tunables, self._arm_params)
+        # FIXME: merge global_config into self._arm_params (PR pending)
+
         (status, params) = self._vm_service.vm_provision(
-            self._params, self._deploy_template, self._arm_params)
+            self._params, self._deploy_template, arm_params)
 
         if status.is_pending:
             (status, _) = self._vm_service.wait_vm_deployment(True, params)
