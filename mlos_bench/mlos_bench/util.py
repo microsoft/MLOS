@@ -109,7 +109,7 @@ def prepare_class_load(config: dict,
     class_name = config["class"]
     class_config = config.setdefault("config", {})
 
-    merge_parameters(class_config, global_config)
+    merge_parameters(dest=class_config, source=global_config)
 
     if _LOG.isEnabledFor(logging.DEBUG):
         _LOG.debug("Instantiating: %s with config:\n%s",

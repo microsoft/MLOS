@@ -168,7 +168,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         class_name = config["class"]
         class_config = config.setdefault("config", {})
 
-        merge_parameters(class_config, global_config)
+        merge_parameters(dest=class_config, source=global_config)
 
         for key in set(class_config).intersection(config.get("resolve_config_property_paths", [])):
             if isinstance(class_config[key], str):

@@ -112,7 +112,8 @@ class Environment(metaclass=abc.ABCMeta):
         self._params: Dict[str, TunableValue] = {}
         self._const_args = config.get("const_args", {})
 
-        merge_parameters(self._const_args, global_config, config.get("required_args"))
+        merge_parameters(dest=self._const_args, source=global_config,
+                         required_keys=config.get("required_args"))
 
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
@@ -212,7 +213,7 @@ class Environment(metaclass=abc.ABCMeta):
         assert isinstance(tunables, TunableGroups)
 
         self._params = self._combine_tunables(tunables)
-        merge_parameters(self._params, global_config)
+        merge_parameters(dest=self._params, source=global_config)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Combined parameters:\n%s", json.dumps(self._params, indent=2))
