@@ -20,15 +20,20 @@ class SupportsRemoteExec(Protocol):
     scripts on a remote host OS.
     """
 
-    def remote_exec(self, script: Iterable[str], params: dict) -> Tuple["Status", dict]:
+    def remote_exec(self, vm_name: str, config: dict,
+                    script: Iterable[str], script_params: dict) -> Tuple[Status, dict]:
         """
         Run a command on remote host OS.
 
         Parameters
         ----------
+        vm_name : str
+            Name of the VM to run the script on.
+        config : dict
+            Flat dictionary of (key, value) pairs of deployment configuration parameters.
         script : Iterable[str]
             A list of lines to execute as a script on a remote VM.
-        params : dict
+        script_params : dict
             Flat dictionary of (key, value) pairs of parameters.
             They usually come from `const_args` and `tunable_params`
             properties of the Environment.
@@ -48,7 +53,7 @@ class SupportsRemoteExec(Protocol):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-            Must have the "asyncResultsUrl" key to get the results.
+            Must have the "asyncResultsUrl" and "vmName" keys to get the results.
             If the key is not present, return Status.PENDING.
 
         Returns

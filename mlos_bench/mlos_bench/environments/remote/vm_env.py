@@ -50,11 +50,18 @@ class VMEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(name=name, config=config, global_config=global_config,
+                         tunables=tunables, service=service)
 
         assert self._service is not None and isinstance(self._service, SupportsVMOps), \
             "VMEnv requires a service that supports VM operations"
         self._vm_service: SupportsVMOps = self._service
+
+        # TODO: Provide external schema validation?
+        template = self._config_loader_service.load_config(
+            self.config['arm_template_file'], schema_type=None)
+        assert isinstance(template, dict)
+        self._deploy_template = template
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -80,7 +87,9 @@ class VMEnv(Environment):
         if not super().setup(tunables, global_config):
             return False
 
-        (status, params) = self._vm_service.vm_provision(self._params)
+        (status, params) = self._vm_service.vm_provision(
+            self._params, self._deploy_template, self._arm_params)
+
         if status.is_pending:
             (status, _) = self._vm_service.wait_vm_deployment(True, params)
 
@@ -92,7 +101,7 @@ class VMEnv(Environment):
         Shut down the VM and release it.
         """
         _LOG.info("VM tear down: %s", self)
-        (status, params) = self._vm_service.vm_deprovision()
+        (status, params) = self._vm_service.vm_deprovision(self._params)
         if status.is_pending:
             (status, _) = self._vm_service.wait_vm_deployment(False, params)
 

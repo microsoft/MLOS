@@ -18,12 +18,16 @@ class SupportsVMOps(Protocol):
     Protocol interface for VM provisioning operations.
     """
 
-    def vm_provision(self, params: dict) -> Tuple["Status", dict]:
+    def vm_provision(self, config: dict, template: dict, params: dict) -> Tuple["Status", dict]:
         """
         Check if VM is ready. Deploy a new VM, if necessary.
 
         Parameters
         ----------
+        config : dict
+            Flat dictionary of (key, value) pairs of deployment configuration parameters.
+        template : dict
+            ARM Template with VM and other resources to deploy on Azure.
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
             VMEnv tunables are variable parameters that, together with the
@@ -56,12 +60,14 @@ class SupportsVMOps(Protocol):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
 
-    def vm_start(self, params: dict) -> Tuple["Status", dict]:
+    def vm_start(self, vm_name: str, params: dict) -> Tuple["Status", dict]:
         """
         Start a VM.
 
         Parameters
         ----------
+        vm_name : str
+            Name of the VM to start.
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
 
@@ -72,10 +78,17 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_stop(self) -> Tuple["Status", dict]:
+    def vm_stop(self, vm_name: str, params: dict) -> Tuple["Status", dict]:
         """
         Stops the VM by initiating a graceful shutdown.
 
+        Parameters
+        ----------
+        vm_name : str
+            Name of the VM to stop.
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
         Returns
         -------
         result : (Status, dict={})
@@ -83,10 +96,17 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_restart(self) -> Tuple["Status", dict]:
+    def vm_restart(self, vm_name: str, params: dict) -> Tuple["Status", dict]:
         """
         Restarts the VM by initiating a graceful shutdown.
 
+        Parameters
+        ----------
+        vm_name : str
+            Name of the VM to restart.
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
         Returns
         -------
         result : (Status, dict={})
@@ -94,9 +114,14 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_deprovision(self) -> Tuple["Status", dict]:
+    def vm_deprovision(self, params: dict) -> Tuple["Status", dict]:
         """
-        Deallocates the VM by shutting it down then releasing the compute resources.
+        Deallocate the resources deployed with `vm_provision` earlier.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
 
         Returns
         -------
