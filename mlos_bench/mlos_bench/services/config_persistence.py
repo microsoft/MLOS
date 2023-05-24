@@ -24,7 +24,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import merge_parameters, instantiate_from_config, path_join, BaseTypeVar
+from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, BaseTypeVar
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
