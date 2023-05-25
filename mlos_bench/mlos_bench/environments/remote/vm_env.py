@@ -14,6 +14,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
@@ -90,7 +91,7 @@ class VMEnv(Environment):
             return False
 
         arm_params = self._combine_tunables(tunables, self._arm_params)
-        # FIXME: merge global_config into self._arm_params (PR pending)
+        merge_parameters(dest=arm_params, source=global_config)
 
         (status, params) = self._vm_service.vm_provision(
             self._params, self._deploy_template, arm_params)

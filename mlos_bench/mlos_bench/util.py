@@ -28,7 +28,7 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Service", "Sto
 BaseTypes = Union["Environment", "Optimizer", "Service", "Storage"]
 
 
-def merge_parameters(*, dest: dict, source: Optional[dict] = None,
+def merge_parameters(dest: dict, source: Optional[dict] = None,
                      required_keys: Optional[Iterable[str]] = None) -> dict:
     """
     Merge the source config dict into the destination config.

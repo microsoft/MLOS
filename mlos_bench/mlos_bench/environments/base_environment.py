@@ -215,7 +215,7 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
 
-        self._params = self._combine_tunables(tunables)
+        self._params = self._combine_tunables(tunables, self._const_args)
         merge_parameters(dest=self._params, source=global_config)
 
         if _LOG.isEnabledFor(logging.DEBUG):
