@@ -172,12 +172,14 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             if val.get("value") is not None
         }
 
-    def _azure_vm_post_helper(self, url: str) -> Tuple[Status, dict]:
+    def _azure_vm_post_helper(self, params: dict, url: str) -> Tuple[Status, dict]:
         """
         General pattern for performing an action on an Azure VM via its REST API.
 
         Parameters
         ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
         url: str
             REST API url for the target to perform on the Azure VM.
             Should be a url that we intend to POST to.
@@ -198,9 +200,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         # Logical flow for async operations based on:
         # https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
         if response.status_code == 200:
-            return (Status.SUCCEEDED, {})
+            return (Status.SUCCEEDED, params)
         elif response.status_code == 202:
-            result: Dict[str, Any] = {}
+            result = params.copy()
             if "Azure-AsyncOperation" in response.headers:
                 result["asyncResultsUrl"] = response.headers.get("Azure-AsyncOperation")
             elif "Location" in response.headers:
@@ -279,7 +281,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         _LOG.info("Wait for %s to %s", config["deploymentName"],
                   "provision" if is_setup else "deprovision")
 
-        return self._wait_while(self._check_deployment, Status.PENDING, params)
+        return self._wait_while(self._check_deployment, Status.PENDING, config)
 
     def wait_vm_operation(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -305,7 +307,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
 
         _LOG.info("Wait for operation on VM %s", config["vmName"])
 
-        return self._wait_while(self._check_vm_operation_status, Status.RUNNING, params)
+        return self._wait_while(self._check_vm_operation_status, Status.RUNNING, config)
 
     def _wait_while(self, func: Callable[[dict], Tuple[Status, dict]],
                     loop_status: Status, params: dict) -> Tuple[Status, dict]:
@@ -503,7 +505,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             ]
         )
         _LOG.info("Start VM: %s :: %s", config["vmName"], params)
-        return self._azure_vm_post_helper(self._URL_START.format(
+        return self._azure_vm_post_helper(config, self._URL_START.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -534,7 +536,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             ]
         )
         _LOG.info("Stop VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(self._URL_STOP.format(
+        return self._azure_vm_post_helper(config, self._URL_STOP.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -583,7 +585,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             ]
         )
         _LOG.info("Reboot VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(self._URL_REBOOT.format(
+        return self._azure_vm_post_helper(config, self._URL_REBOOT.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -621,12 +623,11 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         if _LOG.isEnabledFor(logging.INFO):
             _LOG.info("Run a script on VM: %s\n  %s", config["vmName"], "\n  ".join(script))
 
-        # FIXME: How do we know what parameters to pass to the remote script??
-
+        # FIXME: Filter the parameters for the remote script?? (RN we pass all of them)
         json_req = {
             "commandId": "RunShellScript",
             "script": list(script),
-            "parameters": [{"name": key, "value": val} for (key, val) in params.items()]
+            "parameters": [{"name": key, "value": val} for (key, val) in config.items()]
         }
 
         url = self._URL_REXEC_RUN.format(
@@ -650,9 +651,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
 
         if response.status_code == 200:
             # TODO: extract the results from JSON response
-            return (Status.SUCCEEDED, {})
+            return (Status.SUCCEEDED, config)
         elif response.status_code == 202:
             return (Status.PENDING, {
+                **config,
                 "asyncResultsUrl": response.headers.get("Azure-AsyncOperation")
             })
         else:
