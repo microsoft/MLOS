@@ -93,7 +93,7 @@ class VMEnv(Environment):
         Shut down the VM and release it.
         """
         _LOG.info("VM tear down: %s", self)
-        (status, params) = self._vm_service.vm_deprovision()
+        (status, params) = self._vm_service.vm_deprovision(self._params)
         if status.is_pending:
             (status, _) = self._vm_service.wait_vm_deployment(False, params)
 

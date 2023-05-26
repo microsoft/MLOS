@@ -418,7 +418,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         Returns
         -------
         result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
+            A pair of Status and result. The result is the input `params` plus the
+            parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         config = merge_parameters(
@@ -469,9 +470,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             output = self._extract_arm_parameters(response.json())
             if _LOG.isEnabledFor(logging.DEBUG):
                 _LOG.debug("Extracted parameters:\n%s", json.dumps(output, indent=2))
-            # self.config.update(params)
-            output.setdefault("asyncResultsUrl", url)
-            return (Status.PENDING, output)
+            config.update(output)
+            config.setdefault("asyncResultsUrl", url)
+            return (Status.PENDING, config)
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
             # _LOG.error("Bad Request:\n%s", response.request.body)
@@ -551,11 +552,11 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         Returns
         -------
         result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
+            A pair of Status and result. The result is always the same as input `params`.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         _LOG.info("Deprovision: %s", params["deploymentName"])
-        return (Status.SUCCEEDED, {})
+        return (Status.SUCCEEDED, params)
 
     def vm_restart(self, params: dict) -> Tuple[Status, dict]:
         """
