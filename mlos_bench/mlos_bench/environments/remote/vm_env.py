@@ -53,7 +53,6 @@ class VMEnv(Environment):
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
 
-
         assert self._service is not None and isinstance(self._service, SupportsVMOps), \
             "VMEnv requires a service that supports VM operations"
         self._vm_service: SupportsVMOps = self._service

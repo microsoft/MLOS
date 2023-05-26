@@ -18,12 +18,12 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
-from mlos_bench.util import check_required_params
+from mlos_bench.util import check_required_params, merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: disable=too-many-instance-attributes
+class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
     """
     Helper methods to manage VMs on Azure.
     """
@@ -270,8 +270,12 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        config = merge_parameters(
+            dest=self.config.copy(), source=params, required_keys=["deploymentName"])
+
         _LOG.info("Wait for %s to %s", config["deploymentName"],
                   "provision" if is_setup else "deprovision")
+
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
     def wait_vm_operation(self, params: dict) -> Tuple[Status, dict]:
@@ -293,7 +297,11 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
+        config = merge_parameters(
+            dest=self.config.copy(), source=params, required_keys=["vmName"])
+
         _LOG.info("Wait for operation on VM %s", config["vmName"])
+
         return self._wait_while(self._check_vm_operation_status, Status.RUNNING, params)
 
     def _wait_while(self, func: Callable[[dict], Tuple[Status, dict]],
@@ -316,6 +324,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         result : (Status, dict)
             A pair of Status and result.
         """
+        config = merge_parameters(
+            dest=self.config.copy(), source=params, required_keys=["deploymentName"])
+
         poll_period = params.get("pollInterval", self._poll_interval)
 
         _LOG.debug("Wait for %s status %s :: poll %.2f timeout %d s",
@@ -343,7 +354,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
         _LOG.warning("Request timed out: %s", params)
         return (Status.TIMED_OUT, {})
 
-    def _check_deployment(self, _params: dict) -> Tuple[Status, dict]:
+    def _check_deployment(self, params: dict) -> Tuple[Status, dict]:
         """
         Check if Azure deployment exists.
         Return SUCCEEDED if true, PENDING otherwise.
@@ -361,6 +372,16 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result. The result is always {}.
             Status is one of {SUCCEEDED, PENDING, FAILED}
         """
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "deploymentName",
+            ]
+        )
+
         _LOG.info("Check deployment: %s", config["deploymentName"])
 
         url = self._URL_DEPLOY.format(
@@ -397,6 +418,16 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "deploymentName",
+            ]
+        )
+
         _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
 
         url = self._URL_DEPLOY.format(
@@ -455,6 +486,15 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "vmName",
+            ]
+        )
         _LOG.info("Start VM: %s :: %s", config["vmName"], params)
         return self._azure_vm_post_helper(self._URL_START.format(
             subscription=config["subscription"],
@@ -462,9 +502,14 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             vm_name=config["vmName"],
         ))
 
-    def vm_stop(self) -> Tuple[Status, dict]:
+    def vm_stop(self, params: dict) -> Tuple[Status, dict]:
         """
         Stops the VM on Azure by initiating a graceful shutdown.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
 
         Returns
         -------
@@ -472,6 +517,15 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "vmName",
+            ]
+        )
         _LOG.info("Stop VM: %s", config["vmName"])
         return self._azure_vm_post_helper(self._URL_STOP.format(
             subscription=config["subscription"],
@@ -479,29 +533,48 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             vm_name=config["vmName"],
         ))
 
-    def vm_deprovision(self) -> Tuple[Status, dict]:
+    def vm_deprovision(self, params: dict) -> Tuple[Status, dict]:
         """
         Deallocates the VM on Azure by shutting it down then releasing the compute resources.
 
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
         Returns
         -------
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        _LOG.info("Deprovision: %s", config["deploymentName"])
+        _LOG.info("Deprovision: %s", params["deploymentName"])
         return (Status.SUCCEEDED, {})
 
-    def vm_restart(self) -> Tuple[Status, dict]:
+    def vm_restart(self, params: dict) -> Tuple[Status, dict]:
         """
         Reboot the VM on Azure by initiating a graceful shutdown.
 
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
         Returns
         -------
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "vmName",
+            ]
+        )
         _LOG.info("Reboot VM: %s", config["vmName"])
         return self._azure_vm_post_helper(self._URL_REBOOT.format(
             subscription=config["subscription"],
@@ -528,8 +601,20 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "vmName",
+            ]
+        )
+
         if _LOG.isEnabledFor(logging.INFO):
             _LOG.info("Run a script on VM: %s\n  %s", config["vmName"], "\n  ".join(script))
+
+        # FIXME: How do we know what parameters to pass to the remote script??
 
         json_req = {
             "commandId": "RunShellScript",
@@ -585,6 +670,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):  # pylint: dis
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
+        config = merge_parameters(
+            dest=self.config.copy(), source=params, required_keys=["vmName"])
+
         _LOG.info("Check the results on VM: %s", config["vmName"])
 
         status, result = self.wait_vm_operation(params)
