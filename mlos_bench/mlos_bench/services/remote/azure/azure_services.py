@@ -147,6 +147,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         # TODO: Provide external schema validation?
         self._deploy_template = self.config_loader_service.load_config(
             config['deploymentTemplatePath'], schema_type=None)
+        assert isinstance(self._deploy_template, dict)
+
+        self._template_params = frozenset(self._deploy_template.get("parameters", {}).keys())
 
         self._headers = {
             # Access token from `az account get-access-token`:
@@ -440,7 +443,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             "properties": {
                 "mode": "Incremental",
                 "template": self._deploy_template,
-                "parameters": {key: {"value": val} for (key, val) in params.items()}
+                "parameters": {
+                    key: {"value": val} for (key, val) in params.items()
+                    if key in self._template_params
+                }
             }
         }
 
