@@ -53,18 +53,20 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
     """
 
-    def __init__(  # pylint: disable=too-many-arguments,too-many-locals
-        self,
-        parameter_space: ConfigSpace.ConfigurationSpace,
-        space_adapter: Optional[BaseSpaceAdapter] = None,
-        seed: Optional[int] = 0,
-        run_name: Optional[str] = None,
-        output_directory: Optional[str] = None,
-        max_trials: int = 100,
-        n_random_init: Optional[int] = 10,
-        n_random_probability: Optional[float] = 0.1,
-    ):
-        super().__init__(parameter_space, space_adapter)
+    def __init__(self, *,
+                 parameter_space: ConfigSpace.ConfigurationSpace,
+                 space_adapter: Optional[BaseSpaceAdapter] = None,
+                 seed: Optional[int] = 0,
+                 run_name: Optional[str] = None,
+                 output_directory: Optional[str] = None,
+                 max_trials: int = 100,
+                 n_random_init: Optional[int] = 10,
+                 n_random_probability: Optional[float] = 0.1):
+
+        super().__init__(
+            parameter_space=parameter_space,
+            space_adapter=space_adapter,
+        )
 
         # pylint: disable=import-outside-toplevel
         from smac import HyperparameterOptimizationFacade as Optimizer_Smac
