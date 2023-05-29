@@ -7,7 +7,6 @@ Tests for Bayesian Optimizers.
 """
 
 from typing import List, Optional, Type
-from math import isclose
 
 import pytest
 
