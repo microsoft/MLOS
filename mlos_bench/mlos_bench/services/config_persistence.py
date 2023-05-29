@@ -14,7 +14,7 @@ import sys
 import json    # For logging only
 import logging
 
-from typing import Any, Dict, Iterable, List, Optional, Union, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 import json5    # To read configs with comments and other JSON5 syntax features
 from jsonschema import ValidationError, SchemaError
@@ -24,7 +24,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config, path_join, BaseTypeVar
+from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, BaseTypeVar
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -106,7 +106,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     def load_config(self,
                     json_file_name: str,
                     schema_type: Optional[ConfigSchema],
-                    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+                    ) -> Dict[str, Any]:
         """
         Load JSON config file. Search for a file relative to `_config_path`
         if the input path is not absolute.
@@ -168,14 +168,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         class_name = config["class"]
         class_config = config.setdefault("config", {})
 
-        if global_config is None:
-            global_config = {}
+        merge_parameters(dest=class_config, source=global_config)
 
-        class_params = set(class_config)
-        for key in class_params.intersection(global_config):
-            class_config[key] = global_config[key]
-
-        for key in class_params.intersection(config.get("resolve_config_property_paths", [])):
+        for key in set(class_config).intersection(config.get("resolve_config_property_paths", [])):
             if isinstance(class_config[key], str):
                 class_config[key] = self.resolve_path(class_config[key])
             elif isinstance(class_config[key], (list, tuple)):
@@ -341,7 +336,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return service
 
     def build_service(self,
-                      config: Union[Dict[str, Any], List[Dict[str, Any]]],
+                      config: Dict[str, Any],
                       global_config: Optional[Dict[str, Any]] = None,
                       parent: Optional[Service] = None) -> Service:
         """
@@ -349,7 +344,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        config : dict or list of dict
+        config : dict or an object with a list of dicts under the "services" key
             A list where each element is a dictionary with 2 mandatory fields:
                 "class": FQN of a Python class to instantiate;
                 "config": Free-format dictionary to pass to the constructor.
@@ -368,12 +363,18 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             _LOG.debug("Build service from config:\n%s",
                        json.dumps(config, indent=2))
 
-        if isinstance(config, dict):
+        assert isinstance(config, dict)
+        config_list: List[Dict[str, Any]]
+        if "class" not in config:
+            # Top level config is a simple object with a list of services
+            config_list = config["services"]
+        else:
+            # Top level config is a single service
             if parent is None:
                 return self._build_standalone_service(config, global_config)
-            config = [config]
+            config_list = [config]
 
-        return self._build_composite_service(config, global_config, parent)
+        return self._build_composite_service(config_list, global_config, parent)
 
     def load_environment(self, json_file_name: str,
                          tunables: TunableGroups,
@@ -426,12 +427,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         env : List[Environment]
             A list of new benchmarking environments.
         """
-        config_list = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
-        if isinstance(config_list, dict):
-            config_list = [config_list]
+        config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         return [
             self.build_environment(config, tunables, global_config, service)
-            for config in config_list
         ]
 
     def load_services(self, json_file_names: Iterable[str],
@@ -459,7 +457,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                   json_file_names, parent.__class__.__name__)
         service = Service(global_config, parent)
         for fname in json_file_names:
-            config = self.load_config(fname, schema_type=None)  # TODO: , ConfigSchema.SERVICE)
+            config = self.load_config(fname, ConfigSchema.SERVICE)
             service.register(self.build_service(config, global_config, service).export())
         return service
 

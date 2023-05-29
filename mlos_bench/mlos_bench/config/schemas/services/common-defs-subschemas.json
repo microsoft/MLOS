@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/common-defs-subschemas.json",
+    "title": "mlos_bench common Service config schema definitions",
+    "description": "mlos_bench Service config schema definitions",
+    "$defs": {
+        "poll_configs": {
+            "type": "object",
+            "properties": {
+                "pollInterval": {
+                    "description": "Poll interval in seconds.",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "pollTimeout": {
+                    "description": "Poll timeout in seconds.",
+                    "type": "number",
+                    "minimum": 1
+                }
+            }
+        },
+        "temp_dir_config": {
+            "type": "object",
+            "properties": {
+                "temp_dir": {
+                    "description": "Path to temp dir (or null to use system default).",
+                    "type": ["string", "null"]
+                }
+            },
+            "minProperties": 1
+        }
+
+    }
+}

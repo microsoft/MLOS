@@ -15,7 +15,7 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config
+from mlos_bench.util import instantiate_from_config, merge_parameters
 
 if TYPE_CHECKING:
     from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -110,21 +110,10 @@ class Environment(metaclass=abc.ABCMeta):
         self._service = service
         self._is_ready = False
         self._params: Dict[str, TunableValue] = {}
-
-        if global_config is None:
-            global_config = {}
-
         self._const_args = config.get("const_args", {})
-        for key in set(self._const_args).intersection(global_config):
-            self._const_args[key] = global_config[key]
 
-        for key in config.get("required_args", []):
-            if key in self._const_args:
-                continue
-            if key in global_config:
-                self._const_args[key] = global_config[key]
-            else:
-                raise ValueError("Missing required parameter: " + key)
+        merge_parameters(dest=self._const_args, source=global_config,
+                         required_keys=config.get("required_args"))
 
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
@@ -146,7 +135,27 @@ class Environment(metaclass=abc.ABCMeta):
         return self.name
 
     def __repr__(self) -> str:
-        return f"Env: {self.__class__} :: '{self.name}'"
+        return f"{self.__class__.__name__}::'{self.name}'"
+
+    def pprint(self, indent: int = 4, level: int = 0) -> str:
+        """
+        Pretty-print the environment configuration.
+        For composite environments, print all children environments as well.
+
+        Parameters
+        ----------
+        indent : int
+            Number of spaces to indent the output. Default is 4.
+        level : int
+            Current level of indentation. Default is 0.
+
+        Returns
+        -------
+        pretty : str
+            Pretty-printed environment configuration.
+            Default output is the same as `__repr__`.
+        """
+        return f'{" " * indent * level}{repr(self)}'
 
     def _combine_tunables(self, tunables: TunableGroups) -> Dict[str, TunableValue]:
         """
@@ -203,12 +212,9 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
 
-        if global_config is None:
-            global_config = {}
-
         self._params = self._combine_tunables(tunables)
-        for key in set(self._params).intersection(global_config):
-            self._params[key] = global_config[key]
+        merge_parameters(dest=self._params, source=global_config)
+
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Combined parameters:\n%s", json.dumps(self._params, indent=2))
 

@@ -1,0 +1,18 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    "description": "Azure VM Service configuration.",
+
+    "class": "mlos_bench.services.remote.azure.azure_services.AzureVMService",
+    "config": {
+        "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
+        "subscription": "subscription-id",
+        "accessToken": "access-token-blob",
+
+        "resourceGroup": "rg",
+        "deploymentName": "deployment",
+        "vmName": "test-vm",
+
+        "pollInterval": 1,
+        "pollTimeout": 60
+    }
+}

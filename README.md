@@ -60,7 +60,9 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
 2. For an example of using the `mlos_core` optimizer APIs run the [`BayesianOptimization.ipynb`](./mlos_core/notebooks/BayesianOptimization.ipynb) notebook.
 
-3. For an example of using the `mlos_bench` tool to run an experiment, see the [`mlos_bench` Quickstart README](./mlos_bench/README.md#quickstart).  Here's a quick summary:
+3. For an example of using the `mlos_bench` tool to run an experiment, see the [`mlos_bench` Quickstart README](./mlos_bench/README.md#quickstart).
+
+    Here's a quick summary:
 
     ```sh
     # get an azure token
@@ -69,6 +71,8 @@ Simply open the project in VSCode and follow the prompts to build and open the d
     # run a simple experiment
     mlos_bench --config ./mlos_bench/mlos_bench/config/cli/azure-redis-1shot.jsonc
     ```
+
+    > See Also: [mlos_bench/config](./mlos_bench/mlos_bench/config/) for additional configuration details.
 
 ## Distributing
 

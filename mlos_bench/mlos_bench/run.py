@@ -26,7 +26,7 @@ _LOG = logging.getLogger(__name__)
 
 def _main() -> None:
 
-    launcher = Launcher("mlos_bench")
+    launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool")
 
     result = _optimize(
         launcher.environment,
@@ -63,8 +63,12 @@ def _optimize(env: Environment,
     global_config : dict
         Global configuration parameters.
     """
+    if _LOG.isEnabledFor(logging.INFO):
+        _LOG.info("Root Environment:\n%s", env.pprint())
+
     experiment_id = global_config["experimentId"].strip()
     trial_id = int(global_config.get("trialId", 1))
+
     # Start new or resume the existing experiment. Verify that the
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
