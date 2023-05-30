@@ -118,11 +118,12 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
 
         check_required_params(
             config, {
-                "deploymentTemplatePath",
                 "subscription",
                 "accessToken",
                 "resourceGroup",
                 "deploymentName",
+                "deploymentTemplatePath",
+                "deploymentTemplateParameters",
             }
         )
 
@@ -145,11 +146,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._request_timeout = float(config.get("requestTimeout", self._REQUEST_TIMEOUT))
 
         # TODO: Provide external schema validation?
-        self._deploy_template = self.config_loader_service.load_config(
+        template = self.config_loader_service.load_config(
             config['deploymentTemplatePath'], schema_type=None)
-        assert isinstance(self._deploy_template, dict)
+        assert template is not None and isinstance(template, dict)
+        self._deploy_template = template
 
-        self._template_params = frozenset(self._deploy_template.get("parameters", {}).keys())
+        self._deploy_params = merge_parameters(
+            dest=config['deploymentTemplateParameters'].copy(), source=self.config)
 
         self._headers = {
             # Access token from `az account get-access-token`:
@@ -425,7 +428,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         config = merge_parameters(
-            dest=self.config.copy(),
+            dest=self._deploy_params.copy(),
             source=params,
             required_keys=[
                 "subscription",
@@ -447,8 +450,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
                 "mode": "Incremental",
                 "template": self._deploy_template,
                 "parameters": {
-                    key: {"value": val} for (key, val) in params.items()
-                    if key in self._template_params
+                    key: {"value": val} for (key, val) in config.items()
+                    if key in self._deploy_template.get("parameters", {})
                 }
             }
         }

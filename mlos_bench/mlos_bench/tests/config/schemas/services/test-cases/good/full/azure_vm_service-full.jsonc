@@ -4,26 +4,29 @@
 
     "class": "mlos_bench.services.remote.azure.azure_services.AzureVMService",
     "config": {
-        "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
+
         "subscription": "subscription-id",
         "accessToken": "access-token-blob",
 
         "resourceGroup": "rg",
         "deploymentName": "deployment",
 
-        "location": "westus2",
+        "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
+        "deploymentTemplateParameters": {
+            "location": "westus2",
 
-        "adminUsername": "admin",
-        "authenticationType": "sshPublicKey",
-        "adminPasswordOrKey": "ssh-rsa ...",
+            "adminUsername": "admin",
+            "authenticationType": "sshPublicKey",
+            "adminPasswordOrKey": "ssh-rsa ...",
 
-        "virtualNetworkName": "vnet",
-        "subnetName": "subnet",
-        "networkSecurityGroupName": "nsg",
+            "virtualNetworkName": "vnet",
+            "subnetName": "subnet",
+            "networkSecurityGroupName": "nsg",
 
-        "ubuntuOSVersion": "18.04-LTS",
+            "ubuntuOSVersion": "18.04-LTS",
 
-        "vmName": "test-vm",
+            "vmName": "test-vm"
+        },
 
         "pollInterval": 1,
         "pollTimeout": 60
