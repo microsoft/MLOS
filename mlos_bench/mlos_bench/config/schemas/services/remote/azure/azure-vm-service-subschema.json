@@ -19,10 +19,6 @@
                 },
                 {
                     "properties": {
-                        "deploymentTemplatePath": {
-                            "type": "string",
-                            "pattern": "[.]json[c]?$"
-                        },
                         "subscription": {
                             "type": "string"
                         },
@@ -34,24 +30,33 @@
                         },
                         "deploymentName": {
                             "type": "string"
+                        },
+                        "deploymentTemplatePath": {
+                            "type": "string",
+                            "pattern": "[.]json[c]?$"
+                        },
+                        "deploymentTemplateParameters": {
+                            "description": "Key/value pairs of ARM template parameters.",
+                            "type": "object",
+                            "additionalProperties": {
+                                "$comment": "The value of any parameter can be a string, number, boolean, or null.",
+                                "type": [
+                                    "string",
+                                    "number",
+                                    "boolean",
+                                    "null"
+                                ]
+                            }
                         }
                     },
                     "required": [
-                        "deploymentTemplatePath",
                         "subscription",
                         "accessToken",
                         "resourceGroup",
-                        "deploymentName"
-                    ],
-                    "additionalProperties": {
-                        "$comment": "Free-format properties of the ARM Template specified in deploymentTemplatePath",
-                        "type": [
-                            "string",
-                            "number",
-                            "boolean",
-                            "null"
-                        ]
-                    }
+                        "deploymentName",
+                        "deploymentTemplatePath",
+                        "deploymentTemplateParameters"
+                    ]
                 }
             ],
             "unevaluatedProperties": false
