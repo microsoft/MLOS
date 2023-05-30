@@ -34,10 +34,6 @@
                         },
                         "deploymentName": {
                             "type": "string"
-                        },
-                        "vmName": {
-                            "$comment": "TODO: Fix this so we can support multi-VMs",
-                            "type": "string"
                         }
                     },
                     "required": [
@@ -45,9 +41,17 @@
                         "subscription",
                         "accessToken",
                         "resourceGroup",
-                        "deploymentName",
-                        "vmName"
-                    ]
+                        "deploymentName"
+                    ],
+                    "additionalProperties": {
+                        "$comment": "Free-format properties of the ARM Template specified in deploymentTemplatePath",
+                        "type": [
+                            "string",
+                            "number",
+                            "boolean",
+                            "null"
+                        ]
+                    }
                 }
             ],
             "unevaluatedProperties": false
