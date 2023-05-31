@@ -203,7 +203,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         # Logical flow for async operations based on:
         # https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
         if response.status_code == 200:
-            return (Status.SUCCEEDED, params)
+            return (Status.SUCCEEDED, params.copy())
         elif response.status_code == 202:
             result = params.copy()
             if "Azure-AsyncOperation" in response.headers:
