@@ -4,13 +4,14 @@
             "class": "mlos_bench.services.remote.azure.AzureVMService",
 
             "config": {
+                "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+                // `subscription`, `accessToken`, etc. are placeholders
+                // for values provided in the global config:
                 "subscription": "AZURE SUBSCRIPTION ID",
                 "accessToken": "AZURE ACCESS TOKEN FROM `az account get-access-token`",
 
                 "resourceGroup": "os-autotune",
                 "deploymentName": "os-autotune-001",
-
-                "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
 
                 "deploymentTemplateParameters": {
                     "location": "westus2",
