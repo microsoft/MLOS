@@ -627,7 +627,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         json_req = {
             "commandId": "RunShellScript",
             "script": list(script),
-            "parameters": [{"name": key, "value": val} for (key, val) in config.items()]
+            "parameters": [
+                {"name": key, "value": val} for (key, val) in config.items()
+                if not isinstance(val, (dict, list, tuple))
+            ]
         }
 
         url = self._URL_REXEC_RUN.format(

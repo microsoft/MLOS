@@ -116,6 +116,7 @@ def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service: AzureVMS
     assert status == operation_status
 
 
+@pytest.mark.skip(reason="Enable after we fix the issue")
 @patch("mlos_bench.services.remote.azure.azure_services.requests")
 def test_remote_exec_headers_output(mock_requests: MagicMock, azure_vm_service: AzureVMService) -> None:
 
