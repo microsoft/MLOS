@@ -453,7 +453,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             _LOG.info("Response: %s", response)
 
         if response.status_code == 200:
-            return (Status.PENDING, {})
+            return (Status.PENDING, params)
         elif response.status_code == 201:
             output = self._extract_arm_parameters(response.json())
             if _LOG.isEnabledFor(logging.DEBUG):
