@@ -4,25 +4,21 @@
 
     "class": "mlos_bench.services.remote.azure.azure_services.AzureVMService",
     "config": {
-
+        "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",
         "accessToken": "access-token-blob",
 
         "resourceGroup": "rg",
         "deploymentName": "deployment",
 
-        "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "deploymentTemplateParameters": {
             "location": "westus2",
-
             "adminUsername": "admin",
             "authenticationType": "sshPublicKey",
             "adminPasswordOrKey": "ssh-rsa ...",
-
             "virtualNetworkName": "vnet",
             "subnetName": "subnet",
             "networkSecurityGroupName": "nsg",
-
             "ubuntuOSVersion": "18.04-LTS",
         },
 

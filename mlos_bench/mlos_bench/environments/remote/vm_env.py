@@ -50,8 +50,7 @@ class VMEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config,
-                         tunables=tunables, service=service)
+        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
         assert self._service is not None and isinstance(self._service, SupportsVMOps), \
             "VMEnv requires a service that supports VM operations"

@@ -4,7 +4,6 @@
             "class": "mlos_bench.services.remote.azure.AzureVMService",
 
             "config": {
-
                 "subscription": "AZURE SUBSCRIPTION ID",
                 "accessToken": "AZURE ACCESS TOKEN FROM `az account get-access-token`",
 

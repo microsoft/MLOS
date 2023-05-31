@@ -3,9 +3,7 @@
     "class": "mlos_bench.environments.remote.VMEnv",
 
     "include_tunables": ["environments/vm/azure/azure-vm-tunables.jsonc"],
-
     "config": {
-
         "tunable_params": ["azure-vm"],
 
         "const_args": {
