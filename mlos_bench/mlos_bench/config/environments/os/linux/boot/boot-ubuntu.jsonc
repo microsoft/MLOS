@@ -7,9 +7,9 @@
             {
                 "name": "Boot Ubuntu VM on Azure",
                 "class": "mlos_bench.environments.remote.OSEnv",
-                "required_args": [
-                    "vmName"
-                ]
+                "config": {
+                    "required_args": ["vmName"]
+                }
             },
             // Local: Generate GRUB config and upload it to the shared storage
             {
