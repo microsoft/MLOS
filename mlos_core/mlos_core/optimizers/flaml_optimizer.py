@@ -25,7 +25,7 @@ class EvaluatedSample(NamedTuple):
 
 
 class FlamlOptimizer(BaseOptimizer):
-    """Optimizer class for FLAML: A fast library for AutoML and tuning.
+    """Wraper class for FLAML Optimizer: A fast library for AutoML and tuning.
 
     Parameters
     ----------
