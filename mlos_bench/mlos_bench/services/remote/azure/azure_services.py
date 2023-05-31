@@ -623,14 +623,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         if _LOG.isEnabledFor(logging.INFO):
             _LOG.info("Run a script on VM: %s\n  %s", config["vmName"], "\n  ".join(script))
 
-        # FIXME: Filter the parameters for the remote script?? (RN we pass all of them)
         json_req = {
             "commandId": "RunShellScript",
             "script": list(script),
-            "parameters": [
-                {"name": key, "value": val} for (key, val) in config.items()
-                if not isinstance(val, (dict, list, tuple))
-            ]
+            "parameters": [{"name": key, "value": val} for (key, val) in params.items()]
         }
 
         url = self._URL_REXEC_RUN.format(
