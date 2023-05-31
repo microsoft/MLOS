@@ -52,7 +52,8 @@
                                     "boolean",
                                     "null"
                                 ]
-                            }
+                            },
+                            "minProperties": 1
                         }
                     },
                     "required": [
