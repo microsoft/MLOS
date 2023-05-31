@@ -9,9 +9,6 @@
             "$ref": "./base-environment-subschema.json"
         },
         {
-            "$ref": "../common-environment-subschemas.json#/$defs/leaf_environment_config"
-        },
-        {
             "properties": {
                 "class": {
                     "enum": [
