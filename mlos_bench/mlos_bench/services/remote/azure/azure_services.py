@@ -551,8 +551,20 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             A pair of Status and result. The result is always the same as input `params`.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        _LOG.info("Deprovision: %s", params["deploymentName"])
-        return (Status.SUCCEEDED, params)
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "deploymentName",
+            ]
+        )
+        _LOG.info("Deprovision: %s", config["deploymentName"])
+        # TODO: Properly deprovision all resources specified in the ARM template.
+        if "vmName" in config:
+            return self.vm_stop(params)
+        return (Status.SUCCEEDED, config)
 
     def vm_restart(self, params: dict) -> Tuple[Status, dict]:
         """
