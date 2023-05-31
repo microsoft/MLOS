@@ -21,7 +21,7 @@
                     "$comment": "config objects need to specify their entire schema, so we need to include the unevaluatedProperties handling here.",
                     "allOf": [
                         {
-                            "$ref": "./common-environment-subschemas.json#/$defs/leaf_environment_config"
+                            "$ref": "./common-environment-subschemas.json#/$defs/common_environment_config"
                         },
                         {
                             "type": "object",
