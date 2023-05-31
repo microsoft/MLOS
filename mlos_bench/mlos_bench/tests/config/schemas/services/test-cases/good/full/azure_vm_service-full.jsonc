@@ -19,7 +19,7 @@
             "virtualNetworkName": "vnet",
             "subnetName": "subnet",
             "networkSecurityGroupName": "nsg",
-            "ubuntuOSVersion": "18.04-LTS",
+            "ubuntuOSVersion": "18.04-LTS"
         },
 
         "pollInterval": 1,

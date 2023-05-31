@@ -3,9 +3,9 @@
     "config": {
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",
-        // "accessToken": "access-token-blob",
+        "accessToken": "access-token-blob",
 
-        "resourceGroup": "rg",
-        "deploymentName": "deployment"
+        "resourceGroup": "rg"
+        //"deploymentName": "deployment"    // <-- missing
     }
 }
