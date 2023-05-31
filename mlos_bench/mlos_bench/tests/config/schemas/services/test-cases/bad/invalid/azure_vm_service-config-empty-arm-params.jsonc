@@ -7,7 +7,7 @@
         "deploymentName": "deployment",
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "deploymentTemplateParameters": {
-            "param": "value"
+            // "param": "value" // <-- need at least one parameter
         }
     }
 }
