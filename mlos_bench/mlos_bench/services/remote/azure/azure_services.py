@@ -278,13 +278,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        config = merge_parameters(
-            dest=self.config.copy(), source=params, required_keys=["deploymentName"])
-
-        _LOG.info("Wait for %s to %s", config["deploymentName"],
+        _LOG.info("Wait for %s to %s", params["deploymentName"],
                   "provision" if is_setup else "deprovision")
-
-        return self._wait_while(self._check_deployment, Status.PENDING, config)
+        return self._wait_while(self._check_deployment, Status.PENDING, params)
 
     def wait_vm_operation(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -305,12 +301,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        config = merge_parameters(
-            dest=self.config.copy(), source=params, required_keys=["vmName"])
-
-        _LOG.info("Wait for operation on VM %s", config["vmName"])
-
-        return self._wait_while(self._check_vm_operation_status, Status.RUNNING, config)
+        _LOG.info("Wait for operation on VM %s", params["vmName"])
+        return self._wait_while(self._check_vm_operation_status, Status.RUNNING, params)
 
     def _wait_while(self, func: Callable[[dict], Tuple[Status, dict]],
                     loop_status: Status, params: dict) -> Tuple[Status, dict]:
