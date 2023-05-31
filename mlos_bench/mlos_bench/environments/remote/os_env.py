@@ -96,7 +96,7 @@ class OSEnv(Environment):
         Clean up and shut down the host without deprovisioning it.
         """
         _LOG.info("OS tear down: %s", self)
-        (status, params) = self._host_service.vm_stop()
+        (status, params) = self._host_service.vm_stop(self._params)
         if status.is_pending:
             (status, _) = self._host_service.wait_vm_operation(params)
 

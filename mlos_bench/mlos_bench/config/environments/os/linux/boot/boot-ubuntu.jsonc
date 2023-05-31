@@ -6,7 +6,12 @@
             // Boot and shutdown Azure VM - all logic is in Python
             {
                 "name": "Boot Ubuntu VM on Azure",
-                "class": "mlos_bench.environments.remote.OSEnv"
+                "class": "mlos_bench.environments.remote.OSEnv",
+                "config": {
+                    "const_args": {
+                        "vmName": "os-autotune-linux-vm"
+                    }
+                }
             },
             // Local: Generate GRUB config and upload it to the shared storage
             {
@@ -56,6 +61,7 @@
                         "linux-kernel-boot"
                     ],
                     "required_args": [
+                        "vmName",
                         "storageAccountName",
                         "storageFileShareName",
                         "storageAccountKey",
@@ -64,6 +70,7 @@
                         "trialId"
                     ],
                     "const_args": {
+                        "vmName": "os-autotune-linux-vm",
                         "storageAccountName": "osatsharedstorage",
                         "storageFileShareName": "os-autotune-file-share",
                         "mountPoint": "/mnt/osat_fs"

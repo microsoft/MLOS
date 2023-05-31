@@ -19,34 +19,46 @@
                 },
                 {
                     "properties": {
-                        "deploymentTemplatePath": {
-                            "type": "string",
-                            "pattern": "[.]json[c]?$"
-                        },
                         "subscription": {
+                            "description": "Azure subscription id (typically provided in the global config in order to omit from source control).",
                             "type": "string"
                         },
                         "accessToken": {
+                            "description": "Azure access token (typically provided in the global config in order to omit from source control).",
                             "type": "string"
                         },
                         "resourceGroup": {
+                            "description": "The name of the resource group to place the deployment in (typically provided in the global config in order to omit from source control).",
                             "type": "string"
                         },
                         "deploymentName": {
+                            "$comment": "TODO: provide templating strings to augment names via experimentId/trialId, for instance.",
+                            "description": "Name of the deployment to create for the experiment resources.",
                             "type": "string"
                         },
-                        "vmName": {
-                            "$comment": "TODO: Fix this so we can support multi-VMs",
-                            "type": "string"
+                        "deploymentTemplatePath": {
+                            "description": "Path to an ARM template file.",
+                            "type": "string",
+                            "pattern": "[.]json[c]?$"
+                        },
+                        "deploymentTemplateParameters": {
+                            "description": "Key/value pairs of ARM template parameters.",
+                            "type": "object",
+                            "additionalProperties": {
+                                "$comment": "The value of any parameter can be a string, number, boolean, or null.",
+                                "type": [
+                                    "string",
+                                    "number",
+                                    "boolean",
+                                    "null"
+                                ]
+                            },
+                            "minProperties": 1
                         }
                     },
                     "required": [
-                        "deploymentTemplatePath",
-                        "subscription",
-                        "accessToken",
-                        "resourceGroup",
                         "deploymentName",
-                        "vmName"
+                        "deploymentTemplatePath"
                     ]
                 }
             ],

@@ -48,11 +48,13 @@
                         "redis"
                     ],
                     "required_args": [
+                        "vmName",
                         "experimentId",
                         "trialId",
                         "mountPoint"
                     ],
                     "const_args": {
+                        "vmName": "os-autotune-linux-vm",
                         "mountPoint": "/mnt/osat_fs"
                     },
                     "setup": [

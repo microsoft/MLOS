@@ -72,10 +72,15 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_stop(self) -> Tuple["Status", dict]:
+    def vm_stop(self, params: dict) -> Tuple["Status", dict]:
         """
         Stops the VM by initiating a graceful shutdown.
 
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
         Returns
         -------
         result : (Status, dict={})
@@ -83,10 +88,15 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_restart(self) -> Tuple["Status", dict]:
+    def vm_restart(self, params: dict) -> Tuple["Status", dict]:
         """
         Restarts the VM by initiating a graceful shutdown.
 
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
         Returns
         -------
         result : (Status, dict={})
@@ -94,9 +104,14 @@ class SupportsVMOps(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def vm_deprovision(self) -> Tuple["Status", dict]:
+    def vm_deprovision(self, params: dict) -> Tuple["Status", dict]:
         """
         Deallocates the VM by shutting it down then releasing the compute resources.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
 
         Returns
         -------
