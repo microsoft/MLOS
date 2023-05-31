@@ -419,13 +419,14 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
+        config = merge_parameters(dest=self.config.copy(), source=params)
         params = merge_parameters(dest=self._deploy_params.copy(), source=params)
-        _LOG.info("Deploy: %s :: %s", self.config["deploymentName"], params)
+        _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
 
         url = self._URL_DEPLOY.format(
-            subscription=self.config["subscription"],
-            resource_group=self.config["resourceGroup"],
-            deployment_name=self.config["deploymentName"],
+            subscription=config["subscription"],
+            resource_group=config["resourceGroup"],
+            deployment_name=config["deploymentName"],
         )
 
         json_req = {
@@ -453,13 +454,14 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             _LOG.info("Response: %s", response)
 
         if response.status_code == 200:
-            return (Status.PENDING, params)
+            return (Status.PENDING, config)
         elif response.status_code == 201:
             output = self._extract_arm_parameters(response.json())
             if _LOG.isEnabledFor(logging.DEBUG):
                 _LOG.debug("Extracted parameters:\n%s", json.dumps(output, indent=2))
             params.update(output)
             params.setdefault("asyncResultsUrl", url)
+            params.setdefault("deploymentName", config["deploymentName"])
             return (Status.PENDING, params)
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
