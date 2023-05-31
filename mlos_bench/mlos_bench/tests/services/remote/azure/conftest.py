@@ -35,7 +35,7 @@ def azure_vm_service(config_persistence_service: ConfigPersistenceService) -> Az
         "deploymentName": "TEST_DEPLOYMENT",
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
         "deploymentTemplateParameters": {
-            "vmName": "dummy-vm",
+            "location": "westus2",
         },
         "pollInterval": 1,
         "pollTimeout": 2

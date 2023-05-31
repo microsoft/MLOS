@@ -24,8 +24,6 @@
             "networkSecurityGroupName": "nsg",
 
             "ubuntuOSVersion": "18.04-LTS",
-
-            "vmName": "test-vm"
         },
 
         "pollInterval": 1,

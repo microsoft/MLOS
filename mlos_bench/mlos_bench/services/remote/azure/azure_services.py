@@ -427,22 +427,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        config = merge_parameters(
-            dest=self._deploy_params.copy(),
-            source=params,
-            required_keys=[
-                "subscription",
-                "resourceGroup",
-                "deploymentName",
-            ]
-        )
-
-        _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
+        params = merge_parameters(dest=self._deploy_params.copy(), source=params)
+        _LOG.info("Deploy: %s :: %s", self.config["deploymentName"], params)
 
         url = self._URL_DEPLOY.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            deployment_name=config["deploymentName"],
+            subscription=self.config["subscription"],
+            resource_group=self.config["resourceGroup"],
+            deployment_name=self.config["deploymentName"],
         )
 
         json_req = {
@@ -450,7 +441,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
                 "mode": "Incremental",
                 "template": self._deploy_template,
                 "parameters": {
-                    key: {"value": val} for (key, val) in config.items()
+                    key: {"value": val} for (key, val) in params.items()
                     if key in self._deploy_template.get("parameters", {})
                 }
             }
@@ -475,9 +466,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             output = self._extract_arm_parameters(response.json())
             if _LOG.isEnabledFor(logging.DEBUG):
                 _LOG.debug("Extracted parameters:\n%s", json.dumps(output, indent=2))
-            config.update(output)
-            config.setdefault("asyncResultsUrl", url)
-            return (Status.PENDING, config)
+            params.update(output)
+            params.setdefault("asyncResultsUrl", url)
+            return (Status.PENDING, params)
         else:
             _LOG.error("Response: %s :: %s", response, response.text)
             # _LOG.error("Bad Request:\n%s", response.request.body)
