@@ -40,6 +40,10 @@
                     "environments/os/linux/runtime/linux-runtime-tunables.jsonc"
                 ],
                 "config": {
+                    "const_args": {
+                        // Placeholder for a value that comes from the parent environment.
+                        "vmName": "placeholder-vm"
+                    },
                     "required_args": [
                         "vmName",
                         "storageAccountName",
