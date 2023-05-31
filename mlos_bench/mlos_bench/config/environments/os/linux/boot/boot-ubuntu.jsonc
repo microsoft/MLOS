@@ -7,11 +7,6 @@
             {
                 "name": "Boot Ubuntu VM on Azure",
                 "class": "mlos_bench.environments.remote.OSEnv",
-                "config": {
-                    "const_args": {
-                        "vmName": "os-autotune-linux-vm"
-                    }
-                }
             },
             // Local: Generate GRUB config and upload it to the shared storage
             {
@@ -29,10 +24,6 @@
                         "experimentId",
                         "trialId"
                     ],
-                    "const_args": {
-                        "experimentId": "RedisBench", // Placeholder for value passed from outside
-                        "trialId": 1 // Placeholder for value passed from the optimizer
-                    },
                     // Dump tunable parameters to a local JSON file:
                     "dump_params_file": "boot-params.json",
                     // TODO: expand "setup" command to support array syntax like devcontainers so we can execute without a shell.
@@ -69,12 +60,6 @@
                         "experimentId",
                         "trialId"
                     ],
-                    "const_args": {
-                        "vmName": "os-autotune-linux-vm",
-                        "storageAccountName": "osatsharedstorage",
-                        "storageFileShareName": "os-autotune-file-share",
-                        "mountPoint": "/mnt/osat_fs"
-                    },
                     "wait_boot": true,
                     "setup": [
                         "sudo mkdir -p $mountPoint",

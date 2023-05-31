@@ -53,10 +53,6 @@
                         "trialId",
                         "mountPoint"
                     ],
-                    "const_args": {
-                        "vmName": "os-autotune-linux-vm",
-                        "mountPoint": "/mnt/osat_fs"
-                    },
                     "setup": [
                         "$mountPoint/$experimentId/$trialId/scripts/setup-workload.sh",
                         "$mountPoint/$experimentId/$trialId/scripts/setup-app.sh"

@@ -15,6 +15,16 @@
     ],
 
     "config": {
+
+        "const_args": {
+            "experimentId": "RedisBench",
+            "trialId": 1,
+            "vmName": "os-autotune-linux-vm",
+            "storageAccountName": "osatsharedstorage",
+            "storageFileShareName": "os-autotune-file-share",
+            "mountPoint": "/mnt/osat_fs"
+        },
+
         "include_children": [
             "environments/vm/azure/provision-ubuntu-vm.jsonc",
             "environments/os/linux/boot/boot-ubuntu.jsonc",

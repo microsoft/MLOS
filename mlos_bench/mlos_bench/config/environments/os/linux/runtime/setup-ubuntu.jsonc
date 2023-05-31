@@ -49,12 +49,6 @@
                         "experimentId",
                         "trialId"
                     ],
-                    "const_args": {
-                        "vmName": "os-autotune-linux-vm",
-                        "storageAccountName": "osatsharedstorage",
-                        "storageFileShareName": "os-autotune-file-share",
-                        "mountPoint": "/mnt/osat_fs"
-                    },
                     "wait_boot": true,
                     "setup": [
                         "sudo mkdir -p $mountPoint",

@@ -52,6 +52,10 @@ class CompositeEnv(Environment):
 
         self._children: List[Environment] = []
 
+        global_config = (global_config or {}).copy()
+        for (key, val) in self._const_args.items():
+            global_config.setdefault(key, val)
+
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
                     child_config_file, self._tunable_params, global_config, self._service):
