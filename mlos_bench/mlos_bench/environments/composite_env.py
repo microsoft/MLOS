@@ -52,6 +52,9 @@ class CompositeEnv(Environment):
 
         self._children: List[Environment] = []
 
+        # To support trees of composite environments (e.g. for multiple VM experiments),
+        # each CompositeEnv gets a copy of the original global config and adjusts it with
+        # the `const_args` specific to it.
         global_config = (global_config or {}).copy()
         for (key, val) in self._const_args.items():
             global_config.setdefault(key, val)
