@@ -57,12 +57,8 @@
                         }
                     },
                     "required": [
-                        "subscription",
-                        "accessToken",
-                        "resourceGroup",
                         "deploymentName",
-                        "deploymentTemplatePath",
-                        "deploymentTemplateParameters"
+                        "deploymentTemplatePath"
                     ]
                 }
             ],
