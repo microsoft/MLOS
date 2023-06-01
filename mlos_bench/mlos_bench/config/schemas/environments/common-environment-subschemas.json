@@ -4,8 +4,8 @@
     "title": "mlos_bench common Environment config subschemas",
     "description": "config elements common to several Environments.",
     "$defs": {
-        "leaf_environment_config": {
-            "$comment": "A set of additional properties that only leaf Environment configs use (i.e., not relevant for CompositeEnv).",
+        "common_environment_config": {
+            "$comment": "A set of properties all Environment configs use.",
             "type": "object",
             "properties": {
                 "tunable_params": {

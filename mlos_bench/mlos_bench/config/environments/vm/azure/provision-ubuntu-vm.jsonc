@@ -4,10 +4,6 @@
 
     "include_tunables": ["environments/vm/azure/azure-vm-tunables.jsonc"],
     "config": {
-        "tunable_params": ["azure-vm"],
-
-        "const_args": {
-            "vmName": "os-autotune-linux-vm"
-        }
+        "tunable_params": ["azure-vm"]
     }
 }

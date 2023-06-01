@@ -40,6 +40,10 @@
                     "environments/os/linux/runtime/linux-runtime-tunables.jsonc"
                 ],
                 "config": {
+                    "const_args": {
+                        // Placeholder for a value that comes from the parent environment.
+                        "vmName": "placeholder-vm"
+                    },
                     "required_args": [
                         "vmName",
                         "storageAccountName",
@@ -49,12 +53,6 @@
                         "experimentId",
                         "trialId"
                     ],
-                    "const_args": {
-                        "vmName": "os-autotune-linux-vm",
-                        "storageAccountName": "osatsharedstorage",
-                        "storageFileShareName": "os-autotune-file-share",
-                        "mountPoint": "/mnt/osat_fs"
-                    },
                     "wait_boot": true,
                     "setup": [
                         "sudo mkdir -p $mountPoint",

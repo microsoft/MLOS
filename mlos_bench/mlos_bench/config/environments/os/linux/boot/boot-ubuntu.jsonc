@@ -8,9 +8,11 @@
                 "name": "Boot Ubuntu VM on Azure",
                 "class": "mlos_bench.environments.remote.OSEnv",
                 "config": {
+                    "required_args": ["vmName"],
                     "const_args": {
-                        "vmName": "os-autotune-linux-vm"
-                    }
+                        // Placeholder for a value that comes from the parent environment.
+                        "vmName": "placeholder-vm"
+                    },
                 }
             },
             // Local: Generate GRUB config and upload it to the shared storage
@@ -29,10 +31,6 @@
                         "experimentId",
                         "trialId"
                     ],
-                    "const_args": {
-                        "experimentId": "RedisBench", // Placeholder for value passed from outside
-                        "trialId": 1 // Placeholder for value passed from the optimizer
-                    },
                     // Dump tunable parameters to a local JSON file:
                     "dump_params_file": "boot-params.json",
                     // TODO: expand "setup" command to support array syntax like devcontainers so we can execute without a shell.
@@ -60,6 +58,10 @@
                     "tunable_params": [
                         "linux-kernel-boot"
                     ],
+                    "const_args": {
+                        // Placeholder for a value that comes from the parent environment.
+                        "vmName": "placeholder-vm"
+                    },
                     "required_args": [
                         "vmName",
                         "storageAccountName",
@@ -69,12 +71,6 @@
                         "experimentId",
                         "trialId"
                     ],
-                    "const_args": {
-                        "vmName": "os-autotune-linux-vm",
-                        "storageAccountName": "osatsharedstorage",
-                        "storageFileShareName": "os-autotune-file-share",
-                        "mountPoint": "/mnt/osat_fs"
-                    },
                     "wait_boot": true,
                     "setup": [
                         "sudo mkdir -p $mountPoint",
