@@ -109,7 +109,6 @@ class Environment(metaclass=abc.ABCMeta):
         self.config = config
         self._service = service
         self._is_ready = False
-        self._params: Dict[str, TunableValue] = {}
         self._const_args = config.get("const_args", {})
 
         merge_parameters(dest=self._const_args, source=global_config,
@@ -121,6 +120,8 @@ class Environment(metaclass=abc.ABCMeta):
 
         tunable_groups = config.get("tunable_params")
         self._tunable_params = tunables.subgroup(tunable_groups) if tunable_groups else tunables
+
+        self._params = self._combine_tunables(self._tunable_params)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Config for: %s\n%s",
@@ -189,6 +190,19 @@ class Environment(metaclass=abc.ABCMeta):
             A collection of covariant groups of tunable parameters.
         """
         return self._tunable_params
+
+    @property
+    def parameters(self) -> TunableValue:
+        """
+        Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
+        Note that before `.setup()` is called, all tunables will be set to None.
+
+        Returns
+        -------
+        parameters : Dict[str, TunableValue]
+            Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
+        """
+        return self._params
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
