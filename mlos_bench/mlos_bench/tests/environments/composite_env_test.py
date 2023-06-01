@@ -31,7 +31,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                     "name": "Mock Environment",
                     "class": "mlos_bench.environments.mock_env.MockEnv",
                     "config": {
-                        "tunable_groups": ["provision"],
+                        "tunable_params": ["provision"],
                         "const_args": {
                             "vmName": "Placeholder VM",
                             "other_param": 99,
@@ -57,7 +57,4 @@ def test_composite_env(composite_env: CompositeEnv, tunable_groups: TunableGroup
         "vmName": "Mock VM",                    # const_args from the parent
         "other_param": 99,                      # const_args from the child
         "vmSize": "Standard_B4ms",              # tunable_params from the parent
-        "idle": "halt",
-        "kernel_sched_latency_ns": 2000000,
-        "kernel_sched_migration_cost_ns": -1,
     }
