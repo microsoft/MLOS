@@ -28,17 +28,31 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
             },
             "children": [
                 {
-                    "name": "Mock Environment",
+                    "name": "Mock Environment 1",
                     "class": "mlos_bench.environments.mock_env.MockEnv",
                     "config": {
                         "tunable_params": ["provision"],
                         "const_args": {
                             "vmName": "Placeholder VM",
-                            "other_param": 99,
+                            "EnvId": 1,
                         },
                         "required_args": ["vmName"],
                         "range": [60, 120],
-                        "metrics": ["score", "other_score"],
+                        "metrics": ["score"],
+                    }
+                },
+                {
+                    "name": "Mock Environment 2",
+                    "class": "mlos_bench.environments.mock_env.MockEnv",
+                    "config": {
+                        "tunable_params": ["boot"],
+                        "const_args": {
+                            "vmName": "Placeholder VM",
+                            "EnvId": 2,
+                        },
+                        "required_args": ["vmName"],
+                        "range": [60, 120],
+                        "metrics": ["score"],
                     }
                 }
             ]
@@ -48,13 +62,39 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
     )
 
 
-def test_composite_env(composite_env: CompositeEnv, tunable_groups: TunableGroups) -> None:
+def test_composite_env_params(composite_env: CompositeEnv) -> None:
     """
     Check that the const_args from the parent environment get propagated to the children.
     """
+    assert composite_env.children[0].parameters == {
+        "vmName": "Mock VM",        # const_args from the parent
+        "EnvId": 1,                 # const_args from the child
+        "vmSize": "Standard_B4ms",  # tunable_params from the parent
+    }
+    assert composite_env.children[1].parameters == {
+        "vmName": "Mock VM",        # const_args from the parent
+        "EnvId": 2,                 # const_args from the child
+        "idle": "halt",             # tunable_params from the parent
+    }
+
+
+def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: TunableGroups) -> None:
+    """
+    Check that the child environments update their tunable parameters.
+    """
+    tunable_groups.assign({
+        "vmSize": "Standard_B2s",
+        "idle": "mwait",
+        "kernel_sched_migration_cost_ns": 100000,
+    })
     assert composite_env.setup(tunable_groups)
     assert composite_env.children[0].parameters == {
-        "vmName": "Mock VM",                    # const_args from the parent
-        "other_param": 99,                      # const_args from the child
-        "vmSize": "Standard_B4ms",              # tunable_params from the parent
+        "vmName": "Mock VM",        # const_args from the parent
+        "EnvId": 1,                 # const_args from the child
+        "vmSize": "Standard_B2s",   # tunable_params from the parent
+    }
+    assert composite_env.children[1].parameters == {
+        "vmName": "Mock VM",        # const_args from the parent
+        "EnvId": 2,                 # const_args from the child
+        "idle": "mwait",            # tunable_params from the parent
     }
