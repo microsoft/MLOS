@@ -3,13 +3,14 @@
 # Licensed under the MIT License.
 #
 """
-Unit tests for mock benchmark environment.
+Unit tests for composite environment.
 """
 
 import pytest
 
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 
 # pylint: disable=redefined-outer-name
 
@@ -31,6 +32,10 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                     "class": "mlos_bench.environments.mock_env.MockEnv",
                     "config": {
                         "tunable_groups": ["provision"],
+                        "const_args": {
+                            "vmName": "Placeholder VM",
+                            "other_param": 99,
+                        },
                         "required_args": ["vmName"],
                         "range": [60, 120],
                         "metrics": ["score", "other_score"],
@@ -38,16 +43,21 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                 }
             ]
         },
-        tunables=tunable_groups
+        tunables=tunable_groups,
+        service=ConfigPersistenceService({}),
     )
 
 
 def test_composite_env(composite_env: CompositeEnv, tunable_groups: TunableGroups) -> None:
     """
-    Check the default values of the mock environment.
+    Check that the const_args from the parent environment get propagated to the children.
     """
     assert composite_env.setup(tunable_groups)
-    assert composite_env.parameters == {
-        "vmName": "Mock VM",
-        "vmSize": "Standard_B4ms",
+    assert composite_env.children[0].parameters == {
+        "vmName": "Mock VM",                    # const_args from the parent
+        "other_param": 99,                      # const_args from the child
+        "vmSize": "Standard_B4ms",              # tunable_params from the parent
+        "idle": "halt",
+        "kernel_sched_latency_ns": 2000000,
+        "kernel_sched_migration_cost_ns": -1,
     }

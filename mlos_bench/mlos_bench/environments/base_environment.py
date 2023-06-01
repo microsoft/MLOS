@@ -192,7 +192,7 @@ class Environment(metaclass=abc.ABCMeta):
         return self._tunable_params
 
     @property
-    def parameters(self) -> TunableValue:
+    def parameters(self) -> Dict[str, TunableValue]:
         """
         Key/value pairs of all environment parameters (i.e., `const_args` and `tunable_params`).
         Note that before `.setup()` is called, all tunables will be set to None.
