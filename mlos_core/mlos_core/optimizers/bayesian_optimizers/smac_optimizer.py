@@ -53,7 +53,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
     """
 
-    def __init__(self, *,
+    def __init__(self, *,  # pylint: disable=too-many-locals
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  seed: Optional[int] = 0,
