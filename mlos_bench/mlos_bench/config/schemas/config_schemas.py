@@ -7,7 +7,7 @@ A simple class for describing where to find different config schemas and validat
 """
 
 from enum import Enum
-from os import path, walk
+from os import path, walk, environ
 from typing import Dict, Iterator, Mapping
 
 import json         # schema files are pure json - no comments
@@ -98,5 +98,8 @@ class ConfigSchema(Enum):
         jsonschema.exceptions.ValidationError
         jsonschema.exceptions.SchemaError
         """
-        resolver: jsonschema.RefResolver = jsonschema.RefResolver.from_schema(self.schema, store=SCHEMA_STORE)
-        jsonschema.validate(instance=config, schema=self.schema, resolver=resolver)
+        # Allow skipping schema validation for tight dev cycle changes.
+        # Note: this may cause pytest to fail if it's expecting exceptions to be raised for invalid configs.
+        if environ.get('MLOS_BENCH_SKIP_SCHEMA_VALIDATION', 'false').lower() in {'true', 'y', 'yes', '1'}:
+            resolver: jsonschema.RefResolver = jsonschema.RefResolver.from_schema(self.schema, store=SCHEMA_STORE)
+            jsonschema.validate(instance=config, schema=self.schema, resolver=resolver)
