@@ -61,6 +61,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                     "class": "mlos_bench.environments.composite_env.CompositeEnv",
                     "config": {
                         "const_args": {
+                            # This should be propagated to the children, but not up to the parent.
                             "vmName": "Nested Mock VM",
                             "EnvId": 3
                         },
@@ -111,13 +112,13 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         "vmName": "Mock VM",        # const_args from the parent
         "EnvId": 1,                 # const_args from the child
         "vmSize": "Standard_B4ms",  # tunable_params from the parent
-        #"someConst": "root"        # not required, so not passed from the parent
+        # "someConst": "root"        # not required, so not passed from the parent
     }
     assert composite_env.children[1].parameters == {
         "vmName": "Mock VM",        # const_args from the parent
         "EnvId": 2,                 # const_args from the child
         "idle": "halt",             # tunable_params from the parent
-        #"someConst": "root"        # not required, so not passed from the parent
+        # "someConst": "root"        # not required, so not passed from the parent
     }
     assert isinstance(composite_env.children[2], CompositeEnv)
     # CompositeEnv child should receive everything from the parent since it didn't specify a tunable_params subgroup to filter on.
