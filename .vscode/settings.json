@@ -24,7 +24,6 @@
         // - https://github.com/microsoft/vscode/issues/2809#issuecomment-1544387883
         // - mlos_bench/config/schemas/README.md
 
-        // TODO: Add more rules for other mlos_bench config schemas.
         {
             "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/environments/test-cases/**/*.jsonc",
