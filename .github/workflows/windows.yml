@@ -125,11 +125,10 @@ jobs:
         # See Also: mlos-windows.yml
         conda install -y -v -n mlos-dist-test-$env:PythonVersion conda-forge::GPy
         conda install -y -v -n mlos-dist-test-$env:PythonVersion 'conda-forge::pyrfr>=0.9.0'
-        conda run -n mlos-dist-test-$env:PythonVersion pip install pytest pytest-timeout pytest-forked pytest-xdist
         # Install mlos_core wheel.
-        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_core_whl}[full]"
+        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_core_whl}[full-tests]"
         # Install mlos_bench wheel.
-        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_bench_whl}[full]"
+        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_bench_whl}[full-tests]"
         # Just pick one simple test to run for now.
         # The rest should have been handled in a separate step.
         conda run -n mlos-dist-test-$env:PythonVersion python -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
