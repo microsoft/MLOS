@@ -45,6 +45,13 @@ Optimizers
    SkoptOptimizer
    SmacOptimizer
 
+.. currentmodule:: mlos_core.optimizers.flaml_optimizer
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   FlamlOptimizer
+
 Spaces
 ======
 .. currentmodule:: mlos_core.spaces
@@ -54,6 +61,7 @@ Spaces
 
    configspace_to_emukit_space
    configspace_to_skopt_space
+   configspace_to_flaml_space
 
 Space Adapters
 --------------
@@ -76,6 +84,13 @@ Space Adapters
    :template: class.rst
 
    BaseSpaceAdapter
+
+.. currentmodule:: mlos_core.spaces.adapters.identity_adapter
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   IdentityAdapter
 
 .. currentmodule:: mlos_core.spaces.adapters.llamatune
 .. autosummary::
