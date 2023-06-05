@@ -15,7 +15,7 @@
             "type": "object",
             "allOf": [
                 {
-                    "$ref": "./common-environment-subschemas.json#/$defs/leaf_environment_config"
+                    "$ref": "./common-environment-subschemas.json#/$defs/common_environment_config"
                 },
                 {
                     "properties": {

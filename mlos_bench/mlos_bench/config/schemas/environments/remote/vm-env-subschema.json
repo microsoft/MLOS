@@ -17,7 +17,7 @@
             "$comment": "NOTE: there aren't currently any additional properties accepted by the VMEnv.",
             "allOf": [
                 {
-                    "$ref": "../common-environment-subschemas.json#/$defs/leaf_environment_config"
+                    "$ref": "../common-environment-subschemas.json#/$defs/common_environment_config"
                 }
             ],
             "unevaluatedProperties": false

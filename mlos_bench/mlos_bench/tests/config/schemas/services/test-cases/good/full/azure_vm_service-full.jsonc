@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "Azure VM Service configuration.",
 
     "class": "mlos_bench.services.remote.azure.azure_services.AzureVMService",
@@ -10,7 +10,17 @@
 
         "resourceGroup": "rg",
         "deploymentName": "deployment",
-        "vmName": "test-vm",
+
+        "deploymentTemplateParameters": {
+            "location": "westus2",
+            "adminUsername": "admin",
+            "authenticationType": "sshPublicKey",
+            "adminPasswordOrKey": "ssh-rsa ...",
+            "virtualNetworkName": "vnet",
+            "subnetName": "subnet",
+            "networkSecurityGroupName": "nsg",
+            "ubuntuOSVersion": "18.04-LTS"
+        },
 
         "pollInterval": 1,
         "pollTimeout": 60

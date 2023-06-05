@@ -21,9 +21,9 @@ from mlos_bench.services.remote.azure.azure_services import AzureVMService
 @pytest.mark.parametrize(
     ("operation_name", "accepts_params"), [
         ("vm_start", True),
-        ("vm_stop", False),
-        ("vm_deprovision", False),
-        ("vm_restart", False),
+        ("vm_stop", True),
+        ("vm_deprovision", True),
+        ("vm_restart", True),
     ])
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"), [
@@ -42,7 +42,7 @@ def test_vm_operation_status(mock_requests: MagicMock, azure_vm_service: AzureVM
 
     operation = getattr(azure_vm_service, operation_name)
     if accepts_params:
-        status, _ = operation({})
+        status, _ = operation({"vmName": "test-vm"})
     else:
         status, _ = operation()
 
@@ -58,6 +58,7 @@ def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock
     retry_after = 12345
     params = {
         "asyncResultsUrl": async_url,
+        "vmName": "test-vm",
         "pollInterval": retry_after,
     }
 
@@ -80,6 +81,7 @@ def test_wait_vm_operation_timeout(mock_requests: MagicMock, azure_vm_service: A
     # Mock response header
     params = {
         "asyncResultsUrl": "DUMMY_ASYNC_URL",
+        "vmName": "test-vm",
         "pollInterval": 1
     }
 

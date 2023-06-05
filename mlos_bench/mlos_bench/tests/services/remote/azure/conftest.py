@@ -34,7 +34,10 @@ def azure_vm_service(config_persistence_service: ConfigPersistenceService) -> Az
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
         "accessToken": "TEST_TOKEN",
-        "vmName": "dummy-vm",
+        "deploymentTemplateParameters": {
+            "location": "westus2",
+        },
+        "vmName": "test-vm",  # Should come from the upper-level config
         "pollInterval": 1,
         "pollTimeout": 2
     }, parent=config_persistence_service)
