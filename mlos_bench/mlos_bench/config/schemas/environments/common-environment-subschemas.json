@@ -4,53 +4,6 @@
     "title": "mlos_bench common Environment config subschemas",
     "description": "config elements common to several Environments.",
     "$defs": {
-        "base_environment": {
-            "$comment": "Config elements common to all Environments.",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "description": "Name of the Environment.",
-                    "type": "string"
-                },
-                "class": {
-                    "description": "Class of the Environment.",
-                    "type": "string",
-                    "pattern": "^mlos_bench[.]environments[.]"
-                },
-                "include_services": {
-                    "description": "Path(s) to Service config files to include for the Environment.",
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "$comment": "Paths are expected to be json.",
-                        "pattern": "[.]json[c]?$"
-                    },
-                    "uniqueItems": true,
-                    "minItems": 1
-                },
-                "include_tunables": {
-                    "description": "Path(s) to TunableParams config files to include for the Environment.",
-                    "type": "array",
-                    "items": {
-                        "type": "string",
-                        "$comment": "Paths are expected to be json.",
-                        "pattern": "[.]json[c]?$"
-                    },
-                    "uniqueItems": true,
-                    "minItems": 1
-                },
-                "config": {
-                    "type": "object",
-                    "$comment": "Additional config details specific to the Environment and handled in their own subschema.",
-                    "minItems": 1
-                }
-            },
-            "required": [
-                "name",
-                "class"
-            ]
-        },
-
         "common_environment_config": {
             "$comment": "A set of properties all Environment configs use.",
             "type": "object",

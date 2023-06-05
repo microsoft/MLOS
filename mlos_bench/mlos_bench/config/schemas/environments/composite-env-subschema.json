@@ -46,6 +46,7 @@
                                                 "$ref": "./leaf-environment-subschemas.json"
                                             },
                                             {
+                                                "$comment": "Allow inline nested composite envs as well.",
                                                 "$ref": "#"
                                             }
                                         ]

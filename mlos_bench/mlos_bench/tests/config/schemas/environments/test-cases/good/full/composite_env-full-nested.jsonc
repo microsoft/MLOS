@@ -23,7 +23,12 @@
                     "children": [
                         {
                             "name": "child MockEnv",
-                            "class": "mlos_bench.environments.MockEnv"
+                            "class": "mlos_bench.environments.MockEnv",
+                            "config": {
+                                "const_args": {
+                                    "some_const_arg": 42
+                                }
+                            }
                         }
                     ]
                 }
