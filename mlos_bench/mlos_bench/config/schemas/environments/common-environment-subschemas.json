@@ -14,6 +14,7 @@
                     "items": {
                         "type": "string"
                     },
+                    "uniqueItems": true,
                     "minItems": 1
                 },
                 "required_args": {
@@ -22,6 +23,7 @@
                     "items": {
                         "type": "string"
                     },
+                    "uniqueItems": true,
                     "minItems": 1
                 },
                 "const_args": {

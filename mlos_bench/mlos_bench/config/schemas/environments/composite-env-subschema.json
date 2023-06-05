@@ -33,6 +33,7 @@
                                         "type": "string",
                                         "pattern": "[.]json[c]?$"
                                     },
+                                    "uniqueItems": true,
                                     "minItems": 1
                                 },
                                 "children": {
@@ -43,6 +44,7 @@
                                         "$ref": "./leaf-environment-subschemas.json",
                                         "unevaluatedProperties": false
                                     },
+                                    "uniqueItems": true,
                                     "minItems": 1
                                 }
                             },
