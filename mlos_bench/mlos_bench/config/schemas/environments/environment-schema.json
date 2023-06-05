@@ -3,6 +3,165 @@
     "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
     "title": "mlos_bench Environment config",
     "description": "config for an mlos_bench Environment - this is the top level schema that should be used to validate an environment config",
+
+    "$defs": {
+        "base_environment": {
+            "$comment": "Config elements common to all Environments.",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "description": "Name of the Environment.",
+                    "type": "string"
+                },
+                "class": {
+                    "description": "Class of the Environment.",
+                    "type": "string",
+                    "pattern": "^mlos_bench[.]environments[.]"
+                },
+                "include_services": {
+                    "description": "Path(s) to Service config files to include for the Environment.",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "$comment": "Paths are expected to be json.",
+                        "pattern": "[.]json[c]?$"
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "include_tunables": {
+                    "description": "Path(s) to TunableParams config files to include for the Environment.",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "$comment": "Paths are expected to be json.",
+                        "pattern": "[.]json[c]?$"
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "config": {
+                    "type": "object",
+                    "$comment": "Additional config details specific to the Environment and handled in their own subschema.",
+                    "minItems": 1
+                }
+            },
+            "required": [
+                "name",
+                "class"
+            ]
+        },
+
+        "leaf_environment": {
+            "type": "object",
+            "$comment": "The set of known leaf environment subschemas.",
+            "allOf": [
+                {
+                    "$ref": "#/$defs/base_environment"
+                },
+                {
+                    "oneOf": [
+                        {
+                            "$ref": "./mock-env-subschema.json"
+                        },
+                        {
+                            "$ref": "./local/local-env-subschema.json"
+                        },
+                        {
+                            "$ref": "./local/local-fileshare-env-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/os-env-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/remote-env-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/vm-env-subschema.json"
+                        }
+                    ]
+                }
+            ]
+        },
+
+        "composite_env": {
+            "type":"object",
+            "allOf": [
+                {
+                    "$ref": "#/$defs/base_environment"
+                },
+                {
+                    "properties": {
+                        "class": {
+                            "enum": [
+                                "mlos_bench.environments.CompositeEnv",
+                                "mlos_bench.environments.composite_env.CompositeEnv"
+                            ]
+                        },
+                        "config": {
+                            "type": "object",
+                            "$comment": "config objects need to specify their entire schema, so we need to include the unevaluatedProperties handling here.",
+                            "allOf": [
+                                {
+                                    "$ref": "./common-environment-subschemas.json#/$defs/common_environment_config"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "include_children": {
+                                            "description": "List of child environment config files to include in the composite environment.",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string",
+                                                "pattern": "[.]json[c]?$"
+                                            },
+                                            "uniqueItems": true,
+                                            "minItems": 1
+                                        },
+                                        "children": {
+                                            "description": "List of inline child environment configs to include in the composite environment.",
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object",
+                                                "anyOf": [
+                                                    {
+                                                        "$ref": "#/$defs/leaf_environment"
+                                                    },
+                                                    {
+                                                        "$ref": "#/$defs/composite_env"
+                                                    }
+                                                ]
+                                            },
+                                            "uniqueItems": true,
+                                            "minItems": 1
+                                        }
+                                    },
+                                    "anyOf": [
+                                        {
+                                            "required": [
+                                                "include_children"
+                                            ]
+                                        },
+                                        {
+                                            "required": [
+                                                "children"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "unevaluatedProperties": false
+                        }
+                    },
+                    "required": [
+                        "class",
+                        "config"
+                    ]
+                }
+            ]
+        }
+    },
+
     "type": "object",
     "allOf": [
         {
@@ -23,10 +182,10 @@
         {
             "oneOf": [
                 {
-                    "$ref": "./leaf-environment-subschemas.json"
+                    "$ref": "#/$defs/leaf_environment"
                 },
                 {
-                    "$ref": "./composite-env-subschema.json"
+                    "$ref": "#/$defs/composite_env"
                 }
             ]
         }
