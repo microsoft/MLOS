@@ -21,10 +21,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class RemoteEnv(Environment):
+    # pylint: disable=too-many-instance-attributes
     """
     Environment to run benchmarks and scripts on a remote host.
     """
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self,
                  *,
