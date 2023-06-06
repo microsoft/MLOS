@@ -100,6 +100,6 @@ class ConfigSchema(Enum):
         """
         # Allow skipping schema validation for tight dev cycle changes.
         # Note: this may cause pytest to fail if it's expecting exceptions to be raised for invalid configs.
-        if environ.get('MLOS_BENCH_SKIP_SCHEMA_VALIDATION', 'false').lower() in {'true', 'y', 'yes', '1'}:
+        if environ.get('MLOS_BENCH_SKIP_SCHEMA_VALIDATION', 'false').lower() not in {'true', 'y', 'yes', '1'}:
             resolver: jsonschema.RefResolver = jsonschema.RefResolver.from_schema(self.schema, store=SCHEMA_STORE)
             jsonschema.validate(instance=config, schema=self.schema, resolver=resolver)
