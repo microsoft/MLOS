@@ -420,8 +420,12 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         config = merge_parameters(dest=self.config.copy(), source=params)
-        params = merge_parameters(dest=self._deploy_params.copy(), source=params)
         _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
+
+        params = merge_parameters(dest=self._deploy_params.copy(), source=params)
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Deploy: %s merged params ::\n%s",
+                       config["deploymentName"], json.dumps(params, indent=2))
 
         url = self._URL_DEPLOY.format(
             subscription=config["subscription"],
@@ -591,7 +595,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             vm_name=config["vmName"],
         ))
 
-    def remote_exec(self, script: Iterable[str], params: dict) -> Tuple[Status, dict]:
+    def remote_exec(self, script: Iterable[str], config: dict,
+                    env_params: dict) -> Tuple[Status, dict]:
         """
         Run a command on Azure VM.
 
@@ -599,10 +604,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         ----------
         script : Iterable[str]
             A list of lines to execute as a script on a remote VM.
-        params : dict
-            Flat dictionary of (key, value) pairs of parameters.
+        config : dict
+            Flat dictionary of (key, value) pairs of the Environment parameters.
             They usually come from `const_args` and `tunable_params`
             properties of the Environment.
+        env_params : dict
+            Parameters to pass as *shell* environment variables into the script.
+            This is usually a subset of `config` with some possible conversions.
 
         Returns
         -------
@@ -612,7 +620,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         """
         config = merge_parameters(
             dest=self.config.copy(),
-            source=params,
+            source=config,
             required_keys=[
                 "subscription",
                 "resourceGroup",
@@ -626,7 +634,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         json_req = {
             "commandId": "RunShellScript",
             "script": list(script),
-            "parameters": [{"name": key, "value": val} for (key, val) in params.items()]
+            "parameters": [{"name": key, "value": val} for (key, val) in env_params.items()]
         }
 
         url = self._URL_REXEC_RUN.format(
@@ -661,13 +669,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def get_remote_exec_results(self, params: dict) -> Tuple[Status, dict]:
+    def get_remote_exec_results(self, config: dict) -> Tuple[Status, dict]:
         """
         Get the results of the asynchronously running command.
 
         Parameters
         ----------
-        params : dict
+        config : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
             Must have the "asyncResultsUrl" key to get the results.
             If the key is not present, return Status.PENDING.
@@ -679,13 +687,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         config = merge_parameters(
-            dest=self.config.copy(), source=params, required_keys=["vmName"])
+            dest=self.config.copy(), source=config, required_keys=["vmName"])
 
         _LOG.info("Check the results on VM: %s", config["vmName"])
 
-        status, result = self.wait_vm_operation(params)
+        (status, result) = self.wait_vm_operation(config)
 
         if status.is_succeeded:
-            return status, result.get("properties", {}).get("output", {})
+            return (status, result.get("properties", {}).get("output", {}))
         else:
-            return status, result
+            return (status, result)

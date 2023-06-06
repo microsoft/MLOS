@@ -6,8 +6,9 @@
 Remotely executed benchmark/script environment.
 """
 
+import re
 import logging
-from typing import Iterable, Optional, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
@@ -23,6 +24,7 @@ class RemoteEnv(Environment):
     """
     Environment to run benchmarks and scripts on a remote host.
     """
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self,
                  *,
@@ -68,6 +70,9 @@ class RemoteEnv(Environment):
         self._script_setup = self.config.get("setup")
         self._script_run = self.config.get("run")
         self._script_teardown = self.config.get("teardown")
+
+        # TODO: Add support for renaming the script parameters.
+        self._script_params: Optional[Iterable[str]] = self.config.get("script_params")
 
         if self._script_setup is None and \
            self._script_run is None and \
@@ -151,6 +156,19 @@ class RemoteEnv(Environment):
             _LOG.info("Remote teardown complete: %s :: %s", self, status)
         super().teardown()
 
+    def _get_env_params(self) -> Dict[str, str]:
+        """
+        Get the *shell* environment parameters to be passed to the remote script.
+
+        Returns
+        -------
+        env_params : Dict[str, str]
+            Parameters to pass as *shell* environment variables into the script.
+            This is usually a subset of `_params` with some possible conversions.
+        """
+        keys = self._params.keys() if self._script_params is None else self._script_params
+        return {re.sub(r"\W", "_", key): str(self._params[key]) for key in keys}
+
     def _remote_exec(self, script: Iterable[str]) -> Tuple[Status, Optional[dict]]:
         """
         Run a script on the remote host.
@@ -166,8 +184,9 @@ class RemoteEnv(Environment):
             A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
-        _LOG.debug("Submit script: %s", self)
-        (status, output) = self._remote_exec_service.remote_exec(script, self._params)
+        env_params = self._get_env_params()
+        _LOG.debug("Submit script: %s with %s", self, env_params)
+        (status, output) = self._remote_exec_service.remote_exec(script, self._params, env_params)
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)
