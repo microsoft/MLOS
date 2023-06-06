@@ -14,7 +14,7 @@ from typing import Optional, Tuple
 import pandas
 
 from mlos_bench.environments.status import Status
-from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -23,8 +23,7 @@ from mlos_bench.util import path_join
 _LOG = logging.getLogger(__name__)
 
 
-class LocalEnv(Environment):
-    # pylint: disable=too-many-instance-attributes
+class LocalEnv(ScriptEnv):
     """
     Scheduler-side Environment that runs scripts locally.
     """
@@ -58,24 +57,17 @@ class LocalEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(name=name, config=config, global_config=global_config,
+                         tunables=tunables, service=service)
 
         assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
             "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
 
         self._temp_dir = self.config.get("temp_dir")
-        self._script_setup = self.config.get("setup")
-        self._script_run = self.config.get("run")
-        self._script_teardown = self.config.get("teardown")
 
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
         self._read_results_file: Optional[str] = self.config.get("read_results_file")
-
-        if self._script_setup is None and \
-           self._script_run is None and \
-           self._script_teardown is None:
-            raise ValueError("At least one of {setup, run, teardown} must be present")
 
         if self._script_setup is None and self._dump_params_file is not None:
             raise ValueError("'setup' must be present if 'dump_params_file' is specified")
