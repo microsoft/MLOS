@@ -686,13 +686,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
-        config = merge_parameters(
-            dest=self.config.copy(), source=config, required_keys=["vmName"])
-
         _LOG.info("Check the results on VM: %s", config["vmName"])
-
         (status, result) = self.wait_vm_operation(config)
-
         if status.is_succeeded:
             return (status, result.get("properties", {}).get("output", {}))
         else:
