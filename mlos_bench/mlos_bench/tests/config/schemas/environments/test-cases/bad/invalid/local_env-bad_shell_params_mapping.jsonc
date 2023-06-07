@@ -1,0 +1,12 @@
+{
+    "name": "local_env-partial",
+    "class": "mlos_bench.environments.LocalEnv",
+    "config": {
+        "run": [
+            "/bin/true"
+        ],
+        "shell_params_mapping": {
+            "/this/is/an/invalid/param/name/to/expose": "but.so.is.this"
+        }
+    }
+}
