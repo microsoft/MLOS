@@ -6,7 +6,7 @@
             "/bin/true"
         ],
         "shell_params_mapping": {
-            "/this/is/an/invalid/param/name/to/expose": "but.so.is.this"
+            "invalid.target.name": "/source/param/name"
         }
     }
 }

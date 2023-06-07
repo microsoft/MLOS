@@ -36,7 +36,7 @@
             "foo"
         ],
         "shell_params_mapping": {
-            "/some/invalid/env/name": "gets_mapped_to_this_env_var_name"
+            "gets_mapped_to_this_env_name": "/source/param/name/that/is/otherwise/invalid/env/name"
         }
     }
 }

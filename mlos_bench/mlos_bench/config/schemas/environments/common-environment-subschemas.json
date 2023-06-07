@@ -117,10 +117,13 @@
                     "minItems": 1
                 },
                 "shell_params_mapping": {
-                    "description": "An explicit mapping from parameter names to environment variable names to be populated with the parameter values and passed to the shell commands. These will override any parameters matched by shell_params_match.",
+                    "description": "An explicit mapping of environment variable names from params to be populated with the parameter values and passed to the shell commands. These will override any parameters matched by shell_params_match.",
                     "type": "object",
-                    "additionalProperties": {
+                    "propertyNames": {
                         "$ref": "#/$defs/shell_param_type"
+                    },
+                    "additionalProperties": {
+                        "type": "string"
                     }
                 }
             }
