@@ -59,6 +59,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         self._script_teardown = self.config.get("teardown")
 
         self._script_params: Optional[Iterable[str]] = self.config.get("script_params")
+        self._script_params_rename: Dict[str, str] = self.config.get("script_params_rename", {})
 
         if self._script_setup is None and \
            self._script_run is None and \
@@ -75,5 +76,17 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             Parameters to pass as *shell* environment variables into the script.
             This is usually a subset of `_params` with some possible conversions.
         """
-        keys = self._params.keys() if self._script_params is None else self._script_params
-        return {re.sub(r"\W", "_", key): str(self._params[key]) for key in keys}
+        keys: Dict[str, str]
+        if self._script_params is None:
+            if self._script_params_rename:
+                # Only rename is specified - use it.
+                keys = self._script_params_rename.copy()
+            else:
+                # Neither `script_params` nor rename are specified - use all params.
+                keys = {key: re.sub(r"\W", "_", key) for key in self._params}
+        else:
+            # Use `script_params` and rename if specified.
+            keys = {key: re.sub(r"\W", "_", key) for key in self._script_params}
+            keys.update(self._script_params_rename)
+
+        return {key_sub: str(self._params[key]) for (key, key_sub) in keys.items()}

@@ -9,7 +9,7 @@ Scheduler-side benchmark environment to run scripts locally.
 import json
 import logging
 
-from typing import Optional, Tuple
+from typing import Iterable, Optional, Tuple
 
 import pandas
 
@@ -114,15 +114,7 @@ class LocalEnv(ScriptEnv):
                     json.dump(tunables.get_param_values(self._tunable_params.get_covariant_group_names()),
                               fh_tunables)
 
-            (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
-                self._script_setup, env=self._params, cwd=temp_dir)
-
-            if return_code == 0:
-                _LOG.info("Local set up complete: %s", self)
-            else:
-                _LOG.warning("ERROR: Local setup returns with code %d stderr:\n%s",
-                             return_code, stderr)
-
+            return_code = self._local_exec(self._script_setup, temp_dir)
             self._is_ready = bool(return_code == 0)
 
         return self._is_ready
@@ -145,13 +137,8 @@ class LocalEnv(ScriptEnv):
 
         with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
 
-            _LOG.info("Run script locally on: %s at %s", self, temp_dir)
-            (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
-                self._script_run, env=self._params, cwd=temp_dir)
-
+            return_code = self._local_exec(self._script_run, temp_dir)
             if return_code != 0:
-                _LOG.warning("ERROR: Local run returns with code %d stderr:\n%s",
-                             return_code, stderr)
                 return (Status.FAILED, None)
 
             assert self._read_results_file is not None
@@ -175,6 +162,31 @@ class LocalEnv(ScriptEnv):
         """
         if self._script_teardown:
             _LOG.info("Local teardown: %s", self)
-            (status, _, _) = self._local_exec_service.local_exec(self._script_teardown, env=self._params)
-            _LOG.info("Local teardown complete: %s :: %s", self, status)
+            return_code = self._local_exec(self._script_teardown)
+            _LOG.info("Local teardown complete: %s :: %s", self, return_code)
         super().teardown()
+
+    def _local_exec(self, script: Iterable[str], cwd: Optional[str] = None) -> int:
+        """
+        Execute a script locally in the scheduler environment.
+
+        Parameters
+        ----------
+        script : Iterable[str]
+            Lines of the script to run locally.
+            Treat every line as a separate command to run.
+        cwd : Optional[str]
+            Work directory to run the script at.
+
+        Returns
+        -------
+        return_code : int
+            Return code of the script. 0 if sucdessful.
+        """
+        env_params = self._get_env_params()
+        _LOG.info("Run script locally on: %s at %s with env %s", self, cwd, env_params)
+        (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
+            script, env=env_params, cwd=cwd)
+        if return_code != 0:
+            _LOG.warning("ERROR: Local script returns code %d stderr:\n%s", return_code, stderr)
+        return return_code
