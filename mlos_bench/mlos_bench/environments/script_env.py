@@ -38,9 +38,17 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             Human-readable name of the environment.
         config : dict
             Free-format dictionary that contains the benchmark environment
-            configuration. Each config must have at least the "tunable_params"
-            and the "const_args" sections. It must also have at least one of
-            the following parameters: {setup, run, teardown}
+            configuration. Each config must have at least the `tunable_params`
+            and the `const_args` sections. It must also have at least one of
+            the following parameters: {`setup`, `run`, `teardown`}.
+            Additional parameters:
+                * `script_params` - an array of parameters to pass to the script
+                  as shell environment variables, and
+                * `script_params_rename` - a dictionary of {to: from} mappings
+                  of the script parameters. If not specified, replace all
+                  non-alphanumeric characters with underscores.
+            If neither `script_params` nor `script_params_rename` are specified,
+            pass *all* parameters to the script.
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
@@ -75,17 +83,17 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             Parameters to pass as *shell* environment variables into the script.
             This is usually a subset of `_params` with some possible conversions.
         """
-        rename: Dict[str, str]
+        rename: Dict[str, str]  # {to: from} mapping of the script parameters.
         if self._script_params is None:
             if self._script_params_rename:
                 # Only rename specified - use it.
                 rename = self._script_params_rename.copy()
             else:
                 # Neither `script_params` nor rename are specified - use all params.
-                rename = {key: self._RE_INVALID.sub("_", key) for key in self._params}
+                rename = {self._RE_INVALID.sub("_", key): key for key in self._params}
         else:
             # Use `script_params` and rename if specified.
-            rename = {key: self._RE_INVALID.sub("_", key) for key in self._script_params}
+            rename = {self._RE_INVALID.sub("_", key): key for key in self._script_params}
             rename.update(self._script_params_rename)
 
-        return {key_sub: str(self._params[key]) for (key, key_sub) in rename.items()}
+        return {key_sub: str(self._params[key]) for (key_sub, key) in rename.items()}
