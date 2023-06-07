@@ -181,7 +181,7 @@ class LocalEnv(ScriptEnv):
         Returns
         -------
         return_code : int
-            Return code of the script. 0 if sucdessful.
+            Return code of the script. 0 if successful.
         """
         env_params = self._get_env_params()
         _LOG.info("Run script locally on: %s at %s with env %s", self, cwd, env_params)
