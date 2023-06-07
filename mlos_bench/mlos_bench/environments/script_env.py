@@ -8,20 +8,19 @@ Base scriptable benchmark environment.
 
 import abc
 import re
-import logging
 from typing import Dict, Iterable, Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
-_LOG = logging.getLogger(__name__)
-
 
 class ScriptEnv(Environment, metaclass=abc.ABCMeta):
     """
     Base Environment that runs scripts for setup/run/teardown.
     """
+
+    _RE_INVALID = re.compile(r"[^a-zA-Z0-9_]")
 
     def __init__(self,
                  *,
@@ -76,17 +75,17 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             Parameters to pass as *shell* environment variables into the script.
             This is usually a subset of `_params` with some possible conversions.
         """
-        keys: Dict[str, str]
+        rename: Dict[str, str]
         if self._script_params is None:
             if self._script_params_rename:
-                # Only rename is specified - use it.
-                keys = self._script_params_rename.copy()
+                # Only rename specified - use it.
+                rename = self._script_params_rename.copy()
             else:
                 # Neither `script_params` nor rename are specified - use all params.
-                keys = {key: re.sub(r"\W", "_", key) for key in self._params}
+                rename = {key: self._RE_INVALID.sub("_", key) for key in self._params}
         else:
             # Use `script_params` and rename if specified.
-            keys = {key: re.sub(r"\W", "_", key) for key in self._script_params}
-            keys.update(self._script_params_rename)
+            rename = {key: self._RE_INVALID.sub("_", key) for key in self._script_params}
+            rename.update(self._script_params_rename)
 
-        return {key_sub: str(self._params[key]) for (key, key_sub) in keys.items()}
+        return {key_sub: str(self._params[key]) for (key, key_sub) in rename.items()}
