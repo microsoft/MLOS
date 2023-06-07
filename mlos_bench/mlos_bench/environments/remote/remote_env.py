@@ -159,7 +159,8 @@ class RemoteEnv(ScriptEnv):
         """
         env_params = self._get_env_params()
         _LOG.debug("Submit script: %s with %s", self, env_params)
-        (status, output) = self._remote_exec_service.remote_exec(script, self._params, env_params)
+        (status, output) = self._remote_exec_service.remote_exec(
+            script, config=self._params, env_params=env_params)
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)

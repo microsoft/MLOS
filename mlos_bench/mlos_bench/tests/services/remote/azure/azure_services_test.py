@@ -111,7 +111,7 @@ def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service: AzureVMS
     mock_response.status_code = http_status_code
     mock_requests.post.return_value = mock_response
 
-    status, _ = azure_vm_service.remote_exec(script, {}, {})
+    status, _ = azure_vm_service.remote_exec(script, config={}, env_params={})
 
     assert status == operation_status
 
@@ -130,7 +130,7 @@ def test_remote_exec_headers_output(mock_requests: MagicMock, azure_vm_service: 
     }
     mock_requests.post.return_value = mock_response
 
-    _, cmd_output = azure_vm_service.remote_exec(script, {}, {
+    _, cmd_output = azure_vm_service.remote_exec(script, config={}, env_params={
         "param_1": 123,
         "param_2": "abc",
     })
