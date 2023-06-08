@@ -15,6 +15,7 @@ from mlos_core.tests import get_all_concrete_subclasses
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
+from mlos_bench.environments.script_env import ScriptEnv
 
 from mlos_bench.tests import try_resolve_class_name
 from mlos_bench.tests.config.schemas import (get_schema_test_cases,
@@ -32,9 +33,13 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 
 # Dynamically enumerate some of the cases we want to make sure we cover.
 
+NON_CONFIG_ENV_CLASSES = {
+    ScriptEnv   # ScriptEnv is ABCMeta abstract, but there's no good way to test that dynamically in Python.
+}
 expected_environment_class_names = [subclass.__module__ + "." + subclass.__name__
                                     for subclass
-                                    in get_all_concrete_subclasses(Environment, pkg_name='mlos_bench')]
+                                    in get_all_concrete_subclasses(Environment, pkg_name='mlos_bench')
+                                    if subclass not in NON_CONFIG_ENV_CLASSES]
 assert expected_environment_class_names
 
 COMPOSITE_ENV_CLASS_NAME = CompositeEnv.__module__ + "." + CompositeEnv.__name__

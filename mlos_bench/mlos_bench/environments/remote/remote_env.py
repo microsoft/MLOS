@@ -10,7 +10,7 @@ import logging
 from typing import Iterable, Optional, Tuple
 
 from mlos_bench.environments.status import Status
-from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
@@ -19,7 +19,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 _LOG = logging.getLogger(__name__)
 
 
-class RemoteEnv(Environment):
+class RemoteEnv(ScriptEnv):
     """
     Environment to run benchmarks and scripts on a remote host.
     """
@@ -53,7 +53,10 @@ class RemoteEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(name=name, config=config, global_config=global_config,
+                         tunables=tunables, service=service)
+
+        self._wait_boot = self.config.get("wait_boot", False)
 
         assert self._service is not None and isinstance(self._service, SupportsRemoteExec), \
             "RemoteEnv requires a service that supports remote execution operations"
@@ -63,18 +66,6 @@ class RemoteEnv(Environment):
         assert self._service is not None and isinstance(self._service, SupportsVMOps), \
             "RemoteEnv requires a service that supports host operations"
         self._host_service: SupportsVMOps = self._service
-
-        self._wait_boot = self.config.get("wait_boot", False)
-        self._script_setup = self.config.get("setup")
-        self._script_run = self.config.get("run")
-        self._script_teardown = self.config.get("teardown")
-
-        if self._script_setup is None and \
-           self._script_run is None and \
-           self._script_teardown is None and \
-           not self._wait_boot:
-            raise ValueError("At least one of {setup, run, teardown}" +
-                             " must be present or wait_boot set to True.")
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -166,8 +157,10 @@ class RemoteEnv(Environment):
             A pair of Status and dict with the benchmark/script results.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
-        _LOG.debug("Submit script: %s", self)
-        (status, output) = self._remote_exec_service.remote_exec(script, self._params)
+        env_params = self._get_env_params()
+        _LOG.debug("Submit script: %s with %s", self, env_params)
+        (status, output) = self._remote_exec_service.remote_exec(
+            script, config=self._params, env_params=env_params)
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)
