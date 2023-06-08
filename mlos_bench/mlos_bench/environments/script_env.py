@@ -68,11 +68,6 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         self._script_params: Optional[Iterable[str]] = self.config.get("script_params")
         self._script_params_rename: Dict[str, str] = self.config.get("script_params_rename", {})
 
-        if self._script_setup is None and \
-           self._script_run is None and \
-           self._script_teardown is None:
-            raise ValueError("At least one of {setup, run, teardown} must be present")
-
     def _get_env_params(self) -> Dict[str, str]:
         """
         Get the *shell* environment parameters to be passed to the script.
