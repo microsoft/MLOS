@@ -1,0 +1,15 @@
+{
+    "name": "partial mock env",
+    "class": "mlos_bench.environments.MockEnv",
+    "config": {
+        "seed": 42,
+        "const_args": {
+            "foo": "bar",
+            "int": 1,
+            "float": 1.1,
+            "bool": true,
+            "null": null,
+            "array": [["nested", "list", "invalid"]]
+        }
+    }
+}

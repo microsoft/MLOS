@@ -28,13 +28,23 @@
                     "description": "Default argument value constants to use for the Environment when not overridden by globals.",
                     "type": "object",
                     "additionalProperties": {
-                        "$comment": "The value of any const_arg can be a string, number, boolean, or null.",
+                        "$comment": "The value of any const_arg can be a string, number, boolean, or null, or an array of the same.",
                         "type": [
                             "string",
                             "number",
                             "boolean",
-                            "null"
-                        ]
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
+                            "type": [
+                                "string",
+                                "number",
+                                "boolean",
+                                "null"
+                            ]
+                        }
                     }
                 }
             },
