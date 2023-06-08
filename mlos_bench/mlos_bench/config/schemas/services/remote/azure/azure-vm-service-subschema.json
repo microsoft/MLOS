@@ -45,13 +45,23 @@
                             "description": "Key/value pairs of ARM template parameters.",
                             "type": "object",
                             "additionalProperties": {
-                                "$comment": "The value of any parameter can be a string, number, boolean, or null.",
+                                "$comment": "The value of any parameter can be a string, number, boolean, or null or an array of the same.",
                                 "type": [
                                     "string",
                                     "number",
                                     "boolean",
-                                    "null"
-                                ]
+                                    "null",
+                                    "array"
+                                ],
+                                "items": {
+                                    "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
+                                    "type": [
+                                        "string",
+                                        "number",
+                                        "boolean",
+                                        "null"
+                                    ]
+                                }
                             },
                             "minProperties": 1
                         }
