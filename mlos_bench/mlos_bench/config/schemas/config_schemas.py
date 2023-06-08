@@ -6,6 +6,7 @@
 A simple class for describing where to find different config schemas and validating configs against them.
 """
 
+import logging
 from enum import Enum
 from os import path, walk, environ
 from typing import Dict, Iterator, Mapping
@@ -15,9 +16,13 @@ import jsonschema
 
 from mlos_bench.util import path_join
 
+_LOG = logging.getLogger(__name__)
 
 # The path to find all config schemas.
 CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
+
+_VALIDATION_ENV_FLAG = 'MLOS_BENCH_SKIP_SCHEMA_VALIDATION'
+_SKIP_VALIDATION = environ.get(_VALIDATION_ENV_FLAG, 'false').lower() in {'true', 'y', 'yes', 'on', '1'}
 
 
 # Note: we separate out the SchemaStore from a class method on ConfigSchema
@@ -100,6 +105,8 @@ class ConfigSchema(Enum):
         """
         # Allow skipping schema validation for tight dev cycle changes.
         # Note: this may cause pytest to fail if it's expecting exceptions to be raised for invalid configs.
-        if environ.get('MLOS_BENCH_SKIP_SCHEMA_VALIDATION', 'false').lower() not in {'true', 'y', 'yes', 'on', '1'}:
+        if _SKIP_VALIDATION:
+            _LOG.warning("%s is set - skip schema validation", _VALIDATION_ENV_FLAG)
+        else:
             resolver: jsonschema.RefResolver = jsonschema.RefResolver.from_schema(self.schema, store=SCHEMA_STORE)
             jsonschema.validate(instance=config, schema=self.schema, resolver=resolver)
