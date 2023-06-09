@@ -69,12 +69,6 @@ class LocalEnv(ScriptEnv):
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
         self._read_results_file: Optional[str] = self.config.get("read_results_file")
 
-        if self._script_setup is None and self._dump_params_file is not None:
-            raise ValueError("'setup' must be present if 'dump_params_file' is specified")
-
-        if self._script_run is None and self._read_results_file is not None:
-            raise ValueError("'run' must be present if 'read_results_file' is specified")
-
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
         Check if the environment is ready and set up the application
