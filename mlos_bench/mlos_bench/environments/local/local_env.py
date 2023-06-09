@@ -93,23 +93,23 @@ class LocalEnv(ScriptEnv):
         if not super().setup(tunables, global_config):
             return False
 
-        if not self._script_setup:
-            self._is_ready = True
-            return True
-
         with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
 
             _LOG.info("Set up the environment locally: %s at %s", self, temp_dir)
 
             if self._dump_params_file:
-                with open(path_join(temp_dir, self._dump_params_file),
-                          "wt", encoding="utf-8") as fh_tunables:
+                fname = path_join(temp_dir, self._dump_params_file)
+                _LOG.debug("Dump tunables to file: %s", fname)
+                with open(fname, "wt", encoding="utf-8") as fh_tunables:
                     # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
-                    json.dump(tunables.get_param_values(self._tunable_params.get_covariant_group_names()),
-                              fh_tunables)
+                    json.dump(tunables.get_param_values(
+                        self._tunable_params.get_covariant_group_names()), fh_tunables)
 
-            return_code = self._local_exec(self._script_setup, temp_dir)
-            self._is_ready = bool(return_code == 0)
+            if self._script_setup:
+                return_code = self._local_exec(self._script_setup, temp_dir)
+                self._is_ready = bool(return_code == 0)
+            else:
+                self._is_ready = True
 
         return self._is_ready
 
@@ -126,24 +126,28 @@ class LocalEnv(ScriptEnv):
             be in the `score` field.
         """
         (status, _) = result = super().run()
-        if not (status.is_ready and self._script_run):
+        if not status.is_ready:
             return result
 
         with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
 
-            return_code = self._local_exec(self._script_run, temp_dir)
-            if return_code != 0:
-                return (Status.FAILED, None)
+            if self._script_run:
+                return_code = self._local_exec(self._script_run, temp_dir)
+                if return_code != 0:
+                    return (Status.FAILED, None)
 
-            assert self._read_results_file is not None
+            if not self._read_results_file:
+                _LOG.debug("Not reading the data at: %s", self)
+                return (Status.SUCCEEDED, {})
+
             data: pandas.DataFrame = pandas.read_csv(
                 self._config_loader_service.resolve_path(
                     self._read_results_file, extra_paths=[temp_dir]))
 
             _LOG.debug("Read data:\n%s", data)
             if len(data) != 1:
-                _LOG.warning("Local run has %d rows: assume long format of (metric, value)",
-                             len(data))
+                _LOG.warning(
+                    "Local run has %d rows: assume long format of (metric, value)", len(data))
                 data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
 
             data_dict = data.iloc[-1].to_dict()
