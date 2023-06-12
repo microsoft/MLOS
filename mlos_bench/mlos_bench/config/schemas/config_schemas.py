@@ -22,6 +22,7 @@ _LOG = logging.getLogger(__name__)
 CONFIG_SCHEMA_DIR = path_join(path.dirname(__file__), abs_path=True)
 
 # Allow skipping schema validation for tight dev cycle changes.
+# It is used in `ConfigSchema.validate()` method below.
 # NOTE: this may cause pytest to fail if it's expecting exceptions
 # to be raised for invalid configs.
 _VALIDATION_ENV_FLAG = 'MLOS_BENCH_SKIP_SCHEMA_VALIDATION'
