@@ -18,7 +18,9 @@
                 },
                 "read_results_file": {
                     "description": "Path to a file to read the results from.",
-                    "type": "string"
+                    "type": "string",
+                    "$comment": "Currently we only support CSV files.",
+                    "pattern": "[.]csv$"
                 }
             }
         }

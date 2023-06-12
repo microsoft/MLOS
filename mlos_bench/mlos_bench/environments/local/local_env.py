@@ -142,6 +142,7 @@ class LocalEnv(ScriptEnv):
                 return (Status.FAILED, None)
 
             assert self._read_results_file is not None
+            # FIXME: We should not be assuming that the only output file type is a CSV.
             data: pandas.DataFrame = pandas.read_csv(
                 self._config_loader_service.resolve_path(
                     self._read_results_file, extra_paths=[temp_dir]))
