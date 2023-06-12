@@ -5,7 +5,7 @@
         "run": [
             "/bin/true"
         ],
-        "shell_params": [
+        "script_params": [
             "/this/is/an/invalid/param/name/to/expose",
             "so.is.this"
         ]
