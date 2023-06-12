@@ -40,7 +40,8 @@
                                 "type": "string",
                                 "examples": ["score"]
                             },
-                            "minItems": 1
+                            "minItems": 1,
+                            "uniqueItems": true
                         }
                     }
                 }

@@ -25,6 +25,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
         config={
             "const_args": {
                 "vmName": "Mock VM",
+                "someConst": "root"
             },
             "children": [
                 {
@@ -54,6 +55,47 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                         "range": [60, 120],
                         "metrics": ["score"],
                     }
+                },
+                {
+                    "name": "Composite Child 3",
+                    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+                    "config": {
+                        "const_args": {
+                            # This should be propagated to the children, but not up to the parent.
+                            "vmName": "Nested Mock VM",
+                            "EnvId": 3
+                        },
+                        "required_args": ["vmName"],
+                        "children": [
+                            {
+                                "name": "Nested Mock Environment 1",
+                                "class": "mlos_bench.environments.mock_env.MockEnv",
+                                "config": {
+                                    "tunable_params": ["provision"],
+                                    "const_args": {
+                                        "vmName": "Placeholder VM",
+                                    },
+                                    "required_args": ["vmName", "someConst"],
+                                    "range": [60, 120],
+                                    "metrics": ["score"],
+                                }
+                            },
+                            {
+                                "name": "Nested Mock Environment 2",
+                                "class": "mlos_bench.environments.mock_env.MockEnv",
+                                "config": {
+                                    "tunable_params": ["boot"],
+                                    "const_args": {
+                                        "vmName": "Placeholder VM",
+                                        "someConst": "leaf"
+                                    },
+                                    "required_args": ["vmName", "someConst"],
+                                    "range": [60, 120],
+                                    "metrics": ["score"],
+                                }
+                            }
+                        ]
+                    },
                 }
             ]
         },
@@ -70,11 +112,38 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         "vmName": "Mock VM",        # const_args from the parent
         "EnvId": 1,                 # const_args from the child
         "vmSize": "Standard_B4ms",  # tunable_params from the parent
+        # "someConst": "root"        # not required, so not passed from the parent
     }
     assert composite_env.children[1].parameters == {
         "vmName": "Mock VM",        # const_args from the parent
         "EnvId": 2,                 # const_args from the child
         "idle": "halt",             # tunable_params from the parent
+        # "someConst": "root"        # not required, so not passed from the parent
+    }
+    assert isinstance(composite_env.children[2], CompositeEnv)
+    # CompositeEnv child should receive everything from the parent since it didn't specify a tunable_params subgroup to filter on.
+    # It should also override the const_args.
+    new_params = composite_env.parameters.copy()
+    new_params["vmName"] = "Nested Mock VM"
+    new_params["EnvId"] = 3
+    assert composite_env.children[2].parameters == new_params
+    # Now check it's parents
+    assert composite_env.children[2].children[0].parameters == {
+        "vmName": "Nested Mock VM",     # const_args from the parent
+        "EnvId": 3,                     # const_args from the parent
+        "vmSize": "Standard_B4ms",      # tunable_params from the parent
+        "someConst": "root"             # tunable_params from grandparent
+    }
+    assert composite_env.children[2].children[1].parameters == {
+        "vmName": "Nested Mock VM",     # const_args from the parent
+        "EnvId": 3,                     # const_args from the parent
+        "idle": "halt",                 # tunable_params from the parent
+        "someConst": "leaf"             # tunable_params from child
+    }
+    # Make sure it didn't alter the grand parent.
+    assert composite_env.parameters == {
+        "vmName": "Mock VM",            # const_args from the parent
+        "someConst": "root"             # tunable_params from parent
     }
 
 

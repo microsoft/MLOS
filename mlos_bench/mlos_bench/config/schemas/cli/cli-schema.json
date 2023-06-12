@@ -12,7 +12,9 @@
             "type": "array",
             "items": {
                 "$ref": "#/$defs/json_config_path"
-            }
+            },
+            "uniqueItems": true,
+            "minItems": 1
         },
         "json_config_path_or_paths": {
             "oneOf": [
@@ -41,7 +43,8 @@
             "type": "array",
             "items": {
                 "type": "string"
-            }
+            },
+            "uniqueItems": true
         },
 
         "environment": {
