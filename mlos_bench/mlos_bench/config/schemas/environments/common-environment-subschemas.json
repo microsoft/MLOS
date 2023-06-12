@@ -80,25 +80,7 @@
                     "description": "The command lines to execute for the teardown phase.",
                     "$ref": "#/$defs/command_lines"
                 }
-            },
-            "$comment": "At least one of setup or run or teardown must be specified.",
-            "anyOf": [
-                {
-                    "required": [
-                        "setup"
-                    ]
-                },
-                {
-                    "required": [
-                        "run"
-                    ]
-                },
-                {
-                    "required": [
-                        "teardown"
-                    ]
-                }
-            ]
+            }
         },
 
         "shell_param_type": {

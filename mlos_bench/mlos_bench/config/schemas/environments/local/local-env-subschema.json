@@ -20,33 +20,7 @@
                     "description": "Path to a file to read the results from.",
                     "type": "string"
                 }
-            },
-            "allOf": [
-                {
-                    "if": {
-                        "required": [
-                            "dump_params_file"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "setup"
-                        ]
-                    }
-                },
-                {
-                    "if": {
-                        "required": [
-                            "read_results_file"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "run"
-                        ]
-                    }
-                }
-            ]
+            }
         }
     },
     "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
