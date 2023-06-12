@@ -119,7 +119,7 @@ class LocalFileShareEnv(LocalEnv):
             # Override _temp_dir so that setup and upload both use the same path.
             self._is_ready = super().setup(tunables, global_config)
             if self._is_ready:
-                params = self._params.copy()
+                params = self._get_env_params()
                 params["PWD"] = self._temp_dir
                 for (path_from, path_to) in self._expand(self._upload, params):
                     self._file_share_service.upload(self._config_loader_service.resolve_path(
@@ -143,7 +143,7 @@ class LocalFileShareEnv(LocalEnv):
         prev_temp_dir = self._temp_dir
         with self._local_exec_service.temp_dir_context(self._temp_dir) as self._temp_dir:
             # Override _temp_dir so that download and run both use the same path.
-            params = self._params.copy()
+            params = self._get_env_params()
             params["PWD"] = self._temp_dir
             for (path_from, path_to) in self._expand(self._download, params):
                 self._file_share_service.download(
