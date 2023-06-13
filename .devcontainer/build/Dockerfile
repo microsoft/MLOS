@@ -8,7 +8,7 @@ FROM node:lts-slim
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         apt-transport-https ca-certificates curl gnupg2 software-properties-common \
-        lsb-release less jq \
+        less jq \
         build-essential g++ libx11-dev libxkbfile-dev libsecret-1-dev python-is-python3 python3-minimal
 
 # Install docker CLI
