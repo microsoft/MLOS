@@ -42,7 +42,6 @@ Optimizers
 
    BaseBayesianOptimizer
    EmukitOptimizer
-   SkoptOptimizer
 
 Spaces
 ======
@@ -52,7 +51,6 @@ Spaces
    :template: function.rst
 
    configspace_to_emukit_space
-   configspace_to_skopt_space
 
 Space Adapters
 --------------

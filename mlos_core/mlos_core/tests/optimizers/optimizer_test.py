@@ -16,8 +16,7 @@ import numpy.typing as npt
 import ConfigSpace as CS
 
 from mlos_core.optimizers import (
-    OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer,
-    SkoptOptimizer)
+    OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer)
 
 from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
@@ -27,7 +26,6 @@ from mlos_core.tests import get_all_concrete_subclasses
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
     *[(member.value, {}) for member in OptimizerType],
-    (SkoptOptimizer, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace,
                                       optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
@@ -54,8 +52,6 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
     *[(member.value, {}) for member in OptimizerType],
-    (SkoptOptimizer, {'base_estimator': 'gp', 'seed': 42}),
-    (SkoptOptimizer, {'base_estimator': 'et', 'seed': 42}),
 ])
 def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
                                      optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
@@ -127,7 +123,6 @@ def test_concrete_optimizer_type(optimizer_type: OptimizerType) -> None:
     # Enumerate all supported Optimizers
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
-    (OptimizerType.SKOPT, {'base_estimator': 'gp'}),
 ])
 def test_create_optimizer_with_factory_method(configuration_space: CS.ConfigurationSpace,
                                               optimizer_type: Optional[OptimizerType], kwargs: Optional[dict]) -> None:
@@ -163,7 +158,6 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     # Enumerate all supported Optimizers
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
-    (OptimizerType.SKOPT, {'base_estimator': 'gp', 'seed': 42}),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
     """

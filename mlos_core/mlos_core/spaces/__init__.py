@@ -13,42 +13,7 @@ import numpy as np
 
 
 if TYPE_CHECKING:
-    import skopt.space
     import emukit.core
-
-
-def configspace_to_skopt_space(config_space: ConfigSpace.ConfigurationSpace) -> "skopt.space.Space":
-    """Converts a ConfigSpace.ConfigurationSpace to a list of skopt spaces.
-
-    Parameters
-    ----------
-    config_space : ConfigSpace.ConfigurationSpace
-        Input configuration space.
-
-    Returns
-    -------
-    skopt.space.Space
-    """
-    import skopt.space  # pylint: disable=import-outside-toplevel
-
-    def _one_parameter_convert(parameter: ConfigSpace.hyperparameters.Hyperparameter) -> "skopt.space.Dimension":
-        if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
-            return skopt.space.Real(
-                low=parameter.lower,
-                high=parameter.upper,
-                prior='uniform' if not parameter.log else 'log-uniform',
-                name=parameter.name)
-        elif isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
-            return skopt.space.Integer(
-                low=parameter.lower,
-                high=parameter.upper,
-                prior='uniform' if not parameter.log else 'log-uniform',
-                name=parameter.name)
-        elif isinstance(parameter, ConfigSpace.CategoricalHyperparameter):
-            return skopt.space.Categorical(categories=parameter.choices, prior=parameter.probabilities, name=parameter.name)
-        raise ValueError(f"Type of parameter {parameter} ({type(parameter)}) not supported.")
-
-    return skopt.space.Space([_one_parameter_convert(param) for param in config_space.get_hyperparameters()])
 
 
 def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace) -> "emukit.core.ParameterSpace":
