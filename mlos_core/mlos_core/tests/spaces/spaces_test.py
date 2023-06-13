@@ -25,6 +25,10 @@ from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
 from mlos_core.spaces import configspace_to_emukit_space
 
 
+# NOTE: Originally this was a union of emukit and skopt supported space/param
+# types, but since we removed skopt support the union needs to have another
+# element in it, so we list the original input type again for now (technically
+# true for SMAC, for instance).
 OptimizerSpace = Union[emukit.core.ParameterSpace, CS.ConfigurationSpace]
 OptimizerParam = Union[emukit.core.Parameter, CS.hyperparameters.Hyperparameter]
 
@@ -190,11 +194,15 @@ class TestEmukitConversion(BaseConversion):
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
         converted_space = configspace_to_emukit_space(input_space)
 
-        random_state = NpRandomState(42)
-        integer_log_uniform = converted_space.rvs(n_samples=1000, random_state=random_state)
+        np.random.seed(42)
+
+        integer_log_uniform = converted_space.sample_uniform(point_count=1000)
 
         # log integer
         integer_log_uniform = np.array(integer_log_uniform).ravel()
-        integer_log_uniform = integer_log_uniform - integer_log_uniform.min()
-        # TODO double check the math on this
-        assert_uniform_counts(np.log(np.bincount(integer_log_uniform)))
+        logs = np.log(integer_log_uniform)
+        int_logs = logs.round().astype(np.int64)
+        diffs = logs - int_logs
+        assert np.allclose(diffs, 0)
+        bincounts = np.bincount(int_logs)
+        assert_uniform_counts(bincounts)

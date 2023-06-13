@@ -33,7 +33,7 @@ def configspace_to_emukit_space(config_space: ConfigSpace.ConfigurationSpace) ->
     def _one_parameter_convert(parameter: ConfigSpace.hyperparameters.Hyperparameter) -> "emukit.core.Parameter":
         log = getattr(parameter, 'log', False)
         if log and not isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
-            raise ValueError("Emukit doesn't support log parameters.")
+            raise ValueError("Emukit doesn't support non-integer log parameters.")
         if isinstance(parameter, ConfigSpace.UniformFloatHyperparameter):
             return emukit.core.ContinuousParameter(name=parameter.name, min_value=parameter.lower, max_value=parameter.upper)
         elif isinstance(parameter, ConfigSpace.UniformIntegerHyperparameter):
