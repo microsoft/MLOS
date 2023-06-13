@@ -8,7 +8,7 @@
         "resourceGroup": "rg",
         "deploymentName": "deployment",
         "deploymentTemplateParameters": {
-            "array": [ ["nested", "array", "invalid"] ]
+            "array": [ { "invalid": "type"} ]
         }
     }
 }
