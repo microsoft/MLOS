@@ -12,7 +12,6 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, List, NoReturn, Union
 
 import numpy as np
-from numpy.random import RandomState as NpRandomState
 import numpy.typing as npt
 import pytest
 
