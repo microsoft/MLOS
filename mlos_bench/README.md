@@ -165,30 +165,30 @@ All we have to do is specifying the [`Storage`](./mlos_bench/storage/) and [`Opt
 
 ```jsonc
 {
-    "config_path": [                                 // Locations of config files and scripts
+    "config_path": [                                    // Locations of config files and scripts
         "my-config",
         "mlos_bench/examples"
     ],
 
-    "environment": "env-azure-ubuntu-redis.jsonc",   // Root config (location relative to config_path)
-    "storage": "storage/sqlite.jsonc",               // Store data in a local SQLite3 file
-    "optimizer": "optimizers/mlos_core_skopt.jsonc", // Use mlos_core/scikit optimizer
+    "environment": "env-azure-ubuntu-redis.jsonc",      // Root config (location relative to config_path)
+    "storage": "storage/sqlite.jsonc",                  // Store data in a local SQLite3 file
+    "optimizer": "optimizers/mlos_core_emukit.jsonc",   // Use mlos_core/emukit optimizer
 
     "globals": [
-        "global_config.json"                         // Config generated at step 2. Uses config_path
+        "global_config.json"                            // Config generated at step 2. Uses config_path
     ],
 
-    "teardown": false,                               // Do not shutdown/deprovision a VM
+    "teardown": false,                                  // Do not shutdown/deprovision a VM
 
-    "log_file": "os-autotune.log",                   // Log file (also prints to stdout)
-    "log_level": 10,                                 // Log level = DEBUG
+    "log_file": "os-autotune.log",                      // Log file (also prints to stdout)
+    "log_level": 10,                                    // Log level = DEBUG
 
-    "experimentId": "RedisBench",                    // Experiment ID (can be in global_config.json)
-    "trialId": 1                                     // Start ID of the trial
+    "experimentId": "RedisBench",                       // Experiment ID (can be in global_config.json)
+    "trialId": 1                                        // Start ID of the trial
 }
 ```
 
-> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-skopt.jsonc](./mlos_bench/config/cli/azure-redis-skopt.jsonc).
+> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-emukit.jsonc](./mlos_bench/config/cli/azure-redis-emukit.jsonc).
 
 The only difference between the two configurations is that the latter has the `optimizer` parameter instead of using a fixed set of tunables via `tunable_values` option.
 It also stores the results of each trial in the SQLite3 database (configured via `storage`).
