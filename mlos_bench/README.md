@@ -172,7 +172,7 @@ All we have to do is specifying the [`Storage`](./mlos_bench/storage/) and [`Opt
 
     "environment": "env-azure-ubuntu-redis.jsonc",      // Root config (location relative to config_path)
     "storage": "storage/sqlite.jsonc",                  // Store data in a local SQLite3 file
-    "optimizer": "optimizers/mlos_core_emukit.jsonc",   // Use mlos_core/emukit optimizer
+    "optimizer": "optimizers/mlos_core_default_opt.jsonc",   // Use mlos_core default optimizer
 
     "globals": [
         "global_config.json"                            // Config generated at step 2. Uses config_path
@@ -188,7 +188,7 @@ All we have to do is specifying the [`Storage`](./mlos_bench/storage/) and [`Opt
 }
 ```
 
-> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-emukit.jsonc](./mlos_bench/config/cli/azure-redis-emukit.jsonc).
+> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-mlos-default-opt.jsonc](./mlos_bench/config/cli/azure-redis-mlos-default-opt.jsonc.jsonc).
 
 The only difference between the two configurations is that the latter has the `optimizer` parameter instead of using a fixed set of tunables via `tunable_values` option.
 It also stores the results of each trial in the SQLite3 database (configured via `storage`).
