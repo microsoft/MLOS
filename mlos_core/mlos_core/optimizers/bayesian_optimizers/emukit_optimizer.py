@@ -90,9 +90,10 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         """
         if context is not None:
             raise NotImplementedError()
-        if len(self._observations) <= 10:
+        if len(self._observations) <= 10:   # TODO: make this configurable
             from emukit.core.initial_designs import RandomDesign    # pylint: disable=import-outside-toplevel
             config = RandomDesign(self.emukit_parameter_space).get_samples(1)
+            # TODO: make sure that returned log int values are properly rounded
         else:
             if getattr(self, 'gpbo', None) is None:
                 # this should happen exactly once, when calling the 11th time

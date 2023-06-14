@@ -10,7 +10,7 @@
     ],
 
     "environment": "environments/composite/env-azure-ubuntu-redis.jsonc",
-    "optimizer": "optimizers/mlos_core_skopt.jsonc",
+    "optimizer": "optimizers/mlos_core_emukit.jsonc",
     "storage": "storage/sqlite.jsonc",
 
     "globals": [
@@ -22,6 +22,6 @@
 
     "teardown": false,
 
-    "log_file": "azure-redis-skopt.log",
+    "log_file": "azure-redis-emukit.log",
     "log_level": "DEBUG"
 }

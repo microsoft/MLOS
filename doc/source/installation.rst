@@ -69,8 +69,8 @@ Distributing
     # this will install just the optimizer component with emukit support:
     pip install dist/mlos_core-0.1.0-py3-none-any.whl[emukit]
 
-    # this will install just the optimizer component with skopt support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[skopt]
+    # this will install just the optimizer component with flaml support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
 
   .. code-block:: shell
 

@@ -35,29 +35,6 @@
     },
     "allOf": [
         {
-            "$comment": "add extra recognized params for SKOPT optimizer type",
-            "if": {
-                "properties": {
-                    "optimizer_type": {
-                        "const": "SKOPT"
-                    }
-                },
-                "required": [
-                    "optimizer_type"
-                ]
-            },
-            "then": {
-                "properties": {
-                    "base_estimator": {
-                        "description": "The base estimator to use for the SKOPT optimizer.",
-                        "enum": [
-                            "gp",
-                            "et"
-                        ]
-                    }
-                }
-            }
-        },
         {
             "$comment": "add extra recognized params for SMAC optimizer type",
             "if": {

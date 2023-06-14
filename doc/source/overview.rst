@@ -35,6 +35,13 @@ Optimizers
 
    RandomOptimizer
 
+.. currentmodule:: mlos_core.optimizers.flaml_optimizer
+.. autosummary::
+   :toctree: generated/
+   :template: class.rst
+
+   FlamlOptimizer
+
 .. currentmodule:: mlos_core.optimizers.bayesian_optimizers
 .. autosummary::
    :toctree: generated/
@@ -42,15 +49,7 @@ Optimizers
 
    BaseBayesianOptimizer
    EmukitOptimizer
-   SkoptOptimizer
    SmacOptimizer
-
-.. currentmodule:: mlos_core.optimizers.flaml_optimizer
-.. autosummary::
-   :toctree: generated/
-   :template: class.rst
-
-   FlamlOptimizer
 
 Spaces
 ======
@@ -60,7 +59,6 @@ Spaces
    :template: function.rst
 
    configspace_to_emukit_space
-   configspace_to_skopt_space
    configspace_to_flaml_space
 
 Space Adapters

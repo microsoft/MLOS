@@ -29,8 +29,8 @@ def test_identity_adapter() -> None:
     adapter = IdentityAdapter(orig_parameter_space=input_space)
 
     num_configs = 10
-    for sampled_config in input_space.sample_configuration(size=num_configs):
-        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
+    for sampled_config in input_space.sample_configuration(size=num_configs):   # pylint: disable=not-an-iterable # (false positive)
+        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=list(sampled_config.keys()))
         target_config_df = adapter.inverse_transform(sampled_config_df)
         assert target_config_df.equals(sampled_config_df)
         target_config = CS.Configuration(adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict())
