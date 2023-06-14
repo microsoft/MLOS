@@ -40,7 +40,7 @@ jobs:
       timeout-minutes: 15
       run: |
         set -x
-        .devcontainer/build/build-devcontainer.sh
+        make CONDA_INFO_LEVEL=-v devcontainer
 
     - name: Start the devcontainer in the background
       timeout-minutes: 3
