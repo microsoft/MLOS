@@ -14,6 +14,7 @@ import ConfigSpace
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.optimizers.bayesian_optimizers.emukit_optimizer import EmukitOptimizer
+from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 from mlos_core.optimizers.flaml_optimizer import FlamlOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
 
@@ -24,6 +25,7 @@ __all__ = [
     'RandomOptimizer',
     'FlamlOptimizer',
     'EmukitOptimizer',
+    'SmacOptimizer',
 ]
 
 
@@ -39,6 +41,9 @@ class OptimizerType(Enum):
     FLAML = FlamlOptimizer
     """An instance of FlamlOptimizer class will be used"""
 
+    SMAC = SmacOptimizer
+    """An instance of SmacOptimizer class will be used"""
+
 
 # To make mypy happy, we need to define a type variable for each optimizer type.
 # https://github.com/python/mypy/issues/12952
@@ -49,9 +54,10 @@ ConcreteOptimizer = TypeVar(
     RandomOptimizer,
     EmukitOptimizer,
     FlamlOptimizer,
+    SmacOptimizer,
 )
 
-DEFAULT_OPTIMIZER_TYPE = OptimizerType.EMUKIT
+DEFAULT_OPTIMIZER_TYPE = OptimizerType.SMAC
 
 
 class OptimizerFactory:

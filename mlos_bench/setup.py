@@ -35,6 +35,7 @@ extra_requires: Dict[str, List[str]] = {    # pylint: disable=consider-using-nam
     # Transitive extra_requires from mlos-core.
     'emukit': ['emukit'],
     'flaml': ['flaml[blendsearch]'],
+    'smac': ['smac'],
 }
 
 # construct special 'full' extra that adds requirements for all built-in

@@ -13,7 +13,9 @@
                 null,
                 "EMUKIT",
                 "FLAML",
-                "RANDOM"
+                "RANDOM",
+                "SKOPT",
+                "SMAC"
             ]
         },
         "space_adapter_type": {
@@ -32,6 +34,37 @@
         }
     },
     "allOf": [
+        {
+            "$comment": "add extra recognized params for SMAC optimizer type",
+            "if": {
+                "properties": {
+                    "optimizer_type": {
+                        "const": "SMAC"
+                    }
+                },
+                "required": [
+                    "optimizer_type"
+                ]
+            },
+            "then": {
+                "$comment": "Not all SMAC optimizer params are exposed here, since some are handled automatically by mlos_bench.",
+                "properties": {
+                    "n_random_init": {
+                        "description": "Number of points evaluated at start to bootstrap the optimizer.",
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 10
+                    },
+                    "n_random_probability": {
+                        "description": "Probability of choosing to evaluate a random configuration during optimization.",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "example": 0.1
+                    }
+                }
+            }
+        },
         {
             "$comment": "a set of rules for the space adapter schema extensions",
             "oneOf": [
