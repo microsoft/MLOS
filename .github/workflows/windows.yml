@@ -90,11 +90,6 @@ jobs:
         if (! (conda env list | Select-String -Pattern "^$env:CONDA_ENV_NAME ") ) { conda env create -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML }
         conda env update -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML --prune
 
-    # For debugging version mismatch issues:
-    - name: List the current conda packages
-      run: |
-        conda list -n $env:CONDA_ENV_NAME --show-channel-urls
-
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
     # so only do this for the default in the devcontainer.
