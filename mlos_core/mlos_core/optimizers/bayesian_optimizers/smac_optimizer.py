@@ -15,7 +15,7 @@ import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
 
-from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
+from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 

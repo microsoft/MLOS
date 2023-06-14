@@ -195,7 +195,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
         space_adapter_kwargs=space_adapter_kwargs,
     )
-
     # Initialize an optimizer that uses the original space
     optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
