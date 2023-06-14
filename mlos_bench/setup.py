@@ -34,7 +34,6 @@ extra_requires: Dict[str, List[str]] = {    # pylint: disable=consider-using-nam
     'storage-sql-sqlite': ['sqlalchemy'],   # sqlite3 comes with python, so we don't need to install it.
     # Transitive extra_requires from mlos-core.
     'emukit': ['emukit'],
-    'skopt': ['scikit-optimize'],
     'flaml': ['flaml[blendsearch]'],
 }
 
