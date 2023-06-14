@@ -6,7 +6,7 @@
 Contains the wrapper class for Emukit Bayesian optimizers.
 """
 
-from typing import Callable, Optional
+from typing import Optional
 
 import ConfigSpace
 import numpy as np
@@ -122,7 +122,7 @@ class EmukitOptimizer(BaseBayesianOptimizer):
         return ret
 
     def acquisition_function(self, configurations: pd.DataFrame,
-                             context: Optional[pd.DataFrame] = None) -> Callable:
+                             context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         raise NotImplementedError("Not implemented for EmuKit yet.")
 
     def _initialize_optimizer(self) -> None:
