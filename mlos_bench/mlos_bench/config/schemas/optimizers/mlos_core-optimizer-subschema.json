@@ -35,7 +35,6 @@
     },
     "allOf": [
         {
-        {
             "$comment": "add extra recognized params for SMAC optimizer type",
             "if": {
                 "properties": {
