@@ -90,6 +90,9 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
     # this will install just the optimizer component with flaml support:
     pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
+
+    # this will install just the optimizer component with smac and flaml support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac,flaml]
     ```
 
     ```sh

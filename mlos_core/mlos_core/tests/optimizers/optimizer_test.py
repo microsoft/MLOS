@@ -176,15 +176,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='x', lower=0, upper=3))
     input_space.add_hyperparameter(CS.UniformFloatHyperparameter(name='y', lower=0, upper=3))
 
-    # Initialize optimizer
-    optimizer: BaseOptimizer = OptimizerFactory.create(
-        parameter_space=input_space,
-        optimizer_type=optimizer_type,
-        optimizer_kwargs=kwargs,
-    )
-    assert optimizer is not None
-
-    # Initialize another optimizer that uses LlamaTune space adapter
+    # Initialize an optimizer that uses LlamaTune space adapter
     space_adapter_kwargs = {
         "num_low_dims": 1,
         "special_param_values": None,
@@ -197,7 +189,16 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
         space_adapter_kwargs=space_adapter_kwargs,
     )
+    # Initialize an optimizer that uses the original space
+    optimizer: BaseOptimizer = OptimizerFactory.create(
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
+        optimizer_kwargs=kwargs,
+    )
+    assert optimizer is not None
+
     assert llamatune_optimizer is not None
+    assert optimizer.optimizer_parameter_space != llamatune_optimizer.optimizer_parameter_space
 
     num_iters = 50
     for _ in range(num_iters):
@@ -208,7 +209,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
         # loop for llamatune-optimizer
         suggestion = llamatune_optimizer.suggest()
-        assert suggestion['x'].iloc[0] == suggestion['y'].iloc[0]   # optimizer explores 1-dimensional space
+        _x, _y = suggestion['x'].iloc[0], suggestion['y'].iloc[0]
+        assert _x == pytest.approx(_y, rel=1e-3) or _x + _y == pytest.approx(3., rel=1e-3)  # optimizer explores 1-dimensional space
         observation = objective(suggestion)
         llamatune_optimizer.register(suggestion, observation)
 
@@ -233,7 +235,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # .surrogate_predict method not currently implemented if space adapter is employed
     if isinstance(llamatune_optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
-            _ = llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x']])
+            llamatune_optimizer.surrogate_predict(llamatune_best_observation[['x', 'y']])
 
 
 # Dynamically determine all of the optimizers we have implemented.

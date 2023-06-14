@@ -72,6 +72,9 @@ Distributing
     # this will install just the optimizer component with flaml support:
     pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
 
+    # this will install just the optimizer component with smac and flaml support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac,flaml]
+
   .. code-block:: shell
 
     # this will install both the optimizer and the experiment runner:

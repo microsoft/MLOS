@@ -41,6 +41,8 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
         with pytest.raises(NotImplementedError):
             optimizer.surrogate_predict(suggestion, context=pd.DataFrame([["something"]]))
 
-        # acquisition function not implemented
-        with pytest.raises(NotImplementedError):
-            optimizer.acquisition_function(suggestion)
+        if optimizer_class in [OptimizerType.EMUKIT.value]:
+            # acquisition function not implemented for Emukit, Skopt
+            # NOTE: currently, only SMAC implements this
+            with pytest.raises(NotImplementedError):
+                optimizer.acquisition_function(suggestion)
