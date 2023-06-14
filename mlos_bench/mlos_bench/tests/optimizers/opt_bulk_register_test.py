@@ -153,26 +153,4 @@ def test_update_emukit_max(emukit_opt_max: MlosCoreOptimizer, mock_configs: List
     _test_opt_update_max(emukit_opt_max, mock_configs, mock_scores, mock_status)
 
 
-def test_update_scikit_gp(scikit_gp_opt: MlosCoreOptimizer, mock_configs: List[dict],
-                          mock_scores: List[float], mock_status: List[Status]) -> None:
-    """
-    Test the bulk update of the scikit-optimize GP optimizer.
-    """
-    _test_opt_update_min(scikit_gp_opt, mock_configs, mock_scores, mock_status)
-
-
-def test_update_scikit_et(scikit_et_opt: MlosCoreOptimizer, mock_configs: List[dict],
-                          mock_scores: List[float], mock_status: List[Status]) -> None:
-    """
-    Test the bulk update of the scikit-optimize ET optimizer.
-    """
-    _test_opt_update_min(scikit_et_opt, mock_configs, mock_scores, mock_status)
-
-
-def test_update_scikit_gp_str(
-        scikit_gp_opt: MlosCoreOptimizer, mock_configs_str: List[dict],
-        mock_scores: List[float], mock_status: List[Status]) -> None:
-    """
-    Test the bulk update of the optimizer with all-string data.
-    """
-    _test_opt_update_min(scikit_gp_opt, mock_configs_str, mock_scores, mock_status)
+# TODO: Add FLAML and SMAC tests.
