@@ -41,11 +41,15 @@ jobs:
       run: |
         set -x
         # Debugging: print the image caches (pre initial build)
-        docker image ls -a
+        pre_images=`docker image ls -a`
+        echo "$pre_images" | md5sum
+        echo "$pre_images"
         # Build the devcontainer image:
         make CONDA_INFO_LEVEL=-v devcontainer
         # Debugging: print the image caches (post initial build)
-        docker image ls -a
+        post_images=`docker image ls -a`
+        echo "$post_images" | md5sum
+        echo "$post_images"
 
     - name: Start the devcontainer in the background
       timeout-minutes: 3
@@ -112,15 +116,23 @@ jobs:
       run: |
         set -x
         # Debugging: print the image caches (pre rebuild)
-        docker image ls -a
+        pre_images=`docker image ls -a`
+        echo "$pre_images" | md5sum
+        echo "$pre_images"
         # Debugging: print the image caches in the devcontainer (pre rebuild)
-        docker exec --user vscode mlos-devcontainer docker image ls -a
+        pre_docker_images=`docker exec --user vscode mlos-devcontainer docker image ls -a`
+        echo "$pre_docker_images" | md5sum
+        echo "$pre_docker_images"
         # Rebuild the devcontainer.
         docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
         # Debugging: reprint the image caches (post rebuild)
-        docker image ls -a
+        post_images=`docker image ls -a`
+        echo "$post_images" | md5sum
+        echo "$post_images"
         # Debugging: reprint the image caches in the devcontainer (post rebuild)
-        docker exec --user vscode mlos-devcontainer docker image ls -a
+        post_docker_images=`docker exec --user vscode mlos-devcontainer docker image ls -a
+        echo "$post_docker_images" | md5sum
+        echo "$post_docker_images"
 
     - name: Generate docs and test check them
       run: |
