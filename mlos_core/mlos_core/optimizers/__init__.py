@@ -14,7 +14,6 @@ import ConfigSpace
 from mlos_core.optimizers.optimizer import BaseOptimizer
 from mlos_core.optimizers.random_optimizer import RandomOptimizer
 from mlos_core.optimizers.bayesian_optimizers.emukit_optimizer import EmukitOptimizer
-from mlos_core.optimizers.bayesian_optimizers.skopt_optimizer import SkoptOptimizer
 from mlos_core.optimizers.flaml_optimizer import FlamlOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType, SpaceAdapterFactory
 
@@ -25,7 +24,6 @@ __all__ = [
     'RandomOptimizer',
     'FlamlOptimizer',
     'EmukitOptimizer',
-    'SkoptOptimizer',
 ]
 
 
@@ -37,9 +35,6 @@ class OptimizerType(Enum):
 
     EMUKIT = EmukitOptimizer
     """An instance of EmukitOptimizer class will be used"""
-
-    SKOPT = SkoptOptimizer
-    """An instance of SkoptOptimizer class will be used"""
 
     FLAML = FlamlOptimizer
     """An instance of FlamlOptimizer class will be used"""
@@ -53,11 +48,10 @@ ConcreteOptimizer = TypeVar(
     'ConcreteOptimizer',
     RandomOptimizer,
     EmukitOptimizer,
-    SkoptOptimizer,
     FlamlOptimizer,
 )
 
-DEFAULT_OPTIMIZER_TYPE = OptimizerType.SKOPT
+DEFAULT_OPTIMIZER_TYPE = OptimizerType.EMUKIT
 
 
 class OptimizerFactory:
@@ -93,7 +87,7 @@ class OptimizerFactory:
         -------
         optimizer : ConcreteOptimizer
             Instance of concrete optimizer class
-            (e.g., RandomOptimizer, EmukitOptimizer, SkoptOptimizer, etc.).
+            (e.g., RandomOptimizer, EmukitOptimizer, FlamlOptimizer, etc.).
         """
         if space_adapter_kwargs is None:
             space_adapter_kwargs = {}

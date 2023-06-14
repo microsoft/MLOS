@@ -11,7 +11,6 @@
             "$comment": "See Also: mlos_core/optimizers/__init__.py",
             "enum": [
                 null,
-                "SKOPT",
                 "EMUKIT",
                 "FLAML",
                 "RANDOM"
@@ -33,30 +32,6 @@
         }
     },
     "allOf": [
-        {
-            "$comment": "add extra recognized params for SKOPT optimizer type",
-            "if": {
-                "properties": {
-                    "optimizer_type": {
-                        "const": "SKOPT"
-                    }
-                },
-                "required": [
-                    "optimizer_type"
-                ]
-            },
-            "then": {
-                "properties": {
-                    "base_estimator": {
-                        "description": "The base estimator to use for the SKOPT optimizer.",
-                        "enum": [
-                            "gp",
-                            "et"
-                        ]
-                    }
-                }
-            }
-        },
         {
             "$comment": "a set of rules for the space adapter schema extensions",
             "oneOf": [

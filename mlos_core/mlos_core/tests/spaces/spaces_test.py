@@ -12,23 +12,24 @@ from abc import ABCMeta, abstractmethod
 from typing import Any, Callable, List, NoReturn, Union
 
 import numpy as np
-from numpy.random import RandomState as NpRandomState
 import numpy.typing as npt
-import pandas as pd
 import pytest
 
 import scipy
-import skopt.space
 import emukit.core
 
 import ConfigSpace as CS
 from ConfigSpace.hyperparameters import NormalIntegerHyperparameter
 
-from mlos_core.spaces import configspace_to_emukit_space, configspace_to_skopt_space
+from mlos_core.spaces import configspace_to_emukit_space
 
 
-OptimizerSpace = Union[skopt.space.Space, emukit.core.ParameterSpace]
-OptimizerParam = Union[skopt.space.Dimension, emukit.core.Parameter]
+# NOTE: Originally this was a union of emukit and skopt supported space/param
+# types, but since we removed skopt support the union needs to have another
+# element in it, so we list the original input type again for now (technically
+# true for SMAC, for instance).
+OptimizerSpace = Union[emukit.core.ParameterSpace, CS.ConfigurationSpace]
+OptimizerParam = Union[emukit.core.Parameter, CS.hyperparameters.Hyperparameter]
 
 
 def assert_uniform_counts(counts: npt.NDArray) -> None:
@@ -141,63 +142,6 @@ class BaseConversion(metaclass=ABCMeta):
         raise NotImplementedError('subclass must override')
 
 
-class TestSkoptConversion(BaseConversion):
-    """
-    Tests for ConfigSpace to Skopt parameter conversion.
-    """
-
-    conversion_function = staticmethod(configspace_to_skopt_space)
-
-    def sample(self, config_space: skopt.space.Space, n_samples: int = 1) -> npt.NDArray:
-        return np.array(config_space.rvs(n_samples=n_samples))
-
-    def get_parameter_names(self, config_space: skopt.space.Space) -> List[str]:
-        return list(config_space.dimension_names)
-
-    def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
-        return pd.value_counts(points[:, 0]).values     # type: ignore[return-value]
-
-    def test_dimensionality(self) -> None:
-        input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("a", lower=1, upper=10))
-        input_space.add_hyperparameter(CS.CategoricalHyperparameter("b", choices=["bof", "bum"]))
-        input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"]))
-        output_space = configspace_to_skopt_space(input_space)
-        assert output_space.transformed_n_dims == len(input_space.get_hyperparameters())
-        assert output_space.n_dims == len(input_space.get_hyperparameters())
-
-    def test_weighted_categorical(self) -> None:
-        input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(CS.CategoricalHyperparameter("c", choices=["foo", "bar"], weights=[0.9, 0.1]))
-        # unpack the space to only get a parameter so we can count more easily later
-        converted_space: skopt.space.Categorical
-        converted_space, *_ = configspace_to_skopt_space(input_space)
-        random_state = NpRandomState(42)
-        sample = converted_space.rvs(n_samples=100, random_state=random_state)  # pylint: disable=no-member
-        counts = pd.value_counts(sample)
-        assert counts["foo"] > 80
-        assert counts["bar"] > 5
-
-    def test_log_spaces(self) -> None:
-        input_space = CS.ConfigurationSpace()
-        input_space.add_hyperparameter(CS.UniformFloatHyperparameter("b", lower=1, upper=5, log=True))
-        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
-        converted_space = configspace_to_skopt_space(input_space)
-
-        random_state = NpRandomState(42)
-        log_uniform, integer_log_uniform = zip(
-            *converted_space.rvs(n_samples=1000, random_state=random_state))
-
-        # log uniform float
-        counts, _ = np.histogram(np.log(log_uniform), bins='auto')
-        assert_uniform_counts(counts)
-        # log integer
-        integer_log_uniform = np.array(integer_log_uniform)
-        integer_log_uniform = integer_log_uniform - integer_log_uniform.min()
-        # TODO double check the math on this
-        assert_uniform_counts(np.log(np.bincount(integer_log_uniform)))
-
-
 class TestEmukitConversion(BaseConversion):
     """
     Tests for ConfigSpace to Emukit parameter conversions.
@@ -247,13 +191,17 @@ class TestEmukitConversion(BaseConversion):
         # integer is supported
         input_space = CS.ConfigurationSpace()
         input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
-        converted_space = configspace_to_skopt_space(input_space)
+        converted_space = configspace_to_emukit_space(input_space)
 
-        random_state = NpRandomState(42)
-        integer_log_uniform = converted_space.rvs(n_samples=1000, random_state=random_state)
+        np.random.seed(42)
+
+        integer_log_uniform = converted_space.sample_uniform(point_count=1000)
 
         # log integer
         integer_log_uniform = np.array(integer_log_uniform).ravel()
-        integer_log_uniform = integer_log_uniform - integer_log_uniform.min()
-        # TODO double check the math on this
-        assert_uniform_counts(np.log(np.bincount(integer_log_uniform)))
+        logs = np.log(integer_log_uniform)
+        int_logs = logs.round().astype(np.int64)
+        diffs = logs - int_logs
+        assert np.allclose(diffs, 0)
+        bincounts = np.bincount(int_logs)
+        assert_uniform_counts(bincounts)
