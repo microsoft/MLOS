@@ -46,42 +46,6 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
 
 
 @pytest.fixture
-def scikit_gp_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
-    """
-    Test fixture for mlos_core Scikit optimizer.
-    """
-    return MlosCoreOptimizer(
-        tunables=tunable_groups,
-        service=None,
-        config={
-            "minimize": "score",
-            "max_iterations": 10,
-            "optimizer_type": "SKOPT",
-            "base_estimator": "gp",
-            "seed": 42
-        },
-    )
-
-
-@pytest.fixture
-def scikit_et_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
-    """
-    Test fixture for mlos_core Scikit optimizer.
-    """
-    return MlosCoreOptimizer(
-        tunables=tunable_groups,
-        service=None,
-        config={
-            "minimize": "score",
-            "max_iterations": 10,
-            "optimizer_type": "SKOPT",
-            "base_estimator": "et",
-            "seed": 42
-        },
-    )
-
-
-@pytest.fixture
 def emukit_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     Test fixture for mlos_core Emukit optimizer.
@@ -111,3 +75,5 @@ def emukit_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "optimizer_type": "EMUKIT"
         },
     )
+
+# TODO: Add FLAML and SMAC fixtures.

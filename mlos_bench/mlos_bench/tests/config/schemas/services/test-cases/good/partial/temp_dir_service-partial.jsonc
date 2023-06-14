@@ -1,6 +1,0 @@
-{
-    "class": "mlos_bench.services.local.temp_dir_context.TempDirContextService",
-    "config": {
-        "temp_dir": null
-    }
-}
