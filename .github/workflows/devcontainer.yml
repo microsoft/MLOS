@@ -40,7 +40,12 @@ jobs:
       timeout-minutes: 15
       run: |
         set -x
+        # Debugging: print the image caches (pre initial build)
+        docker image ls -a
+        # Build the devcontainer image:
         make CONDA_INFO_LEVEL=-v devcontainer
+        # Debugging: print the image caches (post initial build)
+        docker image ls -a
 
     - name: Start the devcontainer in the background
       timeout-minutes: 3
@@ -106,7 +111,16 @@ jobs:
       timeout-minutes: 10
       run: |
         set -x
+        # Debugging: print the image caches (pre rebuild)
+        docker image ls -a
+        # Debugging: print the image caches in the devcontainer (pre rebuild)
+        docker exec --user vscode mlos-devcontainer docker image ls -a
+        # Rebuild the devcontainer.
         docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
+        # Debugging: reprint the image caches (post rebuild)
+        docker image ls -a
+        # Debugging: reprint the image caches in the devcontainer (post rebuild)
+        docker exec --user vscode mlos-devcontainer docker image ls -a
 
     - name: Generate docs and test check them
       run: |
