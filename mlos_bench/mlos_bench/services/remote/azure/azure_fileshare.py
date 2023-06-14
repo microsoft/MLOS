@@ -76,6 +76,7 @@ class AzureFileShareService(FileShareService):
             file_client = self._share_client.get_file_client(remote_path)
             data = file_client.download_file()
             with open(local_path, "wb") as output_file:
+                _LOG.debug("Download file: %s -> %s", remote_path, local_path)
                 data.readinto(output_file)  # type: ignore[no-untyped-call]
 
     def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
@@ -123,6 +124,7 @@ class AzureFileShareService(FileShareService):
             self._remote_makedirs(folder)
             file_client = self._share_client.get_file_client(remote_path)
             with open(local_path, "rb") as file_data:
+                _LOG.debug("Upload file: %s -> %s", local_path, remote_path)
                 file_client.upload_file(file_data)
 
     def _remote_makedirs(self, remote_path: str) -> None:

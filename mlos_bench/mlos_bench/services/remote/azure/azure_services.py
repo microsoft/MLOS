@@ -241,7 +241,12 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         if url is None:
             return Status.PENDING, {}
 
-        response = requests.get(url, headers=self._headers, timeout=self._request_timeout)
+        try:
+            response = requests.get(url, headers=self._headers, timeout=self._request_timeout)
+        except requests.exceptions.ReadTimeout:
+            _LOG.warning("Request timed out: %s", url)
+            # return Status.TIMED_OUT, {}
+            return Status.RUNNING, {}
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
