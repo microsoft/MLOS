@@ -110,9 +110,7 @@ jobs:
         docker exec --user vscode --env MAKEFLAGS=-Oline mlos-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
 
     - name: Test rebuilding the devcontainer in the devcontainer
-      # FIXME: This shouldn't take much time at all since it should all be cached already.
-      #timeout-minutes: 3
-      timeout-minutes: 10
+      timeout-minutes: 3
       run: |
         set -x
         # Debugging: print the image caches (pre rebuild)
