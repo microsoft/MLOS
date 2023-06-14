@@ -10,6 +10,7 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         bash bash-completion \
         less colordiff \
         curl jq \
+        ripgrep \
         vim-nox neovim python3-pynvim \
         make \
         rename \
