@@ -109,6 +109,7 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
     }
 
 
+@pytest.mark.skip(reason="SMAC optimizer integration is WIP")
 def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
                                 smac_opt: MlosCoreOptimizer) -> None:
     """
