@@ -6,9 +6,11 @@
 A collection Service functions for managing VMs on Azure.
 """
 
+import datetime
 import json
 import time
 import logging
+import subprocess
 
 from typing import Callable, Iterable, Tuple
 
@@ -28,9 +30,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
     Helper methods to manage VMs on Azure.
     """
 
-    _POLL_INTERVAL = 4     # seconds
-    _POLL_TIMEOUT = 300    # seconds
-    _REQUEST_TIMEOUT = 5   # seconds
+    _POLL_INTERVAL = 4              # seconds
+    _POLL_TIMEOUT = 300             # seconds
+    _REQUEST_TIMEOUT = 5            # seconds
+    _TOKEN_REQUEST_INTERVAL = 300   # = 5 min
 
     # Azure Resources Deployment REST API as described in
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
@@ -119,7 +122,6 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         check_required_params(
             config, {
                 "subscription",
-                "accessToken",
                 "resourceGroup",
                 "deploymentName",
                 "deploymentTemplatePath",
@@ -144,6 +146,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._poll_interval = float(config.get("pollInterval", self._POLL_INTERVAL))
         self._poll_timeout = float(config.get("pollTimeout", self._POLL_TIMEOUT))
         self._request_timeout = float(config.get("requestTimeout", self._REQUEST_TIMEOUT))
+        self._token_request_interval = float(config.get("tokenRequestInterval", self._TOKEN_REQUEST_INTERVAL))
 
         # TODO: Provide external schema validation?
         template = self.config_loader_service.load_config(
@@ -154,10 +157,27 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._deploy_params = merge_parameters(
             dest=config['deploymentTemplateParameters'].copy(), source=self.config)
 
-        self._headers = {
-            # Access token from `az account get-access-token`:
-            "Authorization": "Bearer " + config["accessToken"]
-        }
+        self._access_token = ""
+        self._token_expiration = datetime.datetime.now()
+
+    def _get_access_token(self) -> str:
+        """
+        Get the access token from Azure CLI.
+        """
+        if (self._token_expiration - datetime.datetime.now()).seconds < self._token_request_interval:
+            _LOG.debug("Request new accessToken")
+            res = json.loads(subprocess.check_output(
+                'az account get-access-token', shell=True, text=True))
+            self._token_expiration = datetime.datetime.fromisoformat(res["expiresOn"])
+            self._access_token = res["accessToken"]
+            _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration)
+        return self._access_token
+
+    def _get_headers(self) -> dict:
+        """
+        Get the headers for the REST API calls.
+        """
+        return {"Authorization": "Bearer " + self._get_access_token()}
 
     @staticmethod
     def _extract_arm_parameters(json_data: dict) -> dict:
@@ -197,7 +217,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         """
         _LOG.debug("Request: POST %s", url)
 
-        response = requests.post(url, headers=self._headers, timeout=self._request_timeout)
+        response = requests.post(url, headers=self._get_headers(), timeout=self._request_timeout)
         _LOG.debug("Response: %s", response)
 
         # Logical flow for async operations based on:
@@ -242,7 +262,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             return Status.PENDING, {}
 
         try:
-            response = requests.get(url, headers=self._headers, timeout=self._request_timeout)
+            response = requests.get(url, headers=self._get_headers(), timeout=self._request_timeout)
         except requests.exceptions.ReadTimeout:
             _LOG.warning("Request timed out: %s", url)
             # return Status.TIMED_OUT, {}
@@ -395,7 +415,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             deployment_name=config["deploymentName"],
         )
 
-        response = requests.head(url, headers=self._headers, timeout=self._request_timeout)
+        response = requests.head(url, headers=self._get_headers(), timeout=self._request_timeout)
         _LOG.debug("Response: %s", response)
 
         if response.status_code == 204:
@@ -453,7 +473,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
 
         response = requests.put(url, json=json_req,
-                                headers=self._headers, timeout=self._request_timeout)
+                                headers=self._get_headers(), timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
@@ -652,7 +672,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             _LOG.debug("Request: POST %s\n%s", url, json.dumps(json_req, indent=2))
 
         response = requests.post(
-            url, json=json_req, headers=self._headers, timeout=self._request_timeout)
+            url, json=json_req, headers=self._get_headers(), timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,

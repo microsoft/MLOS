@@ -33,7 +33,6 @@ def azure_vm_service(config_persistence_service: ConfigPersistenceService) -> Az
         "deploymentName": "TEST_DEPLOYMENT",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
-        "accessToken": "TEST_TOKEN",
         "deploymentTemplateParameters": {
             "location": "westus2",
         },
