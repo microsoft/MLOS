@@ -6,11 +6,9 @@
 A collection Service functions for managing VMs on Azure.
 """
 
-import datetime
 import json
 import time
 import logging
-import subprocess
 
 from typing import Callable, Iterable, Tuple
 
@@ -18,6 +16,7 @@ import requests
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
+from mlos_bench.services.types.authenticator_type import SupportsAuth
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
 from mlos_bench.util import check_required_params, merge_parameters
@@ -33,7 +32,6 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
     _POLL_INTERVAL = 4              # seconds
     _POLL_TIMEOUT = 300             # seconds
     _REQUEST_TIMEOUT = 5            # seconds
-    _TOKEN_REQUEST_INTERVAL = 300   # = 5 min
 
     # Azure Resources Deployment REST API as described in
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
@@ -146,7 +144,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._poll_interval = float(config.get("pollInterval", self._POLL_INTERVAL))
         self._poll_timeout = float(config.get("pollTimeout", self._POLL_TIMEOUT))
         self._request_timeout = float(config.get("requestTimeout", self._REQUEST_TIMEOUT))
-        self._token_request_interval = float(config.get("tokenRequestInterval", self._TOKEN_REQUEST_INTERVAL))
+
+        assert parent is not None and isinstance(parent, SupportsAuth)
+        self._auth_service: SupportsAuth = parent
 
         # TODO: Provide external schema validation?
         template = self.config_loader_service.load_config(
@@ -157,27 +157,11 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._deploy_params = merge_parameters(
             dest=config['deploymentTemplateParameters'].copy(), source=self.config)
 
-        self._access_token = ""
-        self._token_expiration = datetime.datetime.now()
-
-    def _get_access_token(self) -> str:
-        """
-        Get the access token from Azure CLI.
-        """
-        if (self._token_expiration - datetime.datetime.now()).seconds < self._token_request_interval:
-            _LOG.debug("Request new accessToken")
-            res = json.loads(subprocess.check_output(
-                'az account get-access-token', shell=True, text=True))
-            self._token_expiration = datetime.datetime.fromisoformat(res["expiresOn"])
-            self._access_token = res["accessToken"]
-            _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration)
-        return self._access_token
-
     def _get_headers(self) -> dict:
         """
         Get the headers for the REST API calls.
         """
-        return {"Authorization": "Bearer " + self._get_access_token()}
+        return {"Authorization": "Bearer " + self._auth_service.get_access_token()}
 
     @staticmethod
     def _extract_arm_parameters(json_data: dict) -> dict:
