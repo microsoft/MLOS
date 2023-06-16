@@ -14,6 +14,7 @@ class SupportsAuth(Protocol):
     """
     Protocol interface for authentication for the cloud services.
     """
+    # pylint: disable=too-few-public-methods
 
     def get_access_token(self) -> str:
         """

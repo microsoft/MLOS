@@ -163,10 +163,11 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
+    # pylint: disable=too-many-locals
     if kwargs is None:
         kwargs = {}
 
-    def objective(point: pd.DataFrame) -> pd.Series:   # pylint: disable=invalid-name
+    def objective(point: pd.DataFrame) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
         ret: pd.Series = np.sin(point['x'] * point['y'])
         return ret
