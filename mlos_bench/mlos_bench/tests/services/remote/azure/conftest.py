@@ -7,10 +7,11 @@ Configuration test fixtures for azure_services in mlos_bench.
 """
 
 from unittest.mock import patch
+
 import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.services.remote.azure import AzureVMService, AzureFileShareService
+from mlos_bench.services.remote.azure import AzureAuthService, AzureVMService, AzureFileShareService
 
 # pylint: disable=redefined-outer-name
 
@@ -24,7 +25,18 @@ def config_persistence_service() -> ConfigPersistenceService:
 
 
 @pytest.fixture
-def azure_vm_service(config_persistence_service: ConfigPersistenceService) -> AzureVMService:
+def azure_auth_service(config_persistence_service: ConfigPersistenceService,
+                       monkeypatch: pytest.MonkeyPatch) -> AzureAuthService:
+    """
+    Creates a dummy AzureAuthService for tests that require it.
+    """
+    auth = AzureAuthService(config={}, parent=config_persistence_service)
+    monkeypatch.setattr(auth, "get_access_token", lambda: "TEST_TOKEN")
+    return auth
+
+
+@pytest.fixture
+def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
     """
     Creates a dummy Azure VM service for tests that require it.
     """
@@ -39,7 +51,7 @@ def azure_vm_service(config_persistence_service: ConfigPersistenceService) -> Az
         "vmName": "test-vm",  # Should come from the upper-level config
         "pollInterval": 1,
         "pollTimeout": 2
-    }, parent=config_persistence_service)
+    }, parent=azure_auth_service)
 
 
 @pytest.fixture
