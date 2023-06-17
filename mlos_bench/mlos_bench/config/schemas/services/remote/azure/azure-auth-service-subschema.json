@@ -22,7 +22,7 @@
                     "properties": {
                         "tokenRequestInterval": {
                             "description": "Time before token expiration to request a new token",
-                            "type": "int"
+                            "type": "number"
                         }
                     }
                 }
