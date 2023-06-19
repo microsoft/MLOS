@@ -145,9 +145,6 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._poll_timeout = float(config.get("pollTimeout", self._POLL_TIMEOUT))
         self._request_timeout = float(config.get("requestTimeout", self._REQUEST_TIMEOUT))
 
-        assert parent is not None and isinstance(parent, SupportsAuth)
-        self._auth_service: SupportsAuth = parent
-
         # TODO: Provide external schema validation?
         template = self.config_loader_service.load_config(
             config['deploymentTemplatePath'], schema_type=None)
@@ -161,7 +158,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         """
         Get the headers for the REST API calls.
         """
-        return {"Authorization": "Bearer " + self._auth_service.get_access_token()}
+        assert self._parent is not None and isinstance(self._parent, SupportsAuth)
+        return {"Authorization": "Bearer " + self._parent.get_access_token()}
 
     @staticmethod
     def _extract_arm_parameters(json_data: dict) -> dict:
