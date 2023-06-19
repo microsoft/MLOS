@@ -56,7 +56,7 @@ setup(
         'scikit-learn<1.2',     # FIXME: temporarily work around some version mismatch issues (PR 850)
         'joblib>=1.1.1',        # CVE-2022-21797: scikit-learn dependency, addressed in 1.2.0dev0, which isn't currently released
         'scipy>=1.3.2',
-        'numpy<1.24',           # FIXME: temporarily work around some version mismatch issues (PR 850)
+        'numpy<1.26',           # FIXME: temporarily work around some version mismatch issues (PR 850)
         'pandas>=1.0.3',
         'ConfigSpace>=0.7.1',
     ],
