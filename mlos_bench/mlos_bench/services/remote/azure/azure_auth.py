@@ -44,18 +44,20 @@ class AzureAuthService(Service, SupportsAuth):
         # This parameter can come from command line as strings, so conversion is needed.
         self._req_interval = float(config.get("tokenRequestInterval", self._REQ_INTERVAL))
 
-        self._access_token = ""
-        self._token_expiration = datetime.datetime.now()
+        self._access_token = "RENEW *NOW*"
+        self._token_expiration_ts = datetime.datetime.now()  # Typically, some future timestamp.
 
     def get_access_token(self) -> str:
         """
         Get the access token from Azure CLI, if expired.
         """
-        if (self._token_expiration - datetime.datetime.now()).seconds < self._req_interval:
+        ts_diff = (self._token_expiration_ts - datetime.datetime.now()).seconds
+        _LOG.debug("Time to renew the token: %d sec.", ts_diff)
+        if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
             res = json.loads(subprocess.check_output(
                 'az account get-access-token', shell=True, text=True))
-            self._token_expiration = datetime.datetime.fromisoformat(res["expiresOn"])
+            self._token_expiration_ts = datetime.datetime.fromisoformat(res["expiresOn"])
             self._access_token = res["accessToken"]
-            _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration)
+            _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)
         return self._access_token
