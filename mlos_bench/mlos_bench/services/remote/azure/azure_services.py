@@ -158,7 +158,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         """
         Get the headers for the REST API calls.
         """
-        assert self._parent is not None and isinstance(self._parent, SupportsAuth)
+        assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
+            "Authorization service not provided. Include service-auth.jsonc?"
         return {"Authorization": "Bearer " + self._parent.get_access_token()}
 
     @staticmethod
