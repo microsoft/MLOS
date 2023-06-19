@@ -51,8 +51,8 @@ class AzureAuthService(Service, SupportsAuth):
         """
         Get the access token from Azure CLI, if expired.
         """
-        ts_diff = (self._token_expiration_ts - datetime.datetime.now()).seconds
-        _LOG.debug("Time to renew the token: %d sec.", ts_diff)
+        ts_diff = (self._token_expiration_ts - datetime.datetime.now()).total_seconds()
+        _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
             res = json.loads(subprocess.check_output(
