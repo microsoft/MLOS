@@ -55,6 +55,7 @@ class AzureAuthService(Service, SupportsAuth):
         _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
+            # TODO: Use azure-identity SDK and a key valut instead of `az` CLI.
             res = json.loads(subprocess.check_output(
                 'az account get-access-token', shell=True, text=True))
             self._token_expiration_ts = datetime.datetime.fromisoformat(res["expiresOn"])
