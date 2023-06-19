@@ -29,9 +29,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
     Helper methods to manage VMs on Azure.
     """
 
-    _POLL_INTERVAL = 4              # seconds
-    _POLL_TIMEOUT = 300             # seconds
-    _REQUEST_TIMEOUT = 5            # seconds
+    _POLL_INTERVAL = 4      # seconds
+    _POLL_TIMEOUT = 300     # seconds
+    _REQUEST_TIMEOUT = 5    # seconds
 
     # Azure Resources Deployment REST API as described in
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
