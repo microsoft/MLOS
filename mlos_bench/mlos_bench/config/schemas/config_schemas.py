@@ -102,6 +102,7 @@ class ConfigSchema(Enum):
         Parameters
         ----------
         config : dict
+            The config to validate.
 
         Raises
         ------
