@@ -3,12 +3,9 @@
     "config": {
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",
-        "accessToken": "access-token-blob",
-
         "resourceGroup": "rg",
         "deploymentName": "deployment",
         "vmName": "test-vm",
-
         "extra": "invalid"
     }
 }

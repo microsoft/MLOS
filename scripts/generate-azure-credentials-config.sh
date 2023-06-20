@@ -4,7 +4,8 @@
 ## Licensed under the MIT License.
 ##
 
-az account get-access-token |
+az account get-access-token \
+    --query "{tenant:tenant,subscription:subscription}" |
     jq ".storageAccountKey = `
         az storage account keys list \
             --resource-group os-autotune \
