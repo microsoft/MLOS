@@ -153,4 +153,17 @@ def test_update_emukit_max(emukit_opt_max: MlosCoreOptimizer, mock_configs: List
     _test_opt_update_max(emukit_opt_max, mock_configs, mock_scores, mock_status)
 
 
-# TODO: Add FLAML and SMAC tests.
+def test_update_flaml(flaml_opt: MlosCoreOptimizer, mock_configs: List[dict],
+                      mock_scores: List[float], mock_status: List[Status]) -> None:
+    """
+    Test the bulk update of the FLAML optimizer.
+    """
+    _test_opt_update_min(flaml_opt, mock_configs, mock_scores, mock_status)
+
+
+def test_update_smac(smac_opt: MlosCoreOptimizer, mock_configs: List[dict],
+                     mock_scores: List[float], mock_status: List[Status]) -> None:
+    """
+    Test the bulk update of the SMAC optimizer.
+    """
+    _test_opt_update_min(smac_opt, mock_configs, mock_scores, mock_status)
