@@ -68,9 +68,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
             space_adapter=space_adapter,
         )
 
-        # Declare at the top because we need it in __del__/cleanup()
-        self._temp_output_directory: Optional[TemporaryDirectory] = None
-
         # pylint: disable=import-outside-toplevel
         from smac import HyperparameterOptimizationFacade as Optimizer_Smac
         from smac import Scenario
@@ -89,13 +86,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         seed = -1 if seed is None else seed
 
         # Create temporary directory for SMAC output (if none provided)
+        self.temp_output_directory: Optional[TemporaryDirectory] = None
         if output_directory is None:
             # pylint: disable=consider-using-with
             try:
-                self._temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)  # Argument added in Python 3.10
+                self.temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)  # Argument added in Python 3.10
             except TypeError:
-                self._temp_output_directory = TemporaryDirectory()
-            output_directory = self._temp_output_directory.name
+                self.temp_output_directory = TemporaryDirectory()
+            output_directory = self.temp_output_directory.name
 
         scenario: Scenario = Scenario(
             self.optimizer_parameter_space,
@@ -236,9 +234,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
 
     def cleanup(self) -> None:
-        if self._temp_output_directory is not None:
-            self._temp_output_directory.cleanup()
-            self._temp_output_directory = None
+        if self.temp_output_directory is not None:
+            self.temp_output_directory.cleanup()
+            self.temp_output_directory = None
 
     def _to_configspace_configs(self, configurations: pd.DataFrame) -> list:
         """Convert a dataframe of configurations to a list of ConfigSpace configurations.
