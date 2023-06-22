@@ -95,9 +95,9 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         "idle": "halt",                 # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
     }
-    assert composite_env.children[1].parameters == {
+    assert composite_env.children[2].parameters == {
         "vmName": "Mock Control VM",     # const_args from the parent
-        "EnvId": 2,                     # const_args from the child
+        "EnvId": 3,                     # const_args from the child
         "idle": "halt",                 # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
         "vm_client_name": "Mock Client VM",
