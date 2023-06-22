@@ -1,7 +1,8 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
-az account get-access-token |
+az account get-access-token `
+    --query "{tenant:tenant,subscription:subscription}" |
     ConvertFrom-Json |
     Add-Member "storageAccountKey" (
         az storage account keys list `
