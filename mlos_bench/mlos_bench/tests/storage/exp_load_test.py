@@ -115,4 +115,5 @@ def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,
     assert len(configs) == 2
     assert scores == [None, score]
     assert status == [Status.FAILED, Status.SUCCEEDED]
+    assert tunable_groups.copy().assign(configs[0]).reset() == trial_fail.tunables
     assert tunable_groups.copy().assign(configs[1]).reset() == trial_succ.tunables
