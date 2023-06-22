@@ -13,6 +13,7 @@ from typing import Optional, Tuple, List, Dict, Iterator, Any
 
 from sqlalchemy import Engine, Connection, Table, column, func
 
+from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
@@ -88,14 +89,16 @@ class Experiment(Storage.Experiment):
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError()
 
-    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float]]:
+    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float], List[Status]]:
         configs = []
         scores = []
+        status = []
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 self._schema.trial.select().with_only_columns(
                     self._schema.trial.c.trial_id,
                     self._schema.trial.c.config_id,
+                    self._schema.trial.c.status,
                     self._schema.trial_result.c.metric_value,
                 ).join(
                     self._schema.trial_result, (
@@ -103,7 +106,6 @@ class Experiment(Storage.Experiment):
                         (self._schema.trial.c.trial_id == self._schema.trial_result.c.trial_id)
                     )
                 ).where(
-                    self._schema.trial.c.status == 'SUCCEEDED',
                     self._schema.trial.c.exp_id == self._experiment_id,
                     self._schema.trial_result.c.metric_id == (opt_target or self._opt_target),
                 ).order_by(
@@ -115,7 +117,8 @@ class Experiment(Storage.Experiment):
                     conn, self._schema.config_param, config_id=trial.config_id)
                 configs.append(tunables)
                 scores.append(float(trial.metric_value))
-            return (configs, scores)
+                status.append(Status(trial.status))
+            return (configs, scores, status)
 
     @staticmethod
     def _get_params(conn: Connection, table: Table, **kwargs: Any) -> Dict[str, Any]:
