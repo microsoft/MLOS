@@ -28,6 +28,31 @@ BaseTypeVar = TypeVar("BaseTypeVar", "Environment", "Optimizer", "Service", "Sto
 BaseTypes = Union["Environment", "Optimizer", "Service", "Storage"]
 
 
+def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> dict:
+    """
+    Replaces all $name values in the destination config with the corresponding
+    value from the source config.
+
+    Parameters
+    ----------
+    dest : dict
+        Destination config.
+    source : Optional[dict]
+        Source config.
+
+    Returns
+    -------
+    dest : dict
+        A reference to the destination config after the preprocessing.
+    """
+    if source is None:
+        source = {}
+    for key, val in dest.items():
+        if isinstance(val, str) and val.startswith("$") and val[1:] in source:
+            dest[key] = source[val[1:]]
+    return dest
+
+
 def merge_parameters(*, dest: dict, source: Optional[dict] = None,
                      required_keys: Optional[Iterable[str]] = None) -> dict:
     """
