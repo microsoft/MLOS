@@ -117,7 +117,7 @@ class Experiment(Storage.Experiment):
                     conn, self._schema.config_param, config_id=trial.config_id)
                 configs.append(tunables)
                 scores.append(float(trial.metric_value))
-                status.append(Status(trial.status))
+                status.append(Status[trial.status])
             return (configs, scores, status)
 
     @staticmethod
