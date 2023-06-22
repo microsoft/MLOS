@@ -90,9 +90,8 @@ class Experiment(Storage.Experiment):
         raise NotImplementedError()
 
     def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float], List[Status]]:
-        configs = []
-        scores = []
-        status = []
+        opt_target = opt_target or self._opt_target
+        (configs, scores, status) = ([], [], [])
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 self._schema.trial.select().with_only_columns(
@@ -104,10 +103,12 @@ class Experiment(Storage.Experiment):
                     self._schema.trial_result, (
                         (self._schema.trial.c.exp_id == self._schema.trial_result.c.exp_id) &
                         (self._schema.trial.c.trial_id == self._schema.trial_result.c.trial_id)
-                    )
+                    ), isouter=True
                 ).where(
                     self._schema.trial.c.exp_id == self._experiment_id,
-                    self._schema.trial_result.c.metric_id == (opt_target or self._opt_target),
+                    self._schema.trial.c.status.in_(['SUCCEEDED', 'FAILED', 'TIMED_OUT']),
+                    (self._schema.trial_result.c.metric_id.is_(None) |
+                     (self._schema.trial_result.c.metric_id == opt_target)),
                 ).order_by(
                     self._schema.trial.c.trial_id.asc(),
                 )
@@ -116,7 +117,7 @@ class Experiment(Storage.Experiment):
                 tunables = self._get_params(
                     conn, self._schema.config_param, config_id=trial.config_id)
                 configs.append(tunables)
-                scores.append(float(trial.metric_value))
+                scores.append(None if trial.metric_value is None else float(trial.metric_value))
                 status.append(Status[trial.status])
             return (configs, scores, status)
 
