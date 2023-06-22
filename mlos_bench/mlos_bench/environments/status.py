@@ -35,7 +35,6 @@ class Status(enum.Enum):
             Status.SUCCEEDED,
         }
 
-    @property
     def is_completed(self) -> bool:
         """
         Check if the status of the benchmark/environment is
