@@ -94,4 +94,33 @@ def test_emukit_optimization_loop_max(mock_env_no_noise: MockEnv,
     # Emukit optimizer is not deterministic, so we can't assert the exact values of the tunables.
 
 
-# TODO: Add FLAML and SMAC tests.
+def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
+                                 flaml_opt: MlosCoreOptimizer) -> None:
+    """
+    Toy optimization loop with mock environment and FLAML optimizer.
+    """
+    (score, tunables) = _optimize(mock_env_no_noise, flaml_opt)
+    assert score == pytest.approx(75.0, 0.01)
+    assert tunables.get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "idle": "halt",
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 2000000,
+    }
+
+
+# TODO: Enable SMAC tests.
+@pytest.mark.skip(reason="SMAC optimizer integration is WIP")
+def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
+                                smac_opt: MlosCoreOptimizer) -> None:
+    """
+    Toy optimization loop with mock environment and SMAC optimizer.
+    """
+    (score, tunables) = _optimize(mock_env_no_noise, smac_opt)
+    assert score == pytest.approx(75.0, 0.01)
+    assert tunables.get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "idle": "halt",
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 2000000,
+    }

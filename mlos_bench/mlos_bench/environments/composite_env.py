@@ -61,12 +61,12 @@ class CompositeEnv(Environment):
 
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
-                    child_config_file, self._tunable_params, global_config, self._service):
+                    child_config_file, self._tunable_params, global_config, self._const_args, self._service):
                 self._add_child(env)
 
         for child_config in config.get("children", []):
             self._add_child(self._config_loader_service.build_environment(
-                child_config, self._tunable_params, global_config, self._service))
+                child_config, self._tunable_params, global_config, self._const_args, self._service))
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
