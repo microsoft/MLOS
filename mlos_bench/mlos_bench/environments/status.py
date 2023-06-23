@@ -35,6 +35,17 @@ class Status(enum.Enum):
             Status.SUCCEEDED,
         }
 
+    def is_completed(self) -> bool:
+        """
+        Check if the status of the benchmark/environment is
+        one of {SUCCEEDED, FAILED, TIMED_OUT}.
+        """
+        return self in {
+            Status.SUCCEEDED,
+            Status.FAILED,
+            Status.TIMED_OUT,
+        }
+
     @property
     def is_pending(self) -> bool:
         """
@@ -73,6 +84,6 @@ class Status(enum.Enum):
     @property
     def is_timed_out(self) -> bool:
         """
-        Check if the status of the benchmark/environment is TIMEDOUT.
+        Check if the status of the benchmark/environment is TIMED_OUT.
         """
         return self == Status.FAILED
