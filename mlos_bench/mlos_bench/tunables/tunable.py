@@ -9,7 +9,7 @@ import copy
 import collections
 import logging
 
-from typing import Dict, List, Optional, Sequence, Tuple, Type, TypedDict, Union
+from typing import Any, Dict, List, Optional, Sequence, Tuple, Type, TypedDict, Union
 
 _LOG = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ class TunableDict(TypedDict, total=False):
     values: Optional[List[Optional[str]]]
     range: Optional[Union[Sequence[int], Sequence[float]]]
     special: Optional[Union[List[int], List[str]]]
+    meta: Dict[str, Any]
 
 
 class Tunable:  # pylint: disable=too-many-instance-attributes
@@ -63,6 +64,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._description = config.get("description")
         self._default = config["default"]
         self._values = config.get("values")
+        self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
         config_range = config.get("range")
         if config_range is not None:
@@ -376,3 +378,11 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         assert self.is_categorical
         assert self._values is not None
         return self._values
+
+    @property
+    def meta(self) -> Dict[str, Any]:
+        """
+        Get the tunable's metadata. This is a free-form dictionary that can be used to
+        store any additional information about the tunable (e.g., the unit information).
+        """
+        return self._meta
