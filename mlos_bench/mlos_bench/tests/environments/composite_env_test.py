@@ -23,6 +23,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
     return CompositeEnv(
         name="Composite Test Environment",
         config={
+            "tunable_params": ["provision", "boot"],
             "const_args": {
                 "vm_server_name": "Mock Server VM",
                 "vm_client_name": "Mock Client VM",
