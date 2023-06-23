@@ -24,6 +24,7 @@ def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
         config={
             "minimize": "score",
             "max_iterations": 5,
+            "use_defaults": True,
             "seed": 42
         },
     )
@@ -40,6 +41,7 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
         config={
             "maximize": "score",
             "max_iterations": 10,
+            "use_defaults": True,
             "seed": 42
         },
     )
