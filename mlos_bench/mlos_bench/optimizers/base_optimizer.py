@@ -152,12 +152,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         score : float
             A scalar benchmark score to be used as a primary target for MINIMIZATION.
         """
-        if not status.is_succeeded:
+        if not status.is_completed():
             return None
-        assert score is not None
-        if isinstance(score, dict):
-            score = score[self._opt_target]
-        return float(score) * self._opt_sign
+        if status.is_succeeded:
+            assert score is not None
+            if isinstance(score, dict):
+                score = score[self._opt_target]
+            return float(score) * self._opt_sign
+        assert score is None
+        return float("inf")
 
     def not_converged(self) -> bool:
         """

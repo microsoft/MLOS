@@ -17,7 +17,8 @@ if (-not $AZURE_STORAGE_ACCOUNT_NAME) {
     Write-Error "Missing default az storage account name config."
 }
 
-az account get-access-token |
+az account get-access-token `
+    --query "{tenant:tenant,subscription:subscription}" |
     ConvertFrom-Json |
     Add-Member "storageAccountKey" (
         az storage account keys list `

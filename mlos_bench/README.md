@@ -154,7 +154,7 @@ Create and activate the environment with:
     mlos_bench --config "config_bench.jsonc"
     ```
 
-    This should run a single trial with the given tunable values, write teh results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter).
+    This should run a single trial with the given tunable values, write the results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter).
 
 9. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.
 

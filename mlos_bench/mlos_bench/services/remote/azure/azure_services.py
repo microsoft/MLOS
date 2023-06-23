@@ -16,6 +16,7 @@ import requests
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
+from mlos_bench.services.types.authenticator_type import SupportsAuth
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
 from mlos_bench.util import check_required_params, merge_parameters
@@ -119,7 +120,6 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         check_required_params(
             config, {
                 "subscription",
-                "accessToken",
                 "resourceGroup",
                 "deploymentName",
                 "deploymentTemplatePath",
@@ -154,10 +154,13 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._deploy_params = merge_parameters(
             dest=config['deploymentTemplateParameters'].copy(), source=self.config)
 
-        self._headers = {
-            # Access token from `az account get-access-token`:
-            "Authorization": "Bearer " + config["accessToken"]
-        }
+    def _get_headers(self) -> dict:
+        """
+        Get the headers for the REST API calls.
+        """
+        assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
+            "Authorization service not provided. Include service-auth.jsonc?"
+        return {"Authorization": "Bearer " + self._parent.get_access_token()}
 
     @staticmethod
     def _extract_arm_parameters(json_data: dict) -> dict:
@@ -197,7 +200,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         """
         _LOG.debug("Request: POST %s", url)
 
-        response = requests.post(url, headers=self._headers, timeout=self._request_timeout)
+        response = requests.post(url, headers=self._get_headers(), timeout=self._request_timeout)
         _LOG.debug("Response: %s", response)
 
         # Logical flow for async operations based on:
@@ -242,7 +245,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             return Status.PENDING, {}
 
         try:
-            response = requests.get(url, headers=self._headers, timeout=self._request_timeout)
+            response = requests.get(url, headers=self._get_headers(), timeout=self._request_timeout)
         except requests.exceptions.ReadTimeout:
             _LOG.warning("Request timed out: %s", url)
             # return Status.TIMED_OUT, {}
@@ -395,7 +398,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             deployment_name=config["deploymentName"],
         )
 
-        response = requests.head(url, headers=self._headers, timeout=self._request_timeout)
+        response = requests.head(url, headers=self._get_headers(), timeout=self._request_timeout)
         _LOG.debug("Response: %s", response)
 
         if response.status_code == 204:
@@ -453,7 +456,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
 
         response = requests.put(url, json=json_req,
-                                headers=self._headers, timeout=self._request_timeout)
+                                headers=self._get_headers(), timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
@@ -652,7 +655,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             _LOG.debug("Request: POST %s\n%s", url, json.dumps(json_req, indent=2))
 
         response = requests.post(
-            url, json=json_req, headers=self._headers, timeout=self._request_timeout)
+            url, json=json_req, headers=self._get_headers(), timeout=self._request_timeout)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
