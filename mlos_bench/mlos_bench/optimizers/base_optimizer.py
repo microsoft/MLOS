@@ -158,10 +158,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             assert score is not None
             if isinstance(score, dict):
                 score = score[self._opt_target]
-        else:
-            assert score is None
-            score = float("inf")
-        return float(score) * self._opt_sign
+            return float(score) * self._opt_sign
+        assert score is None
+        return float("inf")
 
     def not_converged(self) -> bool:
         """

@@ -57,7 +57,7 @@ class MlosCoreOptimizer(Optimizer):
         if not super().bulk_register(configs, scores, status):
             return False
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
-        df_scores = pd.Series(scores, dtype=float)
+        df_scores = pd.Series(scores, dtype=float) * self._opt_sign
         if status is not None:
             df_status = pd.Series(status)
             df_scores[df_status != Status.SUCCEEDED] = float("inf")
@@ -67,7 +67,7 @@ class MlosCoreOptimizer(Optimizer):
         # External data can have incorrect types (e.g., all strings).
         for (tunable, _group) in self._tunables:
             df_configs[tunable.name] = df_configs[tunable.name].astype(tunable.dtype)
-        self._opt.register(df_configs, df_scores * self._opt_sign)
+        self._opt.register(df_configs, df_scores)
         if _LOG.isEnabledFor(logging.DEBUG):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
