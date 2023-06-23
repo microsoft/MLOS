@@ -1,13 +1,29 @@
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
 
+$AZURE_DEFAULTS_GROUP = $Env:AZURE_DEFAULTS_GROUP
+if (-not $AZURE_DEFAULTS_GROUP) {
+    $AZURE_DEFAULTS_GROUP = (az config get defaults.group --query value --output tsv)
+}
+if (-not $AZURE_DEFAULTS_GROUP) {
+    Write-Error "Missing default az resource group config."
+}
+
+$AZURE_STORAGE_ACCOUNT_NAME = $Env:AZURE_STORAGE_ACCOUNT_NAME
+if (-not $AZURE_STORAGE_ACCOUNT_NAME) {
+    $AZURE_STORAGE_ACCOUNT_NAME = (az config get storage.account --query value --output tsv)
+}
+if (-not $AZURE_STORAGE_ACCOUNT_NAME) {
+    Write-Error "Missing default az storage account name config."
+}
+
 az account get-access-token `
     --query "{tenant:tenant,subscription:subscription}" |
     ConvertFrom-Json |
     Add-Member "storageAccountKey" (
         az storage account keys list `
-            --resource-group os-autotune `
-            --account-name osatsharedstorage `
+            --resource-group $AZURE_DEFAULTS_GROUP `
+            --account-name $AZURE_STORAGE_ACCOUNT_NAME `
             --query "[0].value" `
             --output tsv `
         ) -PassThru |
