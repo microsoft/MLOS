@@ -56,9 +56,7 @@ class MlosCoreOptimizer(Optimizer):
                       status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):
             return False
-        # By default, hyperparameters in ConfigurationSpace are sorted by name:
-        tunables_names = sorted(self._tunables.get_param_values().keys())
-        df_configs = pd.DataFrame(configs)[tunables_names]
+        df_configs = self._to_df(configs)  # Impute missing values, if necessary
         df_scores = pd.Series(scores, dtype=float)
         if status is not None:
             df_status = pd.Series(status)
@@ -74,6 +72,34 @@ class MlosCoreOptimizer(Optimizer):
             (score, _) = self.get_best_observation()
             _LOG.debug("Warm-up end: %s = %s", self.target, score)
         return True
+
+    def _to_df(self, configs: Sequence[dict]) -> pd.DataFrame:
+        """
+        Select from past trials only the columns required in this experiment and
+        impute default values for the tunables that are missing in the dataframe.
+
+        Parameters
+        ----------
+        configs : Sequence[dict]
+            Sequence of dicts with past trials data.
+
+        Returns
+        -------
+        df_configs : pd.DataFrame
+            A dataframe with past trials data, with missing values imputed.
+        """
+        df_configs = pd.DataFrame(configs)
+        tunables_names = self._tunables.get_param_values().keys()
+        missing_cols = set(tunables_names).difference(df_configs.columns)
+        for (tunable, _group) in self._tunables:
+            if tunable.name in missing_cols:
+                df_configs[tunable.name] = tunable.default
+            else:
+                df_configs[tunable.name].fillna(tunable.default, inplace=True)
+        # By default, hyperparameters in ConfigurationSpace are sorted by name:
+        df_configs = df_configs[sorted(tunables_names)]
+        _LOG.debug("Loaded configs:\n%s", df_configs)
+        return df_configs
 
     def suggest(self) -> TunableGroups:
         use_defaults = self._use_defaults and self._iter == 1
