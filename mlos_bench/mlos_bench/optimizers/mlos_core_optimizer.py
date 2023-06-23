@@ -59,10 +59,11 @@ class MlosCoreOptimizer(Optimizer):
         df_configs = self._to_df(configs)  # Impute missing values, if necessary
         df_scores = pd.Series(scores, dtype=float) * self._opt_sign
         if status is not None:
-            # TODO: mlos_core currently does not support registration of failed trials:
-            df_status_ok = pd.Series(status) == Status.SUCCEEDED
-            df_configs = df_configs[df_status_ok]
-            df_scores = df_scores[df_status_ok]
+            df_status = pd.Series(status)
+            df_scores[df_status != Status.SUCCEEDED] = float("inf")
+            df_status_completed = df_status.apply(Status.is_completed)
+            df_configs = df_configs[df_status_completed]
+            df_scores = df_scores[df_status_completed]
         # External data can have incorrect types (e.g., all strings).
         for (tunable, _group) in self._tunables:
             df_configs[tunable.name] = df_configs[tunable.name].astype(tunable.dtype)
@@ -108,9 +109,8 @@ class MlosCoreOptimizer(Optimizer):
 
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
-        score = super().register(tunables, status, score)
-        # TODO: mlos_core currently does not support registration of failed trials:
-        if status.is_succeeded:
+        score = super().register(tunables, status, score)  # With _opt_sign applied
+        if status.is_completed:
             # By default, hyperparameters in ConfigurationSpace are sorted by name:
             df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
             _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)
