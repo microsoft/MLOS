@@ -7,10 +7,10 @@ on:
         description: Manual MLOS Markdown Link Check run
   push:
     branches: [ main ]
-  merge_group:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
+  merge_group:
+    types: [checks_requested]
 
 jobs:
   # Check in-repo markdown links
