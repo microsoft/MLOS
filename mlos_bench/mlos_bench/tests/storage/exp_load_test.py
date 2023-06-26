@@ -18,9 +18,10 @@ def test_exp_load_empty(exp_storage_memory_sql: Storage.Experiment) -> None:
     """
     Try to retrieve old experimental data from the empty storage.
     """
-    (configs, scores) = exp_storage_memory_sql.load()
+    (configs, scores, status) = exp_storage_memory_sql.load()
     assert not configs
     assert not scores
+    assert not status
 
 
 def test_exp_pending_empty(exp_storage_memory_sql: Storage.Experiment) -> None:
@@ -110,8 +111,9 @@ def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,
     (pending,) = list(exp_storage_memory_sql.pending_trials())
     assert pending.trial_id == trial_pend.trial_id
 
-    (configs, scores) = exp_storage_memory_sql.load()
-    assert len(configs) == 1
-    assert len(scores) == 1
-    assert scores[0] == score
-    assert tunable_groups.copy().assign(configs[0]).reset() == trial_succ.tunables
+    (configs, scores, status) = exp_storage_memory_sql.load()
+    assert len(configs) == 2
+    assert scores == [None, score]
+    assert status == [Status.FAILED, Status.SUCCEEDED]
+    assert tunable_groups.copy().assign(configs[0]).reset() == trial_fail.tunables
+    assert tunable_groups.copy().assign(configs[1]).reset() == trial_succ.tunables
