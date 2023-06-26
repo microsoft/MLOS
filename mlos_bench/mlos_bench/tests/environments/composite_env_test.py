@@ -145,6 +145,7 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
     return CompositeEnv(
         name="Composite Test Environment",
         config={
+            "tunable_params": ["provision", "boot"],
             "const_args": {
                 "vm_server_name": "Mock Server VM",
                 "vm_client_name": "Mock Client VM",
@@ -155,6 +156,7 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                     "name": "Nested Composite Client Environment 1",
                     "class": "mlos_bench.environments.composite_env.CompositeEnv",
                     "config": {
+                        "tunable_params": ["provision"],
                         "const_args": {
                             "vmName": "$vm_client_name",
                             "EnvId": 1,
@@ -183,6 +185,7 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                     "name": "Nested Composite Server Environment 2",
                     "class": "mlos_bench.environments.composite_env.CompositeEnv",
                     "config": {
+                        "tunable_params": ["boot"],
                         "const_args": {
                             "vmName": "$vm_server_name",
                             "EnvId": 2,
