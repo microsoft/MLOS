@@ -110,7 +110,7 @@ class MlosCoreOptimizer(Optimizer):
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
         score = super().register(tunables, status, score)  # With _opt_sign applied
-        if status.is_completed:
+        if status.is_completed():
             # By default, hyperparameters in ConfigurationSpace are sorted by name:
             df_config = pd.DataFrame(dict(sorted(tunables.get_param_values().items())), index=[0])
             _LOG.debug("Score: %s Dataframe:\n%s", score, df_config)

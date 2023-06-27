@@ -85,7 +85,7 @@ class OSEnv(Environment):
             return False
 
         (status, params) = self._host_service.vm_start(self._params)
-        if status.is_pending:
+        if status.is_pending():
             (status, _) = self._host_service.wait_vm_operation(params)
 
         self._is_ready = status in {Status.SUCCEEDED, Status.READY}
@@ -97,7 +97,7 @@ class OSEnv(Environment):
         """
         _LOG.info("OS tear down: %s", self)
         (status, params) = self._host_service.vm_stop(self._params)
-        if status.is_pending:
+        if status.is_pending():
             (status, _) = self._host_service.wait_vm_operation(params)
 
         super().teardown()
