@@ -24,7 +24,7 @@
                     "$ref": "../common-environment-subschemas.json#/$defs/setup_run_teardown_configs"
                 },
                 {
-                    "$ref": "../common-environment-subschemas.json#/$defs/script_params_config"
+                    "$ref": "../common-environment-subschemas.json#/$defs/shell_env_params_config"
                 },
                 {
                     "$comment": "LocalFileShareEnv inherits from LocalEnv, so it supports all the same config features.",

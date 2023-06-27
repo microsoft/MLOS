@@ -29,13 +29,13 @@
         "read_results_file": "/tmp/results.csv",
         "dump_params_file": "/tmp/dump_params.json",
 
-        "script_params_match": [
+        "shell_env_params_match": [
             "^MLOS_[a-zA-Z0-9_]+$"
         ],
-        "script_params": [
+        "shell_env_params": [
             "foo"
         ],
-        "script_params_mapping": {
+        "shell_env_params_mapping": {
             "gets_mapped_to_this_env_name": "/source/param/name/that/is/otherwise/invalid/env/name"
         }
     }

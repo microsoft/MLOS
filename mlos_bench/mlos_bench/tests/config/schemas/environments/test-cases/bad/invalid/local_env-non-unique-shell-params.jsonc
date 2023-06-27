@@ -5,7 +5,7 @@
         "run": [
             "/bin/true"
         ],
-        "script_params": [
+        "shell_env_params": [
             "foo",
             "foo"
         ]
