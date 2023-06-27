@@ -68,7 +68,7 @@ class MockOptimizer(Optimizer):
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
         registered_score = super().register(tunables, status, score)
-        if status.is_succeeded and (
+        if status.is_succeeded() and (
             self._best_score is None or (registered_score is not None and registered_score < self._best_score)
         ):
             self._best_score = registered_score

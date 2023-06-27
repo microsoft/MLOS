@@ -75,7 +75,7 @@ class MockEnv(Environment):
             named "score". All output metrics have the same value.
         """
         (status, _) = result = super().run()
-        if not status.is_ready:
+        if not status.is_ready():
             return result
 
         # Simple convex function of all tunable parameters.

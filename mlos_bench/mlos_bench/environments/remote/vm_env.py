@@ -81,10 +81,10 @@ class VMEnv(Environment):
             return False
 
         (status, params) = self._vm_service.vm_provision(self._params)
-        if status.is_pending:
+        if status.is_pending():
             (status, _) = self._vm_service.wait_vm_deployment(True, params)
 
-        self._is_ready = status.is_succeeded
+        self._is_ready = status.is_succeeded()
         return self._is_ready
 
     def teardown(self) -> None:
@@ -93,7 +93,7 @@ class VMEnv(Environment):
         """
         _LOG.info("VM tear down: %s", self)
         (status, params) = self._vm_service.vm_deprovision(self._params)
-        if status.is_pending:
+        if status.is_pending():
             (status, _) = self._vm_service.wait_vm_deployment(False, params)
 
         super().teardown()
