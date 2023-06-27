@@ -105,32 +105,4 @@ jobs:
     # split commands across lines with CWD maintained (hence we also require the "cd .." here).
     - name: Generate and test binary distribution files
       run: |
-        # Build the mlos_core wheel.
-        cd mlos_core
-        conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
-        cd ..
-        $mlos_core_whl = (Resolve-Path mlos_core/dist/mlos_core-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
-        echo $mlos_core_whl
-        # Build the mlos_bench wheel.
-        cd mlos_bench
-        conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
-        cd ..
-        $mlos_bench_whl = (Resolve-Path mlos_bench/dist/mlos_bench-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
-        echo $mlos_bench_whl
-        # Setup a clean environment to test installing/using them.
-        $PythonVersReq = (conda list -n $env:CONDA_ENV_NAME | Select-String -AllMatches -Pattern '^python\s+([0-9.]+)\s+').Matches.Groups[1].Value
-        conda create -y -v -n mlos-dist-test-$env:PythonVersion python=${PythonVersReq}
-        conda install -y -v -n mlos-dist-test-$env:PythonVersion vswhere vs2019_win-64
-        # Add a few extras we have to pull in from conda-forge.
-        # See Also: mlos-windows.yml
-        conda install -y -v -n mlos-dist-test-$env:PythonVersion conda-forge::GPy
-        conda install -y -v -n mlos-dist-test-$env:PythonVersion -c conda-forge 'pyrfr>=0.9.0'
-        # Install mlos_core wheel.
-        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_core_whl}[full-tests]"
-        # Install mlos_bench wheel.
-        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_bench_whl}[full-tests]"
-        # Just pick one simple test to run for now.
-        # The rest should have been handled in a separate step.
-        conda run -n mlos-dist-test-$env:PythonVersion python -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
-        # Run a simple mlos_bench test.
-        conda run -n mlos-dist-test-$env:PythonVersion python -m pytest mlos_bench/mlos_bench/tests/environments/mock_env_test.py
+        .github/workflows/build-dist-test.ps1
