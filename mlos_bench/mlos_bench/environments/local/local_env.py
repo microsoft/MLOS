@@ -153,7 +153,7 @@ class LocalEnv(ScriptEnv):
 
             data_dict = data.iloc[-1].to_dict()
             _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
-            return (Status.SUCCEEDED, data_dict)
+            return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
 
     def teardown(self) -> None:
         """
