@@ -20,6 +20,7 @@ jobs:
 
     # Test multiple versions of python.
     strategy:
+      fail-fast: false
       matrix:
         python_version:
           # Empty string is the floating most recent version of python
