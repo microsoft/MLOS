@@ -130,7 +130,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
-        if status.is_succeeded == (score is None):  # XOR
+        if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)
 
@@ -154,7 +154,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         if not status.is_completed():
             return None
-        if status.is_succeeded:
+        if status.is_succeeded():
             assert score is not None
             if isinstance(score, dict):
                 score = score[self._opt_target]

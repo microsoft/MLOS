@@ -92,16 +92,16 @@ class RemoteEnv(ScriptEnv):
         if self._wait_boot:
             _LOG.info("Wait for the remote environment to start: %s", self)
             (status, params) = self._host_service.vm_start(self._params)
-            if status.is_pending:
+            if status.is_pending():
                 (status, _) = self._host_service.wait_vm_operation(params)
-            if not status.is_succeeded:
+            if not status.is_succeeded():
                 return False
 
         if self._script_setup:
             _LOG.info("Set up the remote environment: %s", self)
             (status, _) = self._remote_exec(self._script_setup)
             _LOG.info("Remote set up complete: %s :: %s", self, status)
-            self._is_ready = status.is_succeeded
+            self._is_ready = status.is_succeeded()
         else:
             self._is_ready = True
 
@@ -125,7 +125,7 @@ class RemoteEnv(ScriptEnv):
         """
         _LOG.info("Run script remotely on: %s", self)
         (status, _) = result = super().run()
-        if not (status.is_ready and self._script_run):
+        if not (status.is_ready() and self._script_run):
             return result
 
         result = self._remote_exec(self._script_run)

@@ -126,7 +126,7 @@ class LocalEnv(ScriptEnv):
             be in the `score` field.
         """
         (status, _) = result = super().run()
-        if not status.is_ready:
+        if not status.is_ready():
             return result
 
         with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:

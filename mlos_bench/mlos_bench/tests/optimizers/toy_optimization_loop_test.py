@@ -30,7 +30,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
         assert env.setup(tunables)
 
         (status, output) = env.run()
-        assert status.is_succeeded
+        assert status.is_succeeded()
         assert output is not None
         score = output['score']
         assert 60 <= score <= 120
