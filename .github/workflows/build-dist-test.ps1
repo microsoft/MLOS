@@ -15,7 +15,9 @@ Set-Location "$PSScriptRoot/../.."
 
 # Build the mlos_core wheel.
 Set-Location mlos_core
-Remove-Item -Recurse -Force dist
+if (Test-Path dist) {
+    Remove-Item -Recurse -Force dist
+}
 conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
 Set-Location ..
 $mlos_core_whl = (Resolve-Path mlos_core/dist/mlos_core-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
@@ -27,7 +29,9 @@ if (!($mlos_core_whl)) {
 
 # Build the mlos_bench wheel.
 Set-Location mlos_bench
-Remove-Item -Recurse -Force dist
+if (Test-Path dist) {
+    Remove-Item -Recurse -Force dist
+}
 conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
 Set-Location ..
 $mlos_bench_whl = (Resolve-Path mlos_bench/dist/mlos_bench-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
@@ -47,12 +51,21 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 conda install -y -v -n mlos-dist-test vswhere vs2019_win-64
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to install compiler dependencies."
+    exit $LASTEXITCODE
+}
 # Add a few extras we have to pull in from conda-forge.
 # See Also: mlos-windows.yml
 conda install -y -v -n mlos-dist-test conda-forge::GPy
-conda install -y -v -n mlos-dist-test -c conda-forge 'pyrfr>=0.9.0'
 if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to install dependencies."
+    Write-Error "Failed to install GPy dependencies."
+    exit $LASTEXITCODE
+}
+# FIXME: conda on Windows doesn't appear to respect ">=0.9.0" as a version constraint despite various quoting tweaks.
+conda install -y -v -n mlos-dist-test -c conda-forge 'pyrfr=0.9'
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to install pyrfr dependencies."
     exit $LASTEXITCODE
 }
 
