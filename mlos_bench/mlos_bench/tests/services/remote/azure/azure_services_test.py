@@ -72,7 +72,7 @@ def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock
 
     assert (async_url, ) == mock_requests.get.call_args[0]
     assert (retry_after, ) == mock_sleep.call_args[0]
-    assert status.is_succeeded
+    assert status.is_succeeded()
 
 
 @patch("mlos_bench.services.remote.azure.azure_services.requests")

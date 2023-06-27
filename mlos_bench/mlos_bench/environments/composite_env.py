@@ -155,13 +155,13 @@ class CompositeEnv(Environment):
         """
         _LOG.info("Run: %s", self._children)
         (status, _) = result = super().run()
-        if not status.is_ready:
+        if not status.is_ready():
             return result
         for env in self._children:
             _LOG.debug("Child env. run: %s", env)
             (status, _) = result = env.run()
             _LOG.debug("Child env. run results: %s :: %s", env, result)
-            if not status.is_good:
+            if not status.is_good():
                 break
         _LOG.info("Run completed: %s :: %s", self, result)
         return result
