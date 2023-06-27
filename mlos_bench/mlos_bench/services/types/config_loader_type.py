@@ -6,9 +6,10 @@
 Protocol interface for helper functions to lookup and load configs.
 """
 
-from typing import List, Iterable, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
+from typing import Dict, List, Iterable, Optional, Union, Protocol, runtime_checkable, TYPE_CHECKING
 
 from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.tunables.tunable import TunableValue
 
 
 # Avoid's circular import issues.
@@ -62,9 +63,11 @@ class SupportsConfigLoading(Protocol):
             Free-format dictionary that contains the configuration.
         """
 
-    def build_environment(self, config: dict,
+    def build_environment(self,     # pylint: disable=too-many-arguments
+                          config: dict,
                           tunables: "TunableGroups",
                           global_config: Optional[dict] = None,
+                          parent_args: Optional[Dict[str, TunableValue]] = None,
                           service: Optional["Service"] = None) -> "Environment":
         """
         Factory method for a new environment with a given config.
@@ -79,9 +82,12 @@ class SupportsConfigLoading(Protocol):
         tunables : TunableGroups
             A (possibly empty) collection of groups of tunable parameters for
             all environments.
-        global_config : dict
+        global_config : Optional[dict]
             Global parameters to add to the environment config.
-        service: Service
+        parent_args : Optional[Dict[str, TunableValue]]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
+        service: Optional[Service]
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
 
@@ -91,10 +97,12 @@ class SupportsConfigLoading(Protocol):
             An instance of the `Environment` class initialized with `config`.
         """
 
-    def load_environment_list(
-            self, json_file_name: str,
+    def load_environment_list(  # pylint: disable=too-many-arguments
+            self,
+            json_file_name: str,
             tunables: "TunableGroups",
             global_config: Optional[dict] = None,
+            parent_args: Optional[Dict[str, TunableValue]] = None,
             service: Optional["Service"] = None) -> List["Environment"]:
         """
         Load and build a list of environments from the config file.
@@ -106,9 +114,12 @@ class SupportsConfigLoading(Protocol):
             Can contain either one environment or a list of environments.
         tunables : TunableGroups
             A (possibly empty) collection of tunables to add to the environment.
-        global_config : dict
+        global_config : Optional[dict]
             Global parameters to add to the environment config.
-        service : Service
+        parent_args : Optional[Dict[str, TunableValue]]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
+        service : Optional[Service]
             An optional reference of the parent service to mix in.
 
         Returns

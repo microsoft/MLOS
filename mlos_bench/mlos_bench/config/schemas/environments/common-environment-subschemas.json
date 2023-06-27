@@ -14,6 +14,7 @@
                     "items": {
                         "type": "string"
                     },
+                    "uniqueItems": true,
                     "minItems": 1
                 },
                 "required_args": {
@@ -22,6 +23,7 @@
                     "items": {
                         "type": "string"
                     },
+                    "uniqueItems": true,
                     "minItems": 1
                 },
                 "const_args": {
@@ -62,6 +64,7 @@
             },
             "minItems": 1
         },
+
         "setup_run_teardown_configs": {
             "type": "object",
             "properties": {
@@ -157,6 +160,7 @@
             ],
             "unevaluatedProperties": false
         },
+
         "file_upload_config": {
             "type": "object",
             "properties": {

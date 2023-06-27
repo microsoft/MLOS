@@ -36,14 +36,18 @@
                             "type": "array",
                             "items": {
                                 "$ref": "../common-environment-subschemas.json#/$defs/file_download_config"
-                            }
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
                         },
                         "upload": {
                             "description": "List of file upload config objects.",
                             "type": "array",
                             "items": {
                                 "$ref": "../common-environment-subschemas.json#/$defs/file_upload_config"
-                            }
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
                         }
                     },
                     "anyOf": [

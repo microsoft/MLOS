@@ -92,7 +92,9 @@
             "type": ["string", "array"],
             "items": {
                 "type": "string"
-            }
+            },
+            "uniqueItems": true,
+            "minItems": 1
         },
 
         "config": {

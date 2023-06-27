@@ -54,6 +54,7 @@
                         "type": "string",
                         "pattern": "[.]json[c]?$"
                     },
+                    "uniqueItems": true,
                     "minItems": 1
                 },
                 "tunable_values": {
@@ -100,6 +101,7 @@
                 "$comment": "Paths are expected to be json.",
                 "pattern": "[.]json[c]?$"
             },
+            "uniqueItems": true,
             "minItems": 1
         },
 
