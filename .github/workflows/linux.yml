@@ -88,7 +88,7 @@ jobs:
       run: |
         set -x
         conda config --set channel_priority strict
-        #conda update -v -y -n base conda
+        conda update -v -y -n base -c defaults --all
 
     # Try and speed up the pipeline by using a faster solver:
     - name: Install and default to mamba solver
@@ -103,6 +103,13 @@ jobs:
 
     - name: Create/update mlos conda environment
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME CONDA_INFO_LEVEL=-v conda-env
+
+    - name: Log conda info
+      run: |
+        conda info
+        conda config --show
+        conda config --show-sources
+        conda list -n $CONDA_ENV_NAME
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
