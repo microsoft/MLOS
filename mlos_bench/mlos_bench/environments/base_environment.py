@@ -11,6 +11,7 @@ import json
 import logging
 from typing import Dict, Optional, Tuple, TYPE_CHECKING
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
@@ -105,6 +106,7 @@ class Environment(metaclass=abc.ABCMeta):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
+        ConfigSchema.ENVIRONMENT.validate(config)
         self.name = name
         self.config = config
         self._service = service

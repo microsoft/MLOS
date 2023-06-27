@@ -11,6 +11,7 @@ import logging
 
 from typing import Callable, Dict, List, Optional, Union
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.util import instantiate_from_config
 
@@ -61,6 +62,9 @@ class Service:
             An optional parent service that can provide mixin functions.
         """
         self.config = config or {}
+        print(self.config)
+        if not isinstance(self, SupportsConfigLoading):
+            ConfigSchema.SERVICE.validate(self.config)
         self._parent = parent
         self._services: Dict[str, Callable] = {}
 

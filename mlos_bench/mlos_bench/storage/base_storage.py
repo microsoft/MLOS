@@ -13,6 +13,7 @@ from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -42,6 +43,7 @@ class Storage(metaclass=ABCMeta):
             Free-format key/value pairs of configuration parameters.
         """
         _LOG.debug("Storage config: %s", config)
+        ConfigSchema.STORAGE.validate(config)
         self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()

@@ -12,6 +12,7 @@ from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool    # pylint: disable=deprecated-module
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -37,6 +38,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)
+        ConfigSchema.OPTIMIZER.validate(config)
         self._config = config.copy()
         self._tunables = tunables
         self._service = service

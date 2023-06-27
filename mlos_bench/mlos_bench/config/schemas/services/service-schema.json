@@ -9,6 +9,9 @@
             "$comment": "additional service types should be added here",
             "oneOf": [
                 {
+                    "$ref": "./config-persistence-service-subschema.json"
+                },
+                {
                     "$ref": "./local/local-exec-service-subschema.json"
                 },
                 {
@@ -70,8 +73,7 @@
                 }
             ],
             "required": [
-                "class",
-                "config"
+                "class"
             ]
         },
         {
