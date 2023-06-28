@@ -3,8 +3,6 @@
 
     "config": {
         "minimize": "score",
-        "max_iterations": 20,
-        "seed": 12345,
-        "start_with_defaults": false
+        "extra_param": "should not be here"
     }
 }
