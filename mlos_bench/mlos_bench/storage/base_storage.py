@@ -154,7 +154,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float], List[Status]]:
+        def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
             This call returns data from ALL merged-in experiments and attempts
