@@ -5,13 +5,6 @@
         "minimize": "score",
         "max_iterations": 20,
         "seed": 12345,
-        "use_defaults": false,
-        "tunable_values": {
-            "foo": "bar",
-            // Values can't be objects.
-            "baz": [
-                "foo"
-            ]
-        }
+        "start_with_defaults": false
     }
 }

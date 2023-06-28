@@ -13,16 +13,6 @@
         "minimize": "score",
         "max_iterations": 20,
         "seed": 12345,
-        "use_defaults": false,
-
-        "include_tunable_values": [
-            "path/to/tunable/values.jsonc",
-            "path/to/tunable/values.json"
-        ],
-
-        "tunable_values": {
-            "tunable": "value",
-            "knobs": 1
-        }
+        "start_with_defaults": false
     }
 }

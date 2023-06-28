@@ -57,7 +57,10 @@ class MockOptimizer(Optimizer):
         Generate the next (random) suggestion.
         """
         tunables = self._tunables.copy()
-        if self._iter > 1 or not self._use_defaults:
+        if self._start_with_defaults:
+            _LOG.info("Use default values for the first trial")
+            self._start_with_defaults = False
+        else:
             for (tunable, _group) in tunables:
                 tunable.value = self._random[tunable.type](tunable)
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)

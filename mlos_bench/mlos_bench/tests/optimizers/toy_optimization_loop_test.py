@@ -62,7 +62,7 @@ def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
     """
     Toy optimization loop with mock environment and optimizer.
     """
-    mock_opt._use_defaults = False  # pylint: disable=protected-access
+    mock_opt._start_with_defaults = False  # pylint: disable=protected-access
     (score, tunables) = _optimize(mock_env_no_noise, mock_opt)
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {

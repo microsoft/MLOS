@@ -21,6 +21,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.base_environment import Environment
 
 from mlos_bench.optimizers.base_optimizer import Optimizer
+from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 
 from mlos_bench.storage.base_storage import Storage
@@ -91,12 +92,15 @@ class Launcher:
                          " Run `mlos_bench --help` and consult `README.md` for more info.")
         self.root_env_config = self._config_loader.resolve_path(env_path)
 
-        tunable_groups = TunableGroups()    # base tunable groups that all others get build on
         self.environment: Environment = self._config_loader.load_environment(
-            self.root_env_config, tunable_groups, self.global_config, service=self._parent_service)
+            self.root_env_config, TunableGroups(), self.global_config, service=self._parent_service)
 
-        # NOTE: Load the tunable values *before* the optimizer
-        self.tunables = self._load_tunable_values(args.tunable_values or config.get("tunable_values", []))
+        # NOTE: Init tunable values *after* the Environment, but *before* the Optimizer
+        self.tunables = self._init_tunable_values(
+            args.random_init or config.get("random_init", False),
+            config.get("random_seed") if args.random_seed is None else args.random_seed,
+            args.tunable_values or config.get("tunable_values", []))
+
         self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
         self.storage = self._load_storage(args.storage or config.get("storage"))
 
@@ -141,6 +145,15 @@ class Launcher:
             '--storage', required=False,
             help='Path to the storage configuration file.' +
                  ' If omitted, use the ephemeral in-memory SQL storage.')
+
+        parser.add_argument(
+            '--random_init', required=False, default=False,
+            dest='random_init', action='store_true',
+            help='Initialize tunables with random values. (Before applying --tunable_values).')
+
+        parser.add_argument(
+            '--random_seed', required=False, type=int,
+            help='Seed to use with --random_init')
 
         parser.add_argument(
             '--tunable_values', nargs="+", required=False,
@@ -208,11 +221,18 @@ class Launcher:
             global_config["config_path"] = config_path
         return global_config
 
-    def _load_tunable_values(self, args_tunables: Optional[str]) -> TunableGroups:
+    def _init_tunable_values(self, random_init: bool, seed: Optional[int],
+                             args_tunables: Optional[str]) -> TunableGroups:
         """
-        Load key/value pairs of the tunable values from given JSON files, if any.
+        Initialize the tunables and load key/value pairs of the tunable values
+        from given JSON files, if specified.
         """
         tunables = self.environment.tunable_params
+
+        if random_init:
+            opt = MockOptimizer(tunables=tunables, service=None, config={"seed": seed})
+            tunables = opt.suggest()
+
         if args_tunables is not None:
             for data_file in args_tunables:
                 values = self._config_loader.load_config(data_file, ConfigSchema.TUNABLE_VALUES)

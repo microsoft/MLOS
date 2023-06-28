@@ -102,8 +102,10 @@ class MlosCoreOptimizer(Optimizer):
         return df_configs
 
     def suggest(self) -> TunableGroups:
-        use_defaults = self._use_defaults and self._iter == 1
-        df_config = self._opt.suggest(defaults=use_defaults)
+        if self._start_with_defaults:
+            _LOG.info("Use default values for the first trial")
+        df_config = self._opt.suggest(defaults=self._start_with_defaults)
+        self._start_with_defaults = False
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return self._tunables.copy().assign(df_config.loc[0].to_dict())
 

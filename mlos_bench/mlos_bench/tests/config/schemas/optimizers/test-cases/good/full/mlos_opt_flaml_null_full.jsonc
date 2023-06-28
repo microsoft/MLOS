@@ -6,7 +6,7 @@
         "minimize": "score",
         "max_iterations": 10,
         "seed": 12345,
-        "use_defaults": false,
+        "start_with_defaults": false,
         "optimizer_type": "FLAML",
         "space_adapter_type": null
     }
