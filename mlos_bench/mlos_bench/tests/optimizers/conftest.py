@@ -99,6 +99,22 @@ def flaml_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
 
 
 @pytest.fixture
+def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
+    """
+    Test fixture for mlos_core FLAML optimizer.
+    """
+    return MlosCoreOptimizer(
+        tunables=tunable_groups,
+        service=None,
+        config={
+            "maximize": "score",
+            "max_iterations": 5,
+            "optimizer_type": "FLAML"
+        },
+    )
+
+
+@pytest.fixture
 def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     Test fixture for mlos_core SMAC optimizer.
@@ -110,6 +126,23 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "minimize": "score",
             "max_iterations": 5,
             "use_defaults": True,
+            "optimizer_type": "SMAC",
+            "seed": 42,
+        },
+    )
+
+
+@pytest.fixture
+def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
+    """
+    Test fixture for mlos_core SMAC optimizer.
+    """
+    return MlosCoreOptimizer(
+        tunables=tunable_groups,
+        service=None,
+        config={
+            "maximize": "score",
+            "max_iterations": 5,
             "optimizer_type": "SMAC",
             "seed": 42,
         },

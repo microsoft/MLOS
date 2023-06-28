@@ -5,7 +5,7 @@
         "run": [
             "/bin/true"
         ],
-        "shell_params_mapping": {
+        "shell_env_params_mapping": {
             "source_param_num_invalid": 0,
             "source_param_bool_invalid": true,
             "source_param_null_invalid": null,

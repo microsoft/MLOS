@@ -91,6 +91,7 @@
                             "items": {
                                 "$ref": "#/$defs/service_config"
                             },
+                            "uniqueItems": true,
                             "minItems": 1
                         }
                     }

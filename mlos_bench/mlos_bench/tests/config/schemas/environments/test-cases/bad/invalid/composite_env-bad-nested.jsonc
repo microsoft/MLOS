@@ -1,0 +1,46 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+    "name": "composite-env-full",
+    "description": "More descriptive text.",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+    "include_tunables": [
+        "some/tunables.jsonc"
+    ],
+    "include_services": [
+        "some/service.jsonc"
+    ],
+    "config": {
+        "children": [
+            {
+                "name": "child MockEnv",
+                "class": "mlos_bench.environments.MockEnv"
+            },
+            {
+                "name": "child CompositeEnv",
+                "class": "mlos_bench.environments.composite_env.CompositeEnv",
+                "config": {
+                    "children": [
+                        {
+                            "name": "child MockEnv",
+                            "class": "mlos_bench.environments.MockEnv",
+                            "extras": "invalid"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "sibling CompositeEnv",
+                "class": "mlos_bench.environments.CompositeEnv",
+                "config": {
+                    "include_children": [
+                        "some/other/child.jsonc"
+                    ],
+                    "extras": "invalid"
+                }
+            }
+        ],
+        "include_children": [
+            "some/child.jsonc"
+        ]
+    }
+}

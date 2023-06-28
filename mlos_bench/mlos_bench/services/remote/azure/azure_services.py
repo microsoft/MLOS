@@ -696,7 +696,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         """
         _LOG.info("Check the results on VM: %s", config.get("vmName"))
         (status, result) = self.wait_vm_operation(config)
-        if status.is_succeeded:
+        if status.is_succeeded():
             return (status, result.get("properties", {}).get("output", {}))
         else:
             return (status, result)

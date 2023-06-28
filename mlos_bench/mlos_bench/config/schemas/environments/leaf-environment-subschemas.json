@@ -33,7 +33,5 @@
             ]
         }
     ],
-    "required": [
-        "class"
-    ]
+    "required": ["class", "name"]
 }

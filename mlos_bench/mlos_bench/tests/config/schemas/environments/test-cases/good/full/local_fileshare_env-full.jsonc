@@ -25,7 +25,7 @@
         "teardown": [
             "/bin/bash -c true"
         ],
-        "read_results_file": "/tmp/results.json",
+        "read_results_file": "/tmp/results.csv",
         "dump_params_file": "/tmp/dump_params.json",
         "download": [
             {
