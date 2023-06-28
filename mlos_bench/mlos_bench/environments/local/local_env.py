@@ -136,6 +136,7 @@ class LocalEnv(ScriptEnv):
                 if return_code != 0:
                     return (Status.FAILED, None)
 
+            # FIXME: We should not be assuming that the only output file type is a CSV.
             if not self._read_results_file:
                 _LOG.debug("Not reading the data at: %s", self)
                 return (Status.SUCCEEDED, {})

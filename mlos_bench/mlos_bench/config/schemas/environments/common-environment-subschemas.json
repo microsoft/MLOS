@@ -80,36 +80,18 @@
                     "description": "The command lines to execute for the teardown phase.",
                     "$ref": "#/$defs/command_lines"
                 }
-            },
-            "$comment": "At least one of setup or run or teardown must be specified.",
-            "anyOf": [
-                {
-                    "required": [
-                        "setup"
-                    ]
-                },
-                {
-                    "required": [
-                        "run"
-                    ]
-                },
-                {
-                    "required": [
-                        "teardown"
-                    ]
-                }
-            ]
+            }
         },
 
         "shell_param_type": {
-            "description": "All parameters must be valid shell variable names, else use shell_params_mapping.",
+            "description": "All parameters must be valid shell variable names, else use shell_env_params_mapping.",
             "type": "string",
             "pattern": "^[a-zA-Z_][a-zA-Z0-9_]+$"
         },
-        "shell_params_config": {
+        "shell_env_params_config": {
             "type": "object",
             "properties": {
-                "shell_params_match": {
+                "shell_env_params_match": {
                     "description": "A list of regexes to match against the environment parameters. All matches will be exposed to shell commands as environment variables.",
                     "type": "array",
                     "items": {
@@ -120,8 +102,8 @@
                         ]
                     }
                 },
-                "shell_params": {
-                    "description": "An explicit list of parameters (and their values) to pass to the shell as environment variables.  These will override any parameters matched by shell_params_match.",
+                "shell_env_params": {
+                    "description": "An explicit list of parameters (and their values) to pass to the shell as environment variables.  These will override any parameters matched by shell_env_params_match.",
                     "type": "array",
                     "items": {
                         "$ref": "#/$defs/shell_param_type"
@@ -129,8 +111,8 @@
                     "uniqueItems": true,
                     "minItems": 1
                 },
-                "shell_params_mapping": {
-                    "description": "An explicit mapping of environment variable names from params to be populated with the parameter values and passed to the shell commands. These will override any parameters matched by shell_params_match.",
+                "shell_env_params_mapping": {
+                    "description": "An explicit mapping of environment variable names from params to be populated with the parameter values and passed to the shell commands. These will override any parameters matched by shell_env_params_match.",
                     "type": "object",
                     "propertyNames": {
                         "$ref": "#/$defs/shell_param_type"

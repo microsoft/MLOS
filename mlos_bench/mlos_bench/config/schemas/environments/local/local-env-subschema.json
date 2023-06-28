@@ -18,35 +18,11 @@
                 },
                 "read_results_file": {
                     "description": "Path to a file to read the results from.",
-                    "type": "string"
+                    "type": "string",
+                    "$comment": "Currently we only support CSV files.",
+                    "pattern": "[.]csv$"
                 }
-            },
-            "allOf": [
-                {
-                    "if": {
-                        "required": [
-                            "dump_params_file"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "setup"
-                        ]
-                    }
-                },
-                {
-                    "if": {
-                        "required": [
-                            "read_results_file"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "run"
-                        ]
-                    }
-                }
-            ]
+            }
         }
     },
     "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
@@ -70,7 +46,7 @@
                     "$ref": "../common-environment-subschemas.json#/$defs/setup_run_teardown_configs"
                 },
                 {
-                    "$ref": "../common-environment-subschemas.json#/$defs/shell_params_config"
+                    "$ref": "../common-environment-subschemas.json#/$defs/shell_env_params_config"
                 },
                 {
                     "$ref": "#/$defs/local_env_config"
