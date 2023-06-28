@@ -89,7 +89,7 @@ class Experiment(Storage.Experiment):
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError()
 
-    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float], List[Status]]:
+    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
         opt_target = opt_target or self._opt_target
         (configs, scores, status) = ([], [], [])
         with self._engine.connect() as conn:
