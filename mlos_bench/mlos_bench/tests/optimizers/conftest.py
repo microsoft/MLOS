@@ -41,7 +41,6 @@ def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
         config={
             "minimize": "score",
             "max_iterations": 5,
-            "start_with_defaults": True,
             "seed": 42
         },
     )
@@ -58,7 +57,6 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
         config={
             "maximize": "score",
             "max_iterations": 10,
-            "start_with_defaults": True,
             "seed": 42
         },
     )
@@ -75,7 +73,6 @@ def emukit_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "minimize": "score",
             "max_iterations": 5,
-            "start_with_defaults": True,
             "optimizer_type": "EMUKIT"
         },
     )
@@ -92,7 +89,6 @@ def emukit_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "maximize": "score",
             "max_iterations": 5,
-            "start_with_defaults": True,
             "optimizer_type": "EMUKIT"
         },
     )
@@ -109,7 +105,6 @@ def flaml_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "minimize": "score",
             "max_iterations": 5,
-            "start_with_defaults": True,
             "optimizer_type": "FLAML"
         },
     )
@@ -126,7 +121,6 @@ def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "maximize": "score",
             "max_iterations": 5,
-            "start_with_defaults": True,
             "optimizer_type": "FLAML"
         },
     )
@@ -143,7 +137,6 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "minimize": "score",
             "max_iterations": 5,
-            "start_with_defaults": True,
             "optimizer_type": "SMAC",
             "seed": 42,
         },
@@ -161,7 +154,6 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "maximize": "score",
             "max_iterations": 5,
-            "start_with_defaults": True,
             "optimizer_type": "SMAC",
             "seed": 42,
         },

@@ -43,7 +43,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._iter = 1
         # If True, suggest the already assigned tunable values for the first iteration:
         self._start_with_defaults: bool = bool(
-            strtobool(str(self._config.pop('start_with_defaults', False))))
+            strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_iterations', 100))
         self._opt_target: str
         _opt_target = self._config.pop('maximize', None)
