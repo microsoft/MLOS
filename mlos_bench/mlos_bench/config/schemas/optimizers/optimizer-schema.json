@@ -24,7 +24,7 @@
                     "type": "string"
                 },
                 "max_iterations": {
-                    "description": "The maximum number of additional iterations to run when we launch the app.",
+                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) iterations to run when we launch the app.",
                     "type": "integer",
                     "minimum": 0
                 },
