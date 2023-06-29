@@ -69,7 +69,7 @@
 
         "random_seed": {
             "description": "Random seed to use in conjunction with random_init.",
-            "type": "int"
+            "type": "number"
         },
 
         "tunable_values": {
