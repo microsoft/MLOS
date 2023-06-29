@@ -10,6 +10,9 @@
     "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/sqlite.jsonc",
 
+    "random_init": true,
+    "random_seed": 42,
+
     "tunable_values": [
         "tunable-values/tunable-values-example.jsonc"
     ],
