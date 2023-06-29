@@ -3,7 +3,7 @@
 
     "config": {
         "minimize": "score",
-        "optimizer_type": "EMUKIT",
+        "optimizer_type": "SMAC",
         // base_estimator is only valid for optimizer_type == SKOPT
         "base_estimator": "gp"
     }

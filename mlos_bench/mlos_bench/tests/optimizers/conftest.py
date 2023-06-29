@@ -46,38 +46,6 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
 
 
 @pytest.fixture
-def emukit_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
-    """
-    Test fixture for mlos_core Emukit optimizer.
-    """
-    return MlosCoreOptimizer(
-        tunables=tunable_groups,
-        service=None,
-        config={
-            "minimize": "score",
-            "max_iterations": 5,
-            "optimizer_type": "EMUKIT"
-        },
-    )
-
-
-@pytest.fixture
-def emukit_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
-    """
-    Test fixture for mlos_core Emukit optimizer.
-    """
-    return MlosCoreOptimizer(
-        tunables=tunable_groups,
-        service=None,
-        config={
-            "maximize": "score",
-            "max_iterations": 5,
-            "optimizer_type": "EMUKIT"
-        },
-    )
-
-
-@pytest.fixture
 def flaml_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
     Test fixture for mlos_core FLAML optimizer.

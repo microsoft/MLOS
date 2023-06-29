@@ -73,27 +73,6 @@ def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
     }
 
 
-def test_emukit_optimization_loop(mock_env_no_noise: MockEnv,
-                                  emukit_opt: MlosCoreOptimizer) -> None:
-    """
-    Toy optimization loop with mock environment and EmuKit optimizer.
-    """
-    (score, _tunables) = _optimize(mock_env_no_noise, emukit_opt)
-    assert score == pytest.approx(75.0, 0.01)
-    # Emukit optimizer is not deterministic, so we can't assert the exact values of the tunables.
-
-
-def test_emukit_optimization_loop_max(mock_env_no_noise: MockEnv,
-                                      emukit_opt_max: MlosCoreOptimizer) -> None:
-    """
-    Toy optimization loop with mock environment and EmuKit optimizer
-    in maximization mode.
-    """
-    (score, _tunables) = _optimize(mock_env_no_noise, emukit_opt_max)
-    assert score == pytest.approx(75.0, 0.01)
-    # Emukit optimizer is not deterministic, so we can't assert the exact values of the tunables.
-
-
 def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
                                  flaml_opt: MlosCoreOptimizer) -> None:
     """

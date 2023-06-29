@@ -7,7 +7,15 @@
         "max_iterations": 20,
         "seed": 12345,
         "use_defaults": false,
-        "optimizer_type": "EMUKIT",
-        "space_adapter_type": null
+        "optimizer_type": "SMAC",
+        "space_adapter_type": "LLAMATUNE",
+        "space_adapter_config": {
+            "num_low_dims": 2,
+            "max_unique_values_per_param": 100,
+            "special_param_values": {
+                "foo": "bar"
+            }
+        },
+        "n_random_init": 20
     }
 }

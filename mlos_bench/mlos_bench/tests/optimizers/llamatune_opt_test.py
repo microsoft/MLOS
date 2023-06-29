@@ -18,7 +18,7 @@ from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 @pytest.fixture
 def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
-    Test fixture for mlos_core Emukit optimizer.
+    Test fixture for mlos_core SMAC optimizer.
     """
     return MlosCoreOptimizer(
         tunables=tunable_groups,
@@ -30,7 +30,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             },
             "minimize": "score",
             "max_iterations": 10,
-            "optimizer_type": "EMUKIT",
+            "optimizer_type": "SMAC",
         })
 
 
@@ -44,7 +44,7 @@ def mock_scores() -> list:
 
 def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list) -> None:
     """
-    Make sure that llamatune+emukit optimizer initializes and works correctly.
+    Make sure that llamatune+smac optimizer initializes and works correctly.
     """
     for score in mock_scores:
         assert llamatune_opt.not_converged()

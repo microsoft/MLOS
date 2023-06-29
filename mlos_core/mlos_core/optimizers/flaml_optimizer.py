@@ -13,7 +13,6 @@ import ConfigSpace
 import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
-from mlos_core.spaces import configspace_to_flaml_space
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
@@ -25,7 +24,7 @@ class EvaluatedSample(NamedTuple):
 
 
 class FlamlOptimizer(BaseOptimizer):
-    """Wraper class for FLAML Optimizer: A fast library for AutoML and tuning.
+    """Wrapper class for FLAML Optimizer: A fast library for AutoML and tuning.
 
     Parameters
     ----------
@@ -50,7 +49,10 @@ class FlamlOptimizer(BaseOptimizer):
             space_adapter=space_adapter,
         )
 
-        self.flaml_parameter_space: dict = configspace_to_flaml_space(self.optimizer_parameter_space)
+        # pylint: disable=import-outside-toplevel
+        from mlos_core.spaces.converters.flaml import configspace_to_flaml_space, FlamlDomain
+
+        self.flaml_parameter_space: Dict[str, FlamlDomain] = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.low_cost_partial_config = low_cost_partial_config
 
         self.evaluated_samples: Dict[ConfigSpace.Configuration, EvaluatedSample] = {}

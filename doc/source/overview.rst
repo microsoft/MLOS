@@ -48,7 +48,6 @@ Optimizers
    :template: class.rst
 
    BaseBayesianOptimizer
-   EmukitOptimizer
    SmacOptimizer
 
 Spaces
@@ -58,7 +57,6 @@ Spaces
    :toctree: generated/
    :template: function.rst
 
-   configspace_to_emukit_space
    configspace_to_flaml_space
 
 Space Adapters
