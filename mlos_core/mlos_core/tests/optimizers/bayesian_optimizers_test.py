@@ -40,4 +40,3 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
     if isinstance(optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
             optimizer.surrogate_predict(suggestion, context=pd.DataFrame([["something"]]))
-

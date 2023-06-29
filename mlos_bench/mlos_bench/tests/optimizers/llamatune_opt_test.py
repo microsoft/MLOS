@@ -49,7 +49,7 @@ def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list
     for score in mock_scores:
         assert llamatune_opt.not_converged()
         tunables = llamatune_opt.suggest()
-        # Emukit optimizer is not deterministic, so we can't check the tunables here.
+        # FIXME: Emukit optimizer is not deterministic, so we can't check the tunables here.
         llamatune_opt.register(tunables, Status.SUCCEEDED, score)
 
     (score, _tunables) = llamatune_opt.get_best_observation()

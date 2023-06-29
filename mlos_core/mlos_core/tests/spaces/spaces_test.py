@@ -135,7 +135,10 @@ class BaseConversion(metaclass=ABCMeta):
     def test_weighted_categorical(self) -> None:
         raise NotImplementedError('subclass must override')
 
-    def test_log_spaces(self) -> None:
+    def test_log_int_spaces(self) -> None:
+        raise NotImplementedError('subclass must override')
+
+    def test_log_float_spaces(self) -> None:
         raise NotImplementedError('subclass must override')
 
 
@@ -149,9 +152,7 @@ class TestFlamlConversion(BaseConversion):
     def sample(self, config_space: FlamlSpace, n_samples: int = 1) -> npt.NDArray:  # type: ignore[override]
         assert isinstance(config_space, dict)
         assert isinstance(next(iter(config_space.values())), flaml.tune.sample.Domain)
-        ret: npt.NDArray = np.array([domain.sample(size=n_samples) for domain in config_space.values()])
-        if n_samples > 1:
-            ret = ret.T
+        ret: npt.NDArray = np.array([domain.sample(size=n_samples) for domain in config_space.values()]).T
         return ret
 
     def get_parameter_names(self, config_space: FlamlSpace) -> List[str]:   # type: ignore[override]
@@ -160,8 +161,9 @@ class TestFlamlConversion(BaseConversion):
         return ret
 
     def categorical_counts(self, points: npt.NDArray) -> npt.NDArray:
-        ret: npt.NDArray = np.sum(points, axis=0)
-        return ret
+        _vals, counts = np.unique(points, return_counts=True)
+        assert isinstance(counts, np.ndarray)
+        return counts
 
     def test_dimensionality(self) -> None:
         input_space = CS.ConfigurationSpace()
@@ -178,7 +180,7 @@ class TestFlamlConversion(BaseConversion):
         with pytest.raises(ValueError, match="non-uniform"):
             configspace_to_flaml_space(input_space)
 
-    def check_log_int_spaces(self) -> None:
+    def test_log_int_spaces(self) -> None:
         np.random.seed(42)
 
         # integer is supported
@@ -191,13 +193,10 @@ class TestFlamlConversion(BaseConversion):
         # log integer
         integer_log_uniform = np.array(integer_log_uniform).ravel()
         logs = np.log(integer_log_uniform)
-        int_logs = logs.round().astype(np.int64)
-        diffs = logs - int_logs
-        assert np.allclose(diffs, 0)
-        bincounts = np.bincount(int_logs)
-        assert_uniform_counts(bincounts)
 
-    def check_log_float_spaces(self) -> None:
+        raise NotImplementedError('TODO: test int log uniform')
+
+    def test_log_float_spaces(self) -> None:
         np.random.seed(42)
 
         # continuous is supported
@@ -207,7 +206,7 @@ class TestFlamlConversion(BaseConversion):
 
         # TODO: test float log uniform
         float_log_uniform = self.sample(converted_space, n_samples=1000)
+        float_log_uniform = np.array(float_log_uniform).ravel()
+        logs = np.log(float_log_uniform)
 
-    def test_log_spaces(self) -> None:
-        self.check_log_int_spaces()
-        self.check_log_float_spaces()
+        raise NotImplementedError('TODO: test float log uniform')
