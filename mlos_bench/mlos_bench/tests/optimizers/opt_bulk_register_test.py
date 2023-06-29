@@ -119,6 +119,13 @@ def test_update_mock_min(mock_opt: MockOptimizer, mock_configs: List[dict],
     Test the bulk update of the mock optimizer on the minimization problem.
     """
     _test_opt_update_min(mock_opt, mock_configs, mock_scores, mock_status)
+    # make sure the first suggestion after bulk load is *NOT* the default config:
+    assert mock_opt.suggest().get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "idle": "halt",
+        "kernel_sched_migration_cost_ns": 13111,
+        'kernel_sched_latency_ns': 796233790,
+    }
 
 
 def test_update_mock_min_str(mock_opt: MockOptimizer, mock_configs_str: List[dict],
