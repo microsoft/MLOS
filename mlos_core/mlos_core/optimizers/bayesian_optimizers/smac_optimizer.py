@@ -47,6 +47,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     n_random_init : Optional[int]
         Number of points evaluated at start to bootstrap the optimizer. Defaults to 10.
+        If less than 0, a value is determined based on the dimensionality of the parameter space.
 
     n_random_probability: Optional[float]
         Probability of choosing to evaluate a random configuration during optimization.
@@ -59,8 +60,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
                  seed: Optional[int] = 0,
                  run_name: Optional[str] = None,
                  output_directory: Optional[str] = None,
-                 max_trials: int = 100,
-                 n_random_init: Optional[int] = 10,
+                 max_trials: int = 1000,
+                 n_random_init: Optional[int] = -1,
                  n_random_probability: Optional[float] = 0.1):
 
         super().__init__(
@@ -111,6 +112,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         initial_design: Optional[LatinHypercubeInitialDesign] = None
         if n_random_init is not None:
+            if n_random_init < 0:
+                # FIXME: Review ParEGO paper to set a better default for multi-objective optimization cases.
+                n_random_init = min(100, 10 * len(self.parameter_space.get_hyperparameters()))
             initial_design = LatinHypercubeInitialDesign(scenario=scenario, n_configs=n_random_init)
         random_design: Optional[ProbabilityRandomDesign] = None
         if n_random_probability is not None:
