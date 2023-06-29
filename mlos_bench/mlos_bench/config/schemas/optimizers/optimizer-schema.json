@@ -24,7 +24,7 @@
                     "type": "string"
                 },
                 "max_iterations": {
-                    "description": "The maximum number of iterations to run.",
+                    "description": "The maximum number of additional iterations to run when we launch the app.",
                     "type": "integer",
                     "minimum": 0
                 },
