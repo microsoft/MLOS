@@ -230,8 +230,9 @@ class Launcher:
         tunables = self.environment.tunable_params
 
         if random_init:
-            opt = MockOptimizer(tunables=tunables, service=None, config={"seed": seed})
-            tunables = opt.suggest()
+            tunables = MockOptimizer(
+                tunables=tunables, service=None,
+                config={"start_with_defaults": False, "seed": seed}).suggest()
 
         if args_tunables is not None:
             for data_file in args_tunables:
