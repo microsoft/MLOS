@@ -41,7 +41,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._tunables = tunables
         self._service = service
         self._iter = 1
-        # If True, suggest the already assigned tunable values for the first iteration:
+        # If False, use the optimizer to suggest the initial configuration;
+        # if True (default), use the already initialized values for the first iteration.
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_iterations', 100))

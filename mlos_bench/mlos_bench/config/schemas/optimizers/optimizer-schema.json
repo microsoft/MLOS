@@ -33,7 +33,7 @@
                     "type": "integer"
                 },
                 "start_with_defaults": {
-                    "description": "Whether to use the ConfigSpace defaults for the first iteration of the optimizer.",
+                    "description": "If false, use the optimizer to suggest the initial configuration; if true (default), use the already assigned values for the first iteration.",
                     "type": "boolean"
                 }
             },
