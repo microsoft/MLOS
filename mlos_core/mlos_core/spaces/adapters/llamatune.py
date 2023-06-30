@@ -286,7 +286,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
             if param not in all_parameters:
                 raise ValueError(error_prefix + f"Parameter '{param}' does not exist.")
 
-            hyperparameter = self.orig_parameter_space.get_hyperparameter(param)
+            hyperparameter = self.orig_parameter_space[param]
             if not isinstance(hyperparameter, ConfigSpace.UniformIntegerHyperparameter):
                 raise NotImplementedError(error_prefix + f"Parameter '{param}' is not supported. "
                                           "Only Integer Hyperparameters are currently supported.")
