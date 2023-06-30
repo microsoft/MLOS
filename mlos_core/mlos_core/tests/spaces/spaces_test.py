@@ -244,4 +244,4 @@ class TestFlamlConversion(BaseConversion):
 
 if __name__ == '__main__':
     # For attaching debugger debugging:
-    pytest.main(["-k", "test_log_int_spaces"])
+    pytest.main(["-vv", "-k", "test_log_int_spaces", __file__])
