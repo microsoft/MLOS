@@ -13,7 +13,6 @@ import ConfigSpace
 import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
-from mlos_core.spaces import configspace_to_flaml_space
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 
 
@@ -50,6 +49,7 @@ class FlamlOptimizer(BaseOptimizer):
             space_adapter=space_adapter,
         )
 
+        from mlos_core.spaces.converters.flaml import configspace_to_flaml_space    # pylint: disable=import-outside-toplevel
         self.flaml_parameter_space: dict = configspace_to_flaml_space(self.optimizer_parameter_space)
         self.low_cost_partial_config = low_cost_partial_config
 
