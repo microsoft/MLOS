@@ -211,8 +211,7 @@ class TestFlamlConversion(BaseConversion):
         np.random.seed(42)
         # integer is supported
         input_space = CS.ConfigurationSpace()
-        #input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
-        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20))
+        input_space.add_hyperparameter(CS.UniformIntegerHyperparameter("d", lower=1, upper=20, log=True))
         converted_space = configspace_to_flaml_space(input_space)
 
         # test log integer sampling
