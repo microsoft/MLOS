@@ -131,7 +131,7 @@ class BaseConversion(metaclass=ABCMeta):
 
         converted_space = self.conversion_function(input_space)
         assert self.get_parameter_names(converted_space) == ["a", "b"]
-        point, *_ = self.sample(converted_space)
+        point = self.sample(converted_space)
         assert 100 <= point[0] <= 200
         assert -10 <= point[1] <= -5
 
