@@ -6,13 +6,20 @@
 Contains space converters for FLAML.
 """
 
-from typing import Dict, TypeAlias
+from typing import Dict
+
+import sys
 
 import ConfigSpace
 import numpy as np
 
 import flaml.tune
 import flaml.tune.sample
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
 
 
 FlamlDomain: TypeAlias = flaml.tune.sample.Domain
