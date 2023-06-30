@@ -52,7 +52,10 @@ Optimizers
 
 Spaces
 ======
-.. currentmodule:: mlos_core.spaces
+
+Converters
+----------
+.. currentmodule:: mlos_core.spaces.converters.flaml
 .. autosummary::
    :toctree: generated/
    :template: function.rst
