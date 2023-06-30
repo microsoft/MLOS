@@ -23,4 +23,4 @@ def config_to_dataframe(config: ConfigSpace.Configuration) -> pd.DataFrame:
     pd.DataFrame
         A DataFrame with a single row, containing the config's parameters.
     """
-    return pd.DataFrame([config.get_dictionary()])
+    return pd.DataFrame([dict(config)])
