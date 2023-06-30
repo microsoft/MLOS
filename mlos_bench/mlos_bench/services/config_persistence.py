@@ -23,8 +23,9 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, BaseTypeVar
+from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, preprocess_dynamic_configs, BaseTypeVar
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -147,7 +148,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         return config   # type: ignore[no-any-return]
 
     def prepare_class_load(self, config: Dict[str, Any],
-                           global_config: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
+                           global_config: Optional[Dict[str, Any]] = None,
+                           parent_args: Optional[Dict[str, TunableValue]] = None) -> Tuple[str, Dict[str, Any]]:
         """
         Extract the class instantiation parameters from the configuration.
         Mix-in the global parameters and resolve the local file system paths,
@@ -159,6 +161,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Configuration of the optimizer.
         global_config : dict
             Global configuration parameters (optional).
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
 
         Returns
         -------
@@ -167,6 +172,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         class_name = config["class"]
         class_config = config.setdefault("config", {})
+
+        # Replace any appearance of "$param_name" in the const_arg values with
+        # the value from the parent CompositeEnv.
+        # Note: we could consider expanding this feature to additional config
+        # sections in the future, but for now only use it in const_args.
+        if class_name.startswith("mlos_bench.environments."):
+            const_args = class_config.get("const_args", {})
+            preprocess_dynamic_configs(dest=const_args, source=parent_args)
 
         merge_parameters(dest=class_config, source=global_config)
 
@@ -224,9 +237,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.info("Created: %s", inst)
         return inst
 
-    def build_environment(self, config: Dict[str, Any],
+    def build_environment(self,     # pylint: disable=too-many-arguments
+                          config: Dict[str, Any],
                           tunables: TunableGroups,
                           global_config: Optional[Dict[str, Any]] = None,
+                          parent_args: Optional[Dict[str, TunableValue]] = None,
                           service: Optional[Service] = None) -> Environment:
         """
         Factory method for a new environment with a given config.
@@ -243,6 +258,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             all environments.
         global_config : dict
             Global parameters to add to the environment config.
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
@@ -253,7 +271,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             An instance of the `Environment` class initialized with `config`.
         """
         env_name = config["name"]
-        (env_class, env_config) = self.prepare_class_load(config)
+        (env_class, env_config) = self.prepare_class_load(config, global_config, parent_args)
 
         env_services_path = config.get("include_services")
         if env_services_path is not None:
@@ -344,8 +362,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         Parameters
         ----------
-        config : dict or an object with a list of dicts under the "services" key
-            A list where each element is a dictionary with 2 mandatory fields:
+        config : dict
+            A dictionary with 2 mandatory fields:
                 "class": FQN of a Python class to instantiate;
                 "config": Free-format dictionary to pass to the constructor.
         global_config : dict
@@ -376,9 +394,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return self._build_composite_service(config_list, global_config, parent)
 
-    def load_environment(self, json_file_name: str,
+    def load_environment(self,  # pylint: disable=too-many-arguments
+                         json_file_name: str,
                          tunables: TunableGroups,
                          global_config: Optional[Dict[str, Any]] = None,
+                         parent_args: Optional[Dict[str, TunableValue]] = None,
                          service: Optional[Service] = None) -> Environment:
         """
         Load and build new environment from the config file.
@@ -391,6 +411,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A (possibly empty) collection of tunables to add to the environment.
         global_config : dict
             Global parameters to add to the environment config.
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
         service : Service
             An optional reference of the parent service to mix in.
 
@@ -401,11 +424,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         assert isinstance(config, dict)
-        return self.build_environment(config, tunables, global_config, service)
+        return self.build_environment(config, tunables, global_config, parent_args, service)
 
-    def load_environment_list(self, json_file_name: str,
+    def load_environment_list(self,     # pylint: disable=too-many-arguments
+                              json_file_name: str,
                               tunables: TunableGroups,
                               global_config: Optional[Dict[str, Any]] = None,
+                              parent_args: Optional[Dict[str, TunableValue]] = None,
                               service: Optional[Service] = None) -> List[Environment]:
         """
         Load and build a list of environments from the config file.
@@ -421,6 +446,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Global parameters to add to the environment config.
         service : Service
             An optional reference of the parent service to mix in.
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
 
         Returns
         -------
@@ -429,7 +457,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         return [
-            self.build_environment(config, tunables, global_config, service)
+            self.build_environment(config, tunables, global_config, parent_args, service)
         ]
 
     def load_services(self, json_file_names: Iterable[str],

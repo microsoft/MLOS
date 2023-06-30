@@ -23,7 +23,6 @@ class Status(enum.Enum):
     FAILED = 6
     TIMED_OUT = 7
 
-    @property
     def is_good(self) -> bool:
         """
         Check if the status of the benchmark/environment is good.
@@ -35,44 +34,49 @@ class Status(enum.Enum):
             Status.SUCCEEDED,
         }
 
-    @property
+    def is_completed(self) -> bool:
+        """
+        Check if the status of the benchmark/environment is
+        one of {SUCCEEDED, FAILED, TIMED_OUT}.
+        """
+        return self in {
+            Status.SUCCEEDED,
+            Status.FAILED,
+            Status.TIMED_OUT,
+        }
+
     def is_pending(self) -> bool:
         """
         Check if the status of the benchmark/environment is PENDING.
         """
         return self == Status.PENDING
 
-    @property
     def is_ready(self) -> bool:
         """
         Check if the status of the benchmark/environment is READY.
         """
         return self == Status.READY
 
-    @property
     def is_succeeded(self) -> bool:
         """
         Check if the status of the benchmark/environment is SUCCEEDED.
         """
         return self == Status.SUCCEEDED
 
-    @property
     def is_failed(self) -> bool:
         """
         Check if the status of the benchmark/environment is FAILED.
         """
         return self == Status.FAILED
 
-    @property
     def is_canceled(self) -> bool:
         """
         Check if the status of the benchmark/environment is CANCELED.
         """
         return self == Status.CANCELED
 
-    @property
     def is_timed_out(self) -> bool:
         """
-        Check if the status of the benchmark/environment is TIMEDOUT.
+        Check if the status of the benchmark/environment is TIMED_OUT.
         """
         return self == Status.FAILED

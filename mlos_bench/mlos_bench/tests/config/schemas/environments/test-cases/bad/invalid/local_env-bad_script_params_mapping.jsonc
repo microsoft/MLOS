@@ -5,7 +5,7 @@
         "run": [
             "/bin/true"
         ],
-        "shell_params_mapping": {
+        "shell_env_params_mapping": {
             "invalid.target.name": "/source/param/name"
         }
     }

@@ -30,7 +30,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
         assert env.setup(tunables)
 
         (status, output) = env.run()
-        assert status.is_succeeded
+        assert status.is_succeeded()
         assert output is not None
         score = output['score']
         assert 60 <= score <= 120
@@ -58,12 +58,11 @@ def test_mock_optimization_loop(mock_env_no_noise: MockEnv,
 
 
 def test_mock_optimization_loop_no_defaults(mock_env_no_noise: MockEnv,
-                                            mock_opt: MockOptimizer) -> None:
+                                            mock_opt_no_defaults: MockOptimizer) -> None:
     """
     Toy optimization loop with mock environment and optimizer.
     """
-    mock_opt._use_defaults = False  # pylint: disable=protected-access
-    (score, tunables) = _optimize(mock_env_no_noise, mock_opt)
+    (score, tunables) = _optimize(mock_env_no_noise, mock_opt_no_defaults)
     assert score == pytest.approx(75.0, 0.01)
     assert tunables.get_param_values() == {
         "vmSize": "Standard_B4ms",
@@ -94,4 +93,33 @@ def test_emukit_optimization_loop_max(mock_env_no_noise: MockEnv,
     # Emukit optimizer is not deterministic, so we can't assert the exact values of the tunables.
 
 
-# TODO: Add FLAML and SMAC tests.
+def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
+                                 flaml_opt: MlosCoreOptimizer) -> None:
+    """
+    Toy optimization loop with mock environment and FLAML optimizer.
+    """
+    (score, tunables) = _optimize(mock_env_no_noise, flaml_opt)
+    assert score == pytest.approx(75.0, 0.01)
+    assert tunables.get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "idle": "halt",
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 2000000,
+    }
+
+
+# TODO: Enable SMAC tests.
+@pytest.mark.skip(reason="SMAC optimizer integration is WIP")
+def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
+                                smac_opt: MlosCoreOptimizer) -> None:
+    """
+    Toy optimization loop with mock environment and SMAC optimizer.
+    """
+    (score, tunables) = _optimize(mock_env_no_noise, smac_opt)
+    assert score == pytest.approx(75.0, 0.01)
+    assert tunables.get_param_values() == {
+        "vmSize": "Standard_B4ms",
+        "idle": "halt",
+        "kernel_sched_migration_cost_ns": -1,
+        "kernel_sched_latency_ns": 2000000,
+    }

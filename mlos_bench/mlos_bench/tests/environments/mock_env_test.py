@@ -18,12 +18,12 @@ def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups) -> N
     """
     assert mock_env.setup(tunable_groups)
     (status, data) = mock_env.run()
-    assert status.is_succeeded
+    assert status.is_succeeded()
     assert data is not None
     assert data["score"] == pytest.approx(73.97, 0.01)
     # Second time, results should differ because of the noise.
     (status, data) = mock_env.run()
-    assert status.is_succeeded
+    assert status.is_succeeded()
     assert data is not None
     assert data["score"] == pytest.approx(93.22, 0.01)
 
@@ -36,7 +36,7 @@ def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGr
     for _ in range(10):
         # Noise-free results should be the same every time.
         (status, data) = mock_env_no_noise.run()
-        assert status.is_succeeded
+        assert status.is_succeeded()
         assert data is not None
         assert data["score"] == pytest.approx(75.0, 0.01)
 
@@ -61,7 +61,7 @@ def test_mock_env_assign(mock_env: MockEnv, tunable_groups: TunableGroups,
     tunable_groups.assign(tunable_values)
     assert mock_env.setup(tunable_groups)
     (status, data) = mock_env.run()
-    assert status.is_succeeded
+    assert status.is_succeeded()
     assert data is not None
     assert data["score"] == pytest.approx(expected_score, 0.01)
 
@@ -89,6 +89,6 @@ def test_mock_env_no_noise_assign(mock_env_no_noise: MockEnv,
     for _ in range(10):
         # Noise-free environment should produce the same results every time.
         (status, data) = mock_env_no_noise.run()
-        assert status.is_succeeded
+        assert status.is_succeeded()
         assert data is not None
         assert data["score"] == pytest.approx(expected_score, 0.01)

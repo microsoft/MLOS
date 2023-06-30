@@ -27,6 +27,9 @@
                     "$ref": "./remote/mock/mock-remote-exec-service-subschema.json"
                 },
                 {
+                    "$ref": "./remote/azure/azure-auth-service-subschema.json"
+                },
+                {
                     "$ref": "./remote/azure/azure-vm-service-subschema.json"
                 },
                 {
@@ -88,6 +91,7 @@
                             "items": {
                                 "$ref": "#/$defs/service_config"
                             },
+                            "uniqueItems": true,
                             "minItems": 1
                         }
                     }

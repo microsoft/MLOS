@@ -5,7 +5,7 @@
         "minimize": "score",
         "max_iterations": 20,
         "seed": 12345,
-        "use_defaults": false,
+        "start_with_defaults": false,
         "optimizer_type": "EMUKIT",
         "space_adapter_type": "LLAMATUNE",
         "space_adapter_config": {

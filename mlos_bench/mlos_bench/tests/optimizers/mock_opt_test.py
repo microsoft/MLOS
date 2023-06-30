@@ -15,17 +15,11 @@ from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 
 
 @pytest.fixture
-def mock_configurations() -> list:
+def mock_configurations_no_defaults() -> list:
     """
     A list of 2-tuples of (tunable_values, score) to test the optimizers.
     """
     return [
-        ({
-            "vmSize": "Standard_B4ms",
-            "idle": "halt",
-            "kernel_sched_migration_cost_ns": -1,
-            "kernel_sched_latency_ns": 2000000,
-        }, 88.88),
         ({
             "vmSize": "Standard_B4ms",
             "idle": "halt",
@@ -45,6 +39,21 @@ def mock_configurations() -> list:
             "kernel_sched_latency_ns": 795285932,
         }, 99.99),
     ]
+
+
+@pytest.fixture
+def mock_configurations(mock_configurations_no_defaults: list) -> list:
+    """
+    A list of 2-tuples of (tunable_values, score) to test the optimizers.
+    """
+    return [
+        ({
+            "vmSize": "Standard_B4ms",
+            "idle": "halt",
+            "kernel_sched_migration_cost_ns": -1,
+            "kernel_sched_latency_ns": 2000000,
+        }, 88.88),
+    ] + mock_configurations_no_defaults
 
 
 def _optimize(mock_opt: MockOptimizer, mock_configurations: list) -> float:
@@ -68,6 +77,15 @@ def test_mock_optimizer(mock_opt: MockOptimizer, mock_configurations: list) -> N
     Make sure that mock optimizer produces consistent suggestions.
     """
     score = _optimize(mock_opt, mock_configurations)
+    assert score == pytest.approx(66.66, 0.01)
+
+
+def test_mock_optimizer_no_defaults(mock_opt_no_defaults: MockOptimizer,
+                                    mock_configurations_no_defaults: list) -> None:
+    """
+    Make sure that mock optimizer produces consistent suggestions.
+    """
+    score = _optimize(mock_opt_no_defaults, mock_configurations_no_defaults)
     assert score == pytest.approx(66.66, 0.01)
 
 

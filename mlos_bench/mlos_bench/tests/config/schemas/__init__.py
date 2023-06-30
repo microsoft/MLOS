@@ -125,11 +125,14 @@ def check_test_case_against_schema(test_case: SchemaTestCaseInfo, schema_type: C
     Parameters
     ----------
     test_case : SchemaTestCaseInfo
+        Schema test case to check.
     schema_type : ConfigSchema
+        Schema to check against, e.g., ENVIRONMENT or SERVICE.
 
     Raises
     ------
     NotImplementedError
+        If test case is not known.
     """
     if test_case.test_case_type == "good":
         schema_type.validate(test_case.config)

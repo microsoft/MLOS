@@ -24,6 +24,9 @@
                     "$ref": "../common-environment-subschemas.json#/$defs/setup_run_teardown_configs"
                 },
                 {
+                    "$ref": "../common-environment-subschemas.json#/$defs/shell_env_params_config"
+                },
+                {
                     "$comment": "LocalFileShareEnv inherits from LocalEnv, so it supports all the same config features.",
                     "$ref": "./local-env-subschema.json#/$defs/local_env_config"
                 },
@@ -36,14 +39,18 @@
                             "type": "array",
                             "items": {
                                 "$ref": "../common-environment-subschemas.json#/$defs/file_download_config"
-                            }
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
                         },
                         "upload": {
                             "description": "List of file upload config objects.",
                             "type": "array",
                             "items": {
                                 "$ref": "../common-environment-subschemas.json#/$defs/file_upload_config"
-                            }
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
                         }
                     },
                     "anyOf": [

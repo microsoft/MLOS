@@ -126,7 +126,7 @@ class LocalEnv(ScriptEnv):
             be in the `score` field.
         """
         (status, _) = result = super().run()
-        if not status.is_ready:
+        if not status.is_ready():
             return result
 
         with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
@@ -136,6 +136,7 @@ class LocalEnv(ScriptEnv):
                 if return_code != 0:
                     return (Status.FAILED, None)
 
+            # FIXME: We should not be assuming that the only output file type is a CSV.
             if not self._read_results_file:
                 _LOG.debug("Not reading the data at: %s", self)
                 return (Status.SUCCEEDED, {})
@@ -152,7 +153,7 @@ class LocalEnv(ScriptEnv):
 
             data_dict = data.iloc[-1].to_dict()
             _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
-            return (Status.SUCCEEDED, data_dict)
+            return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
 
     def teardown(self) -> None:
         """

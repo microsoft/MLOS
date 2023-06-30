@@ -57,10 +57,11 @@ class MockOptimizer(Optimizer):
         Generate the next (random) suggestion.
         """
         tunables = self._tunables.copy()
-        for (tunable, _group) in tunables:
-            if self._use_defaults and self._iter == 1:
-                tunable.value = tunable.default
-            else:
+        if self._start_with_defaults:
+            _LOG.info("Use default values for the first trial")
+            self._start_with_defaults = False
+        else:
+            for (tunable, _group) in tunables:
                 tunable.value = self._random[tunable.type](tunable)
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables
@@ -68,7 +69,7 @@ class MockOptimizer(Optimizer):
     def register(self, tunables: TunableGroups, status: Status,
                  score: Optional[Union[float, dict]] = None) -> Optional[float]:
         registered_score = super().register(tunables, status, score)
-        if status.is_succeeded and (
+        if status.is_succeeded() and (
             self._best_score is None or (registered_score is not None and registered_score < self._best_score)
         ):
             self._best_score = registered_score

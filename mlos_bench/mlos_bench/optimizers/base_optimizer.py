@@ -41,8 +41,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._tunables = tunables
         self._service = service
         self._iter = 1
-        self._use_defaults: bool = bool(strtobool(str(self._config.pop('use_defaults', True))))
-        self._max_iter = int(self._config.pop('max_iterations', 25))
+        # If False, use the optimizer to suggest the initial configuration;
+        # if True (default), use the already initialized values for the first iteration.
+        self._start_with_defaults: bool = bool(
+            strtobool(str(self._config.pop('start_with_defaults', True))))
+        self._max_iter = int(self._config.pop('max_iterations', 100))
         self._opt_target: str
         _opt_target = self._config.pop('maximize', None)
         if _opt_target is None:
@@ -91,7 +94,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             raise ValueError("Numbers of configs and scores do not match.")
         if status is not None and len(configs or []) != len(status or []):
             raise ValueError("Numbers of configs and status values do not match.")
-        return bool(configs and scores)
+        has_data = bool(configs and scores)
+        if has_data and self._start_with_defaults:
+            _LOG.info("Prior data exists - do *NOT* use the default initialization.")
+            self._start_with_defaults = False
+        return has_data
 
     @abstractmethod
     def suggest(self) -> TunableGroups:
@@ -130,7 +137,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Iteration %d :: Register: %s = %s score: %s",
                   self._iter, tunables, status, score)
-        if status.is_succeeded == (score is None):  # XOR
+        if status.is_succeeded() == (score is None):  # XOR
             raise ValueError("Status and score must be consistent.")
         return self._get_score(status, score)
 
@@ -152,12 +159,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         score : float
             A scalar benchmark score to be used as a primary target for MINIMIZATION.
         """
-        if not status.is_succeeded:
+        if not status.is_completed():
             return None
-        assert score is not None
-        if isinstance(score, dict):
-            score = score[self._opt_target]
-        return float(score) * self._opt_sign
+        if status.is_succeeded():
+            assert score is not None
+            if isinstance(score, dict):
+                score = score[self._opt_target]
+            return float(score) * self._opt_sign
+        assert score is None
+        return float("inf")
 
     def not_converged(self) -> bool:
         """
