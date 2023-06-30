@@ -48,5 +48,4 @@ def configspace_to_flaml_space(config_space: ConfigSpace.ConfigurationSpace) -> 
             return flaml.tune.choice(parameter.choices)     # TODO: set order?
         raise ValueError(f"Type of parameter {parameter} ({type(parameter)}) not supported.")
 
-    return {param.name: _one_parameter_convert(param)
-            for param in config_space.get_hyperparameters()}
+    return {param.name: _one_parameter_convert(param) for param in config_space.values()}

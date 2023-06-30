@@ -8,7 +8,7 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 """
 
 from pathlib import Path
-from typing import Mapping, Optional
+from typing import Dict, Optional, TYPE_CHECKING
 from tempfile import TemporaryDirectory
 
 import ConfigSpace
@@ -81,7 +81,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac.runhistory import TrialInfo
 
         # Store for TrialInfo instances returned by .ask()
-        self.trial_info_map: Mapping[ConfigSpace.Configuration, TrialInfo] = {}
+        self.trial_info_map: Dict[ConfigSpace.Configuration, TrialInfo] = {}
 
         # The default when not specified is to use a known seed (0) to keep results reproducible.
         # However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
@@ -190,16 +190,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
+        if TYPE_CHECKING:
+            from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
 
         if context is not None:
             raise NotImplementedError()
 
         trial: TrialInfo = self.base_optimizer.ask()
-        # Type ignore because this is WIP from ConfigSpace side
-        # Check here: https://github.com/automl/ConfigSpace/issues/293
-        self.trial_info_map[trial.config] = trial  # type: ignore
-        return pd.DataFrame([trial.config], columns=self.optimizer_parameter_space.get_hyperparameter_names())
+        self.trial_info_map[trial.config] = trial
+        return pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()

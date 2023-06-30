@@ -68,7 +68,7 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> N
     with pytest.raises(ValueError):
         LlamaTuneAdapter(
             orig_parameter_space=input_space,
-            num_low_dims=len(input_space.get_hyperparameter_names())
+            num_low_dims=len(list(input_space.keys()))
         )
 
     # Enable only low-dimensional space projections
@@ -320,7 +320,7 @@ def test_max_unique_values_per_param() -> None:
         )
 
         # Keep track of unique values generated for each parameter
-        unique_values_dict: Dict[str, set] = {param: set() for param in input_space.get_hyperparameter_names()}
+        unique_values_dict: Dict[str, set] = {param: set() for param in list(input_space.keys())}
         for config in gen_random_configs(adapter, num_configs):
             for param, value in config.items():
                 unique_values_dict[param].add(value)
@@ -422,7 +422,7 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
         param: {special_value: 0 for special_value, _ in tuples_list}
         for param, tuples_list in adapter._special_param_values_dict.items()    # pylint: disable=protected-access
     }
-    unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.get_hyperparameter_names()}
+    unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.keys()}
 
     num_configs = 1000
     for config in adapter.target_parameter_space.sample_configuration(size=num_configs):    # pylint: disable=not-an-iterable
