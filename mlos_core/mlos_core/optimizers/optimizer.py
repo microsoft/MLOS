@@ -201,7 +201,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         df_dict = collections.defaultdict(list)
         for i in range(config.shape[0]):
             j = 0
-            for param in self.optimizer_parameter_space.get_hyperparameters():
+            for param in self.optimizer_parameter_space.values():
                 if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                     for (offset, val) in enumerate(param.choices):
                         if config[i][j + offset] == 1:
@@ -222,7 +222,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         """
         n_cols = 0
         n_rows = config.shape[0] if config.ndim > 1 else 1
-        for param in self.optimizer_parameter_space.get_hyperparameters():
+        for param in self.optimizer_parameter_space.values():
             if isinstance(param, ConfigSpace.CategoricalHyperparameter):
                 n_cols += len(param.choices)
             else:
@@ -230,7 +230,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         one_hot = np.zeros((n_rows, n_cols), dtype=np.float32)
         for i in range(n_rows):
             j = 0
-            for param in self.optimizer_parameter_space.get_hyperparameters():
+            for param in self.optimizer_parameter_space.values():
                 if config.ndim > 1:
                     col = config.columns.get_loc(param.name)
                     val = config.iloc[i, col]
