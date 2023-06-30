@@ -8,7 +8,7 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 """
 
 from pathlib import Path
-from typing import Dict, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING
 from tempfile import TemporaryDirectory
 
 import ConfigSpace
@@ -170,7 +170,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Register each trial (one-by-one)
         for config, score in zip(self._to_configspace_configs(configurations), scores.tolist()):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-            info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config))
+            info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
             value: TrialValue = TrialValue(cost=score, time=0.0, status=StatusType.SUCCESS)
             self.base_optimizer.tell(info, value, save=False)
 
@@ -239,7 +239,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             self._temp_output_directory.cleanup()
             self._temp_output_directory = None
 
-    def _to_configspace_configs(self, configurations: pd.DataFrame) -> list:
+    def _to_configspace_configs(self, configurations: pd.DataFrame) -> List[ConfigSpace.Configuration]:
         """Convert a dataframe of configurations to a list of ConfigSpace configurations.
 
         Parameters

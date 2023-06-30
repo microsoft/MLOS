@@ -31,6 +31,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "minimize": "score",
             "max_iterations": 10,
             "optimizer_type": "SMAC",
+            # "start_with_defaults": False,
         })
 
 
@@ -54,3 +55,8 @@ def test_llamatune_optimizer(llamatune_opt: MlosCoreOptimizer, mock_scores: list
 
     (score, _tunables) = llamatune_opt.get_best_observation()
     assert score == pytest.approx(66.66, 0.01)
+
+
+if __name__ == '__main__':
+    # For attaching debugger debugging:
+    pytest.main(["-vv", "-n1", "-k", "test_llamatune_optimizer", __file__])
