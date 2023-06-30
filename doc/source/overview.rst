@@ -59,6 +59,14 @@ Spaces
    :template: function.rst
 
    configspace_to_emukit_space
+
+Converters
+----------
+.. currentmodule:: mlos_core.spaces.converters.flaml
+.. autosummary::
+   :toctree: generated/
+   :template: function.rst
+
    configspace_to_flaml_space
 
 Space Adapters
