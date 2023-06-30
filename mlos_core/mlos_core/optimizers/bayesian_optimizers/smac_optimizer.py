@@ -170,7 +170,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Register each trial (one-by-one)
         for config, score in zip(self._to_configspace_configs(configurations), scores.tolist()):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-            info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config))
+            info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
             value: TrialValue = TrialValue(cost=score, time=0.0, status=StatusType.SUCCESS)
             self.base_optimizer.tell(info, value, save=False)
 
