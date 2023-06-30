@@ -15,21 +15,6 @@
     ],
 
     "config": {
-        // Run a single benchmark with this configuration.
-        // Can be overwritten from the command line.
-        "include_tunable_values": [
-            // Note: tunable values need not specify a value for all params.
-            // In which case, unspecified values are governed by the "use_default" config parameter.
-            "tunable-values/tunable-values-example.jsonc"
-        ],
-        // Additional values of the tunable parameters.
-        "tunable_values": {},
-
-        // Whether to assign the "default" tunable parameter as a value or a
-        // random value for those parameters not specified.
-        "use_defaults": true,
-
-        // Other optimizer configuration parameters.
         "minimize": "score"
     }
 }

@@ -14,6 +14,23 @@ from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 
 
 @pytest.fixture
+def mock_opt_no_defaults(tunable_groups: TunableGroups) -> MockOptimizer:
+    """
+    Test fixture for MockOptimizer that ignores the initial configuration.
+    """
+    return MockOptimizer(
+        tunables=tunable_groups,
+        service=None,
+        config={
+            "minimize": "score",
+            "max_iterations": 5,
+            "start_with_defaults": False,
+            "seed": 42
+        },
+    )
+
+
+@pytest.fixture
 def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
     """
     Test fixture for MockOptimizer.
