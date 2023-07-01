@@ -16,7 +16,7 @@ class MockRemoteExecService(Service, SupportsRemoteExec):
     Mock remote script execution service.
     """
 
-    def __init__(self, config: dict, parent: Service):
+    def __init__(self, config: dict, global_config: dict, parent: Service):
         """
         Create a new instance of mock remote exec service.
 
@@ -25,10 +25,12 @@ class MockRemoteExecService(Service, SupportsRemoteExec):
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
         self.register({
             "remote_exec": mock_operation,
             "get_remote_exec_results": mock_operation,

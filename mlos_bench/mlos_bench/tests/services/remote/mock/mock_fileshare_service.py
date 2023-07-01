@@ -19,8 +19,8 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
     A collection Service functions for mocking file share ops.
     """
 
-    def __init__(self, config: dict, parent: FileShareService):
-        super().__init__(config, parent)
+    def __init__(self, config: dict, global_config: dict, parent: FileShareService):
+        super().__init__(config, global_config, parent)
 
         self.register([
             self.download,

@@ -16,7 +16,7 @@ class MockVMService(Service, SupportsVMOps):
     Mock VM service for testing.
     """
 
-    def __init__(self, config: dict, parent: Service):
+    def __init__(self, config: dict, global_config: dict, parent: Service):
         """
         Create a new instance of mock VM services proxy.
 
@@ -25,10 +25,12 @@ class MockVMService(Service, SupportsVMOps):
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
         self.register({
             name: mock_operation for name in (
                 "wait_vm_deployment",
