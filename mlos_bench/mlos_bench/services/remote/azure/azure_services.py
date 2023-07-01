@@ -103,7 +103,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         "?api-version=2022-03-01"
     )
 
-    def __init__(self, config: dict, parent: Service):
+    def __init__(self, config: dict, global_config: dict, parent: Service):
         """
         Create a new instance of Azure services proxy.
 
@@ -112,10 +112,12 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
 
         check_required_params(
             config, {
@@ -152,7 +154,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         self._deploy_template = template
 
         self._deploy_params = merge_parameters(
-            dest=config['deploymentTemplateParameters'].copy(), source=self.config)
+            dest=config['deploymentTemplateParameters'].copy(), source=global_config)
 
     def _get_headers(self) -> dict:
         """

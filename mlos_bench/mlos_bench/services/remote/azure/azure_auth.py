@@ -24,7 +24,7 @@ class AzureAuthService(Service, SupportsAuth):
 
     _REQ_INTERVAL = 300   # = 5 min
 
-    def __init__(self, config: dict, parent: Service):
+    def __init__(self, config: dict, global_config: dict, parent: Service):
         """
         Create a new instance of Azure authentication services proxy.
 
@@ -33,10 +33,12 @@ class AzureAuthService(Service, SupportsAuth):
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
 
         # Register methods that we want to expose to the Environment objects.
         self.register([self.get_access_token])

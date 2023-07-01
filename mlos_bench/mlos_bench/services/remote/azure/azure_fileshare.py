@@ -27,7 +27,7 @@ class AzureFileShareService(FileShareService):
 
     _SHARE_URL = "https://{account_name}.file.core.windows.net/{fs_name}"
 
-    def __init__(self, config: dict, parent: Service):
+    def __init__(self, config: dict, global_config: dict, parent: Service):
         """
         Create a new file share Service for Azure environments with a given config.
 
@@ -37,10 +37,12 @@ class AzureFileShareService(FileShareService):
             Free-format dictionary that contains the file share configuration.
             It will be passed as a constructor parameter of the class
             specified by `class_name`.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
 
         check_required_params(
             config, {
