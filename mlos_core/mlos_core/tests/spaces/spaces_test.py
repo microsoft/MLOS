@@ -224,7 +224,6 @@ class TestFlamlConversion(BaseConversion):
         # See Also: https://github.com/microsoft/FLAML/issues/1104
         assert_is_log_uniform(integer_log_uniform, base=10)
 
-    @pytest.mark.skip(reason="FIXME: flaml sampling is non-log-uniform")
     def test_log_float_spaces(self) -> None:
         np.random.seed(42)
 
@@ -237,10 +236,6 @@ class TestFlamlConversion(BaseConversion):
         float_log_uniform = self.sample(converted_space, n_samples=1000)
         float_log_uniform = np.array(float_log_uniform).ravel()
 
-        # FIXME: this fails - flaml is calling np.random.uniform() on base 10
-        # logs of the bounds as expected but for some reason the resulting
-        # samples are more skewed towards the lower end of the range
-        # See Also: https://github.com/microsoft/FLAML/issues/1104
         assert_is_log_uniform(float_log_uniform)
 
 
