@@ -54,12 +54,14 @@ def assert_is_log_uniform(arr: npt.NDArray, base: float = np.e) -> None:
 
 def test_is_uniform() -> None:
     """Test our uniform distribution check function."""
+    np.random.seed(42)
     uniform = np.random.uniform(1, 20, 1000)
     assert_is_uniform(uniform)
 
 
 def test_is_log_uniform() -> None:
     """Test our log uniform distribution check function."""
+    np.random.seed(42)
     log_uniform = np.exp(np.random.uniform(np.log(1), np.log(20), 1000))
     assert_is_log_uniform(log_uniform)
 
