@@ -17,8 +17,6 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  # See comments in setup.py
-  - numpy<1.24
   - python=3.9
   # See comments in mlos.yml.
   #- gcc_linux-64
