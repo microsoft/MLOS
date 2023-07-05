@@ -29,8 +29,7 @@ jobs:
           - "3.8"
           - "3.9"
           - "3.10"
-          # FIXME: There are currently several missing/broken dependencies for python 3.11.
-          #- "3.11"
+          - "3.11"
 
     env:
       cache_cur_date: unset

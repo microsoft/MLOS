@@ -20,8 +20,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
-  - python<3.11
+  - python
   # Require a compiler to be installed/configured and build GPy directly.
   - vs2019_win-64
   - vswhere
