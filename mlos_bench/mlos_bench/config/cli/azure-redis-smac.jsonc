@@ -22,6 +22,6 @@
 
     "teardown": false,
 
-    "log_file": "azure-redis-emukit.log",
+    "log_file": "azure-redis-smac.log",
     "log_level": "DEBUG"
 }

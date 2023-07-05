@@ -20,14 +20,11 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  # See comments in setup.py
-  - numpy<1.24
   # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
   - python<3.11
   # Require a compiler to be installed/configured and build GPy directly.
   - vs2019_win-64
   - vswhere
-  - conda-forge::GPy
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
   - conda-forge::pyrfr>=0.9.0
