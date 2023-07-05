@@ -85,8 +85,8 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 2. Install it (e.g. after copying it somewhere else).
 
     ```sh
-    # this will install just the optimizer component with emukit support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[emukit]
+    # this will install just the optimizer component with SMAC support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac]
 
     # this will install just the optimizer component with flaml support:
     pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]

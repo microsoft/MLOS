@@ -6,7 +6,7 @@
         "minimize": "score",
         "max_iterations": 20,
         "seed": 12345,
-        "optimizer_type": "EMUKIT",
+        "optimizer_type": "SMAC",
         "space_adapter_type": "LLAMATUNE"
         // no space_adapter_config required
     }

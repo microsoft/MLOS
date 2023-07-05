@@ -26,7 +26,6 @@ except LookupError as e:
 
 
 extra_requires: Dict[str, List[str]] = {  # pylint: disable=consider-using-namedtuple-or-dataclass
-    'emukit': ['emukit'],
     'flaml': ['flaml[blendsearch]'],
     'smac': ['smac>=2.0.0'],  # NOTE: Major refactoring on SMAC starting from v2.0.0
 }

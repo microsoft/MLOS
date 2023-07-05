@@ -40,9 +40,3 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
     if isinstance(optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
             optimizer.surrogate_predict(suggestion, context=pd.DataFrame([["something"]]))
-
-        if optimizer_class in [OptimizerType.EMUKIT.value]:
-            # acquisition function not implemented for Emukit, Skopt
-            # NOTE: currently, only SMAC implements this
-            with pytest.raises(NotImplementedError):
-                optimizer.acquisition_function(suggestion)

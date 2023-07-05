@@ -48,17 +48,10 @@ Optimizers
    :template: class.rst
 
    BaseBayesianOptimizer
-   EmukitOptimizer
    SmacOptimizer
 
 Spaces
 ======
-.. currentmodule:: mlos_core.spaces
-.. autosummary::
-   :toctree: generated/
-   :template: function.rst
-
-   configspace_to_emukit_space
 
 Converters
 ----------
