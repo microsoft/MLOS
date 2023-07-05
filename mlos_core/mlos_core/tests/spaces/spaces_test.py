@@ -54,12 +54,14 @@ def assert_is_log_uniform(arr: npt.NDArray, base: float = np.e) -> None:
 
 def test_is_uniform() -> None:
     """Test our uniform distribution check function."""
+    np.random.seed(42)
     uniform = np.random.uniform(1, 20, 1000)
     assert_is_uniform(uniform)
 
 
 def test_is_log_uniform() -> None:
     """Test our log uniform distribution check function."""
+    np.random.seed(42)
     log_uniform = np.exp(np.random.uniform(np.log(1), np.log(20), 1000))
     assert_is_log_uniform(log_uniform)
 
@@ -224,7 +226,6 @@ class TestFlamlConversion(BaseConversion):
         # See Also: https://github.com/microsoft/FLAML/issues/1104
         assert_is_log_uniform(integer_log_uniform, base=10)
 
-    @pytest.mark.skip(reason="FIXME: flaml sampling is non-log-uniform")
     def test_log_float_spaces(self) -> None:
         np.random.seed(42)
 
@@ -237,10 +238,6 @@ class TestFlamlConversion(BaseConversion):
         float_log_uniform = self.sample(converted_space, n_samples=1000)
         float_log_uniform = np.array(float_log_uniform).ravel()
 
-        # FIXME: this fails - flaml is calling np.random.uniform() on base 10
-        # logs of the bounds as expected but for some reason the resulting
-        # samples are more skewed towards the lower end of the range
-        # See Also: https://github.com/microsoft/FLAML/issues/1104
         assert_is_log_uniform(float_log_uniform)
 
 
