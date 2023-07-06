@@ -43,7 +43,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
     BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath("")).replace("\\", "/")
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None,
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
         """
         Create a new instance of config persistence service.
@@ -53,10 +55,12 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         config : dict
             Free-format dictionary that contains parameters for the service.
             (E.g., root path for config files, etc.)
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
         self._config_path: List[str] = self.config.get("config_path", [])
         self._config_loader_service = self
 
@@ -312,7 +316,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             An instance of the `Service` class initialized with `config`.
         """
         (svc_class, svc_config) = self.prepare_class_load(config, global_config)
-        service = Service.new(svc_class, svc_config, parent)
+        service = Service.new(svc_class, svc_config, global_config, parent)
         _LOG.info("Created service: %s", service)
         return service
 
@@ -483,7 +487,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         _LOG.info("Load services: %s parent: %s",
                   json_file_names, parent.__class__.__name__)
-        service = Service(global_config, parent)
+        service = Service({}, global_config, parent)
         for fname in json_file_names:
             config = self.load_config(fname, ConfigSchema.SERVICE)
             service.register(self.build_service(config, global_config, service).export())

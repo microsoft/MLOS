@@ -13,7 +13,7 @@ import shlex
 import subprocess
 import sys
 
-from typing import Dict, Iterable, Mapping, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, TYPE_CHECKING
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
@@ -32,7 +32,10 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     due to reduced dependency management complications vs the target environment.
     """
 
-    def __init__(self, config: Optional[dict] = None, parent: Optional[Service] = None):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new instance of a service to run scripts locally.
 
@@ -41,10 +44,12 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         config : dict
             Free-format dictionary that contains parameters for the service.
             (E.g., root path for config files, etc.)
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
         self.register([self.local_exec])
 
     def local_exec(self, script_lines: Iterable[str],

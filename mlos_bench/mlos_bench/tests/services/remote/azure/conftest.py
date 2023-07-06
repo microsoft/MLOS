@@ -30,7 +30,7 @@ def azure_auth_service(config_persistence_service: ConfigPersistenceService,
     """
     Creates a dummy AzureAuthService for tests that require it.
     """
-    auth = AzureAuthService(config={}, parent=config_persistence_service)
+    auth = AzureAuthService(config={}, global_config={}, parent=config_persistence_service)
     monkeypatch.setattr(auth, "get_access_token", lambda: "TEST_TOKEN")
     return auth
 
@@ -51,7 +51,7 @@ def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
         "vmName": "test-vm",  # Should come from the upper-level config
         "pollInterval": 1,
         "pollTimeout": 2
-    }, parent=azure_auth_service)
+    }, global_config={}, parent=azure_auth_service)
 
 
 @pytest.fixture
@@ -64,4 +64,4 @@ def azure_fileshare(config_persistence_service: ConfigPersistenceService) -> Azu
             "storageAccountName": "TEST_ACCOUNT_NAME",
             "storageFileShareName": "TEST_FS_NAME",
             "storageAccountKey": "TEST_ACCOUNT_KEY"
-        }, parent=config_persistence_service)
+        }, global_config={}, parent=config_persistence_service)

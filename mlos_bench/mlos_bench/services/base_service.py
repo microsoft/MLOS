@@ -9,7 +9,7 @@ Base class for the service mix-ins.
 import json
 import logging
 
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.util import instantiate_from_config
@@ -23,7 +23,11 @@ class Service:
     """
 
     @classmethod
-    def new(cls, class_name: str, config: dict, parent: Optional["Service"]) -> "Service":
+    def new(cls,
+            class_name: str,
+            config: Optional[Dict[str, Any]] = None,
+            global_config: Optional[Dict[str, Any]] = None,
+            parent: Optional["Service"] = None) -> "Service":
         """
         Factory method for a new service with a given config.
 
@@ -37,6 +41,8 @@ class Service:
             Free-format dictionary that contains the service configuration.
             It will be passed as a constructor parameter of the class
             specified by `class_name`.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             A parent service that can provide mixin functions.
 
@@ -45,9 +51,12 @@ class Service:
         svc : Service
             An instance of the `Service` class initialized with `config`.
         """
-        return instantiate_from_config(cls, class_name, config, parent)
+        return instantiate_from_config(cls, class_name, config, global_config, parent)
 
-    def __init__(self, config: Optional[dict] = None, parent: Optional["Service"] = None):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional["Service"] = None):
         """
         Create a new service with a given config.
 
@@ -57,6 +66,8 @@ class Service:
             Free-format dictionary that contains the service configuration.
             It will be passed as a constructor parameter of the class
             specified by `class_name`.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
         """
@@ -72,11 +83,13 @@ class Service:
             self._config_loader_service = parent
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Service: %s Config:\n%s",
-                       self.__class__.__name__, json.dumps(self.config, indent=2))
-            _LOG.debug("Service: %s Parent mixins: %s",
-                       self.__class__.__name__,
+            _LOG.debug("Service: %s Config:\n%s", self, json.dumps(self.config, indent=2))
+            _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config or {}, indent=2))
+            _LOG.debug("Service: %s Parent mixins: %s", self,
                        [] if parent is None else list(parent._services.keys()))
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     @property
     def config_loader_service(self) -> SupportsConfigLoading:
