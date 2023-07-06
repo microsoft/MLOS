@@ -20,6 +20,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - swig
   - python
   # Require a compiler to be installed/configured and build GPy directly.
   - vs2019_win-64

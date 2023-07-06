@@ -17,6 +17,7 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - swig
   - python
   - pip:
     - bump2version
