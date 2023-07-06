@@ -22,7 +22,9 @@ class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
     An abstract base of all file shares.
     """
 
-    def __init__(self, config: dict, global_config: Optional[Dict[str, Any]], parent: Service):
+    def __init__(self, config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new file share with a given config.
 

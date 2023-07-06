@@ -32,7 +32,8 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     due to reduced dependency management complications vs the target environment.
     """
 
-    def __init__(self, config: Optional[dict] = None,
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
         """

@@ -10,7 +10,7 @@ import json
 import time
 import logging
 
-from typing import Callable, Iterable, Tuple
+from typing import Any, Callable, Dict, Iterable, Optional, Tuple
 
 import requests
 
@@ -103,7 +103,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         "?api-version=2022-03-01"
     )
 
-    def __init__(self, config: dict, global_config: dict, parent: Service):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new instance of Azure services proxy.
 
@@ -120,7 +123,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         super().__init__(config, global_config, parent)
 
         check_required_params(
-            config, {
+            self.config, {
                 "subscription",
                 "resourceGroup",
                 "deploymentName",
@@ -143,18 +146,18 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         ])
 
         # These parameters can come from command line as strings, so conversion is needed.
-        self._poll_interval = float(config.get("pollInterval", self._POLL_INTERVAL))
-        self._poll_timeout = float(config.get("pollTimeout", self._POLL_TIMEOUT))
-        self._request_timeout = float(config.get("requestTimeout", self._REQUEST_TIMEOUT))
+        self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
+        self._poll_timeout = float(self.config.get("pollTimeout", self._POLL_TIMEOUT))
+        self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
 
         # TODO: Provide external schema validation?
         template = self.config_loader_service.load_config(
-            config['deploymentTemplatePath'], schema_type=None)
+            self.config['deploymentTemplatePath'], schema_type=None)
         assert template is not None and isinstance(template, dict)
         self._deploy_template = template
 
         self._deploy_params = merge_parameters(
-            dest=config['deploymentTemplateParameters'].copy(), source=global_config)
+            dest=self.config['deploymentTemplateParameters'].copy(), source=global_config)
 
     def _get_headers(self) -> dict:
         """

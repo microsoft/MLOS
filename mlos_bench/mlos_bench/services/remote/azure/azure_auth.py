@@ -10,6 +10,7 @@ import datetime
 import json
 import logging
 import subprocess
+from typing import Any, Dict, Optional
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth
@@ -24,7 +25,10 @@ class AzureAuthService(Service, SupportsAuth):
 
     _REQ_INTERVAL = 300   # = 5 min
 
-    def __init__(self, config: dict, global_config: dict, parent: Service):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new instance of Azure authentication services proxy.
 
@@ -44,7 +48,7 @@ class AzureAuthService(Service, SupportsAuth):
         self.register([self.get_access_token])
 
         # This parameter can come from command line as strings, so conversion is needed.
-        self._req_interval = float(config.get("tokenRequestInterval", self._REQ_INTERVAL))
+        self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))
 
         self._access_token = "RENEW *NOW*"
         self._token_expiration_ts = datetime.datetime.now()  # Typically, some future timestamp.

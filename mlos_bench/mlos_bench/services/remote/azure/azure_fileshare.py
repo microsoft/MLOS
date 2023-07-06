@@ -9,7 +9,7 @@ A collection FileShare functions for interacting with Azure File Shares.
 import os
 import logging
 
-from typing import Set
+from typing import Any, Dict, Optional, Set
 
 from azure.storage.fileshare import ShareClient
 
@@ -27,7 +27,10 @@ class AzureFileShareService(FileShareService):
 
     _SHARE_URL = "https://{account_name}.file.core.windows.net/{fs_name}"
 
-    def __init__(self, config: dict, global_config: dict, parent: Service):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new file share Service for Azure environments with a given config.
 
@@ -45,7 +48,7 @@ class AzureFileShareService(FileShareService):
         super().__init__(config, global_config, parent)
 
         check_required_params(
-            config, {
+            self.config, {
                 "storageAccountName",
                 "storageFileShareName",
                 "storageAccountKey",
@@ -54,10 +57,10 @@ class AzureFileShareService(FileShareService):
 
         self._share_client = ShareClient.from_share_url(
             AzureFileShareService._SHARE_URL.format(
-                account_name=config["storageAccountName"],
-                fs_name=config["storageFileShareName"],
+                account_name=self.config["storageAccountName"],
+                fs_name=self.config["storageFileShareName"],
             ),
-            credential=config["storageAccountKey"],
+            credential=self.config["storageAccountKey"],
         )
 
     def download(self, remote_path: str, local_path: str, recursive: bool = True) -> None:

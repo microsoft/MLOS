@@ -23,9 +23,11 @@ class Service:
     """
 
     @classmethod
-    def new(cls, class_name: str, config: dict,
-            global_config: Optional[Dict[str, Any]],
-            parent: Optional["Service"]) -> "Service":
+    def new(cls,
+            class_name: str,
+            config: Optional[Dict[str, Any]] = None,
+            global_config: Optional[Dict[str, Any]] = None,
+            parent: Optional["Service"] = None) -> "Service":
         """
         Factory method for a new service with a given config.
 
@@ -51,7 +53,8 @@ class Service:
         """
         return instantiate_from_config(cls, class_name, config, global_config, parent)
 
-    def __init__(self, config: Optional[dict] = None,
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional["Service"] = None):
         """
@@ -81,7 +84,7 @@ class Service:
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Service: %s Config:\n%s", self, json.dumps(self.config, indent=2))
-            _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config, indent=2))
+            _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config or {}, indent=2))
             _LOG.debug("Service: %s Parent mixins: %s", self,
                        [] if parent is None else list(parent._services.keys()))
 

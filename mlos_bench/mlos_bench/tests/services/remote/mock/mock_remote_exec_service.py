@@ -6,6 +6,8 @@
 A collection Service functions for mocking remote script execution.
 """
 
+from typing import Any, Dict, Optional
+
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.tests.services.remote.mock import mock_operation
@@ -16,7 +18,9 @@ class MockRemoteExecService(Service, SupportsRemoteExec):
     Mock remote script execution service.
     """
 
-    def __init__(self, config: dict, global_config: dict, parent: Service):
+    def __init__(self, config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new instance of mock remote exec service.
 

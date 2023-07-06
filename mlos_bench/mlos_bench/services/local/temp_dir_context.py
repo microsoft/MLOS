@@ -26,7 +26,8 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
     This class is not supposed to be used as a standalone service.
     """
 
-    def __init__(self, config: Optional[dict] = None,
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
         """

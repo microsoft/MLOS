@@ -7,7 +7,7 @@ A collection Service functions for mocking local exec.
 """
 
 import logging
-from typing import Iterable, Mapping, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, TYPE_CHECKING
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
@@ -24,8 +24,8 @@ class MockLocalExecService(TempDirContextService, SupportsLocalExec):
     Mock methods for LocalExecService testing.
     """
 
-    def __init__(self, config: Optional[dict] = None,
-                 global_config: Optional[dict] = None,
+    def __init__(self, config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
         super().__init__(config, global_config, parent)
         self.register([self.local_exec])
