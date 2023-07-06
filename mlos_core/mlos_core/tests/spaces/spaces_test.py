@@ -148,6 +148,10 @@ class BaseConversion(metaclass=ABCMeta):
 
         # uniform float
         assert_is_uniform(uniform)
+
+        # Check that we get both ends of the sampled range returned to us.
+        assert input_space['c'].lower in integer_uniform
+        assert input_space['c'].upper in integer_uniform
         # integer uniform
         assert_is_uniform(integer_uniform)
 
