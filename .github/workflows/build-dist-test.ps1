@@ -57,11 +57,6 @@ if ($LASTEXITCODE -ne 0) {
 }
 # Add a few extras we have to pull in from conda-forge.
 # See Also: mlos-windows.yml
-conda install -y -v -n mlos-dist-test conda-forge::GPy
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Failed to install GPy dependencies."
-    exit $LASTEXITCODE
-}
 # FIXME: conda on Windows doesn't appear to respect ">=0.9.0" as a version constraint despite various quoting tweaks.
 conda install -y -v -n mlos-dist-test -c conda-forge 'pyrfr=0.9'
 if ($LASTEXITCODE -ne 0) {
