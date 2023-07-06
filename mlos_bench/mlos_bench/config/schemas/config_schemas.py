@@ -14,6 +14,9 @@ from typing import Dict, Iterator, Mapping
 import json         # schema files are pure json - no comments
 import jsonschema
 
+from referencing import Registry, Resource
+from referencing.jsonschema import DRAFT202012
+
 from mlos_bench.util import path_join
 
 _LOG = logging.getLogger(__name__)
@@ -39,6 +42,7 @@ class SchemaStore(Mapping):
 
     # A class member mapping of schema id to schema object.
     _SCHEMA_STORE: Dict[str, dict] = {}
+    _REGISTRY: Registry = Registry()
 
     def __len__(self) -> int:
         return self._SCHEMA_STORE.__len__()
@@ -55,6 +59,8 @@ class SchemaStore(Mapping):
     @classmethod
     def _load_schemas(cls) -> None:
         """Loads all schemas and subschemas into the schema store for the validator to reference."""
+        if cls._SCHEMA_STORE:
+            return
         for root, _, files in walk(CONFIG_SCHEMA_DIR):
             for file_name in files:
                 if not file_name.endswith(".json"):
@@ -69,6 +75,23 @@ class SchemaStore(Mapping):
                     assert "$id" in schema
                     assert schema["$id"] not in cls._SCHEMA_STORE
                     cls._SCHEMA_STORE[schema["$id"]] = schema
+
+    @classmethod
+    def _load_registry(cls) -> None:
+        """Also store them in a Registry object for referencing by recent versions of jsonschema."""
+        if not cls._SCHEMA_STORE:
+            cls._load_schemas()
+        cls._REGISTRY = Registry().with_resources([
+            (url, Resource.from_contents(schema, default_specification=DRAFT202012))
+            for url, schema in cls._SCHEMA_STORE.items()
+        ])
+
+    @property
+    def registry(self) -> Registry:
+        """Returns a Registry object with all the schemas loaded."""
+        if not self._REGISTRY:
+            self._load_registry()
+        return self._REGISTRY
 
 
 SCHEMA_STORE = SchemaStore()
@@ -112,5 +135,7 @@ class ConfigSchema(Enum):
         if _SKIP_VALIDATION:
             _LOG.warning("%s is set - skip schema validation", _VALIDATION_ENV_FLAG)
         else:
-            resolver: jsonschema.RefResolver = jsonschema.RefResolver.from_schema(self.schema, store=SCHEMA_STORE)
-            jsonschema.validate(instance=config, schema=self.schema, resolver=resolver)
+            jsonschema.Draft202012Validator(
+                schema=self.schema,
+                registry=SCHEMA_STORE.registry,     # type: ignore[call-arg]
+            ).validate(config)
