@@ -10,7 +10,7 @@ import abc
 import logging
 from contextlib import nullcontext
 from tempfile import TemporaryDirectory
-from typing import Optional, Union
+from typing import Any, Dict, Optional, Union
 
 from mlos_bench.services.base_service import Service
 
@@ -26,7 +26,10 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
     This class is not supposed to be used as a standalone service.
     """
 
-    def __init__(self, config: Optional[dict] = None, parent: Optional[Service] = None):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new instance of a service that provides temporary directory context
         for local exec service.
@@ -36,10 +39,12 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
         config : dict
             Free-format dictionary that contains parameters for the service.
             (E.g., root path for config files, etc.)
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
         self._temp_dir = self.config.get("temp_dir")
         self.register([self.temp_dir_context])
 
