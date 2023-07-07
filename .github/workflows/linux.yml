@@ -113,8 +113,8 @@ jobs:
         conda config --show-sources
         conda list -n $CONDA_ENV_NAME
         ls -l $CONDA_DIR/envs/$CONDA_ENV_NAME/lib/python*/site-packages/
-        conda run -n base pip cache dir
-        conda run -n base pip cache info
+        conda run -n $CONDA_ENV_NAME pip cache dir
+        conda run -n $CONDA_ENV_NAME pip cache info
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
