@@ -17,8 +17,8 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
-  - python<3.11
+  - swig
+  - python
   - pip:
     - bump2version
     - check-jsonschema
