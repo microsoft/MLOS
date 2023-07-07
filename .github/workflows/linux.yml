@@ -64,12 +64,14 @@ jobs:
         # to parse this file since it expects all env vars to be declared above.
         echo "CONDA_DIR=$CONDA" >> $GITHUB_ENV
 
-    - name: Restore cached conda environment
+    #- name: Restore cached conda environment
+    - name: Restore cached conda packages
       id: restore-conda-cache
       if: ${{ github.event_name != 'schedule' }}
       uses: actions/cache@v3
       with:
-        path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
+        #path: ${{ env.CONDA_DIR }}/envs/${{ env.CONDA_ENV_NAME }}
+        path: ${{ env.CONDA_DIR }}/pkgs
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
           conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_NAME }}.yml') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
@@ -111,6 +113,8 @@ jobs:
         conda config --show-sources
         conda list -n $CONDA_ENV_NAME
         ls -l $CONDA_DIR/envs/$CONDA_ENV_NAME/lib/python*/site-packages/
+        conda run $CONDA_ENV_NAME pip cache dir
+        conda run $CONDA_ENV_NAME pip cache info
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
