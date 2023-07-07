@@ -110,7 +110,7 @@ jobs:
         conda config --show
         conda config --show-sources
         conda list -n $CONDA_ENV_NAME
-        ls -l $CONDA_DIR/envs/$CONDA_ENV_NAME/lib/python*/site-packages/attrs*
+        ls -l $CONDA_DIR/envs/$CONDA_ENV_NAME/lib/python*/site-packages/
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
