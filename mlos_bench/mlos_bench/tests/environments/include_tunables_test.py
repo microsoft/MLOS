@@ -7,6 +7,7 @@ Test the selection of tunables / tunable groups for the environment.
 """
 
 from mlos_bench.environments.mock_env import MockEnv
+from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -122,3 +123,54 @@ def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
         "const_param1": 10,
         "const_param2": "foo",
     }
+
+
+def test_loader_level_include() -> None:
+    """
+    Make sure only the selected tunable groups are available to the environment,
+    the set is not changed after calling the `.setup()` method.
+    """
+    env_json = {
+        "class": "mlos_bench.environments.mock_env.MockEnv",
+        "name": "Test Env",
+        "include_tunables": [
+            "environments/os/linux/boot/linux-boot-tunables.jsonc"
+        ],
+        "config": {
+            "tunable_params": ["linux-kernel-boot"],
+            "const_args": {
+                "const_param1": 10,
+                "const_param2": "foo",
+            },
+        },
+    }
+    loader = ConfigPersistenceService({
+        "config_path": [
+            "mlos_bench/config",
+            "mlos_bench/examples",
+        ]
+    })
+    env = loader.build_environment(config=env_json, tunables=TunableGroups())
+    expected_params = {
+        "align_va_addr": "on",
+        "idle": "halt",
+        "ima.ahash_bufsize": 4096,
+        "noautogroup": "",
+        "nohugevmalloc": "",
+        "nohalt": "",
+        "nohz": "",
+        "no-kvmapf": "",
+        "nopvspin": "",
+    }
+    assert env.tunable_params.get_param_values() == expected_params
+
+    expected_params["align_va_addr"] = "off"
+    tunables = env.tunable_params.copy().assign({"align_va_addr": "off"})
+    assert env.setup(tunables)
+    # Make sure the set of tunables does not change after the setup:
+    assert env.parameters == {
+        **expected_params,
+        "const_param1": 10,
+        "const_param2": "foo",
+    }
+    assert env.tunable_params.get_param_values() == expected_params
