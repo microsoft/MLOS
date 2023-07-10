@@ -48,8 +48,10 @@ class CompositeEnv(Environment):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
         """
-        super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
+        super().__init__(name=name, config=config, global_config=global_config,
+                         tunables=tunables, service=service)
 
+        _LOG.debug("Build composite environment '%s' START: %s", self, self.tunable_params)
         self._children: List[Environment] = []
 
         # To support trees of composite environments (e.g. for multiple VM experiments),
@@ -61,12 +63,16 @@ class CompositeEnv(Environment):
 
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
-                    child_config_file, self._tunable_params, global_config, self._const_args, self._service):
+                    child_config_file, self._tunable_params, global_config,
+                    self._const_args, self._service):
                 self._add_child(env)
 
         for child_config in config.get("children", []):
             self._add_child(self._config_loader_service.build_environment(
-                child_config, self._tunable_params, global_config, self._const_args, self._service))
+                child_config, self._tunable_params, global_config,
+                self._const_args, self._service))
+
+        _LOG.debug("Build composite environment '%s' END: %s", self, self.tunable_params)
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
@@ -102,6 +108,7 @@ class CompositeEnv(Environment):
         Add a new child environment to the composite environment.
         This method is called from the constructor only.
         """
+        _LOG.debug("Merge tunables: '%s' <- '%s' :: %s", self, env, env.tunable_params)
         self._children.append(env)
         self._tunable_params.merge(env.tunable_params)
 

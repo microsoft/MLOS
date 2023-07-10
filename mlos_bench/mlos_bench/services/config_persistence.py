@@ -238,7 +238,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             tunables = self._load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
         inst = instantiate_from_config(base_cls, class_name, tunables, service, class_config)
-        _LOG.info("Created: %s", inst)
+        _LOG.info("Created: %s %s", base_cls.__name__, inst)
         return inst
 
     def build_environment(self,     # pylint: disable=too-many-arguments
@@ -516,8 +516,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             The larger collection of tunable parameters.
         """
         _LOG.info("Load tunables: '%s'", json_file_names)
+        tunables = parent.copy()
         for fname in json_file_names:
             config = self.load_config(fname, ConfigSchema.TUNABLE_PARAMS)
             assert isinstance(config, dict)
-            parent.merge(TunableGroups(config))
-        return parent
+            tunables.merge(TunableGroups(config))
+        return tunables
