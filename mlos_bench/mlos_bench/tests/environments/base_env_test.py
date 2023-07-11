@@ -30,6 +30,20 @@ def test_expand_groups() -> None:
         _GROUPS) == ["begin", "c", "d", "efg", "end"]
 
 
+def test_expand_groups_empty_input() -> None:
+    """
+    Make sure an empty group stays empty.
+    """
+    assert Environment._expand_groups([], _GROUPS) == []
+
+
+def test_expand_groups_empty_list() -> None:
+    """
+    Make sure an empty group expansion works properly.
+    """
+    assert not Environment._expand_groups(["$empty"], _GROUPS)
+
+
 def test_expand_groups_unknown() -> None:
     """
     Make sure we fail on unknown $GROUP names expansion.
