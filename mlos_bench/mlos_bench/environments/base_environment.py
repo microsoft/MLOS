@@ -9,7 +9,7 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -118,13 +118,46 @@ class Environment(metaclass=abc.ABCMeta):
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
             tunables = TunableGroups()
 
-        self._tunable_params = tunables.subgroup(config.get("tunable_params", []))
+        groups = self._expand_groups(
+            config.get("tunable_params", []),
+            (global_config or {}).get("tunable_params_map", {}))
+        _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
+
+        self._tunable_params = tunables.subgroup(groups)
         self._params = self._combine_tunables(self._tunable_params)
-        _LOG.debug("Parameters for %s :: %s", name, self._params)
+        _LOG.debug("Parameters for '%s' :: %s", name, self._params)
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Config for: %s\n%s",
+            _LOG.debug("Config for: '%s'\n%s",
                        name, json.dumps(self.config, indent=2))
+
+    @staticmethod
+    def _expand_groups(groups: Iterable[str],
+                       groups_exp: Dict[str, Union[str, Sequence[str]]]) -> List[str]:
+        """
+        Expand `$tunable_group` into actual names of the tunable groups.
+
+        Parameters
+        ----------
+        groups : List[str]
+            Names of the groups of tunables, maybe with `$` prefix (subject to expansion).
+        groups_exp : dict
+            A dictionary that maps dollar variables for tunable groups to the lists
+            of actual tunable groups IDs.
+
+        Returns
+        -------
+        groups : List[str]
+            A flat list of tunable groups IDs for the environment.
+        """
+        res = []
+        for grp in groups:
+            if grp[:1] == "$":
+                add_groups = groups_exp[grp[1:]]
+                res += [add_groups] if isinstance(add_groups, str) else add_groups
+            else:
+                res.append(grp)
+        return res
 
     @property
     def _config_loader_service(self) -> "SupportsConfigLoading":
@@ -224,7 +257,10 @@ class Environment(metaclass=abc.ABCMeta):
         """
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
-
+        # Assign new values to the environment's tunable parameters:
+        groups = list(self._tunable_params.get_covariant_group_names())
+        self._tunable_params.assign(tunables.get_param_values(groups))
+        # Combine tunables, const_args, and global config into `self._params`:
         self._params = self._combine_tunables(tunables)
         merge_parameters(dest=self._params, source=global_config)
 

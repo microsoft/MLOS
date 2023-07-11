@@ -94,15 +94,20 @@ class Launcher:
 
         self.environment: Environment = self._config_loader.load_environment(
             self.root_env_config, TunableGroups(), self.global_config, service=self._parent_service)
+        _LOG.info("Init environment: %s", self.environment)
 
         # NOTE: Init tunable values *after* the Environment, but *before* the Optimizer
         self.tunables = self._init_tunable_values(
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
             args.tunable_values or config.get("tunable_values", []))
+        _LOG.info("Init tunables: %s", self.tunables)
 
         self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
+        _LOG.info("Init optimizer: %s", self.optimizer)
+
         self.storage = self._load_storage(args.storage or config.get("storage"))
+        _LOG.info("Init storage: %s", self.storage)
 
         self.teardown = args.teardown or config.get("teardown", True)
 
@@ -228,17 +233,21 @@ class Launcher:
         from given JSON files, if specified.
         """
         tunables = self.environment.tunable_params
+        _LOG.debug("Init tunables: default = %s", tunables)
 
         if random_init:
             tunables = MockOptimizer(
                 tunables=tunables, service=None,
                 config={"start_with_defaults": False, "seed": seed}).suggest()
+            _LOG.debug("Init tunables: random = %s", tunables)
 
         if args_tunables is not None:
             for data_file in args_tunables:
                 values = self._config_loader.load_config(data_file, ConfigSchema.TUNABLE_VALUES)
                 assert isinstance(values, Dict)
                 tunables.assign(values)
+                _LOG.debug("Init tunables: load %s = %s", data_file, tunables)
+
         return tunables
 
     def _load_optimizer(self, args_optimizer: Optional[str]) -> Optimizer:
