@@ -257,7 +257,10 @@ class Environment(metaclass=abc.ABCMeta):
         """
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
-
+        # Assign new values to the environment's tunable parameters:
+        groups = list(self._tunable_params.get_covariant_group_names())
+        self._tunable_params.assign(tunables.get_param_values(groups))
+        # Combine tunables, const_args, and global config into `self._params`:
         self._params = self._combine_tunables(tunables)
         merge_parameters(dest=self._params, source=global_config)
 
