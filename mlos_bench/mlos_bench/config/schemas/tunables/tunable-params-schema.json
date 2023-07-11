@@ -122,6 +122,7 @@
                     "$ref": "#/$defs/tunable_param"
                 }
             },
+            "minProperties": 1,
             "unevaluatedProperties": false
         },
         "covariant_tunable_group": {
@@ -156,5 +157,6 @@
             "$ref": "#/$defs/covariant_tunable_group"
         }
     },
+    "minProperties": 1,
     "unevaluatedProperties": false
 }
