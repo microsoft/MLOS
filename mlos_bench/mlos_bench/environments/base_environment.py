@@ -120,7 +120,7 @@ class Environment(metaclass=abc.ABCMeta):
 
         groups = self._expand_groups(
             config.get("tunable_params", []),
-            (global_config or {}).get("tunable_params", {}))
+            (global_config or {}).get("tunable_params_map", {}))
         _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
 
         self._tunable_params = tunables.subgroup(groups)
