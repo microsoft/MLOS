@@ -27,6 +27,7 @@
         ],
         "read_results_file": "/tmp/results.csv",
         "dump_params_file": "/tmp/dump_params.json",
+        "dump_meta_file": "/tmp/dump_params_meta.json",
         "download": [
             {
                 "from": "https://some-host/some-path/some-file.tar.gz",
