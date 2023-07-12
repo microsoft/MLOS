@@ -67,6 +67,7 @@ class LocalEnv(ScriptEnv):
         self._temp_dir = self.config.get("temp_dir")
 
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
+        self._dump_meta_file: Optional[str] = self.config.get("dump_meta_file")
         self._read_results_file: Optional[str] = self.config.get("read_results_file")
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
@@ -102,8 +103,16 @@ class LocalEnv(ScriptEnv):
                 _LOG.debug("Dump tunables to file: %s", fname)
                 with open(fname, "wt", encoding="utf-8") as fh_tunables:
                     # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
-                    json.dump(tunables.get_param_values(
-                        self._tunable_params.get_covariant_group_names()), fh_tunables)
+                    json.dump(tunables.get_param_values(), fh_tunables)
+
+            if self._dump_meta_file:
+                fname = path_join(temp_dir, self._dump_meta_file)
+                _LOG.debug("Dump tunables metadata to file: %s", fname)
+                with open(fname, "wt", encoding="utf-8") as fh_meta:
+                    json.dump({
+                        tunable.name: tunable.meta
+                        for (tunable, _group) in tunables if tunable.meta
+                    }, fh_meta)
 
             if self._script_setup:
                 return_code = self._local_exec(self._script_setup, temp_dir)

@@ -117,5 +117,9 @@
         "editor.defaultFormatter": "ms-python.autopep8",
         "editor.formatOnSave": true,
         "editor.formatOnSaveMode": "modifications"
-    }
+    },
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false
 }

@@ -16,6 +16,10 @@
                     "description": "Path to a file to dump the parameters to.",
                     "type": "string"
                 },
+                "dump_meta_file": {
+                    "description": "Path to a file to dump the tunables' metadata to.",
+                    "type": "string"
+                },
                 "read_results_file": {
                     "description": "Path to a file to read the results from.",
                     "type": "string",
