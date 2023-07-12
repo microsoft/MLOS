@@ -103,7 +103,7 @@ class LocalEnv(ScriptEnv):
                 _LOG.debug("Dump tunables to file: %s", fname)
                 with open(fname, "wt", encoding="utf-8") as fh_tunables:
                     # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
-                    json.dump(tunables.get_param_values(), fh_tunables)
+                    json.dump(self._tunable_params.get_param_values(), fh_tunables)
 
             if self._dump_meta_file:
                 fname = path_join(temp_dir, self._dump_meta_file)
@@ -111,7 +111,7 @@ class LocalEnv(ScriptEnv):
                 with open(fname, "wt", encoding="utf-8") as fh_meta:
                     json.dump({
                         tunable.name: tunable.meta
-                        for (tunable, _group) in tunables if tunable.meta
+                        for (tunable, _group) in self._tunable_params if tunable.meta
                     }, fh_meta)
 
             if self._script_setup:
