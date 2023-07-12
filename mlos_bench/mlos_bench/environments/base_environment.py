@@ -150,7 +150,7 @@ class Environment(metaclass=abc.ABCMeta):
         groups : List[str]
             A flat list of tunable groups IDs for the environment.
         """
-        res = []
+        res: List[str] = []
         for grp in groups:
             if grp[:1] == "$":
                 add_groups = groups_exp[grp[1:]]
