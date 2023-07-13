@@ -100,7 +100,8 @@ class Launcher:
         self.tunables = self._init_tunable_values(
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
-            config.get("tunable_values", []) + (args.tunable_values or []))
+            config.get("tunable_values", []) + (args.tunable_values or [])
+        )
         _LOG.info("Init tunables: %s", self.tunables)
 
         self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
