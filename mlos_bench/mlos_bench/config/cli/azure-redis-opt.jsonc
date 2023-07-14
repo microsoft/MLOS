@@ -10,7 +10,7 @@
         "mlos_bench/mlos_bench/tests/config"
     ],
 
-    "environment": "environments/composite/env-azure-ubuntu-redis.jsonc",
+    "environment": "environments/root/root-azure-redis.jsonc",
     "optimizer": "optimizers/mlos_core_flaml.jsonc",
     "storage": "storage/sqlite.jsonc",
 
