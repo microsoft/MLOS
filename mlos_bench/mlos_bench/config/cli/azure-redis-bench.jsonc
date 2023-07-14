@@ -6,6 +6,7 @@
 {
     "config_path": [
         "mlos_bench/mlos_bench/config",
+        "mlos_bench/mlos_bench/config/experiments",
         "mlos_bench/mlos_bench/tests/config"
     ],
 
