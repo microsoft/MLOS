@@ -7,6 +7,11 @@
         "poll_configs": {
             "type": "object",
             "properties": {
+                "requestTimeout": {
+                    "description": "Request timeout in seconds.",
+                    "type": "number",
+                    "minimum": 1
+                },
                 "pollInterval": {
                     "description": "Poll interval in seconds.",
                     "type": "number",
@@ -29,6 +34,5 @@
             },
             "minProperties": 1
         }
-
     }
 }
