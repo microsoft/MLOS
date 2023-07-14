@@ -48,13 +48,15 @@
                         "$mountPoint/$experimentId/$trialId/scripts/setup-app.sh"
                     ],
                     "run": [
+                        "mkdir -p /tmp/mlos_bench/output/",
                         "$mountPoint/$experimentId/$trialId/scripts/run-workload.sh",
                         "mkdir -p $mountPoint/$experimentId/$trialId/output/",
                         "cp -r /tmp/mlos_bench/output/* $mountPoint/$experimentId/$trialId/output/"
                     ],
                     "teardown": [
                         "$mountPoint/$experimentId/$trialId/scripts/cleanup-workload.sh",
-                        "$mountPoint/$experimentId/$trialId/scripts/cleanup-app.sh"
+                        "$mountPoint/$experimentId/$trialId/scripts/cleanup-app.sh",
+                        "rm -r /tmp/mlos_bench/"
                     ]
                 }
             },
