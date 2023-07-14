@@ -6,7 +6,7 @@
 
     "config": {
         "minimize": "score",
-        "max_iterations": 20,
+        "max_iterations": 100,
         "optimizer_type": "FLAML"
     }
 }

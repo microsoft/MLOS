@@ -6,19 +6,16 @@
 {
     "config_path": [
         "mlos_bench/mlos_bench/config",
+        "mlos_bench/mlos_bench/config/experiments",
         "mlos_bench/mlos_bench/tests/config"
     ],
 
     "environment": "environments/composite/env-azure-ubuntu-redis.jsonc",
-    "optimizer": "optimizers/one_shot_opt.jsonc",
+    "optimizer": "optimizers/mlos_core_flaml.jsonc",
     "storage": "storage/sqlite.jsonc",
 
-    "tunable_values": [
-        "tunable-values/tunable-values-example.jsonc"
-    ],
-
     "globals": [
-        "global_config.json"
+        "global_config_azure.json"
     ],
 
     "experimentId": "RedisBench",
@@ -26,6 +23,6 @@
 
     "teardown": false,
 
-    "log_file": "azure-redis-1shot.log",
+    "log_file": "azure-redis-opt.log",
     "log_level": "DEBUG"
 }

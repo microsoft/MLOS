@@ -10,18 +10,18 @@
     ],
 
     "environment": "environments/composite/env-azure-ubuntu-redis.jsonc",
-    "optimizer": "optimizers/mlos_core_flaml.jsonc",
     "storage": "storage/sqlite.jsonc",
 
-    "globals": [
-        "global_config.json"
+    "tunable_values": [
+        "tunable-values/tunable-values-example.jsonc"
     ],
 
-    "experimentId": "RedisBench",
-    "trialId": 1,
+    "globals": [
+        "global_config_azure.json"
+    ],
 
     "teardown": false,
 
-    "log_file": "azure-redis-flaml.log",
+    "log_file": "azure-redis-bench.log",
     "log_level": "DEBUG"
 }
