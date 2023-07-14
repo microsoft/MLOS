@@ -41,7 +41,7 @@ def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
     Creates a dummy Azure VM service for tests that require it.
     """
     return AzureVMService(config={
-        "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+        "deploymentTemplatePath": "services/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
         "deploymentName": "TEST_DEPLOYMENT",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
