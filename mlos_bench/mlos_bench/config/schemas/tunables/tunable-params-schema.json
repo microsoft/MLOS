@@ -10,6 +10,10 @@
                 "description": {
                     "type": "string"
                 },
+                "meta": {
+                    "type": "object",
+                    "description": "Free-form metadata associated with the parameter"
+                },
                 "type": {
                     "const": "categorical"
                 },
@@ -27,7 +31,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special"]
+                "required": ["range", "special", "meta"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -43,6 +47,10 @@
                 },
                 "default": {
                     "type": "integer"
+                },
+                "meta": {
+                    "type": "object",
+                    "description": "Free-form metadata associated with the parameter"
                 },
                 "range": {
                     "type": "array",
@@ -62,7 +70,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "meta"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -75,6 +83,10 @@
                 },
                 "type": {
                     "const": "float"
+                },
+                "meta": {
+                    "type": "object",
+                    "description": "Free-form metadata associated with the parameter"
                 },
                 "default": {
                     "type": "number"
@@ -95,7 +107,7 @@
                     "uniqueItems": true
                 }
             },
-            "required": ["type", "default", "range"],
+            "required": ["type", "default", "range", "meta"],
             "not": {
                 "required": ["values"]
             },

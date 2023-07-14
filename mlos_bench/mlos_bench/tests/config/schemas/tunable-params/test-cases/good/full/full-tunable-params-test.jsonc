@@ -8,18 +8,21 @@
                 "type": "int",
                 "default": 10,
                 "range": [1, 500],
+                "meta": {"suffix": "MB"},
                 "special": [-1]
             },
             "float": {
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
+                "meta": {"scale": 1000, "prefix": "/proc/var/random/"},
                 "range": [1.1, 111.1],
                 "special": [-1.1]
             },
             "cat": {
                 "description": "Cat",
                 "type": "categorical",
+                "meta": {"quote": true},
                 "default": "yes",
                 "values": ["yes", "no"]
             }
@@ -36,6 +39,7 @@
                 "description": "Int",
                 "type": "int",
                 "default": 10,
+                "meta": {"suffix": "MB"},
                 "range": [1, 500],
                 "special": [-1]
             },
@@ -43,6 +47,7 @@
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
+                "meta": {"scale": 1000, "prefix": "/proc/var/random/"},
                 "range": [1.1, 111.1],
                 "special": [-1.1]
             },
@@ -50,6 +55,7 @@
                 "description": "Cat",
                 "type": "categorical",
                 "default": "yes",
+                "meta": {"quote": true},
                 "values": ["yes", "no"]
             }
         }
