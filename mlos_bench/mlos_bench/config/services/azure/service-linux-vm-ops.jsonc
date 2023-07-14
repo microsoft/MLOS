@@ -19,15 +19,12 @@
 
                     "storageAccountName": "PLACEHOLDER; e.g., osatsharedstorage",
                     "storageFileShareName": "PLACEHOLDER; e.g., os-autotune-file-share",
+                    "location": "PLACEHOLDER; e.g., westus2",
 
                     "virtualNetworkName": "PLACEHOLDER; e.g., mlos-2vms-vnet",
                     "subnetName": "PLACEHOLDER; e.g., mlos-2vms-subnet",
 
-                    "vmName_server": "PLACEHOLDER; e.g., mlos-server-vm",
-                    "vmName_client": "PLACEHOLDER; e.g., mlos-client-vm",
-
-                    "location": "PLACEHOLDER; e.g., westus2",
-
+                    "vmName": "PLACEHOLDER; e.g., os-autotune-linux-vm",
                     "vmSize": "PLACEHOLDER; e.g., Standard_B2s",
                     "ubuntuOSVersion": "PLACEHOLDER; e.g., 18.04-LTS"
                 },

@@ -9,6 +9,11 @@
     ],
 
     "config": {
+
+        "const_args": {
+            "mountPoint": "/mnt/osat_fs"
+        },
+
         "include_children": [
             "environments/vm/azure/provision-ubuntu-vm.jsonc",
             "environments/os/linux/boot/boot-ubuntu.jsonc",
