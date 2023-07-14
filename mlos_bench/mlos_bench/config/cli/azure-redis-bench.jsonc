@@ -2,7 +2,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 //
-
+// Run:
+// mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-bench.jsonc --globals experiment_RedisBench.jsonc --tunable_values tunable-values/tunable-values-example.jsonc
 {
     "config_path": [
         "mlos_bench/mlos_bench/config",
@@ -12,10 +13,6 @@
 
     "environment": "environments/root/root-azure-redis.jsonc",
     "storage": "storage/sqlite.jsonc",
-
-    "tunable_values": [
-        "tunable-values/tunable-values-example.jsonc"
-    ],
 
     "globals": [
         "global_config_azure.json"

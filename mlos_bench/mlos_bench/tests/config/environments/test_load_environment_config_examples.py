@@ -84,7 +84,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
 
 
 composite_configs = filter_configs(locate_config_examples(path_join(
-    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/composite/")))
+    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/root/")))
 assert composite_configs
 
 
