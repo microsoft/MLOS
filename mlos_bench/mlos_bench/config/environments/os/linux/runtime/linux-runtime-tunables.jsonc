@@ -21,15 +21,15 @@
                 "description": "If 1, the child thread runs first",
                 "type": "categorical",
                 "meta": {"name_prefix": "/proc/sys/kernel/"},
-                "default": 0,
-                "values": [0, 1]
+                "default": "0",
+                "values": ["0", "1"]
             },
             "sched_tunable_scaling": {
                 "description": "Enable tunable scaling",
                 "type": "categorical",
                 "meta": {"name_prefix": "/proc/sys/kernel/"},
-                "default": 1,
-                "values": [0, 1]
+                "default": "1",
+                "values": ["0", "1"]
             }
         }
     },

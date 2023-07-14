@@ -44,9 +44,9 @@ def test_launch_main_app(root_path: str,
     """
     with local_exec_service.temp_dir_context() as temp_dir:
 
-        log_path = path_join(temp_dir, "mock-1shot.log")
+        log_path = path_join(temp_dir, "mock-bench.log")
         cmd = "./mlos_bench/mlos_bench/run.py" + \
-              " --config mlos_bench/mlos_bench/tests/config/cli/mock-1shot.jsonc" + \
+              " --config mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc" + \
               f" --log_file '{log_path}'"
         (return_code, _stdout, _stderr) = local_exec_service.local_exec([cmd], cwd=root_path)
 
