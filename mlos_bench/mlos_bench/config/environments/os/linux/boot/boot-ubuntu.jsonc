@@ -29,7 +29,7 @@
                     ],
                     // Dump tunable parameters to a local JSON file:
                     "dump_params_file": "boot-params.json",
-                    "script_params": [
+                    "shell_env_params": [
                         "experimentId",
                         "trialId"
                     ],
@@ -59,7 +59,7 @@
                         "trialId"
                     ],
                     "wait_boot": true,
-                    "script_params": [
+                    "shell_env_params": [
                         "storageAccountName",
                         "storageFileShareName",
                         "storageAccountKey",
