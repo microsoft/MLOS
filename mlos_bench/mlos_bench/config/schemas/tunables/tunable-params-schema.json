@@ -107,9 +107,9 @@
                     "uniqueItems": true
                 }
             },
-            "required": ["type", "default", "range", "meta"],
+            "required": ["type", "default", "range"],
             "not": {
-                "required": ["values"]
+                "required": ["values", "meta"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
