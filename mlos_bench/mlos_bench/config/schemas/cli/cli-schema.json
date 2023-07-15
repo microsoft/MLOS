@@ -72,6 +72,18 @@
             "type": "number"
         },
 
+        "tunable_params_map": {
+            "description": "$VARIABLE mapping for groups of tunable parameters",
+            "type": "object",
+            "items": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "uniqueItems": true
+            }
+        },
+
         "tunable_values": {
             "description": "Path to the json config(s) describing the tunable values to use.",
             "$ref": "#/$defs/json_config_path_or_paths"
