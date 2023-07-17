@@ -111,9 +111,6 @@ class Environment(metaclass=abc.ABCMeta):
         self._is_ready = False
         self._const_args = config.get("const_args", {})
 
-        merge_parameters(dest=self._const_args, source=global_config,
-                         required_keys=config.get("required_args"))
-
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
             tunables = TunableGroups()
@@ -124,6 +121,14 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
 
         self._tunable_params = tunables.subgroup(groups)
+
+        # If a parameter comes from the tunables, do not require it in the const_args or globals
+        req_args = (
+            set(config.get("required_args", [])) -
+            set(self._tunable_params.get_param_values().keys())
+        )
+        merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
+
         self._params = self._combine_tunables(self._tunable_params)
         _LOG.debug("Parameters for '%s' :: %s", name, self._params)
 
