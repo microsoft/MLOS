@@ -78,8 +78,9 @@ class Launcher:
 
         self._parent_service = LocalExecService(parent=self._config_loader)
 
+        global_config_paths = config.get("globals", []) + (args.globals or [])
         self.global_config = self._load_config(
-            args.globals or config.get("globals", []),
+            global_config_paths,
             args.config_path or config.get("config_path", []),
             args_rest,
             {key: val for (key, val) in config.items() if key not in vars(args)},
