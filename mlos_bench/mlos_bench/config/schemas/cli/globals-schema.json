@@ -9,27 +9,34 @@
             "$comment": "Optionally allow the schema to be specified in the top level of the config, but make sure it matches the expected schema.",
             "type": "string",
             "pattern": "/schemas/cli/globals-schema.json$"
+        },
+        "tunable_params_map": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
         }
     },
-    "patternProperties": {
-        "^[^$]+$": {
-            "$comment": "Global configs are either strings, numbers, booleans, or nulls, or an array of the same.",
+    "additionalProperties": {
+        "$comment": "Global configs are either strings, numbers, booleans, or nulls, or an array of the same.",
+        "type": [
+            "string",
+            "number",
+            "boolean",
+            "null",
+            "array"
+        ],
+        "items": {
+            "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
             "type": [
                 "string",
                 "number",
                 "boolean",
-                "null",
-                "array"
-            ],
-            "items": {
-                "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
-                "type": [
-                    "string",
-                    "number",
-                    "boolean",
-                    "null"
-                ]
-            }
+                "null"
+            ]
         }
     },
     "not": {
