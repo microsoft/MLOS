@@ -17,7 +17,7 @@
             "virtualNetworkName": "vnet",
             "subnetName": "subnet",
             "networkSecurityGroupName": "nsg",
-            "ubuntuOSVersion": "18.04-LTS",
+            "ubuntuOSUrn": "Canonical:UbuntuServer:18.04-LTS:latest",
 
             "string": "bar",
             "int": 1,

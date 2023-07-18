@@ -24,7 +24,7 @@
                     "subnetName": "os-autotune-subnet",
                     "networkSecurityGroupName": "os-autotune-nsg",
 
-                    "ubuntuOSVersion": "18.04-LTS"
+                    "ubuntuOSUrn": "Canonical:UbuntuServer:18.04-LTS:latest",
                 },
 
                 "pollInterval": 10,
