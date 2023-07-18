@@ -39,12 +39,23 @@
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
     },
-    "ubuntuOSUrn": {
+    "ubuntuOSOffer": {
       "type": "string",
       "allowedValues": [
-          "Canonical:UbuntuServer:18.04-LTS:latest",
-          "Canonical:0001-com-ubuntu-server-focal:20_04-lts-gen2:latest",
-          "Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest"
+          "UbuntuServer",
+          "0001-com-ubuntu-server-focal",
+          "0001-com-ubuntu-server-jammy"
+      ],
+      "metadata": {
+        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
+      }
+    },
+    "ubuntuOSVersion": {
+      "type": "string",
+      "allowedValues": [
+          "18.04-LTS",
+          "20_04-lts-gen2",
+          "22_04-lts-gen2"
       ],
       "metadata": {
         "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
@@ -218,7 +229,10 @@
             }
           },
           "imageReference": {
-            "urn": "[parameters('ubuntuOSUrn')]"
+            "publisher": "Canonical",
+            "offer": "[parameters('ubuntuOSOffer')]",
+            "sku": "[parameters('ubuntuOSVersion')]",
+            "version": "latest"
           }
         },
         "networkProfile": {
