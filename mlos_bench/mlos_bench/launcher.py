@@ -78,10 +78,9 @@ class Launcher:
 
         self._parent_service = LocalExecService(parent=self._config_loader)
 
-        global_config_paths = config.get("globals", []) + (args.globals or [])
         self.global_config = self._load_config(
-            global_config_paths,
-            args.config_path or config.get("config_path", []),
+            config.get("globals", []) + (args.globals or []),
+            (args.config_path or []) + config.get("config_path", []),
             args_rest,
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
@@ -101,7 +100,8 @@ class Launcher:
         self.tunables = self._init_tunable_values(
             args.random_init or config.get("random_init", False),
             config.get("random_seed") if args.random_seed is None else args.random_seed,
-            args.tunable_values or config.get("tunable_values", []))
+            config.get("tunable_values", []) + (args.tunable_values or [])
+        )
         _LOG.info("Init tunables: %s", self.tunables)
 
         self.optimizer = self._load_optimizer(args.optimizer or config.get("optimizer"))
