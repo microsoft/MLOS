@@ -1,6 +1,9 @@
 {
     "name": "Setup Ubuntu VM",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
+    "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
+
     "config": {
         "children": [
             // Boot and shutdown Azure VM - all logic is in Python
@@ -15,8 +18,6 @@
             {
                 "name": "Generate boot parameters for a Ubuntu VM",
                 "class": "mlos_bench.environments.local.LocalFileShareEnv",
-
-                "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
 
                 "config": {
 
