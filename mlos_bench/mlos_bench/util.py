@@ -13,6 +13,7 @@ import json
 import logging
 import importlib
 import subprocess
+from string import Template
 from typing import Any, Dict, Iterable, Mapping, Optional, Tuple, Type, TypeVar, TYPE_CHECKING, Union
 
 _LOG = logging.getLogger(__name__)
@@ -51,6 +52,25 @@ def preprocess_dynamic_configs(*, dest: dict, source: Optional[dict] = None) -> 
         if isinstance(val, str) and val.startswith("$") and val[1:] in source:
             dest[key] = source[val[1:]]
     return dest
+
+
+def expand_string(s: str, params: dict) -> str:
+    """
+    Expands $var syntax in a string.
+
+    Parameters
+    ----------
+    s : str
+        String with $var expansions.
+    params : dict
+        Replacements for $var expansions.
+
+    Returns
+    -------
+    str
+        Expanded string.
+    """
+    return Template(s).safe_substitute(params)
 
 
 def merge_parameters(*, dest: dict, source: Optional[dict] = None,

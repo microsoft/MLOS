@@ -69,6 +69,8 @@ class LocalFileShareEnv(LocalEnv):
             "LocalEnv requires a service that supports file upload/download operations"
         self._file_share_service: SupportsFileShareOps = self._service
 
+        # TODO: Replace these with expand_string util functions?
+
         self._upload = self._template_from_to("upload")
         self._download = self._template_from_to("download")
 

@@ -18,7 +18,7 @@ from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import path_join
+from mlos_bench.util import expand_string, path_join
 
 _LOG = logging.getLogger(__name__)
 
@@ -150,9 +150,11 @@ class LocalEnv(ScriptEnv):
                 _LOG.debug("Not reading the data at: %s", self)
                 return (Status.SUCCEEDED, {})
 
+            # TODO: Test this!
+            results_file_path = expand_string(self._read_results_file, self.parameters)
             data: pandas.DataFrame = pandas.read_csv(
                 self._config_loader_service.resolve_path(
-                    self._read_results_file, extra_paths=[temp_dir]))
+                    results_file_path, extra_paths=[temp_dir]))
 
             _LOG.debug("Read data:\n%s", data)
             if len(data) != 1:
