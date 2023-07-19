@@ -266,12 +266,12 @@ class Environment(metaclass=abc.ABCMeta):
         # (Derived classes still have to check `self._tunable_params.is_updated()`).
         is_updated = self._tunable_params.is_updated()
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Tunable groups reset = %s :: %s", is_updated, {
+            _LOG.debug("Env '%s': Tunable groups reset = %s :: %s", self, is_updated, {
                 name: self._tunable_params.is_updated([name])
                 for name in self._tunable_params.get_covariant_group_names()
             })
         else:
-            _LOG.info("Tunable groups reset = %s", is_updated)
+            _LOG.info("Env '%s': Tunable groups reset = %s", self, is_updated)
 
         # Combine tunables, const_args, and global config into `self._params`:
         self._params = self._combine_tunables(tunables)
