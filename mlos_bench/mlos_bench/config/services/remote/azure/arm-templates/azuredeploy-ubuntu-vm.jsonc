@@ -27,7 +27,7 @@
       }
     },
     "adminPasswordOrKey": {
-      "type": "secureString",
+      "type": "string",
       "metadata": {
         "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
       }
