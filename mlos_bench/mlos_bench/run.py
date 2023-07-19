@@ -11,6 +11,7 @@ Note: this script is also available as a CLI tool via pip under the name "mlos_b
 See `--help` output for details.
 """
 
+import json
 import logging
 from typing import Optional, Tuple, Dict, Any
 
@@ -68,6 +69,7 @@ def _optimize(env: Environment,
 
     experiment_id = global_config["experimentId"].strip()
     trial_id = int(global_config.get("trialId", 1))
+    config_id = int(global_config.get("configId", -1))
 
     # Start new or resume the existing experiment. Verify that the
     # experiment configuration is compatible with the previous runs.
@@ -81,19 +83,32 @@ def _optimize(env: Environment,
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
 
-        # Load (tunable values, benchmark scores) to warm-up the optimizer.
-        # `.load()` returns data from ALL merged-in experiments and attempts
-        # to impute the missing tunable values.
-        (configs, scores, status) = exp.load()
-        opt.bulk_register(configs, scores, status)
+        if opt.supports_preload:
+            # Load (tunable values, benchmark scores) to warm-up the optimizer.
+            # `.load()` returns data from ALL merged-in experiments and attempts
+            # to impute the missing tunable values.
+            (configs, scores, status) = exp.load()
+            opt.bulk_register(configs, scores, status)
+            # Complete any pending trials.
+            for trial in exp.pending_trials():
+                _run(env, opt, trial, global_config)
+        else:
+            _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
-        # First, complete any pending trials.
-        for trial in exp.pending_trials():
-            _run(env, opt, trial, global_config)
-
-        # Then, run new trials until the optimizer is done.
+        # Now run new trials until the optimizer is done.
         while opt.not_converged():
+
             tunables = opt.suggest()
+
+            if config_id > 0:
+                tunable_values = exp.load_config(config_id)
+                tunables.assign(tunable_values)
+                _LOG.info("Load config from storage: %d", config_id)
+                if _LOG.isEnabledFor(logging.DEBUG):
+                    _LOG.debug("Config %d ::\n%s",
+                               config_id, json.dumps(tunable_values, indent=2))
+                config_id = -1
+
             trial = exp.new_trial(tunables)
             _run(env, opt, trial, global_config)
 

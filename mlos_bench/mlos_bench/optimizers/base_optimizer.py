@@ -68,6 +68,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         return self._opt_target
 
+    @property
+    def supports_preload(self) -> bool:
+        """
+        Return True if the optimizer supports pre-loading the data from previous experiments.
+        """
+        return True
+
     @abstractmethod
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None) -> bool:
