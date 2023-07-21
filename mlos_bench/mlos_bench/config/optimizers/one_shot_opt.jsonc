@@ -15,6 +15,7 @@
     ],
 
     "config": {
-        "minimize": "score"
+        "optimization_target": "score",
+        "optimization_direction": "min"
     }
 }
