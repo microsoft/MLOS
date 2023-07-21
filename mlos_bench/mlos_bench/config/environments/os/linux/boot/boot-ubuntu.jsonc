@@ -1,5 +1,5 @@
 {
-    "name": "Setup Ubuntu VM",
+    "name": "Boot-time Linux VM configuration",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
 
     "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],

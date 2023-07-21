@@ -1,5 +1,5 @@
 {
-    "name": "Setup Ubuntu VM",
+    "name": "Configure Linux VM at runtime",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
 
     "include_tunables": ["environments/os/linux/runtime/linux-runtime-tunables.jsonc"],
