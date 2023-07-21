@@ -154,6 +154,12 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def load_config(self, config_id: int) -> Dict[str, Any]:
+            """
+            Load tunable values for a given config ID.
+            """
+
+        @abstractmethod
         def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
