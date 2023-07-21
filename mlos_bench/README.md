@@ -188,11 +188,11 @@ All we have to do is specifying the [`Storage`](./mlos_bench/storage/) and [`Opt
 }
 ```
 
-> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-mlos-default-opt.jsonc](./mlos_bench/config/cli/azure-redis-mlos-default-opt.jsonc).
+> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-opt.jsonc](./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc).
 
 The only difference between the two configurations is that the latter has the `optimizer` parameter instead of using a fixed set of tunables via `tunable_values` option.
 It also stores the results of each trial in the SQLite3 database (configured via `storage`).
 
 > Note that any config parameter (or even all of them) can be overridden by the corresponding command-line options, e.g.
 >
-> `mlos_bench --config "config_opt.jsonc" --log_level 20 --trialId 1000`
+> `mlos_bench --config ./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_RedisBench.jsonc --max_iterations 5 --log_level DEBUG`
