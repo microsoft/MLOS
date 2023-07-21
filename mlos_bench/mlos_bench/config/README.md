@@ -6,7 +6,7 @@ These are meant to be used as examples and starting points for your own configur
 
 In general the `config` directory layout follows that of the `mlos_bench` module/directory layout (e.g. `remote` and `local` `Environments` making using of `Services`, etc., each with their own `json` configs and shell scripts.).
 
-Full end-to-end examples are provided in the [`cli`](./cli/) directory, and typically and make use of the [`CompositeEnvironments`](./environments/composite/) to combine multiple [`Environments`](./environments/), also referencing [`Services`](./services/), [`Storage`](./storage/), and [`Optimizer`](./optimizers/) configs, into a single [`mlos_bench`](../run.py) run.
+Full end-to-end examples are provided in the [`cli`](./cli/) directory, and typically and make use of the root [`CompositeEnvironments`](./environments/root/) to combine multiple [`Environments`](./environments/), also referencing [`Services`](./services/), [`Storage`](./storage/), and [`Optimizer`](./optimizers/) configs, into a single [`mlos_bench`](../run.py) run.
 
 ## Schemas
 
