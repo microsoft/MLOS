@@ -257,9 +257,22 @@ class Environment(metaclass=abc.ABCMeta):
         """
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
+
         # Assign new values to the environment's tunable parameters:
         groups = list(self._tunable_params.get_covariant_group_names())
         self._tunable_params.assign(tunables.get_param_values(groups))
+
+        # Write to the log whether the environment needs to be reset.
+        # (Derived classes still have to check `self._tunable_params.is_updated()`).
+        is_updated = self._tunable_params.is_updated()
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Env '%s': Tunable groups reset = %s :: %s", self, is_updated, {
+                name: self._tunable_params.is_updated([name])
+                for name in self._tunable_params.get_covariant_group_names()
+            })
+        else:
+            _LOG.info("Env '%s': Tunable groups reset = %s", self, is_updated)
+
         # Combine tunables, const_args, and global config into `self._params`:
         self._params = self._combine_tunables(tunables)
         merge_parameters(dest=self._params, source=global_config)
