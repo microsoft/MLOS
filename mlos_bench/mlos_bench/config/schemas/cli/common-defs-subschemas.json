@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/cli/common-defs-subschemas.json",
+    "title": "mlos_bench cli/globals common subschemas config",
+    "$comment": "Includes common subschemas for both cli configs and globals.",
+    "$defs": {
+        "tunable_params_map": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                },
+                "uniqueItems": true
+            }
+        }
+    }
+}

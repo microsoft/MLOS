@@ -11,13 +11,7 @@
             "pattern": "/schemas/cli/globals-schema.json$"
         },
         "tunable_params_map": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                }
-            }
+            "$ref": "./common-defs-subschemas.json#/$defs/tunable_params_map"
         }
     },
     "additionalProperties": {

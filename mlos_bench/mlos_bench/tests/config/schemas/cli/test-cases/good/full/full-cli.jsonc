@@ -1,6 +1,4 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/cli/cli-schema.json",
-
     "config_path": [
         "mlos_bench/mlos_bench/config",
         "mlos_bench/mlos_bench/tests/config"
@@ -20,6 +18,12 @@
     "globals": [
         "global_config.json"
     ],
+
+    "tunable_params_map": {
+        "linux-boot": [],
+        "linux-runtime": [],
+        "mysql": ["mysql-innodb", "mysql-buffer"]
+    },
 
     "experimentId": "RedisBench",
     "trialId": 1,

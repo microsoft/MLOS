@@ -29,6 +29,7 @@
         },
 
         "pollInterval": 1,
-        "pollTimeout": 60
+        "pollTimeout": 60,
+        "requestTimeout": 90
     }
 }
