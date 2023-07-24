@@ -135,7 +135,7 @@ We'll give more details on that below.
 
 ### 5. Create another config file for the parameters specific to your experiment
 
-Copy one of our examples, e.g., [`experiment_RedisBench.jsonc`](/mlos_bench/config/experiments/experiment_RedisBench.jsonc) and name it after your experiment, e.g. `experiment_MyBenchmark.jsonc`.
+Copy one of our examples, e.g., [`experiment_RedisBench.jsonc`](./mlos_bench/config/experiments/experiment_RedisBench.jsonc) and name it after your experiment, e.g. `experiment_MyBenchmark.jsonc`.
 
 In that file, you can specify any parameters that occur in your other configs, namely in `"const_args"` section of the Environment configs, or in `"config"` sections of your Service, Storage, or Optimizer configurations.
 
