@@ -4,6 +4,15 @@
     "title": "mlos_bench Tunable Params config",
 
     "$defs": {
+        "tunable_param_meta": {
+            "type": "object",
+            "additionalProperties": {
+                "type": ["array", "string", "boolean", "null", "number"],
+                "items": {
+                    "type": ["string", "boolean", "null", "number"]
+                }
+            }
+        },
         "tunable_param_categorical": {
             "type": "object",
             "properties": {
@@ -11,8 +20,7 @@
                     "type": "string"
                 },
                 "meta": {
-                    "type": "object",
-                    "description": "Free-form metadata associated with the parameter"
+                    "$ref": "#/$defs/tunable_param_meta"
                 },
                 "type": {
                     "const": "categorical"
@@ -31,7 +39,7 @@
             },
             "required": ["type", "default", "values"],
             "not": {
-                "required": ["range", "special", "meta"]
+                "required": ["range", "special"]
             },
             "$comment": "TODO: add check that default is in values",
             "unevaluatedProperties": false
@@ -42,15 +50,14 @@
                 "description": {
                     "type": "string"
                 },
+                "meta": {
+                    "$ref": "#/$defs/tunable_param_meta"
+                },
                 "type": {
                     "const": "int"
                 },
                 "default": {
                     "type": "integer"
-                },
-                "meta": {
-                    "type": "object",
-                    "description": "Free-form metadata associated with the parameter"
                 },
                 "range": {
                     "type": "array",
@@ -70,7 +77,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values", "meta"]
+                "required": ["values"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false
@@ -81,12 +88,11 @@
                 "description": {
                     "type": "string"
                 },
+                "meta": {
+                    "$ref": "#/$defs/tunable_param_meta"
+                },
                 "type": {
                     "const": "float"
-                },
-                "meta": {
-                    "type": "object",
-                    "description": "Free-form metadata associated with the parameter"
                 },
                 "default": {
                     "type": "number"
@@ -109,7 +115,7 @@
             },
             "required": ["type", "default", "range"],
             "not": {
-                "required": ["values", "meta"]
+                "required": ["values"]
             },
             "$comment": "TODO: add check that default is in range",
             "unevaluatedProperties": false

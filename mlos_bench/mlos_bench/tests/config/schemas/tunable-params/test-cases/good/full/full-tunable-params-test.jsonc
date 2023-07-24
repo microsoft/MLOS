@@ -15,14 +15,14 @@
                 "description": "Float",
                 "type": "float",
                 "default": 10.1,
-                "meta": {"scale": 1000, "prefix": "/proc/var/random/"},
+                "meta": {"scale": 1000, "prefix": "/proc/var/random/", "base": 2.71828},
                 "range": [1.1, 111.1],
                 "special": [-1.1]
             },
             "cat": {
                 "description": "Cat",
                 "type": "categorical",
-                "meta": {"quote": true},
+                "meta": {"quote": true, "list": ["a", "b", "c", 1, 2, 3]},
                 "default": "yes",
                 "values": ["yes", "no"]
             }
