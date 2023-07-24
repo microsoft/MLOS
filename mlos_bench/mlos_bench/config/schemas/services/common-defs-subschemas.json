@@ -21,6 +21,11 @@
                     "description": "Poll timeout in seconds.",
                     "type": "number",
                     "minimum": 1
+                },
+                "requestTimeout": {
+                    "description": "Request timeout in seconds.",
+                    "type": "number",
+                    "minimum": 1
                 }
             }
         },

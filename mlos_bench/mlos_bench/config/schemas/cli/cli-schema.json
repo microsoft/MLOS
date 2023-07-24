@@ -72,6 +72,10 @@
             "type": "number"
         },
 
+        "tunable_params_map": {
+            "$ref": "./common-defs-subschemas.json#/$defs/tunable_params_map"
+        },
+
         "tunable_values": {
             "description": "Path to the json config(s) describing the tunable values to use.",
             "$ref": "#/$defs/json_config_path_or_paths"
