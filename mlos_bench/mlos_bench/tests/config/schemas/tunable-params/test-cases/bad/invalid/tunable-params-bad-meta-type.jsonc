@@ -1,0 +1,13 @@
+{
+    "covariant_group_name-1": {
+        "cost": 1,
+        "params": {
+            "float": {
+                "type": "float",
+                "default": 0.5,
+                "range": [0, 1],
+                "meta": ["list", "not", "allowed"]
+            }
+        }
+    }
+}
