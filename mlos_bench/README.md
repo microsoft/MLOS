@@ -60,10 +60,10 @@ From here onwards we assume we are in the project root directory.
 Ensure you have a conda environment (`mlos`) set up for executing `mlos_bench`.
 Create and activate the environment with:
 
-    ```sh
-    conda env create -f conda-envs/mlos.yml
-    conda activate mlos
-    ```
+```sh
+conda env create -f conda-envs/mlos.yml
+conda activate mlos
+```
 
 ### 2. Make sure that you have Azure CLI tool installed and working
 
@@ -71,22 +71,22 @@ Create and activate the environment with:
 
 If necessary, login to Azure and set your default subscription:
 
-    ```powershell
-    # If using az cli for the first time, a login will be required:
-    az login
-    # Make sure that GSL subscription is your default:
-    az account set --subscription "..."
-    ```
+```powershell
+# If using az cli for the first time, a login will be required:
+az login
+# Make sure that GSL subscription is your default:
+az account set --subscription "..."
+```
 
 ### 3. Generate access tokens to interact with Azure resources
 
 A script at `./scripts/generate-azure-credentials-config.ps1` produces a JSON with Azure credentials.
 This data is in the format that can be used by our framework.
 
-    ```powershell
-    # If using for the az cli first time, a login will be required
-    ./scripts/generate-azure-credentials-config.ps1 > ./global_config_azure.json
-    ```
+```powershell
+# If using for the az cli first time, a login will be required
+./scripts/generate-azure-credentials-config.ps1 > ./global_config_azure.json
+```
 
 On Linux, use `./scripts/generate-azure-credentials-config.sh` (requires `az` and `jq` to be installed).
 
@@ -97,12 +97,12 @@ See [`mysql.jsonc`](./mlos_bench/config/storage/mysql.jsonc) or [`postgresql.jso
 Save your config in `./global_config_storage.jsonc` file.
 It should look like this:
 
-    ```jsonc
-    {
-        "host": "mysql-db.mysql.database.azure.com",
-        "password": "database_password"
-    }
-    ```
+```jsonc
+{
+    "host": "mysql-db.mysql.database.azure.com",
+    "password": "database_password"
+}
+```
 
 Any parameter that is not specified in `./global_config_storage.json` will be taken from the corresponding DB's config file, e.g., [`postgresql.jsonc`](./mlos_bench/config/storage/postgresql.jsonc).
 
@@ -146,9 +146,9 @@ In that file, you can specify any parameters that occur in your other configs, n
 
 Now we can run our configuration with `mlos_bench`:
 
-    ```sh
-    mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-bench.jsonc" --globals "experiment_MyBenchmark.jsonc"
-    ```
+```sh
+mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-bench.jsonc" --globals "experiment_MyBenchmark.jsonc"
+```
 
 This should run a single trial with the given tunable values (loaded from one or more files in the `"tunable_values"`), write the results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter in the CLI config).
 
@@ -162,9 +162,9 @@ Also, note that you don't have to provide full path to the `experiment_MyBenchma
 Searching for an optimal set of tunable parameters is very similar to running a single benchmark.
 All we have to do is specifying the [`Optimizer`](./mlos_bench/optimizers/) in the top-level configuration, like in our [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) example.
 
-    ```sh
-    mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc --max_iterations 10"
-    ```
+```sh
+mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc --max_iterations 10"
+```
 
 Note that again we use the command line option `--max_iterations` to override the default value from [`mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc).
 
