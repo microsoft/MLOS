@@ -9,6 +9,15 @@
             "$comment": "Optionally allow the schema to be specified in the top level of the config, but make sure it matches the expected schema.",
             "type": "string",
             "pattern": "/schemas/cli/globals-schema.json$"
+        },
+        "tunable_params_map": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
+            }
         }
     },
     "additionalProperties": {
@@ -32,7 +41,7 @@
     },
     "not": {
         "required": [
-            "tunable_values", "tunable_params_map"
+            "tunable_values"
         ]
     }
 }
