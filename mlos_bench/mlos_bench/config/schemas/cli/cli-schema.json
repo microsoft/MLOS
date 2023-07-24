@@ -73,15 +73,7 @@
         },
 
         "tunable_params_map": {
-            "description": "$VARIABLE mapping for groups of tunable parameters",
-            "type": "object",
-            "items": {
-                "type": "array",
-                "items": {
-                    "type": "string"
-                },
-                "uniqueItems": true
-            }
+            "$ref": "./common-defs-subschemas.json#/$defs/tunable_params_map"
         },
 
         "tunable_values": {
