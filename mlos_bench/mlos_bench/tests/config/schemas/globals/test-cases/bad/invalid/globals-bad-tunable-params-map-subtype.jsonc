@@ -1,0 +1,13 @@
+{
+    "foo": "bar",
+    "bar": "baz",
+    "num": 1,
+    "bool": true,
+    "object": {
+        // should be disallowed
+        "foo": "bar"
+    },
+    "tunable_params_map": {
+        "empty": null
+    }
+}

@@ -1,5 +1,5 @@
 {
-    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    //"$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "Azure FileShare Service configuration.",
 
     "class": "mlos_bench.services.remote.azure.azure_fileshare.AzureFileShareService",
@@ -9,6 +9,7 @@
         "storageAccountKey": "storage-account-key-blob",
 
         "pollInterval": 1,
-        "pollTimeout": 10
+        "pollTimeout": 10,
+        "requestTimeout": 10
     }
 }
