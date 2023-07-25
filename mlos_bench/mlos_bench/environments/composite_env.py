@@ -51,7 +51,13 @@ class CompositeEnv(Environment):
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
 
-        _LOG.debug("Build composite environment '%s' START: %s", self, self.tunable_params)
+        # By default, the Environment includes only the tunables explicitly specified
+        # in the "tunable_params" section of the config. `CompositeEnv`, however, must
+        # retain all tunables from its children environments plus the ones that come
+        # from the "include_tunables".
+        tunables = tunables.copy() if tunables else TunableGroups()
+
+        _LOG.debug("Build composite environment '%s' START: %s", self, tunables)
         self._children: List[Environment] = []
 
         # To support trees of composite environments (e.g. for multiple VM experiments),
@@ -63,16 +69,15 @@ class CompositeEnv(Environment):
 
         for child_config_file in config.get("include_children", []):
             for env in self._config_loader_service.load_environment_list(
-                    child_config_file, self._tunable_params, global_config,
-                    self._const_args, self._service):
-                self._add_child(env)
+                    child_config_file, tunables, global_config, self._const_args, self._service):
+                self._add_child(env, tunables)
 
         for child_config in config.get("children", []):
-            self._add_child(self._config_loader_service.build_environment(
-                child_config, self._tunable_params, global_config,
-                self._const_args, self._service))
+            env = self._config_loader_service.build_environment(
+                child_config, tunables, global_config, self._const_args, self._service)
+            self._add_child(env, tunables)
 
-        _LOG.debug("Build composite environment '%s' END: %s", self, self.tunable_params)
+        _LOG.debug("Build composite environment '%s' END: %s", self, self._tunable_params)
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
@@ -103,7 +108,7 @@ class CompositeEnv(Environment):
         return super().pprint(indent, level) + '\n' + '\n'.join(
             child.pprint(indent, level + 1) for child in self._children)
 
-    def _add_child(self, env: Environment) -> None:
+    def _add_child(self, env: Environment, tunables: TunableGroups) -> None:
         """
         Add a new child environment to the composite environment.
         This method is called from the constructor only.
@@ -111,6 +116,7 @@ class CompositeEnv(Environment):
         _LOG.debug("Merge tunables: '%s' <- '%s' :: %s", self, env, env.tunable_params)
         self._children.append(env)
         self._tunable_params.merge(env.tunable_params)
+        tunables.merge(env.tunable_params)
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
