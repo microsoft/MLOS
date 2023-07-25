@@ -35,5 +35,8 @@
         // Redis config parameter groups (see `redis-tunables.jsonc`):
         // ["redis"]
         "redis": []
-    }
+    },
+
+    "optimization_target": "score",
+    "optimization_direction": "min"
 }
