@@ -5,7 +5,8 @@
     "class": "mlos_bench.optimizers.MlosCoreOptimizer",
 
     "config": {
-        "minimize": "score",
+        "optimization_target": "score",
+        "optimization_direction": "min",
         "max_iterations": 100,
         "optimizer_type": "FLAML"
     }

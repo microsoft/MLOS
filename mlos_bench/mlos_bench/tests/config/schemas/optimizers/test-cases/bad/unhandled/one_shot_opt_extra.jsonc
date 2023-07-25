@@ -2,7 +2,7 @@
     "class": "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer",
 
     "config": {
-        "minimize": "score",
+        "optimization_target": "score",
         "extra_param": "should not be here"
     }
 }

@@ -12,16 +12,13 @@
             "$comment": "config properties common to all optimizer types.",
             "type": "object",
             "properties": {
-                "minimize": {
-                    "description": "The name of the metric to minimize.",
-                    "$comment": "In oneOf spec below require one of 'minimize' or 'maximize'.",
-                    "type": "string",
-                    "default": "score"
-                },
-                "maximize": {
-                    "description": "The name of the metric to maximize.",
-                    "$comment": "In oneOf spec below require one of 'minimize' or 'maximize'.",
+                "optimization_target": {
+                    "description": "The name of the metric to optimize.",
                     "type": "string"
+                },
+                "optimization_direction": {
+                    "description": "Whether to minimize or maximize the optimization target.",
+                    "enum": ["min", "max"]
                 },
                 "max_iterations": {
                     "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) iterations to run when we launch the app.",
@@ -36,10 +33,6 @@
                     "description": "If false, use the optimizer to suggest the initial configuration; if true (default), use the already assigned values for the first iteration.",
                     "type": "boolean"
                 }
-            },
-            "not": {
-                "$comment": "Require either 'minimize' or 'maximize' or neither, but not both.",
-                "required": ["minimize", "maximize"]
             }
         }
     },
