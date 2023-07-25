@@ -3,8 +3,6 @@
 
     "config": {
         "optimization_target": "score",
-        "space_adapter_type": null,
-        "optimizer_type": "RANDOM",
-        "random_seed": 0
+        "optimization_direction": "INVALID"
     }
 }
