@@ -59,5 +59,5 @@ def test_launch_main_app(root_path: str,
             ]
             assert len([
                 ln for ln in best_score_lines
-                if " best score: 64.8" in ln
+                if " best score: 65.67" in ln
             ]) == 1
