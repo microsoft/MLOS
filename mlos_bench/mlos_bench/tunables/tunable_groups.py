@@ -220,6 +220,8 @@ class TunableGroups:
         # pylint: disable=protected-access
         tunables = TunableGroups()
         for name in group_names:
+            if name not in self._tunable_groups:
+                raise KeyError(f"Unknown covariant group name '{name}' in tunable group {self}")
             tunables._add_group(self._tunable_groups[name])
         return tunables
 
