@@ -90,8 +90,8 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
                 if return_code != 0 and return_on_error:
                     break
 
-        stdout = "\n".join(stdout_list)
-        stderr = "\n".join(stderr_list)
+        stdout = "".join(stdout_list)
+        stderr = "".join(stderr_list)
 
         _LOG.debug("Run: stdout:\n%s", stdout)
         _LOG.debug("Run: stderr:\n%s", stderr)
@@ -122,8 +122,10 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         """
         cmd = shlex.split(script_line)
         script_path = self.config_loader_service.resolve_path(cmd[0])
-        if os.path.exists(script_path):
+        if os.path.exists(script_path) and not os.path.isdir(script_path):
             script_path = os.path.abspath(script_path)
+        else:
+            script_path = cmd[0]  # rollback to the original value
 
         cmd = [script_path] + cmd[1:]
         if script_path.strip().lower().endswith(".py"):
