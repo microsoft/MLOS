@@ -61,6 +61,15 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
         "storageAccountName": "foo",
         "storageAccountKey": "bar",
         "storageFileShareName": "baz",
+
+        # Assign some values to variadic tunables and required parameters present in the config examples.
+        "vmName": "vmTestName",
+        "tunable_params_map": {
+            "linux-runtime": ["linux-scheduler", "linux-swap"],
+            "linux-boot": ["linux-kernel-boot"],
+            "provision": ["azure-vm"],
+            "redis": ["redis"],
+        }
     }
 
     # Make sure we have the required services for the envs being used.
