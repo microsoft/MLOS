@@ -133,6 +133,7 @@ def test_run_script_read_csv(local_exec_service: LocalExecService) -> None:
             # Workaround for Python's subprocess module on Windows adding a
             # space inbetween the col1,col2 arg and the redirect symbol which
             # cmd poorly interprets as being part of the original string arg.
+            # Without this, we get "col2 " as the second column name.
             data.rename(str.rstrip, axis='columns', inplace=True)
         assert all(data.col1 == [111, 333])
         assert all(data.col2 == [222, 444])
