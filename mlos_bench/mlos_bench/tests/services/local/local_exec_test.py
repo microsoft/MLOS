@@ -5,6 +5,7 @@
 """
 Unit tests for the service to run the scripts locally.
 """
+import os
 import sys
 
 import pytest
@@ -126,6 +127,16 @@ def test_run_script_read_csv(local_exec_service: LocalExecService) -> None:
         assert return_code == 0
         assert stdout.strip() == ""
         assert stderr.strip() == ""
+
+        if sys.platform == 'win32':
+            # On Windows we need to remove the trailing ' ' from the CSV file
+            # that was written due to the way the Python recomposes shell
+            # expansions by reintroducing ' 's between lists of arguments.
+            with open(path_join(temp_dir, "output.csv"), "rt", encoding="utf-8") as fh_output:
+                lines = fh_output.readlines()
+            with open(path_join(temp_dir, "output.csv"), "wt", encoding="utf-8") as fh_output:
+                for line in lines:
+                    fh_output.write(line.rstrip() + os.linesep)
 
         data = pandas.read_csv(path_join(temp_dir, "output.csv"))
         assert all(data.col1 == [111, 333])

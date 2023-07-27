@@ -199,11 +199,11 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             env_copy.update(env)
             env = env_copy
 
-        _LOG.info("Run: %s", cmd)
-
         try:
             if sys.platform != 'win32':
                 cmd = [" ".join(cmd)]
+
+            _LOG.info("Run: %s", cmd)
 
             proc = subprocess.run(cmd, env=env or None, cwd=cwd, shell=True,
                                   text=True, check=False, capture_output=True)
