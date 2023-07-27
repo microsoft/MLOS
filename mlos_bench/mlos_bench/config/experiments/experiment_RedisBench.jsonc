@@ -26,7 +26,7 @@
 
         // Boot-time Linux parameter groups (see `linux-boot-tunables.jsonc`):
         // ["linux-kernel-boot"]
-        "linux-boot": [],
+        "linux-boot": ["linux-kernel-boot"],
 
         // Runtime Linux parameter groups (see `linux-runtime-tunables.jsonc`):
         // ["linux-swap", "linux-hugepages-2048kB", "linux-scheduler"]
