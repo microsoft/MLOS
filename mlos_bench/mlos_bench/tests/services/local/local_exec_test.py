@@ -10,13 +10,35 @@ import sys
 import pytest
 import pandas
 
-from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.services.local.local_exec import LocalExecService, split_cmdline
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.util import path_join
 
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to
 # `local_exec_service` fixture as both a function and a parameter.
+
+
+def test_split_cmdline() -> None:
+    """
+    Test splitting a commandline into subcommands.
+    """
+    cmdline = "(echo hello && echo world | tee > /tmp/test || echo foo; true)"
+    assert list(split_cmdline(cmdline)) == [
+        ['('],
+        ['echo', 'hello'],
+        ['&&'],
+        ['echo', 'world'],
+        ['|'],
+        ['tee'],
+        ['>'],
+        ['/tmp/test'],
+        ['||'],
+        ['echo', 'foo'],
+        [';'],
+        ['true'],
+        [')'],
+    ]
 
 
 @pytest.fixture
