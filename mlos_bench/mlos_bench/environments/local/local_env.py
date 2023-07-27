@@ -159,8 +159,6 @@ class LocalEnv(ScriptEnv):
                 _LOG.warning(
                     "Local run has %d rows: assume long format of (metric, value)", len(data))
                 data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
-            else:
-                assert 'score' in data.columns
 
             data_dict = data.iloc[-1].to_dict()
             _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
