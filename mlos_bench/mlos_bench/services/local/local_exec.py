@@ -122,6 +122,8 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         """
         cmd = shlex.split(script_line)
         script_path = self.config_loader_service.resolve_path(cmd[0])
+        # special case handling for leading lone `.` character, which also means `source`
+        # (as in, include, but not execute) in shell syntax
         if os.path.exists(script_path) and not os.path.isdir(script_path):
             script_path = os.path.abspath(script_path)
         else:
