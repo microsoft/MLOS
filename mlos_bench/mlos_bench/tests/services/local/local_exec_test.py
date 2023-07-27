@@ -23,7 +23,7 @@ def test_split_cmdline() -> None:
     """
     Test splitting a commandline into subcommands.
     """
-    cmdline = ". env.sh && (echo hello && echo world | tee > /tmp/test || echo foo; true)"
+    cmdline = ". env.sh && (echo hello && echo world | tee > /tmp/test || echo foo && echo $var; true)"
     assert list(split_cmdline(cmdline)) == [
         ['.', 'env.sh'],
         ['&&'],
@@ -37,6 +37,8 @@ def test_split_cmdline() -> None:
         ['/tmp/test'],
         ['||'],
         ['echo', 'foo'],
+        ['&&'],
+        ['echo', '$var'],
         [';'],
         ['true'],
         [')'],

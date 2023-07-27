@@ -43,6 +43,7 @@ def split_cmdline(cmdline: str) -> Iterable[List[str]]:
         Can be rejoined as a flattened array.
     """
     cmdline_tokens = shlex.shlex(cmdline, posix=True, punctuation_chars=True)
+    cmdline_tokens.whitespace_split = True
     subcmd = []
     for token in cmdline_tokens:
         if token[0] not in cmdline_tokens.punctuation_chars:
