@@ -125,8 +125,8 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
                 if return_code != 0 and return_on_error:
                     break
 
-        stdout = "\n".join(stdout_list)
-        stderr = "\n".join(stderr_list)
+        stdout = "".join(stdout_list)
+        stderr = "".join(stderr_list)
 
         _LOG.debug("Run: stdout:\n%s", stdout)
         _LOG.debug("Run: stderr:\n%s", stderr)
@@ -185,11 +185,9 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         # For each subcmd, perform path resolution fixups for any scripts being executed.
         subcmds = split_cmdline(script_line)
         subcmds = [self._resolve_cmdline_script_path(subcmd) for subcmd in subcmds]
-
         # Finally recombine all of the fixed up subcmd tokens into the original.
         cmd = [token for subcmd in subcmds for token in subcmd]
 
-        # split the command line into set of subcmd tokens
         env: Dict[str, str] = {}
         if env_params:
             env = {key: str(val) for (key, val) in env_params.items()}
