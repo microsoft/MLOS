@@ -49,7 +49,7 @@ def split_cmdline(cmdline: str) -> Iterable[List[str]]:
         if token[0] not in cmdline_tokens.punctuation_chars:
             subcmd.append(token)
         else:
-            # Separator encounters.  Yield the previous subcmd we accumulated.
+            # Separator encountered. Yield any non-empty previous subcmd we accumulated.
             if subcmd:
                 yield subcmd
             # Also return the separators.
