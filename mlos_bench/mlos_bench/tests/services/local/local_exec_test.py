@@ -23,8 +23,10 @@ def test_split_cmdline() -> None:
     """
     Test splitting a commandline into subcommands.
     """
-    cmdline = "(echo hello && echo world | tee > /tmp/test || echo foo; true)"
+    cmdline = ". env.sh && (echo hello && echo world | tee > /tmp/test || echo foo; true)"
     assert list(split_cmdline(cmdline)) == [
+        ['.', 'env.sh'],
+        ['&&'],
         ['('],
         ['echo', 'hello'],
         ['&&'],
@@ -48,6 +50,20 @@ def local_exec_service() -> LocalExecService:
     """
     return LocalExecService(parent=ConfigPersistenceService())
 
+
+def test_resolve_script(local_exec_service: LocalExecService) -> None:
+    """
+    Test local script resolution logic with complex subcommand names.
+    """
+    script = "os/linux/runtime/scripts/local/generate_kernel_config_script.py"
+    script_abspath = local_exec_service.config_loader_service.resolve_path(script)
+    orig_cmdline = f". env.sh && {script}"
+    expected_cmdline = f". env.sh && {script_abspath}"
+    subcmds_tokens = split_cmdline(orig_cmdline)
+    subcmds_tokens = [local_exec_service._resolve_cmdline_script_path(subcmd_tokens) for subcmd_tokens in subcmds_tokens]
+    cmdline_tokens = [token for subcmd_tokens in subcmds_tokens for token in subcmd_tokens]
+    expanded_cmdline = " ".join(cmdline_tokens)
+    assert expanded_cmdline == expected_cmdline
 
 def test_run_script(local_exec_service: LocalExecService) -> None:
     """
