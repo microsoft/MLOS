@@ -46,7 +46,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._start_with_defaults: bool = bool(
             strtobool(str(self._config.pop('start_with_defaults', True))))
         self._max_iter = int(self._config.pop('max_iterations', 100))
-        self._opt_target = self._config.pop('optimization_target', 'score')
+        self._opt_target = str(self._config.pop('optimization_target', 'score'))
         self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
 
     def __repr__(self) -> str:
