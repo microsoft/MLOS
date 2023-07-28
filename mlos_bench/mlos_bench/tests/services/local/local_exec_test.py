@@ -5,7 +5,6 @@
 """
 Unit tests for the service to run the scripts locally.
 """
-import os
 import sys
 
 import pytest
