@@ -9,7 +9,8 @@ Scheduler-side benchmark environment to run scripts locally.
 import json
 import logging
 
-from typing import Iterable, Optional, Tuple
+from datetime import datetime
+from typing import Iterable, List, Optional, Tuple
 
 import pandas
 
@@ -69,6 +70,7 @@ class LocalEnv(ScriptEnv):
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
         self._dump_meta_file: Optional[str] = self.config.get("dump_meta_file")
         self._read_results_file: Optional[str] = self.config.get("read_results_file")
+        self._read_telemetry_file: Optional[str] = self.config.get("read_telemetry_file")
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -163,6 +165,32 @@ class LocalEnv(ScriptEnv):
             data_dict = data.iloc[-1].to_dict()
             _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
             return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
+
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, str]]]:
+        """
+        Check the status of the benchmark environment.
+
+        Returns
+        -------
+        (benchmark_status, telemetry) : (Status, list)
+            A pair of (benchmark status, telemetry) values.
+            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+        """
+        if not self._is_ready:
+            _LOG.warning("Environment not ready: %s", self)
+            return (Status.PENDING, [])
+
+        with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
+
+            if not self._read_telemetry_file:
+                return (Status.READY, [])
+
+            data: pandas.DataFrame = pandas.read_csv(
+                self._config_loader_service.resolve_path(
+                    self._read_telemetry_file, extra_paths=[temp_dir]))
+            _LOG.debug("Read telemetry:\n%s", data)
+
+            return (Status.READY, list(data.to_records()))
 
     def teardown(self) -> None:
         """

@@ -13,6 +13,7 @@ See `--help` output for details.
 
 import json
 import logging
+from datetime import datetime
 from typing import Optional, Tuple, Dict, Any
 
 from mlos_bench.launcher import Launcher
@@ -137,7 +138,8 @@ def _run(env: Environment, opt: Optimizer,
 
     if not env.setup(trial.tunables, trial.config(global_config)):
         _LOG.warning("Setup failed: %s :: %s", env, trial.tunables)
-        trial.update(Status.FAILED)
+        # FIXME: Use the actual timestamp from the environment.
+        trial.update(Status.FAILED, datetime.now())
         opt.register(trial.tunables, Status.FAILED)
         return
 
@@ -148,7 +150,8 @@ def _run(env: Environment, opt: Optimizer,
 
     (status, results) = env.run()  # Block and wait for the final result.
     _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
-    trial.update(status, results)
+    # FIXME: Use the actual timestamp from the benchmark.
+    trial.update(status, datetime.now(), results)
     opt.register(trial.tunables, status, results)
 
 

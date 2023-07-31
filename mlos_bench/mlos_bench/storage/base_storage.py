@@ -8,7 +8,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-
+from datetime import datetime
 from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
@@ -245,7 +245,7 @@ class Storage(metaclass=ABCMeta):
             return config
 
         @abstractmethod
-        def update(self, status: Status,
+        def update(self, status: Status, timestamp: datetime,
                    metrics: Optional[Union[Dict[str, float], float]] = None
                    ) -> Optional[Dict[str, float]]:
             """
@@ -255,6 +255,8 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Status of the experiment run.
+            timestamp: datetime
+                Timestamp of the status and metrics.
             metrics : Optional[Union[Dict[str, float], float]]
                 One or several metrics of the experiment run.
                 Must contain the optimization target if the status is SUCCEEDED.
@@ -273,7 +275,7 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update_telemetry(self, status: Status,
-                             metrics: Optional[Dict[str, float]] = None) -> None:
+                             metrics: List[Tuple[datetime, str, str]]) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 
