@@ -12,7 +12,7 @@
                 "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
                 "deploymentName": "PLACEHOLDER; e.g., mlos-2vms",
 
-                "deploymentTemplatePath": "services/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+                "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
 
                 // Make sure to list all ARM template parameters that can be overridden by the caller.
                 "deploymentTemplateParameters": {
