@@ -8,6 +8,12 @@ In general the `config` directory layout follows that of the `mlos_bench` module
 
 Full end-to-end examples are provided in the [`cli`](./cli/) directory, and typically and make use of the root [`CompositeEnvironments`](./environments/root/) to combine multiple [`Environments`](./environments/), also referencing [`Services`](./services/), [`Storage`](./storage/), and [`Optimizer`](./optimizers/) configs, into a single [`mlos_bench`](../run.py) run.
 
+## Globals
+
+As mentioned in the [mlos_bench/README.md](../../README.md),
+a general rule is that the parameters from the global configs like `global_config_azure.json` or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
+That allows us to propagate the values of the parameters that are specific to the experiment into other components of the framework and keep the majority of the config files in our library immutable and reusable.
+
 ## Schemas
 
 The [`schemas`](./schemas/) directory contains the [`jsonschema`](https://json-schema.org/) schemas for the `mlos_bench` config files and may also be helpful when writing your own configs.
