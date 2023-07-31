@@ -10,7 +10,7 @@ import sys
 import pytest
 import pandas
 
-from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.services.local.local_exec import LocalExecService, split_cmdline
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.util import path_join
 
@@ -19,12 +19,54 @@ from mlos_bench.util import path_join
 # `local_exec_service` fixture as both a function and a parameter.
 
 
+def test_split_cmdline() -> None:
+    """
+    Test splitting a commandline into subcommands.
+    """
+    cmdline = ". env.sh && (echo hello && echo world | tee > /tmp/test || echo foo && echo $var; true)"
+    assert list(split_cmdline(cmdline)) == [
+        ['.', 'env.sh'],
+        ['&&'],
+        ['('],
+        ['echo', 'hello'],
+        ['&&'],
+        ['echo', 'world'],
+        ['|'],
+        ['tee'],
+        ['>'],
+        ['/tmp/test'],
+        ['||'],
+        ['echo', 'foo'],
+        ['&&'],
+        ['echo', '$var'],
+        [';'],
+        ['true'],
+        [')'],
+    ]
+
+
 @pytest.fixture
 def local_exec_service() -> LocalExecService:
     """
     Test fixture for LocalExecService.
     """
     return LocalExecService(parent=ConfigPersistenceService())
+
+
+def test_resolve_script(local_exec_service: LocalExecService) -> None:
+    """
+    Test local script resolution logic with complex subcommand names.
+    """
+    script = "os/linux/runtime/scripts/local/generate_kernel_config_script.py"
+    script_abspath = local_exec_service.config_loader_service.resolve_path(script)
+    orig_cmdline = f". env.sh && {script}"
+    expected_cmdline = f". env.sh && {script_abspath}"
+    subcmds_tokens = split_cmdline(orig_cmdline)
+    # pylint: disable=protected-access
+    subcmds_tokens = [local_exec_service._resolve_cmdline_script_path(subcmd_tokens) for subcmd_tokens in subcmds_tokens]
+    cmdline_tokens = [token for subcmd_tokens in subcmds_tokens for token in subcmd_tokens]
+    expanded_cmdline = " ".join(cmdline_tokens)
+    assert expanded_cmdline == expected_cmdline
 
 
 def test_run_script(local_exec_service: LocalExecService) -> None:
@@ -86,6 +128,12 @@ def test_run_script_read_csv(local_exec_service: LocalExecService) -> None:
         assert stderr.strip() == ""
 
         data = pandas.read_csv(path_join(temp_dir, "output.csv"))
+        if sys.platform == 'win32':
+            # Workaround for Python's subprocess module on Windows adding a
+            # space inbetween the col1,col2 arg and the redirect symbol which
+            # cmd poorly interprets as being part of the original string arg.
+            # Without this, we get "col2 " as the second column name.
+            data.rename(str.rstrip, axis='columns', inplace=True)
         assert all(data.col1 == [111, 333])
         assert all(data.col2 == [222, 444])
 

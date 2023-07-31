@@ -157,7 +157,7 @@ class LocalEnv(ScriptEnv):
                     results_file_path, extra_paths=[temp_dir]))
 
             _LOG.debug("Read data:\n%s", data)
-            if len(data) != 1:
+            if list(data.columns) == ["metric", "value"]:
                 _LOG.warning(
                     "Local run has %d rows: assume long format of (metric, value)", len(data))
                 data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
