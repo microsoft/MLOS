@@ -1,0 +1,42 @@
+{
+    "experimentId": "RedisBench",
+    "trialId": 1,
+
+    // TODO: Generate these names from $experimentId
+    "deploymentName": "RedisBench",
+    "vmName": "os-autotune-linux-vm",
+
+    "resourceGroup": "os-autotune",
+    "location": "westus2",
+
+    "virtualNetworkName": "mlos-2vms-vnet",
+    "subnetName": "mlos-2vms-subnet",
+
+    "storageAccountName": "osatsharedstorage",
+    "storageFileShareName": "os-autotune-file-share",
+
+    "vmSize": "Standard_B2s",
+    "ubuntuOSVersion": "18.04-LTS",
+
+    "tunable_params_map": {
+
+        // VM provisioning parameter groups (see `azure-vm-tunables.jsonc`):
+        // ["azure-vm"] (not used at the moment)
+        "provision": [],
+
+        // Boot-time Linux parameter groups (see `linux-boot-tunables.jsonc`):
+        // ["linux-kernel-boot"]
+        "linux-boot": ["linux-kernel-boot"],
+
+        // Runtime Linux parameter groups (see `linux-runtime-tunables.jsonc`):
+        // ["linux-swap", "linux-hugepages-2048kB", "linux-scheduler"]
+        "linux-runtime": ["linux-scheduler"],
+
+        // Redis config parameter groups (see `redis-tunables.jsonc`):
+        // ["redis"]
+        "redis": []
+    },
+
+    "optimization_target": "score",
+    "optimization_direction": "min"
+}

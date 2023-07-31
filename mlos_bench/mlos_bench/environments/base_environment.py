@@ -158,7 +158,10 @@ class Environment(metaclass=abc.ABCMeta):
         res: List[str] = []
         for grp in groups:
             if grp[:1] == "$":
-                add_groups = groups_exp[grp[1:]]
+                tunable_group_name = grp[1:]
+                if tunable_group_name not in groups_exp:
+                    raise KeyError(f"Expected tunable group name ${tunable_group_name} undefined in {groups_exp}")
+                add_groups = groups_exp[tunable_group_name]
                 res += [add_groups] if isinstance(add_groups, str) else add_groups
             else:
                 res.append(grp)
@@ -173,7 +176,7 @@ class Environment(metaclass=abc.ABCMeta):
         return self.name
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}::'{self.name}'"
+        return f"{self.__class__.__name__} :: '{self.name}'"
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
         """
