@@ -157,6 +157,7 @@ build/*.build-stamp
 /config.json*
 /global_config*.json*
 
+.azure/config
 .env
 
 # Test databases

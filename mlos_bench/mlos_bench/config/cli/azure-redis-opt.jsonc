@@ -12,7 +12,7 @@
     ],
 
     "environment": "environments/root/root-azure-redis.jsonc",
-    "optimizer": "optimizers/mlos_core_flaml.jsonc",
+    "optimizer": "optimizers/mlos_core_default_opt.jsonc",
     "storage": "storage/sqlite.jsonc",
 
     "globals": [
