@@ -70,7 +70,7 @@ conda activate mlos
 ### 2. Make sure that you have Azure CLI tool installed and working
 
 > Installation instructions for `az` (Azure CLI) [can be found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
-
+>
 > Note: `az` comes preinstalled inside the devcontainer.
 
 If necessary, login to Azure and set your default subscription:
@@ -82,27 +82,29 @@ az login
 # For instance:
 az account set --subscription "My Subscription Name"
 az config set defaults.group=MyRG --local
-az config set storage.account=MyStorageAccount --local 
+az config set storage.account=MyStorageAccount --local
 az account set --subscription "..."
 ```
 
 ### 3. Generate access tokens to interact with Azure resources
 
-A script at `./scripts/generate-azure-credentials-config.ps1` produces a JSON with Azure credentials.
-This data is in the format that can be used by our framework.
+A script at `./scripts/generate-azure-credentials-config` produces a JSON config snippet with necessary Azure credentials.
 
-If using Windows, use the following:
-```powershell
-./scripts/generate-azure-credentials-config.ps1 > ./global_config_azure.json
+```shell
+./scripts/generate-azure-credentials-config > ./global_config_azure.json
 ```
 
-On Linux (or inside the devcontainer), use the following:
-```sh
-./scripts/generate-azure-credentials-config.sh > ./global_config_azure.json
-\`\`\` # FIXME: Remove backslash escapes in actual code - can't see to do that in the web editor
+This data produced in the `global_config_azure.json` file is in the format that can be used by our framework.
 
-> Note: Requires `jq` to also be installed (comes preinstalled in the devcontainer).
+```jsonc
+{
+  "subscription": "some-guid",
+  "tenant": "some-other-guid",
+  "storageAccountKey": "some-base-64-encoded-key",
+}
+```
 
+> Note: On Linux, this script also requires `jq` to also be installed (comes preinstalled in the devcontainer).
 
 ### 4. Create a JSON config with DB credentials (Optional)
 
