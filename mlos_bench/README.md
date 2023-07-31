@@ -65,16 +65,24 @@ conda env create -f conda-envs/mlos.yml
 conda activate mlos
 ```
 
+> Note: if you are running inside the devcontainer, this should be done automatically.
+
 ### 2. Make sure that you have Azure CLI tool installed and working
 
 > Installation instructions for `az` (Azure CLI) [can be found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
 
+> Note: `az` comes preinstalled inside the devcontainer.
+
 If necessary, login to Azure and set your default subscription:
 
-```powershell
+```shell
 # If using az cli for the first time, a login will be required:
 az login
-# Make sure that GSL subscription is your default:
+# Make sure to set your default subscription, RG, and Storage Account for these experiments.
+# For instance:
+az account set --subscription "My Subscription Name"
+az config set defaults.group=MyRG --local
+az config set storage.account=MyStorageAccount --local 
 az account set --subscription "..."
 ```
 
@@ -83,17 +91,23 @@ az account set --subscription "..."
 A script at `./scripts/generate-azure-credentials-config.ps1` produces a JSON with Azure credentials.
 This data is in the format that can be used by our framework.
 
+If using Windows, use the following:
 ```powershell
-# If using for the az cli first time, a login will be required
 ./scripts/generate-azure-credentials-config.ps1 > ./global_config_azure.json
 ```
 
-On Linux, use `./scripts/generate-azure-credentials-config.sh` (requires `az` and `jq` to be installed).
+On Linux (or inside the devcontainer), use the following:
+```sh
+./scripts/generate-azure-credentials-config.sh > ./global_config_azure.json
+\`\`\` # FIXME: Remove backslash escapes in actual code - can't see to do that in the web editor
+
+> Note: Requires `jq` to also be installed (comes preinstalled in the devcontainer).
+
 
 ### 4. Create a JSON config with DB credentials (Optional)
 
 If you plan to store the information about experiments and benchmarks in a (remote) database like PostgreSQL or MySQL, create a JSON/JSONC file with the DB hostname and password.
-See [`mysql.jsonc`](./mlos_bench/config/storage/mysql.jsonc) or [`postgresql.jsonc`](./mlos_bench/config/storage/postgresql.jsonc) configuration files for the full list of DB parameters.
+See [`mysql.jsonc`](./mlos_bench/config/storage/mysql.jsonc) or [`postgresql.jsonc`](./mlos_bench/config/storage/postgresql.jsonc) configuration files for examples with a more complete list of DB parameters supported by underlying the [SqlAlchemy](https://www.sqlalchemy.org/library.html#reference) library.
 Save your config in `./global_config_storage.jsonc` file.
 It should look like this:
 
@@ -109,6 +123,8 @@ Any parameter that is not specified in `./global_config_storage.json` will be ta
 For database like SQLite or DuckDB, there is no need for an additional config file.
 The data will be stored locally in a file, e.g., `./mlos_bench.duckdb`.
 See [`sqlite.jsonc`](./mlos_bench/config/storage/sqlite.jsonc) or [`duckdb.jsonc`](./mlos_bench/config/storage/duckdb.jsonc) for more details.
+
+> Note: if no storage is specified, a basic sqlite config will be used by default.
 
 ### 5. Create a top-level configuration file for your MLOS setup
 
@@ -127,7 +143,7 @@ They also refer to other configs, e.g.
 - Reusable config snippets in `"config_path"` section, and
 - Additional config files containing sensitive data like DB passwords and Azure credentials.
 
-> Make sure that the files `./global_config_azure.json` and `./global_config_storage.json` you created in steps 3 and 4 are included in the `"globals"` section of your CLI config.
+> Make sure that the files `./global_config_azure.json` and `./global_config_storage.json` you created in the previous steps are included in the `"globals"` section of your CLI config.
 
 For the purpose of this tutorial, we will assume that we reuse the existing [`azure-redis-bench.jsonc`](./mlos_bench/config/cli/azure-redis-bench.jsonc) and [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) configurations without any changes.
 In a more realistic scenario, however, you might need to change and/or create new config files for some parts of your benchmarking environment.
@@ -146,7 +162,7 @@ In that file, you can specify any parameters that occur in your other configs, n
 
 Now we can run our configuration with `mlos_bench`:
 
-```sh
+```shell
 mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-bench.jsonc" --globals "experiment_MyBenchmark.jsonc"
 ```
 
