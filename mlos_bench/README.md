@@ -15,6 +15,13 @@ It makes use of the `mlos-core` package for its optimizer.
     - [Description](#description)
     - [Features](#features)
     - [Quickstart](#quickstart)
+        - [Install and activate the conda environment](#install-and-activate-the-conda-environment)
+        - [Make sure that you have Azure CLI tool installed and working](#make-sure-that-you-have-azure-cli-tool-installed-and-working)
+        - [Generate access tokens to interact with Azure resources](#generate-access-tokens-to-interact-with-azure-resources)
+        - [Create a JSON config with DB credentials Optional](#create-a-json-config-with-db-credentials-optional)
+        - [Create a top-level configuration file for your MLOS setup](#create-a-top-level-configuration-file-for-your-mlos-setup)
+        - [Create another config file for the parameters specific to your experiment](#create-another-config-file-for-the-parameters-specific-to-your-experiment)
+        - [Run the benchmark](#run-the-benchmark)
     - [Optimization](#optimization)
 
 <!-- /TOC -->
@@ -47,152 +54,136 @@ With a [JSON5](https://spec.json5.org) [config file](./mlos_bench/config/) and c
 To get started, we can adapt an example configuration to test out running `mlos-bench`.
 For these instructions, we will be using Azure for our resources.
 
-1. Make sure that you have Azure CLI tool installed and working.
+### 1. Install and activate the conda environment
 
-    > Installation instructions for `az` (Azure CLI) [can be found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
-
-    If necessary, login to Azure and set your default subscription:
-
-    ```powershell
-    # If using az cli for the first time, a login will be required:
-    az login
-    # Make sure that GSL subscription is your default:
-    az account set --subscription "..."
-    ```
-
-2. Generate access tokens to interact with Azure resources.
-
-    A script at `./scripts/generate-azure-credentials-config.ps1` produces a JSON with Azure credentials.
-    This data is in the format that can be used by our framework.
-
-    ```powershell
-    # If using for the az cli first time, a login will be required
-    ./scripts/generate-azure-credentials-config.ps1 > ./global_config.json
-    ```
-
-    On Linux, use `./scripts/generate-azure-credentials-config.sh` (requires `az` and `jq` to be installed).
-
-3. Copy the sample config tree from `mlos_bench/config` to another folder of your choice, e.g.,
-
-    ```sh
-    cp -R mlos_bench/config ./my-config
-    ```
-
-    > Note: there are several other examples in [`mlos_bench/config`](./mlos_bench/config/) that you can use as a starting point for your own experiments.
-
-4. Modify the service configuration files at `my-config/azure/service-*.jsonc` with your Azure setup data.
-E.g., in `my-config/azure/service-provision-vm.jsonc`, put your target resource group information, as well as desired VM name, denoted in `{{ ... }}` below.
-
-    > All resource names have to either:
-    >
-    > - Not conflict with existing resource names in the resource group for a new deployment, or
-    > - Correspond to existing resources from a previous successful deployment.
-    >
-    > Re-using resources from a partial, unsuccessful deployment will likely fail. It is recommended to delete resources from those partial deployments.
-
-    ```json
-    [
-        {
-            "class": "mlos_bench.environments.azure.AzureVMService",
-
-            "config": {
-                "deploymentTemplatePath": "azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-
-                "subscription": "{{ ID of subscription to use }}",
-                "resourceGroup": "{{ Name of resource group to use }}",
-                "deploymentName": "{{ A deployment name to group all deployments under, e.g. redis-os-autotune-001 }}",
-                "vmName": "{{ A VM name, e.g. redis-osat-vm }}",
-            }
-        }
-    ]
-    ```
-
-5. Update your copy of `my-config/env-azure-ubuntu-redis.jsonc` and other config files with the details of your setup.
-Please refer to inline comments in the corresponding `.jsonc` files for more information.
-
-6. From here onwards we assume we are in the project root directory.
+From here onwards we assume we are in the project root directory.
 Ensure you have a conda environment (`mlos`) set up for executing `mlos_bench`.
 Create and activate the environment with:
 
-    ```sh
-    conda env create -f conda-envs/mlos.yml
-    conda activate mlos
-    ```
+```sh
+conda env create -f conda-envs/mlos.yml
+conda activate mlos
+```
 
-7. Connect the [`Environment`](./mlos_bench/environments/), [`Service`](./mlos_bench/services/), [`Storage`](./mlos_bench/storage/), and [`Optimizer`](./mlos_bench/optimizers/) configurations in a top-level [JSON5](https://spec.json5.org) configuration - say, `config_bench.jsonc`:
+> Note: if you are running inside the devcontainer, this should be done automatically.
 
-    ```jsonc
-    {
-        "config_path": [                                 // Locations of config files and scripts
-            "my-config",
-            "mlos_bench/examples"
-        ],
+### 2. Make sure that you have Azure CLI tool installed and working
 
-        "environment": "env-azure-ubuntu-redis.jsonc",   // Root config (location relative to config_path)
+> Installation instructions for `az` (Azure CLI) [can be found here](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli).
+>
+> Note: `az` comes preinstalled inside the devcontainer.
 
-        "tunable_values": [                              // Key/value pairs of tunable parameters. Uses config_path
-            "tunable-values-example.json"
-        ],
+If necessary, login to Azure and set your default subscription:
 
-        "globals": [                                     // Config generated at step 2. Uses config_path
-            "global_config.json"
-        ],
+```shell
+# If using az cli for the first time, a login will be required:
+az login
+# Make sure to set your default subscription, RG, and Storage Account for these experiments.
+# For instance:
+az account set --subscription "My Subscription Name"
+az config set defaults.group=MyRG --local
+az config set storage.account=MyStorageAccount --local
+az account set --subscription "..."
+```
 
-        "teardown": false,                               // Do not shutdown/deprovision a VM
+### 3. Generate access tokens to interact with Azure resources
 
-        "log_file": "os-autotune.log",                   // Log file (also prints to stdout)
-        "log_level": 10,                                 // Log level = DEBUG
+A script at `./scripts/generate-azure-credentials-config` produces a JSON config snippet with necessary Azure credentials.
 
-        "experimentId": "RedisBench",                    // Experiment ID (can be in global_config.json)
-        "trialId": 1                                     // Trial ID (can come from the persistent storage service)
-    }
-    ```
+```shell
+./scripts/generate-azure-credentials-config > ./global_config_azure.json
+```
 
-8. Run our configuration through `mlos_bench`:
+This data produced in the `global_config_azure.json` file is in the format that can be used by our framework.
 
-    ```sh
-    mlos_bench --config "config_bench.jsonc"
-    ```
+```jsonc
+{
+  "subscription": "some-guid",
+  "tenant": "some-other-guid",
+  "storageAccountKey": "some-base-64-encoded-key",
+}
+```
 
-    This should run a single trial with the given tunable values, write the results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter).
+> Note: On Linux, this script also requires `jq` to also be installed (comes preinstalled in the devcontainer).
 
-9. Check `os-autotune.log` to verify we get output corresponding to the command we remotely executed in the VM.
+### 4. Create a JSON config with DB credentials (Optional)
+
+If you plan to store the information about experiments and benchmarks in a (remote) database like PostgreSQL or MySQL, create a JSON/JSONC file with the DB hostname and password.
+See [`mysql.jsonc`](./mlos_bench/config/storage/mysql.jsonc) or [`postgresql.jsonc`](./mlos_bench/config/storage/postgresql.jsonc) configuration files for examples with a more complete list of DB parameters supported by underlying the [SqlAlchemy](https://www.sqlalchemy.org/library.html#reference) library.
+Save your config in `./global_config_storage.jsonc` file.
+It should look like this:
+
+```jsonc
+{
+    "host": "mysql-db.mysql.database.azure.com",
+    "password": "database_password"
+}
+```
+
+Any parameter that is not specified in `./global_config_storage.json` will be taken from the corresponding DB's config file, e.g., [`postgresql.jsonc`](./mlos_bench/config/storage/postgresql.jsonc).
+
+For database like SQLite or DuckDB, there is no need for an additional config file.
+The data will be stored locally in a file, e.g., `./mlos_bench.duckdb`.
+See [`sqlite.jsonc`](./mlos_bench/config/storage/sqlite.jsonc) or [`duckdb.jsonc`](./mlos_bench/config/storage/duckdb.jsonc) for more details.
+
+> Note: if no storage is specified, a basic sqlite config will be used by default.
+
+### 5. Create a top-level configuration file for your MLOS setup
+
+We provide a few examples of such files in [`./mlos_bench/config/cli/`](./mlos_bench/config/cli).
+For example, [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) is a configuration for optimizing Redis VM on Azure and saving the results in a local SQLite database.
+Likewise, [`azure-redis-bench.jsonc`](./mlos_bench/config/cli/azure-redis-bench.jsonc) is a setup to run a single Redis benchmark (and, again, save the results in SQLite).
+
+CLI configs like those are meant to connect several MLOS components together, namely:
+
+- Benchmarking environment (configured in [`environments/root/root-azure-redis.jsonc`](./mlos_bench/config/environments/root/root-azure-redis.jsonc));
+- Optimization engine ([`optimizers/mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc));
+- Storage for experimental data ([`storage/sqlite.jsonc`](./mlos_bench/config/storage/sqlite.jsonc));
+
+They also refer to other configs, e.g.
+
+- Reusable config snippets in `"config_path"` section, and
+- Additional config files containing sensitive data like DB passwords and Azure credentials.
+
+> Make sure that the files `./global_config_azure.json` and `./global_config_storage.json` you created in the previous steps are included in the `"globals"` section of your CLI config.
+
+For the purpose of this tutorial, we will assume that we reuse the existing [`azure-redis-bench.jsonc`](./mlos_bench/config/cli/azure-redis-bench.jsonc) and [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) configurations without any changes.
+In a more realistic scenario, however, you might need to change and/or create new config files for some parts of your benchmarking environment.
+We'll give more details on that below.
+
+### 5. Create another config file for the parameters specific to your experiment
+
+Copy one of our examples, e.g., [`experiment_RedisBench.jsonc`](./mlos_bench/config/experiments/experiment_RedisBench.jsonc) and name it after your experiment, e.g. `experiment_MyBenchmark.jsonc`.
+
+In that file, you can specify any parameters that occur in your other configs, namely in `"const_args"` section of the Environment configs, or in `"config"` sections of your Service, Storage, or Optimizer configurations.
+
+> A general rule is that the parameters from the global configs like `./global_config_azure.json` or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
+> That allows us to propagate the values of the parameters that are specific to the experiment into other components of the framework and keep the majority of the config files in our library immutable and reusable.
+
+### 6. Run the benchmark
+
+Now we can run our configuration with `mlos_bench`:
+
+```shell
+mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-bench.jsonc" --globals "experiment_MyBenchmark.jsonc"
+```
+
+This should run a single trial with the given tunable values (loaded from one or more files in the `"tunable_values"`), write the results to the log and keep the environment running (as directed by the `"teardown": false` configuration parameter in the CLI config).
+
+Note that using the `--globals` command line option is the same as adding `experiment_MyBenchmark.jsonc` to the `"globals"` section of the CLI config.
+Same applies to all other CLI parameters - e.g., you can change the log level by adding `--log_level INFO` to the command line.
+
+Also, note that you don't have to provide full path to the `experiment_MyBenchmark.jsonc` file - the application will look for it in the paths specified in the `"config_path"` section of the CLI config.
 
 ## Optimization
 
 Searching for an optimal set of tunable parameters is very similar to running a single benchmark.
-All we have to do is specifying the [`Storage`](./mlos_bench/storage/) and [`Optimizer`](./mlos_bench/optimizers/) in the top-level configuration, e.g.:
+All we have to do is specifying the [`Optimizer`](./mlos_bench/optimizers/) in the top-level configuration, like in our [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) example.
 
-```jsonc
-{
-    "config_path": [                                    // Locations of config files and scripts
-        "my-config",
-        "mlos_bench/examples"
-    ],
-
-    "environment": "env-azure-ubuntu-redis.jsonc",      // Root config (location relative to config_path)
-    "storage": "storage/sqlite.jsonc",                  // Store data in a local SQLite3 file
-    "optimizer": "optimizers/mlos_core_default_opt.jsonc",   // Use mlos_core default optimizer
-
-    "globals": [
-        "global_config.json"                            // Config generated at step 2. Uses config_path
-    ],
-
-    "teardown": false,                                  // Do not shutdown/deprovision a VM
-
-    "log_file": "os-autotune.log",                      // Log file (also prints to stdout)
-    "log_level": 10,                                    // Log level = DEBUG
-
-    "experimentId": "RedisBench",                       // Experiment ID (can be in global_config.json)
-    "trialId": 1                                        // Start ID of the trial
-}
+```sh
+mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc --max_iterations 10"
 ```
 
-> **NOTE:** A working example of this configuration can be found in our repository at [azure-redis-mlos-default-opt.jsonc](./mlos_bench/config/cli/azure-redis-mlos-default-opt.jsonc).
+Note that again we use the command line option `--max_iterations` to override the default value from [`mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc).
 
-The only difference between the two configurations is that the latter has the `optimizer` parameter instead of using a fixed set of tunables via `tunable_values` option.
-It also stores the results of each trial in the SQLite3 database (configured via `storage`).
-
-> Note that any config parameter (or even all of them) can be overridden by the corresponding command-line options, e.g.
->
-> `mlos_bench --config "config_opt.jsonc" --log_level 20 --trialId 1000`
+We don't have to specify the `"tunable_values"` for the optimization: the optimizer will suggest new values on each iteration and the framework will feed this data into the benchmarking environment.

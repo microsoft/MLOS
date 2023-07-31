@@ -1,6 +1,9 @@
 {
-    "name": "Setup Ubuntu VM",
+    "name": "Boot-time Linux VM configuration",
     "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
+    "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
+
     "config": {
         "children": [
             // Boot and shutdown Azure VM - all logic is in Python
@@ -8,24 +11,18 @@
                 "name": "Boot Ubuntu VM on Azure",
                 "class": "mlos_bench.environments.remote.OSEnv",
                 "config": {
-                    "required_args": ["vmName"],
-                    "const_args": {
-                        // Placeholder for a value that comes from the parent environment.
-                        "vmName": "placeholder-vm"
-                    },
+                    "required_args": ["vmName"]
                 }
             },
             // Local: Generate GRUB config and upload it to the shared storage
             {
                 "name": "Generate boot parameters for a Ubuntu VM",
                 "class": "mlos_bench.environments.local.LocalFileShareEnv",
-                "include_tunables": [
-                    "environments/os/linux/boot/linux-boot-tunables.jsonc"
-                ],
+
                 "config": {
-                    "tunable_params": [
-                        "linux-kernel-boot"
-                    ],
+
+                    "tunable_params": ["$linux-boot"],
+
                     // Values provided from the global config/optimizer:
                     "required_args": [
                         "experimentId",
@@ -33,9 +30,10 @@
                     ],
                     // Dump tunable parameters to a local JSON file:
                     "dump_params_file": "boot-params.json",
-                    // TODO: expand "setup" command to support array syntax like devcontainers so we can execute without a shell.
-                    // In particular this should let us resolve the path to the script more easily.
-                    // Alternatively: we could provide a "CWD" argument to the setup command.
+                    "shell_env_params": [
+                        "experimentId",
+                        "trialId"
+                    ],
                     "setup": [
                         "environments/os/linux/boot/scripts/local/generate_grub_config.py boot-params.json grub.cfg"
                     ],
@@ -51,17 +49,7 @@
             {
                 "name": "Apply boot parameters to a remote Ubuntu VM",
                 "class": "mlos_bench.environments.RemoteEnv",
-                "include_tunables": [
-                    "environments/os/linux/boot/linux-boot-tunables.jsonc"
-                ],
                 "config": {
-                    "tunable_params": [
-                        "linux-kernel-boot"
-                    ],
-                    "const_args": {
-                        // Placeholder for a value that comes from the parent environment.
-                        "vmName": "placeholder-vm"
-                    },
                     "required_args": [
                         "vmName",
                         "storageAccountName",
@@ -72,9 +60,17 @@
                         "trialId"
                     ],
                     "wait_boot": true,
+                    "shell_env_params": [
+                        "storageAccountName",
+                        "storageFileShareName",
+                        "storageAccountKey",
+                        "mountPoint",
+                        "experimentId",
+                        "trialId"
+                    ],
                     "setup": [
                         "sudo mkdir -p $mountPoint",
-                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=$storageAccountKey,serverino,nosharesock,actimeo=30",
+                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
                         // TODO: Apply GRUB parameters from config on shared storage at:
                         // "$mountPoint/$experimentId/$trialId/input/grub.cfg"
                         // "sudo update-grub",

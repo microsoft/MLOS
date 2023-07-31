@@ -13,7 +13,6 @@
     ],
 
     "environment": "environments/mock/mock_env.jsonc",
-    "optimizer": "optimizers/one_shot_opt.jsonc",
     "storage": "storage/in-memory.jsonc",
 
     "tunable_values": [
@@ -27,6 +26,6 @@
 
     "teardown": true,
 
-    // "log_file": "mock-1shot.log",
+    // "log_file": "mock-bench.log",
     "log_level": "INFO"
 }

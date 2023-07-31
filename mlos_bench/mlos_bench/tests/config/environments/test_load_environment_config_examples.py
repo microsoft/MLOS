@@ -61,6 +61,15 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
         "storageAccountName": "foo",
         "storageAccountKey": "bar",
         "storageFileShareName": "baz",
+
+        # Assign some values to variadic tunables and required parameters present in the config examples.
+        "vmName": "vmTestName",
+        "tunable_params_map": {
+            "linux-runtime": ["linux-scheduler", "linux-swap"],
+            "linux-boot": ["linux-kernel-boot"],
+            "provision": ["azure-vm"],
+            "redis": ["redis"],
+        }
     }
 
     # Make sure we have the required services for the envs being used.
@@ -84,7 +93,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
 
 
 composite_configs = filter_configs(locate_config_examples(path_join(
-    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/composite/")))
+    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/root/")))
 assert composite_configs
 
 

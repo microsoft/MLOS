@@ -2,13 +2,6 @@
     "name": "Azure VM Ubuntu Redis",
     "class": "mlos_bench.environments.CompositeEnv",
 
-    "include_tunables": [
-        "environments/vm/azure/azure-vm-tunables.jsonc",
-        "environments/os/linux/boot/linux-boot-tunables.jsonc",
-        "environments/os/linux/runtime/linux-runtime-tunables.jsonc",
-        "environments/apps/redis/redis-tunables.jsonc"
-    ],
-
     "include_services": [
         "services/remote/azure/service-auth.jsonc",
         "services/remote/azure/service-linux-vm-ops.jsonc",
@@ -18,11 +11,6 @@
     "config": {
 
         "const_args": {
-            "experimentId": "RedisBench",
-            "trialId": 1,
-            "vmName": "os-autotune-linux-vm",
-            "storageAccountName": "osatsharedstorage",
-            "storageFileShareName": "os-autotune-file-share",
             "mountPoint": "/mnt/osat_fs"
         },
 

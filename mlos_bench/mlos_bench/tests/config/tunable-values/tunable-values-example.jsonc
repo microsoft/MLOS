@@ -2,7 +2,8 @@
 {
     "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json",
 
-    "vmSize": "Standard_B2s",
-    "idle": "halt",
-    "kernel_sched_migration_cost_ns": 40000
+    "sched_migration_cost_ns": 500000,
+    "sched_latency_ns": 12000000,
+    "sched_child_runs_first": "0",
+    "sched_tunable_scaling": "1"
 }

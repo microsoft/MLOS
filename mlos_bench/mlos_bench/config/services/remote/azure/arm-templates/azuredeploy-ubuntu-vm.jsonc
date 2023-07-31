@@ -2,15 +2,36 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "OS Autotune vnet"
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "OS Autotune subnet"
+      }
+    },
     "vmName": {
       "type": "string",
-      "defaultValue": "os-autotune-linux-vm",
       "metadata": {
         "description": "OS Autotune Linux VM"
       }
     },
+    "vmPorts": {
+      "type": "array",
+      "defaultValue": [
+        "22"  // ssh
+      ],
+      "metadata": {
+        "description": "Open ports on a server VM"
+      }
+    },
     "adminUsername": {
       "type": "string",
+      "defaultValue": "mlos",
       "metadata": {
         "description": "Username for the Virtual Machine."
       }
@@ -27,7 +48,9 @@
       }
     },
     "adminPasswordOrKey": {
-      "type": "secureString",
+      "type": "securestring",
+      // Fake public key, safe to publish.
+      "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDZnRBZZWYoPaAf4ZFP3rj1IKpdjW3QySgfOfrw6gUcqWN8OnUdxXzJJ35DxDhtZY3Qq038Y7IHfocrxrKL2ID/rrYvo77/uuqaEpELOXU9YA1ervTqlUagARSfeoUQDOZkDsbm603D4/3t3l0hxNHPGDyqjLtP2U+RelhLEngaSGSvwAiFNHJef8ldDfOxgBSVprBvU+48g4mZp5QZ2O50gzhcoFI2+Ho/Am4el2SS6ptxS1BjeVR1/GoLpB/POYfWqgs5/0rrG2gUyRQZdvY97LhMVd3jUK0DeiRnQpv44fnKTh8px3sl6N5sTg9a4tL8PBZC31MqP7QTj9KqMh8HfMp0wEIXPUWinBpTjXtknZiOWodLuAtZ82GzO8sW5HhXW5ZdU6aaNZ1JUakQX+eWTAzF3qQCp2BDIrXccxa5HMjneLczHug5VH1Y4wo3LyI4QBmxoQzYUsvSDBHAGqSu3u6XJVfJbgA5Di1ykGpVaMda0iLc7wG9ADevEfOmSQIMI2PEW6ZLv/+1w+uHYJi4c+3cIr9nSPpBu1HmefY4Hrz9XtYhFwTAk8RCla9v4WPn0hrVQnTBcuW3a79d87v6O2NIv1gosnsEWpWwIHycIe3G/Y6btsoDHcYMWbWewSOVsTru5UAfiZYZk8psjMwc4wcGkIHxcgzFlWb9r8ZOzw== os-autotune-fake-key",
       "metadata": {
         "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
       }
@@ -41,12 +64,11 @@
     },
     "ubuntuOSVersion": {
       "type": "string",
-      "defaultValue": "18.04-LTS",
       "allowedValues": [
-        "12.04.5-LTS",
-        "14.04.5-LTS",
         "16.04.0-LTS",
-        "18.04-LTS"
+        "18.04-LTS",
+        "20.04-LTS",
+        "22.04-LTS"
       ],
       "metadata": {
         "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
@@ -61,39 +83,16 @@
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_B2s",
       "metadata": {
         "description": "The size of the VM"
-      }
-    },
-    "virtualNetworkName": {
-      "type": "string",
-      "defaultValue": "os-autotune-vnet",
-      "metadata": {
-        "description": "Name of the VNET"
-      }
-    },
-    "subnetName": {
-      "type": "string",
-      "defaultValue": "os-autotune-subnet",
-      "metadata": {
-        "description": "Name of the subnet in the virtual network"
-      }
-    },
-    "networkSecurityGroupName": {
-      "type": "string",
-      "defaultValue": "os-autotune-nsg",
-      "metadata": {
-        "description": "Name of the Network Security Group"
       }
     }
   },
   "variables": {
-    "publicIPAddressName": "[format('{0}PublicIP', parameters('vmName'))]",
-    "networkInterfaceName": "[format('{0}NetInt', parameters('vmName'))]",
+    "networkSecurityGroupName": "[format('{0}-NSG', parameters('vmName'))]",
+    "publicIPAddressName": "[format('{0}-PublicIP', parameters('vmName'))]",
+    "networkInterfaceName": "[format('{0}-NetInt', parameters('vmName'))]",
     "osDiskType": "Standard_LRS",
-    "subnetAddressPrefix": "10.1.0.0/24",
-    "addressPrefix": "10.1.0.0/16",
     "linuxConfiguration": {
       "disablePasswordAuthentication": true,
       "ssh": {
@@ -128,24 +127,23 @@
           }
         ],
         "networkSecurityGroup": {
-          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]"
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
         }
       },
       "dependsOn": [
-        "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('networkSecurityGroupName'))]",
-        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]",
-        "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]"
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+        "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
       ]
     },
     {
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2021-05-01",
-      "name": "[parameters('networkSecurityGroupName')]",
+      "name": "[variables('networkSecurityGroupName')]",
       "location": "[parameters('location')]",
       "properties": {
         "securityRules": [
           {
-            "name": "SSH",
+            "name": "ARMTemplatePorts",
             "properties": {
               "priority": 1000,
               "protocol": "Tcp",
@@ -154,37 +152,11 @@
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*",
               "destinationAddressPrefix": "*",
-              "destinationPortRange": "22"
+              "destinationPortRanges": "[parameters('vmPorts')]"
             }
           }
         ]
       }
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2021-05-01",
-      "name": "[parameters('virtualNetworkName')]",
-      "location": "[parameters('location')]",
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
-        }
-      }
-    },
-    {
-      "type": "Microsoft.Network/virtualNetworks/subnets",
-      "apiVersion": "2021-05-01",
-      "name": "[format('{0}/{1}', parameters('virtualNetworkName'), parameters('subnetName'))]",
-      "properties": {
-        "addressPrefix": "[variables('subnetAddressPrefix')]",
-        "privateEndpointNetworkPolicies": "Enabled",
-        "privateLinkServiceNetworkPolicies": "Enabled"
-      },
-      "dependsOn": [
-        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-      ]
     },
     {
       "type": "Microsoft.Network/publicIPAddresses",
