@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Unit tests for the storage subsystem.
+Unit tests for saving and restoring the telemetry data.
 """
 from datetime import datetime, timedelta
 from typing import Any, List, Tuple
