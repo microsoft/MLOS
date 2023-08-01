@@ -65,6 +65,7 @@ def _optimize(env: Environment,
     global_config : dict
         Global configuration parameters.
     """
+    # pylint: disable=too-many-locals
     if _LOG.isEnabledFor(logging.INFO):
         _LOG.info("Root Environment:\n%s", env.pprint())
 

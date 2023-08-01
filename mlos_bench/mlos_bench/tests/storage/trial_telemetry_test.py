@@ -6,7 +6,7 @@
 Unit tests for saving and restoring the telemetry data.
 """
 from datetime import datetime, timedelta
-from typing import Any, List, Tuple
+from typing import Any, List, Optional, Tuple
 
 import pytest
 
@@ -39,7 +39,8 @@ def telemetry_data() -> List[Tuple[datetime, str, Any]]:
     ])
 
 
-def _telemetry_str(data: List[Tuple[datetime, str, Any]]) -> List[Tuple[datetime, str, str]]:
+def _telemetry_str(data: List[Tuple[datetime, str, Any]]
+                   ) -> List[Tuple[datetime, str, Optional[str]]]:
     """
     Convert telemetry values to strings.
     """
