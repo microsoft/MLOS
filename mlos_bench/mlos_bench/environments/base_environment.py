@@ -11,7 +11,7 @@ import json
 import logging
 
 from datetime import datetime
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -319,7 +319,7 @@ class Environment(metaclass=abc.ABCMeta):
         (status, _) = self.status()
         return (status, None)
 
-    def status(self) -> Tuple[Status, List[Tuple[datetime, str, str]]]:
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 
