@@ -93,7 +93,7 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             return self._get_params(conn, self._schema.config_param, config_id=config_id)
 
-    def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, str]]:
+    def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
         with self._engine.connect() as conn:
             cur_telemetry = conn.execute(
                 self._schema.trial_telemetry.select().where(

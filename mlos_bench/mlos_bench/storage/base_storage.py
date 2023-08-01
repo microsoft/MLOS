@@ -160,7 +160,7 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, str]]:
+        def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
             """
             Retrieve the telemetry data for a given trial.
 
