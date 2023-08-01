@@ -93,6 +93,20 @@ class Experiment(Storage.Experiment):
         with self._engine.connect() as conn:
             return self._get_params(conn, self._schema.config_param, config_id=config_id)
 
+    def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, str]]:
+        with self._engine.connect() as conn:
+            cur_telemetry = conn.execute(
+                self._schema.trial_telemetry.select().where(
+                    self._schema.trial_telemetry.c.exp_id == self._experiment_id,
+                    self._schema.trial_telemetry.c.trial_id == trial_id
+                ).order_by(
+                    self._schema.trial_telemetry.c.ts,
+                    self._schema.trial_telemetry.c.metric_id,
+                )
+            )
+            return [(row.ts, row.metric_id, row.metric_value)
+                    for row in cur_telemetry.fetchall()]
+
     def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
         opt_target = opt_target or self._opt_target
         (configs, scores, status) = ([], [], [])

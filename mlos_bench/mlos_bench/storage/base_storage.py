@@ -160,6 +160,22 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, str]]:
+            """
+            Retrieve the telemetry data for a given trial.
+
+            Parameters
+            ----------
+            trial_id : int
+                Trial ID.
+
+            Returns
+            -------
+            metrics : List[Tuple[datetime, str, Any]]
+                Telemetry data.
+            """
+
+        @abstractmethod
         def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
