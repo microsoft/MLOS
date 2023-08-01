@@ -275,7 +275,7 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update_telemetry(self, status: Status,
-                             metrics: List[Tuple[datetime, str, str]]) -> None:
+                             metrics: List[Tuple[datetime, str, Any]]) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 
@@ -283,7 +283,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Current status of the trial.
-            metrics : Optional[Dict[str, float]]
+            metrics : List[Tuple[datetime, str, Any]]
                 Telemetry data.
             """
             _LOG.info("Store telemetry: %s :: %s %s", self, status, metrics)

@@ -6,7 +6,7 @@
 Unit tests for the storage subsystem.
 """
 from datetime import datetime, timedelta
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 import pytest
 
@@ -18,7 +18,7 @@ from mlos_bench.storage.base_storage import Storage
 
 
 @pytest.fixture
-def telemetry_data() -> List[Tuple[datetime, str, str]]:
+def telemetry_data() -> List[Tuple[datetime, str, Any]]:
     """
     Mock telemetry data for the trial.
 
@@ -30,16 +30,18 @@ def telemetry_data() -> List[Tuple[datetime, str, str]]:
     timestamp1 = datetime.now()
     timestamp2 = timestamp1 + timedelta(seconds=1)
     return [
-        (timestamp1, "cpu_load", "10"),
-        (timestamp1, "memory", "20"),
-        (timestamp2, "cpu_load", "30"),
-        (timestamp2, "memory", "40"),
+        (timestamp1, "cpu_load", 10.1),
+        (timestamp1, "memory", 20),
+        (timestamp1, "setup", "prod"),
+        (timestamp2, "cpu_load", 30.1),
+        (timestamp2, "memory", 40),
+        (timestamp2, "setup", "prod"),
     ]
 
 
 def test_update_telemetry_twice(exp_storage_memory_sql: Storage.Experiment,
                                 tunable_groups: TunableGroups,
-                                telemetry_data: List[Tuple[datetime, str, str]]) -> None:
+                                telemetry_data: List[Tuple[datetime, str, Any]]) -> None:
     """
     Make sure update_telemetry() call is idempotent.
     """

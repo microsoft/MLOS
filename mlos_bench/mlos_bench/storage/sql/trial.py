@@ -79,7 +79,7 @@ class Trial(Storage.Trial):
 
         return metrics
 
-    def update_telemetry(self, status: Status, metrics: List[Tuple[datetime, str, str]]) -> None:
+    def update_telemetry(self, status: Status, metrics: List[Tuple[datetime, str, Any]]) -> None:
         super().update_telemetry(status, metrics)
         for (timestamp, key, val) in metrics:
             with self._engine.begin() as conn:
