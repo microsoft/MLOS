@@ -10,7 +10,8 @@ import logging
 from datetime import datetime
 from typing import List, Optional, Tuple, Union, Dict, Any
 
-from sqlalchemy import Engine, Table
+from sqlalchemy import Engine
+from sqlalchemy.exc import IntegrityError
 
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -80,18 +81,15 @@ class Trial(Storage.Trial):
 
     def update_telemetry(self, status: Status, metrics: List[Tuple[datetime, str, str]]) -> None:
         super().update_telemetry(status, metrics)
-        with self._engine.begin() as conn:
-            try:
-                conn.execute(self._schema.trial_telemetry.insert().values([
-                    {
-                        "exp_id": self._experiment_id,
-                        "trial_id": self._trial_id,
-                        "ts": ts,
-                        "metric_id": key,
-                        "metric_value": None if val is None else str(val),
-                    }
-                    for (ts, key, val) in metrics
-                ]))
-            except Exception:
-                conn.rollback()
-                raise
+        for (timestamp, key, val) in metrics:
+            with self._engine.begin() as conn:
+                try:
+                    conn.execute(self._schema.trial_telemetry.insert().values(
+                        exp_id=self._experiment_id,
+                        trial_id=self._trial_id,
+                        ts=timestamp,
+                        metric_id=key,
+                        metric_value=None if val is None else str(val),
+                    ))
+                except IntegrityError as ex:
+                    _LOG.warning("Record already exists: %s :: %s", (timestamp, key, val), ex)
