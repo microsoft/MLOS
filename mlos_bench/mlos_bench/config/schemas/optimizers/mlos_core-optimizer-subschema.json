@@ -60,6 +60,12 @@
                         "minimum": 0,
                         "maximum": 1,
                         "example": 0.1
+                    },
+                    "output_directory": {
+                        "description": "Directory to store SMAC output files.",
+                        "type": ["string", "null"],
+                        "pattern": "^[a-zA-Z0-9_./-]+$",
+                        "example": "smac_output"
                     }
                 }
             }

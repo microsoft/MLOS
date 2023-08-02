@@ -7,6 +7,8 @@ A wrapper for mlos_core optimizers for mlos_bench.
 """
 
 import logging
+import os
+
 from typing import Optional, Sequence, Tuple, Union
 
 import pandas as pd
@@ -38,6 +40,23 @@ class MlosCoreOptimizer(Optimizer):
         opt_type = getattr(OptimizerType, self._config.pop(
             'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
 
+        if opt_type == OptimizerType.SMAC:
+            # If output_directory is specified, turn it into an absolute path.
+            output_directory = self._config.get('output_directory')
+            if output_directory is not None:
+                if not os.path.isabs(output_directory):
+                    self._config['output_directory'] = os.path.join(os.getcwd(), output_directory)
+            else:
+                _LOG.warning("No output_directory specified. SMAC will use temporary directory.")
+
+            # Set max_trials == max_iterations.
+            if 'max_trials' not in self._config:
+                self._config['max_trials'] = self._max_iter
+            assert self._config['max_trials'] == self._max_iter, \
+                f"max_trials {self._config['max_trials']} != max_iterations {self._max_iter}"
+
+            # TODO: Set run_name from experimentId (global_params not currently accessible from here).
+
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})
 
@@ -49,7 +68,7 @@ class MlosCoreOptimizer(Optimizer):
             optimizer_type=opt_type,
             optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
-            space_adapter_kwargs=space_adapter_config
+            space_adapter_kwargs=space_adapter_config,
         )
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
