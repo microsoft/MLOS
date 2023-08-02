@@ -9,9 +9,10 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+from types import TracebackType
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
+from typing_extensions import Literal
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -111,6 +112,7 @@ class Environment(metaclass=abc.ABCMeta):
         self.config = config
         self._service = service
         self._is_ready = False
+        self._in_context = False
         self._const_args = config.get("const_args", {})
 
         if tunables is None:
@@ -173,6 +175,30 @@ class Environment(metaclass=abc.ABCMeta):
     def _config_loader_service(self) -> "SupportsConfigLoading":
         assert self._service is not None
         return self._service.config_loader_service
+
+    def __enter__(self) -> 'Environment':
+        """
+        Enter the environment's benchmarking context.
+        """
+        _LOG.debug("Environment START :: %s", self)
+        assert not self._in_context
+        self._in_context = True
+        return self
+
+    def __exit__(self, exc_type: Optional[Type[BaseException]],
+                 exc_val: Optional[BaseException],
+                 exc_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exit the context of the benchmarking environment.
+        """
+        if exc_val is None:
+            _LOG.debug("Environment END :: %s", self)
+        else:
+            assert exc_type and exc_val
+            _LOG.warning("Environment END :: %s", self, exc_info=(exc_type, exc_val, exc_tb))
+        assert self._in_context
+        self._in_context = False
+        return False  # Do not suppress exceptions
 
     def __str__(self) -> str:
         return self.name
