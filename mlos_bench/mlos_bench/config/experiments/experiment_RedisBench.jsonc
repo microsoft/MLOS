@@ -1,6 +1,6 @@
 {
     "experiment_id": "RedisBench",
-    "trialId": 1,
+    "trial_id": 1,
 
     // TODO: Generate these names from $experiment_id
     "deploymentName": "RedisBench",

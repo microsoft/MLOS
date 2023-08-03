@@ -19,7 +19,7 @@
     ],
 
     "experiment_id": "RedisBench",
-    "trialId": 1,
+    "trial_id": 1,
 
     "teardown": false,
 

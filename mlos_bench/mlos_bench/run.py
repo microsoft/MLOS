@@ -70,8 +70,8 @@ def _optimize(env: Environment,
         _LOG.info("Root Environment:\n%s", env.pprint())
 
     experiment_id = global_config["experiment_id"].strip()
-    trial_id = int(global_config.get("trialId", 1))
-    config_id = int(global_config.get("configId", -1))
+    trial_id = int(global_config.get("trial_id", 1))
+    config_id = int(global_config.get("config_id", -1))
 
     # Start new or resume the existing experiment. Verify that the
     # experiment configuration is compatible with the previous runs.

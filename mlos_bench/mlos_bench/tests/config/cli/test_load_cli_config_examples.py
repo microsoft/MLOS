@@ -55,7 +55,7 @@ def test_load_cli_config_examples(config_loader_service: ConfigPersistenceServic
         "log_file",
         "log_level",
         "experiment_id",
-        "trialId",
+        "trial_id",
         "teardown",
     }
     for arg in config:
