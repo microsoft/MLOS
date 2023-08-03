@@ -86,8 +86,8 @@
             "$ref": "#/$defs/json_config_path_or_paths"
         },
 
-        "experimentId": {
-            "$ref": "./common-defs-subschemas.json#/$defs/experimentId"
+        "experiment_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/experiment_id"
         },
         "trial_id": {
             "$ref": "./common-defs-subschemas.json#/$defs/trial_id"

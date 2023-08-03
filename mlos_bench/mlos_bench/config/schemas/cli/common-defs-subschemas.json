@@ -5,6 +5,7 @@
     "$comment": "Includes common subschemas for both cli configs and globals.",
     "$defs": {
         "tunable_params_map": {
+            "description": "Maps tunable_params to a set of covariant tunable groups.",
             "type": "object",
             "additionalProperties": {
                 "type": "array",
@@ -14,6 +15,7 @@
                 "uniqueItems": true
             }
         },
+
         "experiment_id": {
             "description": "The name of the experiment. Sometimes appended to various resources.",
             "type": "string",

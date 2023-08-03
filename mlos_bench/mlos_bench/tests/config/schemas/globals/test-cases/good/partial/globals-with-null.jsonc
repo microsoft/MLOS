@@ -3,5 +3,7 @@
     "bar": "baz",
     "num": 1,
     "bool": true,
-    "null": null
+    "null": null,
+    "experiment_id": "ExperimentName",
+    "trial_id": 1
 }
