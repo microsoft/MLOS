@@ -211,8 +211,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         Generic instantiation of mlos_bench objects like Storage and Optimizer
         that depend on Service and TunableGroups.
 
-        A class *MUST* have a constructor that takes exactly three arguments:
-        (tunables, service, config)
+        A class *MUST* have a constructor that takes four named arguments:
+        (tunables, config, global_config, service)
 
         Parameters
         ----------
@@ -237,7 +237,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if tunables_path is not None:
             tunables = self._load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        inst = instantiate_from_config(base_cls, class_name, tunables, service, class_config)
+        inst = instantiate_from_config(base_cls, class_name,
+                                       tunables=tunables,
+                                       config=class_config,
+                                       global_config=global_config,
+                                       service=service)
         _LOG.info("Created: %s %s", base_cls.__name__, inst)
         return inst
 
