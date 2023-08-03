@@ -145,7 +145,7 @@ def _run(env: Environment, opt: Optimizer,
             opt.register(trial.tunables, Status.FAILED)
             return
 
-        # In async mode, poll the environment for status and telemetry
+        # In async mode (TODO), poll the environment for status and telemetry
         # and update the storage with the intermediate results.
         (status, telemetry) = env_context.status()
         trial.update_telemetry(status, telemetry)
