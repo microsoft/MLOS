@@ -213,7 +213,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=datetime.now(),
+                    ts_start=datetime.utcnow(),
                     status='PENDING',
                 ))
                 if config is not None:
