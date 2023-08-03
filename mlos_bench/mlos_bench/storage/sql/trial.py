@@ -84,6 +84,7 @@ class Trial(Storage.Trial):
         # NOTE: Not every SQLAlchemy dialect supports `Insert.on_conflict_do_nothing()`
         # and we need to keep `.update_telemetry()` idempotent; hence a loop instead of
         # a bulk upsert.
+        # See Also: comments in <https://github.com/microsoft/MLOS/pull/466>
         for (timestamp, key, val) in metrics:
             with self._engine.begin() as conn:
                 try:
