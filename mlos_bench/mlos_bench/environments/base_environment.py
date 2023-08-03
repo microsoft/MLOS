@@ -9,7 +9,9 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+
+from datetime import datetime
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -314,19 +316,20 @@ class Environment(metaclass=abc.ABCMeta):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
-        return self.status()
+        (status, _) = self.status()
+        return (status, None)
 
-    def status(self) -> Tuple[Status, Optional[dict]]:
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, telemetry) : (Status, dict)
+        (benchmark_status, telemetry) : (Status, list)
             A pair of (benchmark status, telemetry) values.
-            `telemetry` is a free-form dict or None if the environment is not running.
+            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
         if self._is_ready:
-            return (Status.READY, None)
+            return (Status.READY, [])
         _LOG.warning("Environment not ready: %s", self)
-        return (Status.PENDING, None)
+        return (Status.PENDING, [])
