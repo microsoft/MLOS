@@ -8,7 +8,7 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-
+from datetime import datetime
 from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
@@ -160,6 +160,22 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
+        def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
+            """
+            Retrieve the telemetry data for a given trial.
+
+            Parameters
+            ----------
+            trial_id : int
+                Trial ID.
+
+            Returns
+            -------
+            metrics : List[Tuple[datetime, str, Any]]
+                Telemetry data.
+            """
+
+        @abstractmethod
         def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
             """
             Load (tunable values, benchmark scores, status) to warm-up the optimizer.
@@ -240,12 +256,12 @@ class Storage(metaclass=ABCMeta):
             """
             config = self._config.copy()
             config.update(global_config or {})
-            config["experimentId"] = self._experiment_id
-            config["trialId"] = self._trial_id
+            config["experiment_id"] = self._experiment_id
+            config["trial_id"] = self._trial_id
             return config
 
         @abstractmethod
-        def update(self, status: Status,
+        def update(self, status: Status, timestamp: datetime,
                    metrics: Optional[Union[Dict[str, float], float]] = None
                    ) -> Optional[Dict[str, float]]:
             """
@@ -255,6 +271,8 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Status of the experiment run.
+            timestamp: datetime
+                Timestamp of the status and metrics.
             metrics : Optional[Union[Dict[str, float], float]]
                 One or several metrics of the experiment run.
                 Must contain the optimization target if the status is SUCCEEDED.
@@ -273,7 +291,7 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update_telemetry(self, status: Status,
-                             metrics: Optional[Dict[str, float]] = None) -> None:
+                             metrics: List[Tuple[datetime, str, Any]]) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 
@@ -281,7 +299,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Current status of the trial.
-            metrics : Optional[Dict[str, float]]
+            metrics : List[Tuple[datetime, str, Any]]
                 Telemetry data.
             """
             _LOG.info("Store telemetry: %s :: %s %s", self, status, metrics)
