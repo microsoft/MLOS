@@ -7,7 +7,10 @@ Composite benchmark environment.
 """
 
 import logging
-from typing import List, Optional, Tuple
+
+from types import TracebackType
+from typing import List, Optional, Tuple, Type
+from typing_extensions import Literal
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
@@ -59,6 +62,7 @@ class CompositeEnv(Environment):
 
         _LOG.debug("Build composite environment '%s' START: %s", self, tunables)
         self._children: List[Environment] = []
+        self._contexts: List[Environment] = []
 
         # To support trees of composite environments (e.g. for multiple VM experiments),
         # each CompositeEnv gets a copy of the original global config and adjusts it with
@@ -81,6 +85,17 @@ class CompositeEnv(Environment):
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
+
+    def __enter__(self) -> Environment:
+        self._contexts = [env.__enter__() for env in self._children]
+        return super().__enter__()
+
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        for env in reversed(self._children):
+            env.__exit__(ex_type, ex_val, ex_tb)
+        return super().__exit__(ex_type, ex_val, ex_tb)
 
     @property
     def children(self) -> List[Environment]:

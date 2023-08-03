@@ -124,7 +124,7 @@ class LocalEnv(ScriptEnv):
         if not super().setup(tunables, global_config):
             return False
 
-        _LOG.info("Set up the environment locally: %s at %s", self, self._temp_dir)
+        _LOG.info("Set up the environment locally: '%s' at %s", self, self._temp_dir)
         assert self._temp_dir is not None
 
         if self._dump_params_file:
