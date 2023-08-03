@@ -70,6 +70,7 @@ class Environment(metaclass=abc.ABCMeta):
         env : Environment
             An instance of the `Environment` class initialized with `config`.
         """
+        assert issubclass(cls, Environment)
         return instantiate_from_config(
             cls,
             class_name,
