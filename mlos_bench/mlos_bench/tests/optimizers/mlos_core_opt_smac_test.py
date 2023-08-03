@@ -100,6 +100,24 @@ def test_init_mlos_core_smac_relative_output_directory_with_run_name(tunable_gro
         os.path.join(os.getcwd(), test_opt_config['output_directory'], test_opt_config['run_name']))
 
 
+def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunable_groups: TunableGroups) -> None:
+    """
+    Test relative path output directory initialization of mlos_core SMAC optimizer.
+    """
+    test_opt_config = {
+        'optimizer_type': 'SMAC',
+        'output_directory': '/tmp/test_output_dir',
+        'experimentId': 'experiment_id',
+    }
+    service = None
+    opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+    assert isinstance(opt, MlosCoreOptimizer)
+    # pylint: disable=protected-access
+    assert isinstance(opt._opt, SmacOptimizer)
+    assert str(opt._opt.base_optimizer.scenario.output_directory).startswith(
+        os.path.join(os.getcwd(), test_opt_config['output_directory'], test_opt_config['experimentId']))
+
+
 def test_init_mlos_core_smac_temp_output_directory(tunable_groups: TunableGroups) -> None:
     """
     Test relative path output directory initialization of mlos_core SMAC optimizer.

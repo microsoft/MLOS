@@ -55,7 +55,8 @@ class MlosCoreOptimizer(Optimizer):
             assert self._config.get('max_trials') == self._max_iter, \
                 f"max_trials {self._config.get('max_trials')} != max_iterations {self._max_iter}"
 
-            # TODO: Set run_name from experimentId (global_params not currently accessible from here).
+            if 'run_name' not in self._config and self.experiment_id:
+                self._config['run_name'] = self.experiment_id
 
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})

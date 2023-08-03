@@ -37,6 +37,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)
+        config = config.copy()
+        experiment_id = config.pop('experimentId', None)
+        self.experiment_id = str(experiment_id).strip() if experiment_id else None
         self._config = config.copy()
         self._tunables = tunables
         self._service = service
