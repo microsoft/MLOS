@@ -81,6 +81,9 @@ class Trial(Storage.Trial):
 
     def update_telemetry(self, status: Status, metrics: List[Tuple[datetime, str, Any]]) -> None:
         super().update_telemetry(status, metrics)
+        # NOTE: Not every SQLAlchemy dialect supports `Insert.on_conflict_do_nothing()`
+        # and we need to keep `.update_telemetry()` idempotent; hence a loop instead of
+        # a bulk upsert.
         for (timestamp, key, val) in metrics:
             with self._engine.begin() as conn:
                 try:
