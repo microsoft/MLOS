@@ -1,6 +1,9 @@
 {
     "class": "mlos_bench.services.remote.azure.AzureAuthService",
     "config": {
-        "tokenRequestInterval": 300  // seconds
+        "tokenRequestInterval": 300,  // seconds
+        "keyVaultName": "PLACEHOLDER; e.g. mlos-autotune-kv",
+        "certName": "PLACEHOLDER; e.g. mlos-autotune-sp-cert",
+        "spClientId": "PLACEHOLDER;"
     }
 }
