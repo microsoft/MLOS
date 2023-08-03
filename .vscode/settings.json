@@ -50,10 +50,14 @@
         },
         {
             "fileMatch": [
-                "global_config.jsonc",
-                "global_config.json",
+                "mlos_bench/mlos_bench/tests/config/globals/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/globals/**/*.json",
+                "globals*.jsonc",
+                "globals*.json",
+                "global*.jsonc",
+                "global*.json",
                 "config.jsonc",
-                "config.json"
+                "config.json",
             ],
             "url": "./mlos_bench/mlos_bench/config/schemas/cli/globals-schema.json"
         },
