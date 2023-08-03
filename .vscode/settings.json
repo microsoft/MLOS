@@ -112,20 +112,20 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
-    "python.formatting.provider": "none",
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": [
+        "--experimental"
+    ],
+    "autopep8.args": [
+        "--experimental"
+    ],
     "[python]": {
-        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.defaultFormatter": "ms-python.python",
         "editor.formatOnSave": true,
         "editor.formatOnSaveMode": "modifications"
     },
     "python.testing.pytestArgs": [
         "."
     ],
-    "python.testing.unittestEnabled": false,
-    "autopep8.args": [
-        "--experimental"
-    ],
-    "python.formatting.autopep8Args": [
-        "--experimental"
-    ]
+    "python.testing.unittestEnabled": false
 }
