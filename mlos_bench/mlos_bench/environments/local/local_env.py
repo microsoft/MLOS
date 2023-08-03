@@ -82,17 +82,17 @@ class LocalEnv(ScriptEnv):
         self._temp_dir = self._temp_dir_context.__enter__()
         return super().__enter__()
 
-    def __exit__(self, exc_type: Optional[Type[BaseException]],
-                 exc_val: Optional[BaseException],
-                 exc_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
         """
         Exit the context of the benchmarking environment.
         """
         assert not (self._temp_dir is None or self._temp_dir_context is None)
-        self._temp_dir_context.__exit__(exc_type, exc_val, exc_tb)
+        self._temp_dir_context.__exit__(ex_type, ex_val, ex_tb)
         self._temp_dir = None
         self._temp_dir_context = None
-        return super().__exit__(exc_type, exc_val, exc_tb)
+        return super().__exit__(ex_type, ex_val, ex_tb)
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """

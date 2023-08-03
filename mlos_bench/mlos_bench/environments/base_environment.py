@@ -185,17 +185,17 @@ class Environment(metaclass=abc.ABCMeta):
         self._in_context = True
         return self
 
-    def __exit__(self, exc_type: Optional[Type[BaseException]],
-                 exc_val: Optional[BaseException],
-                 exc_tb: Optional[TracebackType]) -> Literal[False]:
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
         """
         Exit the context of the benchmarking environment.
         """
-        if exc_val is None:
+        if ex_val is None:
             _LOG.debug("Environment END :: %s", self)
         else:
-            assert exc_type and exc_val
-            _LOG.warning("Environment END :: %s", self, exc_info=(exc_type, exc_val, exc_tb))
+            assert ex_type and ex_val
+            _LOG.warning("Environment END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
         assert self._in_context
         self._in_context = False
         return False  # Do not suppress exceptions
