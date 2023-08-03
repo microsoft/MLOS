@@ -52,8 +52,8 @@ class MlosCoreOptimizer(Optimizer):
             # Set max_trials == max_iterations.
             if 'max_trials' not in self._config:
                 self._config['max_trials'] = self._max_iter
-            assert self._config['max_trials'] == self._max_iter, \
-                f"max_trials {self._config['max_trials']} != max_iterations {self._max_iter}"
+            assert self._config.get('max_trials') == self._max_iter, \
+                f"max_trials {self._config.get('max_trials')} != max_iterations {self._max_iter}"
 
             # TODO: Set run_name from experimentId (global_params not currently accessible from here).
 
