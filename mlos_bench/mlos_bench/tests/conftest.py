@@ -104,7 +104,7 @@ def covariant_group(tunable_groups: TunableGroups) -> CovariantTunableGroup:
 
 
 @pytest.fixture
-def env_context(tunable_groups: TunableGroups) -> MockEnv:
+def mock_env(tunable_groups: TunableGroups) -> MockEnv:
     """
     Test fixture for MockEnv.
     """
