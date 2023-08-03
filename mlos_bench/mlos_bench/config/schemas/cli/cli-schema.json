@@ -86,15 +86,14 @@
             "$ref": "#/$defs/json_config_path_or_paths"
         },
 
-        "experimentId": {
-            "description": "Name of the experiment.",
-            "$comment": "TODO: Rename this to conform to snake case.",
-            "type": "string"
+        "experiment_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/experiment_id"
         },
-        "trialId": {
-            "description": "Trial id to use for the experiment.",
-            "$comment": "TODO: Rename this to conform to snake case.",
-            "type": "integer"
+        "trial_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/trial_id"
+        },
+        "config_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/config_id"
         },
 
         "teardown": {

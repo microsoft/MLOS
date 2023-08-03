@@ -21,8 +21,8 @@
 
     // "globals": ["global_config.json"],
 
-    "experimentId": "MockExperiment",
-    "trialId": 1,
+    "experiment_id": "MockExperiment",
+    "trial_id": 1,
 
     "teardown": true,
 

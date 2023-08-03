@@ -7,7 +7,6 @@ dependencies:
   - pip
   - pylint
   - pycodestyle
-  - autopep8
   - pydocstyle
   - flake8
   - setuptools
@@ -20,6 +19,7 @@ dependencies:
   - swig
   - python
   - pip:
+    - autopep8>=1.7.0
     - bump2version
     - check-jsonschema
     - licenseheaders

@@ -18,8 +18,8 @@
         "global_config.json"
     ],
 
-    "experimentId": "RedisBench",
-    "trialId": 1,
+    "experiment_id": "RedisBench",
+    "trial_id": 1,
 
     "teardown": false,
 

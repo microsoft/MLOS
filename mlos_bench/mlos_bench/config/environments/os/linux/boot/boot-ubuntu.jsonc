@@ -25,14 +25,14 @@
 
                     // Values provided from the global config/optimizer:
                     "required_args": [
-                        "experimentId",
-                        "trialId"
+                        "experiment_id",
+                        "trial_id"
                     ],
                     // Dump tunable parameters to a local JSON file:
                     "dump_params_file": "boot-params.json",
                     "shell_env_params": [
-                        "experimentId",
-                        "trialId"
+                        "experiment_id",
+                        "trial_id"
                     ],
                     "setup": [
                         "environments/os/linux/boot/scripts/local/generate_grub_config.py boot-params.json grub.cfg"
@@ -40,7 +40,7 @@
                     "upload": [
                         {
                             "from": "grub.cfg",
-                            "to": "$experimentId/$trialId/input/grub.cfg"
+                            "to": "$experiment_id/$trial_id/input/grub.cfg"
                         }
                     ]
                 }
@@ -56,8 +56,8 @@
                         "storageFileShareName",
                         "storageAccountKey",
                         "mountPoint",
-                        "experimentId",
-                        "trialId"
+                        "experiment_id",
+                        "trial_id"
                     ],
                     "wait_boot": true,
                     "shell_env_params": [
@@ -65,17 +65,17 @@
                         "storageFileShareName",
                         "storageAccountKey",
                         "mountPoint",
-                        "experimentId",
-                        "trialId"
+                        "experiment_id",
+                        "trial_id"
                     ],
                     "setup": [
                         "sudo mkdir -p $mountPoint",
                         "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
                         // TODO: Apply GRUB parameters from config on shared storage at:
-                        // "$mountPoint/$experimentId/$trialId/input/grub.cfg"
+                        // "$mountPoint/$experiment_id/$trial_id/input/grub.cfg"
                         // "sudo update-grub",
                         // "sudo shutdown -r now"  // Reboot to apply the parameters
-                        "cat $mountPoint/$experimentId/$trialId/input/grub.cfg"
+                        "cat $mountPoint/$experiment_id/$trial_id/input/grub.cfg"
                     ],
                     "teardown": [
                         // "sudo umount $mountPoint"

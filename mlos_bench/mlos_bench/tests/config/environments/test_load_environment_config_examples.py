@@ -51,8 +51,8 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
     """Loads an environment config example."""
     # Make sure that any "required_args" are provided.
     global_config = {
-        "experimentId": "test",
-        "trialId": 1,
+        "experiment_id": "test",
+        "trial_id": 1,
 
         "mountPoint": "/mnt/tmp",
 

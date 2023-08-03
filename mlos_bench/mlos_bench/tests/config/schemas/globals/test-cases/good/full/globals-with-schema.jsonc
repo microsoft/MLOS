@@ -8,5 +8,7 @@
     "tunable_params_map": {
         // Examples
         "mysql": ["mysql-innodb", "mysql-myisam", "mysql-binlog", "mysql-hugepages"]
-    }
+    },
+    "experiment_id": "ExperimentName",
+    "trial_id": 1
 }
