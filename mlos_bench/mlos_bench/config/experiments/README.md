@@ -12,8 +12,8 @@ it looks like this:
 
 ```jsonc
 {
-    "experimentId": "RedisBench",
-    "trialId": 1,
+    "experiment_id": "RedisBench",
+    "trial_id": 1,
 
     "deploymentName": "RedisBench",
     "vmName": "os-autotune-linux-vm",

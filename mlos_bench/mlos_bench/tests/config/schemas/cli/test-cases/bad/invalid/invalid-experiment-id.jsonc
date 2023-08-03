@@ -1,0 +1,5 @@
+{
+    "experiment_id": "Spaces Not Allowed",
+    "log_file": "/tmp/mlos_bench.log",
+    "log_level": "DEBUG"
+}
