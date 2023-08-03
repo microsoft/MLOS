@@ -47,7 +47,7 @@ class MlosCoreOptimizer(Optimizer):
                 if not os.path.isabs(output_directory):
                     self._config['output_directory'] = os.path.join(os.getcwd(), output_directory)
             else:
-                _LOG.warning("No output_directory specified. SMAC will use temporary directory.")
+                _LOG.warning("No output_directory specified. SMAC will use a temporary directory.")
 
             # Set max_trials == max_iterations.
             if 'max_trials' not in self._config:

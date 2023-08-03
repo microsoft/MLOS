@@ -3,7 +3,6 @@
 
     "config": {
         "optimizer_type": "SMAC",
-        "output_directory": null,
-        "run_name": "run-name"
+        "run_name": "no spaces or / characters are allowed"
     }
 }

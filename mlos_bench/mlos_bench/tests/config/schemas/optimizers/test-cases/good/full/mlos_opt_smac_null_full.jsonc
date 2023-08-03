@@ -10,6 +10,7 @@
         "space_adapter_type": null,
         "n_random_init": 10,
         "n_random_probability": 0.1,
-        "output_directory": "smac_output"
+        "output_directory": "smac_output",
+        "run_name": "ExperimentName"
     }
 }

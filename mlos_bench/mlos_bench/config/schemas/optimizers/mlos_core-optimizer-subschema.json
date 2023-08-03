@@ -66,7 +66,14 @@
                         "type": ["string", "null"],
                         "pattern": "^[a-zA-Z0-9_./-]+$",
                         "example": "smac_output"
+                    },
+                    "run_name": {
+                        "description": "Name to give for the smac output (e.g., $experimentId). If null is used, SMAC will calculate a hash based name.",
+                        "type": ["string", "null"],
+                        "pattern": "^[a-zA-Z0-9_.-]+$",
+                        "example": "$experimentId"
                     }
+
                 }
             }
         },
