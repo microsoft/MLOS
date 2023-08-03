@@ -13,6 +13,22 @@
                 },
                 "uniqueItems": true
             }
+        },
+        "experiment_id": {
+            "description": "The name of the experiment. Sometimes appended to various resources.",
+            "type": "string",
+            "$comment": "No spaces allowed.",
+            "pattern": "^[a-zA-Z0-9_.-]+$"
+        },
+        "trial_id": {
+            "description": "Trial ID to use (or resume) for the experiment.",
+            "type": "integer",
+            "minimum": 0
+        },
+        "config_id": {
+            "description": "Config ID to use (or resume) for the experiment.",
+            "type": "integer",
+            "minimum": 0
         }
     }
 }

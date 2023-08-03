@@ -10,14 +10,19 @@
             "type": "string",
             "pattern": "/schemas/cli/globals-schema.json$"
         },
+
         "tunable_params_map": {
             "$ref": "./common-defs-subschemas.json#/$defs/tunable_params_map"
         },
+
         "experiment_id": {
-            "description": "The name of the experiment. Sometimes appended to various resources.",
-            "type": "string",
-            "$comment": "No spaces allowed.",
-            "pattern": "^[a-zA-Z0-9_.-]+$"
+            "$ref": "./common-defs-subschemas.json#/$defs/experiment_id"
+        },
+        "trial_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/trial_id"
+        },
+        "config_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/config_id"
         }
     },
     "additionalProperties": {
