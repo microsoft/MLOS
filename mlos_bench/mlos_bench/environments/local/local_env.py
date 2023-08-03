@@ -8,6 +8,7 @@ Scheduler-side benchmark environment to run scripts locally.
 
 import json
 import logging
+import os
 
 from tempfile import TemporaryDirectory
 from contextlib import nullcontext
@@ -71,6 +72,11 @@ class LocalEnv(ScriptEnv):
         self._local_exec_service: SupportsLocalExec = self._service
         self._temp_dir: Optional[str] = None
         self._temp_dir_context: Union[TemporaryDirectory, nullcontext, None] = None
+
+        temp_dir = self.config.get("temp_dir")
+        if temp_dir is not None and not os.path.isdir(temp_dir):
+            _LOG.error("temp_dir path is invalid: %s", temp_dir)
+            raise ValueError(f"Temp directory path is invalid: {temp_dir}")
 
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
         self._dump_meta_file: Optional[str] = self.config.get("dump_meta_file")
