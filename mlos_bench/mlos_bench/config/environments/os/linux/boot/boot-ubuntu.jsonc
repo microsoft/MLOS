@@ -25,13 +25,13 @@
 
                     // Values provided from the global config/optimizer:
                     "required_args": [
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     // Dump tunable parameters to a local JSON file:
                     "dump_params_file": "boot-params.json",
                     "shell_env_params": [
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     "setup": [
@@ -40,7 +40,7 @@
                     "upload": [
                         {
                             "from": "grub.cfg",
-                            "to": "$experimentId/$trialId/input/grub.cfg"
+                            "to": "$experiment_id/$trialId/input/grub.cfg"
                         }
                     ]
                 }
@@ -56,7 +56,7 @@
                         "storageFileShareName",
                         "storageAccountKey",
                         "mountPoint",
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     "wait_boot": true,
@@ -65,17 +65,17 @@
                         "storageFileShareName",
                         "storageAccountKey",
                         "mountPoint",
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     "setup": [
                         "sudo mkdir -p $mountPoint",
                         "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
                         // TODO: Apply GRUB parameters from config on shared storage at:
-                        // "$mountPoint/$experimentId/$trialId/input/grub.cfg"
+                        // "$mountPoint/$experiment_id/$trialId/input/grub.cfg"
                         // "sudo update-grub",
                         // "sudo shutdown -r now"  // Reboot to apply the parameters
-                        "cat $mountPoint/$experimentId/$trialId/input/grub.cfg"
+                        "cat $mountPoint/$experiment_id/$trialId/input/grub.cfg"
                     ],
                     "teardown": [
                         // "sudo umount $mountPoint"

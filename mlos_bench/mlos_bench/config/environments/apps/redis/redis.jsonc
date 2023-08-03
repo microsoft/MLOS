@@ -13,7 +13,7 @@
                 "config": {
                     "tunable_params": ["$redis"],
                     "required_args": [
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     // Dump tunable parameters to a local JSON file:
@@ -25,11 +25,11 @@
                     "upload": [
                         {
                             "from": "redis.cfg",
-                            "to": "$experimentId/$trialId/input/redis.cfg"
+                            "to": "$experiment_id/$trialId/input/redis.cfg"
                         },
                         {
                             "from": "environments/apps/redis/scripts/remote/",
-                            "to": "$experimentId/$trialId/scripts"
+                            "to": "$experiment_id/$trialId/scripts"
                         }
                     ]
                 }
@@ -41,23 +41,23 @@
                 "config": {
                     "required_args": [
                         "vmName",
-                        "experimentId",
+                        "experiment_id",
                         "trialId",
                         "mountPoint"
                     ],
                     "setup": [
-                        "$mountPoint/$experimentId/$trialId/scripts/setup-workload.sh",
-                        "$mountPoint/$experimentId/$trialId/scripts/setup-app.sh"
+                        "$mountPoint/$experiment_id/$trialId/scripts/setup-workload.sh",
+                        "$mountPoint/$experiment_id/$trialId/scripts/setup-app.sh"
                     ],
                     "run": [
                         "mkdir -p /tmp/mlos_bench/output/",
-                        "$mountPoint/$experimentId/$trialId/scripts/run-workload.sh",
-                        "mkdir -p $mountPoint/$experimentId/$trialId/output/",
-                        "cp -r /tmp/mlos_bench/output/* $mountPoint/$experimentId/$trialId/output/"
+                        "$mountPoint/$experiment_id/$trialId/scripts/run-workload.sh",
+                        "mkdir -p $mountPoint/$experiment_id/$trialId/output/",
+                        "cp -r /tmp/mlos_bench/output/* $mountPoint/$experiment_id/$trialId/output/"
                     ],
                     "teardown": [
-                        "$mountPoint/$experimentId/$trialId/scripts/cleanup-workload.sh",
-                        "$mountPoint/$experimentId/$trialId/scripts/cleanup-app.sh",
+                        "$mountPoint/$experiment_id/$trialId/scripts/cleanup-workload.sh",
+                        "$mountPoint/$experiment_id/$trialId/scripts/cleanup-app.sh",
                         "rm -r /tmp/mlos_bench/"
                     ]
                 }
@@ -68,12 +68,12 @@
                 "class": "mlos_bench.environments.local.LocalFileShareEnv",
                 "config": {
                     "required_args": [
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     "download": [
                         {
-                            "from": "$experimentId/$trialId/output",
+                            "from": "$experiment_id/$trialId/output",
                             "to": "$PWD/redis-bench-output/"
                         }
                     ],

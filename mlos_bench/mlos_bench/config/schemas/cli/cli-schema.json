@@ -86,7 +86,7 @@
             "$ref": "#/$defs/json_config_path_or_paths"
         },
 
-        "experimentId": {
+        "experiment_id": {
             "description": "Name of the experiment.",
             "$comment": "TODO: Rename this to conform to snake case.",
             "type": "string"

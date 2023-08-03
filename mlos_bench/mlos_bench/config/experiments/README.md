@@ -12,7 +12,7 @@ it looks like this:
 
 ```jsonc
 {
-    "experimentId": "RedisBench",
+    "experiment_id": "RedisBench",
     "trialId": 1,
 
     "deploymentName": "RedisBench",

@@ -1,8 +1,8 @@
 {
-    "experimentId": "RedisBench",
+    "experiment_id": "RedisBench",
     "trialId": 1,
 
-    // TODO: Generate these names from $experimentId
+    // TODO: Generate these names from $experiment_id
     "deploymentName": "RedisBench",
     "vmName": "os-autotune-linux-vm",
 

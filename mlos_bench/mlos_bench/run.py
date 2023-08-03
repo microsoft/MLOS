@@ -69,7 +69,7 @@ def _optimize(env: Environment,
     if _LOG.isEnabledFor(logging.INFO):
         _LOG.info("Root Environment:\n%s", env.pprint())
 
-    experiment_id = global_config["experimentId"].strip()
+    experiment_id = global_config["experiment_id"].strip()
     trial_id = int(global_config.get("trialId", 1))
     config_id = int(global_config.get("configId", -1))
 

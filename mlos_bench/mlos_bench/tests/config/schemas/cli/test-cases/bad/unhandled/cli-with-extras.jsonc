@@ -16,7 +16,7 @@
         "global_config.json"
     ],
 
-    "experimentId": "RedisBench",
+    "experiment_id": "RedisBench",
     "trialId": 1,
 
     "teardown": false,

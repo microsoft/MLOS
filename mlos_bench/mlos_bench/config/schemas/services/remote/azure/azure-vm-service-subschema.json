@@ -28,7 +28,7 @@
                             "type": "string"
                         },
                         "deploymentName": {
-                            "$comment": "TODO: provide templating strings to augment names via experimentId/trialId, for instance.",
+                            "$comment": "TODO: provide templating strings to augment names via experiment_id/trialId, for instance.",
                             "description": "Name of the deployment to create for the experiment resources.",
                             "type": "string"
                         },

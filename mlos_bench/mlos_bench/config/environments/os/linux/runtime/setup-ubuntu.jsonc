@@ -16,14 +16,14 @@
                     "tunable_params": ["$linux-runtime"],
 
                     "required_args": [
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     // Dump tunable parameters to a local JSON file:
                     "dump_params_file": "kernel-params.json",
                     "dump_meta_file": "kernel-params-meta.json",
                     "shell_env_params": [
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     "setup": [
@@ -32,17 +32,17 @@
                     "upload": [
                         {
                             "from": "config-kernel.sh",
-                            "to": "$experimentId/$trialId/input/config-kernel.sh"
+                            "to": "$experiment_id/$trialId/input/config-kernel.sh"
                         },
                         // We don't really need `kernel-params*.json` files on the remote side,
                         // but it's nice to have them in a shared storage for debugging purposes.
                         {
                             "from": "kernel-params.json",
-                            "to": "$experimentId/$trialId/input/kernel-params.json"
+                            "to": "$experiment_id/$trialId/input/kernel-params.json"
                         },
                         {
                             "from": "kernel-params-meta.json",
-                            "to": "$experimentId/$trialId/input/kernel-params-meta.json"
+                            "to": "$experiment_id/$trialId/input/kernel-params-meta.json"
                         }
                     ]
                 }
@@ -58,7 +58,7 @@
                         "storageFileShareName",
                         "storageAccountKey",
                         "mountPoint",
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     "wait_boot": true,
@@ -67,13 +67,13 @@
                         "storageFileShareName",
                         "storageAccountKey",
                         "mountPoint",
-                        "experimentId",
+                        "experiment_id",
                         "trialId"
                     ],
                     "setup": [
                         "sudo mkdir -p $mountPoint",
                         "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
-                        "sudo $mountPoint/$experimentId/$trialId/input/config-kernel.sh"
+                        "sudo $mountPoint/$experiment_id/$trialId/input/config-kernel.sh"
                     ]
                 }
             }

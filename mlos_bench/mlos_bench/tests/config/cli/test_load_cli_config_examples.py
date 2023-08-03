@@ -54,7 +54,7 @@ def test_load_cli_config_examples(config_loader_service: ConfigPersistenceServic
         "globals",      # we don't commit globals to the repo generally, so skip testing them
         "log_file",
         "log_level",
-        "experimentId",
+        "experiment_id",
         "trialId",
         "teardown",
     }

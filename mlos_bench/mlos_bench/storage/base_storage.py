@@ -256,7 +256,7 @@ class Storage(metaclass=ABCMeta):
             """
             config = self._config.copy()
             config.update(global_config or {})
-            config["experimentId"] = self._experiment_id
+            config["experiment_id"] = self._experiment_id
             config["trialId"] = self._trial_id
             return config
 
