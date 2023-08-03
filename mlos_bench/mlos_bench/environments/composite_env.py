@@ -95,6 +95,7 @@ class CompositeEnv(Environment):
                  ex_tb: Optional[TracebackType]) -> Literal[False]:
         for env in reversed(self._children):
             env.__exit__(ex_type, ex_val, ex_tb)
+        self._contexts = []
         return super().__exit__(ex_type, ex_val, ex_tb)
 
     @property
@@ -151,10 +152,8 @@ class CompositeEnv(Environment):
             True if all children setup() operations are successful,
             false otherwise.
         """
-        self._is_ready = (
-            super().setup(tunables, global_config) and
-            all(env.setup(tunables, global_config) for env in self._children)
-        )
+        self._is_ready = super().setup(tunables, global_config) and all(
+            env_context.setup(tunables, global_config) for env_context in self._contexts)
         return self._is_ready
 
     def teardown(self) -> None:
@@ -163,8 +162,8 @@ class CompositeEnv(Environment):
         i.e., calling it several times is equivalent to a single call.
         The environments are being torn down in the reverse order.
         """
-        for env in reversed(self._children):
-            env.teardown()
+        for env_context in reversed(self._contexts):
+            env_context.teardown()
         super().teardown()
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -185,10 +184,10 @@ class CompositeEnv(Environment):
         (status, _) = result = super().run()
         if not status.is_ready():
             return result
-        for env in self._children:
-            _LOG.debug("Child env. run: %s", env)
-            (status, _) = result = env.run()
-            _LOG.debug("Child env. run results: %s :: %s", env, result)
+        for env_context in self._contexts:
+            _LOG.debug("Child env. run: %s", env_context)
+            (status, _) = result = env_context.run()
+            _LOG.debug("Child env. run results: %s :: %s", env_context, result)
             if not status.is_good():
                 break
         _LOG.info("Run completed: %s :: %s", self, result)
