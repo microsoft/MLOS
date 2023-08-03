@@ -25,8 +25,12 @@ class SqlStorage(Storage):
     An implementation of the Storage interface using SQLAlchemy backend.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
-        super().__init__(tunables, service, config)
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
+        super().__init__(tunables, config, global_config, service)
         lazy_schema_create = self._config.pop("lazy_schema_create", False)
         self._log_sql = self._config.pop("log_sql", False)
         self._url = URL.create(**self._config)
