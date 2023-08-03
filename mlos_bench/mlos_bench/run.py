@@ -141,7 +141,7 @@ def _run(env: Environment, opt: Optimizer,
         if not env_context.setup(trial.tunables, trial.config(global_config)):
             _LOG.warning("Setup failed: %s :: %s", env_context, trial.tunables)
             # FIXME: Use the actual timestamp from the environment.
-            trial.update(Status.FAILED, datetime.now())
+            trial.update(Status.FAILED, datetime.utcnow())
             opt.register(trial.tunables, Status.FAILED)
             return
 
@@ -153,7 +153,7 @@ def _run(env: Environment, opt: Optimizer,
         (status, results) = env_context.run()  # Block and wait for the final result.
         _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
         # FIXME: Use the actual timestamp from the benchmark.
-        trial.update(status, datetime.now(), results)
+        trial.update(status, datetime.utcnow(), results)
         opt.register(trial.tunables, status, results)
 
 

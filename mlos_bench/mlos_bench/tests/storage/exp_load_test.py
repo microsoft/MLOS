@@ -66,7 +66,7 @@ def test_exp_trial_pending_fail(exp_storage_memory_sql: Storage.Experiment,
     Start a trial, fail it, and and check that it is NOT pending.
     """
     trial = exp_storage_memory_sql.new_trial(tunable_groups)
-    trial.update(Status.FAILED, datetime.now())
+    trial.update(Status.FAILED, datetime.utcnow())
     trials = list(exp_storage_memory_sql.pending_trials())
     assert not trials
 
@@ -77,7 +77,7 @@ def test_exp_trial_success(exp_storage_memory_sql: Storage.Experiment,
     Start a trial, finish it successfully, and and check that it is NOT pending.
     """
     trial = exp_storage_memory_sql.new_trial(tunable_groups)
-    trial.update(Status.SUCCEEDED, datetime.now(), 99.9)
+    trial.update(Status.SUCCEEDED, datetime.utcnow(), 99.9)
     trials = list(exp_storage_memory_sql.pending_trials())
     assert not trials
 
@@ -88,9 +88,9 @@ def test_exp_trial_update_twice(exp_storage_memory_sql: Storage.Experiment,
     Update the trial status twice and receive an error.
     """
     trial = exp_storage_memory_sql.new_trial(tunable_groups)
-    trial.update(Status.FAILED, datetime.now())
+    trial.update(Status.FAILED, datetime.utcnow())
     with pytest.raises(RuntimeError):
-        trial.update(Status.SUCCEEDED, datetime.now(), 99.9)
+        trial.update(Status.SUCCEEDED, datetime.utcnow(), 99.9)
 
 
 def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,
@@ -105,8 +105,8 @@ def test_exp_trial_pending_3(exp_storage_memory_sql: Storage.Experiment,
     trial_succ = exp_storage_memory_sql.new_trial(tunable_groups)
     trial_pend = exp_storage_memory_sql.new_trial(tunable_groups)
 
-    trial_fail.update(Status.FAILED, datetime.now())
-    trial_succ.update(Status.SUCCEEDED, datetime.now(), score)
+    trial_fail.update(Status.FAILED, datetime.utcnow())
+    trial_succ.update(Status.SUCCEEDED, datetime.utcnow(), score)
 
     (pending,) = list(exp_storage_memory_sql.pending_trials())
     assert pending.trial_id == trial_pend.trial_id

@@ -27,7 +27,7 @@ def telemetry_data() -> List[Tuple[datetime, str, Any]]:
     List[Tuple[datetime, str, str]]
         A list of (timestamp, metric_id, metric_value)
     """
-    timestamp1 = datetime.now()
+    timestamp1 = datetime.utcnow()
     timestamp2 = timestamp1 + timedelta(seconds=1)
     return sorted([
         (timestamp1, "cpu_load", 10.1),
