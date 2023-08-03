@@ -152,6 +152,7 @@ class CompositeEnv(Environment):
             True if all children setup() operations are successful,
             false otherwise.
         """
+        assert self._in_context
         self._is_ready = super().setup(tunables, global_config) and all(
             env_context.setup(tunables, global_config) for env_context in self._contexts)
         return self._is_ready
@@ -162,6 +163,7 @@ class CompositeEnv(Environment):
         i.e., calling it several times is equivalent to a single call.
         The environments are being torn down in the reverse order.
         """
+        assert self._in_context
         for env_context in reversed(self._contexts):
             env_context.teardown()
         super().teardown()
