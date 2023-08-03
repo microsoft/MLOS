@@ -328,8 +328,7 @@ class Environment(metaclass=abc.ABCMeta):
         single call.
         """
         _LOG.info("Teardown %s", self)
-        # TODO: Make sure we create a context before invoking setup/run/status/teardown
-        # assert self._in_context
+        assert self._in_context
         self._is_ready = False
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -360,8 +359,7 @@ class Environment(metaclass=abc.ABCMeta):
             A pair of (benchmark status, telemetry) values.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
-        # TODO: Make sure we create a context before invoking setup/run/status/teardown
-        # assert self._in_context
+        assert self._in_context
         if self._is_ready:
             return (Status.READY, [])
         _LOG.warning("Environment not ready: %s", self)
