@@ -347,6 +347,7 @@ class Environment(metaclass=abc.ABCMeta):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
+        assert self._in_context
         (status, _) = self.status()
         return (status, None)
 

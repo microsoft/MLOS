@@ -141,6 +141,7 @@ def _run(env_context: Environment, opt: Optimizer,
         Global configuration parameters.
     """
     _LOG.info("Trial: %s", trial)
+    with env as env_context:
 
     if not env_context.setup(trial.tunables, trial.config(global_config)):
         _LOG.warning("Setup failed: %s :: %s", env_context, trial.tunables)
