@@ -7,7 +7,10 @@ Composite benchmark environment.
 """
 
 import logging
-from typing import List, Optional, Tuple
+
+from types import TracebackType
+from typing import List, Optional, Tuple, Type
+from typing_extensions import Literal
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
@@ -59,6 +62,7 @@ class CompositeEnv(Environment):
 
         _LOG.debug("Build composite environment '%s' START: %s", self, tunables)
         self._children: List[Environment] = []
+        self._child_contexts: List[Environment] = []
 
         # To support trees of composite environments (e.g. for multiple VM experiments),
         # each CompositeEnv gets a copy of the original global config and adjusts it with
@@ -81,6 +85,27 @@ class CompositeEnv(Environment):
 
         if not self._children:
             raise ValueError("At least one child environment must be present")
+
+    def __enter__(self) -> Environment:
+        self._child_contexts = [env.__enter__() for env in self._children]
+        return super().__enter__()
+
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        ex_throw = None
+        for env in reversed(self._children):
+            try:
+                env.__exit__(ex_type, ex_val, ex_tb)
+            # pylint: disable=broad-exception-caught
+            except Exception as ex:
+                _LOG.error("Exception while exiting child environment '%s': %s", env, ex)
+                ex_throw = ex
+        self._child_contexts = []
+        super().__exit__(ex_type, ex_val, ex_tb)
+        if ex_throw:
+            raise ex_throw
+        return False
 
     @property
     def children(self) -> List[Environment]:
@@ -136,10 +161,9 @@ class CompositeEnv(Environment):
             True if all children setup() operations are successful,
             false otherwise.
         """
-        self._is_ready = (
-            super().setup(tunables, global_config) and
-            all(env.setup(tunables, global_config) for env in self._children)
-        )
+        assert self._in_context
+        self._is_ready = super().setup(tunables, global_config) and all(
+            env_context.setup(tunables, global_config) for env_context in self._child_contexts)
         return self._is_ready
 
     def teardown(self) -> None:
@@ -148,8 +172,9 @@ class CompositeEnv(Environment):
         i.e., calling it several times is equivalent to a single call.
         The environments are being torn down in the reverse order.
         """
-        for env in reversed(self._children):
-            env.teardown()
+        assert self._in_context
+        for env_context in reversed(self._child_contexts):
+            env_context.teardown()
         super().teardown()
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -170,10 +195,10 @@ class CompositeEnv(Environment):
         (status, _) = result = super().run()
         if not status.is_ready():
             return result
-        for env in self._children:
-            _LOG.debug("Child env. run: %s", env)
-            (status, _) = result = env.run()
-            _LOG.debug("Child env. run results: %s :: %s", env, result)
+        for env_context in self._child_contexts:
+            _LOG.debug("Child env. run: %s", env_context)
+            (status, _) = result = env_context.run()
+            _LOG.debug("Child env. run results: %s :: %s", env_context, result)
             if not status.is_good():
                 break
         _LOG.info("Run completed: %s :: %s", self, result)
