@@ -93,13 +93,19 @@ class CompositeEnv(Environment):
     def __exit__(self, ex_type: Optional[Type[BaseException]],
                  ex_val: Optional[BaseException],
                  ex_tb: Optional[TracebackType]) -> Literal[False]:
+        ex_throw = None
         for env in reversed(self._children):
             try:
                 env.__exit__(ex_type, ex_val, ex_tb)
+            # pylint: disable=broad-exception-caught
             except Exception as ex:
                 _LOG.error("Exception while exiting child environment '%s': %s", env, ex)
+                ex_throw = ex
         self._child_contexts = []
-        return super().__exit__(ex_type, ex_val, ex_tb)
+        super().__exit__(ex_type, ex_val, ex_tb)
+        if ex_throw:
+            raise ex_throw
+        return False
 
     @property
     def children(self) -> List[Environment]:
