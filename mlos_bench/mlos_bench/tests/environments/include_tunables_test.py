@@ -64,7 +64,9 @@ def test_two_groups_setup(tunable_groups: TunableGroups) -> None:
     }
     assert env.tunable_params.get_param_values() == expected_params
 
-    assert env.setup(tunable_groups)
+    with env as env_context:
+        assert env_context.setup(tunable_groups)
+
     # Make sure the set of tunables does not change after the setup:
     assert env.tunable_params.get_param_values() == expected_params
     assert env.parameters == {
@@ -116,7 +118,9 @@ def test_zero_groups_implicit_setup(tunable_groups: TunableGroups) -> None:
     )
     assert env.tunable_params.get_param_values() == {}
 
-    assert env.setup(tunable_groups)
+    with env as env_context:
+        assert env_context.setup(tunable_groups)
+
     # Make sure the set of tunables does not change after the setup:
     assert env.tunable_params.get_param_values() == {}
     assert env.parameters == {
@@ -166,7 +170,10 @@ def test_loader_level_include() -> None:
 
     expected_params["align_va_addr"] = "off"
     tunables = env.tunable_params.copy().assign({"align_va_addr": "off"})
-    assert env.setup(tunables)
+
+    with env as env_context:
+        assert env_context.setup(tunables)
+
     # Make sure the set of tunables does not change after the setup:
     assert env.parameters == {
         **expected_params,
