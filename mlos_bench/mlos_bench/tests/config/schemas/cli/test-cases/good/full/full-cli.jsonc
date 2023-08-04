@@ -25,8 +25,8 @@
         "mysql": ["mysql-innodb", "mysql-buffer"]
     },
 
-    "experimentId": "RedisBench",
-    "trialId": 1,
+    "experiment_id": "RedisBench",
+    "trial_id": 1,
 
     "teardown": false,
 
