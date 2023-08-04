@@ -124,6 +124,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             random_design=random_design,
             config_selector=config_selector,
             overwrite=True,
+            logging_level=False,  # Use the existing logger
         )
 
     def __del__(self) -> None:
