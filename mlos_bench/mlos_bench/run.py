@@ -145,13 +145,14 @@ def _run(env: Environment, opt: Optimizer,
             opt.register(trial.tunables, Status.FAILED)
             return
 
+        (status, results) = env_context.run()  # Block and wait for the final result.
+        _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
+
         # In async mode (TODO), poll the environment for status and telemetry
         # and update the storage with the intermediate results.
         (status, telemetry) = env_context.status()
         trial.update_telemetry(status, telemetry)
 
-        (status, results) = env_context.run()  # Block and wait for the final result.
-        _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
         # FIXME: Use the actual timestamp from the benchmark.
         trial.update(status, datetime.utcnow(), results)
         opt.register(trial.tunables, status, results)

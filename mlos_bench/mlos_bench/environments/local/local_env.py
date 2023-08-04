@@ -9,11 +9,12 @@ Scheduler-side benchmark environment to run scripts locally.
 import json
 import logging
 
+from datetime import datetime
 from tempfile import TemporaryDirectory
 from contextlib import nullcontext
 
 from types import TracebackType
-from typing import Iterable, Optional, Tuple, Type, Union
+from typing import Any, Iterable, List, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas
@@ -75,6 +76,7 @@ class LocalEnv(ScriptEnv):
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
         self._dump_meta_file: Optional[str] = self.config.get("dump_meta_file")
         self._read_results_file: Optional[str] = self.config.get("read_results_file")
+        self._read_telemetry_file: Optional[str] = self.config.get("read_telemetry_file")
 
     def __enter__(self) -> Environment:
         assert self._temp_dir is None and self._temp_dir_context is None
@@ -186,6 +188,30 @@ class LocalEnv(ScriptEnv):
         data_dict = data.iloc[-1].to_dict()
         _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
         return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
+
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+
+        (status, _) = super().status()
+        if not (self._is_ready and self._read_telemetry_file):
+            return (status, [])
+
+        assert self._temp_dir is not None
+        try:
+            # FIXME: We should not be assuming that the only output file type is a CSV.
+            data: pandas.DataFrame = pandas.read_csv(
+                self._config_loader_service.resolve_path(
+                    self._read_telemetry_file, extra_paths=[self._temp_dir]))
+        except FileNotFoundError as ex:
+            _LOG.warning("Telemetry CSV file not found: %s", self._read_telemetry_file)
+            return (status, [])
+
+        _LOG.debug("Read telemetry data:\n%s", data)
+        if list(data.columns) != ["timestamp", "metric", "value"]:
+            _LOG.warning(
+                'Telemetry CSV file should have columns ["timestamp", "metric", "value"] :: %s',
+                self._read_telemetry_file)
+
+        return (status, list(data.to_records(index=False)))
 
     def teardown(self) -> None:
         """
