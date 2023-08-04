@@ -28,8 +28,11 @@ class Storage(metaclass=ABCMeta):
     and storage systems (e.g., SQLite or MLFLow).
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service],
-                 config: Dict[str, Any]):
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: Dict[str, Any],
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
         """
         Create a new storage object.
 
@@ -45,6 +48,7 @@ class Storage(metaclass=ABCMeta):
         self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()
+        self._global_config = global_config or {}
 
     @abstractmethod
     def experiment(self, *,

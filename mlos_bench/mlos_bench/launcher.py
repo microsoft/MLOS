@@ -259,7 +259,7 @@ class Launcher:
         """
         if args_optimizer is None:
             return OneShotOptimizer(
-                self.tunables, self._parent_service, self.global_config)
+                self.tunables, config=self.global_config, service=self._parent_service)
         optimizer = self._load(Optimizer, args_optimizer, ConfigSchema.OPTIMIZER)   # type: ignore[type-abstract]
         return optimizer
 
@@ -272,8 +272,8 @@ class Launcher:
         if args_storage is None:
             # pylint: disable=import-outside-toplevel
             from mlos_bench.storage.sql.storage import SqlStorage
-            return SqlStorage(self.tunables, self._parent_service,
-                              {"drivername": "sqlite", "database": ":memory:"})
+            return SqlStorage(self.tunables, service=self._parent_service,
+                              config={"drivername": "sqlite", "database": ":memory:"})
         storage = self._load(Storage, args_storage, ConfigSchema.STORAGE)   # type: ignore[type-abstract]
         return storage
 
