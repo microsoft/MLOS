@@ -26,16 +26,18 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
 
     while opt.not_converged():
 
-        tunables = opt.suggest()
-        assert env.setup(tunables)
+        with env as env_context:
 
-        (status, output) = env.run()
-        assert status.is_succeeded()
-        assert output is not None
-        score = output['score']
-        assert 60 <= score <= 120
+            tunables = opt.suggest()
+            assert env_context.setup(tunables)
 
-        opt.register(tunables, status, score)
+            (status, output) = env_context.run()
+            assert status.is_succeeded()
+            assert output is not None
+            score = output['score']
+            assert 60 <= score <= 120
+
+            opt.register(tunables, status, score)
 
     (best_score, best_tunables) = opt.get_best_observation()
     assert isinstance(best_score, float) and isinstance(best_tunables, TunableGroups)

@@ -295,8 +295,8 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
 
-        # TODO: Make sure we create a context before invoking setup/run/status/teardown
-        # assert self._in_context
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
 
         # Assign new values to the environment's tunable parameters:
         groups = list(self._tunable_params.get_covariant_group_names())
@@ -329,8 +329,8 @@ class Environment(metaclass=abc.ABCMeta):
         single call.
         """
         _LOG.info("Teardown %s", self)
-        # TODO: Make sure we create a context before invoking setup/run/status/teardown
-        # assert self._in_context
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         self._is_ready = False
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -348,6 +348,8 @@ class Environment(metaclass=abc.ABCMeta):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         (status, _) = self.status()
         return (status, None)
 
@@ -361,8 +363,8 @@ class Environment(metaclass=abc.ABCMeta):
             A pair of (benchmark status, telemetry) values.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
-        # TODO: Make sure we create a context before invoking setup/run/status/teardown
-        # assert self._in_context
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         if self._is_ready:
             return (Status.READY, [])
         _LOG.warning("Environment not ready: %s", self)
