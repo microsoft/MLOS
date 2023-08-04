@@ -62,7 +62,7 @@ class CompositeEnv(Environment):
 
         _LOG.debug("Build composite environment '%s' START: %s", self, tunables)
         self._children: List[Environment] = []
-        self._contexts: List[Environment] = []
+        self._child_contexts: List[Environment] = []
 
         # To support trees of composite environments (e.g. for multiple VM experiments),
         # each CompositeEnv gets a copy of the original global config and adjusts it with
@@ -87,15 +87,18 @@ class CompositeEnv(Environment):
             raise ValueError("At least one child environment must be present")
 
     def __enter__(self) -> Environment:
-        self._contexts = [env.__enter__() for env in self._children]
+        self._child_contexts = [env.__enter__() for env in self._children]
         return super().__enter__()
 
     def __exit__(self, ex_type: Optional[Type[BaseException]],
                  ex_val: Optional[BaseException],
                  ex_tb: Optional[TracebackType]) -> Literal[False]:
         for env in reversed(self._children):
-            env.__exit__(ex_type, ex_val, ex_tb)
-        self._contexts = []
+            try:
+                env.__exit__(ex_type, ex_val, ex_tb)
+            except Exception as ex:
+                _LOG.error("Exception while exiting child environment '%s': %s", env, ex)
+        self._child_contexts = []
         return super().__exit__(ex_type, ex_val, ex_tb)
 
     @property
@@ -154,7 +157,7 @@ class CompositeEnv(Environment):
         """
         assert self._in_context
         self._is_ready = super().setup(tunables, global_config) and all(
-            env_context.setup(tunables, global_config) for env_context in self._contexts)
+            env_context.setup(tunables, global_config) for env_context in self._child_contexts)
         return self._is_ready
 
     def teardown(self) -> None:
@@ -164,7 +167,7 @@ class CompositeEnv(Environment):
         The environments are being torn down in the reverse order.
         """
         assert self._in_context
-        for env_context in reversed(self._contexts):
+        for env_context in reversed(self._child_contexts):
             env_context.teardown()
         super().teardown()
 
@@ -186,7 +189,7 @@ class CompositeEnv(Environment):
         (status, _) = result = super().run()
         if not status.is_ready():
             return result
-        for env_context in self._contexts:
+        for env_context in self._child_contexts:
             _LOG.debug("Child env. run: %s", env_context)
             (status, _) = result = env_context.run()
             _LOG.debug("Child env. run results: %s :: %s", env_context, result)
