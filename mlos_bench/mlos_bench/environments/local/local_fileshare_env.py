@@ -114,18 +114,15 @@ class LocalFileShareEnv(LocalEnv):
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        prev_temp_dir = self._temp_dir
-        with self._local_exec_service.temp_dir_context(self._temp_dir) as self._temp_dir:
-            # Override _temp_dir so that setup and upload both use the same path.
-            self._is_ready = super().setup(tunables, global_config)
-            if self._is_ready:
-                params = self._get_env_params()
-                params["PWD"] = self._temp_dir
-                for (path_from, path_to) in self._expand(self._upload, params):
-                    self._file_share_service.upload(self._config_loader_service.resolve_path(
-                        path_from, extra_paths=[self._temp_dir]), path_to)
-            self._temp_dir = prev_temp_dir
-            return self._is_ready
+        self._is_ready = super().setup(tunables, global_config)
+        if self._is_ready:
+            assert self._temp_dir is not None
+            params = self._get_env_params()
+            params["PWD"] = self._temp_dir
+            for (path_from, path_to) in self._expand(self._upload, params):
+                self._file_share_service.upload(self._config_loader_service.resolve_path(
+                    path_from, extra_paths=[self._temp_dir]), path_to)
+        return self._is_ready
 
     def run(self) -> Tuple[Status, Optional[dict]]:
         """
@@ -140,15 +137,11 @@ class LocalFileShareEnv(LocalEnv):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
-        prev_temp_dir = self._temp_dir
-        with self._local_exec_service.temp_dir_context(self._temp_dir) as self._temp_dir:
-            # Override _temp_dir so that download and run both use the same path.
-            params = self._get_env_params()
-            params["PWD"] = self._temp_dir
-            for (path_from, path_to) in self._expand(self._download, params):
-                self._file_share_service.download(
-                    path_from, self._config_loader_service.resolve_path(
-                        path_to, extra_paths=[self._temp_dir]))
-            result = super().run()
-            self._temp_dir = prev_temp_dir
-            return result
+        assert self._temp_dir is not None
+        params = self._get_env_params()
+        params["PWD"] = self._temp_dir
+        for (path_from, path_to) in self._expand(self._download, params):
+            self._file_share_service.download(
+                path_from, self._config_loader_service.resolve_path(
+                    path_to, extra_paths=[self._temp_dir]))
+        return super().run()
