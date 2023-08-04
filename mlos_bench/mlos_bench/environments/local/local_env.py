@@ -8,7 +8,6 @@ Scheduler-side benchmark environment to run scripts locally.
 
 import json
 import logging
-import os
 
 from tempfile import TemporaryDirectory
 from contextlib import nullcontext
