@@ -7,6 +7,7 @@ Unit tests to check the main CLI launcher.
 """
 import os
 import re
+from typing import List
 
 import pytest
 
@@ -39,7 +40,7 @@ def local_exec_service() -> LocalExecService:
 
 
 def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
-                     cli_config: str, re_expected: list[str]) -> None:
+                     cli_config: str, re_expected: List[str]) -> None:
     """
     Run mlos_bench command-line application with given config
     and check the results in the log.
