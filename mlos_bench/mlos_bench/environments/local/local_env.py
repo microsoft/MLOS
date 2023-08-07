@@ -31,6 +31,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class LocalEnv(ScriptEnv):
+    # pylint: disable=too-many-instance-attributes
     """
     Scheduler-side Environment that runs scripts locally.
     """
@@ -70,11 +71,13 @@ class LocalEnv(ScriptEnv):
         assert self._service is not None and isinstance(self._service, SupportsLocalExec), \
             "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
+
         self._temp_dir: Optional[str] = None
         self._temp_dir_context: Union[TemporaryDirectory, nullcontext, None] = None
 
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
         self._dump_meta_file: Optional[str] = self.config.get("dump_meta_file")
+
         self._read_results_file: Optional[str] = self.config.get("read_results_file")
         self._read_telemetry_file: Optional[str] = self.config.get("read_telemetry_file")
 
@@ -202,7 +205,7 @@ class LocalEnv(ScriptEnv):
                 self._config_loader_service.resolve_path(
                     self._read_telemetry_file, extra_paths=[self._temp_dir]))
         except FileNotFoundError as ex:
-            _LOG.warning("Telemetry CSV file not found: %s", self._read_telemetry_file)
+            _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])
 
         _LOG.debug("Read telemetry data:\n%s", data)
