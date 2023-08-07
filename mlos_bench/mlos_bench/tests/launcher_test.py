@@ -47,8 +47,6 @@ def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
     with local_exec_service.temp_dir_context() as temp_dir:
 
         log_path = path_join(temp_dir, "mock-test.log")
-        if os.path.exists(log_path):
-            os.unlink(log_path)
         (return_code, _stdout, _stderr) = local_exec_service.local_exec(
             [f"./mlos_bench/mlos_bench/run.py {cli_config} --log_file '{log_path}'"],
             cwd=root_path)
