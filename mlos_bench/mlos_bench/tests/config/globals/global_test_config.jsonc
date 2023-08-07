@@ -1,0 +1,5 @@
+{
+    // override the default value of the "max_iterations" parameter for the
+    // optimizer when running local tests
+    "max_iterations": 5
+}
