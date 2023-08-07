@@ -12,7 +12,7 @@ from base64 import b64decode
 from typing import Any, Dict, Optional
 
 import azure.identity as azure_id
-import azure.keyvault.secrets as keyvault_secrets
+from azure.keyvault.secrets import SecretClient
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth
@@ -51,13 +51,14 @@ class AzureAuthService(Service, SupportsAuth):
         # Register methods that we want to expose to the Environment objects.
         self.register([self.get_access_token])
 
-        check_required_params(
-            self.config, {
-                "keyVaultName",
-                "certName",
-                "spClientId",
-            }
-        )
+        if "spClientId" in self.config:
+            check_required_params(
+                self.config, {
+                    "keyVaultName",
+                    "certName",
+                    "spClientId",
+                }
+            )
 
         # This parameter can come from command line as strings, so conversion is needed.
         self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))
@@ -71,21 +72,27 @@ class AzureAuthService(Service, SupportsAuth):
 
         # Login as ourselves
         local_user_cred = azure_id.AzureCliCredential()
+        self._cred = local_user_cred
 
-        # Get a client for fetching cert info.
-        keyvault_secrets_client = keyvault_secrets.SecretClient(
-            vault_url=f"https://{keyvault_name}.vault.azure.net",
-            credential=local_user_cred,
-        )
+        # Login as the Service Principal, if provided
+        if sp_client_id is not None:
+            assert keyvault_name is not None
+            assert cert_name is not None
 
-        # The certificate private key data is stored as hidden "Secret" (not Key strangely)
-        #  in PKCS12 format, but we need to decode it.
-        secret = keyvault_secrets_client.get_secret(cert_name)
-        assert secret.value is not None
-        cert_bytes = b64decode(secret.value)
+            # Get a client for fetching cert info
+            keyvault_secrets_client = SecretClient(
+                vault_url=f"https://{keyvault_name}.vault.azure.net",
+                credential=local_user_cred,
+            )
 
-        # Reauthenticate as the service principal.
-        self._sp_cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
+            # The certificate private key data is stored as hidden "Secret" (not Key strangely)
+            #  in PKCS12 format, but we need to decode it.
+            secret = keyvault_secrets_client.get_secret(cert_name)
+            assert secret.value is not None
+            cert_bytes = b64decode(secret.value)
+
+            # Reauthenticate as the service principal.
+            self._cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
 
     def get_access_token(self) -> str:
         """
@@ -95,7 +102,7 @@ class AzureAuthService(Service, SupportsAuth):
         _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
-            res = self._sp_cred.get_token("https://management.azure.com/.default")
+            res = self._cred.get_token("https://management.azure.com/.default")
             self._token_expiration_ts = datetime.datetime.fromtimestamp(res.expires_on)
             self._access_token = res.token
             _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)
