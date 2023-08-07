@@ -6,6 +6,7 @@
 Unit tests to check the main CLI launcher.
 """
 import os
+import re
 
 import pytest
 
@@ -49,15 +50,11 @@ def test_launch_main_app(root_path: str,
               " --config mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc" + \
               f" --log_file '{log_path}'"
         (return_code, _stdout, _stderr) = local_exec_service.local_exec([cmd], cwd=root_path)
-
         assert return_code == 0
 
+        re_log = re.compile(
+            r"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3} run.py:\d+ " +
+            r"_optimize INFO Env: Mock environment best score: 65.67\d+\s*$")
+
         with open(log_path, "rt", encoding="utf-8") as fh_out:
-            best_score_lines = [
-                ln.strip() for ln in fh_out.readlines()
-                if " INFO Env: Mock environment best score: " in ln
-            ]
-            assert len([
-                ln for ln in best_score_lines
-                if " best score: 65.67" in ln
-            ]) == 1
+            assert any(re_log.match(ln) for ln in fh_out)
