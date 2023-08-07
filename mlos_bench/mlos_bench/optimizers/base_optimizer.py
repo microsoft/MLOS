@@ -48,8 +48,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._tunables = tunables
         self._service = service
 
-        experiment_id = self._config.pop('experiment_id', None)
-        experiment_id = self._global_config.get('experiment_id') if experiment_id is None else None
+        experiment_id = self._global_config.get('experiment_id')
         self.experiment_id = str(experiment_id).strip() if experiment_id else None
 
         self._iter = 1
