@@ -45,12 +45,17 @@ class MlosCoreOptimizer(Optimizer):
 
         if opt_type == OptimizerType.SMAC:
             # If output_directory is specified, turn it into an absolute path.
+            if 'output_directory' not in self._config:
+                self._config['output_directory'] = 'smac_output'
+                _LOG.info(
+                    "No output_directory was specified for SMAC optimizer. Defaulting to '%s'.",
+                    self._config['output_directory'])
             output_directory = self._config.get('output_directory')
             if output_directory is not None:
                 if not os.path.isabs(output_directory):
                     self._config['output_directory'] = os.path.join(os.getcwd(), output_directory)
             else:
-                _LOG.warning("No output_directory specified. SMAC will use a temporary directory.")
+                _LOG.warning("SMAC optimizer output_directory was null. SMAC will use a temporary directory.")
 
             # Set max_trials == max_iterations.
             if 'max_trials' not in self._config:
