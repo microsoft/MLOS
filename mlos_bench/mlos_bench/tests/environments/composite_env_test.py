@@ -115,7 +115,10 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "idle": "mwait",
         "kernel_sched_migration_cost_ns": 100000,
     })
-    assert composite_env.setup(tunable_groups)
+
+    with composite_env as env_context:
+        assert env_context.setup(tunable_groups)
+
     assert composite_env.children[0].parameters == {
         "vmName": "Mock Client VM",     # const_args from the parent
         "EnvId": 1,                     # const_args from the child
@@ -246,7 +249,10 @@ def test_nested_composite_env_setup(nested_composite_env: CompositeEnv, tunable_
         "idle": "mwait",
         "kernel_sched_migration_cost_ns": 100000,
     })
-    assert nested_composite_env.setup(tunable_groups)
+
+    with nested_composite_env as env_context:
+        assert env_context.setup(tunable_groups)
+
     assert isinstance(nested_composite_env.children[0], CompositeEnv)
     assert nested_composite_env.children[0].children[0].parameters == {
         "vmName": "Mock Client VM",     # const_args from the parent
@@ -255,6 +261,7 @@ def test_nested_composite_env_setup(nested_composite_env: CompositeEnv, tunable_
         "someConst": "root",            # pulled in from parent via required_args
         "vm_server_name": "Mock Server VM",
     }
+
     assert isinstance(nested_composite_env.children[1], CompositeEnv)
     assert nested_composite_env.children[1].children[0].parameters == {
         "vmName": "Mock Server VM",     # const_args from the parent
