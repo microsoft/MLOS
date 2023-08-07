@@ -7,9 +7,10 @@ Composite benchmark environment.
 """
 
 import logging
+from datetime import datetime
 
 from types import TracebackType
-from typing import List, Optional, Tuple, Type
+from typing import Any, List, Optional, Tuple, Type
 from typing_extensions import Literal
 
 from mlos_bench.services.base_service import Service
@@ -203,3 +204,28 @@ class CompositeEnv(Environment):
                 break
         _LOG.info("Run completed: %s :: %s", self, result)
         return result
+
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+        """
+        Check the status of the benchmark environment.
+
+        Returns
+        -------
+        (benchmark_status, telemetry) : (Status, list)
+            A pair of (benchmark status, telemetry) values.
+            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
+        """
+        (status, telemetry) = super().status()
+        if not status.is_ready():
+            return (status, telemetry)
+
+        joint_telemetry = []
+        for env_context in self._child_contexts:
+            (status, telemetry) = env_context.status()
+            joint_telemetry.extend(telemetry)
+            _LOG.debug("Child env. status: %s :: %s", env_context, status)
+            if not status.is_good():
+                break
+
+        _LOG.info("Final status: %s :: %s", self, status)
+        return (status, joint_telemetry)
