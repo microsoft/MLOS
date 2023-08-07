@@ -27,9 +27,8 @@ def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) 
         'max_trials': 10,
         'max_iterations': 11,
     }
-    service = None
     with pytest.raises(AssertionError):
-        opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+        opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
         assert opt is None
 
 
@@ -41,8 +40,7 @@ def test_init_mlos_core_smac_opt_max_trials(tunable_groups: TunableGroups) -> No
         'optimizer_type': 'SMAC',
         'max_iterations': 123,
     }
-    service = None
-    opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+    opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
     assert opt._opt.base_optimizer.scenario.n_trials == test_opt_config['max_iterations']
@@ -56,8 +54,7 @@ def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGr
         'optimizer_type': 'SMAC',
         'output_directory': '/tmp/test_output_dir',
     }
-    service = None
-    opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+    opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
@@ -73,8 +70,7 @@ def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGr
         'optimizer_type': 'SMAC',
         'output_directory': '/tmp/test_output_dir',
     }
-    service = None
-    opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+    opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
@@ -91,8 +87,7 @@ def test_init_mlos_core_smac_relative_output_directory_with_run_name(tunable_gro
         'output_directory': '/tmp/test_output_dir',
         'run_name': 'test_run',
     }
-    service = None
-    opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+    opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
@@ -109,8 +104,7 @@ def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunabl
         'output_directory': '/tmp/test_output_dir',
         'experimentId': 'experiment_id',
     }
-    service = None
-    opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+    opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
@@ -126,8 +120,7 @@ def test_init_mlos_core_smac_temp_output_directory(tunable_groups: TunableGroups
         'optimizer_type': 'SMAC',
         'output_directory': None,
     }
-    service = None
-    opt = MlosCoreOptimizer(tunable_groups, service, test_opt_config)
+    opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
