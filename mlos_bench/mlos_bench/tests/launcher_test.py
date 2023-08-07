@@ -47,6 +47,9 @@ def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
     """
     with local_exec_service.temp_dir_context() as temp_dir:
 
+        # Test developers note: for local debugging,
+        # uncomment the following line to use a known file path that can be examined:
+        # temp_dir = '/tmp'
         log_path = path_join(temp_dir, "mock-test.log")
         (return_code, _stdout, _stderr) = local_exec_service.local_exec(
             [f"./mlos_bench/mlos_bench/run.py {cli_config} --log_file '{log_path}'"],
