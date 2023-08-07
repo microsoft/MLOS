@@ -102,14 +102,16 @@ def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunabl
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'output_directory': '/tmp/test_output_dir',
-        'experimentId': 'experiment_id',
     }
-    opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
+    global_config = {
+        'experiment_id': 'experiment_id',
+    }
+    opt = MlosCoreOptimizer(tunable_groups, test_opt_config, global_config)
     assert isinstance(opt, MlosCoreOptimizer)
     # pylint: disable=protected-access
     assert isinstance(opt._opt, SmacOptimizer)
     assert str(opt._opt.base_optimizer.scenario.output_directory).startswith(
-        os.path.join(os.getcwd(), test_opt_config['output_directory'], test_opt_config['experimentId']))
+        os.path.join(os.getcwd(), test_opt_config['output_directory'], global_config['experiment_id']))
 
 
 def test_init_mlos_core_smac_temp_output_directory(tunable_groups: TunableGroups) -> None:
