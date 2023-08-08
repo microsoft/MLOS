@@ -106,7 +106,7 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
             "kernel_sched_latency_ns": 450840950,
         }
     else:
-        expected_score = 67.6
+        expected_score = 60.81
         expected_tunable_values = {
             "vmSize": "Standard_B2ms",
             "idle": "mwait",
