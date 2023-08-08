@@ -19,8 +19,11 @@ from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.services.base_service import Service
 from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
+
+from mlos_bench.services.base_service import Service
+
+from mlos_bench.util import path_join
 
 _LOG = logging.getLogger(__name__)
 
@@ -53,7 +56,7 @@ class MlosCoreOptimizer(Optimizer):
             output_directory = self._config.get('output_directory')
             if output_directory is not None:
                 if not os.path.isabs(output_directory):
-                    self._config['output_directory'] = os.path.join(os.getcwd(), output_directory)
+                    self._config['output_directory'] = path_join(os.getcwd(), output_directory)
             else:
                 _LOG.warning("SMAC optimizer output_directory was null. SMAC will use a temporary directory.")
 
