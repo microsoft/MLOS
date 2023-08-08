@@ -8,9 +8,15 @@ Test fixtures for mlos_bench optimizers.
 
 import pytest
 
+import numpy as np
+
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
+
+
+SEED = 42
+np.random.seed(SEED)
 
 
 @pytest.fixture
@@ -26,7 +32,7 @@ def mock_opt_no_defaults(tunable_groups: TunableGroups) -> MockOptimizer:
             "optimization_direction": "min",
             "max_iterations": 5,
             "start_with_defaults": False,
-            "seed": 42
+            "seed": SEED
         },
     )
 
@@ -43,7 +49,7 @@ def mock_opt(tunable_groups: TunableGroups) -> MockOptimizer:
             "optimization_target": "score",
             "optimization_direction": "min",
             "max_iterations": 5,
-            "seed": 42
+            "seed": SEED
         },
     )
 
@@ -60,7 +66,7 @@ def mock_opt_max(tunable_groups: TunableGroups) -> MockOptimizer:
             "optimization_target": "score",
             "optimization_direction": "max",
             "max_iterations": 10,
-            "seed": 42
+            "seed": SEED
         },
     )
 
@@ -112,7 +118,7 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "optimization_direction": "min",
             "max_iterations": 10,
             "optimizer_type": "SMAC",
-            "seed": 42,
+            "seed": SEED,
         },
     )
 
@@ -130,6 +136,6 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "optimization_direction": "max",
             "max_iterations": 10,
             "optimizer_type": "SMAC",
-            "seed": 42,
+            "seed": SEED,
         },
     )
