@@ -306,4 +306,4 @@ class Storage(metaclass=ABCMeta):
             metrics : List[Tuple[datetime, str, Any]]
                 Telemetry data.
             """
-            _LOG.info("Store telemetry: %s :: %s %s", self, status, metrics)
+            _LOG.info("Store telemetry: %s :: %s %d records", self, status, len(metrics))
