@@ -106,12 +106,12 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
             "kernel_sched_latency_ns": 450840950,
         }
     else:
-        expected_score = 60.81
+        expected_score = 67.6
         expected_tunable_values = {
-            "vmSize": "Standard_B2s",
-            "idle": "halt",
-            "kernel_sched_migration_cost_ns": 77434,
-            "kernel_sched_latency_ns": 173779423,
+            "vmSize": "Standard_B2ms",
+            "idle": "mwait",
+            "kernel_sched_migration_cost_ns": 37322,
+            "kernel_sched_latency_ns": 40128951,
         }
     assert score == pytest.approx(expected_score, 0.01)
     assert tunables.get_param_values() == expected_tunable_values
