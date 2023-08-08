@@ -80,6 +80,9 @@ class MlosCoreOptimizer(Optimizer):
             space_adapter_kwargs=space_adapter_config,
         )
 
+    def __repr__(self) -> str:
+        return f"{super().__repr__()}({self._opt.__class__.__name__})"
+
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None) -> bool:
         if not super().bulk_register(configs, scores, status):

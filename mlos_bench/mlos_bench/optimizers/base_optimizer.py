@@ -62,7 +62,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     def __repr__(self) -> str:
         opt_direction = 'min' if self._opt_sign > 0 else 'max'
-        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})"
+        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})(config={self._config})"
 
     @property
     def target(self) -> str:
