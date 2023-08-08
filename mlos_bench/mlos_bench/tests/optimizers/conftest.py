@@ -110,7 +110,7 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": 5,
+            "max_iterations": 10,
             "optimizer_type": "SMAC",
             "seed": 42,
         },
@@ -128,7 +128,7 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "max",
-            "max_iterations": 5,
+            "max_iterations": 10,
             "optimizer_type": "SMAC",
             "seed": 42,
         },
