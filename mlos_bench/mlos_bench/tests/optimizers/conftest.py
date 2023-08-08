@@ -119,6 +119,7 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "max_iterations": 10,
             "optimizer_type": "SMAC",
             "seed": SEED,
+            "output_directory": None
         },
     )
 
@@ -137,5 +138,6 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "max_iterations": 10,
             "optimizer_type": "SMAC",
             "seed": SEED,
+            "output_directory": None
         },
     )
