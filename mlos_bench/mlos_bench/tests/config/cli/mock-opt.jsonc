@@ -9,14 +9,12 @@
 
     "config_path": [
         // relative to the root of the repo (for now), where this is expected to be executed from
-        "mlos_bench/mlos_bench/tests/config"
+        "mlos_bench/mlos_bench/tests/config",
+        "mlos_bench/mlos_bench/config"
     ],
 
     "environment": "environments/mock/mock_env.jsonc",
-
-    "tunable_values": [
-        "tunable-values/tunable-values-example.jsonc"
-    ],
+    "optimizer": "optimizers/mlos_core_default_opt.jsonc",
 
     // "globals": ["global_config.json"],
 
@@ -25,6 +23,6 @@
 
     "teardown": true,
 
-    // "log_file": "mock-bench.log",
-    "log_level": "INFO"
+    // "log_file": "mock-opt.log",
+    "log_level": "DEBUG"
 }
