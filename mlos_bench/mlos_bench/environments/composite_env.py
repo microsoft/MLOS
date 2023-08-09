@@ -203,7 +203,7 @@ class CompositeEnv(Environment):
             (status, metrics) = env_context.run()
             _LOG.debug("Child env. run results: %s :: %s %s", env_context, status, metrics)
             if not status.is_good():
-                _LOG.info("Run failed: %s :: %s %s", self, status)
+                _LOG.info("Run failed: %s :: %s", self, status)
                 return (status, None)
             joint_metrics.update(metrics or {})
 
