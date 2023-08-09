@@ -15,11 +15,12 @@ from mlos_bench.util import path_join
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
+from mlos_bench.tests import SEED
+
 from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
 
 
 OUTPUT_DIR_PATH_BASE = r'c:/temp' if sys.platform == 'win32' else '/tmp/'
-SEED = 42
 
 
 def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) -> None:

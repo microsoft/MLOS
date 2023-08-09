@@ -11,6 +11,7 @@ from typing import Any, Dict
 import json5 as json
 import pytest
 
+from mlos_bench.tests import SEED
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -18,6 +19,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 # pylint: disable=redefined-outer-name
 # -- Ignore pylint complaints about pytest references to
 # `tunable_groups` fixture as both a function and a parameter.
+
 
 TUNABLE_GROUPS_JSON = """
 {
@@ -112,7 +114,7 @@ def mock_env(tunable_groups: TunableGroups) -> MockEnv:
         name="Test Env",
         config={
             "tunable_params": ["provision", "boot", "kernel"],
-            "seed": 13,
+            "seed": SEED,
             "range": [60, 120],
             "metrics": ["score"],
         },

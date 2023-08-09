@@ -8,15 +8,11 @@ Test fixtures for mlos_bench optimizers.
 
 import pytest
 
-import numpy as np
-
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 
-
-SEED = 42
-np.random.seed(SEED)
+from mlos_bench.tests import SEED
 
 
 @pytest.fixture
