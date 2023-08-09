@@ -26,9 +26,11 @@
             "/bin/bash -c true"
         ],
 
-        "read_results_file": "/tmp/results.csv",
         "dump_params_file": "/tmp/dump_params.json",
         "dump_meta_file": "/tmp/dump_params_meta.json",
+
+        "read_results_file": "/tmp/results.csv",
+        "read_telemetry_file": "/tmp/telemetry.csv",
 
         "shell_env_params_match": [
             "^MLOS_[a-zA-Z0-9_]+$"

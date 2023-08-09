@@ -9,8 +9,9 @@ and upload/download data to the shared storage.
 
 import logging
 
+from datetime import datetime
 from string import Template
-from typing import List, Generator, Iterable, Mapping, Optional, Tuple
+from typing import Any, List, Generator, Iterable, Mapping, Optional, Tuple
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
@@ -124,6 +125,29 @@ class LocalFileShareEnv(LocalEnv):
                     path_from, extra_paths=[self._temp_dir]), path_to)
         return self._is_ready
 
+    def _download_files(self, ignore_missing: bool = False) -> None:
+        """
+        Download files from the shared storage.
+
+        Parameters
+        ----------
+        ignore_missing : bool
+            If True, raise an exception when some file cannot be downloaded.
+            If False, proceed with downloading other files and log a warning.
+        """
+        assert self._temp_dir is not None
+        params = self._get_env_params()
+        params["PWD"] = self._temp_dir
+        for (path_from, path_to) in self._expand(self._download, params):
+            try:
+                self._file_share_service.download(
+                    path_from, self._config_loader_service.resolve_path(
+                        path_to, extra_paths=[self._temp_dir]))
+            except FileNotFoundError as ex:
+                _LOG.warning("Cannot download: %s", path_from)
+                if not ignore_missing:
+                    raise ex
+
     def run(self) -> Tuple[Status, Optional[dict]]:
         """
         Download benchmark results from the shared storage
@@ -137,11 +161,9 @@ class LocalFileShareEnv(LocalEnv):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
-        assert self._temp_dir is not None
-        params = self._get_env_params()
-        params["PWD"] = self._temp_dir
-        for (path_from, path_to) in self._expand(self._download, params):
-            self._file_share_service.download(
-                path_from, self._config_loader_service.resolve_path(
-                    path_to, extra_paths=[self._temp_dir]))
+        self._download_files()
         return super().run()
+
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+        self._download_files(ignore_missing=True)
+        return super().status()
