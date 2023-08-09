@@ -86,6 +86,12 @@ jobs:
         set -x
         docker exec --user vscode --env MAKEFLAGS=-Oline mlos-devcontainer make CONDA_INFO_LEVEL=-v check
 
+    # Debugging - #470
+    - name: Run mlos_bench optimizer tests
+      run: |
+        set -x
+        docker exec --user vscode conda run -n mlos pytest /workspaces/MLOS/mlos_bench/mlos_bench/tests/optimizers/
+
     - name: Run tests
       timeout-minutes: 10
       run: |
