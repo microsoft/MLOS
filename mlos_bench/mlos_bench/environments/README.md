@@ -1,6 +1,18 @@
 # Environments
 
-This directory contains the code for the `Environments` used in the [`mlos_bench`](../../../mlos_bench/) benchmarking automation framework.
+## Overview
+
+This directory contains the code for the [`Environment`](./base_environment.py) classes used in the [`mlos_bench`](../../../mlos_bench/) benchmarking automation framework.
+An [`Environment`](./base_environment.py) is a class that represents a system that can be benchmarked.
+It is responsible for setting up the system, running the benchmark, and tearing down the system.
+Each `Environment` object also keeps track of the current state of the system, and can be used to query the system for metrics.
+
+Environments have [`Tunable`](../tunables/tunable.py) parameters and [`TunableGroups`](../tunables/tunable_groups.py) for controlling their configuration.
+It is generally expected that all [`Tunable`](../tunables/tunable.py) parameters within an `Environment` will have the same cost to change.
+
+Common and platform-specific functionality of the environments is implemented in [`Service`](../services/) classes.
+
+## Lifecycle
 
 Each Environment has several stages that it goes through:
 
@@ -8,13 +20,13 @@ Each Environment has several stages that it goes through:
 - `run`
 - `teardown`
 
-Which are implemented using [`Services`](../services/).
+One cal also query the current state of the system via the `.status()` method.
+Our current implementation of the `Environment` classes is synchronous; that means, a `.status()` method can only be used *after* `.run()` method has been called.
 
-Environments also have [`Tunables`](../tunables/) and [`TunableGroups`](../tunables/) for controlling their configuration.
+Once we implement an asynchronous mode of operation, the `.status()` method will be usable at any time during the `Environment` object lifecycle.
 
-Environments can also be stackable via the [`CompositeEnvironment`](./composite_env.py) class.
+## Composite Environments
 
+Environments can be stacked via the [`CompositeEnv`](./composite_env.py) class.
 For instance, a VM, OS, and Application Environment can be stacked together to form a full benchmarking environment, each with their own tunables.
-
-It is generally expected that all `Tunables` within an `Environment` will have the same cost to change.
-Thus one may represent a system by multiple `Environments` (e.g. `BootTimeEnvironment`, `RuntimeEnvironment`, etc.)
+Thus one may represent a system by multiple `Environment` objects, e.g., [`VMEnv`](./remote/vm_env.py), [`RemoteEnv`](remote/remote_env.py), and so on.
