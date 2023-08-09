@@ -9,12 +9,15 @@ Used to make mypy happy about multiple conftest.py modules.
 
 from typing import Optional
 
+import numpy as np
+
 from mlos_bench.util import get_class_from_name
 
 
 # A common seed to use to avoid tracking down race conditions and intermingling
 # issues of seeds across tests that run in non-deterministic parallel orders.
 SEED = 42
+np.random.seed(SEED)
 
 
 def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
