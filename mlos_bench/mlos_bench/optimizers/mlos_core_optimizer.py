@@ -40,7 +40,10 @@ class MlosCoreOptimizer(Optimizer):
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
 
-        space = tunable_groups_to_configspace(tunables)
+        seed = config.get("seed")
+        seed = None if seed is None else int(seed)
+
+        space = tunable_groups_to_configspace(tunables, seed)
         _LOG.debug("ConfigSpace: %s", space)
 
         opt_type = getattr(OptimizerType, self._config.pop(
