@@ -27,7 +27,6 @@ class AzureAuthService(Service, SupportsAuth):
     """
 
     _REQ_INTERVAL = 300   # = 5 min
-    _TENTANT_ID = "72f988bf-86f1-41af-91ab-2d7cd011db47"
 
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
@@ -51,53 +50,60 @@ class AzureAuthService(Service, SupportsAuth):
         # Register methods that we want to expose to the Environment objects.
         self.register([self.get_access_token])
 
-        if "spClientId" in self.config:
-            check_required_params(
-                self.config, {
-                    "keyVaultName",
-                    "certName",
-                    "spClientId",
-                }
-            )
-
         # This parameter can come from command line as strings, so conversion is needed.
         self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))
-        keyvault_name = self.config.get("keyVaultName")
-        cert_name = self.config.get("certName")
-        sp_client_id = self.config.get("spClientId")
-        tenant_id = self.config.get("tenant", self._TENTANT_ID)
 
         self._access_token = "RENEW *NOW*"
         self._token_expiration_ts = datetime.datetime.now()  # Typically, some future timestamp.
 
         # Login as ourselves
-        local_user_cred = azure_id.AzureCliCredential()
-        self._cred = local_user_cred
+        self._cred = azure_id.AzureCliCredential()
 
-        # Login as the Service Principal, if provided
-        if sp_client_id is not None:
-            assert keyvault_name is not None
-            assert cert_name is not None
+    def _init_sp(self):
+        # Perform this initialization outside of __init__ so that environment loading tests
+        # dont need to specifically mock keyvault interactions out
 
-            # Get a client for fetching cert info
-            keyvault_secrets_client = SecretClient(
-                vault_url=f"https://{keyvault_name}.vault.azure.net",
-                credential=local_user_cred,
-            )
+        # Already logged in as SP
+        if isinstance(self._cred, azure_id.CertificateCredential):
+            return
 
-            # The certificate private key data is stored as hidden "Secret" (not Key strangely)
-            #  in PKCS12 format, but we need to decode it.
-            secret = keyvault_secrets_client.get_secret(cert_name)
-            assert secret.value is not None
-            cert_bytes = b64decode(secret.value)
+        check_required_params(
+            self.config, {
+                "spClientId",
+                "keyVaultName",
+                "certName",
+                "tenant",
+            }
+        )
 
-            # Reauthenticate as the service principal.
-            self._cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
+        sp_client_id = self.config["spClientId"]
+        keyvault_name = self.config["keyVaultName"]
+        cert_name = self.config["certName"]
+        tenant_id = self.config["tenant"]
+
+        # Get a client for fetching cert info
+        keyvault_secrets_client = SecretClient(
+            vault_url=f"https://{keyvault_name}.vault.azure.net",
+            credential=self._cred,
+        )
+
+        # The certificate private key data is stored as hidden "Secret" (not Key strangely)
+        #  in PKCS12 format, but we need to decode it.
+        secret = keyvault_secrets_client.get_secret(cert_name)
+        assert secret.value is not None
+        cert_bytes = b64decode(secret.value)
+
+        # Reauthenticate as the service principal.
+        self._cred = azure_id.CertificateCredential(tenant_id=tenant_id, client_id=sp_client_id, certificate_data=cert_bytes)
 
     def get_access_token(self) -> str:
         """
         Get the access token from Azure CLI, if expired.
         """
+        # Ensure we are logged as the Service Principal, if provided
+        if "spClientId" in self.config:
+            self._init_sp()
+
         ts_diff = (self._token_expiration_ts - datetime.datetime.now()).total_seconds()
         _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:

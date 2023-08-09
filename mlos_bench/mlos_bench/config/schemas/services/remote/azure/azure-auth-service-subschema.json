@@ -24,6 +24,10 @@
                             "description": "Time before token expiration to request a new token",
                             "type": "number"
                         },
+                        "spClientId": {
+                            "description": "Client ID of the Service Principal to authenticate as",
+                            "type": "string"
+                        },
                         "keyVaultName": {
                             "description": "Name of key vault to retrieve the certificate from, for authorizing the Service Principal",
                             "type": "string"
@@ -32,13 +36,22 @@
                             "description": "Name of the Service Principal's certificate in the key vault",
                             "type": "string"
                         },
-                        "spClientId": {
-                            "description": "Client ID of the Service Principal to authenticate as",
+                        "tenant": {
+                            "description": "Tenant ID of the Service Principal",
                             "type": "string"
                         }
                     }
                 }
             ],
+            "dependentSchemas": {
+                "spClientId": {
+                    "required": [
+                        "keyVaultName",
+                        "certName",
+                        "tenant"
+                    ]
+                }
+            },
             "unevaluatedProperties": false
         }
     },

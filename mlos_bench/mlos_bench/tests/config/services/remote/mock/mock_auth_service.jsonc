@@ -1,0 +1,4 @@
+{
+    "class": "mlos_bench.tests.services.remote.mock.mock_auth_service.MockAuthService",
+    "config": {}
+}
