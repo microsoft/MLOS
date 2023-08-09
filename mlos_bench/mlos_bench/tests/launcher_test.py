@@ -60,8 +60,8 @@ def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
             iter_expected = iter(re_expected)
             re_log = re.compile(next(iter_expected))
             with open(log_path, "rt", encoding="utf-8") as fh_out:
-                for ln in fh_out:
-                    if re_log.match(ln):
+                for line in fh_out:
+                    if re_log.match(line):
                         re_log = re.compile(next(iter_expected))
             assert False, f"Pattern not found: '{re_log.pattern}'"
         except StopIteration:
