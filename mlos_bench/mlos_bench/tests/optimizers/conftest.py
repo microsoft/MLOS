@@ -79,7 +79,8 @@ def flaml_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "optimization_target": "score",
             "optimization_direction": "min",
             "max_iterations": 5,
-            "optimizer_type": "FLAML"
+            "optimizer_type": "FLAML",
+            "seed": SEED,
         },
     )
 
@@ -96,7 +97,8 @@ def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
             "optimization_target": "score",
             "optimization_direction": "max",
             "max_iterations": 5,
-            "optimizer_type": "FLAML"
+            "optimizer_type": "FLAML",
+            "seed": SEED,
         },
     )
 
