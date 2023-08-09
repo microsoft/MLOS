@@ -20,7 +20,7 @@ Each Environment has several stages that it goes through:
 - `run`
 - `teardown`
 
-One cal also query the current state of the system via the `.status()` method.
+One can also query the current state of the system via the `.status()` method.
 Our current implementation of the `Environment` classes is synchronous; that means, a `.status()` method can only be used *after* `.run()` method has been called.
 
 Once we implement an asynchronous mode of operation, the `.status()` method will be usable at any time during the `Environment` object lifecycle.
