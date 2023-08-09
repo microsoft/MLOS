@@ -28,9 +28,9 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
         config={
             "run": [
                 "echo 'metric,value' > output.csv",
-                "echo 'score,10' >> output.csv",
                 "echo 'latency,10' >> output.csv",
                 "echo 'throughput,66' >> output.csv",
+                "echo 'score,0.9' >> output.csv",
                 "echo '-------------------'",  # This output does not go anywhere
                 "echo 'timestamp,metric,value' > telemetry.csv",
                 f"echo '{time_str1},cpu_load,0.65' >> telemetry.csv",
@@ -52,9 +52,9 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
         (status, data) = env_context.run()
         assert status.is_succeeded()
         assert data == {
-            "score": 10.0,
             "latency": 10.0,
             "throughput": 66.0,
+            "score": 0.9,
         }
 
         (status, telemetry) = env_context.status()
