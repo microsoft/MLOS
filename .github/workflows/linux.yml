@@ -136,7 +136,7 @@ jobs:
 
     # Debugging - #470
     - name: Run mlos_bench optimizer tests
-      run: conda run -n $CONDA_ENV_NAME pytest mlos_bench/mlos_bench/tests/optimizers/
+      run: conda run -n $CONDA_ENV_NAME pytest mlos_bench/mlos_bench/tests/optimizers/ -k smac
 
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests
