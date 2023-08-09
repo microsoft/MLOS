@@ -4,7 +4,8 @@
 
 This directory contains the code for the [`Environment`](./base_environment.py) classes used in the [`mlos_bench`](../../../mlos_bench/) benchmarking automation framework.
 An [`Environment`](./base_environment.py) is a class that represents a system that can be benchmarked.
-It is responsible for setting up the system, running the benchmark, and tearing down the system.
+It is responsible for setting up a portion of the system, running the benchmark (or some other command), and tearing down that portion of the system.
+A `CompositeEnvironment` can be used to stack these together to represent the entire system under evaluation (e.g., VM, OS, App, etc.)
 Each `Environment` object also keeps track of the current state of the system, and can be used to query the system for metrics.
 
 Environments can have [`Tunable`](../tunables/tunable.py) parameters and [`TunableGroups`](../tunables/tunable_groups.py) for controlling their configuration.
