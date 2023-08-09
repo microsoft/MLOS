@@ -134,10 +134,6 @@ jobs:
     #- name: Run lint checks
     #  run: make CONDA_ENV_NAME=$CONDA_ENV_NAME check
 
-    # Debugging - #470
-    - name: Run mlos_bench optimizer tests
-      run: conda run -n $CONDA_ENV_NAME pytest mlos_bench/mlos_bench/tests/optimizers/
-
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests
       run: make CONDA_ENV_NAME=$CONDA_ENV_NAME SKIP_COVERAGE=true test
