@@ -19,6 +19,7 @@ from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimize
 
 
 OUTPUT_DIR_PATH_BASE = r'c:/temp' if sys.platform == 'win32' else '/tmp/'
+SEED = 42
 
 
 def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) -> None:
@@ -29,6 +30,7 @@ def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) 
         'optimizer_type': 'SMAC',
         'max_trials': 10,
         'max_iterations': 11,
+        'seed': SEED,
     }
     with pytest.raises(AssertionError):
         opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
@@ -42,6 +44,7 @@ def test_init_mlos_core_smac_opt_max_trials(tunable_groups: TunableGroups) -> No
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'max_iterations': 123,
+        'seed': SEED,
     }
     opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     # pylint: disable=protected-access
@@ -56,6 +59,7 @@ def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGr
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'output_directory': path_join(OUTPUT_DIR_PATH_BASE, 'test_output_dir'),
+        'seed': SEED,
     }
     opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
@@ -73,6 +77,7 @@ def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGr
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'output_directory': 'test_output_dir',
+        'seed': SEED,
     }
     opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
@@ -90,6 +95,7 @@ def test_init_mlos_core_smac_relative_output_directory_with_run_name(tunable_gro
         'optimizer_type': 'SMAC',
         'output_directory': 'test_output_dir',
         'run_name': 'test_run',
+        'seed': SEED,
     }
     opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
@@ -106,6 +112,7 @@ def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunabl
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'output_directory': 'test_output_dir',
+        'seed': SEED,
     }
     global_config = {
         'experiment_id': 'experiment_id',
@@ -125,6 +132,7 @@ def test_init_mlos_core_smac_temp_output_directory(tunable_groups: TunableGroups
     test_opt_config = {
         'optimizer_type': 'SMAC',
         'output_directory': None,
+        'seed': SEED,
     }
     opt = MlosCoreOptimizer(tunable_groups, test_opt_config)
     assert isinstance(opt, MlosCoreOptimizer)
