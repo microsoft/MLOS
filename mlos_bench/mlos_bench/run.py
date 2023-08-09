@@ -155,6 +155,8 @@ def _run(env_context: Environment, opt: Optimizer,
     # In async mode (TODO), poll the environment for status and telemetry
     # and update the storage with the intermediate results.
     (_, telemetry) = env_context.status()
+    # Use the status from `.run()` as it is the final status of the experiment.
+    # TODO: Use the `.status()` output in async mode.
     trial.update_telemetry(status, telemetry)
 
     # FIXME: Use the actual timestamp from the benchmark.

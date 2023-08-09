@@ -193,17 +193,22 @@ class CompositeEnv(Environment):
             be in the `score` field.
         """
         _LOG.info("Run: %s", self._children)
-        (status, _) = result = super().run()
+        (status, metrics) = super().run()
         if not status.is_ready():
-            return result
+            return (status, metrics)
+
+        joint_metrics = {}
         for env_context in self._child_contexts:
             _LOG.debug("Child env. run: %s", env_context)
-            (status, _) = result = env_context.run()
-            _LOG.debug("Child env. run results: %s :: %s", env_context, result)
+            (status, metrics) = env_context.run()
+            _LOG.debug("Child env. run results: %s :: %s %s", env_context, status, metrics)
             if not status.is_good():
-                break
-        _LOG.info("Run completed: %s :: %s", self, result)
-        return result
+                _LOG.info("Run failed: %s :: %s %s", self, status)
+                return (status, None)
+            joint_metrics.update(metrics or {})
+
+        _LOG.info("Run completed: %s :: %s %s", self, status, joint_metrics)
+        return (status, joint_metrics)
 
     def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
         """
@@ -220,12 +225,14 @@ class CompositeEnv(Environment):
             return (status, telemetry)
 
         joint_telemetry = []
+        final_status = None
         for env_context in self._child_contexts:
             (status, telemetry) = env_context.status()
-            joint_telemetry.extend(telemetry)
             _LOG.debug("Child env. status: %s :: %s", env_context, status)
-            if not status.is_good():
-                break
+            joint_telemetry.extend(telemetry)
+            if not status.is_good() and final_status is None:
+                final_status = status
 
-        _LOG.info("Final status: %s :: %s", self, status)
-        return (status, joint_telemetry)
+        final_status = final_status or status
+        _LOG.info("Final status: %s :: %s", self, final_status)
+        return (final_status, joint_telemetry)
