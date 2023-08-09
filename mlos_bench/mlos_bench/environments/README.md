@@ -7,7 +7,7 @@ An [`Environment`](./base_environment.py) is a class that represents a system th
 It is responsible for setting up the system, running the benchmark, and tearing down the system.
 Each `Environment` object also keeps track of the current state of the system, and can be used to query the system for metrics.
 
-Environments have [`Tunable`](../tunables/tunable.py) parameters and [`TunableGroups`](../tunables/tunable_groups.py) for controlling their configuration.
+Environments can have [`Tunable`](../tunables/tunable.py) parameters and [`TunableGroups`](../tunables/tunable_groups.py) for controlling their configuration.
 It is generally expected that all [`Tunable`](../tunables/tunable.py) parameters within an `Environment` will have the same cost to change.
 
 Common and platform-specific functionality of the environments is implemented in [`Service`](../services/) classes.
