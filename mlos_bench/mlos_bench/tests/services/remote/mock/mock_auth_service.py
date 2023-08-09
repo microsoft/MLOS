@@ -30,4 +30,4 @@ class MockAuthService(Service, SupportsAuth):
         ])
 
     def get_access_token(self) -> str:
-        pass
+        return "TOKEN"
