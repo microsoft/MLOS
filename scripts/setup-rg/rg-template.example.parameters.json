@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "projectPrefix": {
+            "value": "mlos-mysql-autotune"
+        },
+        "vmSKU": {
+            "value": "Standard_D2s_v3"
+        },
+        "vmAdminUsername": {
+            "value": "PLACEHOLDER"
+        },
+        "sshPublicKey": {
+            "value": "PLACEHOLDER"
+        },
+        "fileShareName": {
+            "value": "mlos-file-share"
+        },
+        "resultsDbName": {
+            "value": "mlos-mysql-autotune"
+        },
+        "resultsDbAdminUsername": {
+            "value": "mlos"
+        },
+        "resultsDbAdminPassword": {
+            "value": "PLACEHOLDER"
+        }
+    }
+}
