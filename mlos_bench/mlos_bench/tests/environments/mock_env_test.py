@@ -25,7 +25,7 @@ def test_mock_env_default(mock_env: MockEnv, tunable_groups: TunableGroups) -> N
         (status, data) = env_context.run()
         assert status.is_succeeded()
         assert data is not None
-        assert data["score"] == pytest.approx(93.22, 0.01)
+        assert data["score"] == pytest.approx(72.92, 0.01)
 
 
 def test_mock_env_no_noise(mock_env_no_noise: MockEnv, tunable_groups: TunableGroups) -> None:

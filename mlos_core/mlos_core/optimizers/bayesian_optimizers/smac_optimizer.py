@@ -48,7 +48,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
     n_random_init : Optional[int]
         Number of points evaluated at start to bootstrap the optimizer. Defaults to 10.
 
-    n_random_probability: Optional[float]
+    n_random_probability: float
         Probability of choosing to evaluate a random configuration during optimization.
         Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
     """
@@ -61,7 +61,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                  output_directory: Optional[str] = None,
                  max_trials: int = 100,
                  n_random_init: Optional[int] = 10,
-                 n_random_probability: Optional[float] = 0.1):
+                 n_random_probability: float = 0.1):
 
         super().__init__(
             parameter_space=parameter_space,
@@ -111,10 +111,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         initial_design: Optional[LatinHypercubeInitialDesign] = None
         if n_random_init is not None:
+            assert isinstance(n_random_init, int) and n_random_init >= 0
             initial_design = LatinHypercubeInitialDesign(scenario=scenario, n_configs=n_random_init)
-        random_design: Optional[ProbabilityRandomDesign] = None
-        if n_random_probability is not None:
-            random_design = ProbabilityRandomDesign(probability=n_random_probability)
+
+        # Workaround a bug in SMAC that doesn't pass the seed to the random
+        # design when generated a random_design for itself via the
+        # get_random_design static method when random_design is None.
+        assert isinstance(n_random_probability, float) and n_random_probability >= 0
+        random_design = ProbabilityRandomDesign(probability=n_random_probability, seed=scenario.seed)
 
         self.base_optimizer = Optimizer_Smac(
             scenario,
