@@ -12,6 +12,11 @@ from typing import Optional
 from mlos_bench.util import get_class_from_name
 
 
+# A common seed to use to avoid tracking down race conditions and intermingling
+# issues of seeds across tests that run in non-deterministic parallel orders.
+SEED = 42
+
+
 def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
     """
     Gets the full class name from the given name or None on error.

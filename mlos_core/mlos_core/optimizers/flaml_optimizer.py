@@ -10,6 +10,7 @@ from typing import Dict, NamedTuple, Optional, Union
 from warnings import warn
 
 import ConfigSpace
+import numpy as np
 import pandas as pd
 
 from mlos_core.optimizers.optimizer import BaseOptimizer
@@ -37,17 +38,26 @@ class FlamlOptimizer(BaseOptimizer):
     low_cost_partial_config : dict
         A dictionary from a subset of controlled dimensions to the initial low-cost values.
         More info: https://microsoft.github.io/FLAML/docs/FAQ#about-low_cost_partial_config-in-tune
+
+    seed : Optional[int]
+        If provided, calls np.random.seed() with the provided value to set the seed globally at init.
     """
 
     def __init__(self, *,
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  space_adapter: Optional[BaseSpaceAdapter] = None,
-                 low_cost_partial_config: Optional[dict] = None):
+                 low_cost_partial_config: Optional[dict] = None,
+                 seed: Optional[int] = None):
 
         super().__init__(
             parameter_space=parameter_space,
             space_adapter=space_adapter,
         )
+
+        # Per upstream documentation, it is recommended to set the seed for
+        # flaml at the start of its operation globally.
+        if seed is not None:
+            np.random.seed(seed)
 
         # pylint: disable=import-outside-toplevel
         from mlos_core.spaces.converters.flaml import configspace_to_flaml_space, FlamlDomain

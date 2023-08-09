@@ -95,10 +95,10 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
     Toy optimization loop with mock environment and SMAC optimizer.
     """
     (score, tunables) = _optimize(mock_env_no_noise, smac_opt)
-    assert score == pytest.approx(75.0, 0.01)
+    assert score == pytest.approx(65.24, 0.01)
     assert tunables.get_param_values() == {
-        "vmSize": "Standard_B4ms",
+        "vmSize": "Standard_B2ms",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": -1,
-        "kernel_sched_latency_ns": 2000000,
+        "kernel_sched_migration_cost_ns": 132525,
+        "kernel_sched_latency_ns": 172229834,
     }

@@ -288,7 +288,7 @@ class Storage(metaclass=ABCMeta):
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
             if isinstance(metrics, dict) and self._opt_target not in metrics:
-                _LOG.warning("Trial %s :: opt. target missing: %s", self, self._opt_target)
+                _LOG.warning("Trial %s :: opt.target missing: %s", self, self._opt_target)
                 # raise ValueError(
                 #     f"Optimization target '{self._opt_target}' is missing from {metrics}")
             return {self._opt_target: metrics} if isinstance(metrics, (float, int)) else metrics

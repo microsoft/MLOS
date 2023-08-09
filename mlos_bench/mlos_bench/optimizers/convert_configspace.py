@@ -58,7 +58,7 @@ def _tunable_to_hyperparameter(
         raise TypeError(f"Undefined Parameter Type: {tunable.type}")
 
 
-def tunable_groups_to_configspace(tunables: TunableGroups) -> ConfigurationSpace:
+def tunable_groups_to_configspace(tunables: TunableGroups, seed: Optional[int] = None) -> ConfigurationSpace:
     """
     Convert TunableGroups to  hyperparameters in ConfigurationSpace.
 
@@ -67,12 +67,15 @@ def tunable_groups_to_configspace(tunables: TunableGroups) -> ConfigurationSpace
     tunables : TunableGroups
         A collection of tunable parameters.
 
+    seed : Optional[int]
+        Random seed to use.
+
     Returns
     -------
     configspace : ConfigurationSpace
         A new ConfigurationSpace instance that corresponds to the input TunableGroups.
     """
-    space = ConfigurationSpace()
+    space = ConfigurationSpace(seed=seed)
     space.add_hyperparameters([
         _tunable_to_hyperparameter(tunable, group.name, group.get_current_cost())
         for (tunable, group) in tunables
