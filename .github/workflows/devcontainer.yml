@@ -90,7 +90,7 @@ jobs:
     - name: Run mlos_bench optimizer tests
       run: |
         set -x
-        docker exec --user vscode conda run -n mlos pytest /workspaces/MLOS/mlos_bench/mlos_bench/tests/optimizers/
+        docker exec --user vscode mlos-devcontainer conda run -n mlos pytest /workspaces/MLOS/mlos_bench/mlos_bench/tests/optimizers/
 
     - name: Run tests
       timeout-minutes: 10
