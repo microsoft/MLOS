@@ -28,11 +28,17 @@ class MlosCoreOptimizer(Optimizer):
     A wrapper class for the mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
+        super().__init__(tunables, config, global_config, service)
 
-        super().__init__(tunables, service, config)
+        seed = config.get("seed")
+        seed = None if seed is None else int(seed)
 
-        space = tunable_groups_to_configspace(tunables)
+        space = tunable_groups_to_configspace(tunables, seed)
         _LOG.debug("ConfigSpace: %s", space)
 
         opt_type = getattr(OptimizerType, self._config.pop(
@@ -49,8 +55,11 @@ class MlosCoreOptimizer(Optimizer):
             optimizer_type=opt_type,
             optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
-            space_adapter_kwargs=space_adapter_config
+            space_adapter_kwargs=space_adapter_config,
         )
+
+    def __repr__(self) -> str:
+        return f"{super().__repr__()}({self._opt.__class__.__name__})"
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None) -> bool:

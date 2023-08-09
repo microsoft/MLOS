@@ -9,9 +9,10 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-
 from datetime import datetime
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, TYPE_CHECKING, Union
+from types import TracebackType
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
+from typing_extensions import Literal
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -70,6 +71,7 @@ class Environment(metaclass=abc.ABCMeta):
         env : Environment
             An instance of the `Environment` class initialized with `config`.
         """
+        assert issubclass(cls, Environment)
         return instantiate_from_config(
             cls,
             class_name,
@@ -111,6 +113,7 @@ class Environment(metaclass=abc.ABCMeta):
         self.config = config
         self._service = service
         self._is_ready = False
+        self._in_context = False
         self._const_args = config.get("const_args", {})
 
         if tunables is None:
@@ -173,6 +176,30 @@ class Environment(metaclass=abc.ABCMeta):
     def _config_loader_service(self) -> "SupportsConfigLoading":
         assert self._service is not None
         return self._service.config_loader_service
+
+    def __enter__(self) -> 'Environment':
+        """
+        Enter the environment's benchmarking context.
+        """
+        _LOG.debug("Environment START :: %s", self)
+        assert not self._in_context
+        self._in_context = True
+        return self
+
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exit the context of the benchmarking environment.
+        """
+        if ex_val is None:
+            _LOG.debug("Environment END :: %s", self)
+        else:
+            assert ex_type and ex_val
+            _LOG.warning("Environment END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
+        assert self._in_context
+        self._in_context = False
+        return False  # Do not suppress exceptions
 
     def __str__(self) -> str:
         return self.name
@@ -268,6 +295,9 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
 
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
+
         # Assign new values to the environment's tunable parameters:
         groups = list(self._tunable_params.get_covariant_group_names())
         self._tunable_params.assign(tunables.get_param_values(groups))
@@ -299,6 +329,8 @@ class Environment(metaclass=abc.ABCMeta):
         single call.
         """
         _LOG.info("Teardown %s", self)
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         self._is_ready = False
 
     def run(self) -> Tuple[Status, Optional[dict]]:
@@ -316,6 +348,8 @@ class Environment(metaclass=abc.ABCMeta):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         (status, _) = self.status()
         return (status, None)
 
@@ -329,6 +363,8 @@ class Environment(metaclass=abc.ABCMeta):
             A pair of (benchmark status, telemetry) values.
             `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         if self._is_ready:
             return (Status.READY, [])
         _LOG.warning("Environment not ready: %s", self)

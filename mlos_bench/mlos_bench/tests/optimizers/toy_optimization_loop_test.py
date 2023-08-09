@@ -26,16 +26,18 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
 
     while opt.not_converged():
 
-        tunables = opt.suggest()
-        assert env.setup(tunables)
+        with env as env_context:
 
-        (status, output) = env.run()
-        assert status.is_succeeded()
-        assert output is not None
-        score = output['score']
-        assert 60 <= score <= 120
+            tunables = opt.suggest()
+            assert env_context.setup(tunables)
 
-        opt.register(tunables, status, score)
+            (status, output) = env_context.run()
+            assert status.is_succeeded()
+            assert output is not None
+            score = output['score']
+            assert 60 <= score <= 120
+
+            opt.register(tunables, status, score)
 
     (best_score, best_tunables) = opt.get_best_observation()
     assert isinstance(best_score, float) and isinstance(best_tunables, TunableGroups)
@@ -93,10 +95,10 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
     Toy optimization loop with mock environment and SMAC optimizer.
     """
     (score, tunables) = _optimize(mock_env_no_noise, smac_opt)
-    assert score == pytest.approx(75.0, 0.01)
+    assert score == pytest.approx(65.24, 0.01)
     assert tunables.get_param_values() == {
-        "vmSize": "Standard_B4ms",
+        "vmSize": "Standard_B2ms",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": -1,
-        "kernel_sched_latency_ns": 2000000,
+        "kernel_sched_migration_cost_ns": 132525,
+        "kernel_sched_latency_ns": 172229834,
     }

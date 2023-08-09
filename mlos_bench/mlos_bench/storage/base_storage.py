@@ -28,8 +28,11 @@ class Storage(metaclass=ABCMeta):
     and storage systems (e.g., SQLite or MLFLow).
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service],
-                 config: Dict[str, Any]):
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: Dict[str, Any],
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
         """
         Create a new storage object.
 
@@ -45,6 +48,7 @@ class Storage(metaclass=ABCMeta):
         self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()
+        self._global_config = global_config or {}
 
     @abstractmethod
     def experiment(self, *,
@@ -284,7 +288,7 @@ class Storage(metaclass=ABCMeta):
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
             if isinstance(metrics, dict) and self._opt_target not in metrics:
-                _LOG.warning("Trial %s :: opt. target missing: %s", self, self._opt_target)
+                _LOG.warning("Trial %s :: opt.target missing: %s", self, self._opt_target)
                 # raise ValueError(
                 #     f"Optimization target '{self._opt_target}' is missing from {metrics}")
             return {self._opt_target: metrics} if isinstance(metrics, (float, int)) else metrics
@@ -302,4 +306,4 @@ class Storage(metaclass=ABCMeta):
             metrics : List[Tuple[datetime, str, Any]]
                 Telemetry data.
             """
-            _LOG.info("Store telemetry: %s :: %s %s", self, status, metrics)
+            _LOG.info("Store telemetry: %s :: %s %d records", self, status, len(metrics))

@@ -9,11 +9,18 @@ Scheduler-side benchmark environment to run scripts locally.
 import json
 import logging
 
-from typing import Iterable, Optional, Tuple
+from datetime import datetime
+from tempfile import TemporaryDirectory
+from contextlib import nullcontext
+
+from types import TracebackType
+from typing import Any, Iterable, List, Optional, Tuple, Type, Union
+from typing_extensions import Literal
 
 import pandas
 
 from mlos_bench.environments.status import Status
+from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
@@ -24,6 +31,7 @@ _LOG = logging.getLogger(__name__)
 
 
 class LocalEnv(ScriptEnv):
+    # pylint: disable=too-many-instance-attributes
     """
     Scheduler-side Environment that runs scripts locally.
     """
@@ -64,11 +72,32 @@ class LocalEnv(ScriptEnv):
             "LocalEnv requires a service that supports local execution"
         self._local_exec_service: SupportsLocalExec = self._service
 
-        self._temp_dir = self.config.get("temp_dir")
+        self._temp_dir: Optional[str] = None
+        self._temp_dir_context: Union[TemporaryDirectory, nullcontext, None] = None
 
         self._dump_params_file: Optional[str] = self.config.get("dump_params_file")
         self._dump_meta_file: Optional[str] = self.config.get("dump_meta_file")
+
         self._read_results_file: Optional[str] = self.config.get("read_results_file")
+        self._read_telemetry_file: Optional[str] = self.config.get("read_telemetry_file")
+
+    def __enter__(self) -> Environment:
+        assert self._temp_dir is None and self._temp_dir_context is None
+        self._temp_dir_context = self._local_exec_service.temp_dir_context(self.config.get("temp_dir"))
+        self._temp_dir = self._temp_dir_context.__enter__()
+        return super().__enter__()
+
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exit the context of the benchmarking environment.
+        """
+        assert not (self._temp_dir is None or self._temp_dir_context is None)
+        self._temp_dir_context.__exit__(ex_type, ex_val, ex_tb)
+        self._temp_dir = None
+        self._temp_dir_context = None
+        return super().__exit__(ex_type, ex_val, ex_tb)
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -94,31 +123,30 @@ class LocalEnv(ScriptEnv):
         if not super().setup(tunables, global_config):
             return False
 
-        with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
+        _LOG.info("Set up the environment locally: '%s' at %s", self, self._temp_dir)
+        assert self._temp_dir is not None
 
-            _LOG.info("Set up the environment locally: %s at %s", self, temp_dir)
+        if self._dump_params_file:
+            fname = path_join(self._temp_dir, self._dump_params_file)
+            _LOG.debug("Dump tunables to file: %s", fname)
+            with open(fname, "wt", encoding="utf-8") as fh_tunables:
+                # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
+                json.dump(self._tunable_params.get_param_values(), fh_tunables)
 
-            if self._dump_params_file:
-                fname = path_join(temp_dir, self._dump_params_file)
-                _LOG.debug("Dump tunables to file: %s", fname)
-                with open(fname, "wt", encoding="utf-8") as fh_tunables:
-                    # json.dump(self._params, fh_tunables)  # Tunables *and* const_args
-                    json.dump(self._tunable_params.get_param_values(), fh_tunables)
+        if self._dump_meta_file:
+            fname = path_join(self._temp_dir, self._dump_meta_file)
+            _LOG.debug("Dump tunables metadata to file: %s", fname)
+            with open(fname, "wt", encoding="utf-8") as fh_meta:
+                json.dump({
+                    tunable.name: tunable.meta
+                    for (tunable, _group) in self._tunable_params if tunable.meta
+                }, fh_meta)
 
-            if self._dump_meta_file:
-                fname = path_join(temp_dir, self._dump_meta_file)
-                _LOG.debug("Dump tunables metadata to file: %s", fname)
-                with open(fname, "wt", encoding="utf-8") as fh_meta:
-                    json.dump({
-                        tunable.name: tunable.meta
-                        for (tunable, _group) in self._tunable_params if tunable.meta
-                    }, fh_meta)
-
-            if self._script_setup:
-                return_code = self._local_exec(self._script_setup, temp_dir)
-                self._is_ready = bool(return_code == 0)
-            else:
-                self._is_ready = True
+        if self._script_setup:
+            return_code = self._local_exec(self._script_setup, self._temp_dir)
+            self._is_ready = bool(return_code == 0)
+        else:
+            self._is_ready = True
 
         return self._is_ready
 
@@ -138,31 +166,55 @@ class LocalEnv(ScriptEnv):
         if not status.is_ready():
             return result
 
-        with self._local_exec_service.temp_dir_context(self._temp_dir) as temp_dir:
+        assert self._temp_dir is not None
 
-            if self._script_run:
-                return_code = self._local_exec(self._script_run, temp_dir)
-                if return_code != 0:
-                    return (Status.FAILED, None)
+        if self._script_run:
+            return_code = self._local_exec(self._script_run, self._temp_dir)
+            if return_code != 0:
+                return (Status.FAILED, None)
 
+        # FIXME: We should not be assuming that the only output file type is a CSV.
+        if not self._read_results_file:
+            _LOG.debug("Not reading the data at: %s", self)
+            return (Status.SUCCEEDED, {})
+
+        data: pandas.DataFrame = pandas.read_csv(
+            self._config_loader_service.resolve_path(
+                self._read_results_file, extra_paths=[self._temp_dir]))
+
+        _LOG.debug("Read data:\n%s", data)
+        if list(data.columns) == ["metric", "value"]:
+            _LOG.warning(
+                "Local run has %d rows: assume long format of (metric, value)", len(data))
+            data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
+
+        data_dict = data.iloc[-1].to_dict()
+        _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
+        return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
+
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
+
+        (status, _) = super().status()
+        if not (self._is_ready and self._read_telemetry_file):
+            return (status, [])
+
+        assert self._temp_dir is not None
+        try:
             # FIXME: We should not be assuming that the only output file type is a CSV.
-            if not self._read_results_file:
-                _LOG.debug("Not reading the data at: %s", self)
-                return (Status.SUCCEEDED, {})
-
             data: pandas.DataFrame = pandas.read_csv(
                 self._config_loader_service.resolve_path(
-                    self._read_results_file, extra_paths=[temp_dir]))
+                    self._read_telemetry_file, extra_paths=[self._temp_dir]))
+        except FileNotFoundError as ex:
+            _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
+            return (status, [])
 
-            _LOG.debug("Read data:\n%s", data)
-            if list(data.columns) == ["metric", "value"]:
-                _LOG.warning(
-                    "Local run has %d rows: assume long format of (metric, value)", len(data))
-                data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
+        _LOG.debug("Read telemetry data:\n%s", data)
+        if list(data.columns) != ["timestamp", "metric", "value"]:
+            _LOG.warning(
+                'Telemetry CSV file should have columns ["timestamp", "metric", "value"] :: %s',
+                self._read_telemetry_file)
 
-            data_dict = data.iloc[-1].to_dict()
-            _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
-            return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
+        return (status, list(data.to_records(index=False)))
 
     def teardown(self) -> None:
         """

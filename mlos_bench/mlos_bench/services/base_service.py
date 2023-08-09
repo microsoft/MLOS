@@ -51,6 +51,7 @@ class Service:
         svc : Service
             An instance of the `Service` class initialized with `config`.
         """
+        assert issubclass(cls, Service)
         return instantiate_from_config(cls, class_name, config, global_config, parent)
 
     def __init__(self,

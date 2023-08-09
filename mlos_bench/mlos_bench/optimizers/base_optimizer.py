@@ -24,7 +24,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
         """
         Create a new optimizer for the given configuration space defined by the tunables.
 
@@ -40,6 +44,9 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._config = config.copy()
         self._tunables = tunables
         self._service = service
+
+        self._global_config = global_config or {}
+
         self._iter = 1
         # If False, use the optimizer to suggest the initial configuration;
         # if True (default), use the already initialized values for the first iteration.
@@ -51,7 +58,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
 
     def __repr__(self) -> str:
         opt_direction = 'min' if self._opt_sign > 0 else 'max'
-        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})"
+        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})(config={self._config})"
 
     @property
     def target(self) -> str:

@@ -31,24 +31,24 @@ def _main() -> None:
     launcher = Launcher("mlos_bench", "Systems autotuning and benchmarking tool")
 
     result = _optimize(
-        launcher.environment,
-        launcher.optimizer,
-        launcher.storage,
-        launcher.root_env_config,
-        launcher.global_config
+        env=launcher.environment,
+        opt=launcher.optimizer,
+        storage=launcher.storage,
+        root_env_config=launcher.root_env_config,
+        global_config=launcher.global_config,
+        do_teardown=launcher.teardown
     )
 
     _LOG.info("Final result: %s", result)
 
-    if launcher.teardown:
-        launcher.environment.teardown()
 
-
-def _optimize(env: Environment,
+def _optimize(*,
+              env: Environment,
               opt: Optimizer,
               storage: Storage,
               root_env_config: str,
-              global_config: Dict[str, Any]) -> Tuple[Optional[float], Optional[TunableGroups]]:
+              global_config: Dict[str, Any],
+              do_teardown: bool) -> Tuple[Optional[float], Optional[TunableGroups]]:
     """
     Main optimization loop.
 
@@ -64,6 +64,8 @@ def _optimize(env: Environment,
         A path to the root JSON configuration file of the benchmarking environment.
     global_config : dict
         Global configuration parameters.
+    do_teardown : bool
+        If True, teardown the environment at the end of the experiment
     """
     # pylint: disable=too-many-locals
     if _LOG.isEnabledFor(logging.INFO):
@@ -77,11 +79,11 @@ def _optimize(env: Environment,
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
     # from other experiments and check for compatibility.
-    with storage.experiment(experiment_id=experiment_id,
-                            trial_id=trial_id,
-                            root_env_config=root_env_config,
-                            description=env.name,
-                            opt_target=opt.target) as exp:
+    with env as env_context, storage.experiment(experiment_id=experiment_id,
+                                                trial_id=trial_id,
+                                                root_env_config=root_env_config,
+                                                description=env.name,
+                                                opt_target=opt.target) as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
 
@@ -93,7 +95,7 @@ def _optimize(env: Environment,
             opt.bulk_register(configs, scores, status)
             # Complete any pending trials.
             for trial in exp.pending_trials():
-                _run(env, opt, trial, global_config)
+                _run(env_context, opt, trial, global_config)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
@@ -112,22 +114,25 @@ def _optimize(env: Environment,
                 config_id = -1
 
             trial = exp.new_trial(tunables)
-            _run(env, opt, trial, global_config)
+            _run(env_context, opt, trial, global_config)
+
+        if do_teardown:
+            env_context.teardown()
 
     (best_score, best_config) = opt.get_best_observation()
     _LOG.info("Env: %s best score: %s", env, best_score)
     return (best_score, best_config)
 
 
-def _run(env: Environment, opt: Optimizer,
+def _run(env_context: Environment, opt: Optimizer,
          trial: Storage.Trial, global_config: Dict[str, Any]) -> None:
     """
     Run a single trial.
 
     Parameters
     ----------
-    env : Environment
-        benchmarking environment to run the optimization on.
+    env_context : Environment
+        Benchmarking environment context to run the optimization on.
     opt : Optimizer
         An interface to mlos_core optimizers.
     storage : Storage
@@ -137,20 +142,23 @@ def _run(env: Environment, opt: Optimizer,
     """
     _LOG.info("Trial: %s", trial)
 
-    if not env.setup(trial.tunables, trial.config(global_config)):
-        _LOG.warning("Setup failed: %s :: %s", env, trial.tunables)
+    if not env_context.setup(trial.tunables, trial.config(global_config)):
+        _LOG.warning("Setup failed: %s :: %s", env_context, trial.tunables)
         # FIXME: Use the actual timestamp from the environment.
         trial.update(Status.FAILED, datetime.utcnow())
         opt.register(trial.tunables, Status.FAILED)
         return
 
-    # In async mode, poll the environment for status and telemetry
+    (status, results) = env_context.run()  # Block and wait for the final result.
+    _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
+
+    # In async mode (TODO), poll the environment for status and telemetry
     # and update the storage with the intermediate results.
-    (status, telemetry) = env.status()
+    (_, telemetry) = env_context.status()
+    # Use the status from `.run()` as it is the final status of the experiment.
+    # TODO: Use the `.status()` output in async mode.
     trial.update_telemetry(status, telemetry)
 
-    (status, results) = env.run()  # Block and wait for the final result.
-    _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
     # FIXME: Use the actual timestamp from the benchmark.
     trial.update(status, datetime.utcnow(), results)
     opt.register(trial.tunables, status, results)
