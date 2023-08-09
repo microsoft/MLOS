@@ -25,6 +25,12 @@
                     "type": "string",
                     "$comment": "Currently we only support CSV files.",
                     "pattern": "[.]csv$"
+                },
+                "read_telemetry_file": {
+                    "description": "Path to a file to read the telemetry data from.",
+                    "type": "string",
+                    "$comment": "Currently we only support CSV files.",
+                    "pattern": "[.]csv$"
                 }
             }
         }
