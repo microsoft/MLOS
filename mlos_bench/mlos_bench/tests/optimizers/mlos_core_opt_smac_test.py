@@ -22,10 +22,7 @@ from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimize
 
 OUTPUT_DIR_PATH_BASE = r'c:/temp' if sys.platform == 'win32' else '/tmp/'
 
-SKIP = True
 
-
-@pytest.mark.skipif(condition=SKIP, reason="debugging other flaky tests")
 def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) -> None:
     """
     Test invalid max_trials initialization of mlos_core SMAC optimizer.
@@ -41,7 +38,6 @@ def test_init_mlos_core_smac_opt_bad_trial_count(tunable_groups: TunableGroups) 
         assert opt is None
 
 
-@pytest.mark.skipif(condition=SKIP, reason="debugging other flaky tests")
 def test_init_mlos_core_smac_opt_max_trials(tunable_groups: TunableGroups) -> None:
     """
     Test max_trials initialization of mlos_core SMAC optimizer.
@@ -57,7 +53,6 @@ def test_init_mlos_core_smac_opt_max_trials(tunable_groups: TunableGroups) -> No
     assert opt._opt.base_optimizer.scenario.n_trials == test_opt_config['max_iterations']
 
 
-@pytest.mark.skipif(condition=SKIP, reason="debugging other flaky tests")
 def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGroups) -> None:
     """
     Test absolute path output directory initialization of mlos_core SMAC optimizer.
@@ -76,7 +71,6 @@ def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGr
         str(test_opt_config['output_directory']))
 
 
-@pytest.mark.skipif(condition=SKIP, reason="debugging other flaky tests")
 def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGroups) -> None:
     """
     Test relative path output directory initialization of mlos_core SMAC optimizer.
@@ -94,7 +88,6 @@ def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGr
         path_join(os.getcwd(), str(test_opt_config['output_directory'])))
 
 
-@pytest.mark.skipif(condition=SKIP, reason="debugging other flaky tests")
 def test_init_mlos_core_smac_relative_output_directory_with_run_name(tunable_groups: TunableGroups) -> None:
     """
     Test relative path output directory initialization of mlos_core SMAC optimizer.
@@ -113,7 +106,6 @@ def test_init_mlos_core_smac_relative_output_directory_with_run_name(tunable_gro
         path_join(os.getcwd(), str(test_opt_config['output_directory']), str(test_opt_config['run_name'])))
 
 
-@pytest.mark.skipif(condition=SKIP, reason="debugging other flaky tests")
 def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunable_groups: TunableGroups) -> None:
     """
     Test relative path output directory initialization of mlos_core SMAC optimizer.
@@ -134,7 +126,6 @@ def test_init_mlos_core_smac_relative_output_directory_with_experiment_id(tunabl
         path_join(os.getcwd(), str(test_opt_config['output_directory']), global_config['experiment_id']))
 
 
-@pytest.mark.skipif(condition=SKIP, reason="debugging other flaky tests")
 def test_init_mlos_core_smac_temp_output_directory(tunable_groups: TunableGroups) -> None:
     """
     Test random output directory initialization of mlos_core SMAC optimizer.
