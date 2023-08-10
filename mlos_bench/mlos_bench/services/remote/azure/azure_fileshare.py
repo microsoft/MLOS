@@ -12,6 +12,7 @@ import logging
 from typing import Any, Dict, Optional, Set
 
 from azure.storage.fileshare import ShareClient
+from azure.core.exceptions import ResourceNotFoundError
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
@@ -79,10 +80,14 @@ class AzureFileShareService(FileShareService):
             folder, _ = os.path.split(local_path)
             os.makedirs(folder, exist_ok=True)
             file_client = self._share_client.get_file_client(remote_path)
-            data = file_client.download_file()
-            with open(local_path, "wb") as output_file:
-                _LOG.debug("Download file: %s -> %s", remote_path, local_path)
-                data.readinto(output_file)  # type: ignore[no-untyped-call]
+            try:
+                data = file_client.download_file()
+                with open(local_path, "wb") as output_file:
+                    _LOG.debug("Download file: %s -> %s", remote_path, local_path)
+                    data.readinto(output_file)  # type: ignore[no-untyped-call]
+            except ResourceNotFoundError as ex:
+                # Translate into non-Azure exception:
+                raise FileNotFoundError("Cannot download: {remote_path}") from ex
 
     def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
         super().upload(local_path, remote_path, recursive)
