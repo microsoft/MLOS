@@ -8,7 +8,7 @@ Toy optimization loop to test the optimizers on mock benchmark environment.
 
 from typing import Tuple
 
-from logging import warning
+import logging
 
 import sys
 import pytest
@@ -25,6 +25,13 @@ from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 
 
+# For debugging purposes output some warnings which are captured with failed tests.
+DEBUG = True
+logger = logging.debug
+if DEBUG:
+    logger = logging.warning
+
+
 def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
     """
     Toy optimization loop.
@@ -37,13 +44,14 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
 
             tunables = opt.suggest()
 
-            config = tunable_values_to_configuration(tunables)
-            config_df = config_to_dataframe(config)
-            warning("tunables: %s", str(tunables))
-            warning("config: %s", str(config))
+            logger("tunables: %s", str(tunables))
             if isinstance(opt, MlosCoreOptimizer) and isinstance(opt._opt, SmacOptimizer):
+                config = tunable_values_to_configuration(tunables)
+                config_df = config_to_dataframe(config)
+                logger("config: %s", str(config))
                 try:
-                    warning("prediction: %s", opt._opt.surrogate_predict(config_df))
+                    # pylint: disable=protected-access
+                    logger("prediction: %s", opt._opt.surrogate_predict(config_df))
                 except RuntimeError:
                     pass
 
@@ -54,8 +62,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             assert output is not None
             score = output['score']
             assert 60 <= score <= 120
-
-            warning("score: %s", str(score))
+            logger("score: %s", str(score))
 
             opt.register(tunables, status, score)
 
