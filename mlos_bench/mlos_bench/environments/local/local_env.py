@@ -183,7 +183,8 @@ class LocalEnv(ScriptEnv):
                 self._read_results_file, extra_paths=[self._temp_dir]))
 
         _LOG.debug("Read data:\n%s", data)
-        if list(data.columns) == ["metric", "value"]:
+        if [col.strip() for col in data.columns] == ["metric", "value"]:
+            data.columns = ["metric", "value"]
             _LOG.warning(
                 "Local run has %d rows: assume long format of (metric, value)", len(data))
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
@@ -211,7 +212,7 @@ class LocalEnv(ScriptEnv):
             return (status, [])
 
         _LOG.debug("Read telemetry data:\n%s", data)
-        if list(data.columns) != ["timestamp", "metric", "value"]:
+        if [col.strip() for col in data.columns] != ["timestamp", "metric", "value"]:
             _LOG.warning(
                 'Telemetry CSV file should have columns ["timestamp", "metric", "value"] :: %s',
                 self._read_telemetry_file)
