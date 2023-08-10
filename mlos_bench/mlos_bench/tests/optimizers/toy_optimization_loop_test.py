@@ -45,12 +45,12 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             tunables = opt.suggest()
 
             logger("tunables: %s", str(tunables))
+            # pylint: disable=protected-access
             if isinstance(opt, MlosCoreOptimizer) and isinstance(opt._opt, SmacOptimizer):
                 config = tunable_values_to_configuration(tunables)
                 config_df = config_to_dataframe(config)
                 logger("config: %s", str(config))
                 try:
-                    # pylint: disable=protected-access
                     logger("prediction: %s", opt._opt.surrogate_predict(config_df))
                 except RuntimeError:
                     pass
