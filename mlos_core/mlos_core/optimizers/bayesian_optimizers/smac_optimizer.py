@@ -17,6 +17,7 @@ import pandas as pd
 
 from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBayesianOptimizer
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
+from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
@@ -102,6 +103,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             name=run_name,
             output_directory=Path(output_directory),
             deterministic=True,
+            use_default_config=True,
             n_trials=max_trials,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
             n_workers=1,  # Use a single thread for evaluating trials
@@ -213,11 +215,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         if context is not None:
             raise NotImplementedError()
-        if self._space_adapter:
+        if self._space_adapter and not isinstance(self._space_adapter, IdentityAdapter):
             raise NotImplementedError()
 
         # pylint: disable=protected-access
-        if len(self._observations) < self.base_optimizer._initial_design._n_configs:
+        if len(self._observations) <= self.base_optimizer._initial_design._n_configs:
             raise RuntimeError('Surrogate model can make predictions *only* after all initial points have been evaluated')
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError('Surrogate model is not yet trained')
