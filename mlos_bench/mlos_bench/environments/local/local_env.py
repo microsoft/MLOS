@@ -15,7 +15,7 @@ from tempfile import TemporaryDirectory
 from contextlib import nullcontext
 
 from types import TracebackType
-from typing import Any, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Iterable, List, Mapping, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas
@@ -223,9 +223,10 @@ class LocalEnv(ScriptEnv):
                 'Telemetry CSV file should have columns ["timestamp", "metric", "value"] :: %s',
                 self._read_telemetry_file)
 
+        col_dtypes: Mapping[int, Type] = {0: datetime}
         return (status, [
             (pandas.Timestamp(ts).to_pydatetime(), metric, value)
-            for (ts, metric, value) in data.to_records(index=False, column_dtypes={0: datetime})
+            for (ts, metric, value) in data.to_records(index=False, column_dtypes=col_dtypes)
         ])
 
     def teardown(self) -> None:
