@@ -147,3 +147,4 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
         }
     assert score == pytest.approx(expected_score, 0.01)
     assert tunables.get_param_values() == expected_tunable_values
+    assert False, "OK - TESTING!"
