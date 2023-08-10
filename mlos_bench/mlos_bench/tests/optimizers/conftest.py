@@ -107,6 +107,7 @@ def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
 # tunable dimensions, so for now we set the initial random samples equal to the
 # number of iterations and control them with a seed.
 
+
 @pytest.fixture
 def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
