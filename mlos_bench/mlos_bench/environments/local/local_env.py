@@ -8,6 +8,7 @@ Scheduler-side benchmark environment to run scripts locally.
 
 import json
 import logging
+import sys
 
 from datetime import datetime
 from tempfile import TemporaryDirectory
@@ -182,9 +183,11 @@ class LocalEnv(ScriptEnv):
             self._config_loader_service.resolve_path(
                 self._read_results_file, extra_paths=[self._temp_dir]))
 
+        if sys.platform == 'win32':
+            data.rename(str.rstrip, axis='columns', inplace=True)
+
         _LOG.debug("Read data:\n%s", data)
-        if [col.strip() for col in data.columns] == ["metric", "value"]:
-            data.columns = ["metric", "value"]
+        if list(data.columns) == ["metric", "value"]:
             _LOG.warning(
                 "Local run has %d rows: assume long format of (metric, value)", len(data))
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
@@ -211,8 +214,11 @@ class LocalEnv(ScriptEnv):
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])
 
+        if sys.platform == 'win32':
+            data.rename(str.rstrip, axis='columns', inplace=True)
+
         _LOG.debug("Read telemetry data:\n%s", data)
-        if [col.strip() for col in data.columns] != ["timestamp", "metric", "value"]:
+        if list(data.columns) != ["timestamp", "metric", "value"]:
             _LOG.warning(
                 'Telemetry CSV file should have columns ["timestamp", "metric", "value"] :: %s',
                 self._read_telemetry_file)
