@@ -8,8 +8,14 @@ Toy optimization loop to test the optimizers on mock benchmark environment.
 
 from typing import Tuple
 
+from logging import warning
+
 import sys
 import pytest
+
+from mlos_core import config_to_dataframe
+from mlos_core.optimizers.bayesian_optimizers.smac_optimizer import SmacOptimizer
+from mlos_bench.optimizers.convert_configspace import tunable_values_to_configuration
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.mock_env import MockEnv
@@ -30,6 +36,17 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
         with env as env_context:
 
             tunables = opt.suggest()
+
+            config = tunable_values_to_configuration(tunables)
+            config_df = config_to_dataframe(config)
+            warning("tunables: %s", str(tunables))
+            warning("config: %s", str(config))
+            if isinstance(opt, MlosCoreOptimizer) and isinstance(opt._opt, SmacOptimizer):
+                try:
+                    warning("prediction: %s", opt._opt.surrogate_predict(config_df))
+                except RuntimeError:
+                    pass
+
             assert env_context.setup(tunables)
 
             (status, output) = env_context.run()
@@ -37,6 +54,8 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             assert output is not None
             score = output['score']
             assert 60 <= score <= 120
+
+            warning("score: %s", str(score))
 
             opt.register(tunables, status, score)
 
@@ -90,12 +109,25 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
     }
 
 
+# @pytest.mark.skip(reason="SMAC is not deterministic")
 def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
                                 smac_opt: MlosCoreOptimizer) -> None:
     """
     Toy optimization loop with mock environment and SMAC optimizer.
     """
     (score, tunables) = _optimize(mock_env_no_noise, smac_opt)
+    try:
+        expected_score = 65.24
+        assert score == pytest.approx(expected_score, 0.01)
+        assert tunables.get_param_values() == {
+            "vmSize": "Standard_B2ms",
+            "idle": "halt",
+            "kernel_sched_migration_cost_ns": 132525,
+            "kernel_sched_latency_ns": 172229834,
+        }
+    except AssertionError:
+        warning(f"Original SMAC score: {score} == {expected_score} did not pass.")
+
     # FIXME: For some reason Windows has a slightly different optimization result.
     if sys.platform == 'win32':
         expected_score = 64.05
