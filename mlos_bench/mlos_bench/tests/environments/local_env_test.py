@@ -18,6 +18,7 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
     Produce benchmark and telemetry data in a local script and read it.
     """
     ts1 = datetime.utcnow()
+    ts1 -= timedelta(microseconds=ts1.microsecond)
     ts2 = ts1 + timedelta(minutes=1)
 
     time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
@@ -33,10 +34,10 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
                 "echo 'score,0.9' >> output.csv",
                 "echo '-------------------'",  # This output does not go anywhere
                 "echo 'timestamp,metric,value' > telemetry.csv",
-                f"echo '{time_str1},cpu_load,0.65' >> telemetry.csv",
-                f"echo '{time_str1},mem_usage,10240' >> telemetry.csv",
-                f"echo '{time_str2},cpu_load,0.8' >> telemetry.csv",
-                f"echo '{time_str2},mem_usage,20480' >> telemetry.csv",
+                f"echo '\"{time_str1}\",cpu_load,0.65' >> telemetry.csv",
+                f"echo '\"{time_str1}\",mem_usage,10240' >> telemetry.csv",
+                f"echo '\"{time_str2}\",cpu_load,0.8' >> telemetry.csv",
+                f"echo '\"{time_str2}\",mem_usage,20480' >> telemetry.csv",
             ],
             "read_results_file": "output.csv",
             "read_telemetry_file": "telemetry.csv",
