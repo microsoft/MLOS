@@ -114,10 +114,11 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": 10,
+            # SMAC's RF model can be non-deterministic at low iterations.
+            "max_iterations": 20,
             "optimizer_type": "SMAC",
             "seed": SEED,
-            "output_directory": None
+            "output_directory": None,
         },
     )
 
@@ -133,9 +134,10 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "max",
-            "max_iterations": 10,
+            # SMAC's RF model can be non-deterministic at low iterations.
+            "max_iterations": 20,
             "optimizer_type": "SMAC",
             "seed": SEED,
-            "output_directory": None
+            "output_directory": None,
         },
     )

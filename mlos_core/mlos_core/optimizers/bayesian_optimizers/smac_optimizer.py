@@ -11,6 +11,8 @@ from pathlib import Path
 from typing import Dict, List, Optional, TYPE_CHECKING
 from tempfile import TemporaryDirectory
 
+from math import ceil
+
 import ConfigSpace
 import numpy.typing as npt
 import pandas as pd
@@ -112,6 +114,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         config_selector: ConfigSelector = ConfigSelector(scenario, retrain_after=1)
 
         initial_design: Optional[LatinHypercubeInitialDesign] = None
+        # By default, when left None, SMAC will compute its own value for
+        # n_random_init that seems to be something along the lines of 10% of
+        # max_trials and the number of parameters.
+        # However, at very low initial sampling values, the random forest it
+        # trains by default is not stable (despite being provided a seed).
+        # Hence, we provide a lower bound on the initial number of random samples.
+        if n_random_init is None and max_trials is not None and ceil(max_trials / 10) < 10:
+            n_random_init = 10
         if n_random_init is not None:
             assert isinstance(n_random_init, int) and n_random_init >= 0
             initial_design = LatinHypercubeInitialDesign(scenario=scenario, n_configs=n_random_init)
