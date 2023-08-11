@@ -7,6 +7,8 @@ Unit tests for mock benchmark environment.
 """
 from datetime import datetime, timedelta
 
+import numpy as np
+
 from mlos_bench.environments.local.local_env import LocalEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
@@ -42,12 +44,11 @@ def test_local_env_vars(tunable_groups: TunableGroups) -> None:
         assert env_context.setup(tunable_groups)
         (status, data) = env_context.run()
         assert status.is_succeeded()
-        assert data == {
-            "const_arg": 111,                       # From "const_args"
-            "other_arg": "",                        # Was not included in "shell_env_params"
-            "unknown_arg": "",                      # Unknown/undefined variable
-            "kernel_sched_latency_ns": 2000000,     # From "tunable_params"
-        }
+        assert data is not None
+        assert data["const_arg"] == 111.0                       # From "const_args"
+        assert np.isnan(data["other_arg"])                      # Was not included in "shell_env_params"
+        assert np.isnan(data["unknown_arg"])                    # Unknown/undefined variable
+        assert data["kernel_sched_latency_ns"] == 2000000.0     # From "tunable_params"
 
 
 def test_local_env(tunable_groups: TunableGroups) -> None:
