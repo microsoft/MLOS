@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Unit tests for mock benchmark environment.
+Unit tests for LocalEnv benchmark environment.
 """
 from datetime import datetime, timedelta
 
