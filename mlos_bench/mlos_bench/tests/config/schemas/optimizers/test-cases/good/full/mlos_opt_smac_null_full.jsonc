@@ -9,6 +9,8 @@
         "optimizer_type": "SMAC",
         "space_adapter_type": null,
         "n_random_init": 10,
+        "max_ratio": 0.5,
+        "use_default_config": true,
         "n_random_probability": 0.1,
         "output_directory": "smac_output",
         "run_name": "ExperimentName"

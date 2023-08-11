@@ -108,6 +108,9 @@ def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
 # number of iterations and control them with a seed.
 
 
+SMAC_ITERATIONS = 10
+
+
 @pytest.fixture
 def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
     """
@@ -119,11 +122,13 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": 10,
-            "n_random_init": 10,
+            "max_iterations": SMAC_ITERATIONS,
             "optimizer_type": "SMAC",
             "seed": SEED,
             "output_directory": None,
+            # See Above
+            "n_random_init": SMAC_ITERATIONS,
+            "max_ratio": 1.0,
         },
     )
 
@@ -139,10 +144,12 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "max",
-            "max_iterations": 10,
-            "n_random_init": 10,
+            "max_iterations": SMAC_ITERATIONS,
             "optimizer_type": "SMAC",
             "seed": SEED,
             "output_directory": None,
+            # See Above
+            "n_random_init": SMAC_ITERATIONS,
+            "max_ratio": 1.0,
         },
     )

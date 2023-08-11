@@ -7,6 +7,7 @@ Contains the wrapper class for SMAC Bayesian optimizers.
 See Also: <https://automl.github.io/SMAC3/main/index.html>
 """
 
+from logging import warning
 from pathlib import Path
 from typing import Dict, List, Optional, TYPE_CHECKING
 from tempfile import TemporaryDirectory
@@ -49,6 +50,15 @@ class SmacOptimizer(BaseBayesianOptimizer):
     n_random_init : Optional[int]
         Number of points evaluated at start to bootstrap the optimizer. Defaults to 10.
 
+    max_ratio : Optional[int]
+        Maximum ratio of max_trials to be random configurations to be evaluated
+        at start to bootstrap the optimizer.
+        Useful if you want to explicitly control the number of random
+        configurations evaluated at start.
+
+    use_default_config: bool
+        Whether to use the default config for the first trial.
+
     n_random_probability: float
         Probability of choosing to evaluate a random configuration during optimization.
         Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
@@ -61,7 +71,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
                  run_name: Optional[str] = None,
                  output_directory: Optional[str] = None,
                  max_trials: int = 100,
-                 n_random_init: Optional[int] = 10,
+                 n_random_init: Optional[int] = None,
+                 max_ratio: Optional[float] = None,
+                 use_default_config: bool = True,
                  n_random_probability: float = 0.1):
 
         super().__init__(
@@ -98,12 +110,19 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 self._temp_output_directory = TemporaryDirectory()
             output_directory = self._temp_output_directory.name
 
+        initial_design_args = {}
+        if n_random_init is not None:
+            assert isinstance(n_random_init, int) and n_random_init >= 0
+            if n_random_init == max_trials and use_default_config:
+                # Increase max budgeted trials to account for use_default_config.
+                max_trials += 1
+
         scenario: Scenario = Scenario(
             self.optimizer_parameter_space,
             name=run_name,
             output_directory=Path(output_directory),
             deterministic=True,
-            use_default_config=True,
+            use_default_config=use_default_config,
             n_trials=max_trials,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
             n_workers=1,  # Use a single thread for evaluating trials
@@ -111,10 +130,29 @@ class SmacOptimizer(BaseBayesianOptimizer):
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
         config_selector: ConfigSelector = ConfigSelector(scenario, retrain_after=1)
 
+        # TODO: When bulk registering prior configs to rewarm the optimizer,
+        # there is a way to inform SMAC's initial design that we have
+        # additional_configs and can set n_configs == 0.
+
         initial_design: Optional[LatinHypercubeInitialDesign] = None
         if n_random_init is not None:
-            assert isinstance(n_random_init, int) and n_random_init >= 0
-            initial_design = LatinHypercubeInitialDesign(scenario=scenario, n_configs=n_random_init)
+            initial_design_args = {
+                'scenario': scenario,
+                'n_configs': n_random_init,
+            }
+            if n_random_init > 0.25 * max_trials and max_ratio is None:
+                warning(
+                    'Number of random initial configurations (%d) is ' +
+                    'greater than 25%% of max_trials (%d). ' +
+                    'Consider setting max_ratio to avoid SMAC overriding n_random_init.',
+                    n_random_init,
+                    max_trials,
+                )
+            if max_ratio is not None:
+                assert isinstance(max_ratio, float) and 0.0 <= max_ratio <= 1.0
+                initial_design_args['max_ratio'] = max_ratio
+
+            initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
         # design when generated a random_design for itself via the
