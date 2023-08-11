@@ -62,7 +62,7 @@
                         "example": 0.25
                     },
                     "use_default_config": {
-                        "description": "TODO",
+                        "description": "Whether to use the default config for the first trial.",
                         "type": "boolean",
                         "example": true
                     },
