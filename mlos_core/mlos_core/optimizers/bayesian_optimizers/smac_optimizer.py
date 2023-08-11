@@ -73,7 +73,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
                  max_trials: int = 100,
                  n_random_init: Optional[int] = None,
                  max_ratio: Optional[float] = None,
-                 use_default_config: bool = True,
+                 use_default_config: bool = False,
                  n_random_probability: float = 0.1):
 
         super().__init__(
@@ -243,7 +243,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         trial: TrialInfo = self.base_optimizer.ask()
         self.trial_info_map[trial.config] = trial
-        return pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
+        config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
+        if config_df.isnull().values.any():
+            raise RuntimeError('SMAC optimizer returned a NaN configuration')
+        return config_df
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
