@@ -66,3 +66,30 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
             (ts2, "cpu_load", 0.8),
             (ts2, "mem_usage", 20480.0),
         ]
+
+
+def test_local_env_wide(tunable_groups: TunableGroups) -> None:
+    """
+    Produce benchmark data in wide format and read it.
+    """
+    local_env = LocalEnv(
+        name="Test Local Env",
+        config={
+            "run": [
+                "echo 'latency,throughput,score' > output.csv",
+                "echo '10,66,0.9' >> output.csv",
+            ],
+            "read_results_file": "output.csv",
+        },
+        tunables=tunable_groups,
+        service=LocalExecService(parent=ConfigPersistenceService()),
+    )
+    with local_env as env_context:
+        assert env_context.setup(tunable_groups)
+        (status, data) = env_context.run()
+        assert status.is_succeeded()
+        assert data == {
+            "latency": 10.0,
+            "throughput": 66.0,
+            "score": 0.9,
+        }
