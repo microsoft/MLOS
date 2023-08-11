@@ -181,20 +181,26 @@ class LocalEnv(ScriptEnv):
 
         data: pandas.DataFrame = pandas.read_csv(
             self._config_loader_service.resolve_path(
-                self._read_results_file, extra_paths=[self._temp_dir]))
+                self._read_results_file, extra_paths=[self._temp_dir]),
+            index_col=False,
+        )
 
         if sys.platform == 'win32':
             data.rename(str.rstrip, axis='columns', inplace=True)
 
         _LOG.debug("Read data:\n%s", data)
         if list(data.columns) == ["metric", "value"]:
-            _LOG.warning(
-                "Local run has %d rows: assume long format of (metric, value)", len(data))
+            _LOG.info("Local results have (metric,value) header and %d rows: assume long format", len(data))
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
+        elif len(data) == 1:
+            _LOG.info("Local results have 1 row: assume wide format")
+        else:
+            _LOG.warning("Local run failed: %s :: invalid data format\n%s", self, data)
+            return (Status.FAILED, None)
 
         data_dict = data.iloc[-1].to_dict()
         _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
-        return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
+        return (Status.SUCCEEDED, data_dict)
 
     def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
 
@@ -204,25 +210,24 @@ class LocalEnv(ScriptEnv):
 
         assert self._temp_dir is not None
         try:
+            fname = self._config_loader_service.resolve_path(
+                self._read_telemetry_file, extra_paths=[self._temp_dir])
+
             # FIXME: We should not be assuming that the only output file type is a CSV.
-            data: pandas.DataFrame = pandas.read_csv(
-                self._config_loader_service.resolve_path(
-                    self._read_telemetry_file, extra_paths=[self._temp_dir]),
-                parse_dates=[0],
-            )
+            data: pandas.DataFrame = pandas.read_csv(fname, index_col=False, parse_dates=[0])
+
+            if sys.platform == 'win32':
+                data.rename(str.rstrip, axis='columns', inplace=True)
+
+            if list(data.columns) != ["timestamp", "metric", "value"]:
+                # Assume no header - this is ok for telemetry data.
+                data = pandas.read_csv(fname, index_col=False, parse_dates=[0],
+                                       names=["timestamp", "metric", "value"])
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])
 
-        if sys.platform == 'win32':
-            data.rename(str.rstrip, axis='columns', inplace=True)
-
         _LOG.debug("Read telemetry data:\n%s", data)
-        if list(data.columns) != ["timestamp", "metric", "value"]:
-            _LOG.warning(
-                'Telemetry CSV file should have columns ["timestamp", "metric", "value"] :: %s',
-                self._read_telemetry_file)
-
         col_dtypes: Mapping[int, Type] = {0: datetime}
         return (status, [
             (pandas.Timestamp(ts).to_pydatetime(), metric, value)
