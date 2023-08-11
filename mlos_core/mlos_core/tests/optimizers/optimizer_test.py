@@ -51,8 +51,7 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
-    # *[(member.value, {}) for member in OptimizerType],
-    [OptimizerType.SMAC.value, {}],
+    *[(member.value, {}) for member in OptimizerType],
 ])
 def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
                                      optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
