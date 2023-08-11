@@ -18,7 +18,7 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
     Produce benchmark and telemetry data in a local script and read it.
     """
     ts1 = datetime.utcnow()
-    ts1 -= timedelta(microseconds=ts1.microsecond)
+    ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
     ts2 = ts1 + timedelta(minutes=1)
 
     time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
