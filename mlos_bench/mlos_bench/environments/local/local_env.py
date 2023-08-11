@@ -190,13 +190,17 @@ class LocalEnv(ScriptEnv):
 
         _LOG.debug("Read data:\n%s", data)
         if list(data.columns) == ["metric", "value"]:
-            _LOG.info(
-                "Local run has %d rows: assume long format of (metric, value)", len(data))
+            _LOG.info("Local results have (metric,value) header and %d rows: assume long format", len(data))
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
+        elif len(data) == 1:
+            _LOG.info("Local results have 1 row: assume wide format")
+        else:
+            _LOG.warning("Local run failed: %s :: invalid data format\n%s", self, data)
+            return (Status.FAILED, None)
 
         data_dict = data.iloc[-1].to_dict()
         _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
-        return (Status.SUCCEEDED, data_dict) if data_dict else (Status.FAILED, None)
+        return (Status.SUCCEEDED, data_dict)
 
     def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
 

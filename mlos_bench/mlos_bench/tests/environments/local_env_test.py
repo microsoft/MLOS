@@ -109,7 +109,7 @@ def test_local_env_no_header(tunable_groups: TunableGroups) -> None:
         ]
 
 
-def test_local_env_wrong_results(tunable_groups: TunableGroups) -> None:
+def test_local_env_wrong_format(tunable_groups: TunableGroups) -> None:
     """
     Fail if the results are not in the expected format.
     """
@@ -128,7 +128,9 @@ def test_local_env_wrong_results(tunable_groups: TunableGroups) -> None:
     )
     with local_env as env_context:
         assert env_context.setup(tunable_groups)
-        (_status, _data) = env_context.run()
+        (status, data) = env_context.run()
+        assert status.is_failed()
+        assert data is None
 
 
 def test_local_env_wide(tunable_groups: TunableGroups) -> None:
