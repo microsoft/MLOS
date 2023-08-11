@@ -15,42 +15,6 @@ from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_local_env_vars(tunable_groups: TunableGroups) -> None:
-    """
-    Check that LocalEnv can set shell environment variables.
-    """
-    local_env = LocalEnv(
-        name="Test Local Env",
-        config={
-            "const_args": {
-                "const_arg": 111,  # Passed into "shell_env_params"
-                "other_arg": 222,  # NOT passed into "shell_env_params"
-            },
-            "tunable_params": ["kernel"],
-            "shell_env_params": [
-                "const_arg",                # From "const_arg"
-                "kernel_sched_latency_ns",  # From "tunable_params"
-            ],
-            "run": [
-                "echo const_arg,other_arg,unknown_arg,kernel_sched_latency_ns > output.csv",
-                "echo $const_arg,$other_arg,$unknown_arg,$kernel_sched_latency_ns >> output.csv",
-            ],
-            "read_results_file": "output.csv",
-        },
-        tunables=tunable_groups,
-        service=LocalExecService(parent=ConfigPersistenceService()),
-    )
-    with local_env as env_context:
-        assert env_context.setup(tunable_groups)
-        (status, data) = env_context.run()
-        assert status.is_succeeded()
-        assert data is not None
-        assert data["const_arg"] == 111.0                       # From "const_args"
-        assert np.isnan(data["other_arg"])                      # Was not included in "shell_env_params"
-        assert np.isnan(data["unknown_arg"])                    # Unknown/undefined variable
-        assert data["kernel_sched_latency_ns"] == 2000000.0     # From "tunable_params"
-
-
 def test_local_env(tunable_groups: TunableGroups) -> None:
     """
     Produce benchmark and telemetry data in a local script and read it.
@@ -196,3 +160,39 @@ def test_local_env_wide(tunable_groups: TunableGroups) -> None:
             "throughput": 66.0,
             "score": 0.9,
         }
+
+
+def test_local_env_vars(tunable_groups: TunableGroups) -> None:
+    """
+    Check that LocalEnv can set shell environment variables.
+    """
+    local_env = LocalEnv(
+        name="Test Local Env",
+        config={
+            "const_args": {
+                "const_arg": 111,  # Passed into "shell_env_params"
+                "other_arg": 222,  # NOT passed into "shell_env_params"
+            },
+            "tunable_params": ["kernel"],
+            "shell_env_params": [
+                "const_arg",                # From "const_arg"
+                "kernel_sched_latency_ns",  # From "tunable_params"
+            ],
+            "run": [
+                "echo const_arg,other_arg,unknown_arg,kernel_sched_latency_ns > output.csv",
+                "echo $const_arg,$other_arg,$unknown_arg,$kernel_sched_latency_ns >> output.csv",
+            ],
+            "read_results_file": "output.csv",
+        },
+        tunables=tunable_groups,
+        service=LocalExecService(parent=ConfigPersistenceService()),
+    )
+    with local_env as env_context:
+        assert env_context.setup(tunable_groups)
+        (status, data) = env_context.run()
+        assert status.is_succeeded()
+        assert data is not None
+        assert data["const_arg"] == 111.0                       # From "const_args"
+        assert np.isnan(data["other_arg"])                      # Was not included in "shell_env_params"
+        assert np.isnan(data["unknown_arg"])                    # Unknown/undefined variable
+        assert data["kernel_sched_latency_ns"] == 2000000.0     # From "tunable_params"
