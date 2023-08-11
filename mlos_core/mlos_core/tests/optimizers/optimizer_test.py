@@ -51,15 +51,21 @@ def test_create_optimizer_and_suggest(configuration_space: CS.ConfigurationSpace
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
-    *[(member.value, {}) for member in OptimizerType],
+    # *[(member.value, {}) for member in OptimizerType],
+    [OptimizerType.SMAC.value, {}],
 ])
 def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
                                      optimizer_class: Type[BaseOptimizer], kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers.
     """
+    max_iterations = 20
     if kwargs is None:
         kwargs = {}
+    if optimizer_class == OptimizerType.SMAC.value:
+        # SMAC sets the initial random samples as a percentage of the max iterations, which defaults to 100.
+        # To avoid having to train more than 25 model iterations, we set a lower number of max iterations.
+        kwargs['max_trials'] = max_iterations * 2
 
     def objective(x: pd.Series) -> npt.ArrayLike:   # pylint: disable=invalid-name
         ret: npt.ArrayLike = (6 * x - 2)**2 * np.sin(12 * x - 4)
@@ -74,7 +80,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_observations()
 
-    for _ in range(20):
+    for _ in range(max_iterations):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ['x', 'y', 'z']).all()

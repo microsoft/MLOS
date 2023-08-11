@@ -258,7 +258,9 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         # pylint: disable=protected-access
         if len(self._observations) <= self.base_optimizer._initial_design._n_configs:
-            raise RuntimeError('Surrogate model can make predictions *only* after all initial points have been evaluated')
+            raise RuntimeError(
+                'Surrogate model can make predictions *only* after all initial points have been evaluated ' +
+                f'{len(self._observations)} <= {self.base_optimizer._initial_design._n_configs}')
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError('Surrogate model is not yet trained')
 
