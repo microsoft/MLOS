@@ -10,7 +10,7 @@ import logging
 from datetime import datetime
 
 from types import TracebackType
-from typing import Any, List, Optional, Tuple, Type
+from typing import Any, Dict, List, Optional, Tuple, Type
 from typing_extensions import Literal
 
 from mlos_bench.services.base_service import Service
@@ -178,7 +178,7 @@ class CompositeEnv(Environment):
             env_context.teardown()
         super().teardown()
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Submit a new experiment to the environment.
         Return the result of the *last* child environment if successful,
