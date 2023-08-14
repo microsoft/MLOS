@@ -11,7 +11,7 @@ import logging
 
 from datetime import datetime
 from string import Template
-from typing import Any, List, Generator, Iterable, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Generator, Iterable, Mapping, Optional, Tuple
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
@@ -148,7 +148,7 @@ class LocalFileShareEnv(LocalEnv):
                 if not ignore_missing:
                     raise ex
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Download benchmark results from the shared storage
         and run post-processing scripts locally.

@@ -15,7 +15,7 @@ from tempfile import TemporaryDirectory
 from contextlib import nullcontext
 
 from types import TracebackType
-from typing import Any, Iterable, List, Mapping, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas
@@ -151,7 +151,7 @@ class LocalEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Run a script in the local scheduler environment.
 
@@ -203,6 +203,9 @@ class LocalEnv(ScriptEnv):
         """
         Strip trailing spaces from column names (Windows only).
         """
+        # Windows cmd interpretation of > redirect symbols can leave trailing spaces in
+        # the final column, which leads to misnamed columns.
+        # For now, we simply strip trailing spaces from column names to account for that.
         if sys.platform == 'win32':
             data.rename(str.rstrip, axis='columns', inplace=True)
         return data
@@ -222,12 +225,13 @@ class LocalEnv(ScriptEnv):
             data = self._normalize_columns(
                 pandas.read_csv(fname, index_col=False, parse_dates=[0]))
 
-            col_names = ["timestamp", "metric", "value"]
-            if len(data.columns) != len(col_names):
-                raise ValueError('Telemetry data must have columns {col_names}')
-            elif list(data.columns) != col_names:
+            expected_col_names = ["timestamp", "metric", "value"]
+            if len(data.columns) != len(expected_col_names):
+                raise ValueError(f'Telemetry data must have columns {expected_col_names}')
+            elif list(data.columns) != expected_col_names:
                 # Assume no header - this is ok for telemetry data.
-                data = pandas.read_csv(fname, index_col=False, parse_dates=[0], names=col_names)
+                data = pandas.read_csv(
+                    fname, index_col=False, parse_dates=[0], names=expected_col_names)
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])
