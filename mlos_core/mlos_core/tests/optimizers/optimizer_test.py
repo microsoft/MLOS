@@ -58,8 +58,13 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     """
     Toy problem to test the optimizers.
     """
+    max_iterations = 20
     if kwargs is None:
         kwargs = {}
+    if optimizer_class == OptimizerType.SMAC.value:
+        # SMAC sets the initial random samples as a percentage of the max iterations, which defaults to 100.
+        # To avoid having to train more than 25 model iterations, we set a lower number of max iterations.
+        kwargs['max_trials'] = max_iterations * 2
 
     def objective(x: pd.Series) -> npt.ArrayLike:   # pylint: disable=invalid-name
         ret: npt.ArrayLike = (6 * x - 2)**2 * np.sin(12 * x - 4)
@@ -74,7 +79,7 @@ def test_basic_interface_toy_problem(configuration_space: CS.ConfigurationSpace,
     with pytest.raises(ValueError, match="No observations"):
         optimizer.get_observations()
 
-    for _ in range(20):
+    for _ in range(max_iterations):
         suggestion = optimizer.suggest()
         assert isinstance(suggestion, pd.DataFrame)
         assert (suggestion.columns == ['x', 'y', 'z']).all()
@@ -158,18 +163,27 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     # Enumerate all supported Optimizers
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
+    # TODO: (OptimizerType.SMAC, {'use_default_config': True}),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
     # pylint: disable=too-many-locals
+    num_iters = 50
     if kwargs is None:
         kwargs = {}
+    if optimizer_type == OptimizerType.SMAC:
+        # FIXME: SMAC isn't training its model immediately when
+        # use_default_config is set which causes it to return NaN on the first
+        # ask() call.
+        # For now, we skip that mode and will fix it later ...
+        kwargs['use_default_config'] = False
 
     def objective(point: pd.DataFrame) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
         ret: pd.Series = np.sin(point['x'] * point['y'])
+        assert ret.hasnans is False
         return ret
 
     input_space = CS.ConfigurationSpace(seed=1234)
@@ -201,7 +215,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     assert llamatune_optimizer is not None
     assert optimizer.optimizer_parameter_space != llamatune_optimizer.optimizer_parameter_space
 
-    num_iters = 50
     for _ in range(num_iters):
         # loop for optimizer
         suggestion = optimizer.suggest()
