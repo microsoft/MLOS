@@ -54,13 +54,38 @@
                         "minimum": 1,
                         "example": 10
                     },
+                    "max_ratio": {
+                        "description": "Maximum ratio of max_trials to be random configurations to be evaluated at start to bootstrap the optimizer. Useful if you want to explicitly control the number of random configurations evaluated at start.",
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "example": 0.25
+                    },
+                    "use_default_config": {
+                        "description": "Whether to use the default config for the first trial.",
+                        "type": "boolean",
+                        "example": true
+                    },
                     "n_random_probability": {
                         "description": "Probability of choosing to evaluate a random configuration during optimization.",
                         "type": "number",
                         "minimum": 0,
                         "maximum": 1,
                         "example": 0.1
+                    },
+                    "output_directory": {
+                        "description": "Directory to store SMAC output files.",
+                        "type": ["string", "null"],
+                        "pattern": "^[a-zA-Z0-9_./-]+$",
+                        "example": "smac_output"
+                    },
+                    "run_name": {
+                        "description": "Name to give for the smac output (e.g., $experimentId). If null is used, SMAC will calculate a hash based name.",
+                        "type": ["string", "null"],
+                        "pattern": "^[a-zA-Z0-9_.-]+$",
+                        "example": "$experimentId"
                     }
+
                 }
             }
         },

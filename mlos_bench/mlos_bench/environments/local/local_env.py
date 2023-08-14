@@ -8,13 +8,14 @@ Scheduler-side benchmark environment to run scripts locally.
 
 import json
 import logging
+import sys
 
 from datetime import datetime
 from tempfile import TemporaryDirectory
 from contextlib import nullcontext
 
 from types import TracebackType
-from typing import Any, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Iterable, List, Mapping, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas
@@ -182,6 +183,9 @@ class LocalEnv(ScriptEnv):
             self._config_loader_service.resolve_path(
                 self._read_results_file, extra_paths=[self._temp_dir]))
 
+        if sys.platform == 'win32':
+            data.rename(str.rstrip, axis='columns', inplace=True)
+
         _LOG.debug("Read data:\n%s", data)
         if list(data.columns) == ["metric", "value"]:
             _LOG.warning(
@@ -203,10 +207,15 @@ class LocalEnv(ScriptEnv):
             # FIXME: We should not be assuming that the only output file type is a CSV.
             data: pandas.DataFrame = pandas.read_csv(
                 self._config_loader_service.resolve_path(
-                    self._read_telemetry_file, extra_paths=[self._temp_dir]))
+                    self._read_telemetry_file, extra_paths=[self._temp_dir]),
+                parse_dates=[0],
+            )
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])
+
+        if sys.platform == 'win32':
+            data.rename(str.rstrip, axis='columns', inplace=True)
 
         _LOG.debug("Read telemetry data:\n%s", data)
         if list(data.columns) != ["timestamp", "metric", "value"]:
@@ -214,7 +223,11 @@ class LocalEnv(ScriptEnv):
                 'Telemetry CSV file should have columns ["timestamp", "metric", "value"] :: %s',
                 self._read_telemetry_file)
 
-        return (status, list(data.to_records(index=False)))
+        col_dtypes: Mapping[int, Type] = {0: datetime}
+        return (status, [
+            (pandas.Timestamp(ts).to_pydatetime(), metric, value)
+            for (ts, metric, value) in data.to_records(index=False, column_dtypes=col_dtypes)
+        ])
 
     def teardown(self) -> None:
         """
