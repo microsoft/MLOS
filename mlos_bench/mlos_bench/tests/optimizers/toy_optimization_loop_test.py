@@ -10,7 +10,6 @@ from typing import Tuple
 
 import logging
 
-import sys
 import pytest
 
 from mlos_core import config_to_dataframe
