@@ -6,7 +6,6 @@
 Tests for Bayesian Optimizers.
 """
 
-from math import ceil
 from typing import List, Optional, Type
 
 import pytest
