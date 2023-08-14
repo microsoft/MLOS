@@ -8,7 +8,7 @@ Scheduler-side environment to mock the benchmark results.
 
 import random
 import logging
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy
 
@@ -61,7 +61,7 @@ class MockEnv(Environment):
         self._metrics = self.config.get("metrics", ["score"])
         self._is_ready = True
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Produce mock benchmark data for one experiment.
 
