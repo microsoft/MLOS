@@ -16,6 +16,9 @@ from mlos_bench.util import get_class_from_name
 # issues of seeds across tests that run in non-deterministic parallel orders.
 SEED = 42
 
+# import numpy as np
+# np.random.seed(SEED)
+
 
 def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
     """

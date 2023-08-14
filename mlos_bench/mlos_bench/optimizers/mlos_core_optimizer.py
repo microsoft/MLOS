@@ -7,6 +7,8 @@ A wrapper for mlos_core optimizers for mlos_bench.
 """
 
 import logging
+import os
+
 from typing import Optional, Sequence, Tuple, Union
 
 import pandas as pd
@@ -17,8 +19,11 @@ from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.services.base_service import Service
 from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
+
+from mlos_bench.services.base_service import Service
+
+from mlos_bench.util import path_join
 
 _LOG = logging.getLogger(__name__)
 
@@ -43,6 +48,29 @@ class MlosCoreOptimizer(Optimizer):
 
         opt_type = getattr(OptimizerType, self._config.pop(
             'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
+
+        if opt_type == OptimizerType.SMAC:
+            # If output_directory is specified, turn it into an absolute path.
+            if 'output_directory' not in self._config:
+                self._config['output_directory'] = 'smac_output'
+                _LOG.info(
+                    "No output_directory was specified for SMAC optimizer. Defaulting to '%s'.",
+                    self._config['output_directory'])
+            output_directory = self._config.get('output_directory')
+            if output_directory is not None:
+                if not os.path.isabs(output_directory):
+                    self._config['output_directory'] = path_join(os.getcwd(), output_directory)
+            else:
+                _LOG.warning("SMAC optimizer output_directory was null. SMAC will use a temporary directory.")
+
+            # Set max_trials == max_iterations.
+            if 'max_trials' not in self._config:
+                self._config['max_trials'] = self._max_iter
+            assert self._config.get('max_trials') == self._max_iter, \
+                f"max_trials {self._config.get('max_trials')} != max_iterations {self._max_iter}"
+
+            if 'run_name' not in self._config and self.experiment_id:
+                self._config['run_name'] = self.experiment_id
 
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})
