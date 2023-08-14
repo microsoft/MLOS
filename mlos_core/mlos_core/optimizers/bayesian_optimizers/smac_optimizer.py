@@ -241,11 +241,22 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if context is not None:
             raise NotImplementedError()
 
-        trial: TrialInfo = self.base_optimizer.ask()
-        self.trial_info_map[trial.config] = trial
-        config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
-        if config_df.isnull().values.any():
-            raise RuntimeError('SMAC optimizer returned a NaN configuration')
+        for i in range(2):
+            try:
+                trial: TrialInfo = self.base_optimizer.ask()
+                trial.config.is_valid_configuration()
+                self.optimizer_parameter_space.check_configuration(trial.config)
+                assert trial.config.config_space == self.optimizer_parameter_space
+                self.trial_info_map[trial.config] = trial
+                config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
+                if config_df.isnull().values.any():
+                    raise RuntimeError('SMAC optimizer returned a NaN configuration')
+            except (RuntimeError, IndexError, ValueError) as ex:
+                if i:   # only support one retry attempt
+                    raise ex
+                # else
+                warning('SMAC optimizer returned a bad configuration. Retrying...\n%s\n%s', ex, config_df)
+                # TODO: retrain model?
         return config_df
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:

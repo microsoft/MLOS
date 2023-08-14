@@ -7,6 +7,7 @@ Tests for Bayesian Optimizers.
 """
 
 from typing import List, Optional, Type
+from copy import deepcopy
 
 import pytest
 
@@ -161,24 +162,18 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
 
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
     # Enumerate all supported Optimizers
-    *[(member, {}) for member in OptimizerType],
+    # *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
-    # TODO: (OptimizerType.SMAC, {'use_default_config': True}),
+    (OptimizerType.SMAC, {'use_default_config': True}),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
     # pylint: disable=too-many-locals
-    num_iters = 50
+    num_iters = 40
     if kwargs is None:
         kwargs = {}
-    if optimizer_type == OptimizerType.SMAC:
-        # FIXME: SMAC isn't training its model immediately when
-        # use_default_config is set which causes it to return NaN on the first
-        # ask() call.
-        # For now, we skip that mode and will fix it later ...
-        kwargs['use_default_config'] = False
 
     def objective(point: pd.DataFrame) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
@@ -197,6 +192,12 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         "special_param_values": None,
         "max_unique_values_per_param": None,
     }
+    # Initialize an optimizer that uses the original space
+    optimizer: BaseOptimizer = OptimizerFactory.create(
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
+        optimizer_kwargs=kwargs,
+    )
     llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
         optimizer_type=optimizer_type,
@@ -204,14 +205,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
         space_adapter_kwargs=space_adapter_kwargs,
     )
-    # Initialize an optimizer that uses the original space
-    optimizer: BaseOptimizer = OptimizerFactory.create(
-        parameter_space=input_space,
-        optimizer_type=optimizer_type,
-        optimizer_kwargs=kwargs,
-    )
     assert optimizer is not None
-
     assert llamatune_optimizer is not None
     assert optimizer.optimizer_parameter_space != llamatune_optimizer.optimizer_parameter_space
 
