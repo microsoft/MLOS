@@ -15,7 +15,7 @@ from tempfile import TemporaryDirectory
 from contextlib import nullcontext
 
 from types import TracebackType
-from typing import Any, Iterable, List, Mapping, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Type, Union
 from typing_extensions import Literal
 
 import pandas
@@ -151,7 +151,7 @@ class LocalEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Run a script in the local scheduler environment.
 
