@@ -102,6 +102,14 @@ def flaml_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         },
     )
 
+# FIXME: SMAC's RF model can be non-deterministic at low iterations, which are
+# normally calculated as a percentage of the max_iterations and number of
+# tunable dimensions, so for now we set the initial random samples equal to the
+# number of iterations and control them with a seed.
+
+
+SMAC_ITERATIONS = 10
+
 
 @pytest.fixture
 def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
@@ -114,10 +122,13 @@ def smac_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "min",
-            "max_iterations": 10,
+            "max_iterations": SMAC_ITERATIONS,
             "optimizer_type": "SMAC",
             "seed": SEED,
-            "output_directory": None
+            "output_directory": None,
+            # See Above
+            "n_random_init": SMAC_ITERATIONS,
+            "max_ratio": 1.0,
         },
     )
 
@@ -133,9 +144,12 @@ def smac_opt_max(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "optimization_target": "score",
             "optimization_direction": "max",
-            "max_iterations": 10,
+            "max_iterations": SMAC_ITERATIONS,
             "optimizer_type": "SMAC",
             "seed": SEED,
-            "output_directory": None
+            "output_directory": None,
+            # See Above
+            "n_random_init": SMAC_ITERATIONS,
+            "max_ratio": 1.0,
         },
     )

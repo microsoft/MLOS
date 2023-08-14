@@ -38,14 +38,18 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             The tunables to optimize.
         config : dict
             Free-format key/value pairs of configuration parameters to pass to the optimizer.
+        global_config : Optional[dict]
+        service : Optional[Service]
         """
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)
         self._config = config.copy()
+        self._global_config = global_config or {}
         self._tunables = tunables
         self._service = service
 
-        self._global_config = global_config or {}
+        experiment_id = self._global_config.get('experiment_id')
+        self.experiment_id = str(experiment_id).strip() if experiment_id else None
 
         self._iter = 1
         # If False, use the optimizer to suggest the initial configuration;
