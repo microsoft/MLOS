@@ -185,6 +185,9 @@ class LocalEnv(ScriptEnv):
             index_col=False,
         )
 
+        # Windows cmd interpretation of > redirect symbols can leave trailing spaces in
+        # the final column, which leads to misnamed columns.
+        # For now, we simply strip trailing spaces from column names to account for that.
         if sys.platform == 'win32':
             data.rename(str.rstrip, axis='columns', inplace=True)
 
