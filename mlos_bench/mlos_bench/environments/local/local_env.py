@@ -179,14 +179,11 @@ class LocalEnv(ScriptEnv):
             _LOG.debug("Not reading the data at: %s", self)
             return (Status.SUCCEEDED, {})
 
-        data: pandas.DataFrame = pandas.read_csv(
+        data = self._normalize_columns(pandas.read_csv(
             self._config_loader_service.resolve_path(
                 self._read_results_file, extra_paths=[self._temp_dir]),
             index_col=False,
-        )
-
-        if sys.platform == 'win32':
-            data.rename(str.rstrip, axis='columns', inplace=True)
+        ))
 
         _LOG.debug("Read data:\n%s", data)
         if list(data.columns) == ["metric", "value"]:
@@ -201,6 +198,15 @@ class LocalEnv(ScriptEnv):
         _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
         return (Status.SUCCEEDED, data_dict)
 
+    @staticmethod
+    def _normalize_columns(data: pandas.DataFrame) -> pandas.DataFrame:
+        """
+        Strip trailing spaces from column names (Windows only).
+        """
+        if sys.platform == 'win32':
+            data.rename(str.rstrip, axis='columns', inplace=True)
+        return data
+
     def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
 
         (status, _) = super().status()
@@ -213,10 +219,8 @@ class LocalEnv(ScriptEnv):
                 self._read_telemetry_file, extra_paths=[self._temp_dir])
 
             # FIXME: We should not be assuming that the only output file type is a CSV.
-            data: pandas.DataFrame = pandas.read_csv(fname, index_col=False, parse_dates=[0])
-
-            if sys.platform == 'win32':
-                data.rename(str.rstrip, axis='columns', inplace=True)
+            data = self._normalize_columns(
+                pandas.read_csv(fname, index_col=False, parse_dates=[0]))
 
             col_names = ["timestamp", "metric", "value"]
             if len(data.columns) != len(col_names):
