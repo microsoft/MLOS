@@ -164,16 +164,24 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     # Enumerate all supported Optimizers
     # *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
-    (OptimizerType.SMAC, {'use_default_config': True}),
+    (OptimizerType.SMAC, {
+        'use_default_config': True,
+        # 'max_trials': 100,
+        # 'n_random_init': 5,
+        'max_ratio': 1.0
+    }),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
     # pylint: disable=too-many-locals
-    num_iters = 40
+    num_iters = 20
     if kwargs is None:
         kwargs = {}
+    max_trials = kwargs.get('max_trials')
+    if max_trials and False:
+        num_iters = max_trials
 
     def objective(point: pd.DataFrame) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
@@ -192,16 +200,23 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         "special_param_values": None,
         "max_unique_values_per_param": None,
     }
+    # FIXME: Somewhere in here is where the problem is - the two optimizers are
+    # not independent unless we set the n_random_init value similarly for some
+    # reason.
+    optimizer_kwargs = deepcopy(kwargs)
+    # optimizer_kwargs['n_random_init'] = 10
+    llamatune_optimizer_kwargs = deepcopy(kwargs)
+    # llamatune_optimizer_kwargs['n_random_init'] = 2
     # Initialize an optimizer that uses the original space
     optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
         optimizer_type=optimizer_type,
-        optimizer_kwargs=kwargs,
+        optimizer_kwargs=optimizer_kwargs,
     )
     llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
         optimizer_type=optimizer_type,
-        optimizer_kwargs=kwargs,
+        optimizer_kwargs=llamatune_optimizer_kwargs,
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
         space_adapter_kwargs=space_adapter_kwargs,
     )
@@ -209,7 +224,9 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     assert llamatune_optimizer is not None
     assert optimizer.optimizer_parameter_space != llamatune_optimizer.optimizer_parameter_space
 
-    for _ in range(num_iters):
+    for i in range(num_iters):
+        if i + 1 >= kwargs.get('n_random_init', 10):
+            print("optimizer")
         # loop for optimizer
         suggestion = optimizer.suggest()
         observation = objective(suggestion)

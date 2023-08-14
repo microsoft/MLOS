@@ -49,7 +49,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}(parameter_space={self.parameter_space})"
+        return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
 
     @property
     def space_adapter(self) -> Optional[BaseSpaceAdapter]:
