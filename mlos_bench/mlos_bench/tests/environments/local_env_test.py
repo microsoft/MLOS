@@ -144,14 +144,8 @@ def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None
         (status, _data) = env_context.run()
         assert status.is_succeeded()
 
-        (status, telemetry) = env_context.status()
-        assert status.is_good()
-        assert telemetry == [
-            (ts1, "cpu_load", 0.65),
-            (ts1, "mem_usage", 10240.0),
-            (ts2, "cpu_load", 0.8),
-            (ts2, "mem_usage", 20480.0),
-        ]
+        with pytest.raises(ValueError):
+            env_context.status()
 
 
 def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
