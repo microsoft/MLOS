@@ -195,8 +195,7 @@ class LocalEnv(ScriptEnv):
         elif len(data) == 1:
             _LOG.info("Local results have 1 row: assume wide format")
         else:
-            _LOG.warning("Local run failed: %s :: invalid data format\n%s", self, data)
-            return (Status.FAILED, None)
+            raise ValueError(f"Invalid data format: {data}")
 
         data_dict = data.iloc[-1].to_dict()
         _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
@@ -219,10 +218,12 @@ class LocalEnv(ScriptEnv):
             if sys.platform == 'win32':
                 data.rename(str.rstrip, axis='columns', inplace=True)
 
-            if list(data.columns) != ["timestamp", "metric", "value"]:
+            col_names = ["timestamp", "metric", "value"]
+            if len(data.columns) != len(col_names):
+                raise ValueError('Telemetry data must have columns {col_names}')
+            elif list(data.columns) != col_names:
                 # Assume no header - this is ok for telemetry data.
-                data = pandas.read_csv(fname, index_col=False, parse_dates=[0],
-                                       names=["timestamp", "metric", "value"])
+                data = pandas.read_csv(fname, index_col=False, parse_dates=[0], names=col_names)
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])

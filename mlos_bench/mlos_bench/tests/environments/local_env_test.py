@@ -7,6 +7,8 @@ Unit tests for LocalEnv benchmark environment.
 """
 from datetime import datetime, timedelta
 
+import pytest
+
 from mlos_bench.environments.local.local_env import LocalEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
@@ -68,7 +70,7 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
         ]
 
 
-def test_local_env_no_header(tunable_groups: TunableGroups) -> None:
+def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
     """
     Read the telemetry data with no header.
     """
@@ -109,7 +111,72 @@ def test_local_env_no_header(tunable_groups: TunableGroups) -> None:
         ]
 
 
-def test_local_env_wrong_format(tunable_groups: TunableGroups) -> None:
+def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
+    """
+    Fail when the telemetry data has wrong format.
+    """
+    ts1 = datetime.utcnow()
+    ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
+    ts2 = ts1 + timedelta(minutes=1)
+
+    time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
+    time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S")
+
+    local_env = LocalEnv(
+        name="Test Local Env",
+        config={
+            "run": [
+                # Error: too many columns
+                f"echo {time_str1},EXTRA,cpu_load,0.65 > telemetry.csv",
+                f"echo {time_str1},EXTRA,mem_usage,10240 >> telemetry.csv",
+                f"echo {time_str2},EXTRA,cpu_load,0.8 >> telemetry.csv",
+                f"echo {time_str2},EXTRA,mem_usage,20480 >> telemetry.csv",
+            ],
+            "read_telemetry_file": "telemetry.csv",
+        },
+        service=LocalExecService(parent=ConfigPersistenceService()),
+    )
+
+    with local_env as env_context:
+
+        assert env_context.setup(tunable_groups)
+        (status, _data) = env_context.run()
+        assert status.is_succeeded()
+
+        with pytest.raises(ValueError):
+            env_context.status()
+
+
+def test_local_env_telemetry_invalid_ts(tunable_groups: TunableGroups) -> None:
+    """
+    Fail when the telemetry data has wrong format.
+    """
+    local_env = LocalEnv(
+        name="Test Local Env",
+        config={
+            "run": [
+                # Error: field 1 must be a timestamp
+                "echo 1,cpu_load,0.65 > telemetry.csv",
+                "echo 2,mem_usage,10240 >> telemetry.csv",
+                "echo 3,cpu_load,0.8 >> telemetry.csv",
+                "echo 4,mem_usage,20480 >> telemetry.csv",
+            ],
+            "read_telemetry_file": "telemetry.csv",
+        },
+        service=LocalExecService(parent=ConfigPersistenceService()),
+    )
+
+    with local_env as env_context:
+
+        assert env_context.setup(tunable_groups)
+        (status, _data) = env_context.run()
+        assert status.is_succeeded()
+
+        with pytest.raises(ValueError):
+            env_context.status()
+
+
+def test_local_env_results_no_header(tunable_groups: TunableGroups) -> None:
     """
     Fail if the results are not in the expected format.
     """
@@ -128,9 +195,8 @@ def test_local_env_wrong_format(tunable_groups: TunableGroups) -> None:
     )
     with local_env as env_context:
         assert env_context.setup(tunable_groups)
-        (status, data) = env_context.run()
-        assert status.is_failed()
-        assert data is None
+        with pytest.raises(ValueError):
+            env_context.run()
 
 
 def test_local_env_wide(tunable_groups: TunableGroups) -> None:
