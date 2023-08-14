@@ -16,7 +16,7 @@
     "environment": "environments/mock/mock_env.jsonc",
     "optimizer": "optimizers/mlos_core_default_opt.jsonc",
 
-    // "globals": ["global_config.json"],
+    "globals": ["globals/global_test_config.jsonc"],
 
     "experiment_id": "MockExperiment",
     "trial_id": 1,
