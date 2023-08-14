@@ -7,7 +7,7 @@ Remotely executed benchmark/script environment.
 """
 
 import logging
-from typing import Iterable, Optional, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.script_env import ScriptEnv
@@ -107,7 +107,7 @@ class RemoteEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Runs the run script on the remote environment.
 
