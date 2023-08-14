@@ -218,7 +218,7 @@ class LocalEnv(ScriptEnv):
             if sys.platform == 'win32':
                 data.rename(str.rstrip, axis='columns', inplace=True)
 
-            col_names = ["timestamp", "metric", "value"]
+            expected_col_names = ["timestamp", "metric", "value"]
             if len(data.columns) != len(col_names):
                 raise ValueError('Telemetry data must have columns {col_names}')
             elif list(data.columns) != col_names:
