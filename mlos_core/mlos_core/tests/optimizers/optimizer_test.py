@@ -168,7 +168,7 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
 
 @pytest.mark.parametrize(('optimizer_type', 'kwargs'), [
     # Enumerate all supported Optimizers
-    # *[(member, {}) for member in OptimizerType],
+    *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
     (OptimizerType.SMAC, {
         # Test with default config.
@@ -180,7 +180,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     Toy problem to test the optimizers with llamatune space adapter.
     """
     # pylint: disable=too-many-locals
-    num_iters = 20
+    num_iters = 50
     if kwargs is None:
         kwargs = {}
 
