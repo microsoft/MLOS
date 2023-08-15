@@ -9,7 +9,7 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 
 from logging import warning
 from pathlib import Path
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
 
 import ConfigSpace
@@ -88,7 +88,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac import HyperparameterOptimizationFacade as Optimizer_Smac
         from smac import Scenario
         from smac.intensifier.abstract_intensifier import AbstractIntensifier
-        from smac.initial_design import LatinHypercubeInitialDesign
         from smac.main.config_selector import ConfigSelector
         from smac.random_design.probability_design import ProbabilityRandomDesign
         from smac.runhistory import TrialInfo
@@ -110,7 +109,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 self._temp_output_directory = TemporaryDirectory()
             output_directory = self._temp_output_directory.name
 
-        initial_design_args = {}
         if n_random_init is not None:
             assert isinstance(n_random_init, int) and n_random_init >= 0
             if n_random_init == max_trials and use_default_config:
@@ -134,12 +132,17 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # there is a way to inform SMAC's initial design that we have
         # additional_configs and can set n_configs == 0.
 
-        initial_design: Optional[LatinHypercubeInitialDesign] = None
+        initial_design_args: Dict[str, Union[list, int, float, Scenario]] = {
+            'scenario': scenario,
+            # Workaround a bug in SMAC that sets a default arg to a mutable
+            # value that can cause issues when multiple optimizers are
+            # instantiated with the use_default_config option within the same
+            # process that use different ConfigSpaces so that the second
+            # receives the default config from both as an additional config.
+            'additional_configs': []
+        }
         if n_random_init is not None:
-            initial_design_args = {
-                'scenario': scenario,
-                'n_configs': n_random_init,
-            }
+            initial_design_args['n_configs'] = n_random_init
             if n_random_init > 0.25 * max_trials and max_ratio is None:
                 warning(
                     'Number of random initial configurations (%d) is ' +
