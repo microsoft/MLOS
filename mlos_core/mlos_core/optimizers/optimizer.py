@@ -46,6 +46,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
         self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
+        self._has_context: bool = False
         self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
     def __repr__(self) -> str:
@@ -70,11 +71,19 @@ class BaseOptimizer(metaclass=ABCMeta):
         context : pd.DataFrame
             Not Yet Implemented.
         """
-        # TODO: Validate that if context is ever added it must always be added.
+        # Do some input validation.
+        assert self._has_context ^ (context is None), "Context must always be added or never be added."
+        assert len(configurations) == len(scores), "Mismatched number of configurations and scores."
+        if context:
+            assert len(configurations) == len(context), "Mismatched number of configurations and context."
+        assert configurations.shape[1] == len(self.parameter_space.get_hyperparameters())
         self._observations.append((configurations, scores, context))
+        if context:
+            self._has_context = True
 
         if self._space_adapter:
             configurations = self._space_adapter.inverse_transform(configurations)
+            assert configurations.shape[1] == len(self.optimizer_parameter_space.get_hyperparameters())
         return self._register(configurations, scores, context)
 
     @abstractmethod
@@ -117,8 +126,13 @@ class BaseOptimizer(metaclass=ABCMeta):
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
             configuration = self._suggest(context)
+            assert len(configuration) == 1, "Suggest must return a single configuration."
+            assert len(configuration.columns) == len(self.optimizer_parameter_space.get_hyperparameters()), \
+                "Suggest returned a configuration with the wrong number of parameters."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
+            assert len(configuration.columns) == len(self.parameter_space.get_hyperparameters()), \
+                "Space adapter transformed configuration with the wrong number of parameters."
         return configuration
 
     @abstractmethod
