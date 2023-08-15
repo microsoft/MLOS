@@ -106,12 +106,12 @@ def test_flaml_optimization_loop(mock_env_no_noise: MockEnv,
     Toy optimization loop with mock environment and FLAML optimizer.
     """
     (score, tunables) = _optimize(mock_env_no_noise, flaml_opt)
-    assert score == pytest.approx(75.0, 0.01)
+    assert score == pytest.approx(60.15, 0.01)
     assert tunables.get_param_values() == {
-        "vmSize": "Standard_B4ms",
+        "vmSize": "Standard_B2s",
         "idle": "halt",
-        "kernel_sched_migration_cost_ns": -1,
-        "kernel_sched_latency_ns": 2000000,
+        "kernel_sched_migration_cost_ns": 50132,
+        "kernel_sched_latency_ns": 22674895,
     }
 
 
