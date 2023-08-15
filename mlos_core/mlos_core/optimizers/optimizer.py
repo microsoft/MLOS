@@ -46,7 +46,7 @@ class BaseOptimizer(metaclass=ABCMeta):
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
         self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
-        self._has_context: bool = False
+        self._has_context: Optional[bool] = None
         self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
 
     def __repr__(self) -> str:
@@ -72,18 +72,22 @@ class BaseOptimizer(metaclass=ABCMeta):
             Not Yet Implemented.
         """
         # Do some input validation.
-        assert self._has_context ^ (context is None), "Context must always be added or never be added."
-        assert len(configurations) == len(scores), "Mismatched number of configurations and scores."
-        if context:
-            assert len(configurations) == len(context), "Mismatched number of configurations and context."
-        assert configurations.shape[1] == len(self.parameter_space.values())
+        assert self._has_context is None or self._has_context ^ (context is None), \
+            "Context must always be added or never be added."
+        assert len(configurations) == len(scores), \
+            "Mismatched number of configurations and scores."
+        if context is not None:
+            assert len(configurations) == len(context), \
+                "Mismatched number of configurations and context."
+        assert configurations.shape[1] == len(self.parameter_space.values()), \
+            "Mismatched configuration shape."
         self._observations.append((configurations, scores, context))
-        if context:
-            self._has_context = True
+        self._has_context = context is not None
 
         if self._space_adapter:
             configurations = self._space_adapter.inverse_transform(configurations)
-            assert configurations.shape[1] == len(self.optimizer_parameter_space.values())
+            assert configurations.shape[1] == len(self.optimizer_parameter_space.values()), \
+                "Mismatched configuration shape after inverse transform."
         return self._register(configurations, scores, context)
 
     @abstractmethod
@@ -126,7 +130,8 @@ class BaseOptimizer(metaclass=ABCMeta):
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
             configuration = self._suggest(context)
-            assert len(configuration) == 1, "Suggest must return a single configuration."
+            assert len(configuration) == 1, \
+                "Suggest must return a single configuration."
             assert len(configuration.columns) == len(self.optimizer_parameter_space.values()), \
                 "Suggest returned a configuration with the wrong number of parameters."
         if self._space_adapter:
