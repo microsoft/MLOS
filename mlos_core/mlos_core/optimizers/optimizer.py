@@ -76,14 +76,14 @@ class BaseOptimizer(metaclass=ABCMeta):
         assert len(configurations) == len(scores), "Mismatched number of configurations and scores."
         if context:
             assert len(configurations) == len(context), "Mismatched number of configurations and context."
-        assert configurations.shape[1] == len(self.parameter_space.get_hyperparameters())
+        assert configurations.shape[1] == len(self.parameter_space.values())
         self._observations.append((configurations, scores, context))
         if context:
             self._has_context = True
 
         if self._space_adapter:
             configurations = self._space_adapter.inverse_transform(configurations)
-            assert configurations.shape[1] == len(self.optimizer_parameter_space.get_hyperparameters())
+            assert configurations.shape[1] == len(self.optimizer_parameter_space.values())
         return self._register(configurations, scores, context)
 
     @abstractmethod
@@ -127,11 +127,11 @@ class BaseOptimizer(metaclass=ABCMeta):
         else:
             configuration = self._suggest(context)
             assert len(configuration) == 1, "Suggest must return a single configuration."
-            assert len(configuration.columns) == len(self.optimizer_parameter_space.get_hyperparameters()), \
+            assert len(configuration.columns) == len(self.optimizer_parameter_space.values()), \
                 "Suggest returned a configuration with the wrong number of parameters."
         if self._space_adapter:
             configuration = self._space_adapter.transform(configuration)
-            assert len(configuration.columns) == len(self.parameter_space.get_hyperparameters()), \
+            assert len(configuration.columns) == len(self.parameter_space.values()), \
                 "Space adapter transformed configuration with the wrong number of parameters."
         return configuration
 
