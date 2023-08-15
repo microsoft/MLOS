@@ -126,7 +126,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             n_workers=1,  # Use a single thread for evaluating trials
         )
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
-        config_selector: ConfigSelector = ConfigSelector(scenario, retrain_after=1)
+        config_selector: ConfigSelector = Optimizer_Smac.get_config_selector(scenario, retrain_after=1)
 
         # TODO: When bulk registering prior configs to rewarm the optimizer,
         # there is a way to inform SMAC's initial design that we have
@@ -155,7 +155,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 assert isinstance(max_ratio, float) and 0.0 <= max_ratio <= 1.0
                 initial_design_args['max_ratio'] = max_ratio
 
-            initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
+        # Use the default InitialDesign from SMAC.
+        # (currently SBOL instead of LatinHypercube due to better uniformity
+        # for initial sampling which results in lower overall samples required)
+        initial_design = Optimizer_Smac.get_initial_design(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
         # design when generated a random_design for itself via the
