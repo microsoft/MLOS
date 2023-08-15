@@ -7,7 +7,6 @@ Tests for Bayesian Optimizers.
 """
 
 from copy import deepcopy
-from logging import warning
 from typing import List, Optional, Type
 
 import logging
@@ -173,6 +172,7 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     (OptimizerType.SMAC, {
         # Test with default config.
         'use_default_config': True,
+        # 'n_random_init': 10,
     }),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
@@ -243,10 +243,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         # pylint: disable=protected-access
         opt_n_random_init = optimizer.base_optimizer._initial_design._n_configs
         llamatune_n_random_init = llamatune_optimizer.base_optimizer._initial_design._n_configs
-    if opt_n_random_init != llamatune_n_random_init:
-        warning("Optimizer (%d) and LlamaTuned Optimizer (%d) have different n_random_init values. " +
-                "This has caused problems in some cases.",
-                opt_n_random_init, llamatune_n_random_init)
 
     for i in range(num_iters):
         # Place to set a breakpoint for when the optimizer is done with random init.
