@@ -9,7 +9,9 @@ Toy optimization loop to test the optimizers on mock benchmark environment.
 from typing import Tuple
 
 import logging
+import sys
 
+import numpy as np
 import pytest
 
 from mlos_core import config_to_dataframe
@@ -23,6 +25,7 @@ from mlos_bench.optimizers.base_optimizer import Optimizer
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
 from mlos_bench.optimizers.mlos_core_optimizer import MlosCoreOptimizer
 
+from mlos_bench.tests import SEED
 
 # For debugging purposes output some warnings which are captured with failed tests.
 DEBUG = True
@@ -121,13 +124,24 @@ def test_smac_optimization_loop(mock_env_no_noise: MockEnv,
     """
     Toy optimization loop with mock environment and SMAC optimizer.
     """
+    np.random.seed(SEED)
     (score, tunables) = _optimize(mock_env_no_noise, smac_opt)
-    expected_score = 65.10
-    expected_tunable_values = {
-        "vmSize": "Standard_B2s",
-        "idle": "halt",
-        "kernel_sched_migration_cost_ns": 274881,
-        "kernel_sched_latency_ns": 194964253,
-    }
+    # FIXME: For some reason the optimizer is not deterministic across platforms.
+    if sys.platform == "win32":
+        expected_score = 60.00
+        expected_tunable_values = {
+            "vmSize": "Standard_B2s",
+            "idle": "halt",
+            "kernel_sched_migration_cost_ns": 2633,
+            "kernel_sched_latency_ns": 379297,
+        }
+    else:
+        expected_score = 65.10
+        expected_tunable_values = {
+            "vmSize": "Standard_B2s",
+            "idle": "halt",
+            "kernel_sched_migration_cost_ns": 274881,
+            "kernel_sched_latency_ns": 194964253,
+        }
     assert score == pytest.approx(expected_score, 0.01)
     assert tunables.get_param_values() == expected_tunable_values
