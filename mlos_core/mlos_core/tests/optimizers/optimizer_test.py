@@ -182,7 +182,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # pylint: disable=too-complex
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-locals
-    num_iters = 50
+    num_iters = 65
     if kwargs is None:
         kwargs = {}
 
