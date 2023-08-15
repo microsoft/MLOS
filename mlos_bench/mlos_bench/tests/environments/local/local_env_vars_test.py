@@ -54,8 +54,8 @@ def test_local_env_vars_shell(tunable_groups: TunableGroups) -> None:
     """
     _run_local_env(
         tunable_groups,
-        "$const_arg,$other_arg,$unknown_arg,$kernel_sched_latency_ns",
-        {
+        shell_subcmd="$const_arg,$other_arg,$unknown_arg,$kernel_sched_latency_ns",
+        expected={
             "const_arg": 111,                       # From "const_args"
             "other_arg": float("NaN"),              # Not included in "shell_env_params"
             "unknown_arg": float("NaN"),            # Unknown/undefined variable
@@ -71,8 +71,8 @@ def test_local_env_vars_windows(tunable_groups: TunableGroups) -> None:
     """
     _run_local_env(
         tunable_groups,
-        r"%const_arg%,%other_arg%,%unknown_arg%,%kernel_sched_latency_ns%",
-        {
+        shell_subcmd=r"%const_arg%,%other_arg%,%unknown_arg%,%kernel_sched_latency_ns%",
+        expected={
             "const_arg": 111,                       # From "const_args"
             "other_arg": r"%other_arg%",            # Not included in "shell_env_params"
             "unknown_arg": r"%unknown_arg%",        # Unknown/undefined variable
