@@ -171,10 +171,8 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     # *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
     (OptimizerType.SMAC, {
+        # Test with default config.
         'use_default_config': True,
-        # 'max_trials': 100,
-        # 'n_random_init': 5,
-        'max_ratio': 1.0
     }),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
@@ -185,9 +183,6 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     num_iters = 20
     if kwargs is None:
         kwargs = {}
-    max_trials = kwargs.get('max_trials')
-    if max_trials and False:
-        num_iters = max_trials
 
     def objective(point: pd.DataFrame) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
@@ -206,17 +201,19 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         "special_param_values": None,
         "max_unique_values_per_param": None,
     }
-    # FIXME: Somewhere in here is where the problem is - the two optimizers are
-    # not independent unless we set the n_random_init value similarly for some
-    # reason.
-    if optimizer_type == OptimizerType.SMAC:
-        # Allow us to override the number of random init samples.
-        kwargs['max_ratio'] = 1.0
+
+    # Make some adjustments to the kwargs for the optimizer and LlamaTuned
+    # optimizer for debug/testing.
+
+    # if optimizer_type == OptimizerType.SMAC:
+    #    # Allow us to override the number of random init samples.
+    #    kwargs['max_ratio'] = 1.0
     optimizer_kwargs = deepcopy(kwargs)
     llamatune_optimizer_kwargs = deepcopy(kwargs)
-    if optimizer_type == OptimizerType.SMAC:
-        optimizer_kwargs['n_random_init'] = 10
-        llamatune_optimizer_kwargs['n_random_init'] = 10
+    # if optimizer_type == OptimizerType.SMAC:
+    #    optimizer_kwargs['n_random_init'] = 20
+    #    llamatune_optimizer_kwargs['n_random_init'] = 10
+
     # Initialize an optimizer that uses the original space
     optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
