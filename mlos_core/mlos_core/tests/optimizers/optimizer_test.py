@@ -179,6 +179,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
+    # pylint: disable=too-complex
+    # pylint: disable=too-many-statements
     # pylint: disable=too-many-locals
     num_iters = 50
     if kwargs is None:
