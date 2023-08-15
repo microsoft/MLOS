@@ -159,6 +159,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # (currently SBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
         initial_design = Optimizer_Smac.get_initial_design(**initial_design_args)  # type: ignore[arg-type]
+        # initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
         # design when generated a random_design for itself via the

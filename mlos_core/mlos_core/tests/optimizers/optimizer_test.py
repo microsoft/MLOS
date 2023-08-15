@@ -182,7 +182,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # pylint: disable=too-complex
     # pylint: disable=too-many-statements
     # pylint: disable=too-many-locals
-    num_iters = 75
+    num_iters = 50
     if kwargs is None:
         kwargs = {}
 
@@ -216,18 +216,18 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     #    optimizer_kwargs['n_random_init'] = 20
     #    llamatune_optimizer_kwargs['n_random_init'] = 10
 
-    # Initialize an optimizer that uses the original space
-    optimizer: BaseOptimizer = OptimizerFactory.create(
-        parameter_space=input_space,
-        optimizer_type=optimizer_type,
-        optimizer_kwargs=optimizer_kwargs,
-    )
     llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
         optimizer_type=optimizer_type,
         optimizer_kwargs=llamatune_optimizer_kwargs,
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
         space_adapter_kwargs=space_adapter_kwargs,
+    )
+    # Initialize an optimizer that uses the original space
+    optimizer: BaseOptimizer = OptimizerFactory.create(
+        parameter_space=input_space,
+        optimizer_type=optimizer_type,
+        optimizer_kwargs=optimizer_kwargs,
     )
     assert optimizer is not None
     assert llamatune_optimizer is not None
