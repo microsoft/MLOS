@@ -5,6 +5,8 @@
 """
 Unit tests for passing shell environment variables into LocalEnv scripts.
 """
+import sys
+
 import pytest
 
 from mlos_bench.environments.local.local_env import LocalEnv
@@ -13,7 +15,7 @@ from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
-def test_local_env_vars(tunable_groups: TunableGroups) -> None:
+def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: dict) -> None:
     """
     Check that LocalEnv can set shell environment variables.
     """
@@ -31,7 +33,7 @@ def test_local_env_vars(tunable_groups: TunableGroups) -> None:
             ],
             "run": [
                 "echo const_arg,other_arg,unknown_arg,kernel_sched_latency_ns > output.csv",
-                "echo $const_arg,$other_arg,$unknown_arg,$kernel_sched_latency_ns >> output.csv",
+                f"echo {shell_subcmd} >> output.csv",
             ],
             "read_results_file": "output.csv",
         },
@@ -42,9 +44,38 @@ def test_local_env_vars(tunable_groups: TunableGroups) -> None:
         assert env_context.setup(tunable_groups)
         (status, data) = env_context.run()
         assert status.is_succeeded()
-        assert data == pytest.approx({
+        assert data == pytest.approx(expected, nan_ok=True)
+
+
+@pytest.mark.skipif(sys.platform == 'win32', reason="sh-like shell only")
+def test_local_env_vars_shell(tunable_groups: TunableGroups) -> None:
+    """
+    Check that LocalEnv can set shell environment variables in sh-like shell.
+    """
+    _run_local_env(
+        tunable_groups,
+        "$const_arg,$other_arg,$unknown_arg,$kernel_sched_latency_ns",
+        {
             "const_arg": 111,                       # From "const_args"
             "other_arg": float("NaN"),              # Not included in "shell_env_params"
             "unknown_arg": float("NaN"),            # Unknown/undefined variable
             "kernel_sched_latency_ns": 2000000,     # From "tunable_params"
-        }, nan_ok=True)
+        }
+    )
+
+
+@pytest.mark.skipif(sys.platform != 'win32', reason="Windows only")
+def test_local_env_vars_windows(tunable_groups: TunableGroups) -> None:
+    """
+    Check that LocalEnv can set shell environment variables on Windows / cmd shell.
+    """
+    _run_local_env(
+        tunable_groups,
+        r"%const_arg%,%other_arg%,%unknown_arg%,%kernel_sched_latency_ns%",
+        {
+            "const_arg": 111,                       # From "const_args"
+            "other_arg": r"%other_arg%",            # Not included in "shell_env_params"
+            "unknown_arg": r"%unknown_arg%",        # Unknown/undefined variable
+            "kernel_sched_latency_ns": 2000000,     # From "tunable_params"
+        }
+    )
