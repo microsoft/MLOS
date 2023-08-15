@@ -179,14 +179,11 @@ class LocalEnv(ScriptEnv):
             _LOG.debug("Not reading the data at: %s", self)
             return (Status.SUCCEEDED, {})
 
-        data: pandas.DataFrame = pandas.read_csv(
+        data = self._normalize_columns(pandas.read_csv(
             self._config_loader_service.resolve_path(
                 self._read_results_file, extra_paths=[self._temp_dir]),
             index_col=False,
-        )
-
-        if sys.platform == 'win32':
-            data.rename(str.rstrip, axis='columns', inplace=True)
+        ))
 
         _LOG.debug("Read data:\n%s", data)
         if list(data.columns) == ["metric", "value"]:
@@ -195,12 +192,23 @@ class LocalEnv(ScriptEnv):
         elif len(data) == 1:
             _LOG.info("Local results have 1 row: assume wide format")
         else:
-            _LOG.warning("Local run failed: %s :: invalid data format\n%s", self, data)
-            return (Status.FAILED, None)
+            raise ValueError(f"Invalid data format: {data}")
 
         data_dict = data.iloc[-1].to_dict()
         _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
         return (Status.SUCCEEDED, data_dict)
+
+    @staticmethod
+    def _normalize_columns(data: pandas.DataFrame) -> pandas.DataFrame:
+        """
+        Strip trailing spaces from column names (Windows only).
+        """
+        # Windows cmd interpretation of > redirect symbols can leave trailing spaces in
+        # the final column, which leads to misnamed columns.
+        # For now, we simply strip trailing spaces from column names to account for that.
+        if sys.platform == 'win32':
+            data.rename(str.rstrip, axis='columns', inplace=True)
+        return data
 
     def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
 
@@ -214,15 +222,16 @@ class LocalEnv(ScriptEnv):
                 self._read_telemetry_file, extra_paths=[self._temp_dir])
 
             # FIXME: We should not be assuming that the only output file type is a CSV.
-            data: pandas.DataFrame = pandas.read_csv(fname, index_col=False, parse_dates=[0])
+            data = self._normalize_columns(
+                pandas.read_csv(fname, index_col=False, parse_dates=[0]))
 
-            if sys.platform == 'win32':
-                data.rename(str.rstrip, axis='columns', inplace=True)
-
-            if list(data.columns) != ["timestamp", "metric", "value"]:
+            expected_col_names = ["timestamp", "metric", "value"]
+            if len(data.columns) != len(expected_col_names):
+                raise ValueError(f'Telemetry data must have columns {expected_col_names}')
+            elif list(data.columns) != expected_col_names:
                 # Assume no header - this is ok for telemetry data.
-                data = pandas.read_csv(fname, index_col=False, parse_dates=[0],
-                                       names=["timestamp", "metric", "value"])
+                data = pandas.read_csv(
+                    fname, index_col=False, parse_dates=[0], names=expected_col_names)
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])
