@@ -6,9 +6,11 @@
 Tests for Bayesian Optimizers.
 """
 
-from typing import List, Optional, Type
 from copy import deepcopy
+from logging import warning
+from typing import List, Optional, Type
 
+import logging
 import pytest
 
 import pandas as pd
@@ -19,10 +21,14 @@ import ConfigSpace as CS
 from mlos_core.optimizers import (
     OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer)
 
-from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
+from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer, SmacOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
 from mlos_core.tests import get_all_concrete_subclasses
+
+
+_LOG = logging.getLogger(__name__)
+_LOG.setLevel(logging.DEBUG)
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
@@ -203,10 +209,14 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     # FIXME: Somewhere in here is where the problem is - the two optimizers are
     # not independent unless we set the n_random_init value similarly for some
     # reason.
+    if optimizer_type == OptimizerType.SMAC:
+        # Allow us to override the number of random init samples.
+        kwargs['max_ratio'] = 1.0
     optimizer_kwargs = deepcopy(kwargs)
-    # optimizer_kwargs['n_random_init'] = 10
     llamatune_optimizer_kwargs = deepcopy(kwargs)
-    # llamatune_optimizer_kwargs['n_random_init'] = 2
+    if optimizer_type == OptimizerType.SMAC:
+        optimizer_kwargs['n_random_init'] = 10
+        llamatune_optimizer_kwargs['n_random_init'] = 10
     # Initialize an optimizer that uses the original space
     optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
@@ -224,9 +234,28 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     assert llamatune_optimizer is not None
     assert optimizer.optimizer_parameter_space != llamatune_optimizer.optimizer_parameter_space
 
+    opt_n_random_init = 0
+    llamatune_n_random_init = 0
+    if 'n_random_init' in kwargs:
+        opt_n_random_init = int(kwargs['n_random_init'])
+    if optimizer_type == OptimizerType.SMAC:
+        assert isinstance(optimizer, SmacOptimizer)
+        assert isinstance(llamatune_optimizer, SmacOptimizer)
+        # pylint: disable=protected-access
+        opt_n_random_init = optimizer.base_optimizer._initial_design._n_configs
+        llamatune_n_random_init = llamatune_optimizer.base_optimizer._initial_design._n_configs
+    if opt_n_random_init != llamatune_n_random_init:
+        warning("Optimizer (%d) and LlamaTuned Optimizer (%d) have different n_random_init values. " +
+                "This has caused problems in some cases.",
+                opt_n_random_init, llamatune_n_random_init)
+
     for i in range(num_iters):
-        if i + 1 >= kwargs.get('n_random_init', 10):
-            print("optimizer")
+        # Place to set a breakpoint for when the optimizer is done with random init.
+        if llamatune_n_random_init and i + 1 >= llamatune_n_random_init:
+            print("LlamaTuned Optimizer is done with random init.")
+        if opt_n_random_init and i >= opt_n_random_init:
+            print("Optimizer is done with random init.")
+
         # loop for optimizer
         suggestion = optimizer.suggest()
         observation = objective(suggestion)
