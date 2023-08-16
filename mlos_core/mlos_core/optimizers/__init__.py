@@ -51,7 +51,7 @@ ConcreteOptimizer = TypeVar(
     SmacOptimizer,
 )
 
-DEFAULT_OPTIMIZER_TYPE = OptimizerType.SMAC
+DEFAULT_OPTIMIZER_TYPE = OptimizerType.FLAML
 
 
 class OptimizerFactory:
