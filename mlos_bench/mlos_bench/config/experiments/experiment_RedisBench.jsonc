@@ -2,8 +2,8 @@
     "experiment_id": "RedisBench",
     "trial_id": 1,
 
-    // TODO: Generate these names from $experiment_id
-    "deploymentName": "RedisBench",
+    // Any global parameter can be used as a dollar variable in the global config:
+    "deploymentName": "$experiment_id",
     "vmName": "os-autotune-linux-vm",
 
     "resourceGroup": "os-autotune",
