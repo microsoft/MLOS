@@ -48,7 +48,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Note that modifying this value directly affects the value of `n_random_init`, if latter is set to `None`.
 
     n_random_init : Optional[int]
-        Number of points evaluated at start to bootstrap the optimizer. Defaults to 10.
+        Number of points evaluated at start to bootstrap the optimizer.
+        Default depends on max_trials and number of parameters.
 
     max_ratio : Optional[int]
         Maximum ratio of max_trials to be random configurations to be evaluated
@@ -57,7 +58,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configurations evaluated at start.
 
     use_default_config: bool
-        Whether to use the default config for the first trial.
+        Whether to use the default config for the first trial after random initialization.
 
     n_random_probability: float
         Probability of choosing to evaluate a random configuration during optimization.
@@ -131,6 +132,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # TODO: When bulk registering prior configs to rewarm the optimizer,
         # there is a way to inform SMAC's initial design that we have
         # additional_configs and can set n_configs == 0.
+        # Additionally, we may want to consider encoding those values into the
+        # runhistory when prewarming the optimizer so that the initial design
+        # doesn't reperform random init.
+        # See Also: #488
 
         initial_design_args: Dict[str, Union[list, int, float, Scenario]] = {
             'scenario': scenario,
