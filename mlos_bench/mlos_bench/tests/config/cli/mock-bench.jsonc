@@ -18,10 +18,7 @@
         "tunable-values/tunable-values-example.jsonc"
     ],
 
-    // "globals": ["global_config.json"],
-
-    "experiment_id": "MockExperiment",
-    "trial_id": 1,
+    "globals": ["globals/global_test_config.jsonc"],
 
     "teardown": true,
 
