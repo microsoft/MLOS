@@ -27,9 +27,9 @@ def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
     local_env = create_local_env(tunable_groups, {
         "run": [
             "echo 'metric,value' > output.csv",
-            "echo 'latency,10' >> output.csv",
-            "echo 'throughput,66' >> output.csv",
-            "echo 'score,0.9' >> output.csv",
+            "echo 'latency,4.1' >> output.csv",
+            "echo 'throughput,512' >> output.csv",
+            "echo 'score,0.95' >> output.csv",
             "echo '-------------------'",  # This output does not go anywhere
             "echo 'timestamp,metric,value' > telemetry.csv",
             f"echo {time_str1},cpu_load,0.65 >> telemetry.csv",
@@ -44,9 +44,9 @@ def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
     check_local_env_success(
         local_env, tunable_groups,
         expected_results={
-            "latency": 10.0,
-            "throughput": 66.0,
-            "score": 0.9,
+            "latency": 4.1,
+            "throughput": 512.0,
+            "score": 0.95,
         },
         expected_telemetry=[
             (ts1, "cpu_load", 0.65),
