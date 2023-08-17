@@ -7,10 +7,10 @@ Unit tests for telemetry and status of LocalEnv benchmark environment.
 """
 from datetime import datetime, timedelta
 
-import pytest
-
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.tests.environments.local import create_local_env, check_local_env_success
+from mlos_bench.tests.environments.local import (
+    create_local_env, check_local_env_success, check_local_env_fail_telemetry
+)
 
 
 def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
@@ -113,14 +113,7 @@ def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None
         "read_telemetry_file": "telemetry.csv",
     })
 
-    with local_env as env_context:
-
-        assert env_context.setup(tunable_groups)
-        (status, _data) = env_context.run()
-        assert status.is_succeeded()
-
-        with pytest.raises(ValueError):
-            env_context.status()
+    check_local_env_fail_telemetry(local_env, tunable_groups)
 
 
 def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
@@ -145,14 +138,7 @@ def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    with local_env as env_context:
-
-        assert env_context.setup(tunable_groups)
-        (status, _data) = env_context.run()
-        assert status.is_succeeded()
-
-        with pytest.raises(ValueError):
-            env_context.status()
+    check_local_env_fail_telemetry(local_env, tunable_groups)
 
 
 def test_local_env_telemetry_invalid_ts(tunable_groups: TunableGroups) -> None:
@@ -170,11 +156,4 @@ def test_local_env_telemetry_invalid_ts(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    with local_env as env_context:
-
-        assert env_context.setup(tunable_groups)
-        (status, _data) = env_context.run()
-        assert status.is_succeeded()
-
-        with pytest.raises(ValueError):
-            env_context.status()
+    check_local_env_fail_telemetry(local_env, tunable_groups)

@@ -61,8 +61,30 @@ def check_local_env_success(local_env: LocalEnv,
 
         (status, data) = env_context.run()
         assert status.is_succeeded()
-        assert data == pytest.approx(expected_results)
+        assert data == pytest.approx(expected_results, nan_ok=True)
 
         (status, telemetry) = env_context.status()
         assert status.is_good()
         assert telemetry == pytest.approx(expected_telemetry, nan_ok=True)
+
+
+def check_local_env_fail_telemetry(local_env: LocalEnv, tunable_groups: TunableGroups) -> None:
+    """
+    Set up a local environment and run a test experiment there;
+    Make sure the environment `.status()` call fails.
+
+    Parameters
+    ----------
+    tunable_groups : TunableGroups
+        Tunable parameters (usually come from a fixture).
+    local_env : LocalEnv
+        A local environment to query for the results.
+    """
+    with local_env as env_context:
+
+        assert env_context.setup(tunable_groups)
+        (status, _data) = env_context.run()
+        assert status.is_succeeded()
+
+        with pytest.raises(ValueError):
+            env_context.status()
