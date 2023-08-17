@@ -8,7 +8,7 @@ Unit tests for LocalEnv benchmark environment.
 import pytest
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.tests.environments.local import create_local_env
+from mlos_bench.tests.environments.local import create_local_env, check_local_env_success
 
 
 def test_local_env(tunable_groups: TunableGroups) -> None:
@@ -25,21 +25,15 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
         "read_results_file": "output.csv",
     })
 
-    with local_env as env_context:
-
-        assert env_context.setup(tunable_groups)
-
-        (status, data) = env_context.run()
-        assert status.is_succeeded()
-        assert data == {
+    check_local_env_success(
+        local_env, tunable_groups,
+        expected_results={
             "latency": 10.0,
             "throughput": 66.0,
             "score": 0.9,
-        }
-
-        (status, telemetry) = env_context.status()
-        assert status.is_good()
-        assert not telemetry
+        },
+        expected_telemetry=[],
+    )
 
 
 def test_local_env_results_no_header(tunable_groups: TunableGroups) -> None:
@@ -74,12 +68,12 @@ def test_local_env_wide(tunable_groups: TunableGroups) -> None:
         "read_results_file": "output.csv",
     })
 
-    with local_env as env_context:
-        assert env_context.setup(tunable_groups)
-        (status, data) = env_context.run()
-        assert status.is_succeeded()
-        assert data == pytest.approx({
+    check_local_env_success(
+        local_env, tunable_groups,
+        expected_results={
             "latency": 10,
             "throughput": 66,
             "score": 0.9,
-        })
+        },
+        expected_telemetry=[],
+    )

@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import pytest
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.tests.environments.local import create_local_env
+from mlos_bench.tests.environments.local import create_local_env, check_local_env_success
 
 
 def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
@@ -41,26 +41,20 @@ def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    with local_env as env_context:
-
-        assert env_context.setup(tunable_groups)
-
-        (status, data) = env_context.run()
-        assert status.is_succeeded()
-        assert data == {
+    check_local_env_success(
+        local_env, tunable_groups,
+        expected_results={
             "latency": 10.0,
             "throughput": 66.0,
             "score": 0.9,
-        }
-
-        (status, telemetry) = env_context.status()
-        assert status.is_good()
-        assert telemetry == [
+        },
+        expected_telemetry=[
             (ts1, "cpu_load", 0.65),
             (ts1, "mem_usage", 10240.0),
             (ts2, "cpu_load", 0.8),
             (ts2, "mem_usage", 20480.0),
-        ]
+        ],
+    )
 
 
 def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
@@ -84,20 +78,16 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    with local_env as env_context:
-
-        assert env_context.setup(tunable_groups)
-        (status, _data) = env_context.run()
-        assert status.is_succeeded()
-
-        (status, telemetry) = env_context.status()
-        assert status.is_good()
-        assert telemetry == [
+    check_local_env_success(
+        local_env, tunable_groups,
+        expected_results={},
+        expected_telemetry=[
             (ts1, "cpu_load", 0.65),
             (ts1, "mem_usage", 10240.0),
             (ts2, "cpu_load", 0.8),
             (ts2, "mem_usage", 20480.0),
-        ]
+        ],
+    )
 
 
 def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None:
