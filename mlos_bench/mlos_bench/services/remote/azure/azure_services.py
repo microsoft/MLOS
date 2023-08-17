@@ -10,6 +10,7 @@ import json
 import time
 import logging
 
+from base64 import b64encode
 from typing import Any, Callable, Dict, Iterable, Optional, Tuple
 
 import requests
@@ -158,6 +159,16 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
 
         self._deploy_params = merge_parameters(
             dest=self.config['deploymentTemplateParameters'].copy(), source=global_config)
+
+        self._custom_data_file = self.config.get("customDataFile", None)
+        self._custom_data_base64_str = None
+        if self._custom_data_file is not None:
+            self._custom_data_file = self.config_loader_service.resolve_path(self._custom_data_file)
+            with open(self._custom_data_file, "r", encoding='utf-8') as f:
+                self._custom_data_base64_str = ''
+                while buf := f.read():
+                    self._custom_data_base64_str += b64encode(buf.encode()).decode()
+        self._deploy_params["customDataBase64"] = self._custom_data_base64_str
 
     def _get_headers(self) -> dict:
         """

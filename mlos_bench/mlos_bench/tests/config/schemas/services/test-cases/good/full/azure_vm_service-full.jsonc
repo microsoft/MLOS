@@ -9,6 +9,7 @@
         "resourceGroup": "rg",
         "deploymentName": "deployment",
 
+        "customDataPath": "some/path/to/custom/data.yml",
         "deploymentTemplateParameters": {
             "location": "westus2",
             "adminUsername": "admin",
