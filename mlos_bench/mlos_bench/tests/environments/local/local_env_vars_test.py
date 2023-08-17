@@ -9,37 +9,31 @@ import sys
 
 import pytest
 
-from mlos_bench.environments.local.local_env import LocalEnv
-from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.tunables.tunable_groups import TunableGroups
+from mlos_bench.tests.environments.local import create_local_env
 
 
 def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: dict) -> None:
     """
     Check that LocalEnv can set shell environment variables.
     """
-    local_env = LocalEnv(
-        name="Test Local Env",
-        config={
-            "const_args": {
-                "const_arg": 111,  # Passed into "shell_env_params"
-                "other_arg": 222,  # NOT passed into "shell_env_params"
-            },
-            "tunable_params": ["kernel"],
-            "shell_env_params": [
-                "const_arg",                # From "const_arg"
-                "kernel_sched_latency_ns",  # From "tunable_params"
-            ],
-            "run": [
-                "echo const_arg,other_arg,unknown_arg,kernel_sched_latency_ns > output.csv",
-                f"echo {shell_subcmd} >> output.csv",
-            ],
-            "read_results_file": "output.csv",
+    local_env = create_local_env(tunable_groups, {
+        "const_args": {
+            "const_arg": 111,  # Passed into "shell_env_params"
+            "other_arg": 222,  # NOT passed into "shell_env_params"
         },
-        tunables=tunable_groups,
-        service=LocalExecService(parent=ConfigPersistenceService()),
-    )
+        "tunable_params": ["kernel"],
+        "shell_env_params": [
+            "const_arg",                # From "const_arg"
+            "kernel_sched_latency_ns",  # From "tunable_params"
+        ],
+        "run": [
+            "echo const_arg,other_arg,unknown_arg,kernel_sched_latency_ns > output.csv",
+            f"echo {shell_subcmd} >> output.csv",
+        ],
+        "read_results_file": "output.csv",
+    })
+
     with local_env as env_context:
         assert env_context.setup(tunable_groups)
         (status, data) = env_context.run()
