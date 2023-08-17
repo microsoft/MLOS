@@ -12,6 +12,8 @@ command line.
 
 import logging
 import argparse
+
+from string import Template
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -84,6 +86,7 @@ class Launcher:
             args_rest,
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
+        self.global_config = self._expand_vars(self.global_config)
 
         env_path = args.environment or config.get("environment")
         if not env_path:
@@ -226,6 +229,20 @@ class Launcher:
         if config_path:
             global_config["config_path"] = config_path
         return global_config
+
+    def _expand_vars(self, value: Any) -> Any:
+        """
+        Expand dollar variables in the globals.
+
+        NOTE: `self.global_config` must be set.
+        """
+        if isinstance(value, str):
+            return Template(value).safe_substitute(self.global_config)
+        if isinstance(value, dict):
+            return {key: self._expand_vars(val) for (key, val) in value.items()}
+        if isinstance(value, list):
+            return [self._expand_vars(val) for val in value]
+        return value
 
     def _init_tunable_values(self, random_init: bool, seed: Optional[int],
                              args_tunables: Optional[str]) -> TunableGroups:

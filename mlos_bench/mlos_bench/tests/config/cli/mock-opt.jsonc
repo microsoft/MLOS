@@ -18,9 +18,6 @@
 
     "globals": ["globals/global_test_config.jsonc"],
 
-    "experiment_id": "MockExperiment",
-    "trial_id": 1,
-
     "teardown": true,
 
     // "log_file": "mock-opt.log",
