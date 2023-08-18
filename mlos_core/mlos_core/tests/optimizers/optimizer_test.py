@@ -244,7 +244,7 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
 
     for i in range(num_iters):
         # Place to set a breakpoint for when the optimizer is done with random init.
-        if llamatune_n_random_init and i + 1 >= llamatune_n_random_init:
+        if llamatune_n_random_init and i > llamatune_n_random_init:
             print("LlamaTuned Optimizer is done with random init.")
         if opt_n_random_init and i >= opt_n_random_init:
             print("Optimizer is done with random init.")
