@@ -13,6 +13,7 @@ command line.
 import logging
 import argparse
 
+from itertools import chain
 from string import Template
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
@@ -138,7 +139,7 @@ class Launcher:
                  ' Set to DEBUG for debug, WARNING for warnings only.')
 
         parser.add_argument(
-            '--config_path', nargs="+", required=False,
+            '--config_path', nargs="+", action='append', required=False,
             help='One or more locations of JSON config files.')
 
         parser.add_argument(
@@ -165,13 +166,13 @@ class Launcher:
             help='Seed to use with --random_init')
 
         parser.add_argument(
-            '--tunable_values', nargs="+", required=False,
+            '--tunable_values', nargs="+", action='append', required=False,
             help='Path to one or more JSON files that contain values of the tunable' +
                  ' parameters. This can be used for a single trial (when no --optimizer' +
                  ' is specified) or as default values for the first run in optimization.')
 
         parser.add_argument(
-            '--globals', nargs="+", required=False,
+            '--globals', nargs="+", action='append', required=False,
             help='Path to one or more JSON files that contain additional' +
                  ' [private] parameters of the benchmarking environment.')
 
@@ -180,7 +181,11 @@ class Launcher:
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
-        return parser.parse_known_args()
+        (args, args_rest) = parser.parse_known_args()
+        args.config_path = list(chain(*args.config_path))
+        args.tunable_values = list(chain(*args.tunable_values))
+        args.globals = list(chain(*args.globals))
+        return (args, args_rest)
 
     @staticmethod
     def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, str]:
