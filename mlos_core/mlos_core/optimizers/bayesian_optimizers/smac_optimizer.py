@@ -49,7 +49,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
     n_random_init : Optional[int]
         Number of points evaluated at start to bootstrap the optimizer.
-        Default depends on max_trials and number of parameters.
+        Default depends on max_trials and number of parameters and max_ratio.
+        Note: it can sometimes be useful to set this to 1 when pre-warming the
+        optimizer from historical data.
+        See Also: mlos_bench.optimizer.bulk_register
 
     max_ratio : Optional[int]
         Maximum ratio of max_trials to be random configurations to be evaluated
@@ -186,6 +189,22 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def __del__(self) -> None:
         # Best-effort attempt to clean up, in case the user forgets to call .cleanup()
         self.cleanup()
+
+    @property
+    def n_random_init(self) -> int:
+        """
+        Gets the number of random samples to use to initialize the optimizer's search space sampling.
+
+        Note: This may not be equal to the value passed to the initializer, due to logic present in the SMAC.
+        See Also: max_ratio
+
+        Returns
+        -------
+        int
+            The number of random samples used to initialize the optimizer's search space sampling.
+        """
+        # pylint: disable=protected-access
+        return self.base_optimizer._initial_design._n_configs
 
     @staticmethod
     def _dummy_target_func(config: ConfigSpace.Configuration, seed: int = 0) -> None:

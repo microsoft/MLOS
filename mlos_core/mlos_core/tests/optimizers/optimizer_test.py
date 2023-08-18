@@ -238,9 +238,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     if optimizer_type == OptimizerType.SMAC:
         assert isinstance(optimizer, SmacOptimizer)
         assert isinstance(llamatune_optimizer, SmacOptimizer)
-        # pylint: disable=protected-access
-        opt_n_random_init = optimizer.base_optimizer._initial_design._n_configs
-        llamatune_n_random_init = llamatune_optimizer.base_optimizer._initial_design._n_configs
+        opt_n_random_init = optimizer.n_random_init
+        llamatune_n_random_init = llamatune_optimizer.n_random_init
 
     for i in range(num_iters):
         # Place to set a breakpoint for when the optimizer is done with random init.
