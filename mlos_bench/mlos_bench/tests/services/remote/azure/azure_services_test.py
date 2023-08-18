@@ -45,6 +45,7 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
     # pylint: disable=protected-access
     assert azure_vm_service._deploy_params['customData']
 
+
 @pytest.mark.parametrize(
     ("operation_name", "accepts_params"), [
         ("vm_start", True),
