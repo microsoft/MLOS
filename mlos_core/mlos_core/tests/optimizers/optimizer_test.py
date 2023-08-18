@@ -233,10 +233,8 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     assert llamatune_optimizer is not None
     assert optimizer.optimizer_parameter_space != llamatune_optimizer.optimizer_parameter_space
 
-    opt_n_random_init = 0
     llamatune_n_random_init = 0
-    if 'n_random_init' in kwargs:
-        opt_n_random_init = int(kwargs['n_random_init'])
+    opt_n_random_init = int(kwargs.get('n_random_init', 0))
     if optimizer_type == OptimizerType.SMAC:
         assert isinstance(optimizer, SmacOptimizer)
         assert isinstance(llamatune_optimizer, SmacOptimizer)
