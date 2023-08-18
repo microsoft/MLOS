@@ -6,17 +6,44 @@
 Tests for mlos_bench.services.remote.azure.azure_services
 """
 
+from copy import deepcopy
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from mlos_bench.environments.status import Status
 
+from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
 from mlos_bench.services.remote.azure.azure_services import AzureVMService
 
 # pylint: disable=missing-function-docstring
 # pylint: disable=too-many-arguments
 
+
+def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> None:
+    """
+    Tests loading custom data from a file.
+    """
+    config = {
+        "customDataFile": "services/remote/azure/cloud-init/alt-ssh.yml",
+        "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+        "deploymentName": "TEST_DEPLOYMENT",
+        "subscription": "TEST_SUB",
+        "resourceGroup": "TEST_RG",
+        "deploymentTemplateParameters": {
+            "location": "westus2",
+        },
+    }
+    global_config = {
+        "vmName": "test-vm",
+    }
+    with pytest.raises(ValueError):
+        config_with_custom_data = deepcopy(config)
+        config_with_custom_data['deploymentTemplateParameters']['customData'] = "DUMMY_CUSTOM_DATA"  # type: ignore[index]
+        _ = AzureVMService(config_with_custom_data, global_config, parent=azure_auth_service)
+    azure_vm_service = AzureVMService(config, global_config, parent=azure_auth_service)
+    # pylint: disable=protected-access
+    assert azure_vm_service._deploy_params['customData']
 
 @pytest.mark.parametrize(
     ("operation_name", "accepts_params"), [
