@@ -16,7 +16,7 @@ import sys
 
 from itertools import chain
 from string import Template
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import BaseTypeVar
@@ -181,12 +181,27 @@ class Launcher:
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
+        # By default we use the command line arguments, but allow the caller to
+        # provide some explicitly for testing purposes.
         if argv is None:
             argv = sys.argv[1:].copy()
         (args, args_rest) = parser.parse_known_args(argv)
-        args.config_path = list(chain(*args.config_path))
-        args.tunable_values = list(chain(*args.tunable_values))
-        args.globals = list(chain(*args.globals))
+
+        # Flatten arguments that accept multiple values or multiple instances.
+        def flatten_list_args(lst: Union[None, str, List[str], List[List[str]]]) -> Optional[List[str]]:
+            if lst is None:
+                return None
+            if isinstance(lst, str):
+                # TODO? Split on commas too?
+                return lst.split()
+            if isinstance(lst, list):
+                lst = [flatten_list_args(elem) for elem in lst]
+                return list(chain(*lst))
+            raise NotImplementedError(f"Unsupported type: {type(lst)}")
+        args.config_path = flatten_list_args(args.config_path)
+        args.tunable_values = flatten_list_args(args.tunable_values)
+        args.globals = flatten_list_args(args.globals)
+
         return (args, args_rest)
 
     @staticmethod
