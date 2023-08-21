@@ -6,7 +6,6 @@
 Unit tests to check the main CLI launcher.
 """
 import os
-import re
 from typing import List
 
 import pytest
@@ -18,30 +17,6 @@ from mlos_bench.util import path_join
 
 
 @pytest.fixture
-def config_paths() -> List[str]:
-    """
-    Returns a list of config paths.
-
-    Returns
-    -------
-    List[str]
-    """
-    return [
-        "mlos_bench/config",
-        "mlos_bench/tests/config",
-    ]
-
-
-def test_launcher_args_parse() -> None:
-    """
-    Test argument parsing.
-    """
-    args = _parse_args(["--config", "foo.jsonc", "--max_iterations", "3"])
-    assert args.config == "foo.jsonc"
-    assert args.max_iterations == 3
-
-
-@pytest.fixture
 def root_path() -> str:
     """
     Root path of mlos_bench project.
@@ -50,85 +25,27 @@ def root_path() -> str:
 
 
 @pytest.fixture
-def local_exec_service() -> LocalExecService:
+def config_paths(root_path: str) -> List[str]:
     """
-    Test fixture for LocalExecService.
+    Returns a list of config paths.
+
+    Returns
+    -------
+    List[str]
     """
-    return LocalExecService(parent=ConfigPersistenceService({
-        "config_path": [
-            "mlos_bench/config",
-            "mlos_bench/examples",
-        ]
-    }))
+    return [
+        path_join(root_path, "mlos_bench/mlos_bench/config"),
+        path_join(root_path, "mlos_bench/mlos_bench/tests/config"),
+    ]
 
 
-def _launch_main_app(root_path: str, local_exec_service: LocalExecService,
-                     cli_config: str, re_expected: List[str]) -> None:
+def test_launcher_args_parse_list_append(config_paths: List[str]) -> None:
     """
-    Run mlos_bench command-line application with given config
-    and check the results in the log.
+    Test argument parsing.
     """
-    with local_exec_service.temp_dir_context() as temp_dir:
-
-        # Test developers note: for local debugging,
-        # uncomment the following line to use a known file path that can be examined:
-        # temp_dir = '/tmp'
-        log_path = path_join(temp_dir, "mock-test.log")
-        (return_code, _stdout, _stderr) = local_exec_service.local_exec(
-            [f"./mlos_bench/mlos_bench/run.py {cli_config} --log_file '{log_path}'"],
-            cwd=root_path)
-        assert return_code == 0
-
-        try:
-            iter_expected = iter(re_expected)
-            re_log = re.compile(next(iter_expected))
-            with open(log_path, "rt", encoding="utf-8") as fh_out:
-                for line in fh_out:
-                    if re_log.match(line):
-                        re_log = re.compile(next(iter_expected))
-            assert False, f"Pattern not found: '{re_log.pattern}'"
-        except StopIteration:
-            pass  # Success: all patterns found
-
-
-_RE_DATE = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}"
-
-
-def test_launch_main_app_bench(root_path: str, local_exec_service: LocalExecService) -> None:
-    """
-    Run mlos_bench command-line application with mock benchmark config
-    and check the results in the log.
-    """
-    _launch_main_app(
-        root_path, local_exec_service,
-        "--config mlos_bench/mlos_bench/tests/config/cli/mock-bench.jsonc",
-        [
-            f"^{_RE_DATE} run\\.py:\\d+ " +
-            r"_optimize INFO Env: Mock environment best score: 65\.67\d+\s*$",
-        ]
-    )
-
-
-def test_launch_main_app_opt(root_path: str, local_exec_service: LocalExecService) -> None:
-    """
-    Run mlos_bench command-line application with mock optimization config
-    and check the results in the log.
-    """
-    _launch_main_app(
-        root_path, local_exec_service,
-        "--config mlos_bench/mlos_bench/tests/config/cli/mock-opt.jsonc --max_iterations 3",
-        [
-            # Iteration 1: Expect first value to be the baseline
-            f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
-            r"register DEBUG Score: 65\.67\d+ Dataframe:\s*$",
-            # Iteration 2: The result may not always be deterministic
-            f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
-            r"register DEBUG Score: \d+\.\d+ Dataframe:\s*$",
-            # Iteration 3: non-deterministic (depends on the optimizer)
-            f"^{_RE_DATE} mlos_core_optimizer\\.py:\\d+ " +
-            r"register DEBUG Score: \d+\.\d+ Dataframe:\s*$",
-            # Final result: baseline is the optimum for the mock environment
-            f"^{_RE_DATE} run\\.py:\\d+ " +
-            r"_optimize INFO Env: Mock environment best score: 65\.67\d+\s*$",
-        ]
-    )
+    launcher = Launcher(description="test", argv=[
+        "--config-paths", *config_paths,
+        "--globals", "globals/global_test_config.jsonc",
+        "--globals", "globals/global_test_extra_config.jsonc",
+    ])
+    assert 'test_global_value' in launcher.global_config
