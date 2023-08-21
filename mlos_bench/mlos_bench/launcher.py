@@ -140,7 +140,7 @@ class Launcher:
 
         parser.add_argument(
             '--config_path', '--config-path', '--config-paths', '--config_paths',
-            nargs="+", action='append', required=False,
+            nargs="+", action='extend', required=False,
             help='One or more locations of JSON config files.')
 
         parser.add_argument(
@@ -167,13 +167,13 @@ class Launcher:
             help='Seed to use with --random_init')
 
         parser.add_argument(
-            '--tunable_values', '--tunable-values', nargs="+", action='append', required=False,
+            '--tunable_values', '--tunable-values', nargs="+", action='extend', required=False,
             help='Path to one or more JSON files that contain values of the tunable' +
                  ' parameters. This can be used for a single trial (when no --optimizer' +
                  ' is specified) or as default values for the first run in optimization.')
 
         parser.add_argument(
-            '--globals', nargs="+", action='append', required=False,
+            '--globals', nargs="+", action='extend', required=False,
             help='Path to one or more JSON files that contain additional' +
                  ' [private] parameters of the benchmarking environment.')
 
@@ -187,13 +187,6 @@ class Launcher:
         if argv is None:
             argv = sys.argv[1:].copy()
         (args, args_rest) = parser.parse_known_args(argv)
-
-        # Flatten arguments that accept multiple values or multiple instances.
-        def flatten_list_args(lst: Union[None, List[str], List[List[str]]]) -> Optional[List[str]]:
-            return None if lst is None else list(chain(*lst))
-        args.config_path = flatten_list_args(args.config_path)
-        args.tunable_values = flatten_list_args(args.tunable_values)
-        args.globals = flatten_list_args(args.globals)
 
         return (args, args_rest)
 
