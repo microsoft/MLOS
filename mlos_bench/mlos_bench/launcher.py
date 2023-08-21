@@ -130,16 +130,17 @@ class Launcher:
                  ' for additional config examples for this and other arguments.')
 
         parser.add_argument(
-            '--log_file', required=False,
+            '--log_file', '--log-file', required=False,
             help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(
-            '--log_level', required=False, type=str,
+            '--log_level', '--log-level', required=False, type=str,
             help=f'Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}.' +
                  ' Set to DEBUG for debug, WARNING for warnings only.')
 
         parser.add_argument(
-            '--config_path', nargs="+", action='append', required=False,
+            '--config_path', '--config-path', '--config-paths', '--config_paths',
+            nargs="+", action='append', required=False,
             help='One or more locations of JSON config files.')
 
         parser.add_argument(
@@ -157,16 +158,16 @@ class Launcher:
                  ' If omitted, use the ephemeral in-memory SQL storage.')
 
         parser.add_argument(
-            '--random_init', required=False, default=False,
+            '--random_init', '--random-init', required=False, default=False,
             dest='random_init', action='store_true',
             help='Initialize tunables with random values. (Before applying --tunable_values).')
 
         parser.add_argument(
-            '--random_seed', required=False, type=int,
+            '--random_seed', '--random-seed', required=False, type=int,
             help='Seed to use with --random_init')
 
         parser.add_argument(
-            '--tunable_values', nargs="+", action='append', required=False,
+            '--tunable_values', '--tunable-values', nargs="+", action='append', required=False,
             help='Path to one or more JSON files that contain values of the tunable' +
                  ' parameters. This can be used for a single trial (when no --optimizer' +
                  ' is specified) or as default values for the first run in optimization.')
@@ -177,7 +178,7 @@ class Launcher:
                  ' [private] parameters of the benchmarking environment.')
 
         parser.add_argument(
-            '--no_teardown', required=False, default=None,
+            '--no_teardown', '--no-teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
