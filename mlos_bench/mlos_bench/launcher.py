@@ -10,8 +10,9 @@ It is used in `mlos_bench.run` module to run the benchmark/optimizer from the
 command line.
 """
 
-import logging
 import argparse
+import logging
+import sys
 
 from itertools import chain
 from string import Template
@@ -46,11 +47,10 @@ class Launcher:
     Command line launcher for mlos_bench and mlos_core.
     """
 
-    def __init__(self, description: str, long_text: str = ""):
-
+    def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         _LOG.info("Launch: %s", description)
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}")
-        (args, args_rest) = self._parse_args(parser)
+        (args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
         self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
@@ -117,7 +117,7 @@ class Launcher:
         self.teardown = args.teardown or config.get("teardown", True)
 
     @staticmethod
-    def _parse_args(parser: argparse.ArgumentParser) -> Tuple[argparse.Namespace, List[str]]:
+    def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:
         """
         Parse the command line arguments.
         """
@@ -181,7 +181,9 @@ class Launcher:
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
-        (args, args_rest) = parser.parse_known_args()
+        if argv is None:
+            argv = sys.argv[1:].copy()
+        (args, args_rest) = parser.parse_known_args(argv)
         args.config_path = list(chain(*args.config_path))
         args.tunable_values = list(chain(*args.tunable_values))
         args.globals = list(chain(*args.globals))
