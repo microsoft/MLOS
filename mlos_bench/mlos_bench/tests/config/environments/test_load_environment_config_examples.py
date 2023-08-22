@@ -50,27 +50,7 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
 def load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> List[Environment]:
     """Loads an environment config example."""
     # Make sure that any "required_args" are provided.
-    global_config = {
-        "experiment_id": "test",
-        "trial_id": 1,
-
-        "mountPoint": "/mnt/tmp",
-
-        # FIXME: The setup ubuntu configs currently use these values in their mounting scripts.
-        # We should abstract that out so those details are only needed when a service that uses those is used.
-        "storageAccountName": "foo",
-        "storageAccountKey": "bar",
-        "storageFileShareName": "baz",
-
-        # Assign some values to variadic tunables and required parameters present in the config examples.
-        "vmName": "vmTestName",
-        "tunable_params_map": {
-            "linux-runtime": ["linux-scheduler", "linux-swap"],
-            "linux-boot": ["linux-kernel-boot"],
-            "provision": ["azure-vm"],
-            "redis": ["redis"],
-        }
-    }
+    global_config = config_loader_service.load_config("experiments/experiment_test_config.jsonc", ConfigSchema.GLOBALS)
 
     # Make sure we have the required services for the envs being used.
     mock_service_configs = [
