@@ -5,27 +5,23 @@
 """
 Unit tests to check the main CLI launcher.
 """
-import os
+import sys
 from typing import List
 
 import pytest
 
 from mlos_bench.launcher import Launcher
-from mlos_bench.util import path_join
+
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 # pylint: disable=redefined-outer-name
 
 
 @pytest.fixture
-def root_path() -> str:
-    """
-    Root path of mlos_bench project.
-    """
-    return path_join(os.path.dirname(__file__), "../../..", abs_path=True)
-
-
-@pytest.fixture
-def config_paths(root_path: str) -> List[str]:
+def config_paths() -> List[str]:
     """
     Returns a list of config paths.
 
@@ -34,8 +30,8 @@ def config_paths(root_path: str) -> List[str]:
     List[str]
     """
     return [
-        path_join(root_path, 'mlos_bench/mlos_bench/config'),
-        path_join(root_path, 'mlos_bench/mlos_bench/tests/config'),
+        str(files('mlos_bench.config')),
+        str(files('mlos_bench.tests.config')),
     ]
 
 
