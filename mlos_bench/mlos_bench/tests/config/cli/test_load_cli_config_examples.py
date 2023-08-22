@@ -19,6 +19,7 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.launcher import Launcher
 from mlos_bench.util import path_join
+from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -40,6 +41,7 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
 
 
 configs = filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
+configs += filter_configs(locate_config_examples(path_join(BUILTIN_TEST_CONFIG_PATH, CONFIG_TYPE)))
 assert configs
 
 
