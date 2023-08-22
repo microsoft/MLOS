@@ -9,6 +9,7 @@ Tests for loading storage config examples.
 from typing import List
 
 import logging
+import sys
 
 import pytest
 
@@ -16,7 +17,13 @@ from mlos_bench.tests.config import locate_config_examples
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.launcher import Launcher
 from mlos_bench.util import path_join
+
+if sys.version_info < (3, 10):
+    from importlib_resources import files
+else:
+    from importlib.resources import files
 
 
 _LOG = logging.getLogger(__name__)
@@ -77,3 +84,11 @@ def test_load_cli_config_examples(config_loader_service: ConfigPersistenceServic
                 assert isinstance(sub_config, dict)
         else:
             raise NotImplementedError(f"Unhandled arg {arg} in config {config_path}")
+
+    # Try to load the CLI config by instantiating a launcher.
+    cli_args = f"--config {config_path}" + \
+        f" --config-path {files('mlos_bench.config')} --config-path {files('mlos_bench.tests.config')}" + \
+        f" --config-path {path_join(str(files('mlos_bench.tests.config')), 'globals')}" + \
+        f" --globals {files('mlos_bench.tests.config')}/experiments/experiment_test_config.jsonc"
+    launcher = Launcher(description="test", argv=cli_args.split())
+    assert launcher
