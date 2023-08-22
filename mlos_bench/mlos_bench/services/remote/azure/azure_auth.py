@@ -54,27 +54,30 @@ class AzureAuthService(Service, SupportsAuth):
         self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))
 
         self._access_token = "RENEW *NOW*"
-        self._token_expiration_ts = datetime.datetime.now()  # Typically, some future timestamp.
+        self._token_expiration_ts = datetime.datetime.utcnow()  # Typically, some future timestamp.
 
         # Login as ourselves
         self._cred = azure_id.AzureCliCredential()
 
+        # Verify info required for SP auth early
+        if "spClientId" in self.config:
+            check_required_params(
+                self.config, {
+                    "spClientId",
+                    "keyVaultName",
+                    "certName",
+                    "tenant",
+                }
+            )
+
+
     def _init_sp(self):
         # Perform this initialization outside of __init__ so that environment loading tests
-        # dont need to specifically mock keyvault interactions out
+        # don't need to specifically mock keyvault interactions out
 
         # Already logged in as SP
         if isinstance(self._cred, azure_id.CertificateCredential):
             return
-
-        check_required_params(
-            self.config, {
-                "spClientId",
-                "keyVaultName",
-                "certName",
-                "tenant",
-            }
-        )
 
         sp_client_id = self.config["spClientId"]
         keyvault_name = self.config["keyVaultName"]
@@ -88,7 +91,7 @@ class AzureAuthService(Service, SupportsAuth):
         )
 
         # The certificate private key data is stored as hidden "Secret" (not Key strangely)
-        #  in PKCS12 format, but we need to decode it.
+        # in PKCS12 format, but we need to decode it.
         secret = keyvault_secrets_client.get_secret(cert_name)
         assert secret.value is not None
         cert_bytes = b64decode(secret.value)
@@ -104,12 +107,12 @@ class AzureAuthService(Service, SupportsAuth):
         if "spClientId" in self.config:
             self._init_sp()
 
-        ts_diff = (self._token_expiration_ts - datetime.datetime.now()).total_seconds()
+        ts_diff = (self._token_expiration_ts - datetime.datetime.utcnow()).total_seconds()
         _LOG.debug("Time to renew the token: %.2f sec.", ts_diff)
         if ts_diff < self._req_interval:
             _LOG.debug("Request new accessToken")
             res = self._cred.get_token("https://management.azure.com/.default")
-            self._token_expiration_ts = datetime.datetime.fromtimestamp(res.expires_on)
+            self._token_expiration_ts = datetime.datetime.utcfromtimestamp(res.expires_on)
             self._access_token = res.token
             _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)
         return self._access_token
