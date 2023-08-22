@@ -23,6 +23,6 @@ def config_loader_service() -> ConfigPersistenceService:
     """Config loader service fixture."""
     return ConfigPersistenceService(config={
         "config_path": [
-            files("mlos_bench.tests.config"),
+            str(files("mlos_bench.tests.config")),
         ]
     })
