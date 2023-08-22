@@ -50,6 +50,10 @@
         },
         {
             "fileMatch": [
+                "mlos_bench/mlos_bench/config/experiments/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/experiments/**/*.json",
+                "mlos_bench/mlos_bench/tests/config/experiments/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/experiments/**/*.json",
                 "mlos_bench/mlos_bench/tests/config/globals/**/*.jsonc",
                 "mlos_bench/mlos_bench/tests/config/globals/**/*.json",
                 "globals*.jsonc",
