@@ -113,7 +113,7 @@ class Launcher:
         self.storage = self._load_storage(args.storage or config.get("storage"))
         _LOG.info("Init storage: %s", self.storage)
 
-        self.teardown = args.teardown or config.get("teardown", True)
+        self.teardown: bool = bool(args.teardown) if args.teardown is not None else bool(config.get("teardown", True))
 
     @staticmethod
     def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:

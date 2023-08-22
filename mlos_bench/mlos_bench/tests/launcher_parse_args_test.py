@@ -68,6 +68,7 @@ def test_launcher_args_parse_globals(config_paths: List[str], env_conf_path: str
     assert launcher.global_config['test_global_value'] == 'from-file'
     # Check overriding values in a file from the command line.
     assert launcher.global_config['test_global_value_2'] == 'from-args'
+    assert launcher.teardown
 
 
 def test_launcher_args_parse_multiple_config_paths(config_paths: List[str], env_conf_path: str) -> None:
@@ -77,7 +78,8 @@ def test_launcher_args_parse_multiple_config_paths(config_paths: List[str], env_
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
         f' --environment {env_conf_path}' + \
         ' --globals globals/global_test_config.jsonc' + \
-        ' --experiment_id MockeryExperiment'
+        ' --experiment_id MockeryExperiment' + \
+        ' --no-teardown'
     launcher = Launcher(description="test", argv=cli_args.split())
     # Check that the --globals file is loaded and $var expansion is handled
     # using the value provided on the CLI.
@@ -85,3 +87,7 @@ def test_launcher_args_parse_multiple_config_paths(config_paths: List[str], env_
     assert launcher.global_config['testVmName'] == 'MockeryExperiment-vm'
     # Check that secondary expansion also works.
     assert launcher.global_config['testVnetName'] == 'MockeryExperiment-vm-vnet'
+    assert not launcher.teardown
+
+
+# TODO: Test config file vs. args parsing.
