@@ -14,9 +14,8 @@ import argparse
 import logging
 import sys
 
-from itertools import chain
 from string import Template
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import BaseTypeVar
@@ -245,9 +244,14 @@ class Launcher:
         NOTE: `self.global_config` must be set.
         """
         if isinstance(value, str):
+            if "$" in value:
+                _LOG.warning("Expand vars: %s", value)
             return Template(value).safe_substitute(self.global_config)
         if isinstance(value, dict):
-            return {key: self._expand_vars(val) for (key, val) in value.items()}
+            # Note: we use a loop instead of dict comprehension in order to
+            # allow secondary expansion of subsequent values immediately.
+            for (key, val) in value.items():
+                value[key] = self._expand_vars(val)
         if isinstance(value, list):
             return [self._expand_vars(val) for val in value]
         return value

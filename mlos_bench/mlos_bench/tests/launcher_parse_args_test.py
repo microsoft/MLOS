@@ -40,33 +40,48 @@ def config_paths(root_path: str) -> List[str]:
 
 
 @pytest.fixture
-def minimal_launcher_args(config_paths: List[str]) -> List[str]:
+def env_conf_path() -> str:
     """
-    Returns a list of minimal args necessary for the Launcher.
+    Returns the path to a test environment config file.
+    This is part of the minimal required args by the Launcher.
     """
-    return [
-        '--config-paths', *config_paths,    # provides two config paths as space separate args
-        '--environment', 'environments/mock/mock_env.jsonc',
-    ]
+    return 'environments/mock/mock_env.jsonc'
 
 
-def test_launcher_args_parse_globals(minimal_launcher_args: List[str]) -> None:
+def test_launcher_args_parse_globals(config_paths: List[str], env_conf_path: str) -> None:
     """
-    Test argument parsing.
+    Test that using multiple --globals arguments works and that multiple space
+    separated options to --config-paths works.
     """
-    launcher = Launcher(description="test", argv=[
-        *minimal_launcher_args,
-        # Check that both --globals files are loaded when multiple args are provided.
-        '--globals', 'globals/global_test_config.jsonc',
-        '--globals', 'globals/global_test_extra_config.jsonc',
-        # Check that --some-unknown-key values are loaded into the global config.
-        '--test_global_value_2', 'from-args',
-    ])
+    cli_args = '--config-paths ' + ' '.join(config_paths) + \
+        f' --environment {env_conf_path}' + \
+        ' --globals globals/global_test_config.jsonc' + \
+        ' --globals globals/global_test_extra_config.jsonc' \
+        ' --test_global_value_2 from-args'
+    launcher = Launcher(description="test", argv=cli_args.split())
     # Check that the first --globals file is loaded and $var expansion is handled.
     assert launcher.global_config['experiment_id'] == 'MockExperiment'
     assert launcher.global_config['testVmName'] == 'MockExperiment-vm'
-    assert launcher.global_config['testVnetName'] == 'MockExperiment-vnet'
+    # Check that secondary expansion also works.
+    assert launcher.global_config['testVnetName'] == 'MockExperiment-vm-vnet'
     # Check that the second --globals file is loaded.
     assert launcher.global_config['test_global_value'] == 'from-file'
     # Check overriding values in a file from the command line.
     assert launcher.global_config['test_global_value_2'] == 'from-args'
+
+
+def test_launcher_args_parse_multiple_config_paths(config_paths: List[str], env_conf_path: str) -> None:
+    """
+    Test multiple --config-path instances.
+    """
+    cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
+        f' --environment {env_conf_path}' + \
+        ' --globals globals/global_test_config.jsonc' + \
+        ' --experiment_id MockeryExperiment'
+    launcher = Launcher(description="test", argv=cli_args.split())
+    # Check that the --globals file is loaded and $var expansion is handled
+    # using the value provided on the CLI.
+    assert launcher.global_config['experiment_id'] == 'MockeryExperiment'
+    assert launcher.global_config['testVmName'] == 'MockeryExperiment-vm'
+    # Check that secondary expansion also works.
+    assert launcher.global_config['testVnetName'] == 'MockeryExperiment-vm-vnet'
