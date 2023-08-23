@@ -33,7 +33,7 @@ def _main(input_file: str, output_file: str) -> None:
     with open(input_file, mode='r', encoding='utf-8') as fh_input:
         json_data = json.load(fh_input)
 
-    data = dict(_flat_dict(json_data["jobs"][0], "read"))
+    data = dict(_flat_dict(json_data["jobs"][0]["read"], "read"))
     wide_df = pandas.DataFrame([list(data.values())], columns=list(data.keys()))
 
     wide_df.to_csv(output_file, index=False)
