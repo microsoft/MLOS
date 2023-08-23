@@ -11,6 +11,7 @@ import sys
 import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.util import path_join
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -24,5 +25,6 @@ def config_loader_service() -> ConfigPersistenceService:
     return ConfigPersistenceService(config={
         "config_path": [
             str(files("mlos_bench.tests.config")),
+            path_join(str(files("mlos_bench.tests.config")), "globals"),
         ]
     })
