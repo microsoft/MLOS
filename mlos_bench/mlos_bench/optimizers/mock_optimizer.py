@@ -32,7 +32,7 @@ class MockOptimizer(Optimizer):
                  global_config: Optional[dict] = None,
                  service: Optional[Service] = None):
         super().__init__(tunables, config, global_config, service)
-        rnd = random.Random(config.get("seed", 42))
+        rnd = random.Random(self.seed)
         self._random: Dict[str, Callable[[Tunable], TunableValue]] = {
             "categorical": lambda tunable: rnd.choice(tunable.categories),
             "float": lambda tunable: rnd.uniform(*tunable.range),

@@ -47,6 +47,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._global_config = global_config or {}
         self._tunables = tunables
         self._service = service
+        self._seed = int(config.get("seed", 42))
 
         experiment_id = self._global_config.get('experiment_id')
         self.experiment_id = str(experiment_id).strip() if experiment_id else None
@@ -63,6 +64,20 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     def __repr__(self) -> str:
         opt_direction = 'min' if self._opt_sign > 0 else 'max'
         return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})(config={self._config})"
+
+    @property
+    def seed(self) -> int:
+        """
+        The random seed for the optimizer.
+        """
+        return self._seed
+
+    @property
+    def start_with_defaults(self) -> bool:
+        """
+        Return True if the optimizer should start with the default values.
+        """
+        return self._start_with_defaults
 
     @property
     def target(self) -> str:
