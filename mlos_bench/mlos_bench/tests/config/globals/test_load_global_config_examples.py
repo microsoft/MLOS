@@ -10,12 +10,11 @@ from typing import List
 
 import pytest
 
-from mlos_bench.tests.config import locate_config_examples
+from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.util import path_join
-from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH
 
 
 _LOG = logging.getLogger(__name__)
