@@ -54,7 +54,7 @@ def test_launcher_args_parse_globals(config_paths: List[str], env_conf_path: str
         ' --globals globals/global_test_config.jsonc' + \
         ' --globals globals/global_test_extra_config.jsonc' \
         ' --test_global_value_2 from-args'
-    launcher = Launcher(description="test", argv=cli_args.split())
+    launcher = Launcher(description=__name__, argv=cli_args.split())
     # Check that the first --globals file is loaded and $var expansion is handled.
     assert launcher.global_config['experiment_id'] == 'MockExperiment'
     assert launcher.global_config['testVmName'] == 'MockExperiment-vm'
