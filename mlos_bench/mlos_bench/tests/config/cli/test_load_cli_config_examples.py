@@ -13,6 +13,7 @@ import sys
 
 import pytest
 
+from mlos_bench.tests import check_class_name
 from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -136,12 +137,23 @@ def test_load_cli_config_examples_via_launcher(config_loader_service: ConfigPers
     expected_teardown = config.get('teardown', True)
     assert launcher.teardown == expected_teardown
 
-    # Testing of global processing handled in launcher_parse_args_test.py
+    # Note: Testing of "globals" processing handled in launcher_parse_args_test.py
 
-    # TODO: Instead of just checking that the config is loaded, check that the
+    # Instead of just checking that the config is loaded, check that the
     # Launcher loaded the expected types as well.
+
     assert isinstance(launcher.environment, Environment)
+    env_config = launcher.config_loader.load_config(config["environment"], ConfigSchema.ENVIRONMENT)
+    assert check_class_name(launcher.environment, env_config["class"])
+
     assert isinstance(launcher.optimizer, Optimizer)
+    if "optimizer" in config:
+        opt_config = launcher.config_loader.load_config(config["optimizer"], ConfigSchema.OPTIMIZER)
+        assert check_class_name(launcher.optimizer, opt_config["class"])
+
     assert isinstance(launcher.storage, Storage)
+    if "storage" in config:
+        storage_config = launcher.config_loader.load_config(config["storage"], ConfigSchema.STORAGE)
+        assert check_class_name(launcher.storage, storage_config["class"])
 
     # TODO: Check that the launcher assigns the tunables values as expected.
