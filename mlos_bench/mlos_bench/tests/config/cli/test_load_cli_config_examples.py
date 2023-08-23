@@ -13,13 +13,15 @@ import sys
 
 import pytest
 
-from mlos_bench.tests.config import locate_config_examples
+from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_PATH
 
 from mlos_bench.config.schemas import ConfigSchema
+from mlos_bench.environments import Environment
+from mlos_bench.optimizers import Optimizer
+from mlos_bench.storage import Storage
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.launcher import Launcher
 from mlos_bench.util import path_join
-from mlos_bench.tests.config import BUILTIN_TEST_CONFIG_PATH
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -45,6 +47,7 @@ configs += filter_configs(locate_config_examples(path_join(BUILTIN_TEST_CONFIG_P
 assert configs
 
 
+@pytest.mark.skip(reason="Use full Launcher test (below) instead now.")
 @pytest.mark.parametrize("config_path", configs)
 def test_load_cli_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
@@ -60,7 +63,6 @@ def test_load_cli_config_examples(config_loader_service: ConfigPersistenceServic
     # Foreach arg that references another file, see if we can at least load that too.
     args_to_skip = {
         "config_path",  # handled above
-        "globals",      # we don't commit globals to the repo generally, so skip testing them
         "log_file",
         "log_level",
         "experiment_id",
@@ -71,7 +73,11 @@ def test_load_cli_config_examples(config_loader_service: ConfigPersistenceServic
         if arg in args_to_skip:
             continue
 
-        if arg == "environment":
+        if arg == "globals":
+            for path in config[arg]:
+                sub_config = config_loader_service.load_config(path, ConfigSchema.GLOBALS)
+                assert isinstance(sub_config, dict)
+        elif arg == "environment":
             sub_config = config_loader_service.load_config(config[arg], ConfigSchema.ENVIRONMENT)
             assert isinstance(sub_config, dict)
         elif arg == "optimizer":
@@ -87,10 +93,56 @@ def test_load_cli_config_examples(config_loader_service: ConfigPersistenceServic
         else:
             raise NotImplementedError(f"Unhandled arg {arg} in config {config_path}")
 
+
+@pytest.mark.parametrize("config_path", configs)
+def test_load_cli_config_examples_via_launcher(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+    """Tests loading a config example via the Launcher."""
+    config = config_loader_service.load_config(config_path, ConfigSchema.CLI)
+    assert isinstance(config, dict)
+
     # Try to load the CLI config by instantiating a launcher.
+    # To do this we need to make sure to give it a few extra paths and globals
+    # to look for for our examples.
     cli_args = f"--config {config_path}" + \
         f" --config-path {files('mlos_bench.config')} --config-path {files('mlos_bench.tests.config')}" + \
         f" --config-path {path_join(str(files('mlos_bench.tests.config')), 'globals')}" + \
         f" --globals {files('mlos_bench.tests.config')}/experiments/experiment_test_config.jsonc"
-    launcher = Launcher(description="test", argv=cli_args.split())
+    launcher = Launcher(description=__name__, long_text=config_path, argv=cli_args.split())
     assert launcher
+
+    # Check that some parts of that config are loaded.
+
+    assert ConfigPersistenceService.BUILTIN_CONFIG_PATH in launcher._config_loader._config_path  # pylint: disable=protected-access
+    if config_paths := config.get("config_path"):
+        assert isinstance(config_paths, list)
+        for path in config_paths:
+            # TODO: Check that the order is maintained as well.
+            # pylint: disable=protected-access
+            assert any(_config_path.endswith(path) for _config_path in launcher._config_loader._config_path), \
+                f"Expected {path} to be in {launcher._config_loader._config_path}"
+
+    if 'experiment_id' in config:
+        assert launcher.global_config['experiment_id'] == config['experiment_id']
+    if 'trial_id' in config:
+        assert launcher.global_config['trial_id'] == config['trial_id']
+
+    expected_log_level = logging.getLevelName(config.get('log_level', "INFO"))
+    if isinstance(expected_log_level, int):
+        expected_log_level = logging.getLevelName(expected_log_level)
+    current_log_level = logging.getLevelName(logging.root.getEffectiveLevel())
+    assert current_log_level == expected_log_level
+
+    # TODO: Check that the log_file handler is set correctly.
+
+    expected_teardown = config.get('teardown', True)
+    assert launcher.teardown == expected_teardown
+
+    # Testing of global processing handled in launcher_parse_args_test.py
+
+    # TODO: Instead of just checking that the config is loaded, check that the
+    # Launcher loaded the expected types as well.
+    assert isinstance(launcher.environment, Environment)
+    assert isinstance(launcher.optimizer, Optimizer)
+    assert isinstance(launcher.storage, Storage)
+
+    # TODO: Check that the launcher assigns the tunables values as expected.
