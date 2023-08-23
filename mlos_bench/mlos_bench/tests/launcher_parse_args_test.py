@@ -85,6 +85,7 @@ def test_launcher_args_parse_multiple_config_paths(config_paths: List[str], env_
     assert launcher.global_config['testVnetName'] == 'MockeryExperiment-vm-vnet'
     assert not launcher.teardown
 
+    assert launcher._config_loader._config_path == config_paths  # pylint: disable=protected-access
 
 # TODO: Test config file vs. args parsing.
 # See Also: test_load_cli_config_examples.py

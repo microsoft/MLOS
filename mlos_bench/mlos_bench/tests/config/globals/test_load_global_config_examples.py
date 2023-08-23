@@ -38,7 +38,7 @@ configs += filter_configs(locate_config_examples(path_join(BUILTIN_TEST_CONFIG_P
 assert configs
 
 
-@ pytest.mark.parametrize("config_path", configs)
+@pytest.mark.parametrize("config_path", configs)
 def test_load_globals_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
     """Tests loading a config example."""
     config = config_loader_service.load_config(config_path, ConfigSchema.GLOBALS)
