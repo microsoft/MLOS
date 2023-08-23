@@ -83,6 +83,17 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             self.load_environment_list,
         ])
 
+    @property
+    def config_paths(self) -> List[str]:
+        """
+        Gets the list of config paths this service will search for config files.
+
+        Returns
+        -------
+        List[str]
+        """
+        return list(self._config_path)  # make a copy to avoid modifications
+
     def resolve_path(self, file_path: str,
                      extra_paths: Optional[Iterable[str]] = None) -> str:
         """

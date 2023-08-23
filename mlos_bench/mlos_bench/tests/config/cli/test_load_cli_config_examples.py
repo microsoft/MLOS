@@ -112,14 +112,13 @@ def test_load_cli_config_examples_via_launcher(config_loader_service: ConfigPers
 
     # Check that some parts of that config are loaded.
 
-    assert ConfigPersistenceService.BUILTIN_CONFIG_PATH in launcher._config_loader._config_path  # pylint: disable=protected-access
+    assert ConfigPersistenceService.BUILTIN_CONFIG_PATH in launcher.config_loader.config_paths
     if config_paths := config.get("config_path"):
         assert isinstance(config_paths, list)
         for path in config_paths:
-            # TODO: Check that the order is maintained as well.
-            # pylint: disable=protected-access
-            assert any(_config_path.endswith(path) for _config_path in launcher._config_loader._config_path), \
-                f"Expected {path} to be in {launcher._config_loader._config_path}"
+            # Note: Checks that the order is maintained are handled in launcher_parse_args.py
+            assert any(config_path.endswith(path) for config_path in launcher.config_loader.config_paths), \
+                f"Expected {path} to be in {launcher.config_loader.config_paths}"
 
     if 'experiment_id' in config:
         assert launcher.global_config['experiment_id'] == config['experiment_id']

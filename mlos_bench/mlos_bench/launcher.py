@@ -115,6 +115,13 @@ class Launcher:
 
         self.teardown: bool = bool(args.teardown) if args.teardown is not None else bool(config.get("teardown", True))
 
+    @property
+    def config_loader(self) -> ConfigPersistenceService:
+        """
+        Get the config loader service.
+        """
+        return self._config_loader
+
     @staticmethod
     def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:
         """
