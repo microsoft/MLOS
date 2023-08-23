@@ -302,7 +302,11 @@ class Launcher:
             # pylint: disable=import-outside-toplevel
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, service=self._parent_service,
-                              config={"drivername": "sqlite", "database": ":memory:"})
+                              config={
+                                  "drivername": "sqlite",
+                                  "database": ":memory:",
+                                  "lazy_schema_create": True,
+                              })
         storage = self._load(Storage, args_storage, ConfigSchema.STORAGE)   # type: ignore[type-abstract]
         return storage
 
