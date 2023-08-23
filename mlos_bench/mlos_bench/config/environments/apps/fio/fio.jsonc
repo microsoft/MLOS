@@ -1,0 +1,67 @@
+{
+    "name": "FIO Composite Env",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
+    "config": {
+        "children": [
+            {
+                "name": "Upload FIO job file",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "config": {
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "upload": [
+                        {
+                            "from": "environments/apps/fio/scripts/remote/",
+                            "to": "$experiment_id/$trial_id/scripts/fio"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Run FIO remotely",
+                "class": "mlos_bench.environments.remote.RemoteEnv",
+                "config": {
+                    "required_args": [
+                        "vmName",
+                        "experiment_id",
+                        "trial_id",
+                        "mountPoint"
+                    ],
+                    "setup": [
+                        "sudo apt-get -y install fio"
+                    ],
+                    "run": [
+                        "mkdir -p $mountPoint/$experiment_id/$trial_id/output/fio/",
+                        "sudo fio --output-format=json+ $mountPoint/$experiment_id/$trial_id/scripts/fio/latency-profile.fio > mountPoint/$experiment_id/$trial_id/output/fio/latency-profile.out.json"
+                    ],
+                    "teardown": [
+                        "rm -r /tmp/mlos_bench/fio/"
+                    ]
+                }
+            },
+            {
+                "name": "Download and process FIO data",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "config": {
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "download": [
+                        {
+                            "from": "$experiment_id/$trial_id/output/fio/",
+                            "to": "$PWD/fio-output/"
+                        }
+                    ],
+                    "run": [
+                        "environments/apps/fio/scripts/local/process_fio_results.py fio-output/latency-profile.out.json fio-benchmark.csv"
+                    ],
+                    "read_results_file": "fio-benchmark.csv"
+                }
+            }
+        ]
+    }
+}
