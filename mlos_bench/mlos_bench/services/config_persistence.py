@@ -164,6 +164,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 # Other configs that get loaded may need the schema field
                 # (e.g. Azure ARM templates).
                 del config["$schema"]
+        else:
+            _LOG.warning("Config %s is not validated against a schema.", json_file_name)
         return config   # type: ignore[no-any-return]
 
     def prepare_class_load(self, config: Dict[str, Any],
