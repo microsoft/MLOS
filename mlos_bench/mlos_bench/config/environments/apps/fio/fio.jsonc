@@ -15,7 +15,7 @@
                     "upload": [
                         {
                             "from": "environments/apps/fio/scripts/remote/",
-                            "to": "$experiment_id/$trial_id/scripts/fio"
+                            "to": "$experiment_id/$trial_id/scripts"
                         }
                     ]
                 }
@@ -35,8 +35,10 @@
                         "sudo apt-get -y install fio"
                     ],
                     "run": [
-                        "mkdir -p $mountPoint/$experiment_id/$trial_id/output/fio/",
-                        "sudo fio --output-format=json $mountPoint/$experiment_id/$trial_id/scripts/fio/latency-profile.fio > mountPoint/$experiment_id/$trial_id/output/fio/latency-profile.out.json"
+                        "mkdir -p /tmp/mlos_bench/fio/",
+                        "sudo mkdir -p $mountPoint/$experiment_id/$trial_id/output/fio/",
+                        "sudo fio --output-format=json $mountPoint/$experiment_id/$trial_id/scripts/latency-profile.fio > /tmp/mlos_bench/fio/latency-profile.out.json",
+                        "sudo cp /tmp/mlos_bench/fio/latency-profile.out.json $mountPoint/$experiment_id/$trial_id/output/fio/"
                     ],
                     "teardown": [
                         "rm -r /tmp/mlos_bench/fio/"
@@ -54,13 +56,13 @@
                     "download": [
                         {
                             "from": "$experiment_id/$trial_id/output/fio/",
-                            "to": "$PWD/fio-output/"
+                            "to": "$PWD/fio-output"
                         }
                     ],
                     "run": [
-                        "environments/apps/fio/scripts/local/process_fio_results.py fio-output/latency-profile.out.json fio-benchmark.csv"
+                        "environments/apps/fio/scripts/local/process_fio_results.py fio-output/latency-profile.out.json latency-profile.out.csv"
                     ],
-                    "read_results_file": "fio-benchmark.csv"
+                    "read_results_file": "latency-profile.out.csv"
                 }
             }
         ]
