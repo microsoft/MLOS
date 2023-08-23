@@ -36,7 +36,7 @@
                     ],
                     "run": [
                         "mkdir -p $mountPoint/$experiment_id/$trial_id/output/fio/",
-                        "sudo fio --output-format=json+ $mountPoint/$experiment_id/$trial_id/scripts/fio/latency-profile.fio > mountPoint/$experiment_id/$trial_id/output/fio/latency-profile.out.json"
+                        "sudo fio --output-format=json $mountPoint/$experiment_id/$trial_id/scripts/fio/latency-profile.fio > mountPoint/$experiment_id/$trial_id/output/fio/latency-profile.out.json"
                     ],
                     "teardown": [
                         "rm -r /tmp/mlos_bench/fio/"

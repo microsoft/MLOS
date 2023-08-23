@@ -50,7 +50,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Post-process FIO benchmark results.")
 
     parser.add_argument(
-        "input", help="FIO benchmark results in JSON+ format (downloaded from a remote VM).")
+        "input", help="FIO benchmark results in JSON format (downloaded from a remote VM).")
     parser.add_argument(
         "output", help="Converted FIO benchmark data (CSV, to be consumed by mlos_bench).")
 
