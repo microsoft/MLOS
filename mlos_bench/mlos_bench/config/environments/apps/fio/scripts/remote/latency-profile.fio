@@ -5,17 +5,17 @@
 
 [global]
 bs=4k
-rw=randread
+rw=randrw
 random_generator=lfsr
 direct=1
 ioengine=libaio
 iodepth=128
 # Set max acceptable latency to 500msec
 latency_target=500000
-# profile over a 5s window
-latency_window=5000000
-# 99.9% of IOs must be below the target
-latency_percentile=99.9
+# profile over a 20s window
+latency_window=20000000
+# 99.0% of IOs must be below the target
+latency_percentile=99.0
 
 [device]
 filename=/dev/sda

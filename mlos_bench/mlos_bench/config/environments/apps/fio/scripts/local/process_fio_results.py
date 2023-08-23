@@ -8,6 +8,7 @@ Script for post-processing FIO results for mlos_bench.
 """
 
 import argparse
+import itertools
 import json
 
 from typing import Any, Iterator, Tuple
@@ -33,9 +34,12 @@ def _main(input_file: str, output_file: str) -> None:
     with open(input_file, mode='r', encoding='utf-8') as fh_input:
         json_data = json.load(fh_input)
 
-    data = dict(_flat_dict(json_data["jobs"][0]["read"], "read"))
-    wide_df = pandas.DataFrame([list(data.values())], columns=list(data.keys()))
+    data = dict(itertools.chain(
+        _flat_dict(json_data["jobs"][0], "fio"),
+        _flat_dict(json_data["disk_util"][0], "fio.disk_util")
+    ))
 
+    wide_df = pandas.DataFrame([list(data.values())], columns=list(data.keys()))
     wide_df.to_csv(output_file, index=False)
     print(f"Converted: {input_file} -> {output_file}")
     # print(df)
