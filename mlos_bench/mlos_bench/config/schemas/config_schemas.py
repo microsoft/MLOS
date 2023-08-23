@@ -7,9 +7,10 @@ A simple class for describing where to find different config schemas and validat
 """
 
 import logging
+from logging import warning
 from enum import Enum
 from os import path, walk, environ
-from typing import Dict, Iterator, Mapping
+from typing import Dict, Iterator, Mapping, Optional, Set
 
 import json         # schema files are pure json - no comments
 import jsonschema
@@ -95,6 +96,7 @@ class SchemaStore(Mapping):
 
 
 SCHEMA_STORE = SchemaStore()
+VALIDATION_CACHE: Set[str] = set()
 
 
 class ConfigSchema(Enum):
@@ -118,7 +120,7 @@ class ConfigSchema(Enum):
         assert schema
         return schema
 
-    def validate(self, config: dict) -> None:
+    def validate(self, config: dict, config_id: Optional[str] = None) -> None:
         """
         Validates the given config against this schema.
 
@@ -126,6 +128,9 @@ class ConfigSchema(Enum):
         ----------
         config : dict
             The config to validate.
+        config_id : Optional[str]
+            Unique identifier (e.g., filename the config came from) to act as a
+            cache for schema validation results of the config.
 
         Raises
         ------
@@ -135,7 +140,13 @@ class ConfigSchema(Enum):
         if _SKIP_VALIDATION:
             _LOG.warning("%s is set - skip schema validation", _VALIDATION_ENV_FLAG)
         else:
+            if config_id is not None:
+                if config_id in VALIDATION_CACHE:
+                    _LOG.info("Validation cache hit for %s", config_id)
+                    return
             jsonschema.Draft202012Validator(
                 schema=self.schema,
                 registry=SCHEMA_STORE.registry,     # type: ignore[call-arg]
             ).validate(config)
+            if config_id is not None:
+                VALIDATION_CACHE.add(config_id)

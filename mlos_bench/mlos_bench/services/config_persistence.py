@@ -137,9 +137,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         _LOG.info("Load config: %s", json_file_name)
         with open(json_file_name, mode='r', encoding='utf-8') as fh_json:
             config = json5.load(fh_json)
+            stat = os.stat(fh_json.fileno())
+            file_uid = f"{json_file_name}+{stat.st_mtime}+{stat.st_size}"
         if schema_type is not None:
             try:
-                schema_type.validate(config)
+                schema_type.validate(config, file_uid)
             except (ValidationError, SchemaError) as ex:
                 _LOG.error("Failed to validate config %s against schema type %s at %s",
                            json_file_name, schema_type.name, schema_type.value)
