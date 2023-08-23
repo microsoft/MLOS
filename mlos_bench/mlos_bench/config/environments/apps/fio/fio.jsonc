@@ -55,8 +55,8 @@
                     ],
                     "download": [
                         {
-                            "from": "$experiment_id/$trial_id/output/fio/",
-                            "to": "$PWD/fio-output"
+                            "from": "$experiment_id/$trial_id/output/fio/latency-profile.out.json",
+                            "to": "$PWD/fio-output/latency-profile.out.json"
                         }
                     ],
                     "run": [
