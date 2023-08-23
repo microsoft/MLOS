@@ -52,14 +52,14 @@ class Launcher:
         (args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
-        self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
+        config_path = args.config_path or []
+        self._config_loader = ConfigPersistenceService({"config_path": config_path})
         if args.config:
             config = self._config_loader.load_config(args.config, ConfigSchema.CLI)
             assert isinstance(config, Dict)
-            config_path = config.get("config_path", [])
-            if config_path and not args.config_path:
-                # Reset the config loader with the paths from JSON file.
-                self._config_loader = ConfigPersistenceService({"config_path": config_path})
+            # Merge the args paths for the config loader with the paths from JSON file.
+            config_path += config.get("config_path", [])
+            self._config_loader = ConfigPersistenceService({"config_path": config_path})
         else:
             config = {}
 
