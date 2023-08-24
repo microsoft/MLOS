@@ -107,6 +107,8 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, MockOptimizer)
     # Check that the optimizer got initialized with random values instead of the defaults.
+    # Note: the environment doesn't get updated until suggest() is called to
+    # return these values in run.py.
     assert not launcher.optimizer.tunable_params.is_defaults()
 
     # TODO: Add a check that this flows through and replaces other seed config
