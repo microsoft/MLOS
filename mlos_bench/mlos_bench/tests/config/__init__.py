@@ -46,7 +46,9 @@ def locate_config_examples(root_dir: str,
         examples_filter = list
     config_examples_path = path_join(root_dir, config_examples_dir)
     assert os.path.isdir(config_examples_path)
-    config_examples = examples_filter([path_join(config_examples_path, file)
-                                       for file in
-                                       iglob("**/*.json?", root_dir=config_examples_path, recursive=True)])
-    return config_examples
+    config_examples = []
+    for root, _, dir_files in os.walk(config_examples_path):
+        for file in dir_files:
+            if file.endswith(".json") or file.endswith(".jsonc"):
+                config_examples.append(path_join(root, file))
+    return examples_filter(config_examples)
