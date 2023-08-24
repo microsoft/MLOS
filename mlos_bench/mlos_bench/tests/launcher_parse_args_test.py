@@ -96,8 +96,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     assert not launcher.teardown
 
     config = launcher.config_loader.load_config(config_file, ConfigSchema.CLI)
-    assert launcher.config_loader.config_paths == config_paths \
-        + [path_join(path, abs_path=True) for path in config['config_path']]
+    assert launcher.config_loader.config_paths == [path_join(path, abs_path=True) for path in config_paths + config['config_path']]
 
     # Check that the environment that got loaded looks to be of the right type.
     env_config_file = config['environment']
