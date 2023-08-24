@@ -32,7 +32,7 @@ class SshService(Service, SupportsOSOps, SupportsRemoteExec):
     _POLL_TIMEOUT = 300    # seconds
     _REQUEST_TIMEOUT = 5   # seconds
 
-    def __init__(self, config: dict, parent: Service):
+    def __init__(self, config: dict, global_config: dict, parent: Service):
         """
         Create a new instance of SSH Service.
 
@@ -41,15 +41,17 @@ class SshService(Service, SupportsOSOps, SupportsRemoteExec):
         config : dict
             Free-format dictionary that contains the benchmark environment
             configuration.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
 
         check_required_params(
             config, {
                 "username",
-                "hostname"
+                "hostname",
             }
         )
 

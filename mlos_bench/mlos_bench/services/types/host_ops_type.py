@@ -9,7 +9,7 @@ Protocol interface for Host/VM boot operations.
 from typing import Tuple, Protocol, runtime_checkable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from mlos_bench.environment.status import Status
+    from mlos_bench.environments.status import Status
 
 
 @runtime_checkable

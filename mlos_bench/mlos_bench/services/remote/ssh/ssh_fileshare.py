@@ -20,8 +20,8 @@ _LOG = logging.getLogger(__name__)
 class SshFileShareService(FileShareService):
     """A collection of functions for interacting with SSH servers as file shares."""
 
-    def __init__(self, config: dict, parent: Service):
-        super().__init__(config, parent)
+    def __init__(self, config: dict, global_config: dict, parent: Service):
+        super().__init__(config, global_config, parent)
         raise NotImplementedError("TODO")
 
     def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
