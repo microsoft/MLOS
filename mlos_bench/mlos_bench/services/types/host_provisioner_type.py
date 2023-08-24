@@ -58,7 +58,26 @@ class SupportsHostProvisioning(Protocol):
 
     def deprovision_host(self, params: dict) -> Tuple["Status", dict]:
         """
+        Deprovisions the Host/VM by deleting it.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+
+    def deallocate_host(self, params: dict) -> Tuple["Status", dict]:
+        """
         Deallocates the Host/VM by shutting it down then releasing the compute resources.
+
+        Note: This can cause the VM to arrive on a new host node when its
+        restarted, which may have different performance characteristics.
 
         Parameters
         ----------

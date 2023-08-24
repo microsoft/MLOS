@@ -147,16 +147,21 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
-            self.wait_host_deployment,
-            self.wait_host_operation,
-            self.wait_os_operation,
+            # SupportsHostProvisioning
             self.provision_host,
             self.deprovision_host,
+            self.deallocate_host,
+            self.wait_host_deployment,
+            # SupportsHostOps
             self.start_host,
             self.stop_host,
-            self.shutdown,
             self.restart_host,
+            self.wait_host_operation,
+            # SupportsOSOps
+            self.shutdown,
             self.reboot,
+            self.wait_os_operation,
+            # SupportsRemoteExec
             self.remote_exec,
             self.get_remote_exec_results,
         ])
