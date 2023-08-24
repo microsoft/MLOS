@@ -1,4 +1,3 @@
-# TODO
 #
 # Copyright (c) Microsoft Corporation.
 # Licensed under the MIT License.
@@ -14,11 +13,11 @@ from typing import Callable, Iterable, Tuple
 
 import asyncssh
 
-from mlos_bench.environment.status import Status
-from mlos_bench.service.base_service import Service
-from mlos_bench.service.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.service.types.host_ops_type import SupportsHostOps
-from mlos_bench.service.types.os_ops_type import SupportsOSOps
+from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
+from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
+from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.os_ops_type import SupportsOSOps
 from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
@@ -67,6 +66,3 @@ class SshService(Service, SupportsOSOps, SupportsRemoteExec):
         self._poll_interval = float(config.get("pollInterval", SshService._POLL_INTERVAL))
         self._poll_timeout = float(config.get("pollTimeout", SshService._POLL_TIMEOUT))
         self._request_timeout = float(config.get("requestTimeout", SshService._REQUEST_TIMEOUT))
-
-
-    def _exec
