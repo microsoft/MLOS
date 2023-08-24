@@ -9,7 +9,7 @@ A collection Service functions for managing VMs on Azure.
 import datetime
 import logging
 from base64 import b64decode
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import azure.identity as azure_id
 from azure.keyvault.secrets import SecretClient
@@ -57,6 +57,7 @@ class AzureAuthService(Service, SupportsAuth):
         self._token_expiration_ts = datetime.datetime.utcnow()  # Typically, some future timestamp.
 
         # Login as ourselves
+        self._cred: Union[azure_id.AzureCliCredential, azure_id.CertificateCredential]
         self._cred = azure_id.AzureCliCredential()
 
         # Verify info required for SP auth early
@@ -70,8 +71,7 @@ class AzureAuthService(Service, SupportsAuth):
                 }
             )
 
-
-    def _init_sp(self):
+    def _init_sp(self) -> None:
         # Perform this initialization outside of __init__ so that environment loading tests
         # don't need to specifically mock keyvault interactions out
 
