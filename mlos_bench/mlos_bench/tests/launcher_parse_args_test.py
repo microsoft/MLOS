@@ -67,12 +67,16 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(env_conf_path, ConfigSchema.ENVIRONMENT)
     assert check_class_name(launcher.environment, env_config['class'])
+    # Check that the optimizer looks right.
+    assert isinstance(launcher.optimizer, MockOptimizer)
+    # Check that the optimizer got initialized with defaults.
+    assert launcher.optimizer.tunable_params.is_defaults()
 
 
 def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     """
     Test multiple --config-path instances, --config file vs --arg, --var=val
-    overrides, $var templates, option args, etc.
+    overrides, $var templates, option args, --random-init, etc.
     """
     config_file = 'cli/test-cli-config.jsonc'
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
@@ -102,8 +106,16 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
 
     # Check that the optimizer looks right.
     assert isinstance(launcher.optimizer, MockOptimizer)
-    # TODO: Check that the optimizer got initialized with random values instead of the defaults.
+    # Check that the optimizer got initialized with random values instead of the defaults.
+    assert not launcher.optimizer.tunable_params.is_defaults()
 
-    # TODO: Add a check that this flows through and replaces other seed config values.
+    # TODO: Add a check that this flows through and replaces other seed config
+    # values through the stack.
+    # See Also: #495
+
+    # Check that the value from the file is overridden by the CLI arg.
     assert config['random_seed'] == 42
+    # TODO: This isn't actually respected yet because the `--random-init` only
+    # applies to a temporary Optimizer used to populate the initial values via
+    # random sampling.
     # assert launcher.optimizer.seed == 1234

@@ -76,8 +76,22 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     def start_with_defaults(self) -> bool:
         """
         Return True if the optimizer should start with the default values.
+        Note: This parameter is mutable and will be reset to False after the
+        defaults are first suggested.
         """
         return self._start_with_defaults
+
+    @property
+    def tunable_params(self) -> TunableGroups:
+        """
+        Get the configuration space of the optimizer.
+
+        Returns
+        -------
+        tunables : TunableGroups
+            A collection of covariant groups of tunable parameters.
+        """
+        return self._tunables
 
     @property
     def target(self) -> str:

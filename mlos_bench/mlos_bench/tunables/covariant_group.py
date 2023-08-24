@@ -125,6 +125,16 @@ class CovariantTunableGroup:
         other.reset_is_updated()
         return cpy == other
 
+    def is_defaults(self) -> bool:
+        """
+        Checks whether the currently assigned values of all tunables are at their defaults.
+
+        Returns
+        -------
+        bool
+        """
+        return all(tunable.is_default() for tunable in self._tunables.values())
+
     def restore_defaults(self) -> None:
         """
         Restore all tunable parameters to their default values.
