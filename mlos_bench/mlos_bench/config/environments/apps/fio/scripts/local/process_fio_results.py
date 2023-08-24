@@ -27,22 +27,22 @@ def _flat_dict(data: Any, path: str) -> Iterator[Tuple[str, Any]]:
         yield (path, data)
 
 
-def _main(input_file: str, output_file: str) -> None:
+def _main(input_file: str, output_file: str, prefix: str) -> None:
     """
-    Convert FIO read data from JSON to wide CSV.
+    Convert FIO read data from JSON to tall CSV.
     """
     with open(input_file, mode='r', encoding='utf-8') as fh_input:
         json_data = json.load(fh_input)
 
     data = dict(itertools.chain(
-        _flat_dict(json_data["jobs"][0], "fio"),
-        _flat_dict(json_data["disk_util"][0], "fio.disk_util")
+        _flat_dict(json_data["jobs"][0], prefix),
+        _flat_dict(json_data["disk_util"][0], f"{prefix}.disk_util")
     ))
 
-    wide_df = pandas.DataFrame([list(data.values())], columns=list(data.keys()))
-    wide_df.to_csv(output_file, index=False)
+    tall_df = pandas.DataFrame(data, columns=["metric", "value"])
+    tall_df.to_csv(output_file, index=False)
     print(f"Converted: {input_file} -> {output_file}")
-    # print(df)
+    # print(tall_df)
 
 
 if __name__ == "__main__":
@@ -53,6 +53,9 @@ if __name__ == "__main__":
         "input", help="FIO benchmark results in JSON format (downloaded from a remote VM).")
     parser.add_argument(
         "output", help="Converted FIO benchmark data (CSV, to be consumed by mlos_bench).")
+    parser.add_argument(
+        "--prefix", default="fio",
+        help="Prefix of the metric IDs (default 'fio')")
 
     args = parser.parse_args()
-    _main(args.input, args.output)
+    _main(args.input, args.output, args.prefix)
