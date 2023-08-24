@@ -30,14 +30,17 @@
                         "trial_id",
                         "mountPoint"
                     ],
+                    "const_args": {
+                        "fio_target": "/dev/sda"
+                    },
                     "setup": [
                         "sudo apt-get update",
                         "sudo apt-get -y install fio"
                     ],
                     "run": [
                         "mkdir -p $mountPoint/$experiment_id/$trial_id/output/fio/",
-                        "sudo fio --output-format=json $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > /dev/null",  // warm-up
-                        "sudo fio --output-format=json $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > $mountPoint/$experiment_id/$trial_id/output/fio/readwrite.json"
+                        "sudo fio --output-format=json --filename=$fio_target $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > /dev/null",  // warm-up
+                        "sudo fio --output-format=json --filename=$fio_target $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > $mountPoint/$experiment_id/$trial_id/output/fio/readwrite.json"
                     ]
                 }
             },
