@@ -1,0 +1,88 @@
+{
+    "name": "Boot-time Linux VM configuration",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
+    "include_tunables": ["environments/os/linux/boot/linux-boot-tunables.jsonc"],
+
+    "config": {
+        "children": [
+            // Boot and shutdown Azure VM - all logic is in Python
+            {
+                "name": "Boot Ubuntu VM on Azure",
+                "class": "mlos_bench.environments.remote.OSEnv",
+                "config": {
+                    "required_args": ["vmName"]
+                }
+            },
+            // Local: Generate GRUB config and upload it to the shared storage
+            {
+                "name": "Generate boot parameters for a Ubuntu VM",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+
+                "config": {
+
+                    "tunable_params": ["$linux-boot"],
+
+                    // Values provided from the global config/optimizer:
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    // Dump tunable parameters to a local JSON file:
+                    "dump_params_file": "boot-params.json",
+                    "shell_env_params": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "setup": [
+                        "environments/os/linux/boot/scripts/local/generate_grub_config.py boot-params.json grub.cfg"
+                    ],
+                    "upload": [
+                        {
+                            "from": "grub.cfg",
+                            "to": "$experiment_id/$trial_id/input/grub.cfg"
+                        }
+                    ]
+                }
+            },
+            // Remote: Make sure the VM is up and running, update boot parameters and restart
+            {
+                "name": "Apply boot parameters to a remote Ubuntu VM",
+                "class": "mlos_bench.environments.RemoteEnv",
+                "config": {
+                    "required_args": [
+                        "vmName",
+                        "storageAccountName",
+                        "storageFileShareName",
+                        "storageAccountKey",
+                        "mountPoint",
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "wait_boot": true,
+                    "shell_env_params": [
+                        "storageAccountName",
+                        "storageFileShareName",
+                        "storageAccountKey",
+                        "mountPoint",
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "setup": [
+                        "sudo mkdir -p $mountPoint",
+                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
+                        // TODO: Apply GRUB parameters from config on shared storage at:
+                        // "$mountPoint/$experiment_id/$trial_id/input/grub.cfg"
+                        // "sudo update-grub",
+                        // "sudo shutdown -r now"  // Reboot to apply the parameters
+                        "cat $mountPoint/$experiment_id/$trial_id/input/grub.cfg"
+                    ],
+                    "teardown": [
+                        // "sudo umount $mountPoint"
+                        "echo sudo umount $mountPoint"
+                    ]
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,10 @@
+// *IN-MEMORY* SQLite3 database - effectively, a null storage.
+{
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "config": {
+        // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
+        "drivername": "sqlite",
+        "database": ":memory:"
+    }
+}

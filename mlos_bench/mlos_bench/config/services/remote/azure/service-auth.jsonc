@@ -1,0 +1,6 @@
+{
+    "class": "mlos_bench.services.remote.azure.AzureAuthService",
+    "config": {
+        "tokenRequestInterval": 300  // seconds
+    }
+}

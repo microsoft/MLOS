@@ -9,6 +9,9 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # Windows jobs aren't required to pass atm for the merge group to pass.
+  #merge_group:
+  #  types: [checks_requested]
   schedule:
     - cron: "1 0 * * *"
 
@@ -21,8 +24,8 @@ jobs:
         shell: pwsh
 
     env:
-      CONDA_ENV_NAME: mlos_core
-      CONDA_ENV_YML: mlos_core-windows.yml
+      CONDA_ENV_NAME: mlos
+      CONDA_ENV_YML: mlos-windows.yml
       cache_cur_date: unset
       cache_cur_hour: unset
       cache_prev_hour: unset
@@ -57,7 +60,7 @@ jobs:
       if: github.event_name != 'schedule'
       uses: actions/cache@v3
       with:
-        path: ${{ env.CONDA }}/envs/mlos_core
+        path: ${{ env.CONDA }}/envs/mlos
         key: conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_cur_hour }}
         restore-keys: |
           conda-${{ runner.os }}-${{ env.CONDA_ENV_NAME }}-${{ hashFiles('conda-envs/${{ env.CONDA_ENV_YML }}') }}-${{ hashFiles('mlos_core/setup.py') }}-${{ hashFiles('mlos_bench/setup.py') }}-${{ env.cache_cur_date }}-${{ env.cache_prev_hour }}
@@ -74,7 +77,7 @@ jobs:
     - name: Update and configure conda
       run: |
         conda config --set channel_priority strict
-        #conda update -v -y -n base conda
+        conda update -v -y -n base -c defaults --all
 
     # Try and speed up the pipeline by using a faster solver:
     - name: Install and default to mamba solver
@@ -85,10 +88,17 @@ jobs:
         "CONDA_EXPERIMENTAL_SOLVER=libmamba" >> $env:GITHUB_ENV
         "EXPERIMENTAL_SOLVER=libmamba" >> $env:GITHUB_ENV
 
-    - name: Create/update mlos_core conda environment
+    - name: Create/update mlos conda environment
       run: |
         if (! (conda env list | Select-String -Pattern "^$env:CONDA_ENV_NAME ") ) { conda env create -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML }
         conda env update -v -n $env:CONDA_ENV_NAME -f conda-envs/$env:CONDA_ENV_YML --prune
+
+    - name: Log conda info
+      run: |
+        conda info
+        conda config --show
+        conda config --show-sources
+        conda list -n $env:CONDA_ENV_NAME
 
     # This is moreso about code cleanliness, which is a dev thing, not a
     # functionality thing, and the rules for that change between python versions,
@@ -105,30 +115,4 @@ jobs:
     # split commands across lines with CWD maintained (hence we also require the "cd .." here).
     - name: Generate and test binary distribution files
       run: |
-        # Build the mlos_core wheel.
-        cd mlos_core
-        conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
-        cd ..
-        $mlos_core_whl = (Resolve-Path mlos_core/dist/mlos_core-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
-        echo $mlos_core_whl
-        # Build the mlos_bench wheel.
-        cd mlos_bench
-        conda run -n $env:CONDA_ENV_NAME python setup.py bdist_wheel
-        cd ..
-        $mlos_bench_whl = (Resolve-Path mlos_bench/dist/mlos_bench-*-py3-none-any.whl | Select-Object -ExpandProperty Path)
-        echo $mlos_bench_whl
-        # Setup a clean environment to test installing/using them.
-        $PythonVersReq = (conda list -n $env:CONDA_ENV_NAME | Select-String -AllMatches -Pattern '^python\s+([0-9.]+)\s+').Matches.Groups[1].Value
-        conda create -y -v -n mlos-dist-test-$env:PythonVersion python=${PythonVersReq}
-        conda install -y -v -n mlos-dist-test-$env:PythonVersion vswhere vs2019_win-64
-        conda install -y -v -n mlos-dist-test-$env:PythonVersion conda-forge::GPy
-        conda run -n mlos-dist-test-$env:PythonVersion pip install pytest pytest-timeout pytest-forked pytest-xdist
-        # Install mlos_core wheel.
-        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_core_whl}[full]"
-        # Install mlos_bench wheel.
-        conda run -n mlos-dist-test-$env:PythonVersion pip install "${mlos_bench_whl}[full]"
-        # Just pick one simple test to run for now.
-        # The rest should have been handled in a separate step.
-        conda run -n mlos-dist-test-$env:PythonVersion python -m pytest mlos_core/mlos_core/tests/spaces/spaces_test.py
-        # Run a simple mlos_bench test.
-        conda run -n mlos-dist-test-$env:PythonVersion python -m pytest mlos_bench/mlos_bench/tests/environment/mock_env_test.py
+        .github/workflows/build-dist-test.ps1

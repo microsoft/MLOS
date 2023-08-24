@@ -66,21 +66,28 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> N
 
     # Number of target parameter space dimensions should be fewer than those of the original space
     with pytest.raises(ValueError):
-        _ = LlamaTuneAdapter(input_space, num_low_dims=len(input_space.get_hyperparameter_names()))
+        LlamaTuneAdapter(
+            orig_parameter_space=input_space,
+            num_low_dims=len(list(input_space.keys()))
+        )
 
     # Enable only low-dimensional space projections
-    adapter = LlamaTuneAdapter(input_space, num_low_dims=num_target_space_dims,
-                               special_param_values=None, max_unique_values_per_param=None)
+    adapter = LlamaTuneAdapter(
+        orig_parameter_space=input_space,
+        num_low_dims=num_target_space_dims,
+        special_param_values=None,
+        max_unique_values_per_param=None
+    )
 
     sampled_configs = adapter.target_parameter_space.sample_configuration(size=100)
-    for sampled_config in sampled_configs:
+    for sampled_config in sampled_configs:  # pylint: disable=not-an-iterable # (false positive)
         # Transform low-dim config to high-dim point/config
-        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
+        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=list(sampled_config.keys()))
         orig_config_df = adapter.transform(sampled_config_df)
 
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
-        assert input_space.check_configuration(orig_config) is None
+        input_space.check_configuration(orig_config)
 
         # Transform high-dim config back to low-dim
         target_config_df = adapter.inverse_transform(orig_config_df)
@@ -91,11 +98,11 @@ def test_num_low_dims(num_target_space_dims: int, param_space_kwargs: dict) -> N
 
     # Try inverse projection (i.e., high-to-low) for previously unseen configs
     unseen_sampled_configs = adapter.target_parameter_space.sample_configuration(size=25)
-    for unseen_sampled_config in unseen_sampled_configs:
-        if unseen_sampled_config in sampled_configs:
+    for unseen_sampled_config in unseen_sampled_configs:    # pylint: disable=not-an-iterable # (false positive)
+        if unseen_sampled_config in sampled_configs:        # pylint: disable=unsupported-membership-test # (false positive)
             continue
 
-        unseen_sampled_config_df = pd.DataFrame([unseen_sampled_config.values()], columns=unseen_sampled_config.keys())
+        unseen_sampled_config_df = pd.DataFrame([unseen_sampled_config.values()], columns=list(unseen_sampled_config.keys()))
         with pytest.raises(ValueError):
             _ = adapter.inverse_transform(unseen_sampled_config_df)  # pylint: disable=redefined-variable-type
 
@@ -115,29 +122,30 @@ def test_special_parameter_values_validation() -> None:
     # Only UniformIntegerHyperparameters are currently supported
     with pytest.raises(NotImplementedError):
         special_param_values_dict_1 = {'str': 'choice_1'}
-        _ = LlamaTuneAdapter(
-            input_space,
+        LlamaTuneAdapter(
+            orig_parameter_space=input_space,
             num_low_dims=2,
             special_param_values=special_param_values_dict_1,
-            max_unique_values_per_param=None
+            max_unique_values_per_param=None,
         )
+
     with pytest.raises(NotImplementedError):
         special_param_values_dict_2 = {'cont': -1}
-        _ = LlamaTuneAdapter(
-            input_space,
+        LlamaTuneAdapter(
+            orig_parameter_space=input_space,
             num_low_dims=2,
             special_param_values=special_param_values_dict_2,
-            max_unique_values_per_param=None
+            max_unique_values_per_param=None,
         )
 
     # Special value should belong to parameter value domain
     with pytest.raises(ValueError, match='value domain'):
         special_param_values_dict = {'int': -1}
-        _ = LlamaTuneAdapter(
-            input_space,
+        LlamaTuneAdapter(
+            orig_parameter_space=input_space,
             num_low_dims=2,
             special_param_values=special_param_values_dict,
-            max_unique_values_per_param=None
+            max_unique_values_per_param=None,
         )
 
     # Invalid dicts; ValueError should be thrown
@@ -154,8 +162,12 @@ def test_special_parameter_values_validation() -> None:
     ]
     for spv_dict in invalid_special_param_values_dicts:
         with pytest.raises(ValueError):
-            _ = LlamaTuneAdapter(input_space, num_low_dims=2, special_param_values=spv_dict,
-                                 max_unique_values_per_param=None)
+            LlamaTuneAdapter(
+                orig_parameter_space=input_space,
+                num_low_dims=2,
+                special_param_values=spv_dict,
+                max_unique_values_per_param=None,
+            )
 
     # Biasing percentage of special value(s) are invalid
     invalid_special_param_values_dicts = [
@@ -167,16 +179,21 @@ def test_special_parameter_values_validation() -> None:
         {'int': [(0, 0.4), (1, 0.7)]},  # combined probability >100%
         {'int': [(0, -0.4), (1, 0.7)]},  # probability for value 0 is invalid.
     ]
+
     for spv_dict in invalid_special_param_values_dicts:
         with pytest.raises(ValueError):
-            _ = LlamaTuneAdapter(input_space, num_low_dims=2, special_param_values=spv_dict,
-                                 max_unique_values_per_param=None)
+            LlamaTuneAdapter(
+                orig_parameter_space=input_space,
+                num_low_dims=2,
+                special_param_values=spv_dict,
+                max_unique_values_per_param=None,
+            )
 
 
 def gen_random_configs(adapter: LlamaTuneAdapter, num_configs: int) -> Iterator[CS.Configuration]:
     for sampled_config in adapter.target_parameter_space.sample_configuration(size=num_configs):
         # Transform low-dim config to high-dim config
-        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
+        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=list(sampled_config.keys()))
         orig_config_df = adapter.transform(sampled_config_df)
         orig_config = CS.Configuration(adapter.orig_parameter_space, values=orig_config_df.iloc[0].to_dict())
         yield orig_config
@@ -203,9 +220,14 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
         {'int_1': [0]},
         {'int_1': [(0, bias_percentage)]}
     ]
+
     for spv_dict in special_param_value_dicts:
-        adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
-                                   max_unique_values_per_param=None)
+        adapter = LlamaTuneAdapter(
+            orig_parameter_space=input_space,
+            num_low_dims=1,
+            special_param_values=spv_dict,
+            max_unique_values_per_param=None,
+        )
 
         special_value_occurrences = sum(
             1 for config in gen_random_configs(adapter, num_configs) if config['int_1'] == 0)
@@ -216,9 +238,14 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
         {'int_1': [0, 1]},
         {'int_1': [(0, bias_percentage), (1, bias_percentage)]}
     ]
+
     for spv_dict in special_param_value_dicts:
-        adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
-                                   max_unique_values_per_param=None)
+        adapter = LlamaTuneAdapter(
+            orig_parameter_space=input_space,
+            num_low_dims=1,
+            special_param_values=spv_dict,
+            max_unique_values_per_param=None,
+        )
 
         special_values_occurrences = {0: 0, 1: 0}
         for config in gen_random_configs(adapter, num_configs):
@@ -235,8 +262,12 @@ def test_special_parameter_values_biasing() -> None:    # pylint: disable=too-co
         'int_1': [(0, bias_percentage), (1, bias_percentage / 2)],
         'int_2': [(2, bias_percentage / 2), (100, bias_percentage * 1.5)]
     }
-    adapter = LlamaTuneAdapter(input_space, num_low_dims=1, special_param_values=spv_dict,
-                               max_unique_values_per_param=None)
+    adapter = LlamaTuneAdapter(
+        orig_parameter_space=input_space,
+        num_low_dims=1,
+        special_param_values=spv_dict,
+        max_unique_values_per_param=None,
+    )
 
     special_values_instances: Dict[str, Dict[int, int]] = {
         'int_1': {0: 0, 1: 0},
@@ -281,11 +312,15 @@ def test_max_unique_values_per_param() -> None:
     # Restrict the number of unique parameter values
     num_configs = 200
     for max_unique_values_per_param in (5, 25, 100):
-        adapter = LlamaTuneAdapter(input_space, num_low_dims=3, special_param_values=None,
-                                   max_unique_values_per_param=max_unique_values_per_param)
+        adapter = LlamaTuneAdapter(
+            orig_parameter_space=input_space,
+            num_low_dims=3,
+            special_param_values=None,
+            max_unique_values_per_param=max_unique_values_per_param,
+        )
 
         # Keep track of unique values generated for each parameter
-        unique_values_dict: Dict[str, set] = {param: set() for param in input_space.get_hyperparameter_names()}
+        unique_values_dict: Dict[str, set] = {param: set() for param in list(input_space.keys())}
         for config in gen_random_configs(adapter, num_configs):
             for param, value in config.items():
                 unique_values_dict[param].add(value)
@@ -318,36 +353,45 @@ def test_approx_inverse_mapping(num_target_space_dims: int, param_space_kwargs: 
     input_space = construct_parameter_space(**param_space_kwargs)
 
     # Enable low-dimensional space projection, but disable reverse mapping
-    adapter = LlamaTuneAdapter(input_space, num_low_dims=num_target_space_dims,
-                               special_param_values=None, max_unique_values_per_param=None,
-                               use_approximate_reverse_mapping=False)
-    sampled_config = input_space.sample_configuration(size=1)
+    adapter = LlamaTuneAdapter(
+        orig_parameter_space=input_space,
+        num_low_dims=num_target_space_dims,
+        special_param_values=None,
+        max_unique_values_per_param=None,
+        use_approximate_reverse_mapping=False,
+    )
+
+    sampled_config = input_space.sample_configuration()     # size=1)
     with pytest.raises(ValueError):
-        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
+        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=list(sampled_config.keys()))
         _ = adapter.inverse_transform(sampled_config_df)
 
     # Enable low-dimensional space projection *and* reverse mapping
-    adapter = LlamaTuneAdapter(input_space, num_low_dims=num_target_space_dims,
-                               special_param_values=None, max_unique_values_per_param=None,
-                               use_approximate_reverse_mapping=True)
+    adapter = LlamaTuneAdapter(
+        orig_parameter_space=input_space,
+        num_low_dims=num_target_space_dims,
+        special_param_values=None,
+        max_unique_values_per_param=None,
+        use_approximate_reverse_mapping=True,
+    )
 
     # Warning should be printed the first time
-    sampled_config = input_space.sample_configuration(size=1)
+    sampled_config = input_space.sample_configuration()     # size=1)
     with pytest.warns(UserWarning):
-        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
+        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=list(sampled_config.keys()))
         target_config_df = adapter.inverse_transform(sampled_config_df)
         # Low-dim (i.e., target) config should be valid
         target_config = CS.Configuration(adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict())
-        assert adapter.target_parameter_space.check_configuration(target_config) is None
+        adapter.target_parameter_space.check_configuration(target_config)
 
     # Test inverse transform with 100 random configs
     for _ in range(100):
-        sampled_config = input_space.sample_configuration(size=1)
-        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=sampled_config.keys())
+        sampled_config = input_space.sample_configuration()     # size=1)
+        sampled_config_df = pd.DataFrame([sampled_config.values()], columns=list(sampled_config.keys()))
         target_config_df = adapter.inverse_transform(sampled_config_df)
         # Low-dim (i.e., target) config should be valid
         target_config = CS.Configuration(adapter.target_parameter_space, values=target_config_df.iloc[0].to_dict())
-        assert adapter.target_parameter_space.check_configuration(target_config) is None
+        adapter.target_parameter_space.check_configuration(target_config)
 
 
 @pytest.mark.parametrize(('num_low_dims', 'special_param_values', 'max_unique_values_per_param'), ([
@@ -367,23 +411,27 @@ def test_llamatune_pipeline(num_low_dims: int, special_param_values: dict, max_u
 
     # Define config space with a mix of different parameter types
     input_space = construct_parameter_space(n_continuous_params=10, n_integer_params=10, n_categorical_params=5)
-    adapter = LlamaTuneAdapter(input_space, num_low_dims=num_low_dims, special_param_values=special_param_values,
-                               max_unique_values_per_param=max_unique_values_per_param)
+    adapter = LlamaTuneAdapter(
+        orig_parameter_space=input_space,
+        num_low_dims=num_low_dims,
+        special_param_values=special_param_values,
+        max_unique_values_per_param=max_unique_values_per_param,
+    )
 
     special_value_occurrences = {
         param: {special_value: 0 for special_value, _ in tuples_list}
         for param, tuples_list in adapter._special_param_values_dict.items()    # pylint: disable=protected-access
     }
-    unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.get_hyperparameter_names()}
+    unique_values_dict: Dict[str, Set] = {param: set() for param in input_space.keys()}
 
     num_configs = 1000
-    for config in adapter.target_parameter_space.sample_configuration(size=num_configs):
+    for config in adapter.target_parameter_space.sample_configuration(size=num_configs):    # pylint: disable=not-an-iterable
         # Transform low-dim config to high-dim point/config
-        sampled_config_df = pd.DataFrame([config.values()], columns=config.keys())
+        sampled_config_df = pd.DataFrame([config.values()], columns=list(config.keys()))
         orig_config_df = adapter.transform(sampled_config_df)
         # High-dim (i.e., original) config should be valid
         orig_config = CS.Configuration(input_space, values=orig_config_df.iloc[0].to_dict())
-        assert input_space.check_configuration(orig_config) is None
+        input_space.check_configuration(orig_config)
 
         # Transform high-dim config back to low-dim
         target_config_df = adapter.inverse_transform(orig_config_df)
@@ -435,8 +483,14 @@ def test_deterministic_behavior_for_same_seed(num_target_space_dims: int, param_
         input_space = construct_parameter_space(**param_space_kwargs, seed=seed)
 
         # Init adapter and sample points in the low-dim space
-        adapter = LlamaTuneAdapter(input_space, num_low_dims=num_target_space_dims, special_param_values=None,
-                                   max_unique_values_per_param=None, use_approximate_reverse_mapping=False)
+        adapter = LlamaTuneAdapter(
+            orig_parameter_space=input_space,
+            num_low_dims=num_target_space_dims,
+            special_param_values=None,
+            max_unique_values_per_param=None,
+            use_approximate_reverse_mapping=False,
+        )
+
         sample_configs: List[CS.Configuration] = adapter.target_parameter_space.sample_configuration(size=100)
         return sample_configs
 

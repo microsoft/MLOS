@@ -1,0 +1,10 @@
+{
+    "$schema": "bad/path/to/wrong-schema.json",
+
+    "class": "mlos_bench.optimizers.MockOptimizer",
+
+    "config": {
+        "optimization_target": "score"
+    }
+}
+

@@ -1,0 +1,19 @@
+{
+    "redis": {
+        "cost": 1,
+        "params": {
+            "hz": {
+                "description": "Background tasks frequency",
+                "type": "int",
+                "default": 10,
+                "range": [1, 500]
+            },
+            "dynamic_hz": {
+                "description": "Enable adaptive hz",
+                "type": "categorical",
+                "default": "yes",
+                "values": ["yes", "no"]
+            }
+        }
+    }
+}

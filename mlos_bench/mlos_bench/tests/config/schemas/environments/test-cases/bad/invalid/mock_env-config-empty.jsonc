@@ -1,0 +1,7 @@
+{
+    "name": "mock_env-extras",
+    "class": "mlos_bench.environments.MockEnv",
+    "config": {
+        // needs at least one property, else just omit it
+    }
+}

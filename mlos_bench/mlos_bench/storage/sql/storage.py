@@ -12,7 +12,7 @@ from typing import Optional
 from sqlalchemy import URL, create_engine
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.service.base_service import Service
+from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.experiment import Experiment
@@ -25,16 +25,32 @@ class SqlStorage(Storage):
     An implementation of the Storage interface using SQLAlchemy backend.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
-        super().__init__(tunables, service, config)
-        log_sql = self._config.pop("log_sql", False)
-        url = URL.create(**self._config)
-        self._repr = f"{url.get_backend_name()}:{url.database}"
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
+        super().__init__(tunables, config, global_config, service)
+        lazy_schema_create = self._config.pop("lazy_schema_create", False)
+        self._log_sql = self._config.pop("log_sql", False)
+        self._url = URL.create(**self._config)
+        self._repr = f"{self._url.get_backend_name()}:{self._url.database}"
         _LOG.info("Connect to the database: %s", self)
-        self._engine = create_engine(url, echo=log_sql)
-        self._schema = DbSchema(self._engine).create()
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("DDL statements:\n%s", self._schema)
+        self._engine = create_engine(self._url, echo=self._log_sql)
+        self._db_schema: DbSchema
+        if not lazy_schema_create:
+            assert self._schema
+        else:
+            _LOG.info("Using lazy schema create for database: %s", self)
+
+    @property
+    def _schema(self) -> DbSchema:
+        """Lazily create schema upon first access."""
+        if not hasattr(self, '_db_schema'):
+            self._db_schema = DbSchema(self._engine).create()
+            if _LOG.isEnabledFor(logging.DEBUG):
+                _LOG.debug("DDL statements:\n%s", self._schema)
+        return self._db_schema
 
     def __repr__(self) -> str:
         return self._repr

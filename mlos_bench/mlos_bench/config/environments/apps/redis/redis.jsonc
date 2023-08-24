@@ -1,0 +1,89 @@
+{
+    "name": "Redis Composite Env",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
+    "include_tunables": ["environments/apps/redis/redis-tunables.jsonc"],
+
+    "config": {
+        "children": [
+            // Local: Generate new Redis config and upload it to a shared storage
+            {
+                "name": "Generate Redis configuration",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "config": {
+                    "tunable_params": ["$redis"],
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    // Dump tunable parameters to a local JSON file:
+                    "dump_params_file": "redis-params.json",
+                    "setup": [
+                        "environments/apps/redis/scripts/local/generate_redis_config.py redis-params.json redis.cfg"
+                    ],
+                    // TODO: improve handling of relative paths
+                    "upload": [
+                        {
+                            "from": "redis.cfg",
+                            "to": "$experiment_id/$trial_id/input/redis.cfg"
+                        },
+                        {
+                            "from": "environments/apps/redis/scripts/remote/",
+                            "to": "$experiment_id/$trial_id/scripts"
+                        }
+                    ]
+                }
+            },
+            // Remote: Start Redis with the new config and run the benchmarks
+            {
+                "name": "Benchmark Redis on Linux",
+                "class": "mlos_bench.environments.remote.RemoteEnv",
+                "config": {
+                    "required_args": [
+                        "vmName",
+                        "experiment_id",
+                        "trial_id",
+                        "mountPoint"
+                    ],
+                    "setup": [
+                        "$mountPoint/$experiment_id/$trial_id/scripts/setup-workload.sh",
+                        "$mountPoint/$experiment_id/$trial_id/scripts/setup-app.sh"
+                    ],
+                    "run": [
+                        "mkdir -p /tmp/mlos_bench/output/",
+                        "$mountPoint/$experiment_id/$trial_id/scripts/run-workload.sh",
+                        "mkdir -p $mountPoint/$experiment_id/$trial_id/output/",
+                        "cp -r /tmp/mlos_bench/output/* $mountPoint/$experiment_id/$trial_id/output/"
+                    ],
+                    "teardown": [
+                        "$mountPoint/$experiment_id/$trial_id/scripts/cleanup-workload.sh",
+                        "$mountPoint/$experiment_id/$trial_id/scripts/cleanup-app.sh",
+                        "rm -r /tmp/mlos_bench/"
+                    ]
+                }
+            },
+            // Local: Download Redis benchmark data from the shared storage and process it
+            {
+                "name": "Download and post-process Redis benchmark data",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "config": {
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "download": [
+                        {
+                            "from": "$experiment_id/$trial_id/output",
+                            "to": "$PWD/redis-bench-output/"
+                        }
+                    ],
+                    "run": [
+                        "environments/apps/redis/scripts/local/process_redis_results.py redis-bench-output/results.csv redis-benchmark.csv"
+                    ],
+                    // Read benchmark results from a local CSV file:
+                    "read_results_file": "redis-benchmark.csv"
+                }
+            }
+        ]
+    }
+}

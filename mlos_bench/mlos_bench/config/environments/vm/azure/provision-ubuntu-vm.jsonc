@@ -1,0 +1,11 @@
+{
+    "name": "Deploy Ubuntu VM on Azure",
+    "class": "mlos_bench.environments.remote.VMEnv",
+
+    "include_tunables": ["environments/vm/azure/azure-vm-tunables.jsonc"],
+
+    "config": {
+        "required_args": ["vmName"],
+        "tunable_params": ["$provision"]
+    }
+}

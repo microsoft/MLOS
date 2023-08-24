@@ -1,0 +1,46 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/remote/remote-env-subschema.json",
+    "title": "mlos_bench RemoteEnv config",
+    "description": "Config instance for a mlos_bench RemoteEnv",
+    "type": "object",
+    "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.RemoteEnv",
+                "mlos_bench.environments.remote.RemoteEnv",
+                "mlos_bench.environments.remote.remote_env.RemoteEnv"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "$comment": "config objects need to specify their entire schema, so we need to include the unevaluatedProperties handling here.",
+            "allOf": [
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/common_environment_config"
+                },
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/setup_run_teardown_configs"
+                },
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/shell_env_params_config"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "wait_boot": {
+                            "description": "Whether to wait for the boot process to finish.",
+                            "type": "boolean"
+                        }
+                    }
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": [
+        "class",
+        "config"
+    ]
+}

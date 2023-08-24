@@ -1,0 +1,12 @@
+{
+    "name": "local_env-partial",
+    "class": "mlos_bench.environments.LocalEnv",
+    "config": {
+        "run": [
+            "/bin/true"
+        ],
+        "shell_env_params_mapping": {
+            "invalid.target.name": "/source/param/name"
+        }
+    }
+}

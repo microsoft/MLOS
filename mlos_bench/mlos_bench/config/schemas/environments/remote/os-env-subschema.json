@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/remote/os-env-subschema.json",
+    "title": "mlos_bench OSEnv config",
+    "description": "Config instance for a mlos_bench OSEnv",
+    "type": "object",
+    "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.remote.OSEnv",
+                "mlos_bench.environments.remote.os_env.OSEnv"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "$comment": "NOTE: there aren't currently any additional properties accepted by the OSEnv.  In the future we may want to use an os_type enum to help automatic OS param tuning by default without RemoteEnv requirements.",
+            "allOf": [
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/common_environment_config"
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": [
+        "class"
+    ]
+}

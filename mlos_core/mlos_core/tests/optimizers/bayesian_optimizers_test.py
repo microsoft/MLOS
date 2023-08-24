@@ -27,7 +27,7 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
     """
     if kwargs is None:
         kwargs = {}
-    optimizer = optimizer_class(configuration_space, **kwargs)
+    optimizer = optimizer_class(parameter_space=configuration_space, **kwargs)
     suggestion = optimizer.suggest()
     scores = pd.DataFrame({'score': [1]})
     # test context not implemented errors
@@ -40,7 +40,3 @@ def test_context_not_implemented_error(configuration_space: CS.ConfigurationSpac
     if isinstance(optimizer, BaseBayesianOptimizer):
         with pytest.raises(NotImplementedError):
             optimizer.surrogate_predict(suggestion, context=pd.DataFrame([["something"]]))
-
-        # acquisition function not implemented
-        with pytest.raises(NotImplementedError):
-            optimizer.acquisition_function(suggestion)

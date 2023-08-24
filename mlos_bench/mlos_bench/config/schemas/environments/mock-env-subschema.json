@@ -1,0 +1,55 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/mock-env-subschema.json",
+    "title": "mlos_bench MockEnv config",
+    "description": "Config instance for a mlos_bench MockEnv",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.MockEnv",
+                "mlos_bench.environments.mock_env.MockEnv"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "./common-environment-subschemas.json#/$defs/common_environment_config"
+                },
+                {
+                    "properties": {
+                        "seed": {
+                            "type": "integer",
+                            "description": "Seed for the random number generator",
+                            "default": 0
+                        },
+                        "range": {
+                            "type": "array",
+                            "description": "Range of the random number generator",
+                            "items": {
+                                "type": "integer"
+                            },
+                            "minItems": 2,
+                            "maxItems": 2
+                        },
+                        "metrics": {
+                            "type": "array",
+                            "description": "Names of fake benchmark metrics to be generate",
+                            "items": {
+                                "type": "string",
+                                "examples": ["score"]
+                            },
+                            "minItems": 1,
+                            "uniqueItems": true
+                        }
+                    }
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": [
+        "class"
+    ]
+}

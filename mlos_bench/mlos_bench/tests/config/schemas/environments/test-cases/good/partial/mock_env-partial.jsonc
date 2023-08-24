@@ -1,0 +1,4 @@
+{
+    "name": "mock_env-partial",
+    "class": "mlos_bench.environments.MockEnv"
+}

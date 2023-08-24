@@ -1,0 +1,52 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/cli/globals-schema.json",
+    "title": "mlos_bench globals config",
+    "$comment": "global configs are very similar to tunable values - just a flat dict",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "$comment": "Optionally allow the schema to be specified in the top level of the config, but make sure it matches the expected schema.",
+            "type": "string",
+            "pattern": "/schemas/cli/globals-schema.json$"
+        },
+
+        "tunable_params_map": {
+            "$ref": "./common-defs-subschemas.json#/$defs/tunable_params_map"
+        },
+
+        "experiment_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/experiment_id"
+        },
+        "trial_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/trial_id"
+        },
+        "config_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/config_id"
+        }
+    },
+    "additionalProperties": {
+        "$comment": "Global configs are either strings, numbers, booleans, or nulls, or an array of the same.",
+        "type": [
+            "string",
+            "number",
+            "boolean",
+            "null",
+            "array"
+        ],
+        "items": {
+            "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
+            "type": [
+                "string",
+                "number",
+                "boolean",
+                "null"
+            ]
+        }
+    },
+    "not": {
+        "required": [
+            "tunable_values"
+        ]
+    }
+}

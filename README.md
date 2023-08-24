@@ -1,4 +1,4 @@
-# MlosCore
+# MLOS
 
 [![MLOS DevContainer](https://github.com/microsoft/MLOS/actions/workflows/devcontainer.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/devcontainer.yml)
 [![MLOS Linux](https://github.com/microsoft/MLOS/actions/workflows/linux.yml/badge.svg)](https://github.com/microsoft/MLOS/actions/workflows/linux.yml)
@@ -17,7 +17,7 @@ For these design requirements we intend to reuse as much from existing OSS libra
 
 ## Getting Started
 
-The development environment for MlosCore uses `conda` to ease dependency management.
+The development environment for MLOS uses `conda` to ease dependency management.
 
 ### Devcontainer
 
@@ -35,18 +35,18 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 >
 > See <https://github.com/conda-incubator/conda-libmamba-solver#getting-started> for more details.
 
-0. Create the `mlos_core` Conda environment.
+0. Create the `mlos` Conda environment.
 
      ```sh
-    conda env create -f conda-envs/mlos_core.yml
+    conda env create -f conda-envs/mlos.yml
     ```
 
-    > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos_core-windows.yml`](./conda-envs/mlos_core-windows.yml)).
+    > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos-windows.yml`](./conda-envs/mlos-windows.yml)).
 
    or
 
     ```sh
-    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos_core.yml"
+    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
     make conda-env
     ```
 
@@ -55,12 +55,26 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 1. Initialize the shell environment.
 
     ```sh
-    conda activate mlos_core
+    conda activate mlos
     ```
 
 2. For an example of using the `mlos_core` optimizer APIs run the [`BayesianOptimization.ipynb`](./mlos_core/notebooks/BayesianOptimization.ipynb) notebook.
 
-3. TODO: Add examples of the `mlos_bench` experiment runner APIs.
+3. For an example of using the `mlos_bench` tool to run an experiment, see the [`mlos_bench` Quickstart README](./mlos_bench/README.md#quickstart).
+
+    Here's a quick summary:
+
+    ```shell
+    ./scripts/generate-azure-credentials-config > global_config_azure.json
+
+    # run a simple experiment
+    mlos_bench --config ./mlos_bench/mlos_bench/config/cli/azure-redis-1shot.jsonc
+    ```
+
+    > See Also:
+    >
+    > - [mlos_bench/README.md](./mlos_bench/README.md) for a complete example.
+    > - [mlos_bench/config](./mlos_bench/mlos_bench/config/) for additional configuration details
 
 ## Distributing
 
@@ -73,17 +87,22 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 2. Install it (e.g. after copying it somewhere else).
 
     ```sh
-    # this will install just the optimizer component with emukit support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[emukit]
+    # this will install just the optimizer component with SMAC support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac]
 
-    # this will install just the optimizer component with skopt support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[skopt]
+    # this will install just the optimizer component with flaml support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
+
+    # this will install just the optimizer component with smac and flaml support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac,flaml]
     ```
 
     ```sh
     # this will install both the optimizer and the experiment runner:
     pip install dist/mlos_bench-0.1.0-py3-none-any.whl
     ```
+
+    > Note: exact versions may differ due to automatic versioning.
 
 ## See Also
 

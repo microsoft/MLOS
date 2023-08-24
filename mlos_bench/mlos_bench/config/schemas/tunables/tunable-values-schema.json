@@ -1,0 +1,43 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/tunables/tunable-values-schema.json",
+    "title": "mlos_bench Tunable values config",
+
+    "$defs": {
+        "tunable_values_set": {
+            "type": "object",
+            "patternProperties": {
+                "^[^$]+$": {
+                    "$comment": "Tunable values are either strings, numbers, booleans or nulls.",
+                    "type": ["string", "number", "boolean"]
+                }
+            },
+            "minProperties": 1,
+            "not": {
+                "required": ["tunable_values"]
+            }
+        }
+    },
+
+    "oneOf": [
+        {
+            "description": "Allow a simple object that specifies the tunable values directly.",
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "$schema": {
+                            "$comment": "Optionally allow the schema to be specified in the top level of the config, but make sure it matches the expected schema.",
+                            "type": "string",
+                            "pattern": "/schemas/tunables/tunable-values-schema.json$"
+                        }
+                    }
+                },
+                {
+                    "$ref": "#/$defs/tunable_values_set"
+                }
+            ],
+            "$comment": "TODO: Add support for lists of tunable values as well."
+        }
+    ]
+}

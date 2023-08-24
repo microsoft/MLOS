@@ -4,7 +4,7 @@ Installation
 Development
 -----------
 
-The development environment for MlosCore uses ``conda`` to ease dependency management.
+The development environment for MLOS uses ``conda`` to ease dependency management.
 
 Devcontainer
 ------------
@@ -26,22 +26,22 @@ Manually
     See `<https://github.com/conda-incubator/conda-libmamba-solver#getting-started>`_ for more details.
 
 
-0. Create the `mlos_core` Conda environment.
+0. Create the `mlos` Conda environment.
 
   .. code-block:: shell
 
-    conda env create -f conda-envs/mlos_core.yml
+    conda env create -f conda-envs/mlos.yml
 
 
   .. note::
-    See the `conda-envs/` directory for additional conda environment files, including those used for Windows (e.g. `conda-envs/mlos_core-windows.yml`).
+    See the `conda-envs/` directory for additional conda environment files, including those used for Windows (e.g. `conda-envs/mlos-windows.yml`).
 
 
   or
 
   .. code-block:: shell
 
-    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos_core.yml"
+    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
     make conda-env
 
 
@@ -49,7 +49,7 @@ Manually
 
   .. code-block:: shell
 
-    conda activate mlos_core
+    conda activate mlos
 
 2. Run the BayesianOptimization.ipynb notebook.
 
@@ -66,14 +66,20 @@ Distributing
 
   .. code-block:: shell
 
-    # this will install just the optimizer component with emukit support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[emukit]
+    # this will install just the optimizer component with SMAC support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac]
 
-    # this will install just the optimizer component with skopt support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[skopt]
+    # this will install just the optimizer component with flaml support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]
+
+    # this will install just the optimizer component with smac and flaml support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac,flaml]
 
   .. code-block:: shell
 
     # this will install both the optimizer and the experiment runner:
     pip install dist/mlos_bench-0.1.0-py3-none-any.whl
 
+  .. note::
+
+    Note: exact versions may differ due to automatic versioning.

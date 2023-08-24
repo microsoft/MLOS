@@ -1,0 +1,12 @@
+// Mock optimizer to test the benchmarking framework.
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
+
+    "class": "mlos_bench.optimizers.MockOptimizer",
+
+    "config": {
+        "optimization_target": "score",
+        "max_iterations": 5,
+        "seed": 42
+    }
+}

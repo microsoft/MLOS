@@ -8,13 +8,13 @@ Base interface for saving and restoring the benchmark data.
 
 import logging
 from abc import ABCMeta, abstractmethod
-
+from datetime import datetime
 from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
 
-from mlos_bench.environment.status import Status
-from mlos_bench.service.base_service import Service
+from mlos_bench.environments.status import Status
+from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import get_git_info
 
@@ -28,8 +28,11 @@ class Storage(metaclass=ABCMeta):
     and storage systems (e.g., SQLite or MLFLow).
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service],
-                 config: Dict[str, Any]):
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: Dict[str, Any],
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
         """
         Create a new storage object.
 
@@ -45,6 +48,7 @@ class Storage(metaclass=ABCMeta):
         self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()
+        self._global_config = global_config or {}
 
     @abstractmethod
     def experiment(self, *,
@@ -154,9 +158,31 @@ class Storage(metaclass=ABCMeta):
             """
 
         @abstractmethod
-        def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float]]:
+        def load_config(self, config_id: int) -> Dict[str, Any]:
             """
-            Load (tunable values, benchmark scores) to warm-up the optimizer.
+            Load tunable values for a given config ID.
+            """
+
+        @abstractmethod
+        def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
+            """
+            Retrieve the telemetry data for a given trial.
+
+            Parameters
+            ----------
+            trial_id : int
+                Trial ID.
+
+            Returns
+            -------
+            metrics : List[Tuple[datetime, str, Any]]
+                Telemetry data.
+            """
+
+        @abstractmethod
+        def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
+            """
+            Load (tunable values, benchmark scores, status) to warm-up the optimizer.
             This call returns data from ALL merged-in experiments and attempts
             to impute the missing tunable values.
             """
@@ -196,7 +222,6 @@ class Storage(metaclass=ABCMeta):
         def __init__(self, *,
                      tunables: TunableGroups, experiment_id: str, trial_id: int,
                      config_id: int, opt_target: str, config: Optional[Dict[str, Any]] = None):
-            # pylint: disable=too-many-arguments
             self._tunables = tunables
             self._experiment_id = experiment_id
             self._trial_id = trial_id
@@ -235,12 +260,12 @@ class Storage(metaclass=ABCMeta):
             """
             config = self._config.copy()
             config.update(global_config or {})
-            config["experimentId"] = self._experiment_id
-            config["trialId"] = self._trial_id
+            config["experiment_id"] = self._experiment_id
+            config["trial_id"] = self._trial_id
             return config
 
         @abstractmethod
-        def update(self, status: Status,
+        def update(self, status: Status, timestamp: datetime,
                    metrics: Optional[Union[Dict[str, float], float]] = None
                    ) -> Optional[Dict[str, float]]:
             """
@@ -250,6 +275,8 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Status of the experiment run.
+            timestamp: datetime
+                Timestamp of the status and metrics.
             metrics : Optional[Union[Dict[str, float], float]]
                 One or several metrics of the experiment run.
                 Must contain the optimization target if the status is SUCCEEDED.
@@ -261,14 +288,14 @@ class Storage(metaclass=ABCMeta):
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
             if isinstance(metrics, dict) and self._opt_target not in metrics:
-                _LOG.warning("Trial %s :: opt. target missing: %s", self, self._opt_target)
+                _LOG.warning("Trial %s :: opt.target missing: %s", self, self._opt_target)
                 # raise ValueError(
                 #     f"Optimization target '{self._opt_target}' is missing from {metrics}")
             return {self._opt_target: metrics} if isinstance(metrics, (float, int)) else metrics
 
         @abstractmethod
         def update_telemetry(self, status: Status,
-                             metrics: Optional[Dict[str, float]] = None) -> None:
+                             metrics: List[Tuple[datetime, str, Any]]) -> None:
             """
             Save the experiment's telemetry data and intermediate status.
 
@@ -276,7 +303,7 @@ class Storage(metaclass=ABCMeta):
             ----------
             status : Status
                 Current status of the trial.
-            metrics : Optional[Dict[str, float]]
+            metrics : List[Tuple[datetime, str, Any]]
                 Telemetry data.
             """
-            _LOG.info("Store telemetry: %s :: %s %s", self, status, metrics)
+            _LOG.info("Store telemetry: %s :: %s %d records", self, status, len(metrics))

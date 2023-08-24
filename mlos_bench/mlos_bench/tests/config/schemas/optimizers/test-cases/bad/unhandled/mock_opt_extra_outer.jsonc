@@ -1,0 +1,13 @@
+{
+    "class": "mlos_bench.optimizers.MockOptimizer",
+
+    // Note: this is such a common test case that we also test for it dynamically.
+    "extra_outer": "should not be here",
+
+    "config": {
+        "optimization_target": "score",
+        "max_iterations": 20,
+        "seed": 12345,
+        "start_with_defaults": false
+    }
+}

@@ -1,0 +1,13 @@
+// MLOS Core optimizer
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
+
+    "class": "mlos_bench.optimizers.MlosCoreOptimizer",
+
+    "config": {
+        "optimization_target": "score",
+        "optimization_direction": "min",
+        "max_iterations": 100,
+        "optimizer_type": "FLAML"
+    }
+}

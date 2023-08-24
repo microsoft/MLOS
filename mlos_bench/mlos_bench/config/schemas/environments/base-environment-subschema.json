@@ -1,0 +1,44 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/base-environment-subschema.json",
+    "title": "mlos_bench Base Environment config schema",
+    "description": "Config elements common to all Environments.",
+    "type": "object",
+    "$comment": "See notes regarding intentional lack of $schema property here.",
+    "properties": {
+        "name": {
+            "description": "Name of the Environment.",
+            "type": "string"
+        },
+        "class": {
+            "description": "Class of the Environment.",
+            "type": "string",
+            "$comment": "Exact matches are handled elsewhere.",
+            "pattern": "^mlos_bench[.]environments[.]"
+        },
+        "include_services": {
+            "description": "Path(s) to Service config files to include for the Environment.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "$comment": "Paths are expected to be json.",
+                "pattern": "[.]json[c]?$"
+            },
+            "minItems": 1
+        },
+        "include_tunables": {
+            "description": "Path(s) to TunableParams config files to include for the Environment.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "$comment": "Paths are expected to be json.",
+                "pattern": "[.]json[c]?$"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [
+        "name",
+        "class"
+    ]
+}

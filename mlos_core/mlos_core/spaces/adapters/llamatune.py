@@ -31,34 +31,30 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
     DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM = 10000
     """Default number of (max) unique values of each parameter, when space discretization is used"""
 
-    def __init__(
-        self,
-        orig_config_space: ConfigSpace.ConfigurationSpace,
-        num_low_dims: int = DEFAULT_NUM_LOW_DIMS,
-        special_param_values: Optional[dict] = None,
-        max_unique_values_per_param: Optional[int] = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
-        use_approximate_reverse_mapping: bool = False,
-    ) -> None:  # pylint: disable=too-many-arguments
-        """Create a space adapter that employs LlamaTune's techniques.
+    def __init__(self, *,
+                 orig_parameter_space: ConfigSpace.ConfigurationSpace,
+                 num_low_dims: int = DEFAULT_NUM_LOW_DIMS,
+                 special_param_values: Optional[dict] = None,
+                 max_unique_values_per_param: Optional[int] = DEFAULT_MAX_UNIQUE_VALUES_PER_PARAM,
+                 use_approximate_reverse_mapping: bool = False):
+        """
+        Create a space adapter that employs LlamaTune's techniques.
 
         Parameters
         ----------
-        parameter_space : ConfigSpace.ConfigurationSpace
+        orig_parameter_space : ConfigSpace.ConfigurationSpace
             The original (user-provided) parameter space to optimize.
-
         num_low_dims: int
             Number of dimensions used in the low-dimensional parameter search space.
-
         special_param_values_dict: Optional[dict]
             Dictionary of special
-
         max_unique_values_per_param: Optional[int]:
             Number of unique values per parameter. Used to discretize the parameter space.
             If `None` space discretization is disabled.
         """
-        super().__init__(orig_config_space)
+        super().__init__(orig_parameter_space=orig_parameter_space)
 
-        if num_low_dims >= len(orig_config_space):
+        if num_low_dims >= len(orig_parameter_space):
             raise ValueError("Number of target config space dimensions should be less than those of original config space.")
 
         # Validate input special param values dict
@@ -70,12 +66,12 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
         # Initialize config values scaler: from (-1, 1) to (0, 1) range
         config_scaler = MinMaxScaler(feature_range=(0, 1))
-        ones_vector = np.ones(len(self.orig_parameter_space.get_hyperparameters()))
+        ones_vector = np.ones(len(list(self.orig_parameter_space.values())))
         config_scaler.fit([-ones_vector, ones_vector])
         self._config_scaler = config_scaler
 
         # Generate random mapping from low-dimensional space to original config space
-        num_orig_dims = len(self.orig_parameter_space.get_hyperparameters())
+        num_orig_dims = len(list(self.orig_parameter_space.values()))
         self._h_matrix = self._random_state.choice(range(num_low_dims), num_orig_dims)
         self._sigma_vector = self._random_state.choice([-1, 1], num_orig_dims)
 
@@ -100,7 +96,10 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
             # respective high-dim point; this way we can retrieve the low-dim point, from its high-dim counterpart.
             if target_config is None:
                 # Inherently it is not supported to register points, which were not suggested by the optimizer.
-                if not self._use_approximate_reverse_mapping:
+                if configuration == self.orig_parameter_space.get_default_configuration():
+                    # Default configuration should always be registerable.
+                    pass
+                elif not self._use_approximate_reverse_mapping:
                     raise ValueError(f"{repr(configuration)}\n" "The above configuration was not suggested by the optimizer. "
                                      "Approximate reverse mapping is currently disabled; thus *only* configurations suggested "
                                      "previously by the optimizer can be registered.")
@@ -117,7 +116,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
 
             target_configurations.append(target_config)
 
-        return pd.DataFrame(target_configurations, columns=self.target_parameter_space.get_hyperparameter_names())
+        return pd.DataFrame(target_configurations, columns=list(self.target_parameter_space.keys()))
 
     def transform(self, configuration: pd.DataFrame) -> pd.DataFrame:
         if len(configuration) != 1:
@@ -133,7 +132,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         # Add to inverse dictionary -- needed for registering the performance later
         self._suggested_configs[orig_configuration] = target_configuration
 
-        return pd.DataFrame([orig_values_dict.values()], columns=self.orig_parameter_space.get_hyperparameter_names())
+        return pd.DataFrame([orig_values_dict.values()], columns=list(self.orig_parameter_space.keys()))
 
     def _construct_low_dim_space(self, num_low_dims: int, max_unique_values_per_param: Optional[int]) -> None:
         """Constructs the low-dimensional parameter (potentially discretized) search space.
@@ -191,7 +190,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         configuration : dict
             Projected configuration in the high-dimensional original search space.
         """
-        original_parameters = self.orig_parameter_space.get_hyperparameters()
+        original_parameters = list(self.orig_parameter_space.values())
         low_dim_config_values = list(configuration.values())
 
         if self._q_scaler is not None:
@@ -280,14 +279,14 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
         """
         error_prefix = "Validation of special parameter values dict failed."
 
-        all_parameters = self.orig_parameter_space.get_hyperparameter_names()
+        all_parameters = list(self.orig_parameter_space.keys())
         sanitized_dict = {}
 
         for param, value in special_param_values_dict.items():
             if param not in all_parameters:
                 raise ValueError(error_prefix + f"Parameter '{param}' does not exist.")
 
-            hyperparameter = self.orig_parameter_space.get_hyperparameter(param)
+            hyperparameter = self.orig_parameter_space[param]
             if not isinstance(hyperparameter, ConfigSpace.UniformIntegerHyperparameter):
                 raise NotImplementedError(error_prefix + f"Parameter '{param}' is not supported. "
                                           "Only Integer Hyperparameters are currently supported.")
@@ -351,8 +350,8 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
              "This inverse configuration transformation is typically not supported. " +
              "However, we will try to register this configuration using an *experimental* method.", UserWarning)
 
-        orig_space_num_dims = len(self.orig_parameter_space.get_hyperparameters())
-        target_space_num_dims = len(self.target_parameter_space.get_hyperparameters())
+        orig_space_num_dims = len(list(self.orig_parameter_space.values()))
+        target_space_num_dims = len(list(self.target_parameter_space.values()))
 
         # Construct dense projection matrix from sparse repr
         proj_matrix = np.zeros(shape=(orig_space_num_dims, target_space_num_dims))

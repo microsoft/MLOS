@@ -1,0 +1,165 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/common-environment-subschemas.json",
+    "title": "mlos_bench common Environment config subschemas",
+    "description": "config elements common to several Environments.",
+    "$defs": {
+        "common_environment_config": {
+            "$comment": "A set of properties all Environment configs use.",
+            "type": "object",
+            "properties": {
+                "tunable_params": {
+                    "type": "array",
+                    "description": "The names of tunable groups to reference (i.e., keys from the tunable params).",
+                    "items": {
+                        "type": "string"
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "required_args": {
+                    "description": "Required arguments for the Environment to instantiate. These can be presented as environment variables for scripts to use.",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "const_args": {
+                    "description": "Default argument value constants to use for the Environment when not overridden by globals.",
+                    "type": "object",
+                    "additionalProperties": {
+                        "$comment": "The value of any const_arg can be a string, number, boolean, or null, or an array of the same.",
+                        "type": [
+                            "string",
+                            "number",
+                            "boolean",
+                            "null",
+                            "array"
+                        ],
+                        "items": {
+                            "$comment": "The value of any const_arg list can be a string, number, boolean, or null.",
+                            "type": [
+                                "string",
+                                "number",
+                                "boolean",
+                                "null"
+                            ]
+                        }
+                    }
+                }
+            },
+            "minProperties": 1
+        },
+
+        "command_lines": {
+            "type": "array",
+            "description": "The command lines to execute.",
+            "items": {
+                "$comment": "TODO: Add support for array syntax for command lines that execute without a shell.",
+                "type": [
+                    "string"
+                ]
+            },
+            "minItems": 1
+        },
+
+        "setup_run_teardown_configs": {
+            "type": "object",
+            "properties": {
+                "setup": {
+                    "description": "The command lines to execute for the setup phase.",
+                    "$ref": "#/$defs/command_lines"
+                },
+                "run": {
+                    "description": "The command lines to execute for the run phase.",
+                    "$ref": "#/$defs/command_lines"
+                },
+                "teardown": {
+                    "description": "The command lines to execute for the teardown phase.",
+                    "$ref": "#/$defs/command_lines"
+                }
+            }
+        },
+
+        "shell_param_type": {
+            "description": "All parameters must be valid shell variable names, else use shell_env_params_mapping.",
+            "type": "string",
+            "pattern": "^[a-zA-Z_][a-zA-Z0-9_]+$"
+        },
+        "shell_env_params_config": {
+            "type": "object",
+            "properties": {
+                "shell_env_params_match": {
+                    "description": "A list of regexes to match against the environment parameters. All matches will be exposed to shell commands as environment variables.",
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "format": "regex",
+                        "examples": [
+                            "^MLOS_[a-zA-Z0-9_]+$"
+                        ]
+                    }
+                },
+                "shell_env_params": {
+                    "description": "An explicit list of parameters (and their values) to pass to the shell as environment variables.  These will override any parameters matched by shell_env_params_match.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/$defs/shell_param_type"
+                    },
+                    "uniqueItems": true,
+                    "minItems": 1
+                },
+                "shell_env_params_mapping": {
+                    "description": "An explicit mapping of environment variable names from params to be populated with the parameter values and passed to the shell commands. These will override any parameters matched by shell_env_params_match.",
+                    "type": "object",
+                    "propertyNames": {
+                        "$ref": "#/$defs/shell_param_type"
+                    },
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+
+        "file_download_config": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "description": "Remote path to download the file from.",
+                    "type": "string"
+                },
+                "to": {
+                    "description": "Local path to download the file to.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "from",
+                "to"
+            ],
+            "unevaluatedProperties": false
+        },
+
+        "file_upload_config": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "description": "Local path to upload the file from.",
+                    "type": "string"
+                },
+                "to": {
+                    "description": "Remote path to upload the file to.",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "from",
+                "to"
+            ],
+            "unevaluatedProperties": false
+        }
+    }
+}

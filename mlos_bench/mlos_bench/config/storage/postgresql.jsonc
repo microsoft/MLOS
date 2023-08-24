@@ -1,0 +1,17 @@
+// PostgreSQL storage.
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/storage/storage-schema.json",
+
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "config": {
+        "log_sql": false,  // Write all SQL statements to the log.
+        // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
+        "drivername": "postgresql+psycopg2",
+        "database": "osat",
+        "username": "postgres",
+        "password": "PLACERHOLDER PASSWORD",  // Comes from global config
+        "host": "localhost",
+        "port": 5432
+    }
+}

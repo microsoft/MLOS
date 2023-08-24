@@ -13,6 +13,7 @@ from typing import Optional, Tuple, List, Dict, Iterator, Any
 
 from sqlalchemy import Engine, Connection, Table, column, func
 
+from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
@@ -88,24 +89,44 @@ class Experiment(Storage.Experiment):
         _LOG.info("Merge: %s <- %s", self._experiment_id, experiment_ids)
         raise NotImplementedError()
 
-    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[float]]:
-        configs = []
-        scores = []
+    def load_config(self, config_id: int) -> Dict[str, Any]:
+        with self._engine.connect() as conn:
+            return self._get_params(conn, self._schema.config_param, config_id=config_id)
+
+    def load_telemetry(self, trial_id: int) -> List[Tuple[datetime, str, Any]]:
+        with self._engine.connect() as conn:
+            cur_telemetry = conn.execute(
+                self._schema.trial_telemetry.select().where(
+                    self._schema.trial_telemetry.c.exp_id == self._experiment_id,
+                    self._schema.trial_telemetry.c.trial_id == trial_id
+                ).order_by(
+                    self._schema.trial_telemetry.c.ts,
+                    self._schema.trial_telemetry.c.metric_id,
+                )
+            )
+            return [(row.ts, row.metric_id, row.metric_value)
+                    for row in cur_telemetry.fetchall()]
+
+    def load(self, opt_target: Optional[str] = None) -> Tuple[List[dict], List[Optional[float]], List[Status]]:
+        opt_target = opt_target or self._opt_target
+        (configs, scores, status) = ([], [], [])
         with self._engine.connect() as conn:
             cur_trials = conn.execute(
                 self._schema.trial.select().with_only_columns(
                     self._schema.trial.c.trial_id,
                     self._schema.trial.c.config_id,
+                    self._schema.trial.c.status,
                     self._schema.trial_result.c.metric_value,
                 ).join(
                     self._schema.trial_result, (
                         (self._schema.trial.c.exp_id == self._schema.trial_result.c.exp_id) &
                         (self._schema.trial.c.trial_id == self._schema.trial_result.c.trial_id)
-                    )
+                    ), isouter=True
                 ).where(
-                    self._schema.trial.c.status == 'SUCCEEDED',
                     self._schema.trial.c.exp_id == self._experiment_id,
-                    self._schema.trial_result.c.metric_id == (opt_target or self._opt_target),
+                    self._schema.trial.c.status.in_(['SUCCEEDED', 'FAILED', 'TIMED_OUT']),
+                    (self._schema.trial_result.c.metric_id.is_(None) |
+                     (self._schema.trial_result.c.metric_id == opt_target)),
                 ).order_by(
                     self._schema.trial.c.trial_id.asc(),
                 )
@@ -114,8 +135,9 @@ class Experiment(Storage.Experiment):
                 tunables = self._get_params(
                     conn, self._schema.config_param, config_id=trial.config_id)
                 configs.append(tunables)
-                scores.append(float(trial.metric_value))
-            return (configs, scores)
+                scores.append(None if trial.metric_value is None else float(trial.metric_value))
+                status.append(Status[trial.status])
+            return (configs, scores, status)
 
     @staticmethod
     def _get_params(conn: Connection, table: Table, **kwargs: Any) -> Dict[str, Any]:
@@ -191,7 +213,7 @@ class Experiment(Storage.Experiment):
                     exp_id=self._experiment_id,
                     trial_id=self._trial_id,
                     config_id=config_id,
-                    ts_start=datetime.now(),
+                    ts_start=datetime.utcnow(),
                     status='PENDING',
                 ))
                 if config is not None:

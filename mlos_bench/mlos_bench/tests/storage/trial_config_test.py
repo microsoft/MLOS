@@ -23,8 +23,8 @@ def test_exp_trial_pending(exp_storage_memory_sql: Storage.Experiment,
     assert pending.config() == {
         "location": "westus2",
         "num_repeats": "100",
-        "experimentId": "Test-001",
-        "trialId": 1,
+        "experiment_id": "Test-001",
+        "trial_id": 1,
     }
 
 
@@ -34,7 +34,7 @@ def test_exp_trial_configs(exp_storage_memory_sql: Storage.Experiment,
     Start multiple trials with two different configs and check that
     we store only two config objects in the DB.
     """
-    config1 = tunable_groups.copy().assign({'rootfs': 'ext4'})
+    config1 = tunable_groups.copy().assign({'idle': 'mwait'})
     trials1 = [
         exp_storage_memory_sql.new_trial(config1),
         exp_storage_memory_sql.new_trial(config1),
@@ -43,7 +43,7 @@ def test_exp_trial_configs(exp_storage_memory_sql: Storage.Experiment,
     assert trials1[0].config_id == trials1[1].config_id
     assert trials1[0].config_id == trials1[2].config_id
 
-    config2 = tunable_groups.copy().assign({'rootfs': 'xfs'})
+    config2 = tunable_groups.copy().assign({'idle': 'halt'})
     trials2 = [
         exp_storage_memory_sql.new_trial(config2),
         exp_storage_memory_sql.new_trial(config2),

@@ -58,9 +58,9 @@ class DbSchema:
             "experiment",
             self._meta,
             Column("exp_id", String(255), nullable=False),
-            Column("description", String),
-            Column("root_env_config", String, nullable=False),
-            Column("git_repo", String, nullable=False),
+            Column("description", String(1024)),
+            Column("root_env_config", String(1024), nullable=False),
+            Column("git_repo", String(1024), nullable=False),
             Column("git_commit", String(40), nullable=False),
 
             PrimaryKeyConstraint("exp_id"),
@@ -91,7 +91,7 @@ class DbSchema:
             Column("config_id", Integer, nullable=False),
             Column("ts_start", DateTime, nullable=False, default="now"),
             Column("ts_end", DateTime),
-            # Should match the text IDs of `mlos_bench.environment.Status` enum:
+            # Should match the text IDs of `mlos_bench.environments.Status` enum:
             Column("status", String(16), nullable=False),
 
             PrimaryKeyConstraint("exp_id", "trial_id"),

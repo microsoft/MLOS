@@ -1,0 +1,6 @@
+{
+    "extra": "params are allowed here",
+    "object": {
+        "item": "not allowed"
+    }
+}

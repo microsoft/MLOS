@@ -1,0 +1,34 @@
+name: mlos
+channels:
+  - defaults
+dependencies:
+  # Basic dev environment packages.
+  # All other dependencies for the mlos modules come from pip.
+  - pip
+  - pylint
+  - pycodestyle
+  - pydocstyle
+  - flake8
+  - setuptools
+  - setuptools-scm
+  - jupyter
+  - ipykernel
+  - nb_conda_kernels
+  - matplotlib
+  - seaborn
+  - swig
+  - python
+  - pip:
+    - autopep8>=1.7.0
+    - bump2version
+    - check-jsonschema
+    - licenseheaders
+    - mypy
+    - pandas-stubs
+    - types-colorama
+    - types-jsonschema
+    - types-pygments
+    - types-requests
+    - types-setuptools
+    - "--editable ../mlos_core[full-tests]"
+    - "--editable ../mlos_bench[full-tests]"

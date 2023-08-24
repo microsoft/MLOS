@@ -1,0 +1,82 @@
+{
+    "name": "Configure Linux VM at runtime",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
+    "include_tunables": ["environments/os/linux/runtime/linux-runtime-tunables.jsonc"],
+
+    "config": {
+        "children": [
+            // Local: Generate kernel config and upload it to the shared storage
+            {
+                "name": "Generate Linux kernel parameters for Ubuntu",
+                "class": "mlos_bench.environments.LocalFileShareEnv",
+
+                "config": {
+
+                    "tunable_params": ["$linux-runtime"],
+
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    // Dump tunable parameters to a local JSON file:
+                    "dump_params_file": "kernel-params.json",
+                    "dump_meta_file": "kernel-params-meta.json",
+                    "shell_env_params": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "setup": [
+                        "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py kernel-params.json kernel-params-meta.json config-kernel.sh"
+                    ],
+                    "upload": [
+                        {
+                            "from": "config-kernel.sh",
+                            "to": "$experiment_id/$trial_id/input/config-kernel.sh"
+                        },
+                        // We don't really need `kernel-params*.json` files on the remote side,
+                        // but it's nice to have them in a shared storage for debugging purposes.
+                        {
+                            "from": "kernel-params.json",
+                            "to": "$experiment_id/$trial_id/input/kernel-params.json"
+                        },
+                        {
+                            "from": "kernel-params-meta.json",
+                            "to": "$experiment_id/$trial_id/input/kernel-params-meta.json"
+                        }
+                    ]
+                }
+            },
+            // Remote: Apply new kernel configuration to a VM
+            {
+                "name": "Apply Linux kernel parameters to a remote Ubuntu VM",
+                "class": "mlos_bench.environments.remote.RemoteEnv",
+                "config": {
+                    "required_args": [
+                        "vmName",
+                        "storageAccountName",
+                        "storageFileShareName",
+                        "storageAccountKey",
+                        "mountPoint",
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "wait_boot": true,
+                    "shell_env_params": [
+                        "storageAccountName",
+                        "storageFileShareName",
+                        "storageAccountKey",
+                        "mountPoint",
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "setup": [
+                        "sudo mkdir -p $mountPoint",
+                        "sudo mount -t cifs //$storageAccountName.file.core.windows.net/$storageFileShareName $mountPoint -o username=$storageAccountName,password=\"$storageAccountKey\",serverino,nosharesock,actimeo=30",
+                        "sudo $mountPoint/$experiment_id/$trial_id/input/config-kernel.sh"
+                    ]
+                }
+            }
+        ]
+    }
+}

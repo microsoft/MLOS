@@ -1,0 +1,75 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/composite-env-subschema.json",
+    "title": "mlos_bench Composite Environment config",
+    "description": "Config instance for a Composite mlos_bench Environment",
+    "type": "object",
+    "allOf": [
+        {
+            "$ref": "./base-environment-subschema.json"
+        },
+        {
+            "properties": {
+                "class": {
+                    "enum": [
+                        "mlos_bench.environments.CompositeEnv",
+                        "mlos_bench.environments.composite_env.CompositeEnv"
+                    ]
+                },
+                "config": {
+                    "type": "object",
+                    "$comment": "config objects need to specify their entire schema, so we need to include the unevaluatedProperties handling here.",
+                    "allOf": [
+                        {
+                            "$ref": "./common-environment-subschemas.json#/$defs/common_environment_config"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "include_children": {
+                                    "description": "List of child environment config files to include in the composite environment.",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string",
+                                        "pattern": "[.]json[c]?$"
+                                    },
+                                    "uniqueItems": true,
+                                    "minItems": 1
+                                },
+                                "children": {
+                                    "description": "List of inline child environment configs to include in the composite environment.",
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "anyOf": [
+                                            {
+                                                "$ref": "./leaf-environment-subschemas.json"
+                                            },
+                                            {
+                                                "$comment": "Allow inline nested composite envs as well.",
+                                                "$ref": "#"
+                                            }
+                                        ],
+                                        "unevaluatedProperties": false
+                                    },
+                                    "uniqueItems": true,
+                                    "minItems": 1
+                                }
+                            },
+                            "anyOf": [
+                                {
+                                    "required": ["include_children"]
+                                },
+                                {
+                                    "required": ["children"]
+                                }
+                            ]
+                        }
+                    ],
+                    "unevaluatedProperties": false
+                }
+            },
+            "required": ["class", "config"]
+        }
+    ]
+}

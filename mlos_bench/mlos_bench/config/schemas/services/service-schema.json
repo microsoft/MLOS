@@ -1,0 +1,107 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    "title": "mlos_bench Service config",
+    "description": "config for an mlos_bench Service - this is the top level schema that should be used to validate a Service config",
+    "$defs": {
+        "service_config": {
+            "type": "object",
+            "$comment": "additional service types should be added here",
+            "oneOf": [
+                {
+                    "$ref": "./local/local-exec-service-subschema.json"
+                },
+                {
+                    "$ref": "./local/temp-dir-context-service-subschema.json"
+                },
+                {
+                    "$ref": "./local/mock/mock-local-exec-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/mock/mock-fileshare-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/mock/mock-vm-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/mock/mock-remote-exec-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/azure/azure-auth-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/azure/azure-vm-service-subschema.json"
+                },
+                {
+                    "$ref": "./remote/azure/azure-fileshare-service-subschema.json"
+                }
+            ],
+            "required": [
+                "class",
+                "config"
+            ]
+        },
+        "top_level_items": {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "description": "The schema to use for validating an Service config (accepts both URLs and local paths).",
+                    "type": "string",
+                    "$comment": "This is optional, but if provided, should match the name of this file.  However, we don't expect it to be included in nested configs, so it isn't present in the base config schema.",
+                    "pattern": "/schemas/services/service-schema.json$"
+                },
+                "description": {
+                    "description": "Optional description of the config.",
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "oneOf": [
+        {
+            "description": "Single flat Service config",
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/$defs/top_level_items"
+                },
+                {
+                    "$ref": "#/$defs/service_config"
+                }
+            ],
+            "required": [
+                "class",
+                "config"
+            ]
+        },
+        {
+            "$comment": "We no longer accept a flat list of Service objects.",
+            "description": "Object with list of Service configs.",
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "#/$defs/top_level_items"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "services": {
+                            "description": "List of Service configs.",
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/$defs/service_config"
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
+                        }
+                    }
+                }
+            ],
+            "unevaluatedProperties": false,
+            "required": [
+                "services"
+            ]
+        }
+    ],
+    "unevaluatedProperties": false
+}

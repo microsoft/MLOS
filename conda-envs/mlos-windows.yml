@@ -1,0 +1,40 @@
+name: mlos
+channels:
+  # Note: we have to reverse the channel priority for Windows to accomodate strict channel_priority setups.
+  # Hence, additional dependencies may differ from the Linux setup.
+  - conda-forge
+  - defaults
+dependencies:
+  # Basic dev environment packages.
+  # All other dependencies for the mlos modules come from pip.
+  - pip
+  - pylint
+  - pycodestyle
+  - pydocstyle
+  - flake8
+  - setuptools
+  - setuptools-scm
+  - jupyter
+  - ipykernel
+  - nb_conda_kernels
+  - matplotlib
+  - seaborn
+  - swig
+  - python
+  # Install an SMAC requirement pre-compiled from conda-forge.
+  # This also requires a more recent vs2015_runtime from conda-forge.
+  - conda-forge::pyrfr>=0.9.0
+  - pip:
+    - autopep8>=1.7.0
+    - bump2version
+    - check-jsonschema
+    - licenseheaders
+    - mypy
+    - pandas-stubs
+    - types-jsonschema
+    - types-colorama
+    - types-pygments
+    - types-requests
+    - types-setuptools
+    - "--editable ../mlos_core[full-tests]"
+    - "--editable ../mlos_bench[full-tests]"

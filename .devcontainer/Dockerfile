@@ -10,8 +10,10 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
         bash bash-completion \
         less colordiff \
         curl jq \
+        ripgrep \
         vim-nox neovim python3-pynvim \
         make \
+        rename \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && echo "C-w: unix-filename-rubout" >> /etc/inputrc
     # Also tweak C-w to stop at slashes as well instead of just spaces
@@ -41,7 +43,7 @@ RUN umask 0002 \
     && /opt/conda/bin/conda config --set solver libmamba
 
 # Update the base. This helps save space by making sure the same version
-# python is used for both the base env and mlos_core env.
+# python is used for both the base env and mlos env.
 RUN umask 0002 \
     && /opt/conda/bin/conda update -v -y -n base -c defaults --all \
     && /opt/conda/bin/conda clean -v -y -a
@@ -50,28 +52,28 @@ RUN umask 0002 \
 RUN umask 0002 \
     && /opt/conda/bin/conda run -n base pip install --no-cache-dir -U pynvim
 
-# Setup (part of) the mlos_core environment in the devcontainer.
+# Setup (part of) the mlos environment in the devcontainer.
 # NOTEs:
-# - The mlos_core_deps.yml file is prepared by the prep-container-build script(s).
+# - The mlos_deps.yml file is prepared by the prep-container-build script(s).
 # - The rest happens during first container start once the source is available.
 # See Also: updateContentCommand in .devcontainer/devcontainer.json
 RUN mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/
 RUN /opt/conda/bin/conda init bash \
     && /opt/conda/bin/conda config --set solver libmamba
 
-# Prepare the mlos_core_deps.yml file in a cross platform way.
+# Prepare the mlos_deps.yml file in a cross platform way.
 FROM mcr.microsoft.com/devcontainers/miniconda:3 AS deps-prep
 COPY --chown=vscode:conda . /tmp/conda-tmp/
 RUN /tmp/conda-tmp/prep-deps-files.sh \
-    && ls -l /tmp/conda-tmp/ # && cat /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/mlos_core_deps.yml
+    && ls -l /tmp/conda-tmp/ # && cat /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/mlos_deps.yml
 
-# Install some additional dependencies for the mlos_core environment.
+# Install some additional dependencies for the mlos environment.
 FROM base AS devcontainer
-COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_core_deps.yml /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/
+COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_deps.yml /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/
 RUN umask 0002 \
-    && /opt/conda/bin/conda env create -n mlos_core -v -f /tmp/conda-tmp/mlos_core_deps.yml \
-    && /opt/conda/bin/conda run -n mlos_core pip install -U -r /tmp/conda-tmp/combined.requirements.txt \
+    && /opt/conda/bin/conda env create -n mlos -v -f /tmp/conda-tmp/mlos_deps.yml \
+    && /opt/conda/bin/conda run -n mlos pip install -U -r /tmp/conda-tmp/combined.requirements.txt \
     && /opt/conda/bin/conda clean -v -y -a \
     && mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/
 RUN mkdir -p /home/vscode/.conda/envs \
-    && ln -s /opt/conda/envs/mlos_core /home/vscode/.conda/envs/mlos_core
+    && ln -s /opt/conda/envs/mlos /home/vscode/.conda/envs/mlos

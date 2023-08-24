@@ -1,0 +1,18 @@
+{
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+    "config": {
+        // Here we do our best to list the exhaustive set of full configs available for the base optimizer config.
+        "optimization_target": "score",
+        "max_iterations": 20,
+        "seed": 12345,
+        "start_with_defaults": false,
+        "optimizer_type": "SMAC",
+        "space_adapter_type": null,
+        "n_random_init": 10,
+        "max_ratio": 0.5,
+        "use_default_config": true,
+        "n_random_probability": 0.1,
+        "output_directory": "smac_output",
+        "run_name": "ExperimentName"
+    }
+}

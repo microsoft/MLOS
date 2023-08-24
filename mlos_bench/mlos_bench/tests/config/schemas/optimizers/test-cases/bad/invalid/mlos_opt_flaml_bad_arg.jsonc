@@ -1,0 +1,9 @@
+{
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "optimization_target": "score",
+        "optimizer_type": "FLAML",
+        "base_estimator": "foo"
+    }
+}

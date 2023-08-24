@@ -1,0 +1,54 @@
+{
+    "linux-kernel-boot": {
+        "cost": 300,
+        // See Also: https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html
+        // NOTE: This is an incomplete list.
+        "params": {
+            "align_va_addr": {
+                "type": "categorical",
+                "default": "on",
+                "values": ["on", "off"]
+            },
+            "idle": {
+                "type": "categorical",
+                "default": "halt",
+                "values": ["halt", "poll", "nomwait"]
+            },
+            "ima.ahash_bufsize": {
+                "type": "int",
+                "default": 4096,
+                "range": [0, 65536]
+            },
+            "noautogroup": {
+                "type": "categorical",
+                "default": "",
+                "values": ["", "noautogroup"]
+            },
+            "nohugevmalloc": {
+                "type": "categorical",
+                "default": "",
+                "values": ["", "nohugevmalloc"]
+            },
+            "nohalt": {
+                "type": "categorical",
+                "default": "",
+                "values": ["", "nohalt"]
+            },
+            "nohz": {
+                "type": "categorical",
+                "default": "",
+                "values": ["", "nohz"]
+            },
+            "no-kvmapf": {
+                "type": "categorical",
+                "default": "",
+                "values": ["", "no-kvmapf"]
+            },
+            "nopvspin": {
+                "type": "categorical",
+                "default": "",
+                "values": ["", "nopvspin"]
+            }
+        }
+    }
+}

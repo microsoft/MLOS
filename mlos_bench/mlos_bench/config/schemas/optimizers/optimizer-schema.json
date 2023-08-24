@@ -1,0 +1,181 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json",
+    "title": "mlos_bench Optimizer config",
+
+    "$defs": {
+        "comment": {
+            "$comment": "This section contains reusable partial schema bits (or just split out for readability)"
+        },
+
+        "config_base_optimizer": {
+            "$comment": "config properties common to all optimizer types.",
+            "type": "object",
+            "properties": {
+                "optimization_target": {
+                    "description": "The name of the metric to optimize.",
+                    "type": "string"
+                },
+                "optimization_direction": {
+                    "description": "Whether to minimize or maximize the optimization target.",
+                    "enum": ["min", "max"]
+                },
+                "max_iterations": {
+                    "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) iterations to run when we launch the app.",
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "seed": {
+                    "description": "The seed to use for the random number generator.",
+                    "type": "integer"
+                },
+                "start_with_defaults": {
+                    "description": "If false, use the optimizer to suggest the initial configuration; if true (default), use the already assigned values for the first iteration.",
+                    "type": "boolean"
+                }
+            }
+        }
+    },
+
+    "description": "config for the mlos_bench optimizer",
+    "$comment": "top level schema document rules",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "description": "The schema to use for validating the optimizer config (accepts both URLs and local paths).",
+            "type": "string",
+            "$comment": "This is optional, but if provided, should match the name of this file.",
+            "pattern": "/schemas/optimizers/optimizer-schema.json$"
+        },
+
+        "description": {
+            "description": "Optional description of the config.",
+            "type": "string"
+        },
+
+        "class": {
+            "description": "The name of the optimizer class to use.",
+            "$comment": "required",
+            "enum": [
+                "mlos_bench.optimizers.MlosCoreOptimizer",
+                "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+                "mlos_bench.optimizers.MockOptimizer",
+                "mlos_bench.optimizers.mock_optimizer.MockOptimizer",
+                "mlos_bench.optimizers.OneShotOptimizer",
+                "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer"
+            ]
+        },
+
+        "include_tunables": {
+            "description": "A list of file paths containing tunable parameters definitions to include in the optimization.",
+            "type": "array",
+            "items": {
+                "type": "string",
+                "$comment": "Paths are expected to be json.",
+                "pattern": "[.]json[c]?$"
+            },
+            "uniqueItems": true,
+            "minItems": 1
+        },
+
+        "config": {
+            "description": "The optimizer specific config.",
+            "$comment": "Stub for optimizer specific config appended with condition statements below",
+            "type": "object",
+            "minProperties": 1
+        }
+    },
+    "required": ["class"],
+
+    "oneOf": [
+        {
+            "$comment": "Extensions to the allowed 'config' object properties when the optimizer is the mlos_core optimizer.",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.optimizers.MlosCoreOptimizer",
+                            "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [
+                            {
+                                "$comment": "Allow all base optimizer configs",
+                                "$ref": "#/$defs/config_base_optimizer"
+                            },
+                            {
+                                "$comment": "Extend with properties specific to the mlos_core optimizer type by referencing another subschema file.",
+                                "$ref": "./mlos_core-optimizer-subschema.json"
+                            }
+                        ],
+                        "$comment": "set unevaluatedProperties to false to prevent other properties from being allowed outside the combined set of valid documents $ref'ed above",
+                        "unevaluatedProperties": false
+                    }
+                },
+                "$comment": "Set 'else' to false to prevent it to defaulting to a valid document match."
+            },
+            "else": false
+        },
+
+        {
+            "$comment": "extensions to the 'config' object properties when the mock optimizer is being used",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.optimizers.MockOptimizer",
+                            "mlos_bench.optimizers.mock_optimizer.MockOptimizer"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [{ "$ref": "#/$defs/config_base_optimizer" }],
+                        "$comment": "disallow other properties",
+                        "unevaluatedProperties": false
+                    }
+                }
+            },
+            "else": false
+        },
+
+        {
+            "$comment": "extensions to the 'config' object properties when the one shot optimizer is being used",
+            "if": {
+                "properties": {
+                    "class": {
+                        "enum": [
+                            "mlos_bench.optimizers.OneShotOptimizer",
+                            "mlos_bench.optimizers.one_shot_optimizer.OneShotOptimizer"
+                        ]
+                    }
+                },
+                "required": ["class"]
+            },
+            "then": {
+                "properties": {
+                    "config": {
+                        "type": "object",
+                        "allOf": [
+                            { "$ref": "#/$defs/config_base_optimizer" }
+                        ],
+                        "unevaluatedProperties": false
+                    }
+                }
+            },
+            "else": false
+        }
+    ],
+    "unevaluatedProperties": false
+}

@@ -1,0 +1,73 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/local/local-fileshare-env-subschema.json",
+    "title": "mlos_bench LocalEnv config",
+    "description": "Config instance for a mlos_bench LocalFileShareEnv",
+    "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.LocalFileShareEnv",
+                "mlos_bench.environments.local.LocalFileShareEnv",
+                "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "$comment": "config objects need to specify their entire schema, so we need to include the unevaluatedProperties handling here.",
+            "allOf": [
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/common_environment_config"
+                },
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/setup_run_teardown_configs"
+                },
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/shell_env_params_config"
+                },
+                {
+                    "$comment": "LocalFileShareEnv inherits from LocalEnv, so it supports all the same config features.",
+                    "$ref": "./local-env-subschema.json#/$defs/local_env_config"
+                },
+                {
+                    "$comment": "LocalFileShareEnv adds some additional properties to the config object.",
+                    "type": "object",
+                    "properties": {
+                        "download": {
+                            "description": "List of files download config objects.",
+                            "type": "array",
+                            "items": {
+                                "$ref": "../common-environment-subschemas.json#/$defs/file_download_config"
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
+                        },
+                        "upload": {
+                            "description": "List of file upload config objects.",
+                            "type": "array",
+                            "items": {
+                                "$ref": "../common-environment-subschemas.json#/$defs/file_upload_config"
+                            },
+                            "uniqueItems": true,
+                            "minItems": 1
+                        }
+                    },
+                    "anyOf": [
+                        {
+                            "required": ["upload"]
+                        },
+                        {
+                            "required": ["download"]
+                        }
+                    ]
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": [
+        "class",
+        "config"
+    ]
+}

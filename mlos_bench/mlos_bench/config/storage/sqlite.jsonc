@@ -1,0 +1,14 @@
+// Local SQLite3 database.
+{
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    // Apply --config-path resolution to these config parameters:
+    "resolve_config_property_paths": ["database"],
+
+    "config": {
+        "log_sql": false,  // Write all SQL statements to the log.
+        // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
+        "drivername": "sqlite",
+        "database": "mlos_bench.sqlite"
+    }
+}

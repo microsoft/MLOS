@@ -1,0 +1,13 @@
+{
+    // No schema required.
+    "class": "mlos_bench.optimizers.mlos_core_optimizer.MlosCoreOptimizer",
+
+    "config": {
+        "optimization_target": "score",
+        "max_iterations": 20,
+        "seed": 12345,
+        "optimizer_type": "SMAC",
+        "space_adapter_type": "LLAMATUNE"
+        // no space_adapter_config required
+    }
+}

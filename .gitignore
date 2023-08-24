@@ -152,10 +152,15 @@ build/*.build-stamp
 !.vscode/extensions.json
 !.devcontainer/build/
 
-# Test config. May contain sensitive information
-# like Azure credentials etc.
-/config.json
+# Test configs. May contain sensitive information
+# like Azure credentials, DB password, etc.
+/config.json*
+/global_config*.json*
+
+.azure/config
 .env
+
+smac_output/
 
 # Test databases
 *.sqlite*

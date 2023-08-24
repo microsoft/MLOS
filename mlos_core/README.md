@@ -17,5 +17,5 @@ Since the tunable OS kernel parameter search space is extremely large, `mlos-cor
     - Tailored to application: Consider prior knowledge of the parameter's impact & an application's workload profile (e.g. network heavy, disk heavy, CPU bound, multi-threaded, latency sensitive, throughput oriented, etc.) to identify likely impactful candidates of tunable parameters, specific to a particular application.
 2. Sampling to warm-start optimization in a high dimensional search space
 3. Produce optimal configurations through Bayesian optimization
-    - Support for various optimizer algorithms (default Bayesian optimizer, emukit, skopt, and random for baseline comparison), that handle multiple types of constraints. This includes cost-aware optimization, that considers experiment costs given current tunable parameters.
+    - Support for various optimizer algorithms (default Bayesian optimizer, Flaml, SMAC, and random for baseline comparison), that handle multiple types of constraints. This includes cost-aware optimization, that considers experiment costs given current tunable parameters.
     - Integrated with `mlos-bench`, proposed configurations are logged and evaluated.

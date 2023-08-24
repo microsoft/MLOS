@@ -1,0 +1,11 @@
+{
+    "class": "mlos_bench.storage.sql.storage.SqlStorage",
+
+    "resolve_config_property_paths": ["bad_property"],  // <-- unexpected property
+
+    "config": {
+        "log_sql": false,
+        "drivername": "duckdb",
+        "database": "mlos_bench.duckdb"
+    }
+}

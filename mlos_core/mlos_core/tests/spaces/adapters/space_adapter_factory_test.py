@@ -8,7 +8,7 @@ Tests for space adapter factory.
 
 # pylint: disable=missing-function-docstring
 
-from typing import Optional
+from typing import List, Optional, Type
 
 import pytest
 
@@ -17,6 +17,8 @@ import ConfigSpace as CS
 from mlos_core.spaces.adapters import SpaceAdapterFactory, SpaceAdapterType, ConcreteSpaceAdapter
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
+
+from mlos_core.tests import get_all_concrete_subclasses
 
 
 @pytest.mark.parametrize(('space_adapter_type'), [
@@ -55,9 +57,13 @@ def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[S
 
     space_adapter: BaseSpaceAdapter
     if space_adapter_type is None:
-        space_adapter = SpaceAdapterFactory.create(input_space)
+        space_adapter = SpaceAdapterFactory.create(parameter_space=input_space)
     else:
-        space_adapter = SpaceAdapterFactory.create(input_space, space_adapter_type, space_adapter_kwargs=kwargs)
+        space_adapter = SpaceAdapterFactory.create(
+            parameter_space=input_space,
+            space_adapter_type=space_adapter_type,
+            space_adapter_kwargs=kwargs,
+        )
 
     if space_adapter_type is None or space_adapter_type is SpaceAdapterType.IDENTITY:
         assert isinstance(space_adapter, IdentityAdapter)
@@ -67,3 +73,19 @@ def test_create_space_adapter_with_factory_method(space_adapter_type: Optional[S
         myrepr = repr(space_adapter)
         assert myrepr.startswith(space_adapter_type.value.__name__), \
             f"Expected {space_adapter_type.value.__name__} but got {myrepr}"
+
+
+# Dynamically determine all of the optimizers we have implemented.
+# Note: these must be sorted.
+space_adapter_subclasses: List[Type[BaseSpaceAdapter]] = \
+    get_all_concrete_subclasses(BaseSpaceAdapter, pkg_name='mlos_core')  # type: ignore[type-abstract]
+assert space_adapter_subclasses
+
+
+@pytest.mark.parametrize(('space_adapter_class'), space_adapter_subclasses)
+def test_space_adapter_type_defs(space_adapter_class: Type[BaseSpaceAdapter]) -> None:
+    """
+    Test that all space adapter classes are listed in the SpaceAdapterType enum.
+    """
+    space_adapter_type_classes = {space_adapter_type.value for space_adapter_type in SpaceAdapterType}
+    assert space_adapter_class in space_adapter_type_classes

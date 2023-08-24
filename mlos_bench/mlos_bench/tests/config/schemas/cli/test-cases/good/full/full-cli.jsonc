@@ -1,0 +1,35 @@
+{
+    "config_path": [
+        "mlos_bench/mlos_bench/config",
+        "mlos_bench/mlos_bench/tests/config"
+    ],
+
+    "environment": "environments/root/root-azure-redis.jsonc",
+    "optimizer": "optimizers/one_shot_opt.jsonc",
+    "storage": "storage/sqlite.jsonc",
+
+    "random_init": true,
+    "random_seed": 42,
+
+    "tunable_values": [
+        "tunable-values/tunable-values-example.jsonc"
+    ],
+
+    "globals": [
+        "global_config.json"
+    ],
+
+    "tunable_params_map": {
+        "linux-boot": [],
+        "linux-runtime": [],
+        "mysql": ["mysql-innodb", "mysql-buffer"]
+    },
+
+    "experiment_id": "RedisBench",
+    "trial_id": 1,
+
+    "teardown": false,
+
+    "log_file": "azure-redis-1shot.log",
+    "log_level": "DEBUG"
+}

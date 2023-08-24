@@ -1,0 +1,8 @@
+{
+    "class": "mlos_bench.services.remote.azure.AzureFileShareService",
+    "config": {
+        "storageAccountName": "PLACEHOLDER; e.g.: osatsharedstorage",
+        "storageFileShareName": "PLACEHOLDER; e.g.: os-autotune-file-share",
+        "storageAccountKey": "PLACEHOLDER; comes from global config"
+    }
+}

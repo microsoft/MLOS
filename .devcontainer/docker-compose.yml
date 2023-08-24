@@ -11,7 +11,7 @@ services:
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
       cache_from:
-        - mloscore.azurecr.io/mlos-core-devcontainer:latest
+        - mloscore.azurecr.io/mlos-devcontainer:latest
 
     volumes:
       - ../..:/workspaces:cached
