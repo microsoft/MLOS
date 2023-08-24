@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/remote/host-env-subschema.json",
+    "title": "mlos_bench HostEnv config",
+    "description": "Config instance for a mlos_bench HostEnv",
+    "type": "object",
+    "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.environments.remote.HostEnv",
+                "mlos_bench.environments.remote.host_env.HostEnv"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "$comment": "NOTE: there aren't currently any additional properties accepted by the HostEnv.",
+            "allOf": [
+                {
+                    "$ref": "../common-environment-subschemas.json#/$defs/common_environment_config"
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": [
+        "class"
+    ]
+}
