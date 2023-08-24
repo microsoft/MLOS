@@ -34,7 +34,7 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
     return configs_to_filter
 
 
-configs = filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
+configs = locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs)
 assert configs
 
 
@@ -72,8 +72,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
     return envs
 
 
-composite_configs = filter_configs(locate_config_examples(path_join(
-    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/root/")))
+composite_configs = locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/root/")
 assert composite_configs
 
 

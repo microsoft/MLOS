@@ -6,7 +6,7 @@
 Tests for loading globals config examples.
 """
 import logging
-from typing import List
+from typing import List, Iterable
 
 import pytest
 
@@ -30,11 +30,12 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
     return configs_to_filter
 
 
-configs = []
-# configs += filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
-configs += filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, "experiments")))
-configs += filter_configs(locate_config_examples(path_join(BUILTIN_TEST_CONFIG_PATH, CONFIG_TYPE)))
-configs += filter_configs(locate_config_examples(path_join(BUILTIN_TEST_CONFIG_PATH, "experiments")))
+configs = [
+    # *locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs),
+    *locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, "experiments", filter_configs),
+    *locate_config_examples(BUILTIN_TEST_CONFIG_PATH, CONFIG_TYPE, filter_configs),
+    *locate_config_examples(BUILTIN_TEST_CONFIG_PATH, "experiments", filter_configs),
+]
 assert configs
 
 

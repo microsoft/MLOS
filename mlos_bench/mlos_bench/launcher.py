@@ -251,8 +251,6 @@ class Launcher:
         NOTE: `self.global_config` must be set.
         """
         if isinstance(value, str):
-            if "$" in value:
-                _LOG.warning("Expand vars: %s", value)
             return Template(value).safe_substitute(self.global_config)
         if isinstance(value, dict):
             # Note: we use a loop instead of dict comprehension in order to
