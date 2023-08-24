@@ -27,6 +27,9 @@
                     "$ref": "./remote/mock/mock-remote-exec-service-subschema.json"
                 },
                 {
+                    "$ref": "./remote/mock/mock-auth-service-subschema.json"
+                },
+                {
                     "$ref": "./remote/azure/azure-auth-service-subschema.json"
                 },
                 {
