@@ -526,6 +526,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             required_keys=[
                 "subscription",
                 "resourceGroup",
+                "deploymentName",
                 "vmName",
             ]
         )
@@ -541,8 +542,8 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         """
         Deallocates the VM on Azure by shutting it down then releasing the compute resources.
 
-        Note: This can cause the VM to arrive on a new host node, which may
-        have different performance characteristics.
+        Note: This can cause the VM to arrive on a new host node when its
+        restarted, which may have different performance characteristics.
 
         Parameters
         ----------

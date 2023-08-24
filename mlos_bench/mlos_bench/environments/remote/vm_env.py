@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Remote VM Host Environment.
+"Remote" VM (Host) Environment.
 """
 
 import logging
@@ -16,6 +16,6 @@ _LOG = logging.getLogger(__name__)
 class VMEnv(HostEnv):
     """
     Remote VM/host environment.
-    """
 
-    # Now this is just a class alias for HostEnv for historical purposes.
+    Note: this is just a class alias for HostEnv for historical purposes.
+    """

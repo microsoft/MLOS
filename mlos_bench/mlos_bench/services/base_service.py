@@ -19,7 +19,7 @@ _LOG = logging.getLogger(__name__)
 
 class Service:
     """
-    Base class for all Services and used to build up mix-ins.
+    An abstract base of all Environment Services and used to build up mix-ins.
     """
 
     @classmethod

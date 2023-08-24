@@ -21,9 +21,12 @@ from mlos_bench.services.remote.azure.azure_services import AzureVMService
 @pytest.mark.parametrize(
     ("operation_name", "accepts_params"), [
         ("start_host", True),
-        ("stop_host", False),
-        ("deprovision_host", False),
-        ("restart_host", False),
+        ("stop_host", True),
+        ("shutdown", True),
+        ("deprovision_host", True),
+        ("deallocate_host", True),
+        ("restart_host", True),
+        ("reboot", True),
     ])
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"), [

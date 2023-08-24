@@ -106,10 +106,5 @@ class OSEnv(Environment):
         if status.is_pending:
             (status, _) = self._os_service.wait_os_operation(params)
 
-        # TODO: power off the host?
-        # (status, params) = self._host_service.stop_host()
-        # if status.is_pending:
-        #    (status, _) = self._host_service.wait_host_operation(params)
-
         super().teardown()
         _LOG.debug("Final status of OS stopping: %s :: %s", self, status)

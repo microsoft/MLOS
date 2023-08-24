@@ -75,6 +75,7 @@ setup(
     },
     install_requires=[
         'mlos-core==' + _VERSION,
+        'requests',
         'json5',
         'jsonschema>=4.18.0', 'referencing>=0.29.1',
         'importlib_resources;python_version<"3.10"',
