@@ -78,6 +78,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
         "services/remote/mock/mock_fileshare_service.jsonc",
         "services/remote/mock/mock_vm_service.jsonc",
         "services/remote/mock/mock_remote_exec_service.jsonc",
+        "services/remote/mock/mock_auth_service.jsonc",
     ]
 
     tunable_groups = TunableGroups()    # base tunable groups that all others get built on
