@@ -6,7 +6,7 @@
 Tests for loading globals config examples.
 """
 import logging
-from typing import List, Iterable
+from typing import List
 
 import pytest
 
@@ -14,7 +14,6 @@ from mlos_bench.tests.config import locate_config_examples, BUILTIN_TEST_CONFIG_
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.util import path_join
 
 
 _LOG = logging.getLogger(__name__)

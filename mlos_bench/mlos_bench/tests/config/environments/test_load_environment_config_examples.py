@@ -17,7 +17,6 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import path_join
 
 
 _LOG = logging.getLogger(__name__)
