@@ -36,6 +36,7 @@
                     ],
                     "run": [
                         "mkdir -p $mountPoint/$experiment_id/$trial_id/output/fio/",
+                        "sudo fio --output-format=json $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > /dev/null",  // warm-up
                         "sudo fio --output-format=json $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > $mountPoint/$experiment_id/$trial_id/output/fio/readwrite.json"
                     ]
                 }
