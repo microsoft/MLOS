@@ -20,6 +20,13 @@
         "description": "OS Autotune Linux VM"
       }
     },
+    "customData": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Custom data for the VM (e.g., for cloud-init)."
+      },
+    },
     "vmPorts": {
       "type": "array",
       "defaultValue": [
@@ -207,6 +214,7 @@
         },
         "osProfile": {
           "computerName": "[parameters('vmName')]",
+          "customData": "[base64(parameters('customData'))]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPasswordOrKey')]",
           "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), null(), variables('linuxConfiguration'))]"

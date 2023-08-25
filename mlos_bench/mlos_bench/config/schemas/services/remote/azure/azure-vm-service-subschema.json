@@ -60,6 +60,15 @@
                                 }
                             },
                             "minProperties": 1
+                        },
+                        "customDataFile": {
+                            "description": "Path to a custom data file whose contents should be base64 encoded and passed to the VM template as customDataBase64 in the template parameters.",
+                            "type": "string",
+                            "examples": [
+                                "customData.txt",
+                                "cloud-init.config.yml",
+                                "cloud-init.script.sh"
+                            ]
                         }
                     },
                     "required": [
