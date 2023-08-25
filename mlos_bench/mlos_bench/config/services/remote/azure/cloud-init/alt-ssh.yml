@@ -1,0 +1,13 @@
+#cloud-config
+package_upgrade: true
+packages:
+  - openssh-server
+write_files:
+  # Instruct SSH to listen on additional alternative port.
+  - owner: root:root
+    path: /etc/ssh/sshd_config.d/99-ssh-ports.conf
+    content: |
+      Port 22
+      Port 2222
+runcmd:
+  - service ssh restart
