@@ -1,0 +1,74 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dbName": {
+            "type": "string"
+        },
+        "dbLocation": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "dbAdminUsername": {
+            "type": "string",
+            "defaultValue": "mlos"
+        },
+        "dbAdminPassword": {
+            "type": "securestring"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+    {
+        "type": "Microsoft.DBforMySQL/flexibleServers",
+        "apiVersion": "2021-12-01-preview",
+        "name": "[parameters('dbName')]",
+        "location": "[parameters('dbLocation')]",
+        "sku": {
+            "name": "Standard_B1s",
+            "tier": "Burstable"
+        },
+        "properties": {
+            "administratorLogin": "[parameters('dbAdminUsername')]",
+            "administratorLoginPassword": "[parameters('dbAdminPassword')]",
+            "storage": {
+                "storageSizeGB": 20,
+                "iops": 360,
+                "autoGrow": "Enabled",
+                "autoIoScaling": "Disabled",
+                "logOnDisk": "Disabled"
+            },
+            "version": "8.0.21",
+            "network": {
+                "publicNetworkAccess": "Enabled"
+            },
+            "backup": {
+                "backupRetentionDays": 7,
+                "geoRedundantBackup": "Disabled"
+            },
+            "highAvailability": {
+                "mode": "Disabled"
+            }
+        }
+    },
+    {
+        "type": "Microsoft.DBforMySQL/flexibleServers/databases",
+        "apiVersion": "2021-12-01-preview",
+        "name": "[concat(parameters('dbName'), '/mlos')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('dbName'))]"
+        ],
+        "properties": {
+            "charset": "utf8",
+            "collation": "utf8_general_ci"
+        }
+    }
+    ],
+    "outputs": {
+        "dbName": {
+            "type": "string",
+            "value": "[parameters('dbName')]"
+        }
+    }
+}

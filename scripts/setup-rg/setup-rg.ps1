@@ -1,41 +1,72 @@
 
 param(
-    # ARM template params
+    # Main control plane ARM template params
     [Parameter(Mandatory=$True)]
-    [string] $armParameters,
+    [string] $controlPlaneArmParameters,
+    # Results DB ARM template params
+    [Parameter(Mandatory=$False)]
+    [string] $resultsDbArmParameters,
     # Other params
     [Parameter(Mandatory=$True)]
     [string] $servicePrincipalName,
     [Parameter(Mandatory=$True)]
     [string] $resourceGroupName,
     [Parameter(Mandatory=$True)]
-    [string] $certName
+    [string] $certName,
+    [Parameter(Mandatory=$False)]
+    [int] $certExpirationYears = 1
 )
 
-$currentUserAlias = az account show --query user.name --output tsv
-
-$servicePrincipalId = az ad sp list `
-    --display-name $servicePrincipalName `
-    --query '[].id' `
-    --output tsv
-
-# Assign 'Contributor' access to Service Principal
-az role assignment create `
-    --assignee $servicePrincipalId `
-    --role "Contributor" `
-    --resource-group $resourceGroupName
-
 # Provision resources into the resource group with ARM template
+Write-Output "Provisioning control plane resources..."
 $deploymentResults = az deployment group create `
     --resource-group $resourceGroupName `
     --template-file .\rg-template.json `
-    --parameters $armParameters
+    --parameters $controlPlaneArmParameters `
+    --parameters vmSshSourceAddressPrefix="131.107.0.0/16"
     | ConvertFrom-JSON
 
 if (!$?) {
-    Write-Error "Error in provisioning resources!"
+    Write-Error "Error in provisioning control plane resources!"
     return
 }
+
+# Conditional provisioning of results DB
+if ($resultsDbArmParameters) {
+    Write-Output "Provisioning results DB..."
+    $vmName = $deploymentResults.properties.outputs.vmName.value
+    $vmIpAddress = $deploymentResults.properties.outputs.vmIpAddress.value
+    $dbDeploymentResults = az deployment group create `
+        --resource-group $resourceGroupName `
+        --template-file ./results-db/mysql-template.json `
+        --parameters $resultsDbArmParameters
+
+    if (!$?) {
+        Write-Error "Error in provisioning results DB!"
+    }
+    else {
+        $dbName = $dbDeploymentResults.properties.outputs.dbName.value
+
+        # VM IP access for results DB
+        az mysql flexible-server firewall-rule update `
+            --resource-group $resourceGroupName `
+            --name $dbName `
+            --rule-name "AllowVM-$vmName" `
+            --start-ip-address $vmIpAddress `
+            --end-ip-address $vmIpAddress
+
+        # Corp. IP access for results DB
+        az mysql flexible-server firewall-rule update `
+            --resource-group $resourceGroupName `
+            --name $dbName `
+            --rule-name "CorpIps" `
+            --start-ip-address "131.107.0.0" `
+            --end-ip-address "131.107.255.255"
+    }
+}
+
+$currentUserAlias = az account show --query "user.name" --output tsv
+$resourceGroupId = az group show --name $resourceGroupName --query "id" --output tsv
 
 # Assign 'Key Vault Administrator' access to current user
 $kvName = $deploymentResults.properties.outputs.kvName.value
@@ -45,45 +76,46 @@ az role assignment create `
     --role "Key Vault Administrator" `
     --scope $kvId
 
-# Generate certificate if doesnt exist
-$certThumprint = az keyvault certificate show `
+# Check if cert of same name exists in keyvault already
+$certThumbprint = az keyvault certificate show `
     --name $certName `
     --vault-name $kvName `
     --query "x509ThumbprintHex" --output tsv
+
 if (!$?) {
-    Write-Output "Generating certificate in the key vault..."
-    az keyvault certificate get-default-policy | Out-File -Encoding utf8 defaultCertPolicy.json
-    az keyvault certificate create `
-        --vault-name $kvName `
-        --name $certName `
-        --policy `@defaultCertPolicy.json
-    $certThumprint = az keyvault certificate show `
-        --name $certName `
-        --vault-name $kvName `
-        --query "x509ThumbprintHex" --output tsv
+    # The cert does not exist yet.
+    # Create the service principal if doesn't exist, storing the cert in the keyvault
+    # If it does exist, this also patches the current service principal with the role
+    az ad sp create-for-rbac `
+        --name $servicePrincipalName `
+        --role "Contributor" `
+        --scopes $resourceGroupId `
+        --create-cert `
+        --cert $certName `
+        --keyvault $kvName `
+        --years $certExpirationYears
 } else {
-    Write-Output "Certificate exists in the key vault already."
-}
+    # The cert already exists in the keyvault.
 
-# Upload certificate to service principal if doesnt exist
-$spCertThumbprints = az ad sp credential list `
-    --id $servicePrincipalId `
-    --cert `
-    --query "[].customKeyIdentifier" --output tsv
-if (!$spCertThumbprints.Contains($certThumprint)) {
-    # Download the public portion of the certificate from key vault
-    Write-Output "Downloading certificate from key vault..."
-    az keyvault certificate download `
-        --vault-name $kvName `
-        --name $certName `
-        --file "$certName.pem"
+    # Ensure the SP exists with correct roles, without creating a cert.
+    az ad sp create-for-rbac `
+        --name $servicePrincipalName `
+        --role "Contributor" `
+        --scopes $resourceGroupId `
 
-    # Upload the certificate to the service principal
-    Write-Output "Uploading certificate to service principal..."
-    az ad sp credential reset `
+    # SP's certs
+    $servicePrincipalId = az ad sp list `
+        --display-name $servicePrincipalName `
+        --query "[?servicePrincipalType == 'Application'].objectId" `
+        --output tsv
+    $spCertThumbprints = az ad sp credential list `
         --id $servicePrincipalId `
-        --cert "$certName.pem" `
-        --append
-} else {
-    Write-Output "Certificate uploaded to the Service Principal already."
+        --cert `
+        --query "[].customKeyIdentifier" --output tsv
+
+    if ($spCertThumbprints.Contains($certThumbprint)) {
+        Write-Output "Keyvault contains the certificate '$certName' that is linked to the service principal '$servicePrincipalName' already."
+    } else {
+        Write-Warning "Keyvault already contains a certificate called '$certname', but is not linked with the service principal '$servicePrincipalName'! Skipping cert handling"
+    }
 }

@@ -19,27 +19,48 @@
         "vmAdminUsername": {
             "type": "string"
         },
-        "sshPublicKey": {
-            "type": "string"
+        "sshPublicKeys": {
+            "type": "array"
+        },
+        "storageAccountLocations": {
+            "type": "array",
+            "defaultValue": [
+                "[resourceGroup().location]"
+            ]
         },
         "fileShareName": {
             "type": "string",
             "defaultValue": "mlos-file-share"
         },
-        "resultsDbName": {
+        "vmLocation": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "vmSshPort": {
+            "type": "string",
+            "defaultValue": "22"
+        },
+        "vmSshSourceAddressPrefix": {
             "type": "string"
         },
-        "resultsDbAdminUsername": {
+        "storageSku": {
             "type": "string",
-            "defaultValue": "mlos"
-        },
-        "resultsDbAdminPassword": {
-            "type": "securestring"
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "Premium_ZRS",
+                "Standard_GRS",
+                "Standard_GZRS",
+                "Standard_LRS",
+                "Standard_RAGRS",
+                "Standard_RAGZRS",
+                "Standard_ZRS"
+            ]
         }
     },
     "functions": [],
     "variables": {
-        "storageAccountName": "[toLower(concat(replace(parameters('projectPrefix'), '-', ''), 'storage'))]",
+        "storageAccountName": "[toLower(concat(replace(parameters('projectPrefix'), '-', '')))]",
         "vmName": "[concat(parameters('projectPrefix'), '-vm')]",
         "networkInterfaceName": "[concat(variables('vmName'), '-ni-', uniqueString(resourceGroup().id))]",
         "vnetName": "[concat(variables('vmName'), '-vnet')]",
@@ -52,7 +73,7 @@
         "name": "[variables('publicIpName')]",
         "type": "Microsoft.Network/publicIPAddresses",
         "apiVersion": "2020-11-01",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('vmLocation')]",
         "tags": {
             "displayName": "PublicIPAddress"
         },
@@ -67,17 +88,17 @@
         "name": "[variables('nsgName')]",
         "type": "Microsoft.Network/networkSecurityGroups",
         "apiVersion": "2020-11-01",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('vmLocation')]",
         "properties": {
             "securityRules": [
                 {
-                    "name": "CorpSSH",
+                    "name": "UserSSH",
                     "properties": {
-                        "description": "Corp. IP SSH access",
+                        "description": "For user SSH access",
                         "protocol": "Tcp",
                         "sourcePortRange": "*",
-                        "destinationPortRange": "22",
-                        "sourceAddressPrefix": "131.107.0.0/16",
+                        "destinationPortRange": "[parameters('vmSshPort')]",
+                        "sourceAddressPrefix": "[parameters('vmSshSourceAddressPrefix')]",
                         "destinationAddressPrefix": "*",
                         "access": "Allow",
                         "priority": 100,
@@ -91,7 +112,7 @@
         "name": "[variables('vnetName')]",
         "type": "Microsoft.Network/virtualNetworks",
         "apiVersion": "2020-11-01",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('vmLocation')]",
         "dependsOn": [
             "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
         ],
@@ -112,11 +133,11 @@
                         "serviceEndpoints": [
                             {
                                 "service": "Microsoft.Storage",
-                                "locations": ["[resourceGroup().location]"]
+                                "locations": "[parameters('storageAccountLocations')]"
                             },
                             {
                                 "service": "Microsoft.KeyVault",
-                                "locations": ["[resourceGroup().location]"]
+                                "locations": ["[parameters('vmLocation')]"]
                             }
                         ],
                         "networkSecurityGroup": {
@@ -131,14 +152,14 @@
         "name": "[variables('networkInterfaceName')]",
         "type": "Microsoft.Network/networkInterfaces",
         "apiVersion": "2020-11-01",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('vmLocation')]",
         "dependsOn": [
             "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]",
             "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
             "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
         ],
         "tags": {
-            "displayName": "ubuntuVM1-NetworkInterface"
+            "displayName": "[variables('networkInterfaceName')]"
         },
         "properties": {
             "ipConfigurations": [
@@ -164,7 +185,7 @@
         "name": "[variables('kvName')]",
         "type": "Microsoft.KeyVault/vaults",
         "apiVersion": "2019-09-01",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('vmLocation')]",
         "dependsOn": [
             "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
         ],
@@ -196,7 +217,7 @@
         "name": "[variables('vmName')]",
         "type": "Microsoft.Compute/virtualMachines",
         "apiVersion": "2021-03-01",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('vmLocation')]",
         "dependsOn": [
             "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
         ],
@@ -213,10 +234,14 @@
                 "linuxConfiguration": {
                     "disablePasswordAuthentication": true,
                     "ssh": {
-                        "publicKeys": [
+                        "copy": [
                             {
-                                "path": "[concat('/home/', parameters('vmAdminUsername'), '/.ssh/authorized_keys')]",
-                                "keyData": "[parameters('sshPublicKey')]"
+                                "name": "publicKeys",
+                                "count": "[length(parameters('sshPublicKeys'))]",
+                                "input": {
+                                    "path": "[concat('/home/', parameters('vmAdminUsername'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('sshPublicKeys')[copyIndex('publicKeys')]]"
+                                }
                             }
                         ]
                     }
@@ -250,20 +275,23 @@
         }
     },
     {
-        "name": "[variables('storageAccountName')]",
+        "copy": {
+            "name": "storageAccountCopy",
+            "count": "[length(parameters('storageAccountLocations'))]"
+        },
+        "name": "[concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('storageAccountCopy')])]",
         "type": "Microsoft.Storage/storageAccounts",
         "apiVersion": "2021-04-01",
         "tags": {
-            "displayName": "[variables('storageAccountName')]"
+            "displayName": "[concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('storageAccountCopy')])]"
         },
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('storageAccountLocations')[copyIndex('storageAccountCopy')]]",
         "dependsOn": [
             "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
         ],
         "kind": "StorageV2",
         "sku": {
-            "name": "Standard_LRS",
-            "tier": "Standard"
+            "name": "[parameters('storageSku')]"
         },
         "properties": {
             "networkAcls": {
@@ -280,86 +308,20 @@
         }
     },
     {
+        "copy": {
+            "name": "fileShareCopy",
+            "count": "[length(parameters('storageAccountLocations'))]"
+        },
         "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
         "apiVersion": "2022-09-01",
-        "name": "[concat(variables('storageAccountName'), '/default/', parameters('fileShareName'))]",
+        "name": "[concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('fileShareCopy')], '/default/', parameters('fileShareName'))]",
         "dependsOn": [
-            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            "[resourceId('Microsoft.Storage/storageAccounts', concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('fileShareCopy')]))]"
         ],
         "properties": {
             "accessTier": "TransactionOptimized",
             "shareQuota": 5120,
             "enabledProtocols": "SMB"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/flexibleServers",
-        "apiVersion": "2021-12-01-preview",
-        "name": "[parameters('resultsDbName')]",
-        "location": "[resourceGroup().location]",
-        "sku": {
-            "name": "Standard_B1s",
-            "tier": "Burstable"
-        },
-        "properties": {
-            "administratorLogin": "[parameters('resultsDbAdminUsername')]",
-            "administratorLoginPassword": "[parameters('resultsDbAdminPassword')]",
-            "storage": {
-                "storageSizeGB": 20,
-                "iops": 360,
-                "autoGrow": "Enabled",
-                "autoIoScaling": "Disabled",
-                "logOnDisk": "Disabled"
-            },
-            "version": "8.0.21",
-            "network": {
-                "publicNetworkAccess": "Enabled"
-            },
-            "backup": {
-                "backupRetentionDays": 7,
-                "geoRedundantBackup": "Disabled"
-            },
-            "highAvailability": {
-                "mode": "Disabled"
-            }
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/flexibleServers/databases",
-        "apiVersion": "2021-12-01-preview",
-        "name": "[concat(parameters('resultsDbName'), '/mlos')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('resultsDbName'))]"
-        ],
-        "properties": {
-            "charset": "utf8",
-            "collation": "utf8_general_ci"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/flexibleServers/firewallRules",
-        "apiVersion": "2021-12-01-preview",
-        "name": "[concat(parameters('resultsDbName'), '/CorpIps')]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('resultsDbName'))]"
-        ],
-        "properties": {
-            "startIpAddress": "131.107.0.0",
-            "endIpAddress": "131.107.255.255"
-        }
-    },
-    {
-        "type": "Microsoft.DBforMySQL/flexibleServers/firewallRules",
-        "apiVersion": "2021-12-01-preview",
-        "name": "[concat(parameters('resultsDbName'), '/AllowVM-', variables('vmName'))]",
-        "dependsOn": [
-            "[resourceId('Microsoft.DBforMySQL/flexibleServers', parameters('resultsDbName'))]",
-            "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]",
-            "[resourceId('Microsoft.Compute/virtualMachines', variables('vmName'))]"
-        ],
-        "properties": {
-            "startIpAddress": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))).ipAddress]",
-            "endIpAddress": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))).ipAddress]"
         }
     }
     ],
@@ -367,6 +329,14 @@
         "vmHostName": {
             "type": "string",
             "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))).dnsSettings.fqdn]"
+        },
+        "vmIpAddress": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))).ipAddress]"
+        },
+        "vmName": {
+            "type": "string",
+            "value": "[variables('vmName')]"
         },
         "kvName": {
             "type": "string",

@@ -1,6 +1,7 @@
 # Resource Group Setup
 
-These scripts are helpers for setting up a new resource group (RG) as the control plane for MLOS.
+These scripts are helpers for setting up a new resource group (RG) in Azure as the *control plane* for MLOS.
+The *control plane RG* is a container for the *persistent* resources of MLOS (results/metrics storage, scheduler VM, notebook interface, etc.).
 
 ## Quickstart
 
@@ -13,49 +14,37 @@ These scripts are helpers for setting up a new resource group (RG) as the contro
 2. Make a copy of the ARM parameters file.
 
     ```sh
-    cp rg-template.example.parameters.json rg-template.<your name>.parameters.json
+    cp rg-template.example.parameters.json rg-template.parameters.json
     ```
 
 3. Modify the ARM parameters in the newly created file as needed, especially the `PLACEHOLDER` values.
 
-4. Execute the main script and follow prompts:
+4. Execute the main script with CLI args as follows:
 
-    ```sh
-    ./setup-rg.ps1
-    Supply values for the following parameters:
-    armParameters: rg-template.<your name>.parameters.json
-    servicePrincipalName: <name of service principal for generating tokens with>
-    resourceGroupName: <target resource group for this control plane setup>
-    certName: <desired key vault name of certificate for the service principal e.g. mlos-autotune-sp-cert>
+    ```shell
+    ./setup-rg.ps1 `
+        -armParameters $armParams `
+        -servicePrincipalName $servicePrincipalName `
+        -resourceGroupName $resourceGroupName `
+        -certName $certName
     ```
 
-## Manual
-
-Parameters for script can also passed in manually (without prompt) as follows:
-
-```sh
-./setup-rg.ps1 `
-    -armParameters $armParams `
-    -servicePrincipalName $servicePrincipalName `
-    -resourceGroupName $resourceGroupName `
-    -certName $certName
-```
-
-where `$armParams` follows the same usage as `--parameters` in [az deployment group create](https://learn.microsoft.com/en-us/cli/azure/deployment/group?view=azure-cli-latest#az-deployment-group-create-examples).
+    where `$armParams` can be `rg-template.parameters.json` from before. However, it also follows the same usage as `--parameters` in [az deployment group create](https://learn.microsoft.com/en-us/cli/azure/deployment/group?view=azure-cli-latest#az-deployment-group-create-examples).
 
 ## Workflow
 
 The high-level flow for what this script automates is as follows:
 
 1. Assign `Contributor` access to the Service Principal (SP) for write access over resources.
-    For now we assume the experiment's resources are provisioned in the same RG as the control plane, so the access is granted to the same RG.
+    Ideally, experiment resources are placed in their own RG.
+    When that isn't possible, they can also be placed in the control plane RG, in which case the SP can optionally be given access to the control plane RG as well.
 
 2. Provision control plane resources into the RG.
     This includes:
     - Networking (public IP, security group, vnet, subnet, network interface)
-    - Key Vault
-    - Storage (storage account, file share, MySQL Flex server)
-    - VM
+    - Key Vault for storing the SP credentials.
+    - Storage (storage account, file share, DB)
+    - VM for running the `mlos_bench` scheduler.
 
 3. Assign `Key Vault Administrator` access to the current user.
     This allows the current user to retrieve secrets / certificates from the VM once it is set up.

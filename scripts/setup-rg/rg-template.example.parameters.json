@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "projectPrefix": {
-            "value": "mlos-mysql-autotune"
+            "value": "mlos-autotune"
         },
         "vmSKU": {
             "value": "Standard_D2s_v3"
@@ -11,20 +11,16 @@
         "vmAdminUsername": {
             "value": "PLACEHOLDER"
         },
-        "sshPublicKey": {
+        "sshPublicKeys": {
+            "value": [
+                "PLACEHOLDER"
+            ]
+        },
+        "vmSshSourceAddressPrefix": {
             "value": "PLACEHOLDER"
         },
         "fileShareName": {
             "value": "mlos-file-share"
-        },
-        "resultsDbName": {
-            "value": "mlos-mysql-autotune"
-        },
-        "resultsDbAdminUsername": {
-            "value": "mlos"
-        },
-        "resultsDbAdminPassword": {
-            "value": "PLACEHOLDER"
         }
     }
 }
