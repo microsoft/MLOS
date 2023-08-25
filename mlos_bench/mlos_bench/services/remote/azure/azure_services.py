@@ -83,16 +83,22 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         "?api-version=2022-03-01"
     )
 
-    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate
-    _URL_DEPROVISION = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Compute" +
-        "/virtualMachines/{vm_name}" +
-        "/delete" +
-        "?api-version=2022-03-01"
-    )
+    # TODO: This is probably the more correct URL to use for the deprovision operation.
+    # However, previous code used the deallocate URL above, so for now, we keep
+    # that and handle that change later.
+    # See Also: #498
+    _URL_DEPROVISION = _URL_DEALLOCATE
+
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/delete
+    # _URL_DEPROVISION = (
+    #    "https://management.azure.com" +
+    #    "/subscriptions/{subscription}" +
+    #    "/resourceGroups/{resource_group}" +
+    #    "/providers/Microsoft.Compute" +
+    #    "/virtualMachines/{vm_name}" +
+    #    "/delete" +
+    #    "?api-version=2022-03-01"
+    # )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart
     _URL_REBOOT = (
