@@ -577,7 +577,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
                 "vmName",
             ]
         )
-        _LOG.info("Deallocate: %s", config["deploymentName"])
+        _LOG.info("Deallocate: %s", config["vmName"])
         return self._azure_vm_post_helper(config, self._URL_DEALLOCATE.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
