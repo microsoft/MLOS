@@ -24,12 +24,12 @@ class HostEnv(Environment):
     """
 
     def __init__(self,
+                 *,
                  name: str,
                  config: dict,
                  global_config: Optional[dict] = None,
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
-        # pylint: disable=too-many-arguments
         """
         Create a new environment for host operations.
 
