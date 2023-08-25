@@ -51,7 +51,7 @@ class Environment(metaclass=abc.ABCMeta):
             Human-readable name of the environment.
         class_name: str
             FQN of a Python class to instantiate, e.g.,
-            "mlos_bench.environment.remote.HostEnv".
+            "mlos_bench.environments.remote.HostEnv".
             Must be derived from the `Environment` class.
         config : dict
             Free-format dictionary that contains the benchmark environment
