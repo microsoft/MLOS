@@ -82,7 +82,7 @@ class HostEnv(Environment):
 
         (status, params) = self._host_service.provision_host(self._params)
         if status.is_pending:
-            (status, _) = self._host_service.wait_host_deployment(True, params)
+            (status, _) = self._host_service.wait_host_deployment(params, is_setup=True)
 
         self._is_ready = status.is_succeeded()
         return self._is_ready
@@ -92,9 +92,9 @@ class HostEnv(Environment):
         Shut down the Host and release it.
         """
         _LOG.info("Host tear down: %s", self)
-        (status, params) = self._host_service.deprovision_host()
+        (status, params) = self._host_service.deprovision_host(self._params)
         if status.is_pending:
-            (status, _) = self._host_service.wait_host_deployment(False, params)
+            (status, _) = self._host_service.wait_host_deployment(params, is_setup=False)
 
         super().teardown()
         _LOG.debug("Final status of Host deprovisioning: %s :: %s", self, status)

@@ -293,17 +293,17 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         _LOG.error("Response: %s :: %s", response, response.text)
         return Status.FAILED, {}
 
-    def wait_host_deployment(self, is_setup: bool, params: dict) -> Tuple[Status, dict]:
+    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
 
         Parameters
         ----------
-        is_setup : bool
-            If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
+        is_setup : bool
+            If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
 
         Returns
         -------

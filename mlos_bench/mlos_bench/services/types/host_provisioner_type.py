@@ -36,17 +36,17 @@ class SupportsHostProvisioning(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def wait_host_deployment(self, is_setup: bool, params: dict) -> Tuple["Status", dict]:
+    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple["Status", dict]:
         """
         Waits for a pending operation on a Host/VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
 
         Parameters
         ----------
-        is_setup : bool
-            If True, wait for Host/VM being deployed; otherwise, wait for successful deprovisioning.
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
+        is_setup : bool
+            If True, wait for Host/VM being deployed; otherwise, wait for successful deprovisioning.
 
         Returns
         -------
