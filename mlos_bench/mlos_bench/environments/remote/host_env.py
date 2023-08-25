@@ -81,7 +81,7 @@ class HostEnv(Environment):
             return False
 
         (status, params) = self._host_service.provision_host(self._params)
-        if status.is_pending:
+        if status.is_pending():
             (status, _) = self._host_service.wait_host_deployment(params, is_setup=True)
 
         self._is_ready = status.is_succeeded()
@@ -93,7 +93,7 @@ class HostEnv(Environment):
         """
         _LOG.info("Host tear down: %s", self)
         (status, params) = self._host_service.deprovision_host(self._params)
-        if status.is_pending:
+        if status.is_pending():
             (status, _) = self._host_service.wait_host_deployment(params, is_setup=False)
 
         super().teardown()

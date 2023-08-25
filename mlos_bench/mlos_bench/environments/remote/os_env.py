@@ -89,7 +89,7 @@ class OSEnv(Environment):
             return False
 
         (status, params) = self._host_service.start_host(self._params)
-        if status.is_pending:
+        if status.is_pending():
             (status, _) = self._host_service.wait_host_operation(params)
 
         # TODO: configure OS settings here?
@@ -102,8 +102,8 @@ class OSEnv(Environment):
         Clean up and shut down the host without deprovisioning it.
         """
         _LOG.info("OS tear down: %s", self)
-        (status, params) = self._os_service.shutdown()
-        if status.is_pending:
+        (status, params) = self._os_service.shutdown(self._params)
+        if status.is_pending():
             (status, _) = self._os_service.wait_os_operation(params)
 
         super().teardown()

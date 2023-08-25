@@ -95,9 +95,9 @@ class RemoteEnv(ScriptEnv):
         if self._wait_boot:
             _LOG.info("Wait for the remote environment to start: %s", self)
             (status, params) = self._host_service.start_host(self._params)
-            if status.is_pending:
+            if status.is_pending():
                 (status, _) = self._host_service.wait_host_operation(params)
-            if not status.is_succeeded:
+            if not status.is_succeeded():
                 return False
 
         if self._script_setup:
