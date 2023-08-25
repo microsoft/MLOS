@@ -4,6 +4,10 @@
 
     "class": "mlos_bench.services.remote.azure.AzureAuthService",
     "config": {
-        "tokenRequestInterval": 300
+        "tokenRequestInterval": 300,
+        "spClientId": "client-id",
+        "keyVaultName": "kv-name",
+        "certName": "cert-name",
+        "tenant": "tenant-id"
     }
 }
