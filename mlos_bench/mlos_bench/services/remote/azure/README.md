@@ -25,7 +25,7 @@ The requirements of this method are:
 
 - User logged in to Azure CLI
 - An existing SP with appropriate access to the target resource group (e.g., `Contributor` role).
-  > See scripts/setup-rg/README.md for details on setting up the SP.
+  > See [scripts/setup-rg/README.md](../../../config/services/remote/azure/scripts/setup-rg/README.md) for details on setting up the SP.
 - Key vault for storing certificate.
 - A certificate associated with the SP, which is stored in the key vault.
 - User has access to read the necessary secrets/certificates from the key vault (e.g., `Key Vault Administrator` role).
