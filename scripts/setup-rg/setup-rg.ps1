@@ -23,7 +23,6 @@ $deploymentResults = az deployment group create `
     --resource-group $resourceGroupName `
     --template-file .\rg-template.json `
     --parameters $controlPlaneArmParameters `
-    --parameters vmSshSourceAddressPrefix="131.107.0.0/16"
     | ConvertFrom-JSON
 
 if (!$?) {
@@ -34,18 +33,19 @@ if (!$?) {
 # Conditional provisioning of results DB
 if ($resultsDbArmParameters) {
     Write-Output "Provisioning results DB..."
-    $vmName = $deploymentResults.properties.outputs.vmName.value
-    $vmIpAddress = $deploymentResults.properties.outputs.vmIpAddress.value
     $dbDeploymentResults = az deployment group create `
         --resource-group $resourceGroupName `
         --template-file ./results-db/mysql-template.json `
-        --parameters $resultsDbArmParameters
+        --parameters $resultsDbArmParameters `
+        | ConvertFrom-JSON
 
     if (!$?) {
         Write-Error "Error in provisioning results DB!"
     }
     else {
         $dbName = $dbDeploymentResults.properties.outputs.dbName.value
+        $vmName = $deploymentResults.properties.outputs.vmName.value
+        $vmIpAddress = $deploymentResults.properties.outputs.vmIpAddress.value
 
         # VM IP access for results DB
         az mysql flexible-server firewall-rule update `
@@ -54,14 +54,6 @@ if ($resultsDbArmParameters) {
             --rule-name "AllowVM-$vmName" `
             --start-ip-address $vmIpAddress `
             --end-ip-address $vmIpAddress
-
-        # Corp. IP access for results DB
-        az mysql flexible-server firewall-rule update `
-            --resource-group $resourceGroupName `
-            --name $dbName `
-            --rule-name "CorpIps" `
-            --start-ip-address "131.107.0.0" `
-            --end-ip-address "131.107.255.255"
     }
 }
 

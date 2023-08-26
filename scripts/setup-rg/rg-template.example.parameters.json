@@ -17,7 +17,7 @@
             ]
         },
         "vmSshSourceAddressPrefix": {
-            "value": "PLACEHOLDER"
+            "value": "PLACEHOLDER; e.g. 123.123.0.0/16"
         },
         "fileShareName": {
             "value": "mlos-file-share"

@@ -10,6 +10,15 @@
         },
         "dbAdminPassword": {
             "value": "PLACEHOLDER"
+        },
+        "dbFirewallRules": {
+            "value": [
+                {
+                    "name": "PLACEHOLDER",
+                    "startIpAddress": "123.123.0.0",
+                    "endIpAddress": "123.123.255.255"
+                }
+            ]
         }
     }
 }
