@@ -228,10 +228,12 @@ class LocalEnv(ScriptEnv):
             expected_col_names = ["timestamp", "metric", "value"]
             if len(data.columns) != len(expected_col_names):
                 raise ValueError(f'Telemetry data must have columns {expected_col_names}')
-            elif list(data.columns) != expected_col_names:
+
+            if list(data.columns) != expected_col_names:
                 # Assume no header - this is ok for telemetry data.
                 data = pandas.read_csv(
                     fname, index_col=False, parse_dates=[0], names=expected_col_names)
+
         except FileNotFoundError as ex:
             _LOG.warning("Telemetry CSV file not found: %s :: %s", self._read_telemetry_file, ex)
             return (status, [])

@@ -9,7 +9,7 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 
 from logging import warning
 from pathlib import Path
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
 
 import ConfigSpace
@@ -48,7 +48,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
         Note that modifying this value directly affects the value of `n_random_init`, if latter is set to `None`.
 
     n_random_init : Optional[int]
-        Number of points evaluated at start to bootstrap the optimizer. Defaults to 10.
+        Number of points evaluated at start to bootstrap the optimizer.
+        Default depends on max_trials and number of parameters and max_ratio.
+        Note: it can sometimes be useful to set this to 1 when pre-warming the
+        optimizer from historical data.
+        See Also: mlos_bench.optimizer.bulk_register
 
     max_ratio : Optional[int]
         Maximum ratio of max_trials to be random configurations to be evaluated
@@ -57,7 +61,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configurations evaluated at start.
 
     use_default_config: bool
-        Whether to use the default config for the first trial.
+        Whether to use the default config for the first trial after random initialization.
 
     n_random_probability: float
         Probability of choosing to evaluate a random configuration during optimization.
@@ -88,7 +92,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
         from smac import HyperparameterOptimizationFacade as Optimizer_Smac
         from smac import Scenario
         from smac.intensifier.abstract_intensifier import AbstractIntensifier
-        from smac.initial_design import LatinHypercubeInitialDesign
         from smac.main.config_selector import ConfigSelector
         from smac.random_design.probability_design import ProbabilityRandomDesign
         from smac.runhistory import TrialInfo
@@ -110,7 +113,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 self._temp_output_directory = TemporaryDirectory()
             output_directory = self._temp_output_directory.name
 
-        initial_design_args = {}
         if n_random_init is not None:
             assert isinstance(n_random_init, int) and n_random_init >= 0
             if n_random_init == max_trials and use_default_config:
@@ -128,18 +130,27 @@ class SmacOptimizer(BaseBayesianOptimizer):
             n_workers=1,  # Use a single thread for evaluating trials
         )
         intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
-        config_selector: ConfigSelector = ConfigSelector(scenario, retrain_after=1)
+        config_selector: ConfigSelector = Optimizer_Smac.get_config_selector(scenario, retrain_after=1)
 
         # TODO: When bulk registering prior configs to rewarm the optimizer,
         # there is a way to inform SMAC's initial design that we have
         # additional_configs and can set n_configs == 0.
+        # Additionally, we may want to consider encoding those values into the
+        # runhistory when prewarming the optimizer so that the initial design
+        # doesn't reperform random init.
+        # See Also: #488
 
-        initial_design: Optional[LatinHypercubeInitialDesign] = None
+        initial_design_args: Dict[str, Union[list, int, float, Scenario]] = {
+            'scenario': scenario,
+            # Workaround a bug in SMAC that sets a default arg to a mutable
+            # value that can cause issues when multiple optimizers are
+            # instantiated with the use_default_config option within the same
+            # process that use different ConfigSpaces so that the second
+            # receives the default config from both as an additional config.
+            'additional_configs': []
+        }
         if n_random_init is not None:
-            initial_design_args = {
-                'scenario': scenario,
-                'n_configs': n_random_init,
-            }
+            initial_design_args['n_configs'] = n_random_init
             if n_random_init > 0.25 * max_trials and max_ratio is None:
                 warning(
                     'Number of random initial configurations (%d) is ' +
@@ -152,7 +163,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
                 assert isinstance(max_ratio, float) and 0.0 <= max_ratio <= 1.0
                 initial_design_args['max_ratio'] = max_ratio
 
-            initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
+        # Use the default InitialDesign from SMAC.
+        # (currently SBOL instead of LatinHypercube due to better uniformity
+        # for initial sampling which results in lower overall samples required)
+        initial_design = Optimizer_Smac.get_initial_design(**initial_design_args)  # type: ignore[arg-type]
+        # initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
         # design when generated a random_design for itself via the
@@ -174,6 +189,22 @@ class SmacOptimizer(BaseBayesianOptimizer):
     def __del__(self) -> None:
         # Best-effort attempt to clean up, in case the user forgets to call .cleanup()
         self.cleanup()
+
+    @property
+    def n_random_init(self) -> int:
+        """
+        Gets the number of random samples to use to initialize the optimizer's search space sampling.
+
+        Note: This may not be equal to the value passed to the initializer, due to logic present in the SMAC.
+        See Also: max_ratio
+
+        Returns
+        -------
+        int
+            The number of random samples used to initialize the optimizer's search space sampling.
+        """
+        # pylint: disable=protected-access
+        return self.base_optimizer._initial_design._n_configs
 
     @staticmethod
     def _dummy_target_func(config: ConfigSpace.Configuration, seed: int = 0) -> None:
@@ -242,10 +273,11 @@ class SmacOptimizer(BaseBayesianOptimizer):
             raise NotImplementedError()
 
         trial: TrialInfo = self.base_optimizer.ask()
+        trial.config.is_valid_configuration()
+        self.optimizer_parameter_space.check_configuration(trial.config)
+        assert trial.config.config_space == self.optimizer_parameter_space
         self.trial_info_map[trial.config] = trial
         config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
-        if config_df.isnull().values.any():
-            raise RuntimeError('SMAC optimizer returned a NaN configuration')
         return config_df
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:

@@ -6,8 +6,10 @@
 Tests for Bayesian Optimizers.
 """
 
+from copy import deepcopy
 from typing import List, Optional, Type
 
+import logging
 import pytest
 
 import pandas as pd
@@ -18,10 +20,14 @@ import ConfigSpace as CS
 from mlos_core.optimizers import (
     OptimizerType, ConcreteOptimizer, OptimizerFactory, BaseOptimizer)
 
-from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer
+from mlos_core.optimizers.bayesian_optimizers import BaseBayesianOptimizer, SmacOptimizer
 from mlos_core.spaces.adapters import SpaceAdapterType
 
 from mlos_core.tests import get_all_concrete_subclasses
+
+
+_LOG = logging.getLogger(__name__)
+_LOG.setLevel(logging.DEBUG)
 
 
 @pytest.mark.parametrize(('optimizer_class', 'kwargs'), [
@@ -163,22 +169,22 @@ def test_create_optimizer_with_factory_method(configuration_space: CS.Configurat
     # Enumerate all supported Optimizers
     *[(member, {}) for member in OptimizerType],
     # Optimizer with non-empty kwargs argument
-    # TODO: (OptimizerType.SMAC, {'use_default_config': True}),
+    (OptimizerType.SMAC, {
+        # Test with default config.
+        'use_default_config': True,
+        # 'n_random_init': 10,
+    }),
 ])
 def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optional[dict]) -> None:
     """
     Toy problem to test the optimizers with llamatune space adapter.
     """
+    # pylint: disable=too-complex
+    # pylint: disable=too-many-statements
     # pylint: disable=too-many-locals
     num_iters = 50
     if kwargs is None:
         kwargs = {}
-    if optimizer_type == OptimizerType.SMAC:
-        # FIXME: SMAC isn't training its model immediately when
-        # use_default_config is set which causes it to return NaN on the first
-        # ask() call.
-        # For now, we skip that mode and will fix it later ...
-        kwargs['use_default_config'] = False
 
     def objective(point: pd.DataFrame) -> pd.Series:
         # Best value can be reached by tuning an 1-dimensional search space
@@ -197,10 +203,23 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
         "special_param_values": None,
         "max_unique_values_per_param": None,
     }
+
+    # Make some adjustments to the kwargs for the optimizer and LlamaTuned
+    # optimizer for debug/testing.
+
+    # if optimizer_type == OptimizerType.SMAC:
+    #    # Allow us to override the number of random init samples.
+    #    kwargs['max_ratio'] = 1.0
+    optimizer_kwargs = deepcopy(kwargs)
+    llamatune_optimizer_kwargs = deepcopy(kwargs)
+    # if optimizer_type == OptimizerType.SMAC:
+    #    optimizer_kwargs['n_random_init'] = 20
+    #    llamatune_optimizer_kwargs['n_random_init'] = 10
+
     llamatune_optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
         optimizer_type=optimizer_type,
-        optimizer_kwargs=kwargs,
+        optimizer_kwargs=llamatune_optimizer_kwargs,
         space_adapter_type=SpaceAdapterType.LLAMATUNE,
         space_adapter_kwargs=space_adapter_kwargs,
     )
@@ -208,14 +227,27 @@ def test_optimizer_with_llamatune(optimizer_type: OptimizerType, kwargs: Optiona
     optimizer: BaseOptimizer = OptimizerFactory.create(
         parameter_space=input_space,
         optimizer_type=optimizer_type,
-        optimizer_kwargs=kwargs,
+        optimizer_kwargs=optimizer_kwargs,
     )
     assert optimizer is not None
-
     assert llamatune_optimizer is not None
     assert optimizer.optimizer_parameter_space != llamatune_optimizer.optimizer_parameter_space
 
-    for _ in range(num_iters):
+    llamatune_n_random_init = 0
+    opt_n_random_init = int(kwargs.get('n_random_init', 0))
+    if optimizer_type == OptimizerType.SMAC:
+        assert isinstance(optimizer, SmacOptimizer)
+        assert isinstance(llamatune_optimizer, SmacOptimizer)
+        opt_n_random_init = optimizer.n_random_init
+        llamatune_n_random_init = llamatune_optimizer.n_random_init
+
+    for i in range(num_iters):
+        # Place to set a breakpoint for when the optimizer is done with random init.
+        if llamatune_n_random_init and i > llamatune_n_random_init:
+            _LOG.debug("LlamaTuned Optimizer is done with random init.")
+        if opt_n_random_init and i >= opt_n_random_init:
+            _LOG.debug("Optimizer is done with random init.")
+
         # loop for optimizer
         suggestion = optimizer.suggest()
         observation = objective(suggestion)
