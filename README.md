@@ -65,7 +65,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
     Here's a quick summary:
 
     ```shell
-    ./scripts/generate-azure-credentials-config > global_config_azure.json
+    ./scripts/generate-azure-credentials-config > global_config_azure.jsonc
 
     # run a simple experiment
     mlos_bench --config ./mlos_bench/mlos_bench/config/cli/azure-redis-1shot.jsonc
