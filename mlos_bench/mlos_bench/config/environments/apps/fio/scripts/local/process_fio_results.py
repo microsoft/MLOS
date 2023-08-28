@@ -34,7 +34,7 @@ def _main(input_file: str, output_file: str, prefix: str) -> None:
     with open(input_file, mode='r', encoding='utf-8') as fh_input:
         json_data = json.load(fh_input)
 
-    data = dict(itertools.chain(
+    data = list(itertools.chain(
         _flat_dict(json_data["jobs"][0], prefix),
         _flat_dict(json_data["disk_util"][0], f"{prefix}.disk_util")
     ))
