@@ -11,4 +11,5 @@ RUN echo "Port ${PORT}" > /etc/ssh/sshd_config.d/local.conf \
     && cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys
 
 ENV TIMEOUT=infinity
+STOPSIGNAL SIGKILL
 CMD ["/bin/bash", "-eux", "-c", "service ssh start && sleep ${TIMEOUT}"]
