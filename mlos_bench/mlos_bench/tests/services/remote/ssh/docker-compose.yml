@@ -1,0 +1,14 @@
+version: '2'
+services:
+  ssh:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PORT=2254
+      tags:
+        - "mlos_bench-test-ssh-server"
+    ports:
+      - 2254:2254
+    environment:
+      - TIMEOUT=180

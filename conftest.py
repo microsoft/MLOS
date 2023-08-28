@@ -13,6 +13,7 @@ import os
 from warnings import warn
 
 import pytest
+import shutil
 
 
 def pytest_configure(config: pytest.Config) -> None:   # pylint: disable=unused-argument
@@ -25,3 +26,8 @@ def pytest_configure(config: pytest.Config) -> None:   # pylint: disable=unused-
         matplotlib.rcParams['backend'] = 'agg'
         warn(UserWarning('DISPLAY environment variable is set, which can cause problems in some setups (e.g. WSL). '
             + f'Adjusting matplotlib backend to "{matplotlib.rcParams["backend"]}" to compensate.'))
+
+
+# A decorator for tests that require docker.
+DOCKER = shutil.which('docker')
+test_requires_docker = pytest.mark.skipif(not DOCKER, reason='Docker is not available on this system.')
