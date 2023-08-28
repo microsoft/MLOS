@@ -40,7 +40,8 @@
                     "run": [
                         "mkdir -p $mountPoint/$experiment_id/$trial_id/output/fio/",
                         "sudo fio --output-format=json --filename=$fio_target --runtime=20 $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > /dev/null",  // warm-up
-                        "sudo fio --output-format=json --filename=$fio_target --runtime=60 $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > $mountPoint/$experiment_id/$trial_id/output/fio/readwrite.json"
+                        "sudo fio --output-format=json --filename=$fio_target --runtime=60 $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > $mountPoint/$experiment_id/$trial_id/output/fio/readwrite.json",
+                        "sudo rm $fio_target"
                     ]
                 }
             },
