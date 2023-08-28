@@ -95,7 +95,7 @@ def get_schema_test_cases(test_cases_root: str) -> TestCases:
     # Note: we sort the test cases so that we can deterministically test them in parallel.
     for (test_case_type, schema_test_type) in _SCHEMA_TEST_TYPES.items():
         for test_case_subtype in schema_test_type.test_case_subtypes:
-            for test_case_file in locate_config_examples(os.path.join(test_cases_root, test_case_type, test_case_subtype)):
+            for test_case_file in locate_config_examples(test_cases_root, os.path.join(test_case_type, test_case_subtype)):
                 with open(test_case_file, mode='r', encoding='utf-8') as test_case_fh:
                     try:
                         test_case_info = SchemaTestCaseInfo(

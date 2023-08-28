@@ -56,6 +56,10 @@
                         3306,
                         5432
                     ]
+                },
+                "lazy_schema_create": {
+                    "description": "Whether or not to create the schema lazily.",
+                    "type": "boolean"
                 }
             },
             "unevaluatedProperties": false,
