@@ -16,7 +16,7 @@ from mlos_bench.config.schemas.config_schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import get_class_from_name, path_join
+from mlos_bench.util import get_class_from_name
 
 
 _LOG = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
     return configs_to_filter
 
 
-configs = filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
+configs = locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs)
 assert configs
 
 

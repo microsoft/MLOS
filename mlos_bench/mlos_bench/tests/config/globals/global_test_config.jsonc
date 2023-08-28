@@ -8,6 +8,10 @@
     "experiment_id": "MockExperiment",
     "trial_id": 1,
 
+    // A couple of dynamic globals used to test variable expansion.
+    "testVmName": "$experiment_id-vm",
+    "testVnetName": "$testVmName-vnet",
+
     // Override the default value of the "max_iterations" parameter
     // of the optimizer when running local tests:
     "max_iterations": 5
