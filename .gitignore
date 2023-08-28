@@ -161,6 +161,7 @@ build/*.build-stamp
 .env
 
 smac_output/
+test_output_dir/
 
 # Test databases
 *.sqlite*
