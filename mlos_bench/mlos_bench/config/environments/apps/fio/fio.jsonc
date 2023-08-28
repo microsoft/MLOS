@@ -31,7 +31,7 @@
                         "mountPoint"
                     ],
                     "const_args": {
-                        "fio_target": "/dev/sda"
+                        "fio_target": "/fio_test.tmp"
                     },
                     "setup": [
                         "sudo apt-get update",
