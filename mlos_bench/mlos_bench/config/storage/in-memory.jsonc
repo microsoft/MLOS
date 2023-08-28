@@ -3,6 +3,9 @@
     "class": "mlos_bench.storage.sql.storage.SqlStorage",
 
     "config": {
+        // Don't create the schema until we actually need it.
+        // (helps speed up initial launch and tests)
+        "lazy_schema_create": true,
         // Parameters below must match kwargs of `sqlalchemy.URL.create()`:
         "drivername": "sqlite",
         "database": ":memory:"
