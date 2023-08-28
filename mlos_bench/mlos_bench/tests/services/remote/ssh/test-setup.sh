@@ -13,6 +13,7 @@ server_name=mlos_bench-ssh-test-server
 client_name=mlos_bench-ssh-test-client
 image_name="$server_name"
 timeout=900
+# Use an alternative port than the default 22 to avoid conflicts with the host.
 port=2222
 
 # Create a network for the containers to communicate on.
@@ -26,6 +27,7 @@ docker build -t "$image_name" \
     --build-arg no_proxy=${no_proxy:-} \
     -f Dockerfile .
 
+docker rm --force "$server_name" || true
 docker run -d --rm --env TIMEOUT=$timeout --network="$network_name" --name "$image_name" "$server_name"
 
 # TODO: Do this in the python code:
