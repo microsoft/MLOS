@@ -139,6 +139,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "EnvId": 2,                     # const_args from the child
         "idle": "mwait",                # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
+        "global_param": "global_value"  # pulled in from the global_config
     }
     assert composite_env.children[2].parameters == {
         "vmName": "Mock Control VM",    # const_args from the parent
@@ -146,6 +147,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "idle": "mwait",                # tunable_params from the parent
         "vm_client_name": "Mock Client VM",
         "vm_server_name": "Mock Server VM",
+        # "global_param": "global_value"  # not required, so not picked from the global_config
     }
 
 
