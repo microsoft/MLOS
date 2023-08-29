@@ -1,0 +1,5 @@
+{
+    "name": "host_env-extras",
+    "class": "mlos_bench.environments.remote.host_env.HostEnv",
+    "extra": "invalid"
+}

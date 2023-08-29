@@ -9,11 +9,13 @@ A collection Service functions for mocking managing VMs.
 from typing import Any, Dict, Optional
 
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
+from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.os_ops_type import SupportsOSOps
 from mlos_bench.tests.services.remote.mock import mock_operation
 
 
-class MockVMService(Service, SupportsVMOps):
+class MockVMService(Service, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps):
     """
     Mock VM service for testing.
     """
@@ -37,12 +39,19 @@ class MockVMService(Service, SupportsVMOps):
         super().__init__(config, global_config, parent)
         self.register({
             name: mock_operation for name in (
-                "wait_vm_deployment",
-                "wait_vm_operation",
-                "vm_provision",
-                "vm_start",
-                "vm_stop",
-                "vm_deprovision",
-                "vm_restart",
+                # SupportsHostProvisioning:
+                "wait_host_deployment",
+                "provision_host",
+                "deprovision_host",
+                "deallocate_host",
+                # SupportsHostOps:
+                "start_host",
+                "stop_host",
+                "restart_host",
+                "wait_host_operation",
+                # SupportsOsOps:
+                "shutdown",
+                "reboot",
+                "wait_os_operation",
             )
         })

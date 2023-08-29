@@ -1,0 +1,14 @@
+// This config is not actually used to launch anything - only to test the Launcher cli arg parsing.
+{
+    // We minimally need an environment to load.
+    "environment": "environments/mock/mock_env.jsonc",
+
+    // Check that these are appended to any CLI args.
+    "config_path": [
+        "foo",
+        "bar"
+    ],
+
+    "random_seed": 42,
+    "random_init": true
+}

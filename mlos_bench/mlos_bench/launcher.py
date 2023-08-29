@@ -10,8 +10,9 @@ It is used in `mlos_bench.run` module to run the benchmark/optimizer from the
 command line.
 """
 
-import logging
 import argparse
+import logging
+import sys
 
 from string import Template
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
@@ -45,21 +46,20 @@ class Launcher:
     Command line launcher for mlos_bench and mlos_core.
     """
 
-    def __init__(self, description: str, long_text: str = ""):
-
+    def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         _LOG.info("Launch: %s", description)
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}")
-        (args, args_rest) = self._parse_args(parser)
+        (args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
-        self._config_loader = ConfigPersistenceService({"config_path": args.config_path or []})
+        config_path = args.config_path or []
+        self._config_loader = ConfigPersistenceService({"config_path": config_path})
         if args.config:
             config = self._config_loader.load_config(args.config, ConfigSchema.CLI)
             assert isinstance(config, Dict)
-            config_path = config.get("config_path", [])
-            if config_path and not args.config_path:
-                # Reset the config loader with the paths from JSON file.
-                self._config_loader = ConfigPersistenceService({"config_path": config_path})
+            # Merge the args paths for the config loader with the paths from JSON file.
+            config_path += config.get("config_path", [])
+            self._config_loader = ConfigPersistenceService({"config_path": config_path})
         else:
             config = {}
 
@@ -113,10 +113,17 @@ class Launcher:
         self.storage = self._load_storage(args.storage or config.get("storage"))
         _LOG.info("Init storage: %s", self.storage)
 
-        self.teardown = args.teardown or config.get("teardown", True)
+        self.teardown: bool = bool(args.teardown) if args.teardown is not None else bool(config.get("teardown", True))
+
+    @property
+    def config_loader(self) -> ConfigPersistenceService:
+        """
+        Get the config loader service.
+        """
+        return self._config_loader
 
     @staticmethod
-    def _parse_args(parser: argparse.ArgumentParser) -> Tuple[argparse.Namespace, List[str]]:
+    def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:
         """
         Parse the command line arguments.
         """
@@ -129,16 +136,17 @@ class Launcher:
                  ' for additional config examples for this and other arguments.')
 
         parser.add_argument(
-            '--log_file', required=False,
+            '--log_file', '--log-file', required=False,
             help='Path to the log file. Use stdout if omitted.')
 
         parser.add_argument(
-            '--log_level', required=False, type=str,
+            '--log_level', '--log-level', required=False, type=str,
             help=f'Logging level. Default is {logging.getLevelName(_LOG_LEVEL)}.' +
                  ' Set to DEBUG for debug, WARNING for warnings only.')
 
         parser.add_argument(
-            '--config_path', nargs="+", required=False,
+            '--config_path', '--config-path', '--config-paths', '--config_paths',
+            nargs="+", action='extend', required=False,
             help='One or more locations of JSON config files.')
 
         parser.add_argument(
@@ -156,31 +164,37 @@ class Launcher:
                  ' If omitted, use the ephemeral in-memory SQL storage.')
 
         parser.add_argument(
-            '--random_init', required=False, default=False,
+            '--random_init', '--random-init', required=False, default=False,
             dest='random_init', action='store_true',
             help='Initialize tunables with random values. (Before applying --tunable_values).')
 
         parser.add_argument(
-            '--random_seed', required=False, type=int,
+            '--random_seed', '--random-seed', required=False, type=int,
             help='Seed to use with --random_init')
 
         parser.add_argument(
-            '--tunable_values', nargs="+", required=False,
+            '--tunable_values', '--tunable-values', nargs="+", action='extend', required=False,
             help='Path to one or more JSON files that contain values of the tunable' +
                  ' parameters. This can be used for a single trial (when no --optimizer' +
                  ' is specified) or as default values for the first run in optimization.')
 
         parser.add_argument(
-            '--globals', nargs="+", required=False,
+            '--globals', nargs="+", action='extend', required=False,
             help='Path to one or more JSON files that contain additional' +
                  ' [private] parameters of the benchmarking environment.')
 
         parser.add_argument(
-            '--no_teardown', required=False, default=None,
+            '--no_teardown', '--no-teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
 
-        return parser.parse_known_args()
+        # By default we use the command line arguments, but allow the caller to
+        # provide some explicitly for testing purposes.
+        if argv is None:
+            argv = sys.argv[1:].copy()
+        (args, args_rest) = parser.parse_known_args(argv)
+
+        return (args, args_rest)
 
     @staticmethod
     def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, str]:
@@ -239,7 +253,10 @@ class Launcher:
         if isinstance(value, str):
             return Template(value).safe_substitute(self.global_config)
         if isinstance(value, dict):
-            return {key: self._expand_vars(val) for (key, val) in value.items()}
+            # Note: we use a loop instead of dict comprehension in order to
+            # allow secondary expansion of subsequent values immediately.
+            for (key, val) in value.items():
+                value[key] = self._expand_vars(val)
         if isinstance(value, list):
             return [self._expand_vars(val) for val in value]
         return value
@@ -290,7 +307,11 @@ class Launcher:
             # pylint: disable=import-outside-toplevel
             from mlos_bench.storage.sql.storage import SqlStorage
             return SqlStorage(self.tunables, service=self._parent_service,
-                              config={"drivername": "sqlite", "database": ":memory:"})
+                              config={
+                                  "drivername": "sqlite",
+                                  "database": ":memory:",
+                                  "lazy_schema_create": True,
+                              })
         storage = self._load(Storage, args_storage, ConfigSchema.STORAGE)   # type: ignore[type-abstract]
         return storage
 

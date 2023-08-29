@@ -18,13 +18,15 @@ from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
+from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.os_ops_type import SupportsOSOps
 from mlos_bench.util import check_required_params, merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
 
-class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
+class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps, SupportsRemoteExec):
     """
     Helper methods to manage VMs on Azure.
     """
@@ -71,7 +73,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
     )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/deallocate
-    _URL_DEPROVISION = (
+    _URL_DEALLOCATE = (
         "https://management.azure.com" +
         "/subscriptions/{subscription}" +
         "/resourceGroups/{resource_group}" +
@@ -80,6 +82,23 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         "/deallocate" +
         "?api-version=2022-03-01"
     )
+
+    # TODO: This is probably the more correct URL to use for the deprovision operation.
+    # However, previous code used the deallocate URL above, so for now, we keep
+    # that and handle that change later.
+    # See Also: #498
+    _URL_DEPROVISION = _URL_DEALLOCATE
+
+    # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/delete
+    # _URL_DEPROVISION = (
+    #    "https://management.azure.com" +
+    #    "/subscriptions/{subscription}" +
+    #    "/resourceGroups/{resource_group}" +
+    #    "/providers/Microsoft.Compute" +
+    #    "/virtualMachines/{vm_name}" +
+    #    "/delete" +
+    #    "?api-version=2022-03-01"
+    # )
 
     # From: https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/restart
     _URL_REBOOT = (
@@ -134,13 +153,21 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
-            self.wait_vm_deployment,
-            self.wait_vm_operation,
-            self.vm_provision,
-            self.vm_start,
-            self.vm_stop,
-            self.vm_deprovision,
-            self.vm_restart,
+            # SupportsHostProvisioning
+            self.provision_host,
+            self.deprovision_host,
+            self.deallocate_host,
+            self.wait_host_deployment,
+            # SupportsHostOps
+            self.start_host,
+            self.stop_host,
+            self.restart_host,
+            self.wait_host_operation,
+            # SupportsOSOps
+            self.shutdown,
+            self.reboot,
+            self.wait_os_operation,
+            # SupportsRemoteExec
             self.remote_exec,
             self.get_remote_exec_results,
         ])
@@ -284,17 +311,17 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         _LOG.error("Response: %s :: %s", response, response.text)
         return Status.FAILED, {}
 
-    def wait_vm_deployment(self, is_setup: bool, params: dict) -> Tuple[Status, dict]:
+    def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
 
         Parameters
         ----------
-        is_setup : bool
-            If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
+        is_setup : bool
+            If True, wait for VM being deployed; otherwise, wait for successful deprovisioning.
 
         Returns
         -------
@@ -307,7 +334,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
                   "provision" if is_setup else "deprovision")
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
-    def wait_vm_operation(self, params: dict) -> Tuple[Status, dict]:
+    def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
+        return self.wait_host_operation(params)
+
+    def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -426,7 +456,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         _LOG.error("Response: %s :: %s", response, response.text)
         return (Status.FAILED, {})
 
-    def vm_provision(self, params: dict) -> Tuple[Status, dict]:
+    def provision_host(self, params: dict) -> Tuple[Status, dict]:
         """
         Check if Azure VM is ready. Deploy a new VM, if necessary.
 
@@ -434,8 +464,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-            VMEnv tunables are variable parameters that, together with the
-            VMEnv configuration, are sufficient to provision a VM.
+            HostEnv tunables are variable parameters that, together with the
+            HostEnv configuration, are sufficient to provision a VM.
 
         Returns
         -------
@@ -497,7 +527,76 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    def vm_start(self, params: dict) -> Tuple[Status, dict]:
+    def deprovision_host(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Deprovisions the VM on Azure by deleting it.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+        _LOG.info("Deprovision VM: %s", self.config["vmName"])
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "deploymentName",
+                "vmName",
+            ]
+        )
+        _LOG.info("Deprovision: %s", config["deploymentName"])
+        # TODO: Properly deprovision *all* resources specified in the ARM template.
+        return self._azure_vm_post_helper(config, self._URL_DEPROVISION.format(
+            subscription=config["subscription"],
+            resource_group=config["resourceGroup"],
+            vm_name=config["vmName"],
+        ))
+
+    def deallocate_host(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Deallocates the VM on Azure by shutting it down then releasing the compute resources.
+
+        Note: This can cause the VM to arrive on a new host node when its
+        restarted, which may have different performance characteristics.
+
+        Parameters
+        ----------
+        params : dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+        _LOG.info("Deallocate VM: %s", self.config["vmName"])
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "subscription",
+                "resourceGroup",
+                "vmName",
+            ]
+        )
+        _LOG.info("Deallocate: %s", config["vmName"])
+        return self._azure_vm_post_helper(config, self._URL_DEALLOCATE.format(
+            subscription=config["subscription"],
+            resource_group=config["resourceGroup"],
+            vm_name=config["vmName"],
+        ))
+
+    def start_host(self, params: dict) -> Tuple[Status, dict]:
         """
         Start the VM on Azure.
 
@@ -528,7 +627,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             vm_name=config["vmName"],
         ))
 
-    def vm_stop(self, params: dict) -> Tuple[Status, dict]:
+    def stop_host(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
         """
         Stops the VM on Azure by initiating a graceful shutdown.
 
@@ -536,6 +635,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
+        force : bool
+            If True, force stop the Host/VM.
 
         Returns
         -------
@@ -559,37 +660,10 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             vm_name=config["vmName"],
         ))
 
-    def vm_deprovision(self, params: dict) -> Tuple[Status, dict]:
-        """
-        Deallocates the VM on Azure by shutting it down then releasing the compute resources.
+    def shutdown(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+        return self.stop_host(params, force)
 
-        Parameters
-        ----------
-        params : dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result. The result is always the same as input `params`.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-        """
-        config = merge_parameters(
-            dest=self.config.copy(),
-            source=params,
-            required_keys=[
-                "subscription",
-                "resourceGroup",
-                "deploymentName",
-            ]
-        )
-        _LOG.info("Deprovision: %s", config["deploymentName"])
-        # TODO: Properly deprovision all resources specified in the ARM template.
-        if "vmName" in config:
-            return self.vm_stop(params)
-        return (Status.SUCCEEDED, config)
-
-    def vm_restart(self, params: dict) -> Tuple[Status, dict]:
+    def restart_host(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
         """
         Reboot the VM on Azure by initiating a graceful shutdown.
 
@@ -597,6 +671,8 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
+        force : bool
+            If True, force restart the Host/VM.
 
         Returns
         -------
@@ -619,6 +695,9 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
         ))
+
+    def reboot(self, params: dict, force: bool = False) -> Tuple["Status", dict]:
+        return self.restart_host(params, force)
 
     def remote_exec(self, script: Iterable[str], config: dict,
                     env_params: dict) -> Tuple[Status, dict]:
@@ -712,7 +791,7 @@ class AzureVMService(Service, SupportsVMOps, SupportsRemoteExec):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
         _LOG.info("Check the results on VM: %s", config.get("vmName"))
-        (status, result) = self.wait_vm_operation(config)
+        (status, result) = self.wait_host_operation(config)
         if status.is_succeeded():
             return (status, result.get("properties", {}).get("output", {}))
         else:

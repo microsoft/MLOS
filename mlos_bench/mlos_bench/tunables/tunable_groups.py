@@ -268,6 +268,34 @@ class TunableGroups:
         return any(self._tunable_groups[name].is_updated()
                    for name in (group_names or self.get_covariant_group_names()))
 
+    def is_defaults(self) -> bool:
+        """
+        Checks whether the currently assigned values of all tunables are at their defaults.
+
+        Returns
+        -------
+        bool
+        """
+        return all(group.is_defaults() for group in self._tunable_groups.values())
+
+    def restore_defaults(self, group_names: Optional[Iterable[str]] = None) -> "TunableGroups":
+        """
+        Restore all tunable parameters to their default values.
+
+        Parameters
+        ----------
+        group_names : list of str or None
+            IDs of the (covariant) tunable groups. Restore all groups if omitted.
+
+        Returns
+        -------
+        self : TunableGroups
+            Self-reference for chaining.
+        """
+        for name in (group_names or self.get_covariant_group_names()):
+            self._tunable_groups[name].restore_defaults()
+        return self
+
     def reset(self, group_names: Optional[Iterable[str]] = None) -> "TunableGroups":
         """
         Clear the update flag of given covariant groups.
