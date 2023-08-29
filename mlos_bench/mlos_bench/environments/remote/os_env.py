@@ -13,7 +13,8 @@ import logging
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.services.types.os_ops_type import SupportsOSOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -55,10 +56,13 @@ class OSEnv(Environment):
         """
         super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
-        # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
-        assert self._service is not None and isinstance(self._service, SupportsVMOps), \
+        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
             "RemoteEnv requires a service that supports host operations"
-        self._host_service: SupportsVMOps = self._service
+        self._host_service: SupportsHostOps = self._service
+
+        assert self._service is not None and isinstance(self._service, SupportsOSOps), \
+            "RemoteEnv requires a service that supports host operations"
+        self._os_service: SupportsOSOps = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -68,9 +72,9 @@ class OSEnv(Environment):
         ----------
         tunables : TunableGroups
             A collection of groups of tunable parameters along with the
-            parameters' values. VMEnv tunables are variable parameters that,
-            together with the VMEnv configuration, are sufficient to provision
-            and start a VM.
+            parameters' values. HostEnv tunables are variable parameters that,
+            together with the HostEnv configuration, are sufficient to provision
+            and start a host.
         global_config : dict
             Free-format dictionary of global parameters of the environment
             that are not used in the optimization process.
@@ -84,9 +88,11 @@ class OSEnv(Environment):
         if not super().setup(tunables, global_config):
             return False
 
-        (status, params) = self._host_service.vm_start(self._params)
+        (status, params) = self._host_service.start_host(self._params)
         if status.is_pending():
-            (status, _) = self._host_service.wait_vm_operation(params)
+            (status, _) = self._host_service.wait_host_operation(params)
+
+        # TODO: configure OS settings here?
 
         self._is_ready = status in {Status.SUCCEEDED, Status.READY}
         return self._is_ready
@@ -96,9 +102,9 @@ class OSEnv(Environment):
         Clean up and shut down the host without deprovisioning it.
         """
         _LOG.info("OS tear down: %s", self)
-        (status, params) = self._host_service.vm_stop(self._params)
+        (status, params) = self._os_service.shutdown(self._params)
         if status.is_pending():
-            (status, _) = self._host_service.wait_vm_operation(params)
+            (status, _) = self._os_service.wait_os_operation(params)
 
         super().teardown()
         _LOG.debug("Final status of OS stopping: %s :: %s", self, status)

@@ -61,9 +61,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             An optional parent service that can provide mixin functions.
         """
         super().__init__(config, global_config, parent)
-        self._config_path: List[str] = self.config.get("config_path", [])
         self._config_loader_service = self
 
+        # Normalize and deduplicate config paths, but maintain order.
+        self._config_path: List[str] = []
+        for path in self.config.get("config_path", []):
+            if path not in self._config_path:
+                self._config_path.append(path_join(path, abs_path=True))
         if self.BUILTIN_CONFIG_PATH not in self._config_path:
             self._config_path.append(self.BUILTIN_CONFIG_PATH)
 
@@ -78,6 +82,17 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             self.load_environment,
             self.load_environment_list,
         ])
+
+    @property
+    def config_paths(self) -> List[str]:
+        """
+        Gets the list of config paths this service will search for config files.
+
+        Returns
+        -------
+        List[str]
+        """
+        return list(self._config_path)  # make a copy to avoid modifications
 
     def resolve_path(self, file_path: str,
                      extra_paths: Optional[Iterable[str]] = None) -> str:
@@ -149,6 +164,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 # Other configs that get loaded may need the schema field
                 # (e.g. Azure ARM templates).
                 del config["$schema"]
+        else:
+            _LOG.warning("Config %s is not validated against a schema.", json_file_name)
         return config   # type: ignore[no-any-return]
 
     def prepare_class_load(self, config: Dict[str, Any],

@@ -17,7 +17,6 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import path_join
 
 
 _LOG = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ def filter_configs(configs_to_filter: List[str]) -> List[str]:
     return configs_to_filter
 
 
-configs = filter_configs(locate_config_examples(path_join(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE)))
+configs = locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, CONFIG_TYPE, filter_configs)
 assert configs
 
 
@@ -50,27 +49,7 @@ def test_load_environment_config_examples(config_loader_service: ConfigPersisten
 def load_environment_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> List[Environment]:
     """Loads an environment config example."""
     # Make sure that any "required_args" are provided.
-    global_config = {
-        "experiment_id": "test",
-        "trial_id": 1,
-
-        "mountPoint": "/mnt/tmp",
-
-        # FIXME: The setup ubuntu configs currently use these values in their mounting scripts.
-        # We should abstract that out so those details are only needed when a service that uses those is used.
-        "storageAccountName": "foo",
-        "storageAccountKey": "bar",
-        "storageFileShareName": "baz",
-
-        # Assign some values to variadic tunables and required parameters present in the config examples.
-        "vmName": "vmTestName",
-        "tunable_params_map": {
-            "linux-runtime": ["linux-scheduler", "linux-swap"],
-            "linux-boot": ["linux-kernel-boot"],
-            "provision": ["azure-vm"],
-            "redis": ["redis"],
-        }
-    }
+    global_config = config_loader_service.load_config("experiments/experiment_test_config.jsonc", ConfigSchema.GLOBALS)
 
     # Make sure we have the required services for the envs being used.
     mock_service_configs = [
@@ -93,8 +72,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
     return envs
 
 
-composite_configs = filter_configs(locate_config_examples(path_join(
-    ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/root/")))
+composite_configs = locate_config_examples(ConfigPersistenceService.BUILTIN_CONFIG_PATH, "environments/root/")
 assert composite_configs
 
 

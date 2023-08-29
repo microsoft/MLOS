@@ -91,10 +91,10 @@ az account set --subscription "..."
 A script at `./scripts/generate-azure-credentials-config` produces a JSON config snippet with necessary Azure credentials.
 
 ```shell
-./scripts/generate-azure-credentials-config > ./global_config_azure.json
+./scripts/generate-azure-credentials-config > ./global_config_azure.jsonc
 ```
 
-This data produced in the `global_config_azure.json` file is in the format that can be used by our framework.
+This data produced in the `global_config_azure.jsonc` file is in the format that can be used by our framework.
 
 ```jsonc
 {
@@ -145,7 +145,7 @@ They also refer to other configs, e.g.
 - Reusable config snippets in `"config_path"` section, and
 - Additional config files containing sensitive data like DB passwords and Azure credentials.
 
-> Make sure that the files `./global_config_azure.json` and `./global_config_storage.json` you created in the previous steps are included in the `"globals"` section of your CLI config.
+> Make sure that the files `./global_config_azure.jsonc` and `./global_config_storage.json` you created in the previous steps are included in the `"globals"` section of your CLI config.
 
 For the purpose of this tutorial, we will assume that we reuse the existing [`azure-redis-bench.jsonc`](./mlos_bench/config/cli/azure-redis-bench.jsonc) and [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) configurations without any changes.
 In a more realistic scenario, however, you might need to change and/or create new config files for some parts of your benchmarking environment.
@@ -157,7 +157,7 @@ Copy one of our examples, e.g., [`experiment_RedisBench.jsonc`](./mlos_bench/con
 
 In that file, you can specify any parameters that occur in your other configs, namely in `"const_args"` section of the Environment configs, or in `"config"` sections of your Service, Storage, or Optimizer configurations.
 
-> A general rule is that the parameters from the global configs like `./global_config_azure.json` or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
+> A general rule is that the parameters from the global configs like `./global_config_azure.jsonc` or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
 > That allows us to propagate the values of the parameters that are specific to the experiment into other components of the framework and keep the majority of the config files in our library immutable and reusable.
 
 ### 6. Run the benchmark

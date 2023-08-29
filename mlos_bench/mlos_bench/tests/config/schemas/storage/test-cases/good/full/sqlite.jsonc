@@ -4,6 +4,7 @@
     "resolve_config_property_paths": ["database"],
 
     "config": {
+        "lazy_schema_create": true,
         "drivername": "sqlite",
         "database": "mlos_bench.sqlite"
     }
