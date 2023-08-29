@@ -5,7 +5,6 @@
 ##
 
 set -eu
-set -x
 
 # Argument parsing
 while [[ "$#" -gt 0 ]]; do
@@ -104,6 +103,7 @@ certThumbprint=$(az keyvault certificate show \
     --name "$certName" \
     --vault-name "$kvName" \
     --query "x509ThumbprintHex" --output tsv \
+    2> /dev/null \
     || echo "NOCERT")
 
 if [[ $certThumbprint == "NOCERT" ]]; then
@@ -140,8 +140,6 @@ else
         --query "[].customKeyIdentifier" \
         --output tsv \
         )
-    echo "KV cert thumprint is $certThumbprint"
-    echo "SP's certs are $spCertThumbprints"
     if [[ $spCertThumbprints == *$certThumbprint* ]]; then
         echo "Keyvault contains the certificate '$certName' that is linked to the service principal '$servicePrincipalName' already."
     else

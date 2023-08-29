@@ -72,7 +72,8 @@ az role assignment create `
 $certThumbprint = az keyvault certificate show `
     --name $certName `
     --vault-name $kvName `
-    --query "x509ThumbprintHex" --output tsv
+    --query "x509ThumbprintHex" --output tsv `
+    2>$null
 
 if (!$?) {
     # The cert does not exist yet.
@@ -101,7 +102,7 @@ if (!$?) {
         --query "[?servicePrincipalType == 'Application'].appId" `
         --output tsv
     $spCertThumbprints = az ad app credential list `
-        --id $servicePrincipalId `
+        --id $servicePrincipalAppId `
         --cert `
         --query "[].customKeyIdentifier" `
         --output tsv
