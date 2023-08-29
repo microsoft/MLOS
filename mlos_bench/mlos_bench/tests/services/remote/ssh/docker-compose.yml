@@ -1,14 +1,28 @@
 version: '2'
 services:
-  ssh:
+  mlos_bench-test-ssh-server:
+    attach: false
     build:
       context: .
       dockerfile: Dockerfile
       args:
         - PORT=2254
       tags:
-        - "mlos_bench-test-ssh-server"
+        - mlos_bench-test-ssh-server:latest
     ports:
       - 2254:2254
+    extra_hosts:
+      - host.docker.internal:host-gateway
     environment:
-      - TIMEOUT=180
+      # Let the environment variable TIMEOUT override the default.
+      - TIMEOUT=${TIMEOUT:-180}
+  # Check that we can connect to the server from the client.
+  mlos_bench-test-ssh-client:
+    depends_on:
+      - mlos_bench-test-ssh-server
+    restart: no
+    image: mlos_bench-test-ssh-server:latest
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    # Implicitly uses root and the key in that image.
+    command: ["ssh", "-o", "StrictHostKeyChecking=accept-new", "-p", "2254", "host.docker.internal", "hostname"]
