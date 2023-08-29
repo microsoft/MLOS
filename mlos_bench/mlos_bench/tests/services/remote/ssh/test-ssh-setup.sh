@@ -22,7 +22,7 @@ timeout=${timeout:-180}
 port=2254
 
 #network_name='host'
-#server_fqdn='localhost'
+#server_fqdn='host.docker.internal'
 
 if ! docker ps | awk '{ print $NF }' | grep -q "$server_name"; then
     echo "SSH test server container $server_name not found. Creating it."
@@ -39,7 +39,13 @@ if ! docker ps | awk '{ print $NF }' | grep -q "$server_name"; then
         || { echo "Failed to build SSH test server image $image_name."; exit 1; }
 
     docker rm --force "$server_name" || true
-    docker run -d --rm --env TIMEOUT=$timeout --network="$network_name" -p $port:$port --name "$image_name" "$server_name" \
+    docker run -d --rm \
+        --env TIMEOUT=$timeout \
+        --add-host "host.docker.internal:host-gateway" \
+        --network="$network_name" \
+        -p $port:$port \
+        --name "$image_name" \
+        "$server_name" \
         || { echo "Failed to start local SSH test server container $server_name."; exit 1; }
     sleep 1
 fi
