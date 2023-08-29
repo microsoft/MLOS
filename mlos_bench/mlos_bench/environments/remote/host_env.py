@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-OS-level remote Environment on Azure.
+Remote host Environment.
 """
 
 from typing import Optional
@@ -11,18 +11,16 @@ from typing import Optional
 import logging
 
 from mlos_bench.environments.base_environment import Environment
-from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.types.host_ops_type import SupportsHostOps
-from mlos_bench.services.types.os_ops_type import SupportsOSOps
+from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
 
 
-class OSEnv(Environment):
+class HostEnv(Environment):
     """
-    OS Level Environment for a host.
+    Remote host environment.
     """
 
     def __init__(self,
@@ -33,7 +31,7 @@ class OSEnv(Environment):
                  tunables: Optional[TunableGroups] = None,
                  service: Optional[Service] = None):
         """
-        Create a new environment for remote execution.
+        Create a new environment for host operations.
 
         Parameters
         ----------
@@ -43,8 +41,6 @@ class OSEnv(Environment):
             Free-format dictionary that contains the benchmark environment
             configuration. Each config must have at least the "tunable_params"
             and the "const_args" sections.
-            `RemoteEnv` must also have at least some of the following parameters:
-            {setup, run, teardown, wait_boot}
         global_config : dict
             Free-format dictionary of global parameters (e.g., security credentials)
             to be mixed in into the "const_args" section of the local config.
@@ -52,21 +48,17 @@ class OSEnv(Environment):
             A collection of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM/host, etc.).
         """
         super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
-        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
-            "RemoteEnv requires a service that supports host operations"
-        self._host_service: SupportsHostOps = self._service
-
-        assert self._service is not None and isinstance(self._service, SupportsOSOps), \
-            "RemoteEnv requires a service that supports host operations"
-        self._os_service: SupportsOSOps = self._service
+        assert self._service is not None and isinstance(self._service, SupportsHostProvisioning), \
+            "HostEnv requires a service that supports host operations"
+        self._host_service: SupportsHostProvisioning = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
-        Check if the host is up and running; boot it, if necessary.
+        Check if host is ready. (Re)provision and start it, if necessary.
 
         Parameters
         ----------
@@ -74,7 +66,7 @@ class OSEnv(Environment):
             A collection of groups of tunable parameters along with the
             parameters' values. HostEnv tunables are variable parameters that,
             together with the HostEnv configuration, are sufficient to provision
-            and start a host.
+            and start a Host.
         global_config : dict
             Free-format dictionary of global parameters of the environment
             that are not used in the optimization process.
@@ -84,27 +76,25 @@ class OSEnv(Environment):
         is_success : bool
             True if operation is successful, false otherwise.
         """
-        _LOG.info("OS set up: %s :: %s", self, tunables)
+        _LOG.info("Host set up: %s :: %s", self, tunables)
         if not super().setup(tunables, global_config):
             return False
 
-        (status, params) = self._host_service.start_host(self._params)
+        (status, params) = self._host_service.provision_host(self._params)
         if status.is_pending():
-            (status, _) = self._host_service.wait_host_operation(params)
+            (status, _) = self._host_service.wait_host_deployment(params, is_setup=True)
 
-        # TODO: configure OS settings here?
-
-        self._is_ready = status in {Status.SUCCEEDED, Status.READY}
+        self._is_ready = status.is_succeeded()
         return self._is_ready
 
     def teardown(self) -> None:
         """
-        Clean up and shut down the host without deprovisioning it.
+        Shut down the Host and release it.
         """
-        _LOG.info("OS tear down: %s", self)
-        (status, params) = self._os_service.shutdown(self._params)
+        _LOG.info("Host tear down: %s", self)
+        (status, params) = self._host_service.deprovision_host(self._params)
         if status.is_pending():
-            (status, _) = self._os_service.wait_os_operation(params)
+            (status, _) = self._host_service.wait_host_deployment(params, is_setup=False)
 
         super().teardown()
-        _LOG.debug("Final status of OS stopping: %s :: %s", self, status)
+        _LOG.debug("Final status of Host deprovisioning: %s :: %s", self, status)

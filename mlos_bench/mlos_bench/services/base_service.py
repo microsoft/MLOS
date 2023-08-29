@@ -19,7 +19,7 @@ _LOG = logging.getLogger(__name__)
 
 class Service:
     """
-    An abstract base of all environment services.
+    An abstract base of all Environment Services and used to build up mix-ins.
     """
 
     @classmethod
@@ -119,6 +119,8 @@ class Service:
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Service: %s Add methods: %s",
                        self.__class__.__name__, list(services.keys()))
+
+        # TODO? Throw a warning when an existing method is being overwritten?
 
         self._services.update(services)
         self.__dict__.update(self._services)

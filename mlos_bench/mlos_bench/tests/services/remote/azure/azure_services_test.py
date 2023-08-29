@@ -48,10 +48,13 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
 
 @pytest.mark.parametrize(
     ("operation_name", "accepts_params"), [
-        ("vm_start", True),
-        ("vm_stop", True),
-        ("vm_deprovision", True),
-        ("vm_restart", True),
+        ("start_host", True),
+        ("stop_host", True),
+        ("shutdown", True),
+        ("deprovision_host", True),
+        ("deallocate_host", True),
+        ("restart_host", True),
+        ("reboot", True),
     ])
 @pytest.mark.parametrize(
     ("http_status_code", "operation_status"), [
@@ -96,7 +99,7 @@ def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock
     }
     mock_requests.get.return_value = mock_status_response
 
-    status, _ = azure_vm_service.wait_vm_operation(params)
+    status, _ = azure_vm_service.wait_host_operation(params)
 
     assert (async_url, ) == mock_requests.get.call_args[0]
     assert (retry_after, ) == mock_sleep.call_args[0]
@@ -119,7 +122,7 @@ def test_wait_vm_operation_timeout(mock_requests: MagicMock, azure_vm_service: A
     }
     mock_requests.get.return_value = mock_status_response
 
-    (status, _) = azure_vm_service.wait_vm_operation(params)
+    (status, _) = azure_vm_service.wait_host_operation(params)
     assert status == Status.TIMED_OUT
 
 
@@ -195,12 +198,13 @@ def test_get_remote_exec_results(azure_vm_service: AzureVMService, operation_sta
 
     params = {"asyncResultsUrl": "DUMMY_ASYNC_URL"}
 
-    mock_wait_vm_operation = MagicMock()
-    mock_wait_vm_operation.return_value = (operation_status, wait_output)
-    # azure_vm_service.wait_vm_operation = mock_wait_vm_operation
-    setattr(azure_vm_service, "wait_vm_operation", mock_wait_vm_operation)
+    mock_wait_host_operation = MagicMock()
+    mock_wait_host_operation.return_value = (operation_status, wait_output)
+    # azure_vm_service.wait_host_operation = mock_wait_host_operation
+    setattr(azure_vm_service, "wait_host_operation", mock_wait_host_operation)
 
     status, cmd_output = azure_vm_service.get_remote_exec_results(params)
 
     assert status == operation_status
+    assert mock_wait_host_operation.call_args[0][0] == params
     assert cmd_output == results_output

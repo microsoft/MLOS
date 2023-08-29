@@ -51,7 +51,7 @@ class Environment(metaclass=abc.ABCMeta):
             Human-readable name of the environment.
         class_name: str
             FQN of a Python class to instantiate, e.g.,
-            "mlos_bench.environments.remote.VMEnv".
+            "mlos_bench.environments.remote.HostEnv".
             Must be derived from the `Environment` class.
         config : dict
             Free-format dictionary that contains the benchmark environment
@@ -64,7 +64,7 @@ class Environment(metaclass=abc.ABCMeta):
             A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM/Host, etc.).
 
         Returns
         -------
@@ -107,7 +107,7 @@ class Environment(metaclass=abc.ABCMeta):
             A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM/Host, etc.).
         """
         self.name = name
         self.config = config

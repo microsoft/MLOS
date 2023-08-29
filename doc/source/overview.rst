@@ -152,6 +152,7 @@ Remote Environments
    RemoteEnv
    OSEnv
    VMEnv
+   HostEnv
 
 Tunable Parameters
 ==================
