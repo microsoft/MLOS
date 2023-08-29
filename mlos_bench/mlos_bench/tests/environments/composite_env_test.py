@@ -129,6 +129,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "EnvId": 1,                     # const_args from the child
         "vmSize": "Standard_B2s",       # tunable_params from the parent
         "someConst": "root",            # pulled in from parent via required_args
+        "global_param": "global_value"  # pulled in from the global_config
     }
     assert composite_env.children[1].parameters == {
         "vmName": "Mock Server VM",     # const_args from the parent
@@ -276,6 +277,7 @@ def test_nested_composite_env_setup(nested_composite_env: CompositeEnv, tunable_
         "vmSize": "Standard_B2s",       # tunable_params from the parent
         "someConst": "root",            # pulled in from parent via required_args
         "vm_server_name": "Mock Server VM",
+        "global_param": "global_value"  # pulled in from the global_config
     }
 
     assert isinstance(nested_composite_env.children[1], CompositeEnv)
