@@ -62,7 +62,7 @@ $resourceGroupId = az group show --name $resourceGroupName --query "id" --output
 
 # Assign 'Key Vault Administrator' access to current user
 $kvName = $deploymentResults.properties.outputs.kvName.value
-$kvId = az keyvault show --name $kvName --query "id" --output tsv
+$kvId = az keyvault show --name $kvName --resource-group $resourceGroupName --query "id" --output tsv
 az role assignment create `
     --assignee $currentUserAlias `
     --role "Key Vault Administrator" `
@@ -95,19 +95,20 @@ if (!$?) {
         --role "Contributor" `
         --scopes $resourceGroupId `
 
-    # SP's certs
-    $servicePrincipalId = az ad sp list `
+    # SP's certs, which are stored in the registered application instead
+    $servicePrincipalAppId = az ad sp list `
         --display-name $servicePrincipalName `
-        --query "[?servicePrincipalType == 'Application'].objectId" `
+        --query "[?servicePrincipalType == 'Application'].appId" `
         --output tsv
-    $spCertThumbprints = az ad sp credential list `
+    $spCertThumbprints = az ad app credential list `
         --id $servicePrincipalId `
         --cert `
-        --query "[].customKeyIdentifier" --output tsv
+        --query "[].customKeyIdentifier" `
+        --output tsv
 
     if ($spCertThumbprints.Contains($certThumbprint)) {
         Write-Output "Keyvault contains the certificate '$certName' that is linked to the service principal '$servicePrincipalName' already."
     } else {
-        Write-Warning "Keyvault already contains a certificate called '$certname', but is not linked with the service principal '$servicePrincipalName'! Skipping cert handling"
+        Write-Warning "Keyvault already contains a certificate called '$certName', but is not linked with the service principal '$servicePrincipalName'! Skipping cert handling"
     }
 }
