@@ -174,4 +174,4 @@ def docker_compose_project_name() -> str:
     str
         Name of the docker-compose project.
     """
-    return "mlos_bench-test"
+    return f"mlos_bench-test-{os.getpid()}"

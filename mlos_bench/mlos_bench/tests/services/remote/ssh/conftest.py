@@ -50,6 +50,10 @@ def ssh_test_server(ssh_test_server_hostname: str,
     using pytest-docker.
 
     Yields the (hostname, port, username, id_rsa_path) of the test server.
+
+    Once the session is over, the docker containers are torn down, and the
+    temporary file holding the dynamically generated private key of the test
+    server is deleted.
     """
     # else ...
     docker_services.wait_until_responsive(
