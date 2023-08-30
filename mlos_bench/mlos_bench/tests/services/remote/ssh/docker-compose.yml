@@ -1,6 +1,6 @@
 version: '2'
 services:
-  mlos_bench-test-ssh-server:
+  ssh-server:
     attach: false
     build:
       context: .
@@ -17,9 +17,9 @@ services:
       # Let the environment variable TIMEOUT override the default.
       - TIMEOUT=${TIMEOUT:-180}
   # Check that we can connect to the server from the client.
-  mlos_bench-test-ssh-client:
+  ssh-client:
     depends_on:
-      - mlos_bench-test-ssh-server
+      - ssh-server
     restart: no
     image: mlos_bench-test-ssh-server:latest
     extra_hosts:
