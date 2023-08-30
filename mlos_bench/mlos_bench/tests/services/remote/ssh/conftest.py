@@ -11,7 +11,7 @@ from subprocess import run
 import tempfile
 
 import os
-import shutil
+import sys
 
 import pytest
 from pytest_docker.plugin import Services as DockerServices
@@ -29,8 +29,15 @@ SSH_TEST_SERVER_PORT = 2254
 @pytest.fixture(scope="session")
 def ssh_test_server_hostname() -> str:
     """Returns the hostname of the test server."""
+    if sys.platform == 'win32':
+        # Docker (Desktop) for Windows (WSL2) uses a special networking magic
+        # to refer to the host machine when exposing ports.
+        return 'localhost'
+    # On Linux, if we're running in a docker container, we can use the
+    # --add-host (extra_hosts in docker-compose.yml) to refer to the host IP.
     if resolve_host_name('host.docker.internal'):
         return 'host.docker.internal'
+    # Otherwise, assume we're executing directly inside conda on the host.
     return 'localhost'
 
 
