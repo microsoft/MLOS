@@ -144,7 +144,7 @@ class LocalEnv(ScriptEnv):
                 }, fh_meta)
 
         if self._script_setup:
-            return_code = self._local_exec(self._script_setup, self._temp_dir)
+            (return_code, _output) = self._local_exec(self._script_setup, self._temp_dir)
             self._is_ready = bool(return_code == 0)
         else:
             self._is_ready = True
@@ -169,15 +169,17 @@ class LocalEnv(ScriptEnv):
 
         assert self._temp_dir is not None
 
+        stdout_data: Dict[str, float] = {}
         if self._script_run:
-            return_code = self._local_exec(self._script_run, self._temp_dir)
+            (return_code, output) = self._local_exec(self._script_run, self._temp_dir)
             if return_code != 0:
                 return (Status.FAILED, None)
+            stdout_data = self._extract_stdout_results(output.get("stdout", ""))
 
         # FIXME: We should not be assuming that the only output file type is a CSV.
         if not self._read_results_file:
             _LOG.debug("Not reading the data at: %s", self)
-            return (Status.SUCCEEDED, {})
+            return (Status.SUCCEEDED, stdout_data)
 
         data = self._normalize_columns(pandas.read_csv(
             self._config_loader_service.resolve_path(
@@ -194,9 +196,9 @@ class LocalEnv(ScriptEnv):
         else:
             raise ValueError(f"Invalid data format: {data}")
 
-        data_dict = data.iloc[-1].to_dict()
-        _LOG.info("Local run complete: %s ::\n%s", self, data_dict)
-        return (Status.SUCCEEDED, data_dict)
+        stdout_data.update(data.iloc[-1].to_dict())
+        _LOG.info("Local run complete: %s ::\n%s", self, stdout_data)
+        return (Status.SUCCEEDED, stdout_data)
 
     @staticmethod
     def _normalize_columns(data: pandas.DataFrame) -> pandas.DataFrame:
@@ -251,11 +253,11 @@ class LocalEnv(ScriptEnv):
         """
         if self._script_teardown:
             _LOG.info("Local teardown: %s", self)
-            return_code = self._local_exec(self._script_teardown)
+            (return_code, _output) = self._local_exec(self._script_teardown)
             _LOG.info("Local teardown complete: %s :: %s", self, return_code)
         super().teardown()
 
-    def _local_exec(self, script: Iterable[str], cwd: Optional[str] = None) -> int:
+    def _local_exec(self, script: Iterable[str], cwd: Optional[str] = None) -> Tuple[int, dict]:
         """
         Execute a script locally in the scheduler environment.
 
@@ -269,13 +271,13 @@ class LocalEnv(ScriptEnv):
 
         Returns
         -------
-        return_code : int
-            Return code of the script. 0 if successful.
+        (return_code, output) : (int, dict)
+            Return code of the script and a dict with stdout/stderr. Return code = 0 if successful.
         """
         env_params = self._get_env_params()
         _LOG.info("Run script locally on: %s at %s with env %s", self, cwd, env_params)
-        (return_code, _stdout, stderr) = self._local_exec_service.local_exec(
+        (return_code, stdout, stderr) = self._local_exec_service.local_exec(
             script, env=env_params, cwd=cwd)
         if return_code != 0:
             _LOG.warning("ERROR: Local script returns code %d stderr:\n%s", return_code, stderr)
-        return return_code
+        return (return_code, {"stdout": stdout, "stderr": stderr})

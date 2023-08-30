@@ -100,7 +100,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         return {key_sub: str(self._params[key]) for (key_sub, key) in rename.items()}
 
-    def _extract_stdout_results(self, stdout: str) -> Dict[str, str]:
+    def _extract_stdout_results(self, stdout: str) -> Dict[str, float]:
         """
         Extract the results from the stdout of the script.
 
@@ -111,10 +111,10 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        results : Dict[str, str]
+        results : Dict[str, float]
             A dictionary of results extracted from the stdout.
         """
         if not self._parse_results_stdout:
             return {}
         _LOG.debug("Extract regex: '%s' from: '%s'", self._parse_results_stdout, stdout)
-        return dict(self._parse_results_stdout.findall(stdout))
+        return {key: float(val) for (key, val) in self._parse_results_stdout.findall(stdout)}
