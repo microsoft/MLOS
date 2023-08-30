@@ -132,9 +132,9 @@ class RemoteEnv(ScriptEnv):
             return result
 
         (status, output) = self._remote_exec(self._script_run)
-        if status.is_succeeded():
+        if status.is_succeeded() and output is not None:
             output = self._extract_stdout_results(output.get("stdout", ""))
-        _LOG.info("Remote run complete: %s :: %s", self, status, output)
+        _LOG.info("Remote run complete: %s :: %s = %s", self, status, output)
         return (status, output)
 
     def teardown(self) -> None:
