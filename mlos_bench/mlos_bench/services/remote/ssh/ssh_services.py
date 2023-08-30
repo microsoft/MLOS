@@ -6,6 +6,7 @@
 A collection Service functions for managing hosts via SSH.
 """
 
+import os
 import time
 import logging
 
@@ -25,7 +26,7 @@ _LOG = logging.getLogger(__name__)
 
 class SshService(Service, SupportsOSOps, SupportsRemoteExec):
     """
-    Helper methods to manage VMs on Azure.
+    Helper methods to manage machines via SSH.
     """
 
     _POLL_INTERVAL = 4     # seconds
@@ -34,7 +35,7 @@ class SshService(Service, SupportsOSOps, SupportsRemoteExec):
 
     def __init__(self, config: dict, global_config: dict, parent: Service):
         """
-        Create a new instance of SSH Service.
+        Create a new instance of an SSH Service.
 
         Parameters
         ----------
@@ -68,3 +69,22 @@ class SshService(Service, SupportsOSOps, SupportsRemoteExec):
         self._poll_interval = float(config.get("pollInterval", SshService._POLL_INTERVAL))
         self._poll_timeout = float(config.get("pollTimeout", SshService._POLL_TIMEOUT))
         self._request_timeout = float(config.get("requestTimeout", SshService._REQUEST_TIMEOUT))
+
+        self._username = config["username"]
+        if not self._priv_key_file:
+            self._ssh_auth_socket = os.environ.get("SSH_AUTH_SOCK")
+        self._priv_key_file = config.get("priv_key_file", None)
+        if not self._priv_key_file:
+            for key_file in ("id_rsa", "id_dsa", "id_ecdsa"):
+                if os.path.exists(os.path.join(os.path.expanduser("~"), ".ssh", key_file)):
+                    self._priv_key_file = os.path.join(os.path.expanduser("~"), ".ssh", key_file)
+                    break
+        if not self._priv_key_file and not self._ssh_auth_socket:
+            raise ValueError("Missing priv_key_file parameter and no default key file found in ~/.ssh")
+        self._hostname = config["hostname"]
+        self._port = config.get("port", 22)
+
+    def __repr__(self) -> str:
+        return f"SshService(username={self._username}, priv_key_file={self._priv_key_file}, " \
+               + "hostname={self._hostname}, port={self._port})"
+
