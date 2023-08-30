@@ -167,6 +167,7 @@ class RemoteEnv(ScriptEnv):
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)
-            # TODO: extract the results from `output`.
+            if status.is_succeeded():
+                output = self._extract_stdout_results(output.get("stdout", ""))
         _LOG.debug("Status: %s :: %s", status, output)
         return (status, output)

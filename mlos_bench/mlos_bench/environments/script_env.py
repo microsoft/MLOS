@@ -7,12 +7,15 @@ Base scriptable benchmark environment.
 """
 
 import abc
+import logging
 import re
 from typing import Dict, Iterable, Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
+
+_LOG = logging.getLogger(__name__)
 
 
 class ScriptEnv(Environment, metaclass=abc.ABCMeta):
@@ -68,6 +71,10 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         self._shell_env_params: Optional[Iterable[str]] = self.config.get("shell_env_params")
         self._shell_env_params_rename: Dict[str, str] = self.config.get("shell_env_params_rename", {})
 
+        parse_results_stdout = self.config.get("parse_results_stdout")
+        self._parse_results_stdout: Optional[re.Pattern[str]] = \
+            re.compile(parse_results_stdout) if parse_results_stdout else None
+
     def _get_env_params(self) -> Dict[str, str]:
         """
         Get the *shell* environment parameters to be passed to the script.
@@ -92,3 +99,22 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             rename.update(self._shell_env_params_rename)
 
         return {key_sub: str(self._params[key]) for (key_sub, key) in rename.items()}
+
+    def _extract_stdout_results(self, stdout: str) -> Dict[str, str]:
+        """
+        Extract the results from the stdout of the script.
+
+        Parameters
+        ----------
+        stdout : str
+            The stdout of the script.
+
+        Returns
+        -------
+        results : Dict[str, str]
+            A dictionary of results extracted from the stdout.
+        """
+        if not self._parse_results_stdout:
+            return {}
+        _LOG.debug("Extract regex: '%s' from: '%s'", self._parse_results_stdout, stdout)
+        return dict(self._parse_results_stdout.findall(stdout))
