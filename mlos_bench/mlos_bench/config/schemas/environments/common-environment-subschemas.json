@@ -79,6 +79,10 @@
                 "teardown": {
                     "description": "The command lines to execute for the teardown phase.",
                     "$ref": "#/$defs/command_lines"
+                },
+                "parse_results_stdout": {
+                    "description": "A regex to parse the stdout of the run phase for results.",
+                    "type": "string"
                 }
             }
         },
