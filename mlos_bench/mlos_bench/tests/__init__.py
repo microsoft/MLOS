@@ -70,7 +70,7 @@ def check_socket(host: str, port: int, timeout: float = 1.0) -> bool:
         return result == 0
 
 
-def resolve_host_name(host: str) -> str:
+def resolve_host_name(host: str) -> Optional[str]:
     """
     Resolves the host name to an IP address.
 
@@ -82,4 +82,7 @@ def resolve_host_name(host: str) -> str:
     -------
     str
     """
-    return socket.gethostbyname(host)
+    try:
+        return socket.gethostbyname(host)
+    except socket.gaierror:
+        return None
