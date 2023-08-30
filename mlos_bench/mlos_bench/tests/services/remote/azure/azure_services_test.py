@@ -185,9 +185,11 @@ def test_remote_exec_headers_output(mock_requests: MagicMock, azure_vm_service: 
             Status.SUCCEEDED,
             {
                 "properties": {
-                    "output": [
-                        {"message": "DUMMY_STDOUT_STDERR"},
-                    ]
+                    "output": {
+                        "value": [
+                            {"message": "DUMMY_STDOUT_STDERR"},
+                        ]
+                    }
                 }
             },
             {"stdout": "DUMMY_STDOUT_STDERR"}
