@@ -9,11 +9,10 @@ Tests for mlos_bench.services.remote.ssh.ssh_services
 from typing import Tuple
 from subprocess import run
 
-from mlos_bench.tests import check_socket, resolve_host_name
-from mlos_bench.tests import test_requires_docker
+from mlos_bench.tests import requires_docker, check_socket, resolve_host_name
 
 
-@test_requires_docker
+@requires_docker
 def test_ssh_service(ssh_test_server: Tuple[str, int, str, str]) -> None:
     """Test the SSH service."""
     hostname, port, username, id_rsa_path = ssh_test_server

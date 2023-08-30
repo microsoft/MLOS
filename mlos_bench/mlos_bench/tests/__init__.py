@@ -19,7 +19,7 @@ from mlos_bench.util import get_class_from_name
 
 # A decorator for tests that require docker.
 DOCKER = shutil.which('docker')
-test_requires_docker = pytest.mark.skipif(not DOCKER, reason='Docker is not available on this system.')
+requires_docker = pytest.mark.skipif(not DOCKER, reason='Docker is not available on this system.')
 
 # A common seed to use to avoid tracking down race conditions and intermingling
 # issues of seeds across tests that run in non-deterministic parallel orders.

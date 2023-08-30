@@ -6,16 +6,17 @@
 Fixtures for the SSH service tests.
 """
 
-from typing import Tuple
+from typing import Generator, Tuple
 from subprocess import run
 import tempfile
 
 import os
+import shutil
 
 import pytest
 from pytest_docker.plugin import Services as DockerServices
 
-from mlos_bench.tests import check_socket, resolve_host_name
+from mlos_bench.tests import DOCKER, check_socket, resolve_host_name
 
 # pylint: disable=redefined-outer-name
 
@@ -36,13 +37,14 @@ def ssh_test_server_hostname() -> str:
 @pytest.fixture(scope="session")
 def ssh_test_server(ssh_test_server_hostname: str,
                     docker_compose_project_name: str,
-                    docker_services: DockerServices) -> Tuple[str, int, str, str]:
+                    docker_services: DockerServices) -> Generator[Tuple[str, int, str, str], None, None]:
     """
     Fixture for getting the ssh test server services setup via docker-compose
     using pytest-docker.
 
-    Returns the (hostname, port, username, id_rsa_path) of the test server.
+    Yields the (hostname, port, username, id_rsa_path) of the test server.
     """
+    # else ...
     docker_services.wait_until_responsive(
         check=lambda: check_socket(ssh_test_server_hostname, SSH_TEST_SERVER_PORT),
         timeout=30.0,
