@@ -21,7 +21,7 @@ def test_local_env_stdout(tunable_groups: TunableGroups) -> None:
             "echo 'throughput,222'",
             "echo 'score,0.999'",
         ],
-        "parse_results_stdout": r"(\w+),([0-9.]+)",
+        "results_stdout_pattern": r"(\w+),([0-9.]+)",
     })
 
     check_local_env_success(
@@ -49,7 +49,7 @@ def test_local_env_file_stdout(tunable_groups: TunableGroups) -> None:
             "echo 'extra1,333' >> output.csv",
             "echo 'extra2,444' >> output.csv",
         ],
-        "parse_results_stdout": r"(\w+),([0-9.]+)",
+        "results_stdout_pattern": r"(\w+),([0-9.]+)",
         "read_results_file": "output.csv",
     })
 

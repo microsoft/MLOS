@@ -71,9 +71,9 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         self._shell_env_params: Optional[Iterable[str]] = self.config.get("shell_env_params")
         self._shell_env_params_rename: Dict[str, str] = self.config.get("shell_env_params_rename", {})
 
-        parse_results_stdout = self.config.get("parse_results_stdout")
-        self._parse_results_stdout: Optional[re.Pattern[str]] = \
-            re.compile(parse_results_stdout) if parse_results_stdout else None
+        results_stdout_pattern = self.config.get("results_stdout_pattern")
+        self._results_stdout_pattern: Optional[re.Pattern[str]] = \
+            re.compile(results_stdout_pattern) if results_stdout_pattern else None
 
     def _get_env_params(self) -> Dict[str, str]:
         """
@@ -114,7 +114,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         results : Dict[str, float]
             A dictionary of results extracted from the stdout.
         """
-        if not self._parse_results_stdout:
+        if not self._results_stdout_pattern:
             return {}
-        _LOG.debug("Extract regex: '%s' from: '%s'", self._parse_results_stdout, stdout)
-        return {key: float(val) for (key, val) in self._parse_results_stdout.findall(stdout)}
+        _LOG.debug("Extract regex: '%s' from: '%s'", self._results_stdout_pattern, stdout)
+        return {key: float(val) for (key, val) in self._results_stdout_pattern.findall(stdout)}
