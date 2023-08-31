@@ -1,0 +1,12 @@
+{
+    "class": "mlos_bench.services.remote.ssh.SshHostService",
+    "config": {
+        "hostname": "host.example.com",
+        "username": "someuser",
+        "known_hosts_path": [
+            "array",
+            "not",
+            "supported"
+        ]
+    }
+}

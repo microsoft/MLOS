@@ -2,13 +2,13 @@
     // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "SSH Host Service configuration.",
 
-    "class": "mlos_bench.services.remote.ssh.ssh_host_service.SshHostService",
+    "class": "mlos_bench.services.remote.ssh.ssh_fileshare_service.SshFileShareService",
     "config": {
         "hostname": "host.example.com",
         "username": "someuser",
         "port": 22,
         "priv_key_path": "~/.ssh/id_rsa",
-        "known_hosts_path": null,
+        "known_hosts_path": "~/.ssh/known_hosts",
         "requestTimeout": 90
     }
 }

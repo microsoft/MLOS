@@ -40,6 +40,11 @@
                     "description": "Path to the private key to use when connecting to the remote machine.",
                     "type": "string",
                     "examples": ["~/.ssh/id_rsa"]
+                },
+                "known_hosts_path": {
+                    "description": "Path to known_hosts file. Set to null to disable host key checking.",
+                    "type": ["null", "string"],
+                    "examples": [null, "~/.ssh/known_hosts"]
                 }
             },
             "required": [
