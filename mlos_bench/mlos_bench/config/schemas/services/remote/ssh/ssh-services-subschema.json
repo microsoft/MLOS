@@ -17,8 +17,8 @@
             "type": "object",
             "properties": {
                 "requestTimeout": {
-                    "description": "Request timeout in seconds.",
-                    "type": "number",
+                    "description": "Request timeout in seconds, or null to disable timeout.",
+                    "type": ["null", "number"],
                     "minimum": 1
                 },
                 "hostname": {
