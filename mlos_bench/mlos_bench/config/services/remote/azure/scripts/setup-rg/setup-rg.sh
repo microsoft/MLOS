@@ -10,13 +10,13 @@ set -eu
 while [[ "$#" -gt 0 ]]; do
 case $1 in
     # Main control plane ARM template params
-    --controlPlaneArmParameters)
-        controlPlaneArmParameters="$2"
+    --controlPlaneArmParamsFile)
+        controlPlaneArmParamsFile="$2"
         shift 2
         ;;
     # Results DB ARM template params
-    --resultsDbArmParameters)
-        resultsDbArmParameters="$2"
+    --resultsDbArmParamsFile)
+        resultsDbArmParamsFile="$2"
         shift 2
         ;;
     # Other params
@@ -44,7 +44,7 @@ esac
 done
 
 # Default values
-resultsDbArmParameters=${resultsDbArmParameters:-""}
+resultsDbArmParamsFile=${resultsDbArmParamsFile:-""}
 certExpirationYears=${certExpirationYears:-1}
 
 # Provision resources into the resource group with ARM template
@@ -52,24 +52,26 @@ echo "Provisioning control plane resources..."
 deploymentResults=$(az deployment group create \
     --resource-group "$resourceGroupName" \
     --template-file ./rg-template.json \
-    --parameters "$controlPlaneArmParameters" \
+    --parameters "$controlPlaneArmParamsFile" \
+    --output json \
     )
 
-if [[ ! $? ]]; then
+if [[ $? -ne 0 ]]; then
     echo "Error in provisioning control plane resources!"
     exit 1
 fi
 
 # Conditional provisioning of results DB
-if [[ "$resultsDbArmParameters" ]]; then
+if [[ "$resultsDbArmParamsFile" ]]; then
     echo "Provisioning results DB..."
     dbDeploymentResults=$(az deployment group create \
         --resource-group "$resourceGroupName" \
         --template-file ./results-db/mysql-template.json \
-        --parameters "$resultsDbArmParameters" \
+        --parameters "$resultsDbArmParamsFile" \
+        --output json \
         )
 
-    if [[ ! $? ]]; then
+    if [[ $? -ne 0 ]]; then
         echo "Error in provisioning results DB!"
     else
         dbName=$(echo "$dbDeploymentResults" | jq -r ".properties.outputs.dbName.value")
@@ -77,13 +79,12 @@ if [[ "$resultsDbArmParameters" ]]; then
         vmIpAddress=$(echo "$deploymentResults" | jq -r ".properties.outputs.vmIpAddress.value")
 
         # VM IP access for results DB
-        az mysql flexible-server firewall-rule update \
+        az mysql flexible-server firewall-rule create \
             --resource-group "$resourceGroupName" \
             --name "$dbName" \
             --rule-name "AllowVM-$vmName" \
             --start-ip-address "$vmIpAddress" \
-            --end-ip-address "$vmIpAddress" \
-
+            --end-ip-address "$vmIpAddress"
     fi
 fi
 
@@ -96,7 +97,7 @@ kvId=$(az keyvault show --name "$kvName" --resource-group "$resourceGroupName" -
 az role assignment create \
     --assignee "$currentUserAlias" \
     --role "Key Vault Administrator" \
-    --scope "$kvId" \
+    --scope "$kvId"
 
 # Check if cert of same name exists in keyvault already
 certThumbprint=$(az keyvault certificate show \
@@ -104,7 +105,8 @@ certThumbprint=$(az keyvault certificate show \
     --vault-name "$kvName" \
     --query "x509ThumbprintHex" --output tsv \
     2> /dev/null \
-    || echo "NOCERT")
+    || echo "NOCERT" \
+    )
 
 if [[ $certThumbprint == "NOCERT" ]]; then
     # The cert does not exist yet.
@@ -117,8 +119,7 @@ if [[ $certThumbprint == "NOCERT" ]]; then
         --create-cert \
         --cert "$certName" \
         --keyvault "$kvName" \
-        --years "$certExpirationYears" \
-
+        --years "$certExpirationYears"
 else
     # The cert already exists in the keyvault.
 
@@ -126,7 +127,7 @@ else
     az ad sp create-for-rbac \
         --name "$servicePrincipalName" \
         --role "Contributor" \
-        --scopes "$resourceGroupId" \
+        --scopes "$resourceGroupId"
 
     # SP's certs, which are stored in the registered application instead
     servicePrincipalAppId=$(az ad sp list \

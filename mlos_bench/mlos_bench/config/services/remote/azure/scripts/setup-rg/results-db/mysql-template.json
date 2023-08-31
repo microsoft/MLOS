@@ -39,9 +39,7 @@
             "storage": {
                 "storageSizeGB": 20,
                 "iops": 360,
-                "autoGrow": "Enabled",
-                "autoIoScaling": "Disabled",
-                "logOnDisk": "Disabled"
+                "autoGrow": "Enabled"
             },
             "version": "8.0.21",
             "network": {

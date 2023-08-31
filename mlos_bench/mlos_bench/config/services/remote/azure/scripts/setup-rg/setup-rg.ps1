@@ -2,10 +2,10 @@
 param(
     # Main control plane ARM template params
     [Parameter(Mandatory=$True)]
-    [string] $controlPlaneArmParameters,
+    [string] $controlPlaneArmParamsFile,
     # Results DB ARM template params
     [Parameter(Mandatory=$False)]
-    [string] $resultsDbArmParameters,
+    [string] $resultsDbArmParamsFile,
     # Other params
     [Parameter(Mandatory=$True)]
     [string] $servicePrincipalName,
@@ -22,7 +22,8 @@ Write-Output "Provisioning control plane resources..."
 $deploymentResults = az deployment group create `
     --resource-group $resourceGroupName `
     --template-file .\rg-template.json `
-    --parameters $controlPlaneArmParameters `
+    --parameters $controlPlaneArmParamsFile `
+    --output json `
     | ConvertFrom-JSON
 
 if (!$?) {
@@ -31,12 +32,13 @@ if (!$?) {
 }
 
 # Conditional provisioning of results DB
-if ($resultsDbArmParameters) {
+if ($resultsDbArmParamsFile) {
     Write-Output "Provisioning results DB..."
     $dbDeploymentResults = az deployment group create `
         --resource-group $resourceGroupName `
         --template-file ./results-db/mysql-template.json `
-        --parameters $resultsDbArmParameters `
+        --parameters $resultsDbArmParamsFile `
+        --output json `
         | ConvertFrom-JSON
 
     if (!$?) {
@@ -48,7 +50,7 @@ if ($resultsDbArmParameters) {
         $vmIpAddress = $deploymentResults.properties.outputs.vmIpAddress.value
 
         # VM IP access for results DB
-        az mysql flexible-server firewall-rule update `
+        az mysql flexible-server firewall-rule create `
             --resource-group $resourceGroupName `
             --name $dbName `
             --rule-name "AllowVM-$vmName" `
@@ -73,9 +75,10 @@ $certThumbprint = az keyvault certificate show `
     --name $certName `
     --vault-name $kvName `
     --query "x509ThumbprintHex" --output tsv `
-    2>$null
+    2>$null `
+    || "NOCERT"
 
-if (!$?) {
+if ($certThumbprint == "NOCERT") {
     # The cert does not exist yet.
     # Create the service principal if doesn't exist, storing the cert in the keyvault
     # If it does exist, this also patches the current service principal with the role

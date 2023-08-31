@@ -17,7 +17,8 @@
             }
         },
         "vmAdminUsername": {
-            "type": "string"
+            "type": "string",
+            "defaultValue": "mlos"
         },
         "sshPublicKeys": {
             "type": "array"
@@ -31,6 +32,13 @@
         "fileShareName": {
             "type": "string",
             "defaultValue": "mlos-file-share"
+        },
+        "vmCustomData": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Custom data for the VM (e.g., for cloud-init)."
+            }
         },
         "vmLocation": {
             "type": "string",
@@ -60,12 +68,12 @@
     },
     "functions": [],
     "variables": {
-        "storageAccountName": "[toLower(concat(replace(parameters('projectPrefix'), '-', '')))]",
+        "storageAccountName": "[toLower(replace(parameters('projectPrefix'), '-', ''))]",
         "vmName": "[concat(parameters('projectPrefix'), '-vm')]",
         "networkInterfaceName": "[concat(variables('vmName'), '-ni-', uniqueString(resourceGroup().id))]",
-        "vnetName": "[concat(variables('vmName'), '-vnet')]",
+        "vnetName": "[concat(parameters('projectPrefix'), '-vnet')]",
         "publicIpName": "[concat(variables('vmName'), '-ip')]",
-        "nsgName": "[concat(variables('vmName'), '-nsg')]",
+        "nsgName": "[concat(parameters('projectPrefix'), '-nsg')]",
         "kvName": "[concat(parameters('projectPrefix'), '-kv')]"
     },
     "resources": [
@@ -196,7 +204,7 @@
             "enabledForDeployment": true,
             "enabledForTemplateDeployment": true,
             "enabledForDiskEncryption": true,
-            "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+            "tenantId": "[subscription().tenantId]",
             "accessPolicies": [],
             "enableRbacAuthorization": true,
             "networkAcls": {
@@ -230,6 +238,7 @@
             },
             "osProfile": {
                 "computerName": "[variables('vmName')]",
+                "customData": "[if(empty(parameters('vmCustomData')), null(), base64(parameters('vmCustomData')))]",
                 "adminUsername": "[parameters('vmAdminUsername')]",
                 "linuxConfiguration": {
                     "disablePasswordAuthentication": true,
