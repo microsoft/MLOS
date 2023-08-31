@@ -30,6 +30,9 @@
                     "$ref": "./remote/mock/mock-auth-service-subschema.json"
                 },
                 {
+                    "$ref": "./remote/ssh/ssh-services-subschema.json"
+                },
+                {
                     "$ref": "./remote/azure/azure-auth-service-subschema.json"
                 },
                 {

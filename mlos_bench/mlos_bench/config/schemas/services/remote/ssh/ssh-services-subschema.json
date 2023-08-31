@@ -1,0 +1,53 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/ssh/ssh-services-subschema.json",
+    "title": "mlos_bench SSH Host and Fileshare Service config",
+    "description": "config for an mlos_bench SSH Host and Fileshare Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.ssh.SshHostService",
+                "mlos_bench.services.remote.ssh.ssh_host_service.SshHostService",
+                "mlos_bench.services.remote.ssh.SshFileShareService",
+                "mlos_bench.services.remote.ssh.ssh_fileshare_service.SshFileShareService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "properties": {
+                "requestTimeout": {
+                    "description": "Request timeout in seconds.",
+                    "type": "number",
+                    "minimum": 1
+                },
+                "hostname": {
+                    "description": "Hostname of the remote machine.",
+                    "type": "string"
+                },
+                "port": {
+                    "description": "Port to use when connecting to the remote machine.",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535,
+                    "examples": [22]
+                },
+                "username": {
+                    "description": "Username to use when connecting to the remote machine.",
+                    "type": "string"
+                },
+                "priv_key_path": {
+                    "description": "Path to the private key to use when connecting to the remote machine.",
+                    "type": "string",
+                    "examples": ["~/.ssh/id_rsa"]
+                }
+            },
+            "required": [
+                "username",
+                "hostname"
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"]
+}
