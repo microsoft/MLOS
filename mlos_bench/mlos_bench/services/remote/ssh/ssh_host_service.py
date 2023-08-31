@@ -24,10 +24,11 @@ from mlos_bench.util import check_required_params
 _LOG = logging.getLogger(__name__)
 
 
-class SshService(Service, SupportsOSOps, SupportsRemoteExec):
+class SshHostService(Service, SupportsOSOps, SupportsRemoteExec):
     """
     Helper methods to manage machines via SSH.
     """
+    # pylint: disable=too-many-instance-attributes
 
     _POLL_INTERVAL = 4     # seconds
     _POLL_TIMEOUT = 300    # seconds
@@ -66,13 +67,12 @@ class SshService(Service, SupportsOSOps, SupportsRemoteExec):
         ])
 
         # These parameters can come from command line as strings, so conversion is needed.
-        self._poll_interval = float(config.get("pollInterval", SshService._POLL_INTERVAL))
-        self._poll_timeout = float(config.get("pollTimeout", SshService._POLL_TIMEOUT))
-        self._request_timeout = float(config.get("requestTimeout", SshService._REQUEST_TIMEOUT))
+        self._poll_interval = float(config.get("pollInterval", SshHostService._POLL_INTERVAL))
+        self._poll_timeout = float(config.get("pollTimeout", SshHostService._POLL_TIMEOUT))
+        self._request_timeout = float(config.get("requestTimeout", SshHostService._REQUEST_TIMEOUT))
 
         self._username = config["username"]
-        if not self._priv_key_file:
-            self._ssh_auth_socket = os.environ.get("SSH_AUTH_SOCK")
+        self._ssh_auth_socket = os.environ.get("SSH_AUTH_SOCK")
         self._priv_key_file = config.get("priv_key_file", None)
         if not self._priv_key_file:
             for key_file in ("id_rsa", "id_dsa", "id_ecdsa"):
@@ -87,4 +87,3 @@ class SshService(Service, SupportsOSOps, SupportsRemoteExec):
     def __repr__(self) -> str:
         return f"SshService(username={self._username}, priv_key_file={self._priv_key_file}, " \
                + "hostname={self._hostname}, port={self._port})"
-
