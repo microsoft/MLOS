@@ -181,15 +181,19 @@ def test_remote_exec_headers_output(mock_requests: MagicMock, azure_vm_service: 
 
 @pytest.mark.parametrize(
     ("operation_status", "wait_output", "results_output"), [
-        (Status.SUCCEEDED, {
-            "properties": {
-                "output": [
-                    {"message": "DUMMY_STDOUT_STDERR"},
-                ]
-            }
-        }, [
-            {"message": "DUMMY_STDOUT_STDERR"},
-        ]),
+        (
+            Status.SUCCEEDED,
+            {
+                "properties": {
+                    "output": {
+                        "value": [
+                            {"message": "DUMMY_STDOUT_STDERR"},
+                        ]
+                    }
+                }
+            },
+            {"stdout": "DUMMY_STDOUT_STDERR"}
+        ),
         (Status.PENDING, {}, {}),
         (Status.FAILED, {}, {}),
     ])

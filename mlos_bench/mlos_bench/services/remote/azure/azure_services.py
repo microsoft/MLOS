@@ -789,10 +789,13 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            A dict can have an "stdout" key with the remote output.
         """
         _LOG.info("Check the results on VM: %s", config.get("vmName"))
         (status, result) = self.wait_host_operation(config)
-        if status.is_succeeded():
-            return (status, result.get("properties", {}).get("output", {}))
-        else:
+        _LOG.debug("Result: %s :: %s", status, result)
+        if not status.is_succeeded():
+            # TODO: Extract the telemetry and status from stdout, if available
             return (status, result)
+        val = result.get("properties", {}).get("output", {}).get("value", [])
+        return (status, {"stdout": val[0].get("message", "")} if val else {})
