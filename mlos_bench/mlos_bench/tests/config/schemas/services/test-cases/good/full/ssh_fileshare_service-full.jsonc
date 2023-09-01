@@ -4,9 +4,8 @@
 
     "class": "mlos_bench.services.remote.ssh.ssh_fileshare_service.SshFileShareService",
     "config": {
-        "hostname": "host.example.com",
-        "username": "someuser",
-        "port": 22,
+        "ssh_username": "someuser",
+        "ssh_port": 22,
         "priv_key_path": "~/.ssh/id_rsa",
         "known_hosts_path": "~/.ssh/known_hosts",
         "requestTimeout": 90

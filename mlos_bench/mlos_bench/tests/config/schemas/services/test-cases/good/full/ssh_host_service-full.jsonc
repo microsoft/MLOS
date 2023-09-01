@@ -4,9 +4,8 @@
 
     "class": "mlos_bench.services.remote.ssh.ssh_host_service.SshHostService",
     "config": {
-        "hostname": "host.example.com",
-        "username": "someuser",
-        "port": 22,
+        "ssh_username": "someuser",
+        "ssh_port": 2222,
         "priv_key_path": "~/.ssh/id_rsa",
         "known_hosts_path": null,
         "requestTimeout": 90

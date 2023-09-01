@@ -21,25 +21,23 @@
                     "type": ["null", "number"],
                     "minimum": 1
                 },
-                "hostname": {
-                    "description": "Hostname of the remote machine.",
-                    "type": "string"
-                },
-                "port": {
-                    "description": "Port to use when connecting to the remote machine.",
+                "ssh_port": {
+                    "description": "Default port to use when connecting to the remote machine(s).",
                     "type": "integer",
                     "minimum": 1,
                     "maximum": 65535,
                     "examples": [22]
                 },
-                "username": {
-                    "description": "Username to use when connecting to the remote machine.",
-                    "type": "string"
+                "ssh_username": {
+                    "description": "Default username to use when connecting to the remote machine(s). If null or unspecified, will default to the value in ~/.ssh/config or the current user if not provided in another config.",
+                    "type": ["null", "string"],
+                    "examples": ["root"]
                 },
                 "priv_key_path": {
-                    "description": "Path to the private key to use when connecting to the remote machine.",
+                    "$comment": "TODO: add support for multiple private keys or dynamically fetched private keys.",
+                    "description": "Path to the private key to use when connecting to the remote machine(s). Note: these should be passwordless or else an ssh-agent should be available via the SSH_AUTH_SOCK environment variable.",
                     "type": "string",
-                    "examples": ["~/.ssh/id_rsa"]
+                    "examples": ["~/.ssh/id_rsa", "~/.ssh/id_ecdsa"]
                 },
                 "known_hosts_path": {
                     "description": "Path to known_hosts file. Set to null to disable host key checking.",
@@ -47,10 +45,6 @@
                     "examples": [null, "~/.ssh/known_hosts"]
                 }
             },
-            "required": [
-                "username",
-                "hostname"
-            ],
             "unevaluatedProperties": false
         }
     },

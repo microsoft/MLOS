@@ -1,7 +1,0 @@
-{
-    "class": "mlos_bench.services.remote.ssh.SshHostService",
-    "config": {
-        // "hostname": "host.example.com", // Missing.
-        "username": "someuser"
-    }
-}

@@ -1,8 +1,7 @@
 {
     "class": "mlos_bench.services.remote.ssh.SshHostService",
     "config": {
-        "hostname": "host.example.com",
-        "username": "someuser",
+        "ssh_username": "someuser",
         "requestTimeout": 0.0
     }
 }

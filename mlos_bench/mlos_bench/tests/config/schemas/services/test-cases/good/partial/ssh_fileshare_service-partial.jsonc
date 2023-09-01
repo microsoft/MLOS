@@ -1,9 +1,4 @@
 {
-    "description": "SSH Host Service configuration.",
-
     "class": "mlos_bench.services.remote.ssh.SshFileShareService",
-    "config": {
-        "hostname": "host.example.com",
-        "username": "someuser"
-    }
+    "config": {}
 }
