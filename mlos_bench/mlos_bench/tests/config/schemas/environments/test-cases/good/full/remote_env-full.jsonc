@@ -26,6 +26,8 @@
             "/bin/bash -c true"
         ],
 
+        "results_stdout_pattern": "(\\w+),([0-9.]+)",
+
         "shell_env_params_match": [
             "^MLOS_[a-zA-Z0-9_]+$"
         ],
