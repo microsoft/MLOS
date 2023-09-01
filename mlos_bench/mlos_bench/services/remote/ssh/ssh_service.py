@@ -63,3 +63,10 @@ class SshService(Service, metaclass=ABCMeta):
                 raise ValueError(f"known_hosts_file {self._known_hosts_file} does not exist")
 
     # TODO: Connection handling.
+    async def _connect_host(self, host: str) -> asyncssh.SSHClientConnection:
+        """
+        Connects to the given host.
+
+        :param host: Host to connect to.
+        :return: Connection object.
+        """

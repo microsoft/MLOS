@@ -76,7 +76,15 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        raise NotImplementedError("TODO")
+        config = merge_parameters(
+            dest=self.config.copy(),
+            source=config,
+            required_keys=[
+                "ssh_hostname",
+            ]
+        )
+        # TODO: port, username, key, etc. handling?
+
 
     def get_remote_exec_results(self, config: dict) -> Tuple["Status", dict]:
         """

@@ -4,6 +4,7 @@
         "abstractmethods",
         "arange",
         "astype",
+        "asyncssh",
         "autotune",
         "autotuning",
         "bincount",
