@@ -25,7 +25,7 @@ jobs:
       BUILDKIT_INLINE_CACHE: 1
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set NO_CACHE variable for nightly builds
       if: github.event_name == 'schedule'
