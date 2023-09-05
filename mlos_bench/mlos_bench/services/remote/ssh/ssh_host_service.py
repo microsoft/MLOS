@@ -53,6 +53,24 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             self.get_remote_exec_results
         ])
 
+    async def _run_cmd(self, conn: asyncssh.SSHClientConnection, cmd: str) -> asyncssh.SSHCompletedProcess:
+        """
+        Runs a command on a host via SSH.
+
+        Parameters
+        ----------
+        conn : asyncssh.SSHClientConnection
+            Connection to the host.
+        cmd : str
+            Command to run.
+
+        Returns
+        -------
+        asyncssh.SSHCompletedProcess
+            Returns the result of the command.
+        """
+        return await conn.run(cmd, check=True, timeout=self._request_timeout)
+
     def remote_exec(self, script: Iterable[str], config: dict,
                     env_params: dict) -> Tuple["Status", dict]:
         """

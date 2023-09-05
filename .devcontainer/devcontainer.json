@@ -17,6 +17,7 @@
     "postCreateCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos -f ${containerWorkspaceFolder}/conda-envs/mlos.yml",
     // Various mounting, run, post-create, and user settings
     "containerEnv": {
+        "LOCAL_USER_NAME": "${localEnv:USER}${localEnv:USERNAME}",
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
         "CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
         "SSH_AUTH_SOCK": "${localEnv:SSH_AUTH_SOCK}",

@@ -6,8 +6,9 @@
     "config": {
         "ssh_username": "someuser",
         "ssh_port": 2222,
-        "priv_key_path": "~/.ssh/id_rsa",
-        "known_hosts_path": null,
-        "requestTimeout": 90
+        "ssh_priv_key_path": "~/.ssh/id_rsa",
+        "ssh_known_hosts_path": null,
+        "ssh_request_timeout": 90,
+        "ssh_keepalive_interval": 10
     }
 }

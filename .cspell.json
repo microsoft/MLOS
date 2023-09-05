@@ -32,6 +32,7 @@
         "iterrows",
         "jsonschema",
         "jupyterlab",
+        "keepalive",
         "kwargs",
         "libmamba",
         "linalg",
