@@ -2,6 +2,8 @@
 test.py
 """
 
+import pytest
+
 from typing import Any, Coroutine
 
 import asyncio
