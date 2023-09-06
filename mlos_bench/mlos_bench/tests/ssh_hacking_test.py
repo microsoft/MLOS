@@ -7,9 +7,9 @@ from threading import Thread
 
 import os
 
-from typing import Any, Coroutine, Optional, Tuple
+from typing import Any, Coroutine, List, Optional, Tuple
 
-from concurrent.futures import Future
+from concurrent.futures import Future, ThreadPoolExecutor
 
 from asyncio import Task
 import asyncio
@@ -74,15 +74,19 @@ def start_ssh_coroutine(ssh_coroutine: Coroutine[Any, Any, SSHCompletedProcess],
     return
 
 
+def background_thread_loop(event_loop: AbstractEventLoop) -> None:
+    asyncio.set_event_loop(event_loop)
+    event_loop.run_forever()
+
+
 def test_ssh() -> None:
     """test ssh async funcs"""
     # Dev note: submitting things to a loop on its own does nothing - we need to run the loop.
-    #loop = asyncio.get_event_loop()
-    #result = loop.run_until_complete(ssh_rexec_coroutine)
+    event_loop = asyncio.new_event_loop()
+    event_loop_thread = Thread(target=background_thread_loop, args=(event_loop,), daemon=True)
+    event_loop_thread.start()
 
-    threads = []
-    tasks: Task[SSHCompletedProcess] = list()
-    results_dict = {}
+    futures: List[Future[SSHCompletedProcess]] = []
     for i in range(0, 3):
         ssh_rexec_coroutine = ssh_rexec(
             host='host.docker.internal',
@@ -90,26 +94,23 @@ def test_ssh() -> None:
             username=os.getenv('LOCAL_USER_NAME', os.getenv('USER', os.getenv('USERNAME', None))),
             cmd='sleep 1; printenv')
 
-        #thread = Thread(target=start_ssh_coroutine, args=[ssh_rexec_coroutine, results_dict, i])
-        #thread.start()
-        #threads.append(thread)
         print("ssh_rexec_coroutine running in background ...")
-        #thread.join()
-
-        task = asyncio.create_task(ssh_rexec_coroutine, str(i))
-        tasks.append(task)
+        future = asyncio.run_coroutine_threadsafe(ssh_rexec_coroutine, event_loop)
+        futures.append(future)
 
     for i in range(0, 3):
-        #thread = threads[i]
-        #thread.join()
-        #print(results_dict[f'result_{i}'].stdout)
+        # thread = threads[i]
+        # thread.join()
+        # print(results_dict[f'result_{i}'].stdout)
 
-        task = tasks[i]
-        result = task.result()
+        future = futures[i]
+        result = future.result()
         print(result.stdout)
 
+    event_loop.call_soon_threadsafe(event_loop.stop)
+    event_loop_thread.join()
+    print("Done")
 
 
 if __name__ == "__main__":
     test_ssh()
-    print("Done.")
