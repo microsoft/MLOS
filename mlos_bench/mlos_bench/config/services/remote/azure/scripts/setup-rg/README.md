@@ -28,7 +28,7 @@ The *control plane RG* is a container for the *persistent* resources of MLOS (re
 5. Execute the main script with CLI args as follows:
 
     ```shell
-    # With Powershell
+    # With Powershell, recommended to use Powershell 7
     ./setup-rg.ps1 `
         -controlPlaneArmParamsFile $controlPlaneArmParamsFile `
         -resultsDbArmParamsFile $resultsDbArmParamsFile  # If provisioning results DB, otherwise omit `

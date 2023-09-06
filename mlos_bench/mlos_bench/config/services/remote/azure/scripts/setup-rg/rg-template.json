@@ -257,6 +257,7 @@
                 }
             },
             "storageProfile": {
+                // TODO: Look into automatically use the latest Ubuntu Server LTS
                 "imageReference": {
                     "publisher": "Canonical",
                     "offer": "0001-com-ubuntu-server-jammy",
