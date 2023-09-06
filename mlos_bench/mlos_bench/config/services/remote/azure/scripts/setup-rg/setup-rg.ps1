@@ -1,3 +1,4 @@
+#Requires -Version 7
 ##
 ## Copyright (c) Microsoft Corporation.
 ## Licensed under the MIT License.
