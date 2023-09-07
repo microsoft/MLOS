@@ -2,10 +2,11 @@
 test.py
 """
 
-from asyncio import AbstractEventLoop, Task
-from concurrent.futures import Future, ThreadPoolExecutor
-from threading import Thread, RLock, current_thread
-from typing import Any, Dict, Coroutine, List, Optional, Tuple
+from asyncio import AbstractEventLoop, Lock
+from concurrent.futures import Future
+from threading import Thread
+from time import time
+from typing import Dict, List, Optional, Tuple
 
 import asyncio
 import os
@@ -19,25 +20,12 @@ _LOG = logging.getLogger(__name__)
 _LOG.setLevel(logging.DEBUG)
 
 
-async def ssh_rexec(host: str, port: int, username: Optional[str], cmd: str) -> SSHCompletedProcess:
-    """Start an SSH command asynchronously and wait for the result"""
-    connect_kwargs = {
-        'host': host,
-        'port': port,
-        'known_hosts': None,
-    }
-    if username:
-        connect_kwargs['username'] = username
-    async with asyncssh.connect(**connect_kwargs) as conn:
-        return await conn.run(cmd)
-
-
 class SshCachedClient(asyncssh.SSHClient):
     """
     Wrapper around SSHClient to provide connection caching and reconnect logic.
     """
     _cache: Dict[str, Tuple[SSHClientConnection, SSHClient]] = {}
-    _cache_lock = RLock()
+    _cache_lock = Lock()
 
     def __init__(self, *args: tuple, **kwargs: dict):
         self._connection_id: Optional[str] = None
@@ -55,29 +43,32 @@ class SshCachedClient(asyncssh.SSHClient):
         return f"{connect_params['username']}@{connect_params['host']}:{connect_params['port']}"
 
     @staticmethod
-    def get_client_connection(connect_params: dict, i: int = -1) -> Tuple[SSHClientConnection, SSHClient]:
+    async def get_client_connection(connect_params: dict, i: int = -1) -> Tuple[SSHClientConnection, SSHClient]:
         """Gets a (possibly cached) client connection."""
         _LOG.warning("%d: get_client_connection: %s", i, connect_params)
-        with SshCachedClient._cache_lock:
-            _LOG.warning("%d: acquired cache lock", i)
-            connection_id = SshCachedClient.connection_id_from_params(connect_params)
-            if connection_id not in SshCachedClient._cache:
-                _LOG.warning("%d: establishing connection to %s", i, connection_id)
-                connect_params.setdefault('env', {})
-                connect_params['env']['CLIENT_ID'] = str(i)
-                SshCachedClient._cache[connection_id] = asyncio.run(asyncssh.create_connection(SshCachedClient, **connect_params))
-            else:
-                _LOG.warning("%d: using cached connection %s", i, connection_id)
-            return SshCachedClient._cache[connection_id]
+        # await SshCachedClient._cache_lock.acquire()
+        assert SshCachedClient._cache_lock.locked()
+        _LOG.warning("%d: acquired cache lock", i)
+        connection_id = SshCachedClient.connection_id_from_params(connect_params)
+        if connection_id not in SshCachedClient._cache:
+            _LOG.warning("%d: establishing connection to %s", i, connection_id)
+            connect_params.setdefault('env', {})
+            connect_params['env']['CLIENT_ID'] = str(i)
+            SshCachedClient._cache[connection_id] = await asyncssh.create_connection(SshCachedClient, **connect_params)
+        else:
+            _LOG.warning("%d: using cached connection %s", i, connection_id)
+        SshCachedClient._cache_lock.release()
+        return SshCachedClient._cache[connection_id]
 
     def connection_made(self, conn: SSHClientConnection) -> None:
         """Override hook provided by asyncssh.SSHClient."""
         _LOG.warning("connection made by %s: %s", conn._options.env, conn)
-        with SshCachedClient._cache_lock:
-            _LOG.warning("acquired lock")
-            self._connection_id = SshCachedClient.connection_id(conn)
-            _LOG.warning("cached connection %s: %s", self._connection_id, conn)
-            SshCachedClient._cache[self._connection_id] = (conn, self)
+        # FIXME: await SshCachedClient._cache_lock.acquire()
+        _LOG.warning("acquired lock")
+        self._connection_id = SshCachedClient.connection_id(conn)
+        _LOG.warning("cached connection %s: %s", self._connection_id, conn)
+        SshCachedClient._cache[self._connection_id] = (conn, self)
+        # FIXME: SshCachedClient._cache_lock.release()
         return super().connection_made(conn)
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
@@ -103,38 +94,75 @@ CONNECT_PARAMS = {
 EVENT_LOOP = asyncio.new_event_loop()
 
 
-def remote_exec(connect_params: dict, cmd: str, i: int) -> SSHCompletedProcess:
-    _LOG.warning("remote_exec running in background thread %d", i)
-    connection, _ = SshCachedClient.get_client_connection(connect_params, i)
+async def remote_exec(connect_params: dict, cmd: str, i: int) -> SSHCompletedProcess:
+    """Run a command on a remote host, connecting if necessary."""
+    _LOG.warning("%d: remote_exec running in background thread %d", i, i)
+    start_time = time()
+    await SshCachedClient._cache_lock.acquire() # pylint: disable=protected-access
+    time_taken = time() - start_time
+    _LOG.warning("%d: remote_exec acquired lock in %f seconds", i, time_taken)
+    start_time = time()
+    time_taken = time() - start_time
+    connection, _ = await SshCachedClient.get_client_connection(connect_params, i)
+    _LOG.warning("%d: remote_exec got connection in %f seconds", i, time_taken)
     _LOG.warning("remote_exec got connection %s", connection)
-    result = asyncio.run(connection.run(cmd, check=True))
-    _LOG.warning("remote_exec got result %s", result)
+    start_time = time()
+    result = await connection.run(cmd, check=True)
+    time_taken = time() - start_time
+    _LOG.warning("remote_exec got result from cmd '%s' in %f seconds", cmd, time_taken)
     return result
+
+
+def background_event_loop_thread(event_loop: AbstractEventLoop) -> None:
+    """Entry point for a background event loop thread."""
+    _LOG.warning("Starting background event loop thread")
+    asyncio.set_event_loop(event_loop)
+    event_loop.run_forever()
 
 
 def test_ssh() -> None:
     """test ssh async funcs"""
-    # Dev note: submitting things to a loop on its own does nothing - we need to run the loop.
 
-    thread_pool_executor = ThreadPoolExecutor(max_workers=3)
+    # Start an event loop thread in the background.
+    event_loop = asyncio.new_event_loop()
+    event_loop_thread = Thread(target=background_event_loop_thread, args=(event_loop,), daemon=True)
+    event_loop_thread.start()
 
-    futures: List[Future[SSHCompletedProcess]] = []
-
-    # connect_future = event_loop.run_in_executor(thread_pool_executor, SshCachedClient.get_client_connection, connect_params)
-    # connection, client = connect_future.result()
+    preconnect = False
+    if preconnect:
+        _LOG.warning("preconnecting")
+        connect_future = asyncio.run_coroutine_threadsafe(SshCachedClient.get_client_connection(
+            connect_params=CONNECT_PARAMS.copy(), i=-1), event_loop)
+        connection, client = connect_future.result()
+        _LOG.warning("connection: %s", connection)
+        _LOG.warning("client: %s", client)
 
     MAX_CMDs = 4
+    cmd_futures: List[Future[SSHCompletedProcess]] = []
     for i in range(0, MAX_CMDs):
-        future = thread_pool_executor.submit(remote_exec, connect_params=CONNECT_PARAMS.copy(), cmd='sleep 1; printenv', i=i)
-        futures.append(future)
+        cmd_futures.append(
+            asyncio.run_coroutine_threadsafe(
+                remote_exec(
+                    connect_params=CONNECT_PARAMS.copy(),
+                    cmd='sleep 1; printenv',
+                    i=i),
+                event_loop))
+
     for i in range(0, MAX_CMDs):
-        future = futures[i]
-        result = future.result()
+        result = cmd_futures[i].result()
         _LOG.warning("%d: result:\n%s", i, result.stdout)
-    thread_pool_executor.shutdown()
+
+    # Submit a task to the event loop to stop itself.
+    event_loop.call_soon_threadsafe(event_loop.stop)
+    # Wait for the event loop thread to finish.
+    event_loop_thread.join()
+
     print("Done")
 
 
 if __name__ == "__main__":
     print(_LOG)
+    main_start_time = time()
     test_ssh()
+    main_time_taken = time() - main_start_time
+    _LOG.warning("test_ssh took %f seconds", main_time_taken)
