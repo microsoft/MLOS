@@ -119,9 +119,7 @@ class AzureFileShareService(FileShareService):
         seen.add(local_path)
 
         if os.path.isdir(local_path):
-            dir_client = self._share_client.get_directory_client(remote_path)
-            if not dir_client.exists():
-                dir_client.create_directory()
+            self._remote_makedirs(remote_path)
             for entry in os.scandir(local_path):
                 name = entry.name
                 local_target = f"{local_path}/{name}"
