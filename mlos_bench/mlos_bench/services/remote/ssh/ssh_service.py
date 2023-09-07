@@ -8,13 +8,15 @@ A collection functions for interacting with SSH servers as file shares.
 
 
 from abc import ABCMeta
-from typing import Dict, List, Optional, Union
+from typing import Dict, Optional
+from threading import Lock, Thread
 
 import logging
 import os
 
 import asyncio
 import asyncssh
+
 from asyncssh.connection import SSHClientConnection
 
 from mlos_bench.services.base_service import Service
@@ -29,7 +31,9 @@ class SshClient(asyncssh.SSHClient):
     This attempts to handle connection reuse and reconnection and encapsulating
     some of the async aspects of the library.
 
-    Used by the SshService.
+    Used by the SshService to try and maintain a single connection to hosts,
+    handle reconnects if possible, and use that to run commands rather than
+    reconnect for each command.
 
     Parameters
     ----------
@@ -39,11 +43,37 @@ class SshClient(asyncssh.SSHClient):
     def __init__(self, *args: tuple, **kwargs: dict):
         self._connect_params: dict = kwargs.pop('connect_params')
         self._connection: Optional[SSHClientConnection] = None
+        self._connection_lock = Lock()
         super().__init__(*args, **kwargs)
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.connect_params_to_repr(self._connect_params)})"
+
+    def __hash__(self) -> int:
+        return hash(repr(self))
+
     def __del__(self) -> None:
-        if self._connection:
-            self._connection.close()
+        try:
+            self.disconnect()
+        except Exception as ex:     # pylint: disable=broad-exception-caught
+            _LOG.warning("Encountered an issue disconnecting during object destructor: %s", ex)
+
+    @staticmethod
+    def connect_params_to_repr(connect_params: dict) -> str:
+        """
+        Gets a string representation of the connection parameters.
+
+        Useful for looking up existing SshClients.
+
+        Parameters
+        ----------
+        connect_params : dict
+
+        Returns
+        -------
+        str
+        """
+        return f"{connect_params['username']}@{connect_params['host']}:{connect_params['port']}"
 
     @property
     def connection(self) -> SSHClientConnection:
@@ -52,7 +82,8 @@ class SshClient(asyncssh.SSHClient):
 
         Note: May block.
         """
-        return self._connection if self._connection else self.connect()
+        with self._connection_lock:
+            return self._connection if self._connection else self.connect()
 
     async def _async_connect(self) -> SSHClientConnection:
         connect_params = self._connect_params.copy()
@@ -70,26 +101,37 @@ class SshClient(asyncssh.SSHClient):
         asyncssh.SSHClientConnection
             Returns a connection to the host.
         """
-        if not self._connection:
-            self._connection = asyncio.run(self._async_connect())
+        with self._connection_lock:
+            if not self._connection:
+                self._connection = asyncio.run(self._async_connect())
         return self._connection
 
-    def close(self) -> None:
+    def disconnect(self) -> None:
         """
         Closes the connection to the host.
         """
-        if self._connection:
-            self._connection.close()
-            self._connection = None
+        with self._connection_lock:
+            if self._connection:
+                connection = self._connection
+                self._connection = None
+                connection.close()
+
+    # Override hooks provided by asyncssh.SSHClient:
 
     def connection_made(self, conn: SSHClientConnection) -> None:
         _LOG.debug("Connection to %s made: %s", self._connect_params['host'], conn)
+        conn._port
         return super().connection_made(conn)
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
         _LOG.debug("Connection to %s lost: %s", self._connect_params['host'], exc)
-        if not self.connect():
-            raise ConnectionError(f"Connection to {self._connect_params['host']} lost: {exc}")
+        with self._connection_lock:
+            self._connection = None
+            if exc is not None:
+                # Attempt to reconnect.
+                if not self.connect():
+                    raise ConnectionError(f"Connection to {self._connect_params['host']} lost: {exc}")
+            # Else, manually disconnected.
 
 
 class SshService(Service, metaclass=ABCMeta):
@@ -99,23 +141,34 @@ class SshService(Service, metaclass=ABCMeta):
 
     _REQUEST_TIMEOUT: Optional[float] = None  # seconds
 
+    # Cache of SshClient connections.
+    # Note: we place this in the base class so it can be used across
+    # SshHostService and SshFileShareService subclasses.
+    _clients: Dict[str, SshClient] = {}
+
     def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
         super().__init__(config, global_config, parent)
 
+        # None can be used to disable the request timeout.
         self._request_timeout = config.get("ssh_request_timeout", self._REQUEST_TIMEOUT)
         self._request_timeout = float(self._request_timeout) if self._request_timeout is not None else None
+
+        # Setup default connect_params dict for all SshClients we might need to create.
 
         # Note: None is an acceptable value for several of these, in which case
         # reasonable defaults or values from ~/.ssh/config will take effect.
 
-        self._clients: Dict[str, SshClient] = {}
-        self._connect_params: Dict[str, Union[None, int, str, List[str]]] = {
+        self._connect_params: dict = {
+            # In general scripted commands shouldn't need a pty and having one
+            # available can confuse some commands, though we may need to make
+            # this configurable in the future.
             'request_pty': False,
         }
         if 'ssh_keepalive_interval' in config:
-            self._connect_params['keepalive_interval'] = config.get('ssh_keepalive_interval')
+            keepalive_internal = config.get('ssh_keepalive_interval')
+            self._connect_params['keepalive_interval'] = int(keepalive_internal) if keepalive_internal is not None else None
         if config.get('ssh_username'):
-            self._connect_params['username'] = config['ssh_username']
+            self._connect_params['username'] = str(config['ssh_username'])
         if config.get('ssh_port'):
             self._connect_params['port'] = int(config['ssh_port'])
         if 'ssh_known_hosts_file' in config:
@@ -133,7 +186,7 @@ class SshService(Service, metaclass=ABCMeta):
                     raise ValueError(f"ssh_priv_key_file {priv_key_file} does not exist")
                 self._connect_params['client_keys'] = [priv_key_file]
 
-    def connect_host(self, params: dict) -> SshClient:
+    def get_host_client(self, params: dict) -> SshClient:
         """
         Gets an SshClient for a host if one doesn't already exist.
 
@@ -146,13 +199,15 @@ class SshService(Service, metaclass=ABCMeta):
         -------
         SshClient
         """
-        ssh_client = self._clients.get(params['ssh_hostname'])
+        connect_params: dict = self._connect_params.copy()
+        connect_params['host'] = connect_params.pop('ssh_hostname')
+        # Allow overriding certain params on a per host basis using const_args.
+        connect_params['port'] = params.pop('ssh_port', connect_params['port'])
+        connect_params['username'] = params.pop('ssh_username', connect_params['username'])
+        ssh_client_id = SshClient.connect_params_to_repr(connect_params)
+
+        ssh_client = self._clients.get(ssh_client_id, None)
         if ssh_client is None:
-            connect_params: dict = self._connect_params.copy()
-            connect_params['host'] = connect_params.pop('ssh_hostname')
-            # Allow overriding certain params on a per host basis using const_args.
-            connect_params['port'] = params.pop('ssh_port', connect_params['port'])
-            connect_params['username'] = params.pop('ssh_username', connect_params['username'])
             ssh_client = SshClient(connect_params=connect_params)
-            self._clients[params['ssh_hostname']] = ssh_client
+            self._clients[ssh_client_id] = ssh_client
         return ssh_client
