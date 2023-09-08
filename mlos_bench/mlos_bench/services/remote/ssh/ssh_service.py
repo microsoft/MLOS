@@ -8,8 +8,9 @@ A collection functions for interacting with SSH servers as file shares.
 
 
 from abc import ABCMeta
+from asyncio import AbstractEventLoop, Lock as CoroutineLock
 from typing import Dict, Optional
-from threading import Lock, Thread
+from threading import Lock, Thread, Lock as ThreadLock
 
 import logging
 import os
@@ -139,12 +140,34 @@ class SshService(Service, metaclass=ABCMeta):
     Base class for SSH services.
     """
 
+    # AsyncSSH requires an asyncio event loop to be running to work.
+    # However, that that event loop blocks the main thread.
+    # To avoid having to change our entire API to use async/await, all the way
+    # up the stack, we run the event loop that runs any async code in a
+    # background thread and submit async code to it using
+    # asyncio.run_coroutine_threadsafe, interacting with Futures after that.
+    # This is a bit of a hack, but it works for now.
+    #
+    # The event loop is created on demand and shared across all SshService
+    # instances, hence we need to lock it when doing the setup/teardown.
+    # We ran tests to ensure that multiple requests can still be executing
+    # concurrently inside that event loop so there should be no performance loss.
+    #
+    # Note: the tests were run to confirm that this works with two threads.
+    # Using a larger thread pool requires a bit more work since asyncssh
+    # requires that run() requests are submitted to the same event loop handler
+    # that the connection was made on.
+    #
+    _event_loop: Optional[AbstractEventLoop] = None
+    _event_loop_thread: Optional[Thread] = None
+
     _REQUEST_TIMEOUT: Optional[float] = None  # seconds
 
     # Cache of SshClient connections.
     # Note: we place this in the base class so it can be used across
     # SshHostService and SshFileShareService subclasses.
     _clients: Dict[str, SshClient] = {}
+    _clients_lock = ThreadLock()
 
     def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
         super().__init__(config, global_config, parent)
