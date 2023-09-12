@@ -27,7 +27,8 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
             "const_args": {
                 "vm_server_name": "Mock Server VM",
                 "vm_client_name": "Mock Client VM",
-                "someConst": "root"
+                "someConst": "root",
+                "global_param": "default"
             },
             "children": [
                 {
@@ -39,7 +40,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                             "vmName": "$vm_client_name",
                             "EnvId": 1,
                         },
-                        "required_args": ["vmName", "someConst"],
+                        "required_args": ["vmName", "someConst", "global_param"],
                         "range": [60, 120],
                         "metrics": ["score"],
                     }
@@ -52,6 +53,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                         "const_args": {
                             "vmName": "$vm_server_name",
                             "EnvId": 2,
+                            "global_param": "local"
                         },
                         "required_args": ["vmName"],
                         "range": [60, 120],
@@ -76,6 +78,9 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
         },
         tunables=tunable_groups,
         service=ConfigPersistenceService({}),
+        global_config={
+            "global_param": "global_value"
+        }
     )
 
 
@@ -89,12 +94,14 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         "EnvId": 1,                     # const_args from the child
         "vmSize": "Standard_B4ms",      # tunable_params from the parent
         "someConst": "root",            # pulled in from parent via required_args
+        "global_param": "global_value"  # pulled in from the global_config
     }
     assert composite_env.children[1].parameters == {
         "vmName": "Mock Server VM",     # const_args from the parent
         "EnvId": 2,                     # const_args from the child
         "idle": "halt",                 # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
+        "global_param": "global_value"  # pulled in from the global_config
     }
     assert composite_env.children[2].parameters == {
         "vmName": "Mock Control VM",     # const_args from the parent
@@ -103,6 +110,7 @@ def test_composite_env_params(composite_env: CompositeEnv) -> None:
         # "someConst": "root"           # not required, so not passed from the parent
         "vm_client_name": "Mock Client VM",
         "vm_server_name": "Mock Server VM"
+        # "global_param": "global_value"  # not required, so not picked from the global_config
     }
 
 
@@ -124,12 +132,14 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "EnvId": 1,                     # const_args from the child
         "vmSize": "Standard_B2s",       # tunable_params from the parent
         "someConst": "root",            # pulled in from parent via required_args
+        "global_param": "global_value"  # pulled in from the global_config
     }
     assert composite_env.children[1].parameters == {
         "vmName": "Mock Server VM",     # const_args from the parent
         "EnvId": 2,                     # const_args from the child
         "idle": "mwait",                # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
+        "global_param": "global_value"  # pulled in from the global_config
     }
     assert composite_env.children[2].parameters == {
         "vmName": "Mock Control VM",    # const_args from the parent
@@ -137,6 +147,7 @@ def test_composite_env_setup(composite_env: CompositeEnv, tunable_groups: Tunabl
         "idle": "mwait",                # tunable_params from the parent
         "vm_client_name": "Mock Client VM",
         "vm_server_name": "Mock Server VM",
+        # "global_param": "global_value"  # not required, so not picked from the global_config
     }
 
 
@@ -175,7 +186,13 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
                                     # here to indicate that all required_args from
                                     # the parent should be included here too in
                                     # order to reduce duplication.
-                                    "required_args": ["vmName", "EnvId", "someConst", "vm_server_name"],
+                                    "required_args": [
+                                        "vmName",
+                                        "EnvId",
+                                        "someConst",
+                                        "vm_server_name",
+                                        "global_param"
+                                    ],
                                     "range": [60, 120],
                                     "metrics": ["score"],
                                 }
@@ -214,6 +231,9 @@ def nested_composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
         },
         tunables=tunable_groups,
         service=ConfigPersistenceService({}),
+        global_config={
+            "global_param": "global_value"
+        }
     )
 
 
@@ -229,6 +249,7 @@ def test_nested_composite_env_params(nested_composite_env: CompositeEnv) -> None
         "vmSize": "Standard_B4ms",      # tunable_params from the parent
         "someConst": "root",            # pulled in from parent via required_args
         "vm_server_name": "Mock Server VM",
+        "global_param": "global_value"  # pulled in from the global_config
     }
     assert isinstance(nested_composite_env.children[1], CompositeEnv)
     assert nested_composite_env.children[1].children[0].parameters == {
@@ -237,6 +258,7 @@ def test_nested_composite_env_params(nested_composite_env: CompositeEnv) -> None
         "idle": "halt",                 # tunable_params from the parent
         # "someConst": "root"           # not required, so not passed from the parent
         "vm_client_name": "Mock Client VM",
+        # "global_param": "global_value"  # not required, so not picked from the global_config
     }
 
 
@@ -260,6 +282,7 @@ def test_nested_composite_env_setup(nested_composite_env: CompositeEnv, tunable_
         "vmSize": "Standard_B2s",       # tunable_params from the parent
         "someConst": "root",            # pulled in from parent via required_args
         "vm_server_name": "Mock Server VM",
+        "global_param": "global_value"  # pulled in from the global_config
     }
 
     assert isinstance(nested_composite_env.children[1], CompositeEnv)

@@ -1,0 +1,356 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "projectPrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "Prefix used for naming resources."
+            },
+            "defaultValue": "mlos"
+        },
+        "vmSKU": {
+            "type": "string",
+            "defaultValue": "Standard_D2s_v3",
+            "metadata": {
+                "description": "VM SKU"
+            }
+        },
+        "vmAdminUsername": {
+            "type": "string",
+            "defaultValue": "mlos"
+        },
+        "sshPublicKeys": {
+            "type": "array"
+        },
+        "storageAccountLocations": {
+            "type": "array",
+            "defaultValue": [
+                "[resourceGroup().location]"
+            ]
+        },
+        "fileShareName": {
+            "type": "string",
+            "defaultValue": "mlos-file-share"
+        },
+        "vmCustomData": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Custom data for the VM (e.g., for cloud-init)."
+            }
+        },
+        "vmLocation": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]"
+        },
+        "vmSshPort": {
+            "type": "string",
+            "defaultValue": "22"
+        },
+        "vmSshSourceAddressPrefix": {
+            "type": "string"
+        },
+        "storageSku": {
+            "type": "string",
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Premium_LRS",
+                "Premium_ZRS",
+                "Standard_GRS",
+                "Standard_GZRS",
+                "Standard_LRS",
+                "Standard_RAGRS",
+                "Standard_RAGZRS",
+                "Standard_ZRS"
+            ]
+        }
+    },
+    "functions": [],
+    "variables": {
+        "storageAccountName": "[toLower(replace(parameters('projectPrefix'), '-', ''))]",
+        "vmName": "[concat(parameters('projectPrefix'), '-vm')]",
+        "networkInterfaceName": "[concat(variables('vmName'), '-ni-', uniqueString(resourceGroup().id))]",
+        "vnetName": "[concat(parameters('projectPrefix'), '-vnet')]",
+        "publicIpName": "[concat(variables('vmName'), '-ip')]",
+        "nsgName": "[concat(parameters('projectPrefix'), '-nsg')]",
+        "kvName": "[concat(parameters('projectPrefix'), '-kv')]"
+    },
+    "resources": [
+        {
+        "name": "[variables('publicIpName')]",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "apiVersion": "2020-11-01",
+        "location": "[parameters('vmLocation')]",
+        "tags": {
+            "displayName": "PublicIPAddress"
+        },
+        "properties": {
+            "publicIPAllocationMethod": "Static",
+            "dnsSettings": {
+                "domainNameLabel": "[variables('vmName')]"
+            }
+        }
+    },
+    {
+        "name": "[variables('nsgName')]",
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2020-11-01",
+        "location": "[parameters('vmLocation')]",
+        "properties": {
+            "securityRules": [
+                {
+                    "name": "UserSSH",
+                    "properties": {
+                        "description": "For user SSH access",
+                        "protocol": "Tcp",
+                        "sourcePortRange": "*",
+                        "destinationPortRange": "[parameters('vmSshPort')]",
+                        "sourceAddressPrefix": "[parameters('vmSshSourceAddressPrefix')]",
+                        "destinationAddressPrefix": "*",
+                        "access": "Allow",
+                        "priority": 100,
+                        "direction": "Inbound"
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "[variables('vnetName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2020-11-01",
+        "location": "[parameters('vmLocation')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        ],
+        "tags": {
+            "displayName": "[variables('vnetName')]"
+        },
+        "properties": {
+            "addressSpace": {
+                "addressPrefixes": [
+                    "10.0.0.0/16"
+                ]
+            },
+            "subnets": [
+                {
+                    "name": "default",
+                    "properties": {
+                        "addressPrefix": "10.0.0.0/24",
+                        "serviceEndpoints": [
+                            {
+                                "service": "Microsoft.Storage",
+                                "locations": "[parameters('storageAccountLocations')]"
+                            },
+                            {
+                                "service": "Microsoft.KeyVault",
+                                "locations": ["[parameters('vmLocation')]"]
+                            }
+                        ],
+                        "networkSecurityGroup": {
+                            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    {
+        "name": "[variables('networkInterfaceName')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2020-11-01",
+        "location": "[parameters('vmLocation')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]",
+            "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+            "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+        ],
+        "tags": {
+            "displayName": "[variables('networkInterfaceName')]"
+        },
+        "properties": {
+            "ipConfigurations": [
+                {
+                    "name": "ipConfig1",
+                    "properties": {
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIPAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))]"
+                        },
+                        "subnet": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]"
+                        }
+                    }
+                }
+            ],
+            "networkSecurityGroup": {
+                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+            }
+        }
+    },
+    {
+        "name": "[variables('kvName')]",
+        "type": "Microsoft.KeyVault/vaults",
+        "apiVersion": "2019-09-01",
+        "location": "[parameters('vmLocation')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+        ],
+        "tags": {
+            "displayName": "[variables('kvName')]"
+        },
+        "properties": {
+            "enabledForDeployment": true,
+            "enabledForTemplateDeployment": true,
+            "enabledForDiskEncryption": true,
+            "tenantId": "[subscription().tenantId]",
+            "accessPolicies": [],
+            "enableRbacAuthorization": true,
+            "networkAcls": {
+                "virtualNetworkRules": [
+                    {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]",
+                        "ignoreMissingVnetServiceEndpoint": false
+                    }
+                ]
+            },
+            "sku": {
+                "name": "standard",
+                "family": "A"
+            }
+        }
+    },
+    {
+        "name": "[variables('vmName')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2021-03-01",
+        "location": "[parameters('vmLocation')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+        ],
+        "tags": {
+            "displayName": "[variables('vmName')]"
+        },
+        "properties": {
+            "hardwareProfile": {
+                "vmSize": "[parameters('vmSKU')]"
+            },
+            "osProfile": {
+                "computerName": "[variables('vmName')]",
+                "customData": "[if(empty(parameters('vmCustomData')), null(), base64(parameters('vmCustomData')))]",
+                "adminUsername": "[parameters('vmAdminUsername')]",
+                "linuxConfiguration": {
+                    "disablePasswordAuthentication": true,
+                    "ssh": {
+                        "copy": [
+                            {
+                                "name": "publicKeys",
+                                "count": "[length(parameters('sshPublicKeys'))]",
+                                "input": {
+                                    "path": "[concat('/home/', parameters('vmAdminUsername'), '/.ssh/authorized_keys')]",
+                                    "keyData": "[parameters('sshPublicKeys')[copyIndex('publicKeys')]]"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "storageProfile": {
+                // TODO: Look into automatically use the latest Ubuntu Server LTS
+                "imageReference": {
+                    "publisher": "Canonical",
+                    "offer": "0001-com-ubuntu-server-jammy",
+                    "sku": "22_04-lts-gen2",
+                    "version": "latest"
+                },
+                "osDisk": {
+                    "name": "[concat(variables('vmName'), '-OsDisk')]",
+                    "caching": "ReadWrite",
+                    "createOption": "FromImage"
+                }
+            },
+            "networkProfile": {
+                "networkInterfaces": [
+                    {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                    }
+                ]
+            },
+            "diagnosticsProfile": {
+                "bootDiagnostics": {
+                    "enabled": false
+                }
+            }
+        }
+    },
+    {
+        "copy": {
+            "name": "storageAccountCopy",
+            "count": "[length(parameters('storageAccountLocations'))]"
+        },
+        "name": "[concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('storageAccountCopy')])]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2021-04-01",
+        "tags": {
+            "displayName": "[concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('storageAccountCopy')])]"
+        },
+        "location": "[parameters('storageAccountLocations')[copyIndex('storageAccountCopy')]]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+        ],
+        "kind": "StorageV2",
+        "sku": {
+            "name": "[parameters('storageSku')]"
+        },
+        "properties": {
+            "networkAcls": {
+                "bypass": "AzureServices",
+                "virtualNetworkRules": [
+                    {
+                        "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'default')]",
+                        "action": "Allow"
+                    }
+                ],
+                "ipRules": [],
+                "defaultAction": "Deny"
+            }
+        }
+    },
+    {
+        "copy": {
+            "name": "fileShareCopy",
+            "count": "[length(parameters('storageAccountLocations'))]"
+        },
+        "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+        "apiVersion": "2022-09-01",
+        "name": "[concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('fileShareCopy')], '/default/', parameters('fileShareName'))]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', concat(variables('storageAccountName'), parameters('storageAccountLocations')[copyIndex('fileShareCopy')]))]"
+        ],
+        "properties": {
+            "accessTier": "TransactionOptimized",
+            "shareQuota": 5120,
+            "enabledProtocols": "SMB"
+        }
+    }
+    ],
+    "outputs": {
+        "vmHostName": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))).dnsSettings.fqdn]"
+        },
+        "vmIpAddress": {
+            "type": "string",
+            "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIpName'))).ipAddress]"
+        },
+        "vmName": {
+            "type": "string",
+            "value": "[variables('vmName')]"
+        },
+        "kvName": {
+            "type": "string",
+            "value": "[variables('kvName')]"
+        }
+    }
+}

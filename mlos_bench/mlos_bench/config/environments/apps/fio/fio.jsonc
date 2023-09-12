@@ -1,0 +1,77 @@
+{
+    "name": "FIO Composite Env",
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+
+    "config": {
+
+        "const_args": {
+            "fio_prefix": "fio"
+        },
+
+        "children": [
+            {
+                "name": "Upload FIO job file",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "config": {
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "upload": [
+                        {
+                            "from": "environments/apps/fio/scripts/remote/",
+                            "to": "$experiment_id/$trial_id/scripts"
+                        }
+                    ]
+                }
+            },
+            {
+                "name": "Run FIO remotely",
+                "class": "mlos_bench.environments.remote.RemoteEnv",
+                "config": {
+                    "required_args": [
+                        "vmName",
+                        "experiment_id",
+                        "trial_id",
+                        "mountPoint",
+                        "fio_prefix"
+                    ],
+                    "const_args": {
+                        "fio_target": "/fio_test.tmp"
+                    },
+                    "setup": [
+                        "sudo apt-get update",
+                        "sudo apt-get -y install fio"
+                    ],
+                    "run": [
+                        "mkdir -p $mountPoint/$experiment_id/$trial_id/output/$fio_prefix/",
+                        "sudo fio --output-format=json --filename=$fio_target --runtime=20 $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > /dev/null",  // warm-up
+                        "sudo fio --output-format=json --filename=$fio_target --runtime=60 $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > $mountPoint/$experiment_id/$trial_id/output/$fio_prefix/readwrite.json",
+                        "sudo rm $fio_target"
+                    ]
+                }
+            },
+            {
+                "name": "Download and process FIO data",
+                "class": "mlos_bench.environments.local.LocalFileShareEnv",
+                "config": {
+                    "required_args": [
+                        "experiment_id",
+                        "trial_id",
+                        "fio_prefix"
+                    ],
+                    "download": [
+                        {
+                            "from": "$experiment_id/$trial_id/output/$fio_prefix",
+                            "to": "$PWD/$fio_prefix/"
+                        }
+                    ],
+                    "run": [
+                        "environments/apps/fio/scripts/local/process_fio_results.py --prefix $fio_prefix $fio_prefix/readwrite.json readwrite.csv"
+                    ],
+                    "read_results_file": "readwrite.csv"
+                }
+            }
+        ]
+    }
+}
