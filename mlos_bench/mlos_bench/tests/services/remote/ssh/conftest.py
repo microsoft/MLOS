@@ -6,7 +6,7 @@
 Fixtures for the SSH service tests.
 """
 
-from typing import Generator, Tuple
+from typing import Generator
 from subprocess import run
 import tempfile
 
@@ -17,13 +17,9 @@ import pytest
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.tests import check_socket, resolve_host_name
+from mlos_bench.tests.services.remote.ssh import SSH_TEST_SERVER_PORT, SshTestServerInfo
 
 # pylint: disable=redefined-outer-name
-
-
-# The SSH test server port.
-# See Also: docker-compose.yml
-SSH_TEST_SERVER_PORT = 2254
 
 
 @pytest.fixture(scope="session")
@@ -44,7 +40,7 @@ def ssh_test_server_hostname() -> str:
 @pytest.fixture(scope="session")
 def ssh_test_server(ssh_test_server_hostname: str,
                     docker_compose_project_name: str,
-                    docker_services: DockerServices) -> Generator[Tuple[str, int, str, str], None, None]:
+                    docker_services: DockerServices) -> Generator[SshTestServerInfo, None, None]:
     """
     Fixture for getting the ssh test server services setup via docker-compose
     using pytest-docker.
@@ -70,5 +66,9 @@ def ssh_test_server(ssh_test_server_hostname: str,
         if cmd.returncode != 0:
             raise RuntimeError(f"Failed to copy ssh key from ssh-server container: {str(cmd.stderr)}")
         os.chmod(id_rsa_file.name, 0o600)
-        yield (ssh_test_server_hostname, SSH_TEST_SERVER_PORT, username, id_rsa_file.name)
+        yield SshTestServerInfo(
+            hostname=ssh_test_server_hostname,
+            port=SSH_TEST_SERVER_PORT,
+            username=username,
+            id_rsa_path=id_rsa_file.name)
         # NamedTempFile deleted on context exit
