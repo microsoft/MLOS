@@ -6,11 +6,10 @@
 A collection functions for interacting with SSH servers as file shares.
 """
 
-
 from abc import ABCMeta
-from asyncio import AbstractEventLoop, Lock as CoroutineLock
-from typing import Dict, Optional
-from threading import Lock, Thread, Lock as ThreadLock
+from asyncio import AbstractEventLoop, Event as CoroEvent, Lock as CoroLock
+from typing import Dict, Optional, Tuple, Union
+from threading import current_thread, Lock as ThreadLock, Thread
 
 import logging
 import os
@@ -18,7 +17,7 @@ import os
 import asyncio
 import asyncssh
 
-from asyncssh.connection import SSHClientConnection
+from asyncssh.connection import SSHClient, SSHClientConnection
 
 from mlos_bench.services.base_service import Service
 
@@ -27,112 +26,126 @@ _LOG = logging.getLogger(__name__)
 
 class SshClient(asyncssh.SSHClient):
     """
-    A class to manage SSH connections to hosts.
-
-    This attempts to handle connection reuse and reconnection and encapsulating
-    some of the async aspects of the library.
+    Wrapper around SSHClient to help provide connection caching and reconnect logic.
 
     Used by the SshService to try and maintain a single connection to hosts,
     handle reconnects if possible, and use that to run commands rather than
     reconnect for each command.
-
-    Parameters
-    ----------
-    connect_params : dict
     """
 
+    _CONNECTION_PENDING = 'INIT'
+    _CONNECTION_LOST = 'LOST'
+
     def __init__(self, *args: tuple, **kwargs: dict):
-        self._connect_params: dict = kwargs.pop('connect_params')
+        self._connection_id: str = SshClient._CONNECTION_PENDING
         self._connection: Optional[SSHClientConnection] = None
-        self._connection_lock = Lock()
+        self._conn_event: CoroEvent = CoroEvent()
         super().__init__(*args, **kwargs)
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.connect_params_to_repr(self._connect_params)})"
+        return self._connection_id
+
+    def __str__(self) -> str:
+        return self.__repr__()
 
     def __hash__(self) -> int:
-        return hash(repr(self))
-
-    def __del__(self) -> None:
-        try:
-            self.disconnect()
-        except Exception as ex:     # pylint: disable=broad-exception-caught
-            _LOG.warning("Encountered an issue disconnecting during object destructor: %s", ex)
+        return hash(self._connection_id)
 
     @staticmethod
-    def connect_params_to_repr(connect_params: dict) -> str:
-        """
-        Gets a string representation of the connection parameters.
+    def id_from_connection(connection: SSHClientConnection) -> str:
+        """Gets a unique id repr for the connection."""
+        return f"{connection._username}@{connection._host}:{connection._port}"    # pylint: disable=protected-access
 
-        Useful for looking up existing SshClients.
-
-        Parameters
-        ----------
-        connect_params : dict
-
-        Returns
-        -------
-        str
-        """
+    @staticmethod
+    def id_from_params(connect_params: dict) -> str:
+        """Gets a unique id repr for the connection."""
         return f"{connect_params['username']}@{connect_params['host']}:{connect_params['port']}"
 
-    @property
-    def connection(self) -> SSHClientConnection:
-        """
-        Gets the SSH client connection to the host.
-
-        Note: May block.
-        """
-        with self._connection_lock:
-            return self._connection if self._connection else self.connect()
-
-    async def _async_connect(self) -> SSHClientConnection:
-        connect_params = self._connect_params.copy()
-        # TODO: Setup logger on ssh client?
-        return await asyncssh.connect(**connect_params)
-
-    def connect(self) -> SSHClientConnection:
-        """
-        Establishes a connection to the remote host using asyncssh.
-
-        Note: May block.
-
-        Returns
-        -------
-        asyncssh.SSHClientConnection
-            Returns a connection to the host.
-        """
-        with self._connection_lock:
-            if not self._connection:
-                self._connection = asyncio.run(self._async_connect())
-        return self._connection
-
-    def disconnect(self) -> None:
-        """
-        Closes the connection to the host.
-        """
-        with self._connection_lock:
-            if self._connection:
-                connection = self._connection
-                self._connection = None
-                connection.close()
-
-    # Override hooks provided by asyncssh.SSHClient:
-
     def connection_made(self, conn: SSHClientConnection) -> None:
-        _LOG.debug("Connection to %s made: %s", self._connect_params['host'], conn)
-        conn._port
+        """
+        Override hook provided by asyncssh.SSHClient.
+
+        Changes the connection_id from _CONNECTION_PENDING to a unique id repr.
+        """
+        self._conn_event.clear()
+        _LOG.debug("%s: Connection made by %s: %s", current_thread().name, conn._options.env, conn) \
+            # pylint: disable=protected-access
+        self._connection_id = SshClient.id_from_connection(conn)
+        self._connection = conn
+        self._conn_event.set()
         return super().connection_made(conn)
 
     def connection_lost(self, exc: Optional[Exception]) -> None:
-        _LOG.debug("Connection to %s lost: %s", self._connect_params['host'], exc)
-        with self._connection_lock:
-            self._connection = None
-            if exc is not None:
-                # Attempt to reconnect.
-                if not self.connect():
-                    raise ConnectionError(f"Connection to {self._connect_params['host']} lost: {exc}")
-            # Else, manually disconnected.
+        self._conn_event.clear()
+        _LOG.debug("%s: %s", current_thread().name, "connection_lost")
+        if exc is None:
+            _LOG.debug("%s: gracefully disconnected ssh from %s: %s", current_thread().name, self._connection_id, exc)
+        else:
+            _LOG.debug("%s: ssh connection lost on %s: %s", current_thread().name, self._connection_id, exc)
+        self._connection_id = SshClient._CONNECTION_LOST
+        self._connection = None
+        self._conn_event.set()
+        return super().connection_lost(exc)
+
+    async def connection(self) -> Optional[SSHClientConnection]:
+        """
+        Waits for and returns the SSHClientConnection to be established or lost.
+        """
+        _LOG.debug("%s: Waiting for connection to be available.", current_thread().name)
+        await self._conn_event.wait()
+        _LOG.debug("%s: Connection available for %s", current_thread().name, self._connection_id)
+        return self._connection
+
+
+class SshClientCache:
+    """
+    Manages a cache of SshClient connections.
+    Note: Only one per event loop thread supported.
+    """
+
+    def __init__(self) -> None:
+        self._cache: Dict[str, Tuple[SSHClientConnection, SshClient]] = {}
+        self._cache_lock = CoroLock()
+
+    def __str__(self) -> str:
+        return str(self._cache)
+
+    async def get_client_connection(self, connect_params: dict) -> Tuple[SSHClientConnection, SshClient]:
+        """
+        Gets a (possibly cached) client connection.
+
+        Parameters
+        ----------
+        connect_params: dict
+            Parameters to pass to asyncssh.create_connection.
+
+        Returns
+        -------
+        Tuple[SSHClientConnection, SshClient]
+            A tuple of (SSHClientConnection, SshClient).
+        """
+        _LOG.debug("%s: get_client_connection: %s", current_thread().name, connect_params)
+        async with self._cache_lock:
+            _LOG.debug("%s: acquired cache lock in %f seconds", current_thread().name, time_taken)
+            connection_id = SshClient.id_from_params(connect_params)
+            client: Union[None, SshClient, SSHClient]
+            _, client = self._cache.get(connection_id, (None, None))
+            if client:
+                _LOG.debug("%s: Checking cached client %s", current_thread().name, connection_id)
+                connection = await client.connection()
+                if not connection:
+                    _LOG.debug("%s: Removing stale client connection %s from cache.", current_thread().name, connection_id)
+                    self._cache.pop(connection_id)
+                    # Try to reconnect next.
+                else:
+                    _LOG.debug("%s: Using cached client %s", current_thread().name, connection_id)
+            if connection_id not in self._cache:
+                _LOG.debug("%s: Establishing client connection to %s", current_thread().name, connection_id)
+                connection, client = await asyncssh.create_connection(SshClient, **connect_params)
+                assert isinstance(client, SshClient)
+                self._cache[connection_id] = (connection, client)
+                _LOG.debug("%s: Created connection to %s.", current_thread().name, connection_id)
+            return self._cache[connection_id]
 
 
 class SshService(Service, metaclass=ABCMeta):
@@ -160,14 +173,10 @@ class SshService(Service, metaclass=ABCMeta):
     #
     _event_loop: Optional[AbstractEventLoop] = None
     _event_loop_thread: Optional[Thread] = None
+    _event_loop_thread_lock = ThreadLock()
+    _event_loop_thread_ssh_client_cache: Optional[SshClientCache] = None
 
     _REQUEST_TIMEOUT: Optional[float] = None  # seconds
-
-    # Cache of SshClient connections.
-    # Note: we place this in the base class so it can be used across
-    # SshHostService and SshFileShareService subclasses.
-    _clients: Dict[str, SshClient] = {}
-    _clients_lock = ThreadLock()
 
     def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
         super().__init__(config, global_config, parent)
@@ -208,6 +217,14 @@ class SshService(Service, metaclass=ABCMeta):
                 if not os.path.exists(priv_key_file):
                     raise ValueError(f"ssh_priv_key_file {priv_key_file} does not exist")
                 self._connect_params['client_keys'] = [priv_key_file]
+        # TODO: Start the background thread if it's not already running.
+
+    def __del__(self) -> None:
+        """
+        Ensures that the event loop thread is stopped when the service is
+        garbage collected.
+        """
+        # TODO: Semaphore to ensure that the event loop thread is stopped by the last one to exit.
 
     def get_host_client(self, params: dict) -> SshClient:
         """
@@ -222,6 +239,9 @@ class SshService(Service, metaclass=ABCMeta):
         -------
         SshClient
         """
+
+        # FIXME: This needs to be replaced with a Future or something.
+
         connect_params: dict = self._connect_params.copy()
         connect_params['host'] = connect_params.pop('ssh_hostname')
         # Allow overriding certain params on a per host basis using const_args.
