@@ -13,6 +13,7 @@
         "commandline",
         "conda",
         "configspace",
+        "coro",
         "dataframe",
         "devcontainer",
         "discretization",
