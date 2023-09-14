@@ -6,11 +6,12 @@
 A collection Service functions for managing hosts via SSH.
 """
 
+from concurrent.futures import Future
 from typing import Iterable, List, Optional, Tuple
 
 import logging
 
-import asyncssh
+from asyncssh import SSHCompletedProcess, ConnectionLost, DisconnectError, ProcessError
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -26,6 +27,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
     """
     Helper methods to manage machines via SSH.
     """
+
     # pylint: disable=too-many-instance-attributes
 
     def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
@@ -43,6 +45,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             Parent service that can provide mixin functions.
         """
         super().__init__(config, global_config, parent)
+        self._shell = config.get("ssh_shell", "/bin/bash")
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
@@ -53,28 +56,31 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             self.get_remote_exec_results
         ])
 
-    async def _run_cmd(self, conn: asyncssh.SSHClientConnection, cmd: str) -> asyncssh.SSHCompletedProcess:
+    async def _run_cmd(self, params: dict, script: Iterable[str], env_params: dict) -> SSHCompletedProcess:
         """
         Runs a command on a host via SSH.
 
         Parameters
         ----------
-        conn : asyncssh.SSHClientConnection
-            Connection to the host.
+        params : dict
+            Flat dictionary of (key, value) pairs of parameters (used for establishing the connection).
         cmd : str
             Command to run.
 
         Returns
         -------
-        asyncssh.SSHCompletedProcess
+        SSHCompletedProcess
             Returns the result of the command.
         """
-        return await conn.run(cmd, check=True, timeout=self._request_timeout)
+        connection, _ = await self._get_client_connection(params)
+        return await connection.run([self._shell, '-c', '; '.join(script)],
+                                    check=False,
+                                    timeout=self._request_timeout,
+                                    env=env_params)
 
-    def remote_exec(self, script: Iterable[str], config: dict,
-                    env_params: dict) -> Tuple["Status", dict]:
+    def remote_exec(self, script: Iterable[str], config: dict, env_params: dict) -> Tuple["Status", dict]:
         """
-        Run a command on remote host OS.
+        Start running a command on remote host OS.
 
         Parameters
         ----------
@@ -101,8 +107,8 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
                 "ssh_hostname",
             ]
         )
-        # TODO: port, username, key, etc. handling?
-
+        config["asyncRemoteExecResultsFuture"] = self._run_coroutine(self._run_cmd(config, script, env_params))
+        return (Status.PENDING, config)
 
     def get_remote_exec_results(self, config: dict) -> Tuple["Status", dict]:
         """
@@ -112,7 +118,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         ----------
         config : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-            Must have the "asyncResultsUrl" key to get the results.
+            Must have the "asyncRemoteExecResultsFuture" key to get the results.
             If the key is not present, return Status.PENDING.
 
         Returns
@@ -121,9 +127,42 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
         """
-        raise NotImplementedError("TODO")
+        future = config.get("asyncRemoteExecResultsFuture")
+        if not future:
+            raise ValueError("Missing 'asyncRemoteExecResultsFuture'.")
+        assert isinstance(future, Future)
+        result = None
+        try:
+            result = future.result(timeout=self._request_timeout)
+            assert isinstance(result, SSHCompletedProcess)
+            return (
+                Status.SUCCEEDED if result.exit_status == 0 and result.returncode == 0 else Status.FAILED,
+                {
+                    "stdout": str(result.stdout),
+                    "stderr": str(result.stderr),
+                    "ssh_completed_process_result": result,
+                },
+            )
+        except (ConnectionLost, DisconnectError, ProcessError, TimeoutError) as ex:
+            _LOG.error("Failed to get remote exec results: %s", ex)
+            return (Status.FAILED, {"result": result})
 
-    def _exec_os_op(self, cmd_opts_list: List[str], params: dict, force: bool = False) -> Tuple[Status, dict]:
+    def _exec_os_op(self, cmd_opts_list: List[str], params: dict) -> Tuple[Status, dict]:
+        """_summary_
+
+        Parameters
+        ----------
+        cmd_opts_list : List[str]
+            List of commands to try to execute.
+        params : dict
+            The params used to connect to the host.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -153,7 +192,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         Returns
         -------
         result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
+            A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         cmd_opts_list = [
@@ -162,7 +201,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             'halt -p',
             'systemctl poweroff',
         ]
-        return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params, force=force)
+        return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params)
 
     def reboot(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
         """
@@ -178,7 +217,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         Returns
         -------
         result : (Status, dict={})
-            A pair of Status and result. The result is always {}.
+            A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
         cmd_opts_list = [
@@ -187,7 +226,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             'halt --reboot',
             'systemctl reboot',
         ]
-        return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params, force=force)
+        return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params)
 
     def wait_os_operation(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -198,7 +237,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         ----------
         params: dict
             Flat dictionary of (key, value) pairs of tunable parameters.
-            Must have the "asyncResultsUrl" key to get the results.
+            Must have the "asyncRemoteExecResultsFuture" key to get the results.
             If the key is not present, return Status.PENDING.
 
         Returns
@@ -208,4 +247,4 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        raise NotImplementedError("TODO")
+        return self.get_remote_exec_results(params)

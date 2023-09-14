@@ -321,7 +321,7 @@ class SshService(Service, metaclass=ABCMeta):
         connect_params['username'] = params.pop('ssh_username', connect_params['username'])
         return connect_params
 
-    async def _get_client(self, params: Optional[dict] = None) -> Tuple[SSHClientConnection, SshClient]:
+    async def _get_client_connection(self, params: Optional[dict] = None) -> Tuple[SSHClientConnection, SshClient]:
         """
         Gets a (possibly cached) SshClient (connection) for the given connection params.
 
