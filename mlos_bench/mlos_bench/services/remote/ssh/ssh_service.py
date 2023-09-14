@@ -8,7 +8,8 @@ A collection functions for interacting with SSH servers as file shares.
 
 from abc import ABCMeta
 from asyncio import AbstractEventLoop, Event as CoroEvent, Lock as CoroLock
-from typing import Dict, Optional, Tuple, Union
+from concurrent.futures import Future
+from typing import Any, Coroutine, Dict, Optional, Tuple, TypeVar, Union
 from threading import current_thread, Lock as ThreadLock, Thread
 
 import logging
@@ -17,7 +18,7 @@ import os
 import asyncio
 import asyncssh
 
-from asyncssh.connection import SSHClient, SSHClientConnection
+from asyncssh.connection import SSHClientConnection
 
 from mlos_bench.services.base_service import Service
 
@@ -101,11 +102,15 @@ class SshClientCache:
     """
     Manages a cache of SshClient connections.
     Note: Only one per event loop thread supported.
+    See additional details in SshService comments.
     """
 
     def __init__(self) -> None:
         self._cache: Dict[str, Tuple[SSHClientConnection, SshClient]] = {}
         self._cache_lock = CoroLock()
+
+    def __del__(self) -> None:
+        self.cleanup()
 
     def __str__(self) -> str:
         return str(self._cache)
@@ -126,9 +131,8 @@ class SshClientCache:
         """
         _LOG.debug("%s: get_client_connection: %s", current_thread().name, connect_params)
         async with self._cache_lock:
-            _LOG.debug("%s: acquired cache lock in %f seconds", current_thread().name, time_taken)
             connection_id = SshClient.id_from_params(connect_params)
-            client: Union[None, SshClient, SSHClient]
+            client: Union[None, SshClient, asyncssh.SSHClient]
             _, client = self._cache.get(connection_id, (None, None))
             if client:
                 _LOG.debug("%s: Checking cached client %s", current_thread().name, connection_id)
@@ -147,6 +151,14 @@ class SshClientCache:
                 _LOG.debug("%s: Created connection to %s.", current_thread().name, connection_id)
             return self._cache[connection_id]
 
+    def cleanup(self) -> None:
+        """
+        Closes all cached connections.
+        """
+        for (connection, _) in self._cache.values():
+            connection.close()
+        self._cache = {}
+
 
 class SshService(Service, metaclass=ABCMeta):
     """
@@ -162,15 +174,19 @@ class SshService(Service, metaclass=ABCMeta):
     # This is a bit of a hack, but it works for now.
     #
     # The event loop is created on demand and shared across all SshService
-    # instances, hence we need to lock it when doing the setup/teardown.
+    # instances, hence we need to lock it when doing the creation/cleanup.
+    #
     # We ran tests to ensure that multiple requests can still be executing
-    # concurrently inside that event loop so there should be no performance loss.
+    # concurrently inside that event loop so there should be no practical
+    # performance loss for our initial cases even with just single background
+    # thread running the event loop.
     #
     # Note: the tests were run to confirm that this works with two threads.
     # Using a larger thread pool requires a bit more work since asyncssh
     # requires that run() requests are submitted to the same event loop handler
     # that the connection was made on.
-    #
+    # In that case, each background thread should get its own SshClientCache.
+
     _event_loop: Optional[AbstractEventLoop] = None
     _event_loop_thread: Optional[Thread] = None
     _event_loop_thread_lock = ThreadLock()
@@ -180,6 +196,7 @@ class SshService(Service, metaclass=ABCMeta):
     _REQUEST_TIMEOUT: Optional[float] = None  # seconds
 
     def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
+        # pylint: disable=too-complex
         super().__init__(config, global_config, parent)
 
         # None can be used to disable the request timeout.
@@ -221,6 +238,9 @@ class SshService(Service, metaclass=ABCMeta):
         # Start the background thread if it's not already running.
         with SshService._event_loop_thread_lock:
             if not SshService._event_loop_thread:
+                assert SshService._event_loop_thread_ssh_client_cache is None
+                SshService._event_loop_thread_ssh_client_cache = SshClientCache()
+                assert SshService._event_loop is None
                 SshService._event_loop = asyncio.new_event_loop()
                 SshService._event_loop_thread = Thread(target=SshService._run_event_loop, daemon=True)
                 SshService._event_loop_thread.start()
@@ -234,48 +254,86 @@ class SshService(Service, metaclass=ABCMeta):
         with SshService._event_loop_thread_lock:
             SshService._event_loop_thread_refcnt -= 1
             if SshService._event_loop_thread_refcnt == 0:
+                assert SshService._event_loop_thread_ssh_client_cache is not None
+                SshService._event_loop_thread_ssh_client_cache.cleanup()
+                SshService._event_loop_thread_ssh_client_cache = None
                 assert SshService._event_loop is not None
-                assert SshService._event_loop_thread is not None
                 SshService._event_loop.call_soon_threadsafe(SshService._event_loop.stop)
+                assert SshService._event_loop_thread is not None
                 SshService._event_loop_thread.join(timeout=1)
                 if SshService._event_loop_thread.is_alive():
                     raise RuntimeError("Failed to stop event loop thread.")
+                SshService._event_loop = None
                 SshService._event_loop_thread = None
 
-    @staticmethod
-    def _run_event_loop() -> None:
+    @classmethod
+    def _run_event_loop(cls) -> None:
         """
         Runs the asyncio event loop in a background thread.
         """
-        assert SshService._event_loop is not None
-        asyncio.set_event_loop(SshService._event_loop)
-        SshService._event_loop.run_forever()
+        assert cls._event_loop is not None
+        asyncio.set_event_loop(cls._event_loop)
+        cls._event_loop.run_forever()
 
-    def get_host_client(self, params: dict) -> SshClient:
+    CoroReturnType = TypeVar('CoroReturnType')
+
+    @classmethod
+    def _run_coroutine(cls, coro: Coroutine[Any, Any, CoroReturnType]) -> Future[CoroReturnType]:
         """
-        Gets an SshClient for a host if one doesn't already exist.
+        Runs the given coroutine in the background event loop thread.
 
         Parameters
         ----------
-        params : dict
+        coro : Coroutine[Any, Any, CoroReturnType]
+            The coroutine to run.
+
+        Returns
+        -------
+        Future[CoroReturnType]
+            A future that will be completed when the coroutine completes.
+        """
+        assert cls._event_loop is not None
+        return asyncio.run_coroutine_threadsafe(coro, cls._event_loop)
+
+    def _get_connect_params(self, params: Optional[dict] = None) -> dict:
+        """
+        Produces a dict of connection parameters for asyncssh.create_connection.
+
+        Parameters
+        ----------
+        params : Optional[dict]
             Additional connection parameters specific to this host.
 
         Returns
         -------
-        SshClient
+        dict
+            A dict of connection parameters for asyncssh.create_connection.
         """
+        if params is None:
+            params = {}
 
-        # FIXME: This needs to be replaced with a Future or something.
-
+        # Start with the base config params.
         connect_params: dict = self._connect_params.copy()
         connect_params['host'] = connect_params.pop('ssh_hostname')
         # Allow overriding certain params on a per host basis using const_args.
+        # Converting the key names as necessary.
         connect_params['port'] = params.pop('ssh_port', connect_params['port'])
         connect_params['username'] = params.pop('ssh_username', connect_params['username'])
-        ssh_client_id = SshClient.connect_params_to_repr(connect_params)
+        return connect_params
 
-        ssh_client = self._clients.get(ssh_client_id, None)
-        if ssh_client is None:
-            ssh_client = SshClient(connect_params=connect_params)
-            self._clients[ssh_client_id] = ssh_client
-        return ssh_client
+    async def _get_client(self, params: Optional[dict] = None) -> Tuple[SSHClientConnection, SshClient]:
+        """
+        Gets a (possibly cached) SshClient (connection) for the given connection params.
+
+        Parameters
+        ----------
+        params : Optional[dict]
+            Optional override connection parameters.
+
+        Returns
+        -------
+        Tuple[SSHClientConnection, SshClient]
+            The connection and client objects.
+        """
+        assert self._event_loop_thread_ssh_client_cache is not None
+        return await self._event_loop_thread_ssh_client_cache.get_client_connection(self._get_connect_params(params))
