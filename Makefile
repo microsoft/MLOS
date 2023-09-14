@@ -74,10 +74,7 @@ licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 
 build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) $(SCRIPT_FILES) $(SQL_FILES) doc/mit-license.tmpl
 	# Note: to avoid makefile dependency loops, we don't touch the setup.py files as that would force the conda-env to be rebuilt.
-	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl \
-	    -E .py .sh .ps1 .sql \
-	    -x mlos_bench/setup.py mlos_core/setup.py \
-	    -f $(PYTHON_FILES) $(SCRIPT_FILES) $(SQL_FILES)
+	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 .sql .cmd -x mlos_bench/setup.py mlos_core/setup.py
 	touch $@
 
 .PHONY: cspell
