@@ -4,7 +4,6 @@
 ## Licensed under the MIT License.
 ##
 
-#
 # A script to start the SSH server in a container and copy the SSH keys from it.
 # For pytest, the fixture in conftest.py will handle this for us using the
 # pytest-docker plugin, but for manual testing, this script can be used.

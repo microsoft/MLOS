@@ -5,11 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile
       args:
-        - PORT=2254
+        - PORT=${PORT:-2254}
       tags:
         - mlos_bench-test-ssh-server:latest
     ports:
-      - 2254:2254
+      - ${PORT:-2254}:${PORT:-2254}
     extra_hosts:
       - host.docker.internal:host-gateway
     environment:
@@ -24,4 +24,4 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     # Implicitly uses root and the key in that image.
-    command: ["ssh", "-o", "StrictHostKeyChecking=accept-new", "-p", "2254", "host.docker.internal", "hostname"]
+    command: ["ssh", "-o", "StrictHostKeyChecking=accept-new", "-p", "${PORT:-2254}", "host.docker.internal", "hostname"]

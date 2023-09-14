@@ -174,6 +174,7 @@ class SshService(Service, metaclass=ABCMeta):
     _event_loop: Optional[AbstractEventLoop] = None
     _event_loop_thread: Optional[Thread] = None
     _event_loop_thread_lock = ThreadLock()
+    _event_loop_thread_refcnt: int = 0
     _event_loop_thread_ssh_client_cache: Optional[SshClientCache] = None
 
     _REQUEST_TIMEOUT: Optional[float] = None  # seconds
@@ -217,14 +218,38 @@ class SshService(Service, metaclass=ABCMeta):
                 if not os.path.exists(priv_key_file):
                     raise ValueError(f"ssh_priv_key_file {priv_key_file} does not exist")
                 self._connect_params['client_keys'] = [priv_key_file]
-        # TODO: Start the background thread if it's not already running.
+        # Start the background thread if it's not already running.
+        with SshService._event_loop_thread_lock:
+            if not SshService._event_loop_thread:
+                SshService._event_loop = asyncio.new_event_loop()
+                SshService._event_loop_thread = Thread(target=SshService._run_event_loop, daemon=True)
+                SshService._event_loop_thread.start()
+            SshService._event_loop_thread_refcnt += 1
 
     def __del__(self) -> None:
         """
-        Ensures that the event loop thread is stopped when the service is
-        garbage collected.
+        Ensures that the event loop thread is stopped when all subservice
+        instances are garbage collected.
         """
-        # TODO: Semaphore to ensure that the event loop thread is stopped by the last one to exit.
+        with SshService._event_loop_thread_lock:
+            SshService._event_loop_thread_refcnt -= 1
+            if SshService._event_loop_thread_refcnt == 0:
+                assert SshService._event_loop is not None
+                assert SshService._event_loop_thread is not None
+                SshService._event_loop.call_soon_threadsafe(SshService._event_loop.stop)
+                SshService._event_loop_thread.join(timeout=1)
+                if SshService._event_loop_thread.is_alive():
+                    raise RuntimeError("Failed to stop event loop thread.")
+                SshService._event_loop_thread = None
+
+    @staticmethod
+    def _run_event_loop() -> None:
+        """
+        Runs the asyncio event loop in a background thread.
+        """
+        assert SshService._event_loop is not None
+        asyncio.set_event_loop(SshService._event_loop)
+        SshService._event_loop.run_forever()
 
     def get_host_client(self, params: dict) -> SshClient:
         """

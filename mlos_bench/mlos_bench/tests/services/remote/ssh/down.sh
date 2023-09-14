@@ -4,7 +4,6 @@
 ## Licensed under the MIT License.
 ##
 
-#
 # A script to stop the SSH server in a container and remove the SSH keys.
 # For pytest, the fixture in conftest.py will handle this for us using the
 # pytest-docker plugin, but for manual testing, this script can be used.
