@@ -9,6 +9,7 @@
         "ssh_priv_key_path": "~/.ssh/id_rsa",
         "ssh_known_hosts_path": null,
         "ssh_request_timeout": 90,
-        "ssh_keepalive_interval": 10
+        "ssh_keepalive_interval": 10,
+        "ssh_shell": "/bin/bash"
     }
 }

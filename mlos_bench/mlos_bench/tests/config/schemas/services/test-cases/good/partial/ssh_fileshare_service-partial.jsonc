@@ -1,4 +1,3 @@
 {
-    "class": "mlos_bench.services.remote.ssh.SshFileShareService",
-    "config": {}
+    "class": "mlos_bench.services.remote.ssh.SshFileShareService"
 }

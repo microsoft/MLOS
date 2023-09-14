@@ -1,3 +1,6 @@
 {
-    "class": "mlos_bench.services.remote.azure.AzureAuthService"
+    "class": "mlos_bench.services.remote.azure.AzureAuthService",
+    "config": {
+        // should be omitted if empty
+    }
 }

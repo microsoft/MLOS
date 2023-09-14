@@ -1,19 +1,11 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/ssh/ssh-services-subschema.json",
-    "title": "mlos_bench SSH Host and Fileshare Service config",
-    "description": "config for an mlos_bench SSH Host and Fileshare Service",
-    "type": "object",
-    "properties": {
-        "class": {
-            "enum": [
-                "mlos_bench.services.remote.ssh.SshHostService",
-                "mlos_bench.services.remote.ssh.ssh_host_service.SshHostService",
-                "mlos_bench.services.remote.ssh.SshFileShareService",
-                "mlos_bench.services.remote.ssh.ssh_fileshare_service.SshFileShareService"
-            ]
-        },
-        "config": {
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/ssh/common-defs-subschemas.json",
+    "title": "mlos_bench SSH Service common defs config",
+    "description": "mlos_bench SSH Service common defs config",
+    "$defs": {
+        "ssh_service_config": {
+            "description": "SSH Service config.",
             "type": "object",
             "properties": {
                 "ssh_request_timeout": {
@@ -49,9 +41,7 @@
                     "type": ["null", "string"],
                     "examples": [null, "~/.ssh/known_hosts"]
                 }
-            },
-            "unevaluatedProperties": false
+            }
         }
-    },
-    "required": ["class", "config"]
+    }
 }
