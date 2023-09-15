@@ -46,6 +46,7 @@ jobs:
         echo "COMMIT_SHA: ${{ github.sha }}"
         echo "git log: $(git log -1 ${{ github.sha }})"
         echo "COMMIT_MESSAGE: ${{ github.event.commits[0].message }}"
+        cat ${{ github.event_path }}
 
     - name: Build the devcontainer image
       timeout-minutes: 15
