@@ -33,7 +33,7 @@ jobs:
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
     - name: Set NO_CACHE variable based on commit message
-      if: contains(github.event.commits.message, 'NO_CACHE=true')
+      if: contains(github.event.commits[0].message, 'NO_CACHE=true')
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
@@ -42,10 +42,10 @@ jobs:
         set -x
         printenv
         echo "NO_CACHE: ${NO_CACHE:-}"
-        echo "commit messages: ${{ github.event.commits.message }}"
+        echo "commit messages: ${{ github.event.commits[0].message }}"
         echo "COMMIT_SHA: ${{ github.sha }}"
         echo "git log: $(git log -1 ${{ github.sha }})"
-        echo "COMMIT_MESSAGE: ${{ github.event.head_commit.message }}"
+        echo "COMMIT_MESSAGE: ${{ github.event.commits[0].message }}"
 
     - name: Build the devcontainer image
       timeout-minutes: 15
