@@ -42,6 +42,9 @@ jobs:
         set -x
         printenv
         echo "NO_CACHE: ${NO_CACHE:-}"
+        echo "COMMIT_SHA: ${{ github.sha }}"
+        echo "git log: $(git log -1 ${{ github.sha }})"
+        echo "COMMIT_MESSAGE: ${{ github.event.head_commit.message }}"
 
     - name: Build the devcontainer image
       timeout-minutes: 15
