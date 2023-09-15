@@ -32,6 +32,11 @@ jobs:
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
+    - name: Set NO_CACHE variable based on commit message
+      if: contains(github.event.head_commit.message, 'NO_CACHE=true')
+      run: |
+        echo "NO_CACHE=true" >> $GITHUB_ENV
+
     - name: Log some environment variables for debugging
       run: |
         set -x
