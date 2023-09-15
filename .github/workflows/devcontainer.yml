@@ -27,13 +27,15 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set NO_CACHE variable for nightly builds
-      if: github.event_name == 'schedule'
+    - name: Get commit messages
+      id: get-commit-messages
       run: |
-        echo "NO_CACHE=true" >> $GITHUB_ENV
+        # Only look at the last 10 commits, to avoid getting too much data.
+        git log --format "%B" -10 ${{ github.event.before }}...${{ github.sha }} > /tmp/commit_messages.txt
+        echo "COMMIT_MESSAGES=$(cat /tmp/commit_messages.txt)" >> $GITHUB_OUTPUT
 
-    - name: Set NO_CACHE variable based on commit message
-      if: contains(github.event.commits[0].message, 'NO_CACHE=true')
+    - name: Set NO_CACHE variable based on commit messages and for nightly builds
+      if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true')
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
@@ -42,11 +44,11 @@ jobs:
         set -x
         printenv
         echo "NO_CACHE: ${NO_CACHE:-}"
-        echo "commit messages: ${{ github.event.commits[0].message }}"
+        echo "COMMIT_MESSAGES: ${COMMIT_MESSAGES:-}"
         echo "COMMIT_SHA: ${{ github.sha }}"
-        echo "git log: $(git log -1 ${{ github.sha }})"
-        echo "COMMIT_MESSAGE: ${{ github.event.commits[0].message }}"
-        cat ${{ github.event_path }}
+        echo "git log -1 ${{ github.sha }}: $(git log -1 ${{ github.sha }})"
+        # Output the full event json for debugging.
+        # cat ${{ github.event_path }}
 
     - name: Build the devcontainer image
       timeout-minutes: 15
