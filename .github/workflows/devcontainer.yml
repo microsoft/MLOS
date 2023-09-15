@@ -31,7 +31,8 @@ jobs:
       id: get-commit-messages
       run: |
         # Only look at the last 10 commits, to avoid getting too much data.
-        git log --format="%B" -10 ${{ github.event.before }}..${{ github.event.after }} > /tmp/commit_messages.txt
+        git fetch --deepen=50
+        git log --format="%B" -10 ${{ github.event.before }}..${{ github.event.after }} > /tmp/commit_messages.txt || true
         echo "COMMIT_MESSAGES=$(cat /tmp/commit_messages.txt)" >> $GITHUB_OUTPUT
 
     - name: Set NO_CACHE variable based on commit messages and for nightly builds
