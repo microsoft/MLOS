@@ -29,7 +29,7 @@ jobs:
 
     - name: Get commit messages
       id: get-commit-messages
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'push'
       run: |
         # Only look at the last 10 commits, to avoid getting too much data.
         # If the message wasn't in there (e.g. because the push was a merge and too large), then we just ignore it.
