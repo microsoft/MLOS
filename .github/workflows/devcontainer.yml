@@ -47,6 +47,7 @@ jobs:
         set -x
         printenv
         echo "NO_CACHE: ${NO_CACHE:-}"
+        echo "EVENT_NAME: ${{ github.event_name }}"
         echo "COMMIT_MESSAGES: ${{ steps.get-commit-messages.outputs.COMMIT_MESSAGES }}"
         echo "COMMIT_SHA: ${{ github.sha }}"
         echo "git log -1 ${{ github.sha }}: $(git log -1 ${{ github.sha }})"
