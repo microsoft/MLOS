@@ -29,12 +29,13 @@ jobs:
 
     - name: Get commit messages
       id: get-commit-messages
+      if: github.event_name == 'pull_request'
       run: |
         # Only look at the last 10 commits, to avoid getting too much data.
         # If the message wasn't in there (e.g. because the push was a merge and too large), then we just ignore it.
         git fetch --deepen=10
-        git log --format="%B" -10 ${{ github.event.before }}..${{ github.event.after }} > /tmp/commit_messages.txt || true
-        echo "COMMIT_MESSAGES=$(cat /tmp/commit_messages.txt)" >> $GITHUB_OUTPUT
+        COMMIT_MESSAGES=$(git log --format="%B" -10 ${{ github.event.before }}..${{ github.event.after }} | tee /tmp/commit_messages.txt)
+        echo "COMMIT_MESSAGES=$COMMIT_MESSAGES" >> $GITHUB_OUTPUT
 
     - name: Set NO_CACHE variable based on commit messages and for nightly builds
       if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true')
