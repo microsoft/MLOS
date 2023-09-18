@@ -58,14 +58,14 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
     async def _run_cmd(self, params: dict, script: Iterable[str], env_params: dict) -> SSHCompletedProcess:
         """
-        Runs a command on a host via SSH.
+        Runs a command asynchronously on a host via SSH.
 
         Parameters
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of parameters (used for establishing the connection).
         cmd : str
-            Command to run.
+            Command(s) to run via shell.
 
         Returns
         -------
