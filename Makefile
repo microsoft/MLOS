@@ -9,6 +9,8 @@ ENV_YML := conda-envs/${CONDA_ENV_NAME}.yml
 PYTHON_FILES := $(shell find ./ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./((mlos_core|mlos_bench)/)?build/' -e '^./doc/source/')
 MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_core/build/')
 MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
+SCRIPT_FILES := $(shell find ./ -name '*.sh' -or -name '*.ps1' -or -name '*.cmd')
+SQL_FILES := $(shell find ./ -name '*.sql')
 
 DOCKER := $(shell which docker)
 # Make sure the build directory exists.
@@ -70,9 +72,9 @@ build/pydocstyle.%.${CONDA_ENV_NAME}.build-stamp: build/conda-env.${CONDA_ENV_NA
 .PHONY: licenseheaders
 licenseheaders: build/licenseheaders.${CONDA_ENV_NAME}.build-stamp
 
-build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) doc/mit-license.tmpl
+build/licenseheaders.${CONDA_ENV_NAME}.build-stamp: $(PYTHON_FILES) $(SCRIPT_FILES) $(SQL_FILES) doc/mit-license.tmpl
 	# Note: to avoid makefile dependency loops, we don't touch the setup.py files as that would force the conda-env to be rebuilt.
-	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 -x mlos_bench/setup.py mlos_core/setup.py
+	conda run -n ${CONDA_ENV_NAME} licenseheaders -t doc/mit-license.tmpl -E .py .sh .ps1 .sql .cmd -x mlos_bench/setup.py mlos_core/setup.py
 	touch $@
 
 .PHONY: cspell
