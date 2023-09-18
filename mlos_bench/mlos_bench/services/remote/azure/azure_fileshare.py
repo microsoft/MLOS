@@ -64,8 +64,8 @@ class AzureFileShareService(FileShareService):
             credential=self.config["storageAccountKey"],
         )
 
-    def download(self, remote_path: str, local_path: str, recursive: bool = True) -> None:
-        super().download(remote_path, local_path, recursive)
+    def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
+        super().download(params, remote_path, local_path, recursive)
         dir_client = self._share_client.get_directory_client(remote_path)
         if dir_client.exists():
             os.makedirs(local_path, exist_ok=True)
@@ -74,7 +74,7 @@ class AzureFileShareService(FileShareService):
                 local_target = f"{local_path}/{name}"
                 remote_target = f"{remote_path}/{name}"
                 if recursive or not content["is_directory"]:
-                    self.download(remote_target, local_target, recursive)
+                    self.download(params, remote_target, local_target, recursive)
         else:  # Must be a file
             # Ensure parent folders exist
             folder, _ = os.path.split(local_path)
@@ -89,8 +89,8 @@ class AzureFileShareService(FileShareService):
                 # Translate into non-Azure exception:
                 raise FileNotFoundError("Cannot download: {remote_path}") from ex
 
-    def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
-        super().upload(local_path, remote_path, recursive)
+    def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
+        super().upload(params, local_path, remote_path, recursive)
         self._upload(local_path, remote_path, recursive, set())
 
     def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: Set[str]) -> None:
