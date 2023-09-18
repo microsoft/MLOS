@@ -27,8 +27,17 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set NO_CACHE variable for nightly builds
-      if: github.event_name == 'schedule'
+    - name: Get commit messages
+      id: get-commit-messages
+      run: |
+        # Only look at the last 10 commits, to avoid getting too much data.
+        # If the message wasn't in there (e.g. because the push was a merge and too large), then we just ignore it.
+        git fetch --deepen=10
+        git log --format="%B" -10 ${{ github.event.before }}..${{ github.event.after }} > /tmp/commit_messages.txt || true
+        echo "COMMIT_MESSAGES=$(cat /tmp/commit_messages.txt)" >> $GITHUB_OUTPUT
+
+    - name: Set NO_CACHE variable based on commit messages and for nightly builds
+      if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true')
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
@@ -37,6 +46,11 @@ jobs:
         set -x
         printenv
         echo "NO_CACHE: ${NO_CACHE:-}"
+        echo "COMMIT_MESSAGES: ${{ steps.get-commit-messages.outputs.COMMIT_MESSAGES }}"
+        echo "COMMIT_SHA: ${{ github.sha }}"
+        echo "git log -1 ${{ github.sha }}: $(git log -1 ${{ github.sha }})"
+        # Output the full event json for debugging.
+        # cat ${{ github.event_path }}
 
     - name: Build the devcontainer image
       timeout-minutes: 15
@@ -65,6 +79,7 @@ jobs:
         docker exec --user root mlos-devcontainer chown -R vscode:vscode /home/vscode
         docker exec --user root mlos-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
         docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
+        docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/envs/mlos
 
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
