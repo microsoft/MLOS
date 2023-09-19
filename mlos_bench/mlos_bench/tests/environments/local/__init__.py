@@ -40,6 +40,7 @@ def create_local_env(tunable_groups: TunableGroups, config: Dict[str, Any]) -> L
 
 
 def create_composite_local_env(tunable_groups: TunableGroups,
+                               params: Dict[str, Any],
                                local_configs: List[Dict[str, Any]]) -> CompositeEnv:
     """
     Create a CompositeEnv with several LocalEnv instances.
@@ -48,6 +49,8 @@ def create_composite_local_env(tunable_groups: TunableGroups,
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
+    params: Dict[str, Any]
+        Additional config params for the CompositeEnv.
     local_configs: List[Dict[str, Any]]
         Configurations of the local environments.
 
@@ -59,6 +62,7 @@ def create_composite_local_env(tunable_groups: TunableGroups,
     return CompositeEnv(
         name="TestCompositeEnv",
         config={
+            **params,
             "children": [
                 {
                     "name": f"TestLocalEnv{i}",
