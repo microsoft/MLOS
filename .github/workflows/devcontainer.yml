@@ -7,7 +7,7 @@ on:
         description: Manual MLOS DevContainer run aux info tags
       NO_CACHE:
         type: boolean
-        description: Whether to disable caching
+        description: Disable caching?
         default: false
         required: false
   push:
