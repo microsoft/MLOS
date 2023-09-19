@@ -33,8 +33,8 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
                 f"echo {time_str1},cpu_load,0.64 >> telemetry.csv",
                 f"echo {time_str1},mem_usage,5120 >> telemetry.csv",
             ],
-            "read_results_file": "output1.csv",
-            "read_telemetry_file": "telemetry1.csv",
+            "read_results_file": "output.csv",
+            "read_telemetry_file": "telemetry.csv",
         },
         {
             "run": [
