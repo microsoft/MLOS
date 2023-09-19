@@ -57,6 +57,7 @@ jobs:
         echo "COMMIT_MESSAGES: ${{ steps.get-commit-messages.outputs.COMMIT_MESSAGES }}"
         echo "COMMIT_SHA: ${{ github.sha }}"
         echo "git log -1 ${{ github.sha }}: $(git log -1 ${{ github.sha }})"
+        echo "manual trigger event tags: ${{ github.event.inputs.tags }}"
         # Output the full event json for debugging.
         # cat ${{ github.event_path }}
 
