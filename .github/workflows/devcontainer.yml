@@ -47,7 +47,7 @@ jobs:
         } >> $GITHUB_OUTPUT
 
     - name: Set NO_CACHE variable based on commit messages and for nightly builds
-      if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true') || github.event.inputs.NO_CACHE == true
+      if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true') || github.event.inputs.NO_CACHE == 'true'
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
