@@ -4,7 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: Manual MLOS DevContainer run
+        description: Manual MLOS DevContainer run aux info tags
+      NO_CACHE:
+        type: boolean
+        description: Whether to disable caching
+        default: false
+        required: false
   push:
     branches: [ main ]
   pull_request:
@@ -42,7 +47,7 @@ jobs:
         } >> $GITHUB_OUTPUT
 
     - name: Set NO_CACHE variable based on commit messages and for nightly builds
-      if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true')
+      if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true') || github.event.inputs.NO_CACHE == true
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
@@ -57,7 +62,8 @@ jobs:
         echo "COMMIT_MESSAGES: ${{ steps.get-commit-messages.outputs.COMMIT_MESSAGES }}"
         echo "COMMIT_SHA: ${{ github.sha }}"
         echo "git log -1 ${{ github.sha }}: $(git log -1 ${{ github.sha }})"
-        echo "manual trigger event tags: ${{ github.event.inputs.tags }}"
+        echo "Manual Trigger Input Tags: ${{ github.event.inputs.tags }}"
+        echo "Manual Trigger Input NO_CACHE: ${{ github.event.inputs.NO_CACHE }}"
         # Output the full event json for debugging.
         # cat ${{ github.event_path }}
 
