@@ -7,11 +7,11 @@ A collection functions for interacting with SSH servers as file shares.
 """
 
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 import logging
 
-from asyncssh import scp, SFTPError
+from asyncssh import scp, SFTPError, SSHClientConnection
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
@@ -38,6 +38,7 @@ class SshFileShareService(FileShareService, SshService):
     async def _start_file_copy(self, params: dict, mode: CopyMode,
                                local_path: str, remote_path: str,
                                recursive: bool = True) -> None:
+        # pylint: disable=too-many-arguments
         """
         Starts a file copy operation
 
@@ -62,12 +63,17 @@ class SshFileShareService(FileShareService, SshService):
             If the remote OS returns an error.
         """
         connection, _ = await self._get_client_connection(params)
+        srcpaths: Union[str, Tuple[SSHClientConnection, str]]
+        dstpath: Union[str, Tuple[SSHClientConnection, str]]
         if mode == CopyMode.DOWNLOAD:
-            return await scp(srcpaths=(connection, remote_path), dstpath=local_path, recurse=recursive, preserve=True)
+            srcpaths = (connection, remote_path)
+            dstpath = local_path
         elif mode == CopyMode.UPLOAD:
-            return await scp(srcpaths=local_path, dstpath=(connection, remote_path), recurse=recursive, preserve=True)
+            srcpaths = local_path
+            dstpath = (connection, remote_path)
         else:
             raise ValueError(f"Unknown copy mode: {mode}")
+        return await scp(srcpaths=srcpaths, dstpath=dstpath, recurse=recursive, preserve=True)
 
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
         super().download(params, remote_path, local_path, recursive)

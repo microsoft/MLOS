@@ -1,3 +1,4 @@
+name: mlos_bench-test-ssh-server
 services:
   ssh-server:
     attach: false
@@ -8,6 +9,7 @@ services:
         - PORT=${PORT:-2254}
       tags:
         - mlos_bench-test-ssh-server:latest
+    image: mlos_bench-test-ssh-server:latest
     ports:
       - ${PORT:-2254}:${PORT:-2254}
     extra_hosts:

@@ -171,11 +171,11 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             ]
         )
         cmd_opts = ' '.join([f"'{cmd}'" for cmd in cmd_opts_list])
-        script = r"if [[ $EUID -ne 0 ]]; then sudo=$(command -v sudo -n); sudo=${sudo:+$sudo -n}; fi; " \
+        script = r"if [[ $EUID -ne 0 ]]; then sudo=$(command -v sudo); sudo=${sudo:+$sudo -n}; fi; " \
             + f"for cmd in {cmd_opts}; do " \
             + r"  $sudo $cmd && exit 0;" \
             + r"done;" \
-            + r"echo 'ERROR: Failed to shutdown system.'; exit 1"
+            + r"echo 'ERROR: Failed to shutdown/reboot the system.'; exit 1"
         return self.remote_exec(script, config, env_params={})
 
     def shutdown(self, params: dict, force: bool = False) -> Tuple[Status, dict]:

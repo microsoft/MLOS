@@ -16,6 +16,9 @@ import sys
 import pytest
 from pytest_docker.plugin import Services as DockerServices
 
+from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
+from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
+
 from mlos_bench.tests import check_socket, resolve_host_name
 from mlos_bench.tests.services.remote.ssh import SSH_TEST_SERVER_PORT, SshTestServerInfo
 
@@ -72,3 +75,23 @@ def ssh_test_server(ssh_test_server_hostname: str,
             username=username,
             id_rsa_path=id_rsa_file.name)
         # NamedTempFile deleted on context exit
+
+
+@pytest.fixture
+def ssh_host_service() -> SshHostService:
+    """Generic SshHostService fixture."""
+    return SshHostService(
+        config={},
+        global_config={},
+        parent=None,
+    )
+
+
+@pytest.fixture
+def ssh_fileshare_service() -> SshFileShareService:
+    """Generic SshFileShareService fixture."""
+    return SshFileShareService(
+        config={},
+        global_config={},
+        parent=None,
+    )
