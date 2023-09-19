@@ -10,7 +10,7 @@ import sys
 import pytest
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.tests.environments.local import create_local_env, check_local_env_success
+from mlos_bench.tests.environments.local import create_local_env, check_env_success
 
 
 def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: dict) -> None:
@@ -34,7 +34,7 @@ def _run_local_env(tunable_groups: TunableGroups, shell_subcmd: str, expected: d
         "read_results_file": "output.csv",
     })
 
-    check_local_env_success(local_env, tunable_groups, expected, [])
+    check_env_success(local_env, tunable_groups, expected, [])
 
 
 @pytest.mark.skipif(sys.platform == 'win32', reason="sh-like shell only")

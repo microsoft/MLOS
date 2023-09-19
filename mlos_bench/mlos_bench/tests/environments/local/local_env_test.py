@@ -8,7 +8,7 @@ Unit tests for LocalEnv benchmark environment.
 import pytest
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.tests.environments.local import create_local_env, check_local_env_success
+from mlos_bench.tests.environments.local import create_local_env, check_env_success
 
 
 def test_local_env(tunable_groups: TunableGroups) -> None:
@@ -25,7 +25,7 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
         "read_results_file": "output.csv",
     })
 
-    check_local_env_success(
+    check_env_success(
         local_env, tunable_groups,
         expected_results={
             "latency": 10.0,
@@ -68,7 +68,7 @@ def test_local_env_wide(tunable_groups: TunableGroups) -> None:
         "read_results_file": "output.csv",
     })
 
-    check_local_env_success(
+    check_env_success(
         local_env, tunable_groups,
         expected_results={
             "latency": 10,
