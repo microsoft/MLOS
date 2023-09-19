@@ -18,7 +18,7 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
     """
     ts1 = datetime.utcnow()
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
-    ts2 = ts1 + timedelta(minutes=1)
+    ts2 = ts1 + timedelta(minutes=2)
 
     time_str1 = ts1.strftime("%Y-%m-%d %H:%M:%S")
     time_str2 = ts2.strftime("%Y-%m-%d %H:%M:%S")
