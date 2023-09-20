@@ -40,6 +40,7 @@ def create_local_env(tunable_groups: TunableGroups, config: Dict[str, Any]) -> L
 
 
 def create_composite_local_env(tunable_groups: TunableGroups,
+                               global_config: Dict[str, Any],
                                params: Dict[str, Any],
                                local_configs: List[Dict[str, Any]]) -> CompositeEnv:
     """
@@ -49,6 +50,8 @@ def create_composite_local_env(tunable_groups: TunableGroups,
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
+    global_config : Dict[str, Any]
+        Global configuration parameters.
     params: Dict[str, Any]
         Additional config params for the CompositeEnv.
     local_configs: List[Dict[str, Any]]
@@ -73,6 +76,7 @@ def create_composite_local_env(tunable_groups: TunableGroups,
             ]
         },
         tunables=tunable_groups,
+        global_config=global_config,
         service=LocalExecService(parent=ConfigPersistenceService()),
     )
 

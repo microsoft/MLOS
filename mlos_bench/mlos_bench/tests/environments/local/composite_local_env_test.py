@@ -27,7 +27,11 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
     (var_prefix, var_suffix) = ("%", "%") if sys.platform == 'win32' else ("$", "")
 
     env = create_composite_local_env(
-        tunable_groups,
+        tunable_groups=tunable_groups,
+        global_config={
+            "reads": 2222,
+            "writes": 1111,
+        },
         params={
             "const_args": {
                 "latency": 4.2,
@@ -38,14 +42,19 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
         local_configs=[
             {
                 "const_args": {
-                    "latency": 3.3,  # Overridden by the composite env
+                    "latency": 3.3,
                 },
-                "required_args": ["errors"],
-                "shell_env_params": ["latency", "errors"],
+                "required_args": ["errors", "reads"],
+                "shell_env_params": [
+                    "latency",  # const_args overridden by the composite env
+                    "errors",   # Comes from the composite env const_args
+                    "reads"     # Comes straight from the global config
+                ],
                 "run": [
                     "echo 'metric,value' > output.csv",
                     f"echo 'latency,{var_prefix}latency{var_suffix}' >> output.csv",
                     f"echo 'errors,{var_prefix}errors{var_suffix}' >> output.csv",
+                    f"echo 'reads,{var_prefix}reads{var_suffix}' >> output.csv",
                     "echo '-------------------'",  # This output does not go anywhere
                     "echo 'timestamp,metric,value' > telemetry.csv",
                     f"echo {time_str1},cpu_load,0.64 >> telemetry.csv",
@@ -56,14 +65,20 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
             },
             {
                 "const_args": {
-                    "throughput": 999,  # Overridden by the composite env
-                    "score": 0.97,  # Not overridden
+                    "throughput": 999,
+                    "score": 0.97,
                 },
-                "shell_env_params": ["throughput", "score"],
+                "required_args": ["writes"],
+                "shell_env_params": [
+                    "throughput",   # const_args overridden by the composite env
+                    "score",        # Comes from the local const_args
+                    "writes"        # Comes straight from the global config
+                ],
                 "run": [
                     "echo 'metric,value' > output.csv",
                     f"echo 'throughput,{var_prefix}throughput{var_suffix}' >> output.csv",
                     f"echo 'score,{var_prefix}score{var_suffix}' >> output.csv",
+                    f"echo 'writes,{var_prefix}writes{var_suffix}' >> output.csv",
                     "echo '-------------------'",  # This output does not go anywhere
                     "echo 'timestamp,metric,value' > telemetry.csv",
                     f"echo {time_str2},cpu_load,0.79 >> telemetry.csv",
@@ -82,6 +97,8 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
             "throughput": 768.0,
             "score": 0.97,
             "errors": 0.0,
+            "reads": 2222.0,
+            "writes": 1111.0,
         },
         expected_telemetry=[
             (ts1, "cpu_load", 0.64),
