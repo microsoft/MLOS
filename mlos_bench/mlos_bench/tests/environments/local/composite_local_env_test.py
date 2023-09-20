@@ -43,12 +43,13 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
             {
                 "const_args": {
                     "latency": 3.3,
+                    "reads": 0,
                 },
                 "required_args": ["errors", "reads"],
                 "shell_env_params": [
                     "latency",  # const_args overridden by the composite env
-                    "errors",   # Comes from the composite env const_args
-                    "reads"     # Comes straight from the global config
+                    "errors",   # Comes from the parent const_args
+                    "reads"     # const_args overridden by the global config
                 ],
                 "run": [
                     "echo 'metric,value' > output.csv",
