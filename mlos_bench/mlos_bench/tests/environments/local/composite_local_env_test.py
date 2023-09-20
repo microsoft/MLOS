@@ -16,6 +16,10 @@ def test_composite_env(tunable_groups: TunableGroups) -> None:
     """
     Produce benchmark and telemetry data in TWO local environments
     and combine the results.
+    Also checks that global configs flow down at least one level of CompositeEnv
+    to its children without being explicitly specified in the CompositeEnv so they
+    can be used in the shell_envs by its children.
+    See Also: http://github.com/microsoft/MLOS/issues/501
     """
     ts1 = datetime.utcnow()
     ts1 -= timedelta(microseconds=ts1.microsecond)  # Round to a second
