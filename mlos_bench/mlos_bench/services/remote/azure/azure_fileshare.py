@@ -87,7 +87,7 @@ class AzureFileShareService(FileShareService):
                     data.readinto(output_file)  # type: ignore[no-untyped-call]
             except ResourceNotFoundError as ex:
                 # Translate into non-Azure exception:
-                raise FileNotFoundError("Cannot download: {remote_path}") from ex
+                raise FileNotFoundError(f"Cannot download: {remote_path}") from ex
 
     def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
         super().upload(params, local_path, remote_path, recursive)

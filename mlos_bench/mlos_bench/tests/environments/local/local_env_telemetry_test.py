@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.tests.environments.local import (
-    create_local_env, check_local_env_success, check_local_env_fail_telemetry
+    create_local_env, check_env_success, check_env_fail_telemetry
 )
 
 
@@ -41,7 +41,7 @@ def test_local_env_telemetry(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    check_local_env_success(
+    check_env_success(
         local_env, tunable_groups,
         expected_results={
             "latency": 4.1,
@@ -78,7 +78,7 @@ def test_local_env_telemetry_no_header(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    check_local_env_success(
+    check_env_success(
         local_env, tunable_groups,
         expected_results={},
         expected_telemetry=[
@@ -113,7 +113,7 @@ def test_local_env_telemetry_wrong_header(tunable_groups: TunableGroups) -> None
         "read_telemetry_file": "telemetry.csv",
     })
 
-    check_local_env_fail_telemetry(local_env, tunable_groups)
+    check_env_fail_telemetry(local_env, tunable_groups)
 
 
 def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
@@ -138,7 +138,7 @@ def test_local_env_telemetry_invalid(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    check_local_env_fail_telemetry(local_env, tunable_groups)
+    check_env_fail_telemetry(local_env, tunable_groups)
 
 
 def test_local_env_telemetry_invalid_ts(tunable_groups: TunableGroups) -> None:
@@ -156,4 +156,4 @@ def test_local_env_telemetry_invalid_ts(tunable_groups: TunableGroups) -> None:
         "read_telemetry_file": "telemetry.csv",
     })
 
-    check_local_env_fail_telemetry(local_env, tunable_groups)
+    check_env_fail_telemetry(local_env, tunable_groups)

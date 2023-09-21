@@ -11,6 +11,8 @@ from typing import Any, Dict, List, Tuple
 
 import pytest
 
+from mlos_bench.environments.base_environment import Environment
+from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.environments.local.local_env import LocalEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
@@ -30,17 +32,59 @@ def create_local_env(tunable_groups: TunableGroups, config: Dict[str, Any]) -> L
 
     Returns
     -------
-    local_env : LocalEnv
+    env : LocalEnv
         A new instance of the local environment.
     """
     return LocalEnv(name="TestLocalEnv", config=config, tunables=tunable_groups,
                     service=LocalExecService(parent=ConfigPersistenceService()))
 
 
-def check_local_env_success(local_env: LocalEnv,
-                            tunable_groups: TunableGroups,
-                            expected_results: Dict[str, float],
-                            expected_telemetry: List[Tuple[datetime, str, Any]]) -> None:
+def create_composite_local_env(tunable_groups: TunableGroups,
+                               global_config: Dict[str, Any],
+                               params: Dict[str, Any],
+                               local_configs: List[Dict[str, Any]]) -> CompositeEnv:
+    """
+    Create a CompositeEnv with several LocalEnv instances.
+
+    Parameters
+    ----------
+    tunable_groups : TunableGroups
+        Tunable parameters (usually come from a fixture).
+    global_config : Dict[str, Any]
+        Global configuration parameters.
+    params: Dict[str, Any]
+        Additional config params for the CompositeEnv.
+    local_configs: List[Dict[str, Any]]
+        Configurations of the local environments.
+
+    Returns
+    -------
+    env : CompositeEnv
+        A new instance of the local environment.
+    """
+    return CompositeEnv(
+        name="TestCompositeEnv",
+        config={
+            **params,
+            "children": [
+                {
+                    "name": f"TestLocalEnv{i}",
+                    "class": "mlos_bench.environments.local.local_env.LocalEnv",
+                    "config": config,
+                }
+                for (i, config) in enumerate(local_configs)
+            ]
+        },
+        tunables=tunable_groups,
+        global_config=global_config,
+        service=LocalExecService(parent=ConfigPersistenceService()),
+    )
+
+
+def check_env_success(env: Environment,
+                      tunable_groups: TunableGroups,
+                      expected_results: Dict[str, float],
+                      expected_telemetry: List[Tuple[datetime, str, Any]]) -> None:
     """
     Set up a local environment and run a test experiment there.
 
@@ -48,14 +92,14 @@ def check_local_env_success(local_env: LocalEnv,
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
-    local_env : LocalEnv
-        A local environment to query for the results.
+    env : Environment
+        An environment to query for the results.
     expected_results : Dict[str, float]
         Expected results of the benchmark.
     expected_telemetry : List[Tuple[datetime, str, Any]]
         Expected telemetry data of the benchmark.
     """
-    with local_env as env_context:
+    with env as env_context:
 
         assert env_context.setup(tunable_groups)
 
@@ -68,7 +112,7 @@ def check_local_env_success(local_env: LocalEnv,
         assert telemetry == pytest.approx(expected_telemetry, nan_ok=True)
 
 
-def check_local_env_fail_telemetry(local_env: LocalEnv, tunable_groups: TunableGroups) -> None:
+def check_env_fail_telemetry(env: Environment, tunable_groups: TunableGroups) -> None:
     """
     Set up a local environment and run a test experiment there;
     Make sure the environment `.status()` call fails.
@@ -77,10 +121,10 @@ def check_local_env_fail_telemetry(local_env: LocalEnv, tunable_groups: TunableG
     ----------
     tunable_groups : TunableGroups
         Tunable parameters (usually come from a fixture).
-    local_env : LocalEnv
-        A local environment to query for the results.
+    env : Environment
+        An environment to query for the results.
     """
-    with local_env as env_context:
+    with env as env_context:
 
         assert env_context.setup(tunable_groups)
         (status, _data) = env_context.run()
