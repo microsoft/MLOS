@@ -22,4 +22,7 @@ docker compose -p "$PROJECT_NAME" up --remove-orphans
 docker compose -p "$PROJECT_NAME" exec ssh-server service ssh start
 docker compose -p "$PROJECT_NAME" cp ssh-server:/root/.ssh/id_rsa ./id_rsa
 chmod 0600 ./id_rsa
-echo "OK"
+set +x
+
+echo "OK: private key available at '$scriptdir/id_rsa'. Connect at the following {host:port}:"
+docker compose -p "$PROJECT_NAME" port ssh-server ${PORT:-2254}

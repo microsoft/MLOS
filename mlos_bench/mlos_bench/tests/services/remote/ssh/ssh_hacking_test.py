@@ -24,7 +24,7 @@ import pytest
 from asyncssh import SSHCompletedProcess, SSHClient, SSHClientConnection, ProcessError, ConnectionLost, DisconnectError
 import asyncssh
 
-from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, SSH_TEST_SERVER_PORT
+from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, SSH_TEST_SERVER_NAME, SSH_TEST_SERVER_PORT
 
 
 _LOG = logging.getLogger(__name__)
@@ -200,9 +200,13 @@ def background_event_loop_thread(event_loop: AbstractEventLoop) -> None:
 def start_ssh_test_server() -> SshTestServerInfo:
     """Starts an ssh server in a docker container."""
     run("./up.sh", cwd=SCRIPT_DIR, check=True)
+    cmd_result = run(f"docker compose -p 'mlos_bench-test-manual' port {SSH_TEST_SERVER_NAME} {SSH_TEST_SERVER_PORT}",
+                     check=True, shell=True, capture_output=True)
+    host, port = cmd_result.stdout.decode().strip().split(":")
+    assert host == '0.0.0.0'
     return SshTestServerInfo(
         hostname='host.docker.internal',
-        port=SSH_TEST_SERVER_PORT,
+        port=int(port),
         username='root',
         id_rsa_path=os.path.join(SCRIPT_DIR, 'id_rsa'),
     )
@@ -217,6 +221,8 @@ def ssh_test_server() -> Generator[SshTestServerInfo, None, None]:
     # run("./down.sh", cwd=SCRIPT_DIR, check=True)
 
 
+# NOTE: Set SSH_HACKING_TEST=true to enable this test.
+# e.g., in the .env file in the devcontainer.
 @pytest.mark.skipif(not strtobool(os.getenv("SSH_HACKING_TEST", "false")), reason="SSH_HACKING_TEST not enabled")
 def test_ssh_hacking(ssh_test_server: SshTestServerInfo) -> None:  # pylint: disable=redefined-outer-name
     """test ssh async funcs"""
@@ -244,9 +250,9 @@ def test_ssh_hacking(ssh_test_server: SshTestServerInfo) -> None:  # pylint: dis
         _LOG.warning("connection: %s", connection)
         _LOG.warning("client: %s", client)
 
-    MAX_CMDs = 8
+    max_cmds = 8
     cmd_futures: List[Future[SSHCompletedProcess]] = []
-    for i in range(0, MAX_CMDs):
+    for i in range(0, max_cmds):
         cmd = r'date +%s.%N; sleep 1; printenv'
         test_ssh_disconnected = True
         if i == 2 and test_ssh_disconnected:
@@ -263,7 +269,7 @@ def test_ssh_hacking(ssh_test_server: SshTestServerInfo) -> None:  # pylint: dis
                     i=i),
                 event_loop))
 
-    for i in range(0, MAX_CMDs):
+    for i in range(0, max_cmds):
         result = cmd_futures[i].result()
         _LOG.warning("%d: result[%s, %s]:\nstdout:\n%s\nstderr:\n%s",
                      i, result.returncode, result.exit_status, result.stdout, result.stderr)
