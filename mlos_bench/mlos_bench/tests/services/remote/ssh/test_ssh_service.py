@@ -16,7 +16,7 @@ from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 
 from mlos_bench.tests import requires_docker, requires_ssh, check_socket, resolve_host_name
-from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
+from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, SSH_TEST_SERVER_NAME
 
 
 @requires_docker
@@ -34,7 +34,7 @@ def test_ssh_service_test_infra(ssh_test_server: SshTestServerInfo) -> None:
               capture_output=True,
               text=True,
               check=True)
-    assert cmd.stdout.strip() == 'ssh-server'
+    assert cmd.stdout.strip() == SSH_TEST_SERVER_NAME
 
 
 def test_ssh_service_background_thread() -> None:
