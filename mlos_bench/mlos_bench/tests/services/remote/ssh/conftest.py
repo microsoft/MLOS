@@ -20,7 +20,10 @@ from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 
 from mlos_bench.tests import check_socket, resolve_host_name
-from mlos_bench.tests.services.remote.ssh import SSH_TEST_SERVER_NAME, SSH_TEST_SERVER_PORT, SshTestServerInfo
+from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
+                                                  ALT_TEST_SERVER_NAME,
+                                                  SSH_TEST_SERVER_NAME,
+                                                  SSH_TEST_SERVER_PORT)
 
 # pylint: disable=redefined-outer-name
 
@@ -54,7 +57,6 @@ def ssh_test_server(ssh_test_server_hostname: str,
     temporary file holding the dynamically generated private key of the test
     server is deleted.
     """
-    # else ...
     local_port = docker_services.port_for(SSH_TEST_SERVER_NAME, SSH_TEST_SERVER_PORT)
     docker_services.wait_until_responsive(
         check=lambda: check_socket(ssh_test_server_hostname, local_port),
@@ -76,6 +78,30 @@ def ssh_test_server(ssh_test_server_hostname: str,
             username=username,
             id_rsa_path=id_rsa_file.name)
         # NamedTempFile deleted on context exit
+
+
+@pytest.fixture(scope="session")
+def alt_test_server(ssh_test_server: SshTestServerInfo,
+                    docker_services: DockerServices) -> SshTestServerInfo:
+    """
+    Fixture for getting the second ssh test server info from the docker-compose.yml.
+    See additional notes in the ssh_test_server fixture above.
+    """
+    # Note: The alt-server uses the same image as the ssh-server container, so
+    # the id_rsa key and username should all match.
+    # Only the host port it is allocate is different.
+    alt_local_port = docker_services.port_for(ALT_TEST_SERVER_NAME, SSH_TEST_SERVER_PORT)
+    docker_services.wait_until_responsive(
+        check=lambda: check_socket(ssh_test_server.hostname, alt_local_port),
+        timeout=30.0,
+        pause=0.5,
+    )
+    return SshTestServerInfo(
+        hostname=ssh_test_server.hostname,
+        port=alt_local_port,
+        username=ssh_test_server.username,
+        id_rsa_path=ssh_test_server.id_rsa_path)
+    # NamedTempFile deleted on context exit
 
 
 @pytest.fixture

@@ -22,6 +22,20 @@ services:
     environment:
       # Let the environment variable TIMEOUT override the default.
       - TIMEOUT=${TIMEOUT:-180}
+  # Also start a second server for testing multiple instances.
+  alt-server:
+    depends_on:
+      - ssh-server
+    hostname: alt-server
+    attach: false
+    image: mlos_bench-test-ssh-server:latest
+    ports:
+      - ${PORT:-2254}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      # Let the environment variable TIMEOUT override the default.
+      - TIMEOUT=${TIMEOUT:-180}
   # Check that we can connect to the server from the client.
   ssh-client:
     depends_on:
