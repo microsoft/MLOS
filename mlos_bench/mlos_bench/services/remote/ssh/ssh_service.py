@@ -60,7 +60,7 @@ class SshClient(asyncssh.SSHClient):
     @staticmethod
     def id_from_params(connect_params: dict) -> str:
         """Gets a unique id repr for the connection."""
-        return f"{connect_params['username']}@{connect_params['host']}:{connect_params['port']}"
+        return f"{connect_params.get('username')}@{connect_params['host']}:{connect_params.get('port')}"
 
     def connection_made(self, conn: SSHClientConnection) -> None:
         """
@@ -197,44 +197,46 @@ class SshService(Service, metaclass=ABCMeta):
 
     def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
         # pylint: disable=too-complex
+
+        # Make sure that the value we allow overriding on a per-connection
+        # basis are present in the config so merge_parameters can do its thing.
+        config.setdefault('ssh_port', None)
+        assert isinstance(config['ssh_port'], (int, type(None)))
+        config.setdefault('ssh_username', None)
+        assert isinstance(config['ssh_username'], (str, type(None)))
+        config.setdefault('ssh_priv_key_path', None)
+        assert isinstance(config['ssh_priv_key_path'], (str, type(None)))
+
         super().__init__(config, global_config, parent)
 
         # None can be used to disable the request timeout.
         self._request_timeout = config.get("ssh_request_timeout", self._REQUEST_TIMEOUT)
         self._request_timeout = float(self._request_timeout) if self._request_timeout is not None else None
 
-        # Setup default connect_params dict for all SshClients we might need to create.
-
-        # Note: None is an acceptable value for several of these, in which case
-        # reasonable defaults or values from ~/.ssh/config will take effect.
-
+        # Prep an initial connect_params.
         self._connect_params: dict = {
             # In general scripted commands shouldn't need a pty and having one
             # available can confuse some commands, though we may need to make
             # this configurable in the future.
             'request_pty': False,
+            # By default disable known_hosts checking (since most VMs expected to be dynamically created).
+            'known_hosts': None,
         }
-        if 'ssh_keepalive_interval' in config:
-            keepalive_internal = config.get('ssh_keepalive_interval')
-            self._connect_params['keepalive_interval'] = int(keepalive_internal) if keepalive_internal is not None else None
-        if config.get('ssh_username'):
-            self._connect_params['username'] = str(config['ssh_username'])
-        if config.get('ssh_port'):
-            self._connect_params['port'] = int(config['ssh_port'])
-        if 'ssh_known_hosts_file' in config:
-            self._connect_params['known_hosts'] = config.get("ssh_known_hosts_file", None)
+
+        if 'ssh_known_hosts_file' in self.config:
+            self._connect_params['known_hosts'] = self.config.get("ssh_known_hosts_file", None)
             if isinstance(self._connect_params['known_hosts'], str):
                 known_hosts_file = os.path.expanduser(self._connect_params['known_hosts'])
                 if not os.path.exists(known_hosts_file):
                     raise ValueError(f"ssh_known_hosts_file {known_hosts_file} does not exist")
                 self._connect_params['known_hosts'] = known_hosts_file
-        if 'ssh_priv_key_file' in config:
-            priv_key_file = config.get("ssh_priv_key_file")
-            if priv_key_file:
-                priv_key_file = os.path.expanduser(priv_key_file)
-                if not os.path.exists(priv_key_file):
-                    raise ValueError(f"ssh_priv_key_file {priv_key_file} does not exist")
-                self._connect_params['client_keys'] = [priv_key_file]
+        if self._connect_params['known_hosts'] is None:
+            _LOG.info("%s known_hosts checking is disabled per config.", self.__class__.__name__)
+
+        if 'ssh_keepalive_interval' in self.config:
+            keepalive_internal = self.config.get('ssh_keepalive_interval')
+            self._connect_params['keepalive_interval'] = int(keepalive_internal) if keepalive_internal is not None else None
+
         # Start the background thread if it's not already running.
         with SshService._event_loop_thread_lock:
             if not SshService._event_loop_thread:
@@ -248,7 +250,7 @@ class SshService(Service, metaclass=ABCMeta):
 
     def __del__(self) -> None:
         """
-        Ensures that the event loop thread is stopped when all subservice
+        Ensures that the event loop thread is stopped when all sub-service
         instances are garbage collected.
         """
         with SshService._event_loop_thread_lock:
@@ -312,13 +314,33 @@ class SshService(Service, metaclass=ABCMeta):
         if params is None:
             params = {}
 
+        # Setup default connect_params dict for all SshClients we might need to create.
+
+        # Note: None is an acceptable value for several of these, in which case
+        # reasonable defaults or values from ~/.ssh/config will take effect.
+
         # Start with the base config params.
-        connect_params: dict = self._connect_params.copy()
-        connect_params['host'] = connect_params.pop('ssh_hostname')
-        # Allow overriding certain params on a per host basis using const_args.
-        # Converting the key names as necessary.
-        connect_params['port'] = params.pop('ssh_port', connect_params['port'])
-        connect_params['username'] = params.pop('ssh_username', connect_params['username'])
+        connect_params = self._connect_params.copy()
+
+        connect_params['host'] = params.pop('ssh_hostname')
+
+        if params.get('ssh_port'):
+            connect_params['port'] = int(params.pop('ssh_port'))
+        elif self.config['ssh_port']:
+            connect_params['port'] = int(self.config['ssh_port'])
+
+        if 'ssh_username' in params:
+            connect_params['username'] = str(params.pop('ssh_username'))
+        elif self.config['ssh_username']:
+            connect_params['username'] = str(self.config['ssh_username'])
+
+        priv_key_file: Optional[str] = params.get('ssh_priv_key_path', self.config['ssh_priv_key_path'])
+        if priv_key_file:
+            priv_key_file = os.path.expanduser(priv_key_file)
+            if not os.path.exists(priv_key_file):
+                raise ValueError(f"ssh_priv_key_path {priv_key_file} does not exist")
+            connect_params['client_keys'] = [priv_key_file]
+
         return connect_params
 
     async def _get_client_connection(self, params: Optional[dict] = None) -> Tuple[SSHClientConnection, SshClient]:

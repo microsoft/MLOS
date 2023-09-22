@@ -72,8 +72,13 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         SSHCompletedProcess
             Returns the result of the command.
         """
+        if isinstance(script, str):
+            raise ValueError("script must be an iterable of lines.")
         connection, _ = await self._get_client_connection(params)
-        return await connection.run([self._shell, '-c', '; '.join(script)],
+        # Note: passing environment variables to SSH servers is typically restricted to just some LC_* values.
+        # TODO: Handle transferring environment variables by making a script to set them.
+        script_lines = [line_split for line in script for line_split in line.splitlines()]
+        return await connection.run(';'.join(script_lines),
                                     check=False,
                                     timeout=self._request_timeout,
                                     env=env_params)
@@ -135,11 +140,13 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         try:
             result = future.result(timeout=self._request_timeout)
             assert isinstance(result, SSHCompletedProcess)
+            stdout = result.stdout.decode() if isinstance(result.stdout, bytes) else result.stdout
+            stderr = result.stderr.decode() if isinstance(result.stderr, bytes) else result.stderr
             return (
                 Status.SUCCEEDED if result.exit_status == 0 and result.returncode == 0 else Status.FAILED,
                 {
-                    "stdout": str(result.stdout),
-                    "stderr": str(result.stderr),
+                    "stdout": stdout,
+                    "stderr": stderr,
                     "ssh_completed_process_result": result,
                 },
             )

@@ -55,6 +55,7 @@
         "pyplot",
         "pytest",
         "Quickstart",
+        "refcnt",
         "rexec",
         "rootfs",
         "runhistory",

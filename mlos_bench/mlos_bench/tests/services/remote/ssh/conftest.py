@@ -105,10 +105,13 @@ def alt_test_server(ssh_test_server: SshTestServerInfo,
 
 
 @pytest.fixture
-def ssh_host_service() -> SshHostService:
+def ssh_host_service(ssh_test_server: SshTestServerInfo) -> SshHostService:
     """Generic SshHostService fixture."""
     return SshHostService(
-        config={},
+        config={
+            "ssh_username": ssh_test_server.username,
+            "ssh_priv_key_path": ssh_test_server.id_rsa_path,
+        },
         global_config={},
         parent=None,
     )
@@ -118,7 +121,9 @@ def ssh_host_service() -> SshHostService:
 def ssh_fileshare_service() -> SshFileShareService:
     """Generic SshFileShareService fixture."""
     return SshFileShareService(
-        config={},
+        config={
+            # Left blank to make sure we test per connection overrides.
+        },
         global_config={},
         parent=None,
     )
