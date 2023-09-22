@@ -6,8 +6,6 @@
 Tests for mlos_bench.services.remote.ssh.ssh_host_service
 """
 
-import time
-
 from mlos_bench.environments.status import Status
 
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService

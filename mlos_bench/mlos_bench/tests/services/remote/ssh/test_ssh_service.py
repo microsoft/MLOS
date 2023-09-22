@@ -12,7 +12,7 @@ from subprocess import run
 from threading import Thread
 
 import pytest
-from pytest_lazyfixture import lazy_fixture, LazyFixture
+from pytest_lazyfixture import lazy_fixture
 
 from mlos_bench.services.remote.ssh.ssh_service import SshService
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
