@@ -29,6 +29,7 @@ dependencies:
     - types-jsonschema
     - types-colorama
     - types-pygments
+    - types-pytest-lazy-fixture
     - types-requests
     - types-setuptools
     - "--editable ../mlos_core[full-tests]"
