@@ -11,30 +11,37 @@ import gc
 from subprocess import run
 from threading import Thread
 
+import pytest
+from pytest_lazyfixture import lazy_fixture, LazyFixture
+
 from mlos_bench.services.remote.ssh.ssh_service import SshService
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 
 from mlos_bench.tests import requires_docker, requires_ssh, check_socket, resolve_host_name
-from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, SSH_TEST_SERVER_NAME
+from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SERVER_NAME, SSH_TEST_SERVER_NAME
 
 
 @requires_docker
 @requires_ssh
-def test_ssh_service_test_infra(ssh_test_server: SshTestServerInfo) -> None:
+@pytest.mark.parametrize(["ssh_test_server_info", "server_name"], [
+    (lazy_fixture("ssh_test_server"), SSH_TEST_SERVER_NAME),
+    (lazy_fixture("alt_test_server"), ALT_TEST_SERVER_NAME),
+])
+def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_name: str) -> None:
     """Check for the pytest-docker ssh test infra."""
-    ip_addr = resolve_host_name(ssh_test_server.hostname)
+    ip_addr = resolve_host_name(ssh_test_server_info.hostname)
     assert ip_addr is not None
 
-    assert check_socket(ip_addr, ssh_test_server.port)
+    assert check_socket(ip_addr, ssh_test_server_info.port)
     ssh_cmd = "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new " \
-        + f"-l {ssh_test_server.username} -i {ssh_test_server.id_rsa_path} " \
-        + f"-p {ssh_test_server.port} {ssh_test_server.hostname} hostname"
+        + f"-l {ssh_test_server_info.username} -i {ssh_test_server_info.id_rsa_path} " \
+        + f"-p {ssh_test_server_info.port} {ssh_test_server_info.hostname} hostname"
     cmd = run(ssh_cmd.split(),
               capture_output=True,
               text=True,
               check=True)
-    assert cmd.stdout.strip() == SSH_TEST_SERVER_NAME
+    assert cmd.stdout.strip() == server_name
 
 
 def test_ssh_service_background_thread() -> None:
