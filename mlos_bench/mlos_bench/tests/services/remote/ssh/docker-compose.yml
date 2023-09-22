@@ -1,6 +1,7 @@
 name: mlos_bench-test-ssh-server
 services:
   ssh-server:
+    hostname: ssh-server
     attach: false
     build:
       context: .

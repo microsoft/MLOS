@@ -15,13 +15,14 @@ from mlos_bench.services.remote.ssh.ssh_service import SshService
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 
-from mlos_bench.tests import requires_docker, check_socket, resolve_host_name
+from mlos_bench.tests import requires_docker, requires_ssh, check_socket, resolve_host_name
 from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
 
 
 @requires_docker
+@requires_ssh
 def test_ssh_service_test_infra(ssh_test_server: SshTestServerInfo) -> None:
-    """Test the pytest-docker ssh test infra."""
+    """Check for the pytest-docker ssh test infra."""
     ip_addr = resolve_host_name(ssh_test_server.hostname)
     assert ip_addr is not None
 
