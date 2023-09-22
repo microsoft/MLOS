@@ -63,7 +63,9 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
     (status, results_info) = ssh_host_service.remote_exec(
         script=["hostname"],
         config=alt_test_server.to_ssh_service_config(),
-        env_params={},
+        env_params={
+            "UNUSED": "unused",  # unused, making sure it doesn't carry over with cached connections
+        },
     )
     assert status == Status.PENDING
     assert "asyncRemoteExecResultsFuture" in results_info
@@ -73,16 +75,20 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
 
     # Test reusing the existing connection.
     (status, results_info) = ssh_host_service.remote_exec(
-        script=["echo BAR=$BAR && false"],
+        script=["echo BAR=$BAR && echo UNUSED=$UNUSED && false"],
         config=config,
         # Also test interacting with environment_variables.
         env_params={
-            "BAR": "bar",   # unused, making sure it doesn't carry over with cached connections
+            "BAR": "bar",
         },
     )
     status, results = ssh_host_service.get_remote_exec_results(results_info)
-    assert status == Status.FAILED
-    assert results["stdout"].strip() == "BAR=bar"
+    assert status == Status.FAILED  # should retain exit code from "false"
+    stdout = str(results["stdout"])
+    assert stdout.splitlines() == [
+        "BAR=bar",
+        "UNUSED=",
+    ]
     connection, client = ssh_host_service._event_loop_thread_ssh_client_cache._cache[connection_id]
     assert connection._local_port == local_port
 
