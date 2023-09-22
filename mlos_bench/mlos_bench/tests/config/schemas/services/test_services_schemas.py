@@ -17,6 +17,7 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
+from mlos_bench.services.remote.ssh.ssh_service import SshService
 
 from mlos_bench.tests import try_resolve_class_name
 from mlos_bench.tests.config.schemas import (get_schema_test_cases,
@@ -37,6 +38,7 @@ TEST_CASES = get_schema_test_cases(path.join(path.dirname(__file__), "test-cases
 NON_CONFIG_SERVICE_CLASSES = {
     ConfigPersistenceService,   # configured thru the launcher cli args
     TempDirContextService,      # ABCMeta abstract class, but no good way to test that dynamically in Python.
+    SshService,                 # ABCMeta abstract base class
 }
 
 expected_service_class_names = [subclass.__module__ + "." + subclass.__name__
