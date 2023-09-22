@@ -3,6 +3,7 @@ services:
   ssh-server:
     hostname: ssh-server
     attach: false
+    restart: always
     build:
       context: .
       dockerfile: Dockerfile

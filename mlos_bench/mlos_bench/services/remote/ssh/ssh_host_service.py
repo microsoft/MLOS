@@ -73,11 +73,14 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             Returns the result of the command.
         """
         if isinstance(script, str):
-            raise ValueError("script must be an iterable of lines.")
+            # Script should be an iterable of lines, not an iterable string.
+            script = [script]
         connection, _ = await self._get_client_connection(params)
         # Note: passing environment variables to SSH servers is typically restricted to just some LC_* values.
         # TODO: Handle transferring environment variables by making a script to set them.
-        script_lines = [line_split for line in script for line_split in line.splitlines()]
+        env_script_lines = [f"export {name}={value}" for (name, value) in env_params.items()]
+        script_lines = env_script_lines + [line_split for line in script for line_split in line.splitlines()]
+        # Note: connection.run() uses "exec" with a shell by default.
         return await connection.run(';'.join(script_lines),
                                     check=False,
                                     timeout=self._request_timeout,
@@ -232,6 +235,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             'reboot',
             'halt --reboot',
             'systemctl reboot',
+            'kill 1',
         ]
         return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params)
 
