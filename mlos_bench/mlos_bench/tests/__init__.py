@@ -18,9 +18,11 @@ from mlos_bench.util import get_class_from_name
 
 
 # A decorator for tests that require docker.
+# Use with @requires_docker above a test_...() function.
 DOCKER = shutil.which('docker')
 requires_docker = pytest.mark.skipif(not DOCKER, reason='Docker is not available on this system.')
 # A decorator for tests that require ssh.
+# Use with @requires_ssh above a test_...() function.
 SSH = shutil.which('ssh')
 requires_ssh = pytest.mark.skipif(not SSH, reason='ssh is not available on this system.')
 
