@@ -14,8 +14,9 @@
             "type": "object",
             "properties": {},
             "required": [],
+            "minProperties": 1,
             "unevaluatedProperties": false
         }
     },
-    "required": ["class", "config"]
+    "required": ["class"]
 }

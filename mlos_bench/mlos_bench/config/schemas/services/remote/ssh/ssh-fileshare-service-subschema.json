@@ -8,7 +8,7 @@
         "class": {
             "enum": [
                 "mlos_bench.services.remote.ssh.SshFileShareService",
-                "mlos_bench.services.remote.ssh.ssh_fileshare_service.SshFileShareService"
+                "mlos_bench.services.remote.ssh.ssh_fileshare.SshFileShareService"
             ]
         },
         "config": {
