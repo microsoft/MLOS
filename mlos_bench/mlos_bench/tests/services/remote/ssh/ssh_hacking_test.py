@@ -200,13 +200,16 @@ def background_event_loop_thread(event_loop: AbstractEventLoop) -> None:
 def start_ssh_test_server() -> SshTestServerInfo:
     """Starts an ssh server in a docker container."""
     run("./up.sh", cwd=SCRIPT_DIR, check=True)
-    cmd_result = run(f"docker compose -p 'mlos_bench-test-manual' port {SSH_TEST_SERVER_NAME} {SSH_TEST_SERVER_PORT}",
+    COMPOSE_PROJECT_NAME = 'mlos_bench-test-manual'
+    cmd_result = run(f"docker compose -p {COMPOSE_PROJECT_NAME} port {SSH_TEST_SERVER_NAME} {SSH_TEST_SERVER_PORT}",
                      check=True, shell=True, capture_output=True)
     host, port = cmd_result.stdout.decode().strip().split(":")
     assert host == '0.0.0.0'
+    assert int(port)
     return SshTestServerInfo(
+        compose_project_name=COMPOSE_PROJECT_NAME,
+        service_name=SSH_TEST_SERVER_NAME,
         hostname='host.docker.internal',
-        port=int(port),
         username='root',
         id_rsa_path=os.path.join(SCRIPT_DIR, 'id_rsa'),
     )
@@ -226,6 +229,7 @@ def ssh_test_server() -> Generator[SshTestServerInfo, None, None]:
 @pytest.mark.skipif(not strtobool(os.getenv("SSH_HACKING_TEST", "false")), reason="SSH_HACKING_TEST not enabled")
 def test_ssh_hacking(ssh_test_server: SshTestServerInfo) -> None:  # pylint: disable=redefined-outer-name
     """test ssh async funcs"""
+    # pylint: disable=too-many-locals
 
     # Start an event loop thread in the background.
     event_loop = asyncio.new_event_loop()
@@ -233,9 +237,13 @@ def test_ssh_hacking(ssh_test_server: SshTestServerInfo) -> None:  # pylint: dis
     event_loop_thread.start()
     event_loop_thread_ssh_client_cache = SshClientCache()
 
+    port_cmd = run(f"docker compose -p 'mlos_bench-test-manual' port {SSH_TEST_SERVER_NAME} {SSH_TEST_SERVER_PORT}",
+                   check=True, shell=True, capture_output=True)
+    local_port = int(port_cmd.stdout.decode().strip().split(":")[1])
+
     connect_params = {
         'host': ssh_test_server.hostname,
-        'port': ssh_test_server.port,
+        'port': local_port,
         'username': ssh_test_server.username,
         'known_hosts': None,
         'client_keys': [ssh_test_server.id_rsa_path],

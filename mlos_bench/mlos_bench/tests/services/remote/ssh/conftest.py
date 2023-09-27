@@ -19,11 +19,11 @@ from pytest_docker.plugin import Services as DockerServices
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 
-from mlos_bench.tests import check_socket, resolve_host_name
+from mlos_bench.tests import resolve_host_name
 from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
                                                   ALT_TEST_SERVER_NAME,
                                                   SSH_TEST_SERVER_NAME,
-                                                  SSH_TEST_SERVER_PORT)
+                                                  wait_docker_service_socket)
 
 # pylint: disable=redefined-outer-name
 
@@ -57,26 +57,22 @@ def ssh_test_server(ssh_test_server_hostname: str,
     temporary file holding the dynamically generated private key of the test
     server is deleted.
     """
-    local_port = docker_services.port_for(SSH_TEST_SERVER_NAME, SSH_TEST_SERVER_PORT)
-    docker_services.wait_until_responsive(
-        check=lambda: check_socket(ssh_test_server_hostname, local_port),
-        timeout=30.0,
-        pause=0.5,
-    )
     # Get a copy of the ssh id_rsa key from the test ssh server.
     with tempfile.NamedTemporaryFile() as id_rsa_file:
-        username = 'root'
-        id_rsa_src = f"/{username}/.ssh/id_rsa"
+        ssh_test_server_info = SshTestServerInfo(
+            compose_project_name=docker_compose_project_name,
+            service_name=SSH_TEST_SERVER_NAME,
+            hostname=ssh_test_server_hostname,
+            username='root',
+            id_rsa_path=id_rsa_file.name)
+        wait_docker_service_socket(docker_services, ssh_test_server_info.hostname, ssh_test_server_info.get_port())
+        id_rsa_src = f"/{ssh_test_server_info.username}/.ssh/id_rsa"
         docker_cp_cmd = f"docker compose -p {docker_compose_project_name} cp {SSH_TEST_SERVER_NAME}:{id_rsa_src} {id_rsa_file.name}"
         cmd = run(docker_cp_cmd.split(), check=True, cwd=os.path.dirname(__file__), capture_output=True, text=True)
         if cmd.returncode != 0:
             raise RuntimeError(f"Failed to copy ssh key from {SSH_TEST_SERVER_NAME} container: {str(cmd.stderr)}")
         os.chmod(id_rsa_file.name, 0o600)
-        yield SshTestServerInfo(
-            hostname=ssh_test_server_hostname,
-            port=local_port,
-            username=username,
-            id_rsa_path=id_rsa_file.name)
+        yield ssh_test_server_info
         # NamedTempFile deleted on context exit
 
 
@@ -90,18 +86,14 @@ def alt_test_server(ssh_test_server: SshTestServerInfo,
     # Note: The alt-server uses the same image as the ssh-server container, so
     # the id_rsa key and username should all match.
     # Only the host port it is allocate is different.
-    alt_local_port = docker_services.port_for(ALT_TEST_SERVER_NAME, SSH_TEST_SERVER_PORT)
-    docker_services.wait_until_responsive(
-        check=lambda: check_socket(ssh_test_server.hostname, alt_local_port),
-        timeout=30.0,
-        pause=0.5,
-    )
-    return SshTestServerInfo(
+    alt_test_server_info = SshTestServerInfo(
+        compose_project_name=ssh_test_server.compose_project_name,
+        service_name=ALT_TEST_SERVER_NAME,
         hostname=ssh_test_server.hostname,
-        port=alt_local_port,
         username=ssh_test_server.username,
         id_rsa_path=ssh_test_server.id_rsa_path)
-    # NamedTempFile deleted on context exit
+    wait_docker_service_socket(docker_services, alt_test_server_info.hostname, alt_test_server_info.get_port())
+    return alt_test_server_info
 
 
 @pytest.fixture

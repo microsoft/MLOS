@@ -3,7 +3,6 @@ services:
   ssh-server:
     hostname: ssh-server
     attach: false
-    restart: always
     build:
       context: .
       dockerfile: Dockerfile
@@ -29,6 +28,7 @@ services:
       - ssh-server
     hostname: alt-server
     attach: false
+    restart: always
     image: mlos_bench-test-ssh-server:latest
     ports:
       - ${PORT:-2254}

@@ -28,15 +28,17 @@ from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SER
     (lazy_fixture("ssh_test_server"), SSH_TEST_SERVER_NAME),
     (lazy_fixture("alt_test_server"), ALT_TEST_SERVER_NAME),
 ])
-def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo, server_name: str) -> None:
+def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
+                                server_name: str) -> None:
     """Check for the pytest-docker ssh test infra."""
     ip_addr = resolve_host_name(ssh_test_server_info.hostname)
     assert ip_addr is not None
 
-    assert check_socket(ip_addr, ssh_test_server_info.port)
+    local_port = ssh_test_server_info.get_port()
+    assert check_socket(ip_addr, local_port)
     ssh_cmd = "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new " \
         + f"-l {ssh_test_server_info.username} -i {ssh_test_server_info.id_rsa_path} " \
-        + f"-p {ssh_test_server_info.port} {ssh_test_server_info.hostname} hostname"
+        + f"-p {local_port} {ssh_test_server_info.hostname} hostname"
     cmd = run(ssh_cmd.split(),
               capture_output=True,
               text=True,

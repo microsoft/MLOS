@@ -6,16 +6,27 @@
 Tests for mlos_bench.services.remote.ssh.ssh_host_service
 """
 
+import time
+
+from logging import warning
+
+import pytest
+from pytest_docker.plugin import Services as DockerServices
+
 from mlos_bench.environments.status import Status
 
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_service import SshClient
 
 from mlos_bench.tests import requires_docker
-from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SERVER_NAME, SSH_TEST_SERVER_NAME
+from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
+                                                  ALT_TEST_SERVER_NAME,
+                                                  SSH_TEST_SERVER_NAME,
+                                                  wait_docker_service_socket)
 
 
 @requires_docker
+@pytest.mark.xdist_group("ssh_test_server")
 def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
                                  alt_test_server: SshTestServerInfo,
                                  ssh_host_service: SshHostService) -> None:
@@ -51,7 +62,7 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
     assert connection is not None
     assert connection._username == ssh_test_server.username
     assert connection._host == ssh_test_server.hostname
-    assert connection._port == ssh_test_server.port
+    assert connection._port == ssh_test_server.get_port()
     local_port = connection._local_port
     assert local_port
     assert client is not None
@@ -121,4 +132,68 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
     assert connection._local_port != local_port
 
 
-# TODO: Test rebooting (changes the port number unfortunately).
+@requires_docker
+@pytest.mark.xdist_group("ssh_test_server")
+def test_ssh_service_reboot(docker_services: DockerServices,
+                            alt_test_server: SshTestServerInfo,
+                            ssh_host_service: SshHostService) -> None:
+    """
+    Test the SshHostService reboot.
+    """
+    # pylint: disable=protected-access
+
+    # Note: rebooting changes the port number unfortunately, but makes it
+    # easier to check for success.
+    # Also, it may cause issues with other parallel unit tests, so we run it as
+    # a part of the same unit test for now.
+    alt_test_server_ssh_service_config = alt_test_server.to_ssh_service_config()
+    (status, results_info) = ssh_host_service.remote_exec(
+        script=[
+            "echo \"sleeping...\"",
+            "sleep 30",
+            "echo \"shouldn't reach this point\""
+        ],
+        config=alt_test_server_ssh_service_config,
+        env_params={},
+    )
+    assert status == Status.PENDING
+    # Wait a moment for that to start in the background thread.
+    time.sleep(0.5)
+
+    # Now try to restart the server (gracefully).
+    # TODO: Test graceful vs. forceful.
+    (status, reboot_results_info) = ssh_host_service.reboot(params=alt_test_server_ssh_service_config)
+    assert status == Status.PENDING
+
+    (status, reboot_results_info) = ssh_host_service.wait_os_operation(reboot_results_info)
+    # FIXME: reboot/shutdown ops mostly return FAILED, but the reboot/shutdown succeeds.
+    warning(f"reboot status: {status} {reboot_results_info}")
+
+    try:
+        status, results = ssh_host_service.get_remote_exec_results(results_info)
+        assert status == Status.FAILED
+        stdout = str(results["stdout"])
+        assert "sleeping" in stdout
+        assert "shouldn't reach this point" not in stdout
+    except Exception as ex:
+        # TODO: Check for decent error handling on disconnects
+        warning(f"Exception from pending command post reboot: {ex}")
+
+    # Give docker some time to restart the service after the "reboot".
+    # Note: this relies on having `restart: always` in the docker-compose.yml file.
+    time.sleep(1)
+
+    # try to reconnect and see if the port changed
+    alt_test_server_ssh_service_config_new = alt_test_server.to_ssh_service_config(uncached=True)
+    assert alt_test_server_ssh_service_config_new["ssh_port"] != alt_test_server_ssh_service_config["ssh_port"]
+
+    wait_docker_service_socket(docker_services, alt_test_server.hostname, alt_test_server_ssh_service_config_new["ssh_port"])
+
+    (status, results_info) = ssh_host_service.remote_exec(
+        script=["hostname"],
+        config=alt_test_server_ssh_service_config_new,
+        env_params={},
+    )
+    status, results = ssh_host_service.get_remote_exec_results(results_info)
+    assert status == Status.SUCCEEDED
+    assert results["stdout"].strip() == ALT_TEST_SERVER_NAME
