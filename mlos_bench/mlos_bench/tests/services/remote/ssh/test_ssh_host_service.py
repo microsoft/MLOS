@@ -142,8 +142,6 @@ def test_ssh_service_reboot(docker_services: DockerServices,
     """
     Test the SshHostService reboot.
     """
-    # pylint: disable=protected-access
-
     # Note: rebooting changes the port number unfortunately, but makes it
     # easier to check for success.
     # Also, it may cause issues with other parallel unit tests, so we run it as

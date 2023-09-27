@@ -24,6 +24,7 @@ from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SER
 
 @requires_docker
 @requires_ssh
+@pytest.mark.xdist_group("ssh_test_server")
 @pytest.mark.parametrize(["ssh_test_server_info", "server_name"], [
     (lazy_fixture("ssh_test_server"), SSH_TEST_SERVER_NAME),
     (lazy_fixture("alt_test_server"), ALT_TEST_SERVER_NAME),
