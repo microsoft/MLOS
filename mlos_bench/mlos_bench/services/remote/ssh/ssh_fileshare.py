@@ -16,6 +16,7 @@ from asyncssh import scp, SFTPError, SSHClientConnection
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
 from mlos_bench.services.remote.ssh.ssh_service import SshService
+from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
@@ -76,6 +77,13 @@ class SshFileShareService(FileShareService, SshService):
         return await scp(srcpaths=srcpaths, dstpath=dstpath, recurse=recursive, preserve=True)
 
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
+        params = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "ssh_hostname",
+            ]
+        )
         super().download(params, remote_path, local_path, recursive)
         file_copy_future = self._run_coroutine(
             self._start_file_copy(params, CopyMode.DOWNLOAD, local_path, remote_path, recursive))
@@ -86,6 +94,13 @@ class SshFileShareService(FileShareService, SshService):
             raise RuntimeError(f"Failed to download {remote_path} to {local_path} from {params}") from ex
 
     def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
+        params = merge_parameters(
+            dest=self.config.copy(),
+            source=params,
+            required_keys=[
+                "ssh_hostname",
+            ]
+        )
         super().upload(params, local_path, remote_path, recursive)
         file_copy_future = self._run_coroutine(
             self._start_file_copy(params, CopyMode.UPLOAD, local_path, remote_path, recursive))
