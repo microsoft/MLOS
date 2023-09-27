@@ -200,14 +200,14 @@ def background_event_loop_thread(event_loop: AbstractEventLoop) -> None:
 def start_ssh_test_server() -> SshTestServerInfo:
     """Starts an ssh server in a docker container."""
     run("./up.sh", cwd=SCRIPT_DIR, check=True)
-    COMPOSE_PROJECT_NAME = 'mlos_bench-test-manual'
-    cmd_result = run(f"docker compose -p {COMPOSE_PROJECT_NAME} port {SSH_TEST_SERVER_NAME} {SSH_TEST_SERVER_PORT}",
+    compose_project_name = 'mlos_bench-test-manual'
+    cmd_result = run(f"docker compose -p {compose_project_name} port {SSH_TEST_SERVER_NAME} {SSH_TEST_SERVER_PORT}",
                      check=True, shell=True, capture_output=True)
     host, port = cmd_result.stdout.decode().strip().split(":")
     assert host == '0.0.0.0'
     assert int(port)
     return SshTestServerInfo(
-        compose_project_name=COMPOSE_PROJECT_NAME,
+        compose_project_name=compose_project_name,
         service_name=SSH_TEST_SERVER_NAME,
         hostname='host.docker.internal',
         username='root',
