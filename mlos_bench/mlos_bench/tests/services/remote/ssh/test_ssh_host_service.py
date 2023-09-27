@@ -133,10 +133,12 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
 
 
 @requires_docker
+@pytest.mark.parametrize("graceful", [True, False])
 @pytest.mark.xdist_group("ssh_test_server")
 def test_ssh_service_reboot(docker_services: DockerServices,
                             alt_test_server: SshTestServerInfo,
-                            ssh_host_service: SshHostService) -> None:
+                            ssh_host_service: SshHostService,
+                            graceful: bool) -> None:
     """
     Test the SshHostService reboot.
     """
@@ -162,22 +164,28 @@ def test_ssh_service_reboot(docker_services: DockerServices,
 
     # Now try to restart the server (gracefully).
     # TODO: Test graceful vs. forceful.
-    (status, reboot_results_info) = ssh_host_service.reboot(params=alt_test_server_ssh_service_config)
-    assert status == Status.PENDING
+    if graceful:
+        (status, reboot_results_info) = ssh_host_service.reboot(params=alt_test_server_ssh_service_config)
+        assert status == Status.PENDING
 
-    (status, reboot_results_info) = ssh_host_service.wait_os_operation(reboot_results_info)
-    # FIXME: reboot/shutdown ops mostly return FAILED, but the reboot/shutdown succeeds.
-    warning(f"reboot status: {status} {reboot_results_info}")
+        (status, reboot_results_info) = ssh_host_service.wait_os_operation(reboot_results_info)
+        # NOTE: reboot/shutdown ops mostly return FAILED, even though the reboot succeeds.
+        print(f"reboot status: {status} {reboot_results_info}")
+    else:
+        (status, kill_results_info) = ssh_host_service.remote_exec(
+            script=["kill -9 1; kill -9 -1"],
+            config=alt_test_server_ssh_service_config,
+            env_params={},
+        )
+        (status, kill_results_info) = ssh_host_service.get_remote_exec_results(kill_results_info)
+        print(f"kill status: {status} {kill_results_info}")
 
-    try:
-        status, results = ssh_host_service.get_remote_exec_results(results_info)
-        assert status == Status.FAILED
-        stdout = str(results["stdout"])
-        assert "sleeping" in stdout
-        assert "shouldn't reach this point" not in stdout
-    except Exception as ex:
-        # TODO: Check for decent error handling on disconnects
-        warning(f"Exception from pending command post reboot: {ex}")
+    # TODO: Check for decent error handling on disconnects.
+    status, results = ssh_host_service.get_remote_exec_results(results_info)
+    assert status == Status.FAILED
+    stdout = str(results["stdout"])
+    assert "sleeping" in stdout
+    assert "shouldn't reach this point" not in stdout
 
     # Give docker some time to restart the service after the "reboot".
     # Note: this relies on having `restart: always` in the docker-compose.yml file.
