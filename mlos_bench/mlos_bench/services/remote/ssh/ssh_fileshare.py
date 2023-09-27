@@ -90,8 +90,8 @@ class SshFileShareService(FileShareService, SshService):
         try:
             _ = file_copy_future.result()
         except (OSError, SFTPError) as ex:
-            # TODO: Improve error handling:
-            raise RuntimeError(f"Failed to download {remote_path} to {local_path} from {params}") from ex
+            _LOG.error("Failed to download %s to %s from %s: %s", remote_path, local_path, params, ex)
+            raise ex
 
     def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
         params = merge_parameters(
@@ -107,5 +107,5 @@ class SshFileShareService(FileShareService, SshService):
         try:
             _ = file_copy_future.result()
         except (OSError, SFTPError) as ex:
-            # TODO: Improve error handling:
-            raise RuntimeError(f"Failed to upload {local_path} to {remote_path} on {params}") from ex
+            _LOG.error("Failed to upload %s to %s on %s: %s", local_path, remote_path, params, ex)
+            raise ex
