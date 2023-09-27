@@ -27,6 +27,8 @@ from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
 
 # pylint: disable=redefined-outer-name
 
+HOST_DOCKER_NAME = 'host.docker.internal'
+
 
 @pytest.fixture(scope="session")
 def ssh_test_server_hostname() -> str:
@@ -37,8 +39,8 @@ def ssh_test_server_hostname() -> str:
         return 'localhost'
     # On Linux, if we're running in a docker container, we can use the
     # --add-host (extra_hosts in docker-compose.yml) to refer to the host IP.
-    if resolve_host_name('host.docker.internal'):
-        return 'host.docker.internal'
+    if resolve_host_name(HOST_DOCKER_NAME):
+        return HOST_DOCKER_NAME
     # Otherwise, assume we're executing directly inside conda on the host.
     return 'localhost'
 

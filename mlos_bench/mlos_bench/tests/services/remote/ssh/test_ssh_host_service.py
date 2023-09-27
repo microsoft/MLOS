@@ -8,8 +8,6 @@ Tests for mlos_bench.services.remote.ssh.ssh_host_service
 
 import time
 
-from logging import warning
-
 import pytest
 from pytest_docker.plugin import Services as DockerServices
 

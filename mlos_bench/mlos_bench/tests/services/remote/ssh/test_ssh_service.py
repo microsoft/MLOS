@@ -32,6 +32,8 @@ from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SER
 def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
                                 server_name: str) -> None:
     """Check for the pytest-docker ssh test infra."""
+    assert ssh_test_server_info.service_name == server_name
+
     ip_addr = resolve_host_name(ssh_test_server_info.hostname)
     assert ip_addr is not None
 
