@@ -7,41 +7,52 @@
         "service_config": {
             "type": "object",
             "$comment": "additional service types should be added here",
-            "oneOf": [
+            "allOf": [
                 {
-                    "$ref": "./local/local-exec-service-subschema.json"
+                    "oneOf": [
+                        {
+                            "$ref": "./local/local-exec-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./local/temp-dir-context-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./local/mock/mock-local-exec-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/mock/mock-fileshare-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/mock/mock-vm-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/mock/mock-remote-exec-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/mock/mock-auth-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/azure/azure-auth-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/azure/azure-vm-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/azure/azure-fileshare-service-subschema.json"
+                        }
+                    ],
+                    "required": ["class"]
                 },
                 {
-                    "$ref": "./local/temp-dir-context-service-subschema.json"
-                },
-                {
-                    "$ref": "./local/mock/mock-local-exec-service-subschema.json"
-                },
-                {
-                    "$ref": "./remote/mock/mock-fileshare-service-subschema.json"
-                },
-                {
-                    "$ref": "./remote/mock/mock-vm-service-subschema.json"
-                },
-                {
-                    "$ref": "./remote/mock/mock-remote-exec-service-subschema.json"
-                },
-                {
-                    "$ref": "./remote/mock/mock-auth-service-subschema.json"
-                },
-                {
-                    "$ref": "./remote/azure/azure-auth-service-subschema.json"
-                },
-                {
-                    "$ref": "./remote/azure/azure-vm-service-subschema.json"
-                },
-                {
-                    "$ref": "./remote/azure/azure-fileshare-service-subschema.json"
+                    "type": "object",
+                    "properties": {
+                        "config": {
+                            "type": "object",
+                            "$comment": "Service-specific config.",
+                            "minProperties": 1
+                        }
+                    }
                 }
-            ],
-            "required": [
-                "class",
-                "config"
             ]
         },
         "top_level_items": {
@@ -72,10 +83,7 @@
                     "$ref": "#/$defs/service_config"
                 }
             ],
-            "required": [
-                "class",
-                "config"
-            ]
+            "required": ["class"]
         },
         {
             "$comment": "We no longer accept a flat list of Service objects.",
