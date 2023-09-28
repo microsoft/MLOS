@@ -17,6 +17,7 @@ dependencies:
   - matplotlib
   - seaborn
   - swig
+  - libpq
   - python
   - pip:
     - autopep8>=1.7.0

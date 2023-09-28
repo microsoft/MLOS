@@ -16,6 +16,8 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
+  - swig
+  - libpq
   - python=3.9
   # See comments in mlos.yml.
   #- gcc_linux-64
