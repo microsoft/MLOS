@@ -10,6 +10,7 @@ There are two services defined in that config:
 2. `alt-server`
 
 We rely on `docker compose` to map their internal container service ports to random ports on the host.
+Hence, when connecting, we need to look up these ports on demand using something akin to `docker compose port`.
 
 Both containers run the same image, which is dynamically built, and defined in the [`Dockerfile`](./Dockerfile).
 This will dynamically generate a passphrase-less ssh key (`id_rsa`) stored inside the image that can be `docker cp`-ed out and then used to authenticate `ssh` clients into that instance.
@@ -19,3 +20,8 @@ These are brought up as session fixtures under a unique (PID based) compose proj
 > For manual testing, to bring up/down the test infrastructure the [`up.sh`](./up.sh) and [`down.sh`](./down.sh) scripts can be used, which assigns a known project name.
 
 In the case of `pytest`, since the `SshService` base class implements a shared connection cache that we wish to test, and testing "rebooting" of servers (containers) is also necessary, tests are run serially across a single worker by using the `pytest-xdist` plugin's `--dist loadgroup` feature and the `@pytest.mark.xdist_group("ssh_test_server")` decorator.
+In some cases we explicitly call the python garbage collector via `gc.collect()` to make sure that the shared cache cleanup handler is operating as expected.
+
+## See Also
+
+Notes in the [`SshService`](../../../../services/remote/ssh/ssh_service.py) implementation.
