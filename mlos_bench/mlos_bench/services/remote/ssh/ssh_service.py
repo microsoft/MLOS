@@ -14,6 +14,7 @@ from threading import current_thread, Lock as ThreadLock, Thread
 
 import logging
 import os
+import sys
 
 import asyncio
 import asyncssh
@@ -21,6 +22,12 @@ import asyncssh
 from asyncssh.connection import SSHClientConnection
 
 from mlos_bench.services.base_service import Service
+
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 
 _LOG = logging.getLogger(__name__)
 
@@ -288,9 +295,13 @@ class SshService(Service, metaclass=ABCMeta):
         cls._event_loop.run_forever()
 
     CoroReturnType = TypeVar('CoroReturnType')
+    if sys.version_info >= (3, 9):
+        FutureReturnType = Future[CoroReturnType]
+    else:
+        FutureReturnType = Future
 
     @classmethod
-    def _run_coroutine(cls, coro: Coroutine[Any, Any, CoroReturnType]) -> Future[CoroReturnType]:
+    def _run_coroutine(cls, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
         """
         Runs the given coroutine in the background event loop thread.
 
