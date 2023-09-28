@@ -137,5 +137,5 @@ class ConfigSchema(Enum):
         else:
             jsonschema.Draft202012Validator(
                 schema=self.schema,
-                registry=SCHEMA_STORE.registry,     # type: ignore[call-arg]
+                registry=SCHEMA_STORE.registry,
             ).validate(config)

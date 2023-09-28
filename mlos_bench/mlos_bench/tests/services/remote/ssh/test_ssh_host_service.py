@@ -6,7 +6,6 @@
 Tests for mlos_bench.services.remote.ssh.ssh_host_service
 """
 
-import gc
 import time
 
 import pytest
