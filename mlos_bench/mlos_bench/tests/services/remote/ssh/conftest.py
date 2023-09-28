@@ -8,10 +8,10 @@ Fixtures for the SSH service tests.
 
 from typing import Generator
 from subprocess import run
-import tempfile
 
 import os
 import sys
+import tempfile
 
 import pytest
 from pytest_docker.plugin import Services as DockerServices

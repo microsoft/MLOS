@@ -49,6 +49,7 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
     assert cmd.stdout.strip() == server_name
 
 
+@pytest.mark.xdist_group("ssh_test_server")
 def test_ssh_service_background_thread() -> None:
     """Test the SSH service background thread setup/cleanup handling."""
     # pylint: disable=protected-access
