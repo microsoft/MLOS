@@ -62,8 +62,8 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
 
     def __repr__(self) -> str:
-        opt_direction = 'min' if self._opt_sign > 0 else 'max'
-        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})(config={self._config})"
+        opt_direction = 'min' if self.is_min else 'max'
+        return f"{self.name}:{opt_direction}({self.target})(config={self._config})"
 
     @property
     def seed(self) -> int:
@@ -92,6 +92,21 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             A collection of covariant groups of tunable parameters.
         """
         return self._tunables
+
+    @property
+    def name(self) -> str:
+        """
+        The name of the optimizer. We save this information in
+        mlos_bench storage to track the source of each configuration.
+        """
+        return self.__class__.__name__
+
+    @property
+    def is_min(self) -> bool:
+        """
+        True if minimizing, False otherwise. Minimization is the default.
+        """
+        return self._opt_sign > 0
 
     @property
     def target(self) -> str:

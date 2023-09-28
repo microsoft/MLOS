@@ -113,7 +113,11 @@ def _optimize(*,
                                config_id, json.dumps(tunable_values, indent=2))
                 config_id = -1
 
-            trial = exp.new_trial(tunables)
+            trial = exp.new_trial(tunables, config={
+                "optimizer": opt.name,
+                "opt_target": opt.target,
+                "opt_direction": "min" if opt.is_min else "max",
+            })
             _run(env_context, opt, trial, global_config)
 
         if do_teardown:
