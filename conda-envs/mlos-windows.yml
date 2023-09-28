@@ -20,6 +20,7 @@ dependencies:
   - matplotlib
   - seaborn
   - swig
+  - libpq
   - python
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
