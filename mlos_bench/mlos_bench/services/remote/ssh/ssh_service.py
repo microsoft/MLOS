@@ -269,6 +269,16 @@ class SshService(Service, metaclass=ABCMeta):
                 SshService._event_loop_thread = None
 
     @classmethod
+    def clear_client_cache(cls) -> None:
+        """
+        Clears the cache of client connections.
+        Note: This may cause in flight operations to fail.
+        """
+        with cls._event_loop_thread_lock:
+            if cls._event_loop_thread_ssh_client_cache is not None:
+                cls._event_loop_thread_ssh_client_cache.cleanup()
+
+    @classmethod
     def _run_event_loop(cls) -> None:
         """
         Runs the asyncio event loop in a background thread.
