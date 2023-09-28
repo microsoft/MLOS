@@ -11,7 +11,7 @@ There are two services defined in that config:
 
 We rely on `docker compose` to map their internal container service ports to random ports on the host.
 Hence, when connecting, we need to look up these ports on demand using something akin to `docker compose port`.
-Because of complexities of networking in different development environments (especially for Docker on WSL2 for Windows), we may also have to connect to a different host address than `localhost` (e.g., `host.docker.internal`, which is dynamically requested as a part of of the devcontainer setup).
+Because of complexities of networking in different development environments (especially for Docker on WSL2 for Windows), we may also have to connect to a different host address than `localhost` (e.g., `host.docker.internal`, which is dynamically requested as a part of of the [devcontainer](../../../../../../.devcontainer/docker-compose.yml) setup).
 
 Both containers run the same image, which is dynamically built, and defined in the [`Dockerfile`](./Dockerfile).
 This will dynamically generate a passphrase-less ssh key (`id_rsa`) stored inside the image that can be `docker cp`-ed out and then used to authenticate `ssh` clients into that instance.
