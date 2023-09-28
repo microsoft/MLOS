@@ -24,4 +24,4 @@ def pytest_configure(config: pytest.Config) -> None:   # pylint: disable=unused-
         import matplotlib   # pylint: disable=import-outside-toplevel
         matplotlib.rcParams['backend'] = 'agg'
         warn(UserWarning('DISPLAY environment variable is set, which can cause problems in some setups (e.g. WSL). '
-            + f'Adjusting matplotlib backend to "{matplotlib.rcParams["backend"]}" to compensate.'))
+                         + f'Adjusting matplotlib backend to "{matplotlib.rcParams["backend"]}" to compensate.'))
