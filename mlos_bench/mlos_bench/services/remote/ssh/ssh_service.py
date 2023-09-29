@@ -296,9 +296,9 @@ class SshService(Service, metaclass=ABCMeta):
 
     CoroReturnType = TypeVar('CoroReturnType')
     if sys.version_info >= (3, 9):
-        FutureReturnType = Future[CoroReturnType]
+        FutureReturnType: TypeAlias = Future[CoroReturnType]
     else:
-        FutureReturnType = Future
+        FutureReturnType: TypeAlias = Future
 
     @classmethod
     def _run_coroutine(cls, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
