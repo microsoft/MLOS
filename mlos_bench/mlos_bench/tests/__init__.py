@@ -7,8 +7,11 @@ Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
 
+from logging import warning
 from typing import Optional
 
+import filecmp
+import os
 import socket
 import shutil
 
@@ -91,3 +94,32 @@ def resolve_host_name(host: str) -> Optional[str]:
         return socket.gethostbyname(host)
     except socket.gaierror:
         return None
+
+
+def are_dir_trees_equal(dir1: str, dir2: str) -> bool:
+    """
+    Compare two directories recursively. Files in each directory are
+    assumed to be equal if their names and contents are equal.
+
+    @param dir1: First directory path
+    @param dir2: Second directory path
+
+    @return: True if the directory trees are the same and
+        there were no errors while accessing the directories or files,
+        False otherwise.
+    """
+    # See Also: https://stackoverflow.com/a/6681395
+    dirs_cmp = filecmp.dircmp(dir1, dir2)
+    if len(dirs_cmp.left_only) > 0 or len(dirs_cmp.right_only) > 0 or len(dirs_cmp.funny_files) > 0:
+        warning(f"Found differences in dir trees {dir1}, {dir2}:\n{dirs_cmp.diff_files}\n{dirs_cmp.funny_files}")
+        return False
+    (_, mismatch, errors) = filecmp.cmpfiles(dir1, dir2, dirs_cmp.common_files, shallow=False)
+    if len(mismatch) > 0 or len(errors) > 0:
+        warning(f"Found differences in files:\n{mismatch}\n{errors}")
+        return False
+    for common_dir in dirs_cmp.common_dirs:
+        new_dir1 = os.path.join(dir1, common_dir)
+        new_dir2 = os.path.join(dir2, common_dir)
+        if not are_dir_trees_equal(new_dir1, new_dir2):
+            return False
+    return True
