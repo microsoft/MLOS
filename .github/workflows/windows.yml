@@ -33,11 +33,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Prep tests deps
-      run: |
-        # In github the docker compose operation doesn't always build due to an older version, so we do it explicitly first.
-        docker compose -f mlos_bench/mlos_bench/tests/services/remote/ssh/docker-compose.yml build
-
     - uses: conda-incubator/setup-miniconda@v2
 
     - name: Set cache timestamp variables
