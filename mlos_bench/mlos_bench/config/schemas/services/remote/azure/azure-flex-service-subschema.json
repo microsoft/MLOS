@@ -1,0 +1,55 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-flex-service-subschema.json",
+    "title": "mlos_bench Azure Flex DB configuration Service config",
+    "description": "config for an mlos_bench Azure Flex DB Service configuration",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.azure.AzureFlexConfigService",
+                "mlos_bench.services.remote.azure.azure_flex.AzureFlexConfigService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "../../common-defs-subschemas.json#/$defs/poll_configs"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "subscription": {
+                            "description": "Azure subscription id (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
+                        "resourceGroup": {
+                            "description": "The name of the resource group to place the deployment in (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
+                        "vmName": {
+                            "description": "Name of the server.",
+                            "type": "string"
+                        },
+                        "provider": {
+                            "description": "Name of the Azure DB provider (i.e., a DB service type).",
+                            "enum": [
+                                "Microsoft.DBforMySQL",
+                                "Microsoft.DBforPostgreSQL",
+                                "Microsoft.DBforMariaDB"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "subscription",
+                        "resourceGroup",
+                        "provider"
+                    ]
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"]
+}

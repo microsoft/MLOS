@@ -6,6 +6,7 @@
 A collection Service functions for managing VMs on Azure.
 """
 import logging
+
 from typing import Any, Dict, Optional, Tuple
 
 import requests
