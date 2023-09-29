@@ -35,6 +35,13 @@ jobs:
 
     - uses: conda-incubator/setup-miniconda@v2
 
+    - name: Check docker builder status
+      run: |
+        docker builder ls
+        docker builder inspect
+        docker buildx ls
+        docker buildx inspect
+
     - name: Set cache timestamp variables
       id: set_cache_vars
       run: |
