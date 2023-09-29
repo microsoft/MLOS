@@ -24,7 +24,7 @@ jobs:
         shell: pwsh
 
     env:
-      DOCKER_DEFAULT_PLATFORM: linux/amd64
+      DOCKER_DEFAULT_PLATFORM: linux
       CONDA_ENV_NAME: mlos
       CONDA_ENV_YML: mlos-windows.yml
       cache_cur_date: unset
