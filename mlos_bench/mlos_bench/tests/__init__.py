@@ -7,7 +7,8 @@ Tests for mlos_bench.
 Used to make mypy happy about multiple conftest.py modules.
 """
 
-from logging import warning
+from logging import debug, warning
+from subprocess import run
 from typing import Optional
 
 import filecmp
@@ -23,7 +24,13 @@ from mlos_bench.util import get_class_from_name
 # A decorator for tests that require docker.
 # Use with @requires_docker above a test_...() function.
 DOCKER = shutil.which('docker')
-requires_docker = pytest.mark.skipif(not DOCKER, reason='Docker is not available on this system.')
+if DOCKER:
+    cmd = run("docker builder inspect default", shell=True, check=True, capture_output=True)
+    stdout = cmd.stdout.decode()
+    if not any(line for line in stdout.splitlines() if 'Platform' in line and 'linux' in line):
+        debug("Docker is available but missing support for targeting linux platform.")
+        DOCKER = None
+requires_docker = pytest.mark.skipif(not DOCKER, reason='Docker with Linux support is not available on this system.')
 # A decorator for tests that require ssh.
 # Use with @requires_ssh above a test_...() function.
 SSH = shutil.which('ssh')
