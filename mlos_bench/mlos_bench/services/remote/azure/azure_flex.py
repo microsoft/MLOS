@@ -24,9 +24,7 @@ class AzureFlexConfigService(Service, SupportsRemoteConfig):
     Helper methods to configure Azure Flex services.
     """
 
-    _POLL_INTERVAL = 4     # seconds
-    _POLL_TIMEOUT = 300    # seconds
-    _REQUEST_TIMEOUT = 5   # seconds
+    _REQUEST_TIMEOUT = 5  # seconds
 
     # Azure Flex Services Configuration REST API as described in
     # https://learn.microsoft.com/en-us/rest/api/mysql/flexibleserver/configurations
@@ -93,8 +91,6 @@ class AzureFlexConfigService(Service, SupportsRemoteConfig):
         )
 
         # These parameters can come from command line as strings, so conversion is needed.
-        self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
-        self._poll_timeout = float(self.config.get("pollTimeout", self._POLL_TIMEOUT))
         self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
 
         self.register([self.configure])

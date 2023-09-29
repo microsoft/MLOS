@@ -11,8 +11,6 @@
         // One of: Microsoft.{DBforMySQL,DBforPostgreSQL,DBforMariaDB}
         "provider": "Microsoft.DBforMySQL",
 
-        "requestTimeout": 20,   // HTTP request timeout in seconds
-        "pollInterval": 20,     // Poll every 20 seconds
-        "pollTimeout": 600      // Give up polling after 10 minutes
+        "requestTimeout": 20  // HTTP request timeout in seconds
     }
 }
