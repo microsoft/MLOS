@@ -65,21 +65,11 @@ class AzureFlexConfigService(Service, SupportsRemoteConfig):
             "provider",
         })
 
-        provider = self.config["provider"]
-        if provider == "Microsoft.DBforMySQL":
-            self._is_batch = True
-            is_flex = True
-            api_version = "2022-01-01"
-        elif provider == "Microsoft.DBforMariaDB":
-            self._is_batch = False
-            is_flex = False
-            api_version = "2018-06-01"
-        elif provider == "Microsoft.DBforPostgreSQL":
-            self._is_batch = False
-            is_flex = True
-            api_version = "2022-12-01"
-        else:
-            raise ValueError(f"Unsupported DB provider: {provider}")
+        (self._is_batch, is_flex, api_version) = {
+            "Microsoft.DBforMySQL": (True, True, "2022-01-01"),
+            "Microsoft.DBforMariaDB": (False, False, "2018-06-01"),
+            "Microsoft.DBforPostgreSQL": (False, True, "2022-12-01"),
+        }[self.config["provider"]]
 
         self._url_config = self._URL_CONFIGURE.format(
             subscription=self.config["subscription"],
