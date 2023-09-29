@@ -109,7 +109,6 @@ jobs:
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests
       run: |
-        # Run pylint
         conda run -n $env:CONDA_ENV_NAME pytest --junitxml=junit/test-results.xml mlos_core/ mlos_bench/
 
     # Note: unlike the Makefile version, the pwsh version of these rules are all run within a single shell context, so we can
