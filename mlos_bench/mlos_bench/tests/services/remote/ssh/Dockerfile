@@ -1,5 +1,5 @@
 # Basic Dockerfile for testing the SSH service.
-FROM --platform=linux debian:latest
+FROM debian:latest
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
