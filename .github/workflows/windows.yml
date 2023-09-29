@@ -106,11 +106,14 @@ jobs:
     #- name: Run lint checks
     #  run: conda run -n $env:CONDA_ENV_NAME pylint -j0 mlos_core/mlos_core mlos_bench/mlos_bench
 
-    # Only run the coverage checks on the devcontainer job.
-    - name: Run tests
+    - name: Prep tests deps
       run: |
         # In github the docker compose operation doesn't always build due to an older version, so we do it explicitly first.
         docker compose -f mlos_bench/mlos_bench/tests/services/remote/ssh/docker-compose.yml build
+
+    # Only run the coverage checks on the devcontainer job.
+    - name: Run tests
+      run: |
         # Run pylint
         conda run -n $env:CONDA_ENV_NAME pytest --junitxml=junit/test-results.xml mlos_core/ mlos_bench/
 
