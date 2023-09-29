@@ -109,6 +109,9 @@ jobs:
     # Only run the coverage checks on the devcontainer job.
     - name: Run tests
       run: |
+        # In github the docker compose operation doesn't always build due to an older version, so we do it explicitly first.
+        docker compose -f mlos_bench/mlos_bench/tests/services/remote/ssh/docker-compose.yml build
+        # Run pylint
         conda run -n $env:CONDA_ENV_NAME pytest --junitxml=junit/test-results.xml mlos_core/ mlos_bench/
 
     # Note: unlike the Makefile version, the pwsh version of these rules are all run within a single shell context, so we can
