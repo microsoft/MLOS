@@ -31,8 +31,8 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
             self.upload,
         ])
 
-    def download(self, remote_path: str, local_path: str, recursive: bool = True) -> None:
+    def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
         pass
 
-    def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
+    def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
         pass
