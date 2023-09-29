@@ -7,6 +7,8 @@
         "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
         "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
         "vmName": "PLACEHOLDER; e.g., mlos-vm-mysql",
+
+        // One of: Microsoft.{DBforMySQL,DBforPostgreSQL,DBforMariaDB}
         "provider": "Microsoft.DBforMySQL",
 
         "requestTimeout": 20,   // HTTP request timeout in seconds
