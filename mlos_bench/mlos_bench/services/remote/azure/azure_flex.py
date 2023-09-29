@@ -38,21 +38,11 @@ class AzureFlexConfigService(Service, SupportsRemoteConfig):
     _URL_CONFIGURE = (
         "https://management.azure.com" +
         "/subscriptions/{subscription}" +
-        "/resourceGroups/{resourceGroup}" +
+        "/resourceGroups/{resource_group}" +
         "/providers/{provider}" +
-        "/{serverType}/{vmName}" +
-        "/configurations/\{configurationName\}" +
-        "?api-version={apiVersion}"
-    )
-
-    _URL_CONFIGURE_BATCH = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resourceGroup}" +
-        "/providers/{provider}" +
-        "/{serverType}/{vmName}" +
-        "/updateConfigurations" +
-        "?api-version={apiVersion}"
+        "/{server_type}/{vm_name}" +
+        "/{update}" +
+        "?api-version={api_version}"
     )
 
     def __init__(self,
@@ -79,9 +69,33 @@ class AzureFlexConfigService(Service, SupportsRemoteConfig):
             "resourceGroup",
             "provider",
             "vmName",
-            "isFlex",
-            "apiVersion",
         })
+
+        provider = self.config["provider"]
+        if provider == "Microsoft.DBforMySQL":
+            self._is_batch = True
+            is_flex = True
+            api_version = "2022-01-01"
+        elif provider == "Microsoft.DBforMariaDB":
+            self._is_batch = False
+            is_flex = False
+            api_version = "2018-06-01"
+        elif provider == "Microsoft.DBforPostgreSQL":
+            self._is_batch = False
+            is_flex = False
+            api_version = "2022-12-01"
+        else:
+            raise ValueError(f"Unsupported DB provider: {provider}")
+
+        self._url_config = self._URL_CONFIGURE.format(
+            subscription=self.config["subscription"],
+            resource_group=self.config["resourceGroup"],
+            provider=self.config["provider"],
+            vm_name=self.config["vmName"],
+            server_type="flexibleServers" if is_flex else "servers",
+            update="updateConfigurations" if self._is_batch else "configurations/{param_name}",
+            api_version=api_version,
+        )
 
         # These parameters can come from command line as strings, so conversion is needed.
         self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
@@ -98,20 +112,52 @@ class AzureFlexConfigService(Service, SupportsRemoteConfig):
             "Authorization service not provided. Include service-auth.jsonc?"
         return {"Authorization": "Bearer " + self._parent.get_access_token()}
 
-    def _config_one(self, paramName: str, paramValue: Any) -> Tuple[Status, dict]:
+    def _config_one(self, param_name: str, param_value: Any) -> Tuple[Status, dict]:
         """
+        Update a single parameter of the Azure DB service.
+
+        Parameters
+        ----------
+        param_name : str
+            Name of the parameter to update.
+        param_value : Any
+            Value of the parameter to update.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        url = self._URL_CONFIGURE.format(
-            subscription=self.config["subscription"],
-            resourceGroup=self.config["resourceGroup"],
-            provider=self.config["provider"],
-            serverType=self._server_type,
-            vmName=self.config["vmName"],
-            configurationName=paramName,
-            apiVersion=self.config["apiVersion"],
-        )
+        url = self._url_config.format(param_name=param_name)
+
         response = requests.put(url, headers=self._get_headers(),
-                                json={"properties": {"value": str(paramValue)}})
+                                json={"properties": {"value": str(param_value)}},
+                                timeout=self._request_timeout)
+
+        return (Status.SUCCEEDED, {}) if response.status_code == 200 else (Status.FAILED, {})
+
+    def _config_batch(self, params: Dict[str, Any]) -> Tuple[Status, dict]:
+        """
+        Batch update the parameters of an Azure DB service.
+
+        Parameters
+        ----------
+        params : str
+            Name of the parameter to update.
+
+        Returns
+        -------
+        result : (Status, dict={})
+            A pair of Status and result. The result is always {}.
+            Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+        json_req = {"properties": {"value": str(val)}}
+        response = requests.put(self._url_config, headers=self._get_headers(),
+                                json=json_req, timeout=self._request_timeout)
+
+        return (Status.SUCCEEDED, {}) if response.status_code == 200 else (Status.FAILED, {})
+
 
     def _azure_vm_post_helper(self, params: dict, url: str) -> Tuple[Status, dict]:
         """
