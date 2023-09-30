@@ -1,10 +1,7 @@
 {
+    // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
     "name": "Azure MySQL Flex DB Configuration",
     "class": "mlos_bench.environments.remote.SaaSEnv",
-
-    "include_services": ["services/remote/azure/service-flex-mysql.jsonc"],
-    "include_tunables": ["environments/apps/mysql/mysql-tunables.jsonc"],
-
     "config": {
         "required_args": ["vmName"],
         "tunable_params": ["mysql-innodb", "mysql-buffer"]

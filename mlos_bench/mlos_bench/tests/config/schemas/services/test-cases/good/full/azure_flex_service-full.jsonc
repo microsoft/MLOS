@@ -1,0 +1,14 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    "description": "Azure SaaS Configuration Service",
+
+    "class": "mlos_bench.services.remote.azure.AzureFlexConfigService",
+
+    "config": {
+        "subscription": "subscription-id",
+        "resourceGroup": "rg",
+        "vmName": "vm-name",
+        "provider": "Microsoft.DBforMySQL",
+        "requestTimeout": 20
+    }
+}
