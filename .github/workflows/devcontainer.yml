@@ -84,6 +84,7 @@ jobs:
           --env CONTAINER_WORKSPACE_FOLDER=/workspaces/MLOS \
           --env LOCAL_WORKSPACE_FOLDER=$(pwd) \
           --workdir /workspaces/MLOS \
+          --add-host host.docker.internal:host-gateway \
           --name mlos-devcontainer mlos-devcontainer sleep infinity
     - name: Fixup vscode uid/gid in the running container
       timeout-minutes: 3
