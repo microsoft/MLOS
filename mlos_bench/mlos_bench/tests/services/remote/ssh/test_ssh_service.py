@@ -7,6 +7,7 @@ Tests for mlos_bench.services.remote.ssh.SshService base class.
 """
 
 import gc
+import time
 
 from subprocess import run
 from threading import Thread
@@ -62,7 +63,10 @@ def test_ssh_service_background_thread() -> None:
     ssh_host_service = SshHostService(config={}, global_config={}, parent=None)
     assert ssh_host_service
     assert isinstance(SshService._event_loop_thread, Thread)
-    assert SshService._event_loop_thread.is_alive()     # type: ignore[unreachable] # (false positive)
+    # Give the thread a chance to start.
+    # Mostly import on the underpowered Windows CI machines.
+    time.sleep(0.25)    # type: ignore[unreachable] # (false positive)
+    assert SshService._event_loop_thread.is_alive()
     assert SshService._event_loop_thread_refcnt == 1
     assert SshService._event_loop_thread_ssh_client_cache is not None
     assert SshService._event_loop is not None
@@ -92,3 +96,8 @@ def test_ssh_service_background_thread() -> None:
     assert SshService._event_loop_thread_refcnt == 0
     assert SshService._event_loop is None
     assert SshService._event_loop_thread_ssh_client_cache is None
+
+
+if __name__ == '__main__':
+    # For debugging in Windows which has issues with pytest detection in vscode.
+    pytest.main(["-n1", "--dist=no", "-k", "test_ssh_service_background_thread"])
