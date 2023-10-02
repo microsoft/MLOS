@@ -14,7 +14,6 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.remote_config_type import SupportsRemoteConfig
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import check_required_params
 
 _LOG = logging.getLogger(__name__)
 
@@ -53,7 +52,6 @@ class SaaSEnv(Environment):
         """
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
-        check_required_params(self.config, {"vmName"})
 
         assert self._service is not None and isinstance(self._service, SupportsRemoteConfig), \
             "SaaSEnv requires a service that supports remote host configuration API"
