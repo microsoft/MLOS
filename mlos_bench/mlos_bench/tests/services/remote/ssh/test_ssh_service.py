@@ -64,7 +64,7 @@ def test_ssh_service_background_thread() -> None:
     assert ssh_host_service
     assert isinstance(SshService._event_loop_thread, Thread)
     # Give the thread a chance to start.
-    # Mostly import on the underpowered Windows CI machines.
+    # Mostly important on the underpowered Windows CI machines.
     time.sleep(0.25)    # type: ignore[unreachable] # (false positive)
     assert SshService._event_loop_thread.is_alive()
     assert SshService._event_loop_thread_refcnt == 1
