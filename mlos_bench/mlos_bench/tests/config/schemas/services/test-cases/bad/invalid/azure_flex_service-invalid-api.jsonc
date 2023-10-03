@@ -8,10 +8,10 @@
         "subscription": "subscription-id",
         "resourceGroup": "rg",
         "vmName": "vm-name",
-        "provider": "Microsoft.DBforSQLServer",  // Invalid provider
+        "provider": "Microsoft.DBforMySQL",
         "supportsBatchUpdate": true,
         "isFlex": true,
-        "apiVersion": "2022-01-01",
+        "apiVersion": "latest",  // Invalid version
         "requestTimeout": 20
     }
 }

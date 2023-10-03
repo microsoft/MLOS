@@ -1,4 +1,4 @@
-// A service to configure Azure MySQL Flexible Server.
+// A service to configure Azure MariaDB Flexible Server.
 {
     "class": "mlos_bench.services.remote.azure.AzureSaaSConfigService",
 
@@ -6,12 +6,12 @@
 
         "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
         "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
-        "vmName": "PLACEHOLDER; e.g., mlos-vm-mysql",
+        "vmName": "PLACEHOLDER; e.g., mlos-vm-mariadb",
 
-        "provider": "Microsoft.DBforMySQL",
-        "supportsBatchUpdate": true,
-        "isFlex": true,
-        "apiVersion": "2022-01-01",
+        "provider": "Microsoft.DBforMariaDB",
+        "supportsBatchUpdate": false,
+        "isFlex": false,
+        "apiVersion": "2018-06-01",
 
         "requestTimeout": 20  // HTTP request timeout in seconds
     }

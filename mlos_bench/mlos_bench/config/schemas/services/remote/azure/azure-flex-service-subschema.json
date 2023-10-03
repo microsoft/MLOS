@@ -7,8 +7,8 @@
     "properties": {
         "class": {
             "enum": [
-                "mlos_bench.services.remote.azure.AzureFlexConfigService",
-                "mlos_bench.services.remote.azure.azure_flex.AzureFlexConfigService"
+                "mlos_bench.services.remote.azure.AzureSaaSConfigService",
+                "mlos_bench.services.remote.azure.azure_saas.AzureSaaSConfigService"
             ]
         },
         "config": {
@@ -39,12 +39,28 @@
                                 "Microsoft.DBforPostgreSQL",
                                 "Microsoft.DBforMariaDB"
                             ]
+                        },
+                        "supportsBatchUpdate": {
+                            "description": "Whether API supports updating multiple config parameters at once",
+                            "type": "boolean"
+                        },
+                        "isFlex": {
+                            "description": "Whether SaaS is an Azure Flexible Server",
+                            "type": "boolean"
+                        },
+                        "apiVersion": {
+                            "description": "Version of Azure REST API",
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}(-preview)?$"
                         }
                     },
                     "required": [
                         "subscription",
                         "resourceGroup",
-                        "provider"
+                        "provider",
+                        "supportsBatchUpdate",
+                        "isFlex",
+                        "apiVersion"
                     ]
                 }
             ],

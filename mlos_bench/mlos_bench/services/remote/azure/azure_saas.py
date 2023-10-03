@@ -20,14 +20,14 @@ from mlos_bench.util import check_required_params, merge_parameters
 _LOG = logging.getLogger(__name__)
 
 
-class AzureFlexConfigService(Service, SupportsRemoteConfig):
+class AzureSaaSConfigService(Service, SupportsRemoteConfig):
     """
     Helper methods to configure Azure Flex services.
     """
 
     _REQUEST_TIMEOUT = 5  # seconds
 
-    # Azure Flex Services Configuration REST API as described in
+    # Azure SaaS DB Services Configuration REST API as described in
     # https://learn.microsoft.com/en-us/rest/api/mysql/flexibleserver/configurations
 
     _URL_CONFIGURE = (
