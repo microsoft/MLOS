@@ -46,25 +46,69 @@ class TrialSqlData(TrialData):
         """
         Retrieve the trials' configuration from the storage.
         """
-        return pandas.DataFrame()
+        with self._engine.connect() as conn:
+            cur_config = conn.execute(
+                self._schema.config_param.select().where(
+                    self._schema.config_param.c.config_id == self._config_id
+                ).order_by(
+                    self._schema.config_param.c.param_id,
+                )
+            )
+            return pandas.DataFrame(
+                [(row.param_id, row.param_value) for row in cur_config.fetchall()],
+                columns=['parameter', 'value'])
 
     @property
     def results(self) -> pandas.DataFrame:
         """
         Retrieve the trials' results from the storage.
         """
-        return pandas.DataFrame()
+        with self._engine.connect() as conn:
+            cur_results = conn.execute(
+                self._schema.trial_result.select().where(
+                    self._schema.trial_result.c.exp_id == self._exp_id,
+                    self._schema.trial_result.c.trial_id == self._trial_id
+                ).order_by(
+                    self._schema.trial_result.c.metric_id,
+                )
+            )
+            return pandas.DataFrame(
+                [(row.metric_id, row.metric_value) for row in cur_results.fetchall()],
+                columns=['metric', 'value'])
 
     @property
     def telemetry(self) -> pandas.DataFrame:
         """
         Retrieve the trials' telemetry from the storage.
         """
-        return pandas.DataFrame()
+        with self._engine.connect() as conn:
+            cur_telemetry = conn.execute(
+                self._schema.trial_telemetry.select().where(
+                    self._schema.trial_telemetry.c.exp_id == self._exp_id,
+                    self._schema.trial_telemetry.c.trial_id == self._trial_id
+                ).order_by(
+                    self._schema.trial_telemetry.c.ts,
+                    self._schema.trial_telemetry.c.metric_id,
+                )
+            )
+            return pandas.DataFrame(
+                [(row.ts, row.metric_id, row.metric_value) for row in cur_telemetry.fetchall()],
+                columns=['ts', 'metric', 'value'])
 
     @property
     def metadata(self) -> pandas.DataFrame:
         """
         Retrieve the trials' metadata.
         """
-        return pandas.DataFrame()
+        with self._engine.connect() as conn:
+            cur_params = conn.execute(
+                self._schema.trial_param.select().where(
+                    self._schema.trial_param.c.exp_id == self._exp_id,
+                    self._schema.trial_param.c.trial_id == self._trial_id
+                ).order_by(
+                    self._schema.trial_param.c.param_id,
+                )
+            )
+            return pandas.DataFrame(
+                [(row.param_id, row.param_value) for row in cur_params.fetchall()],
+                columns=['parameter', 'value'])

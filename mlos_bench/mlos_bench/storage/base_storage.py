@@ -32,7 +32,7 @@ class Storage(metaclass=ABCMeta):
     """
 
     @classmethod
-    def new(cls, config_file: str, tunables_file: Optional[str], **kwargs: dict) -> 'Storage':
+    def new(cls, config_file: str, tunables_files: List[str], **kwargs: dict) -> 'Storage':
         """
         Create a new storage object from a config file.
 
@@ -53,9 +53,9 @@ class Storage(metaclass=ABCMeta):
         config_loader = ConfigPersistenceService(kwargs)
         class_config = config_loader.load_config(config_file, ConfigSchema.STORAGE)  # type: ignore[type-abstract]
         tunables = TunableGroups()
-        if tunables_file:
+        for fname in tunables_files:
             # pylint: disable=protected-access
-            tunables = config_loader._load_tunables(tunables_file, tunables)
+            tunables = config_loader._load_tunables(fname, tunables)
         assert isinstance(class_config, Dict)
         ret = config_loader.build_generic(
             base_cls=cls,
