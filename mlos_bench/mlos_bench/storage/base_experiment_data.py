@@ -27,6 +27,9 @@ class ExperimentData(metaclass=ABCMeta):
         """
         return self._exp_id
 
+    def __repr__(self) -> str:
+        return f"Experiment :: {self._exp_id}"
+
     @property
     @abstractmethod
     def trials(self) -> Dict[int, TrialData]:

@@ -33,6 +33,9 @@ class TrialData(metaclass=ABCMeta):
         self._ts_end = ts_end
         self._status = status
 
+    def __repr__(self) -> str:
+        return f"Trial :: {self._exp_id}:{self._trial_id} config:{self._config_id} {self._status}"
+
     @property
     def exp_id(self) -> str:
         """
