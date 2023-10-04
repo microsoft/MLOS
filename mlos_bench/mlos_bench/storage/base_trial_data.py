@@ -75,29 +75,29 @@ class TrialData(metaclass=ABCMeta):
         """
         return self._status
 
-    @abstractmethod
     @property
+    @abstractmethod
     def config(self) -> pandas.DataFrame:
         """
         Retrieve the trials' configuration from the storage.
         """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def results(self) -> pandas.DataFrame:
         """
         Retrieve the trials' results from the storage.
         """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def telemetry(self) -> pandas.DataFrame:
         """
         Retrieve the trials' telemetry from the storage.
         """
 
-    @abstractmethod
     @property
+    @abstractmethod
     def metadata(self) -> pandas.DataFrame:
         """
         Retrieve the trials' metadata.

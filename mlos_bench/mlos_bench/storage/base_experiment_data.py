@@ -27,8 +27,8 @@ class ExperimentData(metaclass=ABCMeta):
         """
         return self._exp_id
 
-    @abstractmethod
     @property
+    @abstractmethod
     def trials(self) -> Dict[int, TrialData]:
         """
         Retrieve the trials' data from the storage.

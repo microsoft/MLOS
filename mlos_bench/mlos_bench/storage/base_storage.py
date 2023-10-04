@@ -50,8 +50,8 @@ class Storage(metaclass=ABCMeta):
         self._config = config.copy()
         self._global_config = global_config or {}
 
-    @abstractmethod
     @property
+    @abstractmethod
     def experiments(self) -> Dict[str, ExperimentData]:
         """
         Retrieve the experiments' data from the storage.
