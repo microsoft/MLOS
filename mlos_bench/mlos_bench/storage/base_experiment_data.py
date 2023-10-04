@@ -35,4 +35,9 @@ class ExperimentData(metaclass=ABCMeta):
     def trials(self) -> Dict[int, TrialData]:
         """
         Retrieve the trials' data from the storage.
+
+        Returns
+        -------
+        trials : Dict[int, TrialData]
+            A dictionary of the trials' data, keyed by trial id.
         """

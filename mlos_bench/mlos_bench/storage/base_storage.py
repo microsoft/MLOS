@@ -55,6 +55,11 @@ class Storage(metaclass=ABCMeta):
     def experiments(self) -> Dict[str, ExperimentData]:
         """
         Retrieve the experiments' data from the storage.
+
+        Returns
+        -------
+        experiments : Dict[str, ExperimentData]
+            A dictionary of the experiments' data, keyed by experiment id.
         """
 
     @abstractmethod

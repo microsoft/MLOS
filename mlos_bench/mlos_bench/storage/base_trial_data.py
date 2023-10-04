@@ -83,6 +83,12 @@ class TrialData(metaclass=ABCMeta):
     def config(self) -> pandas.DataFrame:
         """
         Retrieve the trials' configuration from the storage.
+
+        Returns
+        -------
+        config : pandas.DataFrame
+            A dataframe with the configuration of the current trial.
+            It has two `str` columns, "parameter" and "value".
         """
 
     @property
@@ -90,6 +96,13 @@ class TrialData(metaclass=ABCMeta):
     def results(self) -> pandas.DataFrame:
         """
         Retrieve the trials' results from the storage.
+
+        Returns
+        -------
+        config : pandas.DataFrame
+            A dataframe with the trial results.
+            It has two `str` columns, "metric" and "value".
+            If the trial status is not SUCCEEDED, the dataframe is empty.
         """
 
     @property
@@ -97,6 +110,14 @@ class TrialData(metaclass=ABCMeta):
     def telemetry(self) -> pandas.DataFrame:
         """
         Retrieve the trials' telemetry from the storage.
+
+        Returns
+        -------
+        config : pandas.DataFrame
+            A dataframe with the trial telemetry, if there is any.
+            It has one `datetime` column, "ts", and two `str` columns, "metric" and "value".
+            If the trial status is not SUCCEEDED, or there is no telemetry data,
+            the dataframe is empty.
         """
 
     @property
@@ -104,4 +125,11 @@ class TrialData(metaclass=ABCMeta):
     def metadata(self) -> pandas.DataFrame:
         """
         Retrieve the trials' metadata.
+
+        Returns
+        -------
+        config : pandas.DataFrame
+            An optional dataframe with the metadata associated with the trial.
+            It has two `str` columns, "parameter" and "value".
+            Returns an empty dataframe if there is no metadata.
         """
