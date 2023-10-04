@@ -39,8 +39,15 @@ class ExperimentSqlData(ExperimentData):
                 )
             )
             return {
-                trial.trial_id: TriaSqlData(
-                    self._engine, self._schema, self._exp_id, trial.trial_id, trial.config_id,
-                    trial.ts_start, trial.ts_end, Status[trial.status])
+                trial.trial_id: TrialSqlData(
+                    engine=self._engine,
+                    schema=self._schema,
+                    exp_id=self._exp_id,
+                    trial_id=trial.trial_id,
+                    config_id=trial.config_id,
+                    ts_start=trial.ts_start,
+                    ts_end=trial.ts_end,
+                    status=Status[trial.status],
+                )
                 for trial in cur_trials.fetchall()
             }
