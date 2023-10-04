@@ -35,7 +35,7 @@ def from_config(config_file: str,
         A new storage object.
     """
     config_loader = ConfigPersistenceService(kwargs)
-    class_config = config_loader.load_config(config_file, ConfigSchema.STORAGE)  # type: ignore[type-abstract]
+    class_config = config_loader.load_config(config_file, ConfigSchema.STORAGE)
     tunables = TunableGroups()
     for fname in (tunables_files or []):
         # pylint: disable=protected-access
