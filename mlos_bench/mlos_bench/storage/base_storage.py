@@ -32,7 +32,7 @@ class Storage(metaclass=ABCMeta):
     """
 
     @classmethod
-    def new(cls, config_file: str, tunables_files: List[str], **kwargs: dict) -> 'Storage':
+    def new(cls, config_file: str, tunables_files: Optional[List[str]] = None, **kwargs: dict) -> 'Storage':
         """
         Create a new storage object from a config file.
 
@@ -40,8 +40,8 @@ class Storage(metaclass=ABCMeta):
         ----------
         config_file : str
             JSON5 config file to load.
-        tunables_file : str
-            A file with JSON5 metadata of the tunables.
+        tunables_files : Optional[List[str]]
+            An optional list of files containing JSON5 metadata of the tunables.
         kwargs : dict
             Additional configuration parameters.
 
@@ -53,7 +53,7 @@ class Storage(metaclass=ABCMeta):
         config_loader = ConfigPersistenceService(kwargs)
         class_config = config_loader.load_config(config_file, ConfigSchema.STORAGE)  # type: ignore[type-abstract]
         tunables = TunableGroups()
-        for fname in tunables_files:
+        for fname in (tunables_files or []):
             # pylint: disable=protected-access
             tunables = config_loader._load_tunables(fname, tunables)
         assert isinstance(class_config, Dict)
