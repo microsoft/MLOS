@@ -6,7 +6,7 @@
 Factory method to create a new Storage instance from configs.
 """
 
-from typing import Optional, List, Dict
+from typing import Any, Optional, List, Dict
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -15,8 +15,9 @@ from mlos_bench.storage.base_storage import Storage
 
 
 def from_config(config_file: str,
-                tunables_files: Optional[List[str]] = None,
-                **kwargs: dict) -> Storage:
+                global_configs: Optional[List[str]] = None,
+                tunables: Optional[List[str]] = None,
+                **kwargs: Any) -> Storage:
     """
     Create a new storage object from JSON5 config file.
 
@@ -24,7 +25,9 @@ def from_config(config_file: str,
     ----------
     config_file : str
         JSON5 config file to load.
-    tunables_files : Optional[List[str]]
+    global_configs : Optional[List[str]]
+        An optional list of config files with global parameters.
+    tunables : Optional[List[str]]
         An optional list of files containing JSON5 metadata of the tunables.
     kwargs : dict
         Additional configuration parameters.
@@ -34,19 +37,27 @@ def from_config(config_file: str,
     storage : Storage
         A new storage object.
     """
-    config_loader = ConfigPersistenceService(kwargs)
+    config_path: List[str] = kwargs.get("config_path", [])
+    config_loader = ConfigPersistenceService({"config_path": config_path})
+    global_config = {}
+    for fname in (global_configs or []):
+        config = config_loader.load_config(fname, ConfigSchema.GLOBALS)
+        global_config.update(config)
+        config_path += config.get("config_path", [])
+        config_loader = ConfigPersistenceService({"config_path": config_path})
+    global_config.update(kwargs)
+
+    # pylint: disable=protected-access
+    tunable_groups = config_loader._load_tunables(tunables or [], TunableGroups())
     class_config = config_loader.load_config(config_file, ConfigSchema.STORAGE)
-    tunables = TunableGroups()
-    for fname in (tunables_files or []):
-        # pylint: disable=protected-access
-        tunables = config_loader._load_tunables(fname, tunables)
     assert isinstance(class_config, Dict)
+
     ret = config_loader.build_generic(
         base_cls=Storage,  # type: ignore[type-abstract]
-        tunables=tunables,
+        tunables=tunable_groups,
         service=config_loader,
         config=class_config,
-        global_config=kwargs
+        global_config=global_config
     )
     assert isinstance(ret, Storage)
     return ret
