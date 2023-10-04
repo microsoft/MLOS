@@ -13,10 +13,8 @@ from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
 
-from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
-from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import get_git_info
@@ -25,47 +23,10 @@ _LOG = logging.getLogger(__name__)
 
 
 class Storage(metaclass=ABCMeta):
-    # pylint: disable=too-few-public-methods
     """
     An abstract interface between the benchmarking framework
     and storage systems (e.g., SQLite or MLFLow).
     """
-
-    @classmethod
-    def new(cls, config_file: str, tunables_files: Optional[List[str]] = None, **kwargs: dict) -> 'Storage':
-        """
-        Create a new storage object from a config file.
-
-        Parameters
-        ----------
-        config_file : str
-            JSON5 config file to load.
-        tunables_files : Optional[List[str]]
-            An optional list of files containing JSON5 metadata of the tunables.
-        kwargs : dict
-            Additional configuration parameters.
-
-        Returns
-        -------
-        storage : Storage
-            A new storage object.
-        """
-        config_loader = ConfigPersistenceService(kwargs)
-        class_config = config_loader.load_config(config_file, ConfigSchema.STORAGE)  # type: ignore[type-abstract]
-        tunables = TunableGroups()
-        for fname in (tunables_files or []):
-            # pylint: disable=protected-access
-            tunables = config_loader._load_tunables(fname, tunables)
-        assert isinstance(class_config, Dict)
-        ret = config_loader.build_generic(
-            base_cls=cls,
-            tunables=tunables,
-            service=config_loader,
-            config=class_config,
-            global_config=kwargs
-        )
-        assert isinstance(ret, cls)
-        return ret
 
     def __init__(self,
                  tunables: TunableGroups,
