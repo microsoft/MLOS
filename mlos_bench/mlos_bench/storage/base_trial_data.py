@@ -34,7 +34,7 @@ class TrialData(metaclass=ABCMeta):
         self._status = status
 
     def __repr__(self) -> str:
-        return f"Trial :: {self._exp_id}:{self._trial_id} config:{self._config_id} {self._status}"
+        return f"{self._exp_id}:{self._trial_id} config:{self._config_id} {self._status.name}"
 
     @property
     def exp_id(self) -> str:
