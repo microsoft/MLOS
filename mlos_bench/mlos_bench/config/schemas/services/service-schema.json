@@ -41,7 +41,7 @@
                             "$ref": "./remote/azure/azure-fileshare-service-subschema.json"
                         },
                         {
-                            "$ref": "./remote/azure/azure-flex-service-subschema.json"
+                            "$ref": "./remote/azure/azure-saas-service-subschema.json"
                         }
                     ],
                     "required": ["class"]
