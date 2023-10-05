@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-flex-service-subschema.json",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-saas-service-subschema.json",
     "title": "mlos_bench Azure Flex DB configuration Service config",
     "description": "config for an mlos_bench Azure Flex DB Service configuration",
     "type": "object",
