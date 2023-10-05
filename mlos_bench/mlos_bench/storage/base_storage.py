@@ -15,6 +15,7 @@ from typing_extensions import Literal
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
+from mlos_bench.storage.base_experiment_data import ExperimentData
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import get_git_info
 
@@ -22,7 +23,6 @@ _LOG = logging.getLogger(__name__)
 
 
 class Storage(metaclass=ABCMeta):
-    # pylint: disable=too-few-public-methods,too-many-instance-attributes
     """
     An abstract interface between the benchmarking framework
     and storage systems (e.g., SQLite or MLFLow).
@@ -49,6 +49,18 @@ class Storage(metaclass=ABCMeta):
         self._service = service
         self._config = config.copy()
         self._global_config = global_config or {}
+
+    @property
+    @abstractmethod
+    def experiments(self) -> Dict[str, ExperimentData]:
+        """
+        Retrieve the experiments' data from the storage.
+
+        Returns
+        -------
+        experiments : Dict[str, ExperimentData]
+            A dictionary of the experiments' data, keyed by experiment id.
+        """
 
     @abstractmethod
     def experiment(self, *,
@@ -214,6 +226,7 @@ class Storage(metaclass=ABCMeta):
             """
 
     class Trial(metaclass=ABCMeta):
+        # pylint: disable=too-many-instance-attributes
         """
         Base interface for storing the results of a single run of the experiment.
         This class is instantiated in the `Storage.Experiment.trial()` method.
