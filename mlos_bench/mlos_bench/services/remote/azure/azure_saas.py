@@ -63,20 +63,34 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             "subscription",
             "resourceGroup",
             "provider",
-            "supportsBatchUpdate",
-            "isFlex",
-            "apiVersion"
         })
 
-        self._is_batch = self.config["supportsBatchUpdate"]
+        (self._is_batch, is_flex, api_version) = {
+            "Microsoft.DBforMySQL": (
+                self.config.get("supportsBatchUpdate", True),
+                self.config.get("isFlex", True),
+                self.config.get("apiVersion", "2022-01-01"),
+            ),
+            "Microsoft.DBforMariaDB": (
+                self.config.get("supportsBatchUpdate", False),
+                self.config.get("isFlex", False),
+                self.config.get("apiVersion", "2018-06-01"),
+            ),
+            "Microsoft.DBforPostgreSQL": (
+                self.config.get("supportsBatchUpdate", False),
+                self.config.get("isFlex", True),
+                self.config.get("apiVersion", "2022-12-01"),
+            ),
+        }[self.config["provider"]]
+
         self._url_config = self._URL_CONFIGURE.format(
             subscription=self.config["subscription"],
             resource_group=self.config["resourceGroup"],
             provider=self.config["provider"],
             vm_name="{vm_name}",
-            server_type="flexibleServers" if self.config["isFlex"] else "servers",
+            server_type="flexibleServers" if is_flex else "servers",
             update="updateConfigurations" if self._is_batch else "configurations/{param_name}",
-            api_version=self.config["apiVersion"],
+            api_version=api_version,
         )
 
         # These parameters can come from command line as strings, so conversion is needed.
