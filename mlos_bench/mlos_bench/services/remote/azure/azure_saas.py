@@ -27,8 +27,10 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
     _REQUEST_TIMEOUT = 5  # seconds
 
-    # Azure SaaS DB Services Configuration REST API as described in
+    # REST API for Azure SaaS DB Services configuration as described in:
     # https://learn.microsoft.com/en-us/rest/api/mysql/flexibleserver/configurations
+    # https://learn.microsoft.com/en-us/rest/api/postgresql/flexibleserver/configurations
+    # https://learn.microsoft.com/en-us/rest/api/mariadb/configurations
 
     _URL_CONFIGURE = (
         "https://management.azure.com" +
@@ -65,23 +67,24 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             "provider",
         })
 
-        (self._is_batch, is_flex, api_version) = {
-            "Microsoft.DBforMySQL": (
-                self.config.get("supportsBatchUpdate", True),
-                self.config.get("isFlex", True),
-                self.config.get("apiVersion", "2022-01-01"),
-            ),
-            "Microsoft.DBforMariaDB": (
-                self.config.get("supportsBatchUpdate", False),
-                self.config.get("isFlex", False),
-                self.config.get("apiVersion", "2018-06-01"),
-            ),
-            "Microsoft.DBforPostgreSQL": (
-                self.config.get("supportsBatchUpdate", False),
-                self.config.get("isFlex", True),
-                self.config.get("apiVersion", "2022-12-01"),
-            ),
-        }[self.config["provider"]]
+        # Provide sane defaults for known DB providers.
+        provider = self.config.get("provider")
+        if provider == "Microsoft.DBforMySQL":
+            self._is_batch = self.config.get("supportsBatchUpdate", True)
+            is_flex = self.config.get("isFlex", True)
+            api_version = self.config.get("apiVersion", "2022-01-01")
+        elif provider == "Microsoft.DBforMariaDB":
+            self._is_batch = self.config.get("supportsBatchUpdate", False)
+            is_flex = self.config.get("isFlex", False)
+            api_version = self.config.get("apiVersion", "2018-06-01")
+        elif provider == "Microsoft.DBforPostgreSQL":
+            self._is_batch = self.config.get("supportsBatchUpdate", False)
+            is_flex = self.config.get("isFlex", True)
+            api_version = self.config.get("apiVersion", "2022-12-01")
+        else:
+            self._is_batch = self.config["supportsBatchUpdate"]
+            is_flex = self.config["isFlex"]
+            api_version = self.config["apiVersion"]
 
         self._url_config = self._URL_CONFIGURE.format(
             subscription=self.config["subscription"],
