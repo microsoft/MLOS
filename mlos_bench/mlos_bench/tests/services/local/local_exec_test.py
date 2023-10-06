@@ -50,7 +50,10 @@ def local_exec_service() -> LocalExecService:
     """
     Test fixture for LocalExecService.
     """
-    return LocalExecService(parent=ConfigPersistenceService())
+    return LocalExecService(config={
+        "abort_on_error": True,
+    },
+        parent=ConfigPersistenceService())
 
 
 def test_resolve_script(local_exec_service: LocalExecService) -> None:
@@ -168,3 +171,30 @@ def test_run_script_fail(local_exec_service: LocalExecService) -> None:
     (return_code, stdout, _stderr) = local_exec_service.local_exec(["foo_bar_baz hello"])
     assert return_code != 0
     assert stdout.strip() == ""
+
+
+def test_run_script_middle_fail_abort(local_exec_service: LocalExecService) -> None:
+    """
+    Try to run a series of commands, one of which fails, and abort early.
+    """
+    (return_code, stdout, _stderr) = local_exec_service.local_exec([
+        "echo hello",
+        "false",
+        "echo world",
+    ])
+    assert return_code != 0
+    assert stdout.strip() == "hello"
+
+
+def test_run_script_middle_fail_pass(local_exec_service: LocalExecService) -> None:
+    """
+    Try to run a series of commands, one of which fails, but let it pass.
+    """
+    local_exec_service.abort_on_error = False
+    (return_code, stdout, _stderr) = local_exec_service.local_exec([
+        "echo -n hello",
+        "false",
+        "echo world",
+    ])
+    assert return_code == 0
+    assert stdout.strip() == "helloworld"
