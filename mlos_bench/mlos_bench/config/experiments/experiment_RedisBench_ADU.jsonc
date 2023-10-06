@@ -1,5 +1,7 @@
 {
-    "experiment_id": "ADU-MLOS-Demo",
+    // *** IMPORTANT! ***
+    // Make sure each user has a unique experiment_id:
+    "experiment_id": "ADU-User-YOUR_ID_HERE",
     "trial_id": 1,
 
     // Any global parameter can be used as a dollar variable in the global config:
