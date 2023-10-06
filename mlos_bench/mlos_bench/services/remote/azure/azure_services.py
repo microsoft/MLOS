@@ -445,11 +445,20 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             deployment_name=config["deploymentName"],
         )
 
-        response = requests.head(url, headers=self._get_headers(), timeout=self._request_timeout)
+        response = requests.get(url, headers=self._get_headers(), timeout=self._request_timeout)
         _LOG.debug("Response: %s", response)
 
-        if response.status_code == 204:
-            return (Status.SUCCEEDED, {})
+        if response.status_code == 200:
+            output = response.json()
+            state = output.get("properties", {}).get("provisioningState", "")
+
+            if state == "Succeeded":
+                return (Status.SUCCEEDED, {})
+            elif state in {"Accepted", "Creating", "Deleting", "Running", "Updating"}:
+                return (Status.PENDING, {})
+            else:
+                _LOG.error("Response: %s :: %s", response, response.text)
+                return (Status.FAILED, {})
         elif response.status_code == 404:
             return (Status.PENDING, {})
 
