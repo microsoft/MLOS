@@ -50,10 +50,10 @@ def local_exec_service() -> LocalExecService:
     """
     Test fixture for LocalExecService.
     """
-    return LocalExecService(config={
+    config = {
         "abort_on_error": True,
-    },
-        parent=ConfigPersistenceService())
+    }
+    return LocalExecService(config, parent=ConfigPersistenceService())
 
 
 def test_resolve_script(local_exec_service: LocalExecService) -> None:
