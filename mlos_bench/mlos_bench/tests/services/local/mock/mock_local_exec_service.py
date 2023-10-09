@@ -32,6 +32,5 @@ class MockLocalExecService(TempDirContextService, SupportsLocalExec):
 
     def local_exec(self, script_lines: Iterable[str],
                    env: Optional[Mapping[str, "TunableValue"]] = None,
-                   cwd: Optional[str] = None,
-                   return_on_error: bool = False) -> Tuple[int, str, str]:
+                   cwd: Optional[str] = None) -> Tuple[int, str, str]:
         return (0, "", "")
