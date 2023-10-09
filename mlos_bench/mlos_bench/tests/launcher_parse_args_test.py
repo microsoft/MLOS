@@ -35,6 +35,7 @@ def config_paths() -> List[str]:
     List[str]
     """
     return [
+        path_join(os.getcwd(), abs_path=True),
         str(files('mlos_bench.config')),
         str(files('mlos_bench.tests.config')),
     ]
