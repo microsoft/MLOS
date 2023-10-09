@@ -62,8 +62,8 @@ def test_resolve_script(local_exec_service: LocalExecService) -> None:
     """
     script = "os/linux/runtime/scripts/local/generate_kernel_config_script.py"
     script_abspath = local_exec_service.config_loader_service.resolve_path(script)
-    orig_cmdline = f". env.sh && {script}"
-    expected_cmdline = f". env.sh && {script_abspath}"
+    orig_cmdline = f". env.sh && {script} --input foo"
+    expected_cmdline = f". env.sh && {script_abspath} --input foo"
     subcmds_tokens = split_cmdline(orig_cmdline)
     # pylint: disable=protected-access
     subcmds_tokens = [local_exec_service._resolve_cmdline_script_path(subcmd_tokens) for subcmd_tokens in subcmds_tokens]
