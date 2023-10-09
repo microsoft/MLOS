@@ -119,12 +119,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         path_list = list(extra_paths or []) + self._config_path
         _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
-        if not os.path.isabs(file_path):
-            for path in path_list:
-                full_path = path_join(path, file_path, abs_path=True)
-                if os.path.exists(full_path):
-                    _LOG.debug("Path resolved: %s", full_path)
-                    return full_path
+        if os.path.isabs(file_path):
+            _LOG.debug("Path is absolute: %s", file_path)
+            return file_path
+        for path in path_list:
+            full_path = path_join(path, file_path, abs_path=True)
+            if os.path.exists(full_path):
+                _LOG.debug("Path resolved: %s", full_path)
+                return full_path
         _LOG.debug("Path not resolved: %s", file_path)
         return file_path
 
