@@ -49,6 +49,9 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     separated options to --config-paths works.
     Check $var expansion and Environment loading.
     """
+    if sys.platform == 'win32':
+        os.environ['PWD'] = os.getcwd()
+
     # This is part of the minimal required args by the Launcher.
     env_conf_path = 'environments/mock/mock_env.jsonc'
     cli_args = '--config-paths ' + ' '.join(config_paths) + \
@@ -83,6 +86,9 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     Test multiple --config-path instances, --config file vs --arg, --var=val
     overrides, $var templates, option args, --random-init, etc.
     """
+    if sys.platform == 'win32':
+        os.environ['PWD'] = os.getcwd()
+
     config_file = 'cli/test-cli-config.jsonc'
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
         f' --config {config_file}' + \
