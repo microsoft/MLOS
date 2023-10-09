@@ -179,7 +179,7 @@ def test_run_script_middle_fail_abort(local_exec_service: LocalExecService) -> N
     """
     (return_code, stdout, _stderr) = local_exec_service.local_exec([
         "echo hello",
-        "false",
+        "cmd /c 'exit 1'" if sys.platform == 'win32' else "false",
         "echo world",
     ])
     assert return_code != 0
@@ -192,9 +192,12 @@ def test_run_script_middle_fail_pass(local_exec_service: LocalExecService) -> No
     """
     local_exec_service.abort_on_error = False
     (return_code, stdout, _stderr) = local_exec_service.local_exec([
-        "echo -n hello",
-        "false",
+        "echo hello",
+        "cmd /c 'exit 1'" if sys.platform == 'win32' else "false",
         "echo world",
     ])
     assert return_code == 0
-    assert stdout.strip() == "helloworld"
+    assert stdout.splitlines() == [
+        "hello",
+        "world",
+    ]
