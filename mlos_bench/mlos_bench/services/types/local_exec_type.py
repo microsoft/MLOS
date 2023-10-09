@@ -27,8 +27,7 @@ class SupportsLocalExec(Protocol):
 
     def local_exec(self, script_lines: Iterable[str],
                    env: Optional[Mapping[str, TunableValue]] = None,
-                   cwd: Optional[str] = None,
-                   return_on_error: bool = False) -> Tuple[int, str, str]:
+                   cwd: Optional[str] = None) -> Tuple[int, str, str]:
         """
         Execute the script lines from `script_lines` in a local process.
 
@@ -42,9 +41,6 @@ class SupportsLocalExec(Protocol):
         cwd : str
             Work directory to run the script at.
             If omitted, use `temp_dir` or create a temporary dir.
-        return_on_error : bool
-            If True, stop running script lines on first non-zero return code.
-            The default is False.
 
         Returns
         -------
