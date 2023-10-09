@@ -13,6 +13,7 @@ import shlex
 import subprocess
 import sys
 
+from string import Template
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
 
 from mlos_bench.services.base_service import Service
@@ -201,6 +202,9 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
                 cmd = [" ".join(cmd)]
 
             _LOG.info("Run: %s", cmd)
+            if _LOG.isEnabledFor(logging.DEBUG):
+                _LOG.debug("Expands to: %s", Template(" ".join(cmd)).safe_substitute(env))
+                _LOG.debug("Current working dir: %s", cwd)
 
             proc = subprocess.run(cmd, env=env or None, cwd=cwd, shell=True,
                                   text=True, check=False, capture_output=True)

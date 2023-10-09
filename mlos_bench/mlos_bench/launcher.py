@@ -12,6 +12,7 @@ command line.
 
 import argparse
 import logging
+import os
 import sys
 
 from string import Template
@@ -251,7 +252,14 @@ class Launcher:
         NOTE: `self.global_config` must be set.
         """
         if isinstance(value, str):
-            return Template(value).safe_substitute(self.global_config)
+            # use values either from the environment or from the global config
+            # Note: python 3.8 doesn't support the | operator, so we create a
+            # new set of params explicitly.
+            # Since this operates by updating the global_config along the way,
+            # we need to continually update the set of params to use for substitution.
+            params = dict(os.environ)
+            params.update(self.global_config)
+            return Template(value).safe_substitute(params)
         if isinstance(value, dict):
             # Note: we use a loop instead of dict comprehension in order to
             # allow secondary expansion of subsequent values immediately.
