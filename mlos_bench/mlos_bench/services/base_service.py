@@ -120,10 +120,7 @@ class Service:
             _LOG.debug("Service: %s Add methods: %s",
                        self.__class__.__name__, list(services.keys()))
 
-            # Log when an existing method is being overwritten.
-            for service_name in services:
-                if service_name in self._services:
-                    _LOG.debug("Service: %s Overwriting method: %s", self, service_name)
+        # TODO? Throw a warning when an existing method is being overwritten?
 
         self._services.update(services)
         self.__dict__.update(self._services)
