@@ -8,6 +8,7 @@ Helper functions to work with temp files locally on the scheduler side.
 
 import abc
 import logging
+import os
 from contextlib import nullcontext
 from string import Template
 from tempfile import TemporaryDirectory
@@ -69,6 +70,8 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
         temp_dir_context : TemporaryDirectory
             Temporary directory context to use in the `with` clause.
         """
-        if path is None and self._temp_dir is None:
+        temp_dir = path or self._temp_dir
+        if temp_dir is None:
             return TemporaryDirectory()
-        return nullcontext(path or self._temp_dir)
+        os.makedirs(temp_dir, exist_ok=True)
+        return nullcontext(temp_dir)
