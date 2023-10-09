@@ -50,7 +50,10 @@ def local_exec_service() -> LocalExecService:
     """
     Test fixture for LocalExecService.
     """
-    return LocalExecService(parent=ConfigPersistenceService())
+    config = {
+        "abort_on_error": True,
+    }
+    return LocalExecService(config, parent=ConfigPersistenceService())
 
 
 def test_resolve_script(local_exec_service: LocalExecService) -> None:
@@ -59,8 +62,8 @@ def test_resolve_script(local_exec_service: LocalExecService) -> None:
     """
     script = "os/linux/runtime/scripts/local/generate_kernel_config_script.py"
     script_abspath = local_exec_service.config_loader_service.resolve_path(script)
-    orig_cmdline = f". env.sh && {script}"
-    expected_cmdline = f". env.sh && {script_abspath}"
+    orig_cmdline = f". env.sh && {script} --input foo"
+    expected_cmdline = f". env.sh && {script_abspath} --input foo"
     subcmds_tokens = split_cmdline(orig_cmdline)
     # pylint: disable=protected-access
     subcmds_tokens = [local_exec_service._resolve_cmdline_script_path(subcmd_tokens) for subcmd_tokens in subcmds_tokens]
@@ -168,3 +171,33 @@ def test_run_script_fail(local_exec_service: LocalExecService) -> None:
     (return_code, stdout, _stderr) = local_exec_service.local_exec(["foo_bar_baz hello"])
     assert return_code != 0
     assert stdout.strip() == ""
+
+
+def test_run_script_middle_fail_abort(local_exec_service: LocalExecService) -> None:
+    """
+    Try to run a series of commands, one of which fails, and abort early.
+    """
+    (return_code, stdout, _stderr) = local_exec_service.local_exec([
+        "echo hello",
+        "cmd /c 'exit 1'" if sys.platform == 'win32' else "false",
+        "echo world",
+    ])
+    assert return_code != 0
+    assert stdout.strip() == "hello"
+
+
+def test_run_script_middle_fail_pass(local_exec_service: LocalExecService) -> None:
+    """
+    Try to run a series of commands, one of which fails, but let it pass.
+    """
+    local_exec_service.abort_on_error = False
+    (return_code, stdout, _stderr) = local_exec_service.local_exec([
+        "echo hello",
+        "cmd /c 'exit 1'" if sys.platform == 'win32' else "false",
+        "echo world",
+    ])
+    assert return_code == 0
+    assert stdout.splitlines() == [
+        "hello",
+        "world",
+    ]
