@@ -457,7 +457,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             elif state in {"Accepted", "Creating", "Deleting", "Running", "Updating"}:
                 return (Status.PENDING, {})
             else:
-                _LOG.error("Response: %s :: %s", response, response.text)
+                _LOG.error("Response: %s :: %s", response, json.dumps(output, index=2))
                 return (Status.FAILED, {})
         elif response.status_code == 404:
             return (Status.PENDING, {})
