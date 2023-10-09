@@ -9,6 +9,7 @@ Helper functions to work with temp files locally on the scheduler side.
 import abc
 import logging
 from contextlib import nullcontext
+from string import Template
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, Optional, Union
 
@@ -46,6 +47,13 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
         """
         super().__init__(config, global_config, parent)
         self._temp_dir = self.config.get("temp_dir")
+        if self._temp_dir:
+            # expand globals
+            global_config_strs = {} if global_config is None else {key: str(val) for (key, val) in global_config.items()}
+            self._temp_dir = Template(self._temp_dir).substitute(global_config_strs)
+            # and resolve the path to absolute path
+            self._temp_dir = self._config_loader_service.resolve_path(self._temp_dir)
+        _LOG.info("%s: temp dir: %s", self, self._temp_dir)
         self.register([self.temp_dir_context])
 
     def temp_dir_context(self, path: Optional[str] = None) -> Union[TemporaryDirectory, nullcontext]:
