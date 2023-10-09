@@ -49,8 +49,7 @@ class TempDirContextService(Service, metaclass=abc.ABCMeta):
         self._temp_dir = self.config.get("temp_dir")
         if self._temp_dir:
             # expand globals
-            global_config_strs = {} if global_config is None else {key: str(val) for (key, val) in global_config.items()}
-            self._temp_dir = Template(self._temp_dir).substitute(global_config_strs)
+            self._temp_dir = Template(self._temp_dir).safe_substitute(global_config or {})
             # and resolve the path to absolute path
             self._temp_dir = self._config_loader_service.resolve_path(self._temp_dir)
         _LOG.info("%s: temp dir: %s", self, self._temp_dir)
