@@ -65,7 +65,7 @@ class OptimizerFactory:
                optimizer_type: OptimizerType = DEFAULT_OPTIMIZER_TYPE,
                optimizer_kwargs: Optional[dict] = None,
                space_adapter_type: SpaceAdapterType = SpaceAdapterType.IDENTITY,
-               space_adapter_kwargs: Optional[dict] = None) -> ConcreteOptimizer:
+               space_adapter_kwargs: Optional[dict] = None) -> ConcreteOptimizer:   # type: ignore[type-var]
         """
         Create a new optimizer instance, given the parameter space, optimizer type,
         and potential optimizer options.
