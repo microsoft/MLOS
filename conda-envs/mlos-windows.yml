@@ -32,8 +32,9 @@ dependencies:
     - licenseheaders
     - mypy
     - pandas-stubs
-    - types-jsonschema
+    - types-beautifulsoup4
     - types-colorama
+    - types-jsonschema
     - types-pygments
     - types-requests
     - types-setuptools
