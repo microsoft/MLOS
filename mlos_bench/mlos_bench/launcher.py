@@ -257,8 +257,8 @@ class Launcher:
             # new set of params explicitly.
             # Since this operates by updating the global_config along the way,
             # we need to continually update the set of params to use for substitution.
-            params = dict(os.environ)
-            params.update(self.global_config)
+            params = self.global_config.copy()
+            params.update(dict(os.environ))
             return Template(value).safe_substitute(params)
         if isinstance(value, dict):
             # Note: we use a loop instead of dict comprehension in order to
