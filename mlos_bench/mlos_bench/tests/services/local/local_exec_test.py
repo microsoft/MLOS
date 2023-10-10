@@ -222,4 +222,4 @@ def test_temp_dir_path_expansion() -> None:
         }
         local_exec_service = LocalExecService(config, global_config, parent=ConfigPersistenceService())
         # pylint: disable=protected-access
-        assert local_exec_service._temp_dir == path_join(temp_dir, "temp")
+        assert path_join(local_exec_service._temp_dir, abs_path=True) == path_join(temp_dir, "temp")
