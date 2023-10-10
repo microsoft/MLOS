@@ -136,4 +136,4 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
 
 
 if __name__ == '__main__':
-    pytest.main([__file__, "-n1", "-k", "test_launcher_args_parse_2"])
+    pytest.main([__file__, "-n1"])
