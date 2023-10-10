@@ -10,6 +10,7 @@ import abc
 import json
 import logging
 from datetime import datetime
+from string import Template
 from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
@@ -114,7 +115,7 @@ class Environment(metaclass=abc.ABCMeta):
         self._service = service
         self._is_ready = False
         self._in_context = False
-        self._const_args = config.get("const_args", {})
+        self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
 
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
@@ -133,6 +134,7 @@ class Environment(metaclass=abc.ABCMeta):
             set(self._tunable_params.get_param_values().keys())
         )
         merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
+        self._const_args = self._expand_vars(self._const_args, global_config or {})
 
         self._params = self._combine_tunables(self._tunable_params)
         _LOG.debug("Parameters for '%s' :: %s", name, self._params)
@@ -170,6 +172,19 @@ class Environment(metaclass=abc.ABCMeta):
                 res += [add_groups] if isinstance(add_groups, str) else add_groups
             else:
                 res.append(grp)
+        return res
+
+    @staticmethod
+    def _expand_vars(params: Dict[str, TunableValue], global_config: Dict[str, TunableValue]) -> dict:
+        """
+        Expand `$var` into actual values of the variables.
+        """
+        res: Dict[str, TunableValue] = {}
+        for key, val in params.items():
+            if isinstance(val, str):
+                res[key] = Template(val).safe_substitute(global_config)
+            else:
+                res[key] = val
         return res
 
     @property
