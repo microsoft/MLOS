@@ -69,7 +69,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             if path not in self._config_path:
                 self._config_path.append(path_join(path, abs_path=True))
         # Prepend the cwd if not already on the list.
-        cwd = os.path.abspath(os.getcwd())
+        cwd = path_join(os.getcwd(), abs_path=True)
         if cwd not in self._config_path:
             self._config_path.insert(0, cwd)
         # Append the built-in config path if not already on the list.
