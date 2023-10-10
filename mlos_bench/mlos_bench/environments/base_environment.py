@@ -179,13 +179,10 @@ class Environment(metaclass=abc.ABCMeta):
         """
         Expand `$var` into actual values of the variables.
         """
-        res: Dict[str, TunableValue] = {}
-        for key, val in params.items():
-            if isinstance(val, str):
-                res[key] = Template(val).safe_substitute(global_config)
-            else:
-                res[key] = val
-        return res
+        return {
+            key: Template(val).safe_substitute(global_config) if isinstance(val, str) else val
+            for key, val in params.items()
+        }
 
     @property
     def _config_loader_service(self) -> "SupportsConfigLoading":
