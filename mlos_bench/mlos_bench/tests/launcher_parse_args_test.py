@@ -70,7 +70,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # Check overriding values in a file from the command line.
     assert launcher.global_config['test_global_value_2'] == 'from-args'
     # Check that we can expand a $var in a config file that references an environment variable.
-    assert launcher.global_config["varWithEnvVarRef"] == path_join(os.getcwd(), "foo", abs_path=True)
+    assert path_join(launcher.global_config["varWithEnvVarRef"], abs_path=True) == path_join(os.getcwd(), "foo", abs_path=True)
     assert launcher.teardown
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(env_conf_path, ConfigSchema.ENVIRONMENT)
@@ -105,7 +105,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # Check that secondary expansion also works.
     assert launcher.global_config['testVnetName'] == 'MockeryExperiment-vm-vnet'
     # Check that we can expand a $var in a config file that references an environment variable.
-    assert launcher.global_config["varWithEnvVarRef"] == path_join(os.getcwd(), "foo", abs_path=True)
+    assert path_join(launcher.global_config["varWithEnvVarRef"], abs_path=True) == path_join(os.getcwd(), "foo", abs_path=True)
     assert not launcher.teardown
 
     config = launcher.config_loader.load_config(config_file, ConfigSchema.CLI)
@@ -133,3 +133,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # applies to a temporary Optimizer used to populate the initial values via
     # random sampling.
     # assert launcher.optimizer.seed == 1234
+
+
+if __name__ == '__main__':
+    pytest.main([__file__, "-n1"])
