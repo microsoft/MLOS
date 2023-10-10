@@ -6,6 +6,7 @@
 Unit tests for the service to run the scripts locally.
 """
 import sys
+import tempfile
 
 import pytest
 import pandas
@@ -201,3 +202,24 @@ def test_run_script_middle_fail_pass(local_exec_service: LocalExecService) -> No
         "hello",
         "world",
     ]
+
+
+def test_temp_dir_path_expansion() -> None:
+    """
+    Test that we can control the temp_dir path using globals expansion.
+    """
+    # Create a temp dir for the test.
+    # Normally this would be a real path set on the CLI or in a global config,
+    # but for test purposes we still want it to be dynamic and cleaned up after
+    # the fact.
+    with tempfile.TemporaryDirectory() as temp_dir:
+        global_config = {
+            "workdir": temp_dir,   # e.g., "." or "/tmp/mlos_bench"
+        }
+        config = {
+            # The temp_dir for the LocalExecService should get expanded via workdir global config.
+            "temp_dir": "$workdir/temp",
+        }
+        local_exec_service = LocalExecService(config, global_config, parent=ConfigPersistenceService())
+        # pylint: disable=protected-access
+        assert local_exec_service._temp_dir == path_join(temp_dir, "temp")

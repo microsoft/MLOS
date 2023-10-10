@@ -68,6 +68,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         for path in self.config.get("config_path", []):
             if path not in self._config_path:
                 self._config_path.append(path_join(path, abs_path=True))
+        # Prepend the cwd if not already on the list.
+        cwd = os.path.abspath(os.getcwd())
+        if cwd not in self._config_path:
+            self._config_path.insert(0, cwd)
+        # Append the built-in config path if not already on the list.
         if self.BUILTIN_CONFIG_PATH not in self._config_path:
             self._config_path.append(self.BUILTIN_CONFIG_PATH)
 
@@ -114,12 +119,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         path_list = list(extra_paths or []) + self._config_path
         _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
-        if not os.path.isabs(file_path):
-            for path in path_list:
-                full_path = path_join(path, file_path, abs_path=True)
-                if os.path.exists(full_path):
-                    _LOG.debug("Path resolved: %s", full_path)
-                    return full_path
+        if os.path.isabs(file_path):
+            _LOG.debug("Path is absolute: %s", file_path)
+            return file_path
+        for path in path_list:
+            full_path = path_join(path, file_path, abs_path=True)
+            if os.path.exists(full_path):
+                _LOG.debug("Path resolved: %s", full_path)
+                return full_path
         _LOG.debug("Path not resolved: %s", file_path)
         return file_path
 
