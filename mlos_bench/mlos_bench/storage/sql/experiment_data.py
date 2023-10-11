@@ -107,12 +107,12 @@ class ExperimentSqlData(ExperimentData):
                 )
             )
             results_df = pandas.DataFrame(
-                [(row.trial_id, "result." + row.metric_id, float(row.metric_value))
+                [(row.trial_id, "result." + row.metric_id, row.metric_value)
                  for row in cur_results.fetchall()],
                 columns=['trial_id', 'metric', 'value']
             ).pivot(
                 index="trial_id", columns="metric", values="value",
-            )
+            ).apply(pandas.to_numeric, errors='ignore')
 
             return trials_df.merge(configs_df, on=["trial_id", "config_id"], how="left") \
                             .merge(results_df, on="trial_id", how="left")
