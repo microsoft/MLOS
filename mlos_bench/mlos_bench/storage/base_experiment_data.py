@@ -19,7 +19,7 @@ class ExperimentData(metaclass=ABCMeta):
     Base interface for accessing the stored benchmark data.
     """
 
-    def __init__(self, exp_id: str, description: str,
+    def __init__(self, *, exp_id: str, description: str,
                  root_env_config: str, git_repo: str, git_commit: str):
         self._exp_id = exp_id
         self._description = description

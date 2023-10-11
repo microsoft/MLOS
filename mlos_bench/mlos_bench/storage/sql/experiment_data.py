@@ -24,7 +24,13 @@ class ExperimentSqlData(ExperimentData):
 
     def __init__(self, *, engine: Engine, schema: DbSchema, exp_id: str,
                  description: str, root_env_config: str, git_repo: str, git_commit: str):
-        super().__init__(exp_id, description, root_env_config, git_repo, git_commit)
+        super().__init__(
+            exp_id=exp_id,
+            description=description,
+            root_env_config=root_env_config,
+            git_repo=git_repo,
+            git_commit=git_commit,
+        )
         self._engine = engine
         self._schema = schema
 

@@ -90,7 +90,7 @@ class SqlStorage(Storage):
                     description=exp.description,
                     root_env_config=exp.root_env_config,
                     git_repo=exp.git_repo,
-                    git_commit=exp.git_commit
+                    git_commit=exp.git_commit,
                 )
                 for exp in cur_exp.fetchall()
             }
