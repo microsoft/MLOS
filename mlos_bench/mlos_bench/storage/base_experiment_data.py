@@ -7,7 +7,7 @@ Base interface for accessing the stored benchmark data.
 """
 
 from abc import ABCMeta, abstractmethod
-from typing import Dict
+from typing import Dict, Tuple
 
 import pandas
 
@@ -19,8 +19,13 @@ class ExperimentData(metaclass=ABCMeta):
     Base interface for accessing the stored benchmark data.
     """
 
-    def __init__(self, exp_id: str):
+    def __init__(self, exp_id: str, description: str,
+                 root_env_config: str, git_repo: str, git_commit: str):
         self._exp_id = exp_id
+        self._description = description
+        self._root_env_config = root_env_config
+        self._git_repo = git_repo
+        self._git_commit = git_commit
 
     @property
     def exp_id(self) -> str:
@@ -29,8 +34,27 @@ class ExperimentData(metaclass=ABCMeta):
         """
         return self._exp_id
 
+    @property
+    def description(self) -> str:
+        """
+        Description of the current experiment.
+        """
+        return self._description
+
+    @property
+    def root_env_config(self) -> Tuple[str, str, str]:
+        """
+        Root environment configuration.
+
+        Returns
+        -------
+        root_env_config : Tuple[str, str, str]
+            A tuple of (root_env_config, git_repo, git_commit) for the root environment.
+        """
+        return (self._root_env_config, self._git_repo, self._git_commit)
+
     def __repr__(self) -> str:
-        return f"Experiment :: {self._exp_id}"
+        return f"Experiment :: {self._exp_id}: '{self._description}'"
 
     @property
     @abstractmethod

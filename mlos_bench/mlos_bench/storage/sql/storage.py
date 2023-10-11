@@ -78,13 +78,19 @@ class SqlStorage(Storage):
     def experiments(self) -> Dict[str, ExperimentData]:
         with self._engine.connect() as conn:
             cur_exp = conn.execute(
-                self._schema.experiment.select().with_only_columns(
-                    self._schema.experiment.c.exp_id
-                ).order_by(
+                self._schema.experiment.select().order_by(
                     self._schema.experiment.c.exp_id.asc(),
                 )
             )
             return {
-                exp.exp_id: ExperimentSqlData(self._engine, self._schema, exp.exp_id)
+                exp.exp_id: ExperimentSqlData(
+                    engine=self._engine,
+                    schema=self._schema,
+                    exp_id=exp.exp_id,
+                    description=exp.description,
+                    root_env_config=exp.root_env_config,
+                    git_repo=exp.git_repo,
+                    git_commit=exp.git_commit
+                )
                 for exp in cur_exp.fetchall()
             }
