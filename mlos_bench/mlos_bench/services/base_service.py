@@ -97,7 +97,9 @@ class Service:
         instantiated from in order to validate configs provided outside the
         file loading mechanism.
         """
-        if isinstance(self, SupportsConfigLoading):
+        if self.__class__ == Service:
+            # Skip over the case where instantiate a bare base Service class in order to build up a mix-in.
+            assert config == {}
             return
         json_config: dict = {
             "class": self.__class__.__module__ + "." + self.__class__.__name__,
