@@ -1,0 +1,20 @@
+//
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+//
+
+// *** DO *NOT* CHANGE! This config is used for tests! ***
+{
+    "experiment_id": "MockExperiment",
+    "trial_id": 1,
+
+    // A couple of dynamic globals used to test variable expansion.
+    "testVmName": "$experiment_id-vm",
+    "testVnetName": "$testVmName-vnet",
+
+    "varWithEnvVarRef": "$PWD/foo",
+
+    // Override the default value of the "max_iterations" parameter
+    // of the optimizer when running local tests:
+    "max_iterations": 5
+}

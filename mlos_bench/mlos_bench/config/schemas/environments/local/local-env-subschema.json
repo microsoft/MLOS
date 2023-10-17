@@ -16,37 +16,23 @@
                     "description": "Path to a file to dump the parameters to.",
                     "type": "string"
                 },
+                "dump_meta_file": {
+                    "description": "Path to a file to dump the tunables' metadata to.",
+                    "type": "string"
+                },
                 "read_results_file": {
                     "description": "Path to a file to read the results from.",
-                    "type": "string"
-                }
-            },
-            "allOf": [
-                {
-                    "if": {
-                        "required": [
-                            "dump_params_file"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "setup"
-                        ]
-                    }
+                    "type": "string",
+                    "$comment": "Currently we only support CSV files.",
+                    "pattern": "[.]csv$"
                 },
-                {
-                    "if": {
-                        "required": [
-                            "read_results_file"
-                        ]
-                    },
-                    "then": {
-                        "required": [
-                            "run"
-                        ]
-                    }
+                "read_telemetry_file": {
+                    "description": "Path to a file to read the telemetry data from.",
+                    "type": "string",
+                    "$comment": "Currently we only support CSV files.",
+                    "pattern": "[.]csv$"
                 }
-            ]
+            }
         }
     },
     "$comment": "NOTE: We only list unique properties here. Others are inherited from the leaf-environment-subschema.json. Additionally, unevaluatedProperties handling is dealt with elsewhere.",
@@ -70,7 +56,7 @@
                     "$ref": "../common-environment-subschemas.json#/$defs/setup_run_teardown_configs"
                 },
                 {
-                    "$ref": "../common-environment-subschemas.json#/$defs/shell_params_config"
+                    "$ref": "../common-environment-subschemas.json#/$defs/shell_env_params_config"
                 },
                 {
                     "$ref": "#/$defs/local_env_config"

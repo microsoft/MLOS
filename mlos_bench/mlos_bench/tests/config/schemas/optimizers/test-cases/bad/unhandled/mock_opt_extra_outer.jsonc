@@ -5,9 +5,9 @@
     "extra_outer": "should not be here",
 
     "config": {
-        "minimize": "score",
+        "optimization_target": "score",
         "max_iterations": 20,
         "seed": 12345,
-        "use_defaults": false
+        "start_with_defaults": false
     }
 }

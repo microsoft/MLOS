@@ -7,9 +7,8 @@ No-op optimizer for mlos_bench that proposes a single configuration.
 """
 
 import logging
-from typing import Dict, Optional, Any
+from typing import Optional
 
-from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.optimizers.mock_optimizer import MockOptimizer
@@ -25,24 +24,18 @@ class OneShotOptimizer(MockOptimizer):
 
     # TODO: Add support for multiple explicit configs (i.e., FewShot or Manual Optimizer) - #344
 
-    def __init__(self, tunables: TunableGroups,
-                 service: Optional[Service], config: Dict[str, Any]):
-        super().__init__(tunables, service, config)
-        if self._service is None:
-            _LOG.warning("Config loading service not available")
-        else:
-            # Generate initial random or default suggestion based on optimizer config.
-            self._tunables = super().suggest()
-            # Now assign the values we were given in the config.
-            for data_file in config.get("include_tunable_values", []):
-                tunable_values = self._service.config_loader_service.load_config(
-                    data_file, schema_type=ConfigSchema.TUNABLE_VALUES)
-                assert isinstance(tunable_values, Dict)
-                self._tunables.assign(tunable_values)
-        self._tunables.assign(config.get("tunable_values", {}))
-
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
+        super().__init__(tunables, config, global_config, service)
         _LOG.info("Run a single iteration for: %s", self._tunables)
         self._max_iter = 1  # Always run for just one iteration.
+
+    @property
+    def supports_preload(self) -> bool:
+        return False
 
     def suggest(self) -> TunableGroups:
         _LOG.info("Suggest: %s", self._tunables)

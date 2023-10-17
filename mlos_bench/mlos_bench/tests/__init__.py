@@ -12,6 +12,14 @@ from typing import Optional
 from mlos_bench.util import get_class_from_name
 
 
+# A common seed to use to avoid tracking down race conditions and intermingling
+# issues of seeds across tests that run in non-deterministic parallel orders.
+SEED = 42
+
+# import numpy as np
+# np.random.seed(SEED)
+
+
 def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
     """
     Gets the full class name from the given name or None on error.
@@ -23,3 +31,11 @@ def try_resolve_class_name(class_name: Optional[str]) -> Optional[str]:
         return the_class.__module__ + "." + the_class.__name__
     except (ValueError, AttributeError, ModuleNotFoundError, ImportError):
         return None
+
+
+def check_class_name(obj: object, expected_class_name: str) -> bool:
+    """
+    Compares the class name of the given object with the given name.
+    """
+    full_class_name = obj.__class__.__module__ + "." + obj.__class__.__name__
+    return full_class_name == try_resolve_class_name(expected_class_name)

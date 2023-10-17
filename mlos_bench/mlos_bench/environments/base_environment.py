@@ -9,7 +9,11 @@ A hierarchy of benchmark environments.
 import abc
 import json
 import logging
-from typing import Dict, Optional, Tuple, TYPE_CHECKING
+from datetime import datetime
+from string import Template
+from types import TracebackType
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
+from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
@@ -49,7 +53,7 @@ class Environment(metaclass=abc.ABCMeta):
             Human-readable name of the environment.
         class_name: str
             FQN of a Python class to instantiate, e.g.,
-            "mlos_bench.environments.remote.VMEnv".
+            "mlos_bench.environments.remote.HostEnv".
             Must be derived from the `Environment` class.
         config : dict
             Free-format dictionary that contains the benchmark environment
@@ -62,13 +66,14 @@ class Environment(metaclass=abc.ABCMeta):
             A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM/Host, etc.).
 
         Returns
         -------
         env : Environment
             An instance of the `Environment` class initialized with `config`.
         """
+        assert issubclass(cls, Environment)
         return instantiate_from_config(
             cls,
             class_name,
@@ -104,40 +109,117 @@ class Environment(metaclass=abc.ABCMeta):
             A collection of groups of tunable parameters for all environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a VM/Host, etc.).
         """
         ConfigSchema.ENVIRONMENT.validate(config)
         self.name = name
         self.config = config
         self._service = service
         self._is_ready = False
-        self._const_args = config.get("const_args", {})
-
-        merge_parameters(dest=self._const_args, source=global_config,
-                         required_keys=config.get("required_args"))
+        self._in_context = False
+        self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
 
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
             tunables = TunableGroups()
 
-        self._tunable_params = tunables.subgroup(config.get("tunable_params", []))
+        groups = self._expand_groups(
+            config.get("tunable_params", []),
+            (global_config or {}).get("tunable_params_map", {}))
+        _LOG.debug("Tunable groups for: '%s' :: %s", name, groups)
+
+        self._tunable_params = tunables.subgroup(groups)
+
+        # If a parameter comes from the tunables, do not require it in the const_args or globals
+        req_args = (
+            set(config.get("required_args", [])) -
+            set(self._tunable_params.get_param_values().keys())
+        )
+        merge_parameters(dest=self._const_args, source=global_config, required_keys=req_args)
+        self._const_args = self._expand_vars(self._const_args, global_config or {})
+
         self._params = self._combine_tunables(self._tunable_params)
-        _LOG.debug("Parameters for %s :: %s", name, self._params)
+        _LOG.debug("Parameters for '%s' :: %s", name, self._params)
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Config for: %s\n%s",
+            _LOG.debug("Config for: '%s'\n%s",
                        name, json.dumps(self.config, indent=2))
+
+    @staticmethod
+    def _expand_groups(groups: Iterable[str],
+                       groups_exp: Dict[str, Union[str, Sequence[str]]]) -> List[str]:
+        """
+        Expand `$tunable_group` into actual names of the tunable groups.
+
+        Parameters
+        ----------
+        groups : List[str]
+            Names of the groups of tunables, maybe with `$` prefix (subject to expansion).
+        groups_exp : dict
+            A dictionary that maps dollar variables for tunable groups to the lists
+            of actual tunable groups IDs.
+
+        Returns
+        -------
+        groups : List[str]
+            A flat list of tunable groups IDs for the environment.
+        """
+        res: List[str] = []
+        for grp in groups:
+            if grp[:1] == "$":
+                tunable_group_name = grp[1:]
+                if tunable_group_name not in groups_exp:
+                    raise KeyError(f"Expected tunable group name ${tunable_group_name} undefined in {groups_exp}")
+                add_groups = groups_exp[tunable_group_name]
+                res += [add_groups] if isinstance(add_groups, str) else add_groups
+            else:
+                res.append(grp)
+        return res
+
+    @staticmethod
+    def _expand_vars(params: Dict[str, TunableValue], global_config: Dict[str, TunableValue]) -> dict:
+        """
+        Expand `$var` into actual values of the variables.
+        """
+        return {
+            key: Template(val).safe_substitute(global_config) if isinstance(val, str) else val
+            for key, val in params.items()
+        }
 
     @property
     def _config_loader_service(self) -> "SupportsConfigLoading":
         assert self._service is not None
         return self._service.config_loader_service
 
+    def __enter__(self) -> 'Environment':
+        """
+        Enter the environment's benchmarking context.
+        """
+        _LOG.debug("Environment START :: %s", self)
+        assert not self._in_context
+        self._in_context = True
+        return self
+
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exit the context of the benchmarking environment.
+        """
+        if ex_val is None:
+            _LOG.debug("Environment END :: %s", self)
+        else:
+            assert ex_type and ex_val
+            _LOG.warning("Environment END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
+        assert self._in_context
+        self._in_context = False
+        return False  # Do not suppress exceptions
+
     def __str__(self) -> str:
         return self.name
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}::'{self.name}'"
+        return f"{self.__class__.__name__} :: '{self.name}'"
 
     def pprint(self, indent: int = 4, level: int = 0) -> str:
         """
@@ -227,6 +309,25 @@ class Environment(metaclass=abc.ABCMeta):
         _LOG.info("Setup %s :: %s", self, tunables)
         assert isinstance(tunables, TunableGroups)
 
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
+
+        # Assign new values to the environment's tunable parameters:
+        groups = list(self._tunable_params.get_covariant_group_names())
+        self._tunable_params.assign(tunables.get_param_values(groups))
+
+        # Write to the log whether the environment needs to be reset.
+        # (Derived classes still have to check `self._tunable_params.is_updated()`).
+        is_updated = self._tunable_params.is_updated()
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Env '%s': Tunable groups reset = %s :: %s", self, is_updated, {
+                name: self._tunable_params.is_updated([name])
+                for name in self._tunable_params.get_covariant_group_names()
+            })
+        else:
+            _LOG.info("Env '%s': Tunable groups reset = %s", self, is_updated)
+
+        # Combine tunables, const_args, and global config into `self._params`:
         self._params = self._combine_tunables(tunables)
         merge_parameters(dest=self._params, source=global_config)
 
@@ -242,9 +343,11 @@ class Environment(metaclass=abc.ABCMeta):
         single call.
         """
         _LOG.info("Teardown %s", self)
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Execute the run script for this environment.
 
@@ -259,19 +362,24 @@ class Environment(metaclass=abc.ABCMeta):
             If run script is a benchmark, then the score is usually expected to
             be in the `score` field.
         """
-        return self.status()
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
+        (status, _) = self.status()
+        return (status, None)
 
-    def status(self) -> Tuple[Status, Optional[dict]]:
+    def status(self) -> Tuple[Status, List[Tuple[datetime, str, Any]]]:
         """
         Check the status of the benchmark environment.
 
         Returns
         -------
-        (benchmark_status, telemetry) : (Status, dict)
+        (benchmark_status, telemetry) : (Status, list)
             A pair of (benchmark status, telemetry) values.
-            `telemetry` is a free-form dict or None if the environment is not running.
+            `telemetry` is a list (maybe empty) of (timestamp, metric, value) triplets.
         """
+        # Make sure we create a context before invoking setup/run/status/teardown
+        assert self._in_context
         if self._is_ready:
-            return (Status.READY, None)
+            return (Status.READY, [])
         _LOG.warning("Environment not ready: %s", self)
-        return (Status.PENDING, None)
+        return (Status.PENDING, [])

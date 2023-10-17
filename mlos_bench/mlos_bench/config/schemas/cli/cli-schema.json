@@ -12,7 +12,9 @@
             "type": "array",
             "items": {
                 "$ref": "#/$defs/json_config_path"
-            }
+            },
+            "uniqueItems": true,
+            "minItems": 1
         },
         "json_config_path_or_paths": {
             "oneOf": [
@@ -41,7 +43,8 @@
             "type": "array",
             "items": {
                 "type": "string"
-            }
+            },
+            "uniqueItems": true
         },
 
         "environment": {
@@ -59,6 +62,20 @@
             "$ref": "#/$defs/json_config_path"
         },
 
+        "random_init": {
+            "description": "If true, initialize the tunables with random values; otherwise, use the defaults.",
+            "type": "boolean"
+        },
+
+        "random_seed": {
+            "description": "Random seed to use in conjunction with random_init.",
+            "type": "number"
+        },
+
+        "tunable_params_map": {
+            "$ref": "./common-defs-subschemas.json#/$defs/tunable_params_map"
+        },
+
         "tunable_values": {
             "description": "Path to the json config(s) describing the tunable values to use.",
             "$ref": "#/$defs/json_config_path_or_paths"
@@ -69,15 +86,14 @@
             "$ref": "#/$defs/json_config_path_or_paths"
         },
 
-        "experimentId": {
-            "description": "Name of the experiment.",
-            "$comment": "TODO: Rename this to conform to snake case.",
-            "type": "string"
+        "experiment_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/experiment_id"
         },
-        "trialId": {
-            "description": "Trial id to use for the experiment.",
-            "$comment": "TODO: Rename this to conform to snake case.",
-            "type": "integer"
+        "trial_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/trial_id"
+        },
+        "config_id": {
+            "$ref": "./common-defs-subschemas.json#/$defs/config_id"
         },
 
         "teardown": {

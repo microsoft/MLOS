@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/mock/mock-auth-service-subschema.json",
+    "title": "mlos_bench Mock Auth Service config",
+    "description": "config for an mlos_bench Mock Auth Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.tests.services.remote.mock.mock_auth_service.MockAuthService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "properties": {},
+            "required": [],
+            "minProperties": 1,
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class"]
+}

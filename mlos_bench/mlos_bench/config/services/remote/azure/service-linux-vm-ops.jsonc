@@ -1,34 +1,37 @@
+// A service to provision resources specified in an Azure ARM template.
 {
     "services": [
         {
             "class": "mlos_bench.services.remote.azure.AzureVMService",
 
             "config": {
+
+                // All values below, including those in `deploymentTemplateParameters`,
+                // can be overridden by the parameters pushed from the caller Environment.
+                "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
+                "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
+                "deploymentName": "PLACEHOLDER; e.g., mlos-2vms",
+
                 "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-                // `subscription`, `virtualNetworkName`, etc. are placeholders
-                // for values provided in the global config:
-                "subscription": "AZURE SUBSCRIPTION ID",
-                "resourceGroup": "os-autotune",
-                "deploymentName": "os-autotune-001",
 
+                // Make sure to list all ARM template parameters that can be overridden by the caller.
                 "deploymentTemplateParameters": {
-                    "location": "westus2",
 
-                    "adminUsername": "os-autotune",
-                    "authenticationType": "sshPublicKey",
+                    "storageAccountName": "PLACEHOLDER; e.g., osatsharedstorage",
+                    "storageFileShareName": "PLACEHOLDER; e.g., os-autotune-file-share",
+                    "location": "PLACEHOLDER; e.g., westus2",
 
-                    // Fake public key, safe to publish.
-                    "adminPasswordOrKey": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDZnRBZZWYoPaAf4ZFP3rj1IKpdjW3QySgfOfrw6gUcqWN8OnUdxXzJJ35DxDhtZY3Qq038Y7IHfocrxrKL2ID/rrYvo77/uuqaEpELOXU9YA1ervTqlUagARSfeoUQDOZkDsbm603D4/3t3l0hxNHPGDyqjLtP2U+RelhLEngaSGSvwAiFNHJef8ldDfOxgBSVprBvU+48g4mZp5QZ2O50gzhcoFI2+Ho/Am4el2SS6ptxS1BjeVR1/GoLpB/POYfWqgs5/0rrG2gUyRQZdvY97LhMVd3jUK0DeiRnQpv44fnKTh8px3sl6N5sTg9a4tL8PBZC31MqP7QTj9KqMh8HfMp0wEIXPUWinBpTjXtknZiOWodLuAtZ82GzO8sW5HhXW5ZdU6aaNZ1JUakQX+eWTAzF3qQCp2BDIrXccxa5HMjneLczHug5VH1Y4wo3LyI4QBmxoQzYUsvSDBHAGqSu3u6XJVfJbgA5Di1ykGpVaMda0iLc7wG9ADevEfOmSQIMI2PEW6ZLv/+1w+uHYJi4c+3cIr9nSPpBu1HmefY4Hrz9XtYhFwTAk8RCla9v4WPn0hrVQnTBcuW3a79d87v6O2NIv1gosnsEWpWwIHycIe3G/Y6btsoDHcYMWbWewSOVsTru5UAfiZYZk8psjMwc4wcGkIHxcgzFlWb9r8ZOzw== os-autotune-fake-key",
+                    "virtualNetworkName": "PLACEHOLDER; e.g., mlos-2vms-vnet",
+                    "subnetName": "PLACEHOLDER; e.g., mlos-2vms-subnet",
 
-                    "virtualNetworkName": "os-autotune-vnet",
-                    "subnetName": "os-autotune-subnet",
-                    "networkSecurityGroupName": "os-autotune-nsg",
-
-                    "ubuntuOSVersion": "18.04-LTS"
+                    "vmName": "PLACEHOLDER; e.g., os-autotune-linux-vm",
+                    "vmSize": "PLACEHOLDER; e.g., Standard_B2s",
+                    "ubuntuOSVersion": "PLACEHOLDER; e.g., 18.04-LTS"
                 },
 
-                "pollInterval": 10,
-                "pollTimeout": 300
+                "requestTimeout": 20,   // HTTP request timeout in seconds
+                "pollInterval": 20,     // Poll every 20 seconds
+                "pollTimeout": 3600     // Give up polling after one hour
             }
         }
     ]

@@ -184,6 +184,12 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         """
         return self._default
 
+    def is_default(self) -> TunableValue:
+        """
+        Checks whether the currently assigned value of the tunable is at its default.
+        """
+        return self._default == self._current_value
+
     @property
     def value(self) -> TunableValue:
         """
@@ -221,6 +227,24 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
 
         self._current_value = coerced_value
         return self._current_value
+
+    def update(self, value: TunableValue) -> bool:
+        """
+        Assign the value to the tunable. Return True if it is a new value, False otherwise.
+
+        Parameters
+        ----------
+        value : Union[int, float, str]
+            Value to assign.
+
+        Returns
+        -------
+        is_updated : bool
+            True if the new value is different from the previous one, False otherwise.
+        """
+        prev_value = self._current_value
+        self.value = value
+        return prev_value != self._current_value
 
     def is_valid(self, value: TunableValue) -> bool:
         """

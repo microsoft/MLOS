@@ -34,8 +34,8 @@ RUN npm install -g markdown-link-check
 ARG NODE_UID=1000
 ARG NODE_GID=1000
 ARG DOCKER_GID=999
-RUN groupmod --gid $NODE_GID node \
-    && usermod --uid $NODE_UID --gid $NODE_GID node \
+RUN groupmod --non-unique --gid $NODE_GID node \
+    && usermod --non-unique --uid $NODE_UID --gid $NODE_GID node \
     && chown -R $NODE_UID:$NODE_GID /home/node \
     && groupadd --non-unique --gid $DOCKER_GID docker \
     && adduser node docker

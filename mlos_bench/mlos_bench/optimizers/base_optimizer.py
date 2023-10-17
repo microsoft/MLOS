@@ -25,7 +25,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
         """
         Create a new optimizer for the given configuration space defined by the tunables.
 
@@ -35,30 +39,76 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             The tunables to optimize.
         config : dict
             Free-format key/value pairs of configuration parameters to pass to the optimizer.
+        global_config : Optional[dict]
+        service : Optional[Service]
         """
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)
         ConfigSchema.OPTIMIZER.validate(config)
         self._config = config.copy()
+        self._global_config = global_config or {}
         self._tunables = tunables
         self._service = service
+        self._seed = int(config.get("seed", 42))
+
+        experiment_id = self._global_config.get('experiment_id')
+        self.experiment_id = str(experiment_id).strip() if experiment_id else None
+
         self._iter = 1
-        self._use_defaults: bool = bool(strtobool(str(self._config.pop('use_defaults', True))))
-        self._max_iter = int(self._config.pop('max_iterations', 25))
-        self._opt_target: str
-        _opt_target = self._config.pop('maximize', None)
-        if _opt_target is None:
-            self._opt_target = self._config.pop('minimize', 'score')
-            self._opt_sign = 1
-        else:
-            self._opt_target = _opt_target
-            if 'minimize' in self._config:
-                raise ValueError("Cannot specify both 'maximize' and 'minimize'.")
-            self._opt_sign = -1
+        # If False, use the optimizer to suggest the initial configuration;
+        # if True (default), use the already initialized values for the first iteration.
+        self._start_with_defaults: bool = bool(
+            strtobool(str(self._config.pop('start_with_defaults', True))))
+        self._max_iter = int(self._config.pop('max_iterations', 100))
+        self._opt_target = str(self._config.pop('optimization_target', 'score'))
+        self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
 
     def __repr__(self) -> str:
-        opt_direction = 'min' if self._opt_sign > 0 else 'max'
-        return f"{self.__class__.__name__}:{opt_direction}({self._opt_target})"
+        opt_direction = 'min' if self.is_min else 'max'
+        return f"{self.name}:{opt_direction}({self.target})(config={self._config})"
+
+    @property
+    def seed(self) -> int:
+        """
+        The random seed for the optimizer.
+        """
+        return self._seed
+
+    @property
+    def start_with_defaults(self) -> bool:
+        """
+        Return True if the optimizer should start with the default values.
+        Note: This parameter is mutable and will be reset to False after the
+        defaults are first suggested.
+        """
+        return self._start_with_defaults
+
+    @property
+    def tunable_params(self) -> TunableGroups:
+        """
+        Get the configuration space of the optimizer.
+
+        Returns
+        -------
+        tunables : TunableGroups
+            A collection of covariant groups of tunable parameters.
+        """
+        return self._tunables
+
+    @property
+    def name(self) -> str:
+        """
+        The name of the optimizer. We save this information in
+        mlos_bench storage to track the source of each configuration.
+        """
+        return self.__class__.__name__
+
+    @property
+    def is_min(self) -> bool:
+        """
+        True if minimizing, False otherwise. Minimization is the default.
+        """
+        return self._opt_sign > 0
 
     @property
     def target(self) -> str:
@@ -66,6 +116,13 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         The name of the target metric to optimize.
         """
         return self._opt_target
+
+    @property
+    def supports_preload(self) -> bool:
+        """
+        Return True if the optimizer supports pre-loading the data from previous experiments.
+        """
+        return True
 
     @abstractmethod
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
@@ -93,7 +150,11 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
             raise ValueError("Numbers of configs and scores do not match.")
         if status is not None and len(configs or []) != len(status or []):
             raise ValueError("Numbers of configs and status values do not match.")
-        return bool(configs and scores)
+        has_data = bool(configs and scores)
+        if has_data and self._start_with_defaults:
+            _LOG.info("Prior data exists - do *NOT* use the default initialization.")
+            self._start_with_defaults = False
+        return has_data
 
     @abstractmethod
     def suggest(self) -> TunableGroups:

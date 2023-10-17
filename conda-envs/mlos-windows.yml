@@ -10,7 +10,6 @@ dependencies:
   - pip
   - pylint
   - pycodestyle
-  - autopep8
   - pydocstyle
   - flake8
   - setuptools
@@ -20,25 +19,22 @@ dependencies:
   - nb_conda_kernels
   - matplotlib
   - seaborn
-  # See comments in setup.py
-  - numpy<1.24
-  # FIXME: for now, we are disabling support for python 3.11 due to various dependency issues.
-  - python<3.11
-  # Require a compiler to be installed/configured and build GPy directly.
-  - vs2019_win-64
-  - vswhere
-  - conda-forge::GPy
+  - swig
+  - libpq
+  - python
   # Install an SMAC requirement pre-compiled from conda-forge.
   # This also requires a more recent vs2015_runtime from conda-forge.
   - conda-forge::pyrfr>=0.9.0
   - pip:
+    - autopep8>=1.7.0
     - bump2version
     - check-jsonschema
     - licenseheaders
     - mypy
     - pandas-stubs
-    - types-jsonschema
+    - types-beautifulsoup4
     - types-colorama
+    - types-jsonschema
     - types-pygments
     - types-requests
     - types-setuptools

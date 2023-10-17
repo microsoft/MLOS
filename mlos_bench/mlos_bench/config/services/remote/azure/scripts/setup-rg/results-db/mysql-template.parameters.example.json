@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "dbName": {
+            "value": "mlos-autotune-db"
+        },
+        "dbAdminUsername": {
+            "value": "mlos"
+        },
+        "dbAdminPassword": {
+            "value": "PLACEHOLDER"
+        },
+        "dbFirewallRules": {
+            "value": [
+                {
+                    "name": "PLACEHOLDER",
+                    "startIpAddress": "192.168.0.0",
+                    "endIpAddress": "192.168.255.255"
+                }
+            ]
+        }
+    }
+}

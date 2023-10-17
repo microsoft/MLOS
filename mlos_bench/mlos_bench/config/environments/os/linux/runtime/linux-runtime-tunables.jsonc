@@ -1,14 +1,66 @@
 {
-    "linux-kernel-runtime": {
+    "linux-scheduler": {
         "cost": 1,
-        // TODO: FIXME: These should include actual filesystem paths to the parameters.
         "params": {
-            "kernel_sched_migration_cost_ns": {
+            "sched_migration_cost_ns": {
                 "description": "Cost of migrating the thread to another core",
                 "type": "int",
-                "default": -1,
-                "range": [-1, 500000],
+                "meta": {"name_prefix": "/proc/sys/kernel/"},
+                "default": 500000,
+                "range": [-1, 1000000],
                 "special": [-1]
+            },
+            "sched_latency_ns": {
+                "description": "Latency of the scheduler",
+                "type": "int",
+                "meta": {"name_prefix": "/proc/sys/kernel/"},
+                "default": 12000000,
+                "range": [0, 1000000000]
+            },
+            "sched_child_runs_first": {
+                "description": "If 1, the child thread runs first",
+                "type": "categorical",
+                "meta": {"name_prefix": "/proc/sys/kernel/"},
+                "default": "0",
+                "values": ["0", "1"]
+            },
+            "sched_tunable_scaling": {
+                "description": "Enable tunable scaling",
+                "type": "categorical",
+                "meta": {"name_prefix": "/proc/sys/kernel/"},
+                "default": "1",
+                "values": ["0", "1"]
+            }
+        }
+    },
+    "linux-swap": {
+        "cost": 1,
+        "params": {
+            "swappiness": {
+                "description": "Relative IO cost of swapping and filesystem paging",
+                "type": "int",
+                "meta": {"name_prefix": "/proc/sys/vm/"},
+                "default": 60,
+                "range": [0, 200]
+            }
+        }
+    },
+    "linux-hugepages-2048kB": {
+        "cost": 1,
+        "params": {
+            "nr_hugepages": {
+                "description": "Number of 2MB hugepages",
+                "type": "int",
+                "meta": {"name_prefix": "/sys/kernel/mm/hugepages/hugepages-2048kB/"},
+                "default": 0,
+                "range": [0, 65536]  // 128GB
+            },
+            "nr_overcommit_hugepages": {
+                "description": "Number of overcommit 2MB hugepages",
+                "type": "int",
+                "meta": {"name_prefix": "/sys/kernel/mm/hugepages/hugepages-2048kB/"},
+                "default": 0,
+                "range": [0, 2048]  // 4GB
             }
         }
     }

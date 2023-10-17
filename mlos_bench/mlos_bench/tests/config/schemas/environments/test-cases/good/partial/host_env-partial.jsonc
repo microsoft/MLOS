@@ -1,0 +1,5 @@
+{
+    "name": "host_env-partial",
+    "class": "mlos_bench.environments.remote.HostEnv"
+    // FIXME: not very useful atm ...
+}

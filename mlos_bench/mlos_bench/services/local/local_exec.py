@@ -13,7 +13,8 @@ import shlex
 import subprocess
 import sys
 
-from typing import Dict, Iterable, Mapping, Optional, Tuple, TYPE_CHECKING
+from string import Template
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
@@ -25,6 +26,41 @@ if TYPE_CHECKING:
 _LOG = logging.getLogger(__name__)
 
 
+def split_cmdline(cmdline: str) -> Iterable[List[str]]:
+    """
+    A single command line may contain multiple commands separated by
+    special characters (e.g., &&, ||, etc.) so further split the
+    commandline into an array of subcommand arrays.
+
+    Parameters
+    ----------
+    cmdline: str
+        The commandline to split.
+
+    Yields
+    ------
+    Iterable[List[str]]
+        A list of subcommands or separators, each one a list of tokens.
+        Can be rejoined as a flattened array.
+    """
+    cmdline_tokens = shlex.shlex(cmdline, posix=True, punctuation_chars=True)
+    cmdline_tokens.whitespace_split = True
+    subcmd = []
+    for token in cmdline_tokens:
+        if token[0] not in cmdline_tokens.punctuation_chars:
+            subcmd.append(token)
+        else:
+            # Separator encountered. Yield any non-empty previous subcmd we accumulated.
+            if subcmd:
+                yield subcmd
+            # Also return the separators.
+            yield [token]
+            subcmd = []
+    # Return the trailing subcommand.
+    if subcmd:
+        yield subcmd
+
+
 class LocalExecService(TempDirContextService, SupportsLocalExec):
     """
     Collection of methods to run scripts and commands in an external process
@@ -32,7 +68,10 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     due to reduced dependency management complications vs the target environment.
     """
 
-    def __init__(self, config: Optional[dict] = None, parent: Optional[Service] = None):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new instance of a service to run scripts locally.
 
@@ -41,16 +80,18 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         config : dict
             Free-format dictionary that contains parameters for the service.
             (E.g., root path for config files, etc.)
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
+        self.abort_on_error = self.config.get("abort_on_error", True)
         self.register([self.local_exec])
 
     def local_exec(self, script_lines: Iterable[str],
                    env: Optional[Mapping[str, "TunableValue"]] = None,
-                   cwd: Optional[str] = None,
-                   return_on_error: bool = False) -> Tuple[int, str, str]:
+                   cwd: Optional[str] = None) -> Tuple[int, str, str]:
         """
         Execute the script lines from `script_lines` in a local process.
 
@@ -64,9 +105,6 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         cwd : str
             Work directory to run the script at.
             If omitted, use `temp_dir` or create a temporary dir.
-        return_on_error : bool
-            If True, stop running script lines on first non-zero return code.
-            The default is False.
 
         Returns
         -------
@@ -82,16 +120,44 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
                 (return_code, stdout, stderr) = self._local_exec_script(line, env, temp_dir)
                 stdout_list.append(stdout)
                 stderr_list.append(stderr)
-                if return_code != 0 and return_on_error:
+                if return_code != 0 and self.abort_on_error:
                     break
 
-        stdout = "\n".join(stdout_list)
-        stderr = "\n".join(stderr_list)
+        stdout = "".join(stdout_list)
+        stderr = "".join(stderr_list)
 
         _LOG.debug("Run: stdout:\n%s", stdout)
         _LOG.debug("Run: stderr:\n%s", stderr)
 
         return (return_code, stdout, stderr)
+
+    def _resolve_cmdline_script_path(self, subcmd_tokens: List[str]) -> List[str]:
+        """
+        Resolves local script path (first token) in the (sub)command line
+        tokens to its full path.
+
+        Parameters
+        ----------
+        subcmd_tokens : List[str]
+            The previously split tokens of the subcmd.
+
+        Returns
+        -------
+        List[str]
+            A modified sub command line with the script paths resolved.
+        """
+        script_path = self.config_loader_service.resolve_path(subcmd_tokens[0])
+        # Special case check for lone `.` which means both `source` and
+        # "current directory" (which isn't executable) in posix shells.
+        if os.path.exists(script_path) and os.path.isfile(script_path):
+            # If the script exists, use it.
+            subcmd_tokens[0] = os.path.abspath(script_path)
+            # Also check if it is a python script and prepend the currently
+            # executing python executable path to avoid requiring
+            # executable mode bits or a shebang.
+            if script_path.strip().lower().endswith(".py"):
+                subcmd_tokens.insert(0, sys.executable)
+        return subcmd_tokens
 
     def _local_exec_script(self, script_line: str,
                            env_params: Optional[Mapping[str, "TunableValue"]],
@@ -102,9 +168,7 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         Parameters
         ----------
         script_line : str
-            Line of the script to tun in the local process.
-        args : Iterable[str]
-            Command line arguments for the script.
+            Line of the script to run in the local process.
         env_params : Mapping[str, Union[int, float, str]]
             Environment variables.
         cwd : str
@@ -115,14 +179,12 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         (return_code, stdout, stderr) : (int, str, str)
             A 3-tuple of return code, stdout, and stderr of the script process.
         """
-        cmd = shlex.split(script_line)
-        script_path = self.config_loader_service.resolve_path(cmd[0])
-        if os.path.exists(script_path):
-            script_path = os.path.abspath(script_path)
-
-        cmd = [script_path] + cmd[1:]
-        if script_path.strip().lower().endswith(".py"):
-            cmd = [sys.executable] + cmd
+        # Split the command line into set of subcmd tokens.
+        # For each subcmd, perform path resolution fixups for any scripts being executed.
+        subcmds = split_cmdline(script_line)
+        subcmds = [self._resolve_cmdline_script_path(subcmd) for subcmd in subcmds]
+        # Finally recombine all of the fixed up subcmd tokens into the original.
+        cmd = [token for subcmd in subcmds for token in subcmd]
 
         env: Dict[str, str] = {}
         if env_params:
@@ -135,11 +197,14 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             env_copy.update(env)
             env = env_copy
 
-        _LOG.info("Run: %s", cmd)
-
         try:
             if sys.platform != 'win32':
                 cmd = [" ".join(cmd)]
+
+            _LOG.info("Run: %s", cmd)
+            if _LOG.isEnabledFor(logging.DEBUG):
+                _LOG.debug("Expands to: %s", Template(" ".join(cmd)).safe_substitute(env))
+                _LOG.debug("Current working dir: %s", cwd)
 
             proc = subprocess.run(cmd, env=env or None, cwd=cwd, shell=True,
                                   text=True, check=False, capture_output=True)

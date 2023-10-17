@@ -66,8 +66,8 @@ Distributing
 
   .. code-block:: shell
 
-    # this will install just the optimizer component with emukit support:
-    pip install dist/mlos_core-0.1.0-py3-none-any.whl[emukit]
+    # this will install just the optimizer component with SMAC support:
+    pip install dist/mlos_core-0.1.0-py3-none-any.whl[smac]
 
     # this will install just the optimizer component with flaml support:
     pip install dist/mlos_core-0.1.0-py3-none-any.whl[flaml]

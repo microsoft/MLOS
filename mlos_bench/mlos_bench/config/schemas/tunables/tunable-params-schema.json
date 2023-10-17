@@ -4,11 +4,23 @@
     "title": "mlos_bench Tunable Params config",
 
     "$defs": {
+        "tunable_param_meta": {
+            "type": "object",
+            "additionalProperties": {
+                "type": ["array", "string", "boolean", "null", "number"],
+                "items": {
+                    "type": ["string", "boolean", "null", "number"]
+                }
+            }
+        },
         "tunable_param_categorical": {
             "type": "object",
             "properties": {
                 "description": {
                     "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/$defs/tunable_param_meta"
                 },
                 "type": {
                     "const": "categorical"
@@ -38,6 +50,9 @@
                 "description": {
                     "type": "string"
                 },
+                "meta": {
+                    "$ref": "#/$defs/tunable_param_meta"
+                },
                 "type": {
                     "const": "int"
                 },
@@ -56,7 +71,8 @@
                     "type": "array",
                     "items": {
                         "type": "integer"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": ["type", "default", "range"],
@@ -71,6 +87,9 @@
             "properties": {
                 "description": {
                     "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/$defs/tunable_param_meta"
                 },
                 "type": {
                     "const": "float"
@@ -90,7 +109,8 @@
                     "type": "array",
                     "items": {
                         "type": "number"
-                    }
+                    },
+                    "uniqueItems": true
                 }
             },
             "required": ["type", "default", "range"],
@@ -120,6 +140,7 @@
                     "$ref": "#/$defs/tunable_param"
                 }
             },
+            "minProperties": 1,
             "unevaluatedProperties": false
         },
         "covariant_tunable_group": {
@@ -154,5 +175,6 @@
             "$ref": "#/$defs/covariant_tunable_group"
         }
     },
+    "minProperties": 1,
     "unevaluatedProperties": false
 }

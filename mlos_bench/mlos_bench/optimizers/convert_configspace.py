@@ -14,7 +14,7 @@ from ConfigSpace.hyperparameters import Hyperparameter
 from ConfigSpace import UniformIntegerHyperparameter
 from ConfigSpace import UniformFloatHyperparameter
 from ConfigSpace import CategoricalHyperparameter
-from ConfigSpace import ConfigurationSpace
+from ConfigSpace import ConfigurationSpace, Configuration
 
 from mlos_bench.tunables.tunable import Tunable
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -45,20 +45,20 @@ def _tunable_to_hyperparameter(
     if tunable.type == "categorical":
         return CategoricalHyperparameter(
             tunable.name, choices=tunable.categories,
-            default_value=tunable.value, meta=meta)
+            default_value=tunable.default, meta=meta)
     elif tunable.type == "int":
         return UniformIntegerHyperparameter(
             tunable.name, lower=tunable.range[0], upper=tunable.range[1],
-            default_value=tunable.value, meta=meta)
+            default_value=tunable.default, meta=meta)
     elif tunable.type == "float":
         return UniformFloatHyperparameter(
             tunable.name, lower=tunable.range[0], upper=tunable.range[1],
-            default_value=tunable.value, meta=meta)
+            default_value=tunable.default, meta=meta)
     else:
         raise TypeError(f"Undefined Parameter Type: {tunable.type}")
 
 
-def tunable_groups_to_configspace(tunables: TunableGroups) -> ConfigurationSpace:
+def tunable_groups_to_configspace(tunables: TunableGroups, seed: Optional[int] = None) -> ConfigurationSpace:
     """
     Convert TunableGroups to  hyperparameters in ConfigurationSpace.
 
@@ -67,14 +67,35 @@ def tunable_groups_to_configspace(tunables: TunableGroups) -> ConfigurationSpace
     tunables : TunableGroups
         A collection of tunable parameters.
 
+    seed : Optional[int]
+        Random seed to use.
+
     Returns
     -------
     configspace : ConfigurationSpace
         A new ConfigurationSpace instance that corresponds to the input TunableGroups.
     """
-    space = ConfigurationSpace()
+    space = ConfigurationSpace(seed=seed)
     space.add_hyperparameters([
         _tunable_to_hyperparameter(tunable, group.name, group.get_current_cost())
         for (tunable, group) in tunables
     ])
     return space
+
+
+def tunable_values_to_configuration(tunables: TunableGroups) -> Configuration:
+    """
+    Converts a TunableGroups current values to a ConfigSpace Configuration.
+
+    Parameters
+    ----------
+    tunables : TunableGroups
+        The TunableGroups to take the current value from.
+
+    Returns
+    -------
+    Configuration
+        A ConfigSpace Configuration.
+    """
+    configspace = tunable_groups_to_configspace(tunables)
+    return Configuration(configspace, values={tunable.name: tunable.value for (tunable, _group) in tunables})

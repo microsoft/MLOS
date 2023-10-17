@@ -4,7 +4,12 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: Manual MLOS DevContainer run
+        description: Manual MLOS DevContainer run aux info tags
+      NO_CACHE:
+        type: boolean
+        description: Disable caching?
+        default: false
+        required: false
   push:
     branches: [ main ]
   pull_request:
@@ -25,10 +30,24 @@ jobs:
       BUILDKIT_INLINE_CACHE: 1
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - name: Set NO_CACHE variable for nightly builds
-      if: github.event_name == 'schedule'
+    - name: Get commit messages
+      id: get-commit-messages
+      if: github.event_name == 'pull_request'
+      run: |
+        # Only look at the last 10 commits, to avoid getting too much data.
+        # If the message wasn't in there (e.g. because the push was a merge and too large), then we just ignore it.
+        git fetch --deepen=10
+        # Handle multiline output:
+        {
+          echo 'COMMIT_MESSAGES<<COMMIT_MESSAGES_EOF'
+          git log --format="%B" -10 ${{ github.event.before }}..${{ github.event.after }} | tee /tmp/commit_messages.txt
+          echo COMMIT_MESSAGES_EOF
+        } >> $GITHUB_OUTPUT
+
+    - name: Set NO_CACHE variable based on commit messages and for nightly builds
+      if: github.event_name == 'schedule' || contains(steps.get-commit-messages.outputs.COMMIT_MESSAGES, 'NO_CACHE=true') || github.event.inputs.NO_CACHE == 'true'
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
@@ -37,6 +56,16 @@ jobs:
         set -x
         printenv
         echo "NO_CACHE: ${NO_CACHE:-}"
+        echo "EVENT_NAME: ${{ github.event_name }}"
+        echo "BEFORE: ${{ github.event.before }}"
+        echo "AFTER: ${{ github.event.after }}"
+        echo "COMMIT_MESSAGES: ${{ steps.get-commit-messages.outputs.COMMIT_MESSAGES }}"
+        echo "COMMIT_SHA: ${{ github.sha }}"
+        echo "git log -1 ${{ github.sha }}: $(git log -1 ${{ github.sha }})"
+        echo "Manual Trigger Input Tags: ${{ github.event.inputs.tags }}"
+        echo "Manual Trigger Input NO_CACHE: ${{ github.event.inputs.NO_CACHE }}"
+        # Output the full event json for debugging.
+        # cat ${{ github.event_path }}
 
     - name: Build the devcontainer image
       timeout-minutes: 15
@@ -60,11 +89,12 @@ jobs:
       timeout-minutes: 3
       run: |
         set -x
-        docker exec --user root mlos-devcontainer groupmod -g `id -g` vscode
-        docker exec --user root mlos-devcontainer usermod -u `id -u` -g `id -g` vscode
+        docker exec --user root mlos-devcontainer groupmod --non-unique -g `id -g` vscode
+        docker exec --user root mlos-devcontainer usermod --non-unique -u `id -u` -g `id -g` vscode
         docker exec --user root mlos-devcontainer chown -R vscode:vscode /home/vscode
         docker exec --user root mlos-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
         docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
+        docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/envs/mlos
 
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
@@ -103,7 +133,7 @@ jobs:
         docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v dist dist-test
 
     - name: Test rebuilding the devcontainer in the devcontainer
-      timeout-minutes: 5
+      timeout-minutes: 3
       run: |
         set -x
         docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
@@ -131,7 +161,7 @@ jobs:
 
     - name: Container Registry Login
       if: github.repository == 'microsoft/mlos' && github.ref == 'refs/heads/main'
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: ${{ secrets.ACR_LOGINURL }}
         username: ${{ secrets.ACR_USERNAME }}

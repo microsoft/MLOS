@@ -7,6 +7,8 @@ A wrapper for mlos_core optimizers for mlos_bench.
 """
 
 import logging
+import os
+
 from typing import Optional, Sequence, Tuple, Union
 
 import pandas as pd
@@ -17,8 +19,11 @@ from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.optimizers.base_optimizer import Optimizer
-from mlos_bench.services.base_service import Service
 from mlos_bench.optimizers.convert_configspace import tunable_groups_to_configspace
+
+from mlos_bench.services.base_service import Service
+
+from mlos_bench.util import path_join
 
 _LOG = logging.getLogger(__name__)
 
@@ -28,15 +33,44 @@ class MlosCoreOptimizer(Optimizer):
     A wrapper class for the mlos_core optimizers.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
+        super().__init__(tunables, config, global_config, service)
 
-        super().__init__(tunables, service, config)
+        seed = config.get("seed")
+        seed = None if seed is None else int(seed)
 
-        space = tunable_groups_to_configspace(tunables)
+        space = tunable_groups_to_configspace(tunables, seed)
         _LOG.debug("ConfigSpace: %s", space)
 
         opt_type = getattr(OptimizerType, self._config.pop(
             'optimizer_type', DEFAULT_OPTIMIZER_TYPE.name))
+
+        if opt_type == OptimizerType.SMAC:
+            # If output_directory is specified, turn it into an absolute path.
+            if 'output_directory' not in self._config:
+                self._config['output_directory'] = 'smac_output'
+                _LOG.info(
+                    "No output_directory was specified for SMAC optimizer. Defaulting to '%s'.",
+                    self._config['output_directory'])
+            output_directory = self._config.get('output_directory')
+            if output_directory is not None:
+                if not os.path.isabs(output_directory):
+                    self._config['output_directory'] = path_join(os.getcwd(), output_directory)
+            else:
+                _LOG.warning("SMAC optimizer output_directory was null. SMAC will use a temporary directory.")
+
+            # Make sure max_trials >= max_iterations.
+            if 'max_trials' not in self._config:
+                self._config['max_trials'] = self._max_iter
+            assert int(self._config['max_trials']) >= self._max_iter, \
+                f"max_trials {self._config.get('max_trials')} <= max_iterations {self._max_iter}"
+
+            if 'run_name' not in self._config and self.experiment_id:
+                self._config['run_name'] = self.experiment_id
 
         space_adapter_type = self._config.pop('space_adapter_type', None)
         space_adapter_config = self._config.pop('space_adapter_config', {})
@@ -49,8 +83,12 @@ class MlosCoreOptimizer(Optimizer):
             optimizer_type=opt_type,
             optimizer_kwargs=self._config,
             space_adapter_type=space_adapter_type,
-            space_adapter_kwargs=space_adapter_config
+            space_adapter_kwargs=space_adapter_config,
         )
+
+    @property
+    def name(self) -> str:
+        return f"{self.__class__.__name__}:{self._opt.__class__.__name__}"
 
     def bulk_register(self, configs: Sequence[dict], scores: Sequence[Optional[float]],
                       status: Optional[Sequence[Status]] = None) -> bool:
@@ -102,8 +140,10 @@ class MlosCoreOptimizer(Optimizer):
         return df_configs
 
     def suggest(self) -> TunableGroups:
-        use_defaults = self._use_defaults and self._iter == 1
-        df_config = self._opt.suggest(defaults=use_defaults)
+        if self._start_with_defaults:
+            _LOG.info("Use default values for the first trial")
+        df_config = self._opt.suggest(defaults=self._start_with_defaults)
+        self._start_with_defaults = False
         _LOG.info("Iteration %d :: Suggest:\n%s", self._iter, df_config)
         return self._tunables.copy().assign(df_config.loc[0].to_dict())
 

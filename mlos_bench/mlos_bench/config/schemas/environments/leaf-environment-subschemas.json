@@ -28,12 +28,13 @@
                     "$ref": "./remote/remote-env-subschema.json"
                 },
                 {
+                    "$ref": "./remote/host-env-subschema.json"
+                },
+                {
                     "$ref": "./remote/vm-env-subschema.json"
                 }
             ]
         }
     ],
-    "required": [
-        "class"
-    ]
+    "required": ["class", "name"]
 }

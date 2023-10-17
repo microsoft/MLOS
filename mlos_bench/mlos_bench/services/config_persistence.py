@@ -23,8 +23,9 @@ from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
-from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, BaseTypeVar
+from mlos_bench.util import instantiate_from_config, merge_parameters, path_join, preprocess_dynamic_configs, BaseTypeVar
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -42,7 +43,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
     BUILTIN_CONFIG_PATH = str(files("mlos_bench.config").joinpath("")).replace("\\", "/")
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None,
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
         """
         Create a new instance of config persistence service.
@@ -52,13 +55,24 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         config : dict
             Free-format dictionary that contains parameters for the service.
             (E.g., root path for config files, etc.)
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
-        self._config_path: List[str] = self.config.get("config_path", [])
+        super().__init__(config, global_config, parent)
         self._config_loader_service = self
 
+        # Normalize and deduplicate config paths, but maintain order.
+        self._config_path: List[str] = []
+        for path in self.config.get("config_path", []):
+            if path not in self._config_path:
+                self._config_path.append(path_join(path, abs_path=True))
+        # Prepend the cwd if not already on the list.
+        cwd = path_join(os.getcwd(), abs_path=True)
+        if cwd not in self._config_path:
+            self._config_path.insert(0, cwd)
+        # Append the built-in config path if not already on the list.
         if self.BUILTIN_CONFIG_PATH not in self._config_path:
             self._config_path.append(self.BUILTIN_CONFIG_PATH)
 
@@ -73,6 +87,17 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             self.load_environment,
             self.load_environment_list,
         ])
+
+    @property
+    def config_paths(self) -> List[str]:
+        """
+        Gets the list of config paths this service will search for config files.
+
+        Returns
+        -------
+        List[str]
+        """
+        return list(self._config_path)  # make a copy to avoid modifications
 
     def resolve_path(self, file_path: str,
                      extra_paths: Optional[Iterable[str]] = None) -> str:
@@ -94,12 +119,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         path_list = list(extra_paths or []) + self._config_path
         _LOG.debug("Resolve path: %s in: %s", file_path, path_list)
-        if not os.path.isabs(file_path):
-            for path in path_list:
-                full_path = path_join(path, file_path, abs_path=True)
-                if os.path.exists(full_path):
-                    _LOG.debug("Path resolved: %s", full_path)
-                    return full_path
+        if os.path.isabs(file_path):
+            _LOG.debug("Path is absolute: %s", file_path)
+            return file_path
+        for path in path_list:
+            full_path = path_join(path, file_path, abs_path=True)
+            if os.path.exists(full_path):
+                _LOG.debug("Path resolved: %s", full_path)
+                return full_path
         _LOG.debug("Path not resolved: %s", file_path)
         return file_path
 
@@ -144,10 +171,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 # Other configs that get loaded may need the schema field
                 # (e.g. Azure ARM templates).
                 del config["$schema"]
+        else:
+            _LOG.warning("Config %s is not validated against a schema.", json_file_name)
         return config   # type: ignore[no-any-return]
 
     def prepare_class_load(self, config: Dict[str, Any],
-                           global_config: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
+                           global_config: Optional[Dict[str, Any]] = None,
+                           parent_args: Optional[Dict[str, TunableValue]] = None) -> Tuple[str, Dict[str, Any]]:
         """
         Extract the class instantiation parameters from the configuration.
         Mix-in the global parameters and resolve the local file system paths,
@@ -159,6 +189,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Configuration of the optimizer.
         global_config : dict
             Global configuration parameters (optional).
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
 
         Returns
         -------
@@ -167,6 +200,14 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         class_name = config["class"]
         class_config = config.setdefault("config", {})
+
+        # Replace any appearance of "$param_name" in the const_arg values with
+        # the value from the parent CompositeEnv.
+        # Note: we could consider expanding this feature to additional config
+        # sections in the future, but for now only use it in const_args.
+        if class_name.startswith("mlos_bench.environments."):
+            const_args = class_config.get("const_args", {})
+            preprocess_dynamic_configs(dest=const_args, source=parent_args)
 
         merge_parameters(dest=class_config, source=global_config)
 
@@ -194,8 +235,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         Generic instantiation of mlos_bench objects like Storage and Optimizer
         that depend on Service and TunableGroups.
 
-        A class *MUST* have a constructor that takes exactly three arguments:
-        (tunables, service, config)
+        A class *MUST* have a constructor that takes four named arguments:
+        (tunables, config, global_config, service)
 
         Parameters
         ----------
@@ -220,13 +261,19 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         if tunables_path is not None:
             tunables = self._load_tunables(tunables_path, tunables)
         (class_name, class_config) = self.prepare_class_load(config, global_config)
-        inst = instantiate_from_config(base_cls, class_name, tunables, service, class_config)
-        _LOG.info("Created: %s", inst)
+        inst = instantiate_from_config(base_cls, class_name,
+                                       tunables=tunables,
+                                       config=class_config,
+                                       global_config=global_config,
+                                       service=service)
+        _LOG.info("Created: %s %s", base_cls.__name__, inst)
         return inst
 
-    def build_environment(self, config: Dict[str, Any],
+    def build_environment(self,     # pylint: disable=too-many-arguments
+                          config: Dict[str, Any],
                           tunables: TunableGroups,
                           global_config: Optional[Dict[str, Any]] = None,
+                          parent_args: Optional[Dict[str, TunableValue]] = None,
                           service: Optional[Service] = None) -> Environment:
         """
         Factory method for a new environment with a given config.
@@ -243,6 +290,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             all environments.
         global_config : dict
             Global parameters to add to the environment config.
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
         service: Service
             An optional service object (e.g., providing methods to
             deploy or reboot a VM, etc.).
@@ -253,7 +303,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             An instance of the `Environment` class initialized with `config`.
         """
         env_name = config["name"]
-        (env_class, env_config) = self.prepare_class_load(config)
+        (env_class, env_config) = self.prepare_class_load(config, global_config, parent_args)
 
         env_services_path = config.get("include_services")
         if env_services_path is not None:
@@ -294,7 +344,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             An instance of the `Service` class initialized with `config`.
         """
         (svc_class, svc_config) = self.prepare_class_load(config, global_config)
-        service = Service.new(svc_class, svc_config, parent)
+        service = Service.new(svc_class, svc_config, global_config, parent)
         _LOG.info("Created service: %s", service)
         return service
 
@@ -376,9 +426,11 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
 
         return self._build_composite_service(config_list, global_config, parent)
 
-    def load_environment(self, json_file_name: str,
+    def load_environment(self,  # pylint: disable=too-many-arguments
+                         json_file_name: str,
                          tunables: TunableGroups,
                          global_config: Optional[Dict[str, Any]] = None,
+                         parent_args: Optional[Dict[str, TunableValue]] = None,
                          service: Optional[Service] = None) -> Environment:
         """
         Load and build new environment from the config file.
@@ -391,6 +443,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             A (possibly empty) collection of tunables to add to the environment.
         global_config : dict
             Global parameters to add to the environment config.
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
         service : Service
             An optional reference of the parent service to mix in.
 
@@ -401,11 +456,13 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         assert isinstance(config, dict)
-        return self.build_environment(config, tunables, global_config, service)
+        return self.build_environment(config, tunables, global_config, parent_args, service)
 
-    def load_environment_list(self, json_file_name: str,
+    def load_environment_list(self,     # pylint: disable=too-many-arguments
+                              json_file_name: str,
                               tunables: TunableGroups,
                               global_config: Optional[Dict[str, Any]] = None,
+                              parent_args: Optional[Dict[str, TunableValue]] = None,
                               service: Optional[Service] = None) -> List[Environment]:
         """
         Load and build a list of environments from the config file.
@@ -421,6 +478,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Global parameters to add to the environment config.
         service : Service
             An optional reference of the parent service to mix in.
+        parent_args : Dict[str, TunableValue]
+            An optional reference of the parent CompositeEnv's const_args used to
+            expand dynamic config parameters from.
 
         Returns
         -------
@@ -429,7 +489,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         config = self.load_config(json_file_name, ConfigSchema.ENVIRONMENT)
         return [
-            self.build_environment(config, tunables, global_config, service)
+            self.build_environment(config, tunables, global_config, parent_args, service)
         ]
 
     def load_services(self, json_file_names: Iterable[str],
@@ -455,7 +515,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         """
         _LOG.info("Load services: %s parent: %s",
                   json_file_names, parent.__class__.__name__)
-        service = Service(global_config, parent)
+        service = Service({}, global_config, parent)
         for fname in json_file_names:
             config = self.load_config(fname, ConfigSchema.SERVICE)
             service.register(self.build_service(config, global_config, service).export())
@@ -484,8 +544,9 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             The larger collection of tunable parameters.
         """
         _LOG.info("Load tunables: '%s'", json_file_names)
+        tunables = parent.copy()
         for fname in json_file_names:
             config = self.load_config(fname, ConfigSchema.TUNABLE_PARAMS)
             assert isinstance(config, dict)
-            parent.merge(TunableGroups(config))
-        return parent
+            tunables.merge(TunableGroups(config))
+        return tunables

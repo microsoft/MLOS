@@ -17,6 +17,14 @@
             "allOf": [
                 {
                     "$ref": "../common-defs-subschemas.json#/$defs/temp_dir_config"
+                },
+                {
+                    "properties": {
+                        "abort_on_error": {
+                            "description": "Whether or not to abort immediately when a script line returns an errorcode.",
+                            "type": "boolean"
+                        }
+                    }
                 }
             ],
             "unevaluatedProperties": false

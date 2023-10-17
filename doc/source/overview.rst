@@ -48,17 +48,18 @@ Optimizers
    :template: class.rst
 
    BaseBayesianOptimizer
-   EmukitOptimizer
    SmacOptimizer
 
 Spaces
 ======
-.. currentmodule:: mlos_core.spaces
+
+Converters
+----------
+.. currentmodule:: mlos_core.spaces.converters.flaml
 .. autosummary::
    :toctree: generated/
    :template: function.rst
 
-   configspace_to_emukit_space
    configspace_to_flaml_space
 
 Space Adapters
@@ -151,6 +152,7 @@ Remote Environments
    RemoteEnv
    OSEnv
    VMEnv
+   HostEnv
 
 Tunable Parameters
 ==================

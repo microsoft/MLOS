@@ -6,7 +6,7 @@
 Unit tests for LocalExecService to run Python scripts locally.
 """
 
-from typing import Dict
+from typing import Any, Dict
 
 import json
 
@@ -33,12 +33,19 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
     Run a Python script using a local_exec service.
     """
     input_file = "./input-params.json"
+    meta_file = "./input-params-meta.json"
     output_file = "./config-kernel.sh"
 
     # Tunable parameters to save in JSON
     params: Dict[str, TunableValue] = {
         "sched_migration_cost_ns": 40000,
-        "sched_granularity_ns": 800000
+        "sched_granularity_ns": 800000,
+    }
+
+    # Tunable parameters metadata
+    params_meta: Dict[str, Any] = {
+        "sched_migration_cost_ns": {"name_prefix": "/proc/sys/kernel/"},
+        "sched_granularity_ns": {"name_prefix": "/proc/sys/kernel/"},
     }
 
     with local_exec_service.temp_dir_context() as temp_dir:
@@ -46,11 +53,14 @@ def test_run_python_script(local_exec_service: LocalExecService) -> None:
         with open(path_join(temp_dir, input_file), "wt", encoding="utf-8") as fh_input:
             json.dump(params, fh_input)
 
+        with open(path_join(temp_dir, meta_file), "wt", encoding="utf-8") as fh_meta:
+            json.dump(params_meta, fh_meta)
+
         script_path = local_exec_service.config_loader_service.resolve_path(
             "environments/os/linux/runtime/scripts/local/generate_kernel_config_script.py")
 
         (return_code, _stdout, stderr) = local_exec_service.local_exec([
-            f"{script_path} {input_file} {output_file}"
+            f"{script_path} {input_file} {meta_file} {output_file}"
         ], cwd=temp_dir, env=params)
 
         assert stderr.strip() == ""

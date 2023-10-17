@@ -24,7 +24,6 @@
         // - https://github.com/microsoft/vscode/issues/2809#issuecomment-1544387883
         // - mlos_bench/config/schemas/README.md
 
-        // TODO: Add more rules for other mlos_bench config schemas.
         {
             "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/environments/test-cases/**/*.jsonc",
@@ -51,10 +50,18 @@
         },
         {
             "fileMatch": [
-                "global_config.jsonc",
-                "global_config.json",
+                "mlos_bench/mlos_bench/config/experiments/**/*.jsonc",
+                "mlos_bench/mlos_bench/config/experiments/**/*.json",
+                "mlos_bench/mlos_bench/tests/config/experiments/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/experiments/**/*.json",
+                "mlos_bench/mlos_bench/tests/config/globals/**/*.jsonc",
+                "mlos_bench/mlos_bench/tests/config/globals/**/*.json",
+                "globals*.jsonc",
+                "globals*.json",
+                "global*.jsonc",
+                "global*.json",
                 "config.jsonc",
-                "config.json"
+                "config.json",
             ],
             "url": "./mlos_bench/mlos_bench/config/schemas/cli/globals-schema.json"
         },
@@ -113,10 +120,21 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/source",
     "esbonio.sphinx.buildDir": "${workspaceFolder}/doc/build/",
-    "python.formatting.provider": "none",
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": [
+        "--experimental"
+    ],
+    "autopep8.args": [
+        "--experimental"
+    ],
     "[python]": {
-        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.defaultFormatter": "ms-python.python",
         "editor.formatOnSave": true,
         "editor.formatOnSaveMode": "modifications"
-    }
+    },
+    "python.testing.pytestArgs": [
+        "-n1",  // don't run tests in parallel inside vscode - makes attaching the debugger more cumbersome
+        "."
+    ],
+    "python.testing.unittestEnabled": false
 }

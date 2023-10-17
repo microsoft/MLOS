@@ -9,9 +9,10 @@ A collection FileShare functions for interacting with Azure File Shares.
 import os
 import logging
 
-from typing import Set
+from typing import Any, Dict, Optional, Set
 
 from azure.storage.fileshare import ShareClient
+from azure.core.exceptions import ResourceNotFoundError
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
@@ -27,7 +28,10 @@ class AzureFileShareService(FileShareService):
 
     _SHARE_URL = "https://{account_name}.file.core.windows.net/{fs_name}"
 
-    def __init__(self, config: dict, parent: Service):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None):
         """
         Create a new file share Service for Azure environments with a given config.
 
@@ -37,13 +41,15 @@ class AzureFileShareService(FileShareService):
             Free-format dictionary that contains the file share configuration.
             It will be passed as a constructor parameter of the class
             specified by `class_name`.
+        global_config : dict
+            Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, parent)
+        super().__init__(config, global_config, parent)
 
         check_required_params(
-            config, {
+            self.config, {
                 "storageAccountName",
                 "storageFileShareName",
                 "storageAccountKey",
@@ -52,14 +58,14 @@ class AzureFileShareService(FileShareService):
 
         self._share_client = ShareClient.from_share_url(
             AzureFileShareService._SHARE_URL.format(
-                account_name=config["storageAccountName"],
-                fs_name=config["storageFileShareName"],
+                account_name=self.config["storageAccountName"],
+                fs_name=self.config["storageFileShareName"],
             ),
-            credential=config["storageAccountKey"],
+            credential=self.config["storageAccountKey"],
         )
 
-    def download(self, remote_path: str, local_path: str, recursive: bool = True) -> None:
-        super().download(remote_path, local_path, recursive)
+    def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
+        super().download(params, remote_path, local_path, recursive)
         dir_client = self._share_client.get_directory_client(remote_path)
         if dir_client.exists():
             os.makedirs(local_path, exist_ok=True)
@@ -68,19 +74,23 @@ class AzureFileShareService(FileShareService):
                 local_target = f"{local_path}/{name}"
                 remote_target = f"{remote_path}/{name}"
                 if recursive or not content["is_directory"]:
-                    self.download(remote_target, local_target, recursive)
+                    self.download(params, remote_target, local_target, recursive)
         else:  # Must be a file
             # Ensure parent folders exist
             folder, _ = os.path.split(local_path)
             os.makedirs(folder, exist_ok=True)
             file_client = self._share_client.get_file_client(remote_path)
-            data = file_client.download_file()
-            with open(local_path, "wb") as output_file:
-                _LOG.debug("Download file: %s -> %s", remote_path, local_path)
-                data.readinto(output_file)  # type: ignore[no-untyped-call]
+            try:
+                data = file_client.download_file()
+                with open(local_path, "wb") as output_file:
+                    _LOG.debug("Download file: %s -> %s", remote_path, local_path)
+                    data.readinto(output_file)  # type: ignore[no-untyped-call]
+            except ResourceNotFoundError as ex:
+                # Translate into non-Azure exception:
+                raise FileNotFoundError(f"Cannot download: {remote_path}") from ex
 
-    def upload(self, local_path: str, remote_path: str, recursive: bool = True) -> None:
-        super().upload(local_path, remote_path, recursive)
+    def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
+        super().upload(params, local_path, remote_path, recursive)
         self._upload(local_path, remote_path, recursive, set())
 
     def _upload(self, local_path: str, remote_path: str, recursive: bool, seen: Set[str]) -> None:
@@ -109,9 +119,7 @@ class AzureFileShareService(FileShareService):
         seen.add(local_path)
 
         if os.path.isdir(local_path):
-            dir_client = self._share_client.get_directory_client(remote_path)
-            if not dir_client.exists():
-                dir_client.create_directory()
+            self._remote_makedirs(remote_path)
             for entry in os.scandir(local_path):
                 name = entry.name
                 local_target = f"{local_path}/{name}"

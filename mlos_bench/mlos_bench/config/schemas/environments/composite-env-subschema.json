@@ -33,16 +33,26 @@
                                         "type": "string",
                                         "pattern": "[.]json[c]?$"
                                     },
+                                    "uniqueItems": true,
                                     "minItems": 1
                                 },
                                 "children": {
                                     "description": "List of inline child environment configs to include in the composite environment.",
                                     "type": "array",
                                     "items": {
-                                        "$comment": "Each config included can be a leaf environment config.  We do not currently support inline nested composite environments.",
-                                        "$ref": "./leaf-environment-subschemas.json",
+                                        "type": "object",
+                                        "anyOf": [
+                                            {
+                                                "$ref": "./leaf-environment-subschemas.json"
+                                            },
+                                            {
+                                                "$comment": "Allow inline nested composite envs as well.",
+                                                "$ref": "#"
+                                            }
+                                        ],
                                         "unevaluatedProperties": false
                                     },
+                                    "uniqueItems": true,
                                     "minItems": 1
                                 }
                             },

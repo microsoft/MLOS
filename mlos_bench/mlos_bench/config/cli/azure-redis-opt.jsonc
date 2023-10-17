@@ -1,0 +1,26 @@
+//
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+//
+// Run:
+// mlos_bench --config mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc --globals experiment_RedisBench.jsonc --max_iterations 10
+{
+    "config_path": [
+        "mlos_bench/mlos_bench/config",
+        "mlos_bench/mlos_bench/config/experiments",
+        "mlos_bench/mlos_bench/tests/config"
+    ],
+
+    "environment": "environments/root/root-azure-redis.jsonc",
+    "optimizer": "optimizers/mlos_core_default_opt.jsonc",
+    "storage": "storage/sqlite.jsonc",
+
+    "globals": [
+        "global_config_azure.jsonc"
+    ],
+
+    "teardown": false,
+
+    "log_file": "azure-redis-opt.log",
+    "log_level": "DEBUG"
+}

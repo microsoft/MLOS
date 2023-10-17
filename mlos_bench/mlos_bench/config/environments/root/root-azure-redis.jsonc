@@ -1,0 +1,24 @@
+{
+    "name": "Azure VM Ubuntu Redis",
+    "class": "mlos_bench.environments.CompositeEnv",
+
+    "include_services": [
+        "services/remote/azure/service-auth.jsonc",
+        "services/remote/azure/service-linux-vm-ops.jsonc",
+        "services/remote/azure/service-fileshare.jsonc"
+    ],
+
+    "config": {
+
+        "const_args": {
+            "mountPoint": "/mnt/osat_fs"
+        },
+
+        "include_children": [
+            "environments/vm/azure/provision-ubuntu-vm.jsonc",
+            "environments/os/linux/boot/boot-ubuntu.jsonc",
+            "environments/os/linux/runtime/setup-ubuntu.jsonc",
+            "environments/apps/redis/redis.jsonc"
+        ]
+    }
+}

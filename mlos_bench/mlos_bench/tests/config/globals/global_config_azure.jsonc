@@ -1,0 +1,4 @@
+// Intentionally left empty for testing purposes.
+// Just needs to exist for other configs to be able to reference it.
+// See README.md and scripts/generate-azure-credentials-config for more details.
+{}

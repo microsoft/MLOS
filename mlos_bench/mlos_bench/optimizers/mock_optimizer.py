@@ -26,9 +26,13 @@ class MockOptimizer(Optimizer):
     Mock optimizer to test the Environment API.
     """
 
-    def __init__(self, tunables: TunableGroups, service: Optional[Service], config: dict):
-        super().__init__(tunables, service, config)
-        rnd = random.Random(config.get("seed", 42))
+    def __init__(self,
+                 tunables: TunableGroups,
+                 config: dict,
+                 global_config: Optional[dict] = None,
+                 service: Optional[Service] = None):
+        super().__init__(tunables, config, global_config, service)
+        rnd = random.Random(self.seed)
         self._random: Dict[str, Callable[[Tunable], TunableValue]] = {
             "categorical": lambda tunable: rnd.choice(tunable.categories),
             "float": lambda tunable: rnd.uniform(*tunable.range),
@@ -57,10 +61,11 @@ class MockOptimizer(Optimizer):
         Generate the next (random) suggestion.
         """
         tunables = self._tunables.copy()
-        for (tunable, _group) in tunables:
-            if self._use_defaults and self._iter == 1:
-                tunable.value = tunable.default
-            else:
+        if self._start_with_defaults:
+            _LOG.info("Use default values for the first trial")
+            self._start_with_defaults = False
+        else:
+            for (tunable, _group) in tunables:
                 tunable.value = self._random[tunable.type](tunable)
         _LOG.info("Iteration %d :: Suggest: %s", self._iter, tunables)
         return tunables

@@ -4,16 +4,18 @@
 #
 """
 Remotely executed benchmark/script environment.
+
+e.g. Application Environment
 """
 
 import logging
-from typing import Iterable, Optional, Tuple
+from typing import Dict, Iterable, Optional, Tuple
 
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.services.types.vm_provisioner_type import SupportsVMOps
+from mlos_bench.services.types.host_ops_type import SupportsHostOps
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -21,7 +23,9 @@ _LOG = logging.getLogger(__name__)
 
 class RemoteEnv(ScriptEnv):
     """
-    Environment to run benchmarks and scripts on a remote host.
+    Environment to run benchmarks and scripts on a remote host OS.
+
+    e.g. Application Environment
     """
 
     def __init__(self,
@@ -51,7 +55,7 @@ class RemoteEnv(ScriptEnv):
             A collection of tunable parameters for *all* environments.
         service: Service
             An optional service object (e.g., providing methods to
-            deploy or reboot a VM, etc.).
+            deploy or reboot a Host, VM, OS, etc.).
         """
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
@@ -62,10 +66,9 @@ class RemoteEnv(ScriptEnv):
             "RemoteEnv requires a service that supports remote execution operations"
         self._remote_exec_service: SupportsRemoteExec = self._service
 
-        # TODO: Refactor this as "host" and "os" operations to accommodate SSH service.
-        assert self._service is not None and isinstance(self._service, SupportsVMOps), \
+        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
             "RemoteEnv requires a service that supports host operations"
-        self._host_service: SupportsVMOps = self._service
+        self._host_service: SupportsHostOps = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
@@ -91,9 +94,9 @@ class RemoteEnv(ScriptEnv):
 
         if self._wait_boot:
             _LOG.info("Wait for the remote environment to start: %s", self)
-            (status, params) = self._host_service.vm_start(self._params)
+            (status, params) = self._host_service.start_host(self._params)
             if status.is_pending():
-                (status, _) = self._host_service.wait_vm_operation(params)
+                (status, _) = self._host_service.wait_host_operation(params)
             if not status.is_succeeded():
                 return False
 
@@ -107,7 +110,7 @@ class RemoteEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[dict]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
         Runs the run script on the remote environment.
 
@@ -128,9 +131,11 @@ class RemoteEnv(ScriptEnv):
         if not (status.is_ready() and self._script_run):
             return result
 
-        result = self._remote_exec(self._script_run)
-        _LOG.info("Remote run complete: %s :: %s", self, result)
-        return result
+        (status, output) = self._remote_exec(self._script_run)
+        if status.is_succeeded() and output is not None:
+            output = self._extract_stdout_results(output.get("stdout", ""))
+        _LOG.info("Remote run complete: %s :: %s = %s", self, status, output)
+        return (status, output)
 
     def teardown(self) -> None:
         """
@@ -164,6 +169,5 @@ class RemoteEnv(ScriptEnv):
         _LOG.debug("Script submitted: %s %s :: %s", self, status, output)
         if status in {Status.PENDING, Status.SUCCEEDED}:
             (status, output) = self._remote_exec_service.get_remote_exec_results(output)
-            # TODO: extract the results from `output`.
         _LOG.debug("Status: %s :: %s", status, output)
         return (status, output)
