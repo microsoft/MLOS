@@ -29,6 +29,7 @@
                     }
                 }
             },
+            "minProperties": 1,
             "unevaluatedProperties": false
         }
     },
