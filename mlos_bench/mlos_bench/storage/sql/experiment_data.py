@@ -22,8 +22,15 @@ class ExperimentSqlData(ExperimentData):
     Base interface for accessing the stored benchmark data.
     """
 
-    def __init__(self, engine: Engine, schema: DbSchema, exp_id: str):
-        super().__init__(exp_id)
+    def __init__(self, *, engine: Engine, schema: DbSchema, exp_id: str,
+                 description: str, root_env_config: str, git_repo: str, git_commit: str):
+        super().__init__(
+            exp_id=exp_id,
+            description=description,
+            root_env_config=root_env_config,
+            git_repo=git_repo,
+            git_commit=git_commit,
+        )
         self._engine = engine
         self._schema = schema
 
