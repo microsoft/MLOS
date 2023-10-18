@@ -81,7 +81,7 @@
                     "output_directory": {
                         "description": "Directory to store SMAC output files.",
                         "type": ["string", "null"],
-                        "pattern": "^[a-zA-Z0-9_./-]+$",
+                        "pattern": "^[a-zA-Z0-9_./\\:-]+$",
                         "example": "smac_output"
                     },
                     "run_name": {
