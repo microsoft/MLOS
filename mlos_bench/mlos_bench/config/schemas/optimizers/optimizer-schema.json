@@ -14,24 +14,29 @@
             "properties": {
                 "optimization_target": {
                     "description": "The name of the metric to optimize.",
-                    "type": "string"
+                    "type": "string",
+                    "example": "score"
                 },
                 "optimization_direction": {
                     "description": "Whether to minimize or maximize the optimization target.",
-                    "enum": ["min", "max"]
+                    "enum": ["min", "max"],
+                    "example": "min"
                 },
                 "max_iterations": {
                     "description": "The maximum number of additional (in the case of merging experiment data or resuming experiments) iterations to run when we launch the app.",
                     "type": "integer",
-                    "minimum": 0
+                    "minimum": 0,
+                    "example": 100
                 },
                 "seed": {
                     "description": "The seed to use for the random number generator.",
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 42
                 },
                 "start_with_defaults": {
                     "description": "If false, use the optimizer to suggest the initial configuration; if true (default), use the already assigned values for the first iteration.",
-                    "type": "boolean"
+                    "type": "boolean",
+                    "example": true
                 }
             }
         }
