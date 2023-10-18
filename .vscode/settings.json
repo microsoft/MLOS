@@ -135,6 +135,7 @@
     "python.testing.pytestArgs": [
         "-n1",  // don't run tests in parallel inside vscode - makes attaching the debugger more cumbersome
         "--dist=no",
+        "--log-level=DEBUG",
         "."
     ],
     "python.testing.unittestEnabled": false

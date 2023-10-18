@@ -51,6 +51,11 @@ jobs:
       run: |
         echo "NO_CACHE=true" >> $GITHUB_ENV
 
+    - name: Run pytest with debug logging enabled for nightly runs
+      if: github.event_name == 'schedule'
+      run: |
+        echo "PYTEST_EXTRA_OPTIONS=--log-level=DEBUG" >> $GITHUB_ENV
+
     - name: Log some environment variables for debugging
       run: |
         set -x
@@ -83,6 +88,7 @@ jobs:
           --volume $(pwd):/workspaces/MLOS \
           --env CONTAINER_WORKSPACE_FOLDER=/workspaces/MLOS \
           --env LOCAL_WORKSPACE_FOLDER=$(pwd) \
+          --env PYTEST_EXTRA_OPTIONS=$PYTEST_EXTRA_OPTIONS \
           --workdir /workspaces/MLOS \
           --add-host host.docker.internal:host-gateway \
           --name mlos-devcontainer mlos-devcontainer sleep infinity
