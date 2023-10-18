@@ -7,7 +7,7 @@ Saving and restoring the benchmark data in SQL database.
 """
 
 import logging
-from typing import Optional
+from typing import Dict, Optional
 
 from sqlalchemy import URL, create_engine
 
@@ -16,6 +16,8 @@ from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_storage import Storage
 from mlos_bench.storage.sql.schema import DbSchema
 from mlos_bench.storage.sql.experiment import Experiment
+from mlos_bench.storage.base_experiment_data import ExperimentData
+from mlos_bench.storage.sql.experiment_data import ExperimentSqlData
 
 _LOG = logging.getLogger(__name__)
 
@@ -71,3 +73,24 @@ class SqlStorage(Storage):
             description=description,
             opt_target=opt_target,
         )
+
+    @property
+    def experiments(self) -> Dict[str, ExperimentData]:
+        with self._engine.connect() as conn:
+            cur_exp = conn.execute(
+                self._schema.experiment.select().order_by(
+                    self._schema.experiment.c.exp_id.asc(),
+                )
+            )
+            return {
+                exp.exp_id: ExperimentSqlData(
+                    engine=self._engine,
+                    schema=self._schema,
+                    exp_id=exp.exp_id,
+                    description=exp.description,
+                    root_env_config=exp.root_env_config,
+                    git_repo=exp.git_repo,
+                    git_commit=exp.git_commit,
+                )
+                for exp in cur_exp.fetchall()
+            }
