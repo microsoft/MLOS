@@ -133,6 +133,7 @@ jobs:
         df -h
         sudo -n du -hsc /var/lib/* /var/cache/* /tmp/*
         du -hsc *
+        docker image ls
 
     - name: Generate and test binary distribution files
       timeout-minutes: 10
