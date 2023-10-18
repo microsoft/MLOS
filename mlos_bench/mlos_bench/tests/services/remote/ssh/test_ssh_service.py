@@ -56,7 +56,7 @@ def test_ssh_service_background_thread() -> None:
     # pylint: disable=protected-access
 
     # Should start with no event loop thread.
-    gc.collect()
+    _ = [gc.collect(i) for i in (2, 1, 0)]
     assert SshService._event_loop_thread is None
 
     # After we make an initial SshService instance, we should have a thread.
@@ -81,7 +81,7 @@ def test_ssh_service_background_thread() -> None:
 
     # And it should remain after we delete the first instance.
     ssh_host_service = None
-    gc.collect()
+    _ = [gc.collect(i) for i in (2, 1, 0)]
     assert SshService._event_loop_thread_refcnt == 1
     assert SshService._event_loop_thread is not None
     assert SshService._event_loop_thread.is_alive()
@@ -91,7 +91,7 @@ def test_ssh_service_background_thread() -> None:
 
     # But not after we delete the remaining instances.
     ssh_fileshare_service = None
-    gc.collect()
+    _ = [gc.collect(i) for i in (2, 1, 0)]
     assert SshService._event_loop_thread is None
     assert SshService._event_loop_thread_refcnt == 0
     assert SshService._event_loop is None
