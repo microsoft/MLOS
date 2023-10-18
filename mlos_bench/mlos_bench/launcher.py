@@ -89,6 +89,10 @@ class Launcher:
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
         self.global_config = self._expand_vars(self.global_config)
+        assert isinstance(self.global_config, dict)
+        # Ensure that the trial_id is present since it gets used by some other
+        # configs but is typically controlled by the run optimize loop.
+        self.global_config.setdefault('trial_id', 1)
 
         env_path = args.environment or config.get("environment")
         if not env_path:
