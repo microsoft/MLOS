@@ -15,6 +15,7 @@ from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
@@ -110,6 +111,7 @@ class Environment(metaclass=abc.ABCMeta):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM/Host, etc.).
         """
+        self._validate_json_config(config, name)
         self.name = name
         self.config = config
         self._service = service
@@ -142,6 +144,21 @@ class Environment(metaclass=abc.ABCMeta):
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Config for: '%s'\n%s",
                        name, json.dumps(self.config, indent=2))
+
+    def _validate_json_config(self, config: dict, name: str) -> None:
+        """
+        Reconstructs a basic json config that this class might have been
+        instantiated from in order to validate configs provided outside the
+        file loading mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if name:
+            json_config["name"] = name
+        if config:
+            json_config["config"] = config
+        ConfigSchema.ENVIRONMENT.validate(json_config)
 
     @staticmethod
     def _expand_groups(groups: Iterable[str],

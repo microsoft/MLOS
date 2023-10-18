@@ -13,6 +13,7 @@ from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -45,10 +46,24 @@ class Storage(metaclass=ABCMeta):
             Free-format key/value pairs of configuration parameters.
         """
         _LOG.debug("Storage config: %s", config)
+        self._validate_json_config(config)
         self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()
         self._global_config = global_config or {}
+
+    def _validate_json_config(self, config: dict) -> None:
+        """
+        Reconstructs a basic json config that this class might have been
+        instantiated from in order to validate configs provided outside the
+        file loading mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if config:
+            json_config["config"] = config
+        ConfigSchema.STORAGE.validate(json_config)
 
     @property
     @abstractmethod
