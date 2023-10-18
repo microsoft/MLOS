@@ -10,6 +10,7 @@ import gc
 import time
 
 from subprocess import run
+from typing import List
 from threading import Thread
 
 import pytest
@@ -50,13 +51,18 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
     assert cmd.stdout.strip() == server_name
 
 
+def gc_collect() -> List[int]:
+    """Perform a full garbage collection."""
+    return [gc.collect(i) for i in (2, 1, 0)] + [gc.collect()]
+
+
 @pytest.mark.xdist_group("ssh_test_server")
 def test_ssh_service_background_thread() -> None:
     """Test the SSH service background thread setup/cleanup handling."""
     # pylint: disable=protected-access
 
     # Should start with no event loop thread.
-    _ = [gc.collect(i) for i in (2, 1, 0)]
+    gc_collect()
     assert SshService._event_loop_thread is None
 
     # After we make an initial SshService instance, we should have a thread.
@@ -81,7 +87,7 @@ def test_ssh_service_background_thread() -> None:
 
     # And it should remain after we delete the first instance.
     ssh_host_service = None
-    _ = [gc.collect(i) for i in (2, 1, 0)]
+    gc_collect()
     assert SshService._event_loop_thread_refcnt == 1
     assert SshService._event_loop_thread is not None
     assert SshService._event_loop_thread.is_alive()
@@ -91,7 +97,7 @@ def test_ssh_service_background_thread() -> None:
 
     # But not after we delete the remaining instances.
     ssh_fileshare_service = None
-    _ = [gc.collect(i) for i in (2, 1, 0)]
+    gc_collect()
     assert SshService._event_loop_thread is None
     assert SshService._event_loop_thread_refcnt == 0
     assert SshService._event_loop is None
