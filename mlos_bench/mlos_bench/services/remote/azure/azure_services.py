@@ -551,7 +551,6 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        _LOG.info("Deprovision VM: %s", self.config["vmName"])
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -562,7 +561,8 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
                 "vmName",
             ]
         )
-        _LOG.info("Deprovision: %s", config["deploymentName"])
+        _LOG.info("Deprovision VM: %s", config["vmName"])
+        _LOG.info("Deprovision deployment: %s", config["deploymentName"])
         # TODO: Properly deprovision *all* resources specified in the ARM template.
         return self._azure_vm_post_helper(config, self._URL_DEPROVISION.format(
             subscription=config["subscription"],
@@ -588,7 +588,6 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        _LOG.info("Deallocate VM: %s", self.config["vmName"])
         config = merge_parameters(
             dest=self.config.copy(),
             source=params,
@@ -598,7 +597,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
                 "vmName",
             ]
         )
-        _LOG.info("Deallocate: %s", config["vmName"])
+        _LOG.info("Deallocate VM: %s", config["vmName"])
         return self._azure_vm_post_helper(config, self._URL_DEALLOCATE.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
