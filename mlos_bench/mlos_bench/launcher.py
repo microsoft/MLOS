@@ -21,6 +21,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import BaseTypeVar
 
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.environments.base_environment import Environment
 
@@ -198,13 +199,40 @@ class Launcher:
         return (args, args_rest)
 
     @staticmethod
-    def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, str]:
+    def _try_parse_val(val: str) -> TunableValue:
+        """
+        Try to parse the value as an int or float, otherwise return the string.
+
+        This can help with config schema validation to make sure early on that
+        the args we're expecting are the right type.
+
+        Parameters
+        ----------
+        val : str
+            The initial cmd line arg value.
+
+        Returns
+        -------
+        TunableValue
+            The parsed value.
+        """
+        try:
+            if "." in val:
+                return float(val)
+            else:
+                return int(val)
+        except ValueError:
+            pass
+        return str(val)
+
+    @staticmethod
+    def _try_parse_extra_args(cmdline: Iterable[str]) -> Dict[str, TunableValue]:
         """
         Helper function to parse global key/value pairs from the command line.
         """
         _LOG.debug("Extra args: %s", cmdline)
 
-        config = {}
+        config: Dict[str, TunableValue] = {}
         key = None
         for elem in cmdline:
             if elem.startswith("--"):
@@ -213,15 +241,16 @@ class Launcher:
                 key = elem[2:]
                 kv_split = key.split("=", 1)
                 if len(kv_split) == 2:
-                    config[kv_split[0].strip()] = kv_split[1]
+                    config[kv_split[0].strip()] = Launcher._try_parse_val(kv_split[1])
                     key = None
             else:
                 if key is None:
                     raise ValueError("Command line argument has no key: " + elem)
-                config[key.strip()] = elem
+                config[key.strip()] = Launcher._try_parse_val(elem)
                 key = None
 
         if key is not None:
+            # Handles missing trailing elem from last --key arg.
             raise ValueError("Command line argument has no value: " + key)
 
         _LOG.debug("Parsed config: %s", config)
