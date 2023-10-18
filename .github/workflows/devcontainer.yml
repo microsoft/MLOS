@@ -127,6 +127,13 @@ jobs:
         # Now actually run the tests.
         docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v test
 
+    - name: Debugging - Output Disk Usage
+      run: |
+        set -x
+        df -h
+        sudo -n du -hsc /var/lib/* /var/cache/* /tmp/*
+        du -hsc *
+
     - name: Generate and test binary distribution files
       timeout-minutes: 10
       run: |
