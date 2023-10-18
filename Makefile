@@ -183,7 +183,7 @@ build/pytest.${CONDA_ENV_NAME}.build-stamp: build/pytest.mlos_core.${CONDA_ENV_N
 	for pytest_module in $(PYTEST_MODULES); do rm -f build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.needs-build-stamp; done
 	# Run pytest for the modules: $(PYTEST_MODULES)
 	mkdir -p doc/source/badges/
-	conda run -n ${CONDA_ENV_NAME} pytest $(PYTEST_OPTIONS) $(PYTEST_MODULES)
+	conda run -n ${CONDA_ENV_NAME} pytest $(PYTEST_OPTIONS) $(PYTEST_EXTRA_OPTIONS) $(PYTEST_MODULES)
 	# Mark those as done again.
 	for pytest_module in $(PYTEST_MODULES); do touch build/pytest.$${pytest_module}.${CONDA_ENV_NAME}.needs-build-stamp; done
 	touch $@
