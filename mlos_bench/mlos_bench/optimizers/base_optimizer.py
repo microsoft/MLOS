@@ -25,6 +25,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
 
+    # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
+    BASE_SUPPORTED_CONFIG_PROPS = {
+        "optimization_target",
+        "optimization_direction",
+        "max_iterations",
+        "seed",
+        "start_with_defaults",
+    }
+
     def __init__(self,
                  tunables: TunableGroups,
                  config: dict,

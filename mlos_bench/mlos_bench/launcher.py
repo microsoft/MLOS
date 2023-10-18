@@ -300,8 +300,11 @@ class Launcher:
         create a one-shot optimizer to run a single benchmark trial.
         """
         if args_optimizer is None:
+            # global_config may contain additional properties, so we need to
+            # strip those out before instantiating the basic optimizer.
+            config = { key: val for key, val in self.global_config.items() if key in OneShotOptimizer.BASE_SUPPORTED_CONFIG_PROPS }
             return OneShotOptimizer(
-                self.tunables, config=self.global_config, service=self._parent_service)
+                self.tunables, config=config, service=self._parent_service)
         optimizer = self._load(Optimizer, args_optimizer, ConfigSchema.OPTIMIZER)   # type: ignore[type-abstract]
         return optimizer
 
