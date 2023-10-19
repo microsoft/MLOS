@@ -205,19 +205,19 @@ class SshService(Service, metaclass=ABCMeta):
     def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
         # pylint: disable=too-complex
 
-        # Make sure that the value we allow overriding on a per-connection
-        # basis are present in the config so merge_parameters can do its thing.
-        config.setdefault('ssh_port', None)
-        assert isinstance(config['ssh_port'], (int, type(None)))
-        config.setdefault('ssh_username', None)
-        assert isinstance(config['ssh_username'], (str, type(None)))
-        config.setdefault('ssh_priv_key_path', None)
-        assert isinstance(config['ssh_priv_key_path'], (str, type(None)))
-
         super().__init__(config, global_config, parent)
 
+        # Make sure that the value we allow overriding on a per-connection
+        # basis are present in the config so merge_parameters can do its thing.
+        self.config.setdefault('ssh_port', None)
+        assert isinstance(self.config['ssh_port'], (int, type(None)))
+        self.config.setdefault('ssh_username', None)
+        assert isinstance(self.config['ssh_username'], (str, type(None)))
+        self.config.setdefault('ssh_priv_key_path', None)
+        assert isinstance(self.config['ssh_priv_key_path'], (str, type(None)))
+
         # None can be used to disable the request timeout.
-        self._request_timeout = config.get("ssh_request_timeout", self._REQUEST_TIMEOUT)
+        self._request_timeout = self.config.get("ssh_request_timeout", self._REQUEST_TIMEOUT)
         self._request_timeout = float(self._request_timeout) if self._request_timeout is not None else None
 
         # Prep an initial connect_params.
