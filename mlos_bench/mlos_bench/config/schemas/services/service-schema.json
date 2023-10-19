@@ -11,6 +11,9 @@
                 {
                     "oneOf": [
                         {
+                            "$ref": "./config-persistence-service-subschema.json"
+                        },
+                        {
                             "$ref": "./local/local-exec-service-subschema.json"
                         },
                         {

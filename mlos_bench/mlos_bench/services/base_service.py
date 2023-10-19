@@ -11,6 +11,7 @@ import logging
 
 from typing import Any, Callable, Dict, List, Optional, Union
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 from mlos_bench.util import instantiate_from_config
 
@@ -73,6 +74,7 @@ class Service:
             An optional parent service that can provide mixin functions.
         """
         self.config = config or {}
+        self._validate_json_config(self.config)
         self._parent = parent
         self._services: Dict[str, Callable] = {}
 
@@ -88,6 +90,23 @@ class Service:
             _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config or {}, indent=2))
             _LOG.debug("Service: %s Parent mixins: %s", self,
                        [] if parent is None else list(parent._services.keys()))
+
+    def _validate_json_config(self, config: dict) -> None:
+        """
+        Reconstructs a basic json config that this class might have been
+        instantiated from in order to validate configs provided outside the
+        file loading mechanism.
+        """
+        if self.__class__ == Service:
+            # Skip over the case where instantiate a bare base Service class in order to build up a mix-in.
+            assert config == {}
+            return
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if config:
+            json_config["config"] = config
+        ConfigSchema.SERVICE.validate(json_config)
 
     def __repr__(self) -> str:
         return self.__class__.__name__

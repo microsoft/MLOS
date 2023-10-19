@@ -13,6 +13,7 @@ from types import TracebackType
 from typing import Optional, Union, List, Tuple, Dict, Iterator, Type, Any
 from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.storage.base_experiment_data import ExperimentData
@@ -45,10 +46,24 @@ class Storage(metaclass=ABCMeta):
             Free-format key/value pairs of configuration parameters.
         """
         _LOG.debug("Storage config: %s", config)
+        self._validate_json_config(config)
         self._tunables = tunables.copy()
         self._service = service
         self._config = config.copy()
         self._global_config = global_config or {}
+
+    def _validate_json_config(self, config: dict) -> None:
+        """
+        Reconstructs a basic json config that this class might have been
+        instantiated from in order to validate configs provided outside the
+        file loading mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if config:
+            json_config["config"] = config
+        ConfigSchema.STORAGE.validate(json_config)
 
     @property
     @abstractmethod
@@ -279,8 +294,8 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update(self, status: Status, timestamp: datetime,
-                   metrics: Optional[Union[Dict[str, float], float]] = None
-                   ) -> Optional[Dict[str, float]]:
+                   metrics: Optional[Union[Dict[str, Any], float]] = None
+                   ) -> Optional[Dict[str, Any]]:
             """
             Update the storage with the results of the experiment.
 
@@ -290,13 +305,13 @@ class Storage(metaclass=ABCMeta):
                 Status of the experiment run.
             timestamp: datetime
                 Timestamp of the status and metrics.
-            metrics : Optional[Union[Dict[str, float], float]]
+            metrics : Optional[Union[Dict[str, Any], float]]
                 One or several metrics of the experiment run.
-                Must contain the optimization target if the status is SUCCEEDED.
+                Must contain the (float) optimization target if the status is SUCCEEDED.
 
             Returns
             -------
-            metrics : Optional[Dict[str, float]]
+            metrics : Optional[Dict[str, Any]]
                 Same as `metrics`, but always in the dict format.
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
