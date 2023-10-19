@@ -25,6 +25,12 @@
                 "meta": {"quote": true, "list": ["a", "b", "c", 1, 2, 3]},
                 "default": "yes",
                 "values": ["yes", "no"]
+            },
+            "cat-ints": {
+                "description": "Categorical integers",
+                "type": "categorical",
+                "default": 1,
+                "values": [1, 2, 3]
             }
         }
     },

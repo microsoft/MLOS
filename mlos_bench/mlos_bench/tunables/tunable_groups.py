@@ -9,6 +9,7 @@ import copy
 
 from typing import Dict, Generator, Iterable, Mapping, Optional, Tuple, Union
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.tunables.tunable import Tunable, TunableValue
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 
@@ -29,6 +30,7 @@ class TunableGroups:
         """
         if config is None:
             config = {}
+        ConfigSchema.TUNABLE_PARAMS.validate(config)
         self._index: Dict[str, CovariantTunableGroup] = {}  # Index (Tunable id -> CovariantTunableGroup)
         self._tunable_groups: Dict[str, CovariantTunableGroup] = {}
         for (name, group_config) in config.items():
