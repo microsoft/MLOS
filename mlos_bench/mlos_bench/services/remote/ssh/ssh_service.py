@@ -255,11 +255,16 @@ class SshService(Service, metaclass=ABCMeta):
                 SshService._event_loop_thread.start()
             SshService._event_loop_thread_refcnt += 1
 
-    def __del__(self) -> None:
+        self._enabled = True
+
+    def close(self) -> None:    # pylint: disable=no-self-use
         """
-        Ensures that the event loop thread is stopped when all sub-service
-        instances are garbage collected.
+        An explicit way to disable this service instance from being used again.
+
+        Useful for testing to work around the fact that garbage collection is lazy in python.
         """
+        if not self._enabled:
+            return
         with SshService._event_loop_thread_lock:
             SshService._event_loop_thread_refcnt -= 1
             if SshService._event_loop_thread_refcnt == 0:
@@ -274,6 +279,14 @@ class SshService(Service, metaclass=ABCMeta):
                     raise RuntimeError("Failed to stop event loop thread.")
                 SshService._event_loop = None
                 SshService._event_loop_thread = None
+            self._enabled = False
+
+    def __del__(self) -> None:
+        """
+        Ensures that the event loop thread is stopped when all sub-service
+        instances are garbage collected.
+        """
+        self.close()
 
     @classmethod
     def clear_client_cache(cls) -> None:
@@ -300,8 +313,7 @@ class SshService(Service, metaclass=ABCMeta):
     else:
         FutureReturnType: TypeAlias = Future
 
-    @classmethod
-    def _run_coroutine(cls, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
+    def _run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
         """
         Runs the given coroutine in the background event loop thread.
 
@@ -315,16 +327,17 @@ class SshService(Service, metaclass=ABCMeta):
         Future[CoroReturnType]
             A future that will be completed when the coroutine completes.
         """
-        assert cls._event_loop is not None
-        return asyncio.run_coroutine_threadsafe(coro, cls._event_loop)
+        assert self._enabled
+        assert self._event_loop is not None
+        return asyncio.run_coroutine_threadsafe(coro, self._event_loop)
 
-    def _get_connect_params(self, params: Optional[dict] = None) -> dict:
+    def _get_connect_params(self, params: dict) -> dict:
         """
         Produces a dict of connection parameters for asyncssh.create_connection.
 
         Parameters
         ----------
-        params : Optional[dict]
+        params : dict
             Additional connection parameters specific to this host.
 
         Returns
@@ -332,9 +345,6 @@ class SshService(Service, metaclass=ABCMeta):
         dict
             A dict of connection parameters for asyncssh.create_connection.
         """
-        if params is None:
-            params = {}
-
         # Setup default connect_params dict for all SshClients we might need to create.
 
         # Note: None is an acceptable value for several of these, in which case
@@ -343,7 +353,7 @@ class SshService(Service, metaclass=ABCMeta):
         # Start with the base config params.
         connect_params = self._connect_params.copy()
 
-        connect_params['host'] = params.pop('ssh_hostname')
+        connect_params['host'] = params['ssh_hostname']     # required
 
         if params.get('ssh_port'):
             connect_params['port'] = int(params.pop('ssh_port'))
@@ -364,13 +374,13 @@ class SshService(Service, metaclass=ABCMeta):
 
         return connect_params
 
-    async def _get_client_connection(self, params: Optional[dict] = None) -> Tuple[SSHClientConnection, SshClient]:
+    async def _get_client_connection(self, params: dict) -> Tuple[SSHClientConnection, SshClient]:
         """
         Gets a (possibly cached) SshClient (connection) for the given connection params.
 
         Parameters
         ----------
-        params : Optional[dict]
+        params : dict
             Optional override connection parameters.
 
         Returns
@@ -378,5 +388,6 @@ class SshService(Service, metaclass=ABCMeta):
         Tuple[SSHClientConnection, SshClient]
             The connection and client objects.
         """
+        assert self._enabled
         assert self._event_loop_thread_ssh_client_cache is not None
         return await self._event_loop_thread_ssh_client_cache.get_client_connection(self._get_connect_params(params))

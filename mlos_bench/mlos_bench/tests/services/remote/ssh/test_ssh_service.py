@@ -6,11 +6,11 @@
 Tests for mlos_bench.services.remote.ssh.SshService base class.
 """
 
+import asyncio
 import gc
 import time
 
 from subprocess import run
-from typing import List
 from threading import Thread
 
 import pytest
@@ -51,18 +51,13 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
     assert cmd.stdout.strip() == server_name
 
 
-def gc_collect() -> List[int]:
-    """Perform a full garbage collection."""
-    return [gc.collect(i) for i in (2, 1, 0)] + [gc.collect()]
-
-
 @pytest.mark.xdist_group("ssh_test_server")
 def test_ssh_service_background_thread() -> None:
     """Test the SSH service background thread setup/cleanup handling."""
     # pylint: disable=protected-access
 
     # Should start with no event loop thread.
-    gc_collect()
+    gc.collect()
     assert SshService._event_loop_thread is None
 
     # After we make an initial SshService instance, we should have a thread.
@@ -86,8 +81,14 @@ def test_ssh_service_background_thread() -> None:
     assert SshService._event_loop is ssh_host_service._event_loop is ssh_fileshare_service._event_loop
 
     # And it should remain after we delete the first instance.
-    ssh_host_service = None
-    gc_collect()
+    # Note: since GC is not guaranteed, we need to provide a way to explicitly close an instance.
+    ssh_host_service.close()
+    # And that instance should be unusable after we explicitly close it.
+    assert not ssh_host_service._enabled
+    with pytest.raises(AssertionError):
+        ssh_host_service._run_coroutine(asyncio.sleep(0.1))
+    del ssh_host_service
+    gc.collect()
     assert SshService._event_loop_thread_refcnt == 1
     assert SshService._event_loop_thread is not None
     assert SshService._event_loop_thread.is_alive()
@@ -96,8 +97,9 @@ def test_ssh_service_background_thread() -> None:
     assert SshService._event_loop_thread_ssh_client_cache is not None
 
     # But not after we delete the remaining instances.
-    ssh_fileshare_service = None
-    gc_collect()
+    ssh_fileshare_service.close()
+    del ssh_fileshare_service
+    gc.collect()
     assert SshService._event_loop_thread is None
     assert SshService._event_loop_thread_refcnt == 0
     assert SshService._event_loop is None
