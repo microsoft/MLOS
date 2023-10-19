@@ -294,8 +294,8 @@ class Storage(metaclass=ABCMeta):
 
         @abstractmethod
         def update(self, status: Status, timestamp: datetime,
-                   metrics: Optional[Union[Dict[str, float], float]] = None
-                   ) -> Optional[Dict[str, float]]:
+                   metrics: Optional[Union[Dict[str, Any], float]] = None
+                   ) -> Optional[Dict[str, Any]]:
             """
             Update the storage with the results of the experiment.
 
@@ -305,13 +305,13 @@ class Storage(metaclass=ABCMeta):
                 Status of the experiment run.
             timestamp: datetime
                 Timestamp of the status and metrics.
-            metrics : Optional[Union[Dict[str, float], float]]
+            metrics : Optional[Union[Dict[str, Any], float]]
                 One or several metrics of the experiment run.
-                Must contain the optimization target if the status is SUCCEEDED.
+                Must contain the (float) optimization target if the status is SUCCEEDED.
 
             Returns
             -------
-            metrics : Optional[Dict[str, float]]
+            metrics : Optional[Dict[str, Any]]
                 Same as `metrics`, but always in the dict format.
             """
             _LOG.info("Store trial: %s :: %s %s", self, status, metrics)
