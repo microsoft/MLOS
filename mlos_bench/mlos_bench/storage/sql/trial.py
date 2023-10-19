@@ -42,8 +42,8 @@ class Trial(Storage.Trial):
         self._schema = schema
 
     def update(self, status: Status, timestamp: datetime,
-               metrics: Optional[Union[Dict[str, float], float]] = None
-               ) -> Optional[Dict[str, float]]:
+               metrics: Optional[Union[Dict[str, Any], float]] = None
+               ) -> Optional[Dict[str, Any]]:
         metrics = super().update(status, timestamp, metrics)
         with self._engine.begin() as conn:
             try:
