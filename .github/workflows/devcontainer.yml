@@ -136,10 +136,11 @@ jobs:
     - name: Debugging - Output Disk Usage
       run: |
         set -x
-        df -h
-        sudo -n du -hsc /var/lib/* /var/cache/* /tmp/*
-        du -hsc *
-        docker image ls
+        df -h | sort -h
+        sudo df -h /var/lib/docker/* | sort -h | uniq
+        sudo -n du -hsc /var/lib/* /var/cache/* /tmp/* | sort -h
+        sudo du -hsc /mnt/* | sort -h
+        docker image ls | awk '{ printf "%s\t%s\n", $NF, $0 }' | sort -h
 
     - name: Generate and test binary distribution files
       timeout-minutes: 10
