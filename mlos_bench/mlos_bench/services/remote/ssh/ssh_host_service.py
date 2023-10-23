@@ -235,7 +235,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             'reboot',
             'halt --reboot',
             'systemctl reboot',
-            'kill 1',
+            'kill -9 1' if force else 'kill 1',
         ]
         return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params)
 
