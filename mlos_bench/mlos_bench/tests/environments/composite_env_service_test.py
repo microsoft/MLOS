@@ -63,10 +63,10 @@ def test_composite_services(composite_env: CompositeEnv) -> None:
     """
     # pylint: disable=protected-access
     with composite_env.children[0]._service.temp_dir_context() as temp_dir:
-        assert temp_dir == "tmp_global"
+        assert os.path.samefile(temp_dir, "tmp_global")
 
     with composite_env.children[1]._service.temp_dir_context() as temp_dir:
-        assert temp_dir == "tmp_other_2"
+        assert os.path.samefile(temp_dir, "tmp_other_2")
 
     with composite_env.children[2]._service.temp_dir_context() as temp_dir:
-        assert temp_dir == "tmp_other_3"
+        assert os.path.samefile(temp_dir, "tmp_other_3")
