@@ -136,8 +136,7 @@ class Service:
             services = {svc.__name__: svc for svc in services}
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Service: %s Add methods: %s",
-                       self.__class__.__name__, list(services.keys()))
+            _LOG.debug("Service: %s Add methods: %s", self, list(services.keys()))
 
         # TODO? Throw a warning when an existing method is being overwritten?
 
