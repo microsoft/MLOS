@@ -9,7 +9,6 @@ A collection functions for interacting with SSH servers as file shares.
 from abc import ABCMeta
 from asyncio import AbstractEventLoop, Event as CoroEvent, Lock as CoroLock
 from concurrent.futures import Future
-from types import NoneType
 from typing import Any, Coroutine, Dict, Optional, Tuple, TypeVar, Union
 from threading import current_thread, Lock as ThreadLock, Thread
 
@@ -205,11 +204,11 @@ class SshService(Service, metaclass=ABCMeta):
         # Make sure that the value we allow overriding on a per-connection
         # basis are present in the config so merge_parameters can do its thing.
         self.config.setdefault('ssh_port', None)
-        assert isinstance(self.config['ssh_port'], (int, NoneType))
+        assert isinstance(self.config['ssh_port'], (int, type(None)))
         self.config.setdefault('ssh_username', None)
-        assert isinstance(self.config['ssh_username'], (str, NoneType))
+        assert isinstance(self.config['ssh_username'], (str, type(None)))
         self.config.setdefault('ssh_priv_key_path', None)
-        assert isinstance(self.config['ssh_priv_key_path'], (str, NoneType))
+        assert isinstance(self.config['ssh_priv_key_path'], (str, type(None)))
 
         # None can be used to disable the request timeout.
         self._request_timeout = self.config.get("ssh_request_timeout", self._REQUEST_TIMEOUT)
