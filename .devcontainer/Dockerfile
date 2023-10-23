@@ -37,8 +37,10 @@ RUN apt-get update \
         make \
         rename \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && echo "C-w: unix-filename-rubout" >> /etc/inputrc
-    # Also tweak C-w to stop at slashes as well instead of just spaces
+    echo "# Also tweak C-w to stop at slashes as well instead of just spaces" \
+    && echo "C-w: unix-filename-rubout" >> /etc/inputrc \
+    && addgroup conda \
+    && adduser vscode conda
 
 # Now start installing conda, updating it, configuring it, and setting up the
 # mlos environment all in one shot to reduce the number of layers and allow
@@ -61,15 +63,15 @@ RUN set -x \
         conda \
     && sudo -n apt-get clean && sudo -n rm -rf /var/lib/apt/lists/* \
     && echo "# Give the vscode user access to modify the conda envs directly." \
-    && sudo -n chgrp -R vscode /opt/conda \
+    && sudo -n chgrp -R conda /opt/conda \
     && sudo -n chmod -R g+w /opt/conda \
     && echo "# Set some cache dirs to be owned by the vscode user even as we're currently" \
     && echo "# executing as root to build the container image." \
     && sudo -n mkdir -p ${PIP_CACHE_DIR} \
-    && sudo -n chown -R vscode:vscode ${PIP_CACHE_DIR} \
+    && sudo -n chown -R vscode:conda ${PIP_CACHE_DIR} \
     && sudo -n chmod -R u=rwX,g=rwXs,o=rX ${PIP_CACHE_DIR} \
     && sudo -n mkdir -p ${CONDA_PKGS_DIRS}/cache/ \
-    && sudo -n chown -R vscode:vscode ${CONDA_PKGS_DIRS} \
+    && sudo -n chown -R vscode:conda ${CONDA_PKGS_DIRS} \
     && sudo -n chmod -R u=rwX,g=rwXs,o=rX ${CONDA_PKGS_DIRS} \
     && echo "# Upgrade conda and use strict priorities" \
     && echo "# Use the mamba solver (necessary for some quality of life speedups due to" \

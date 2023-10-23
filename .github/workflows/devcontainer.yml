@@ -100,7 +100,7 @@ jobs:
         docker exec --user root mlos-devcontainer chown -R vscode:vscode /home/vscode
         docker exec --user root mlos-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
         docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
-        docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/envs/mlos
+        #docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/envs/mlos
 
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
