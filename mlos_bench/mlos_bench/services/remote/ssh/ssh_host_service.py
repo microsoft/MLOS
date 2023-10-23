@@ -81,7 +81,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         env_script_lines = [f"export {name}={value}" for (name, value) in env_params.items()]
         script_lines = env_script_lines + [line_split for line in script for line_split in line.splitlines()]
         # Note: connection.run() uses "exec" with a shell by default.
-        return await connection.run(';'.join(script_lines),
+        return await connection.run('\n'.join(script_lines),
                                     check=False,
                                     timeout=self._request_timeout,
                                     env=env_params)
@@ -181,11 +181,19 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             ]
         )
         cmd_opts = ' '.join([f"'{cmd}'" for cmd in cmd_opts_list])
-        script = r"if [[ $EUID -ne 0 ]]; then sudo=$(command -v sudo); sudo=${sudo:+$sudo -n}; fi; " \
-            + f"for cmd in {cmd_opts}; do " \
-            + r"  $sudo $cmd && exit 0;" \
-            + r"done;" \
-            + r"echo 'ERROR: Failed to shutdown/reboot the system.'; exit 1"
+        script = rf"""
+            if [[ $EUID -ne 0 ]]; then
+                sudo=$(command -v sudo)
+                sudo=${{sudo:+$sudo -n}}
+            fi
+
+            for cmd in {cmd_opts}; do
+                $sudo $cmd && exit 0
+            done
+
+            echo 'ERROR: Failed to shutdown/reboot the system.'
+            exit 1
+        """
         return self.remote_exec(script, config, env_params={})
 
     def shutdown(self, params: dict, force: bool = False) -> Tuple[Status, dict]:
