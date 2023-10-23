@@ -31,7 +31,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends \
         bash bash-completion \
         less colordiff \
-        jq \
+        curl jq \
         ripgrep \
         vim-nox neovim python3-pynvim \
         make \
