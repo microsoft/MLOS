@@ -11,8 +11,6 @@ import time
 import pytest
 from pytest_docker.plugin import Services as DockerServices
 
-from mlos_bench.environments.status import Status
-
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_service import SshClient
 
@@ -53,10 +51,10 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
         config=config,
         env_params={},
     )
-    assert status == Status.PENDING
+    assert status.is_pending()
     assert "asyncRemoteExecResultsFuture" in results_info
     status, results = ssh_host_service.get_remote_exec_results(results_info)
-    assert status == Status.SUCCEEDED
+    assert status.is_succeeded()
     assert results["stdout"].strip() == SSH_TEST_SERVER_NAME
 
     # Check that the client caching is behaving as expected.
@@ -78,10 +76,10 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
             "UNUSED": "unused",  # unused, making sure it doesn't carry over with cached connections
         },
     )
-    assert status == Status.PENDING
+    assert status.is_pending()
     assert "asyncRemoteExecResultsFuture" in results_info
     status, results = ssh_host_service.get_remote_exec_results(results_info)
-    assert status == Status.SUCCEEDED
+    assert status.is_succeeded()
     assert results["stdout"].strip() == ALT_TEST_SERVER_NAME
 
     # Test reusing the existing connection.
@@ -94,7 +92,7 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
         },
     )
     status, results = ssh_host_service.get_remote_exec_results(results_info)
-    assert status == Status.FAILED  # should retain exit code from "false"
+    assert status.is_failed()   # should retain exit code from "false"
     stdout = str(results["stdout"])
     assert stdout.splitlines() == [
         "BAR=bar",
@@ -121,7 +119,7 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
         },
     )
     status, results = ssh_host_service.get_remote_exec_results(results_info)
-    assert status == Status.SUCCEEDED
+    assert status.is_succeeded()
     stdout = str(results["stdout"])
     lines = stdout.splitlines()
     assert lines == [
@@ -151,14 +149,14 @@ def test_ssh_service_reboot(docker_services: DockerServices,
     alt_test_server_ssh_service_config = alt_test_server.to_ssh_service_config()
     (status, results_info) = ssh_host_service.remote_exec(
         script=[
-            "echo \"sleeping...\"",
-            "sleep 30",
-            "echo \"shouldn't reach this point\""
+            'echo "sleeping..."',
+            'sleep 30',
+            'echo "should not reach this point"'
         ],
         config=alt_test_server_ssh_service_config,
         env_params={},
     )
-    assert status == Status.PENDING
+    assert status.is_pending()
     # Wait a moment for that to start in the background thread.
     time.sleep(0.5)
 
@@ -166,7 +164,7 @@ def test_ssh_service_reboot(docker_services: DockerServices,
     # TODO: Test graceful vs. forceful.
     if graceful:
         (status, reboot_results_info) = ssh_host_service.reboot(params=alt_test_server_ssh_service_config)
-        assert status == Status.PENDING
+        assert status.is_pending()
 
         (status, reboot_results_info) = ssh_host_service.wait_os_operation(reboot_results_info)
         # NOTE: reboot/shutdown ops mostly return FAILED, even though the reboot succeeds.
@@ -182,10 +180,10 @@ def test_ssh_service_reboot(docker_services: DockerServices,
 
     # TODO: Check for decent error handling on disconnects.
     status, results = ssh_host_service.get_remote_exec_results(results_info)
-    assert status == Status.FAILED
+    assert status.is_failed()
     stdout = str(results["stdout"])
     assert "sleeping" in stdout
-    assert "shouldn't reach this point" not in stdout
+    assert "should not reach this point" not in stdout
 
     # Give docker some time to restart the service after the "reboot".
     # Note: this relies on having `restart: always` in the docker-compose.yml file.
@@ -203,5 +201,5 @@ def test_ssh_service_reboot(docker_services: DockerServices,
         env_params={},
     )
     status, results = ssh_host_service.get_remote_exec_results(results_info)
-    assert status == Status.SUCCEEDED
+    assert status.is_succeeded()
     assert results["stdout"].strip() == ALT_TEST_SERVER_NAME

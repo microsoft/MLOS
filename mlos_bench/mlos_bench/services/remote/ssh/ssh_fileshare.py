@@ -88,7 +88,7 @@ class SshFileShareService(FileShareService, SshService):
         file_copy_future = self._run_coroutine(
             self._start_file_copy(params, CopyMode.DOWNLOAD, local_path, remote_path, recursive))
         try:
-            _ = file_copy_future.result()
+            file_copy_future.result()
         except (OSError, SFTPError) as ex:
             _LOG.error("Failed to download %s to %s from %s: %s", remote_path, local_path, params, ex)
             raise ex
@@ -105,7 +105,7 @@ class SshFileShareService(FileShareService, SshService):
         file_copy_future = self._run_coroutine(
             self._start_file_copy(params, CopyMode.UPLOAD, local_path, remote_path, recursive))
         try:
-            _ = file_copy_future.result()
+            file_copy_future.result()
         except (OSError, SFTPError) as ex:
             _LOG.error("Failed to upload %s to %s on %s: %s", local_path, remote_path, params, ex)
             raise ex

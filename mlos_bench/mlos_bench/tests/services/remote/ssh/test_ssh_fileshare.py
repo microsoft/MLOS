@@ -17,7 +17,6 @@ import pytest
 
 from asyncssh import SFTPError
 
-from mlos_bench.environments.status import Status
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 from mlos_bench.util import path_join
@@ -182,5 +181,5 @@ def test_ssh_fileshare_upload_file_dne(ssh_test_server: SshTestServerInfo,
         env_params={},
     )
     (status, results) = ssh_host_service.get_remote_exec_results(results)
-    assert status == Status.SUCCEEDED
+    assert status.is_succeeded()
     assert str(results["stdout"]).strip() == "0"

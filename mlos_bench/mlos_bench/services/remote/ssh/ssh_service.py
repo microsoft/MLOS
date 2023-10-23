@@ -9,6 +9,7 @@ A collection functions for interacting with SSH servers as file shares.
 from abc import ABCMeta
 from asyncio import AbstractEventLoop, Event as CoroEvent, Lock as CoroLock
 from concurrent.futures import Future
+from types import NoneType
 from typing import Any, Coroutine, Dict, Optional, Tuple, TypeVar, Union
 from threading import current_thread, Lock as ThreadLock, Thread
 
@@ -52,12 +53,6 @@ class SshClient(asyncssh.SSHClient):
 
     def __repr__(self) -> str:
         return self._connection_id
-
-    def __str__(self) -> str:
-        return self.__repr__()
-
-    def __hash__(self) -> int:
-        return hash(self._connection_id)
 
     @staticmethod
     def id_from_connection(connection: SSHClientConnection) -> str:
@@ -210,11 +205,11 @@ class SshService(Service, metaclass=ABCMeta):
         # Make sure that the value we allow overriding on a per-connection
         # basis are present in the config so merge_parameters can do its thing.
         self.config.setdefault('ssh_port', None)
-        assert isinstance(self.config['ssh_port'], (int, type(None)))
+        assert isinstance(self.config['ssh_port'], (int, NoneType))
         self.config.setdefault('ssh_username', None)
-        assert isinstance(self.config['ssh_username'], (str, type(None)))
+        assert isinstance(self.config['ssh_username'], (str, NoneType))
         self.config.setdefault('ssh_priv_key_path', None)
-        assert isinstance(self.config['ssh_priv_key_path'], (str, type(None)))
+        assert isinstance(self.config['ssh_priv_key_path'], (str, NoneType))
 
         # None can be used to disable the request timeout.
         self._request_timeout = self.config.get("ssh_request_timeout", self._REQUEST_TIMEOUT)
@@ -257,7 +252,7 @@ class SshService(Service, metaclass=ABCMeta):
 
         self._enabled = True
 
-    def close(self) -> None:    # pylint: disable=no-self-use
+    def close(self) -> None:
         """
         An explicit way to disable this service instance from being used again.
 
@@ -267,7 +262,7 @@ class SshService(Service, metaclass=ABCMeta):
             return
         with SshService._event_loop_thread_lock:
             SshService._event_loop_thread_refcnt -= 1
-            if SshService._event_loop_thread_refcnt == 0:
+            if SshService._event_loop_thread_refcnt <= 0:
                 assert SshService._event_loop_thread_ssh_client_cache is not None
                 SshService._event_loop_thread_ssh_client_cache.cleanup()
                 SshService._event_loop_thread_ssh_client_cache = None
