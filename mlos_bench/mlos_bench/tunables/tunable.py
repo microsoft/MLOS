@@ -62,8 +62,10 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
         self._name = name
         self._type = config["type"]  # required
         self._description = config.get("description")
-        self._default = config["default"]
+        self._default = self.dtype(config["default"])
         self._values = config.get("values")
+        if self._values:
+            self._values = [str(v) for v in self._values]
         self._meta: Dict[str, Any] = config.get("meta", {})
         self._range: Optional[Union[Tuple[int, int], Tuple[float, float]]] = None
         config_range = config.get("range")
@@ -72,7 +74,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             config_range = (config_range[0], config_range[1])
             self._range = config_range
         self._special = config.get("special")
-        self._current_value = self._default
+        self.value = self._default
         self._sanity_check()
 
     def _sanity_check(self) -> None:
@@ -209,7 +211,7 @@ class Tunable:  # pylint: disable=too-many-instance-attributes
             if self.is_categorical and value is None:
                 coerced_value = None
             else:
-                coerced_value = self._DTYPE[self._type](value)
+                coerced_value = self.dtype(value)
         except Exception:
             _LOG.error("Impossible conversion: %s %s <- %s %s",
                        self._type, self._name, type(value), value)
