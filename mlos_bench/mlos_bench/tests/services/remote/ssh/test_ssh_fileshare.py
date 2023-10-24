@@ -6,9 +6,11 @@
 Tests for mlos_bench.services.remote.ssh.ssh_services
 """
 
+from contextlib import contextmanager
 from os.path import basename
 from pathlib import Path
-from typing import Dict, List
+from tempfile import _TemporaryFileWrapper  # pylint: disable=import-private-name
+from typing import Any, Dict, Generator, List
 
 import os
 import tempfile
@@ -23,6 +25,34 @@ from mlos_bench.util import path_join
 
 from mlos_bench.tests import are_dir_trees_equal, requires_docker
 from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
+
+
+@contextmanager
+def closeable_temp_file(**kwargs: Any) -> Generator[_TemporaryFileWrapper, None, None]:
+    """
+    Provides a context manager for a temporary file that can be closed and
+    still unlinked.
+
+    Since Windows doesn't allow us to reopen the file while it's still open we
+    need to handle deletion ourselves separately.
+
+    Parameters
+    ----------
+    kwargs: dict
+        Args to pass to NamedTemporaryFile constructor.
+
+    Returns
+    -------
+    context manager for a temporary file
+    """
+    fname = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, **kwargs) as temp_file:
+            fname = temp_file.name
+            yield temp_file
+    finally:
+        if fname:
+            os.unlink(fname)
 
 
 @pytest.mark.xdist_group("ssh_test_server")
@@ -40,12 +70,7 @@ def test_ssh_fileshare_single_file(ssh_test_server: SshTestServerInfo,
     lines = [line + "\n" for line in lines]
 
     # 1. Write a local file and upload it.
-
-    # NOTE: Since Windows doesn't allow us to reopen the file while it's still
-    # open we need to handle deletion ourselves.
-    # pylint: disable=consider-using-with
-    try:
-        temp_file = tempfile.NamedTemporaryFile(mode='w+t', encoding='utf-8', delete=False)
+    with closeable_temp_file(mode='w+t', encoding='utf-8') as temp_file:
         temp_file.writelines(lines)
         temp_file.flush()
         temp_file.close()
@@ -57,9 +82,8 @@ def test_ssh_fileshare_single_file(ssh_test_server: SshTestServerInfo,
         )
         os.unlink(temp_file.name)
 
-        # 2. Download the remote file and compare the contents.
-
-        temp_file = tempfile.NamedTemporaryFile(mode='w+t', encoding='utf-8', delete=False)
+    # 2. Download the remote file and compare the contents.
+    with closeable_temp_file(mode='w+t', encoding='utf-8') as temp_file:
         temp_file.close()
         ssh_fileshare_service.download(
             params=config,
@@ -70,8 +94,6 @@ def test_ssh_fileshare_single_file(ssh_test_server: SshTestServerInfo,
         with open(temp_file.name, mode='r', encoding='utf-8') as temp_file_h:
             read_lines = temp_file_h.readlines()
             assert read_lines == lines
-    finally:
-        os.unlink(temp_file.name)
 
 
 @pytest.mark.xdist_group("ssh_test_server")
@@ -138,11 +160,7 @@ def test_ssh_fileshare_download_file_dne(ssh_test_server: SshTestServerInfo,
 
     canary_str = "canary"
 
-    try:
-        # Windows doesn't allow us to reopen the file while it's still open so we
-        # have to reopen it and handle deletion ourselves.
-        # pylint: disable=consider-using-with
-        temp_file = tempfile.NamedTemporaryFile(mode='w+t', encoding='utf-8', delete=False)
+    with closeable_temp_file(mode='w+t', encoding='utf-8') as temp_file:
         temp_file.writelines([canary_str])
         temp_file.flush()
         temp_file.close()
@@ -156,8 +174,6 @@ def test_ssh_fileshare_download_file_dne(ssh_test_server: SshTestServerInfo,
         with open(temp_file.name, mode='r', encoding='utf-8') as temp_file_h:
             read_lines = temp_file_h.readlines()
         assert read_lines == [canary_str]
-    finally:
-        os.unlink(temp_file.name)
 
 
 @pytest.mark.xdist_group("ssh_test_server")
