@@ -79,16 +79,14 @@ RUN /tmp/conda-tmp/prep-deps-files.sh \
 # Install some additional dependencies for the mlos environment.
 # Make sure they have conda group ownership to make the devcontainer more
 # reliable useable across vscode uid changes.
-# Note: even though it increases the size of the container a tad, we skip
-# purging the pip cache after this build step in order to help dev operations
-# like `make conda-env` go faster.
 FROM base AS devcontainer
-USER vscode:conda
+USER vscode
 COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_deps.yml /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/
 RUN umask 0002 \
-    && /opt/conda/bin/conda env create -n mlos -v -f /tmp/conda-tmp/mlos_deps.yml \
-    && /opt/conda/bin/conda run -n mlos pip install -U -r /tmp/conda-tmp/combined.requirements.txt \
-    && /opt/conda/bin/conda clean -v -y -a \
+    && sg conda -c "/opt/conda/bin/conda env create -n mlos -v -f /tmp/conda-tmp/mlos_deps.yml" \
+    && sg conda -c "/opt/conda/bin/conda run -n mlos pip install --no-cache-dir -U -r /tmp/conda-tmp/combined.requirements.txt" \
+    && sg conda -c "/opt/conda/bin/conda run -n mlos pip cache purge" \
+    && sg conda -c "/opt/conda/bin/conda clean -v -y -a" \
     && mkdir -p /opt/conda/pkgs/cache/ && chown -R vscode:conda /opt/conda/pkgs/cache/
 RUN mkdir -p /home/vscode/.conda/envs \
     && ln -s /opt/conda/envs/mlos /home/vscode/.conda/envs/mlos
