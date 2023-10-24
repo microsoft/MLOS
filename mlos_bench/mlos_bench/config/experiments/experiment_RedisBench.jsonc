@@ -1,6 +1,5 @@
 {
     "experiment_id": "RedisBench",
-    "trial_id": 1,
 
     // Any global parameter can be used as a dollar variable in the global config:
     "deploymentName": "$experiment_id",

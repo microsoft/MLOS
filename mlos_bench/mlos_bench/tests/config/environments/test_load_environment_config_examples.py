@@ -50,6 +50,7 @@ def load_environment_config_examples(config_loader_service: ConfigPersistenceSer
     """Loads an environment config example."""
     # Make sure that any "required_args" are provided.
     global_config = config_loader_service.load_config("experiments/experiment_test_config.jsonc", ConfigSchema.GLOBALS)
+    global_config.setdefault('trial_id', 1)     # normally populated by Launcher
 
     # Make sure we have the required services for the envs being used.
     mock_service_configs = [
