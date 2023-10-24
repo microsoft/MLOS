@@ -380,8 +380,7 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
                 config, global_config, service).export())
 
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Created mix-in service:\n%s", "\n".join(
-                f'  "{key}": {val}' for (key, val) in service.export().items()))
+            _LOG.debug("Created mix-in service: %s", service)
 
         return service
 

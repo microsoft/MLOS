@@ -88,8 +88,7 @@ class Service:
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Service: %s Config:\n%s", self, json.dumps(self.config, indent=2))
             _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config or {}, indent=2))
-            _LOG.debug("Service: %s Parent mixins: %s", self,
-                       [] if parent is None else list(parent._services.keys()))
+            _LOG.debug("Service: %s Parent: %s", self, parent.pprint() if parent else None)
 
     def _validate_json_config(self, config: dict) -> None:
         """
@@ -109,7 +108,16 @@ class Service:
         ConfigSchema.SERVICE.validate(json_config)
 
     def __repr__(self) -> str:
-        return self.__class__.__name__
+        return f"{self.__class__.__name__}@{hex(id(self))}"
+
+    def pprint(self) -> str:
+        """
+        Produce a human-readable string listing all public methods of the service.
+        """
+        return f"{self} ::\n" + "\n".join(
+            f'  "{key}": {getattr(val, "__self__", "stand-alone")}'
+            for (key, val) in self._services.items()
+        )
 
     @property
     def config_loader_service(self) -> SupportsConfigLoading:
@@ -135,13 +143,13 @@ class Service:
         if not isinstance(services, dict):
             services = {svc.__name__: svc for svc in services}
 
+        for (key, val) in services.items():
+            if key not in self._services:
+                self._services[key] = val
+                self.__dict__[key] = val
+
         if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Service: %s Add methods: %s", self, list(services.keys()))
-
-        # TODO? Throw a warning when an existing method is being overwritten?
-
-        self._services.update(services)
-        self.__dict__.update(self._services)
+            _LOG.debug("Added methods to: %s", self.pprint())
 
     def export(self) -> Dict[str, Callable]:
         """
@@ -152,4 +160,7 @@ class Service:
         services : dict
             A dictionary of string -> function pairs.
         """
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Export methods from: %s", self.pprint())
+
         return self._services

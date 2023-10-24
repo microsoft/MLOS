@@ -28,16 +28,16 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
         config={
             "children": [
                 {
-                    "name": "Mock Client Environment 1",
+                    "name": "Env 1 :: tmp_global",
                     "class": "mlos_bench.environments.mock_env.MockEnv",
                 },
                 {
-                    "name": "Mock Server Environment 2",
+                    "name": "Env 2 :: tmp_other_2",
                     "class": "mlos_bench.environments.mock_env.MockEnv",
                     "include_services": ["services/local/mock/mock_local_exec_service_2.jsonc"],
                 },
                 {
-                    "name": "Mock Control Environment 3",
+                    "name": "Env 3 :: tmp_other_3",
                     "class": "mlos_bench.environments.mock_env.MockEnv",
                     "include_services": ["services/local/mock/mock_local_exec_service_3.jsonc"],
                 }
