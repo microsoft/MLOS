@@ -34,7 +34,7 @@ RUN mkdir -p ${CONDA_PKGS_DIRS} \
     && chown -R vscode:conda ${CONDA_PKGS_DIRS} \
     && chmod -R u=rwX,g=rwXs,o=rX ${CONDA_PKGS_DIRS}
 
-USER vscode
+USER vscode:conda
 
 # Upgrade conda and use strict priorities
 # Use the mamba solver (necessary for some quality of life speedups due to
@@ -46,13 +46,16 @@ RUN umask 0002 \
     && /opt/conda/bin/conda list -n base \
     && /opt/conda/bin/conda install -v -y -n base conda-libmamba-solver \
     && /opt/conda/bin/conda config --set solver libmamba \
-    && /opt/conda/bin/conda list -n base
+    && /opt/conda/bin/conda list -n base \
+    && /opt/conda/bin/conda clean -v -y -a
 
 # Update the base. This helps save space by making sure the same version
 # python is used for both the base env and mlos env.
 RUN umask 0002 \
     && /opt/conda/bin/conda update -v -y -n base -c defaults --all \
-    && /opt/conda/bin/conda clean -v -y -a
+    && /opt/conda/bin/conda update -v -y -n base -c defaults conda python \
+    && /opt/conda/bin/conda clean -v -y -a \
+    && /opt/conda/bin/conda run -n base pip cache purge
 
 # Install some additional editor packages for the base environment.
 RUN umask 0002 \
@@ -74,7 +77,13 @@ RUN /tmp/conda-tmp/prep-deps-files.sh \
     && ls -l /tmp/conda-tmp/ # && cat /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/mlos_deps.yml
 
 # Install some additional dependencies for the mlos environment.
+# Make sure they have conda group ownership to make the devcontainer more
+# reliable useable across vscode uid changes.
+# Note: even though it increases the size of the container a tad, we skip
+# purging the pip cache after this build step in order to help dev operations
+# like `make conda-env` go faster.
 FROM base AS devcontainer
+USER vscode:conda
 COPY --from=deps-prep --chown=vscode:conda /tmp/conda-tmp/mlos_deps.yml /tmp/conda-tmp/combined.requirements.txt /tmp/conda-tmp/
 RUN umask 0002 \
     && /opt/conda/bin/conda env create -n mlos -v -f /tmp/conda-tmp/mlos_deps.yml \

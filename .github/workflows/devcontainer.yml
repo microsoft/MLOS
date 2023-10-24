@@ -98,9 +98,6 @@ jobs:
         docker exec --user root mlos-devcontainer groupmod --non-unique -g `id -g` vscode
         docker exec --user root mlos-devcontainer usermod --non-unique -u `id -u` -g `id -g` vscode
         docker exec --user root mlos-devcontainer chown -R vscode:vscode /home/vscode
-        docker exec --user root mlos-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
-        docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
-        #docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/envs/mlos
 
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
