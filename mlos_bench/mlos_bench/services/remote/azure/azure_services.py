@@ -809,5 +809,4 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             # TODO: Extract the telemetry and status from stdout, if available
             return (status, result)
         val = result.get("properties", {}).get("output", {}).get("value", [])
-        # TODO: Return stderr as well?
         return (status, {"stdout": val[0].get("message", "")} if val else {})
