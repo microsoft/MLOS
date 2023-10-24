@@ -29,9 +29,22 @@
             "cat-ints": {
                 "description": "Categorical integers",
                 "type": "categorical",
-                "default": 1,
-                "values": [1, 2, 3]
+                "values": [1, 2, 3],
+                "default": 1
+            },
+            "cat-bool": {
+                "description": "Categorical bool",
+                "type": "categorical",
+                "values": [true, false],
+                "default": true
+            },
+            "cat-mixed": {
+                "description": "Categorical mixed (should all be converted to strings internally)",
+                "type": "categorical",
+                "values": [true, 1, "true"],
+                "default": true
             }
+
         }
     },
     "covariant_group_name-2": {
