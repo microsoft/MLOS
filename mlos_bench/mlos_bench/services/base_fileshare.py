@@ -9,7 +9,7 @@ Base class for remote file shares.
 import logging
 
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.fileshare_type import SupportsFileShareOps
@@ -24,7 +24,8 @@ class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new file share with a given config.
 
@@ -38,11 +39,13 @@ class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        # IMPORTANT: Save the local methods before invoking the base class constructor
-        local_methods = [self.upload, self.download]
-        super().__init__(config, global_config, parent)
-        self.register(local_methods)
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [self.upload, self.download])
+        )
 
     @abstractmethod
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:

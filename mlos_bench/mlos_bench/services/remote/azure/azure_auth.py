@@ -9,7 +9,7 @@ A collection Service functions for managing VMs on Azure.
 import datetime
 import logging
 from base64 import b64decode
-from typing import Any, Dict, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import azure.identity as azure_id
 from azure.keyvault.secrets import SecretClient
@@ -31,7 +31,8 @@ class AzureAuthService(Service, SupportsAuth):
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of Azure authentication services proxy.
 
@@ -44,13 +45,13 @@ class AzureAuthService(Service, SupportsAuth):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        # IMPORTANT: Save the local methods before invoking the base class constructor
-        local_methods = [self.get_access_token]
-        super().__init__(config, global_config, parent)
-
-        # Register methods that we want to expose to the Environment objects.
-        self.register(local_methods)
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [self.get_access_token])
+        )
 
         # This parameter can come from command line as strings, so conversion is needed.
         self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))

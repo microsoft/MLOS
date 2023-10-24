@@ -14,7 +14,7 @@ import sys
 import json    # For logging only
 import logging
 
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Type, Union
 
 import json5    # To read configs with comments and other JSON5 syntax features
 from jsonschema import ValidationError, SchemaError
@@ -46,7 +46,8 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of config persistence service.
 
@@ -59,8 +60,22 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        super().__init__(config, global_config, parent)
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [
+                self.resolve_path,
+                self.load_config,
+                self.prepare_class_load,
+                self.build_service,
+                self.build_environment,
+                self.load_services,
+                self.load_environment,
+                self.load_environment_list,
+            ])
+        )
         self._config_loader_service = self
 
         # Normalize and deduplicate config paths, but maintain order.
@@ -75,18 +90,6 @@ class ConfigPersistenceService(Service, SupportsConfigLoading):
         # Append the built-in config path if not already on the list.
         if self.BUILTIN_CONFIG_PATH not in self._config_path:
             self._config_path.append(self.BUILTIN_CONFIG_PATH)
-
-        # Register methods that we want to expose to the Environment objects.
-        self.register([
-            self.resolve_path,
-            self.load_config,
-            self.prepare_class_load,
-            self.build_service,
-            self.build_environment,
-            self.load_services,
-            self.load_environment,
-            self.load_environment_list,
-        ])
 
     @property
     def config_paths(self) -> List[str]:

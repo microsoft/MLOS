@@ -7,7 +7,7 @@ A collection Service functions for mocking file share ops.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
@@ -23,11 +23,12 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
 
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
-        # IMPORTANT: Save the local methods before invoking the base class constructor
-        local_methods = [self.upload, self.download]
-        super().__init__(config, global_config, parent)
-        self.register(local_methods)
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [self.upload, self.download])
+        )
 
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
         pass

@@ -58,7 +58,8 @@ class Service:
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional["Service"] = None):
+                 parent: Optional["Service"] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new service with a given config.
 
@@ -72,6 +73,8 @@ class Service:
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
         self.config = config or {}
         self._validate_json_config(self.config)
@@ -80,6 +83,8 @@ class Service:
 
         if parent:
             self.register(parent.export())
+        if methods:
+            self.register(methods)
 
         self._config_loader_service: SupportsConfigLoading
         if parent and isinstance(parent, SupportsConfigLoading):
@@ -89,6 +94,28 @@ class Service:
             _LOG.debug("Service: %s Config:\n%s", self, json.dumps(self.config, indent=2))
             _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config or {}, indent=2))
             _LOG.debug("Service: %s Parent: %s", self, parent.pprint() if parent else None)
+
+    @staticmethod
+    def merge_methods(ext_methods: Union[Dict[str, Callable], List[Callable], None],
+                      local_methods: Union[Dict[str, Callable], List[Callable]]) -> Dict[str, Callable]:
+        """
+        Merge methods from the external caller with the local ones.
+        This function is usually called by the derived class constructor
+        just before invoking the constructor of the base class.
+        """
+        if isinstance(local_methods, dict):
+            local_methods = local_methods.copy()
+        else:
+            local_methods = {svc.__name__: svc for svc in local_methods}
+
+        if not ext_methods:
+            return local_methods
+
+        if not isinstance(ext_methods, dict):
+            ext_methods = {svc.__name__: svc for svc in ext_methods}
+
+        local_methods.update(ext_methods)
+        return local_methods
 
     def _validate_json_config(self, config: dict) -> None:
         """
