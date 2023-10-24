@@ -32,7 +32,8 @@ set -x
 mkdir -p "/tmp/$container_name/dc/shellhistory"
 docker run -it --rm \
     --name "$container_name" \
-    --user vscode:$docker_gid \
+    --user vscode \
+    --group-add $docker_gid \
     -v "$HOME/.azure":/dc/azure \
     -v "/tmp/$container_name/dc/shellhistory:/dc/shellhistory" \
     -v /var/run/docker.sock:/var/run/docker.sock \

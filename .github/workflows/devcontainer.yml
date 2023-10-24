@@ -91,7 +91,7 @@ jobs:
           --env PYTEST_EXTRA_OPTIONS=$PYTEST_EXTRA_OPTIONS \
           --workdir /workspaces/MLOS \
           --add-host host.docker.internal:host-gateway \
-          --name mlos-devcontainer mlos-devcontainer sleep infinity
+          --name mlos-devcontainer mlos-devcontainer sleep 1800
     - name: Fixup vscode uid/gid in the running container
       timeout-minutes: 3
       run: |
@@ -99,9 +99,6 @@ jobs:
         docker exec --user root mlos-devcontainer groupmod --non-unique -g `id -g` vscode
         docker exec --user root mlos-devcontainer usermod --non-unique -u `id -u` -g `id -g` vscode
         docker exec --user root mlos-devcontainer chown -R vscode:vscode /home/vscode
-        docker exec --user root mlos-devcontainer mkdir -p /opt/conda/pkgs/cache /var/cache/pip
-        docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/pkgs/cache /var/cache/pip
-        docker exec --user root mlos-devcontainer chown -R vscode /opt/conda/envs/mlos
 
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
@@ -143,6 +140,7 @@ jobs:
       timeout-minutes: 3
       run: |
         set -x
+        git --no-pager diff --exit-code
         docker exec --user vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v devcontainer
 
     - name: Generate docs and test check them
