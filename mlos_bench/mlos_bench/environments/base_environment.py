@@ -119,6 +119,10 @@ class Environment(metaclass=abc.ABCMeta):
         self._in_context = False
         self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
 
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Environment: '%s' Service: %s", name,
+                       self._service.pprint() if self._service else None)
+
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
             tunables = TunableGroups()

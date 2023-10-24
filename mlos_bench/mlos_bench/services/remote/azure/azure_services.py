@@ -10,7 +10,7 @@ import json
 import time
 import logging
 
-from typing import Any, Callable, Dict, Iterable, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import requests
 
@@ -125,7 +125,8 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of Azure services proxy.
 
@@ -138,8 +139,31 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        super().__init__(config, global_config, parent)
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [
+                # SupportsHostProvisioning
+                self.provision_host,
+                self.deprovision_host,
+                self.deallocate_host,
+                self.wait_host_deployment,
+                # SupportsHostOps
+                self.start_host,
+                self.stop_host,
+                self.restart_host,
+                self.wait_host_operation,
+                # SupportsOSOps
+                self.shutdown,
+                self.reboot,
+                self.wait_os_operation,
+                # SupportsRemoteExec
+                self.remote_exec,
+                self.get_remote_exec_results,
+            ])
+        )
 
         check_required_params(
             self.config, {
@@ -150,27 +174,6 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
                 "deploymentTemplateParameters",
             }
         )
-
-        # Register methods that we want to expose to the Environment objects.
-        self.register([
-            # SupportsHostProvisioning
-            self.provision_host,
-            self.deprovision_host,
-            self.deallocate_host,
-            self.wait_host_deployment,
-            # SupportsHostOps
-            self.start_host,
-            self.stop_host,
-            self.restart_host,
-            self.wait_host_operation,
-            # SupportsOSOps
-            self.shutdown,
-            self.reboot,
-            self.wait_os_operation,
-            # SupportsRemoteExec
-            self.remote_exec,
-            self.get_remote_exec_results,
-        ])
 
         # These parameters can come from command line as strings, so conversion is needed.
         self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
