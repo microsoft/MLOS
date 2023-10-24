@@ -62,11 +62,8 @@ def test_composite_services(composite_env: CompositeEnv) -> None:
     Check that each environment gets its own instance of the services.
     """
     # pylint: disable=protected-access
-    with composite_env.children[0]._service.temp_dir_context() as temp_dir:
-        assert os.path.samefile(temp_dir, "tmp_global")
-
-    with composite_env.children[1]._service.temp_dir_context() as temp_dir:
-        assert os.path.samefile(temp_dir, "tmp_other_2")
-
-    with composite_env.children[2]._service.temp_dir_context() as temp_dir:
-        assert os.path.samefile(temp_dir, "tmp_other_3")
+    for (i, path) in ((0, "tmp_global"), (1, "tmp_other_2"), (2, "tmp_other_3")):
+        service = composite_env.children[i]._service
+        assert service is not None and hasattr(service, "temp_dir_context")
+        with service.temp_dir_context() as temp_dir:
+            assert os.path.samefile(temp_dir, path)
