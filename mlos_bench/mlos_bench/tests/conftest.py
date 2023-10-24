@@ -14,6 +14,8 @@ import json5 as json
 import pytest
 
 from mlos_bench.tests import SEED
+
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.mock_env import MockEnv
 from mlos_bench.tunables.covariant_group import CovariantTunableGroup
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -76,6 +78,7 @@ def tunable_groups_config() -> Dict[str, Any]:
     """
     conf = json.loads(TUNABLE_GROUPS_JSON)
     assert isinstance(conf, dict)
+    ConfigSchema.TUNABLE_PARAMS.validate(conf)
     return conf
 
 
