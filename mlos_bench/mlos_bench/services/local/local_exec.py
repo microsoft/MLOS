@@ -14,7 +14,9 @@ import subprocess
 import sys
 
 from string import Template
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
+from typing import (
+    Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
+)
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
@@ -71,7 +73,8 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of a service to run scripts locally.
 
@@ -84,10 +87,14 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        super().__init__(config, global_config, parent)
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [self.local_exec])
+        )
         self.abort_on_error = self.config.get("abort_on_error", True)
-        self.register([self.local_exec])
 
     def local_exec(self, script_lines: Iterable[str],
                    env: Optional[Mapping[str, "TunableValue"]] = None,
