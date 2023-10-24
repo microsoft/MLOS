@@ -27,8 +27,10 @@ class MockLocalExecService(TempDirContextService, SupportsLocalExec):
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
+        # IMPORTANT: Save the local methods before invoking the base class constructor
+        local_methods = [self.local_exec]
         super().__init__(config, global_config, parent)
-        self.register([self.local_exec])
+        self.register(local_methods)
 
     def local_exec(self, script_lines: Iterable[str],
                    env: Optional[Mapping[str, "TunableValue"]] = None,

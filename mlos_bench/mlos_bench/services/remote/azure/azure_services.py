@@ -139,20 +139,8 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         parent : Service
             Parent service that can provide mixin functions.
         """
-        super().__init__(config, global_config, parent)
-
-        check_required_params(
-            self.config, {
-                "subscription",
-                "resourceGroup",
-                "deploymentName",
-                "deploymentTemplatePath",
-                "deploymentTemplateParameters",
-            }
-        )
-
-        # Register methods that we want to expose to the Environment objects.
-        self.register([
+        # IMPORTANT: Save the local methods before invoking the base class constructor
+        local_methods = [
             # SupportsHostProvisioning
             self.provision_host,
             self.deprovision_host,
@@ -170,7 +158,22 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             # SupportsRemoteExec
             self.remote_exec,
             self.get_remote_exec_results,
-        ])
+        ]
+
+        super().__init__(config, global_config, parent)
+
+        check_required_params(
+            self.config, {
+                "subscription",
+                "resourceGroup",
+                "deploymentName",
+                "deploymentTemplatePath",
+                "deploymentTemplateParameters",
+            }
+        )
+
+        # Register methods that we want to expose to the Environment objects.
+        self.register(local_methods)
 
         # These parameters can come from command line as strings, so conversion is needed.
         self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))

@@ -45,10 +45,12 @@ class AzureAuthService(Service, SupportsAuth):
         parent : Service
             Parent service that can provide mixin functions.
         """
+        # IMPORTANT: Save the local methods before invoking the base class constructor
+        local_methods = [self.get_access_token]
         super().__init__(config, global_config, parent)
 
         # Register methods that we want to expose to the Environment objects.
-        self.register([self.get_access_token])
+        self.register(local_methods)
 
         # This parameter can come from command line as strings, so conversion is needed.
         self._req_interval = float(self.config.get("tokenRequestInterval", self._REQ_INTERVAL))

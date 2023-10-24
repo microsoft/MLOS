@@ -143,10 +143,8 @@ class Service:
         if not isinstance(services, dict):
             services = {svc.__name__: svc for svc in services}
 
-        for (key, val) in services.items():
-            if key not in self._services:
-                self._services[key] = val
-                self.__dict__[key] = val
+        self._services.update(services)
+        self.__dict__.update(self._services)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Added methods to: %s", self.pprint())

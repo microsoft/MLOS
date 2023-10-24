@@ -39,12 +39,10 @@ class FileShareService(Service, SupportsFileShareOps, metaclass=ABCMeta):
         parent : Service
             Parent service that can provide mixin functions.
         """
+        # IMPORTANT: Save the local methods before invoking the base class constructor
+        local_methods = [self.upload, self.download]
         super().__init__(config, global_config, parent)
-
-        self.register([
-            self.download,
-            self.upload,
-        ])
+        self.register(local_methods)
 
     @abstractmethod
     def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:

@@ -23,11 +23,10 @@ class MockAuthService(Service, SupportsAuth):
     def __init__(self, config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None):
+        # IMPORTANT: Save the local methods before invoking the base class constructor
+        local_methods = [self.get_access_token]
         super().__init__(config, global_config, parent)
-
-        self.register([
-            self.get_access_token
-        ])
+        self.register(local_methods)
 
     def get_access_token(self) -> str:
         return "TOKEN"
