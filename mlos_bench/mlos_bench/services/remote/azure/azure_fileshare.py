@@ -9,7 +9,7 @@ A collection FileShare functions for interacting with Azure File Shares.
 import os
 import logging
 
-from typing import Any, Dict, Optional, Set
+from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from azure.storage.fileshare import ShareClient
 from azure.core.exceptions import ResourceNotFoundError
@@ -31,7 +31,8 @@ class AzureFileShareService(FileShareService):
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new file share Service for Azure environments with a given config.
 
@@ -45,8 +46,13 @@ class AzureFileShareService(FileShareService):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        super().__init__(config, global_config, parent)
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [self.upload, self.download])
+        )
 
         check_required_params(
             self.config, {
