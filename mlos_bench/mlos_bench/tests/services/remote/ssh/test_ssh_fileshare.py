@@ -80,7 +80,6 @@ def test_ssh_fileshare_single_file(ssh_test_server: SshTestServerInfo,
             local_path=temp_file.name,
             remote_path=remote_file_path,
         )
-        os.unlink(temp_file.name)
 
     # 2. Download the remote file and compare the contents.
     with closeable_temp_file(mode='w+t', encoding='utf-8') as temp_file:
