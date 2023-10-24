@@ -7,13 +7,12 @@ A collection functions for interacting with SSH servers as file shares.
 """
 
 from enum import Enum
-from typing import Optional, Tuple, Union
+from typing import Tuple, Union
 
 import logging
 
 from asyncssh import scp, SFTPError, SSHClientConnection
 
-from mlos_bench.services.base_service import Service
 from mlos_bench.services.base_fileshare import FileShareService
 from mlos_bench.services.remote.ssh.ssh_service import SshService
 from mlos_bench.util import merge_parameters
@@ -32,9 +31,6 @@ class CopyMode(Enum):
 
 class SshFileShareService(FileShareService, SshService):
     """A collection of functions for interacting with SSH servers as file shares."""
-
-    def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
-        super().__init__(config, global_config, parent)
 
     async def _start_file_copy(self, params: dict, mode: CopyMode,
                                local_path: str, remote_path: str,

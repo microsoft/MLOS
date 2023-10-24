@@ -51,6 +51,7 @@
         "obvs",
         "perc",
         "pinv",
+        "poweroff",
         "pylint",
         "pyplot",
         "pytest",

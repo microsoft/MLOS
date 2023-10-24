@@ -9,7 +9,7 @@ A collection functions for interacting with SSH servers as file shares.
 from abc import ABCMeta
 from asyncio import AbstractEventLoop, Event as CoroEvent, Lock as CoroLock
 from concurrent.futures import Future
-from typing import Any, Coroutine, Dict, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, TypeVar, Union
 from threading import current_thread, Lock as ThreadLock, Thread
 
 import logging
@@ -196,10 +196,14 @@ class SshService(Service, metaclass=ABCMeta):
 
     _REQUEST_TIMEOUT: Optional[float] = None  # seconds
 
-    def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         # pylint: disable=too-complex
 
-        super().__init__(config, global_config, parent)
+        super().__init__(config, global_config, parent, methods)
 
         # Make sure that the value we allow overriding on a per-connection
         # basis are present in the config so merge_parameters can do its thing.

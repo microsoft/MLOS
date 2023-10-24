@@ -7,7 +7,7 @@ A collection Service functions for managing hosts via SSH.
 """
 
 from concurrent.futures import Future
-from typing import Iterable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import logging
 
@@ -30,7 +30,11 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
 
     # pylint: disable=too-many-instance-attributes
 
-    def __init__(self, config: dict, global_config: dict, parent: Optional[Service]):
+    def __init__(self,
+                 config: Optional[Dict[str, Any]] = None,
+                 global_config: Optional[Dict[str, Any]] = None,
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of an SSH Service.
 
@@ -43,9 +47,11 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        super().__init__(config, global_config, parent)
-        self._shell = config.get("ssh_shell", "/bin/bash")
+        super().__init__(config, global_config, parent, )
+        self._shell = self.config.get("ssh_shell", "/bin/bash")
 
         # Register methods that we want to expose to the Environment objects.
         self.register([
