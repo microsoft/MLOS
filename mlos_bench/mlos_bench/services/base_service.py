@@ -10,7 +10,7 @@ import json
 import logging
 
 from types import TracebackType
-from typing import Any, Callable, Dict, List, Optional, Self, Set, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -81,7 +81,7 @@ class Service:
         self.config = config or {}
         self._validate_json_config(self.config)
         self._parent = parent
-        self._service_methods: Dict[str, Callable[[Self, Any], Any]] = {}
+        self._service_methods: Dict[str, Callable] = {}
 
         if parent:
             self.register(parent.export())
