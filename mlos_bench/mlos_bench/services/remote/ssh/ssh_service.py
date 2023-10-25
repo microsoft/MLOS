@@ -9,7 +9,8 @@ A collection functions for interacting with SSH servers as file shares.
 from abc import ABCMeta
 from asyncio import AbstractEventLoop, Event as CoroEvent, Lock as CoroLock
 from concurrent.futures import Future
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Tuple, TypeVar, Union
+from types import TracebackType
+from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, TypeVar, Union
 from threading import current_thread, Lock as ThreadLock, Thread
 
 import logging
@@ -242,6 +243,7 @@ class SshService(Service, metaclass=ABCMeta):
             keepalive_internal = self.config.get('ssh_keepalive_interval')
             self._connect_params['keepalive_interval'] = int(keepalive_internal) if keepalive_internal is not None else None
 
+    def _enter_context(self) -> "SshService":
         # Start the background thread if it's not already running.
         with SshService._event_loop_thread_lock:
             if not SshService._event_loop_thread:
@@ -252,17 +254,13 @@ class SshService(Service, metaclass=ABCMeta):
                 SshService._event_loop_thread = Thread(target=SshService._run_event_loop, daemon=True)
                 SshService._event_loop_thread.start()
             SshService._event_loop_thread_refcnt += 1
+        super()._enter_context()
+        return self
 
-        self._enabled = True
-
-    def close(self) -> None:
-        """
-        An explicit way to disable this service instance from being used again.
-
-        Useful for testing to work around the fact that garbage collection is lazy in python.
-        """
-        if not self._enabled:
-            return
+    def _exit_context(self, ex_type: Optional[Type[BaseException]],
+                      ex_val: Optional[BaseException],
+                      ex_tb: Optional[TracebackType]) -> Literal[False]:
+        assert self._in_context
         with SshService._event_loop_thread_lock:
             SshService._event_loop_thread_refcnt -= 1
             if SshService._event_loop_thread_refcnt <= 0:
@@ -277,14 +275,7 @@ class SshService(Service, metaclass=ABCMeta):
                     raise RuntimeError("Failed to stop event loop thread.")
                 SshService._event_loop = None
                 SshService._event_loop_thread = None
-            self._enabled = False
-
-    def __del__(self) -> None:
-        """
-        Ensures that the event loop thread is stopped when all sub-service
-        instances are garbage collected.
-        """
-        self.close()
+        return super()._exit_context(ex_type, ex_val, ex_tb)
 
     @classmethod
     def clear_client_cache(cls) -> None:
@@ -325,7 +316,7 @@ class SshService(Service, metaclass=ABCMeta):
         Future[CoroReturnType]
             A future that will be completed when the coroutine completes.
         """
-        assert self._enabled
+        assert self._in_context
         assert self._event_loop is not None
         return asyncio.run_coroutine_threadsafe(coro, self._event_loop)
 
@@ -386,6 +377,6 @@ class SshService(Service, metaclass=ABCMeta):
         Tuple[SSHClientConnection, SshClient]
             The connection and client objects.
         """
-        assert self._enabled
+        assert self._in_context
         assert self._event_loop_thread_ssh_client_cache is not None
         return await self._event_loop_thread_ssh_client_cache.get_client_connection(self._get_connect_params(params))

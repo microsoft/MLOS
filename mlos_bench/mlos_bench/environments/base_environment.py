@@ -115,6 +115,7 @@ class Environment(metaclass=abc.ABCMeta):
         self.name = name
         self.config = config
         self._service = service
+        self._service_context: Optional[Service] = None
         self._is_ready = False
         self._in_context = False
         self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
@@ -216,6 +217,8 @@ class Environment(metaclass=abc.ABCMeta):
         """
         _LOG.debug("Environment START :: %s", self)
         assert not self._in_context
+        if self._service:
+            self._service_context = self._service.__enter__()
         self._in_context = True
         return self
 
@@ -225,13 +228,25 @@ class Environment(metaclass=abc.ABCMeta):
         """
         Exit the context of the benchmarking environment.
         """
+        ex_throw = None
         if ex_val is None:
             _LOG.debug("Environment END :: %s", self)
         else:
             assert ex_type and ex_val
             _LOG.warning("Environment END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
         assert self._in_context
+        if self._service_context:
+            try:
+                self._service_context.__exit__(ex_type, ex_val, ex_tb)
+            # pylint: disable=broad-exception-caught
+            except Exception as ex:
+                _LOG.error("Exception while exiting Service context '%s': %s", self._service, ex)
+                ex_throw = ex
+            finally:
+                self._service_context = None
         self._in_context = False
+        if ex_throw:
+            raise ex_throw
         return False  # Do not suppress exceptions
 
     def __str__(self) -> str:

@@ -9,7 +9,9 @@ Base class for the service mix-ins.
 import json
 import logging
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from types import TracebackType
+from typing import Any, Callable, Dict, List, Optional, Self, Set, Type, Union
+from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
@@ -79,12 +81,33 @@ class Service:
         self.config = config or {}
         self._validate_json_config(self.config)
         self._parent = parent
-        self._services: Dict[str, Callable] = {}
+        self._service_methods: Dict[str, Callable[[Self, Any], Any]] = {}
 
         if parent:
             self.register(parent.export())
         if methods:
             self.register(methods)
+
+        # In order to get a list of all child contexts, we need to look at only
+        # the bound methods that were not overridden by another mixin.
+        # Then we inspect the internally bound __self__ variable to discover
+        # which Service instance that method belongs too.
+        # To do this we also
+
+        # As a sanity check, make sure all methods registered are bound.
+        assert all(hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
+                   for svc_method in self._service_methods.values())
+        self._services: Set[Service] = {
+            # Enumerate the services that are bound to this instance in the
+            # order they were added.
+            # Unfortunately, by creating a set, we may destroy the ability to
+            # preserve the context setup/teardown order.
+            svc_method.__self__ for _, svc_method in self._service_methods.items()
+            # To make pylint happy, we need to check that the __self__ attribute is present.
+            if hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
+        }
+        self._service_contexts: List[Service] = []
+        self._in_context = False
 
         self._config_loader_service: SupportsConfigLoading
         if parent and isinstance(parent, SupportsConfigLoading):
@@ -117,6 +140,65 @@ class Service:
         local_methods.update(ext_methods)
         return local_methods
 
+    def __enter__(self) -> "Service":
+        """
+        Enter the Service mix-in context.
+
+        Calls the _enter_context() method of all the Services registered under this one.
+        """
+        assert not self._in_context
+        self._service_contexts = [svc._enter_context() for svc in self._services]
+        self._in_context = True
+        return self
+
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exit the Service mix-in context.
+
+        Calls the _exit_context() method of all the Services registered under this one.
+        """
+        assert self._in_context
+        ex_throw = None
+        for svc in reversed(self._service_contexts):
+            try:
+                svc._exit_context(ex_type, ex_val, ex_tb)
+            # pylint: disable=broad-exception-caught
+            except Exception as ex:
+                _LOG.error("Exception while exiting Service context '%s': %s", svc, ex)
+                ex_throw = ex
+        self._service_contexts = []
+        if ex_throw:
+            raise ex_throw
+        self._in_context = False
+        return False
+
+    def _enter_context(self) -> "Service":
+        """
+        Enters the context for this particular Service instance.
+
+        Called by the base __enter__ method of the Service class so it can be
+        used with mix-ins and overridden by subclasses.
+        """
+        assert not self._in_context
+        self._in_context = True
+        return self
+
+    def _exit_context(self, ex_type: Optional[Type[BaseException]],
+                      ex_val: Optional[BaseException],
+                      ex_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exits the context for this particular Service instance.
+
+        Called by the base __enter__ method of the Service class so it can be
+        used with mix-ins and overridden by subclasses.
+        """
+        # pylint: disable=unused-argument
+        assert self._in_context
+        self._in_context = False
+        return False
+
     def _validate_json_config(self, config: dict) -> None:
         """
         Reconstructs a basic json config that this class might have been
@@ -143,7 +225,7 @@ class Service:
         """
         return f"{self} ::\n" + "\n".join(
             f'  "{key}": {getattr(val, "__self__", "stand-alone")}'
-            for (key, val) in self._services.items()
+            for (key, val) in self._service_methods.items()
         )
 
     @property
@@ -170,8 +252,8 @@ class Service:
         if not isinstance(services, dict):
             services = {svc.__name__: svc for svc in services}
 
-        self._services.update(services)
-        self.__dict__.update(self._services)
+        self._service_methods.update(services)
+        self.__dict__.update(self._service_methods)
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Added methods to: %s", self.pprint())
@@ -188,4 +270,4 @@ class Service:
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Export methods from: %s", self.pprint())
 
-        return self._services
+        return self._service_methods

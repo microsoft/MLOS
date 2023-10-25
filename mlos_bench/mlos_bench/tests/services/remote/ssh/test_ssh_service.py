@@ -7,7 +7,6 @@ Tests for mlos_bench.services.remote.ssh.SshService base class.
 """
 
 import asyncio
-import gc
 import time
 
 from subprocess import run
@@ -57,50 +56,54 @@ def test_ssh_service_background_thread() -> None:
     # pylint: disable=protected-access
 
     # Should start with no event loop thread.
-    gc.collect()
     assert SshService._event_loop_thread is None
 
-    # After we make an initial SshService instance, we should have a thread.
+    # The background thread should only be created upon context entry.
     ssh_host_service = SshHostService(config={}, global_config={}, parent=None)
     assert ssh_host_service
-    assert isinstance(SshService._event_loop_thread, Thread)
-    # Give the thread a chance to start.
-    # Mostly important on the underpowered Windows CI machines.
-    time.sleep(0.25)    # type: ignore[unreachable] # (false positive)
-    assert SshService._event_loop_thread.is_alive()
-    assert SshService._event_loop_thread_refcnt == 1
-    assert SshService._event_loop_thread_ssh_client_cache is not None
-    assert SshService._event_loop is not None
-    assert SshService._event_loop.is_running()
+    assert not ssh_host_service._in_context
+    assert ssh_host_service._event_loop_thread is None
 
-    # But we should only get one thread.
-    ssh_fileshare_service = SshFileShareService(config={}, global_config={}, parent=None)
-    assert ssh_fileshare_service
-    assert SshService._event_loop_thread_refcnt == 2
-    assert SshService._event_loop_thread is ssh_host_service._event_loop_thread is ssh_fileshare_service._event_loop_thread
-    assert SshService._event_loop is ssh_host_service._event_loop is ssh_fileshare_service._event_loop
+    # After we enter the SshService instance context, we should have a background thread.
+    with ssh_host_service:
+        assert ssh_host_service._in_context
+        assert isinstance(SshService._event_loop_thread, Thread)    # type: ignore[unreachable] # (false positives)
+        # Give the thread a chance to start.
+        # Mostly important on the underpowered Windows CI machines.
+        time.sleep(0.25)
+        assert SshService._event_loop_thread.is_alive()
+        assert SshService._event_loop_thread_refcnt == 1
+        assert SshService._event_loop_thread_ssh_client_cache is not None
+        assert SshService._event_loop is not None
+        assert SshService._event_loop.is_running()
 
-    # And it should remain after we delete the first instance.
-    # Note: since GC is not guaranteed, we need to provide a way to explicitly close an instance.
-    ssh_host_service.close()
-    # And that instance should be unusable after we explicitly close it.
-    assert not ssh_host_service._enabled
-    with pytest.raises(AssertionError):
-        ssh_host_service._run_coroutine(asyncio.sleep(0.1))
-    del ssh_host_service
-    gc.collect()
-    assert SshService._event_loop_thread_refcnt == 1
-    assert SshService._event_loop_thread is not None
-    assert SshService._event_loop_thread.is_alive()
-    assert SshService._event_loop is not None
-    assert SshService._event_loop.is_running()
-    assert SshService._event_loop_thread_ssh_client_cache is not None
+        ssh_fileshare_service = SshFileShareService(config={}, global_config={}, parent=None)
+        assert ssh_fileshare_service
+        assert not ssh_fileshare_service._in_context
+
+        with ssh_fileshare_service:
+            assert ssh_fileshare_service._in_context
+            assert ssh_host_service._in_context
+            assert SshService._event_loop_thread_refcnt == 2
+            # We should only get one thread for all instances.
+            assert SshService._event_loop_thread is ssh_host_service._event_loop_thread is ssh_fileshare_service._event_loop_thread
+            assert SshService._event_loop is ssh_host_service._event_loop is ssh_fileshare_service._event_loop
+
+        assert not ssh_fileshare_service._in_context
+        # And that instance should be unusable after we are outside the context.
+        with pytest.raises(AssertionError):
+            ssh_fileshare_service._run_coroutine(asyncio.sleep(0.1))
+
+        # The background thread should remain running since we have another context still open.
+        assert SshService._event_loop_thread_refcnt == 1
+        assert SshService._event_loop_thread is not None
+        assert SshService._event_loop_thread.is_alive()
+        assert SshService._event_loop is not None
+        assert SshService._event_loop.is_running()
+        assert SshService._event_loop_thread_ssh_client_cache is not None
 
     # But not after we delete the remaining instances.
-    ssh_fileshare_service.close()
-    del ssh_fileshare_service
-    gc.collect()
-    assert SshService._event_loop_thread is None
+    assert SshService._event_loop_thread is None    # type: ignore[unreachable] # (false positives)
     assert SshService._event_loop_thread_refcnt == 0
     assert SshService._event_loop is None
     assert SshService._event_loop_thread_ssh_client_cache is None
