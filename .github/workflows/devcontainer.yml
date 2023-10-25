@@ -99,6 +99,10 @@ jobs:
         docker exec --user root mlos-devcontainer usermod --non-unique -u `id -u` -g `id -g` vscode
         docker exec --user root mlos-devcontainer chown -R vscode:vscode /home/vscode
 
+    - name: Print some debug info from inside the container
+      run: |
+        docker exec --user vscode mlos-devcontainer printenv
+
     - name: Update the conda env in the devcontainer
       timeout-minutes: 10
       run: |
