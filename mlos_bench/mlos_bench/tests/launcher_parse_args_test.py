@@ -9,6 +9,7 @@ See Also: test_load_cli_config_examples.py
 
 import os
 import sys
+from getpass import getuser
 from typing import List
 
 import pytest
@@ -49,8 +50,14 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     separated options to --config-paths works.
     Check $var expansion and Environment loading.
     """
+    # The VSCode pytest wrapper actually starts in a different directory before
+    # changing into the code directory, but doesn't update the PWD environment
+    # variable.
+    expected_root_pwd = os.environ.get('VSCODE_CWD', os.getcwd())
     if sys.platform == 'win32':
-        os.environ['PWD'] = os.getcwd()
+        # Some env tweaks for platform compatibility.
+        os.environ['PWD'] = expected_root_pwd
+        os.environ['USER'] = os.environ['USERNAME']
 
     # This is part of the minimal required args by the Launcher.
     env_conf_path = 'environments/mock/mock_env.jsonc'
@@ -70,7 +77,9 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # Check overriding values in a file from the command line.
     assert launcher.global_config['test_global_value_2'] == 'from-args'
     # Check that we can expand a $var in a config file that references an environment variable.
-    assert path_join(launcher.global_config["varWithEnvVarRef"], abs_path=True) == path_join(os.getcwd(), "foo", abs_path=True)
+    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
+        == path_join(expected_root_pwd, "foo", abs_path=True)
+    assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
     assert launcher.teardown
     # Check that the environment that got loaded looks to be of the right type.
     env_config = launcher.config_loader.load_config(env_conf_path, ConfigSchema.ENVIRONMENT)
@@ -86,8 +95,14 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     Test multiple --config-path instances, --config file vs --arg, --var=val
     overrides, $var templates, option args, --random-init, etc.
     """
+    # The VSCode pytest wrapper actually starts in a different directory before
+    # changing into the code directory, but doesn't update the PWD environment
+    # variable.
+    expected_root_pwd = os.environ.get('VSCODE_CWD', os.getcwd())
     if sys.platform == 'win32':
-        os.environ['PWD'] = os.getcwd()
+        # Some env tweaks for platform compatibility.
+        os.environ['PWD'] = expected_root_pwd
+        os.environ['USER'] = os.environ['USERNAME']
 
     config_file = 'cli/test-cli-config.jsonc'
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
@@ -105,7 +120,9 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # Check that secondary expansion also works.
     assert launcher.global_config['testVnetName'] == 'MockeryExperiment-vm-vnet'
     # Check that we can expand a $var in a config file that references an environment variable.
-    assert path_join(launcher.global_config["varWithEnvVarRef"], abs_path=True) == path_join(os.getcwd(), "foo", abs_path=True)
+    assert path_join(launcher.global_config["pathVarWithEnvVarRef"], abs_path=True) \
+        == path_join(expected_root_pwd, "foo", abs_path=True)
+    assert launcher.global_config["varWithEnvVarRef"] == f'user:{getuser()}'
     assert not launcher.teardown
 
     config = launcher.config_loader.load_config(config_file, ConfigSchema.CLI)
