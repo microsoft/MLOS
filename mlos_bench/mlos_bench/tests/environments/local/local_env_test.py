@@ -53,6 +53,9 @@ def test_local_env_service_context(tunable_groups: TunableGroups) -> None:
         assert local_env._service._service_contexts     # type: ignore[unreachable] # (false positive)
         assert all(svc._in_context for svc in local_env._service._service_contexts)
         assert all(svc._in_context for svc in local_env._service._services)
+    assert not local_env._service._in_context   # type: ignore[unreachable] # (false positive)
+    assert not local_env._service._service_contexts
+    assert not any(svc._in_context for svc in local_env._service._services)
 
 
 def test_local_env_results_no_header(tunable_groups: TunableGroups) -> None:
