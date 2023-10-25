@@ -111,9 +111,6 @@ class SshClientCache:
         self._cache: Dict[str, Tuple[SSHClientConnection, SshClient]] = {}
         self._cache_lock = CoroLock()
 
-    def __del__(self) -> None:
-        self.cleanup()
-
     def __str__(self) -> str:
         return str(self._cache)
 
