@@ -6,12 +6,11 @@
 A collection Service functions for mocking remote script execution.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
-from mlos_bench.tests.services.remote.mock import mock_op
+from mlos_bench.tests.services.remote.mock import mock_operation
 
 
 class MockRemoteExecService(Service, SupportsRemoteExec):
@@ -39,11 +38,7 @@ class MockRemoteExecService(Service, SupportsRemoteExec):
         super().__init__(
             config, global_config, parent,
             self.merge_methods(methods, {
-                "remote_exec": self.mock_operation,
-                "get_remote_exec_results": self.mock_operation,
+                "remote_exec": mock_operation,
+                "get_remote_exec_results": mock_operation,
             })
         )
-
-    def mock_operation(self, *_args: Any, **_kwargs: Any) -> Tuple[Status, dict]:   # pylint: disable=no-self-use
-        """Mock operation as a class method"""
-        return mock_op(_args, _kwargs)
