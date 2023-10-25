@@ -50,17 +50,16 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         methods : Union[Dict[str, Callable], List[Callable], None]
             New methods to register with the service.
         """
-        super().__init__(config, global_config, parent, )
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [
+                self.shutdown,
+                self.reboot,
+                self.wait_os_operation,
+                self.remote_exec,
+                self.get_remote_exec_results,
+            ]))
         self._shell = self.config.get("ssh_shell", "/bin/bash")
-
-        # Register methods that we want to expose to the Environment objects.
-        self.register([
-            self.shutdown,
-            self.reboot,
-            self.wait_os_operation,
-            self.remote_exec,
-            self.get_remote_exec_results
-        ])
 
     async def _run_cmd(self, params: dict, script: Iterable[str], env_params: dict) -> SSHCompletedProcess:
         """
