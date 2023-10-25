@@ -6,13 +6,14 @@
 A collection Service functions for mocking managing VMs.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
 from mlos_bench.services.types.os_ops_type import SupportsOSOps
-from mlos_bench.tests.services.remote.mock import mock_operation
+from mlos_bench.tests.services.remote.mock import mock_op
 
 
 class MockVMService(Service, SupportsHostProvisioning, SupportsHostOps, SupportsOSOps):
@@ -40,7 +41,7 @@ class MockVMService(Service, SupportsHostProvisioning, SupportsHostOps, Supports
         super().__init__(
             config, global_config, parent,
             self.merge_methods(methods, {
-                name: mock_operation for name in (
+                name: self.mock_operation for name in (
                     # SupportsHostProvisioning:
                     "wait_host_deployment",
                     "provision_host",
@@ -58,3 +59,7 @@ class MockVMService(Service, SupportsHostProvisioning, SupportsHostOps, Supports
                 )
             })
         )
+
+    def mock_operation(self, *_args: Any, **_kwargs: Any) -> Tuple[Status, dict]:   # pylint: disable=no-self-use
+        """Mock operation as a class method"""
+        return mock_op(_args, _kwargs)

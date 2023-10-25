@@ -33,6 +33,7 @@ mkdir -p "/tmp/$container_name/dc/shellhistory"
 docker run -it --rm \
     --name "$container_name" \
     --user vscode \
+    --env USER=vscode \
     --group-add $docker_gid \
     -v "$HOME/.azure":/dc/azure \
     -v "/tmp/$container_name/dc/shellhistory:/dc/shellhistory" \
