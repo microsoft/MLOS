@@ -145,12 +145,7 @@ class Service:
 
         Calls the _enter_context() method of all the Services registered under this one.
         """
-        if self._in_context:
-            # Multiple environments can share the same Service, so we need to
-            # add a check and make this a re-entrant Service context.
-            assert self._service_contexts
-            assert all(svc._in_context for svc in self._services)
-            return self
+        assert not self._in_context
         self._service_contexts = [svc._enter_context() for svc in self._services]
         self._in_context = True
         return self
@@ -163,12 +158,7 @@ class Service:
 
         Calls the _exit_context() method of all the Services registered under this one.
         """
-        if not self._in_context:
-            # Multiple environments can share the same Service, so we need to
-            # add a check and make this a re-entrant Service context.
-            assert not self._service_contexts
-            assert all(not svc._in_context for svc in self._services)
-            return False
+        assert self._in_context
         ex_throw = None
         for svc in reversed(self._service_contexts):
             try:
