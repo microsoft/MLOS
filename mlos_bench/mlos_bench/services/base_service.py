@@ -10,11 +10,7 @@ import json
 import logging
 
 from types import TracebackType
-<<<<<<< HEAD
-from typing import Any, Callable, Dict, List, Optional, Self, Set, Type, Union
-=======
 from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
->>>>>>> context-manager-support-for-services
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
