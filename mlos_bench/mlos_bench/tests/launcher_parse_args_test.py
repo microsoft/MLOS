@@ -53,7 +53,7 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # The VSCode pytest wrapper actually starts in a different directory before
     # changing into the code directory, but doesn't update the PWD environment
     # variable.
-    expected_root_pwd = os.environ.get('VSCODE_PWD', os.getcwd())
+    expected_root_pwd = os.environ.get('VSCODE_CWD', os.getcwd())
     if sys.platform == 'win32':
         # Some env tweaks for platform compatibility.
         os.environ['PWD'] = expected_root_pwd
@@ -98,7 +98,7 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     # The VSCode pytest wrapper actually starts in a different directory before
     # changing into the code directory, but doesn't update the PWD environment
     # variable.
-    expected_root_pwd = os.environ.get('VSCODE_PWD', os.getcwd())
+    expected_root_pwd = os.environ.get('VSCODE_CWD', os.getcwd())
     if sys.platform == 'win32':
         # Some env tweaks for platform compatibility.
         os.environ['PWD'] = expected_root_pwd
