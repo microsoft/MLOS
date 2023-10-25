@@ -94,16 +94,15 @@ class Service:
         # which Service instance that method belongs too.
         # To do this we also
 
-        # As a sanity check, make sure all methods registered are bound.
-        assert all(hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
-                   for svc_method in self._service_methods.values())
         self._services: Set[Service] = {
-            # Enumerate the services that are bound to this instance in the
+            # Enumerate the Services that are bound to this instance in the
             # order they were added.
             # Unfortunately, by creating a set, we may destroy the ability to
-            # preserve the context setup/teardown order.
+            # preserve the context enter/exit order, but hopefully it doesn't
+            # matter.
             svc_method.__self__ for _, svc_method in self._service_methods.items()
-            # To make pylint happy, we need to check that the __self__ attribute is present.
+            # Note: some methods are actually stand alone functions, so we need
+            # to filter them out.
             if hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
         }
         self._service_contexts: List[Service] = []
