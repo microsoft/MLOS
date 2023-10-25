@@ -36,6 +36,25 @@ def test_local_env(tunable_groups: TunableGroups) -> None:
     )
 
 
+def test_local_env_service_context(tunable_groups: TunableGroups) -> None:
+    """
+    Basic check that context support for Service mixins are handled when environment contexts are entered.
+    """
+    local_env = create_local_env(tunable_groups, {
+        "run": ["echo NA"]
+    })
+    # pylint: disable=protected-access
+    assert local_env._service
+    assert not local_env._service._in_context
+    assert not local_env._service._service_contexts
+    with local_env as env_context:
+        assert env_context._in_context
+        assert local_env._service._in_context
+        assert local_env._service._service_contexts     # type: ignore[unreachable] # (false positive)
+        assert all(svc._in_context for svc in local_env._service._service_contexts)
+        assert all(svc._in_context for svc in local_env._service._services)
+
+
 def test_local_env_results_no_header(tunable_groups: TunableGroups) -> None:
     """
     Fail if the results are not in the expected format.
