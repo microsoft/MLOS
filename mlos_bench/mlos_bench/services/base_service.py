@@ -10,7 +10,11 @@ import json
 import logging
 
 from types import TracebackType
+<<<<<<< HEAD
 from typing import Any, Callable, Dict, List, Optional, Self, Set, Type, Union
+=======
+from typing import Any, Callable, Dict, List, Optional, Set, Type, Union
+>>>>>>> context-manager-support-for-services
 from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
@@ -81,7 +85,7 @@ class Service:
         self.config = config or {}
         self._validate_json_config(self.config)
         self._parent = parent
-        self._service_methods: Dict[str, Callable[[Self, Any], Any]] = {}
+        self._service_methods: Dict[str, Callable] = {}
 
         if parent:
             self.register(parent.export())
@@ -94,16 +98,15 @@ class Service:
         # which Service instance that method belongs too.
         # To do this we also
 
-        # As a sanity check, make sure all methods registered are bound.
-        assert all(hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
-                   for svc_method in self._service_methods.values())
         self._services: Set[Service] = {
-            # Enumerate the services that are bound to this instance in the
+            # Enumerate the Services that are bound to this instance in the
             # order they were added.
             # Unfortunately, by creating a set, we may destroy the ability to
-            # preserve the context setup/teardown order.
+            # preserve the context enter/exit order, but hopefully it doesn't
+            # matter.
             svc_method.__self__ for _, svc_method in self._service_methods.items()
-            # To make pylint happy, we need to check that the __self__ attribute is present.
+            # Note: some methods are actually stand alone functions, so we need
+            # to filter them out.
             if hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
         }
         self._service_contexts: List[Service] = []
