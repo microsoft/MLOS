@@ -8,7 +8,6 @@ Helper functions for config example loading tests.
 
 from typing import Callable, List, Optional
 
-from glob import iglob
 import os
 import sys
 

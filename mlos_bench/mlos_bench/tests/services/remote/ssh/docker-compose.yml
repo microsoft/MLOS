@@ -1,0 +1,50 @@
+name: mlos_bench-test-ssh-server
+services:
+  ssh-server:
+    hostname: ssh-server
+    attach: false
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - PORT=${PORT:-2254}
+      tags:
+        - mlos_bench-test-ssh-server:latest
+    image: mlos_bench-test-ssh-server:latest
+    ports:
+      # To allow multiple instances of this to coexist, instead of explicitly
+      # mapping the port, let it get assigned randomly on the host.
+      # It
+      #- ${PORT:-2254}:${PORT:-2254}
+      - ${PORT:-2254}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      # Let the environment variable TIMEOUT override the default.
+      - TIMEOUT=${TIMEOUT:-180}
+  # Also start a second server for testing multiple instances.
+  alt-server:
+    depends_on:
+      - ssh-server
+    hostname: alt-server
+    attach: false
+    restart: always
+    image: mlos_bench-test-ssh-server:latest
+    ports:
+      - ${PORT:-2254}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      # Let the environment variable TIMEOUT override the default.
+      - TIMEOUT=${TIMEOUT:-180}
+  # Check that we can connect to the server from the client.
+  ssh-client:
+    depends_on:
+      - ssh-server
+    restart: no
+    image: mlos_bench-test-ssh-server:latest
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    # Implicitly uses root and the key in that image.
+    #command: ["ssh", "-o", "StrictHostKeyChecking=accept-new", "-p", "${PORT:-2254}", "host.docker.internal", "hostname"]
+    command: ["ssh", "-o", "StrictHostKeyChecking=accept-new", "-p", "${PORT:-2254}", "ssh-server", "hostname"]

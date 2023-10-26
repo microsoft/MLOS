@@ -28,6 +28,7 @@ else
     docker_gid=$(stat -c%g /var/run/docker.sock)
 fi
 
+set -x
 mkdir -p "/tmp/$container_name/dc/shellhistory"
 docker run -it --rm \
     --name "$container_name" \

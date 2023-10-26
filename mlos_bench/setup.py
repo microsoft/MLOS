@@ -28,6 +28,7 @@ except LookupError as e:
 extra_requires: Dict[str, List[str]] = {    # pylint: disable=consider-using-namedtuple-or-dataclass
     # Additional tools for extra functionality.
     'azure': ['azure-storage-file-share', 'azure-identity', 'azure-keyvault'],
+    'ssh': ['asyncssh'],
     'storage-sql-duckdb': ['sqlalchemy', 'duckdb_engine'],
     'storage-sql-mysql': ['sqlalchemy', 'mysql-connector-python'],
     'storage-sql-postgres': ['sqlalchemy', 'psycopg2'],
@@ -47,6 +48,8 @@ extra_requires['full-tests'] = extra_requires['full'] + [
     'pytest-xdist',
     'pytest-cov',
     'pytest-local-badge',
+    'pytest-lazy-fixture',
+    'pytest-docker',
 ]
 
 # pylint: disable=duplicate-code

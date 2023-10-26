@@ -24,6 +24,9 @@ services:
 
     env_file: ../.env
 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
   docs-www:
     build:
       context: ./tmp
