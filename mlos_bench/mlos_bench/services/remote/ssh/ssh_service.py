@@ -238,7 +238,7 @@ class SshService(Service, metaclass=ABCMeta):
 
         if 'ssh_keepalive_interval' in self.config:
             keepalive_internal = self.config.get('ssh_keepalive_interval')
-            self._connect_params['keepalive_interval'] = int(keepalive_internal) if keepalive_internal is not None else None
+            self._connect_params['keepalive_interval'] = None if if keepalive_internal is None else int(keepalive_internal)
 
     def _enter_context(self) -> "SshService":
         # Start the background thread if it's not already running.
