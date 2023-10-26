@@ -97,6 +97,12 @@ def test_event_loop_context() -> None:
         assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is not None
         assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop.is_running()
 
+        start = time.time()
+        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
+        assert 0.0 <= time.time() - start < 0.1
+        assert future.result(timeout=0.2) == 'foo'
+        assert 0.1 <= time.time() - start <= 0.2
+
     # Once we exit the last context, the background thread should be stopped
     # and unusable for running co-routines.
 
