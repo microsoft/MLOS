@@ -39,6 +39,8 @@
                 "class": "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
                 "name": "local_ssh_env",
                 "config": {
+                    // these are needed by the SshFileShareService
+                    // FIXME: Can we only include these in the CompositeEnv and have them propagate down?
                     "required_args": [
                         "ssh_hostname",
                         "ssh_port",
