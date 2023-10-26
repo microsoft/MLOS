@@ -2,7 +2,6 @@
     // *** IMPORTANT! ***
     // Make sure each user has a unique experiment_id:
     "experiment_id": "ADU-User-YOUR-ID-HERE",
-    "trial_id": 1,
 
     // Any global parameter can be used as a dollar variable in the global config:
     "deploymentName": "$experiment_id-DEPLOY",
@@ -14,7 +13,7 @@
     "virtualNetworkName": "ADU-MLOS-Demo-vnet",
     "subnetName": "ADU-MLOS-Demo-subnet",
 
-    "storageAccountName": "adumlosdemostorage",
+    "storageAccountName": "adumlosdemostorage",  // must be globally unique w/o spaces
     "storageFileShareName": "adu-mlos-demo-file-share",
 
     "vmSize": "Standard_B2s",
