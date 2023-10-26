@@ -1,0 +1,47 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/ssh/common-defs-subschemas.json",
+    "title": "mlos_bench SSH Service common defs config",
+    "description": "mlos_bench SSH Service common defs config",
+    "$defs": {
+        "ssh_service_config": {
+            "description": "SSH Service config.",
+            "type": "object",
+            "properties": {
+                "ssh_request_timeout": {
+                    "description": "Request timeout in seconds, or null to disable timeout.",
+                    "type": ["null", "number"],
+                    "minimum": 1
+                },
+                "ssh_keepalive_interval": {
+                    "description": "Whether to send keep alive packets to the remote machine(s).",
+                    "type": ["null", "number"],
+                    "minimum": 1
+                },
+                "ssh_port": {
+                    "description": "Default port to use when connecting to the remote machine(s).",
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 65535,
+                    "examples": [22]
+                },
+                "ssh_username": {
+                    "description": "Default username to use when connecting to the remote machine(s). If null or unspecified, will default to the value in ~/.ssh/config or the current user if not provided in another config.",
+                    "type": ["null", "string"],
+                    "examples": ["root"]
+                },
+                "ssh_priv_key_path": {
+                    "$comment": "TODO: add support for multiple private keys or dynamically fetched private keys.",
+                    "description": "Optional path to the private key to use when connecting to the remote machine(s). Keys are automatically searched for if not specified. Note: these should be passwordless or else an ssh-agent should be available via the SSH_AUTH_SOCK environment variable.",
+                    "type": "string",
+                    "examples": ["~/.ssh/id_rsa", "~/.ssh/id_ecdsa"]
+                },
+                "ssh_known_hosts_path": {
+                    "description": "Path to known_hosts file. Set to null to disable host key checking.",
+                    "type": ["null", "string"],
+                    "examples": [null, "~/.ssh/known_hosts"]
+                }
+            }
+        }
+    }
+}

@@ -6,7 +6,9 @@
 Common fixtures for mock TunableGroups and Environment objects.
 """
 
-from typing import Any, Dict
+from typing import Any, Dict, List
+
+import os
 
 import json5 as json
 import pytest
@@ -139,3 +141,40 @@ def mock_env_no_noise(tunable_groups: TunableGroups) -> MockEnv:
         },
         tunables=tunable_groups
     )
+
+
+# Fixtures to configure the pytest-docker plugin.
+
+
+@pytest.fixture(scope="session")
+def docker_compose_file(pytestconfig: pytest.Config) -> List[str]:
+    """
+    Returns the path to the docker-compose file.
+
+    Parameters
+    ----------
+    pytestconfig : pytest.Config
+
+    Returns
+    -------
+    str
+        Path to the docker-compose file.
+    """
+    _ = pytestconfig  # unused
+    return [
+        os.path.join(os.path.dirname(__file__), "services", "remote", "ssh", "docker-compose.yml"),
+        # Add additional configs as necessary here.
+    ]
+
+
+@pytest.fixture(scope="session")
+def docker_compose_project_name() -> str:
+    """
+    Returns the name of the docker-compose project.
+
+    Returns
+    -------
+    str
+        Name of the docker-compose project.
+    """
+    return f"mlos_bench-test-{os.getpid()}"

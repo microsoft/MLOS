@@ -1,0 +1,21 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/ssh/ssh-fileshare-service-subschema.json",
+    "title": "mlos_bench SSH Fileshare Service config",
+    "description": "config for an mlos_bench SSH Fileshare Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.ssh.SshFileShareService",
+                "mlos_bench.services.remote.ssh.ssh_fileshare.SshFileShareService"
+            ]
+        },
+        "config": {
+            "$ref": "./common-defs-subschemas.json#/$defs/ssh_service_config",
+            "minProperties": 1,
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class"]
+}

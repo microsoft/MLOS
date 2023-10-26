@@ -1,0 +1,11 @@
+{
+    "class": "mlos_bench.services.remote.ssh.SshHostService",
+    "config": {
+        "ssh_username": "someuser",
+        "ssh_known_hosts_path": [
+            "array",
+            "not",
+            "supported"
+        ]
+    }
+}

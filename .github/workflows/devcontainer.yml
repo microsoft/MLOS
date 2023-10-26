@@ -90,6 +90,7 @@ jobs:
           --env LOCAL_WORKSPACE_FOLDER=$(pwd) \
           --env PYTEST_EXTRA_OPTIONS=$PYTEST_EXTRA_OPTIONS \
           --workdir /workspaces/MLOS \
+          --add-host host.docker.internal:host-gateway \
           --name mlos-devcontainer mlos-devcontainer sleep 1800
     - name: Fixup vscode uid/gid in the running container
       timeout-minutes: 3

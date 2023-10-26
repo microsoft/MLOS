@@ -4,4 +4,10 @@
 #
 """SSH remote service."""
 
-# TODO
+from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
+from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
+
+__all__ = [
+    "SshHostService",
+    "SshFileShareService",
+]
