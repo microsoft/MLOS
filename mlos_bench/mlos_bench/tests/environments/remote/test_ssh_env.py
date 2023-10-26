@@ -8,6 +8,8 @@ Unit tests for RemoveEnv benchmark environment via local SSH test services.
 
 import sys
 
+import pytest
+
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -44,3 +46,7 @@ def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestS
         },
         expected_telemetry=[],
     )
+
+
+if __name__ == "__main__":
+    pytest.main(["-n1", __file__])
