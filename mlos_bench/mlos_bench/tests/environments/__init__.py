@@ -3,6 +3,67 @@
 # Licensed under the MIT License.
 #
 """
-Tests for mlos_bench.environments.
-Used to make mypy happy about multiple conftest.py modules.
+Tests helpers for mlos_bench.environments.
 """
+
+from datetime import datetime
+from typing import Any, Dict, List, Tuple, Union
+
+import pytest
+
+from mlos_bench.environments.base_environment import Environment
+
+from mlos_bench.tunables.tunable_groups import TunableGroups
+
+
+def check_env_success(env: Environment,
+                      tunable_groups: TunableGroups,
+                      expected_results: Dict[str, Union[float, str]],
+                      expected_telemetry: List[Tuple[datetime, str, Any]]) -> None:
+    """
+    Set up an environment and run a test experiment there.
+
+    Parameters
+    ----------
+    tunable_groups : TunableGroups
+        Tunable parameters (usually come from a fixture).
+    env : Environment
+        An environment to query for the results.
+    expected_results : Dict[str, float]
+        Expected results of the benchmark.
+    expected_telemetry : List[Tuple[datetime, str, Any]]
+        Expected telemetry data of the benchmark.
+    """
+    with env as env_context:
+
+        assert env_context.setup(tunable_groups)
+
+        (status, data) = env_context.run()
+        assert status.is_succeeded()
+        assert data == pytest.approx(expected_results, nan_ok=True)
+
+        (status, telemetry) = env_context.status()
+        assert status.is_good()
+        assert telemetry == pytest.approx(expected_telemetry, nan_ok=True)
+
+
+def check_env_fail_telemetry(env: Environment, tunable_groups: TunableGroups) -> None:
+    """
+    Set up a local environment and run a test experiment there;
+    Make sure the environment `.status()` call fails.
+
+    Parameters
+    ----------
+    tunable_groups : TunableGroups
+        Tunable parameters (usually come from a fixture).
+    env : Environment
+        An environment to query for the results.
+    """
+    with env as env_context:
+
+        assert env_context.setup(tunable_groups)
+        (status, _data) = env_context.run()
+        assert status.is_succeeded()
+
+        with pytest.raises(ValueError):
+            env_context.status()
