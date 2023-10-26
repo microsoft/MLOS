@@ -34,6 +34,8 @@ def check_env_success(env: Environment,
         Expected results of the benchmark.
     expected_telemetry : List[Tuple[datetime, str, Any]]
         Expected telemetry data of the benchmark.
+    global_config : dict
+        Global params.
     """
     with env as env_context:
 
