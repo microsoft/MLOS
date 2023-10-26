@@ -6,7 +6,7 @@
 Basic MockService for testing.
 """
 
-from typing import Any, Callable, Dict, List, Optional, Protocol, Union, runtime_checkable
+from typing import Callable, Dict, List, Optional, Protocol, Union, runtime_checkable
 
 from mlos_bench.services.base_service import Service
 
@@ -26,12 +26,19 @@ class MockServiceBase(Service, SupportsSomeMethod):
     """A base service class for testing."""
 
     def __init__(
-            self, config: Dict[str, Any] | None = None, global_config: Dict[str, Any] | None = None, parent: Service | None = None,
-            methods: Dict[str, Callable[..., Any]] | List[Callable[..., Any]] | None = None):
-        super().__init__(config, global_config, parent, self.merge_methods(methods, [
-            self.some_method,
-            self.some_other_method,
-        ]))
+            self,
+            config: Optional[dict] = None,
+            global_config: Optional[dict] = None,
+            parent: Optional[Service] = None,
+            methods: Optional[Union[Dict[str, Callable], List[Callable]]] = None) -> None:
+        super().__init__(
+            config,
+            global_config,
+            parent,
+            self.merge_methods(methods, [
+                self.some_method,
+                self.some_other_method,
+            ]))
 
     def some_method(self) -> str:
         """some_method"""
