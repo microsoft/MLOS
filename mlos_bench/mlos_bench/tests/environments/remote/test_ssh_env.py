@@ -6,11 +6,14 @@
 Unit tests for RemoveEnv benchmark environment via local SSH test services.
 """
 
+from typing import Dict
+
 import sys
 
 import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.tests.environments import check_env_success
@@ -26,7 +29,7 @@ def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestS
     """
     Produce benchmark and telemetry data in a local script and read it.
     """
-    global_config = {
+    global_config: Dict[str, TunableValue] = {
         "ssh_hostname": ssh_test_server.hostname,
         "ssh_port": ssh_test_server.get_port(),
         "ssh_username": ssh_test_server.username,
@@ -35,7 +38,7 @@ def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestS
 
     service = ConfigPersistenceService(config={"config_path": [str(files("mlos_bench.tests.config"))]})
     config_path = service.resolve_path("environments/remote/test_ssh_env.jsonc")
-    env = service.load_environment(config_path, tunable_groups, global_config)
+    env = service.load_environment(config_path, tunable_groups, global_config=global_config, service=service)
 
     check_env_success(
         env, tunable_groups,
