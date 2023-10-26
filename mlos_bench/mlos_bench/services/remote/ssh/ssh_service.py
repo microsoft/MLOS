@@ -7,22 +7,22 @@ A collection functions for interacting with SSH servers as file shares.
 """
 
 from abc import ABCMeta
-from asyncio import AbstractEventLoop, Event as CoroEvent, Lock as CoroLock
+from asyncio import Event as CoroEvent, Lock as CoroLock
 from concurrent.futures import Future
 from types import TracebackType
 from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, TypeVar, Union
-from threading import current_thread, Lock as ThreadLock, Thread
+from threading import current_thread
 
 import logging
 import os
 import sys
 
-import asyncio
 import asyncssh
 
 from asyncssh.connection import SSHClientConnection
 
 from mlos_bench.services.base_service import Service
+from mlos_bench.event_loop_context import EventLoopContext
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -110,9 +110,29 @@ class SshClientCache:
     def __init__(self) -> None:
         self._cache: Dict[str, Tuple[SSHClientConnection, SshClient]] = {}
         self._cache_lock = CoroLock()
+        self._refcnt: int = 0
 
     def __str__(self) -> str:
         return str(self._cache)
+
+    def __len__(self) -> int:
+        return len(self._cache)
+
+    def enter(self) -> None:
+        """
+        Manages the cache lifecycle with reference counting.
+        To be used in the __enter__ method of a caller's context manager.
+        """
+        self._refcnt += 1
+
+    def exit(self) -> None:
+        """
+        Manages the cache lifecycle with reference counting.
+        To be used in the __exit__ method of a caller's context manager.
+        """
+        self._refcnt -= 1
+        if self._refcnt <= 0:
+            self.cleanup()
 
     async def get_client_connection(self, connect_params: dict) -> Tuple[SSHClientConnection, SshClient]:
         """
@@ -165,7 +185,7 @@ class SshService(Service, metaclass=ABCMeta):
     """
 
     # AsyncSSH requires an asyncio event loop to be running to work.
-    # However, that that event loop blocks the main thread.
+    # However, running that event loop blocks the main thread.
     # To avoid having to change our entire API to use async/await, all the way
     # up the stack, we run the event loop that runs any async code in a
     # background thread and submit async code to it using
@@ -173,7 +193,8 @@ class SshService(Service, metaclass=ABCMeta):
     # This is a bit of a hack, but it works for now.
     #
     # The event loop is created on demand and shared across all SshService
-    # instances, hence we need to lock it when doing the creation/cleanup.
+    # instances, hence we need to lock it when doing the creation/cleanup,
+    # or later, during context enter and exit.
     #
     # We ran tests to ensure that multiple requests can still be executing
     # concurrently inside that event loop so there should be no practical
@@ -186,11 +207,10 @@ class SshService(Service, metaclass=ABCMeta):
     # that the connection was made on.
     # In that case, each background thread should get its own SshClientCache.
 
-    _event_loop: Optional[AbstractEventLoop] = None
-    _event_loop_thread: Optional[Thread] = None
-    _event_loop_thread_lock = ThreadLock()
-    _event_loop_thread_refcnt: int = 0
-    _event_loop_thread_ssh_client_cache: Optional[SshClientCache] = None
+    # Maintain one just one event loop thread for all SshService instances.
+    # But only keep it running while they are within a context.
+    _EVENT_LOOP_CONTEXT = EventLoopContext()
+    _EVENT_LOOP_THREAD_SSH_CLIENT_CACHE = SshClientCache()
 
     _REQUEST_TIMEOUT: Optional[float] = None  # seconds
 
@@ -199,8 +219,6 @@ class SshService(Service, metaclass=ABCMeta):
                  global_config: Optional[Dict[str, Any]] = None,
                  parent: Optional[Service] = None,
                  methods: Union[Dict[str, Callable], List[Callable], None] = None):
-        # pylint: disable=too-complex
-
         super().__init__(config, global_config, parent, methods)
 
         # Make sure that the value we allow overriding on a per-connection
@@ -238,40 +256,24 @@ class SshService(Service, metaclass=ABCMeta):
 
         if 'ssh_keepalive_interval' in self.config:
             keepalive_internal = self.config.get('ssh_keepalive_interval')
-            self._connect_params['keepalive_interval'] = None if if keepalive_internal is None else int(keepalive_internal)
+            self._connect_params['keepalive_interval'] = None if keepalive_internal is None else int(keepalive_internal)
 
     def _enter_context(self) -> "SshService":
         # Start the background thread if it's not already running.
-        with SshService._event_loop_thread_lock:
-            if not SshService._event_loop_thread:
-                assert SshService._event_loop_thread_ssh_client_cache is None
-                SshService._event_loop_thread_ssh_client_cache = SshClientCache()
-                assert SshService._event_loop is None
-                SshService._event_loop = asyncio.new_event_loop()
-                SshService._event_loop_thread = Thread(target=SshService._run_event_loop, daemon=True)
-                SshService._event_loop_thread.start()
-            SshService._event_loop_thread_refcnt += 1
+        assert not self._in_context
+        SshService._EVENT_LOOP_CONTEXT.enter()
+        SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE.enter()
         super()._enter_context()
         return self
 
     def _exit_context(self, ex_type: Optional[Type[BaseException]],
                       ex_val: Optional[BaseException],
                       ex_tb: Optional[TracebackType]) -> Literal[False]:
+        # Stop the background thread if it's not needed anymore and potentially
+        # cleanup the cache as well.
         assert self._in_context
-        with SshService._event_loop_thread_lock:
-            SshService._event_loop_thread_refcnt -= 1
-            if SshService._event_loop_thread_refcnt <= 0:
-                assert SshService._event_loop_thread_ssh_client_cache is not None
-                SshService._event_loop_thread_ssh_client_cache.cleanup()
-                SshService._event_loop_thread_ssh_client_cache = None
-                assert SshService._event_loop is not None
-                SshService._event_loop.call_soon_threadsafe(SshService._event_loop.stop)
-                assert SshService._event_loop_thread is not None
-                SshService._event_loop_thread.join(timeout=1)
-                if SshService._event_loop_thread.is_alive():
-                    raise RuntimeError("Failed to stop event loop thread.")
-                SshService._event_loop = None
-                SshService._event_loop_thread = None
+        SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE.exit()
+        SshService._EVENT_LOOP_CONTEXT.exit()
         return super()._exit_context(ex_type, ex_val, ex_tb)
 
     @classmethod
@@ -280,18 +282,7 @@ class SshService(Service, metaclass=ABCMeta):
         Clears the cache of client connections.
         Note: This may cause in flight operations to fail.
         """
-        with cls._event_loop_thread_lock:
-            if cls._event_loop_thread_ssh_client_cache is not None:
-                cls._event_loop_thread_ssh_client_cache.cleanup()
-
-    @classmethod
-    def _run_event_loop(cls) -> None:
-        """
-        Runs the asyncio event loop in a background thread.
-        """
-        assert cls._event_loop is not None
-        asyncio.set_event_loop(cls._event_loop)
-        cls._event_loop.run_forever()
+        cls._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE.cleanup()
 
     CoroReturnType = TypeVar('CoroReturnType')
     if sys.version_info >= (3, 9):
@@ -314,8 +305,7 @@ class SshService(Service, metaclass=ABCMeta):
             A future that will be completed when the coroutine completes.
         """
         assert self._in_context
-        assert self._event_loop is not None
-        return asyncio.run_coroutine_threadsafe(coro, self._event_loop)
+        return self._EVENT_LOOP_CONTEXT.run_coroutine(coro)
 
     def _get_connect_params(self, params: dict) -> dict:
         """
@@ -375,5 +365,4 @@ class SshService(Service, metaclass=ABCMeta):
             The connection and client objects.
         """
         assert self._in_context
-        assert self._event_loop_thread_ssh_client_cache is not None
-        return await self._event_loop_thread_ssh_client_cache.get_client_connection(self._get_connect_params(params))
+        return await SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE.get_client_connection(self._get_connect_params(params))

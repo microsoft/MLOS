@@ -51,31 +51,30 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
 
 
 @pytest.mark.xdist_group("ssh_test_server")
-def test_ssh_service_background_thread() -> None:
-    """Test the SSH service background thread setup/cleanup handling."""
+def test_ssh_service_context_handler() -> None:
+    """
+    Test the SSH service context manager handling.
+    See Also: test_event_loop_context
+    """
     # pylint: disable=protected-access
 
     # Should start with no event loop thread.
-    assert SshService._event_loop_thread is None
+    assert SshService._EVENT_LOOP_CONTEXT._event_loop_thread is None
 
     # The background thread should only be created upon context entry.
     ssh_host_service = SshHostService(config={}, global_config={}, parent=None)
     assert ssh_host_service
     assert not ssh_host_service._in_context
-    assert ssh_host_service._event_loop_thread is None
+    assert ssh_host_service._EVENT_LOOP_CONTEXT._event_loop_thread is None
 
     # After we enter the SshService instance context, we should have a background thread.
     with ssh_host_service:
         assert ssh_host_service._in_context
-        assert isinstance(SshService._event_loop_thread, Thread)    # type: ignore[unreachable] # (false positives)
+        assert isinstance(SshService._EVENT_LOOP_CONTEXT._event_loop_thread, Thread)  # type: ignore[unreachable]
         # Give the thread a chance to start.
         # Mostly important on the underpowered Windows CI machines.
         time.sleep(0.25)
-        assert SshService._event_loop_thread.is_alive()
-        assert SshService._event_loop_thread_refcnt == 1
-        assert SshService._event_loop_thread_ssh_client_cache is not None
-        assert SshService._event_loop is not None
-        assert SshService._event_loop.is_running()
+        assert SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE is not None
 
         ssh_fileshare_service = SshFileShareService(config={}, global_config={}, parent=None)
         assert ssh_fileshare_service
@@ -84,10 +83,12 @@ def test_ssh_service_background_thread() -> None:
         with ssh_fileshare_service:
             assert ssh_fileshare_service._in_context
             assert ssh_host_service._in_context
-            assert SshService._event_loop_thread_refcnt == 2
-            # We should only get one thread for all instances.
-            assert SshService._event_loop_thread is ssh_host_service._event_loop_thread is ssh_fileshare_service._event_loop_thread
-            assert SshService._event_loop is ssh_host_service._event_loop is ssh_fileshare_service._event_loop
+            assert SshService._EVENT_LOOP_CONTEXT._event_loop_thread \
+                is ssh_host_service._EVENT_LOOP_CONTEXT._event_loop_thread \
+                is ssh_fileshare_service._EVENT_LOOP_CONTEXT._event_loop_thread
+            assert SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE \
+                is ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE \
+                is ssh_fileshare_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE
 
         assert not ssh_fileshare_service._in_context
         # And that instance should be unusable after we are outside the context.
@@ -95,18 +96,8 @@ def test_ssh_service_background_thread() -> None:
             ssh_fileshare_service._run_coroutine(asyncio.sleep(0.1))
 
         # The background thread should remain running since we have another context still open.
-        assert SshService._event_loop_thread_refcnt == 1
-        assert SshService._event_loop_thread is not None
-        assert SshService._event_loop_thread.is_alive()
-        assert SshService._event_loop is not None
-        assert SshService._event_loop.is_running()
-        assert SshService._event_loop_thread_ssh_client_cache is not None
-
-    # But not after we delete the remaining instances.
-    assert SshService._event_loop_thread is None    # type: ignore[unreachable] # (false positives)
-    assert SshService._event_loop_thread_refcnt == 0
-    assert SshService._event_loop is None
-    assert SshService._event_loop_thread_ssh_client_cache is None
+        assert isinstance(SshService._EVENT_LOOP_CONTEXT._event_loop_thread, Thread)  # type: ignore[unreachable]
+        assert SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE is not None
 
 
 if __name__ == '__main__':

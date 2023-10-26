@@ -42,8 +42,8 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
         # certain operations.
         ssh_host_service.clear_client_cache()
         connection_id = SshClient.id_from_params(ssh_test_server.to_connect_params())
-        assert ssh_host_service._event_loop_thread_ssh_client_cache is not None
-        connection_client = ssh_host_service._event_loop_thread_ssh_client_cache._cache.get(connection_id)
+        assert ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE is not None
+        connection_client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache.get(connection_id)
         assert connection_client is None
 
         (status, results_info) = ssh_host_service.remote_exec(
@@ -58,7 +58,7 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
         assert results["stdout"].strip() == SSH_TEST_SERVER_NAME
 
         # Check that the client caching is behaving as expected.
-        connection, client = ssh_host_service._event_loop_thread_ssh_client_cache._cache[connection_id]
+        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[connection_id]
         assert connection is not None
         assert connection._username == ssh_test_server.username
         assert connection._host == ssh_test_server.hostname
@@ -98,7 +98,7 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
             "BAR=bar",
             "UNUSED=",
         ]
-        connection, client = ssh_host_service._event_loop_thread_ssh_client_cache._cache[connection_id]
+        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[connection_id]
         assert connection._local_port == local_port
 
         # Close the connection (gracefully)
@@ -128,8 +128,11 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
             "BAZ=",
         ]
         # Make sure it looks like we reconnected.
-        connection, client = ssh_host_service._event_loop_thread_ssh_client_cache._cache[connection_id]
+        connection, client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache[connection_id]
         assert connection._local_port != local_port
+
+    # Make sure the cache is cleaned up on context exit.
+    assert len(SshHostService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE) == 0
 
 
 @requires_docker
