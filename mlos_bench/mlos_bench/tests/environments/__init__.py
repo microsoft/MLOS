@@ -7,7 +7,7 @@ Tests helpers for mlos_bench.environments.
 """
 
 from datetime import datetime
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -19,7 +19,8 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 def check_env_success(env: Environment,
                       tunable_groups: TunableGroups,
                       expected_results: Dict[str, Union[float, str]],
-                      expected_telemetry: List[Tuple[datetime, str, Any]]) -> None:
+                      expected_telemetry: List[Tuple[datetime, str, Any]],
+                      global_config: Optional[dict] = None) -> None:
     """
     Set up an environment and run a test experiment there.
 
@@ -36,7 +37,7 @@ def check_env_success(env: Environment,
     """
     with env as env_context:
 
-        assert env_context.setup(tunable_groups)
+        assert env_context.setup(tunable_groups, global_config)
 
         (status, data) = env_context.run()
         assert status.is_succeeded()
