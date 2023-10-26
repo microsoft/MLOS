@@ -1,0 +1,52 @@
+// Test config for test_ssh_env.py
+{
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+    "description": "Test Environment for RemoteEnv via local SSH test infrastructure",
+    "name": "composite_remote_ssh_env",
+
+    "include_services": [
+        // from the built in configs
+        "services/remote/ssh/ssh_host_service.jsonc",
+        "services/remote/ssh/ssh_fileshare_service.jsonc"
+    ],
+
+    "config": {
+        "children": [
+            {
+                "class": "mlos_bench.environments.remote.remote_env.RemoteEnv",
+                "name": "remote_ssh_env",
+                "config": {
+                    "required_args": [
+                        "ssh_hostname",
+                        "ssh_port",
+                        "ssh_username",
+                        "ssh_priv_key_path"
+                    ],
+                    "shell_env_params": [
+                        "ssh_username"
+                    ],
+                    "run": [
+                        // write a basic results csv file we can download and compare with
+                        "echo 'metric,value' > output.csv",
+                        "echo \"'hostname,`hostname`\" >> output.csv",
+                        "echo \"username,${ssh_username}\" >> output.csv",
+                        "echo score,0.9 >> output.csv"
+                    ]
+                }
+            },
+            {
+                "class": "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
+                "name": "local_ssh_env",
+                "config": {
+                    "download": [
+                        {
+                            "from": "output.csv",
+                            "to": "output-downloaded.csv"
+                        }
+                    ],
+                    "read_results_file": "output-downloaded.csv"
+                }
+            }
+        ]
+    }
+}
