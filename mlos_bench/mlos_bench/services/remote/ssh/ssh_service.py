@@ -234,7 +234,7 @@ class SshService(Service, metaclass=ABCMeta):
                     raise ValueError(f"ssh_known_hosts_file {known_hosts_file} does not exist")
                 self._connect_params['known_hosts'] = known_hosts_file
         if self._connect_params['known_hosts'] is None:
-            _LOG.info("%s known_hosts checking is disabled per config.", self.__class__.__name__)
+            _LOG.info("%s known_hosts checking is disabled per config.", self)
 
         if 'ssh_keepalive_interval' in self.config:
             keepalive_internal = self.config.get('ssh_keepalive_interval')
