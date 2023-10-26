@@ -39,6 +39,12 @@
                 "class": "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
                 "name": "local_ssh_env",
                 "config": {
+                    "required_args": [
+                        "ssh_hostname",
+                        "ssh_port",
+                        "ssh_username",
+                        "ssh_priv_key_path"
+                    ],
                     "download": [
                         {
                             "from": "output.csv",
