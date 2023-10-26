@@ -91,6 +91,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
                 # Only rename specified - use it.
                 rename = self._shell_env_params_rename.copy()
             else:
+                # FIXME: We should not be exposing all params by default.
                 # Neither `shell_env_params` nor rename are specified - use all params.
                 rename = {self._RE_INVALID.sub("_", key): key for key in self._params}
         else:
