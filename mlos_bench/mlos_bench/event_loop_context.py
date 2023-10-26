@@ -22,7 +22,6 @@ else:
 
 class EventLoopContext:
     """
-    A dataclass to encapsulate a background thread for event loop processing.
     EventLoopContext encapsulates a background thread for asyncio event
     loop processing as an aid for context managers.
 
