@@ -1,0 +1,21 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/mock-service-subschema.json",
+    "title": "mlos_bench Mock Service config",
+    "description": "config for an mlos_bench Mock Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.tests.services.mock_service.MockServiceBase",
+                "mlos_bench.tests.services.mock_service.MockServiceChild"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "$comment": "simple class for testing - no config properties accepted atm",
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class"]
+}
