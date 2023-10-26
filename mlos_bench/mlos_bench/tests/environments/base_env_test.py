@@ -6,8 +6,11 @@
 Unit tests for base environment class functionality.
 """
 
+from typing import Dict
+
 import pytest
 
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.environments.base_environment import Environment
 
 _GROUPS = {
@@ -50,3 +53,23 @@ def test_expand_groups_unknown() -> None:
     """
     with pytest.raises(KeyError):
         Environment._expand_groups(["$list", "$UNKNOWN", "$str", "end"], _GROUPS)
+
+
+def test_expand_const_args() -> None:
+    """
+    Test expansion of const args via expand_vars.
+    """
+    const_args: Dict[str, TunableValue] = {
+        "a": "b",
+        "foo": "$bar/baz",
+        "1": 1,
+    }
+    global_config: Dict[str, TunableValue] = {
+        "bar": "blah",
+    }
+    result = Environment._expand_vars(const_args, global_config)
+    assert result == {
+        "a": "b",
+        "foo": "blah/baz",
+        "1": 1,
+    }

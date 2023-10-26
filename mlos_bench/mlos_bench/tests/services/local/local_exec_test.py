@@ -6,6 +6,7 @@
 Unit tests for the service to run the scripts locally.
 """
 import sys
+import tempfile
 
 import pytest
 import pandas
@@ -50,7 +51,10 @@ def local_exec_service() -> LocalExecService:
     """
     Test fixture for LocalExecService.
     """
-    return LocalExecService(parent=ConfigPersistenceService())
+    config = {
+        "abort_on_error": True,
+    }
+    return LocalExecService(config, parent=ConfigPersistenceService())
 
 
 def test_resolve_script(local_exec_service: LocalExecService) -> None:
@@ -59,8 +63,8 @@ def test_resolve_script(local_exec_service: LocalExecService) -> None:
     """
     script = "os/linux/runtime/scripts/local/generate_kernel_config_script.py"
     script_abspath = local_exec_service.config_loader_service.resolve_path(script)
-    orig_cmdline = f". env.sh && {script}"
-    expected_cmdline = f". env.sh && {script_abspath}"
+    orig_cmdline = f". env.sh && {script} --input foo"
+    expected_cmdline = f". env.sh && {script_abspath} --input foo"
     subcmds_tokens = split_cmdline(orig_cmdline)
     # pylint: disable=protected-access
     subcmds_tokens = [local_exec_service._resolve_cmdline_script_path(subcmd_tokens) for subcmd_tokens in subcmds_tokens]
@@ -168,3 +172,55 @@ def test_run_script_fail(local_exec_service: LocalExecService) -> None:
     (return_code, stdout, _stderr) = local_exec_service.local_exec(["foo_bar_baz hello"])
     assert return_code != 0
     assert stdout.strip() == ""
+
+
+def test_run_script_middle_fail_abort(local_exec_service: LocalExecService) -> None:
+    """
+    Try to run a series of commands, one of which fails, and abort early.
+    """
+    (return_code, stdout, _stderr) = local_exec_service.local_exec([
+        "echo hello",
+        "cmd /c 'exit 1'" if sys.platform == 'win32' else "false",
+        "echo world",
+    ])
+    assert return_code != 0
+    assert stdout.strip() == "hello"
+
+
+def test_run_script_middle_fail_pass(local_exec_service: LocalExecService) -> None:
+    """
+    Try to run a series of commands, one of which fails, but let it pass.
+    """
+    local_exec_service.abort_on_error = False
+    (return_code, stdout, _stderr) = local_exec_service.local_exec([
+        "echo hello",
+        "cmd /c 'exit 1'" if sys.platform == 'win32' else "false",
+        "echo world",
+    ])
+    assert return_code == 0
+    assert stdout.splitlines() == [
+        "hello",
+        "world",
+    ]
+
+
+def test_temp_dir_path_expansion() -> None:
+    """
+    Test that we can control the temp_dir path using globals expansion.
+    """
+    # Create a temp dir for the test.
+    # Normally this would be a real path set on the CLI or in a global config,
+    # but for test purposes we still want it to be dynamic and cleaned up after
+    # the fact.
+    with tempfile.TemporaryDirectory() as temp_dir:
+        global_config = {
+            "workdir": temp_dir,   # e.g., "." or "/tmp/mlos_bench"
+        }
+        config = {
+            # The temp_dir for the LocalExecService should get expanded via workdir global config.
+            "temp_dir": "$workdir/temp",
+        }
+        local_exec_service = LocalExecService(config, global_config, parent=ConfigPersistenceService())
+        # pylint: disable=protected-access
+        assert isinstance(local_exec_service._temp_dir, str)
+        assert path_join(local_exec_service._temp_dir, abs_path=True) == path_join(temp_dir, "temp", abs_path=True)

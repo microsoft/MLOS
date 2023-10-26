@@ -13,7 +13,10 @@ import shlex
 import subprocess
 import sys
 
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
+from string import Template
+from typing import (
+    Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING, Union
+)
 
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.temp_dir_context import TempDirContextService
@@ -70,7 +73,8 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of a service to run scripts locally.
 
@@ -83,14 +87,18 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
             Free-format dictionary of global parameters.
         parent : Service
             An optional parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        super().__init__(config, global_config, parent)
-        self.register([self.local_exec])
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [self.local_exec])
+        )
+        self.abort_on_error = self.config.get("abort_on_error", True)
 
     def local_exec(self, script_lines: Iterable[str],
                    env: Optional[Mapping[str, "TunableValue"]] = None,
-                   cwd: Optional[str] = None,
-                   return_on_error: bool = False) -> Tuple[int, str, str]:
+                   cwd: Optional[str] = None) -> Tuple[int, str, str]:
         """
         Execute the script lines from `script_lines` in a local process.
 
@@ -104,9 +112,6 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
         cwd : str
             Work directory to run the script at.
             If omitted, use `temp_dir` or create a temporary dir.
-        return_on_error : bool
-            If True, stop running script lines on first non-zero return code.
-            The default is False.
 
         Returns
         -------
@@ -122,7 +127,7 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
                 (return_code, stdout, stderr) = self._local_exec_script(line, env, temp_dir)
                 stdout_list.append(stdout)
                 stderr_list.append(stderr)
-                if return_code != 0 and return_on_error:
+                if return_code != 0 and self.abort_on_error:
                     break
 
         stdout = "".join(stdout_list)
@@ -204,6 +209,9 @@ class LocalExecService(TempDirContextService, SupportsLocalExec):
                 cmd = [" ".join(cmd)]
 
             _LOG.info("Run: %s", cmd)
+            if _LOG.isEnabledFor(logging.DEBUG):
+                _LOG.debug("Expands to: %s", Template(" ".join(cmd)).safe_substitute(env))
+                _LOG.debug("Current working dir: %s", cwd)
 
             proc = subprocess.run(cmd, env=env or None, cwd=cwd, shell=True,
                                   text=True, check=False, capture_output=True)

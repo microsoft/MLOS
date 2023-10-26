@@ -12,6 +12,7 @@ from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool    # pylint: disable=deprecated-module
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.tunables.tunable_groups import TunableGroups
@@ -23,6 +24,15 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     """
     An abstract interface between the benchmarking framework and mlos_core optimizers.
     """
+
+    # See Also: mlos_bench/mlos_bench/config/schemas/optimizers/optimizer-schema.json
+    BASE_SUPPORTED_CONFIG_PROPS = {
+        "optimization_target",
+        "optimization_direction",
+        "max_iterations",
+        "seed",
+        "start_with_defaults",
+    }
 
     def __init__(self,
                  tunables: TunableGroups,
@@ -43,6 +53,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         """
         _LOG.info("Create optimizer for: %s", tunables)
         _LOG.debug("Optimizer config: %s", config)
+        self._validate_json_config(config)
         self._config = config.copy()
         self._global_config = global_config or {}
         self._tunables = tunables
@@ -60,6 +71,19 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._max_iter = int(self._config.pop('max_iterations', 100))
         self._opt_target = str(self._config.pop('optimization_target', 'score'))
         self._opt_sign = {"min": 1, "max": -1}[self._config.pop('optimization_direction', 'min')]
+
+    def _validate_json_config(self, config: dict) -> None:
+        """
+        Reconstructs a basic json config that this class might have been
+        instantiated from in order to validate configs provided outside the
+        file loading mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if config:
+            json_config["config"] = config
+        ConfigSchema.OPTIMIZER.validate(json_config)
 
     def __repr__(self) -> str:
         opt_direction = 'min' if self.is_min else 'max'

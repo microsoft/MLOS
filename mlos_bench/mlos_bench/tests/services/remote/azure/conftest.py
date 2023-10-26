@@ -48,10 +48,11 @@ def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
         "deploymentTemplateParameters": {
             "location": "westus2",
         },
-        "vmName": "test-vm",  # Should come from the upper-level config
         "pollInterval": 1,
         "pollTimeout": 2
-    }, global_config={}, parent=azure_auth_service)
+    }, global_config={
+        "vmName": "test-vm",  # Should come from the upper-level config
+    }, parent=azure_auth_service)
 
 
 @pytest.fixture
