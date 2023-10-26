@@ -20,6 +20,9 @@
                             "$ref": "./local/temp-dir-context-service-subschema.json"
                         },
                         {
+                            "$ref": "./mock-service-subschema.json"
+                        },
+                        {
                             "$ref": "./local/mock/mock-local-exec-service-subschema.json"
                         },
                         {
