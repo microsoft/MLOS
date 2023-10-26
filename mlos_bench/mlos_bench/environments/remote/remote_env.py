@@ -66,9 +66,10 @@ class RemoteEnv(ScriptEnv):
             "RemoteEnv requires a service that supports remote execution operations"
         self._remote_exec_service: SupportsRemoteExec = self._service
 
-        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
-            "RemoteEnv requires a service that supports host operations"
-        self._host_service: SupportsHostOps = self._service
+        if self._wait_boot:
+            assert self._service is not None and isinstance(self._service, SupportsHostOps), \
+                "RemoteEnv requires a service that supports host operations"
+            self._host_service: SupportsHostOps = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
         """
