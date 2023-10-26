@@ -36,11 +36,8 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
     with ssh_host_service:
         config = ssh_test_server.to_ssh_service_config()
 
-        # Ensure that the SSH client isn't cached yet. Note: this may interact with
-        # state from other tests, so we group them into the same xdist_group, run
-        # with --dist loadgroup, and gc.collect() or other forms of cleanup between
-        # certain operations.
-        ssh_host_service.clear_client_cache()
+        # Note: this may interact with state from other tests, so we group them
+        # into the same xdist_group, run with --dist loadgroup.
         connection_id = SshClient.id_from_params(ssh_test_server.to_connect_params())
         assert ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE is not None
         connection_client = ssh_host_service._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE._cache.get(connection_id)
