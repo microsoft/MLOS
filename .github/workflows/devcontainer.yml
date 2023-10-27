@@ -129,8 +129,10 @@ jobs:
       run: |
         set -x
         # Simulate test collection in vscode.
-        docker exec --user vscode --env USER=vscode mlos-devcontainer \
-          conda run -n mlos python -m pytest -svxl -n auto --collect-only --rootdir /workspaces/MLOS -s --cache-clear
+        test_count=$(docker exec --user vscode --env USER=vscode mlos-devcontainer \
+          conda run -n mlos python -m pytest -svxl -n auto --collect-only --rootdir /workspaces/MLOS -s --cache-clear \
+          | grep -c '<Function ')
+        if [ $test_count" -lt 725 ]; then echo "Expected at least 725 tests, got $test_count"; exit 1; fi
         # Now actually run the tests.
         docker exec --user vscode --env USER=vscode mlos-devcontainer make CONDA_INFO_LEVEL=-v test
 
