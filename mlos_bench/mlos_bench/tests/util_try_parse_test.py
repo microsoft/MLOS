@@ -17,4 +17,6 @@ def test_try_parse_val() -> None:
     assert try_parse_val("1") == int(1)
     assert try_parse_val("1.1") == float(1.1)
     assert try_parse_val("1e6") == float(1e6)
+    assert try_parse_val("NaN") == float("nan")
+    assert try_parse_val("inf") == float("Inf")
     assert try_parse_val("str") == str("str")
