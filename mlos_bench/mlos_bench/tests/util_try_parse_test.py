@@ -6,6 +6,8 @@
 Unit tests for try_parse_val utility function.
 """
 
+import math
+
 from mlos_bench.util import try_parse_val
 
 
@@ -17,6 +19,8 @@ def test_try_parse_val() -> None:
     assert try_parse_val("1") == int(1)
     assert try_parse_val("1.1") == float(1.1)
     assert try_parse_val("1e6") == float(1e6)
-    assert try_parse_val("NaN") == float("nan")
-    assert try_parse_val("inf") == float("Inf")
+    res = try_parse_val("NaN")
+    assert isinstance(res, float) and math.isnan(res)
+    res = try_parse_val("inf")
+    assert isinstance(res, float) and math.isinf(res)
     assert try_parse_val("str") == str("str")
