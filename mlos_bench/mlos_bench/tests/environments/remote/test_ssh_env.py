@@ -18,6 +18,7 @@ from mlos_bench.tunables.tunable_groups import TunableGroups
 
 from mlos_bench.tests.environments import check_env_success
 from mlos_bench.tests.services.remote.ssh import SshTestServerInfo
+from mlos_bench.tests import requires_docker
 
 if sys.version_info < (3, 10):
     from importlib_resources import files
@@ -25,6 +26,7 @@ else:
     from importlib.resources import files
 
 
+@requires_docker
 @pytest.mark.xdist_group("ssh_test_server")
 def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestServerInfo) -> None:
     """
