@@ -69,7 +69,10 @@
                             "to": "output-downloaded.csv"
                         }
                     ],
-                    "read_results_file": "output-downloaded.csv"
+                    "read_results_file": "output-downloaded.csv",
+                    "teardown": [
+                        "rm -f output-downloaded.csv"
+                    ]
                 }
             }
         ]
