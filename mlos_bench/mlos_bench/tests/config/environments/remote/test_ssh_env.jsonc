@@ -28,10 +28,18 @@
                     ],
                     "run": [
                         // write a basic results csv file we can download and compare with
-                        "echo 'metric,value' > output.csv",
-                        "echo \"'hostname,`hostname`\" >> output.csv",
-                        "echo \"username,${ssh_username}\" >> output.csv",
-                        "echo score,0.9 >> output.csv"
+                        "echo 'Generating test metrics output ...' >&2",
+                        "echo 'metric,value' | tee output.csv",
+                        // Check that we connected to the test server.
+                        "echo \"hostname,`hostname`\" | tee -a output.csv",
+                        // Test environment variables
+                        "echo \"username,${ssh_username}\" | tee -a output.csv",
+                        "echo score,0.9 | tee -a output.csv",
+                        "echo 'Done' >&2",
+                        // Wait a moment (mostly for debugging)
+                        "echo 'Sleeping ...' >&2",
+                        //"sleep 10",
+                        "echo 'Done' >&2"
                     ]
                 }
             },
