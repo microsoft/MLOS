@@ -270,10 +270,11 @@ def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
     if val is None:
         return val
     try:
-        if "." in val:
-            return float(val)
-        else:
-            return int(val)
+        val_float = float(val)
+        try:
+            val_int = int(val)
+            return val_int if val_int == val_float else val_float
+        except ValueError:
+            return val_float
     except ValueError:
-        pass
-    return str(val)
+        return str(val)
