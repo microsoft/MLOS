@@ -82,7 +82,7 @@ class Service:
         self._validate_json_config(self.config)
         self._parent = parent
         self._service_methods: Dict[str, Callable] = {}
-        self._services: Set[Service] = {}
+        self._services: Set[Service] = set()
         self._service_contexts: List[Service] = []
         self._in_context = False
 
@@ -99,19 +99,6 @@ class Service:
             _LOG.debug("Service: %s Config:\n%s", self, json.dumps(self.config, indent=2))
             _LOG.debug("Service: %s Globals:\n%s", self, json.dumps(global_config or {}, indent=2))
             _LOG.debug("Service: %s Parent: %s", self, parent.pprint() if parent else None)
-
-        self._services: Set[Service] = {
-            # Enumerate the Services that are bound to this instance in the
-            # order they were added.
-            # Unfortunately, by creating a set, we may destroy the ability to
-            # preserve the context enter/exit order, but hopefully it doesn't
-            # matter.
-            svc_method.__self__ for _, svc_method in self._service_methods.items()
-            # Note: some methods are actually stand alone functions, so we need
-            # to filter them out.
-            if hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
-        }
-        self._service_contexts: List[Service] = []
 
     @staticmethod
     def merge_methods(ext_methods: Union[Dict[str, Callable], List[Callable], None],
