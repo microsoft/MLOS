@@ -11,12 +11,8 @@
             "justMyCode": false,
             "env": {
                 // When debugging tests, only run a single pytest worker instance.
-<<<<<<< HEAD
                 "PYTEST_ADDOPTS": "-n1 --no-cov --dist=no --log-level=DEBUG",
                 "TIMEOUT": "1800"
-=======
-                "PYTEST_ADDOPTS": "-n1 --no-cov --dist=no --log-level=DEBUG"
->>>>>>> main
             }
         }
     ]
