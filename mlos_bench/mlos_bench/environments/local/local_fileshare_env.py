@@ -147,6 +147,9 @@ class LocalFileShareEnv(LocalEnv):
                 _LOG.warning("Cannot download: %s", path_from)
                 if not ignore_missing:
                     raise ex
+            except Exception as ex:
+                _LOG.error("Cannot download %s to %s: %s", path_from, path_to, ex)
+                raise ex
 
     def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
         """
