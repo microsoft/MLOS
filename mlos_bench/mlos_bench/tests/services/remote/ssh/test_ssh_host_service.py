@@ -22,7 +22,7 @@ from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
 
 
 @requires_docker
-@pytest.mark.xdist_group("ssh_test_server")
+@pytest.mark.xdist_group("alt_test_server")
 def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
                                  alt_test_server: SshTestServerInfo,
                                  ssh_host_service: SshHostService) -> None:
@@ -134,7 +134,7 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
 
 @requires_docker
 @pytest.mark.parametrize("graceful", [True, False])
-@pytest.mark.xdist_group("ssh_test_server")
+@pytest.mark.xdist_group("alt_test_server")
 def test_ssh_service_reboot(docker_services: DockerServices,
                             alt_test_server: SshTestServerInfo,
                             ssh_host_service: SshHostService,
