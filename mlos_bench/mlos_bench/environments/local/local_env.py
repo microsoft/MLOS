@@ -191,6 +191,8 @@ class LocalEnv(ScriptEnv):
         if list(data.columns) == ["metric", "value"]:
             _LOG.info("Local results have (metric,value) header and %d rows: assume long format", len(data))
             data = pandas.DataFrame([data.value.to_list()], columns=data.metric.to_list())
+            # Try to convert string metrics to numbers.
+            data = data.apply(pandas.to_numeric, errors="ignore")   # type: ignore[assignment]  # (false positive)
         elif len(data) == 1:
             _LOG.info("Local results have 1 row: assume wide format")
         else:
