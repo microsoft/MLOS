@@ -16,6 +16,7 @@ from typing_extensions import Literal
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -178,7 +179,7 @@ class CompositeEnv(Environment):
             env_context.teardown()
         super().teardown()
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """
         Submit a new experiment to the environment.
         Return the result of the *last* child environment if successful,

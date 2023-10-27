@@ -60,6 +60,7 @@ def _optimize(env: Environment, opt: Optimizer) -> Tuple[float, TunableGroups]:
             assert status.is_succeeded()
             assert output is not None
             score = output['score']
+            assert isinstance(score, float)
             assert 60 <= score <= 120
             logger("score: %s", str(score))
 

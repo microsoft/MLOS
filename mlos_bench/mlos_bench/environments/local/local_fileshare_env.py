@@ -151,7 +151,7 @@ class LocalFileShareEnv(LocalEnv):
                 _LOG.error("Cannot download %s to %s: %s", path_from, path_to, ex)
                 raise ex
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """
         Download benchmark results from the shared storage
         and run post-processing scripts locally.

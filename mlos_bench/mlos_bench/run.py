@@ -165,7 +165,10 @@ def _run(env_context: Environment, opt: Optimizer,
 
     # FIXME: Use the actual timestamp from the benchmark.
     trial.update(status, datetime.utcnow(), results)
-    opt.register(trial.tunables, status, results)
+    # Filter out non-numeric scores from the optimizer.
+    scores = results if not isinstance(results, dict) \
+        else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
+    opt.register(trial.tunables, status, scores)
 
 
 if __name__ == "__main__":
