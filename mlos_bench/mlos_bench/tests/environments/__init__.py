@@ -49,6 +49,9 @@ def check_env_success(env: Environment,
         assert status.is_good()
         assert telemetry == pytest.approx(expected_telemetry, nan_ok=True)
 
+        env_context.teardown()
+        assert not env_context._is_ready    # pylint: disable=protected-access
+
 
 def check_env_fail_telemetry(env: Environment, tunable_groups: TunableGroups) -> None:
     """
