@@ -82,31 +82,14 @@ class Service:
         self._validate_json_config(self.config)
         self._parent = parent
         self._service_methods: Dict[str, Callable] = {}
+        self._services: Set[Service] = set()
+        self._service_contexts: List[Service] = []
+        self._in_context = False
 
         if parent:
             self.register(parent.export())
         if methods:
             self.register(methods)
-
-        # In order to get a list of all child contexts, we need to look at only
-        # the bound methods that were not overridden by another mixin.
-        # Then we inspect the internally bound __self__ variable to discover
-        # which Service instance that method belongs too.
-        # To do this we also
-
-        self._services: Set[Service] = {
-            # Enumerate the Services that are bound to this instance in the
-            # order they were added.
-            # Unfortunately, by creating a set, we may destroy the ability to
-            # preserve the context enter/exit order, but hopefully it doesn't
-            # matter.
-            svc_method.__self__ for _, svc_method in self._service_methods.items()
-            # Note: some methods are actually stand alone functions, so we need
-            # to filter them out.
-            if hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
-        }
-        self._service_contexts: List[Service] = []
-        self._in_context = False
 
         self._config_loader_service: SupportsConfigLoading
         if parent and isinstance(parent, SupportsConfigLoading):
@@ -266,6 +249,27 @@ class Service:
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Added methods to: %s", self.pprint())
+
+        # In order to get a list of all child contexts, we need to look at only
+        # the bound methods that were not overridden by another mixin.
+        # Then we inspect the internally bound __self__ variable to discover
+        # which Service instance that method belongs too.
+        # To do this we also
+
+        # All service loading must happen prior to entering a context.
+        assert not self._in_context
+        assert not self._service_contexts
+        self._services = {
+            # Enumerate the Services that are bound to this instance in the
+            # order they were added.
+            # Unfortunately, by creating a set, we may destroy the ability to
+            # preserve the context enter/exit order, but hopefully it doesn't
+            # matter.
+            svc_method.__self__ for _, svc_method in self._service_methods.items()
+            # Note: some methods are actually stand alone functions, so we need
+            # to filter them out.
+            if hasattr(svc_method, '__self__') and isinstance(svc_method.__self__, Service)
+        }
 
     def export(self) -> Dict[str, Callable]:
         """
