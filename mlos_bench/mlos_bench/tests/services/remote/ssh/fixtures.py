@@ -108,8 +108,6 @@ def ssh_host_service(ssh_test_server: SshTestServerInfo) -> SshHostService:
             "ssh_username": ssh_test_server.username,
             "ssh_priv_key_path": ssh_test_server.id_rsa_path,
         },
-        global_config={},
-        parent=None,
     )
 
 
