@@ -13,12 +13,13 @@ import pytest
 
 from mlos_bench.environments.base_environment import Environment
 
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
 def check_env_success(env: Environment,
                       tunable_groups: TunableGroups,
-                      expected_results: Dict[str, Union[float, str]],
+                      expected_results: Dict[str, Union[TunableValue]],
                       expected_telemetry: List[Tuple[datetime, str, Any]],
                       global_config: Optional[dict] = None) -> None:
     """
