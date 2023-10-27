@@ -70,6 +70,7 @@
                         }
                     ],
                     "read_results_file": "output-downloaded.csv",
+                    // FIXME: Not getting executed?
                     "teardown": [
                         "rm -f output-downloaded.csv"
                     ]
