@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -13,8 +11,9 @@ services:
       cache_from:
         - mloscore.azurecr.io/mlos-devcontainer:latest
         - mlos-devcontainer:latest
-      tags:
-        - mlos-devcontainer:latest
+      # codespaces prebuild uses an older docker compose that doesn't support this
+      #tags:
+      #  - mlos-devcontainer:latest
 
     volumes:
       - ../..:/workspaces:cached
