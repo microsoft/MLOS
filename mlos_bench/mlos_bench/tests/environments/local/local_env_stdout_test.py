@@ -50,7 +50,7 @@ def test_local_env_file_stdout(tunable_groups: TunableGroups) -> None:
             "echo 'metric,value' > output.csv",
             "echo 'extra1,333' >> output.csv",
             "echo 'extra2,444' >> output.csv",
-            "echo 'file-msg,string' >> output.csv",
+            "echo 'file-msg,string'>> output.csv",
         ],
         "results_stdout_pattern": r"([a-zA-Z0-9_-]+),([a-z0-9.]+)",
         "read_results_file": "output.csv",
