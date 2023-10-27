@@ -118,6 +118,4 @@ def ssh_fileshare_service() -> SshFileShareService:
         config={
             # Left blank to make sure we test per connection overrides.
         },
-        global_config={},
-        parent=None,
     )
