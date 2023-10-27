@@ -16,6 +16,7 @@ from mlos_bench.environments.composite_env import CompositeEnv
 from mlos_bench.environments.local.local_env import LocalEnv
 from mlos_bench.services.config_persistence import ConfigPersistenceService
 from mlos_bench.services.local.local_exec import LocalExecService
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 
@@ -83,7 +84,7 @@ def create_composite_local_env(tunable_groups: TunableGroups,
 
 def check_env_success(env: Environment,
                       tunable_groups: TunableGroups,
-                      expected_results: Dict[str, float],
+                      expected_results: Dict[str, TunableValue],
                       expected_telemetry: List[Tuple[datetime, str, Any]]) -> None:
     """
     Set up a local environment and run a test experiment there.

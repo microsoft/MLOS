@@ -44,12 +44,14 @@ def test_local_env_file_stdout(tunable_groups: TunableGroups) -> None:
             "echo 'latency,111'",
             "echo 'throughput,222'",
             "echo 'score,0.999'",
+            "echo 'stdout-msg,string'",
             "echo '-------------------'",  # Should be ignored
             "echo 'metric,value' > output.csv",
             "echo 'extra1,333' >> output.csv",
             "echo 'extra2,444' >> output.csv",
+            "echo 'file-msg,string' >> output.csv",
         ],
-        "results_stdout_pattern": r"(\w+),([0-9.]+)",
+        "results_stdout_pattern": r"([a-zA-Z0-9_-]+),([a-z0-9.]+)",
         "read_results_file": "output.csv",
     })
 
@@ -59,8 +61,10 @@ def test_local_env_file_stdout(tunable_groups: TunableGroups) -> None:
             "latency": 111.0,
             "throughput": 222.0,
             "score": 0.999,
+            "stdout-msg": "string",
             "extra1": 333.0,
             "extra2": 444.0,
+            "file-msg": "string",
         },
         expected_telemetry=[],
     )

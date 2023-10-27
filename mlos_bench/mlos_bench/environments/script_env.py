@@ -13,7 +13,10 @@ from typing import Dict, Iterable, Optional
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
+
+from mlos_bench.util import try_parse_val
 
 _LOG = logging.getLogger(__name__)
 
@@ -100,7 +103,7 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         return {key_sub: str(self._params[key]) for (key_sub, key) in rename.items()}
 
-    def _extract_stdout_results(self, stdout: str) -> Dict[str, float]:
+    def _extract_stdout_results(self, stdout: str) -> Dict[str, TunableValue]:
         """
         Extract the results from the stdout of the script.
 
@@ -111,10 +114,10 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
 
         Returns
         -------
-        results : Dict[str, float]
+        results : Dict[str, TunableValue]
             A dictionary of results extracted from the stdout.
         """
         if not self._results_stdout_pattern:
             return {}
         _LOG.debug("Extract regex: '%s' from: '%s'", self._results_stdout_pattern, stdout)
-        return {key: float(val) for (key, val) in self._results_stdout_pattern.findall(stdout)}
+        return {key: try_parse_val(val) for (key, val) in self._results_stdout_pattern.findall(stdout)}

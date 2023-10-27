@@ -381,7 +381,7 @@ class Environment(metaclass=abc.ABCMeta):
         assert self._in_context
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """
         Execute the run script for this environment.
 
