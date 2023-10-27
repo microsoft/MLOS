@@ -74,7 +74,8 @@ def ssh_test_server(ssh_test_server_hostname: str,
         docker_cp_cmd = f"docker compose -p {docker_compose_project_name} cp {SSH_TEST_SERVER_NAME}:{id_rsa_src} {id_rsa_file.name}"
         cmd = run(docker_cp_cmd.split(), check=True, cwd=os.path.dirname(__file__), capture_output=True, text=True)
         if cmd.returncode != 0:
-            raise RuntimeError(f"Failed to copy ssh key from {SSH_TEST_SERVER_NAME} container: {str(cmd.stderr)}")
+            raise RuntimeError(f"Failed to copy ssh key from {SSH_TEST_SERVER_NAME} container "
+                               + f"[return={cmd.returncode}]: {str(cmd.stderr)}")
         os.chmod(id_rsa_file.name, 0o600)
         yield ssh_test_server_info
         # NamedTempFile deleted on context exit
@@ -108,8 +109,11 @@ def ssh_host_service(ssh_test_server: SshTestServerInfo) -> SshHostService:
             "ssh_username": ssh_test_server.username,
             "ssh_priv_key_path": ssh_test_server.id_rsa_path,
         },
+<<<<<<< HEAD
         global_config={},
         parent=None,
+=======
+>>>>>>> main
     )
 
 
@@ -120,6 +124,9 @@ def ssh_fileshare_service() -> SshFileShareService:
         config={
             # Left blank to make sure we test per connection overrides.
         },
+<<<<<<< HEAD
         global_config={},
         parent=None,
+=======
+>>>>>>> main
     )
