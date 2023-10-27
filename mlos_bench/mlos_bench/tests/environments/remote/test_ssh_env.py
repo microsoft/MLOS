@@ -25,6 +25,7 @@ else:
     from importlib.resources import files
 
 
+@pytest.mark.xdist_group("ssh_test_server")
 def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestServerInfo) -> None:
     """
     Produce benchmark and telemetry data in a local script and read it.
