@@ -1,0 +1,7 @@
+{
+    "class": "mlos_bench.services.remote.ssh.SshFileShareService",
+    "config": {
+        "ssh_username": "someuser",
+        "ssh_port": null    // bad port type
+    }
+}

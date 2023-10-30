@@ -132,9 +132,10 @@
         "editor.formatOnSave": true,
         "editor.formatOnSaveMode": "modifications"
     },
+    // See Also .vscode/launch.json for environment variable args to pytest during debug sessions.
+    // For the rest, see setup.cfg
     "python.testing.pytestArgs": [
-        "-n1",  // don't run tests in parallel inside vscode - makes attaching the debugger more cumbersome
-        "."
+        "--log-level=DEBUG"
     ],
     "python.testing.unittestEnabled": false
 }

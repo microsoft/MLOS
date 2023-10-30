@@ -17,6 +17,7 @@
     "postCreateCommand": "/opt/conda/bin/conda env update --solver=libmamba -v -n mlos -f ${containerWorkspaceFolder}/conda-envs/mlos.yml",
     // Various mounting, run, post-create, and user settings
     "containerEnv": {
+        "LOCAL_USER_NAME": "${localEnv:USER}${localEnv:USERNAME}",
         "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}",
         "CONTAINER_WORKSPACE_FOLDER": "${containerWorkspaceFolder}",
         "SSH_AUTH_SOCK": "${localEnv:SSH_AUTH_SOCK}",
@@ -29,7 +30,7 @@
     // Features to add to the dev container. More info: https://containers.dev/features.
     "features": {
         "ghcr.io/devcontainers/features/azure-cli:1": {},
-        "ghcr.io/devcontainers/features/conda:1": {},
+        //"ghcr.io/devcontainers/features/conda:1": {},
         "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
         "ghcr.io/devcontainers/features/github-cli:1": {},
         "ghcr.io/stuartleeks/dev-container-features/azure-cli-persistence:0": {},

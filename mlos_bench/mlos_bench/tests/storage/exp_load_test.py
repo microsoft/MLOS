@@ -82,6 +82,25 @@ def test_exp_trial_success(exp_storage_memory_sql: Storage.Experiment,
     assert not trials
 
 
+def test_exp_trial_update_categ(exp_storage_memory_sql: Storage.Experiment,
+                                tunable_groups: TunableGroups) -> None:
+    """
+    Update the trial with multiple metrics, some of which are categorical.
+    """
+    trial = exp_storage_memory_sql.new_trial(tunable_groups)
+    trial.update(Status.SUCCEEDED, datetime.utcnow(), {"score": 99.9, "benchmark": "test"})
+    assert exp_storage_memory_sql.load() == (
+        [{
+            'idle': 'halt',
+            'kernel_sched_latency_ns': '2000000',
+            'kernel_sched_migration_cost_ns': '-1',
+            'vmSize': 'Standard_B4ms'
+        }],
+        [99.9],
+        [Status.SUCCEEDED]
+    )
+
+
 def test_exp_trial_update_twice(exp_storage_memory_sql: Storage.Experiment,
                                 tunable_groups: TunableGroups) -> None:
     """

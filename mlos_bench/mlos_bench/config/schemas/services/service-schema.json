@@ -11,10 +11,16 @@
                 {
                     "oneOf": [
                         {
+                            "$ref": "./config-persistence-service-subschema.json"
+                        },
+                        {
                             "$ref": "./local/local-exec-service-subschema.json"
                         },
                         {
                             "$ref": "./local/temp-dir-context-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./mock-service-subschema.json"
                         },
                         {
                             "$ref": "./local/mock/mock-local-exec-service-subschema.json"
@@ -30,6 +36,12 @@
                         },
                         {
                             "$ref": "./remote/mock/mock-auth-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/ssh/ssh-host-service-subschema.json"
+                        },
+                        {
+                            "$ref": "./remote/ssh/ssh-fileshare-service-subschema.json"
                         },
                         {
                             "$ref": "./remote/azure/azure-auth-service-subschema.json"

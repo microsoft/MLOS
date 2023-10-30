@@ -15,6 +15,7 @@ from types import TracebackType
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Type, TYPE_CHECKING, Union
 from typing_extensions import Literal
 
+from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.tunables.tunable import TunableValue
@@ -110,12 +111,18 @@ class Environment(metaclass=abc.ABCMeta):
             An optional service object (e.g., providing methods to
             deploy or reboot a VM/Host, etc.).
         """
+        self._validate_json_config(config, name)
         self.name = name
         self.config = config
         self._service = service
+        self._service_context: Optional[Service] = None
         self._is_ready = False
         self._in_context = False
         self._const_args: Dict[str, TunableValue] = config.get("const_args", {})
+
+        if _LOG.isEnabledFor(logging.DEBUG):
+            _LOG.debug("Environment: '%s' Service: %s", name,
+                       self._service.pprint() if self._service else None)
 
         if tunables is None:
             _LOG.warning("No tunables provided for %s. Tunable inheritance across composite environments may be broken.", name)
@@ -142,6 +149,21 @@ class Environment(metaclass=abc.ABCMeta):
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Config for: '%s'\n%s",
                        name, json.dumps(self.config, indent=2))
+
+    def _validate_json_config(self, config: dict, name: str) -> None:
+        """
+        Reconstructs a basic json config that this class might have been
+        instantiated from in order to validate configs provided outside the
+        file loading mechanism.
+        """
+        json_config: dict = {
+            "class": self.__class__.__module__ + "." + self.__class__.__name__,
+        }
+        if name:
+            json_config["name"] = name
+        if config:
+            json_config["config"] = config
+        ConfigSchema.ENVIRONMENT.validate(json_config)
 
     @staticmethod
     def _expand_groups(groups: Iterable[str],
@@ -195,6 +217,8 @@ class Environment(metaclass=abc.ABCMeta):
         """
         _LOG.debug("Environment START :: %s", self)
         assert not self._in_context
+        if self._service:
+            self._service_context = self._service.__enter__()
         self._in_context = True
         return self
 
@@ -204,13 +228,25 @@ class Environment(metaclass=abc.ABCMeta):
         """
         Exit the context of the benchmarking environment.
         """
+        ex_throw = None
         if ex_val is None:
             _LOG.debug("Environment END :: %s", self)
         else:
             assert ex_type and ex_val
             _LOG.warning("Environment END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
         assert self._in_context
+        if self._service_context:
+            try:
+                self._service_context.__exit__(ex_type, ex_val, ex_tb)
+            # pylint: disable=broad-exception-caught
+            except Exception as ex:
+                _LOG.error("Exception while exiting Service context '%s': %s", self._service, ex)
+                ex_throw = ex
+            finally:
+                self._service_context = None
         self._in_context = False
+        if ex_throw:
+            raise ex_throw
         return False  # Do not suppress exceptions
 
     def __str__(self) -> str:
@@ -345,7 +381,7 @@ class Environment(metaclass=abc.ABCMeta):
         assert self._in_context
         self._is_ready = False
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """
         Execute the run script for this environment.
 

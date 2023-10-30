@@ -1,0 +1,37 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/config-persistence-service-subschema.json",
+    "title": "mlos_bench Config Persistence Service config",
+    "description": "config for an mlos_bench Config Persistence Service",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.ConfigPersistenceService",
+                "mlos_bench.services.config_persistence.ConfigPersistenceService"
+            ]
+        },
+        "config_path": {
+            "description": "A list of paths to search for additional configs",
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        },
+        "config": {
+            "type": "object",
+            "properties": {
+                "config_path": {
+                    "description": "A list of paths to search for additional configs",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "minProperties": 1,
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class"]
+}

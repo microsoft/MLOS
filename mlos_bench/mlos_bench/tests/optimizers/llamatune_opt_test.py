@@ -28,7 +28,7 @@ def llamatune_opt(tunable_groups: TunableGroups) -> MlosCoreOptimizer:
         config={
             "space_adapter_type": "LLAMATUNE",
             "space_adapter_config": {
-                "num_low_dims": 1,
+                "num_low_dims": 2,
             },
             "optimization_target": "score",
             "max_iterations": 10,

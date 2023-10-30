@@ -15,7 +15,7 @@
                         "type": "string"
                     },
                     "uniqueItems": true,
-                    "minItems": 1
+                    "minItems": 0
                 },
                 "required_args": {
                     "description": "Required arguments for the Environment to instantiate. These can be presented as environment variables for scripts to use.",

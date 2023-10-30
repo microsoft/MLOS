@@ -72,7 +72,7 @@ def _optimize(*,
         _LOG.info("Root Environment:\n%s", env.pprint())
 
     experiment_id = global_config["experiment_id"].strip()
-    trial_id = int(global_config.get("trial_id", 1))
+    trial_id = int(global_config["trial_id"])
     config_id = int(global_config.get("config_id", -1))
 
     # Start new or resume the existing experiment. Verify that the
@@ -165,7 +165,10 @@ def _run(env_context: Environment, opt: Optimizer,
 
     # FIXME: Use the actual timestamp from the benchmark.
     trial.update(status, datetime.utcnow(), results)
-    opt.register(trial.tunables, status, results)
+    # Filter out non-numeric scores from the optimizer.
+    scores = results if not isinstance(results, dict) \
+        else {k: float(v) for (k, v) in results.items() if isinstance(v, (int, float))}
+    opt.register(trial.tunables, status, scores)
 
 
 if __name__ == "__main__":

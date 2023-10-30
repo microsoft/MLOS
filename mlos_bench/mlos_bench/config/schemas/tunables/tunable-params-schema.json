@@ -175,6 +175,5 @@
             "$ref": "#/$defs/covariant_tunable_group"
         }
     },
-    "minProperties": 1,
     "unevaluatedProperties": false
 }

@@ -38,4 +38,4 @@ for pkg in mlos_core mlos_bench; do
     get_python_deps "$pkg"
 done
 rm -rf "$tmpdir"
-cat /tmp/conda-tmp/*.requirements.txt | sort -u > /tmp/conda-tmp/combined.requirements.txt
+cat /tmp/conda-tmp/*.requirements.txt | sort -u | tee /tmp/conda-tmp/combined.requirements.txt

@@ -2,7 +2,6 @@
 // Specifically the azure-redis-bench and azure-redis-opt tests.
 {
     "experiment_id": "test",
-    "trial_id": 1,
 
     "mountPoint": "/mnt/tmp",
 
