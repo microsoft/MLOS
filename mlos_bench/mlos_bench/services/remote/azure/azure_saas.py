@@ -202,7 +202,11 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
                                 json={"properties": {"value": str(param_value)}},
                                 timeout=self._request_timeout)
         _LOG.debug("Response: %s :: %s", response, response.text)
-        return (Status.SUCCEEDED, {}) if response.status_code == 200 else (Status.FAILED, {})
+        if response.status_code == 504:
+            return (Status.TIMED_OUT, {})
+        if response.status_code == 200:
+            return (Status.SUCCEEDED, {})
+        return (Status.FAILED, {})
 
     def _config_many(self, config: Dict[str, Any],
                      params: Dict[str, Any]) -> Tuple[Status, dict]:
@@ -261,4 +265,8 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         response = requests.post(url, headers=self._get_headers(),
                                  json=json_req, timeout=self._request_timeout)
         _LOG.debug("Response: %s :: %s", response, response.text)
-        return (Status.SUCCEEDED, {}) if response.status_code == 200 else (Status.FAILED, {})
+        if response.status_code == 504:
+            return (Status.TIMED_OUT, {})
+        if response.status_code == 200:
+            return (Status.SUCCEEDED, {})
+        return (Status.FAILED, {})

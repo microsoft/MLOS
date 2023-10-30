@@ -37,7 +37,7 @@ class SupportsRemoteConfig(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def is_config_pending_restart(self, config: Dict[str, Any]) -> Tuple[Status, dict]:
+    def is_config_pending_restart(self, config: Dict[str, Any]) -> Tuple["Status", dict]:
         """
         Check if the configuration of an Azure DB service requires a restart.
 
