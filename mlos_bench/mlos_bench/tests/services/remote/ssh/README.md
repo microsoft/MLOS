@@ -20,8 +20,7 @@ These are brought up as session fixtures under a unique (PID based) compose proj
 
 > For manual testing, to bring up/down the test infrastructure the [`up.sh`](./up.sh) and [`down.sh`](./down.sh) scripts can be used, which assigns a known project name.
 
-In the case of `pytest`, since the `SshService` base class implements a shared connection cache that we wish to test, and testing "rebooting" of servers (containers) is also necessary, tests are run serially across a single worker by using the `pytest-xdist` plugin's `--dist loadgroup` feature and the `@pytest.mark.xdist_group("ssh_test_server")` decorator.
-In some cases we explicitly call the python garbage collector via `gc.collect()` to make sure that the shared cache cleanup handler is operating as expected.
+In the case of `pytest`, since the `SshService` base class implements a shared connection cache that we wish to test, and testing "rebooting" of servers (containers) is also necessary, but we want to avoid single threaded execution for tests, we start a third container only for testing reboots.
 
 ## See Also
 
