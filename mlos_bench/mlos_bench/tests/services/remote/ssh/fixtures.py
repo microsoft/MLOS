@@ -122,7 +122,6 @@ def reboot_test_server(ssh_test_server: SshTestServerInfo,
     return reboot_test_server_info
 
 
-
 @pytest.fixture
 def ssh_host_service(ssh_test_server: SshTestServerInfo) -> SshHostService:
     """Generic SshHostService fixture."""

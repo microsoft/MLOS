@@ -6,6 +6,8 @@
 Tests for mlos_bench.services.remote.ssh.ssh_host_service
 """
 
+from subprocess import CalledProcessError
+
 import time
 
 import pytest
@@ -144,7 +146,7 @@ def check_ssh_service_reboot(docker_services: DockerServices,
     # Also, it may cause issues with other parallel unit tests, so we run it as
     # a part of the same unit test for now.
     with ssh_host_service:
-        reboot_test_server_ssh_service_config = reboot_test_server.to_ssh_service_config()
+        reboot_test_server_ssh_service_config = reboot_test_server.to_ssh_service_config(uncached=True)
         (status, results_info) = ssh_host_service.remote_exec(
             script=[
                 'echo "sleeping..."',
@@ -176,22 +178,32 @@ def check_ssh_service_reboot(docker_services: DockerServices,
             (status, kill_results_info) = ssh_host_service.get_remote_exec_results(kill_results_info)
             print(f"kill status: {status} {kill_results_info}")
 
-        # TODO: Check for decent error handling on disconnects.
+        # Check for decent error handling on disconnects.
         status, results = ssh_host_service.get_remote_exec_results(results_info)
         assert status.is_failed()
         stdout = str(results["stdout"])
         assert "sleeping" in stdout
         assert "should not reach this point" not in stdout
 
-        # Give docker some time to restart the service after the "reboot".
-        # Note: this relies on having `restart: always` in the docker-compose.yml file.
-        time.sleep(3)
+        reboot_test_server_ssh_service_config_new = reboot_test_server_ssh_service_config
+        for _ in range(0, 3):
+            # Give docker some time to restart the service after the "reboot".
+            # Note: this relies on having a `restart_policy` in the docker-compose.yml file.
+            time.sleep(1)
+            # try to reconnect and see if the port changed
+            try:
+                reboot_test_server_ssh_service_config_new = reboot_test_server.to_ssh_service_config(uncached=True)
+                if reboot_test_server_ssh_service_config_new["ssh_port"] != reboot_test_server_ssh_service_config["ssh_port"]:
+                    break
+            except CalledProcessError:
+                pass
 
-        # try to reconnect and see if the port changed
-        reboot_test_server_ssh_service_config_new = reboot_test_server.to_ssh_service_config(uncached=True)
+        assert reboot_test_server_ssh_service_config_new
         assert reboot_test_server_ssh_service_config_new["ssh_port"] != reboot_test_server_ssh_service_config["ssh_port"]
 
-        wait_docker_service_socket(docker_services, reboot_test_server.hostname, reboot_test_server_ssh_service_config_new["ssh_port"])
+        wait_docker_service_socket(docker_services,
+                                   reboot_test_server.hostname,
+                                   reboot_test_server_ssh_service_config_new["ssh_port"])
 
         (status, results_info) = ssh_host_service.remote_exec(
             script=["hostname"],
