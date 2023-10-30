@@ -102,12 +102,10 @@ class SaaSEnv(Environment):
             if not status.is_succeeded():
                 return False
 
-            _LOG.info("Wait for the remote environment to start: %s", self)
+            _LOG.info("Wait to restart: %s", self)
             (status, params) = self._host_service.start_host(self._params)
             if status.is_pending():
                 (status, _) = self._host_service.wait_host_operation(params)
-            if not status.is_succeeded():
-                return False
 
         self._is_ready = status.is_succeeded()
         return self._is_ready
