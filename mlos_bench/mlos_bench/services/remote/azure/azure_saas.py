@@ -86,13 +86,23 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             is_flex = self.config["isFlex"]
             api_version = self.config["apiVersion"]
 
-        self._url_config = self._URL_CONFIGURE.format(
+        self._url_config_set = self._URL_CONFIGURE.format(
             subscription=self.config["subscription"],
             resource_group=self.config["resourceGroup"],
             provider=self.config["provider"],
             vm_name="{vm_name}",
             server_type="flexibleServers" if is_flex else "servers",
             update="updateConfigurations" if self._is_batch else "configurations/{param_name}",
+            api_version=api_version,
+        )
+
+        self._url_config_get = self._URL_CONFIGURE.format(
+            subscription=self.config["subscription"],
+            resource_group=self.config["resourceGroup"],
+            provider=self.config["provider"],
+            vm_name="{vm_name}",
+            server_type="flexibleServers" if is_flex else "servers",
+            update="configurations",
             api_version=api_version,
         )
 
@@ -122,6 +132,38 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         if self._is_batch:
             return self._config_batch(config, params)
         return self._config_many(config, params)
+
+    def is_config_pending_restart(self, config: Dict[str, Any]) -> Tuple[Status, dict]:
+        """
+        Check if the configuration of an Azure DB service requires a restart.
+
+        Parameters
+        ----------
+        config : Dict[str, Any]
+            Key/value pairs of configuration parameters (e.g., vmName).
+
+        Returns
+        -------
+        result : (Status, dict={"isConfigPendingRestart": bool})
+            A pair of Status and result. A Boolean field
+            "isConfigPendingRestart" indicates whether restart is required.
+            Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
+        """
+        config = merge_parameters(
+            dest=self.config.copy(), source=config, required_keys=["vmName"])
+        url = self._url_config_get.format(vm_name=config["vmName"])
+        _LOG.debug("Request: GET %s", url)
+        response = requests.put(
+            url, headers=self._get_headers(), timeout=self._request_timeout)
+        _LOG.debug("Response: %s :: %s", response, response.text)
+        if response.status_code == 504:
+            return (Status.TIMED_OUT, {})
+        if response.status_code != 200:
+            return (Status.FAILED, {})
+        return (Status.SUCCEEDED, {"isConfigPendingRestart": any(
+            {'False': False, 'True': True}[val['properties']['isConfigPendingRestart']]
+            for val in response.json()['value']
+        )})
 
     def _get_headers(self) -> dict:
         """
@@ -154,7 +196,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         """
         config = merge_parameters(
             dest=self.config.copy(), source=config, required_keys=["vmName"])
-        url = self._url_config.format(vm_name=config["vmName"], param_name=param_name)
+        url = self._url_config_set.format(vm_name=config["vmName"], param_name=param_name)
         _LOG.debug("Request: PUT %s", url)
         response = requests.put(url, headers=self._get_headers(),
                                 json={"properties": {"value": str(param_value)}},
@@ -207,7 +249,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         """
         config = merge_parameters(
             dest=self.config.copy(), source=config, required_keys=["vmName"])
-        url = self._url_config.format(vm_name=config["vmName"])
+        url = self._url_config_set.format(vm_name=config["vmName"])
         json_req = {
             "value": [
                 {"name": key, "properties": {"value": str(val)}}
@@ -215,8 +257,8 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             ],
             # "resetAllToDefault": "True"
         }
-        _LOG.debug("Request: PUT %s", url)
-        response = requests.put(url, headers=self._get_headers(),
-                                json=json_req, timeout=self._request_timeout)
+        _LOG.debug("Request: POST %s", url)
+        response = requests.post(url, headers=self._get_headers(),
+                                 json=json_req, timeout=self._request_timeout)
         _LOG.debug("Response: %s :: %s", response, response.text)
         return (Status.SUCCEEDED, {}) if response.status_code == 200 else (Status.FAILED, {})

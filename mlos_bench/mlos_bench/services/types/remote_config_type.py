@@ -18,8 +18,6 @@ class SupportsRemoteConfig(Protocol):
     Protocol interface for configuring cloud services.
     """
 
-    # pylint: disable=too-few-public-methods
-
     def configure(self, config: Dict[str, Any],
                   params: Dict[str, Any]) -> Tuple["Status", dict]:
         """
@@ -37,4 +35,21 @@ class SupportsRemoteConfig(Protocol):
         result : (Status, dict={})
             A pair of Status and result. The result is always {}.
             Status is one of {PENDING, SUCCEEDED, FAILED}
+        """
+
+    def is_config_pending_restart(self, config: Dict[str, Any]) -> Tuple[Status, dict]:
+        """
+        Check if the configuration of an Azure DB service requires a restart.
+
+        Parameters
+        ----------
+        config : Dict[str, Any]
+            Key/value pairs of configuration parameters (e.g., vmName).
+
+        Returns
+        -------
+        result : (Status, dict={"isConfigPendingRestart": bool})
+            A pair of Status and result. A Boolean field
+            "isConfigPendingRestart" indicates whether restart is required.
+            Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
         """
