@@ -161,7 +161,7 @@ def check_ssh_service_reboot(docker_services: DockerServices,
         time.sleep(0.5)
 
         # Now try to restart the server (gracefully).
-        # Test graceful vs. forceful.
+        # TODO: Test graceful vs. forceful.
         if graceful:
             (status, reboot_results_info) = ssh_host_service.reboot(params=reboot_test_server_ssh_service_config)
             assert status.is_pending()
@@ -170,6 +170,7 @@ def check_ssh_service_reboot(docker_services: DockerServices,
             # NOTE: reboot/shutdown ops mostly return FAILED, even though the reboot succeeds.
             print(f"reboot status: {status} {reboot_results_info}")
         else:
+            # TODO: How to restart the container when this happens, but only a few times.
             (status, kill_results_info) = ssh_host_service.remote_exec(
                 script=["kill -9 1; kill -9 -1"],
                 config=reboot_test_server_ssh_service_config,
@@ -185,7 +186,7 @@ def check_ssh_service_reboot(docker_services: DockerServices,
         assert "sleeping" in stdout
         assert "should not reach this point" not in stdout
 
-        reboot_test_server_ssh_service_config_new = reboot_test_server_ssh_service_config
+        reboot_test_server_ssh_service_config_new: dict = {}
         for _ in range(0, 3):
             # Give docker some time to restart the service after the "reboot".
             # Note: this relies on having a `restart_policy` in the docker-compose.yml file.
@@ -198,7 +199,6 @@ def check_ssh_service_reboot(docker_services: DockerServices,
             except CalledProcessError:
                 pass
 
-        assert reboot_test_server_ssh_service_config_new
         assert reboot_test_server_ssh_service_config_new["ssh_port"] != reboot_test_server_ssh_service_config["ssh_port"]
 
         wait_docker_service_socket(docker_services,
