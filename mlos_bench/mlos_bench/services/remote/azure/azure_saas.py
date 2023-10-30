@@ -7,7 +7,7 @@ A collection Service functions for managing VMs on Azure.
 """
 import logging
 
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 
@@ -45,7 +45,8 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
-                 parent: Optional[Service] = None):
+                 parent: Optional[Service] = None,
+                 methods: Union[Dict[str, Callable], List[Callable], None] = None):
         """
         Create a new instance of Azure services proxy.
 
@@ -58,8 +59,16 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             Free-format dictionary of global parameters.
         parent : Service
             Parent service that can provide mixin functions.
+        methods : Union[Dict[str, Callable], List[Callable], None]
+            New methods to register with the service.
         """
-        super().__init__(config, global_config, parent)
+        super().__init__(
+            config, global_config, parent,
+            self.merge_methods(methods, [
+                self.configure,
+                self.is_config_pending_restart
+            ])
+        )
 
         check_required_params(self.config, {
             "subscription",
@@ -108,8 +117,6 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
         # These parameters can come from command line as strings, so conversion is needed.
         self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
-
-        self.register([self.configure])
 
     def configure(self, config: Dict[str, Any],
                   params: Dict[str, Any]) -> Tuple[Status, dict]:
