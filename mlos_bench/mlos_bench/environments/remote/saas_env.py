@@ -12,6 +12,7 @@ import logging
 
 from mlos_bench.environments.base_environment import Environment
 from mlos_bench.services.base_service import Service
+from mlos_bench.services.types.host_ops_type import SupportsHostOps
 from mlos_bench.services.types.remote_config_type import SupportsRemoteConfig
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
@@ -53,6 +54,10 @@ class SaaSEnv(Environment):
         super().__init__(name=name, config=config, global_config=global_config,
                          tunables=tunables, service=service)
 
+        assert self._service is not None and isinstance(self._service, SupportsHostOps), \
+            "RemoteEnv requires a service that supports host operations"
+        self._host_service: SupportsHostOps = self._service
+
         assert self._service is not None and isinstance(self._service, SupportsRemoteConfig), \
             "SaaSEnv requires a service that supports remote host configuration API"
         self._config_service: SupportsRemoteConfig = self._service
@@ -81,6 +86,28 @@ class SaaSEnv(Environment):
 
         (status, _) = self._config_service.configure(
             self._params, self._tunable_params.get_param_values())
+        if not status.is_succeeded():
+            return False
+
+        (status, res) = self._config_service.is_config_pending_restart(self._params)
+        if not status.is_succeeded():
+            return False
+
+        if res['isConfigPendingRestart']:
+
+            _LOG.info("Restarting: %s", self)
+            (status, params) = self._host_service.restart_host(self._params)
+            if status.is_pending():
+                (status, _) = self._host_service.wait_host_operation(params)
+            if not status.is_succeeded():
+                return False
+
+            _LOG.info("Wait for the remote environment to start: %s", self)
+            (status, params) = self._host_service.start_host(self._params)
+            if status.is_pending():
+                (status, _) = self._host_service.wait_host_operation(params)
+            if not status.is_succeeded():
+                return False
 
         self._is_ready = status.is_succeeded()
         return self._is_ready
