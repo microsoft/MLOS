@@ -13,4 +13,4 @@ RUN echo "Port ${PORT}" > /etc/ssh/sshd_config.d/local.conf \
     && cat /root/.ssh/id_rsa.pub > /root/.ssh/authorized_keys
 
 ENV TIMEOUT=180
-CMD ["/bin/bash", "-eux", "-c", "trap : TERM INT; service ssh start && sleep ${TIMEOUT:-180} & wait"]
+CMD ["/bin/bash", "-eux", "-c", "trap : TERM INT; service ssh start && sleep ${TIMEOUT:-180} & wait -n"]

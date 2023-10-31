@@ -45,7 +45,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 1s
+        delay: 0s
         max_attempts: 3
     image: mlos_bench-test-ssh-server:latest
     ports:
