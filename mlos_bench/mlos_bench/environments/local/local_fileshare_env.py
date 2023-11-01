@@ -121,7 +121,7 @@ class LocalFileShareEnv(LocalEnv):
             params = self._get_env_params()
             params["PWD"] = self._temp_dir
             for (path_from, path_to) in self._expand(self._upload, params):
-                self._file_share_service.upload(self.config, self._config_loader_service.resolve_path(
+                self._file_share_service.upload(self._params, self._config_loader_service.resolve_path(
                     path_from, extra_paths=[self._temp_dir]), path_to)
         return self._is_ready
 
@@ -140,13 +140,16 @@ class LocalFileShareEnv(LocalEnv):
         params["PWD"] = self._temp_dir
         for (path_from, path_to) in self._expand(self._download, params):
             try:
-                self._file_share_service.download(self.config,
+                self._file_share_service.download(self._params,
                                                   path_from, self._config_loader_service.resolve_path(
                                                       path_to, extra_paths=[self._temp_dir]))
             except FileNotFoundError as ex:
                 _LOG.warning("Cannot download: %s", path_from)
                 if not ignore_missing:
                     raise ex
+            except Exception as ex:
+                _LOG.exception("Cannot download %s to %s", path_from, path_to)
+                raise ex
 
     def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """

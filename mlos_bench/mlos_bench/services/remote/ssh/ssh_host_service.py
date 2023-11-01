@@ -88,7 +88,9 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         env_script_lines = [f"export {name}='{value}'" for (name, value) in env_params.items()]
         script_lines = env_script_lines + [line_split for line in script for line_split in line.splitlines()]
         # Note: connection.run() uses "exec" with a shell by default.
-        return await connection.run('\n'.join(script_lines),
+        script_str = '\n'.join(script_lines)
+        _LOG.debug("Running script on %s:\n%s", connection, script_str)
+        return await connection.run(script_str,
                                     check=False,
                                     timeout=self._request_timeout,
                                     env=env_params)
