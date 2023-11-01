@@ -148,7 +148,7 @@ class LocalFileShareEnv(LocalEnv):
                 if not ignore_missing:
                     raise ex
             except Exception as ex:
-                _LOG.error("Cannot download %s to %s: %s", path_from, path_to, ex)
+                _LOG.exception("Cannot download %s to %s", path_from, path_to)
                 raise ex
 
     def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
