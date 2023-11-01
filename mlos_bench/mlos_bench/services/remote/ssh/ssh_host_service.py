@@ -192,8 +192,9 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
                 sudo=${{sudo:+$sudo -n}}
             fi
 
+            set -x
             for cmd in {cmd_opts}; do
-                $sudo $cmd && exit 0
+                $sudo /bin/bash -c "$cmd" && exit 0
             done
 
             echo 'ERROR: Failed to shutdown/reboot the system.'
