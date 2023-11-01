@@ -87,7 +87,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         script_lines = env_script_lines + [line_split for line in script for line_split in line.splitlines()]
         # Note: connection.run() uses "exec" with a shell by default.
         script_str = '\n'.join(script_lines)
-        _LOG.debug("Running script on %s: %s", connection, script_str)
+        _LOG.debug("Running script on %s:\n%s", connection, script_str)
         return await connection.run(script_str,
                                     check=False,
                                     timeout=self._request_timeout,
