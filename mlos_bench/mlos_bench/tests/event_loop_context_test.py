@@ -48,6 +48,7 @@ class EventLoopContextCaller:
         return False
 
 
+@pytest.mark.filterwarnings("ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0")
 def test_event_loop_context() -> None:
     """Test event loop context background thread setup/cleanup handling."""
     # pylint: disable=protected-access
@@ -111,8 +112,9 @@ def test_event_loop_context() -> None:
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread_refcnt == 0
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is None
 
-    with pytest.raises(AssertionError):
-        event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1))
+    with pytest.raises(AssertionError), pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
+        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
+        raise ValueError(f"Future should not have been available to wait on {future.result()}")
 
 
 if __name__ == '__main__':
