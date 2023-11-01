@@ -34,13 +34,10 @@
         "read_results_file": "/tmp/results.csv",
         "read_telemetry_file": "/tmp/telemetry.csv",
 
-        "shell_env_params_match": [
-            "^MLOS_[a-zA-Z0-9_]+$"
-        ],
         "shell_env_params": [
             "foo"
         ],
-        "shell_env_params_mapping": {
+        "shell_env_params_rename": {
             "gets_mapped_to_this_env_name": "/source/param/name/that/is/otherwise/invalid/env/name"
         }
     }
