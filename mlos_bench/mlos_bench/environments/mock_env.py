@@ -15,7 +15,7 @@ import numpy
 from mlos_bench.services.base_service import Service
 from mlos_bench.environments.status import Status
 from mlos_bench.environments.base_environment import Environment
-from mlos_bench.tunables import Tunable, TunableGroups
+from mlos_bench.tunables import Tunable, TunableGroups, TunableValue
 
 _LOG = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class MockEnv(Environment):
         self._metrics = self.config.get("metrics", ["score"])
         self._is_ready = True
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """
         Produce mock benchmark data for one experiment.
 

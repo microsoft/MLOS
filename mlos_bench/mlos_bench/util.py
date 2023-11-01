@@ -247,3 +247,34 @@ def get_git_info(path: str = __file__) -> Tuple[str, str, str]:
     _LOG.debug("Current git branch: %s %s", git_repo, git_commit)
     rel_path = os.path.relpath(os.path.abspath(path), os.path.abspath(git_root))
     return (git_repo, git_commit, rel_path.replace("\\", "/"))
+
+
+# Note: to avoid circular imports, we don't specify TunableValue here.
+def try_parse_val(val: Optional[str]) -> Optional[Union[int, float, str]]:
+    """
+    Try to parse the value as an int or float, otherwise return the string.
+
+    This can help with config schema validation to make sure early on that
+    the args we're expecting are the right type.
+
+    Parameters
+    ----------
+    val : str
+        The initial cmd line arg value.
+
+    Returns
+    -------
+    TunableValue
+        The parsed value.
+    """
+    if val is None:
+        return val
+    try:
+        val_float = float(val)
+        try:
+            val_int = int(val)
+            return val_int if val_int == val_float else val_float
+        except ValueError:
+            return val_float
+    except ValueError:
+        return str(val)

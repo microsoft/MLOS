@@ -25,6 +25,7 @@ from mlos_bench.environments.base_environment import Environment
 from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 from mlos_bench.util import path_join
 
@@ -151,7 +152,7 @@ class LocalEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """
         Run a script in the local scheduler environment.
 
@@ -169,7 +170,7 @@ class LocalEnv(ScriptEnv):
 
         assert self._temp_dir is not None
 
-        stdout_data: Dict[str, float] = {}
+        stdout_data: Dict[str, TunableValue] = {}
         if self._script_run:
             (return_code, output) = self._local_exec(self._script_run, self._temp_dir)
             if return_code != 0:

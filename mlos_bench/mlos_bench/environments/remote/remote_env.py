@@ -16,6 +16,7 @@ from mlos_bench.environments.script_env import ScriptEnv
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
+from mlos_bench.tunables.tunable import TunableValue
 from mlos_bench.tunables.tunable_groups import TunableGroups
 
 _LOG = logging.getLogger(__name__)
@@ -110,7 +111,7 @@ class RemoteEnv(ScriptEnv):
 
         return self._is_ready
 
-    def run(self) -> Tuple[Status, Optional[Dict[str, float]]]:
+    def run(self) -> Tuple[Status, Optional[Dict[str, TunableValue]]]:
         """
         Runs the run script on the remote environment.
 
