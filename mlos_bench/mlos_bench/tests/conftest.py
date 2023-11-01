@@ -168,7 +168,7 @@ def docker_compose_file(pytestconfig: pytest.Config) -> List[str]:
 
 
 @pytest.fixture(scope="session")
-def docker_compose_project_name() -> str:
+def docker_compose_project_name(testrun_uid: str) -> str:
     """
     Returns the name of the docker-compose project.
 
@@ -177,4 +177,4 @@ def docker_compose_project_name() -> str:
     str
         Name of the docker-compose project.
     """
-    return f"mlos_bench-test-{os.getpid()}"
+    return f"mlos_bench-test-{testrun_uid[0:8]}"
