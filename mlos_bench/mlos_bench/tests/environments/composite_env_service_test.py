@@ -46,7 +46,7 @@ def composite_env(tunable_groups: TunableGroups) -> CompositeEnv:
         tunables=tunable_groups,
         service=LocalExecService(
             config={
-                "temp_dir": "tmp_global"
+                "temp_dir": "_test_tmp_global"
             },
             parent=ConfigPersistenceService({
                 "config_path": [
@@ -61,9 +61,9 @@ def test_composite_services(composite_env: CompositeEnv) -> None:
     """
     Check that each environment gets its own instance of the services.
     """
-    # pylint: disable=protected-access
-    for (i, path) in ((0, "tmp_global"), (1, "tmp_other_2"), (2, "tmp_other_3")):
-        service = composite_env.children[i]._service
+    for (i, path) in ((0, "_test_tmp_global"), (1, "_test_tmp_other_2"), (2, "_test_tmp_other_3")):
+        service = composite_env.children[i]._service  # pylint: disable=protected-access
         assert service is not None and hasattr(service, "temp_dir_context")
         with service.temp_dir_context() as temp_dir:
             assert os.path.samefile(temp_dir, path)
+        os.rmdir(path)

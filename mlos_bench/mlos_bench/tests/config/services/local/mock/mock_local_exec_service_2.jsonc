@@ -2,6 +2,6 @@
     "class": "mlos_bench.tests.services.local.mock.mock_local_exec_service.MockLocalExecService",
 
     "config": {
-        "temp_dir": "tmp_other_2"
+        "temp_dir": "_test_tmp_other_2"
     }
 }
