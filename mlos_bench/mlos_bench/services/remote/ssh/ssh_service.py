@@ -8,27 +8,18 @@ A collection functions for interacting with SSH servers as file shares.
 
 from abc import ABCMeta
 from asyncio import Event as CoroEvent, Lock as CoroLock
-from concurrent.futures import Future
 from types import TracebackType
-from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, Union
 from threading import current_thread
 
 import logging
 import os
-import sys
 
 import asyncssh
-
 from asyncssh.connection import SSHClientConnection
 
 from mlos_bench.services.base_service import Service
-from mlos_bench.event_loop_context import EventLoopContext
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
+from mlos_bench.event_loop_context import EventLoopContext, CoroReturnType, FutureReturnType
 
 _LOG = logging.getLogger(__name__)
 
@@ -283,12 +274,6 @@ class SshService(Service, metaclass=ABCMeta):
         Note: This may cause in flight operations to fail.
         """
         cls._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE.cleanup()
-
-    CoroReturnType = TypeVar('CoroReturnType')
-    if sys.version_info >= (3, 9):
-        FutureReturnType: TypeAlias = Future[CoroReturnType]
-    else:
-        FutureReturnType: TypeAlias = Future
 
     def _run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
         """
