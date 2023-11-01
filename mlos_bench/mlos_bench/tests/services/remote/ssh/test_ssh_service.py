@@ -96,7 +96,7 @@ def test_ssh_service_context_handler() -> None:
             raise ValueError(f"Future should not have been available to wait on {future.result()}")
 
         # The background thread should remain running since we have another context still open.
-        assert isinstance(SshService._EVENT_LOOP_CONTEXT._event_loop_thread, Thread)  # type: ignore[unreachable]
+        assert isinstance(SshService._EVENT_LOOP_CONTEXT._event_loop_thread, Thread)
         assert SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE is not None
 
 

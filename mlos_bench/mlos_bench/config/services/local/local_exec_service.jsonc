@@ -1,0 +1,3 @@
+{
+    "class": "mlos_bench.services.local.local_exec.LocalExecService"
+}

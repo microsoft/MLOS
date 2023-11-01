@@ -17,8 +17,6 @@ import tempfile
 
 import pytest
 
-from asyncssh import SFTPError
-
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
 from mlos_bench.services.remote.ssh.ssh_fileshare import SshFileShareService
 from mlos_bench.util import path_join
@@ -164,7 +162,7 @@ def test_ssh_fileshare_download_file_dne(ssh_test_server: SshTestServerInfo,
             temp_file.flush()
             temp_file.close()
 
-            with pytest.raises(SFTPError):
+            with pytest.raises(FileNotFoundError):
                 ssh_fileshare_service.download(
                     params=config,
                     remote_path="/tmp/file-dne.txt",
