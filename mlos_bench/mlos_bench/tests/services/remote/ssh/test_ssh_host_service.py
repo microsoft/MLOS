@@ -6,11 +6,11 @@
 Tests for mlos_bench.services.remote.ssh.ssh_host_service
 """
 
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError, run
 
+import logging
 import time
 
-import pytest
 from pytest_docker.plugin import Services as DockerServices
 
 from mlos_bench.services.remote.ssh.ssh_host_service import SshHostService
@@ -22,6 +22,9 @@ from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
                                                   REBOOT_TEST_SERVER_NAME,
                                                   SSH_TEST_SERVER_NAME,
                                                   wait_docker_service_socket)
+
+
+_LOG = logging.getLogger(__name__)
 
 
 @requires_docker
@@ -132,8 +135,6 @@ def test_ssh_service_remote_exec(ssh_test_server: SshTestServerInfo,
     assert len(SshHostService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE) == 0
 
 
-@requires_docker
-@pytest.mark.parametrize("graceful", [True, False])
 def check_ssh_service_reboot(docker_services: DockerServices,
                              reboot_test_server: SshTestServerInfo,
                              ssh_host_service: SshHostService,
@@ -146,38 +147,28 @@ def check_ssh_service_reboot(docker_services: DockerServices,
     # Also, it may cause issues with other parallel unit tests, so we run it as
     # a part of the same unit test for now.
     with ssh_host_service:
-        reboot_test_server_ssh_service_config = reboot_test_server.to_ssh_service_config(uncached=True)
+        reboot_test_srv_ssh_svc_conf = reboot_test_server.to_ssh_service_config(uncached=True)
         (status, results_info) = ssh_host_service.remote_exec(
             script=[
                 'echo "sleeping..."',
                 'sleep 30',
                 'echo "should not reach this point"'
             ],
-            config=reboot_test_server_ssh_service_config,
+            config=reboot_test_srv_ssh_svc_conf,
             env_params={},
         )
         assert status.is_pending()
         # Wait a moment for that to start in the background thread.
-        time.sleep(0.5)
+        time.sleep(1)
 
-        # Now try to restart the server (gracefully).
-        # TODO: Test graceful vs. forceful.
-        if graceful:
-            (status, reboot_results_info) = ssh_host_service.reboot(params=reboot_test_server_ssh_service_config)
-            assert status.is_pending()
+        # Now try to restart the server.
+        (status, reboot_results_info) = ssh_host_service.reboot(params=reboot_test_srv_ssh_svc_conf,
+                                                                force=not graceful)
+        assert status.is_pending()
 
-            (status, reboot_results_info) = ssh_host_service.wait_os_operation(reboot_results_info)
-            # NOTE: reboot/shutdown ops mostly return FAILED, even though the reboot succeeds.
-            print(f"reboot status: {status} {reboot_results_info}")
-        else:
-            # TODO: How to restart the container when this happens, but only a few times.
-            (status, kill_results_info) = ssh_host_service.remote_exec(
-                script=["kill -9 1; kill -9 -1"],
-                config=reboot_test_server_ssh_service_config,
-                env_params={},
-            )
-            (status, kill_results_info) = ssh_host_service.get_remote_exec_results(kill_results_info)
-            print(f"kill status: {status} {kill_results_info}")
+        (status, reboot_results_info) = ssh_host_service.wait_os_operation(reboot_results_info)
+        # NOTE: reboot/shutdown ops mostly return FAILED, even though the reboot succeeds.
+        _LOG.debug("reboot status: %s: %s", status, reboot_results_info)
 
         # Check for decent error handling on disconnects.
         status, results = ssh_host_service.get_remote_exec_results(results_info)
@@ -186,28 +177,30 @@ def check_ssh_service_reboot(docker_services: DockerServices,
         assert "sleeping" in stdout
         assert "should not reach this point" not in stdout
 
-        reboot_test_server_ssh_service_config_new: dict = {}
+        reboot_test_srv_ssh_svc_conf_new: dict = {}
         for _ in range(0, 3):
             # Give docker some time to restart the service after the "reboot".
             # Note: this relies on having a `restart_policy` in the docker-compose.yml file.
             time.sleep(1)
             # try to reconnect and see if the port changed
             try:
-                reboot_test_server_ssh_service_config_new = reboot_test_server.to_ssh_service_config(uncached=True)
-                if reboot_test_server_ssh_service_config_new["ssh_port"] != reboot_test_server_ssh_service_config["ssh_port"]:
+                run_res = run("docker ps | grep mlos_bench-test- | grep reboot", shell=True, capture_output=True, check=False)
+                print(run_res.stdout.decode())
+                print(run_res.stderr.decode())
+                reboot_test_srv_ssh_svc_conf_new = reboot_test_server.to_ssh_service_config(uncached=True)
+                if reboot_test_srv_ssh_svc_conf_new["ssh_port"] != reboot_test_srv_ssh_svc_conf["ssh_port"]:
                     break
-            except CalledProcessError:
-                pass
-
-        assert reboot_test_server_ssh_service_config_new["ssh_port"] != reboot_test_server_ssh_service_config["ssh_port"]
+            except CalledProcessError as ex:
+                _LOG.info("Failed to check port for reboot test server: %s", ex)
+        assert reboot_test_srv_ssh_svc_conf_new["ssh_port"] != reboot_test_srv_ssh_svc_conf["ssh_port"]
 
         wait_docker_service_socket(docker_services,
                                    reboot_test_server.hostname,
-                                   reboot_test_server_ssh_service_config_new["ssh_port"])
+                                   reboot_test_srv_ssh_svc_conf_new["ssh_port"])
 
         (status, results_info) = ssh_host_service.remote_exec(
             script=["hostname"],
-            config=reboot_test_server_ssh_service_config_new,
+            config=reboot_test_srv_ssh_svc_conf_new,
             env_params={},
         )
         status, results = ssh_host_service.get_remote_exec_results(results_info)
@@ -222,5 +215,6 @@ def test_ssh_service_reboot(docker_services: DockerServices,
     """
     Test the SshHostService reboot operation.
     """
+    # Grouped together to avoid parallel runner interactions.
     check_ssh_service_reboot(docker_services, reboot_test_server, ssh_host_service, graceful=True)
     check_ssh_service_reboot(docker_services, reboot_test_server, ssh_host_service, graceful=False)
