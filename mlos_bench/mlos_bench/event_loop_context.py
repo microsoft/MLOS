@@ -19,6 +19,12 @@ if sys.version_info >= (3, 10):
 else:
     from typing_extensions import TypeAlias
 
+CoroReturnType = TypeVar('CoroReturnType')  # pylint: disable=invalid-name
+if sys.version_info >= (3, 9):
+    FutureReturnType: TypeAlias = Future[CoroReturnType]
+else:
+    FutureReturnType: TypeAlias = Future
+
 
 class EventLoopContext:
     """
@@ -77,12 +83,6 @@ class EventLoopContext:
                     raise RuntimeError("Failed to stop event loop thread.")
                 self._event_loop = None
                 self._event_loop_thread = None
-
-    CoroReturnType = TypeVar('CoroReturnType')
-    if sys.version_info >= (3, 9):
-        FutureReturnType: TypeAlias = Future[CoroReturnType]
-    else:
-        FutureReturnType: TypeAlias = Future
 
     def run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
         """
