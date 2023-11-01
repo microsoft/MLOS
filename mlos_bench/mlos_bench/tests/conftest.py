@@ -6,9 +6,6 @@
 Common fixtures for mock TunableGroups and Environment objects.
 """
 
-from warnings import warn
-
-from time import time_ns
 from typing import Any, Dict, Generator, List
 
 import os
@@ -174,14 +171,6 @@ def docker_compose_file(pytestconfig: pytest.Config) -> List[str]:
 
 
 @pytest.fixture(scope="session")
-def short_testrun_uid(testrun_uid: str) -> str:
-    """
-    Shorten the unique test run id that xdist provides so we can use it with docker-compose.
-    """
-    return testrun_uid[0:8]
-
-
-@pytest.fixture(scope="session")
 def docker_compose_project_name(short_testrun_uid: str) -> str:
     """
     Returns the name of the docker-compose project.
@@ -197,9 +186,7 @@ def docker_compose_project_name(short_testrun_uid: str) -> str:
 
 
 @pytest.fixture(scope="session")
-def docker_services_lock(shared_temp_dir: str,
-                         short_testrun_uid: str,
-                         worker_id: str) -> Generator[InterProcessReaderWriterLock, None, None]:
+def docker_services_lock(shared_temp_dir: str, short_testrun_uid: str) -> InterProcessReaderWriterLock:
     """
     Gets a pytest session lock for xdist workers to mark when they're using the
     docker services.
@@ -209,16 +196,11 @@ def docker_services_lock(shared_temp_dir: str,
         A lock to ensure that setup/teardown operations don't happen while a
         worker is using the docker services.
     """
-    lock = InterProcessReaderWriterLock(f"{shared_temp_dir}/pytest_docker_services-{short_testrun_uid}.lock")
-    warn(UserWarning(f"{time_ns()}: worker_id {worker_id} getting lock {lock.path}"))
-    yield lock
-    warn(UserWarning(f"{time_ns()}: worker_id {worker_id} done with lock {lock.path}"))
+    return InterProcessReaderWriterLock(f"{shared_temp_dir}/pytest_docker_services-{short_testrun_uid}.lock")
 
 
 @pytest.fixture(scope="session")
-def docker_setup_teardown_lock(shared_temp_dir: str,
-                               short_testrun_uid: str,
-                               worker_id: str) -> Generator[InterProcessLock, None, None]:
+def docker_setup_teardown_lock(shared_temp_dir: str, short_testrun_uid: str) -> InterProcessLock:
     """
     Gets a pytest session lock between xdist workers for the docker
     setup/teardown operations.
@@ -227,10 +209,7 @@ def docker_setup_teardown_lock(shared_temp_dir: str,
     ------
         A lock to ensure that only one worker is doing setup/teardown at a time.
     """
-    lock = InterProcessLock(f"{shared_temp_dir}/pytest_docker_services-setup-teardown-{short_testrun_uid}.lock")
-    warn(UserWarning(f"{time_ns()}: worker_id {worker_id} getting lock {lock.path}"))
-    yield lock
-    warn(UserWarning(f"{time_ns()}: worker_id {worker_id} done with lock {lock.path}"))
+    return InterProcessLock(f"{shared_temp_dir}/pytest_docker_services-setup-teardown-{short_testrun_uid}.lock")
 
 
 @pytest.fixture(scope="session")
@@ -242,21 +221,15 @@ def locked_docker_services(
     docker_cleanup: Any,
     docker_setup_teardown_lock: InterProcessLock,
     docker_services_lock: InterProcessReaderWriterLock,
-    worker_id: str,
 ) -> Generator[DockerServices, Any, None]:
     """
     A locked version of the docker_services fixture to implement xdist single instance locking.
     """
     # pylint: disable=too-many-arguments
     # Mark the services as in use with the reader lock.
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquiring read lock {docker_services_lock.path}"))
     docker_services_lock.acquire_read_lock()
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquired read lock {docker_services_lock.path}"))
     # Acquire the setup lock to prevent multiple setup operations at once.
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquiring lock {docker_setup_teardown_lock.path}"))
     docker_setup_teardown_lock.acquire()
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquired lock {docker_setup_teardown_lock.path}"))
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} about to setup docker services"))
     # This "with get_docker_services(...)"" pattern is in the default fixture.
     # We call it instead of docker_services() to avoid pytest complaints about
     # calling fixtures directly.
@@ -269,37 +242,22 @@ def locked_docker_services(
     ) as docker_services:
         # Release the setup/tear down lock in order to let the setup operation
         # continue for other workers (should be a no-op at this point).
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} releasing lock {docker_setup_teardown_lock.path}"))
         docker_setup_teardown_lock.release()
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} released lock {docker_setup_teardown_lock.path}"))
         # Yield the services so that tests within this worker can use them.
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} yielding docker services {docker_services}"))
         yield docker_services
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} returned from yielding docker services {docker_services}"))
         # Now tests that use those services get to run on this worker...
         # Once the tests are done, release the read lock that marks the services as in use.
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} releasing read lock {docker_services_lock.path}"))
         docker_services_lock.release_read_lock()
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} released read lock {docker_services_lock.path}"))
         # Now as we prepare to execute the cleanup code on context exit we need
         # to acquire the setup/teardown lock again.
         # First we attempt to get the write lock so that we wait for other
         # readers to finish and guard against a lock inversion possibility.
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquiring write lock {docker_services_lock.path}"))
         docker_services_lock.acquire_write_lock()
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquired write lock {docker_services_lock.path}"))
         # Next, acquire the setup/teardown lock
         # First one here is the one to do actual work, everyone else is basically a no-op.
         # Upon context exit, we should execute the docker_cleanup code.
         # And try to get the setup/tear down lock again.
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquiring lock {docker_setup_teardown_lock.path}"))
         docker_setup_teardown_lock.acquire()
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} acquired lock {docker_setup_teardown_lock.path}"))
-        warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} about to take down docker services"))
     # Finally, after the docker_cleanup code has finished, remove both locks.
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} releasing lock {docker_setup_teardown_lock.path}"))
     docker_setup_teardown_lock.release()
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} released lock {docker_setup_teardown_lock.path}"))
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} releasing write lock {docker_services_lock.path}"))
     docker_services_lock.release_write_lock()
-    warn(UserWarning(f"{time_ns()}: worker_id: {worker_id} released write lock {docker_services_lock.path}"))

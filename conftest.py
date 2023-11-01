@@ -70,5 +70,14 @@ def pytest_unconfigure(config: pytest.Config) -> None:
     Called after all tests have completed.
     """
     if is_master(config):
-        shared_temp_dir = str(getattr(config, "shared_temp_dir"))
-        shutil.rmtree(shared_temp_dir)
+        shared_tmp_dir = str(getattr(config, "shared_temp_dir"))
+        shutil.rmtree(shared_tmp_dir)
+
+
+@pytest.fixture(scope="session")
+def short_testrun_uid(testrun_uid: str) -> str:
+    """
+    Shorten the unique test run id that xdist provides so we can use it with
+    other systems (e.g., docker).
+    """
+    return testrun_uid[0:8]
