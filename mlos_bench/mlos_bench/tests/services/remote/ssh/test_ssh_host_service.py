@@ -209,12 +209,12 @@ def check_ssh_service_reboot(docker_services: DockerServices,
 
 
 @requires_docker
-def test_ssh_service_reboot(docker_services: DockerServices,
+def test_ssh_service_reboot(locked_docker_services: DockerServices,
                             reboot_test_server: SshTestServerInfo,
                             ssh_host_service: SshHostService) -> None:
     """
     Test the SshHostService reboot operation.
     """
     # Grouped together to avoid parallel runner interactions.
-    check_ssh_service_reboot(docker_services, reboot_test_server, ssh_host_service, graceful=True)
-    check_ssh_service_reboot(docker_services, reboot_test_server, ssh_host_service, graceful=False)
+    check_ssh_service_reboot(locked_docker_services, reboot_test_server, ssh_host_service, graceful=True)
+    check_ssh_service_reboot(locked_docker_services, reboot_test_server, ssh_host_service, graceful=False)

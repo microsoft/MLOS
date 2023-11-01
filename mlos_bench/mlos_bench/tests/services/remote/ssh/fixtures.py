@@ -51,7 +51,7 @@ def ssh_test_server_hostname() -> str:
 @pytest.fixture(scope="session")
 def ssh_test_server(ssh_test_server_hostname: str,
                     docker_compose_project_name: str,
-                    docker_services: DockerServices) -> Generator[SshTestServerInfo, None, None]:
+                    locked_docker_services: DockerServices) -> Generator[SshTestServerInfo, None, None]:
     """
     Fixture for getting the ssh test server services setup via docker-compose
     using pytest-docker.
@@ -70,7 +70,7 @@ def ssh_test_server(ssh_test_server_hostname: str,
             hostname=ssh_test_server_hostname,
             username='root',
             id_rsa_path=id_rsa_file.name)
-        wait_docker_service_socket(docker_services, ssh_test_server_info.hostname, ssh_test_server_info.get_port())
+        wait_docker_service_socket(locked_docker_services, ssh_test_server_info.hostname, ssh_test_server_info.get_port())
         id_rsa_src = f"/{ssh_test_server_info.username}/.ssh/id_rsa"
         docker_cp_cmd = f"docker compose -p {docker_compose_project_name} cp {SSH_TEST_SERVER_NAME}:{id_rsa_src} {id_rsa_file.name}"
         cmd = run(docker_cp_cmd.split(), check=True, cwd=os.path.dirname(__file__), capture_output=True, text=True)
@@ -84,7 +84,7 @@ def ssh_test_server(ssh_test_server_hostname: str,
 
 @pytest.fixture(scope="session")
 def alt_test_server(ssh_test_server: SshTestServerInfo,
-                    docker_services: DockerServices) -> SshTestServerInfo:
+                    locked_docker_services: DockerServices) -> SshTestServerInfo:
     """
     Fixture for getting the second ssh test server info from the docker-compose.yml.
     See additional notes in the ssh_test_server fixture above.
@@ -98,13 +98,13 @@ def alt_test_server(ssh_test_server: SshTestServerInfo,
         hostname=ssh_test_server.hostname,
         username=ssh_test_server.username,
         id_rsa_path=ssh_test_server.id_rsa_path)
-    wait_docker_service_socket(docker_services, alt_test_server_info.hostname, alt_test_server_info.get_port())
+    wait_docker_service_socket(locked_docker_services, alt_test_server_info.hostname, alt_test_server_info.get_port())
     return alt_test_server_info
 
 
 @pytest.fixture(scope="session")
 def reboot_test_server(ssh_test_server: SshTestServerInfo,
-                       docker_services: DockerServices) -> SshTestServerInfo:
+                       locked_docker_services: DockerServices) -> SshTestServerInfo:
     """
     Fixture for getting the third ssh test server info from the docker-compose.yml.
     See additional notes in the ssh_test_server fixture above.
@@ -118,7 +118,7 @@ def reboot_test_server(ssh_test_server: SshTestServerInfo,
         hostname=ssh_test_server.hostname,
         username=ssh_test_server.username,
         id_rsa_path=ssh_test_server.id_rsa_path)
-    wait_docker_service_socket(docker_services, reboot_test_server_info.hostname, reboot_test_server_info.get_port())
+    wait_docker_service_socket(locked_docker_services, reboot_test_server_info.hostname, reboot_test_server_info.get_port())
     return reboot_test_server_info
 
 
