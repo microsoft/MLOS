@@ -43,6 +43,10 @@ services:
     hostname: reboot-server
     attach: false
     deploy:
+      # Only restart a few times so that we eventually cleanup after
+      # ourselves in the case of an interrupted pytest failure.
+      # Note: this also relies on "wait -n" in the CMD to exit properly on
+      # various signals.
       restart_policy:
         condition: on-failure
         delay: 0s
