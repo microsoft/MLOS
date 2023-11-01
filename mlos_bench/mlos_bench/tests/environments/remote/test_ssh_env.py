@@ -8,6 +8,7 @@ Unit tests for RemoveEnv benchmark environment via local SSH test services.
 
 from typing import Dict
 
+import os
 import sys
 
 import pytest
@@ -52,6 +53,8 @@ def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestS
         },
         expected_telemetry=[],
     )
+    assert not os.path.exists(os.path.join(os.getcwd(), "output-downloaded.csv")), \
+        "output-downloaded.csv should have been cleaned up by temp_dir context"
 
 
 if __name__ == "__main__":

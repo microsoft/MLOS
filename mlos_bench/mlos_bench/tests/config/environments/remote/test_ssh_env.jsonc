@@ -66,13 +66,13 @@
                     "download": [
                         {
                             "from": "output.csv",
-                            "to": "output-downloaded.csv"
+                            // Download to the temporary directory, not the current working directory.
+                            "to": "$PWD/output-downloaded.csv"
                         }
                     ],
                     "read_results_file": "output-downloaded.csv",
-                    // FIXME: Not getting executed?
                     "teardown": [
-                        "rm -f output-downloaded.csv"
+                        "test ! -e output-downloaded.csv"
                     ]
                 }
             }
