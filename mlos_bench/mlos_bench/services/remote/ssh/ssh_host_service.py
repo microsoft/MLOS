@@ -50,6 +50,8 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
         methods : Union[Dict[str, Callable], List[Callable], None]
             New methods to register with the service.
         """
+        # Same methods are also provided by the AzureVMService class
+        # pylint: disable=duplicate-code
         super().__init__(
             config, global_config, parent,
             self.merge_methods(methods, [
