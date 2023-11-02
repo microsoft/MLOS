@@ -75,6 +75,7 @@
         "subschemas",
         "tolist",
         "tunables",
+        "workerinput",
         "xdist",
         "xlabel",
         "ylabel"

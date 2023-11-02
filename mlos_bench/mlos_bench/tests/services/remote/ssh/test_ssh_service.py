@@ -25,7 +25,6 @@ from mlos_bench.tests.services.remote.ssh import SshTestServerInfo, ALT_TEST_SER
 
 @requires_docker
 @requires_ssh
-@pytest.mark.xdist_group("ssh_test_server")
 @pytest.mark.parametrize(["ssh_test_server_info", "server_name"], [
     (lazy_fixture("ssh_test_server"), SSH_TEST_SERVER_NAME),
     (lazy_fixture("alt_test_server"), ALT_TEST_SERVER_NAME),
@@ -50,7 +49,7 @@ def test_ssh_service_test_infra(ssh_test_server_info: SshTestServerInfo,
     assert cmd.stdout.strip() == server_name
 
 
-@pytest.mark.xdist_group("ssh_test_server")
+@pytest.mark.filterwarnings("ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0")
 def test_ssh_service_context_handler() -> None:
     """
     Test the SSH service context manager handling.
@@ -92,8 +91,9 @@ def test_ssh_service_context_handler() -> None:
 
         assert not ssh_fileshare_service._in_context
         # And that instance should be unusable after we are outside the context.
-        with pytest.raises(AssertionError):
-            ssh_fileshare_service._run_coroutine(asyncio.sleep(0.1))
+        with pytest.raises(AssertionError), pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
+            future = ssh_fileshare_service._run_coroutine(asyncio.sleep(0.1, result='foo'))
+            raise ValueError(f"Future should not have been available to wait on {future.result()}")
 
         # The background thread should remain running since we have another context still open.
         assert isinstance(SshService._EVENT_LOOP_CONTEXT._event_loop_thread, Thread)

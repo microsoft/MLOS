@@ -20,6 +20,7 @@ from mlos_bench.tests import check_socket
 SSH_TEST_SERVER_PORT = 2254
 SSH_TEST_SERVER_NAME = 'ssh-server'
 ALT_TEST_SERVER_NAME = 'alt-server'
+REBOOT_TEST_SERVER_NAME = 'reboot-server'
 
 
 @dataclass

@@ -53,7 +53,6 @@ def closeable_temp_file(**kwargs: Any) -> Generator[_TemporaryFileWrapper, None,
             os.unlink(fname)
 
 
-@pytest.mark.xdist_group("ssh_test_server")
 @requires_docker
 def test_ssh_fileshare_single_file(ssh_test_server: SshTestServerInfo,
                                    ssh_fileshare_service: SshFileShareService) -> None:
@@ -94,7 +93,6 @@ def test_ssh_fileshare_single_file(ssh_test_server: SshTestServerInfo,
                 assert read_lines == lines
 
 
-@pytest.mark.xdist_group("ssh_test_server")
 @requires_docker
 def test_ssh_fileshare_recursive(ssh_test_server: SshTestServerInfo,
                                  ssh_fileshare_service: SshFileShareService) -> None:
@@ -150,7 +148,6 @@ def test_ssh_fileshare_recursive(ssh_test_server: SshTestServerInfo,
             assert are_dir_trees_equal(tempdir1, path_join(tempdir2, basename(remote_file_path)))
 
 
-@pytest.mark.xdist_group("ssh_test_server")
 @requires_docker
 def test_ssh_fileshare_download_file_dne(ssh_test_server: SshTestServerInfo,
                                          ssh_fileshare_service: SshFileShareService) -> None:
@@ -176,7 +173,6 @@ def test_ssh_fileshare_download_file_dne(ssh_test_server: SshTestServerInfo,
             assert read_lines == [canary_str]
 
 
-@pytest.mark.xdist_group("ssh_test_server")
 @requires_docker
 def test_ssh_fileshare_upload_file_dne(ssh_test_server: SshTestServerInfo,
                                        ssh_host_service: SshHostService,

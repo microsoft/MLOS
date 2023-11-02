@@ -28,7 +28,29 @@ services:
       - ssh-server
     hostname: alt-server
     attach: false
-    restart: always
+    image: mlos_bench-test-ssh-server:latest
+    ports:
+      - ${PORT:-2254}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    environment:
+      # Let the environment variable TIMEOUT override the default.
+      - TIMEOUT=${TIMEOUT:-180}
+  # Add a third for testing only reboot operations.
+  reboot-server:
+    depends_on:
+      - ssh-server
+    hostname: reboot-server
+    attach: false
+    deploy:
+      # Only restart a few times so that we eventually cleanup after
+      # ourselves in the case of an interrupted pytest failure.
+      # Note: this also relies on "wait -n" in the CMD to exit properly on
+      # various signals.
+      restart_policy:
+        condition: on-failure
+        delay: 0s
+        max_attempts: 3
     image: mlos_bench-test-ssh-server:latest
     ports:
       - ${PORT:-2254}

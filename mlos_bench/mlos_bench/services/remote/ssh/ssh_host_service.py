@@ -196,8 +196,9 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
                 sudo=${{sudo:+$sudo -n}}
             fi
 
+            set -x
             for cmd in {cmd_opts}; do
-                $sudo $cmd && exit 0
+                $sudo /bin/bash -c "$cmd" && exit 0
             done
 
             echo 'ERROR: Failed to shutdown/reboot the system.'
@@ -252,7 +253,7 @@ class SshHostService(SshService, SupportsOSOps, SupportsRemoteExec):
             'reboot',
             'halt --reboot',
             'systemctl reboot',
-            'kill -9 1' if force else 'kill 1',
+            'kill -KILL 1; kill -KILL -1' if force else 'kill -TERM 1; kill -TERM -1',
         ]
         return self._exec_os_op(cmd_opts_list=cmd_opts_list, params=params)
 

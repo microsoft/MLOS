@@ -25,7 +25,7 @@ from mlos_bench.util import get_class_from_name
 # Use with @requires_docker above a test_...() function.
 DOCKER = shutil.which('docker')
 if DOCKER:
-    cmd = run("docker builder inspect default", shell=True, check=False, capture_output=True)
+    cmd = run("docker builder inspect default || docker buildx inspect default", shell=True, check=False, capture_output=True)
     stdout = cmd.stdout.decode()
     if cmd.returncode != 0 or not any(line for line in stdout.splitlines() if 'Platform' in line and 'linux' in line):
         debug("Docker is available but missing support for targeting linux platform.")
