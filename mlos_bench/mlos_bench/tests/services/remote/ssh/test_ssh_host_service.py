@@ -23,7 +23,6 @@ from mlos_bench.tests.services.remote.ssh import (SshTestServerInfo,
                                                   SSH_TEST_SERVER_NAME,
                                                   wait_docker_service_socket)
 
-
 _LOG = logging.getLogger(__name__)
 
 
