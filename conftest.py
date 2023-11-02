@@ -35,7 +35,7 @@ def pytest_configure(config: pytest.Config) -> None:
     if os.environ.get('DISPLAY', None):
         import matplotlib   # pylint: disable=import-outside-toplevel
         matplotlib.rcParams['backend'] = 'agg'
-        if is_master(config):
+        if is_master(config) or dict(getattr(config, 'workerinput', {}))['workerid'] == 'gw0':
             # Only warn once.
             warn(UserWarning('DISPLAY environment variable is set, which can cause problems in some setups (e.g. WSL). '
                              + f'Adjusting matplotlib backend to "{matplotlib.rcParams["backend"]}" to compensate.'))
