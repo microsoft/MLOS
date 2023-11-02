@@ -94,7 +94,6 @@ class SaaSEnv(Environment):
             return False
 
         if res['isConfigPendingRestart']:
-
             _LOG.info("Restarting: %s", self)
             (status, params) = self._host_service.restart_host(self._params)
             if status.is_pending():
