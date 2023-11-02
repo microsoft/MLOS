@@ -10,12 +10,12 @@
             "request": "test",
             "justMyCode": false,
             "env": {
+                // When debugging tests, only run a single pytest worker instance.
+                "PYTEST_ADDOPTS": "-n0 --no-cov --dist=no --log-level=DEBUG",
                 // For debugging the ssh containers in particular, let them
                 // live a little longer before automatically stopping them.
                 // See Also: mlos_bench/tests/services/remote/ssh/
-                "TIMEOUT": "1800",
-                // When debugging tests, only run a single pytest worker instance.
-                "PYTEST_ADDOPTS": "-n0 --no-cov --dist=no --log-level=DEBUG"
+                "TIMEOUT": "1800"
             }
         }
     ]
