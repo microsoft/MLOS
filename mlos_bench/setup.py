@@ -50,6 +50,7 @@ extra_requires['full-tests'] = extra_requires['full'] + [
     'pytest-local-badge',
     'pytest-lazy-fixture',
     'pytest-docker',
+    'fasteners',
 ]
 
 # pylint: disable=duplicate-code
