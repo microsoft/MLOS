@@ -14,7 +14,7 @@
         },
         "config": {
             "type": "object",
-            "$comment": "NOTE: there aren't currently any additional properties accepted by the OSEnv.  In the future we may want to use an os_type enum to help automatic OS param tuning by default without RemoteEnv requirements.",
+            "$comment": "NOTE: there aren't currently any additional properties accepted by the SaaSEnv.",
             "allOf": [
                 {
                     "$ref": "../common-environment-subschemas.json#/$defs/common_environment_config"
