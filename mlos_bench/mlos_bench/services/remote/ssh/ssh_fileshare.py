@@ -11,7 +11,7 @@ from typing import Tuple, Union
 
 import logging
 
-from asyncssh import scp, SFTPError, SSHClientConnection
+from asyncssh import scp, SFTPError, SFTPNoSuchFile, SFTPFailure, SSHClientConnection
 
 from mlos_bench.services.base_fileshare import FileShareService
 from mlos_bench.services.remote.ssh.ssh_service import SshService
@@ -58,6 +58,8 @@ class SshFileShareService(FileShareService, SshService):
             If the local OS returns an error.
         SFTPError
             If the remote OS returns an error.
+        FileNotFoundError
+            If the remote file does not exist, the SFTPError is converted to a FileNotFoundError.
         """
         connection, _ = await self._get_client_connection(params)
         srcpaths: Union[str, Tuple[SSHClientConnection, str]]
@@ -87,6 +89,12 @@ class SshFileShareService(FileShareService, SshService):
             file_copy_future.result()
         except (OSError, SFTPError) as ex:
             _LOG.error("Failed to download %s to %s from %s: %s", remote_path, local_path, params, ex)
+            if isinstance(ex, SFTPNoSuchFile) or (
+                isinstance(ex, SFTPFailure) and ex.code == 4
+                    and any(msg.lower() in ex.reason.lower() for msg in ("File not found", "No such file or directory"))
+            ):
+                _LOG.warning("File %s does not exist on %s", remote_path, params)
+                raise FileNotFoundError(f"File {remote_path} does not exist on {params}") from ex
             raise ex
 
     def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:

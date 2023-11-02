@@ -35,15 +35,13 @@ HOST_DOCKER_NAME = 'host.docker.internal'
 @pytest.fixture(scope="session")
 def ssh_test_server_hostname() -> str:
     """Returns the local hostname to use to connect to the test ssh server."""
-    if sys.platform == 'win32':
-        # Docker (Desktop) for Windows (WSL2) uses a special networking magic
-        # to refer to the host machine when exposing ports.
-        return 'localhost'
-    # On Linux, if we're running in a docker container, we can use the
-    # --add-host (extra_hosts in docker-compose.yml) to refer to the host IP.
-    if resolve_host_name(HOST_DOCKER_NAME):
+    if sys.platform != 'win32' and resolve_host_name(HOST_DOCKER_NAME):
+        # On Linux, if we're running in a docker container, we can use the
+        # --add-host (extra_hosts in docker-compose.yml) to refer to the host IP.
         return HOST_DOCKER_NAME
-    # Otherwise, assume we're executing directly inside conda on the host.
+    # Docker (Desktop) for Windows (WSL2) uses a special networking magic
+    # to refer to the host machine as `localhost` when exposing ports.
+    # In all other cases, assume we're executing directly inside conda on the host.
     return 'localhost'
 
 
