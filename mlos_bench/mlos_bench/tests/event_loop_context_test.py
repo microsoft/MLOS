@@ -7,8 +7,10 @@ Tests for mlos_bench.event_loop_context background thread logic.
 """
 
 import asyncio
+import sys
 import time
 
+from asyncio import AbstractEventLoop
 from threading import Thread
 from types import TracebackType
 from typing import Optional, Type
@@ -62,6 +64,8 @@ def test_event_loop_context() -> None:
     assert not event_loop_caller_instance_1._in_context
     assert event_loop_caller_instance_1.EVENT_LOOP_CONTEXT._event_loop_thread is None
 
+    event_loop: Optional[AbstractEventLoop] = None
+
     # After we enter the instance context, we should have a background thread.
     with event_loop_caller_instance_1:
         assert event_loop_caller_instance_1._in_context
@@ -73,6 +77,7 @@ def test_event_loop_context() -> None:
         assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread_refcnt == 1
         assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is not None
         assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop.is_running()
+        event_loop = EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop
 
         event_loop_caller_instance_2 = EventLoopContextCaller(instance_id=2)
         assert event_loop_caller_instance_2
@@ -110,11 +115,34 @@ def test_event_loop_context() -> None:
 
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread is None    # type: ignore[unreachable] # (false positives)
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread_refcnt == 0
-    assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is None
+    assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is event_loop is not None
+    assert not EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop.is_running()
+    # Check that the event loop has no more tasks.
+    assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, '_ready')
+    # Windows ProactorEventLoopPolicy adds a dummy task.
+    if sys.platform == 'win32' and isinstance(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, asyncio.ProactorEventLoop):
+        assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 1
+    else:
+        assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 0
+    assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, '_scheduled')
+    assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._scheduled) == 0
 
     with pytest.raises(AssertionError), pytest.warns(RuntimeWarning, match=r".*coroutine 'sleep' was never awaited"):
         future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
         raise ValueError(f"Future should not have been available to wait on {future.result()}")
+
+    # Test that when re-entering the context we have the same event loop.
+    with event_loop_caller_instance_1:
+        assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is not None
+        assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop.is_running()
+        assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is event_loop
+
+        # Test running again.
+        start = time.time()
+        future = event_loop_caller_instance_1.EVENT_LOOP_CONTEXT.run_coroutine(asyncio.sleep(0.1, result='foo'))
+        assert 0.0 <= time.time() - start < 0.1
+        assert future.result(timeout=0.2) == 'foo'
+        assert 0.1 <= time.time() - start <= 0.2
 
 
 if __name__ == '__main__':
