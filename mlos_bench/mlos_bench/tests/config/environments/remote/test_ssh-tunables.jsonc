@@ -1,0 +1,12 @@
+{
+    "test_ssh_tunable_group": {
+        "cost": 1,
+        "params": {
+            "test_param": {
+                "type": "int",
+                "default": 0,
+                "range": [0, 10]
+            }
+        }
+    }
+}

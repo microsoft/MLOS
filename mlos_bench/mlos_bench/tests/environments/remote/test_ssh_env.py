@@ -11,6 +11,8 @@ from typing import Dict
 import os
 import sys
 
+import numpy as np
+
 import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
@@ -28,7 +30,7 @@ else:
 
 
 @requires_docker
-def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestServerInfo) -> None:
+def test_remote_ssh_env(ssh_test_server: SshTestServerInfo) -> None:
     """
     Produce benchmark and telemetry data in a local script and read it.
     """
@@ -41,14 +43,18 @@ def test_remote_ssh_env(tunable_groups: TunableGroups, ssh_test_server: SshTestS
 
     service = ConfigPersistenceService(config={"config_path": [str(files("mlos_bench.tests.config"))]})
     config_path = service.resolve_path("environments/remote/test_ssh_env.jsonc")
-    env = service.load_environment(config_path, tunable_groups, global_config=global_config, service=service)
+    env = service.load_environment(config_path, TunableGroups(), global_config=global_config, service=service)
 
     check_env_success(
-        env, tunable_groups,
+        env, env.tunable_params,
         expected_results={
             "hostname": ssh_test_server.service_name,
             "username": ssh_test_server.username,
             "score": 0.9,
+            "ssh_priv_key_path": np.nan,    # empty strings are returned as "not a number"
+            "test_param": "unset",
+            "FOO": "unset",
+            "ssh_username": "unset",
         },
         expected_telemetry=[],
     )
