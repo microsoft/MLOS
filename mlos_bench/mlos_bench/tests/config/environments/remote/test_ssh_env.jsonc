@@ -11,7 +11,7 @@
         "services/remote/ssh/ssh_fileshare_service.jsonc"
     ],
 
-    "include_tunables": ["./test_ssh-tunables.jsonc"],
+    "include_tunables": ["environments/remote/test_ssh-tunables.jsonc"],
 
     "config": {
         "children": [
@@ -41,7 +41,7 @@
                         // Test environment variables
                         "echo \"username,${ssh_username}\" | tee -a output.csv",
                         // Shouldn't be exported
-                        "echo \"ssh_priv_key_path,${ssh_priv_key_path:-unset}\" | tee -a output.csv",
+                        "echo \"ssh_priv_key_path,${ssh_priv_key_path:-}\" | tee -a output.csv",
                         "echo \"test_param,${test_param:-unset}\" | tee -a output.csv",
                         "echo score,0.9 | tee -a output.csv",
                         "echo 'Done' >&2",
@@ -71,9 +71,9 @@
                     ],
                     //"shell_env_params": []    // left unspecified, no environment variables should be exported
                     "run": [
-                        "echo 'Checking that no tunables or other variables are automatically exported where they shouldn't be' >&2",
-                        "echo 'FOO,${FOO:-unset}' | tee -a output.csv",
-                        "echo 'ssh_username,${ssh_username:-unset}' | tee -a output.csv"
+                        "echo \"Checking that no tunables or other variables are automatically exported where they shouldn't be\" >&2",
+                        "echo \"FOO,${FOO:-unset}\" | tee -a output.csv",
+                        "echo \"ssh_username,${ssh_username:-unset}\" | tee -a output.csv"
                     ]
                 }
             },
@@ -100,11 +100,10 @@
                             "to": "$PWD/output-downloaded.csv"
                         }
                     ],
-                    //"shell_env_params": []    // left unspecified, no environment variables should be exported
+                    //"shell_env_params": [],   // left unspecified, no environment variables should be exported
                     "run": [
-                        "set -x",
-                        "test -z \"${FOO:-}\"",
-                        "test -z \"${test_param:-}\""
+                        "if printenv | grep -e ^FOO=; then exit 1; fi",
+                        "if printenv | grep -e ^test_param=; then exit 1; fi"
                     ],
                     "read_results_file": "output-downloaded.csv",
                     "teardown": [
