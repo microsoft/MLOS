@@ -65,8 +65,9 @@ class EventLoopContext:
         with self._event_loop_thread_lock:
             if not self._event_loop_thread:
                 assert self._event_loop_thread_refcnt == 0
-                assert self._event_loop is None
-                self._event_loop = asyncio.new_event_loop()
+                if self._event_loop is None:
+                    self._event_loop = asyncio.new_event_loop()
+                assert not self._event_loop.is_running()
                 self._event_loop_thread = Thread(target=self._run_event_loop, daemon=True)
                 self._event_loop_thread.start()
             self._event_loop_thread_refcnt += 1
@@ -94,7 +95,7 @@ class EventLoopContext:
                 self._event_loop_thread.join(timeout=1)
                 if self._event_loop_thread.is_alive():
                     raise RuntimeError("Failed to stop event loop thread.")
-                self._event_loop = None
+                self._event_loop.close()
                 self._event_loop_thread = None
 
     def run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
