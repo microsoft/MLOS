@@ -12,7 +12,9 @@ from typing import Any, Coroutine, Optional, TypeVar
 from threading import Lock as ThreadLock, Thread
 
 import asyncio
+import logging
 import sys
+import time
 
 if sys.version_info >= (3, 10):
     from typing import TypeAlias
@@ -24,6 +26,8 @@ if sys.version_info >= (3, 9):
     FutureReturnType: TypeAlias = Future[CoroReturnType]
 else:
     FutureReturnType: TypeAlias = Future
+
+_LOG = logging.getLogger(__name__)
 
 
 class EventLoopContext:
@@ -77,6 +81,15 @@ class EventLoopContext:
             if self._event_loop_thread_refcnt == 0:
                 assert self._event_loop is not None
                 self._event_loop.call_soon_threadsafe(self._event_loop.stop)
+                timeout = 3
+                sleep_interval = 0.1
+                for i in range(0, int(timeout / sleep_interval)):
+                    if not self._event_loop.is_running():
+                        break
+                    if i == 0:
+                        _LOG.info("Waiting for event loop thread to stop...")
+                    time.sleep(sleep_interval)
+                assert not self._event_loop.is_running()
                 assert self._event_loop_thread is not None
                 self._event_loop_thread.join(timeout=1)
                 if self._event_loop_thread.is_alive():
