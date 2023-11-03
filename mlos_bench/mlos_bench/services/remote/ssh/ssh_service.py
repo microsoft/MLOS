@@ -8,6 +8,7 @@ A collection functions for interacting with SSH servers as file shares.
 
 from abc import ABCMeta
 from asyncio import Event as CoroEvent, Lock as CoroLock
+from warnings import warn
 from types import TracebackType
 from typing import Any, Callable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, Union
 from threading import current_thread
@@ -124,6 +125,9 @@ class SshClientCache:
         self._refcnt -= 1
         if self._refcnt <= 0:
             self.cleanup()
+            if self._cache_lock.locked():
+                warn(RuntimeWarning("SshClientCache lock was still held on exit."))
+                self._cache_lock.release()
 
     async def get_client_connection(self, connect_params: dict) -> Tuple[SSHClientConnection, SshClient]:
         """
