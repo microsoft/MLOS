@@ -89,11 +89,12 @@ class SaaSEnv(Environment):
         if not status.is_succeeded():
             return False
 
-        (status, res) = self._config_service.is_config_pending_restart(self._params)
+        (status, res) = self._config_service.is_config_pending(self._params)
         if not status.is_succeeded():
             return False
 
-        if res['isConfigPendingRestart']:
+        # Azure Flex DB instances currently require a VM reboot after reconfiguration.
+        if res.get('isConfigPendingRestart') or res.get('isConfigPendingReboot'):
             _LOG.info("Restarting: %s", self)
             (status, params) = self._host_service.restart_host(self._params)
             if status.is_pending():

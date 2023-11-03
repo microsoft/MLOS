@@ -21,7 +21,7 @@ class SupportsRemoteConfig(Protocol):
     def configure(self, config: Dict[str, Any],
                   params: Dict[str, Any]) -> Tuple["Status", dict]:
         """
-        Update the parameters of an Azure DB service.
+        Update the parameters of a SaaS service in the cloud.
 
         Parameters
         ----------
@@ -37,9 +37,9 @@ class SupportsRemoteConfig(Protocol):
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
 
-    def is_config_pending_restart(self, config: Dict[str, Any]) -> Tuple["Status", dict]:
+    def is_config_pending(self, config: Dict[str, Any]) -> Tuple["Status", dict]:
         """
-        Check if the configuration of an Azure DB service requires a restart.
+        Check if the configuration of a service requires reboot or restart.
 
         Parameters
         ----------
@@ -48,8 +48,9 @@ class SupportsRemoteConfig(Protocol):
 
         Returns
         -------
-        result : (Status, dict={"isConfigPendingRestart": bool})
+        result : (Status, dict)
             A pair of Status and result. A Boolean field
-            "isConfigPendingRestart" indicates whether restart is required.
+            "isConfigPendingRestart" indicates whether the service restart is required.
+            If "isConfigPendingReboot" is set to True, rebooting a VM is necessary.
             Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
         """

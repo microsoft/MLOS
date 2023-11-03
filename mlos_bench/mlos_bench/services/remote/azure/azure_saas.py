@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-A collection Service functions for managing VMs on Azure.
+A collection Service functions for configuring SaaS instances on Azure.
 """
 import logging
 
@@ -66,7 +66,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             config, global_config, parent,
             self.merge_methods(methods, [
                 self.configure,
-                self.is_config_pending_restart
+                self.is_config_pending
             ])
         )
 
@@ -140,9 +140,9 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             return self._config_batch(config, params)
         return self._config_many(config, params)
 
-    def is_config_pending_restart(self, config: Dict[str, Any]) -> Tuple[Status, dict]:
+    def is_config_pending(self, config: Dict[str, Any]) -> Tuple[Status, dict]:
         """
-        Check if the configuration of an Azure DB service requires a restart.
+        Check if the configuration of an Azure DB service requires a reboot or restart.
 
         Parameters
         ----------
@@ -151,9 +151,10 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
 
         Returns
         -------
-        result : (Status, dict={"isConfigPendingRestart": bool})
+        result : (Status, dict)
             A pair of Status and result. A Boolean field
-            "isConfigPendingRestart" indicates whether restart is required.
+            "isConfigPendingRestart" indicates whether the service restart is required.
+            If "isConfigPendingReboot" is set to True, rebooting a VM is necessary.
             Status is one of {PENDING, TIMED_OUT, SUCCEEDED, FAILED}
         """
         config = merge_parameters(
@@ -167,7 +168,8 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
             return (Status.TIMED_OUT, {})
         if response.status_code != 200:
             return (Status.FAILED, {})
-        return (Status.SUCCEEDED, {"isConfigPendingRestart": any(
+        # Currently, Azure Flex servers require a VM reboot.
+        return (Status.SUCCEEDED, {"isConfigPendingReboot": any(
             {'False': False, 'True': True}[val['properties']['isConfigPendingRestart']]
             for val in response.json()['value']
         )})
