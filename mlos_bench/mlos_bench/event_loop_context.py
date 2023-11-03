@@ -86,7 +86,6 @@ class EventLoopContext:
                 self._event_loop_thread.join(timeout=3)
                 if self._event_loop_thread.is_alive():
                     raise RuntimeError("Failed to stop event loop thread.")
-                self._event_loop.close()
                 self._event_loop_thread = None
 
     def run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
