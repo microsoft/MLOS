@@ -267,8 +267,8 @@ class SshService(Service, metaclass=ABCMeta):
         # Stop the background thread if it's not needed anymore and potentially
         # cleanup the cache as well.
         assert self._in_context
-        SshService._EVENT_LOOP_CONTEXT.exit()
         SshService._EVENT_LOOP_THREAD_SSH_CLIENT_CACHE.exit()
+        SshService._EVENT_LOOP_CONTEXT.exit()
         return super()._exit_context(ex_type, ex_val, ex_tb)
 
     @classmethod
