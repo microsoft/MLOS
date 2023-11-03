@@ -98,8 +98,10 @@
             "fileMatch": [
                 "mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/**/*.jsonc",
                 "mlos_bench/mlos_bench/tests/config/schemas/tunable-params/test-cases/**/*.json",
-                "mlos_bench/mlos_bench/config/environments/**/*-tunables.jsonc",
-                "mlos_bench/mlos_bench/config/environments/**/*-tunables.json"
+                "mlos_bench/mlos_bench/tests/config/environments/**/*[_-]tunables.jsonc",
+                "mlos_bench/mlos_bench/tests/config/environments/**/*[_-]tunables.json",
+                "mlos_bench/mlos_bench/config/environments/**/*[_-]tunables.jsonc",
+                "mlos_bench/mlos_bench/config/environments/**/*[_-]tunables.json"
             ],
             "url": "./mlos_bench/mlos_bench/config/schemas/tunables/tunable-params-schema.json"
         },
