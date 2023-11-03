@@ -65,6 +65,8 @@ class EventLoopContext:
             if not self._event_loop_thread:
                 assert self._event_loop_thread_refcnt == 0
                 if self._event_loop is None:
+                    if sys.platform == "win32":
+                        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
                     self._event_loop = asyncio.new_event_loop()
                 assert not self._event_loop.is_running()
                 self._event_loop_thread = Thread(target=self._run_event_loop, daemon=True)

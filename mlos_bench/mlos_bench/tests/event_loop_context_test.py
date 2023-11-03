@@ -7,6 +7,7 @@ Tests for mlos_bench.event_loop_context background thread logic.
 """
 
 import asyncio
+import sys
 import time
 
 from asyncio import AbstractEventLoop
@@ -116,8 +117,13 @@ def test_event_loop_context() -> None:
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread_refcnt == 0
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop is event_loop is not None
     assert not EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop.is_running()
+    # Check that the event loop has no more tasks.
     assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, '_ready')
-    assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 0
+    # Windows ProactorEventLoopPolicy adds a dummy task.
+    if sys.platform == 'win32' and isinstance(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, asyncio.ProactorEventLoop):
+        assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 1
+    else:
+        assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._ready) == 0
     assert hasattr(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop, '_scheduled')
     assert len(EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop._scheduled) == 0
 
