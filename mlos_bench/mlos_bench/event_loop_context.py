@@ -12,6 +12,7 @@ from typing import Any, Coroutine, Optional, TypeVar
 from threading import Lock as ThreadLock, Thread
 
 import asyncio
+import logging
 import sys
 
 if sys.version_info >= (3, 10):
@@ -24,6 +25,8 @@ if sys.version_info >= (3, 9):
     FutureReturnType: TypeAlias = Future[CoroReturnType]
 else:
     FutureReturnType: TypeAlias = Future
+
+_LOG = logging.getLogger(__name__)
 
 
 class EventLoopContext:
@@ -61,8 +64,11 @@ class EventLoopContext:
         with self._event_loop_thread_lock:
             if not self._event_loop_thread:
                 assert self._event_loop_thread_refcnt == 0
-                assert self._event_loop is None
-                self._event_loop = asyncio.new_event_loop()
+                if self._event_loop is None:
+                    if sys.platform == "win32":
+                        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+                    self._event_loop = asyncio.new_event_loop()
+                assert not self._event_loop.is_running()
                 self._event_loop_thread = Thread(target=self._run_event_loop, daemon=True)
                 self._event_loop_thread.start()
             self._event_loop_thread_refcnt += 1
@@ -77,11 +83,11 @@ class EventLoopContext:
             if self._event_loop_thread_refcnt == 0:
                 assert self._event_loop is not None
                 self._event_loop.call_soon_threadsafe(self._event_loop.stop)
+                _LOG.info("Waiting for event loop thread to stop...")
                 assert self._event_loop_thread is not None
-                self._event_loop_thread.join(timeout=1)
+                self._event_loop_thread.join(timeout=3)
                 if self._event_loop_thread.is_alive():
                     raise RuntimeError("Failed to stop event loop thread.")
-                self._event_loop = None
                 self._event_loop_thread = None
 
     def run_coroutine(self, coro: Coroutine[Any, Any, CoroReturnType]) -> FutureReturnType:
