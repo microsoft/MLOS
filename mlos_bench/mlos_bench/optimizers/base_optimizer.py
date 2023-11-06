@@ -8,9 +8,12 @@ and mlos_core optimizers.
 """
 
 import logging
-from typing import Dict, Optional, Sequence, Tuple, Union
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool    # pylint: disable=deprecated-module
+
+from types import TracebackType
+from typing import Dict, Optional, Sequence, Tuple, Type, Union
+from typing_extensions import Literal
 
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.services.base_service import Service
@@ -59,6 +62,7 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
         self._tunables = tunables
         self._service = service
         self._seed = int(config.get("seed", 42))
+        self._in_context = False
 
         experiment_id = self._global_config.get('experiment_id')
         self.experiment_id = str(experiment_id).strip() if experiment_id else None
@@ -88,6 +92,30 @@ class Optimizer(metaclass=ABCMeta):     # pylint: disable=too-many-instance-attr
     def __repr__(self) -> str:
         opt_direction = 'min' if self.is_min else 'max'
         return f"{self.name}:{opt_direction}({self.target})(config={self._config})"
+
+    def __enter__(self) -> 'Optimizer':
+        """
+        Enter the optimizer's context.
+        """
+        _LOG.debug("Optimizer START :: %s", self)
+        assert not self._in_context
+        self._in_context = True
+        return self
+
+    def __exit__(self, ex_type: Optional[Type[BaseException]],
+                 ex_val: Optional[BaseException],
+                 ex_tb: Optional[TracebackType]) -> Literal[False]:
+        """
+        Exit the context of the optimizer.
+        """
+        if ex_val is None:
+            _LOG.debug("Optimizer END :: %s", self)
+        else:
+            assert ex_type and ex_val
+            _LOG.warning("Optimizer END :: %s", self, exc_info=(ex_type, ex_val, ex_tb))
+        assert self._in_context
+        self._in_context = False
+        return False  # Do not suppress exceptions
 
     @property
     def seed(self) -> int:

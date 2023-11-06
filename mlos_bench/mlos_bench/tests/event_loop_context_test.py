@@ -53,7 +53,7 @@ class EventLoopContextCaller:
 @pytest.mark.filterwarnings("ignore:.*(coroutine 'sleep' was never awaited).*:RuntimeWarning:.*event_loop_context_test.*:0")
 def test_event_loop_context() -> None:
     """Test event loop context background thread setup/cleanup handling."""
-    # pylint: disable=protected-access
+    # pylint: disable=protected-access,too-many-statements
 
     # Should start with no event loop thread.
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread is None

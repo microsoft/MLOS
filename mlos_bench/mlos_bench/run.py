@@ -79,30 +79,34 @@ def _optimize(*,
     # experiment configuration is compatible with the previous runs.
     # If the `merge` config parameter is present, merge in the data
     # from other experiments and check for compatibility.
-    with env as env_context, storage.experiment(experiment_id=experiment_id,
-                                                trial_id=trial_id,
-                                                root_env_config=root_env_config,
-                                                description=env.name,
-                                                opt_target=opt.target) as exp:
+    with env as env_context, \
+         opt as opt_context, \
+         storage.experiment(
+            experiment_id=experiment_id,
+            trial_id=trial_id,
+            root_env_config=root_env_config,
+            description=env.name,
+            opt_target=opt.target
+         ) as exp:
 
         _LOG.info("Experiment: %s Env: %s Optimizer: %s", exp, env, opt)
 
-        if opt.supports_preload:
+        if opt_context.supports_preload:
             # Load (tunable values, benchmark scores) to warm-up the optimizer.
             # `.load()` returns data from ALL merged-in experiments and attempts
             # to impute the missing tunable values.
             (configs, scores, status) = exp.load()
-            opt.bulk_register(configs, scores, status)
+            opt_context.bulk_register(configs, scores, status)
             # Complete any pending trials.
             for trial in exp.pending_trials():
-                _run(env_context, opt, trial, global_config)
+                _run(env_context, opt_context, trial, global_config)
         else:
             _LOG.warning("Skip pending trials and warm-up: %s", opt)
 
         # Now run new trials until the optimizer is done.
-        while opt.not_converged():
+        while opt_context.not_converged():
 
-            tunables = opt.suggest()
+            tunables = opt_context.suggest()
 
             if config_id > 0:
                 tunable_values = exp.load_config(config_id)
@@ -118,7 +122,7 @@ def _optimize(*,
                 "opt_target": opt.target,
                 "opt_direction": "min" if opt.is_min else "max",
             })
-            _run(env_context, opt, trial, global_config)
+            _run(env_context, opt_context, trial, global_config)
 
         if do_teardown:
             env_context.teardown()
@@ -128,14 +132,13 @@ def _optimize(*,
     return (best_score, best_config)
 
 
-def _run(env_context: Environment, opt: Optimizer,
-         trial: Storage.Trial, global_config: Dict[str, Any]) -> None:
+def _run(env: Environment, opt: Optimizer, trial: Storage.Trial, global_config: Dict[str, Any]) -> None:
     """
     Run a single trial.
 
     Parameters
     ----------
-    env_context : Environment
+    env : Environment
         Benchmarking environment context to run the optimization on.
     opt : Optimizer
         An interface to mlos_core optimizers.
@@ -146,19 +149,19 @@ def _run(env_context: Environment, opt: Optimizer,
     """
     _LOG.info("Trial: %s", trial)
 
-    if not env_context.setup(trial.tunables, trial.config(global_config)):
-        _LOG.warning("Setup failed: %s :: %s", env_context, trial.tunables)
+    if not env.setup(trial.tunables, trial.config(global_config)):
+        _LOG.warning("Setup failed: %s :: %s", env, trial.tunables)
         # FIXME: Use the actual timestamp from the environment.
         trial.update(Status.FAILED, datetime.utcnow())
         opt.register(trial.tunables, Status.FAILED)
         return
 
-    (status, results) = env_context.run()  # Block and wait for the final result.
+    (status, results) = env.run()  # Block and wait for the final result.
     _LOG.info("Results: %s :: %s\n%s", trial.tunables, status, results)
 
     # In async mode (TODO), poll the environment for status and telemetry
     # and update the storage with the intermediate results.
-    (_, telemetry) = env_context.status()
+    (_, telemetry) = env.status()
     # Use the status from `.run()` as it is the final status of the experiment.
     # TODO: Use the `.status()` output in async mode.
     trial.update_telemetry(status, telemetry)
