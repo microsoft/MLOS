@@ -54,6 +54,7 @@ class EventLoopContextCaller:
 def test_event_loop_context() -> None:
     """Test event loop context background thread setup/cleanup handling."""
     # pylint: disable=protected-access
+    # pylint: disable=too-many-statements
 
     # Should start with no event loop thread.
     assert EventLoopContextCaller.EVENT_LOOP_CONTEXT._event_loop_thread is None
