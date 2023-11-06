@@ -72,6 +72,7 @@ def test_init_mlos_core_smac_absolute_output_directory(tunable_groups: TunableGr
         str(test_opt_config['output_directory']))
     shutil.rmtree(output_dir)
 
+
 def test_init_mlos_core_smac_relative_output_directory(tunable_groups: TunableGroups) -> None:
     """
     Test relative path output directory initialization of mlos_core SMAC optimizer.
