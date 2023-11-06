@@ -52,6 +52,12 @@ class BaseOptimizer(metaclass=ABCMeta):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
 
+    def cleanup(self) -> None:
+        """
+        Remove temp files, release resources, etc. after use. Default is no-op.
+        Redefine this method in optimizers that require cleanup.
+        """
+
     @property
     def space_adapter(self) -> Optional[BaseSpaceAdapter]:
         """Get the space adapter instance (if any)."""

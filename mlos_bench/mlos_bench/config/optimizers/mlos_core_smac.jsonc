@@ -8,7 +8,6 @@
         "optimization_target": "score",
         "optimization_direction": "min",
         "max_iterations": 100,
-        "optimizer_type": "SMAC",
-        "output_directory": "smac_output"
+        "optimizer_type": "SMAC"
     }
 }
