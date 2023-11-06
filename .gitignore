@@ -160,9 +160,6 @@ build/*.build-stamp
 .azure/config
 .env
 
-smac_output/
-test_output_dir/
-
 # Test databases
 *.sqlite*
 *.db
