@@ -207,7 +207,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         """
         assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
             "Authorization service not provided. Include service-auth.jsonc?"
-        return {"Authorization": "Bearer " + self._parent.get_access_token()}
+        return self._parent.get_auth_headers()
 
     @staticmethod
     def _extract_arm_parameters(json_data: dict) -> dict:
