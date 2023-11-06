@@ -8,6 +8,7 @@
         "optimization_target": "score",
         "optimization_direction": "min",
         "max_iterations": 100,
-        "optimizer_type": "SMAC"
+        "optimizer_type": "SMAC",
+        "output_directory": null  // Override to have a permanent output with SMAC history etc.
     }
 }
