@@ -12,7 +12,15 @@
     "testVmName": "$experiment_id-vm",
     "testVnetName": "$testVmName-vnet",
 
-    "varWithEnvVarRef": "$PWD/foo",
+    // Note: $PWD generally also works, but has issues in vscode unit test
+    // runner vs. CLI due to the way its wrapper sometimes starts in one
+    // directory vs. moves to the code directory without changing the
+    // environment variables.
+    // So, for this reason we set an environment variable explicitly in the
+    // test setup, and ensure that the launcher properly propagates it through
+    // here when expanding variables.
+    "pathVarWithEnvVarRef": "$CUSTOM_PATH_FROM_ENV/foo",
+    "varWithEnvVarRef": "user:$USER",
 
     // Override the default value of the "max_iterations" parameter
     // of the optimizer when running local tests:

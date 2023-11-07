@@ -1,0 +1,15 @@
+{
+    // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
+    "description": "SSH Host Service configuration.",
+
+    "class": "mlos_bench.services.remote.ssh.ssh_host_service.SshHostService",
+    "config": {
+        "ssh_username": "someuser",
+        "ssh_port": 2222,
+        "ssh_priv_key_path": "~/.ssh/id_rsa",
+        "ssh_known_hosts_path": null,
+        "ssh_request_timeout": 90,
+        "ssh_keepalive_interval": 10,
+        "ssh_shell": "/bin/bash"
+    }
+}

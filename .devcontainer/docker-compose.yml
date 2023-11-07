@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   app:
     build:
@@ -12,6 +10,10 @@ services:
         no_proxy: ${no_proxy}
       cache_from:
         - mloscore.azurecr.io/mlos-devcontainer:latest
+        - mlos-devcontainer:latest
+      # codespaces prebuild uses an older docker compose that doesn't support this
+      #tags:
+      #  - mlos-devcontainer:latest
 
     volumes:
       - ../..:/workspaces:cached
@@ -20,6 +22,9 @@ services:
     command: /bin/sh -c "while true; do sleep 1000; done"
 
     env_file: ../.env
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   docs-www:
     build:

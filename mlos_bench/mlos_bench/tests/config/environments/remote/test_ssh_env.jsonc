@@ -1,0 +1,119 @@
+// Test config for test_ssh_env.py
+{
+    "class": "mlos_bench.environments.composite_env.CompositeEnv",
+    "description": "Test Environment for RemoteEnv via local SSH test infrastructure",
+    "name": "composite_remote_ssh_env",
+
+    "include_services": [
+        // from the built in configs
+        "services/local/local_exec_service.jsonc",
+        "services/remote/ssh/ssh_host_service.jsonc",
+        "services/remote/ssh/ssh_fileshare_service.jsonc"
+    ],
+
+    "include_tunables": ["environments/remote/test_ssh-tunables.jsonc"],
+
+    "config": {
+        "children": [
+            {
+                "class": "mlos_bench.environments.remote.remote_env.RemoteEnv",
+                "name": "remote_ssh_env",
+                "config": {
+                    "tunable_params": ["test_ssh_tunable_group"],
+                    "required_args": [
+                        "ssh_hostname",
+                        "ssh_port",
+                        "ssh_username",
+                        "ssh_priv_key_path"
+                    ],
+                    "shell_env_params": [
+                        "ssh_username"
+                    ],
+                    "setup": [
+                        "echo 'Preparing output.csv' >&2",
+                        "echo 'metric,value' | tee output.csv"
+                    ],
+                    "run": [
+                        // write a basic results csv file we can download and compare with
+                        "echo 'Generating test metrics output ...' >&2",
+                        // Check that we connected to the test server.
+                        "echo \"hostname,`hostname`\" | tee -a output.csv",
+                        // Test environment variables
+                        "echo \"username,${ssh_username}\" | tee -a output.csv",
+                        // Shouldn't be exported
+                        "echo \"ssh_priv_key_path,${ssh_priv_key_path:-}\" | tee -a output.csv",
+                        "echo \"test_param,${test_param:-unset}\" | tee -a output.csv",
+                        "echo score,0.9 | tee -a output.csv",
+                        "echo 'Done' >&2",
+                        // Wait a moment (mostly for debugging)
+                        "echo 'Sleeping ...' >&2",
+                        //"sleep 10",
+                        "echo 'Done' >&2"
+                    ],
+                    "teardown": [
+                        "rm output.csv",
+                        "echo 'teardown,complete' | tee teardown.txt"
+                    ]
+                }
+            },
+            {
+                "class": "mlos_bench.environments.remote.remote_env.RemoteEnv",
+                "name": "test shell_env export behavior",
+                "config": {
+                    "const_args": {
+                        "FOO": "bar"
+                    },
+                    "required_args": [
+                        "ssh_hostname",
+                        "ssh_port",
+                        "ssh_username",
+                        "ssh_priv_key_path"
+                    ],
+                    //"shell_env_params": []    // left unspecified, no environment variables should be exported
+                    "run": [
+                        "echo \"Checking that no tunables or other variables are automatically exported where they shouldn't be\" >&2",
+                        "echo \"FOO,${FOO:-unset}\" | tee -a output.csv",
+                        "echo \"ssh_username,${ssh_username:-unset}\" | tee -a output.csv"
+                    ]
+                }
+            },
+            {
+                "class": "mlos_bench.environments.local.local_fileshare_env.LocalFileShareEnv",
+                "name": "local_ssh_env",
+                "config": {
+                    "const_args": {
+                        "FOO": "baz"
+                    },
+                    // these are needed by the SshFileShareService
+                    // FIXME: Can we only include these in the CompositeEnv and have them propagate down?
+                    "required_args": [
+                        "ssh_hostname",
+                        "ssh_port",
+                        "ssh_username",
+                        "ssh_priv_key_path"
+                    ],
+                    // Download happens *prior* to teardown, so this should succeed.
+                    "download": [
+                        {
+                            "from": "output.csv",
+                            // Download to the temporary directory, not the current working directory.
+                            "to": "$PWD/output-downloaded.csv"
+                        }
+                    ],
+                    //"shell_env_params": [],   // left unspecified, no environment variables should be exported
+                    /* FIXME: Skipping for now. This runs locally, and only works on Linux.
+                    "run": [
+                        "if printenv | grep -e ^FOO=; then exit 1; fi",
+                        "if printenv | grep -e ^test_param=; then exit 1; fi"
+                    ],
+                    */
+                    "read_results_file": "output-downloaded.csv",
+                    "teardown": [
+                        // Shouldn't exist in the local directory
+                        "test ! -e output-downloaded.csv"
+                    ]
+                }
+            }
+        ]
+    }
+}

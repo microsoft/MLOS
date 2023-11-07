@@ -1,0 +1,7 @@
+{
+    "class": "mlos_bench.services.remote.ssh.ssh_host_service.SshHostService",
+    "config": {
+        // don't check host keys
+        "ssh_known_hosts_path": null
+    }
+}
