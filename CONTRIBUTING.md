@@ -2,7 +2,7 @@
 
 This project welcomes contributions and suggestions.
 Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution.
-For details, visit https://cla.opensource.microsoft.com.
+For details, visit https://cla.opensource.microsoft.com. <!-- markdownlint-disable-line MD034 -->
 
 When you submit a pull request, a CLA bot will automatically determine whether you need to provide a CLA and decorate the PR appropriately (e.g., status check, comment).
 Simply follow the instructions provided by the bot. You will only need to do this once across all repos using our CLA.
@@ -59,7 +59,7 @@ Simply open the project in VSCode and follow the prompts to build and open the d
 
 [`main`](https://github.com/microsoft/MLOS/tree/main) is considered the primary development branch.
 
-We expect development to follow a typical "gitflow" style workflow:
+We expect development to follow a typical "forking" style workflow:
 
 1. Fork a copy of the [MLOS repo in Github](https://github.com/microsoft/MLOS).
 2. Create a development (a.k.a. topic) branch off of `main` to work on changes.
@@ -73,3 +73,8 @@ We expect development to follow a typical "gitflow" style workflow:
 3. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
 4. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
 5. Once approved, the PR can be completed using a squash merge in order to keep a nice linear history.
+
+### See Also
+
+- <https://docs.github.com/en/get-started/quickstart/fork-a-repo>
+- <https://www.atlassian.com/git/tutorials/comparing-workflows/forking-workflow>
