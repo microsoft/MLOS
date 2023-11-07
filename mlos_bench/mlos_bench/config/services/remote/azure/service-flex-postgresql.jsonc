@@ -1,0 +1,18 @@
+// A service to configure Azure PostgreSQL Flexible Server.
+{
+    "class": "mlos_bench.services.remote.azure.AzureSaaSConfigService",
+
+    "config": {
+
+        "subscription": "PLACEHOLDER; AZURE SUBSCRIPTION ID",
+        "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
+        "vmName": "PLACEHOLDER; e.g., mlos-vm-pg",
+
+        "provider": "Microsoft.DBforPostgreSQL",
+        "supportsBatchUpdate": false,
+        "isFlex": true,
+        "apiVersion": "2022-12-01",
+
+        "requestTimeout": 20  // HTTP request timeout in seconds
+    }
+}
