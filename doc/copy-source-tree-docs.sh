@@ -20,7 +20,10 @@ for readme_file_path in README.md mlos_core/README.md mlos_bench/README.md; do
     cp "$readme_file_path" "doc/source/source_tree_docs/$file_dir/index.md"
 
     # Tweak source source code links.
-    sed -i -r -e "s|\]\(([^:#)]+)\)|\]\(https://github.com/microsoft/MLOS/tree/main/$file_dir/\1\)|g" \
+    sed -i -r -e "s|\]\(([^:#)]+)(#[a-zA-Z0-9_-]+)?\)|\]\(https://github.com/microsoft/MLOS/tree/main/$file_dir/\1\2\)|g" \
+        "doc/source/source_tree_docs/$file_dir/index.md"
+    # Tweak the lexers for local expansion by pygments instead of github's.
+    sed -i -r -e 's/```jsonc/```json/' \
         "doc/source/source_tree_docs/$file_dir/index.md"
 done
 
