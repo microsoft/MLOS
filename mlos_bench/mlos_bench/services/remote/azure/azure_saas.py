@@ -180,8 +180,7 @@ class AzureSaaSConfigService(Service, SupportsRemoteConfig):
         """
         assert self._parent is not None and isinstance(self._parent, SupportsAuth), \
             "Authorization service not provided. Include service-auth.jsonc?"
-
-        return {"Authorization": "Bearer " + self._parent.get_access_token()}
+        return self._parent.get_auth_headers()
 
     def _config_one(self, config: Dict[str, Any],
                     param_name: str, param_value: Any) -> Tuple[Status, dict]:
