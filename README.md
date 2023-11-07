@@ -29,7 +29,7 @@ MLOS is a project to enable autotuning for systems.
 
 ## Overview
 
-Although we would like to eventually support online tuning as well, MLOS initially focuses on an *offline* tuning approach.
+MLOS currently focuses on an *offline* tuning approach, though we intend to add online tuning in the future.
 
 To accomplish this, the general flow involves
 

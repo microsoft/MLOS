@@ -4,15 +4,21 @@ Welcome to the MLOS documentation!
 MLOS is a project to enable autotuning for systems.
 
 .. toctree::
-   :hidden:
-   :maxdepth: 3
-   :caption: Documentation
+   :maxdepth: 2
+   :caption: Source Tree Documentation
+
+   source_tree_docs/index
+   source_tree_docs/mlos_bench/index
+   source_tree_docs/mlos_core/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Overview
 
    overview
 
 .. toctree::
-   :hidden:
-   :maxdepth: 4
+   :maxdepth: 3
    :caption: API Reference
 
    api/mlos_core/modules
@@ -20,20 +26,12 @@ MLOS is a project to enable autotuning for systems.
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Examples
 
    auto_examples/index
 
 .. toctree::
    :maxdepth: 1
-   :hidden:
    :caption: References
 
-   Source Tree <https://aka.ms/mlos-core/src>
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Source Tree Documentation
-
-   markdown/index
+   Github Source Tree <https://aka.ms/mlos-core/src>
