@@ -1,0 +1,73 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/remote/azure/azure-saas-service-subschema.json",
+    "title": "mlos_bench Azure Flex DB configuration Service config",
+    "description": "config for an mlos_bench Azure Flex DB Service configuration",
+    "type": "object",
+    "properties": {
+        "class": {
+            "enum": [
+                "mlos_bench.services.remote.azure.AzureSaaSConfigService",
+                "mlos_bench.services.remote.azure.azure_saas.AzureSaaSConfigService"
+            ]
+        },
+        "config": {
+            "type": "object",
+            "allOf": [
+                {
+                    "$ref": "../../common-defs-subschemas.json#/$defs/poll_configs"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "subscription": {
+                            "description": "Azure subscription id (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
+                        "resourceGroup": {
+                            "description": "The name of the resource group to place the deployment in (typically provided in the global config in order to omit from source control).",
+                            "type": "string"
+                        },
+                        "vmName": {
+                            "description": "Name of the server.",
+                            "type": "string"
+                        },
+                        "provider": {
+                            "description": "Name of the Azure DB provider (i.e., a DB service type). See, e.g., https://learn.microsoft.com/en-us/rest/api/mysql/flexibleserver/configurations",
+                            "type": "string",
+                            "examples": [
+                                "Microsoft.DBforMySQL",
+                                "Microsoft.DBforPostgreSQL",
+                                "Microsoft.DBforMariaDB"
+                            ]
+                        },
+                        "supportsBatchUpdate": {
+                            "description": "Whether API supports updating multiple config parameters at once, e.g., https://learn.microsoft.com/en-us/rest/api/mysql/flexibleserver/configurations/batch-update",
+                            "type": "boolean"
+                        },
+                        "isFlex": {
+                            "description": "Whether SaaS is an Azure Flexible Server. See, e.g., https://learn.microsoft.com/en-us/rest/api/postgresql/flexibleserver/configurations",
+                            "type": "boolean"
+                        },
+                        "apiVersion": {
+                            "description": "Version of Azure REST API, e.g., 2022-01-01-preview",
+                            "type": "string",
+                            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}(-preview)?$",
+                            "examples": [
+                                "2022-01-01",
+                                "2023-06-01-preview"
+                            ]
+                        }
+                    },
+                    "required": [
+                        "subscription",
+                        "resourceGroup",
+                        "provider"
+                    ]
+                }
+            ],
+            "unevaluatedProperties": false
+        }
+    },
+    "required": ["class", "config"]
+}
