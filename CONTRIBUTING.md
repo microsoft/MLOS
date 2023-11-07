@@ -10,6 +10,51 @@ Simply follow the instructions provided by the bot. You will only need to do thi
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
+## Environment
+
+### Getting Started
+
+The development environment for MLOS uses `conda` to ease dependency management.
+
+#### Devcontainer (preferred)
+
+For a quick start, you can use the provided [VSCode devcontainer](https://code.visualstudio.com/docs/remote/containers) configuration.
+
+Simply open the project in VSCode and follow the prompts to build and open the devcontainer and the conda environment and additional tools will be installed automatically inside the container.
+
+#### Manually
+
+> See Also: [`conda` install instructions](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
+>
+> Note: to support Windows we currently rely on some pre-compiled packages from `conda-forge` channels, which increases the `conda` solver time during environment create/update.
+>
+> To work around this the (currently) experimental `libmamba` solver can be used.
+>
+> See <https://github.com/conda-incubator/conda-libmamba-solver#getting-started> for more details.
+
+1. Create the `mlos` Conda environment.
+
+     ```sh
+    conda env create -f conda-envs/mlos.yml
+    ```
+
+    > See the [`conda-envs/`](./conda-envs/) directory for additional conda environment files, including those used for Windows (e.g. [`mlos-windows.yml`](./conda-envs/mlos-windows.yml)).
+
+   or
+
+    ```sh
+    # This will also ensure the environment is update to date using "conda env update -f conda-envs/mlos.yml"
+    make conda-env
+    ```
+
+    > Note: the latter expects a *nix environment.
+
+1. Initialize the shell environment.
+
+    ```sh
+    conda activate mlos
+    ```
+
 ## Details
 
 [`main`](https://github.com/microsoft/MLOS/tree/main) is considered the primary development branch.
@@ -19,6 +64,8 @@ We expect development to follow a typical "gitflow" style workflow:
 1. Fork a copy of the [MLOS repo in Github](https://github.com/microsoft/MLOS).
 2. Create a development (a.k.a. topic) branch off of `main` to work on changes.
 
+    For instance:
+
     ```shell
     git checkout -b YourDevName/some-topic-description main
     ```
@@ -26,12 +73,3 @@ We expect development to follow a typical "gitflow" style workflow:
 3. Submit changes for inclusion as a [Pull Request on Github](https://github.com/microsoft/MLOS/pulls).
 4. PRs are associated with [Github Issues](https://github.com/microsoft/MLOS/issues) and need [MLOS-committers](https://github.com/orgs/microsoft/teams/MLOS-committers) to sign-off (in addition to other CI pipeline checks like tests and lint checks to pass).
 5. Once approved, the PR can be completed using a squash merge in order to keep a nice linear history.
-
-### Caveats
-
-There are consumers of MLOS internal to Microsoft that use an internal copy of the Github repo targetting code that is not open-sourced.
-This arrangement sometimes means porting changes from the internal repo to Github (and vise-versa).
-When that happens, the changes are submitted as a PR as described above, with the slight modification of (once approved and passing tests) using a rebase based merge instead of a squash merge in order to allow detecting duplicate patches between the public and private repos.
-
-Additionally, to try and catch breaking changes we run some extra internal integration tests as well.
-If they do find issues, we encourage a conversation to occur on how to resolve them in the PRs.
