@@ -58,6 +58,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.doctest',
+    # 'sphinx.ext.intersphinx',
+    # 'sphinx.ext.linkcode',
     'numpydoc',
     'matplotlib.sphinxext.plot_directive',
     'myst_parser',
