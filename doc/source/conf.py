@@ -23,7 +23,7 @@ from logging import warning
 
 import sphinx_rtd_theme
 
-#sys.path.insert(0, os.path.abspath('../..'))
+
 sys.path.insert(0, os.path.abspath('../../mlos_core/mlos_core'))
 sys.path.insert(1, os.path.abspath('../../mlos_bench/mlos_bench'))
 
@@ -60,7 +60,14 @@ extensions = [
     'sphinx.ext.doctest',
     'numpydoc',
     'matplotlib.sphinxext.plot_directive',
+    'myst_parser',
 ]
+
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown',
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
