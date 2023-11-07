@@ -1,0 +1,12 @@
+{
+    "name": "Azure MySQL Flex DB Configuration",
+    "class": "mlos_bench.environments.remote.SaaSEnv",
+
+    "include_services": ["services/remote/azure/service-flex-mysql.jsonc"],
+    "include_tunables": ["environments/apps/mysql/mysql-tunables.jsonc"],
+
+    "config": {
+        "required_args": ["vmName"],
+        "tunable_params": ["mysql-innodb", "mysql-buffer"]
+    }
+}

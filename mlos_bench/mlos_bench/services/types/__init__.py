@@ -11,6 +11,7 @@ from mlos_bench.services.types.fileshare_type import SupportsFileShareOps
 from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.services.types.local_exec_type import SupportsLocalExec
 from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
+from mlos_bench.services.types.remote_config_type import SupportsRemoteConfig
 
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     'SupportsHostProvisioning',
     'SupportsLocalExec',
     'SupportsRemoteExec',
+    'SupportsRemoteConfig',
 ]
