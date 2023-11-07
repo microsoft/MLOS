@@ -1,4 +1,8 @@
 #!/bin/bash
+##
+## Copyright (c) Microsoft Corporation.
+## Licensed under the MIT License.
+##
 
 # Layout a few markdown files from the source tree into the doc tree so they can be read there too.
 # Fixup any links to point back to the main site though.
