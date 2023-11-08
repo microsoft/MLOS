@@ -17,13 +17,15 @@ from mlos_bench.tests.services.remote.mock.mock_fileshare_service import MockFil
 # pylint: disable=redefined-outer-name
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def mock_fileshare_service() -> MockFileShareService:
     """
     Create a new mock FileShareService instance.
     """
     return MockFileShareService(
-        parent=LocalExecService(parent=ConfigPersistenceService()))
+        config={"fileShareName": "MOCK_FILESHARE"},
+        parent=LocalExecService(parent=ConfigPersistenceService())
+    )
 
 
 @pytest.fixture
@@ -39,17 +41,30 @@ def local_fileshare_env(tunable_groups: TunableGroups,
                 "experiment_id": "EXP_ID",  # Passed into "shell_env_params"
                 "trial_id": 222,            # NOT passed into "shell_env_params"
             },
-            "tunable_params": ["kernel"],
+            "tunable_params": ["boot"],
             "shell_env_params": [
                 "trial_id",                 # From "const_arg"
-                "kernel_sched_latency_ns",  # From "tunable_params"
+                "idle",                     # From "tunable_params", == "halt"
             ],
             "upload": [
                 {
                     "from": "grub.cfg",
-                    "to": "$experiment_id/$trial_id/input/grub.cfg"
-                }
-            ]
+                    "to": "$experiment_id/$trial_id/input/grub.cfg",
+                },
+                {
+                    "from": "data_$idle.csv",
+                    "to": "$experiment_id/$trial_id/input/data_$idle.csv",
+                },
+            ],
+            "run": [
+                "echo No-op run"
+            ],
+            "download": [
+                {
+                    "from": "$experiment_id/$trial_id/$idle/data.csv",
+                    "to": "output/data_$idle.csv",
+                },
+            ],
         },
         tunables=tunable_groups,
         service=mock_fileshare_service,
@@ -69,5 +84,9 @@ def test_local_fileshare_env(tunable_groups: TunableGroups,
         (status, _) = env_context.run()
         assert status.is_succeeded()
         assert mock_fileshare_service.get_upload() == [
-            ("grub.cfg", "EXP_ID/222/input/grub.cfg")
+            ("grub.cfg", "EXP_ID/222/input/grub.cfg"),
+            ("data_halt.csv", "EXP_ID/222/input/data_halt.csv"),
+        ]
+        assert mock_fileshare_service.get_download() == [
+            ("EXP_ID/222/halt/data.csv", "output/data_halt.csv"),
         ]
