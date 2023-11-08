@@ -28,6 +28,9 @@
                     "$ref": "./remote/remote-env-subschema.json"
                 },
                 {
+                    "$ref": "./remote/saas-env-subschema.json"
+                },
+                {
                     "$ref": "./remote/host-env-subschema.json"
                 },
                 {

@@ -1,45 +1,24 @@
-Welcome to MlosCore's documentation!
-====================================
+Welcome to the MLOS documentation!
+==================================
 
-.. image:: badges/tests.svg
-
-.. image:: badges/coverage.svg
-   :target: htmlcov/index.html
-
-``mlos_core``
--------------
-
-This repository contains a stripped down implementation of essentially just the core optimizer and config space description APIs from the original `MLOS <https://github.com/microsoft/MLOS>`_.
-
-It is intended to provide a simplified, easier to consume (e.g. via ``pip``), with lower dependencies abstraction to
-
-- describe a space of context, parameters, their ranges, constraints, etc. and result objectives
-- an "optimizer" service `abstraction <./overview.html#mlos-core-api>`_ (e.g. ``register()`` and ``suggest()``) so we can easily swap out different implementations methods of searching (e.g. random, BO, etc.)
-- provide some helpers for `automating optimization experiment <./overview.html#mlos-bench-api>`_ runner loops and data collection
-
-For these design requirements we intend to reuse as much from existing OSS libraries as possible and layer policies and optimizations specifically geared towards autotuning over top.
-
-``mlos_bench``
---------------
-
-This repository also contains the `mlos_bench <./overview.html#mlos-bench-api>`_ module intended to help automate and manage running experiments for autotuning systems with `mlos_core <./overview.html#mlos-core-api>`_.
-
-See Also
---------
-
-- `Source Code <https://aka.ms/mlos-core/src>`_
+MLOS is a project to enable autotuning for systems.
 
 .. toctree::
-   :hidden:
-   :maxdepth: 3
-   :caption: Documentation
+   :maxdepth: 2
+   :caption: Source Tree Documentation
 
-   installation
+   source_tree_docs/index
+   source_tree_docs/mlos_bench/index
+   source_tree_docs/mlos_core/index
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API Overview
+
    overview
 
 .. toctree::
-   :hidden:
-   :maxdepth: 4
+   :maxdepth: 3
    :caption: API Reference
 
    api/mlos_core/modules
@@ -47,7 +26,12 @@ See Also
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
    :caption: Examples
 
    auto_examples/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: References
+
+   Github Source Tree <https://aka.ms/mlos-core/src>

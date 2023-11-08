@@ -1,0 +1,8 @@
+{
+    // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+    "name": "Azure MySQL Flex DB Configuration",
+    "class": "mlos_bench.environments.remote.SaaSEnv",
+    "config": {
+        // needs at least one param
+    }
+}

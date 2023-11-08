@@ -1,0 +1,113 @@
+{
+    "mysql-innodb": {
+        "cost": 1,
+        "params": {
+            "innodb_buffer_pool_instances": {
+                "range": [1, 64],
+                "type": "int",
+                "description": "The number of regions that the InnoDB buffer pool is divided into",
+                "default": 8
+            },
+            "innodb_buffer_pool_dump_pct": {
+                "range": [1, 100],
+                "type": "int",
+                "description": "Specifies the percentage of the most recently used pages for each buffer pool to read out and dump.",
+                "default": 100
+            },
+            "innodb_old_blocks_pct": {
+                "range": [5, 95],
+                "type": "int",
+                "description": "Specifies the approximate percentage of the InnoDB buffer pool used for the old block sublist.",
+                "default": 37
+            },
+            "innodb_flush_method": {
+                "values": [
+                    "fsync",
+                    "O_DSYNC",
+                    "O_DIRECT"
+                    // Values below can lead to data corruption:
+                    // "O_DIRECT_NO_FSYNC"
+                    // "littlesync",
+                    // "nosync"
+                ],
+                "type": "categorical",
+                "description": "Defines the method used to flush data to InnoDB data files and log files, which can affect I/O throughput.",
+                "default": "fsync"
+            },
+            "innodb_log_buffer_size": {
+                "range": [1, 2048],  // MB (orig. [1048576..4294967295])
+                "type": "int",
+                "meta": {"value_suffix": "M"},
+                "description": "The size in bytes of the buffer that InnoDB uses to write to the log files on disk.",
+                "default": 16  // MB = 16777216
+            }
+        }
+    },
+    "mysql-innodb-other": {
+        "cost": 1,
+        "params": {
+            "innodb_buffer_pool_size": {
+                "range": [1, 1024],  // MB (orig. [1..4294967295]; max = 4GB - 1)
+                "type": "int",
+                "meta": {"value_suffix": "M"},
+                "description": "The size in bytes of the buffer pool, the memory area where InnoDB caches table and index data.",
+                "default": 128  // MB
+            },
+            "innodb_old_blocks_time": {
+                "range": [0, 3600000],  // = 1h in msec. (orig. [0..4294967295] ~= 50 days)
+                "type": "int",
+                "description": "Non-zero values protect against the buffer pool being filled by data that is referenced only for a brief period, such as during a full table scan.",
+                "default": 1000  // microseconds = 1 sec.
+            },
+            "innodb_io_capacity": {
+                "range": [100, 10000],  // max = 2^64 - 1 = 18446744073709551615
+                "type": "int",
+                "description": "Sets an upper limit on I/O activity performed by InnoDB background tasks, such as flushing pages from the buffer pool and merging data from the change buffer.",
+                "default": 200
+            },
+            "innodb_io_capacity_max": {
+                "range": [100, 64000],  // max = 2^64 - 1 = 18446744073709551615
+                "type": "int",
+                "description": "If flushing activity falls behind, InnoDB can flush more aggressively than the limit imposed by innodb_io_capacity. innodb_io_capacity_max defines an upper limit the number of I/O operations performed per second by InnoDB background tasks in such situations.",
+                "default": 2000
+            },
+            "innodb_file_per_table": {
+                "values": ["ON", "OFF"],
+                "type": "categorical",
+                "description": "InnoDB stores the data and indexes for each newly created table in a separate .ibd file instead of the system tablespace. It cannot be updated any more for a master/replica server to keep the replication consistency.",
+                "default": "ON"
+            }
+        }
+    },
+    "mysql-buffer": {
+        "cost": 1,
+        "params": {
+            "join_buffer_size": {
+                "range": [1, 1048576],  // KB (1KB..1GB) (orig. [128, 18446744073709547520])
+                "type": "int",
+                "meta": {"value_suffix": "K"},
+                "description": "The minimum size of the buffer that is used for plain index scans, range index scans, and joins that do not use indexes and thus perform full table scans.",
+                "default": 256  // KB = 262144
+            },
+            "sort_buffer_size": {
+                "range": [32, 32768],  // KB (orig. [32KB..32MB] = [32768, 33554432])
+                "type": "int",
+                "meta": {"value_suffix": "K"},
+                "description": "Each session that must perform a sort allocates a buffer of this size.",
+                "default": 512  // KB = 524288
+            }
+        }
+    },
+    "mysql-buffer-preload": {
+        "cost": 1,
+        "params": {
+            "preload_buffer_size": {
+                "range": [1, 1048576],  // KB (orig. [1KB..1GB] = [1024, 1073741824])
+                "type": "int",
+                "meta": {"value_suffix": "K"},
+                "description": "The size of the buffer that is allocated when preloading indexes.",
+                "default": 32  // KB = 32768
+            }
+        }
+    }
+}
