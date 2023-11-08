@@ -9,7 +9,7 @@ See Also: <https://automl.github.io/SMAC3/main/index.html>
 
 from logging import warning
 from pathlib import Path
-from typing import Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Dict, List, Optional, Union
 from tempfile import TemporaryDirectory
 
 import ConfigSpace
@@ -266,13 +266,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        if TYPE_CHECKING:
-            from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
-
         if context is not None:
             raise NotImplementedError()
 
-        trial: TrialInfo = self.base_optimizer.ask()
+        trial = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
         self.optimizer_parameter_space.check_configuration(trial.config)
         assert trial.config.config_space == self.optimizer_parameter_space
