@@ -50,7 +50,10 @@ class AzureAuthService(Service, SupportsAuth):
         """
         super().__init__(
             config, global_config, parent,
-            self.merge_methods(methods, [self.get_access_token])
+            self.merge_methods(methods, [
+                self.get_access_token,
+                self.get_auth_headers,
+            ])
         )
 
         # This parameter can come from command line as strings, so conversion is needed.
@@ -119,3 +122,9 @@ class AzureAuthService(Service, SupportsAuth):
             self._access_token = res.token
             _LOG.info("Got new accessToken. Expiration time: %s", self._token_expiration_ts)
         return self._access_token
+
+    def get_auth_headers(self) -> dict:
+        """
+        Get the authorization part of HTTP headers for REST API calls.
+        """
+        return {"Authorization": "Bearer " + self.get_access_token()}

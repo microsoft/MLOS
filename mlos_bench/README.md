@@ -1,6 +1,6 @@
 # mlos-bench
 
-This directory contains the code for the `mlos-bench` experiment runner package.
+This [directory](./) contains the code for the `mlos-bench` experiment runner package.
 
 It makes use of the `mlos-core` package for its optimizer.
 
@@ -181,7 +181,7 @@ Searching for an optimal set of tunable parameters is very similar to running a 
 All we have to do is specifying the [`Optimizer`](./mlos_bench/optimizers/) in the top-level configuration, like in our [`azure-redis-opt.jsonc`](./mlos_bench/config/cli/azure-redis-opt.jsonc) example.
 
 ```sh
-mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc --max_iterations 10"
+mlos_bench --config "./mlos_bench/mlos_bench/config/cli/azure-redis-opt.jsonc" --globals "experiment_MyBenchmark.jsonc" --max_iterations 10
 ```
 
 Note that again we use the command line option `--max_iterations` to override the default value from [`mlos_core_flaml.jsonc`](./mlos_bench/config/optimizers/mlos_core_flaml.jsonc).

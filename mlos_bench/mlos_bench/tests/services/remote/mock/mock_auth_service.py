@@ -26,8 +26,14 @@ class MockAuthService(Service, SupportsAuth):
                  methods: Union[Dict[str, Callable], List[Callable], None] = None):
         super().__init__(
             config, global_config, parent,
-            self.merge_methods(methods, [self.get_access_token])
+            self.merge_methods(methods, [
+                self.get_access_token,
+                self.get_auth_headers,
+            ])
         )
 
     def get_access_token(self) -> str:
         return "TOKEN"
+
+    def get_auth_headers(self) -> dict:
+        return {"Authorization": "Bearer " + self.get_access_token()}

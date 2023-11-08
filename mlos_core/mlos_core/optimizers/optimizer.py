@@ -209,8 +209,10 @@ class BaseOptimizer(metaclass=ABCMeta):
         return observations.nsmallest(1, columns='score')
 
     def cleanup(self) -> None:
-        """Cleanup the optimizer."""
-        pass    # pylint: disable=unnecessary-pass # pragma: no cover
+        """
+        Remove temp files, release resources, etc. after use. Default is no-op.
+        Redefine this method in optimizers that require cleanup.
+        """
 
     def _from_1hot(self, config: npt.NDArray) -> pd.DataFrame:
         """
