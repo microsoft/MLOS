@@ -327,6 +327,9 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile
 	touch doc/source/badges/coverage.svg
 	touch doc/source/badges/tests.svg
 
+	# Copy the source tree docs into place.
+	./doc/copy-source-tree-docs.sh
+
 	# Build the rst files into html.
 	conda run -n ${CONDA_ENV_NAME} $(MAKE) -C doc/ $(MAKEFLAGS) html \
 		>> doc/build/log.txt 2>&1 \
