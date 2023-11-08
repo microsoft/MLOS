@@ -78,9 +78,16 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
         self._results_stdout_pattern: Optional[re.Pattern[str]] = \
             re.compile(results_stdout_pattern) if results_stdout_pattern else None
 
-    def _get_env_params(self) -> Dict[str, str]:
+    def _get_env_params(self, restrict: bool = True) -> Dict[str, str]:
         """
         Get the *shell* environment parameters to be passed to the script.
+
+        Parameters
+        ----------
+        restrict : bool
+            If True, only return the parameters that are in the `_shell_env_params`
+            list. If False, return all parameters in `_params` with some possible
+            conversions.
 
         Returns
         -------
@@ -88,7 +95,8 @@ class ScriptEnv(Environment, metaclass=abc.ABCMeta):
             Parameters to pass as *shell* environment variables into the script.
             This is usually a subset of `_params` with some possible conversions.
         """
-        rename = {self._RE_INVALID.sub("_", key): key for key in self._shell_env_params}
+        input_params = self._shell_env_params if restrict else self._params.keys()
+        rename = {self._RE_INVALID.sub("_", key): key for key in input_params}
         rename.update(self._shell_env_params_rename)
         return {key_sub: str(self._params[key]) for (key_sub, key) in rename.items()}
 

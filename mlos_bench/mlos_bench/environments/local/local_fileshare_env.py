@@ -118,7 +118,7 @@ class LocalFileShareEnv(LocalEnv):
         self._is_ready = super().setup(tunables, global_config)
         if self._is_ready:
             assert self._temp_dir is not None
-            params = self._get_env_params()
+            params = self._get_env_params(restrict=False)
             params["PWD"] = self._temp_dir
             for (path_from, path_to) in self._expand(self._upload, params):
                 self._file_share_service.upload(self._params, self._config_loader_service.resolve_path(
@@ -136,7 +136,7 @@ class LocalFileShareEnv(LocalEnv):
             If False, proceed with downloading other files and log a warning.
         """
         assert self._temp_dir is not None
-        params = self._get_env_params()
+        params = self._get_env_params(restrict=False)
         params["PWD"] = self._temp_dir
         for (path_from, path_to) in self._expand(self._download, params):
             try:
