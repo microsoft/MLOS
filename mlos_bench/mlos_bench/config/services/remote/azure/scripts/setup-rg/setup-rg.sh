@@ -6,6 +6,23 @@
 
 set -eu
 
+function usage() {
+    local msg="${1:-}"
+    if [ -n "$msg" ]; then
+        echo "ERROR: $msg"
+    fi
+    script_name=$(basename "$0")
+    cat <<USAGE
+$script_name
+    --resourceGroupName someRgName
+    --controlPlaneArmParamsFile someControlPlaneArmParamsFile.json
+    --resultsDbArmParamsFile someResultsDbArmParamsFile.json
+    --servicePrincipalName someServicePrincipalName
+    --certName someCertName
+USAGE
+    exit 1
+}
+
 # Argument parsing
 while [[ "$#" -gt 0 ]]; do
 case $1 in
@@ -37,21 +54,45 @@ case $1 in
         shift 2
         ;;
     *)
-        echo "Unknown parameter passed $1"
+        usage "Unknown parameter passed $1"
         shift 1
         ;;
 esac
+done
+
+if [ -z "${resourceGroupName:-}" ]; then
+    usage "missing required resourceGroupName"
+elif [ -z "${controlPlaneArmParamsFile:-}" ]; then
+    usage "missing required controlPlaneArmParamsFile"
+elif [ -z "${servicePrincipalName:-}" ]; then
+    usage "missing required servicePrincipalName"
+elif [ -z "${certName:-}" ]; then
+    usage "missing required certName"
+fi
+
+for dependency in az jq; do
+    if ! type $dependency 2>/dev/null; then
+        echo "ERROR: missing dependency: $dependency" >&2
+        exit 1
+    fi
 done
 
 # Default values
 resultsDbArmParamsFile=${resultsDbArmParamsFile:-""}
 certExpirationYears=${certExpirationYears:-1}
 
+# Resolve some file names.
+controlPlaneArmParamsFile=$(readlink -f "$controlPlaneArmParamsFile")
+if [ -n "$resultsDbArmParamsFile" ]; then
+    resultsDbArmParamsFile=$(readlink -f "$resultsDbArmParamsFile")
+fi
+scriptdir=$(dirname "$(readlink -f "$0")")
+
 # Provision resources into the resource group with ARM template
 echo "Provisioning control plane resources..."
 deploymentResults=$(az deployment group create \
     --resource-group "$resourceGroupName" \
-    --template-file ./rg-template.json \
+    --template-file "$scriptdir/rg-template.json" \
     --parameters "$controlPlaneArmParamsFile" \
     --output json \
     )
@@ -66,7 +107,7 @@ if [[ "$resultsDbArmParamsFile" ]]; then
     echo "Provisioning results DB..."
     dbDeploymentResults=$(az deployment group create \
         --resource-group "$resourceGroupName" \
-        --template-file ./results-db/mysql-template.json \
+        --template-file "$scriptdir/results-db/mysql-template.json" \
         --parameters "$resultsDbArmParamsFile" \
         --output json \
         )

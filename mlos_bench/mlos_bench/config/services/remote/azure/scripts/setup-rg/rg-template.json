@@ -11,7 +11,7 @@
         },
         "vmSKU": {
             "type": "string",
-            "defaultValue": "Standard_D2s_v3",
+            "defaultValue": "Standard_D2s_v5",
             "metadata": {
                 "description": "VM SKU"
             }
@@ -53,7 +53,7 @@
         },
         "storageSku": {
             "type": "string",
-            "defaultValue": "Standard_LRS",
+            "defaultValue": "Premium_LRS",
             "allowedValues": [
                 "Premium_LRS",
                 "Premium_ZRS",
