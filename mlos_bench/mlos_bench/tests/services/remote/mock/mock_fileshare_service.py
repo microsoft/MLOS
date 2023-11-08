@@ -32,11 +32,11 @@ class MockFileShareService(FileShareService, SupportsFileShareOps):
         self._upload: List[Tuple[str, str]] = []
         self._download: List[Tuple[str, str]] = []
 
-    def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
-        self._download.append((remote_path, local_path))
-
     def upload(self, params: dict, local_path: str, remote_path: str, recursive: bool = True) -> None:
         self._upload.append((local_path, remote_path))
+
+    def download(self, params: dict, remote_path: str, local_path: str, recursive: bool = True) -> None:
+        self._download.append((remote_path, local_path))
 
     def get_upload(self) -> List[Tuple[str, str]]:
         """

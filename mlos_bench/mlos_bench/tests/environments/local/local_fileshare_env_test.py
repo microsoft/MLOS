@@ -87,6 +87,9 @@ def test_local_fileshare_env(tunable_groups: TunableGroups,
             ("grub.cfg", "EXP_ID/222/input/grub.cfg"),
             ("data_halt.csv", "EXP_ID/222/input/data_halt.csv"),
         ]
+        # NOTE: The "download" section is run twice -- once to check
+        # the status of the run, and once to get the final results.
         assert mock_fileshare_service.get_download() == [
+            ("EXP_ID/222/halt/data.csv", "output/data_halt.csv"),
             ("EXP_ID/222/halt/data.csv", "output/data_halt.csv"),
         ]
