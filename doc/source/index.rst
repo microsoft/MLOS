@@ -1,7 +1,14 @@
 Welcome to the MLOS documentation!
 ==================================
 
-MLOS is a project to enable autotuning for systems.
+.. image:: badges/tests.svg
+
+.. image:: badges/coverage.svg
+   :target: htmlcov/index.html
+
+`MLOS <source_tree_docs/index.html>`_ is a project to enable autotuning for systems.
+
+See below for additional documentation sections.
 
 .. toctree::
    :maxdepth: 2
