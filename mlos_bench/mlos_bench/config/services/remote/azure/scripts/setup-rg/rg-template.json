@@ -53,7 +53,7 @@
         },
         "storageSku": {
             "type": "string",
-            "defaultValue": "Premium_LRS",
+            "defaultValue": "Standard_LRS",
             "allowedValues": [
                 "Premium_LRS",
                 "Premium_ZRS",
@@ -63,6 +63,14 @@
                 "Standard_RAGRS",
                 "Standard_RAGZRS",
                 "Standard_ZRS"
+            ]
+        },
+        "storageKind": {
+            "type": "string",
+            "defaultValue": "StorageV2",
+            "allowedValues": [
+                "FileStorage",
+                "StorageV2"
             ]
         }
     },
@@ -299,7 +307,7 @@
         "dependsOn": [
             "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
         ],
-        "kind": "StorageV2",
+        "kind": "[parameters('storageKind')]",
         "sku": {
             "name": "[parameters('storageSku')]"
         },
@@ -312,7 +320,11 @@
                         "action": "Allow"
                     }
                 ],
-                "ipRules": [],
+                "ipRules": [
+                    {
+                        "value": "[parameters('vmSshSourceAddressPrefix')]"
+                    }
+                ],
                 "defaultAction": "Deny"
             }
         }
