@@ -164,8 +164,8 @@ class FlamlOptimizer(BaseOptimizer):
         points_to_evaluate: list = []
         evaluated_rewards: list = []
         if len(self.evaluated_samples) > 0:
-            evaluated_samples_list: list = [(s.config, s.score) for s in self.evaluated_samples.values()]
-            points_to_evaluate, evaluated_rewards = list(zip(*evaluated_samples_list))
+            points_to_evaluate = [s.config for s in self.evaluated_samples.values()]
+            evaluated_rewards = [s.score for s in self.evaluated_samples.values()]
 
         # Warm start FLAML optimizer
         self._suggested_config = None
