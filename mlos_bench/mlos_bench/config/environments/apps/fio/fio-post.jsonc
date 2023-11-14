@@ -4,7 +4,8 @@
 
     "config": {
         "const_args": {
-            "fio_prefix": "fio.post"
+            "fio_prefix": "fio.post",
+            "fio_benchmark": "readwrite.fio.ini"
         },
         "include_children": [
             "environments/apps/fio/fio.jsonc"
