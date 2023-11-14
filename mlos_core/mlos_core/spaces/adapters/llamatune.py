@@ -296,7 +296,7 @@ class LlamaTuneAdapter(BaseSpaceAdapter):   # pylint: disable=too-many-instance-
                 tuple_list = [(value, self.DEFAULT_SPECIAL_PARAM_VALUE_BIASING_PERCENTAGE)]
             elif isinstance(value, tuple) and [type(v) for v in value] == [int, float]:
                 # User specifies both special value and biasing percentage
-                tuple_list = [value]    # type: ignore[list-item]
+                tuple_list = [value]
             elif isinstance(value, list) and value:
                 if all(isinstance(t, int) for t in value):
                     # User specifies list of special values
