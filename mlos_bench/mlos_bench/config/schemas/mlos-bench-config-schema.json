@@ -4,11 +4,24 @@
     "title": "mlos_bench config schema",
     "description": "Any mlos_bench config - this is the top level schema that should be used to validate any mlos_bench config",
     "if": {
+        "$comment": "check if the config has a class or services property",
+        "type": "object",
         "properties": {
             "class": {
                 "type": "string"
+            },
+            "services": {
+                "type": "array"
             }
-        }
+        },
+        "oneOf": [
+            {
+                "required": ["class"]
+            },
+            {
+                "required": ["services"]
+            }
+        ]
     },
     "then": {
         "oneOf": [
@@ -35,6 +48,7 @@
         ]
     },
     "else": {
+        "$comment": "these configs are *mostly* flat dicts",
         "anyOf": [
             {
                 "description": "cli config",
