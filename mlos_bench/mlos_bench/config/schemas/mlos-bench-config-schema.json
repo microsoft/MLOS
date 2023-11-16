@@ -1,0 +1,48 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/mlos-bench-config-schema.json",
+    "title": "mlos_bench config schema",
+    "description": "Any mlos_bench config - this is the top level schema that should be used to validate any mlos_bench config",
+    "oneOf": [
+        {
+            "description": "cli config",
+            "type": "object",
+            "$ref": "./cli/cli-schema.json"
+        },
+        {
+            "description": "globals config",
+            "type": "object",
+            "$ref": "./cli/globals-schema.json"
+        },
+        {
+            "description": "environment config",
+            "type": "object",
+            "$ref": "./environments/environment-schema.json"
+        },
+        {
+            "description": "optimizer config",
+            "type": "object",
+            "$ref": "./optimizers/optimizer-schema.json"
+        },
+        {
+            "description": "service config",
+            "type": "object",
+            "$ref": "./services/service-schema.json"
+        },
+        {
+            "description": "storage config",
+            "type": "object",
+            "$ref": "./storage/storage-schema.json"
+        },
+        {
+            "description": "tunables params config",
+            "type": "object",
+            "$ref": "./tunables/tunable-params-schema.json"
+        },
+        {
+            "description": "tunables values config",
+            "type": "object",
+            "$ref": "./tunables/tunable-values-schema.json"
+        }
+    ]
+}
