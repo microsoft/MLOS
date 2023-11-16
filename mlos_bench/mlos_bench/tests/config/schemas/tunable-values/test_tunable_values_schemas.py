@@ -30,3 +30,4 @@ def test_tunable_values_configs_against_schema(test_case_name: str) -> None:
     Checks that the tunable values config validates against the schema.
     """
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.TUNABLE_VALUES)
+    check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.UNIFIED)

@@ -111,6 +111,8 @@ class ConfigSchema(Enum):
     TUNABLE_PARAMS = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-params-schema.json")
     TUNABLE_VALUES = path_join(CONFIG_SCHEMA_DIR, "tunables/tunable-values-schema.json")
 
+    UNIFIED = path_join(CONFIG_SCHEMA_DIR, "mlos-bench-config-schema.json")
+
     @property
     def schema(self) -> dict:
         """Gets the schema object for this type."""

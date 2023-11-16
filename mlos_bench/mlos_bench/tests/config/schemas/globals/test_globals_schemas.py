@@ -30,3 +30,4 @@ def test_globals_configs_against_schema(test_case_name: str) -> None:
     Checks that the CLI config validates against the schema.
     """
     check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.GLOBALS)
+    check_test_case_against_schema(TEST_CASES.by_path[test_case_name], ConfigSchema.UNIFIED)
