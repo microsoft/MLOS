@@ -214,8 +214,9 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         retry = Retry(total=total, backoff_factor=backoff_factor)
         adapter = HTTPAdapter(max_retries=retry)
 
-        session.mount("http://", adapter)
         session.mount("https://", adapter)
+
+        session.headers.update(self._get_headers())
 
         return session
 
@@ -311,10 +312,9 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
 
         session = self._get_session(params)
         try:
-            response = session.get(url, headers=self._get_headers(), timeout=self._request_timeout)
+            response = session.get(url, timeout=self._request_timeout)
         except requests.exceptions.ReadTimeout:
             _LOG.warning("Request timed out: %s", url)
-            # return Status.TIMED_OUT, {}
             return Status.RUNNING, {}
         except requests.exceptions.RequestException as ex:
             _LOG.exception("Error in request checking operation status", exc_info=ex)
@@ -472,7 +472,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
 
         session = self._get_session(params)
         try:
-            response = session.get(url, headers=self._get_headers(), timeout=self._request_timeout)
+            response = session.get(url, timeout=self._request_timeout)
         except requests.exceptions.ReadTimeout:
             _LOG.warning("Request timed out: %s", url)
             return Status.RUNNING, {}
