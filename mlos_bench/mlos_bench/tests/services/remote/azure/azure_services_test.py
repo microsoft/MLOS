@@ -6,13 +6,13 @@
 Tests for mlos_bench.services.remote.azure.azure_services
 """
 
-import http
 import json
-import tempfile
 from copy import deepcopy
+from io import BytesIO
 from unittest.mock import MagicMock, patch
 
 import pytest
+import urllib3
 import requests.exceptions as requests_ex
 
 from mlos_bench.environments.status import Status
@@ -21,23 +21,17 @@ from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
 from mlos_bench.services.remote.azure.azure_services import AzureVMService
 
 
-def make_httplib_json_response(status: int, json_data: dict):
+def make_httplib_json_response(status: int, json_data: dict) -> urllib3.HTTPResponse:
     """
     Prepare a json response object for use with urllib3
-    Inspired by: https://stackoverflow.com/questions/66497627/how-to-test-retry-attempts-in-python-using-the-request-library
     """
     data = json.dumps(json_data).encode("utf-8")
-    f = tempfile.TemporaryFile("wb+")
-    f.write(data)
-    f.seek(0)
-    f.status = status
-    f.msg = http.client.HTTPMessage()
-    f.length_remaining = len(data)
-    f.headers = {}
-    f.version = ""
-    f.reason = ""
-    f.isclosed = lambda: f.closed
-    return f
+    response = urllib3.HTTPResponse(
+        status=status,
+        body=BytesIO(data),
+        preload_content=False,
+    )
+    return response
 
 
 @pytest.mark.parametrize(
