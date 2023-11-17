@@ -97,6 +97,10 @@ class Launcher:
             args_rest,
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
+        # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
+        # It's useful to keep it there explicitly mostly for the --help output.
+        if args.experiment_id:
+            self.global_config['experiment_id'] = args.experiment_id
         self.global_config = self._expand_vars(self.global_config)
         assert isinstance(self.global_config, dict)
         # Ensure that the trial_id is present since it gets used by some other
