@@ -201,7 +201,7 @@ class Launcher:
             help='Disable teardown of the environment after the benchmark.')
 
         parser.add_argument(
-            '--experiment_id', '--experiment_id', required=False, default=None,
+            '--experiment_id', '--experiment-id', required=False, default=None,
             help=textwrap.dedent("""
                 Experiment ID to use for the benchmark.
                 If omitted, the value from the --cli config or --globals is used.
