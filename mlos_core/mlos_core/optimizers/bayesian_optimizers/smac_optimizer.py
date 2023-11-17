@@ -20,6 +20,14 @@ from mlos_core.optimizers.bayesian_optimizers.bayesian_optimizer import BaseBaye
 from mlos_core.spaces.adapters.adapter import BaseSpaceAdapter
 from mlos_core.spaces.adapters.identity_adapter import IdentityAdapter
 
+from smac.facade import AbstractFacade
+from smac import HyperparameterOptimizationFacade as Optimizer_Smac
+from smac.intensifier.abstract_intensifier import AbstractIntensifier
+from smac import Scenario
+from smac.main.config_selector import ConfigSelector
+from smac.random_design.probability_design import ProbabilityRandomDesign
+from smac.runhistory import TrialInfo
+
 
 class SmacOptimizer(BaseBayesianOptimizer):
     """Wrapper class for SMAC based Bayesian optimization.
@@ -66,9 +74,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
     n_random_probability: float
         Probability of choosing to evaluate a random configuration during optimization.
         Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
+        
+    facade: AbstractFacade
+        sets the facade to use for SMAC
     """
 
-    def __init__(self, *,  # pylint: disable=too-many-locals
+    def __init__(self, # pylint: disable=too-many-locals
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  seed: Optional[int] = 0,
@@ -78,7 +89,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
                  n_random_init: Optional[int] = None,
                  max_ratio: Optional[float] = None,
                  use_default_config: bool = False,
-                 n_random_probability: float = 0.1):
+                 n_random_probability: float = 0.1,
+                 facade: type[AbstractFacade] = Optimizer_Smac,
+                 intensifier: Optional[type[AbstractIntensifier]] = None,
+                 **kwargs):
 
         super().__init__(
             parameter_space=parameter_space,
@@ -87,14 +101,6 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         # Declare at the top because we need it in __del__/cleanup()
         self._temp_output_directory: Optional[TemporaryDirectory] = None
-
-        # pylint: disable=import-outside-toplevel
-        from smac import HyperparameterOptimizationFacade as Optimizer_Smac
-        from smac import Scenario
-        from smac.intensifier.abstract_intensifier import AbstractIntensifier
-        from smac.main.config_selector import ConfigSelector
-        from smac.random_design.probability_design import ProbabilityRandomDesign
-        from smac.runhistory import TrialInfo
 
         # Store for TrialInfo instances returned by .ask()
         self.trial_info_map: Dict[ConfigSpace.Configuration, TrialInfo] = {}
@@ -128,10 +134,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
             n_trials=max_trials,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
             n_workers=1,  # Use a single thread for evaluating trials
+            **kwargs
         )
-        intensifier: AbstractIntensifier = Optimizer_Smac.get_intensifier(scenario, max_config_calls=1)
-        config_selector: ConfigSelector = Optimizer_Smac.get_config_selector(scenario, retrain_after=1)
-
+        config_selector: ConfigSelector = facade.get_config_selector(scenario, retrain_after=1)
+        print(type(intensifier))
+        intensifier_instance = intensifier(scenario, **kwargs):
+            
         # TODO: When bulk registering prior configs to rewarm the optimizer,
         # there is a way to inform SMAC's initial design that we have
         # additional_configs and can set n_configs == 0.
@@ -166,7 +174,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Use the default InitialDesign from SMAC.
         # (currently SBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
-        initial_design = Optimizer_Smac.get_initial_design(**initial_design_args)  # type: ignore[arg-type]
+        initial_design = facade.get_initial_design(**initial_design_args)  # type: ignore[arg-type]
         # initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
@@ -175,15 +183,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
         assert isinstance(n_random_probability, float) and n_random_probability >= 0
         random_design = ProbabilityRandomDesign(probability=n_random_probability, seed=scenario.seed)
 
-        self.base_optimizer = Optimizer_Smac(
+        self.base_optimizer = facade(
             scenario,
             SmacOptimizer._dummy_target_func,
             initial_design=initial_design,
-            intensifier=intensifier,
+            intensifier=intensifier_instance,
             random_design=random_design,
             config_selector=config_selector,
             overwrite=True,
             logging_level=False,  # Use the existing logger
+            **kwargs
         )
 
     def __del__(self) -> None:
@@ -272,6 +281,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if context is not None:
             raise NotImplementedError()
 
+        print(self.base_optimizer.ask())
+        
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
         self.optimizer_parameter_space.check_configuration(trial.config)
