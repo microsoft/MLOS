@@ -54,6 +54,10 @@ class Launcher:
         epilog = textwrap.dedent("""
             Additional --key=value pairs can be specified to augment or override values listed in --globals.
             Other required_args values can also be pulled from shell environment variables.
+
+            For additional details, please see the website or the README.md files in the source tree:
+            <https://microsoft.github.io/MLOS/source_tree_docs/mlos_bench/>
+            <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>
             """)
         parser = argparse.ArgumentParser(description=f"{description} : {long_text}",
                                          epilog=epilog)
