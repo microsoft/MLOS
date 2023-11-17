@@ -14,6 +14,7 @@ import argparse
 import logging
 import os
 import sys
+import textwrap
 
 from string import Template
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Type
@@ -50,7 +51,12 @@ class Launcher:
 
     def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         _LOG.info("Launch: %s", description)
-        parser = argparse.ArgumentParser(description=f"{description} : {long_text}")
+        epilog = textwrap.dedent("""
+            Additional --key=value pairs can be specified to augment or override values listed in --globals.
+            Other required_args values can also be pulled from shell environment variables.
+            """)
+        parser = argparse.ArgumentParser(description=f"{description} : {long_text}",
+                                         epilog=epilog)
         (args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
@@ -193,6 +199,20 @@ class Launcher:
             '--no_teardown', '--no-teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
+
+        parser.add_argument(
+            '--experiment_id', '--experiment_id', required=False, default=None,
+            help=textwrap.dedent("""
+                Experiment ID to use for the benchmark.
+                If omitted, the value from the --cli config or --globals is used.
+
+                This is used to store and reload trial results from the storage.
+                NOTE: It is **important** to change this value when incompatible
+                changes are made to config files, scripts, versions, etc.
+                This is left as a manual operation as detection of what is
+                "incompatible" is not easily automatable across systems.
+                """)
+        )
 
         # By default we use the command line arguments, but allow the caller to
         # provide some explicitly for testing purposes.
