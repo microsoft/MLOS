@@ -12,6 +12,11 @@ it looks like this:
 
 ```jsonc
 {
+    // The name of the experiment.
+    // This is required value and should be unique across incompatible experiments
+    // (e.g., those with differing tunables, scripts, versions, etc.), since it also
+    // controls how trial data is stored and reloaded to resume and repopulate the
+    // optimizer state.
     "experiment_id": "RedisBench",
 
     "deploymentName": "RedisBench",
