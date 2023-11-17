@@ -94,7 +94,8 @@ def test_exp_trial_update_categ(exp_storage_memory_sql: Storage.Experiment,
             'idle': 'halt',
             'kernel_sched_latency_ns': '2000000',
             'kernel_sched_migration_cost_ns': '-1',
-            'vmSize': 'Standard_B4ms'
+            'vmSize': 'Standard_B4ms',
+            '123': '2',
         }],
         [99.9],
         [Status.SUCCEEDED]
