@@ -11,6 +11,7 @@ from logging import warning
 from pathlib import Path
 from typing import Dict, List, Optional, Union, TYPE_CHECKING
 from tempfile import TemporaryDirectory
+import inspect
 
 import ConfigSpace
 import numpy.typing as npt
@@ -103,7 +104,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self._temp_output_directory: Optional[TemporaryDirectory] = None
 
         # Store for TrialInfo instances returned by .ask()
-        self.trial_info_map: Dict[ConfigSpace.Configuration, TrialInfo] = {}
+        self.trial_info_map: Dict[(ConfigSpace.Configuration, str, float), TrialInfo] = {}
 
         # The default when not specified is to use a known seed (0) to keep results reproducible.
         # However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
@@ -134,11 +135,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
             n_trials=max_trials,
             seed=seed or -1,  # if -1, SMAC will generate a random seed internally
             n_workers=1,  # Use a single thread for evaluating trials
-            **kwargs
+            **SmacOptimizer._filter_kwargs(Scenario, **kwargs)
         )
         config_selector: ConfigSelector = facade.get_config_selector(scenario, retrain_after=1)
-        print(type(intensifier))
-        intensifier_instance = intensifier(scenario, **kwargs):
+        #print(type(intensifier(scenario=scenario, **kwargs)))
+        if intensifier is None:
+            intensifier_instance = facade.get_intensifier(scenario, max_config_calls=1)
+        else:
+            intensifier_instance = intensifier(scenario, **SmacOptimizer._filter_kwargs(intensifier, **kwargs))
             
         # TODO: When bulk registering prior configs to rewarm the optimizer,
         # there is a way to inform SMAC's initial design that we have
@@ -192,7 +196,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
             config_selector=config_selector,
             overwrite=True,
             logging_level=False,  # Use the existing logger
-            **kwargs
+            **SmacOptimizer._filter_kwargs(facade, **kwargs)
         )
 
     def __del__(self) -> None:
@@ -216,7 +220,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         return self.base_optimizer._initial_design._n_configs
 
     @staticmethod
-    def _dummy_target_func(config: ConfigSpace.Configuration, seed: int = 0) -> None:
+    def _filter_kwargs(function, **kwargs):
+        sig = inspect.signature(function)
+        filter_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
+        filtered_dict = {filter_key:kwargs[filter_key] for filter_key in filter_keys & kwargs.keys()}
+        return filtered_dict
+
+    @staticmethod
+    def _dummy_target_func(config: ConfigSpace.Configuration, seed: int = 0, budget: int = 1, instance: object = None) -> None:
         """Dummy target function for SMAC optimizer.
 
         Since we only use the ask-and-tell interface, this is never called.
@@ -255,10 +266,14 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Register each trial (one-by-one)
         for config, score in zip(self._to_configspace_configs(configurations), scores.tolist()):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-            info: TrialInfo = self.trial_info_map.get(config, TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
+            info: TrialInfo = self.trial_info_map.get((config), TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
             value: TrialValue = TrialValue(cost=score, time=0.0, status=StatusType.SUCCESS)
+            
+            if info.config not in self.trial_info_map:
+                elf.trial_info_map[info.config] = info
+            
             self.base_optimizer.tell(info, value, save=False)
-
+        
         # Save optimizer once we register all configs
         self.base_optimizer.optimizer.save()
 
@@ -275,21 +290,22 @@ class SmacOptimizer(BaseBayesianOptimizer):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
-        if TYPE_CHECKING:
-            from smac.runhistory import TrialInfo  # pylint: disable=import-outside-toplevel
+
+        
+
 
         if context is not None:
             raise NotImplementedError()
-
-        print(self.base_optimizer.ask())
         
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
         self.optimizer_parameter_space.check_configuration(trial.config)
         assert trial.config.config_space == self.optimizer_parameter_space
-        self.trial_info_map[trial.config] = trial
-        config_df = pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
-        return config_df
+        self.trial_info_map[trial.config, trial.instance, trial.budget] = trial
+        config_df = self._extract_config(trial)
+        metadata_df = SmacOptimizer._extract_metadata(trial)
+        
+        return config_df, metadata_df
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
@@ -326,6 +342,33 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         configs: list = self._to_configspace_configs(configurations)
         return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
+    
+    @staticmethod
+    def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
+        return pd.DataFrame([[trial.instance, trial.seed, trial.budget]], columns=['instance', 'seed', 'budget'])
+    
+    def _extract_config(self, trial: TrialInfo) -> pd.DataFrame:
+        return pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
+        
+    def get_observations(self) -> pd.DataFrame:
+        print("top")
+        configs = pd.concat([self._extract_config(v) for v in self.trial_info_map.values()])
+        configs = pd.concat([configs, pd.concat([ SmacOptimizer._extract_metadata(v) for v in self.trial_info_map.values()])], axis=1)
+        print(len(configs))
+        scores = pd.concat([score for _, score, _ in self._observations])
+        print(len(scores))
+        try:
+            contexts = pd.concat([context for _, _, context in self._observations if context is not None])
+        except ValueError:
+            contexts = None
+        configs["score"] = scores
+        print(configs)
+        print("bottom")
+        
+        
+        
+        return pd.DataFrame()
+        
 
     def cleanup(self) -> None:
         if self._temp_output_directory is not None:

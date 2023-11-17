@@ -82,6 +82,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         assert configurations.shape[1] == len(self.parameter_space.values()), \
             "Mismatched configuration shape."
         self._observations.append((configurations, scores, context))
+        
         self._has_context = context is not None
 
         if self._space_adapter:
@@ -129,7 +130,9 @@ class BaseOptimizer(metaclass=ABCMeta):
             if self.space_adapter is not None:
                 configuration = self.space_adapter.inverse_transform(configuration)
         else:
-            configuration = self._suggest(context)
+            configuration, metadata = self._suggest(context)
+            assert len(metadata) == 1, \
+                "Suggest must return a single metadata row."
             assert len(configuration) == 1, \
                 "Suggest must return a single configuration."
             assert len(configuration.columns) == len(self.optimizer_parameter_space.values()), \
@@ -138,7 +141,7 @@ class BaseOptimizer(metaclass=ABCMeta):
             configuration = self._space_adapter.transform(configuration)
             assert len(configuration.columns) == len(self.parameter_space.values()), \
                 "Space adapter transformed configuration with the wrong number of parameters."
-        return configuration
+        return configuration, metadata
 
     @abstractmethod
     def _suggest(self, context: Optional[pd.DataFrame] = None) -> pd.DataFrame:
@@ -189,6 +192,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         except ValueError:
             contexts = None
         configs["score"] = scores
+        
         if contexts is not None:
             # configs = pd.concat([configs, contexts], axis=1)
             # Not reachable for now
