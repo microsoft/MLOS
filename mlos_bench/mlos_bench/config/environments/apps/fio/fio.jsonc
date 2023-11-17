@@ -5,7 +5,8 @@
     "config": {
 
         "const_args": {
-            "fio_prefix": "fio"
+            "fio_prefix": "fio",
+            "fio_benchmark": "readwrite.fio.ini"
         },
 
         "children": [
@@ -14,6 +15,10 @@
                 "class": "mlos_bench.environments.local.LocalFileShareEnv",
                 "config": {
                     "required_args": [
+                        "experiment_id",
+                        "trial_id"
+                    ],
+                    "shell_env_params": [
                         "experiment_id",
                         "trial_id"
                     ],
@@ -34,19 +39,28 @@
                         "experiment_id",
                         "trial_id",
                         "mountPoint",
-                        "fio_prefix"
+                        "fio_prefix",
+                        "fio_benchmark"
                     ],
                     "const_args": {
                         "fio_target": "/fio_test.tmp"
                     },
+                    "shell_env_params": [
+                        "mountPoint",
+                        "experiment_id",
+                        "trial_id",
+                        "fio_prefix",
+                        "fio_benchmark",
+                        "fio_target"
+                    ],
                     "setup": [
                         "sudo apt-get update",
                         "sudo apt-get -y install fio"
                     ],
                     "run": [
                         "mkdir -p $mountPoint/$experiment_id/$trial_id/output/$fio_prefix/",
-                        "sudo fio --output-format=json --filename=$fio_target --runtime=20 $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > /dev/null",  // warm-up
-                        "sudo fio --output-format=json --filename=$fio_target --runtime=60 $mountPoint/$experiment_id/$trial_id/scripts/readwrite.fio.ini > $mountPoint/$experiment_id/$trial_id/output/$fio_prefix/readwrite.json",
+                        "sudo fio --output-format=json --filename=$fio_target --runtime=20 $mountPoint/$experiment_id/$trial_id/scripts/$fio_benchmark > /dev/null",  // warm-up
+                        "sudo fio --output-format=json --filename=$fio_target --runtime=60 $mountPoint/$experiment_id/$trial_id/scripts/$fio_benchmark > $mountPoint/$experiment_id/$trial_id/output/$fio_prefix/fio_results.json",
                         "sudo rm $fio_target"
                     ]
                 }
@@ -60,6 +74,11 @@
                         "trial_id",
                         "fio_prefix"
                     ],
+                    "shell_env_params": [
+                        "experiment_id",
+                        "trial_id",
+                        "fio_prefix"
+                    ],
                     "download": [
                         {
                             "from": "$experiment_id/$trial_id/output/$fio_prefix",
@@ -67,9 +86,9 @@
                         }
                     ],
                     "run": [
-                        "environments/apps/fio/scripts/local/process_fio_results.py --prefix $fio_prefix $fio_prefix/readwrite.json readwrite.csv"
+                        "environments/apps/fio/scripts/local/process_fio_results.py --prefix $fio_prefix $fio_prefix/fio_results.json fio_results.csv"
                     ],
-                    "read_results_file": "readwrite.csv"
+                    "read_results_file": "fio_results.csv"
                 }
             }
         ]
