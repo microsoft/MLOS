@@ -21,18 +21,21 @@ def mock_configurations_no_defaults() -> list:
     """
     return [
         ({
+            "123": 2,
             "vmSize": "Standard_B4ms",
             "idle": "halt",
             "kernel_sched_migration_cost_ns": 13111,
             "kernel_sched_latency_ns": 796233790,
         }, 88.88),
         ({
+            "123": 3,
             "vmSize": "Standard_B2ms",
             "idle": "halt",
             "kernel_sched_migration_cost_ns": 117025,
             "kernel_sched_latency_ns": 149827706,
         }, 66.66),
         ({
+            "123": 1,
             "vmSize": "Standard_B4ms",
             "idle": "halt",
             "kernel_sched_migration_cost_ns": 354784,
@@ -48,6 +51,7 @@ def mock_configurations(mock_configurations_no_defaults: list) -> list:
     """
     return [
         ({
+            "123": 2,
             "vmSize": "Standard_B4ms",
             "idle": "halt",
             "kernel_sched_migration_cost_ns": -1,
