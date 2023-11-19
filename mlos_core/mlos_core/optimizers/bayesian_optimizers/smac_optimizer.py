@@ -14,6 +14,7 @@ from tempfile import TemporaryDirectory
 import inspect
 
 import ConfigSpace
+from numpy import isnan
 import numpy.typing as npt
 import pandas as pd
 
@@ -27,7 +28,7 @@ from smac.intensifier.abstract_intensifier import AbstractIntensifier
 from smac import Scenario
 from smac.main.config_selector import ConfigSelector
 from smac.random_design.probability_design import ProbabilityRandomDesign
-from smac.runhistory import TrialInfo
+from smac.runhistory import StatusType, TrialInfo, TrialValue
 
 
 class SmacOptimizer(BaseBayesianOptimizer):
@@ -75,12 +76,12 @@ class SmacOptimizer(BaseBayesianOptimizer):
     n_random_probability: float
         Probability of choosing to evaluate a random configuration during optimization.
         Defaults to `0.1`. Setting this to a higher value favors exploration over exploitation.
-        
+
     facade: AbstractFacade
         sets the facade to use for SMAC
     """
 
-    def __init__(self, # pylint: disable=too-many-locals
+    def __init__(self,  # pylint: disable=too-many-locals
                  parameter_space: ConfigSpace.ConfigurationSpace,
                  space_adapter: Optional[BaseSpaceAdapter] = None,
                  seed: Optional[int] = 0,
@@ -104,7 +105,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         self._temp_output_directory: Optional[TemporaryDirectory] = None
 
         # Store for TrialInfo instances returned by .ask()
-        self.trial_info_map: Dict[(ConfigSpace.Configuration, str, float), TrialInfo] = {}
+        self.trial_info_df: pd.DataFrame = pd.DataFrame(
+            columns=['Configuration', 'Context', 'TrialInfo', 'TrialValue'])
 
         # The default when not specified is to use a known seed (0) to keep results reproducible.
         # However, if a `None` seed is explicitly provided, we let a random seed be produced by SMAC.
@@ -115,7 +117,8 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if output_directory is None:
             # pylint: disable=consider-using-with
             try:
-                self._temp_output_directory = TemporaryDirectory(ignore_cleanup_errors=True)  # Argument added in Python 3.10
+                self._temp_output_directory = TemporaryDirectory(
+                    ignore_cleanup_errors=True)  # Argument added in Python 3.10
             except TypeError:
                 self._temp_output_directory = TemporaryDirectory()
             output_directory = self._temp_output_directory.name
@@ -137,13 +140,16 @@ class SmacOptimizer(BaseBayesianOptimizer):
             n_workers=1,  # Use a single thread for evaluating trials
             **SmacOptimizer._filter_kwargs(Scenario, **kwargs)
         )
-        config_selector: ConfigSelector = facade.get_config_selector(scenario, retrain_after=1)
-        #print(type(intensifier(scenario=scenario, **kwargs)))
+        config_selector: ConfigSelector = facade.get_config_selector(
+            scenario, retrain_after=1)
+
         if intensifier is None:
-            intensifier_instance = facade.get_intensifier(scenario, max_config_calls=1)
+            intensifier_instance = facade.get_intensifier(
+                scenario, max_config_calls=1)
         else:
-            intensifier_instance = intensifier(scenario, **SmacOptimizer._filter_kwargs(intensifier, **kwargs))
-            
+            intensifier_instance = intensifier(
+                scenario, **SmacOptimizer._filter_kwargs(intensifier, **kwargs))
+
         # TODO: When bulk registering prior configs to rewarm the optimizer,
         # there is a way to inform SMAC's initial design that we have
         # additional_configs and can set n_configs == 0.
@@ -178,14 +184,17 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # Use the default InitialDesign from SMAC.
         # (currently SBOL instead of LatinHypercube due to better uniformity
         # for initial sampling which results in lower overall samples required)
-        initial_design = facade.get_initial_design(**initial_design_args)  # type: ignore[arg-type]
+        initial_design = facade.get_initial_design(
+            **initial_design_args)  # type: ignore[arg-type]
         # initial_design = LatinHypercubeInitialDesign(**initial_design_args)  # type: ignore[arg-type]
 
         # Workaround a bug in SMAC that doesn't pass the seed to the random
         # design when generated a random_design for itself via the
         # get_random_design static method when random_design is None.
-        assert isinstance(n_random_probability, float) and n_random_probability >= 0
-        random_design = ProbabilityRandomDesign(probability=n_random_probability, seed=scenario.seed)
+        assert isinstance(n_random_probability,
+                          float) and n_random_probability >= 0
+        random_design = ProbabilityRandomDesign(
+            probability=n_random_probability, seed=scenario.seed)
 
         self.base_optimizer = facade(
             scenario,
@@ -222,8 +231,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
     @staticmethod
     def _filter_kwargs(function, **kwargs):
         sig = inspect.signature(function)
-        filter_keys = [param.name for param in sig.parameters.values() if param.kind == param.POSITIONAL_OR_KEYWORD]
-        filtered_dict = {filter_key:kwargs[filter_key] for filter_key in filter_keys & kwargs.keys()}
+        filter_keys = [param.name for param in sig.parameters.values(
+        ) if param.kind == param.POSITIONAL_OR_KEYWORD]
+        filtered_dict = {filter_key: kwargs[filter_key]
+                         for filter_key in filter_keys & kwargs.keys()}
         return filtered_dict
 
     @staticmethod
@@ -244,7 +255,7 @@ class SmacOptimizer(BaseBayesianOptimizer):
         # -- this planned to be fixed in some future release: https://github.com/automl/SMAC3/issues/946
         raise RuntimeError('This function should never be called.')
 
-    def _register(self, configurations: pd.DataFrame, scores: pd.Series, context: Optional[pd.DataFrame] = None) -> None:
+    def _register(self, configurations: pd.DataFrame, scores: pd.Series, contexts: Optional[pd.DataFrame] = None) -> None:
         """Registers the given configurations and scores.
 
         Parameters
@@ -256,24 +267,36 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Scores from running the configurations. The index is the same as the index of the configurations.
 
         context : pd.DataFrame
-            Not Yet Implemented.
+            Context of the request that is being registered.
         """
-        from smac.runhistory import StatusType, TrialInfo, TrialValue  # pylint: disable=import-outside-toplevel
-
-        if context is not None:
-            raise NotImplementedError()
 
         # Register each trial (one-by-one)
-        for config, score in zip(self._to_configspace_configs(configurations), scores.tolist()):
+        for config, score, ctx in zip(self._to_configspace_configs(configurations), scores.tolist(), self._to_context(contexts)):
             # Retrieve previously generated TrialInfo (returned by .ask()) or create new TrialInfo instance
-            info: TrialInfo = self.trial_info_map.get((config), TrialInfo(config=config, seed=self.base_optimizer.scenario.seed))
-            value: TrialValue = TrialValue(cost=score, time=0.0, status=StatusType.SUCCESS)
-            
-            if info.config not in self.trial_info_map:
-                elf.trial_info_map[info.config] = info
-            
+
+            matching: List = (self.trial_info_df['Configuration'] == config) & pd.Series(
+                [df_ctx.equals(ctx) for df_ctx in self.trial_info_df['Context']])
+
+            if sum(matching) == 0:
+                info: TrialInfo = TrialInfo(config=config, seed=self.base_optimizer.scenario.seed,
+                                            **SmacOptimizer._filter_kwargs(TrialInfo, **ctx.to_dict()))
+            else:
+                info: TrialInfo = self.trial_info_df[matching]['TrialInfo'].iloc[0]
+
+            value: TrialValue = TrialValue(
+                cost=score, time=0.0, status=StatusType.SUCCESS)
+
+            if sum(matching) == 0:
+                # append
+                self.trial_info_df.loc[len(self.trial_info_df.index)] = [
+                    config, ctx, info, value]
+            else:
+                # make a new entry
+                self.trial_info_df.at[list(matching).index(
+                    True), 'TrialValue'] = value
+
             self.base_optimizer.tell(info, value, save=False)
-        
+
         # Save optimizer once we register all configs
         self.base_optimizer.optimizer.save()
 
@@ -291,25 +314,23 @@ class SmacOptimizer(BaseBayesianOptimizer):
             Pandas dataframe with a single row. Column names are the parameter names.
         """
 
-        
-
-
-        if context is not None:
-            raise NotImplementedError()
-        
         trial: TrialInfo = self.base_optimizer.ask()
         trial.config.is_valid_configuration()
         self.optimizer_parameter_space.check_configuration(trial.config)
         assert trial.config.config_space == self.optimizer_parameter_space
-        self.trial_info_map[trial.config, trial.instance, trial.budget] = trial
+
         config_df = self._extract_config(trial)
-        metadata_df = SmacOptimizer._extract_metadata(trial)
-        
-        return config_df, metadata_df
+        context_df = SmacOptimizer._extract_context(trial)
+
+        self.trial_info_df.loc[len(self.trial_info_df.index)] = [
+            trial.config, context_df.iloc[0], trial, None]
+
+        return config_df, context_df
 
     def register_pending(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> None:
         raise NotImplementedError()
 
+    # @TODO make the context work here
     def surrogate_predict(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
         from smac.utils.configspace import convert_configurations_to_array  # pylint: disable=import-outside-toplevel
 
@@ -326,13 +347,13 @@ class SmacOptimizer(BaseBayesianOptimizer):
         if self.base_optimizer._config_selector._model is None:
             raise RuntimeError('Surrogate model is not yet trained')
 
-        configs: npt.NDArray = convert_configurations_to_array(self._to_configspace_configs(configurations))
-        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(configs)
+        configs: npt.NDArray = convert_configurations_to_array(
+            self._to_configspace_configs(configurations))
+        mean_predictions, _ = self.base_optimizer._config_selector._model.predict(
+            configs)
         return mean_predictions.reshape(-1,)
 
     def acquisition_function(self, configurations: pd.DataFrame, context: Optional[pd.DataFrame] = None) -> npt.NDArray:
-        if context is not None:
-            raise NotImplementedError()
         if self._space_adapter:
             raise NotImplementedError()
 
@@ -342,33 +363,50 @@ class SmacOptimizer(BaseBayesianOptimizer):
 
         configs: list = self._to_configspace_configs(configurations)
         return self.base_optimizer._config_selector._acquisition_function(configs).reshape(-1,)
-    
+
     @staticmethod
-    def _extract_metadata(trial: TrialInfo) -> pd.DataFrame:
+    def _extract_context(trial: TrialInfo) -> pd.DataFrame:
         return pd.DataFrame([[trial.instance, trial.seed, trial.budget]], columns=['instance', 'seed', 'budget'])
-    
+
     def _extract_config(self, trial: TrialInfo) -> pd.DataFrame:
         return pd.DataFrame([trial.config], columns=list(self.optimizer_parameter_space.keys()))
-        
+
     def get_observations(self) -> pd.DataFrame:
-        print("top")
-        configs = pd.concat([self._extract_config(v) for v in self.trial_info_map.values()])
-        configs = pd.concat([configs, pd.concat([ SmacOptimizer._extract_metadata(v) for v in self.trial_info_map.values()])], axis=1)
-        print(len(configs))
-        scores = pd.concat([score for _, score, _ in self._observations])
-        print(len(scores))
-        try:
-            contexts = pd.concat([context for _, _, context in self._observations if context is not None])
-        except ValueError:
-            contexts = None
-        configs["score"] = scores
-        print(configs)
-        print("bottom")
-        
-        
-        
-        return pd.DataFrame()
-        
+        return self.trial_info_df
+
+    def get_best_observation(self) -> pd.DataFrame:
+        """Returns the best observation so far as a dataframe.
+
+        Returns
+        -------
+        best_observation : pd.DataFrame
+            Dataframe with a single row containing the best observation. The columns are parameter names and "score" for the score.
+        """
+        if len(self._observations) == 0:
+            raise ValueError("No observations registered yet.")
+        observations = self.get_observations()
+
+        # @TODO instnaces are pretty close to working here, but needs a bit more work
+
+        budgets = observations['TrialInfo'].transform(
+            lambda trial: trial.budget)
+        max_budget = budgets.max()
+
+        if not isnan(max_budget):
+            observations = observations[budgets == max_budget].reset_index()
+
+        def extract(column):
+            keys = list(observations.loc[0, column].keys())
+            out = pd.DataFrame(observations[column].transform(
+                lambda config: [config[k] for k in keys]).to_list(), columns=keys)
+            return out
+
+        out_config = extract('Configuration')
+        out_value = pd.DataFrame(observations['TrialValue'].transform(
+            lambda value: [value.cost]).to_list(), columns=['cost'])
+        out_context = extract('Context')
+
+        return pd.concat([out_config, out_value, out_context], axis=1).nsmallest(1, columns='cost')
 
     def cleanup(self) -> None:
         if self._temp_output_directory is not None:
@@ -389,6 +427,10 @@ class SmacOptimizer(BaseBayesianOptimizer):
             List of ConfigSpace configurations.
         """
         return [
-            ConfigSpace.Configuration(self.optimizer_parameter_space, values=config.to_dict())
+            ConfigSpace.Configuration(
+                self.optimizer_parameter_space, values=config.to_dict())
             for (_, config) in configurations.iterrows()
         ]
+
+    def _to_context(self, contexts: pd.DataFrame) -> List[pd.Series]:
+        return list(map(lambda idx_series: idx_series[1], contexts.iterrows()))

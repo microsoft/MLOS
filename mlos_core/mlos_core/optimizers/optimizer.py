@@ -42,12 +42,15 @@ class BaseOptimizer(metaclass=ABCMeta):
             parameter_space if space_adapter is None else space_adapter.target_parameter_space
 
         if space_adapter is not None and space_adapter.orig_parameter_space != parameter_space:
-            raise ValueError("Given parameter space differs from the one given to space adapter")
+            raise ValueError(
+                "Given parameter space differs from the one given to space adapter")
 
         self._space_adapter: Optional[BaseSpaceAdapter] = space_adapter
-        self._observations: List[Tuple[pd.DataFrame, pd.Series, Optional[pd.DataFrame]]] = []
+        self._observations: List[Tuple[pd.DataFrame,
+                                       pd.Series, Optional[pd.DataFrame]]] = []
         self._has_context: Optional[bool] = None
-        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = []
+        self._pending_observations: List[Tuple[pd.DataFrame, Optional[pd.DataFrame]]] = [
+        ]
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(space_adapter={self.space_adapter})"
@@ -82,11 +85,12 @@ class BaseOptimizer(metaclass=ABCMeta):
         assert configurations.shape[1] == len(self.parameter_space.values()), \
             "Mismatched configuration shape."
         self._observations.append((configurations, scores, context))
-        
+
         self._has_context = context is not None
 
         if self._space_adapter:
-            configurations = self._space_adapter.inverse_transform(configurations)
+            configurations = self._space_adapter.inverse_transform(
+                configurations)
             assert configurations.shape[1] == len(self.optimizer_parameter_space.values()), \
                 "Mismatched configuration shape after inverse transform."
         return self._register(configurations, scores, context)
@@ -125,10 +129,13 @@ class BaseOptimizer(metaclass=ABCMeta):
         configuration : pd.DataFrame
             Pandas dataframe with a single row. Column names are the parameter names.
         """
+
         if defaults:
-            configuration = config_to_dataframe(self.parameter_space.get_default_configuration())
+            configuration = config_to_dataframe(
+                self.parameter_space.get_default_configuration())
             if self.space_adapter is not None:
-                configuration = self.space_adapter.inverse_transform(configuration)
+                configuration = self.space_adapter.inverse_transform(
+                    configuration)
         else:
             configuration, metadata = self._suggest(context)
             assert len(metadata) == 1, \
@@ -188,11 +195,12 @@ class BaseOptimizer(metaclass=ABCMeta):
         configs = pd.concat([config for config, _, _ in self._observations])
         scores = pd.concat([score for _, score, _ in self._observations])
         try:
-            contexts = pd.concat([context for _, _, context in self._observations if context is not None])
+            contexts = pd.concat(
+                [context for _, _, context in self._observations if context is not None])
         except ValueError:
             contexts = None
         configs["score"] = scores
-        
+
         if contexts is not None:
             # configs = pd.concat([configs, contexts], axis=1)
             # Not reachable for now
