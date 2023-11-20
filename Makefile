@@ -11,6 +11,7 @@ MLOS_CORE_PYTHON_FILES := $(shell find ./mlos_core/ -type f -name '*.py' 2>/dev/
 MLOS_BENCH_PYTHON_FILES := $(shell find ./mlos_bench/ -type f -name '*.py' 2>/dev/null | egrep -v -e '^./mlos_bench/build/')
 SCRIPT_FILES := $(shell find ./ -name '*.sh' -or -name '*.ps1' -or -name '*.cmd')
 SQL_FILES := $(shell find ./ -name '*.sql')
+MD_FILES := $(shell find ./ -name '*.md' | grep -v '^./doc/')
 
 DOCKER := $(shell which docker)
 # Make sure the build directory exists.
@@ -317,7 +318,7 @@ doc/build/html/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 doc/build/html/htmlcov/index.html: build/pytest.${CONDA_ENV_NAME}.build-stamp
 endif
 
-doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile
+doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile doc/copy-source-tree-docs.sh $(MD_FILES)
 	@rm -rf doc/build
 	@mkdir -p doc/build
 	@rm -f doc/build/log.txt
@@ -327,7 +328,7 @@ doc/build/html/index.html: $(SPHINX_API_RST_FILES) doc/Makefile
 	touch doc/source/badges/coverage.svg
 	touch doc/source/badges/tests.svg
 
-	# Copy the source tree docs into place.
+	# Copy some of the source tree markdown docs into place.
 	./doc/copy-source-tree-docs.sh
 
 	# Build the rst files into html.
@@ -407,7 +408,7 @@ build/linklint-doc.build-stamp: doc/build/html/index.html doc/build/html/htmlcov
 .PHONY: clean-doc
 clean-doc:
 	rm -rf doc/build/ doc/global/ doc/source/api/ doc/source/generated
-
+	rm -rf doc/source/source_tree_docs/*
 
 .PHONY: clean-check
 clean-check:
