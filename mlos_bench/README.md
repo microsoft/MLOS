@@ -162,7 +162,7 @@ In that file, you can specify any parameters that occur in your other configs, n
 > A general rule is that the parameters from the global configs like `./global_config_azure.jsonc` or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
 > That allows us to propagate the values of the parameters that are specific to the experiment into other components of the framework and keep the majority of the config files in our library immutable and reusable.
 
-#### Importance of the `experiment_id` config
+#### Importance of the experiment_id config
 
 An important part of this file is the value of `experiment_id` which controls the storage and retrieval of trial data.
 Should the experiment be interrupted, the `experiment_id` will be used to resume the experiment from the last completed trial, reloading the optimizer with data from the previously completed trial data.
