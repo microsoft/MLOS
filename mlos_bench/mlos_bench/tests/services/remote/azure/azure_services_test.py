@@ -6,15 +6,68 @@
 Tests for mlos_bench.services.remote.azure.azure_vm_services
 """
 
+import json
 from copy import deepcopy
+from io import BytesIO
 from unittest.mock import MagicMock, patch
 
 import pytest
+import urllib3
+import requests.exceptions as requests_ex
 
 from mlos_bench.environments.status import Status
 
 from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
 from mlos_bench.services.remote.azure.azure_vm_services import AzureVMService
+
+
+def make_httplib_json_response(status: int, json_data: dict) -> urllib3.HTTPResponse:
+    """
+    Prepare a json response object for use with urllib3
+    """
+    data = json.dumps(json_data).encode("utf-8")
+    response = urllib3.HTTPResponse(
+        status=status,
+        body=BytesIO(data),
+        preload_content=False,
+    )
+    return response
+
+
+@pytest.mark.parametrize(
+    ("total_retries", "operation_status"), [
+        (2, Status.SUCCEEDED),
+        (1, Status.FAILED),
+        (0, Status.FAILED),
+    ])
+@patch("urllib3.connectionpool.HTTPConnectionPool._get_conn")
+def test_wait_host_deployment_retry(mock_getconn: MagicMock,
+                                    total_retries: int,
+                                    operation_status: Status,
+                                    azure_vm_service: AzureVMService) -> None:
+    """
+    Test retries of the host deployment operation.
+    """
+    # Simulate intermittent connection issues with multiple connection errors
+    # Sufficient retry attempts should result in success, otherwise a graceful failure state
+    mock_getconn.return_value.getresponse.side_effect = [
+        make_httplib_json_response(200, {"properties": {"provisioningState": "Running"}}),
+        requests_ex.ConnectionError("Connection aborted", OSError(107, "Transport endpoint is not connected")),
+        requests_ex.ConnectionError("Connection aborted", OSError(107, "Transport endpoint is not connected")),
+        make_httplib_json_response(200, {"properties": {"provisioningState": "Running"}}),
+        make_httplib_json_response(200, {"properties": {"provisioningState": "Succeeded"}}),
+    ]
+
+    (status, _) = azure_vm_service.wait_host_deployment(
+        params={
+            "pollInterval": 0.1,
+            "requestTotalRetries": total_retries,
+            "deploymentName": "TEST_DEPLOYMENT1",
+            "subscription": "TEST_SUB1",
+            "resourceGroup": "TEST_RG1",
+        },
+        is_setup=True)
+    assert status == operation_status
 
 
 def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> None:
@@ -80,9 +133,15 @@ def test_vm_operation_status(mock_requests: MagicMock,
     assert status == operation_status
 
 
+<<<<<<< HEAD
 @patch("mlos_bench.services.remote.azure.azure_vm_services.time.sleep")
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock,
+=======
+@patch("mlos_bench.services.remote.azure.azure_services.time.sleep")
+@patch("mlos_bench.services.remote.azure.azure_services.requests.Session")
+def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,
+>>>>>>> main
                                  azure_vm_service: AzureVMService) -> None:
     """
     Test waiting for the completion of the remote VM operation.
@@ -100,17 +159,22 @@ def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock
     mock_status_response.json.return_value = {
         "status": "Succeeded",
     }
-    mock_requests.get.return_value = mock_status_response
+    mock_session.return_value.get.return_value = mock_status_response
 
     status, _ = azure_vm_service.wait_host_operation(params)
 
-    assert (async_url, ) == mock_requests.get.call_args[0]
+    assert (async_url, ) == mock_session.return_value.get.call_args[0]
     assert (retry_after, ) == mock_sleep.call_args[0]
     assert status.is_succeeded()
 
 
+<<<<<<< HEAD
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_wait_vm_operation_timeout(mock_requests: MagicMock,
+=======
+@patch("mlos_bench.services.remote.azure.azure_services.requests.Session")
+def test_wait_vm_operation_timeout(mock_session: MagicMock,
+>>>>>>> main
                                    azure_vm_service: AzureVMService) -> None:
     """
     Test the time out of the remote VM operation.
@@ -126,10 +190,44 @@ def test_wait_vm_operation_timeout(mock_requests: MagicMock,
     mock_status_response.json.return_value = {
         "status": "InProgress",
     }
-    mock_requests.get.return_value = mock_status_response
+    mock_session.return_value.get.return_value = mock_status_response
 
     (status, _) = azure_vm_service.wait_host_operation(params)
     assert status == Status.TIMED_OUT
+
+
+@pytest.mark.parametrize(
+    ("total_retries", "operation_status"), [
+        (2, Status.SUCCEEDED),
+        (1, Status.FAILED),
+        (0, Status.FAILED),
+    ])
+@patch("urllib3.connectionpool.HTTPConnectionPool._get_conn")
+def test_wait_vm_operation_retry(mock_getconn: MagicMock,
+                                 total_retries: int,
+                                 operation_status: Status,
+                                 azure_vm_service: AzureVMService) -> None:
+    """
+    Test the retries of the remote VM operation.
+    """
+    # Simulate intermittent connection issues with multiple connection errors
+    # Sufficient retry attempts should result in success, otherwise a graceful failure state
+    mock_getconn.return_value.getresponse.side_effect = [
+        make_httplib_json_response(200, {"status": "InProgress"}),
+        requests_ex.ConnectionError("Connection aborted", OSError(107, "Transport endpoint is not connected")),
+        requests_ex.ConnectionError("Connection aborted", OSError(107, "Transport endpoint is not connected")),
+        make_httplib_json_response(200, {"status": "InProgress"}),
+        make_httplib_json_response(200, {"status": "Succeeded"}),
+    ]
+
+    (status, _) = azure_vm_service.wait_host_operation(
+        params={
+            "pollInterval": 0.1,
+            "requestTotalRetries": total_retries,
+            "asyncResultsUrl": "https://DUMMY_ASYNC_URL",
+            "vmName": "test-vm",
+        })
+    assert status == operation_status
 
 
 @pytest.mark.parametrize(

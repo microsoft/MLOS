@@ -13,6 +13,7 @@ import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -34,6 +35,8 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
     _POLL_INTERVAL = 4     # seconds
     _POLL_TIMEOUT = 300    # seconds
     _REQUEST_TIMEOUT = 5   # seconds
+    _REQUEST_TOTAL_RETRIES = 10  # Total number retries for each request
+    _REQUEST_RETRY_BACKOFF_FACTOR = 0.3  # Delay (seconds) between retries: {backoff factor} * (2 ** ({number of previous retries}))
 
     # Azure Resources Deployment REST API as described in
     # https://docs.microsoft.com/en-us/rest/api/resources/deployments
@@ -179,6 +182,8 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
         self._poll_timeout = float(self.config.get("pollTimeout", self._POLL_TIMEOUT))
         self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
+        self._total_retries = int(self.config.get("requestTotalRetries", self._REQUEST_TOTAL_RETRIES))
+        self._backoff_factor = float(self.config.get("requestBackoffFactor", self._REQUEST_RETRY_BACKOFF_FACTOR))
 
         # TODO: Provide external schema validation?
         template = self.config_loader_service.load_config(
@@ -200,6 +205,19 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             self._custom_data_file = self.config_loader_service.resolve_path(self._custom_data_file)
             with open(self._custom_data_file, 'r', encoding='utf-8') as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
+
+    def _get_session(self, params: dict) -> requests.Session:
+        """
+        Get a session object that includes automatic retries and headers for REST API calls.
+        """
+        total_retries = params.get("requestTotalRetries", self._total_retries)
+        backoff_factor = params.get("requestBackoffFactor", self._backoff_factor)
+        session = requests.Session()
+        session.mount(
+            "https://",
+            HTTPAdapter(max_retries=Retry(total=total_retries, backoff_factor=backoff_factor)))
+        session.headers.update(self._get_headers())
+        return session
 
     def _get_headers(self) -> dict:
         """
@@ -291,12 +309,15 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         if url is None:
             return Status.PENDING, {}
 
+        session = self._get_session(params)
         try:
-            response = requests.get(url, headers=self._get_headers(), timeout=self._request_timeout)
+            response = session.get(url, timeout=self._request_timeout)
         except requests.exceptions.ReadTimeout:
-            _LOG.warning("Request timed out: %s", url)
-            # return Status.TIMED_OUT, {}
+            _LOG.warning("Request timed out after %.2f s: %s", self._request_timeout, url)
             return Status.RUNNING, {}
+        except requests.exceptions.RequestException as ex:
+            _LOG.exception("Error in request checking operation status", exc_info=ex)
+            return (Status.FAILED, {})
 
         if _LOG.isEnabledFor(logging.DEBUG):
             _LOG.debug("Response: %s\n%s", response,
@@ -448,7 +469,16 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             deployment_name=config["deploymentName"],
         )
 
-        response = requests.get(url, headers=self._get_headers(), timeout=self._request_timeout)
+        session = self._get_session(params)
+        try:
+            response = session.get(url, timeout=self._request_timeout)
+        except requests.exceptions.ReadTimeout:
+            _LOG.warning("Request timed out after %.2f s: %s", self._request_timeout, url)
+            return Status.RUNNING, {}
+        except requests.exceptions.RequestException as ex:
+            _LOG.exception("Error in request checking deployment", exc_info=ex)
+            return (Status.FAILED, {})
+
         _LOG.debug("Response: %s", response)
 
         if response.status_code == 200:
