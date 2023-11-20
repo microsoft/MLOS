@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Tests for mlos_bench.services.remote.azure.azure_services
+Tests for mlos_bench.services.remote.azure.azure_vm_services
 """
 
 from copy import deepcopy
@@ -14,7 +14,7 @@ import pytest
 from mlos_bench.environments.status import Status
 
 from mlos_bench.services.remote.azure.azure_auth import AzureAuthService
-from mlos_bench.services.remote.azure.azure_services import AzureVMService
+from mlos_bench.services.remote.azure.azure_vm_services import AzureVMService
 
 
 def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> None:
@@ -60,7 +60,7 @@ def test_azure_vm_service_custom_data(azure_auth_service: AzureAuthService) -> N
         (401, Status.FAILED),
         (404, Status.FAILED),
     ])
-@patch("mlos_bench.services.remote.azure.azure_services.requests")
+@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 # pylint: disable=too-many-arguments
 def test_vm_operation_status(mock_requests: MagicMock,
                              azure_vm_service: AzureVMService,
@@ -80,8 +80,8 @@ def test_vm_operation_status(mock_requests: MagicMock,
     assert status == operation_status
 
 
-@patch("mlos_bench.services.remote.azure.azure_services.time.sleep")
-@patch("mlos_bench.services.remote.azure.azure_services.requests")
+@patch("mlos_bench.services.remote.azure.azure_vm_services.time.sleep")
+@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock,
                                  azure_vm_service: AzureVMService) -> None:
     """
@@ -109,7 +109,7 @@ def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock
     assert status.is_succeeded()
 
 
-@patch("mlos_bench.services.remote.azure.azure_services.requests")
+@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_wait_vm_operation_timeout(mock_requests: MagicMock,
                                    azure_vm_service: AzureVMService) -> None:
     """
@@ -139,7 +139,7 @@ def test_wait_vm_operation_timeout(mock_requests: MagicMock,
         (401, Status.FAILED),
         (404, Status.FAILED),
     ])
-@patch("mlos_bench.services.remote.azure.azure_services.requests")
+@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service: AzureVMService,
                             http_status_code: int, operation_status: Status) -> None:
     """
@@ -159,7 +159,7 @@ def test_remote_exec_status(mock_requests: MagicMock, azure_vm_service: AzureVMS
     assert status == operation_status
 
 
-@patch("mlos_bench.services.remote.azure.azure_services.requests")
+@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
 def test_remote_exec_headers_output(mock_requests: MagicMock,
                                     azure_vm_service: AzureVMService) -> None:
     """

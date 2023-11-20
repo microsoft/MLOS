@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 #
 """
-Configuration test fixtures for azure_services in mlos_bench.
+Configuration test fixtures for azure_vm_services in mlos_bench.
 """
 
 from unittest.mock import patch
