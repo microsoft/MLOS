@@ -50,7 +50,15 @@ class Launcher:
 
     def __init__(self, description: str, long_text: str = "", argv: Optional[List[str]] = None):
         _LOG.info("Launch: %s", description)
-        parser = argparse.ArgumentParser(description=f"{description} : {long_text}")
+        epilog = """
+            Additional --key=value pairs can be specified to augment or override values listed in --globals.
+            Other required_args values can also be pulled from shell environment variables.
+
+            For additional details, please see the website or the README.md files in the source tree:
+            <https://github.com/microsoft/MLOS/tree/main/mlos_bench/>
+            """
+        parser = argparse.ArgumentParser(description=f"{description} : {long_text}",
+                                         epilog=epilog)
         (args, args_rest) = self._parse_args(parser, argv)
 
         # Bootstrap config loader: command line takes priority.
@@ -88,6 +96,10 @@ class Launcher:
             args_rest,
             {key: val for (key, val) in config.items() if key not in vars(args)},
         )
+        # experiment_id is generally taken from --globals files, but we also allow overriding it on the CLI.
+        # It's useful to keep it there explicitly mostly for the --help output.
+        if args.experiment_id:
+            self.global_config['experiment_id'] = args.experiment_id
         self.global_config = self._expand_vars(self.global_config)
         assert isinstance(self.global_config, dict)
         # Ensure that the trial_id is present since it gets used by some other
@@ -193,6 +205,20 @@ class Launcher:
             '--no_teardown', '--no-teardown', required=False, default=None,
             dest='teardown', action='store_false',
             help='Disable teardown of the environment after the benchmark.')
+
+        parser.add_argument(
+            '--experiment_id', '--experiment-id', required=False, default=None,
+            help="""
+                Experiment ID to use for the benchmark.
+                If omitted, the value from the --cli config or --globals is used.
+
+                This is used to store and reload trial results from the storage.
+                NOTE: It is **important** to change this value when incompatible
+                changes are made to config files, scripts, versions, etc.
+                This is left as a manual operation as detection of what is
+                "incompatible" is not easily automatable across systems.
+                """
+        )
 
         # By default we use the command line arguments, but allow the caller to
         # provide some explicitly for testing purposes.
