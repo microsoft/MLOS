@@ -55,6 +55,8 @@ class NetworkEnv(Environment):
         """
         super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
+        self._deprovision_on_teardown = config.get("deprovision_on_teardown", False)
+
         assert self._service is not None and isinstance(self._service, SupportsNetworkProvisioning), \
             "NetworkEnv requires a service that supports resource provisioning"
         self._network_service: SupportsNetworkProvisioning = self._service
@@ -95,10 +97,13 @@ class NetworkEnv(Environment):
         """
         Shut down the Network and releases it.
         """
-        _LOG.info("Network tear down: %s", self)
-        (status, params) = self._network_service.deprovision_network(self._params, force=False)
-        if status.is_pending():
-            (status, _) = self._network_service.wait_network_deployment(params, is_setup=False)
+        if self._deprovision_on_teardown:
+            _LOG.info("Network tear down: %s", self)
+            (status, params) = self._network_service.deprovision_network(self._params, force=False)
+            if status.is_pending():
+                (status, _) = self._network_service.wait_network_deployment(params, is_setup=False)
 
-        super().teardown()
-        _LOG.debug("Final status of Network deprovisioning: %s :: %s", self, status)
+            super().teardown()
+            _LOG.debug("Final status of Network deprovisioning: %s :: %s", self, status)
+        else:
+            _LOG.info("Skipping network deprovision: %s", self)

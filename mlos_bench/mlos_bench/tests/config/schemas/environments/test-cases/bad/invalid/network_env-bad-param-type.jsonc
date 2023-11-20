@@ -1,0 +1,7 @@
+{
+    "name": "network_env-bad-param-type",
+    "class": "mlos_bench.environments.remote.network_env.NetworkEnv",
+    "config": {
+        "deprovision_on_teardown": "false"  // should be a boolean
+    }
+}

@@ -1,0 +1,5 @@
+{
+    //"$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+    "name": "network_env-full",
+    "class": "mlos_bench.environments.remote.network_env.NetworkEnv"
+}

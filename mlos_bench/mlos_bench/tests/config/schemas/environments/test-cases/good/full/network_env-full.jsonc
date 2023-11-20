@@ -1,0 +1,20 @@
+{
+    //"$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/environments/environment-schema.json",
+    "name": "network_env-full",
+    "description": "More descriptive text.",
+    "class": "mlos_bench.environments.remote.network_env.NetworkEnv",
+    "include_tunables": [
+        "some/tunables.jsonc"
+    ],
+    "include_services": [
+        "some/service.jsonc"
+    ],
+    "config": {
+        "tunable_params": ["baz"],
+        "required_args": ["foo"],
+        "const_args": {
+            "foo": "bar"
+        },
+        "deprovision_on_teardown": false
+    }
+}
