@@ -133,15 +133,9 @@ def test_vm_operation_status(mock_requests: MagicMock,
     assert status == operation_status
 
 
-<<<<<<< HEAD
-@patch("mlos_bench.services.remote.azure.azure_vm_services.time.sleep")
-@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
-def test_wait_vm_operation_ready(mock_requests: MagicMock, mock_sleep: MagicMock,
-=======
 @patch("mlos_bench.services.remote.azure.azure_vm_services.time.sleep")
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests.Session")
 def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,
->>>>>>> main
                                  azure_vm_service: AzureVMService) -> None:
     """
     Test waiting for the completion of the remote VM operation.
@@ -168,13 +162,8 @@ def test_wait_vm_operation_ready(mock_session: MagicMock, mock_sleep: MagicMock,
     assert status.is_succeeded()
 
 
-<<<<<<< HEAD
-@patch("mlos_bench.services.remote.azure.azure_vm_services.requests")
-def test_wait_vm_operation_timeout(mock_requests: MagicMock,
-=======
 @patch("mlos_bench.services.remote.azure.azure_vm_services.requests.Session")
 def test_wait_vm_operation_timeout(mock_session: MagicMock,
->>>>>>> main
                                    azure_vm_service: AzureVMService) -> None:
     """
     Test the time out of the remote VM operation.
