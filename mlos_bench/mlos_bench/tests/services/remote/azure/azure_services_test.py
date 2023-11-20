@@ -48,15 +48,8 @@ def test_wait_host_deployment_retry(mock_getconn: MagicMock,
     """
     Test retries of the host deployment operation.
     """
-    params = {
-        "pollInterval": 0.1,
-        "requestTotalRetries": total_retries,
-        "deploymentName": "TEST_DEPLOYMENT1",
-        "subscription": "TEST_SUB1",
-        "resourceGroup": "TEST_RG1",
-    }
-
-    # Simulate intermittent connection issues
+    # Simulate intermittent connection issues with multiple connection errors
+    # Sufficient retry attempts should result in success, otherwise a graceful failure state
     mock_getconn.return_value.getresponse.side_effect = [
         make_httplib_json_response(200, {"properties": {"provisioningState": "Running"}}),
         requests_ex.ConnectionError("Connection aborted", OSError(107, "Transport endpoint is not connected")),
@@ -65,7 +58,15 @@ def test_wait_host_deployment_retry(mock_getconn: MagicMock,
         make_httplib_json_response(200, {"properties": {"provisioningState": "Succeeded"}}),
     ]
 
-    (status, _) = azure_vm_service.wait_host_deployment(params, is_setup=True)
+    (status, _) = azure_vm_service.wait_host_deployment(
+        params={
+            "pollInterval": 0.1,
+            "requestTotalRetries": total_retries,
+            "deploymentName": "TEST_DEPLOYMENT1",
+            "subscription": "TEST_SUB1",
+            "resourceGroup": "TEST_RG1",
+        },
+        is_setup=True)
     assert status == operation_status
 
 
@@ -198,14 +199,8 @@ def test_wait_vm_operation_retry(mock_getconn: MagicMock,
     """
     Test the retries of the remote VM operation.
     """
-    params = {
-        "pollInterval": 0.1,
-        "requestTotalRetries": total_retries,
-        "asyncResultsUrl": "https://DUMMY_ASYNC_URL",
-        "vmName": "test-vm",
-    }
-
-    # Simulate intermittent connection issues
+    # Simulate intermittent connection issues with multiple connection errors
+    # Sufficient retry attempts should result in success, otherwise a graceful failure state
     mock_getconn.return_value.getresponse.side_effect = [
         make_httplib_json_response(200, {"status": "InProgress"}),
         requests_ex.ConnectionError("Connection aborted", OSError(107, "Transport endpoint is not connected")),
@@ -214,7 +209,13 @@ def test_wait_vm_operation_retry(mock_getconn: MagicMock,
         make_httplib_json_response(200, {"status": "Succeeded"}),
     ]
 
-    (status, _) = azure_vm_service.wait_host_operation(params)
+    (status, _) = azure_vm_service.wait_host_operation(
+        params={
+            "pollInterval": 0.1,
+            "requestTotalRetries": total_retries,
+            "asyncResultsUrl": "https://DUMMY_ASYNC_URL",
+            "vmName": "test-vm",
+        })
     assert status == operation_status
 
 

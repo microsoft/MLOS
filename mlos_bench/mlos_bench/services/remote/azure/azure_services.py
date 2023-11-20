@@ -207,17 +207,16 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
                 self._deploy_params["customData"] = custom_data_fh.read()
 
     def _get_session(self, params: dict) -> requests.Session:
-        total = params.get("requestTotalRetries", self._total_retries)
+        """
+        Get a session object that includes automatic retries and headers for REST API calls.
+        """
+        total_retries = params.get("requestTotalRetries", self._total_retries)
         backoff_factor = params.get("requestBackoffFactor", self._backoff_factor)
-
         session = requests.Session()
-        retry = Retry(total=total, backoff_factor=backoff_factor)
-        adapter = HTTPAdapter(max_retries=retry)
-
-        session.mount("https://", adapter)
-
+        session.mount(
+            "https://",
+            HTTPAdapter(max_retries=Retry(total=total_retries, backoff_factor=backoff_factor)))
         session.headers.update(self._get_headers())
-
         return session
 
     def _get_headers(self) -> dict:
@@ -314,7 +313,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         try:
             response = session.get(url, timeout=self._request_timeout)
         except requests.exceptions.ReadTimeout:
-            _LOG.warning("Request timed out: %s", url)
+            _LOG.warning("Request timed out after %.2f s: %s", self._request_timeout, url)
             return Status.RUNNING, {}
         except requests.exceptions.RequestException as ex:
             _LOG.exception("Error in request checking operation status", exc_info=ex)
@@ -474,7 +473,7 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         try:
             response = session.get(url, timeout=self._request_timeout)
         except requests.exceptions.ReadTimeout:
-            _LOG.warning("Request timed out: %s", url)
+            _LOG.warning("Request timed out after %.2f s: %s", self._request_timeout, url)
             return Status.RUNNING, {}
         except requests.exceptions.RequestException as ex:
             _LOG.exception("Error in request checking deployment", exc_info=ex)
