@@ -97,13 +97,14 @@ class NetworkEnv(Environment):
         """
         Shut down the Network and releases it.
         """
-        if self._deprovision_on_teardown:
-            _LOG.info("Network tear down: %s", self)
-            (status, params) = self._network_service.deprovision_network(self._params, force=False)
-            if status.is_pending():
-                (status, _) = self._network_service.wait_network_deployment(params, is_setup=False)
+        if not self._deprovision_on_teardown:
+            _LOG.info("Skipping Network deprovision: %s", self)
+            return
+        # Else
+        _LOG.info("Network tear down: %s", self)
+        (status, params) = self._network_service.deprovision_network(self._params, ignore_errors=True)
+        if status.is_pending():
+            (status, _) = self._network_service.wait_network_deployment(params, is_setup=False)
 
-            super().teardown()
-            _LOG.debug("Final status of Network deprovisioning: %s :: %s", self, status)
-        else:
-            _LOG.info("Skipping network deprovision: %s", self)
+        super().teardown()
+        _LOG.debug("Final status of Network deprovisioning: %s :: %s", self, status)
