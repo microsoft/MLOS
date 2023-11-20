@@ -21,7 +21,7 @@ It makes use of the `mlos-core` package for its optimizer.
         - [Create a JSON config with DB credentials Optional](#create-a-json-config-with-db-credentials-optional)
         - [Create a top-level configuration file for your MLOS setup](#create-a-top-level-configuration-file-for-your-mlos-setup)
         - [Create another config file for the parameters specific to your experiment](#create-another-config-file-for-the-parameters-specific-to-your-experiment)
-            - [Importance of the experiment_id config](#importance-of-the-experiment_id-config)
+            - [Importance of the Experiment ID config](#importance-of-the-experiment-id-config)
         - [Run the benchmark](#run-the-benchmark)
     - [Optimization](#optimization)
         - [Resuming interrupted experiments](#resuming-interrupted-experiments)
@@ -162,7 +162,7 @@ In that file, you can specify any parameters that occur in your other configs, n
 > A general rule is that the parameters from the global configs like `./global_config_azure.jsonc` or `experiment_MyAppBench.jsonc` override the corresponding parameters in other configurations.
 > That allows us to propagate the values of the parameters that are specific to the experiment into other components of the framework and keep the majority of the config files in our library immutable and reusable.
 
-#### Importance of the experiment_id config
+#### Importance of the Experiment ID config
 
 An important part of this file is the value of `experiment_id` which controls the storage and retrieval of trial data.
 Should the experiment be interrupted, the `experiment_id` will be used to resume the experiment from the last completed trial, reloading the optimizer with data from the previously completed trial data.
@@ -207,4 +207,4 @@ Experiments sometimes get interrupted, e.g., due to errors in automation scripts
 
 To resume an interrupted experiment, simply run the same command as before.
 
-As mentioned above in the [Importance of the `experiment_id` config](#importance-of-the-experiment_id-config) section, the `experiment_id` is used to resume interrupted experiments, reloading prior trial data for that `experiment_id`.
+As mentioned above in the [importance of the `experiment_id` config](#importance-of-the-experiment-id-config) section, the `experiment_id` is used to resume interrupted experiments, reloading prior trial data for that `experiment_id`.
