@@ -197,16 +197,6 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
         Returns
         -------
         result : (Status, dict)
-        Parameters
-        ----------
-        params: dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-            Must have the "asyncResultsUrl" key to get the results.
-            If the key is not present, return Status.PENDING.
-
-        Returns
-        -------
-        result : (Status, dict)
             A pair of Status and result.
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
