@@ -29,6 +29,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
     """
     Helper methods to manage VMs on Azure.
     """
+
     # pylint: disable=too-many-ancestors
 
     # Azure Compute REST API calls as described in
