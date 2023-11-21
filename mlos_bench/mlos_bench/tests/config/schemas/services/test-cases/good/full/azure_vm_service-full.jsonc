@@ -2,7 +2,7 @@
     // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
     "description": "Azure VM Service configuration.",
 
-    "class": "mlos_bench.services.remote.azure.azure_services.AzureVMService",
+    "class": "mlos_bench.services.remote.azure.azure_vm_services.AzureVMService",
     "config": {
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",

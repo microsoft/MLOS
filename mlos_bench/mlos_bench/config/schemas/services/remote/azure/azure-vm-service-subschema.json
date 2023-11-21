@@ -8,7 +8,7 @@
         "class": {
             "enum": [
                 "mlos_bench.services.remote.azure.AzureVMService",
-                "mlos_bench.services.remote.azure.azure_services.AzureVMService"
+                "mlos_bench.services.remote.azure.azure_vm_services.AzureVMService"
             ]
         },
         "config": {
