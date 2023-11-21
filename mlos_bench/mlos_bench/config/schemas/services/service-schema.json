@@ -47,6 +47,9 @@
                             "$ref": "./remote/azure/azure-auth-service-subschema.json"
                         },
                         {
+                            "$ref": "./remote/azure/azure-network-service-subschema.json"
+                        },
+                        {
                             "$ref": "./remote/azure/azure-vm-service-subschema.json"
                         },
                         {

@@ -1,15 +1,14 @@
 {
     // "$schema": "https://raw.githubusercontent.com/microsoft/MLOS/main/mlos_bench/mlos_bench/config/schemas/services/service-schema.json",
-    "description": "Azure VM Service configuration.",
+    "description": "Azure Network Service configuration.",
 
-    "class": "mlos_bench.services.remote.azure.azure_vm_services.AzureVMService",
+    "class": "mlos_bench.services.remote.azure.azure_network_services.AzureNetworkService",
     "config": {
         "deploymentTemplatePath": "some/path/to/deployment/template.jsonc",
         "subscription": "subscription-id",
         "resourceGroup": "rg",
-        "deploymentName": "deployment",
+        "deploymentName": "${experiment_id}-vnet-deployment",
 
-        "customDataFile": "some/path/to/custom/data.yml",
         "deploymentTemplateParameters": {
             "location": "westus2",
             "adminUsername": "admin",
