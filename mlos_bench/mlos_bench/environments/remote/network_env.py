@@ -55,6 +55,8 @@ class NetworkEnv(Environment):
         """
         super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
+        # Virtual networks can be used for more than one experiment, so by default
+        # we don't attempt to deprovision them.
         self._deprovision_on_teardown = config.get("deprovision_on_teardown", False)
 
         assert self._service is not None and isinstance(self._service, SupportsNetworkProvisioning), \

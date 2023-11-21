@@ -11,9 +11,10 @@ import json
 import time
 import logging
 
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
+from requests.adapters import HTTPAdapter, Retry
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -46,14 +47,6 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         "?api-version=2022-05-01"
     )
 
-    _REQUIRED_PARAMS = [
-        "subscription",
-        "resourceGroup",
-        "deploymentName",
-        "deploymentTemplatePath",
-        "deploymentTemplateParameters",
-    ]
-
     def __init__(self,
                  config: Optional[Dict[str, Any]] = None,
                  global_config: Optional[Dict[str, Any]] = None,
@@ -76,7 +69,13 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         """
         super().__init__(config, global_config, parent, methods)
 
-        check_required_params(self.config, self._REQUIRED_PARAMS)
+        check_required_params(self.config, [
+            "subscription",
+            "resourceGroup",
+            "deploymentName",
+            "deploymentTemplatePath",
+            "deploymentTemplateParameters",
+        ])
 
         # These parameters can come from command line as strings, so conversion is needed.
         self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
@@ -93,6 +92,7 @@ class AzureService(Service, metaclass=abc.ABCMeta):
 
         self._deploy_params = merge_parameters(
             dest=self.config['deploymentTemplateParameters'].copy(), source=global_config)
+
     def _get_session(self, params: dict) -> requests.Session:
         """
         Get a session object that includes automatic retries and headers for REST API calls.
@@ -174,8 +174,6 @@ class AzureService(Service, metaclass=abc.ABCMeta):
             # _LOG.error("Bad Request:\n%s", response.request.body)
             return (Status.FAILED, {})
 
-    # TODO: Finish cleaning up methods between base class and subclasses.
-
     def _check_operation_status(self, params: dict) -> Tuple[Status, dict]:
         """
         Checks the status of a pending operation on an Azure resource.
@@ -224,7 +222,7 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         _LOG.error("Response: %s :: %s", response, response.text)
         return Status.FAILED, {}
 
-    def wait_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
+    def _wait_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
         Waits for a pending operation on an Azure resource to resolve to SUCCEEDED or FAILED.
         Return TIMED_OUT when timing out.
@@ -362,7 +360,7 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         _LOG.error("Response: %s :: %s", response, response.text)
         return (Status.FAILED, {})
 
-    def provision_resource(self, params: dict) -> Tuple[Status, dict]:
+    def _provision_resource(self, params: dict) -> Tuple[Status, dict]:
         """
         Attempts to (re)deploy a resource.
 

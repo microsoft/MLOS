@@ -7,13 +7,11 @@ A collection Service functions for managing VMs on Azure.
 """
 
 import json
-import time
 import logging
 
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 import requests
-from requests.adapters import HTTPAdapter, Retry
 
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
@@ -22,7 +20,7 @@ from mlos_bench.services.types.remote_exec_type import SupportsRemoteExec
 from mlos_bench.services.types.host_provisioner_type import SupportsHostProvisioning
 from mlos_bench.services.types.host_ops_type import SupportsHostOps
 from mlos_bench.services.types.os_ops_type import SupportsOSOps
-from mlos_bench.util import check_required_params, merge_parameters
+from mlos_bench.util import merge_parameters
 
 _LOG = logging.getLogger(__name__)
 
@@ -31,24 +29,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
     """
     Helper methods to manage VMs on Azure.
     """
-
-    _POLL_INTERVAL = 4     # seconds
-    _POLL_TIMEOUT = 300    # seconds
-    _REQUEST_TIMEOUT = 5   # seconds
-    _REQUEST_TOTAL_RETRIES = 10  # Total number retries for each request
-    _REQUEST_RETRY_BACKOFF_FACTOR = 0.3  # Delay (seconds) between retries: {backoff factor} * (2 ** ({number of previous retries}))
-
-    # Azure Resources Deployment REST API as described in
-    # https://docs.microsoft.com/en-us/rest/api/resources/deployments
-
-    _URL_DEPLOY = (
-        "https://management.azure.com" +
-        "/subscriptions/{subscription}" +
-        "/resourceGroups/{resource_group}" +
-        "/providers/Microsoft.Resources" +
-        "/deployments/{deployment_name}" +
-        "?api-version=2022-05-01"
-    )
+    # pylint: disable=too-many-ancestors
 
     # Azure Compute REST API calls as described in
     # https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines
@@ -168,24 +149,6 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             ])
         )
 
-        check_required_params(
-            self.config, {
-                "subscription",
-                "resourceGroup",
-                "deploymentName",
-                "deploymentTemplatePath",
-                "deploymentTemplateParameters",
-            }
-        )
-
-        # These parameters can come from command line as strings, so conversion is needed.
-        self._poll_interval = float(self.config.get("pollInterval", self._POLL_INTERVAL))
-        self._poll_timeout = float(self.config.get("pollTimeout", self._POLL_TIMEOUT))
-        self._request_timeout = float(self.config.get("requestTimeout", self._REQUEST_TIMEOUT))
-        self._total_retries = int(self.config.get("requestTotalRetries", self._REQUEST_TOTAL_RETRIES))
-        self._backoff_factor = float(self.config.get("requestBackoffFactor", self._REQUEST_RETRY_BACKOFF_FACTOR))
-
-
         # As a convenience, allow reading customData out of a file, rather than
         # embedding it in a json config file.
         # Note: ARM templates expect this data to be base64 encoded, but that
@@ -197,52 +160,6 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             self._custom_data_file = self.config_loader_service.resolve_path(self._custom_data_file)
             with open(self._custom_data_file, 'r', encoding='utf-8') as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
-
-    # TODO: Finish cleaning up methods between base class and subclasses.
-
-    def _azure_vm_post_helper(self, params: dict, url: str) -> Tuple[Status, dict]:
-        """
-        General pattern for performing an action on an Azure VM via its REST API.
-
-        Parameters
-        ----------
-        params: dict
-            Flat dictionary of (key, value) pairs of tunable parameters.
-        url: str
-            REST API url for the target to perform on the Azure VM.
-            Should be a url that we intend to POST to.
-
-        Returns
-        -------
-        result : (Status, dict={})
-            A pair of Status and result.
-            Status is one of {PENDING, SUCCEEDED, FAILED}
-            Result will have a value for 'asyncResultsUrl' if status is PENDING,
-            and 'pollInterval' if suggested by the API.
-        """
-        _LOG.debug("Request: POST %s", url)
-
-        response = requests.post(url, headers=self._get_headers(), timeout=self._request_timeout)
-        _LOG.debug("Response: %s", response)
-
-        # Logical flow for async operations based on:
-        # https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/async-operations
-        if response.status_code == 200:
-            return (Status.SUCCEEDED, params.copy())
-        elif response.status_code == 202:
-            result = params.copy()
-            if "Azure-AsyncOperation" in response.headers:
-                result["asyncResultsUrl"] = response.headers.get("Azure-AsyncOperation")
-            elif "Location" in response.headers:
-                result["asyncResultsUrl"] = response.headers.get("Location")
-            if "Retry-After" in response.headers:
-                result["pollInterval"] = float(response.headers["Retry-After"])
-
-            return (Status.PENDING, result)
-        else:
-            _LOG.error("Response: %s :: %s", response, response.text)
-            # _LOG.error("Bad Request:\n%s", response.request.body)
-            return (Status.FAILED, {})
 
     def wait_host_deployment(self, params: dict, *, is_setup: bool) -> Tuple[Status, dict]:
         """
@@ -267,6 +184,38 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
                   "provision" if is_setup else "deprovision")
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
+    def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
+        """
+        Waits for a pending operation on an Azure VM to resolve to SUCCEEDED or FAILED.
+        Return TIMED_OUT when timing out.
+
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+        Parameters
+        ----------
+        params: dict
+            Flat dictionary of (key, value) pairs of tunable parameters.
+            Must have the "asyncResultsUrl" key to get the results.
+            If the key is not present, return Status.PENDING.
+
+        Returns
+        -------
+        result : (Status, dict)
+            A pair of Status and result.
+            Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
+            Result is info on the operation runtime if SUCCEEDED, otherwise {}.
+        """
+        _LOG.info("Wait for operation on VM %s", params["vmName"])
+        return self._wait_while(self._check_operation_status, Status.RUNNING, params)
+
     def wait_os_operation(self, params: dict) -> Tuple["Status", dict]:
         return self.wait_host_operation(params)
 
@@ -288,58 +237,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        config = merge_parameters(dest=self.config.copy(), source=params)
-        _LOG.info("Deploy: %s :: %s", config["deploymentName"], params)
-
-        params = merge_parameters(dest=self._deploy_params.copy(), source=params)
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Deploy: %s merged params ::\n%s",
-                       config["deploymentName"], json.dumps(params, indent=2))
-
-        url = self._URL_DEPLOY.format(
-            subscription=config["subscription"],
-            resource_group=config["resourceGroup"],
-            deployment_name=config["deploymentName"],
-        )
-
-        json_req = {
-            "properties": {
-                "mode": "Incremental",
-                "template": self._deploy_template,
-                "parameters": {
-                    key: {"value": val} for (key, val) in params.items()
-                    if key in self._deploy_template.get("parameters", {})
-                }
-            }
-        }
-
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Request: PUT %s\n%s", url, json.dumps(json_req, indent=2))
-
-        response = requests.put(url, json=json_req,
-                                headers=self._get_headers(), timeout=self._request_timeout)
-
-        if _LOG.isEnabledFor(logging.DEBUG):
-            _LOG.debug("Response: %s\n%s", response,
-                       json.dumps(response.json(), indent=2)
-                       if response.content else "")
-        else:
-            _LOG.info("Response: %s", response)
-
-        if response.status_code == 200:
-            return (Status.PENDING, config)
-        elif response.status_code == 201:
-            output = self._extract_arm_parameters(response.json())
-            if _LOG.isEnabledFor(logging.DEBUG):
-                _LOG.debug("Extracted parameters:\n%s", json.dumps(output, indent=2))
-            params.update(output)
-            params.setdefault("asyncResultsUrl", url)
-            params.setdefault("deploymentName", config["deploymentName"])
-            return (Status.PENDING, params)
-        else:
-            _LOG.error("Response: %s :: %s", response, response.text)
-            # _LOG.error("Bad Request:\n%s", response.request.body)
-            return (Status.FAILED, {})
+        return self._provision_resource(params)
 
     def deprovision_host(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -369,7 +267,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
         _LOG.info("Deprovision VM: %s", config["vmName"])
         _LOG.info("Deprovision deployment: %s", config["deploymentName"])
         # TODO: Properly deprovision *all* resources specified in the ARM template.
-        return self._azure_vm_post_helper(config, self._URL_DEPROVISION.format(
+        return self._azure_rest_api_post_helper(config, self._URL_DEPROVISION.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -403,7 +301,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             ]
         )
         _LOG.info("Deallocate VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(config, self._URL_DEALLOCATE.format(
+        return self._azure_rest_api_post_helper(config, self._URL_DEALLOCATE.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -434,7 +332,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             ]
         )
         _LOG.info("Start VM: %s :: %s", config["vmName"], params)
-        return self._azure_vm_post_helper(config, self._URL_START.format(
+        return self._azure_rest_api_post_helper(config, self._URL_START.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -467,7 +365,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             ]
         )
         _LOG.info("Stop VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(config, self._URL_STOP.format(
+        return self._azure_rest_api_post_helper(config, self._URL_STOP.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
@@ -503,7 +401,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             ]
         )
         _LOG.info("Reboot VM: %s", config["vmName"])
-        return self._azure_vm_post_helper(config, self._URL_REBOOT.format(
+        return self._azure_rest_api_post_helper(config, self._URL_REBOOT.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vm_name=config["vmName"],
