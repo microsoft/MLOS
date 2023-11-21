@@ -19,6 +19,7 @@ from mlos_bench.services.remote.azure.azure_vm_services import AzureVMService
 
 from mlos_bench.tests.services.remote.azure import make_httplib_json_response
 
+
 @pytest.mark.parametrize(
     ("total_retries", "operation_status"), [
         (2, Status.SUCCEEDED),
@@ -114,6 +115,9 @@ def test_vm_operation_status(mock_requests: MagicMock,
     mock_requests.post.return_value = mock_response
 
     operation = getattr(azure_vm_service, operation_name)
+    with pytest.raises(ValueError):
+        # Missing vmName should raise ValueError
+        (status, _) = operation({}) if accepts_params else operation()
     (status, _) = operation({"vmName": "test-vm"}) if accepts_params else operation()
     assert status == operation_status
 

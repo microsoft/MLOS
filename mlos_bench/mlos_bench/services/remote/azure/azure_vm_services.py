@@ -180,9 +180,7 @@ class AzureVMService(AzureService, SupportsHostProvisioning, SupportsHostOps, Su
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        _LOG.info("Wait for %s to %s", params["deploymentName"],
-                  "provision" if is_setup else "deprovision")
-        return self._wait_while(self._check_deployment, Status.PENDING, params)
+        return self._wait_deployment(params, is_setup=is_setup)
 
     def wait_host_operation(self, params: dict) -> Tuple[Status, dict]:
         """

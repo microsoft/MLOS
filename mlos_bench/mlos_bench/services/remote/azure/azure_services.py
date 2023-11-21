@@ -241,7 +241,7 @@ class AzureService(Service, metaclass=abc.ABCMeta):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        _LOG.info("Wait for %s to %s", params["deploymentName"],
+        _LOG.info("Wait for %s to %s", params.get("deploymentName") or self.config.get("deploymentName"),
                   "provision" if is_setup else "deprovision")
         return self._wait_while(self._check_deployment, Status.PENDING, params)
 
