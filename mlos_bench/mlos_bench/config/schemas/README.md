@@ -6,6 +6,19 @@ This directory contains [json schemas](https://json-schema.org/) for describing 
 
 `mlos_bench` `.jsonc` config files can reference these schema files in a couple of ways:
 
+### Implicitly
+
+Certain file extensions are registered with [schemastore.org](https://www.schemastore.org) via their [repository](https://github.com/SchemaStore/schemastore) to allow supporting IDEs to automatically apply schema validation.
+
+```sh
+*.mlos.jsonc
+*.mlos.json
+*.mlos.yaml
+*.mlos.yml
+```
+
+This makes use of the [`mlos-bench-config-schema.json`](./mlos-bench-config-schema.json) unified schema file in this directory that tries to automatically select the appropriate subschema based on other content within the file.
+
 ### Internally
 
 If the config file is in the same directory as the schema (e.g. when editing within this repository), it can reference the schema by filename:
