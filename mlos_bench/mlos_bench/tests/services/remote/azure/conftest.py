@@ -11,7 +11,12 @@ from unittest.mock import patch
 import pytest
 
 from mlos_bench.services.config_persistence import ConfigPersistenceService
-from mlos_bench.services.remote.azure import AzureAuthService, AzureVMService, AzureFileShareService
+from mlos_bench.services.remote.azure import (
+    AzureAuthService,
+    AzureNetworkService,
+    AzureVMService,
+    AzureFileShareService,
+)
 
 # pylint: disable=redefined-outer-name
 
@@ -36,13 +41,33 @@ def azure_auth_service(config_persistence_service: ConfigPersistenceService,
 
 
 @pytest.fixture
+def azure_network_service(azure_auth_service: AzureAuthService) -> AzureNetworkService:
+    """
+    Creates a dummy Azure VM service for tests that require it.
+    """
+    return AzureNetworkService(config={
+        "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
+        "deploymentName": "TEST_DEPLOYMENT-VNET",
+        "subscription": "TEST_SUB",
+        "resourceGroup": "TEST_RG",
+        "deploymentTemplateParameters": {
+            "location": "westus2",
+        },
+        "pollInterval": 1,
+        "pollTimeout": 2
+    }, global_config={
+        "vnetName": "test-vnet",  # Should come from the upper-level config
+    }, parent=azure_auth_service)
+
+
+@pytest.fixture
 def azure_vm_service(azure_auth_service: AzureAuthService) -> AzureVMService:
     """
     Creates a dummy Azure VM service for tests that require it.
     """
     return AzureVMService(config={
         "deploymentTemplatePath": "services/remote/azure/arm-templates/azuredeploy-ubuntu-vm.jsonc",
-        "deploymentName": "TEST_DEPLOYMENT",
+        "deploymentName": "TEST_DEPLOYMENT-VM",
         "subscription": "TEST_SUB",
         "resourceGroup": "TEST_RG",
         "deploymentTemplateParameters": {
