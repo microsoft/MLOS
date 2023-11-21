@@ -62,6 +62,7 @@
                 "donjayamanne.python-environment-manager",
                 "eamodio.gitlens",
                 "editorconfig.editorconfig",
+                "remcohaszing.schemastore",
                 "github.copilot",
                 "github.vscode-github-actions",
                 "github.vscode-pull-request-github",
