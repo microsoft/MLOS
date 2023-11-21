@@ -56,7 +56,7 @@ class SupportsNetworkProvisioning(Protocol):
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
 
-    def deprovision_network(self, params: dict, ignore_errors=True) -> Tuple["Status", dict]:
+    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> Tuple["Status", dict]:
         """
         Deprovisions the Network by deleting it.
 

@@ -87,7 +87,7 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
             Status is one of {PENDING, SUCCEEDED, FAILED, TIMED_OUT}
             Result is info on the operation runtime if SUCCEEDED, otherwise {}.
         """
-        return self._wait_deployment(params, is_setup)
+        return self._wait_deployment(params, is_setup=is_setup)
 
     def provision_network(self, params: dict) -> Tuple[Status, dict]:
         """
@@ -107,9 +107,9 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
             parameters extracted from the response JSON, or {} if the status is FAILED.
             Status is one of {PENDING, SUCCEEDED, FAILED}
         """
-        self._provision_resource(params)
+        return self._provision_resource(params)
 
-    def deprovision_network(self, params: dict) -> Tuple[Status, dict]:
+    def deprovision_network(self, params: dict, ignore_errors: bool = True) -> Tuple[Status, dict]:
         """
         Deprovisions the virtual network on Azure by deleting it.
 
@@ -117,6 +117,9 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
         ----------
         params : dict
             Flat dictionary of (key, value) pairs of tunable parameters.
+        ignore_errors : boolean
+            Whether to ignore errors (default) encountered during the operation
+            (e.g., due to dependent resources still in use).
 
         Returns
         -------
@@ -136,9 +139,12 @@ class AzureNetworkService(AzureService, SupportsNetworkProvisioning):
         )
         _LOG.info("Deprovision Network: %s", config["vnetName"])
         _LOG.info("Deprovision deployment: %s", config["deploymentName"])
-        # TODO: Properly deprovision *all* resources specified in the ARM template.
-        return self._azure_rest_api_post_helper(config, self._URL_DEPROVISION.format(
+        (status, results) = self._azure_rest_api_post_helper(config, self._URL_DEPROVISION.format(
             subscription=config["subscription"],
             resource_group=config["resourceGroup"],
             vnet_name=config["vnetName"],
         ))
+        if ignore_errors and status == Status.FAILED:
+            _LOG.warning("Ignoring error: %s", results)
+            status = Status.SUCCEEDED
+        return (status, results)

@@ -295,7 +295,7 @@ class AzureService(Service, metaclass=abc.ABCMeta):
         _LOG.warning("Request timed out: %s", params)
         return (Status.TIMED_OUT, {})
 
-    def _check_deployment(self, params: dict) -> Tuple[Status, dict]:
+    def _check_deployment(self, params: dict) -> Tuple[Status, dict]:   # pylint: disable=too-many-return-statements
         """
         Check if Azure deployment exists.
         Return SUCCEEDED if true, PENDING otherwise.
