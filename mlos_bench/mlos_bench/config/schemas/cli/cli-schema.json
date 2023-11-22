@@ -47,6 +47,16 @@
             "uniqueItems": true
         },
 
+        "services": {
+            "description": "Path to the json config(s) describing the services to use for setting up and running the benchmark environment. These are initial services for all environments.  Individual environments can specify their own service configs to include as well.",
+            "type": "array",
+            "items": {
+                "$ref": "#/$defs/json_config_path"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+        },
+
         "environment": {
             "description": "Path to the json config describing the environment to run the benchmark in.",
             "$ref": "#/$defs/json_config_path"

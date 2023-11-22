@@ -31,8 +31,11 @@ from mlos_bench.optimizers.one_shot_optimizer import OneShotOptimizer
 
 from mlos_bench.storage.base_storage import Storage
 
+from mlos_bench.services.base_service import Service
 from mlos_bench.services.local.local_exec import LocalExecService
 from mlos_bench.services.config_persistence import ConfigPersistenceService
+
+from mlos_bench.services.types.config_loader_type import SupportsConfigLoading
 
 
 _LOG_LEVEL = logging.INFO
@@ -88,7 +91,7 @@ class Launcher:
             log_handler.setFormatter(logging.Formatter(_LOG_FORMAT))
             logging.root.addHandler(log_handler)
 
-        self._parent_service = LocalExecService(parent=self._config_loader)
+        self._parent_service: Service = LocalExecService(parent=self._config_loader)
 
         self.global_config = self._load_config(
             config.get("globals", []) + (args.globals or []),
@@ -105,6 +108,11 @@ class Launcher:
         # Ensure that the trial_id is present since it gets used by some other
         # configs but is typically controlled by the run optimize loop.
         self.global_config.setdefault('trial_id', 1)
+
+        # --service cli args should override the config file values.
+        service_files: List[str] = config.get("services", []) + (args.service or [])
+        assert isinstance(self._parent_service, SupportsConfigLoading)
+        self._parent_service = self._parent_service.load_services(service_files, self.global_config, self._parent_service)
 
         env_path = args.environment or config.get("environment")
         if not env_path:
@@ -168,8 +176,13 @@ class Launcher:
             help='One or more locations of JSON config files.')
 
         parser.add_argument(
+            '--service', '--services',
+            nargs='+', action='extend', required=False,
+            help='Path to JSON file with the configuration of the service(s) for environment(s) to use.')
+
+        parser.add_argument(
             '--environment', required=False,
-            help='Path to JSON file with the configuration of the benchmarking environment.')
+            help='Path to JSON file with the configuration of the benchmarking environment(s).')
 
         parser.add_argument(
             '--optimizer', required=False,
