@@ -19,6 +19,18 @@
                 "required": ["class"]
             },
             {
+                "properties": {
+                    "$schema": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "services": {
+                        "type": "array"
+                    }
+                },
+                "unevaluatedProperties": false,
                 "required": ["services"]
             }
         ]

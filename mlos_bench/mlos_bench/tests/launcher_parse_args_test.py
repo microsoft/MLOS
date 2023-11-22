@@ -18,6 +18,13 @@ from mlos_bench.launcher import Launcher
 from mlos_bench.optimizers import MockOptimizer
 from mlos_bench.config.schemas import ConfigSchema
 from mlos_bench.util import path_join
+from mlos_bench.services.types import (
+    SupportsAuth,
+    SupportsConfigLoading,
+    SupportsFileShareOps,
+    SupportsLocalExec,
+    SupportsRemoteExec,
+)
 from mlos_bench.tests import check_class_name
 
 if sys.version_info < (3, 10):
@@ -62,11 +69,18 @@ def test_launcher_args_parse_1(config_paths: List[str]) -> None:
     # This is part of the minimal required args by the Launcher.
     env_conf_path = 'environments/mock/mock_env.jsonc'
     cli_args = '--config-paths ' + ' '.join(config_paths) + \
+        ' --service services/remote/mock/mock_auth_service.jsonc' + \
+        ' --service services/remote/mock/mock_remote_exec_service.jsonc' + \
         f' --environment {env_conf_path}' + \
         ' --globals globals/global_test_config.jsonc' + \
         ' --globals globals/global_test_extra_config.jsonc' \
         ' --test_global_value_2 from-args'
     launcher = Launcher(description=__name__, argv=cli_args.split())
+    # Check that the parent service
+    assert isinstance(launcher.service, SupportsAuth)
+    assert isinstance(launcher.service, SupportsConfigLoading)
+    assert isinstance(launcher.service, SupportsLocalExec)
+    assert isinstance(launcher.service, SupportsRemoteExec)
     # Check that the first --globals file is loaded and $var expansion is handled.
     assert launcher.global_config['experiment_id'] == 'MockExperiment'
     assert launcher.global_config['testVmName'] == 'MockExperiment-vm'
@@ -107,12 +121,20 @@ def test_launcher_args_parse_2(config_paths: List[str]) -> None:
     config_file = 'cli/test-cli-config.jsonc'
     cli_args = ' '.join([f"--config-path {config_path}" for config_path in config_paths]) + \
         f' --config {config_file}' + \
+        ' --service services/remote/mock/mock_auth_service.jsonc' + \
+        ' --service services/remote/mock/mock_remote_exec_service.jsonc' + \
         ' --globals globals/global_test_config.jsonc' + \
         ' --experiment_id MockeryExperiment' + \
         ' --no-teardown' + \
         ' --random-init' + \
         ' --random-seed 1234'
     launcher = Launcher(description=__name__, argv=cli_args.split())
+    # Check that the parent service
+    assert isinstance(launcher.service, SupportsAuth)
+    assert isinstance(launcher.service, SupportsConfigLoading)
+    assert isinstance(launcher.service, SupportsFileShareOps)
+    assert isinstance(launcher.service, SupportsLocalExec)
+    assert isinstance(launcher.service, SupportsRemoteExec)
     # Check that the --globals file is loaded and $var expansion is handled
     # using the value provided on the CLI.
     assert launcher.global_config['experiment_id'] == 'MockeryExperiment'

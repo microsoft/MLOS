@@ -9,6 +9,10 @@
         "bar"
     ],
 
+    "services": [
+        "services/remote/mock/mock_fileshare_service.jsonc"
+    ],
+
     "random_seed": 42,
     "random_init": true
 }
