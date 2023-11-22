@@ -26,7 +26,7 @@ _LOG = logging.getLogger(__name__)
 
 class AzureService(Service, metaclass=abc.ABCMeta):
     """
-    Helper methods to manage Virtual Networks on Azure.
+    Helper methods to manage Azure resources via REST APIs.
     """
 
     _POLL_INTERVAL = 4     # seconds
