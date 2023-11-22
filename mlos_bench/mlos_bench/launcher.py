@@ -148,6 +148,13 @@ class Launcher:
         """
         return self._config_loader
 
+    @property
+    def service(self) -> Service:
+        """
+        Get the parent service.
+        """
+        return self._parent_service
+
     @staticmethod
     def _parse_args(parser: argparse.ArgumentParser, argv: Optional[List[str]]) -> Tuple[argparse.Namespace, List[str]]:
         """
