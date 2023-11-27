@@ -44,7 +44,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: conda-incubator/setup-miniconda@v2
+    - uses: conda-incubator/setup-miniconda@v3
 
     - name: Set cache timestamp variables
       id: set_cache_vars
