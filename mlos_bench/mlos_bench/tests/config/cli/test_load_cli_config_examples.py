@@ -52,7 +52,7 @@ assert configs
 
 @pytest.mark.skip(reason="Use full Launcher test (below) instead now.")
 @pytest.mark.parametrize("config_path", configs)
-def test_load_cli_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:
+def test_load_cli_config_examples(config_loader_service: ConfigPersistenceService, config_path: str) -> None:   # pragma: no cover
     """Tests loading a config example."""
     # pylint: disable=too-complex
     config = config_loader_service.load_config(config_path, ConfigSchema.CLI)
