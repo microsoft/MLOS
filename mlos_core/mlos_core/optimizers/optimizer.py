@@ -192,7 +192,7 @@ class BaseOptimizer(metaclass=ABCMeta):
         if contexts is not None:
             # configs = pd.concat([configs, contexts], axis=1)
             # Not reachable for now
-            raise NotImplementedError()  # pragma: no cover
+            raise NotImplementedError()
         return configs
 
     def get_best_observation(self) -> pd.DataFrame:
