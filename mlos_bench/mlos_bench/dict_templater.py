@@ -6,6 +6,7 @@
 Simple class to help with nested dictionary $var templating.
 """
 
+from copy import deepcopy
 from string import Template
 from typing import Any, Dict, Optional
 
@@ -27,7 +28,7 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
             The template dict to use for source variables.
         """
         # A copy of the initial data structure we were given with templates intact.
-        self._template_dict = source_dict.copy()
+        self._template_dict = deepcopy(source_dict)
         # The source/target dictionary to expand.
         self._dict: Dict[str, Any] = {}
 
@@ -49,7 +50,7 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
         Dict[str, Any]
             The expanded dictionary.
         """
-        self._dict = self._template_dict.copy()
+        self._dict = deepcopy(self._template_dict)
         extra_source_dict = {} if extra_source_dict is None else extra_source_dict
         self._dict = self._expand_vars(self._dict, extra_source_dict, use_os_env)
         assert isinstance(self._dict, dict)
