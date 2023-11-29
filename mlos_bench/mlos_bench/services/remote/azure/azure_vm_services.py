@@ -210,6 +210,13 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
             with open(self._custom_data_file, 'r', encoding='utf-8') as custom_data_fh:
                 self._deploy_params["customData"] = custom_data_fh.read()
 
+    @property
+    def deploy_params(self) -> dict:
+        """
+        Get the deployment parameters.
+        """
+        return self._deploy_params
+
     def _get_session(self, params: dict) -> requests.Session:
         """
         Get a session object that includes automatic retries and headers for REST API calls.
