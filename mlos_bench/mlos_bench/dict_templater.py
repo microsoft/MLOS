@@ -6,6 +6,7 @@
 Simple class to help with nested dictionary $var templating.
 """
 
+from copy import deepcopy
 from string import Template
 from typing import Any, Dict, Optional
 
@@ -27,11 +28,9 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
             The template dict to use for source variables.
         """
         # A copy of the initial data structure we were given with templates intact.
-        self._template_dict = source_dict.copy()
+        self._template_dict = deepcopy(source_dict)
         # The source/target dictionary to expand.
         self._dict: Dict[str, Any] = {}
-        # An additional source dictionary to use for expansion.
-        self._extra_source_dict: Dict[str, Any] = {}
 
     def expand_vars(self, *,
                     extra_source_dict: Optional[Dict[str, Any]] = None,
@@ -51,13 +50,12 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
         Dict[str, Any]
             The expanded dictionary.
         """
-        self._dict = self._template_dict.copy()
-        extra_source_dict = {} if extra_source_dict is None else extra_source_dict
+        self._dict = deepcopy(self._template_dict)
         self._dict = self._expand_vars(self._dict, extra_source_dict, use_os_env)
         assert isinstance(self._dict, dict)
         return self._dict
 
-    def _expand_vars(self, value: Any, extra_source_dict: Dict[str, Any], use_os_env: bool) -> Any:
+    def _expand_vars(self, value: Any, extra_source_dict: Optional[Dict[str, Any]], use_os_env: bool) -> Any:
         """
         Recursively expand $var strings in the currently operating dictionary.
         """
@@ -70,12 +68,15 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
             # Finally, fallback to the os environment.
             if use_os_env:
                 value = Template(value).safe_substitute(dict(os.environ))
-            return value
-        if isinstance(value, dict):
+        elif isinstance(value, dict):
             # Note: we use a loop instead of dict comprehension in order to
             # allow secondary expansion of subsequent values immediately.
             for (key, val) in value.items():
                 value[key] = self._expand_vars(val, extra_source_dict, use_os_env)
-        if isinstance(value, list):
-            return [self._expand_vars(val, extra_source_dict, use_os_env) for val in value]
+        elif isinstance(value, list):
+            value = [self._expand_vars(val, extra_source_dict, use_os_env) for val in value]
+        elif isinstance(value, (int, float, bool)) or value is None:
+            return value
+        else:
+            raise ValueError(f"Unexpected type {type(value)} for value {value}")
         return value
