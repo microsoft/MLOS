@@ -30,8 +30,6 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
         self._template_dict = source_dict.copy()
         # The source/target dictionary to expand.
         self._dict: Dict[str, Any] = {}
-        # An additional source dictionary to use for expansion.
-        self._extra_source_dict: Dict[str, Any] = {}
 
     def expand_vars(self, *,
                     extra_source_dict: Optional[Dict[str, Any]] = None,
