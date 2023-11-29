@@ -75,6 +75,8 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
                 value[key] = self._expand_vars(val, extra_source_dict, use_os_env)
         elif isinstance(value, list):
             value = [self._expand_vars(val, extra_source_dict, use_os_env) for val in value]
+        elif isinstance(value, (int, float, bool)) or value is None:
+            return value
         else:
             raise ValueError(f"Unexpected type {type(value)} for value {value}")
         return value
