@@ -11,7 +11,7 @@
                 "resourceGroup": "PLACEHOLDER; e.g., os-autotune",
                 "deploymentName": "$resourceGroup-vnet-deployment",
 
-                "deploymentTemplatePath": "services/azure/arm-templates/ARM-virtual-network.jsonc",
+                "deploymentTemplatePath": "services/remote/azure/arm-templates/ARM-virtual-network.jsonc",
                 // Make sure to list all ARM template parameters that can be overridden by the caller.
                 "deploymentTemplateParameters": {
                     "location": "PLACEHOLDER; e.g., westus2",
