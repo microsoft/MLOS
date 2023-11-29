@@ -1,0 +1,52 @@
+{
+    "class": "mlos_bench.environments.remote.network_env.NetworkEnv",
+    "name": "VNetEnv",
+    "description": "Virtual network environment for VM experiments",
+
+    // To allow the virtual network environment config to be reuseable across
+    // different backends, we let the services flow from the top level config.
+    // This is an example of how to do that.
+    //"include_services": [
+    //    "services/azure/service-auth.jsonc",
+    //    "services/azure/service-vnet.jsonc"
+    //],
+
+    "include_tunables": [
+        "tunables/dummy-tunables.jsonc"
+    ],
+
+    "config": {
+        // FIXME: There aren't currently any tunable params for the network environment.
+        // But one is required to workaround a bug (#613) in the config storage layer.
+        "tunable_params": ["dummy_params"],
+
+        // Typically don't want to deprovision the network environment on teardown
+        // since other experiments in this same RG might be using it.
+        "deprovision_on_teardown": false,
+
+        // Default args for the network environment's service should they not be provided by the parent.
+        // Note: there may be others in the network service's config that are not listed here.
+        "const_args": {
+            // By default use the resource group name as the base vnetName.
+            // Note: it is often useful to include the $location in the vnetName in
+            // order to allow easily creating additional experiments across multiple
+            // locations without name collisions.
+            "vnetName": "$resourceGroup-vnet-$location",
+            "subnetName": "default",
+            "networkSecurityGroupName": "$vnetName-$subnetName-nsg",
+            // Note: This needs to be overridden by the parent environment to be useful:
+            "sourceAddressPrefixes": ["192.168.42.0/24"],
+            // By default allow interactive debugging from the sourceAddressPrefixes.
+            "destinationPortRanges": [22, 3389],
+
+            "deploymentName": "$vnetName-deployment"
+        },
+        // minimum required args for the network environment's service (there may be others)
+        "required_args": [
+            "resourceGroup",
+            "location",
+            "vnetName",
+            "deploymentName"
+        ]
+    }
+}
