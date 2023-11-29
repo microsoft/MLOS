@@ -53,7 +53,7 @@ class HostEnv(Environment):
         super().__init__(name=name, config=config, global_config=global_config, tunables=tunables, service=service)
 
         assert self._service is not None and isinstance(self._service, SupportsHostProvisioning), \
-            "HostEnv requires a service that supports host operations"
+            "HostEnv requires a service that supports host provisioning operations"
         self._host_service: SupportsHostProvisioning = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:

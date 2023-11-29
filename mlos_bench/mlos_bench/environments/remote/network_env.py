@@ -60,7 +60,7 @@ class NetworkEnv(Environment):
         self._deprovision_on_teardown = config.get("deprovision_on_teardown", False)
 
         assert self._service is not None and isinstance(self._service, SupportsNetworkProvisioning), \
-            "NetworkEnv requires a service that supports resource provisioning"
+            "NetworkEnv requires a service that supports network provisioning"
         self._network_service: SupportsNetworkProvisioning = self._service
 
     def setup(self, tunables: TunableGroups, global_config: Optional[dict] = None) -> bool:
