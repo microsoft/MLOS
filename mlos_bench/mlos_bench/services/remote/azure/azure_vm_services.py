@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
+from mlos_bench.dict_templater import DictTemplater
 from mlos_bench.environments.status import Status
 from mlos_bench.services.base_service import Service
 from mlos_bench.services.types.authenticator_type import SupportsAuth
@@ -191,8 +192,11 @@ class AzureVMService(Service, SupportsHostProvisioning, SupportsHostOps, Support
         assert template is not None and isinstance(template, dict)
         self._deploy_template = template
 
-        self._deploy_params = merge_parameters(
-            dest=self.config['deploymentTemplateParameters'].copy(), source=global_config)
+        # Allow for recursive variable expansion as we do with global params and const_args.
+        deploy_params = DictTemplater(self.config['deploymentTemplateParameters'].copy()).expand_vars(
+            extra_source_dict=global_config or {})
+
+        self._deploy_params = merge_parameters(dest=deploy_params, source=global_config)
 
         # As a convenience, allow reading customData out of a file, rather than
         # embedding it in a json config file.
