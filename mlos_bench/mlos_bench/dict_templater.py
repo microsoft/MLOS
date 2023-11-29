@@ -51,12 +51,11 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
             The expanded dictionary.
         """
         self._dict = deepcopy(self._template_dict)
-        extra_source_dict = {} if extra_source_dict is None else extra_source_dict
         self._dict = self._expand_vars(self._dict, extra_source_dict, use_os_env)
         assert isinstance(self._dict, dict)
         return self._dict
 
-    def _expand_vars(self, value: Any, extra_source_dict: Dict[str, Any], use_os_env: bool) -> Any:
+    def _expand_vars(self, value: Any, extra_source_dict: Optional[Dict[str, Any]], use_os_env: bool) -> Any:
         """
         Recursively expand $var strings in the currently operating dictionary.
         """
@@ -69,12 +68,13 @@ class DictTemplater:    # pylint: disable=too-few-public-methods
             # Finally, fallback to the os environment.
             if use_os_env:
                 value = Template(value).safe_substitute(dict(os.environ))
-            return value
-        if isinstance(value, dict):
+        elif isinstance(value, dict):
             # Note: we use a loop instead of dict comprehension in order to
             # allow secondary expansion of subsequent values immediately.
             for (key, val) in value.items():
                 value[key] = self._expand_vars(val, extra_source_dict, use_os_env)
-        if isinstance(value, list):
-            return [self._expand_vars(val, extra_source_dict, use_os_env) for val in value]
+        elif isinstance(value, list):
+            value = [self._expand_vars(val, extra_source_dict, use_os_env) for val in value]
+        else:
+            raise ValueError(f"Unexpected type {type(value)} for value {value}")
         return value
